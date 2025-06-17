@@ -22,6 +22,7 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_model_static.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 
@@ -40,26 +41,26 @@ namespace TextAreaInterfaceModifier {
 void SetTextAreaOptionsImpl(Ark_NativePointer node,
                             const Opt_TextAreaOptions* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    std::optional<std::string> placeholder;
-    std::optional<std::string> text;
-    TextAreaControllerPeer* peerPtr = nullptr;
-    auto textAreaOptions = Converter::OptConvert<Ark_TextAreaOptions>(*value);
-    if (textAreaOptions.has_value()) {
-        placeholder = Converter::OptConvert<std::string>(textAreaOptions.value().placeholder);
-        text = Converter::OptConvert<std::string>(textAreaOptions.value().text);
-        auto controller = Converter::OptConvert<Ark_TextAreaController>(textAreaOptions.value().controller);
-        if (controller.has_value()) {
-            peerPtr = controller.value();
-        }
-    }
+    // auto frameNode = reinterpret_cast<FrameNode *>(node);
+    // CHECK_NULL_VOID(frameNode);
+    // CHECK_NULL_VOID(value);
+    // std::optional<std::string> placeholder;
+    // std::optional<std::string> text;
+    // TextAreaControllerPeer* peerPtr = nullptr;
+    // auto textAreaOptions = Converter::OptConvert<Ark_TextAreaOptions>(*value);
+    // if (textAreaOptions.has_value()) {
+    //     placeholder = Converter::OptConvert<std::string>(textAreaOptions.value().placeholder);
+    //     text = Converter::OptConvert<std::string>(textAreaOptions.value().text);
+    //     auto controller = Converter::OptConvert<Ark_TextAreaController>(textAreaOptions.value().controller);
+    //     if (controller.has_value()) {
+    //         peerPtr = controller.value();
+    //     }
+    // }
 
-    auto controller = TextFieldModelNG::GetController(frameNode, placeholder, text);
-    if (peerPtr) {
-        peerPtr->SetController(controller);
-    }
+    // auto controller = TextFieldModelStatic::GetController(frameNode, placeholder, text);
+    // if (peerPtr) {
+    //     peerPtr->SetController(controller);
+    // }
 }
 } // TextAreaInterfaceModifier
 namespace TextAreaAttributeModifier {
@@ -69,7 +70,7 @@ void PlaceholderColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    TextFieldModelNG::SetPlaceholderColor(frameNode, Converter::OptConvert<Color>(*value));
+    TextFieldModelStatic::SetPlaceholderColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void PlaceholderFontImpl(Ark_NativePointer node,
                          const Ark_Font* value)
@@ -77,21 +78,21 @@ void PlaceholderFontImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    TextFieldModelNG::SetPlaceholderFont(frameNode, Converter::OptConvert<Font>(*value));
+    TextFieldModelStatic::SetPlaceholderFont(frameNode, Converter::OptConvert<Font>(*value));
 }
 void EnterKeyTypeImpl(Ark_NativePointer node,
                       Ark_EnterKeyType value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetEnterKeyType(frameNode, Converter::OptConvert<TextInputAction>(value));
+    TextFieldModelStatic::SetEnterKeyType(frameNode, Converter::OptConvert<TextInputAction>(value));
 }
 void TextAlignImpl(Ark_NativePointer node,
                    Ark_TextAlign value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetTextAlign(frameNode, Converter::OptConvert<TextAlign>(value));
+    TextFieldModelStatic::SetTextAlign(frameNode, Converter::OptConvert<TextAlign>(value));
 }
 void CaretColorImpl(Ark_NativePointer node,
                     const Ark_ResourceColor* value)
@@ -99,7 +100,7 @@ void CaretColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    TextFieldModelNG::SetCaretColor(frameNode, Converter::OptConvert<Color>(*value));
+    TextFieldModelStatic::SetCaretColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void FontColorImpl(Ark_NativePointer node,
                    const Ark_ResourceColor* value)
@@ -107,7 +108,7 @@ void FontColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    TextFieldModelNG::SetTextColor(frameNode, Converter::OptConvert<Color>(*value));
+    TextFieldModelStatic::SetTextColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void FontSizeImpl(Ark_NativePointer node,
                   const Ark_Length* value)
@@ -118,7 +119,7 @@ void FontSizeImpl(Ark_NativePointer node,
     auto fontSize = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(fontSize);
     Validator::ValidateNonPercent(fontSize);
-    TextFieldModelNG::SetFontSize(frameNode, fontSize);
+    TextFieldModelStatic::SetFontSize(frameNode, fontSize);
 }
 void FontStyleImpl(Ark_NativePointer node,
                    Ark_FontStyle value)
@@ -126,7 +127,7 @@ void FontStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<Ace::FontStyle>(value);
-    TextFieldModelNG::SetFontStyle(frameNode, convValue);
+    TextFieldModelStatic::SetFontStyle(frameNode, convValue);
 }
 void FontWeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_FontWeight_String* value)
@@ -135,7 +136,7 @@ void FontWeightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto convValue = Converter::OptConvert<FontWeight>(*value);
-    TextFieldModelNG::SetFontWeight(frameNode, convValue);
+    TextFieldModelStatic::SetFontWeight(frameNode, convValue);
 }
 void FontFamilyImpl(Ark_NativePointer node,
                     const Ark_ResourceStr* value)
@@ -147,7 +148,7 @@ void FontFamilyImpl(Ark_NativePointer node,
     if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value); fontfamiliesOpt) {
         families = fontfamiliesOpt->families;
     }
-    TextFieldModelNG::SetFontFamily(frameNode, families);
+    TextFieldModelStatic::SetFontFamily(frameNode, families);
 }
 void TextOverflowImpl(Ark_NativePointer node,
                       Ark_TextOverflow value)
@@ -155,7 +156,7 @@ void TextOverflowImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<TextOverflow>(value); // for enums
-    TextFieldModelNG::SetTextOverflow(frameNode, convValue);
+    TextFieldModelStatic::SetTextOverflow(frameNode, convValue);
 }
 void TextIndentImpl(Ark_NativePointer node,
                     const Ark_Length* value)
@@ -163,7 +164,7 @@ void TextIndentImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    TextFieldModelNG::SetTextIndent(frameNode, Converter::OptConvert<Dimension>(*value));
+    TextFieldModelStatic::SetTextIndent(frameNode, Converter::OptConvert<Dimension>(*value));
 }
 void CaretStyleImpl(Ark_NativePointer node,
                     const Ark_CaretStyle* value)
@@ -172,7 +173,7 @@ void CaretStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto caretStyle = Converter::Convert<Converter::CaretStyle>(*value);
-    TextFieldModelNG::SetCaretColor(frameNode, caretStyle.color);
+    TextFieldModelStatic::SetCaretColor(frameNode, caretStyle.color);
     Validator::ValidateNonNegative(caretStyle.width);
     Validator::ValidateNonPercent(caretStyle.width);
     CaretStyle caretStyleNative;
@@ -185,7 +186,7 @@ void SelectedBackgroundColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    TextFieldModelNG::SetSelectedBackgroundColor(frameNode, Converter::OptConvert<Color>(*value));
+    TextFieldModelStatic::SetSelectedBackgroundColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void OnSubmit0Impl(Ark_NativePointer node,
                    const Callback_EnterKeyType_Void* value)
@@ -321,7 +322,7 @@ void CopyOptionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetCopyOption(frameNode, Converter::OptConvert<CopyOptions>(value));
+    TextFieldModelStatic::SetCopyOption(frameNode, Converter::OptConvert<CopyOptions>(value));
 }
 void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
                                Ark_Boolean value)
@@ -349,7 +350,7 @@ void StyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<InputStyle>(value); // for enums
-    TextFieldModelNG::SetInputStyle(frameNode, convValue);
+    TextFieldModelStatic::SetInputStyle(frameNode, convValue);
 }
 void BarStateImpl(Ark_NativePointer node,
                   Ark_BarState value)
@@ -357,7 +358,7 @@ void BarStateImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<DisplayMode>(value); // for enums
-    TextFieldModelNG::SetBarState(frameNode, convValue);
+    TextFieldModelStatic::SetBarState(frameNode, convValue);
 }
 void SelectionMenuHiddenImpl(Ark_NativePointer node,
                              Ark_Boolean value)
@@ -375,7 +376,7 @@ void MinFontSizeImpl(Ark_NativePointer node,
     auto optValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(optValue);
     Validator::ValidateNonPercent(optValue);
-    TextFieldModelNG::SetAdaptMinFontSize(frameNode, optValue);
+    TextFieldModelStatic::SetAdaptMinFontSize(frameNode, optValue);
 }
 void MaxFontSizeImpl(Ark_NativePointer node,
                      const Ark_Union_Number_String_Resource* value)
@@ -386,7 +387,7 @@ void MaxFontSizeImpl(Ark_NativePointer node,
     auto optValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(optValue);
     Validator::ValidateNonPercent(optValue);
-    TextFieldModelNG::SetAdaptMaxFontSize(frameNode, optValue);
+    TextFieldModelStatic::SetAdaptMaxFontSize(frameNode, optValue);
 }
 void HeightAdaptivePolicyImpl(Ark_NativePointer node,
                               Ark_TextHeightAdaptivePolicy value)
@@ -394,7 +395,7 @@ void HeightAdaptivePolicyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<TextHeightAdaptivePolicy>(value);
-    TextFieldModelNG::SetHeightAdaptivePolicy(frameNode, convValue);
+    TextFieldModelStatic::SetHeightAdaptivePolicy(frameNode, convValue);
 }
 void MaxLinesImpl(Ark_NativePointer node,
                   const Ark_Number* value)
@@ -407,7 +408,7 @@ void MaxLinesImpl(Ark_NativePointer node,
     if (GreatOrEqual(maxLinesInt, 0)) {
         maxLines = static_cast<uint32_t>(maxLinesInt);
     }
-    TextFieldModelNG::SetMaxViewLines(frameNode, maxLines);
+    TextFieldModelStatic::SetMaxViewLines(frameNode, maxLines);
 }
 void WordBreakImpl(Ark_NativePointer node,
                    Ark_WordBreak value)
@@ -415,7 +416,7 @@ void WordBreakImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<WordBreak>(value); // for enums
-    TextFieldModelNG::SetWordBreak(frameNode, convValue);
+    TextFieldModelStatic::SetWordBreak(frameNode, convValue);
 }
 void LineBreakStrategyImpl(Ark_NativePointer node,
                            Ark_LineBreakStrategy value)
@@ -423,7 +424,7 @@ void LineBreakStrategyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<LineBreakStrategy>(value); // for enums
-    TextFieldModelNG::SetLineBreakStrategy(frameNode, convValue);
+    TextFieldModelStatic::SetLineBreakStrategy(frameNode, convValue);
 }
 void DecorationImpl(Ark_NativePointer node,
                     const Ark_TextDecorationOptions* value)
@@ -432,9 +433,9 @@ void DecorationImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto options = Converter::Convert<Converter::TextDecorationOptions>(*value);
-    TextFieldModelNG::SetTextDecoration(frameNode, options.textDecoration);
-    TextFieldModelNG::SetTextDecorationColor(frameNode, options.color);
-    TextFieldModelNG::SetTextDecorationStyle(frameNode, options.textDecorationStyle);
+    TextFieldModelStatic::SetTextDecoration(frameNode, options.textDecoration);
+    TextFieldModelStatic::SetTextDecorationColor(frameNode, options.color);
+    TextFieldModelStatic::SetTextDecorationStyle(frameNode, options.textDecorationStyle);
 }
 void LetterSpacingImpl(Ark_NativePointer node,
                        const Ark_Union_Number_String_Resource* value)
@@ -445,7 +446,7 @@ void LetterSpacingImpl(Ark_NativePointer node,
     auto spacing = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(spacing);
     Validator::ValidateNonPercent(spacing);
-    TextFieldModelNG::SetLetterSpacing(frameNode, spacing);
+    TextFieldModelStatic::SetLetterSpacing(frameNode, spacing);
 }
 void LineSpacingImpl(Ark_NativePointer node,
                      Ark_LengthMetrics value)
@@ -455,7 +456,7 @@ void LineSpacingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto lineSpacing = Converter::OptConvert<Dimension>(value);
     Validator::ValidateNonNegative(lineSpacing);
-    TextFieldModelNG::SetLineSpacing(frameNode, lineSpacing);
+    TextFieldModelStatic::SetLineSpacing(frameNode, lineSpacing);
 }
 void LineHeightImpl(Ark_NativePointer node,
                     const Ark_Union_Number_String_Resource* value)
@@ -465,14 +466,14 @@ void LineHeightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto optValue = Converter::OptConvert<Dimension>(*value);
     Validator::ValidateNonNegative(optValue);
-    TextFieldModelNG::SetLineHeight(frameNode, optValue);
+    TextFieldModelStatic::SetLineHeight(frameNode, optValue);
 }
 void TypeImpl(Ark_NativePointer node,
               Ark_TextAreaType value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetType(frameNode, Converter::OptConvert<TextInputType>(value));
+    TextFieldModelStatic::SetType(frameNode, Converter::OptConvert<TextInputType>(value));
 }
 void EnableAutoFillImpl(Ark_NativePointer node,
                         Ark_Boolean value)
@@ -486,7 +487,7 @@ void ContentTypeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetContentType(frameNode, Converter::OptConvert<TextContentType>(value));
+    TextFieldModelStatic::SetContentType(frameNode, Converter::OptConvert<TextContentType>(value));
 }
 void FontFeatureImpl(Ark_NativePointer node,
                      const Ark_String* value)
@@ -635,8 +636,8 @@ void ShowCounterImpl(Ark_NativePointer node,
             thresholdPercentageOpt = std::nullopt;
         }
     }
-    TextFieldModelNG::SetShowCounterBorder(frameNode, highlightBorderOpt);
-    TextFieldModelNG::SetCounterType(frameNode, thresholdPercentageOpt);
+    TextFieldModelStatic::SetShowCounterBorder(frameNode, highlightBorderOpt);
+    TextFieldModelStatic::SetCounterType(frameNode, thresholdPercentageOpt);
     TextFieldModelNG::SetShowCounter(frameNode, showCounter);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
@@ -665,7 +666,7 @@ void _onChangeEvent_textImpl(Ark_NativePointer node,
         auto arkContent = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(u8Content);
         arkCallback.Invoke(arkContent);
     };
-    TextFieldModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
+    TextFieldModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // TextAreaAttributeModifier
 
