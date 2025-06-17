@@ -601,12 +601,12 @@ WebPattern::~WebPattern()
     TAG_LOGI(AceLogTag::ACE_WEB, "NWEB ~WebPattern start");
     ACE_SCOPED_TRACE("WebPattern::~WebPattern, web id = %d", GetWebId());
     UninitTouchEventListener();
-    if (setWebIdCallback_) {
-        auto setWebIdTask = [callback = setWebIdCallback_]() {
+    if (setWebDetachCallback_) {
+        auto setWebDetachTask = [callback = setWebDetachCallback_, webId = GetWebId()]() {
             CHECK_NULL_VOID(callback);
-            callback(-1);
+            callback(webId);
         };
-        PostTaskToUI(std::move(setWebIdTask), "ArkUIWebviewControllerSetWebIdTask");
+        PostTaskToUI(std::move(setWebDetachTask), "ArkUIWebviewControllerSetWebDetachTask");
     }
     if (delegate_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern delegate_ start SetAudioMuted");

@@ -4260,4 +4260,28 @@ HWTEST_F(WebModelTestNg, SetOnHttpAuthRequest002, TestSize.Level1)
     EXPECT_TRUE(callbackCalled);
 #endif
 }
+
+/**
+ * @tc.name: SetWebDetachFunction001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetWebDetachFunction001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    WebModelNG webModelNG;
+    auto callback = [](int32_t id) {};
+    webModelNG.SetWebDetachFunction(callback);
+
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    EXPECT_NE(webPattern->GetSetWebDetachCallback(), nullptr);
+#endif
+}
 } // namespace OHOS::Ace::NG

@@ -2575,6 +2575,16 @@ void JSWeb::Create(const JSCallbackInfo& info)
             func->Call(webviewController, 1, argv);
         };
 
+        auto setWebDetachFunction = controller->GetProperty("setWebDetach");
+        std::function<void(int32_t)> setWebDetachCallback = nullptr;
+        if (setWebDetachFunction->IsFunction()) {
+            setWebDetachCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(setWebDetachFunction)](
+                                     int32_t webId) {
+                JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
+                func->Call(webviewController, 1, argv);
+            };
+        }
+
         auto setHapPathFunction = controller->GetProperty("innerSetHapPath");
         std::function<void(const std::string&)> setHapPathCallback = nullptr;
         if (setHapPathFunction->IsFunction()) {
@@ -2652,6 +2662,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
         WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));
         WebModel::GetInstance()->SetDefaultFileSelectorShow(std::move(fileSelectorShowFromUserCallback));
+        WebModel::GetInstance()->SetWebDetachFunction(std::move(setWebDetachCallback));
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         if (!getCmdLineFunction->IsFunction()) {
             return;

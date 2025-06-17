@@ -128,6 +128,7 @@ class WebPattern : public NestableScrollContainer,
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
+    using SetWebDetachCallback = std::function<void(int32_t)>;
     using SetHapPathCallback = std::function<void(const std::string&)>;
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
@@ -306,6 +307,16 @@ public:
     SetWebIdCallback GetSetWebIdCallback() const
     {
         return setWebIdCallback_;
+    }
+
+    void SetSetWebDetachCallback(SetWebDetachCallback&& callback)
+    {
+        setWebDetachCallback_ = std::move(callback);
+    }
+
+    SetWebDetachCallback GetSetWebDetachCallback() const
+    {
+        return setWebDetachCallback_;
     }
 
     void SetPermissionClipboardCallback(PermissionClipboardCallback&& Callback)
@@ -1141,6 +1152,7 @@ private:
     std::optional<int32_t> transformHintChangedCallbackId_;
     uint32_t rotation_ = 0;
     SetWebIdCallback setWebIdCallback_ = nullptr;
+    SetWebDetachCallback setWebDetachCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
     DefaultFileSelectorShowCallback defaultFileSelectorShowCallback_ = nullptr;
