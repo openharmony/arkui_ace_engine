@@ -627,6 +627,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "$ace_root/test/mock/adapter/mock_ace_container.cpp",
     "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp",
     "$ace_root/test/mock/core/pattern/mock_picker_haptic_factory.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/scroll_adjust/scroll_adjust_manager.cpp",
   ]
 
   sources += [
