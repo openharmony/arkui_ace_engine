@@ -2214,6 +2214,7 @@ RefPtr<OverlayManager> DialogPattern::GetEmbeddedOverlay(const RefPtr<OverlayMan
 
 void DialogPattern::OnAttachToMainTree()
 {
+    AddFollowParentWindowLayoutNode();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto parentNode = AceType::DynamicCast<FrameNode>(host->GetParent());
@@ -2227,6 +2228,11 @@ void DialogPattern::OnAttachToMainTree()
     CHECK_NULL_VOID(navDestinationPattern);
     auto zIndex = navDestinationPattern->GetTitlebarZIndex();
     dialogRenderContext->UpdateZIndex(zIndex + 1);
+}
+
+void DialogPattern::OnDetachFromMainTree()
+{
+    RemoveFollowParentWindowLayoutNode();
 }
 
 RefPtr<OverlayManager> DialogPattern::GetOverlayManager(const RefPtr<FrameNode>& host)
@@ -2251,5 +2257,29 @@ void DialogPattern::OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode)
     if (overlayManager->isMaskNode(GetHost()->GetId())) {
         overlayManager->PopModalDialog(GetHost()->GetId());
     }
+}
+
+void DialogPattern::AddFollowParentWindowLayoutNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto containerId = pipeline->GetInstanceId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+    CHECK_NULL_VOID(subwindow);
+    subwindow->AddFollowParentWindowLayoutNode(host->GetId());
+}
+
+void DialogPattern::RemoveFollowParentWindowLayoutNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto containerId = pipeline->GetInstanceId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+    CHECK_NULL_VOID(subwindow);
+    subwindow->RemoveFollowParentWindowLayoutNode(host->GetId());
 }
 } // namespace OHOS::Ace::NG

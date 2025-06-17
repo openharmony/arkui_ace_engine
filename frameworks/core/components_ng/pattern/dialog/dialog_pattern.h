@@ -403,6 +403,9 @@ private:
     void CheckScrollHeightIsNegative(const RefPtr<UINode>& contentColumn, const DialogProperties& props);
     RefPtr<OverlayManager> GetOverlayManager(const RefPtr<FrameNode>& host);
     void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+    void AddFollowParentWindowLayoutNode();
+    void RemoveFollowParentWindowLayoutNode();
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;

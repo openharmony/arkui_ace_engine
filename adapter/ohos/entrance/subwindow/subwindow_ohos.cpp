@@ -99,6 +99,7 @@ public:
             [subWindow, enable]() {
                 CHECK_NULL_VOID(subWindow);
                 subWindow->OnFreeMultiWindowSwitch(enable);
+                subWindow->SwitchFollowParentWindowLayout(enable);
             },
             TaskExecutor::TaskType::UI, "ArkUIFreeMultiWindowSwitch");
     }
@@ -1213,18 +1214,25 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     CHECK_NULL_RETURN(context, nullptr);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_RETURN(overlay, nullptr);
+    auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_RETURN(parentAceContainer, nullptr);
     std::map<int32_t, RefPtr<NG::FrameNode>> DialogMap(overlay->GetDialogMap().begin(), overlay->GetDialogMap().end());
     int dialogMapSize = static_cast<int>(DialogMap.size());
     if (dialogMapSize == 0) {
-        auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-        CHECK_NULL_RETURN(parentAceContainer, nullptr);
         auto parentcontext = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
         CHECK_NULL_RETURN(parentcontext, nullptr);
         auto parentOverlay = parentcontext->GetOverlayManager();
         CHECK_NULL_RETURN(parentOverlay, nullptr);
         parentOverlay->SetSubWindowId(childContainerId_);
     }
-    ResizeWindow();
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, nullptr);
+    if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
+        SetFollowParentWindowLayoutEnabled(false);
+        ResizeWindow();
+    } else {
+        SetFollowParentWindowLayoutEnabled(true);
+    }
     ShowWindow();
     CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
@@ -1246,18 +1254,25 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
     CHECK_NULL_RETURN(context, nullptr);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_RETURN(overlay, nullptr);
+    auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_RETURN(parentAceContainer, nullptr);
     std::map<int32_t, RefPtr<NG::FrameNode>> DialogMap(overlay->GetDialogMap().begin(), overlay->GetDialogMap().end());
     int dialogMapSize = static_cast<int>(DialogMap.size());
     if (dialogMapSize == 0) {
-        auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-        CHECK_NULL_RETURN(parentAceContainer, nullptr);
         auto parentcontext = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
         CHECK_NULL_RETURN(parentcontext, nullptr);
         auto parentOverlay = parentcontext->GetOverlayManager();
         CHECK_NULL_RETURN(parentOverlay, nullptr);
         parentOverlay->SetSubWindowId(childContainerId_);
     }
-    ResizeWindow();
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_RETURN(dialogTheme, nullptr);
+    if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
+        SetFollowParentWindowLayoutEnabled(false);
+        ResizeWindow();
+    } else {
+        SetFollowParentWindowLayoutEnabled(true);
+    }
     ShowWindow(dialogProps.focusable);
     CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
@@ -1291,11 +1306,11 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
+    auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentAceContainer);
     std::map<int32_t, RefPtr<NG::FrameNode>> DialogMap(overlay->GetDialogMap().begin(), overlay->GetDialogMap().end());
     int dialogMapSize = static_cast<int>(DialogMap.size());
     if (dialogMapSize == 0) {
-        auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-        CHECK_NULL_VOID(parentAceContainer);
         auto parentcontext = DynamicCast<NG::PipelineContext>(parentAceContainer->GetPipelineContext());
         CHECK_NULL_VOID(parentcontext);
         auto parentOverlay = parentcontext->GetOverlayManager();
@@ -1304,7 +1319,14 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "overlay in parent container %{public}d, SetSubWindowId %{public}d",
             parentContainerId_, childContainerId_);
     }
-    ResizeWindow();
+    auto dialogTheme = context->GetTheme<DialogTheme>();
+    CHECK_NULL_VOID(dialogTheme);
+    if (dialogTheme->GetExpandDisplay() || parentAceContainer->IsFreeMultiWindow()) {
+        SetFollowParentWindowLayoutEnabled(false);
+        ResizeWindow();
+    } else {
+        SetFollowParentWindowLayoutEnabled(true);
+    }
     ShowWindow(dialogProps.focusable);
     CHECK_NULL_VOID(window_);
     window_->SetFullScreen(true);
@@ -2295,5 +2317,36 @@ bool SubwindowOhos::ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode)
     window_->KeepKeyboardOnFocus(true);
     window_->SetFocusable(false);
     return true;
+}
+
+void SubwindowOhos::SwitchFollowParentWindowLayout(bool freeMultiWindowEnable)
+{
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+        "subwindow switch followParentWindowLayout, enable: %{public}d", freeMultiWindowEnable);
+    auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
+    if (NeedFollowParentWindowLayout() && !expandDisplay && !freeMultiWindowEnable) {
+        SetFollowParentWindowLayoutEnabled(true);
+    } else {
+        SetFollowParentWindowLayoutEnabled(false);
+        ResizeWindow();
+    }
+}
+
+void SubwindowOhos::AddFollowParentWindowLayoutNode(int32_t nodeId)
+{
+    followParentWindowLayoutNodeIds_.emplace_back(nodeId);
+    if (followParentWindowLayoutNodeIds_.size() == 1) {
+        bool freeMultiWindowEnable = IsFreeMultiWindow();
+        SwitchFollowParentWindowLayout(freeMultiWindowEnable);
+    }
+}
+
+void SubwindowOhos::RemoveFollowParentWindowLayoutNode(int32_t nodeId)
+{
+    followParentWindowLayoutNodeIds_.remove(nodeId);
+    if (followParentWindowLayoutNodeIds_.empty()) {
+        bool freeMultiWindowEnable = IsFreeMultiWindow();
+        SwitchFollowParentWindowLayout(freeMultiWindowEnable);
+    }
 }
 } // namespace OHOS::Ace
