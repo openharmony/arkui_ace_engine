@@ -35,6 +35,12 @@ bool EffectComponentPattern::OnDirtyLayoutWrapperSwap(
     CHECK_NULL_RETURN(host, false);
     auto pipiline = host->GetContext();
     CHECK_NULL_RETURN(pipiline, false);
+    auto parent = host->GetParent();
+    CHECK_NULL_RETURN(parent, false);
+    if (parent_ == parent || !independentLayer_) {
+        return false;
+    }
+    parent_ = parent;
     pipiline->AddAfterLayoutTask([weak = AceType::WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -48,16 +54,9 @@ bool EffectComponentPattern::OnDirtyLayoutWrapperSwap(
             CHECK_NULL_VOID(renderContext);
             auto rsNode = AceType::DynamicCast<NG::RosenRenderContext>(renderContext)->GetRSNode();
             CHECK_NULL_VOID(rsNode);
-            // rsNode->SetCompositeLayer("CompositeComponent");
         }
-        return;
     });
 
     return false;
-}
-
-void EffectComponentPattern::SetIndependentLayer(bool independentLayer)
-{
-    independentLayer_ = independentLayer;
 }
 } // namespace OHOS::Ace::NG

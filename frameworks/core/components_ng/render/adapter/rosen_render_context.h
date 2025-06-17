@@ -72,6 +72,9 @@ public:
     void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) override;
     void AddInitTypeCallBack(const std::function<void(int32_t&)>& initTypeCallback) override;
 
+    void CreateNodeByType(
+        const ContextParam& param, bool isTextureExportNode, std::shared_ptr<Rosen::RSUIContext>& rsContext);
+
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
     void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode) override;

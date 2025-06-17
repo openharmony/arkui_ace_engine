@@ -47,6 +47,10 @@ EffectComponentModel* EffectComponentModel::GetInstance()
 namespace OHOS::Ace::Framework {
 void JSEffectComponent::Create(const JSCallbackInfo& info)
 {
+    if (info.Length() <= 0) {
+        EffectComponentModel::GetInstance()->Create(false);
+        return;
+    }
     auto independentLayer = false;
     auto tmpInfo = info[0];
     if (tmpInfo->IsObject()) {

@@ -24,9 +24,7 @@ void EffectComponentModelNG::Create(bool independentLayer)
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::EFFECT_COMPONENT_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::EFFECT_COMPONENT_ETS_TAG, nodeId, [independentLayer]() {
-        auto effectComponentPattern = AceType::MakeRefPtr<EffectComponentPattern>();
-        effectComponentPattern->SetIndependentLayer(independentLayer);
-        return effectComponentPattern;
+        return AceType::MakeRefPtr<EffectComponentPattern>(independentLayer);
     });
     stack->Push(frameNode);
 }

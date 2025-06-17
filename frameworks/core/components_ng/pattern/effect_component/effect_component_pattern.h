@@ -23,7 +23,6 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT EffectComponentPattern : public Pattern {
@@ -31,6 +30,7 @@ class ACE_EXPORT EffectComponentPattern : public Pattern {
 
 public:
     EffectComponentPattern() = default;
+    explicit EffectComponentPattern(bool independentLayer) : independentLayer_(independentLayer) {};
     ~EffectComponentPattern() override = default;
 
     void AlwaysSnapshot(bool enable) const;
@@ -56,9 +56,8 @@ public:
     bool OnDirtyLayoutWrapperSwap(
         const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/) override;
 
-    void SetIndependentLayer(bool independentLayer);
-
 private:
+    WeakPtr<UINode> parent_ = nullptr;
     bool independentLayer_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(EffectComponentPattern);
 };
