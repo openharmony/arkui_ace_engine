@@ -15,7 +15,7 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 config("perf_monitor_config") {
-  visibility = ["*.*"]
+  visibility = [ "*:*" ]
 
   include_dirs = [
     "$ace_root/frameworks/base/perfmonitor",
