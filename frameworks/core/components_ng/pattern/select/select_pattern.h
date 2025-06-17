@@ -48,6 +48,11 @@ public:
     SelectPattern() = default;
     ~SelectPattern() override = default;
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     bool IsAtomicNode() const override
     {
         return false;

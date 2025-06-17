@@ -136,8 +136,20 @@ void JSMenu::SetWidth(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+
+    const JSRef<JSVal>& jsValue = info[0];
+    if (jsValue->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+        JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
+        if (layoutPolicy->IsString()) {
+            auto policy = ParseLayoutPolicy(layoutPolicy->ToString());
+            ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, true);
+            return;
+        }
+    }
+
     CalcDimension width;
-    ParseJsDimensionVp(info[0], width);
+    ParseJsDimensionVp(jsValue, width);
     MenuModel::GetInstance()->SetWidth(width);
 }
 
