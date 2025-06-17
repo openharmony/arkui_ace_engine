@@ -585,8 +585,13 @@ private:
 
     bool ExecuteActionNG(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         Accessibility::ActionType action, const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset);
-    bool ConvertActionTypeToBoolen(Accessibility::ActionType action, RefPtr<NG::FrameNode>& frameNode,
-        int64_t elementId, RefPtr<NG::PipelineContext>& context);
+    bool ConvertActionTypeToBoolen(
+        Accessibility::ActionType action,
+        RefPtr<NG::FrameNode>& frameNode,
+        int64_t elementId,
+        RefPtr<NG::PipelineContext>& context,
+        const std::map<std::string, std::string>& actionArguments);
+
     void SetSearchElementInfoByAccessibilityIdResult(Accessibility::AccessibilityElementOperatorCallback& callback,
         std::list<Accessibility::AccessibilityElementInfo>&& infos, const int32_t requestId, bool checkEmbed = false);
 
