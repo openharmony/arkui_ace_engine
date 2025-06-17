@@ -788,6 +788,9 @@ void UINode::AttachToMainTree(bool recursive, PipelineContext* context)
     if (onMainTree_) {
         return;
     }
+    if (context) {
+        context->SetIsTransFlag(true);
+    }
     // the context should not be nullptr.
     AttachContext(context, false);
     onMainTree_ = true;

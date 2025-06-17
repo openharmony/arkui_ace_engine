@@ -6198,7 +6198,9 @@ void PipelineContext::SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo
 
 void PipelineContext::SetIsTransFlag(bool result)
 {
-    isTransFlag_ = result;
+    if (isTransFlag_ != result) {
+        isTransFlag_ = result;
+    }
 }
 
 void PipelineContext::FlushMouseEventForHover()
@@ -6224,7 +6226,11 @@ void PipelineContext::FlushMouseEventForHover()
     event.deviceId = lastMouseEvent_->deviceId;
     event.sourceTool = lastMouseEvent_->sourceTool;
     event.sourceType = lastMouseEvent_->sourceType;
-    event.action = lastMouseEvent_->action;
+    if (lastMouseEvent_->action == MouseAction::WINDOW_ENTER || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
+        event.action = MouseAction::MOVE;
+    } else {
+        event.action = lastMouseEvent_->action;
+    }
     event.time = lastMouseEvent_->time;
     event.touchEventId = lastMouseEvent_->touchEventId;
     event.mockFlushEvent = true;

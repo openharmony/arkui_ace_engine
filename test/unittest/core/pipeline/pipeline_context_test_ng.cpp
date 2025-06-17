@@ -2396,5 +2396,22 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg122, TestSize.Level1)
     context_->FlushMouseEventForHover();
     EXPECT_FALSE(context_->lastMouseEvent_->pointerEvent);
 }
+
+/**
+ * @tc.name: PipelineContextTestNg123
+ * @tc.desc: Test SetIsTransFlag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, SetIsTransFlagTest, TestSize.Level1)
+{
+    context_->SetIsTransFlag(true);
+    context_->SetIsTransFlag(false);
+    context_->SetIsTransFlag(true);
+    EXPECT_TRUE(context_->isTransFlag_);
+    context_->SetIsTransFlag(false);
+    context_->SetIsTransFlag(true);
+    context_->SetIsTransFlag(false);
+    EXPECT_FALSE(context_->isTransFlag_);
+}
 } // namespace NG
 } // namespace OHOS::Ace
