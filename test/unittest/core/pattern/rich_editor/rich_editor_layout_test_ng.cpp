@@ -542,6 +542,10 @@ HWTEST_F(RichEditorLayoutTestNg, HandleAISpanTest001, TestSize.Level1)
     EXPECT_EQ(spanItem1->aiSpanResultCount, 0);
     EXPECT_EQ(spanItem2->aiSpanResultCount, 1);
     EXPECT_EQ(spanItem3->aiSpanResultCount, 1);
+
+    EXPECT_EQ(spanItem1->needReLayout, false);
+    EXPECT_EQ(spanItem2->needReLayout, true);
+    EXPECT_EQ(spanItem3->needReLayout, true);
 }
 
 } // namespace OHOS::Ace::NG
