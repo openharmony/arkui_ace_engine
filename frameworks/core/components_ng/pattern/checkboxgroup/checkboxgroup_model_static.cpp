@@ -40,7 +40,10 @@ void CheckBoxGroupModelStatic::SetSelectedColor(FrameNode* frameNode, const std:
         ACE_UPDATE_NODE_PAINT_PROPERTY(
             CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColorFlagByUser, true, frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColor, frameNode);
+        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(
+            CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColor, PROPERTY_UPDATE_RENDER);
+        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(
+            CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER);
     }
 }
 
@@ -53,6 +56,8 @@ void CheckBoxGroupModelStatic::SetUnSelectedColor(FrameNode* frameNode, const st
             CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColorFlagByUser, true, frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColor, frameNode);
+        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(
+            CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER);
     }
 }
 
@@ -65,6 +70,8 @@ void CheckBoxGroupModelStatic::SetCheckMarkColor(FrameNode* frameNode, const std
             CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColorFlagByUser, true, frameNode);
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColor, frameNode);
+        ACE_RESET_PAINT_PROPERTY_WITH_FLAG(
+            CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColorFlagByUser, PROPERTY_UPDATE_RENDER);
     }
 }
 
