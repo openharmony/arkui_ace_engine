@@ -5086,13 +5086,8 @@ void BackgroundBlurStyle1Impl(Ark_NativePointer node, const Opt_BlurStyle* style
     if (auto styleOpt = Converter::OptConvertPtr<BlurStyle>(style); styleOpt) {
         convValue.blurStyle = *styleOpt;
     }
-    auto sysOptionsOpt = Converter::OptConvertPtr<SysOptions>(sysOptions);
-    if (sysOptionsOpt) {
-        ViewAbstract::SetBackgroundBlurStyle(frameNode, convValue, *sysOptionsOpt);
-        return;
-    }
-    SysOptions defaultSysOptions = { .disableSystemAdaptation = false };
-    ViewAbstract::SetBackgroundBlurStyle(frameNode, convValue, defaultSysOptions);
+    auto sysAdaptiveOptions = Converter::OptConvertPtr<SysOptions>(sysOptions);
+    ViewAbstractModelStatic::SetBackgroundBlurStyle(frameNode, convValue, sysAdaptiveOptions);
 }
 void ForegroundBlurStyle0Impl(Ark_NativePointer node,
                               const Opt_BlurStyle* value,

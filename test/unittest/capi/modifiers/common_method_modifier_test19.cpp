@@ -45,6 +45,9 @@ const auto EXPECTED_RATIO = 0.7f;
 const auto EXPECTED_PERIOD = 250;
 const auto DEFAULT_PERIOD = 1000;
 const auto INITIAL_PERIOD = 0;
+const SysOptions DEFAULT_SYS_OPTIONS = {
+    .disableSystemAdaptation = false
+};
 static const std::unordered_map<Ark_AccessibilityRoleType, std::string> ACCESSIBILITY_ROLE_MAP {
     { ARK_ACCESSIBILITY_ROLE_TYPE_ACTION_SHEET, "actionsheet" },
     { ARK_ACCESSIBILITY_ROLE_TYPE_ALERT_DIALOG, "alertdialog" },
@@ -708,6 +711,211 @@ HWTEST_F(CommonMethodModifierTest19, setOnAxisEventTest, TestSize.Level1)
 }
 
 /*
+ * @tc.name: setBackgroundBlurStyle0TestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle0TestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackgroundBlurStyle0, nullptr);
+
+    const BlurStyleOption expected {
+        .blurStyle = BlurStyle::BACKGROUND_REGULAR,
+        .colorMode = ThemeColorMode::DARK,
+        .scale = 0.123,
+        .adaptiveColor = AdaptiveColor::AVERAGE,
+        .blurOption = {.grayscale = {20, 30}},
+        .policy = BlurStyleActivePolicy::ALWAYS_ACTIVE,
+        .blurType = BlurType::WITHIN_WINDOW,
+        .inactiveColor = Color(0xFF00FFFF),
+        .isValidColor = true,
+        .isWindowFocused = true,
+    };
+    auto styleValid = ARK_BLUR_STYLE_BACKGROUND_REGULAR;
+    auto inputStyleValid = Converter::ArkValue<Opt_BlurStyle>(styleValid);
+    auto inputOptionValid = Converter::ArkValue<Opt_BackgroundBlurStyleOptions>(
+        Ark_BackgroundBlurStyleOptions {
+            .colorMode  = Converter::ArkValue<Opt_ThemeColorMode>(ARK_THEME_COLOR_MODE_DARK),
+            .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
+            .scale = Converter::ArkValue<Opt_Number>(0.123f),
+            .blurOptions = Converter::ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
+                .grayscale = {Converter::ArkValue<Ark_Number>(20), Converter::ArkValue<Ark_Number>(30)}
+            }),
+            .policy =
+                Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
+            .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
+        }
+    );
+    modifier_->setBackgroundBlurStyle0(node_, &inputStyleValid, &inputOptionValid);
+
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+    ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+    ASSERT_FALSE(renderMock->GetSysOptions().value_or(DEFAULT_SYS_OPTIONS).disableSystemAdaptation);
+}
+
+/*
+ * @tc.name: setBackgroundBlurStyleTest0InvalidValues1
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle0TestInvalidValues1, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackgroundBlurStyle0, nullptr);
+    const BlurStyleOption expected;
+    modifier_->setBackgroundBlurStyle0(node_, nullptr, nullptr);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+    ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+    ASSERT_FALSE(renderMock->GetSysOptions().value_or(DEFAULT_SYS_OPTIONS).disableSystemAdaptation);
+}
+
+/*
+ * @tc.name: setBackgroundBlurStyleTest0InvalidValues2
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle0TestInvalidValues2, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackgroundBlurStyle0, nullptr);
+    const BlurStyleOption expected {
+        .blurStyle = BlurStyle::BACKGROUND_REGULAR,
+    };
+    auto styleValid = ARK_BLUR_STYLE_BACKGROUND_REGULAR;
+    auto inputStyleValid = Converter::ArkValue<Opt_BlurStyle>(styleValid);
+    modifier_->setBackgroundBlurStyle0(node_, &inputStyleValid, nullptr);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+    ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+    ASSERT_FALSE(renderMock->GetSysOptions().value_or(DEFAULT_SYS_OPTIONS).disableSystemAdaptation);
+}
+
+/*
+ * @tc.name: setBackgroundBlurStyleTest0InvalidValues3
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle0TestInvalidValues3, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackgroundBlurStyle0, nullptr);
+    const BlurStyleOption expected {
+        .colorMode = ThemeColorMode::DARK,
+        .scale = 0.123,
+        .adaptiveColor = AdaptiveColor::AVERAGE,
+        .blurOption = {.grayscale = {20, 30}},
+        .policy = BlurStyleActivePolicy::ALWAYS_ACTIVE,
+        .blurType = BlurType::WITHIN_WINDOW,
+        .inactiveColor = Color(0xFF00FFFF),
+        .isValidColor = true,
+        .isWindowFocused = true,
+    };
+    auto inputOptionValid = Converter::ArkValue<Opt_BackgroundBlurStyleOptions>(
+        Ark_BackgroundBlurStyleOptions {
+            .colorMode  = Converter::ArkValue<Opt_ThemeColorMode>(ARK_THEME_COLOR_MODE_DARK),
+            .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
+            .scale = Converter::ArkValue<Opt_Number>(0.123f),
+            .blurOptions = Converter::ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
+                .grayscale = {Converter::ArkValue<Ark_Number>(20), Converter::ArkValue<Ark_Number>(30)}
+            }),
+            .policy =
+                Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
+            .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
+        }
+    );
+    modifier_->setBackgroundBlurStyle0(node_, nullptr, &inputOptionValid);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+    ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+    ASSERT_FALSE(renderMock->GetSysOptions().value_or(DEFAULT_SYS_OPTIONS).disableSystemAdaptation);
+}
+
+/*
+ * @tc.name: setBackgroundBlurStyleTest0InvalidValues4
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle0TestInvalidValues4, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackgroundBlurStyle0, nullptr);
+    const BlurStyleOption expected;
+    auto inputStyleInvalid = Converter::ArkValue<Opt_BlurStyle>();
+    auto inputOptionInvalid = Converter::ArkValue<Opt_BackgroundBlurStyleOptions>();
+    modifier_->setBackgroundBlurStyle0(node_, &inputStyleInvalid, &inputOptionInvalid);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+    ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+    ASSERT_FALSE(renderMock->GetSysOptions().value_or(DEFAULT_SYS_OPTIONS).disableSystemAdaptation);
+}
+
+/*
+ * @tc.name: setBackgroundBlurStyleTest0InvalidValues5
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle0TestInvalidValues5, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackgroundBlurStyle0, nullptr);
+    const BlurStyleOption expected {
+        .blurStyle = BlurStyle::BACKGROUND_REGULAR,
+    };
+    auto styleValid = ARK_BLUR_STYLE_BACKGROUND_REGULAR;
+    auto inputStyleValid = Converter::ArkValue<Opt_BlurStyle>(styleValid);
+    auto inputOptionInvalid = Converter::ArkValue<Opt_BackgroundBlurStyleOptions>();
+    modifier_->setBackgroundBlurStyle0(node_, &inputStyleValid, &inputOptionInvalid);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+    ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+    ASSERT_FALSE(renderMock->GetSysOptions().value_or(DEFAULT_SYS_OPTIONS).disableSystemAdaptation);
+}
+
+/*
+ * @tc.name: setBackgroundBlurStyleTest0InvalidValues6
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle0TestInvalidValues6, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackgroundBlurStyle0, nullptr);
+    const BlurStyleOption expected {
+        .colorMode = ThemeColorMode::DARK,
+        .scale = 0.123,
+        .adaptiveColor = AdaptiveColor::AVERAGE,
+        .blurOption = {.grayscale = {20, 30}},
+        .policy = BlurStyleActivePolicy::ALWAYS_ACTIVE,
+        .blurType = BlurType::WITHIN_WINDOW,
+        .inactiveColor = Color(0xFF00FFFF),
+        .isValidColor = true,
+        .isWindowFocused = true,
+    };
+    auto inputOptionValid = Converter::ArkValue<Opt_BackgroundBlurStyleOptions>(
+        Ark_BackgroundBlurStyleOptions {
+            .colorMode  = Converter::ArkValue<Opt_ThemeColorMode>(ARK_THEME_COLOR_MODE_DARK),
+            .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
+            .scale = Converter::ArkValue<Opt_Number>(0.123f),
+            .blurOptions = Converter::ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
+                .grayscale = {Converter::ArkValue<Ark_Number>(20), Converter::ArkValue<Ark_Number>(30)}
+            }),
+            .policy =
+                Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
+            .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
+        }
+    );
+    auto inputStyleInvalid = Converter::ArkValue<Opt_BlurStyle>();
+    modifier_->setBackgroundBlurStyle0(node_, &inputStyleInvalid, &inputOptionValid);
+    auto renderMock = GetMockRenderContext();
+    ASSERT_NE(renderMock, nullptr);
+    ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+    ASSERT_FALSE(renderMock->GetSysOptions().value_or(DEFAULT_SYS_OPTIONS).disableSystemAdaptation);
+}
+
+/*
  * @tc.name: setBackgroundBlurStyle1TestValidValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -741,12 +949,25 @@ HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle1TestValidValues, Tes
             .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
         }
     );
-    modifier_->setBackgroundBlurStyle1(node_, &inputStyleValid, &inputOptionValid, nullptr);
-
+    auto inputSysOptions1 = Converter::ArkValue<Opt_SystemAdaptiveOptions>(
+        Ark_SystemAdaptiveOptions { .disableSystemAdaptation = Converter::ArkValue<Opt_Boolean>(true) }
+    );
+    modifier_->setBackgroundBlurStyle1(node_, &inputStyleValid, &inputOptionValid, &inputSysOptions1);
     auto renderMock = GetMockRenderContext();
     ASSERT_NE(renderMock, nullptr);
     ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
     EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+    ASSERT_TRUE(renderMock->GetSysOptions().has_value());
+    ASSERT_TRUE(renderMock->GetSysOptions().value().disableSystemAdaptation);
+    auto inputSysOptions2 = Converter::ArkValue<Opt_SystemAdaptiveOptions>(
+        Ark_SystemAdaptiveOptions { .disableSystemAdaptation = Converter::ArkValue<Opt_Boolean>(false) }
+    );
+    modifier_->setBackgroundBlurStyle1(node_, &inputStyleValid, &inputOptionValid, &inputSysOptions2);
+    ASSERT_NE(renderMock, nullptr);
+    ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
+    EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+    ASSERT_TRUE(renderMock->GetSysOptions().has_value());
+    ASSERT_FALSE(renderMock->GetSysOptions().value().disableSystemAdaptation);
 }
 
 /*
@@ -763,6 +984,7 @@ HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle1TestInvalidValues1, 
     ASSERT_NE(renderMock, nullptr);
     ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
     EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+    ASSERT_FALSE(renderMock->GetSysOptions().value_or(DEFAULT_SYS_OPTIONS).disableSystemAdaptation);
 }
 
 /*
@@ -783,6 +1005,7 @@ HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle1TestInvalidValues2, 
     ASSERT_NE(renderMock, nullptr);
     ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
     EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+    ASSERT_FALSE(renderMock->GetSysOptions().value_or(DEFAULT_SYS_OPTIONS).disableSystemAdaptation);
 }
 
 /*
@@ -821,6 +1044,7 @@ HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle1TestInvalidValues3, 
     ASSERT_NE(renderMock, nullptr);
     ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
     EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+    ASSERT_FALSE(renderMock->GetSysOptions().value_or(DEFAULT_SYS_OPTIONS).disableSystemAdaptation);
 }
 
 /*
@@ -839,6 +1063,7 @@ HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle1TestInvalidValues4, 
     ASSERT_NE(renderMock, nullptr);
     ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
     EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+    ASSERT_FALSE(renderMock->GetSysOptions().value_or(DEFAULT_SYS_OPTIONS).disableSystemAdaptation);
 }
 
 /*
@@ -860,6 +1085,7 @@ HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle1TestInvalidValues5, 
     ASSERT_NE(renderMock, nullptr);
     ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
     EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+    ASSERT_FALSE(renderMock->GetSysOptions().value_or(DEFAULT_SYS_OPTIONS).disableSystemAdaptation);
 }
 
 /*
@@ -898,6 +1124,7 @@ HWTEST_F(CommonMethodModifierTest19, setBackgroundBlurStyle1TestInvalidValues6, 
     ASSERT_NE(renderMock, nullptr);
     ASSERT_TRUE(renderMock->GetBackBlurStyle().has_value());
     EXPECT_EQ(renderMock->GetBackBlurStyle().value(), expected);
+    ASSERT_FALSE(renderMock->GetSysOptions().value_or(DEFAULT_SYS_OPTIONS).disableSystemAdaptation);
 }
 
 /*
