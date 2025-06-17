@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 /**
-  skeleton of a class to support 
+  skeleton of a class to support
   versioning of backing store values
 */
 

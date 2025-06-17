@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { IObservedObject } from '../../decorator';
-import { 
+import {
     IStateDecoratedVariable,
     IPropDecoratedVariable,
     ILinkDecoratedVariable,
@@ -21,7 +21,8 @@ import {
     IProvideDecoratedVariable,
     IConsumeDecoratedVariable,
     IStorageLinkDecoratedVariable,
-    IStoragePropDecoratedVariable } from '../../decorator';
+    IStoragePropDecoratedVariable,
+} from '../../decorator';
 import { NullableObject } from '../../base/types';
 import { InterfaceProxyHandler } from './observeInterfaceProxy';
 import { ISubscribedWatches } from '../../decorator';
@@ -67,7 +68,7 @@ export class StateMgmtTool {
         return Proxy.tryGetHandler(value) as NullableObject;
     }
     static createProxy<T extends Object>(value: T): T {
-        return Proxy.create(value, new InterfaceProxyHandler<T>()) as T
+        return Proxy.create(value, new InterfaceProxyHandler<T>()) as T;
     }
     static isObjectLiteral<T extends Object>(value: T): boolean {
         return Reflect.isLiteralInitializedInterface(value);

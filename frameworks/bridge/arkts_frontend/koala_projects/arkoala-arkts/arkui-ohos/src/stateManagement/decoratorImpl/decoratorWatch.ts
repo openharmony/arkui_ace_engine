@@ -18,17 +18,17 @@ import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 // WatchFunc: Representaton of a @Watch function isnide V1 decorator class
 export class WatchFunc {
     private static nextWatchId_: WatchIdType = 1;
-    private static readonly watchId2WatchFunc: Map<WatchIdType, WatchFunc> =
-        new Map<WatchIdType, WatchFunc>();
-    private static readonly watchFinalizer: FinalizationRegistry<WatchIdType> =
-        new FinalizationRegistry<WatchIdType>((watchId: WatchIdType) => {
+    private static readonly watchId2WatchFunc: Map<WatchIdType, WatchFunc> = new Map<WatchIdType, WatchFunc>();
+    private static readonly watchFinalizer: FinalizationRegistry<WatchIdType> = new FinalizationRegistry<WatchIdType>(
+        (watchId: WatchIdType) => {
             // remove @Watch id from watchId2WatchFunc Map to avoid memory growth
             WatchFunc.watchId2WatchFunc.delete(watchId);
-        });
+        }
+    );
 
     /**
      * Execute @Watch with given WatchId
-     * @param watchId 
+     * @param watchId
      * @returns true if @Watch / WatchFunc with given id was found
      * otherwise false
      */
@@ -49,23 +49,23 @@ export class WatchFunc {
         this.id_ = WatchFunc.nextWatchId_++;
         WatchFunc.watchId2WatchFunc.set(this.id_, this);
         this.func_ = func;
-        // when this instance gets GC'ed, unregister its id from 
+        // when this instance gets GC'ed, unregister its id from
         // static watchId2WatchFunc Map
         WatchFunc.watchFinalizer.register(this, this.id_);
     }
 
     public id(): WatchIdType {
-        return this.id_
+        return this.id_;
     }
 
-    // replace the watch function 
+    // replace the watch function
     // needed for mkProp
     public setFunc(newFunc: WatchFuncType): void {
         this.func_ = newFunc;
     }
 
-    // register to given object 
-    // when object changes it will call Execute 
+    // register to given object
+    // when object changes it will call Execute
     // for each subscriber
     registerMeTo(obj: ISubscribedWatches): void {
         obj.addWatchSubscriber(this.id_);
@@ -93,7 +93,7 @@ export class SubscribedWatches implements ISubscribedWatches {
                 // lazy delete WatchIds from subscribers_ Set
                 // whose watchId has been removed from watchId2WatchFunc by
                 // watchFinalizer
-                this.subscribers_.delete(watchId)
+                this.subscribers_.delete(watchId);
             }
         });
     }

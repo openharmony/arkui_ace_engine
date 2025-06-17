@@ -14,6 +14,7 @@
  */
 
 import { StateMgmtTool } from '#stateMgmtTool';
+import { NullableObject } from './types';
 
 export class UIUtilsImpl {
     private static observedMap: WeakMap<Object, Object> = new WeakMap<Object, Object>();
@@ -24,10 +25,10 @@ export class UIUtilsImpl {
     }
 
     public static getObservedProxy<T extends Object>(obj: T): T | undefined {
-        if (UIUtilsImpl.isProxied(obj)) {
+        if (obj && UIUtilsImpl.isProxied(obj)) {
             return obj;
         }
-        return UIUtilsImpl.observedMap.get(obj) as (T | undefined);
+        return UIUtilsImpl.observedMap.get(obj) as T | undefined;
     }
 
     public static isProxied<T extends Object>(value: T): boolean {
@@ -43,12 +44,12 @@ export class UIUtilsImpl {
         return UIUtilsImpl.set(source, StateMgmtTool.createProxy<T>(source));
     }
 
-    public makeObserved<T extends Object>(value: T): T {
-        if (StateMgmtTool.isIObservedObject(value)) {
+    public makeObserved<T>(value: T): T {
+        if (StateMgmtTool.isIObservedObject(value as NullableObject)) {
             return value as T;
         }
-        if (StateMgmtTool.isObjectLiteral(value)) {
-            return UIUtilsImpl.makeObservedProxyNoCheck(value);
+        if (value && StateMgmtTool.isObjectLiteral(value)) {
+            return UIUtilsImpl.makeObservedProxyNoCheck(value as Object) as T;
         }
         return value;
     }

@@ -21,7 +21,7 @@ import {
     IProvideDecoratedVariable,
     IConsumeDecoratedVariable,
     IStorageLinkDecoratedVariable,
-    IStoragePropDecoratedVariable
+    IStoragePropDecoratedVariable,
 } from '../../decorator';
 import { NullableObject } from '../../base/types';
 export class StateMgmtTool {

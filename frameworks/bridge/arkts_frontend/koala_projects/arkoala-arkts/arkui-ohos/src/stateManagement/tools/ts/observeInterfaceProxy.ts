@@ -45,7 +45,7 @@ export class InterfaceProxyHandler<T extends Object> implements ProxyHandler<T>,
     }
     public get(target: T, name: string): NullableObject {
         const value = Reflect.get(target, name) as NullableObject;
-        if ((typeof value !== 'function') && (this.shouldAddRef())) {
+        if (typeof value !== 'function' && this.shouldAddRef()) {
             this.__meta.addRef();
         }
         return value;

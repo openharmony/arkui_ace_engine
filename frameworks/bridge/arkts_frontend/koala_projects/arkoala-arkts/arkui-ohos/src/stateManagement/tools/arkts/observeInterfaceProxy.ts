@@ -45,7 +45,7 @@ export class InterfaceProxyHandler<T extends Object> implements ProxyHandler<T>,
     }
     public get(target: T, name: string): Any {
         const value = Reflect.get(target, name) as Any;
-        if ((typeof value !== 'function') && (this.shouldAddRef())) {
+        if (typeof value !== 'function' && this.shouldAddRef()) {
             this.__meta.addRef();
         }
         return value;

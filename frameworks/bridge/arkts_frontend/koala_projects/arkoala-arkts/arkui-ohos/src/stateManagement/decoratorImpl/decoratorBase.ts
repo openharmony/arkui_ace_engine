@@ -27,7 +27,7 @@ import { SubscribedAbstractProperty } from '../decorator';
 It is useful to have separate class implement each variable decoratore,  e.g. for DFX, not use `MutableState` as currently done.
 V1 decorator implementations can limit permissableAddRef (the reading depth for recording dependencies when starting to read from a V1 variable)
 
-V1:  
+V1:
 * @State implements IDecoratedMutableVariable
 * @ObjectLink implements IDecoratedImmutableVariable, IDecoratedUpdatableVariable
 * @Prop implements IDecoratedMutableVariable, IDecoratedUpdatableVariable
@@ -35,17 +35,15 @@ V1:
 * @Provide implements IDecoratedMutableVariable, IDecoratedUpdatableVariable
 * @Consume implements IDecoratedMutableVariable  (updates work a bit special)
 * @Local/StorageLink/Prop IDecoratedMutableVariable
-* 
-V2: 
+V2:
 * @Local implements IDecoratedMutableVariable
 * @Param implements IDecoratedImmutableVariable, IDecoratedUpdatableVariable
 * @Param @Once implements IDecoratedMutableVariable
- 
 */
 
 /**
-* Base class of all decorated variable classes
-*/
+ * Base class of all decorated variable classes
+ */
 export abstract class DecoratedVariableBase<T> {
     protected readonly owningComponent_: ExtendableComponent | null;
     // can be read publically
@@ -69,21 +67,26 @@ export abstract class DecoratedVariableBase<T> {
     }
 }
 
-
-
 /**
 base class for all V1 decorated DecoratedVariableBase implements DecoratedVariableBase
 */
 
-export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase<T> implements IDecoratedV1Variable<T>, SubscribedAbstractProperty<T> {
-
+export abstract class DecoratedV1VariableBase<T>
+    extends DecoratedVariableBase<T>
+    implements IDecoratedV1Variable<T>, SubscribedAbstractProperty<T>
+{
     // V1 decorators can optionally have one @Watch function
     // to manage Local/AppStorge dependencies additional WatchFunc are required
     // therefore _watchFuncs is an Map<WatchIdType, WatchFunc>
     /* compiler BUG: change to protcted */
     public readonly _watchFuncs: Map<WatchIdType, WatchFunc> = new Map<WatchIdType, WatchFunc>();
 
-    constructor(decorator: string, owningComponent: ExtendableComponent | null, varName: string, watchFunc?: WatchFuncType) {
+    constructor(
+        decorator: string,
+        owningComponent: ExtendableComponent | null,
+        varName: string,
+        watchFunc?: WatchFuncType
+    ) {
         super(decorator, owningComponent, varName);
         if (watchFunc) {
             const w = new WatchFunc(watchFunc);
@@ -110,8 +113,8 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase<T
 
     /**
      * remove WatchFunc with given id
-     * @param watchId 
-     * @returns 
+     * @param watchId
+     * @returns
      */
     public removeWatch(watchId: WatchIdType): boolean {
         return this._watchFuncs.delete(watchId);
@@ -124,7 +127,7 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase<T
         }
         if (StateMgmtTool.isISubscribedWatches(value as Object)) {
             const iSubscribedWatches = value as Object as ISubscribedWatches;
-            this._watchFuncs.forEach((watchFunc)=>{
+            this._watchFuncs.forEach((watchFunc) => {
                 watchFunc.registerMeTo(iSubscribedWatches);
             });
         } else {
@@ -137,7 +140,6 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase<T
             }
         }
     }
-
 
     /* compiler BUG: change to protcted */
     public unregisterWatchFromObservedObjectChanges(value: T): void {
@@ -152,7 +154,7 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase<T
         } else {
             // check if value is observed / proxied interface
             const handler = StateMgmtTool.tryGetHandler(value as Object);
-            if (handler && (StateMgmtTool.isISubscribedWatches(handler as Object))) {
+            if (handler && StateMgmtTool.isISubscribedWatches(handler as Object)) {
                 const iSubscribedWatches = handler as ISubscribedWatches;
                 this._watchFuncs.forEach((watchFunc) => {
                     watchFunc.unregisterMeFrom(iSubscribedWatches);
@@ -163,7 +165,9 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase<T
 
     /* compiler BUG: change to protcted */
     public execWatchFuncs(): void {
-        this._watchFuncs.forEach((watchFunc) => { watchFunc.execute(this.varName); });
+        this._watchFuncs.forEach((watchFunc) => {
+            watchFunc.execute(this.varName);
+        });
     }
 
     public registerWatchToSource(me: IDecoratedV1Variable<T>): void {
@@ -183,6 +187,5 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase<T
         };
         watchThis.setFunc(watchFunc);
         this._watchFuncs.set(watchThis.id(), watchThis);
-
     }
 }

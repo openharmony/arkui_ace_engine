@@ -40,29 +40,27 @@ export interface IDecoratedUpdatableVariable<T> {
     update(newValue: T): void;
 }
 
-export interface IStateDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {
-}
+export interface IStateDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
 
-export interface IPropDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedUpdatableVariable<T>, IDecoratedV1Variable<T> {
-}
+export interface IPropDecoratedVariable<T>
+    extends IDecoratedMutableVariable<T>,
+        IDecoratedUpdatableVariable<T>,
+        IDecoratedV1Variable<T> {}
 
-export interface ILinkDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {
-}
+export interface ILinkDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
 
-export interface IProvideDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {
-}
+export interface IProvideDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
 
-export interface IConsumeDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {
-}
+export interface IConsumeDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
 
-export interface IObjectLinkDecoratedVariable<T> extends IDecoratedImmutableVariable<T>, IDecoratedUpdatableVariable<T>, IDecoratedV1Variable<T> {
-}
+export interface IObjectLinkDecoratedVariable<T>
+    extends IDecoratedImmutableVariable<T>,
+        IDecoratedUpdatableVariable<T>,
+        IDecoratedV1Variable<T> {}
 
-export interface IStorageLinkDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {
-}
+export interface IStorageLinkDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
 
-export interface IStoragePropDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {
-}
+export interface IStoragePropDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
 
 export type LinkSourceType<T> = IDecoratedV1Variable<T>;
 
@@ -95,20 +93,61 @@ export const STATE_MGMT_FACTORY: IStateMgmtFactory = new __StateMgmtFactoryImpl(
 export interface IStateMgmtFactory {
     makeMutableStateMeta(): IMutableStateMeta;
     makeSubscribedWatches(): ISubscribedWatches;
-    makeState<T>(owningView: ExtendableComponent, varName: string, initValue: T, watchFunc?: WatchFuncType): IStateDecoratedVariable<T>;
-    makeProp<T>(owningView: ExtendableComponent, varName: string, initValue: T, watchFunc?: WatchFuncType): IPropDecoratedVariable<T>;
-    makeLink<T>(owningView: ExtendableComponent, varName: string, source: LinkSourceType<T>, watchFunc?: WatchFuncType): ILinkDecoratedVariable<T>;
-    makeProvide<T>(owningView: ExtendableComponent, varName: string, provideAlias: string,
-        initValue: T, allowOverride: boolean, watchFunc?: WatchFuncType): IProvideDecoratedVariable<T>;
-    makeConsume<T>(owningView: ExtendableComponent, varName: string, provideAlias: string,  watchFunc?: WatchFuncType): IConsumeDecoratedVariable<T>;
-    makeObjectLink<T>(owningView: ExtendableComponent, varName: string, initValue: T, watchFunc?: WatchFuncType): IObjectLinkDecoratedVariable<T>;
-    makeStorageLink<T>(owningView: ExtendableComponent, propName: string,
-        varName: string, initValue: T, watchFunc?: WatchFuncType): IStorageLinkDecoratedVariable<T>;
-    makeStorageProp<T>(owningView: ExtendableComponent, propName: string,
-        varName: string, initValue: T, watchFunc?: WatchFuncType): IStoragePropDecoratedVariable<T>;
+    makeState<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        initValue: T,
+        watchFunc?: WatchFuncType
+    ): IStateDecoratedVariable<T>;
+    makeProp<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        initValue: T,
+        watchFunc?: WatchFuncType
+    ): IPropDecoratedVariable<T>;
+    makeLink<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        source: LinkSourceType<T>,
+        watchFunc?: WatchFuncType
+    ): ILinkDecoratedVariable<T>;
+    makeProvide<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        provideAlias: string,
+        initValue: T,
+        allowOverride: boolean,
+        watchFunc?: WatchFuncType
+    ): IProvideDecoratedVariable<T>;
+    makeConsume<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        provideAlias: string,
+        watchFunc?: WatchFuncType
+    ): IConsumeDecoratedVariable<T>;
+    makeObjectLink<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        initValue: T,
+        watchFunc?: WatchFuncType
+    ): IObjectLinkDecoratedVariable<T>;
+    makeStorageLink<T>(
+        owningView: ExtendableComponent,
+        propName: string,
+        varName: string,
+        initValue: T,
+        watchFunc?: WatchFuncType
+    ): IStorageLinkDecoratedVariable<T>;
+    makeStorageProp<T>(
+        owningView: ExtendableComponent,
+        propName: string,
+        varName: string,
+        initValue: T,
+        watchFunc?: WatchFuncType
+    ): IStoragePropDecoratedVariable<T>;
 }
 
-export type WatchFuncType = ((propertyName: string) => void);
+export type WatchFuncType = (propertyName: string) => void;
 
 export type WatchIdType = int32;
 
