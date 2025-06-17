@@ -1490,6 +1490,11 @@ public:
         return true;
     }
 
+    virtual void SetFlushTSUpdates(std::function<bool(int32_t)>&& flushTSUpdates)
+    {
+        /* only implemented in PipelineContext for NG */
+    }
+
     void SetUIExtensionEventCallback(std::function<void(uint32_t)>&& callback);
     void AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId);
     void FireAllUIExtensionEvents();
