@@ -57,6 +57,7 @@ void LongPressRecognizer::OnAccepted()
     if (onAccessibilityEventFunc_) {
         onAccessibilityEventFunc_(AccessibilityEventType::LONG_PRESS);
     }
+    lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     if (!touchPoints_.empty() && touchPoints_.begin()->second.sourceType == SourceType::MOUSE) {
         std::chrono::nanoseconds nanoseconds(GetSysTimestamp());
@@ -81,6 +82,7 @@ void LongPressRecognizer::OnRejected()
         return;
     }
     SendRejectMsg();
+    lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
 }
@@ -152,6 +154,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     lastTouchEvent_ = event;
     UpdateFingerListInfo();
     if (GetValidFingersCount() == fingers_) {
+        lastRefereeState_ = refereeState_;
         refereeState_ = RefereeState::DETECTING;
         if (useCatchMode_) {
             DeadlineTimer(curDuration, true);
@@ -241,6 +244,7 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     }
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == 0) {
         SendCallbackMsg(onActionCancel_, false);
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
     } else if (refereeState_ == RefereeState::SUCCEED) {
         TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
