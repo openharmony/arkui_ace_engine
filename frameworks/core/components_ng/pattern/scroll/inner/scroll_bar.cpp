@@ -528,8 +528,6 @@ void ScrollBar::CalcReservedHeight()
     float padding = 0.f;
     float startRadiusHeight = 0.f;
     float endRadiusHeight = 0.f;
-    auto lastStartReservedHeight = startReservedHeight_;
-    auto lastEndReservedHeight = endReservedHeight_;
     GetRadiusAndPadding(startRadius, endRadius, padding);
     if (std::isnan(startRadius)) {
         startRadius = 0.f;
@@ -552,11 +550,6 @@ void ScrollBar::CalcReservedHeight()
         endReservedHeight_ = Dimension(endRadiusHeight + (endRadius / barMargin), DimensionUnit::PX);
     }
     FlushBarWidth();
-
-    if (!NearEqual(lastStartReservedHeight, startReservedHeight_) ||
-        !NearEqual(lastEndReservedHeight, endReservedHeight_)) {
-        MarkNeedRender();
-    }
 }
 
 void ScrollBar::GetRadiusAndPadding(float& startRadius, float& endRadius, float& padding)
