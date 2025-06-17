@@ -181,6 +181,16 @@ public:
 
     void DumpInfo() override;
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool isEqualWidthAndHeight() override
+    {
+        return true;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

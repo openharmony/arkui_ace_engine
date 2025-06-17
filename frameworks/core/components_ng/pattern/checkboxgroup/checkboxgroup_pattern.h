@@ -181,6 +181,16 @@ public:
     void ReportChangeEvent(bool selectStatus);
     std::optional<bool> ParseSelectStatus(const std::string& command);
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool isEqualWidthAndHeight() override
+    {
+        return true;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

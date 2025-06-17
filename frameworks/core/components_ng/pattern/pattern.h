@@ -135,6 +135,11 @@ public:
         return false;
     }
 
+    virtual bool isEqualWidthAndHeight()
+    {
+        return false;
+    }
+
     virtual std::optional<RenderContext::ContextParam> GetContextParam() const
     {
         return std::nullopt;
@@ -683,7 +688,7 @@ public:
         const std::string& key,
         const RefPtr<ResourceObject>& resObj,
         std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc);
-    
+
     void RemoveResObj(const std::string& key);
 
     void AddResCache(const std::string& key, const std::string& value);

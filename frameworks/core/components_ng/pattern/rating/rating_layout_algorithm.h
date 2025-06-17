@@ -20,6 +20,7 @@
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/property/layout_policy_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -49,6 +50,9 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
+
+    std::optional<SizeF> LayoutPolicyIsMatchParent(const LayoutConstraintF& contentConstraint,
+        std::optional<NG::LayoutPolicyProperty> layoutPolicy, int32_t stars);
 
 private:
     RefPtr<ImageLoadingContext> foregroundLoadingCtx_;

@@ -111,6 +111,11 @@ public:
 
     void DumpInfo() override;
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void UpdateRatingScore(double ratingScore);

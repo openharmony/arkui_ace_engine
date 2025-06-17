@@ -146,6 +146,11 @@ public:
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void DumpInfo() override;
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;

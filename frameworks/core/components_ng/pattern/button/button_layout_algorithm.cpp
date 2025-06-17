@@ -224,17 +224,32 @@ void ButtonLayoutAlgorithm::HandleBorderRadius(LayoutWrapper* layoutWrapper)
     }
 }
 
+void IsMatchParentWidthOrHeight(LayoutConstraintF& layoutConstraint,
+    std::optional<NG::LayoutPolicyProperty> layoutPolicy, LayoutWrapper* layoutWrapper)
+{
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+    if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
+        if (layoutPolicy->IsWidthMatch()) {
+            layoutConstraint.parentIdealSize.SetWidth(frameSize.Width());
+        }
+        if (layoutPolicy->IsHeightMatch()) {
+            layoutConstraint.parentIdealSize.SetHeight(frameSize.Height());
+        }
+    }
+}
+
 // Called to perform measure current render node.
 void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
 {
     auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(buttonLayoutProperty);
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+    auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     if (NeedAgingMeasure(layoutWrapper)) {
         return;
     }
+    auto layoutPolicy = buttonLayoutProperty->GetLayoutPolicyProperty();
     if (buttonLayoutProperty->HasLabel()) {
-        auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
         auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
         const auto& selfLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
         auto padding = buttonLayoutProperty->CreatePaddingAndBorder();
@@ -250,9 +265,11 @@ void ButtonLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
         auto defaultHeight = GetDefaultHeight(layoutWrapper);
         auto buttonType = buttonLayoutProperty->GetType().value_or(ButtonType::CAPSULE);
         if (buttonType == ButtonType::CIRCLE) {
+            IsMatchParentWidthOrHeight(layoutConstraint, layoutPolicy, layoutWrapper);
             HandleLabelCircleButtonFrameSize(layoutConstraint, frameSize, defaultHeight);
         } else {
-            if (selfLayoutConstraint && !selfLayoutConstraint->selfIdealSize.Height().has_value()) {
+            if (selfLayoutConstraint && !selfLayoutConstraint->selfIdealSize.Height().has_value()
+                && !layoutPolicy->IsHeightMatch()) {
                 auto layoutContraint = buttonLayoutProperty->GetLayoutConstraint();
                 CHECK_NULL_VOID(layoutContraint);
                 auto maxHeight = layoutContraint->maxSize.Height();

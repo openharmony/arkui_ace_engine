@@ -170,6 +170,16 @@ public:
     void ReportChangeEvent(bool selectStatus);
     int32_t OnInjectionEvent(const std::string& command) override;
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool isEqualWidthAndHeight() override
+    {
+        return true;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
