@@ -27,7 +27,11 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr char LIBFFRT_LIB64_PATH[] = "/system/lib64/ndk/libffrt.z.so";
 constexpr int32_t ENDORSE_LAYOUT_COUNT = 2;
+
+#ifdef IS_RELEASE_VERSION
 constexpr int32_t SINGLE_FRAME_TIME_NANOSEC = 16600000;
+constexpr int32_t NANO_TO_MICRO = 1000;
+#endif
 } // namespace
 uint64_t UITaskScheduler::frameId_ = 0;
 
@@ -174,7 +178,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     isLayouting_ = false;
 #ifdef IS_RELEASE_VERSION
     if (duration > SINGLE_FRAME_TIME_NANOSEC) {
-         PerfMonitor::GetPerfMonitor()->SetSubHealthInfo("SubHealth", "FlushLayoutTask", duration / MICROSEC_TO_NANOSEC);
+        PerfMonitor::GetPerfMonitor()->SetSubHealthInfo("SUBHEALTH", "FlushLayoutTask", duration / NANO_TO_MICRO);
     }
 #endif
 }
