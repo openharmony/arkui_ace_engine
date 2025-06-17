@@ -454,7 +454,7 @@ export class UIContextImpl extends UIContext {
             return null;
         }
         let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
-        if (node) {
+        if (!node) {
             node = FrameNodeUtils.createFrameNode(this, retval);
         }
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -468,7 +468,7 @@ export class UIContextImpl extends UIContext {
             return null;
         }
         let node = FrameNodeUtils.searchNodeInRegisterProxy(retval);
-        if (node) {
+        if (!node) {
             node = FrameNodeUtils.createFrameNode(this, retval);
         }
         ArkUIAniModule._Common_Restore_InstanceId();
