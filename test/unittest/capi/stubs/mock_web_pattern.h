@@ -83,6 +83,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DefaultFontSize, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MinFontSize, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MinLogicalFontSize, int32_t);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BlurOnKeyboardHideMode, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DefaultTextEncodingFormat, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
@@ -207,6 +208,7 @@ private:
     void OnNativeEmbedRuleTypeUpdate(const std::string&) {}
     void OnNativeVideoPlayerConfigUpdate(std::tuple<bool, bool> const&) {}
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption) {}
+    void OnBlurOnKeyboardHideModeUpdate(int) {}
 
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     NestedScrollOptionsExt nestedScroll_ = {
