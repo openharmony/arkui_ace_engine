@@ -117,7 +117,6 @@ public:
             nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
             nativeXComponent_ = std::make_shared<OH_NativeXComponent>(AceType::RawPtr(nativeXComponentImpl_));
         }
-        hasGotNativeXComponent_ = true;
         return std::make_pair(nativeXComponentImpl_, nativeXComponent_);
     }
 
@@ -304,6 +303,11 @@ public:
     bool IsNativeXComponentDisabled() const
     {
         return isNativeXComponentDisabled_;
+    }
+
+    void SetHasGotNativeXComponent(bool hasGotNativeXComponent)
+    {
+        hasGotNativeXComponent_ = hasGotNativeXComponent;
     }
 
     void SetExportTextureSurfaceId(const std::string& surfaceId);
