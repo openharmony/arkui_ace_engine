@@ -483,6 +483,7 @@ void OptionHeight1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
     Validator::ValidatePositive(convValue);
+    Validator::ValidateNonPercent(convValue);
     SelectModelStatic::SetOptionHeight(frameNode, convValue);
 }
 void MenuBackgroundColor0Impl(Ark_NativePointer node,
@@ -555,6 +556,8 @@ void DividerImpl(Ark_NativePointer node,
     }
     auto dividerOptions = value->value;
     auto strokeWidthOpt = Converter::OptConvert<Dimension>(dividerOptions.strokeWidth);
+    Validator::ValidateNonNegative(strokeWidthOpt);
+    Validator::ValidateNonPercent(strokeWidthOpt);
     if (strokeWidthOpt.has_value()) {
         divider.strokeWidth = strokeWidthOpt.value();
     }
@@ -563,10 +566,14 @@ void DividerImpl(Ark_NativePointer node,
         divider.color = colorOpt.value();
     }
     auto startMarginOpt = Converter::OptConvert<Dimension>(dividerOptions.startMargin);
+    Validator::ValidateNonNegative(startMarginOpt);
+    Validator::ValidateNonPercent(startMarginOpt);
     if (startMarginOpt.has_value()) {
         divider.startMargin = startMarginOpt.value();
     }
     auto endMarginOpt = Converter::OptConvert<Dimension>(dividerOptions.endMargin);
+    Validator::ValidateNonNegative(endMarginOpt);
+    Validator::ValidateNonPercent(endMarginOpt);
     if (endMarginOpt.has_value()) {
         divider.endMargin = endMarginOpt.value();
     }
