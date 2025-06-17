@@ -1542,7 +1542,7 @@ void FormPattern::DelayRemoveFormChildNode(FormChildNodeType formChildNodeType)
     std::string nodeIdStr = std::to_string(host->GetId());
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     uiTaskExecutor.PostDelayedTask(
-        [weak = WeakClaim(this)] {
+        [weak = WeakClaim(this), formChildNodeType] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->RemoveFormChildNode(formChildNodeType);
