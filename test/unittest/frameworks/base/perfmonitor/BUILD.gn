@@ -28,8 +28,8 @@ ohos_unittest("perf_monitor_test") {
 
   public_configs = [ ":perf_monitor_config" ]
   sources = [
-    "$ace_root/frameworks/adapter/preview/osal/system_properties.cpp",
-    "$ace_root/frameworks/adapter/preview/osal/perf_interfaces.cpp",
+    "$ace_root/adapter/preview/osal/system_properties.cpp",
+    "$ace_root/adapter/preview/osal/perf_interfaces.cpp",
     "$ace_root/frameworks/base/perfmonitor/perf_monitor.cpp",
     "perf_monitor_test.cpp",
   ]
