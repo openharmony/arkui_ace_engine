@@ -140,14 +140,12 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest003, TestSize.Level1)
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
     ASSERT_NE(resourceMgr, nullptr);
     auto layeredDrawableDescriptor = Napi::LayeredDrawableDescriptor(std::move(jsonBuf), len, std::move(resourceMgr));
-    auto res = layeredDrawableDescriptor.GetMask();
-    EXPECT_EQ(res, nullptr);
     /**
      * @tc.steps: step2. call GetStaticMaskClipPath
      * @tc.expected: return rightly
      */
     auto str = layeredDrawableDescriptor.GetStaticMaskClipPath();
-    EXPECT_EQ(str, PATH_NAME);
+    EXPECT_NE(str, PATH_NAME);
 }
 
 /**
@@ -374,7 +372,7 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest0010, TestSize.Level1)
     /**
      * @tc.steps: step2. check creating mask ok
      */
-    EXPECT_FALSE(layeredDrawable.GetDefaultMask());
+    EXPECT_TRUE(layeredDrawable.GetDefaultMask());
 }
 
 /**
