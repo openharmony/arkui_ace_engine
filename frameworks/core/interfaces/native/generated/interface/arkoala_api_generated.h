@@ -27223,7 +27223,10 @@ typedef struct GENERATED_ArkUIGlobalScopeAccessor {
 } GENERATED_ArkUIGlobalScopeAccessor;
 
 typedef struct GENERATED_ArkUIPromptActionAccessor {
-    void (*showToast)(const Ark_ShowToastOptions* value);
+    void (*showToast)(const Ark_ShowToastOptions* value,
+                      const Callback_Number_Void* callback_value);
+    void (*closeToast)(const Ark_Number* toastId,
+                      const Callback_Number_Void* callback_value);
 } GENERATED_ArkUIPromptActionAccessor;
 
 typedef struct GENERATED_ArkUIRouterExtenderAccessor {
