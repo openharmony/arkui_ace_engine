@@ -282,6 +282,10 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.pressedTime = pressedTime;
     event.convertInfo = convertInfo;
     event.passThrough = passThrough;
+    // Only set postEventNodeId when the event supports passThrough
+    if (passThrough) {
+        event.postEventNodeId = postEventNodeId;
+    }
     return event;
 }
 

@@ -196,6 +196,10 @@ struct MouseEvent final : public PointerEvent {
         mouseEvent.rawDeltaY = rawDeltaY;
         mouseEvent.pressedButtonsArray = pressedButtonsArray;
         mouseEvent.passThrough = passThrough;
+        // Only set postEventNodeId when the event supports passThrough
+        if (passThrough) {
+            mouseEvent.postEventNodeId = postEventNodeId;
+        }
         return mouseEvent;
     }
 
@@ -256,6 +260,10 @@ struct MouseEvent final : public PointerEvent {
         event.pointers.emplace_back(std::move(point));
         event.pressedKeyCodes_ = pressedKeyCodes_;
         event.passThrough = passThrough;
+        // Only set postEventNodeId when the event supports passThrough
+        if (passThrough) {
+            event.postEventNodeId = postEventNodeId;
+        }
         return event;
     }
 

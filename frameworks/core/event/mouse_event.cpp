@@ -186,7 +186,9 @@ bool MouseEventTarget::HandleMouseEvent(const MouseEvent& event)
     info.SetPullAction(event.pullAction);
     info.SetGlobalLocation(event.GetOffset());
     NG::PointF localPoint(event.x, event.y);
-    NG::NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+    bool needPostEvent = isPostEventResult_ || event.passThrough;
+    NG::NGGestureRecognizer::Transform(
+        localPoint, GetAttachedNode(), false, needPostEvent, event.postEventNodeId);
     auto localX = static_cast<float>(localPoint.GetX());
     auto localY = static_cast<float>(localPoint.GetY());
     info.SetLocalLocation(Offset(localX, localY));
