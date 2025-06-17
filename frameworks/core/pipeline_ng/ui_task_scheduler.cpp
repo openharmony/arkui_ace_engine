@@ -28,7 +28,7 @@ namespace {
 constexpr char LIBFFRT_LIB64_PATH[] = "/system/lib64/ndk/libffrt.z.so";
 constexpr int32_t ENDORSE_LAYOUT_COUNT = 2;
 
-#ifdef IS_RELEASE_VERSION
+#ifndef IS_RELEASE_VERSION
 constexpr int32_t SINGLE_FRAME_TIME_NANOSEC = 16600000;
 constexpr int32_t NANO_TO_MICRO = 1000;
 #endif
@@ -176,7 +176,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 #endif
 
     isLayouting_ = false;
-#ifdef IS_RELEASE_VERSION
+#ifndef IS_RELEASE_VERSION
     if (duration > SINGLE_FRAME_TIME_NANOSEC) {
         PerfMonitor::GetPerfMonitor()->SetSubHealthInfo("SUBHEALTH", "FlushLayoutTask", duration / NANO_TO_MICRO);
     }
