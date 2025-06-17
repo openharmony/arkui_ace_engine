@@ -66,6 +66,14 @@ void VideoModelStatic::SetSrc(FrameNode* frameNode,
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(VideoLayoutProperty, VideoSource, videoSrcInfo, frameNode);
 }
 
+void VideoModelStatic::SetShowFirstFrame(FrameNode* frameNode, bool showFirstFrame)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
+    videoPattern->UpdateShowFirstFrame(showFirstFrame);
+}
+
 void VideoModelStatic::SetProgressRate(FrameNode* frameNode, double progressRate)
 {
     CHECK_NULL_VOID(frameNode);
