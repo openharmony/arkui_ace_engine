@@ -1,0 +1,38 @@
+/*
+ * Copyright © 2023 YourCompany. All rights reserved.
+ * This file is part of YourProject and is released under the
+ * of the MIT License as in the LICENSE file.
+ */
+ 
+ {
+  "files": [
+    "**/*.ets"
+  ],
+  "ignore": [
+    "**/src/ohosTest/**/*",
+    "**/src/test/**/*",
+    "**/src/mock/**/*",
+    "**/node_modules/**/*",
+    "**/oh_modules/**/*",
+    "**/build/**/*",
+    "**/.preview/**/*"
+  ],
+  "ruleSet": [
+    "plugin:@performance/recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "@security/no-unsafe-aes": "error",
+    "@security/no-unsafe-hash": "error",
+    "@security/no-unsafe-mac": "warn",
+    "@security/no-unsafe-dh": "error",
+    "@security/no-unsafe-dsa": "error",
+    "@security/no-unsafe-ecdsa": "error",
+    "@security/no-unsafe-rsa-encrypt": "error",
+    "@security/no-unsafe-rsa-sign": "error",
+    "@security/no-unsafe-rsa-key": "error",
+    "@security/no-unsafe-dsa-key": "error",
+    "@security/no-unsafe-dh-key": "error",
+    "@security/no-unsafe-3des": "error"
+  }
+}

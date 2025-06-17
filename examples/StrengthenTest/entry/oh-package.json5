@@ -1,0 +1,15 @@
+/*
+ * Copyright (c) 2023 YourCompany. All rights reserved.
+ * This software is the confidential and proprietary information of Your.
+ * You shall not disclose such Confidential Information and shall use it only in accordance with the terms of the license agreement you entered into with YourCompany.
+ */
+{
+  "name": "entry",
+  "version": "1.0.0",
+  "description": "Please describe the basic information.",
+  "main": "",
+  "author": "",
+  "license": "",
+  "dependencies": {}
+}
+
