@@ -37,6 +37,9 @@
 #include "core/event/pointer_event.h"
 #include "core/common/container_consts.h"
 
+struct _ArkUINodeAdapter;
+typedef _ArkUINodeAdapter* ArkUINodeAdapterHandle;
+
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 class AccessibilityEventInfo;
@@ -752,6 +755,14 @@ public:
 
     virtual void UpdateBorderResource() {};
     virtual void UpdateMarginResource() {};
+    virtual bool DetachHostNodeAdapter(const RefPtr<FrameNode>& node)
+    {
+        return false;
+    }
+    virtual bool GetNodeAdapterComponent(ArkUINodeAdapterHandle handle, const RefPtr<FrameNode>& node)
+    {
+        return false;
+    }
 
 protected:
     virtual void OnAttachToFrameNode() {}
