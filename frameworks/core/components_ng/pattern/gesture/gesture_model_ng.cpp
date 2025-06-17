@@ -152,8 +152,8 @@ void PanGestureModelNG::Create(
     gestureProcessor->PushGestureNG(gesture);
 }
 
-void PanGestureModelNG::Create(
-    int32_t fingersNum, const PanDirection& panDirection, const PanDistanceMap& distanceMap, bool isLimitFingerCount)
+void PanGestureModelNG::Create(int32_t fingersNum, const PanDirection& panDirection,
+    const PanDistanceMapDimension& distanceMap, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
