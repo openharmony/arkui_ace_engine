@@ -303,6 +303,7 @@ public:
     std::shared_ptr<Framework::JsValue> GetJsContext();
     void SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext);
     std::shared_ptr<void> SerializeValue(const std::shared_ptr<Framework::JsValue>& jsValue);
+    void TriggerModuleSerializer() override;
     void SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder);
     std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContext();
 
