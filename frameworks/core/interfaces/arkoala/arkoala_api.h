@@ -3652,6 +3652,9 @@ struct ArkUIGridModifier {
     ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
     void (*setGridAlignItems)(ArkUINodeHandle node, ArkUI_Int32 alignItems);
     void (*resetGridAlignItems)(ArkUINodeHandle node);
+    void (*setSyncLoad)(ArkUINodeHandle node, ArkUI_Bool syncLoad);
+    void (*resetSyncLoad)(ArkUINodeHandle node);
+    ArkUI_Bool (*getSyncLoad)(ArkUINodeHandle node);
     void (*setGridFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
         ArkUI_Int32 fadingEdgeLengthUnit);
     void (*resetGridFadingEdge)(ArkUINodeHandle node);
@@ -5093,6 +5096,9 @@ struct ArkUIWaterFlowModifier {
     void (*setShowCached)(ArkUINodeHandle node, ArkUI_Bool show);
     void (*resetShowCached)(ArkUINodeHandle node);
     ArkUI_Bool (*getShowCached)(ArkUINodeHandle node);
+    void (*setSyncLoad)(ArkUINodeHandle node, ArkUI_Bool syncLoad);
+    void (*resetSyncLoad)(ArkUINodeHandle node);
+    ArkUI_Bool (*getSyncLoad)(ArkUINodeHandle node);
     void (*setEdgeEffect)(
         ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 effectEdge);
     void (*resetEdgeEffect)(ArkUINodeHandle node);

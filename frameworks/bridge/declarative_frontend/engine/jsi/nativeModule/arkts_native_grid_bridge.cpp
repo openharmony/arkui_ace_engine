@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -752,6 +752,35 @@ ArkUINativeModuleValue GridBridge::ResetAlignItems(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridModifier()->resetGridAlignItems(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue GridBridge::SetSyncLoad(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> argSyncLoad = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    bool syncLoad = false;
+    if (!argSyncLoad->IsUndefined() && !argSyncLoad->IsNull()) {
+        syncLoad = argSyncLoad->BooleaValue(vm);
+    }
+
+    GetArkUINodeModifiers()->getGridModifier()->setSyncLoad(nativeNode, syncLoad);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue GridBridge::ResetSyncLoad(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> node = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    CHECK_NULL_RETURN(node->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(node->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getGridModifier()->resetSyncLoad(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

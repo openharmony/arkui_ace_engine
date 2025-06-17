@@ -7201,6 +7201,10 @@ class ArkGridComponent extends ArkScrollable {
     modifierWithKey(this._modifiersWithKeys, GridAlignItemsModifier.identity, GridAlignItemsModifier, value);
     return this;
   }
+  syncLoad(value) {
+    modifierWithKey(this._modifiersWithKeys, GridSyncLoadModifier.identity, GridSyncLoadModifier, value);
+    return this;
+  }
   onWillScroll(callback) {
     modifierWithKey(this._modifiersWithKeys, GridOnWillScrollModifier.identity, GridOnWillScrollModifier, callback);
     return this;
@@ -7752,6 +7756,20 @@ class GridAlignItemsModifier extends ModifierWithKey {
   }
 }
 GridAlignItemsModifier.identity = Symbol('gridAlignItems');
+class GridSyncLoadModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetSyncLoad(node);
+    }
+    else {
+      getUINativeModule().grid.setSyncLoad(node, this.value);
+    }
+  }
+}
+GridSyncLoadModifier.identity = Symbol('gridSyncLoad');
 // @ts-ignore
 if (globalThis.Grid !== undefined) {
   globalThis.Grid.attributeModifier = function (modifier) {
@@ -36649,6 +36667,21 @@ class WaterFlowCachedCountModifier extends ModifierWithKey {
 }
 WaterFlowCachedCountModifier.identity = Symbol('waterFlowCachedCount');
 
+class WaterFlowSyncLoadModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().waterFlow.resetSyncLoad(node);
+    }
+    else {
+      getUINativeModule().waterFlow.setSyncLoad(node, this.value);
+    }
+  }
+}
+WaterFlowSyncLoadModifier.identity = Symbol('waterFlowSyncLoad');
+
 class WaterFlowOnScrollFrameBeginModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -36837,6 +36870,10 @@ class ArkWaterFlowComponent extends ArkScrollable {
   cachedCount(count, show) {
     let opt = new ArkScrollableCacheOptions(count, show ? show : false);
     modifierWithKey(this._modifiersWithKeys, WaterFlowCachedCountModifier.identity, WaterFlowCachedCountModifier, opt);
+    return this;
+  }
+  syncLoad(value) {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowSyncLoadModifier.identity, WaterFlowSyncLoadModifier, value);
     return this;
   }
   onReachStart(event) {

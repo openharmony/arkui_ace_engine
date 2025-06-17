@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -285,6 +285,7 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("clip", &JSScrollable::JsClip);
     JSClass<JSWaterFlow>::StaticMethod("cachedCount", &JSWaterFlow::SetCachedCount);
     JSClass<JSWaterFlow>::StaticMethod("edgeEffect", &JSWaterFlow::SetEdgeEffect);
+    JSClass<JSWaterFlow>::StaticMethod("syncLoad", &JSWaterFlow::SetSyncLoad);
 
     JSClass<JSWaterFlow>::StaticMethod("onScroll", &JSWaterFlow::JsOnScroll);
     JSClass<JSWaterFlow>::StaticMethod("onScrollStart", &JSWaterFlow::JsOnScrollStart);
@@ -522,6 +523,18 @@ void JSWaterFlow::SetEdgeEffect(const JSCallbackInfo& info)
         effectEdge = JSScrollable::ParseEffectEdge(info[1]);
     }
     WaterFlowModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled, effectEdge);
+}
+
+void JSWaterFlow::SetSyncLoad(const JSCallbackInfo& info)
+{
+    bool syncLoad = false;
+    if (info.Length() >= 1) {
+        auto value = info[0];
+        if (value->IsBoolean()) {
+            syncLoad = value->ToBoolean();
+        }
+    }
+    WaterFlowModel::GetInstance()->SetSyncLoad(syncLoad);
 }
 
 void JSWaterFlow::JsOnScroll(const JSCallbackInfo& args)
