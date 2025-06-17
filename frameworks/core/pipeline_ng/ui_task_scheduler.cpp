@@ -20,12 +20,14 @@
 #ifdef FFRT_EXISTS
 #include "base/longframe/long_frame_report.h"
 #endif
+#include "base/perfmonitor/perf_monitor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr char LIBFFRT_LIB64_PATH[] = "/system/lib64/ndk/libffrt.z.so";
 constexpr int32_t ENDORSE_LAYOUT_COUNT = 2;
+constexpr int32_t SINGLE_FRAME_TIME_NANOSEC = 16600000;
 } // namespace
 uint64_t UITaskScheduler::frameId_ = 0;
 
@@ -142,6 +144,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 
     // Priority task creation
     int64_t time = 0;
+    int64_t duration = 0;
     for (auto&& node : dirtyLayoutNodesSet) {
         // need to check the node is destroying or not before CreateLayoutTask
         if (!node || node->IsInDestroying()) {
@@ -153,6 +156,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
         if (frameInfo_ != nullptr) {
             frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
         }
+        duration += time;
     }
 
     while (!ignoreLayoutSafeAreaBundles_.empty()) {
@@ -168,6 +172,11 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 #endif
 
     isLayouting_ = false;
+#ifdef IS_RELEASE_VERSION
+    if (duration > SINGLE_FRAME_TIME_NANOSEC) {
+         PerfMonitor::GetPerfMonitor()->SetSubHealthInfo("SubHealth", "FlushLayoutTask", duration / MICROSEC_TO_NANOSEC);
+    }
+#endif
 }
 
 void UITaskScheduler::FlushPostponedLayoutTask(bool forceUseMainThread)

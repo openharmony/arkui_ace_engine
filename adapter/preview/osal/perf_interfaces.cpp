@@ -89,6 +89,10 @@ void PerfInterfaces::SetFrameTime(int64_t vsyncTime, int64_t duration, double ja
 {
 }
 
+void PerfInterfaces::SetSubHealthInfo(const std::string& info, const std::string& reason, const int32_t duration)
+{
+}
+
 void PerfInterfaces::ReportJankFrameApp(double jank, int32_t jankThreshold)
 {
 }

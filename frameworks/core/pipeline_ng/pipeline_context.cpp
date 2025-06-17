@@ -88,6 +88,7 @@ constexpr int32_t USED_ID_FIND_FLAG = 3;
 constexpr int32_t USED_JSON_PARAM = 4;
 constexpr int32_t MAX_FRAME_COUNT_WITHOUT_JS_UNREGISTRATION = 100;
 constexpr int32_t  RATIO_OF_VSYNC_PERIOD = 2;
+constexpr int32_t  SINGLE_FRAME_TIME_MICROSEC = 16600;
 constexpr char PID_FLAG[] = "pidflag";
 } // namespace
 
@@ -475,6 +476,9 @@ void PipelineContext::FlushDirtyPropertyNodes()
 
 void PipelineContext::FlushDirtyNodeUpdate()
 {
+#ifdef IS_RELEASE_VERSION
+    int64_t startTime = GetCurrentTimestampMicroSecond();
+#endif
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
     if (FrameReport::GetInstance().GetEnable()) {
@@ -512,6 +516,12 @@ void PipelineContext::FlushDirtyNodeUpdate()
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushBuild();
     }
+#ifdef IS_RELEASE_VERSION
+    int64_t duration = GetCurrentTimestampMicroSecond() - startTime;
+    if (duration > SINGLE_FRAME_TIME_MICROSEC) {
+        PerfMonitor::GetPerfMonitor()->SetSubHealthInfo("SubHealth", "FlushDirtyNodeUpdate", duration);
+    }
+#endif
 }
 
 uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
