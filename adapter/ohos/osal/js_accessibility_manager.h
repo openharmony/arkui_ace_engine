@@ -699,6 +699,9 @@ private:
         const SearchParameter& searchParam);
 #ifdef WEB_SUPPORTED
 
+    void WebSetScreenRect(const std::shared_ptr<NG::TransitionalNodeInfo>& node, const CommonProperty& commonProperty,
+        AccessibilityElementInfo& nodeInfo);
+
     void UpdateWebAccessibilityElementInfo(const std::shared_ptr<NG::TransitionalNodeInfo>& node,
         Accessibility::AccessibilityElementInfo& nodeInfo, int32_t treeId);
 

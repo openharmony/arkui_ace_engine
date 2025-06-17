@@ -21,6 +21,7 @@
 #include "accessibility_system_ability_client.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
+#include "core/components_ng/pattern/web/transitional_node_info.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -29,6 +30,9 @@
 #include "adapter/ohos/osal/js_accessibility_manager.h"
 #include "frameworks/core/accessibility/accessibility_node.h"
 #include "adapter/ohos/entrance/ace_container.h"
+#ifdef WEB_SUPPORTED
+#include "nweb_accessibility_node_info.h"
+#endif
 
 using namespace OHOS::Accessibility;
 using namespace testing;
@@ -130,6 +134,202 @@ void JsAccessibilityManagerTest::TearDownTestCase()
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
+
+#ifdef WEB_SUPPORTED
+class MockNWebAccessibilityNodeInfo : public NWeb::NWebAccessibilityNodeInfo {
+    public:
+    std::string GetHint() override
+    {
+        return "";
+    }
+    std::string GetError() override
+    {
+        return "";
+    }
+    int32_t GetRectX()
+    {
+        return 0;
+    }
+    int32_t GetRectY()
+    {
+        return 0;
+    }
+    void SetPageId(int32_t pageId) override {}
+    int32_t GetPageId() override
+    {
+        return 0;
+    }
+    std::vector<uint32_t> GetActions() override
+    {
+        return {};
+    }
+    std::string GetContent() override
+    {
+        return "";
+    }
+    std::vector<int64_t> GetChildIds() override
+    {
+        return {};
+    }
+    void SetParentId(int64_t parentId) override {}
+    int64_t GetParentId() override
+    {
+        return 0;
+    }
+    bool GetIsHeading() override
+    {
+        return false;
+    }
+    bool GetIsChecked() override
+    {
+        return false;
+    }
+    bool GetIsEnabled() override
+    {
+        return false;
+    }
+    bool GetIsFocused() override
+    {
+        return false;
+    }
+    int32_t GetRectWidth()
+    {
+        return 0;
+    }
+    int32_t GetRectHeight()
+    {
+        return 0;
+    }
+    bool GetIsVisible() override
+    {
+        return true;
+    }
+    bool GetIsHinting() override
+    {
+        return false;
+    }
+    bool GetIsEditable() override
+    {
+        return false;
+    }
+    bool GetIsSelected() override
+    {
+        return false;
+    }
+    size_t GetItemCounts() override
+    {
+        return 0;
+    }
+    int32_t GetLiveRegion() override
+    {
+        return 0;
+    }
+    bool GetIsPassword() override
+    {
+        return false;
+    }
+    bool GetIsCheckable() override
+    {
+        return false;
+    }
+    bool GetIsClickable() override
+    {
+        return false;
+    }
+    bool GetIsFocusable() override
+    {
+        return false;
+    }
+    bool GetIsScrollable() override
+    {
+        return false;
+    }
+    bool GetIsDeletable() override
+    {
+        return false;
+    }
+    int64_t GetAccessibilityId() override
+    {
+        return 0;
+    }
+    bool GetIsPopupSupported() override
+    {
+        return false;
+    }
+    bool GetIsContentInvalid() override
+    {
+        return false;
+    }
+    int32_t GetSelectionEnd() override
+    {
+        return 0;
+    }
+    int32_t GetSelectionStart() override
+    {
+        return 0;
+    }
+    float GetRangeInfoMin() override
+    {
+        return 0.0f;
+    }
+    float GetRangeInfoMax() override
+    {
+        return 0.0f;
+    }
+    float GetRangeInfoCurrent() override
+    {
+        return 0.0f;
+    }
+    int32_t GetInputType() override
+    {
+        return 0;
+    }
+    std::string GetComponentType() override
+    {
+        return "";
+    }
+    std::string GetDescriptionInfo() override
+    {
+        return "";
+    }
+    int32_t GetGridRows() override
+    {
+        return 0;
+    }
+    int32_t GetGridItemRow() override
+    {
+        return 0;
+    }
+    int32_t GetGridColumns() override
+    {
+        return 0;
+    }
+    int32_t GetGridItemColumn() override
+    {
+        return 0;
+    }
+    int32_t GetGridItemRowSpan() override
+    {
+        return 0;
+    }
+    int32_t GetGridSelectedMode() override
+    {
+        return 0;
+    }
+    int32_t GetGridItemColumnSpan() override
+    {
+        return 0;
+    }
+    bool GetIsAccessibilityFocus() override
+    {
+        return false;
+    }
+    bool GetIsPluralLineSupported() override
+    {
+        return false;
+    }
+};
+#endif //WEB_SUPPORTED
 
 class MockJsAccessibilityManager : public Framework::JsAccessibilityManager {
 public:
@@ -2521,55 +2721,20 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager040, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsAccessibilityManager041
- * @tc.desc: Test RegisterDynamicRenderGetParentRectHandler default
+ * @tc.name: GetTransformDegreeRelativeToWindow001
+ * @tc.desc: Test GetTransformDegreeRelativeToWindow
  * @tc.type: FUNC
  */
-HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager041, TestSize.Level1)
+HWTEST_F(JsAccessibilityManagerTest, GetTransformDegreeRelativeToWindow001, TestSize.Level1)
 {
-    HandlerReply reply;
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
 
-    RotateTransform rotateData(reply.GetParam<int32_t>("rotateDegree", 0),
-        reply.GetParam<int32_t>("centerX", 0),
-        reply.GetParam<int32_t>("centerY", 0),
-        reply.GetParam<int32_t>("innerCenterX", 0),
-        reply.GetParam<int32_t>("innerCenterY", 0));
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
 
-    AccessibilityParentRectInfo parentRectInfo;
-    EXPECT_EQ(parentRectInfo.rotateTransform.rotateDegree, 0);
-    EXPECT_EQ(parentRectInfo.rotateTransform.centerX, 0);
-    EXPECT_EQ(parentRectInfo.rotateTransform.centerY, 0);
-    EXPECT_EQ(parentRectInfo.rotateTransform.innerCenterX, 0);
-    EXPECT_EQ(parentRectInfo.rotateTransform.innerCenterY, 0);
-}
-
-/**
- * @tc.name: JsAccessibilityManager042
- * @tc.desc: Test RegisterDynamicRenderGetParentRectHandler
- * @tc.type: FUNC
- */
-HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager042, TestSize.Level1)
-{
-    HandlerReply reply;
-
-    reply.SetParam<int32_t>("rotateDegree", 90);
-    reply.SetParam<int32_t>("centerX", 10);
-    reply.SetParam<int32_t>("centerY", 20);
-    reply.SetParam<int32_t>("innerCenterX", 30);
-    reply.SetParam<int32_t>("innerCenterY", 40);
-
-    RotateTransform rotateData(reply.GetParam<int32_t>("rotateDegree", 0),
-        reply.GetParam<int32_t>("centerX", 0),
-        reply.GetParam<int32_t>("centerY", 0),
-        reply.GetParam<int32_t>("innerCenterX", 0),
-        reply.GetParam<int32_t>("innerCenterY", 0));
-
-    AccessibilityParentRectInfo parentRectInfo;
-    EXPECT_EQ(parentRectInfo.rotateTransform.rotateDegree, 90);
-    EXPECT_EQ(parentRectInfo.rotateTransform.centerX, 10);
-    EXPECT_EQ(parentRectInfo.rotateTransform.centerY, 20);
-    EXPECT_EQ(parentRectInfo.rotateTransform.innerCenterX, 30);
-    EXPECT_EQ(parentRectInfo.rotateTransform.innerCenterY, 40);
+    int32_t result = jsAccessibilityManager->GetTransformDegreeRelativeToWindow(frameNode, false);
+    EXPECT_EQ(result, 0);
 }
 
 /**
@@ -2747,6 +2912,134 @@ HWTEST_F(JsAccessibilityManagerTest, SearchElementInfoBySurfaceId001, TestSize.L
     rootElement->RemoveChild(embedNode);
     MockPipelineContext::TearDown();
 }
+
+#ifdef WEB_SUPPORTED
+/**
+ * @tc.name: WebSetScreenRect001
+ * @tc.desc: WebSetScreenRect degree = 90 / degree = 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, WebSetScreenRect001, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    Framework::CommonProperty commonProperty;
+    commonProperty.rotateTransform.rotateDegree = 90;
+    auto nWebAccessibilityNodeInfoPtr = std::make_shared<MockNWebAccessibilityNodeInfo>();
+    auto nodePtr = std::make_shared<NG::TransitionalNodeInfo>(nWebAccessibilityNodeInfoPtr);
+    AccessibilityElementInfo nodeInfo;
+
+    jsAccessibilityManager->WebSetScreenRect(nodePtr, commonProperty, nodeInfo);
+    auto rect = nodeInfo.GetRectInScreen();
+    EXPECT_EQ(rect.GetLeftTopXScreenPostion(), 0);
+    EXPECT_EQ(rect.GetLeftTopYScreenPostion(), 0);
+    EXPECT_EQ(rect.GetRightBottomXScreenPostion(), 0);
+    EXPECT_EQ(rect.GetRightBottomYScreenPostion(), 0);
+
+    commonProperty.rotateTransform.rotateDegree = 0;
+    jsAccessibilityManager->WebSetScreenRect(nodePtr, commonProperty, nodeInfo);
+    rect = nodeInfo.GetRectInScreen();
+    EXPECT_EQ(rect.GetLeftTopXScreenPostion(), 0);
+    EXPECT_EQ(rect.GetLeftTopYScreenPostion(), 0);
+    EXPECT_EQ(rect.GetRightBottomXScreenPostion(), 0);
+    EXPECT_EQ(rect.GetRightBottomYScreenPostion(), 0);
+}
+
+/**
+ * @tc.name: WebSetScreenRect002
+ * @tc.desc: WebSetScreenRect degree = 0, scaleX != 1, scaleY = 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, WebSetScreenRect002, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    Framework::CommonProperty commonProperty;
+    commonProperty.rotateTransform.rotateDegree = 0;
+    commonProperty.scaleX = 3.0f;
+    commonProperty.scaleY = 1.0f;
+    auto nWebAccessibilityNodeInfoPtr = std::make_shared<MockNWebAccessibilityNodeInfo>();
+    auto nodePtr = std::make_shared<NG::TransitionalNodeInfo>(nWebAccessibilityNodeInfoPtr);
+    AccessibilityElementInfo nodeInfo;
+
+    jsAccessibilityManager->WebSetScreenRect(nodePtr, commonProperty, nodeInfo);
+    auto rect = nodeInfo.GetRectInScreen();
+    EXPECT_EQ(rect.GetLeftTopXScreenPostion(), 0);
+    EXPECT_EQ(rect.GetLeftTopYScreenPostion(), 0);
+    EXPECT_EQ(rect.GetRightBottomXScreenPostion(), 0);
+    EXPECT_EQ(rect.GetRightBottomYScreenPostion(), 0);
+}
+
+/**
+ * @tc.name: WebSetScreenRect003
+ * @tc.desc: WebSetScreenRect degree = 0, scaleX = 1, scaleY != 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, WebSetScreenRect003, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    Framework::CommonProperty commonProperty;
+    commonProperty.rotateTransform.rotateDegree = 0;
+    commonProperty.scaleX = 1.0f;
+    commonProperty.scaleY = 3.0f;
+    auto nWebAccessibilityNodeInfoPtr = std::make_shared<MockNWebAccessibilityNodeInfo>();
+    auto nodePtr = std::make_shared<NG::TransitionalNodeInfo>(nWebAccessibilityNodeInfoPtr);
+    AccessibilityElementInfo nodeInfo;
+
+    jsAccessibilityManager->WebSetScreenRect(nodePtr, commonProperty, nodeInfo);
+    auto rect = nodeInfo.GetRectInScreen();
+    EXPECT_EQ(rect.GetLeftTopXScreenPostion(), 0);
+    EXPECT_EQ(rect.GetLeftTopYScreenPostion(), 0);
+    EXPECT_EQ(rect.GetRightBottomXScreenPostion(), 0);
+    EXPECT_EQ(rect.GetRightBottomYScreenPostion(), 0);
+}
+
+/**
+ * @tc.name: WebSetScreenRect004
+ * @tc.desc: WebSetScreenRect degree = 0, scaleX != 1, scaleY != 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, WebSetScreenRect004, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    Framework::CommonProperty commonProperty;
+    commonProperty.rotateTransform.rotateDegree = 0;
+    commonProperty.scaleX = 3.0f;
+    commonProperty.scaleY = 3.0f;
+    auto nWebAccessibilityNodeInfoPtr = std::make_shared<MockNWebAccessibilityNodeInfo>();
+    auto nodePtr = std::make_shared<NG::TransitionalNodeInfo>(nWebAccessibilityNodeInfoPtr);
+    AccessibilityElementInfo nodeInfo;
+
+    jsAccessibilityManager->WebSetScreenRect(nodePtr, commonProperty, nodeInfo);
+    auto rect = nodeInfo.GetRectInScreen();
+    EXPECT_EQ(rect.GetLeftTopXScreenPostion(), 0);
+    EXPECT_EQ(rect.GetLeftTopYScreenPostion(), 0);
+    EXPECT_EQ(rect.GetRightBottomXScreenPostion(), 0);
+    EXPECT_EQ(rect.GetRightBottomYScreenPostion(), 0);
+}
+
+/**
+ * @tc.name: WebSetScreenRect005
+ * @tc.desc: WebSetScreenRect degree = 0, scaleX = 1, scaleY = 1
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, WebSetScreenRect005, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    Framework::CommonProperty commonProperty;
+    commonProperty.rotateTransform.rotateDegree = 0;
+    commonProperty.scaleX = 1.0f;
+    commonProperty.scaleY = 1.0f;
+    auto nWebAccessibilityNodeInfoPtr = std::make_shared<MockNWebAccessibilityNodeInfo>();
+    auto nodePtr = std::make_shared<NG::TransitionalNodeInfo>(nWebAccessibilityNodeInfoPtr);
+    AccessibilityElementInfo nodeInfo;
+
+    jsAccessibilityManager->WebSetScreenRect(nodePtr, commonProperty, nodeInfo);
+    auto rect = nodeInfo.GetRectInScreen();
+    EXPECT_EQ(rect.GetLeftTopXScreenPostion(), 0);
+    EXPECT_EQ(rect.GetLeftTopYScreenPostion(), 0);
+    EXPECT_EQ(rect.GetRightBottomXScreenPostion(), 0);
+    EXPECT_EQ(rect.GetRightBottomYScreenPostion(), 0);
+}
+#endif //WEB_SUPPORTED
 
 /**
  * @tc.name: IsTagInEmbedComponent001
