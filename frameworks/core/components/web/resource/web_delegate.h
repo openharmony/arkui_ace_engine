@@ -955,7 +955,7 @@ public:
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
     void OnProgressChanged(int param);
-    void OnReceivedTitle(const std::string& param);
+    void OnReceivedTitle(const std::string& title, bool isRealTitle = false);
     void ExitFullScreen();
     void OnFullScreenExit();
     void OnGeolocationPermissionsHidePrompt();

@@ -4993,17 +4993,17 @@ void WebDelegate::OnProgressChanged(int param)
         TaskExecutor::TaskType::JS, "ArkUIWebProgressChanged");
 }
 
-void WebDelegate::OnReceivedTitle(const std::string& param)
+void WebDelegate::OnReceivedTitle(const std::string& title, bool isRealTitle)
 {
     CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->PostTask(
-        [weak = WeakClaim(this), param]() {
+        [weak = WeakClaim(this), title, isRealTitle]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             // ace 2.0
             auto onTitleReceiveV2 = delegate->onTitleReceiveV2_;
             if (onTitleReceiveV2) {
-                onTitleReceiveV2(std::make_shared<LoadWebTitleReceiveEvent>(param));
+                onTitleReceiveV2(std::make_shared<LoadWebTitleReceiveEvent>(title, isRealTitle));
             }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebReceivedTitle");

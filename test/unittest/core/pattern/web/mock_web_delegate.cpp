@@ -734,7 +734,7 @@ void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::strin
 void WebDelegate::OnPageStarted(const std::string& param) {}
 void WebDelegate::OnPageFinished(const std::string& param) {}
 void WebDelegate::OnProgressChanged(int param) {}
-void WebDelegate::OnReceivedTitle(const std::string& param) {}
+void WebDelegate::OnReceivedTitle(const std::string& title, bool isRealTitle) {}
 void WebDelegate::ExitFullScreen() {}
 void WebDelegate::OnFullScreenExit()
 {

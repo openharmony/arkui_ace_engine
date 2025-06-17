@@ -1425,4 +1425,14 @@ bool WebClientImpl::OnAllSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSAllSs
         }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientAllSslErrorRequest");
     return jsResult;
 }
+
+void WebClientImpl::OnPageTitleV2(const std::string &title, bool isRealTitle)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnReceivedTitle(title, isRealTitle);
+}
 } // namespace OHOS::Ace

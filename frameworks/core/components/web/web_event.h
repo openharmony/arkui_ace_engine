@@ -856,8 +856,8 @@ class ACE_EXPORT LoadWebTitleReceiveEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebTitleReceiveEvent, BaseEventInfo);
 
 public:
-    explicit LoadWebTitleReceiveEvent(const std::string& title)
-        : BaseEventInfo("LoadWebTitleReceiveEvent"), title_(title)
+    explicit LoadWebTitleReceiveEvent(const std::string& title, bool isRealTitle = false)
+        : BaseEventInfo("LoadWebTitleReceiveEvent"), title_(title), isRealTitle_(isRealTitle)
     {}
     ~LoadWebTitleReceiveEvent() = default;
 
@@ -866,8 +866,14 @@ public:
         return title_;
     }
 
+    bool GetIsRealTitle() const
+    {
+        return isRealTitle_;
+    }
+
 private:
     std::string title_;
+    bool isRealTitle_;
 };
 
 class ACE_EXPORT FullScreenExitHandler : public AceType {
