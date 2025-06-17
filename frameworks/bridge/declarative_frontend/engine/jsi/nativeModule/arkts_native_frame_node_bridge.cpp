@@ -751,6 +751,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnClick(ArkUIRuntimeCallInfo* runtime
     auto flag = IsCustomFrameNode(frameNode);
     auto onClick = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
                        node = AceType::WeakClaim(frameNode), containerId](GestureEvent& info) {
+        panda::JsiFastNativeScope fastNativeScope(vm);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
@@ -778,6 +779,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfoObj(EcmaVM* vm, Tou
 
 Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchEventInfo& info)
 {
+    panda::JsiFastNativeScope fastNativeScope(vm);
     auto eventObj = CreateTouchEventInfoObj(vm, info);
     eventObj->SetNativePointerFieldCount(vm, 1);
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
@@ -844,6 +846,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnTouch(ArkUIRuntimeCallInfo* runtime
     auto flag = IsCustomFrameNode(frameNode);
     auto onTouch = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
                        node = AceType::WeakClaim(frameNode), containerId](TouchEventInfo& info) {
+        panda::JsiFastNativeScope fastNativeScope(vm);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
