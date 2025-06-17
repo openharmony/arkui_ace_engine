@@ -161,6 +161,7 @@ typedef Rosen::VisualEffect* (*OEMVisualEffectFunc)(const Rosen::VisualEffect* e
 
 class ACE_FORCE_EXPORT ViewAbstract {
 public:
+    static void RemoveResObj(const std::string& key);
     static void SetWidth(const CalcLength &width);
     static void SetWidth(const RefPtr<ResourceObject>& resObj);
     static void SetHeight(const CalcLength &height);
@@ -787,7 +788,6 @@ public:
         NG::TransitionFinishCallback&& finishCallback = nullptr);
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
-    static void CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
     static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching);
     static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);
