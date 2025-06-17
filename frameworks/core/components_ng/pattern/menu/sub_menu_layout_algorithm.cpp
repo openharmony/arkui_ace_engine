@@ -222,7 +222,8 @@ float SubMenuLayoutAlgorithm::CalcStackSubMenuPositionYHalfScreenWithPreview(
     }
 }
 
-float SubMenuLayoutAlgorithm::NormalizePositionY(const RefPtr<FrameNode>& frameNode, float menuTopPositionY, float positionY)
+float SubMenuLayoutAlgorithm::NormalizePositionY(const RefPtr<FrameNode>& frameNode, float menuTopPositionY,
+    float positionY)
 {
     CHECK_NULL_RETURN(frameNode, positionY);
     auto pipeline = frameNode->GetContext();
