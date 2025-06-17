@@ -116,6 +116,7 @@ void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOpt
     options.color.reset();
     options.blurStyleOption.reset();
     options.effectOption.reset();
+    options.resMap_.clear();
     if (!obj->IsObject()) {
         return;
     }
