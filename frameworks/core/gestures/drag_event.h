@@ -410,6 +410,16 @@ public:
         return dataLoadParams_;
     }
 
+    void SetUseDataLoadParams(bool useDataLoadParams)
+    {
+        useDataLoadParams_ = useDataLoadParams;
+    }
+
+    bool GetUseDataLoadParams()
+    {
+        return useDataLoadParams_;
+    }
+
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
@@ -442,6 +452,7 @@ private:
     int32_t displayId_ = -1;
     bool needDoInternalDropAnimation_ = false;
     RefPtr<DataLoadParams> dataLoadParams_ = nullptr;
+    bool useDataLoadParams_ { false };
 };
 
 class NotifyDragEvent : public DragEvent {
