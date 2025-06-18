@@ -240,6 +240,7 @@ public:
     void SetDataDetectorConfig(const TextDetectConfig& config) override;
     void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) override;
     void SetBypassVsyncCondition(WebBypassVsyncCondition condition) override;
+    void SetGestureFocusMode(GestureFocusMode mode) override;
 
     // static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     // static void SetWebIdCallback(FrameNode* frameNode, std::function<void(int32_t)>&& webIdCallback);
@@ -379,6 +380,7 @@ public:
     static void SetOnSslErrorEvent(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback);
     static void SetOnDataResubmitted(
         FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& dataResubmittedId);
+    static void SetGestureFocusMode(FrameNode* frameNode, GestureFocusMode mode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

@@ -2168,6 +2168,31 @@ HWTEST_F(WebPatternTestNg, WebRequestFocus_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnGestureFocusModeUpdate_001
+ * @tc.desc: OnGestureFocusModeUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, OnGestureFocusModeUpdate_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->OnGestureFocusModeUpdate(GestureFocusMode::DEFAULT);
+    EXPECT_TRUE(webPattern->IsDefaultGestureFocusMode());
+    webPattern->OnGestureFocusModeUpdate(GestureFocusMode::GESTURE_TAP_AND_LONG_PRESS);
+    EXPECT_FALSE(webPattern->IsDefaultGestureFocusMode());
+#endif
+}
+
+/**
  * @tc.name: IsCurrentFocus_001
  * @tc.desc: IsCurrentFocus.
  * @tc.type: FUNC

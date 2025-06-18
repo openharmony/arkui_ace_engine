@@ -3767,6 +3767,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(isApiGteTwelve ? false : true));
         delegate_->UpdateOptimizeParserBudgetEnabled(GetOptimizeParserBudgetEnabledValue(false));
         delegate_->UpdateWebMediaAVSessionEnabled(GetWebMediaAVSessionEnabledValue(true));
+        delegate_->UpdateGestureFocusMode(GetGestureFocusModeValue(GestureFocusMode::DEFAULT));
         if (GetMetaViewport()) {
             delegate_->UpdateMetaViewport(GetMetaViewport().value());
         }
@@ -4213,7 +4214,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
             imageAnalyzerManager_->UpdateOverlayTouchInfo(touchPoint.x, touchPoint.y, TouchType::DOWN);
         }
     }
-    if (!touchInfos.empty() && !GetNativeEmbedModeEnabledValue(false)) {
+    if (IsDefaultGestureFocusMode() && !touchInfos.empty() && !GetNativeEmbedModeEnabledValue(false)) {
         WebRequestFocus();
     }
 }
@@ -4641,9 +4642,10 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
             if (nodeInfo && nodeInfo->GetAutoFillType() == focusType) {
                 TouchEventInfo info("autofill");
                 TouchLocationInfo location("autofill", 0);
-                const auto& rectF = lastPageNodeRectRelativeToWeb_;
-                location.SetLocalLocation(Offset(rectF.GetX() + (rectF.Width() / POPUP_CALCULATE_RATIO),
-                    rectF.GetY() + (rectF.Height() / POPUP_CALCULATE_RATIO)));
+                auto rectF = nodeInfo->GetPageNodeRect();
+                location.SetLocalLocation(
+                    Offset(rectF.GetX() - requestedWebOffset_.GetX() + (rectF.Width() / POPUP_CALCULATE_RATIO),
+                        rectF.GetY() - requestedWebOffset_.GetY() + (rectF.Height() / POPUP_CALCULATE_RATIO)));
                 info.AddChangedTouchLocationInfo(std::move(location));
                 HandleTouchDown(info, false);
                 HandleTouchUp(info, false);
@@ -4761,7 +4763,6 @@ void WebPattern::ParseNWebViewDataNode(std::unique_ptr<JsonValue> child,
 
     NG::RectF rectF;
     rectF.SetRect(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
-    lastPageNodeRectRelativeToWeb_ = rectF;
     node->SetPageNodeRect(rectF);
     node->SetId(nodeId);
     node->SetDepth(-1);
@@ -4907,6 +4908,7 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType, const std::vector
         nodeInfo->SetPageNodeRect(rectF);
     }
     pageNodeInfo_ = nodeInfos;
+    requestedWebOffset_ = offset;
 
     auto container = Container::CurrentSafely();
     if (container == nullptr) {
@@ -8316,6 +8318,14 @@ void WebPattern::OnBypassVsyncConditionUpdate(WebBypassVsyncCondition condition)
 void WebPattern::SetDefaultBackgroundColor()
 {
     needSetDefaultBackgroundColor_ = true;
+}
+
+void WebPattern::OnGestureFocusModeUpdate(GestureFocusMode mode)
+{
+    gestureFocusMode_ = mode;
+    if (delegate_) {
+        delegate_->UpdateGestureFocusMode(mode);
+    }
 }
 
 void WebPattern::UpdateSingleHandleVisible(bool isVisible)

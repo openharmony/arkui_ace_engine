@@ -683,6 +683,7 @@ void WebDelegate::UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled) {}
 void WebDelegate::UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) {}
 void WebDelegate::UpdateCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled) {}
 void WebDelegate::UpdateBypassVsyncCondition(const WebBypassVsyncCondition& condition) {}
+void WebDelegate::UpdateGestureFocusMode(const GestureFocusMode& mode) {}
 void WebDelegate::UpdateNativeEmbedRuleTag(const std::string& tag) {}
 void WebDelegate::UpdateNativeEmbedRuleType(const std::string& type) {}
 void WebDelegate::UpdateScrollBarColor(const std::string& colorValue) {}

@@ -2312,4 +2312,19 @@ void WebModelNG::SetOnDataResubmitted(
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnDataResubmittedEvent(std::move(dataResubmittedId));
 }
+
+void WebModelNG::SetGestureFocusMode(GestureFocusMode mode)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateGestureFocusMode(mode);
+}
+
+void WebModelNG::SetGestureFocusMode(FrameNode* frameNode, GestureFocusMode mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateGestureFocusMode(mode);
+}
 } // namespace OHOS::Ace::NG

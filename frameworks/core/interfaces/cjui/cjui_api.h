@@ -2114,6 +2114,8 @@ struct CJUIWebModifier {
     void (*resetOnSslErrorEvent)(ArkUINodeHandle node);
     void (*setOnDataResubmitted)(ArkUINodeHandle node, void* callback);
     void (*resetOnDataResubmitted)(ArkUINodeHandle node);
+    void (*setGestureFocusMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetGestureFocusMode)(ArkUINodeHandle node);
 };
 
 struct CJUIBlankModifier {

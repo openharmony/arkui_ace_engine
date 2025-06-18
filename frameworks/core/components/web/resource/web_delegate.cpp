@@ -1559,6 +1559,11 @@ bool WebDelegate::RequestFocus(OHOS::NWeb::NWebFocusSource source)
                     result = false;
                     return;
                 }
+                if (source == OHOS::NWeb::NWebFocusSource::FOCUS_SOURCE_GESTURE) {
+                    focusHub->RequestFocusImmediately();
+                    result = false;
+                    return;
+                }
 
                 auto host = webPattern->GetHost();
                 CHECK_NULL_VOID(host);
@@ -7410,7 +7415,9 @@ void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNati
     if (event->GetId() == NO_NATIVE_FINGER_TYPE) {
         auto webPattern = webPattern_.Upgrade();
         CHECK_NULL_VOID(webPattern);
-        webPattern->RequestFocus();
+        if (webPattern->IsDefaultGestureFocusMode()) {
+            webPattern->RequestFocus();
+        }
         return;
     }
     CHECK_NULL_VOID(taskExecutor_);
@@ -7431,9 +7438,10 @@ void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNati
                 if (!param->HasSendTask()) {
                     param->SetGestureEventResult(true);
                 }
-                if (!param->GetEventResult() && type == OHOS::NWeb::TouchType::DOWN) {
-                    auto webPattern = delegate->webPattern_.Upgrade();
-                    CHECK_NULL_VOID(webPattern);
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                if (webPattern->IsDefaultGestureFocusMode() && !param->GetEventResult() &&
+                    type == OHOS::NWeb::TouchType::DOWN) {
                     webPattern->RequestFocus();
                 }
             }
@@ -8471,6 +8479,24 @@ void WebDelegate::UpdateBypassVsyncCondition(const WebBypassVsyncCondition& cond
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebBypassVsyncCondition");
+}
+
+void WebDelegate::UpdateGestureFocusMode(const GestureFocusMode& mode)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), mode]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::UpdateGestureFocusMode mode:%{public}d", mode);
+                    setting->SetGestureFocusMode(static_cast<int32_t>(mode));
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateGestureFocusMode");
 }
 
 void WebDelegate::UpdateSingleHandleVisible(bool isVisible)

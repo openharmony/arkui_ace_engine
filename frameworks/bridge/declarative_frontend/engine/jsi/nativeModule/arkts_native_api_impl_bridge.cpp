@@ -6779,6 +6779,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnDataResubmitted));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDataResubmitted"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnDataResubmitted));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGestureFocusMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetGestureFocusMode));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGestureFocusMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetGestureFocusMode));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif

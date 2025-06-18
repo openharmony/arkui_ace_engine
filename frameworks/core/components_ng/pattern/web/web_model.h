@@ -216,6 +216,7 @@ public:
     virtual void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) {};
     virtual void SetBypassVsyncCondition(WebBypassVsyncCondition condition) {}
     virtual void SetDefaultBackgroundColor() {};
+    virtual void SetGestureFocusMode(GestureFocusMode mode) {}
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;
