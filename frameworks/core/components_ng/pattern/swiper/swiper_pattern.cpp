@@ -1777,7 +1777,8 @@ void SwiperPattern::FireSwiperCustomAnimationEvent()
     CHECK_NULL_VOID(transition);
 
     auto selectedIndex = GetCurrentIndex();
-    for (auto& item : itemPositionInAnimation_) {
+    auto itemPosition = itemPositionInAnimation_;
+    for (auto& item : itemPosition) {
         if (indexsInAnimation_.find(item.first) == indexsInAnimation_.end()) {
             continue;
         }
