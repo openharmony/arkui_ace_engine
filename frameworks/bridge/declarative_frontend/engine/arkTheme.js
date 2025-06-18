@@ -505,6 +505,15 @@ if (globalThis.WithTheme !== undefined) {
         ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions !== null && themeOptions !== void 0 ? themeOptions : {}, theme);
     };
     globalThis.WithTheme.pop = function () {
+        var _a;
+        if (PUV2ViewBase.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+            const prebuildFunc = () => {
+                globalThis.WithTheme.pop();
+            };
+            (_a = PUV2ViewBase.prebuildFuncQueues.get(PUV2ViewBase.prebuildingElmtId_)) === null || _a === void 0 ? void 0 : _a.push(prebuildFunc);
+            ViewStackProcessor.PushPrebuildCompCmd();
+            return;
+        }
         ArkThemeScopeManager.getInstance().onScopeExit();
         getUINativeModule().theme.pop();
     };

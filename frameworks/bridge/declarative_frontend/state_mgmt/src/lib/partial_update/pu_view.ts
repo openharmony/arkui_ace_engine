@@ -258,6 +258,7 @@ abstract class ViewPU extends PUV2ViewBase
     ViewBuildNodeBase.arkThemeScopeManager?.onViewPUDelete(this);
     this.localStoragebackStore_ = undefined;
     PUV2ViewBase.prebuildFuncQueues.delete(this.id__());
+    PUV2ViewBase.propertyChangedFuncQueues.delete(this.id__());
     // if memory watch register the callback func, then report such information to memory watch
     // when custom node destroyed
     if (ArkUIObjectFinalizationRegisterProxy.callbackFunc_) {
@@ -725,7 +726,7 @@ abstract class ViewPU extends PUV2ViewBase
   // executed on first render only
   // kept for backward compatibility with old ace-ets2bundle
   public observeComponentCreation(compilerAssignedUpdateFunc: UpdateFunc): void {
-    if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+    if (PUV2ViewBase.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
       const prebuildFunc: PrebuildFunc = () => {
         this.observeComponentCreation(compilerAssignedUpdateFunc);
       };
@@ -763,7 +764,7 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: UIClassObject): void {
-    if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+    if (PUV2ViewBase.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
       const prebuildFunc: PrebuildFunc = () => {
         this.observeComponentCreation2(compilerAssignedUpdateFunc, classObject);
       };
@@ -889,7 +890,7 @@ abstract class ViewPU extends PUV2ViewBase
    * @return void
    */
   public observeRecycleComponentCreation(name: string, recycleUpdateFunc: RecycleUpdateFunc): void {
-    if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+    if (PUV2ViewBase.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
       const prebuildFunc: PrebuildFunc = () => {
         this.observeRecycleComponentCreation(name, recycleUpdateFunc);
       };
