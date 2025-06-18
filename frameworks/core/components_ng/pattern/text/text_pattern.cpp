@@ -2117,7 +2117,7 @@ void TextPattern::TriggerSpansOnHover(const HoverInfo& info, const PointF& textO
             continue;
         }
         int32_t end = isSpanStringMode_ && item->position == -1 ? item->interval.second : item->position;
-        int32_t start = end - item->content.length();
+        int32_t start = end - static_cast<int32_t>(item->content.length());
         auto selectedRects = GetSelectedRects(start, end);
         bool isOnHover = false;
         for (auto&& rect : selectedRects) {
