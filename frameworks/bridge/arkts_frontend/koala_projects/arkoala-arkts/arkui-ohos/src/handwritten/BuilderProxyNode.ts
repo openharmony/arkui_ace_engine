@@ -23,6 +23,7 @@ import { ArkUIAniModule } from "arkui.ani"
 export interface UIContentSlotAttribute {
 }
 export class ArkBuilderProxyNodePeer extends PeerNode {
+    private _hasChild:boolean;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -32,5 +33,11 @@ export class ArkBuilderProxyNodePeer extends PeerNode {
         const _peer = new ArkBuilderProxyNodePeer(_peerPtr, peerId, "BuilderProxyNode", flags)
         component?.setPeer(_peer)
         return _peer
+    }
+    set hasChild(hasChild:boolean){
+        this._hasChild = hasChild;
+    }
+    get hasChild():boolean{
+        return this._hasChild;
     }
 }
