@@ -55,6 +55,7 @@
 #include "core/components_ng/pattern/text/text_select_overlay.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
+#include "core/components_ng/render/text_effect.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -859,6 +860,15 @@ public:
     AISpan GetSelectedAIData();
     std::pair<bool, bool> GetCopyAndSelectable();
     std::pair<int32_t, int32_t> GetSelectedStartAndEnd();
+
+    RefPtr<TextEffect> GetTextEffect()
+    {
+        return textEffect_;
+    }
+    RefPtr<TextEffect> GetOrCreateTextEffect(const std::u16string& content, bool& needUpdateTypography);
+    bool CheckWhetherNeedResetTextEffect(bool isNumber = true);
+    void ReseTextEffect();
+    
 protected:
     int32_t GetClickedSpanPosition()
     {
@@ -1129,6 +1139,7 @@ private:
     void AsyncHandleOnCopySpanStringHtml(RefPtr<SpanString>& subSpanString);
     void AsyncHandleOnCopyWithoutSpanStringHtml(const std::string& pasteData);
     std::list<RefPtr<SpanItem>> GetSpanSelectedContent();
+    bool RegularMatchNumbers(const std::u16string& content);
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -1150,6 +1161,7 @@ private:
     bool isMarqueeRunning_ = false;
 
     RefPtr<ParagraphManager> pManager_;
+    RefPtr<TextEffect> textEffect_;
     std::vector<int32_t> placeholderIndex_;
     std::vector<RectF> rectsForPlaceholders_;
     OffsetF imageOffset_;

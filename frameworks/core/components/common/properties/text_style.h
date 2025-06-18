@@ -221,6 +221,22 @@ enum class EllipsisMode {
     TAIL,
 };
 
+enum class TextFlipDirection {
+    DOWN = 0,
+    UP,
+};
+namespace StringUtils {
+inline std::string ToString(const TextFlipDirection& textFlipDirection)
+{
+    static const LinearEnumMapNode<TextFlipDirection, std::string> table[] = {
+        { TextFlipDirection::DOWN, "down" },
+        { TextFlipDirection::UP, "up" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), textFlipDirection);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
+
 namespace StringUtils {
 inline std::string ToString(const EllipsisMode& ellipsisMode)
 {
@@ -1112,7 +1128,6 @@ public:
     void SetGradient(const std::optional<Gradient>& gradient)
     {
         gradient_ = gradient;
-        reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::FOREGROUND_BRUSH));
     }
 
     void SetForeGroundBrushBitMap()

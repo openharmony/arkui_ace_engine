@@ -85,6 +85,7 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/test/mock/core/render/mock_render_surface_creator.cpp",
     "$ace_root/test/mock/core/render/mock_skia_image.cpp",
     "$ace_root/test/mock/core/render/mock_svg_canvas_image.cpp",
+    "$ace_root/test/mock/core/render/mock_texteffect.cpp",
     "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
     "$ace_root/test/mock/interfaces/mock_content_modifier.cpp",
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
