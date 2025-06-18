@@ -17,12 +17,13 @@
 // HANDWRITTEN, DO NOT REGENERATE
 
 import { int32, hashCodeFromString, KoalaCallsiteKey } from '@koalaui/common';
-import { __context, __id, RepeatByArray, remember, NodeAttach } from '@koalaui/runtime';
+import { __context, __id, RepeatByArray, remember, NodeAttach, contextNode, scheduleCallback } from '@koalaui/runtime';
 import { RepeatItem, UIRepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from '../component/repeat';
 import { IDataSource, DataChangeListener } from '../component/lazyForEach';
 import { LazyForEachImpl } from './LazyForEachImpl';
 import { ArkColumnPeer } from '../component/column';
 import { InternalListener } from '../DataChangeListener';
+import { PeerNode } from '../PeerNode';
 
 /** @memo:intrinsic */
 export function RepeatImpl<T>(
@@ -38,15 +39,22 @@ export function RepeatImpl<T>(
     if (!repeat.itemGenFuncs_.get(RepeatEachFuncType)) {
         throw new Error('Repeat item builder function unspecified. Usage error!');
     }
-    repeat.isVirtualScroll_
-        ? virtualRender<T>(arr, repeat.itemGenFuncs_, repeat.keyGenFunc_, repeat.ttypeGenFunc_, repeat.reusable_)
-        : nonVirtualRender<T>(arr, repeat.itemGenFuncs_.get(RepeatEachFuncType)!, repeat.keyGenFunc_);
+    if (repeat.isVirtualScroll_) {
+        const repeatId = __id();
+        const node = contextNode<PeerNode>();
+        scheduleCallback(() => // postpone until node is attached
+            repeat.templateCacheSize_.forEach((size: number, template: string) => node.setReusePoolSize(size, template + repeatId))
+        );
+        virtualRender<T>(arr, repeat.itemGenFuncs_, repeatId, repeat.keyGenFunc_, repeat.ttypeGenFunc_, repeat.reusable_);
+    } else {
+        nonVirtualRender<T>(arr, repeat.itemGenFuncs_.get(RepeatEachFuncType)!, repeat.keyGenFunc_);
+    }
 }
 
 class RepeatItemImpl<T> implements RepeatItem<T> {
     __item: T;
     __index: number;
-    
+
     constructor(initialItem: T, initialIndex: number) {
         this.__item = initialItem;
         this.__index = initialIndex;
@@ -131,7 +139,7 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
     dataLength_: number = 0
     totalCount_?: number | (() => number);
     totalCountSpecified_?: boolean;
-    templateOptions_: Map<string, number> = new Map<string, number>();
+    templateCacheSize_: Map<string, number> = new Map<string, number>();
     ttypeGenFunc_?: TemplateTypedFunc<T>;
     reusable_?: boolean;
     isVirtualScroll_: boolean = false;
@@ -146,7 +154,7 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
             throw new Error('item generator function missing. Application error!');
         }
         this.itemGenFuncs_.set(RepeatEachFuncType, itemGenerator);
-        this.templateOptions_.set(RepeatEachFuncType, this.normTemplateOptions({}));
+        this.templateCacheSize_.set(RepeatEachFuncType, Number.POSITIVE_INFINITY);
         return this;
     }
 
@@ -186,7 +194,7 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
             throw new Error('template generator function missing. Application error!');
         }
         this.itemGenFuncs_.set(type, itemBuilder);
-        this.templateOptions_.set(type, this.normTemplateOptions(templateOptions));
+        this.templateCacheSize_.set(type, templateOptions?.cachedCount ?? Number.POSITIVE_INFINITY);
         return this;
     }
 
@@ -198,26 +206,18 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
         this.ttypeGenFunc_ = typedFunc;
         return this;
     }
-
-    // normalize the template options
-    private normTemplateOptions(options?: TemplateOptions): number {
-        if (options && options.cachedCount && Number.isInteger(options.cachedCount!)) {
-            return options.cachedCount!;
-        }
-        return NaN;
-    }
 }
 
 /** @memo */
 function virtualRender<T>(arr: RepeatArray<T>,
     itemGenFuncs: Map<string, RepeatItemBuilder<T>>,
+    repeatId: KoalaCallsiteKey,
     keyGenerator?: (element: T, index: number) => string,
     typedFunc?: TemplateTypedFunc<T>,
-    reusable?: boolean
+    reusable?: boolean,
 ): void {
-    let dataSource = remember(()=> new RepeatDataSource<T>(arr))
-    dataSource.updateData(arr)
-    const repeatId = __id()
+    let dataSource = remember(() => new RepeatDataSource<T>(arr));
+    dataSource.updateData(arr);
     /** @memo */
     const itemGen = (item: T, index: number): void => {
         const ri = new RepeatItemImpl<T>(item, index as number);

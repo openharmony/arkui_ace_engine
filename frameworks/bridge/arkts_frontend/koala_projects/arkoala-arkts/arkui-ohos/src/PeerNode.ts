@@ -16,7 +16,7 @@
 import { int32, KoalaCallsiteKey } from "@koalaui/common"
 import { Disposable, IncrementalNode, scheduleCallback } from "@koalaui/runtime"
 import { NativePeerNode } from "./NativePeerNode"
-import { nullptr, pointer, InteropNativeModule } from "@koalaui/interop"
+import { nullptr, pointer } from "@koalaui/interop"
 import { ArkRootPeer } from "./component"
 import { ReusablePool } from "./ReusablePool"
 
@@ -58,19 +58,10 @@ export class PeerNode extends IncrementalNode {
             return
         }
         scheduleCallback(this._reuseCb) // could change states
-        for (let child = this.firstChild; child; child = child!.nextSibling) {
-            if (child instanceof PeerNode)
-                (child as PeerNode)!.onReuse()
-        }
     }
 
     onRecycle(): void {
         this._recycleCb?.()
-        // traverse subtree to notify all children
-        for (let child = this.firstChild; child; child = child!.nextSibling) {
-            if (child instanceof PeerNode)
-                (child as PeerNode)!.onRecycle()
-        }
     }
 
     updateReusePoolSize(size: number, reuseKey: string) {
@@ -105,10 +96,17 @@ export class PeerNode extends IncrementalNode {
     }
 
     setReusePoolSize(size: number, reuseKey: string): void {
+        if (size < 0) return
         if (!this.isKind(RootPeerType)) {
             if (this.parent?.isKind(PeerNodeType))
                 (this.parent! as PeerNode).setReusePoolSize(size, reuseKey)
             return
+        }
+        if (!this._reusePool) {
+            this._reusePool = new Map<string, ReusablePool>()
+        }
+        if (!this._reusePool?.has(reuseKey)) {
+            this._reusePool?.set(reuseKey, new ReusablePool())
         }
         this._reusePool?.get(reuseKey)?.setMaxSize(size)
     }
