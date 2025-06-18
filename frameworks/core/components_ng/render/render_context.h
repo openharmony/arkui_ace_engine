@@ -813,6 +813,8 @@ public:
 
     virtual void SetDrawNode() {}
 
+    static void SetNeedCallbackNodeChange(bool needCallback);
+
     virtual void UpdateOcclusionCullingStatus(bool enable) {}
 
     virtual void SetAnimationPropertyValue(AnimationPropertyType property, const std::vector<float>& value) {}

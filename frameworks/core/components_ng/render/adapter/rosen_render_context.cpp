@@ -45,6 +45,7 @@
 #include "core/animation/native_curve_helper.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
+#include "core/common/ace_engine.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"
@@ -155,6 +156,23 @@ static void DrawNodeChangeCallback(std::shared_ptr<RSNode> rsNode, bool isPositi
 bool SetDrawNodeChangeCallback()
 {
     Rosen::RSNode::SetDrawNodeChangeCallback(DrawNodeChangeCallback);
+    return true;
+}
+
+static void PropertyNodeChangeCallback()
+{
+    AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+        if (pipeline) {
+            pipeline->SetNeedCallbackAreaChange(true);
+        }
+    });
+    Rosen::RSNode::SetNeedCallbackNodeChange(false);
+}
+
+bool SetPropertyNodeChangeCallback()
+{
+    Rosen::RSNode::SetPropertyNodeChangeCallback(PropertyNodeChangeCallback);
     return true;
 }
 
@@ -275,6 +293,7 @@ void CancelModifierAnimation(std::shared_ptr<ModifierName>& modifier)
 } // namespace
 
 bool RosenRenderContext::initDrawNodeChangeCallback_ = SetDrawNodeChangeCallback();
+bool RosenRenderContext::initPropertyNodeChangeCallback_ = SetPropertyNodeChangeCallback();
 
 float RosenRenderContext::ConvertDimensionToScaleBySize(const Dimension& dimension, float size)
 {
@@ -2390,6 +2409,10 @@ RectF RosenRenderContext::GetPaintRectWithTransform()
 
     CHECK_NULL_RETURN(rsNode_, rect);
     rect = GetPaintRectWithoutTransform();
+    if (ShouldSkipAffineTransformation(rsNode_)) {
+        gRect = rect;
+        return rect;
+    }
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto skew = rsNode_->GetStagingProperties().GetSkew();
     auto perspective = rsNode_->GetStagingProperties().GetPersp();
@@ -2449,6 +2472,9 @@ std::pair<RectF, bool> RosenRenderContext::GetPaintRectWithTranslate()
         return std::make_pair(RectF(0, 0, -1, -1), error);
     }
     rect = GetPaintRectWithoutTransform();
+    if (ShouldSkipAffineTransformation(rsNode_)) {
+        return std::make_pair(rect, error);
+    }
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     rect.SetOffset(rect.GetOffset() + OffsetF(translate[0], translate[1]));
     return std::make_pair(rect, error);
@@ -2457,6 +2483,9 @@ std::pair<RectF, bool> RosenRenderContext::GetPaintRectWithTranslate()
 Matrix4 RosenRenderContext::GetRevertMatrix()
 {
     CHECK_NULL_RETURN(rsNode_, {});
+    if (ShouldSkipAffineTransformation(rsNode_)) {
+        return Matrix4();
+    }
     auto center = rsNode_->GetStagingProperties().GetPivot();
     Matrix4 rotateMat;
 #if defined(MODIFIER_NG)
@@ -2506,6 +2535,9 @@ Matrix4 RosenRenderContext::GetRevertMatrix()
 Matrix4 RosenRenderContext::GetMatrix()
 {
     CHECK_NULL_RETURN(rsNode_, {});
+    if (ShouldSkipAffineTransformation(rsNode_)) {
+        return Matrix4();
+    }
     auto center = rsNode_->GetStagingProperties().GetPivot();
     int32_t degree = rsNode_->GetStagingProperties().GetRotation();
     if (rsNode_->GetType() == RSUINodeType::DISPLAY_NODE && degree != 0) {
@@ -2540,6 +2572,9 @@ Matrix4 RosenRenderContext::GetMatrix()
 Matrix4 RosenRenderContext::GetMatrixWithTransformRotate()
 {
     CHECK_NULL_RETURN(rsNode_, {});
+    if (ShouldSkipAffineTransformation(rsNode_)) {
+        return Matrix4();
+    }
     auto center = rsNode_->GetStagingProperties().GetPivot();
     Matrix4 rotateMat;
 
@@ -2626,6 +2661,9 @@ void RosenRenderContext::GetPointTransformRotate(PointF& point)
 void RosenRenderContext::GetPointWithTransform(PointF& point)
 {
     CHECK_NULL_VOID(rsNode_);
+    if (ShouldSkipAffineTransformation(rsNode_)) {
+        return;
+    }
     auto skew = rsNode_->GetStagingProperties().GetSkew();
     auto scale = rsNode_->GetStagingProperties().GetScale();
     point = PointF(point.GetX() / scale[0], point.GetY() / scale[1]);
@@ -2677,6 +2715,9 @@ RectF RosenRenderContext::GetPaintRectWithTransformWithoutDegree()
     RectF rect;
     CHECK_NULL_RETURN(rsNode_, rect);
     rect = GetPaintRectWithoutTransform();
+    if (ShouldSkipAffineTransformation(rsNode_)) {
+        return rect;
+    }
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto skew = rsNode_->GetStagingProperties().GetSkew();
     auto perspective = rsNode_->GetStagingProperties().GetPersp();
@@ -8124,6 +8165,24 @@ void RosenRenderContext::MarkNeedDrawNode(bool condition)
     if (condition && rsNode_) {
         rsNode_->SetDrawNode();
     }
+}
+
+bool RosenRenderContext::ShouldSkipAffineTransformation(std::shared_ptr<RSNode> rsNode)
+{
+    if (SystemProperties::GetContainerDeleteFlag() &&
+        rsNode->GetDrawNodeType() != Rosen::DrawNodeType::GeometryPropertyType) {
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN, "Should skip affine transformation, node(%{public}d, %{public}s)",
+                rsNode->GetFrameNodeId(), rsNode->GetFrameNodeTag().c_str());
+        }
+        return true;
+    }
+    return false;
+}
+
+void RenderContext::SetNeedCallbackNodeChange(bool needCallback)
+{
+    Rosen::RSNode::SetNeedCallbackNodeChange(needCallback);
 }
 
 std::shared_ptr<TransitionModifier> RosenRenderContext::GetOrCreateTransitionModifier()
