@@ -84,7 +84,7 @@ HitTestResult DynamicNode::TouchTest(const PointF& globalPoint, const PointF& pa
     auto eventManager = context->GetEventManager();
     CHECK_NULL_RETURN(eventManager, testResult);
     auto delegate = AceType::MakeRefPtr<DynamicTouchDelegate>(pattern);
-    eventManager->RegisterTouchDelegate(touchRestrict.touchEvent.id, delegate);
+    eventManager->ReplaceTouchDelegate(touchRestrict.touchEvent.id, delegate);
     return testResult;
 }
 } // namespace OHOS::Ace::NG
