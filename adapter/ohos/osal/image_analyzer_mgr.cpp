@@ -116,4 +116,14 @@ void ImageAnalyzerMgr::UpdateAIButtonConfig(void** overlayData, AIButtonConfig* 
         return engine_->UpdateAIButtonConfig(overlayData, config);
     }
 }
+
+void ImageAnalyzerMgr::UpdateKeyEvent(void** overlayData, void* keyEvent)
+{
+    if (engine_ && keyEvent != nullptr) {
+        auto* event = static_cast<KeyEvent*>(keyEvent);
+        LOGI("ImageAnalyzerMgr::UpdateKeyEvent event.action: %{public}d, event.code: %{public}d",
+            static_cast<int32_t>(event->action), static_cast<int32_t>(event->code));
+        return engine_->UpdateKeyEvent(overlayData, keyEvent);
+    }
+}
 }

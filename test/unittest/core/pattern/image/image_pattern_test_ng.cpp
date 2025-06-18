@@ -780,7 +780,9 @@ HWTEST_F(ImagePatternTestNg, ImagePatternOnKeyEvent001, TestSize.Level1)
     auto frameNode = CreatePixelMapAnimator();
     ASSERT_NE(frameNode, nullptr);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    imagePattern->OnKeyEvent();
+    auto event = KeyEvent();
+    event.action = KeyAction::UNKNOWN;
+    imagePattern->OnKeyEvent(event);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     EXPECT_EQ(focusHub->IsDefaultFocus(), false);
