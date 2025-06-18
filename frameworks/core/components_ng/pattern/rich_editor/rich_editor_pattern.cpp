@@ -12173,7 +12173,7 @@ int32_t RichEditorPattern::HandleKbVerticalSelection(bool isUp)
         textOffset = Offset(caretOffset.GetX() - GetTextRect().GetX(), careOffsetY);
         CHECK_NULL_RETURN(GreatNotEqual(textOffset.GetY(), 0), 0);
         newPos = paragraphs_.GetIndex(textOffset, true);
-        OffsetF newCaretOffset = CalcCursorOffsetByPosition(newPos, newCaretHeight);
+        OffsetF newCaretOffset = CalcCursorOffsetByPosition(newPos, newCaretHeight, true);
         CHECK_EQUAL_RETURN(!textSelector_.SelectNothing() && textSelector_.GetTextEnd() == caretPosition_ &&
             selectStartOffset.GetY() == newCaretOffset.GetY(), true, textSelector_.GetTextStart());
     } else {

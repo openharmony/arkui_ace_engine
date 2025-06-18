@@ -415,6 +415,8 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleKbVerticalSelection001, TestSize.Lev
     richEditorPattern->textSelector_.destinationOffset = 0;
     richEditorPattern->caretPosition_ = 1;
     EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(true), 0);
+    richEditorPattern->caretPosition_ = 0;
+    EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(true), 0);
 }
 
 /**
