@@ -37,6 +37,15 @@ public:
     static void parseSymbolSwitch(const JSRef<JSVal> jsVal, NG::SymbolEffectOptions& symbolEffectOptions);
     static void SetMinFontScale(const JSCallbackInfo& info);
     static void SetMaxFontScale(const JSCallbackInfo& info);
+    static void SetSymbolShadow(const JSCallbackInfo& info);
+    static void SetShaderStyle(const JSCallbackInfo& info);
+    static bool ParseShaderStyle(const JSRef<JSObject> shaderStyleObj, SymbolGradient& shaderStyle);
+    static void ParseSymbolShadow(const JSRef<JSObject> symbolShadowObj, SymbolShadow& symbolShadow);
+    static void ParseCommonGradientOptions(const JSRef<JSObject>& optionsObj, SymbolGradient& gradient);
+    static void ParseJsColorArray(const JSRef<JSVal>& jsValue, SymbolGradient& gradient);
+    static void ParseGradientCenter(const JSRef<JSArray>& centerArray, SymbolGradient& gradient);
+    static void ParseJsValueToFloat(const JSRef<JSObject>& jsObj, int32_t key, float& output);
+    static float DirectionToAngle(const JsiRef<JsiValue>& directionValue);
 };
 
 } // namespace OHOS::Ace::Framework
