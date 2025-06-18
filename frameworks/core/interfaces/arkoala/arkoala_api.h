@@ -6276,7 +6276,7 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorEnablePreviewText)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetRichEditorEnablePreviewText)(ArkUINodeHandle node);
     void (*setRichEditorEditMenuOptions)(
-        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback);
+        ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback, void* onPrepareMenuCallback);
     void (*resetRichEditorEditMenuOptions)(ArkUINodeHandle node);
     void (*setRichEditorOnWillChange)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnWillChange)(ArkUINodeHandle node);

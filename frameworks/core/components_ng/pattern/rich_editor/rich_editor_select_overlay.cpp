@@ -329,6 +329,7 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
     }
     selectInfo.menuInfo.responseType = static_cast<int32_t>(responseType);
     selectInfo.menuInfo.editorType = static_cast<int32_t>(pattern->GetEditorType());
+    selectInfo.menuInfo.hasOnPrepareMenuCallback = onPrepareMenuCallback_ ? true : false;
     selectInfo.callerFrameNode = pattern->GetHost();
     selectInfo.isNewAvoid = true;
     selectInfo.selectArea = GetSelectArea();
