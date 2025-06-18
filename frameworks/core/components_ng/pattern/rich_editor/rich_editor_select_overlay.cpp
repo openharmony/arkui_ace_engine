@@ -598,6 +598,7 @@ void RichEditorSelectOverlay::OnOverlayTouchDown(const TouchEventInfo& event)
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     if (event.GetSourceTool() == SourceTool::MOUSE && IsHandleShow()) {
+        pattern->ResetSelection();
         pattern->CloseSelectOverlay();
     }
     pattern->RequestFocusWhenSelected();
