@@ -81,6 +81,15 @@
          ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRenderMode, frameNode);
      }
  }
+
+void ImageModelStatic::SetImageMatrix(FrameNode* frameNode, const std::optional<Matrix4>& value)
+{
+    if (value.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageMatrix, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageMatrix, frameNode);
+    }
+}
  
  void ImageModelStatic::SetImageFit(FrameNode* frameNode, const std::optional<ImageFit>& value)
  {

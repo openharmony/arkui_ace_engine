@@ -455,4 +455,13 @@ void ListModelStatic::SetMultiSelectable(FrameNode* frameNode, bool selectable)
     CHECK_NULL_VOID(pattern);
     pattern->SetMultiSelectable(selectable);
 }
+
+void ListModelStatic::SetStackFromEnd(FrameNode* frameNode, const std::optional<bool>& enabled)
+{
+    if (enabled.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, StackFromEnd, enabled.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, StackFromEnd, frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG
