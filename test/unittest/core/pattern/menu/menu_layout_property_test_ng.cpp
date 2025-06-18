@@ -986,4 +986,23 @@ HWTEST_F(MenuLayoutPropertyTestNg, ToJsonValue005, TestSize.Level1)
     EXPECT_EQ(maskJsonObject->GetString("color"), Color::RED.ToString().c_str());
     EXPECT_EQ(backgroundBlurStyleJsonObject->GetString("value"), "BlurStyle.BACKGROUND_THIN");
 }
+
+/**
+ * @tc.name: CheckPreviewConstraintForConstant001
+ * @tc.desc: Verify CheckPreviewConstraintForConstant.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutPropertyTestNg, CheckPreviewConstraintForConstant001, TestSize.Level1)
+{
+    RefPtr<GeometryNode> previewGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    MenuLayoutAlgorithm menuLayoutAlgorithm;
+    menuLayoutAlgorithm.CheckPreviewConstraintForConstant(previewGeometryNode);
+    menuLayoutAlgorithm.previewScaleMode_ = PreviewScaleMode::CONSTANT;
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_PREVIEW_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    Rect menuWindowRect(TARGET_SIZE_WIDTH, TARGET_SIZE_WIDTH, TARGET_SIZE_WIDTH, TARGET_SIZE_WIDTH);
+    menuLayoutAlgorithm.CheckPreviewConstraint(frameNode, menuWindowRect);
+    auto geometryNode = frameNode->GetGeometryNode();
+    EXPECT_EQ(geometryNode->frame_.rect_.width_, 0);
+}
 } // namespace OHOS::Ace::NG

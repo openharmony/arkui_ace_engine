@@ -52,6 +52,16 @@ struct MenuMaskType {
     std::optional<BlurStyle> maskBackGroundBlurStyle;
 };
 
+enum class PreviewScaleMode {
+    AUTO = 0,
+    CONSTANT = 1,
+    MAINTAIN = 2,
+};
+
+enum class AvailableLayoutAreaMode {
+    SAFE_AREA = 0,
+};
+
 struct MenuParam {
     std::string title;
     OffsetF positionOffset;
@@ -135,6 +145,8 @@ struct MenuParam {
     std::optional<bool> maskEnable;
     std::optional<MenuMaskType> maskType;
     std::optional<ModalMode> modalMode;
+    std::optional<PreviewScaleMode> previewScaleMode;
+    std::optional<AvailableLayoutAreaMode> availableLayoutAreaMode;
     OffsetF anchorPosition;
     bool isAnchorPosition = false;
 };

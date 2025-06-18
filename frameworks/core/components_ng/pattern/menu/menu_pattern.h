@@ -621,6 +621,16 @@ public:
         return menuWindowRect_;
     }
 
+    void SetMenuLayoutParam(const PreviewMenuParam& layoutParam)
+    {
+        layoutParam_ = layoutParam;
+    }
+
+    PreviewMenuParam GetMenuLayoutParam() const
+    {
+        return layoutParam_;
+    }
+
     OffsetF GetPreviewMenuDisappearPosition()
     {
         return disappearOffset_;
@@ -819,6 +829,7 @@ private:
     bool isStackSubmenu_ = false;
     bool isNeedDivider_ = false;
     Rect menuWindowRect_;
+    PreviewMenuParam layoutParam_;
     WeakPtr<UINode> customNode_ = nullptr;
     std::optional<MenuPathParams> pathParams_ = std::nullopt;
     float translateYForStack_ = 0.0f;
