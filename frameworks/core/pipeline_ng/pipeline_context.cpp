@@ -2906,6 +2906,7 @@ void PipelineContext::OnTouchEvent(
         historyPointsById_.erase(scalePoint.id);
     }
     if (scalePoint.type == TouchType::DOWN) {
+        DisableNotifyResponseRegionChanged();
         SetUiDvsyncSwitch(false);
         CompensateTouchMoveEventBeforeDown();
         // Set focus state inactive while touch down event received
@@ -6045,6 +6046,13 @@ void PipelineContext::NotifyResponseRegionChanged(const RefPtr<FrameNode>& rootN
     };
     BackgroundTaskExecutor::GetInstance().PostTask(task);
 }
+
+void PipelineContext::DisableNotifyResponseRegionChanged()
+{
+    CHECK_NULL_VOID(taskExecutor_);
+    taskExecutor_->RemoveTask(TaskExecutor::TaskType::UI, "NotifyResponseRegionChanged");
+}
+
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
 
 bool PipelineContext::OnTouchTargetHitTest(const TouchEvent& point, bool isSubPipe, const std::string& target)

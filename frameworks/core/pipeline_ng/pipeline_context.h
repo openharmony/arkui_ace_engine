@@ -997,6 +997,8 @@ public:
 
     void NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) override;
 
+    void DisableNotifyResponseRegionChanged() override;
+
     void SetLocalColorMode(ColorMode colorMode)
     {
         auto localColorModeValue = static_cast<int32_t>(colorMode);

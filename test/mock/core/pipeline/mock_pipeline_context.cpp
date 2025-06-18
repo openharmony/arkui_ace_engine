@@ -915,6 +915,8 @@ std::string PipelineContext::GetResponseRegion(const RefPtr<NG::FrameNode>& root
 
 void PipelineContext::NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) {};
 
+void PipelineContext::DisableNotifyResponseRegionChanged() {};
+
 void PipelineContext::AddFontNodeNG(const WeakPtr<UINode>& node) {}
 
 void PipelineContext::RemoveFontNodeNG(const WeakPtr<UINode>& node) {}

@@ -2866,6 +2866,10 @@ void ScrollablePattern::FireOnScrollStart(bool withPerfMonitor)
     if (withPerfMonitor) {
         PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     }
+    auto pipeline = host->GetContext();
+    if (pipeline) {
+        pipeline->DisableNotifyResponseRegionChanged();
+    }
     if (GetScrollAbort()) {
         ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStart, id:%d, tag:%s",
             static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
