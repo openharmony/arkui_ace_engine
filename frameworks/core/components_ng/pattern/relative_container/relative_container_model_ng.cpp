@@ -58,9 +58,21 @@ void RelativeContainerModelNG::SetGuideline(const std::vector<GuidelineInfo>& gu
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(RelativeContainerLayoutProperty, Guideline, guidelineInfoValue, frameNode);
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         };
-        pattern->AddResObj("RelativeContainer.guideLine", resObj, std::move(updateFunc));
+        pattern->AddResObj("relativeContainer.guideLine", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_LAYOUT_PROPERTY(RelativeContainerLayoutProperty, Guideline, guidelineInfo);
+}
+
+void RelativeContainerModelNG::ResetResObj(const std::string& key)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<OHOS::Ace::NG::RelativeContainerPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
 }
 
 RefPtr<FrameNode> RelativeContainerModelNG::CreateFrameNode(int32_t nodeId)

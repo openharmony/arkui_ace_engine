@@ -69,6 +69,7 @@ void JSBlank::Height(const JSCallbackInfo& info)
 
 void JSBlank::Color(const JSCallbackInfo& info)
 {
+    BlankModel::GetInstance()->ResetResObj("blank.color");
     class Color value;
     RefPtr<ResourceObject> blockResObj;
     if (!ParseJsColor(info[0], value, blockResObj)) {

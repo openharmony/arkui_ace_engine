@@ -126,6 +126,14 @@ void ViewAbstract::SetWidth(const RefPtr<ResourceObject>& resObj)
         } else {
             value = StringUtils::StringToCalcDimension(widthString);
         }
+        if (LessNotEqual(value.Value(), 0.0)) {
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                ClearWidthOrHeight(true);
+                return;
+            } else {
+                value.SetValue(0.0);
+            }
+        }
         CalcLength width;
         if (value.Unit() == DimensionUnit::CALC) {
             width = NG::CalcLength(value.CalcValue());
@@ -186,6 +194,14 @@ void ViewAbstract::SetHeight(const RefPtr<ResourceObject>& resObj)
             pattern->AddResCache("height", value.ToString());
         } else {
             value = StringUtils::StringToCalcDimension(heightString);
+        }
+        if (LessNotEqual(value.Value(), 0.0)) {
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                ClearWidthOrHeight(false);
+                return;
+            } else {
+                value.SetValue(0.0);
+            }
         }
         CalcLength height;
         if (value.Unit() == DimensionUnit::CALC) {
@@ -1329,7 +1345,7 @@ void ViewAbstract::SetBorderRadius(const BorderRadiusProperty& value)
             CHECK_NULL_VOID(pattern);
             pattern->UpdateBorderResource();
         };
-        pattern->AddResObj("borderRadius.edges", resObj, std::move(updateFunc));
+        pattern->AddResObj("borderRadius", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_RENDER_CONTEXT(BorderRadius, value);
 }
@@ -1398,7 +1414,7 @@ void ViewAbstract::SetBorderColor(const BorderColorProperty& value)
             pattern->UpdateBorderResource();
             frameNode->MarkModifyDone();
         };
-        pattern->AddResObj("borderColor.edges", resObj, std::move(updateFunc));
+        pattern->AddResObj("borderColor", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_RENDER_CONTEXT(BorderColor, value);
 }
@@ -1472,7 +1488,7 @@ void ViewAbstract::SetBorderWidth(const BorderWidthProperty& value)
             pattern->UpdateBorderResource();
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
         };
-        pattern->AddResObj("borderWidth.edges", resObj, std::move(updateFunc));
+        pattern->AddResObj("borderWidth", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, value);
     ACE_UPDATE_RENDER_CONTEXT(BorderWidth, value);
@@ -1579,9 +1595,7 @@ void ViewAbstract::SetDashGap(const BorderWidthProperty& value)
             CHECK_NULL_VOID(frameNode);
             BorderWidthProperty &dashGap = const_cast<BorderWidthProperty &>(value);
             dashGap.ReloadResources();
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, dashGap, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(DashGap, dashGap, frameNode);
-            frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE);
         };
         pattern->AddResObj("border.dashGap", resObj, std::move(updateFunc));
     }
@@ -3181,7 +3195,7 @@ void ViewAbstract::SetOffsetEdges(const EdgesParam& value)
             ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Offset, frameNode);
             ACE_UPDATE_NODE_RENDER_CONTEXT(OffsetEdges, edges, frameNode);
         };
-        pattern->AddResObj("position.edges", resObj, std::move(updateFunc));
+        pattern->AddResObj("offset.edges", resObj, std::move(updateFunc));
     }
     ACE_RESET_RENDER_CONTEXT(RenderContext, Offset);
     ACE_UPDATE_RENDER_CONTEXT(OffsetEdges, value);
@@ -8742,5 +8756,17 @@ std::vector<float> ViewAbstract::GetRenderNodePropertyValue(FrameNode* frameNode
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, {});
     return renderContext->GetRenderNodePropertyValue(property);
+}
+
+void ViewAbstract::ResetResObj(const std::string& key)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
 }
 } // namespace OHOS::Ace::NG

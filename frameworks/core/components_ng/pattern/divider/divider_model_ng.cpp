@@ -48,6 +48,18 @@ void DividerModelNG::DividerColor(const Color& value)
     ACE_UPDATE_PAINT_PROPERTY(DividerRenderProperty, DividerColor, value);
 }
 
+void DividerModelNG::ResetResObj(const std::string& key)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto dividerPattern = frameNode->GetPattern<DividerPattern>();
+    CHECK_NULL_VOID(dividerPattern);
+    dividerPattern->RemoveResObj(key);
+}
+
 void DividerModelNG::DividerColor(const RefPtr<ResourceObject>& resObj)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -60,11 +72,11 @@ void DividerModelNG::DividerColor(const RefPtr<ResourceObject>& resObj)
         CHECK_NULL_VOID(frameNode);
         auto dividerPattern = frameNode->GetPattern<DividerPattern>();
         CHECK_NULL_VOID(dividerPattern);
-        std::string dividerColor = dividerPattern->GetResCacheMapByKey("divider.Color");
+        std::string dividerColor = dividerPattern->GetResCacheMapByKey("divider.color");
         Color result;
         if (dividerColor.empty()) {
             ResourceParseUtils::ParseResColor(resObj, result);
-            dividerPattern->AddResCache("divider.Color", result.ColorToString());
+            dividerPattern->AddResCache("divider.color", result.ColorToString());
         } else {
             result = Color::ColorFromString(dividerColor);
         }
@@ -72,7 +84,7 @@ void DividerModelNG::DividerColor(const RefPtr<ResourceObject>& resObj)
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     };
     updateFunc(resObj);
-    dividerPattern->AddResObj("divider.Color", resObj, std::move(updateFunc));
+    dividerPattern->AddResObj("divider.color", resObj, std::move(updateFunc));
 }
 
 void DividerModelNG::StrokeWidth(const Dimension& value)

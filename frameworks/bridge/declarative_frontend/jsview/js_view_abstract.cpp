@@ -489,6 +489,7 @@ void ParseLocationPropsEdgesResObj(EdgesParam& edges, const RefPtr<ResourceObjec
     if (!SystemProperties::ConfigChangePerform()) {
         return;
     }
+    edges.resMap_.clear();
     if (topResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, EdgesParam& edges) {
             CalcDimension result;
@@ -530,6 +531,7 @@ void ParseAllBorderRadiusesResObj(NG::BorderRadiusProperty& borderRadius, const 
     if (!SystemProperties::ConfigChangePerform()) {
         return;
     }
+    borderRadius.resMap_.clear();
     if (topLeftResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
             CalcDimension result;
@@ -1243,6 +1245,7 @@ void ParseEdgeWidthsResObjFunc(NG::BorderWidthProperty& borderWidth, RefPtr<Reso
     if (!SystemProperties::ConfigChangePerform()) {
         return;
     }
+    borderWidth.resMap_.clear();
     if (leftResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
             CalcDimension result;
@@ -1276,6 +1279,63 @@ void ParseEdgeWidthsResObjFunc(NG::BorderWidthProperty& borderWidth, RefPtr<Reso
             ResourceParseUtils::ParseResDimensionVp(resObj, result);
             borderWidth.bottomDimen = result;
             borderWidth.multiValued = true;
+        };
+        borderWidth.AddResource("borderWidth.bottom", bottomResObj, std::move(updateFunc));
+    }
+}
+
+void ParseEdgeWidthsForDashParamsResObj(NG::BorderWidthProperty& borderWidth, RefPtr<ResourceObject> topResObj,
+    RefPtr<ResourceObject> rightResObj, RefPtr<ResourceObject> bottomResObj, RefPtr<ResourceObject> leftResObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    borderWidth.resMap_.clear();
+    if (leftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+            CalcDimension result;
+            if (ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+                CheckDimensionUnit(result, true, false);
+                borderWidth.leftDimen = result;
+            } else {
+                borderWidth.leftDimen = static_cast<CalcDimension>(-1);
+            }
+        };
+        borderWidth.AddResource("borderWidth.left", leftResObj, std::move(updateFunc));
+    }
+    if (rightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+            CalcDimension result;
+            if (ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+                CheckDimensionUnit(result, true, false);
+                borderWidth.rightDimen = result;
+            } else {
+                borderWidth.rightDimen = static_cast<CalcDimension>(-1);
+            }
+        };
+        borderWidth.AddResource("borderWidth.right", rightResObj, std::move(updateFunc));
+    }
+    if (topResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+            CalcDimension result;
+            if (ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+                CheckDimensionUnit(result, true, false);
+                borderWidth.topDimen = result;
+            } else {
+                borderWidth.topDimen = static_cast<CalcDimension>(-1);
+            }
+        };
+        borderWidth.AddResource("borderWidth.top", topResObj, std::move(updateFunc));
+    }
+    if (bottomResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+            CalcDimension result;
+            if (ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
+                CheckDimensionUnit(result, true, false);
+                borderWidth.bottomDimen = result;
+            } else {
+                borderWidth.bottomDimen = static_cast<CalcDimension>(-1);
+            }
         };
         borderWidth.AddResource("borderWidth.bottom", bottomResObj, std::move(updateFunc));
     }
@@ -1316,6 +1376,44 @@ void ParseEdgeWidthsResObj(const JSRef<JSObject>& object, NG::BorderWidthPropert
         borderWidth.multiValued = true;
     }
     ParseEdgeWidthsResObjFunc(borderWidth, leftResObj, rightResObj, topResObj, bottomResObj);
+}
+
+void ParseEdgeWidthsForDashParamsResObj(
+    const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidth, CalcDimension defaultValue)
+{
+    CalcDimension left;
+    RefPtr<ResourceObject> leftResObj;
+    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(LEFT_PROPERTY), left, leftResObj, true)) {
+        CheckDimensionUnit(left, true, false);
+        borderWidth.leftDimen = left;
+    } else {
+        borderWidth.leftDimen = defaultValue;
+    }
+    CalcDimension right;
+    RefPtr<ResourceObject> rightResObj;
+    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(RIGHT_PROPERTY), right, rightResObj, true)) {
+        CheckDimensionUnit(right, true, false);
+        borderWidth.rightDimen = right;
+    } else {
+        borderWidth.rightDimen = defaultValue;
+    }
+    CalcDimension top;
+    RefPtr<ResourceObject> topResObj;
+    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(TOP_PROPERTY), top, topResObj, true)) {
+        CheckDimensionUnit(top, true, false);
+        borderWidth.topDimen = top;
+    } else {
+        borderWidth.topDimen = defaultValue;
+    }
+    CalcDimension bottom;
+    RefPtr<ResourceObject> bottomResObj;
+    if (JSViewAbstract::ParseJsDimensionVpNG(object->GetProperty(BOTTOM_PROPERTY), bottom, bottomResObj, true)) {
+        CheckDimensionUnit(bottom, false, true);
+        borderWidth.bottomDimen = bottom;
+    } else {
+        borderWidth.bottomDimen = defaultValue;
+    }
+    ParseEdgeWidthsForDashParamsResObj(borderWidth, leftResObj, rightResObj, topResObj, bottomResObj);
 }
 
 void ParseEdgeWidthsProps(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension, bool notPercent,
@@ -2156,6 +2254,7 @@ void JSViewAbstract::JsWidth(const JSCallbackInfo& info)
 
 bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
 {
+    ViewAbstractModel::GetInstance()->ResetResObj("width");
     CalcDimension value;
     RefPtr<ResourceObject> valueResObj;
     if (jsValue->IsUndefined()) {
@@ -2233,6 +2332,7 @@ void JSViewAbstract::JsToolbar(const JSCallbackInfo& info)
 
 bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
 {
+    ViewAbstractModel::GetInstance()->ResetResObj("height");
     CalcDimension value;
     RefPtr<ResourceObject> valueResObj;
     if (jsValue->IsUndefined()) {
@@ -2641,6 +2741,9 @@ void JSViewAbstract::JsLayoutGravity(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
 {
+    ViewAbstractModel::GetInstance()->ResetResObj("position.x");
+    ViewAbstractModel::GetInstance()->ResetResObj("position.y");
+    ViewAbstractModel::GetInstance()->ResetResObj("position.edges");
     CalcDimension x;
     CalcDimension y;
     RefPtr<ResourceObject> xResObj;
@@ -2672,6 +2775,8 @@ void JSViewAbstract::JsPosition(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
 {
+    ViewAbstractModel::GetInstance()->ResetResObj("markAnchor.x");
+    ViewAbstractModel::GetInstance()->ResetResObj("markAnchor.y");
     CalcDimension x;
     CalcDimension y;
     RefPtr<ResourceObject> xResObj;
@@ -2699,6 +2804,9 @@ void JSViewAbstract::JsMarkAnchor(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOffset(const JSCallbackInfo& info)
 {
+    ViewAbstractModel::GetInstance()->ResetResObj("offset.x");
+    ViewAbstractModel::GetInstance()->ResetResObj("offset.y");
+    ViewAbstractModel::GetInstance()->ResetResObj("offset.edges");
     CalcDimension x;
     CalcDimension y;
     RefPtr<ResourceObject> xResObj;
@@ -3862,6 +3970,9 @@ void JSViewAbstract::JsMargin(const JSCallbackInfo& info)
 
 void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType type)
 {
+    ViewAbstractModel::GetInstance()->ResetResObj("margin");
+    ViewAbstractModel::GetInstance()->ResetResObj("padding");
+    ViewAbstractModel::GetInstance()->ResetResObj("safeAreaPadding");
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::STRING,
         JSCallbackInfoType::NUMBER };
     auto jsVal = info[0];
@@ -4030,6 +4141,7 @@ void JSViewAbstract::GetEdgeMarginsResObj(NG::MarginProperty& margins, const Com
     if (!SystemProperties::ConfigChangePerform()) {
         return;
     }
+    margins.resMap_.clear();
     if (commonCalcDimension.topResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::MarginProperty& margins) {
             CalcDimension result;
@@ -4316,6 +4428,11 @@ void JSViewAbstract::JsOutlineStyle(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBorder(const JSCallbackInfo& info)
 {
+    ViewAbstractModel::GetInstance()->ResetResObj("borderWidth");
+    ViewAbstractModel::GetInstance()->ResetResObj("borderColor");
+    ViewAbstractModel::GetInstance()->ResetResObj("borderRadius");
+    ViewAbstractModel::GetInstance()->ResetResObj("border.dashGap");
+    ViewAbstractModel::GetInstance()->ResetResObj("border.dashWidth");
     if (!info[0]->IsObject()) {
         CalcDimension borderWidth;
         ViewAbstractModel::GetInstance()->SetBorderWidth(borderWidth);
@@ -4382,6 +4499,7 @@ bool IsBorderWidthObjUndefined(const JSRef<JSVal>& args)
 
 void JSViewAbstract::JsBorderWidth(const JSCallbackInfo& info)
 {
+    ViewAbstractModel::GetInstance()->ResetResObj("borderWidth");
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];
@@ -4453,7 +4571,7 @@ void JSViewAbstract::ParseDashGap(const JSRef<JSVal>& args)
         }
         if (SystemProperties::ConfigChangePerform()) {
             NG::BorderWidthProperty dashGap;
-            ParseEdgeWidthsResObj(obj, dashGap, true);
+            ParseEdgeWidthsForDashParamsResObj(obj, dashGap, static_cast<CalcDimension>(-1));
             ViewAbstractModel::GetInstance()->SetDashGap(dashGap);
         } else {
             ViewAbstractModel::GetInstance()->SetDashGap(commonCalcDimension.left,
@@ -4482,7 +4600,7 @@ void JSViewAbstract::ParseDashWidth(const JSRef<JSVal>& args)
         }
         if (SystemProperties::ConfigChangePerform()) {
             NG::BorderWidthProperty dashWidth;
-            ParseEdgeWidthsResObj(obj, dashWidth, true);
+            ParseEdgeWidthsForDashParamsResObj(obj, dashWidth, static_cast<CalcDimension>(-1));
             ViewAbstractModel::GetInstance()->SetDashWidth(dashWidth);
         } else {
             ViewAbstractModel::GetInstance()->SetDashWidth(commonCalcDimension.left,
@@ -5048,6 +5166,7 @@ void JSViewAbstract::ParseBorderImageWidth(const JSRef<JSVal>& args, RefPtr<Bord
 
 void JSViewAbstract::JsBorderColor(const JSCallbackInfo& info)
 {
+    ViewAbstractModel::GetInstance()->ResetResObj("borderColor");
     ParseBorderColor(info[0]);
 }
 
@@ -5134,7 +5253,7 @@ NG::BorderColorProperty JSViewAbstract::GetBorderColor(const CommonColor& common
             ResourceParseUtils::ParseResColor(resObj, result);
             borderColors.rightColor = result;
         };
-        borderColors.AddResource("borderColor.right", commonColor.leftResObj, std::move(updateFunc));
+        borderColors.AddResource("borderColor.right", commonColor.rightResObj, std::move(updateFunc));
     }
     if (commonColor.topResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
@@ -5226,6 +5345,7 @@ void JSViewAbstract::ParseOuterBorderColor(const JSRef<JSVal>& args)
 
 void JSViewAbstract::JsBorderRadius(const JSCallbackInfo& info)
 {
+    ViewAbstractModel::GetInstance()->ResetResObj("borderRadius");
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING, JSCallbackInfoType::NUMBER,
         JSCallbackInfoType::OBJECT };
     auto jsVal = info[0];

@@ -72,6 +72,7 @@ public:
     virtual void CreateWithOuterBorderRadiusResourceObj(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithLightColorResourceObj(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithOuterBorderWidthResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ResetResObj(const std::string& key) {};
     
     // basic size
     virtual void SetWidth(const CalcDimension& width) = 0;
