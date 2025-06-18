@@ -1681,4 +1681,15 @@ void ViewAbstractModelNG::CreateWithResourceObj(
     CHECK_NULL_VOID(frameNode);
     CreateWithBoolResourceObj(frameNode, resourceObj);
 }
+
+void ViewAbstractModelNG::RemoveResObj(FrameNode* frameNode, const std::string& key)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
+}
 } // namespace OHOS::Ace::NG

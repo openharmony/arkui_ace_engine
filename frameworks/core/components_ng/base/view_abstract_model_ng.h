@@ -1939,6 +1939,7 @@ public:
     {
         ViewAbstract::SetCompositingFilter(frameNode, compositingFilter);
     }
+    static void RemoveResObj(FrameNode* frameNode, const std::string& key);
 
     static void SetAccessibilityVirtualNode(FrameNode* frameNode, std::function<RefPtr<NG::UINode>()>&& buildFunc);
     static void BindPopup(FrameNode* targetNode, const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode)
