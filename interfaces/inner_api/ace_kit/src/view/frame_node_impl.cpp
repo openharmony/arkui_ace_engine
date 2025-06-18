@@ -292,6 +292,9 @@ NodeHandle FrameNodeImpl::GetParentHandle()
     auto* frameNode = reinterpret_cast<AceNode*>(frameNode_);
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto parent = frameNode->GetParent();
+    while (parent != nullptr && !AceType::InstanceOf<FrameNode>(parent)) {
+        parent = parent->GetParent();
+    }
     CHECK_NULL_RETURN(parent, nullptr);
     return reinterpret_cast<NodeHandle>(OHOS::Ace::AceType::RawPtr(parent));
 }
