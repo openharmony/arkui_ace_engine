@@ -615,6 +615,10 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         SetIndicatorJumpIndex(jumpIndex_);
     }
     isVoluntarilyClear_ = false;
+    if (jumpIndexByUser_.has_value()) {
+        jumpIndex_ = jumpIndexByUser_;
+    }
+    jumpIndexByUser_.reset();
     if (jumpIndex_) {
         if ((jumpIndex_.value() < 0 || jumpIndex_.value() >= TotalCount()) && !IsLoop()) {
             jumpIndex_ = 0;
@@ -1897,6 +1901,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     StopSpringAnimationImmediately();
     StopIndicatorAnimation(true);
     jumpIndex_ = index;
+    jumpIndexByUser_ = index;
     AceAsyncTraceBeginCommercial(0, hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
     uiCastJumpIndex_ = index;
     MarkDirtyNodeSelf();
@@ -2198,7 +2203,7 @@ void SwiperPattern::ChangeIndex(int32_t index, SwiperAnimationMode mode)
             SetIndicatorChangeIndexStatus(false);
         }
 
-        SwipeToWithoutAnimation(GetLoopIndex(targetIndex));
+        SwipeToWithoutAnimation(CheckIndexRange(CheckTargetIndex(index)));
     } else if (mode == SwiperAnimationMode::DEFAULT_ANIMATION) {
         if (GetMaxDisplayCount() > 0) {
             SetIndicatorChangeIndexStatus(true);
@@ -2251,7 +2256,7 @@ void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
             SetIndicatorChangeIndexStatus(false);
         }
 
-        SwipeToWithoutAnimation(GetLoopIndex(targetIndex));
+        SwipeToWithoutAnimation(CheckIndexRange(CheckTargetIndex(index)));
     }
 }
 
