@@ -334,6 +334,8 @@ function fixNamespace(code: string) {
     code = code.replaceAll(/public static (hideComponentContent\(contentNode: KPointer)/g, "export function $1")
     code = code.replaceAll(/public static (showAllComponentContents\(\))/g, "export function $1")
     code = code.replaceAll(/public static (hideAllComponentContents\(\))/g, "export function $1")
+    code = code.replaceAll(/public static (showAlertBeforeBackPage\(options)/g, "export function $1")
+    code = code.replaceAll(/public static (hideAlertBeforeBackPage\(\))/g, "export function $1")
     code = code.replaceAll(/public static (get\(callbackId)/g, "export function $1")
     code = code.replaceAll(/static (get\(promiseId)/g, "export function $1")
     code = code.replaceAll(/public static (getSync\(value)/g, "export function $1")

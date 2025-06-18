@@ -28,15 +28,19 @@
 
 namespace OHOS::Ace::NG {
 
-ani_long ConstructCustomNode(ani_int id)
+ani_long ConstructCustomNode(ani_int id, std::function<void()>&& onPageShow, std::function<void()>&& onPageHide,
+    std::function<bool()>&& onBackPress)
 {
     std::string key = NG::ViewStackProcessor::GetInstance()->ProcessViewId(std::to_string(id));
-    auto customNode = NG::CustomNode::CreateCustomNode(id, key);
-    customNode->IncRefCount();
-    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "ConstructCustomNode: customNode %{public}p %{public}d",
-        AceType::RawPtr(customNode), id);
+    struct KoalaPageInfo info {
+        .onPageShowFunc = std::move(onPageShow),
+        .onPageHideFunc = std::move(onPageHide),
+        .onBackPressedFunc = std::move(onBackPress),
+        .jsViewName = key
+    };
+    auto customNode = NG::CustomNodeStatic::ConstructCustomNode(id, std::move(info));
     if (customNode) {
-        return reinterpret_cast<ani_long>(AceType::RawPtr(customNode));
+        return reinterpret_cast<ani_long>(customNode);
     }
     return 0;
 }

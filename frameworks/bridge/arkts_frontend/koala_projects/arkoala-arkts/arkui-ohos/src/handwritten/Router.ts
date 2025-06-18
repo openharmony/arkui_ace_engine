@@ -123,6 +123,10 @@ export interface Router {
     getEntryRootValue(): ComputableState<IncrementalNode>
 
     runStartPage(options: router.RouterOptions, builder: UserViewBuilder): void
+
+    showAlertBeforeBackPage(options: router.EnableAlertOptions): void
+
+    hideAlertBeforeBackPage(): void
 }
 
 class RouterImpl implements Router {
@@ -164,7 +168,7 @@ class RouterImpl implements Router {
         catch (e: Error) {
             InteropNativeModule._NativeLog("AceRouter: catch RunPage error: " + e)
         }
-        return new EntryPoint()
+        return undefined
     }
 
     UpdateVisiblePagePeerNode(node: PeerNode, index: number = -1): void {
@@ -293,7 +297,30 @@ class RouterImpl implements Router {
             RouterExtender.routerBack(options)
             return;
         }
-        RouterExtender.routerBack(options)
+        if (options === undefined) {
+            RouterExtender.routerBack(options)
+        } else {
+            let url = options.url
+            if (url === '/') {
+                return;
+            }
+            let removePages = 1;
+            let findPage = false;
+            for (let i = this.visiblePages.value.length - 2; i >= 0; i--) {
+                if (this.visiblePages.value[i].url === url) {
+                    findPage = true;
+                    break;
+                }
+                removePages++;
+            }
+            if (findPage) {
+                this.showingPageIndex = this.showingPageIndex - removePages
+                this.peerNodeList.splice(this.showingPageIndex + 1, removePages)
+                RouterExtender.routerBack(options)
+                this.visiblePages.splice(this.showingPageIndex + 1, removePages)
+                this.rootState.splice(this.showingPageIndex + 1, removePages)
+            }
+        }
     }
 
     clear(): void {
@@ -395,6 +422,14 @@ class RouterImpl implements Router {
         let newPage = new VisiblePage(builder, options.url, this.getPathInfo(options.url), options.params)
         this.entryPage = newPage;
         this.visiblePages.splice(0, 0, newPage)
+    }
+
+    showAlertBeforeBackPage(options: router.EnableAlertOptions): void {
+        RouterExtender.routerShowAlertBeforeBackPage(options);
+    }
+
+    hideAlertBeforeBackPage(): void {
+        RouterExtender.routerHideAlertBeforeBackPage();
     }
 }
 

@@ -424,6 +424,19 @@ void ArktsFrontend::ClearExtender()
     pageRouterManager_->Clear();
 }
 
+void ArktsFrontend::ShowAlertBeforeBackPageExtender(const std::string& url)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    auto dialogCallback = [](int32_t callbackType) {};
+    pageRouterManager_->EnableAlertBeforeBackPage(url, std::move(dialogCallback));
+}
+
+void ArktsFrontend::HideAlertBeforeBackPageExtender()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->DisableAlertBeforeBackPage();
+}
+
 bool ArktsFrontend::OnBackPressed()
 {
     CHECK_NULL_RETURN(pageRouterManager_, false);
