@@ -163,6 +163,9 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
   }
   dispose(): void {
     super.dispose();
+    if (this.nodePtr_) {
+      getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
+    }
     this.renderNode_?.dispose();
     FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
     this._nodeId = -1;

@@ -454,6 +454,9 @@ class JSBuilderNode extends BaseNode {
         return this._nativeRef?.getNativeHandle();
     }
     dispose() {
+        if (this.nodePtr_) {
+            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'BuilderNode', this.getFrameNode()?.getNodeType() || 'BuilderNode', this.nodePtr_);
+        }
         this.disposable_.dispose();
         this.frameNode_?.dispose();
     }
@@ -518,8 +521,14 @@ class NodeAdapter extends Disposable {
         this.nativePtr_ = this.nativeRef_.getNativeHandle();
         getUINativeModule().nodeAdapter.setCallbacks(this.nativePtr_, this, this.onAttachToNodePtr, this.onDetachFromNodePtr, this.onGetChildId !== undefined ? this.onGetChildId : undefined, this.onCreateChild !== undefined ? this.onCreateNewNodePtr : undefined, this.onDisposeChild !== undefined ? this.onDisposeNodePtr : undefined, this.onUpdateChild !== undefined ? this.onUpdateNodePtr : undefined);
     }
+    getNodeType() {
+        return getUINativeModule().nodeAdapter.getNodeType(this.nativePtr_);
+    }
     dispose() {
         super.dispose();
+        if (this.nativePtr_) {
+            getUINativeModule().nodeAdapter.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'NodeAdapter', this.getNodeType() || 'NodeAdapter', this.nativePtr_);
+        }
         let hostNode = this.attachedNodeRef_.deref();
         if (hostNode !== undefined) {
             NodeAdapter.detachNodeAdapter(hostNode);
@@ -901,6 +910,9 @@ class FrameNode extends Disposable {
     }
     dispose() {
         super.dispose();
+        if (this.nodePtr_) {
+            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
+        }
         this.renderNode_?.dispose();
         FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
         this._nodeId = -1;
@@ -2786,8 +2798,14 @@ class RenderNode extends Disposable {
         this.nodePtr = null;
         this._nativeRef = null;
     }
+    getNodeType() {
+        return getUINativeModule().renderNode.getNodeType(this.nodePtr);
+    }
     dispose() {
         super.dispose();
+        if (this.nodePtr) {
+            getUINativeModule().renderNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'RenderNode', this.getNodeType() || 'RenderNode', this.nodePtr);
+        }
         this._nativeRef?.dispose();
         this.baseNode_?.disposeNode();
         this._frameNode?.deref()?.resetNodePtr();
@@ -3042,6 +3060,9 @@ class ComponentContent extends Content {
         this.builderNode_.onRecycleWithBindObject();
     }
     dispose() {
+        if (this.getNodePtr()) {
+            getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'ComponentContent', this.getFrameNode()?.getNodeType() || 'ComponentContent', this.getNodePtr());
+        }
         this.disposable_.dispose();
         this.detachFromParent();
         this.attachNodeRef_?.dispose();

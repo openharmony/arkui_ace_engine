@@ -397,6 +397,9 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     return this._nativeRef?.getNativeHandle();
   }
   public dispose(): void {
+    if (this.nodePtr_) {
+      getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'BuilderNode', this.getFrameNode()?.getNodeType() || 'BuilderNode', this.nodePtr_);
+    }
     this.disposable_.dispose();
     this.frameNode_?.dispose();
   }

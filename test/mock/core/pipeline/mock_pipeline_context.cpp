@@ -1403,6 +1403,22 @@ void NG::PipelineContext::SetVsyncListener(VsyncCallbackFun vsync)
     vsyncListener_ = std::move(vsync);
 }
 
+void NG::PipelineContext::RegisterArkUIObjectLifecycleCallback(Kit::ArkUIObjectLifecycleCallback&& callback)
+{
+    objectLifecycleCallback_ = std::move(callback);
+}
+
+void NG::PipelineContext::UnregisterArkUIObjectLifecycleCallback()
+{
+    objectLifecycleCallback_ = nullptr;
+}
+
+void NG::PipelineContext::FireArkUIObjectLifecycleCallback(void* data)
+{
+    CHECK_NULL_VOID(objectLifecycleCallback_);
+    objectLifecycleCallback_(data);
+}
+
 void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& finishCallback, const std::optional<int32_t>& count) {}
 } // namespace OHOS::Ace

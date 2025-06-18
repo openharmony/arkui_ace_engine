@@ -312,4 +312,32 @@ ArkUINativeModuleValue NodeAdapterBridge::DetachNodeAdapter(ArkUIRuntimeCallInfo
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue NodeAdapterBridge::FireArkUIObjectLifecycleCallback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto defaultReturnValue = panda::JSValueRef::Undefined(vm);
+    CHECK_NULL_RETURN(vm, defaultReturnValue);
+    Local<JSValueRef> arg = runtimeCallInfo->GetCallArgRef(3);
+    CHECK_NULL_RETURN(!arg.IsNull() && arg->IsNativePointer(vm), defaultReturnValue);
+    auto* nativeNode = nodePtr(arg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, defaultReturnValue);
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, defaultReturnValue);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, defaultReturnValue);
+    void* data = static_cast<void*>(runtimeCallInfo);
+    context->FireArkUIObjectLifecycleCallback(data);
+    return defaultReturnValue;
+}
+
+ArkUINativeModuleValue NodeAdapterBridge::GetNodeType(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::StringRef::NewFromUtf8(vm, ""));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::StringRef::NewFromUtf8(vm, ""));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeType = GetArkUIFullNodeAPI()->getNodeAdapterAPI()->getNodeType(nativeNode);
+    return panda::StringRef::NewFromUtf8(vm, nodeType);
+}
 } // namespace OHOS::Ace::NG

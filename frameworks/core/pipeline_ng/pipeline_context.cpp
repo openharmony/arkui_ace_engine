@@ -6316,4 +6316,22 @@ const RefPtr<NodeRenderStatusMonitor>& PipelineContext::GetNodeRenderStatusMonit
     }
     return nodeRenderStatusMonitor_;
 }
+
+void PipelineContext::RegisterArkUIObjectLifecycleCallback(Kit::ArkUIObjectLifecycleCallback&& callback)
+{
+    LOGI("register arkui object lifecycle callback.");
+    objectLifecycleCallback_ = std::move(callback);
+}
+
+void PipelineContext::UnregisterArkUIObjectLifecycleCallback()
+{
+    LOGI("unregister arkui object lifecycle callback.");
+    objectLifecycleCallback_ = nullptr;
+}
+
+void PipelineContext::FireArkUIObjectLifecycleCallback(void* data)
+{
+    CHECK_NULL_VOID(objectLifecycleCallback_);
+    objectLifecycleCallback_(data);
+}
 } // namespace OHOS::Ace::NG

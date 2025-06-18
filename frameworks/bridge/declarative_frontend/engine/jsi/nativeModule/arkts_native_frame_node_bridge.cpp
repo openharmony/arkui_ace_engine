@@ -2888,4 +2888,22 @@ ArkUINativeModuleValue FrameNodeBridge::UpdateConfiguration(ArkUIRuntimeCallInfo
     GetArkUINodeModifiers()->getFrameNodeModifier()->updateConfiguration(nativeNode);
     return defaultReturnValue;
 }
+
+ArkUINativeModuleValue FrameNodeBridge::FireArkUIObjectLifecycleCallback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    auto defaultReturnValue = panda::JSValueRef::Undefined(vm);
+    CHECK_NULL_RETURN(vm, defaultReturnValue);
+    Local<JSValueRef> arg = runtimeCallInfo->GetCallArgRef(3);
+    CHECK_NULL_RETURN(!arg.IsNull() && arg->IsNativePointer(vm), defaultReturnValue);
+    auto* nativeNode = nodePtr(arg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, defaultReturnValue);
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, defaultReturnValue);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, defaultReturnValue);
+    void* data = static_cast<void*>(runtimeCallInfo);
+    context->FireArkUIObjectLifecycleCallback(data);
+    return defaultReturnValue;
+}
 } // namespace OHOS::Ace::NG

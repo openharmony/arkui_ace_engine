@@ -138,6 +138,57 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+void RegisterRenderNodeCommonAttributes(Local<panda::ObjectRef> renderNode, EcmaVM* vm)
+{
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createRenderNode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::CreateRenderNode));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "appendChild"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::AppendChild));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "insertChildAfter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::InsertChildAfter));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeChild"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::RemoveChild));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "clearChildren"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::ClearChildren));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setClipToFrame"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetClipToFrame));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRotation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetRotation));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShadowColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetShadowColor));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShadowOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetShadowOffset));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLabel"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetLabel));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShadowAlpha"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetShadowAlpha));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShadowElevation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetShadowElevation));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShadowRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetShadowRadius));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "invalidate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::Invalidate));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetScale));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetBackgroundColor));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPivot"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetPivot));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFrame"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetFrame));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetSize));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOpacity"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetOpacity));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTranslate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetTranslate));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPosition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetPosition));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMarkNodeGroup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetMarkNodeGroup));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNodeType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::GetNodeType));
+}
 void RegisterRenderNodeBorderAndMaskAttributes(Local<panda::ObjectRef> renderNode, EcmaVM* vm)
 {
     renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderStyle"),
@@ -1262,6 +1313,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NodeAdapterBridge::AttachNodeAdapter));
     nodeAdapter->Set(vm, panda::StringRef::NewFromUtf8(vm, "detachNodeAdapter"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NodeAdapterBridge::DetachNodeAdapter));
+    nodeAdapter->Set(vm, panda::StringRef::NewFromUtf8(vm, "fireArkUIObjectLifecycleCallback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NodeAdapterBridge::FireArkUIObjectLifecycleCallback));
+    nodeAdapter->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNodeType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NodeAdapterBridge::GetNodeType));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "nodeAdapter"), nodeAdapter);
 
     auto counter = panda::ObjectRef::New(vm);
@@ -4285,54 +4340,11 @@ void ArkUINativeModule::RegisterNodeContainerAttributes(Local<panda::ObjectRef> 
 void ArkUINativeModule::RegisterRenderNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto renderNode = panda::ObjectRef::New(vm);
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createRenderNode"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::CreateRenderNode));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "appendChild"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::AppendChild));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "insertChildAfter"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::InsertChildAfter));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeChild"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::RemoveChild));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "clearChildren"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::ClearChildren));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setClipToFrame"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetClipToFrame));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRotation"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetRotation));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShadowColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetShadowColor));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShadowOffset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetShadowOffset));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLabel"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetLabel));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShadowAlpha"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetShadowAlpha));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShadowElevation"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetShadowElevation));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShadowRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetShadowRadius));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "invalidate"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::Invalidate));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScale"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetScale));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetBackgroundColor));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPivot"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetPivot));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFrame"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetFrame));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetSize));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOpacity"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetOpacity));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTranslate"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetTranslate));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPosition"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetPosition));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMarkNodeGroup"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetMarkNodeGroup));
+    RegisterRenderNodeCommonAttributes(renderNode, vm);
     RegisterRenderNodeBorderAndMaskAttributes(renderNode, vm);
     RegisterRenderNodeShapeClipAttributes(renderNode, vm);
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "fireArkUIObjectLifecycleCallback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::FireArkUIObjectLifecycleCallback));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "renderNode"), renderNode);
 }
 
@@ -4528,6 +4540,8 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetInteractionEventBindingInfo));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "updateConfiguration"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::UpdateConfiguration));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "fireArkUIObjectLifecycleCallback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::FireArkUIObjectLifecycleCallback));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "frameNode"), frameNode);
 }
 

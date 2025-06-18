@@ -15,7 +15,9 @@
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#define private public
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
+#undef private
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "ui/base/ace_type.h"
 
@@ -336,4 +338,56 @@ HWTEST_F(UIContextImplTest, AddAfterLayoutTaskTest002, TestSize.Level1)
      */
     SUCCEED();
 }
+
+/**
+ * @tc.name: RegisterArkUIObjectLifecycleCallback001
+ * @tc.desc: Test register arkui object lifecycle callback to the normal task list
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextImplTest, RegisterArkUIObjectLifecycleCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize a flag to track task execution status
+     */
+    bool taskExecuted = false;
+
+    /**
+     * @tc.steps: step2. Add a task to the normal task list
+     */
+    uiContext_->RegisterArkUIObjectLifecycleCallback([&taskExecuted](void*) { taskExecuted = true; });
+    ASSERT_NE(uiContext_->context_, nullptr);
+    uiContext_->context_->FireArkUIObjectLifecycleCallback(nullptr);
+
+    /**
+     * @tc.expected: step3. Task should be added without errors or crashes
+     */
+    EXPECT_TRUE(taskExecuted);
+}
+
+/**
+ * @tc.name: UnregisterArkUIObjectLifecycleCallback001
+ * @tc.desc: Test unregister arkui object lifecycle callback to the normal task list
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextImplTest, UnregisterArkUIObjectLifecycleCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize a flag to track task execution status
+     */
+    bool taskExecuted = false;
+
+    /**
+     * @tc.steps: step2. Add a task to the normal task list
+     */
+    uiContext_->RegisterArkUIObjectLifecycleCallback([&taskExecuted](void*) { taskExecuted = true; });
+    uiContext_->UnregisterArkUIObjectLifecycleCallback();
+    ASSERT_NE(uiContext_->context_, nullptr);
+    uiContext_->context_->FireArkUIObjectLifecycleCallback(nullptr);
+
+    /**
+     * @tc.expected: step3. Task should be added without errors or crashes
+     */
+    EXPECT_FALSE(taskExecuted);
+}
+
 } // namespace OHOS::Ace::Kit

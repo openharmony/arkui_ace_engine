@@ -6551,6 +6551,7 @@ struct ArkUIRenderNodeModifier {
     void (*setPosition)(ArkUINodeHandle node, ArkUI_Float32 xAxis, ArkUI_Float32 yAxis, ArkUI_Int32 unitValue);
     void (*setMarkNodeGroup)(ArkUINodeHandle node, ArkUI_Bool isNodeGroup);
     void (*setTransformScale)(ArkUINodeHandle node, ArkUI_Float32 xF, ArkUI_Float32 yF);
+    ArkUI_CharPtr (*getNodeType)(ArkUINodeHandle node);
 };
 
 struct ArkUIFrameNodeModifier {
@@ -7194,6 +7195,7 @@ typedef struct {
     ArkUI_Bool (*attachHostNode)(ArkUINodeAdapterHandle handle, ArkUINodeHandle host);
     void (*detachHostNode)(ArkUINodeHandle host);
     ArkUINodeAdapterHandle (*getNodeAdapter)(ArkUINodeHandle host);
+    ArkUI_CharPtr (*getNodeType)(ArkUINodeHandle node);
 } ArkUINodeAdapterAPI;
 
 typedef struct {

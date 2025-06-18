@@ -428,6 +428,12 @@ ArkUINodeAdapterHandle GetNodeAdapter(ArkUINodeHandle host)
     return builder->GetHostHandle();
 }
 
+ArkUI_CharPtr GetNodeTypeInNodeAdapter(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, "");
+    return currentNode->GetTag().c_str();
+}
 } // namespace
 
 const ArkUINodeAdapterAPI* GetNodeAdapterAPI()
@@ -448,7 +454,8 @@ const ArkUINodeAdapterAPI* GetNodeAdapterAPI()
         .getAllItem = GetAllItem,
         .attachHostNode = AttachHostNode,
         .detachHostNode = DetachHostNode,
-        .getNodeAdapter = GetNodeAdapter
+        .getNodeAdapter = GetNodeAdapter,
+        .getNodeType = GetNodeTypeInNodeAdapter,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;
