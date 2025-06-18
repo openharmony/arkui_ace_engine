@@ -18,7 +18,17 @@
 #include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
-void EffectComponentModelNG::Create(bool independentLayer)
+void EffectComponentModelNG::Create()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::EFFECT_COMPONENT_ETS_TAG, nodeId);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::EFFECT_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<EffectComponentPattern>(); });
+    stack->Push(frameNode);
+}
+
+void EffectComponentModelNG::Create(NG::EffectLayer independentLayer)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -28,6 +38,7 @@ void EffectComponentModelNG::Create(bool independentLayer)
     });
     stack->Push(frameNode);
 }
+
 void EffectComponentModelNG::AlwaysSnapshot(bool enable)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

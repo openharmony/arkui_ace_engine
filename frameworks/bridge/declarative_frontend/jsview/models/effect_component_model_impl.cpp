@@ -16,7 +16,12 @@
 #include "bridge/declarative_frontend/jsview/models/effect_component_model_impl.h"
 
 namespace OHOS::Ace::Framework {
-void EffectComponentModelImpl::Create(bool independentLayer)
+void EffectComponentModelImpl::Create()
+{
+    // empty implementation
+}
+
+void EffectComponentModelImpl::Create(NG::EffectLayer independentLayer)
 {
     // empty implementation
 }

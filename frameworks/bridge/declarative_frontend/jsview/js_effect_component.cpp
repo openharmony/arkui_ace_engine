@@ -48,19 +48,26 @@ namespace OHOS::Ace::Framework {
 void JSEffectComponent::Create(const JSCallbackInfo& info)
 {
     if (info.Length() <= 0) {
-        EffectComponentModel::GetInstance()->Create(false);
+        EffectComponentModel::GetInstance()->Create();
         return;
     }
-    auto independentLayer = false;
+    auto independentLayer = -1;
     auto tmpInfo = info[0];
-    if (tmpInfo->IsObject()) {
-        auto obj = JSRef<JSObject>::Cast(tmpInfo);
-        auto independentLayerVal = obj->GetProperty("independentLayer");
-        if (independentLayerVal->IsBoolean()) {
-            independentLayer = independentLayerVal->ToBoolean();
-        }
+    if (!tmpInfo->IsObject()) {
+        EffectComponentModel::GetInstance()->Create();
+        return;
     }
-    EffectComponentModel::GetInstance()->Create(independentLayer);
+    auto obj = JSRef<JSObject>::Cast(tmpInfo);
+    auto independentLayerVal = obj->GetProperty("independentLayer");
+    if (independentLayerVal->IsNumber()) {
+        independentLayer = independentLayerVal->ToNumber<int32_t>();
+        if (independentLayer < static_cast<int32_t>(NG::EffectLayer::NONE) ||
+            independentLayer > static_cast<int32_t>(NG::EffectLayer::TEXT)) {
+            EffectComponentModel::GetInstance()->Create();
+            return;
+        }
+        EffectComponentModel::GetInstance()->Create(static_cast<NG::EffectLayer>(independentLayer));
+    }
 }
 
 void JSEffectComponent::AlwaysSnapshot(const JSCallbackInfo& info)

@@ -21,7 +21,8 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT EffectComponentModelNG : public OHOS::Ace::EffectComponentModel {
 public:
-    void Create(bool independentLayer) override;
+    void Create() override;
+    void Create(NG::EffectLayer independentLayer) override;
     void AlwaysSnapshot(bool enable) override;
 };
 } // namespace OHOS::Ace::NG

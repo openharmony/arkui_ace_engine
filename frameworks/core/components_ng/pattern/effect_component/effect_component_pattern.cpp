@@ -16,8 +16,16 @@
 #include "core/components_ng/pattern/effect_component/effect_component_pattern.h"
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "render_service_client/core/ui/rs_surface_node.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+static std::unordered_map<NG::EffectLayer, Rosen::TopLayerZOrder> effectLayerMap = {
+    { NG::EffectLayer::CHARGE, Rosen::TopLayerZOrder::CHARGE_3D_MOTION },
+    { NG::EffectLayer::TEXT, Rosen::TopLayerZOrder::CHARGE_ACTION_TEXT }
+};
+}
 
 void EffectComponentPattern::AlwaysSnapshot(bool enable) const
 {
@@ -37,7 +45,7 @@ bool EffectComponentPattern::OnDirtyLayoutWrapperSwap(
     CHECK_NULL_RETURN(pipiline, false);
     auto parent = host->GetParent();
     CHECK_NULL_RETURN(parent, false);
-    if (parent_ == parent || !independentLayer_) {
+    if (parent_ == parent || effectLayer_ == EffectLayer::NONE) {
         return false;
     }
     parent_ = parent;
@@ -54,6 +62,13 @@ bool EffectComponentPattern::OnDirtyLayoutWrapperSwap(
             CHECK_NULL_VOID(renderContext);
             auto rsNode = AceType::DynamicCast<NG::RosenRenderContext>(renderContext)->GetRSNode();
             CHECK_NULL_VOID(rsNode);
+            auto surfaceNode = rsNode->ReinterpretCastTo<RSSurfaceNode>();
+            CHECK_NULL_VOID(surfaceNode);
+            if (effectLayerMap.find(effectLayer_) == effectLayerMap.end()) {
+                return false;
+            }
+            Rosen::TopLayerZOrder zOrder = effectLayerMap[effectLayer_];
+            surfaceNode->SetCompositeLayer(zOrder);
         }
     });
 

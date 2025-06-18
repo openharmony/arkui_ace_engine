@@ -21,16 +21,17 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/render/adapter/rosen_render_context.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace::NG {
+enum class EffectLayer : int32_t { NONE = 0, CHARGE, TEXT };
+
 class ACE_EXPORT EffectComponentPattern : public Pattern {
     DECLARE_ACE_TYPE(EffectComponentPattern, Pattern);
 
 public:
     EffectComponentPattern() = default;
-    explicit EffectComponentPattern(bool independentLayer) : independentLayer_(independentLayer) {};
+    explicit EffectComponentPattern(EffectLayer effectLayer) : effectLayer_(effectLayer) {};
     ~EffectComponentPattern() override = default;
 
     void AlwaysSnapshot(bool enable) const;
@@ -47,7 +48,7 @@ public:
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        if (independentLayer_) {
+        if (effectLayer_ == EffectLayer::NONE) {
             return RenderContext::ContextParam { RenderContext::ContextType::COMPOSITE_COMPONENT };
         }
         return RenderContext::ContextParam { RenderContext::ContextType::EFFECT };
@@ -58,7 +59,7 @@ public:
 
 private:
     WeakPtr<UINode> parent_ = nullptr;
-    bool independentLayer_ = false;
+    EffectLayer effectLayer_ = EffectLayer::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(EffectComponentPattern);
 };
 } // namespace OHOS::Ace::NG
