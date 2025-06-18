@@ -892,6 +892,8 @@ public:
     bool IsHandlesShow() override;
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
+    void InitAiSelection(const Offset& globalOffset);
+    bool CheckAIPreviewMenuEnable();
     void CreateDragNode();
     float GetMaxSelectedWidth();
     void InitDragShadow(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& dragNode, bool isDragShadowNeeded,
@@ -1379,6 +1381,7 @@ private:
     Color GetUrlPressColor();
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
+    Offset ConvertGlobalToTextOffset(const Offset& globalOffset);
     void UpdateSelectMenuInfo(SelectMenuInfo& selectInfo);
     void HandleOnPaste() override;
     std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)> CreatePasteCallback();
@@ -1429,6 +1432,7 @@ private:
     void HandleLongPress(GestureEvent& info);
     void HandleDoubleClickOrLongPress(GestureEvent& info);
     void HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host);
+    bool HandleLongPressOnAiSelection();
     void StartVibratorByLongPress();
     std::string GetPositionSpansText(int32_t position, int32_t& startSpan);
     void FireOnSelect(int32_t selectStart, int32_t selectEnd);
