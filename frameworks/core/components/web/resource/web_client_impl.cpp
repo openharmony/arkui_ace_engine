@@ -1443,4 +1443,14 @@ void WebClientImpl::HideMagnifier()
     }
     delegate->HideMagnifier();
 }
+
+void WebClientImpl::OnPageTitleV2(const std::string &title, bool isRealTitle)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnReceivedTitle(title, isRealTitle);
+}
 } // namespace OHOS::Ace

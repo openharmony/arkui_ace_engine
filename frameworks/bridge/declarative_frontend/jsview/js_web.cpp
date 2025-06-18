@@ -2206,6 +2206,7 @@ JSRef<JSVal> LoadWebTitleReceiveEventToJSValue(const LoadWebTitleReceiveEvent& e
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("title", eventInfo.GetTitle());
+    obj->SetProperty("isRealTitle", eventInfo.GetIsRealTitle());
     return JSRef<JSVal>::Cast(obj);
 }
 
