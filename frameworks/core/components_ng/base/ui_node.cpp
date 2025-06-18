@@ -30,12 +30,9 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     if (AceChecker::IsPerformanceCheckEnabled()) {
         auto pos = EngineHelper::GetPositionOnJsCode();
         nodeInfo_ = std::make_unique<PerformanceCheckNode>();
-        const int CODE_ROW_INDEX = 1;
-        const int CODE_COL_INDEX = 2;
-        const int CODE_PAGE_PATH = 0;
-        nodeInfo_->codeRow = std::get<CODE_ROW_INDEX>(pos);
-        nodeInfo_->codeCol = std::get<CODE_COL_INDEX>(pos);
-        nodeInfo_->pagePath = std::get<CODE_PAGE_PATH>(pos);
+        nodeInfo_->codeRow = std::get<1>(pos);
+        nodeInfo_->codeCol = std::get<2>(pos);
+        nodeInfo_->pagePath = std::get<0>(pos);
     }
     apiVersion_ = Container::GetCurrentApiTargetVersion();
     if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
