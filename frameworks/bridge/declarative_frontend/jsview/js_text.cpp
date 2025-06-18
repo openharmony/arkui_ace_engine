@@ -883,7 +883,7 @@ void JSText::Create(const JSCallbackInfo& info)
         jsController->SetController(controller);
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
             auto styledString = jsController->GetStyledString();
-            if (styledString) {
+            if (styledString && controller) {
                 controller->SetStyledString(styledString, false);
                 jsController->ClearStyledString();
             }
