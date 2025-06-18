@@ -62,6 +62,7 @@ export class ArkCustomComponentRootPeer extends PeerNode {
             throw new Error("create CustomComponent fail"); 
         }
         const _peer  = new ArkCustomComponentRootPeer(_peerPtr, peerId, "CustomComponent", flags)
+        component.setPeer(_peer);
         return _peer
     }
 }
