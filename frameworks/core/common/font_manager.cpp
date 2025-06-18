@@ -366,7 +366,7 @@ bool FontManager::RegisterCallbackNG(
     }
     // Register callbacks for non-system fonts that are loaded through the graphic2d.
     FontInfo fontInfo;
-    if (!hasRegistered && !GetSystemFont(familyName, fontInfo)) {
+    if (!hasRegistered) {
         externalLoadCallbacks_.emplace(node, std::make_pair(familyName, callback));
     }
     if (!hasRegisterLoadFontCallback_) {
