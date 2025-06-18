@@ -24,6 +24,7 @@
 #include "utils/convert_utils.h"
 #include "web_module_methods.h"
 #include "custom_node_module.h"
+#include "waterFlowSection_module.h"
 
 namespace OHOS::Ace::Ani {
 
@@ -118,6 +119,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Invalidate",
             "J:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::Invalidate)
+        },
+        ani_native_function {
+            "_SetWaterFlowOptions",
+            "JLarkui/component/waterFlow/WaterFlowOptions;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowOptions)
         },
     };
 

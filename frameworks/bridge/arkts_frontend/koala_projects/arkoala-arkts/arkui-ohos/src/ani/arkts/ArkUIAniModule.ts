@@ -20,6 +20,7 @@ import common from "@ohos.app.ability.common"
 import { DrawContext } from "arkui/Graphics"
 import { DrawModifier } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
+import { WaterFlowOptions,WaterFlowSections } from "arkui/component"
 
 export class ArkUIAniModule {
     static {
@@ -54,4 +55,6 @@ export class ArkUIAniModule {
     native static _SetDrawModifier(ptr: KPointer, drawModifier: DrawModifier): void
     
     native static _Invalidate(ptr: KPointer): void
+
+    native static _SetWaterFlowOptions(ptr: KPointer, options: WaterFlowOptions): void
 }

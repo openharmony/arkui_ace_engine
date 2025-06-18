@@ -67,6 +67,9 @@ struct ArkUIAniContentSlotModifier {
     ArkUIContentSlot (*construct)(ArkUI_Int32 id);
     void (*setContentSlotOptions)(ArkUIContentSlot node, ArkUINodeContent value);
 };
+struct ArkUIAniWaterFlowModifier {
+    void (*setWaterFlowOptions)(ani_env* env, ani_long ptr, ani_object fnObj);
+};
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -75,6 +78,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniCustomNodeModifier* (*getCustomNodeAniModifier)();
     const ArkUIAniContentSlotModifier* (*getContentSlotAniModifier)();
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
+    const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);
