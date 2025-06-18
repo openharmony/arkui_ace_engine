@@ -193,8 +193,12 @@ HWTEST_P(ScrollControllerTestNg, ScrollPage001, TestSize.Level1)
      * @tc.steps: step1. ScrollPage up with animation
      * @tc.expected: Scroll up with animation
      */
+    pattern_->SetIsOverScroll(true);
+    pattern_->SetCanStayOverScroll(true);
     ScrollPage(true, smooth);
     EXPECT_TRUE(TickPosition(0));
+    EXPECT_FALSE(pattern_->GetIsOverScroll());
+    EXPECT_FALSE(pattern_->GetCanStayOverScroll());
 }
 
 INSTANTIATE_TEST_SUITE_P(Smooth, ScrollControllerTestNg, testing::Bool());
@@ -291,8 +295,12 @@ HWTEST_F(ScrollControllerTestNg, ScrollToEdge001, TestSize.Level1)
      * @tc.steps: step2. SCROLL_TOP
      * @tc.expected: Scroll to top with animation
      */
+    pattern_->SetIsOverScroll(true);
+    pattern_->SetCanStayOverScroll(true);
     ScrollToEdge(ScrollEdgeType::SCROLL_TOP, 200.f);
     EXPECT_TRUE(Position(0));
+    EXPECT_FALSE(pattern_->GetIsOverScroll());
+    EXPECT_FALSE(pattern_->GetCanStayOverScroll());
 }
 
 /**
