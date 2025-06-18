@@ -2042,7 +2042,10 @@ void SheetPresentationPattern::SetUIFirstSwitch(bool isFirstTransition, bool isN
 void SheetPresentationPattern::SetWindowUseImplicitAnimation(FrameNode* sheetNode, bool useImplicit)
 {
     CHECK_NULL_VOID(sheetNode);
-    if (IsShowInSubWindow()) {
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (sheetStyle.showInSubWindow.value_or(false)) {
         TAG_LOGD(AceLogTag::ACE_SHEET, "UseImplicitAnimation ShowInSubWindow");
         return;
     }
