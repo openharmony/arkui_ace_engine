@@ -74,7 +74,9 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
     if (!frameNode.Invalid()) {
         auto host = frameNode.Upgrade();
         CHECK_NULL_RETURN(host, false);
-        TransformForRecognizer(localPoint, frameNode, false, isPostEventResult_, event.postEventNodeId);
+        bool needPostEvent = isPostEventResult_ || event.passThrough;
+        TransformForRecognizer(
+            localPoint, frameNode, false, needPostEvent, event.postEventNodeId);
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         auto paintRect = renderContext->GetPaintRectWithoutTransform();
@@ -203,10 +205,11 @@ void ClickRecognizer::OnAccepted()
         touchPoint = touchPoints_.begin()->second;
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
-        isPostEventResult_, touchPoint.postEventNodeId);
-    TransformForRecognizer(localPoint, GetAttachedNode(), false,
-        isPostEventResult_, touchPoint.postEventNodeId);
+    bool needPostEvent = isPostEventResult_ || touchPoint.passThrough;
+    localMatrix_ = NGGestureRecognizer::GetTransformMatrix(
+        GetAttachedNode(), false, needPostEvent, touchPoint.postEventNodeId);
+    TransformForRecognizer(
+        localPoint, GetAttachedNode(), false, needPostEvent, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     if (onClick_) {
         ClickInfo info = GetClickInfo();
@@ -500,8 +503,9 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
         }
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    TransformForRecognizer(localPoint, GetAttachedNode(), false,
-        isPostEventResult_, touchPoint.postEventNodeId);
+    bool needPostEvent = isPostEventResult_ || touchPoint.passThrough;
+    TransformForRecognizer(
+        localPoint, GetAttachedNode(), false, needPostEvent, touchPoint.postEventNodeId);
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
     info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
