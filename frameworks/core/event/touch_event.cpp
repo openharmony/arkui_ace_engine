@@ -73,6 +73,18 @@ TouchEvent& TouchEvent::SetScreenY(float screenY)
     return *this;
 }
 
+TouchEvent& TouchEvent::SetGlobalDisplayX(double globalDisplayX)
+{
+    this->globalDisplayX = globalDisplayX;
+    return *this;
+}
+
+TouchEvent& TouchEvent::SetGlobalDisplayY(double globalDisplayY)
+{
+    this->globalDisplayY = globalDisplayY;
+    return *this;
+}
+
 TouchEvent& TouchEvent::SetTime(TimeStamp time)
 {
     this->time = time;
@@ -252,6 +264,8 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.y = (y - offsetY) / scale;
     event.screenX = (screenX - offsetX) / scale;
     event.screenY = (screenY - offsetY) / scale;
+    event.globalDisplayX = (globalDisplayX - offsetX) / scale;
+    event.globalDisplayY = (globalDisplayY - offsetY) / scale;
     event.type = type;
     event.pullType = pullType;
     event.time = time;
@@ -361,6 +375,11 @@ Offset TouchEvent::GetScreenOffset() const
     return Offset(screenX, screenY);
 }
 
+Offset TouchEvent::GetGlobalDisplayOffset() const
+{
+    return Offset(globalDisplayX, globalDisplayY);
+}
+
 void TouchEvent::CovertId()
 {
     if ((sourceType == SourceType::TOUCH) && (sourceTool == SourceTool::PEN)) {
@@ -394,6 +413,8 @@ TouchEvent TouchEvent::CreateScalePoint(float scale) const
         point.y = point.y / scale;
         point.screenX = point.screenX / scale;
         point.screenY = point.screenY / scale;
+        point.globalDisplayX = point.globalDisplayX / scale;
+        point.globalDisplayY = point.globalDisplayY / scale;
     });
     return CloneWith(scale);
 }
@@ -407,6 +428,8 @@ TouchEvent TouchEvent::UpdateScalePoint(float scale, float offsetX, float offset
             point.y = point.y - offsetY;
             point.screenX = point.screenX - offsetX;
             point.screenY = point.screenY - offsetY;
+            point.globalDisplayX = point.globalDisplayX - offsetX;
+            point.globalDisplayY = point.globalDisplayY - offsetY;
         });
         return CloneWith(1, offsetX, offsetY, pointId);
     }
@@ -416,6 +439,8 @@ TouchEvent TouchEvent::UpdateScalePoint(float scale, float offsetX, float offset
         point.y = (point.y - offsetY) / scale;
         point.screenX = (point.screenX - offsetX) / scale;
         point.screenY = (point.screenY - offsetY) / scale;
+        point.globalDisplayX = (point.globalDisplayX - offsetX) / scale;
+        point.globalDisplayY = (point.globalDisplayY - offsetY) / scale;
     });
     return CloneWith(scale, offsetX, offsetY, pointId);
 }
@@ -427,6 +452,8 @@ TouchEvent TouchEvent::UpdatePointers() const
         .y = y,
         .screenX = screenX,
         .screenY = screenY,
+        .globalDisplayX = globalDisplayX,
+        .globalDisplayY = globalDisplayY,
         .downTime = time,
         .size = size,
         .force = force,
@@ -438,6 +465,8 @@ TouchEvent TouchEvent::UpdatePointers() const
         .SetY(y)
         .SetScreenX(screenX)
         .SetScreenY(screenY)
+        .SetGlobalDisplayX(globalDisplayX)
+        .SetGlobalDisplayY(globalDisplayY)
         .SetType(type)
         .SetTime(time)
         .SetSize(size)
@@ -491,6 +520,26 @@ void TouchCallBackInfo::SetScreenY(float screenY)
 float TouchCallBackInfo::GetScreenY() const
 {
     return screenY_;
+}
+
+void TouchCallBackInfo::SetGlobalDisplayX(double globalDisplayX)
+{
+    globalDisplayX_ = globalDisplayX;
+}
+
+double TouchCallBackInfo::GetGlobalDisplayX() const
+{
+    return globalDisplayX_;
+}
+
+void TouchCallBackInfo::SetGlobalDisplayY(double globalDisplayY)
+{
+    globalDisplayY_ = globalDisplayY;
+}
+
+double TouchCallBackInfo::GetGlobalDisplayY() const
+{
+    return globalDisplayY_;
 }
 
 void TouchCallBackInfo::SetLocalX(float localX)
@@ -548,6 +597,12 @@ TouchLocationInfo& TouchLocationInfo::SetLocalLocation(const Offset& localLocati
 TouchLocationInfo& TouchLocationInfo::SetScreenLocation(const Offset& screenLocation)
 {
     screenLocation_ = screenLocation;
+    return *this;
+}
+
+TouchLocationInfo& TouchLocationInfo::SetGlobalDisplayLocation(const Offset& globalDisplayLocation)
+{
+    globalDisplayLocation_ = globalDisplayLocation;
     return *this;
 }
 
@@ -906,6 +961,8 @@ TouchEvent TouchEventInfo::ConvertToTouchEvent() const
         touchEvent.screenY = static_cast<float>(changedTouches_.front().GetScreenLocation().GetY());
         touchEvent.localX = static_cast<float>(changedTouches_.front().GetLocalLocation().GetX());
         touchEvent.localY = static_cast<float>(changedTouches_.front().GetLocalLocation().GetY());
+        touchEvent.globalDisplayX = static_cast<double>(changedTouches_.front().GetGlobalDisplayLocation().GetX());
+        touchEvent.globalDisplayY = static_cast<double>(changedTouches_.front().GetGlobalDisplayLocation().GetY());
         touchEvent.id = changedTouches_.front().GetFingerId();
         touchEvent.force = changedTouches_.front().GetForce();
         touchEvent.type = changedTouches_.front().GetTouchType();

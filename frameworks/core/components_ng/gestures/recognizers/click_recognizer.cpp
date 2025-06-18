@@ -152,6 +152,7 @@ ClickInfo ClickRecognizer::GetClickInfo()
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
+    info.SetGlobalDisplayLocation(touchPoint.GetGlobalDisplayOffset());
     info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(localOffset);
     info.SetSourceDevice(deviceType_);
     info.SetDeviceId(deviceId_);
@@ -509,6 +510,7 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
     info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
+    info.SetGlobalDisplayLocation(touchPoint.GetGlobalDisplayOffset());
     info.SetSourceDevice(deviceType_);
     info.SetDeviceId(deviceId_);
     info.SetTarget(GetEventTarget().value_or(EventTarget()));

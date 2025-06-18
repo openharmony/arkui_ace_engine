@@ -2064,6 +2064,7 @@ HoverInfo TextPattern::ConvertHoverInfoFromMouseInfo(const MouseInfo& info) cons
     result.SetGlobalLocation(info.GetGlobalLocation());
     result.SetScreenLocation(info.GetScreenLocation());
     result.SetLocalLocation(info.GetLocalLocation());
+    result.SetGlobalDisplayLocation(info.GetGlobalDisplayLocation());
     result.SetTimeStamp(info.GetTimeStamp());
     result.SetTarget(info.GetTarget());
     result.SetDeviceId(info.GetDeviceId());

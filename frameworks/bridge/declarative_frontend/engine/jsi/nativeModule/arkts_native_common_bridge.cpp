@@ -7399,7 +7399,9 @@ Local<panda::ObjectRef> CommonBridge::CreateTapGestureInfo(EcmaVM* vm, GestureEv
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& screenLocation = fingerInfo.screenLocation_;
-    const char* keys[] = { "x", "y", "windowX", "windowY", "displayX", "displayY"};
+    const OHOS::Ace::Offset& globalDisplayLocation = fingerInfo.globalDisplayLocation_;
+    const char* keys[] = { "x", "y", "windowX", "windowY", "displayX", "displayY",
+                           "globalDisplayX", "globalDisplayY"};
     Local<JSValueRef> values[] = {
         panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX())),
         panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY())),
@@ -7407,6 +7409,8 @@ Local<panda::ObjectRef> CommonBridge::CreateTapGestureInfo(EcmaVM* vm, GestureEv
         panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY())),
         panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX())),
         panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY())),
     };
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
@@ -7490,8 +7494,10 @@ Local<panda::ObjectRef> CommonBridge::CreateFingerInfo(EcmaVM* vm, const FingerI
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
     const OHOS::Ace::Offset& screenLocation = fingerInfo.screenLocation_;
+    const OHOS::Ace::Offset& globalDisplayLocation  = fingerInfo.globalDisplayLocation_;
     double density = PipelineBase::GetCurrentDensity();
-    const char* keys[] = { "id", "globalX", "globalY", "localX", "localY", "displayX", "displayY", "hand" };
+    const char* keys[] = { "id", "globalX", "globalY", "localX", "localY", "displayX", "displayY",
+                           "globalDisplayX", "globalDisplayY", "hand" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, fingerInfo.fingerId_),
         panda::NumberRef::New(vm, globalLocation.GetX() / density),
         panda::NumberRef::New(vm, globalLocation.GetY() / density),
@@ -7499,6 +7505,8 @@ Local<panda::ObjectRef> CommonBridge::CreateFingerInfo(EcmaVM* vm, const FingerI
         panda::NumberRef::New(vm, localLocation.GetY() / density),
         panda::NumberRef::New(vm, screenLocation.GetX() / density),
         panda::NumberRef::New(vm, screenLocation.GetY() / density),
+        panda::NumberRef::New(vm, globalDisplayLocation.GetX() / density),
+        panda::NumberRef::New(vm, globalDisplayLocation.GetY() / density),
         panda::NumberRef::New(vm, fingerInfo.operatingHand_) };
         return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
@@ -8768,11 +8776,12 @@ ArkUINativeModuleValue CommonBridge::ResetOnBlur(ArkUIRuntimeCallInfo* runtimeCa
 Local<panda::ObjectRef> CommonBridge::CreateHoverInfo(EcmaVM* vm, const HoverInfo& hoverInfo)
 {
     const char* keys[] = { "stopPropagation", "getModifierKeyState", "timestamp", "source", "target", "deviceId",
-        "targetDisplayId", "displayX", "displayY", "windowX", "windowY", "x", "y" };
+        "targetDisplayId", "displayX", "displayY", "windowX", "windowY", "x", "y", "globalDisplayX", "globalDisplayY" };
     double density = PipelineBase::GetCurrentDensity();
     const Offset& globalOffset = hoverInfo.GetGlobalLocation();
     const Offset& localOffset = hoverInfo.GetLocalLocation();
     const Offset& screenOffset = hoverInfo.GetScreenLocation();
+    const Offset& globalDisplayOffset = hoverInfo.GetGlobalDisplayLocation();
     Local<JSValueRef> values[] = { panda::FunctionRef::New(vm, Framework::JsStopPropagation),
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
         panda::NumberRef::New(vm, static_cast<double>(hoverInfo.GetTimeStamp().time_since_epoch().count())),
@@ -8784,7 +8793,9 @@ Local<panda::ObjectRef> CommonBridge::CreateHoverInfo(EcmaVM* vm, const HoverInf
         panda::NumberRef::New(vm, density != 0 ? globalOffset.GetX() / density : 0),
         panda::NumberRef::New(vm, density != 0 ? globalOffset.GetY() / density : 0),
         panda::NumberRef::New(vm, density != 0 ? localOffset.GetX() / density : 0),
-        panda::NumberRef::New(vm, density != 0 ? localOffset.GetY() / density : 0) };
+        panda::NumberRef::New(vm, density != 0 ? localOffset.GetY() / density : 0),
+        panda::NumberRef::New(vm, density != 0 ? globalDisplayOffset.GetX() / density : 0),
+        panda::NumberRef::New(vm, density != 0 ? globalDisplayOffset.GetY() / density : 0) };
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
 
@@ -9057,8 +9068,10 @@ Local<panda::ObjectRef> CommonBridge::CreateTapGestureLocationInfo(
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& screenLocation = fingerInfo.screenLocation_;
+    const OHOS::Ace::Offset& globalDisplayLocation = fingerInfo.globalDisplayLocation_;
     double density = PipelineBase::GetCurrentDensity();
-    const char* keys[] = { "x", "y", "windowX", "windowY", "displayX", "displayY"};
+    const char* keys[] = { "x", "y", "windowX", "windowY", "displayX", "displayY",
+                           "globalDisplayX", "globalDisplayY"};
     density = density != 0 ? density : 1;
     Local<JSValueRef> values[] = {
         panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX())),
@@ -9067,6 +9080,8 @@ Local<panda::ObjectRef> CommonBridge::CreateTapGestureLocationInfo(
         panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY())),
         panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX())),
         panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY())),
     };
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
@@ -10091,10 +10106,12 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo& 
     const Offset& globalOffset = info.GetGlobalLocation();
     const Offset& localOffset = info.GetLocalLocation();
     const Offset& screenOffset = info.GetScreenLocation();
+    const Offset& globalDisplayOffset = info.GetGlobalDisplayLocation();
     double density = PipelineBase::GetCurrentDensity();
     const char* keys[] = { "action", "displayX", "displayY", "windowX", "windowY", "x", "y", "scrollStep",
         "propagation", "getHorizontalAxisValue", "getVerticalAxisValue", "target", "timestamp", "source", "pressure",
-        "tiltX", "tiltY", "sourceTool", "deviceId", "getModifierKeyState", "axisVertical", "axisHorizontal" };
+        "tiltX", "tiltY", "sourceTool", "deviceId", "getModifierKeyState", "axisVertical", "axisHorizontal",
+        "globalDisplayX", "globalDisplayY" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetAction())),
         panda::NumberRef::New(vm, screenOffset.GetX() / density),
         panda::NumberRef::New(vm, screenOffset.GetY() / density),
@@ -10115,7 +10132,9 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo& 
         panda::NumberRef::New(vm, info.GetDeviceId()),
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
         panda::NumberRef::New(vm, info.GetVerticalAxis()),
-        panda::NumberRef::New(vm, info.GetHorizontalAxis()) };
+        panda::NumberRef::New(vm, info.GetHorizontalAxis()),
+        panda::NumberRef::New(vm, globalDisplayOffset.GetX() / density),
+        panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
     obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));

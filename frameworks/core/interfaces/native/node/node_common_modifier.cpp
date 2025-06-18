@@ -7090,6 +7090,8 @@ ArkUI_Int32 PostTouchEvent(ArkUINodeHandle node, const ArkUITouchEvent* arkUITou
         point.y = touchPointes[index].nodeY;
         point.screenX = touchPointes[index].screenX * density;
         point.screenY = touchPointes[index].screenY * density;
+        point.globalDisplayX = touchPointes[index].globalDisplayX * density;
+        point.globalDisplayY = touchPointes[index].globalDisplayY * density;
         point.originalId = touchPointes[index].id;
         std::chrono::nanoseconds downNanoseconds(static_cast<int64_t>(touchPointes[index].pressedTime));
         TimeStamp downTime(downNanoseconds);
@@ -7102,10 +7104,39 @@ ArkUI_Int32 PostTouchEvent(ArkUINodeHandle node, const ArkUITouchEvent* arkUITou
     touchEvent.y = arkUITouchEvent->actionTouchPoint.nodeY;
     touchEvent.screenX = arkUITouchEvent->actionTouchPoint.screenX * density;
     touchEvent.screenY = arkUITouchEvent->actionTouchPoint.screenY * density;
+    touchEvent.globalDisplayX = arkUITouchEvent->actionTouchPoint.globalDisplayX * density;
+    touchEvent.globalDisplayY = arkUITouchEvent->actionTouchPoint.globalDisplayY * density;
     touchEvent.originalId = arkUITouchEvent->actionTouchPoint.id;
     MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEvent->rawPointerEvent);
     NG::SetPostPointerEvent(pointerEvent, touchEvent);
     return PostTouchEventToFrameNode(node, touchEvent);
+}
+
+void SetSingleHistoryEvent(std::array<ArkUIHistoryTouchEvent, MAX_HISTORY_EVENT_COUNT>& allHistoryEvents,
+    const ArkUITouchEvent* arkUITouchEvent, size_t index)
+{
+    if (!arkUITouchEvent) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "SetSingleHistoryEvent touchevent is null!");
+        return;
+    }
+    if (index >= MAX_HISTORY_EVENT_COUNT) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "SetSingleHistoryEvent index >= MAX!");
+        return;
+    }
+    allHistoryEvents[index].action = arkUITouchEvent->historyEvents[index].action;
+    allHistoryEvents[index].sourceType = arkUITouchEvent->historyEvents[index].sourceType;
+    allHistoryEvents[index].timeStamp = arkUITouchEvent->historyEvents[index].timeStamp;
+    allHistoryEvents[index].actionTouchPoint.nodeX = arkUITouchEvent->historyEvents[index].actionTouchPoint.nodeX;
+    allHistoryEvents[index].actionTouchPoint.nodeY = arkUITouchEvent->historyEvents[index].actionTouchPoint.nodeY;
+    allHistoryEvents[index].actionTouchPoint.windowX = arkUITouchEvent->historyEvents[index].actionTouchPoint.windowX;
+    allHistoryEvents[index].actionTouchPoint.windowY = arkUITouchEvent->historyEvents[index].actionTouchPoint.windowY;
+    allHistoryEvents[index].actionTouchPoint.screenX = arkUITouchEvent->historyEvents[index].actionTouchPoint.screenX;
+    allHistoryEvents[index].actionTouchPoint.screenY = arkUITouchEvent->historyEvents[index].actionTouchPoint.screenY;
+    allHistoryEvents[index].actionTouchPoint.globalDisplayX =
+        arkUITouchEvent->historyEvents[index].actionTouchPoint.globalDisplayX;
+    allHistoryEvents[index].actionTouchPoint.globalDisplayY =
+        arkUITouchEvent->historyEvents[index].actionTouchPoint.globalDisplayY;
+    allHistoryEvents[index].actionTouchPoint.pressure = arkUITouchEvent->historyEvents[index].actionTouchPoint.pressure;
 }
 
 void SetHistoryTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITouchEvent* arkUITouchEvent)
@@ -7114,17 +7145,7 @@ void SetHistoryTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITou
     std::array<std::array<ArkUITouchPoint, MAX_POINTS>, MAX_HISTORY_EVENT_COUNT> allHistoryPoints;
     if (arkUITouchEvent->historySize > 0) {
         for (size_t i = 0; i < arkUITouchEvent->historySize; i++) {
-            allHistoryEvents[i].action = arkUITouchEvent->historyEvents[i].action;
-            allHistoryEvents[i].sourceType = arkUITouchEvent->historyEvents[i].sourceType;
-            allHistoryEvents[i].timeStamp = arkUITouchEvent->historyEvents[i].timeStamp;
-            allHistoryEvents[i].actionTouchPoint.nodeX = arkUITouchEvent->historyEvents[i].actionTouchPoint.nodeX;
-            allHistoryEvents[i].actionTouchPoint.nodeY = arkUITouchEvent->historyEvents[i].actionTouchPoint.nodeY;
-            allHistoryEvents[i].actionTouchPoint.windowX = arkUITouchEvent->historyEvents[i].actionTouchPoint.windowX;
-            allHistoryEvents[i].actionTouchPoint.windowY = arkUITouchEvent->historyEvents[i].actionTouchPoint.windowY;
-            allHistoryEvents[i].actionTouchPoint.screenX = arkUITouchEvent->historyEvents[i].actionTouchPoint.screenX;
-            allHistoryEvents[i].actionTouchPoint.screenY = arkUITouchEvent->historyEvents[i].actionTouchPoint.screenY;
-            allHistoryEvents[i].actionTouchPoint.pressure =
-                arkUITouchEvent->historyEvents[i].actionTouchPoint.pressure;
+            SetSingleHistoryEvent(allHistoryEvents, arkUITouchEvent, i);
             for (size_t j = 0; j < arkUITouchEvent->historyEvents[i].touchPointSize; j++) {
                 allHistoryPoints[i][j].id = arkUITouchEvent->historyEvents[i].touchPointes[j].id;
                 allHistoryPoints[i][j].nodeX = arkUITouchEvent->historyEvents[i].touchPointes[j].nodeX;
@@ -7133,6 +7154,10 @@ void SetHistoryTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITou
                 allHistoryPoints[i][j].windowY = arkUITouchEvent->historyEvents[i].touchPointes[j].windowY;
                 allHistoryPoints[i][j].screenX = arkUITouchEvent->historyEvents[i].touchPointes[j].screenX;
                 allHistoryPoints[i][j].screenY = arkUITouchEvent->historyEvents[i].touchPointes[j].screenY;
+                allHistoryPoints[i][j].globalDisplayX =
+                    arkUITouchEvent->historyEvents[i].touchPointes[j].globalDisplayX;
+                allHistoryPoints[i][j].globalDisplayY =
+                    arkUITouchEvent->historyEvents[i].touchPointes[j].globalDisplayY;
                 allHistoryPoints[i][j].contactAreaWidth =
                     arkUITouchEvent->historyEvents[i].touchPointes[j].contactAreaWidth;
                 allHistoryPoints[i][j].contactAreaHeight =
@@ -8567,6 +8592,7 @@ void TriggerOnClickEvent(void* extraParam, int32_t nodeId, bool usePx, GestureEv
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
+    Offset globalDisplayOffset = info.GetGlobalDisplayLocation();
     ArkUINodeEvent event;
     event.kind = ArkUIEventCategory::CLICK_EVENT;
     event.extraParam = reinterpret_cast<intptr_t>(extraParam);
@@ -8582,6 +8608,10 @@ void TriggerOnClickEvent(void* extraParam, int32_t nodeId, bool usePx, GestureEv
         usePx ? screenOffset.GetX() : PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX());
     event.clickEvent.displayY =
         usePx ? screenOffset.GetY() : PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY());
+    event.clickEvent.globalDisplayX =
+        usePx ? globalDisplayOffset.GetX() : PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX());
+    event.clickEvent.globalDisplayY =
+        usePx ? globalDisplayOffset.GetY() : PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY());
     SetOnClickInfo(event, info, usePx);
     SendArkUISyncEvent(&event);
 }
@@ -8843,6 +8873,7 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     const OHOS::Ace::Offset& globalLocation = locationInfo.GetGlobalLocation();
     const OHOS::Ace::Offset& localLocation = locationInfo.GetLocalLocation();
     const OHOS::Ace::Offset& screenLocation = locationInfo.GetScreenLocation();
+    const OHOS::Ace::Offset& globalDisplayLocation = locationInfo.GetGlobalDisplayLocation();
     touchPoint.id = locationInfo.GetFingerId();
     double density = usePx ? 1 : PipelineBase::GetCurrentDensity();
     touchPoint.nodeX = localLocation.GetX() / density;
@@ -8851,6 +8882,8 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     touchPoint.windowY = globalLocation.GetY() / density;
     touchPoint.screenX = screenLocation.GetX() / density;
     touchPoint.screenY = screenLocation.GetY() / density;
+    touchPoint.globalDisplayX = globalDisplayLocation.GetX() / density;
+    touchPoint.globalDisplayY = globalDisplayLocation.GetY() / density;
     touchPoint.pressure = locationInfo.GetForce();
     touchPoint.contactAreaWidth = locationInfo.GetSize();
     touchPoint.contactAreaHeight = locationInfo.GetSize();
@@ -8887,6 +8920,10 @@ void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
             historyLoaction.GetScreenLocation().GetX() / density;
         points[i].screenY = NearEqual(density, 0.0) ? 0.0f :
             historyLoaction.GetScreenLocation().GetY() / density;
+        points[i].globalDisplayX = NearEqual(density, 0.0) ? 0.0 :
+            historyLoaction.GetGlobalDisplayLocation().GetX() / density;
+        points[i].globalDisplayY = NearEqual(density, 0.0) ? 0.0 :
+            historyLoaction.GetGlobalDisplayLocation().GetY() / density;
         points[i].contactAreaWidth = touchPoint.size;
         points[i].contactAreaHeight = touchPoint.size;
         points[i].pressure = touchPoint.force;
@@ -9004,6 +9041,8 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
                     NearEqual(density, 0.0) ? 0.0f : (*historyLoacationIterator).GetGlobalLocation().GetY() / density;
                 allHistoryEvents[i].actionTouchPoint.screenX = tempTouchEvent.screenX;
                 allHistoryEvents[i].actionTouchPoint.screenY = tempTouchEvent.screenY;
+                allHistoryEvents[i].actionTouchPoint.globalDisplayX = tempTouchEvent.globalDisplayX;
+                allHistoryEvents[i].actionTouchPoint.globalDisplayY = tempTouchEvent.globalDisplayY;
                 allHistoryEvents[i].actionTouchPoint.pressure = tempTouchEvent.force;
                 ConvertTouchPointsToPoints(
                     tempTouchEvent.pointers, allHistoryPoints[i], *historyLoacationIterator, usePx);
@@ -9183,6 +9222,8 @@ void SetOnHoverMove(ArkUINodeHandle node, void* extraParam)
         event.touchEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY();
         event.touchEvent.actionTouchPoint.tiltX = info.GetTiltX().value_or(0.0f);
         event.touchEvent.actionTouchPoint.tiltY = info.GetTiltY().value_or(0.0f);
+        event.touchEvent.actionTouchPoint.globalDisplayX = info.GetGlobalDisplayLocation().GetX();
+        event.touchEvent.actionTouchPoint.globalDisplayY = info.GetGlobalDisplayLocation().GetY();
         event.touchEvent.actionTouchPoint.rollAngle = info.GetRollAngle().value_or(0.0f);
         event.touchEvent.deviceId = info.GetDeviceId();
         event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
@@ -9246,6 +9287,8 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
         event.mouseEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY() / density;
         event.mouseEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX() / density;
         event.mouseEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
+        event.mouseEvent.actionTouchPoint.globalDisplayX = info.GetGlobalDisplayLocation().GetX() / density;
+        event.mouseEvent.actionTouchPoint.globalDisplayY = info.GetGlobalDisplayLocation().GetY() / density;
         event.mouseEvent.rawDeltaX = info.GetRawDeltaX() / density;
         event.mouseEvent.rawDeltaY = info.GetRawDeltaY() / density;
         event.mouseEvent.targetDisplayId = info.GetTargetDisplayId();
@@ -9313,6 +9356,8 @@ void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
         event.axisEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY() / density;
         event.axisEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX() / density;
         event.axisEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
+        event.axisEvent.actionTouchPoint.globalDisplayX = info.GetGlobalDisplayLocation().GetX() / density;
+        event.axisEvent.actionTouchPoint.globalDisplayY = info.GetGlobalDisplayLocation().GetY() / density;
         event.axisEvent.targetDisplayId = info.GetTargetDisplayId();
         event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
         event.axisEvent.deviceId = info.GetDeviceId();

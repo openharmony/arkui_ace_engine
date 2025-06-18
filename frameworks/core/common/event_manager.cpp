@@ -442,8 +442,8 @@ void EventManager::ExecuteTouchTestDoneCallback(
             NG::PointF localPoint(point.x, point.y);
             NG::NGGestureRecognizer::Transform(localPoint, weakNode, false);
             FingerInfo fingerInfo = { point.originalId, point.operatingHand, Offset(point.x, point.y),
-                Offset(localPoint.GetX(), localPoint.GetY()),
-                Offset(point.screenX, point.screenY), touchEvent.sourceType, touchEvent.sourceTool };
+                Offset(localPoint.GetX(), localPoint.GetY()), Offset(point.screenX, point.screenY),
+                Offset(point.globalDisplayX, point.globalDisplayY), touchEvent.sourceType, touchEvent.sourceTool };
             fingerList.emplace_back(fingerInfo);
         }
         info->SetFingerList(fingerList);
@@ -485,6 +485,8 @@ TouchEvent EventManager::ConvertAxisEventToTouchEvent(const AxisEvent& axisEvent
         .y = axisEvent.y,
         .screenX = axisEvent.screenX,
         .screenY = axisEvent.screenY,
+        .globalDisplayX = axisEvent.globalDisplayX,
+        .globalDisplayY = axisEvent.globalDisplayY,
         .downTime = axisEvent.time,
         .size = 0.0,
         .isPressed = (type == TouchType::DOWN),
@@ -495,6 +497,8 @@ TouchEvent EventManager::ConvertAxisEventToTouchEvent(const AxisEvent& axisEvent
         .SetY(axisEvent.y)
         .SetScreenX(axisEvent.screenX)
         .SetScreenY(axisEvent.screenY)
+        .SetGlobalDisplayX(axisEvent.globalDisplayX)
+        .SetGlobalDisplayY(axisEvent.globalDisplayY)
         .SetType(type)
         .SetTime(axisEvent.time)
         .SetSize(0.0)

@@ -37,6 +37,9 @@ void JsClickFunction::Execute(const ClickInfo& info)
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
+    Offset globalDisplayOffset = info.GetGlobalDisplayLocation();
+    obj->SetProperty<double>("globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX()));
+    obj->SetProperty<double>("globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY()));
     obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
     obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
     obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
@@ -92,6 +95,9 @@ void JsClickFunction::Execute(GestureEvent& info)
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
+    Offset globalDisplayOffset = info.GetGlobalDisplayLocation();
+    obj->SetProperty<double>("globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX()));
+    obj->SetProperty<double>("globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY()));
     obj->SetProperty<int32_t>("hand", GetOperatingHand(info));
     obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
     obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
@@ -122,6 +128,18 @@ void JsClickFunction::Execute(GestureEvent& info)
     JsFunction::ExecuteJS(1, &param);
 }
 
+JSRef<JSArray> GetPressedButtons(MouseInfo& info)
+{
+    JSRef<JSArray> pressedButtonArr = JSRef<JSArray>::New();
+    auto pressedButtons = info.GetPressedButtons();
+    uint32_t idx = 0;
+    for (const auto& button : pressedButtons) {
+        auto jsButton = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(button)));
+        pressedButtonArr->SetValueAt(idx++, jsButton);
+    }
+    return pressedButtonArr;
+}
+
 void JsClickFunction::Execute(MouseInfo& info)
 {
     JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
@@ -132,6 +150,9 @@ void JsClickFunction::Execute(MouseInfo& info)
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
+    Offset globalDisplayOffset = info.GetGlobalDisplayLocation();
+    obj->SetProperty<double>("globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX()));
+    obj->SetProperty<double>("globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY()));
     obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
     obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
     obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
@@ -159,14 +180,7 @@ void JsClickFunction::Execute(MouseInfo& info)
     obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
     obj->SetProperty<double>("rawDeltaX", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaX()));
     obj->SetProperty<double>("rawDeltaY", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaY()));
-    JSRef<JSArray> pressedButtonArr = JSRef<JSArray>::New();
-    auto pressedButtons = info.GetPressedButtons();
-    uint32_t idx = 0;
-    for (const auto& button : pressedButtons) {
-        auto jsButton = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(button)));
-        pressedButtonArr->SetValueAt(idx++, jsButton);
-    }
-    obj->SetPropertyObject("pressedButtons", pressedButtonArr);
+    obj->SetPropertyObject("pressedButtons", GetPressedButtons(info));
     obj->Wrap<MouseInfo>(&info);
 
     JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);
@@ -190,6 +204,9 @@ void JsWeakClickFunction::Execute(const ClickInfo& info)
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
+    Offset globalDisplayOffset = info.GetGlobalDisplayLocation();
+    obj->SetProperty<double>("globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX()));
+    obj->SetProperty<double>("globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY()));
     obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
     obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
     obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
@@ -225,6 +242,9 @@ void JsWeakClickFunction::Execute(GestureEvent& info)
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
+    Offset globalDisplayOffset = info.GetGlobalDisplayLocation();
+    obj->SetProperty<double>("globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX()));
+    obj->SetProperty<double>("globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY()));
     obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
     obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
     obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
@@ -261,8 +281,11 @@ void JsWeakClickFunction::Execute(MouseInfo& info)
     Offset localOffset = info.GetLocalLocation();
     Offset globalOffset = info.GetGlobalLocation();
     Offset screenOffset = info.GetScreenLocation();
+    Offset globalDisplayOffset = info.GetGlobalDisplayLocation();
     obj->SetProperty<int32_t>("button", static_cast<int32_t>(info.GetButton()));
     obj->SetProperty<int32_t>("action", static_cast<int32_t>(info.GetAction()));
+    obj->SetProperty<double>("globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX()));
+    obj->SetProperty<double>("globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY()));
     obj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
     obj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
     obj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
@@ -290,14 +313,7 @@ void JsWeakClickFunction::Execute(MouseInfo& info)
     obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
     obj->SetProperty<double>("rawDeltaX", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaX()));
     obj->SetProperty<double>("rawDeltaY", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaY()));
-    JSRef<JSArray> pressedButtonArr = JSRef<JSArray>::New();
-    auto pressedButtons = info.GetPressedButtons();
-    uint32_t idx = 0;
-    for (const auto& button : pressedButtons) {
-        auto jsButton = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(button)));
-        pressedButtonArr->SetValueAt(idx++, jsButton);
-    }
-    obj->SetPropertyObject("pressedButtons", pressedButtonArr);
+    obj->SetPropertyObject("pressedButtons", GetPressedButtons(info));
     obj->Wrap<MouseInfo>(&info);
 
     JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);

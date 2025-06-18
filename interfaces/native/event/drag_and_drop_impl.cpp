@@ -707,6 +707,26 @@ float OH_ArkUI_DragEvent_GetTouchPointYToDisplay(ArkUI_DragEvent* event)
     return result;
 }
 
+float OH_ArkUI_DragEvent_GetTouchPointXToGlobalDisplay(ArkUI_DragEvent* event)
+{
+    if (!event) {
+        return 0.0f;
+    }
+    auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    auto result = static_cast<float>(dragEvent->globalDisplayX);
+    return result;
+}
+
+float OH_ArkUI_DragEvent_GetTouchPointYToGlobalDisplay(ArkUI_DragEvent* event)
+{
+    if (!event) {
+        return 0.0f;
+    }
+    auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    auto result = static_cast<float>(dragEvent->globalDisplayY);
+    return result;
+}
+
 float OH_ArkUI_DragEvent_GetVelocityX(ArkUI_DragEvent* event)
 {
     if (!event) {
