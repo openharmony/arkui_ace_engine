@@ -843,12 +843,6 @@ public:
     }
     virtual void UpdateAIMenuOptions();
     bool PrepareAIMenuOptions(std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions);
-
-    bool IsEnableMatchParent() override
-    {
-        return true;
-    }
-
     bool IsAiSelected();
     RefPtr<FrameNode> CreateAIEntityMenu(const std::function<void()>& onMenuDisappear);
     void InitAiSelection(const Offset& globalOffset);

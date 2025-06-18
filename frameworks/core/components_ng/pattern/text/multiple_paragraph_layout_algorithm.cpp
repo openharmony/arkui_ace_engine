@@ -226,6 +226,7 @@ void MultipleParagraphLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     // child constraint has already been calculated by the UpdateParagraphBySpan method when triggering MeasureContent
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+    MeasureWithFixAtIdealSize(layoutWrapper);
     auto baselineDistance = 0.0f;
     auto paragraph = GetSingleParagraph();
     if (paragraph) {
@@ -600,7 +601,7 @@ bool MultipleParagraphLayoutAlgorithm::ParagraphReLayout(const LayoutConstraintF
     float paragraphNewWidth = std::min(std::min(indentWidth, maxWidth), GetMaxMeasureSize(contentConstraint).Width());
     paragraphNewWidth =
         std::clamp(paragraphNewWidth, contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
-    if (!contentConstraint.selfIdealSize.Width()) {
+    if (!contentConstraint.selfIdealSize.Width() || IsNeedParagraphReLayout()) {
         for (auto pIter = paragraphs.begin(); pIter != paragraphs.end(); pIter++) {
             auto paragraph = pIter->paragraph;
             CHECK_NULL_RETURN(paragraph, false);
@@ -1041,7 +1042,7 @@ void MultipleParagraphLayoutAlgorithm::ApplyIndent(
             value = indentValue.ConvertToPxDistribute(
                 textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         } else {
-            value = static_cast<float>(width * indentValue.Value());
+            value = static_cast<float>(GetIndentMaxWidth(width) * indentValue.Value());
             paragraphStyle.indent = Dimension(value);
         }
     }
@@ -1076,5 +1077,37 @@ SizeF MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(const LayoutConstraint
     auto maxSize = contentConstraint.selfIdealSize;
     maxSize.UpdateIllegalSizeWithCheck(contentConstraint.maxSize);
     return maxSize.ConvertToSizeT();
+}
+
+void MultipleParagraphLayoutAlgorithm::MeasureWithFixAtIdealSize(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto widthPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+    auto heightPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
+    if (widthPolicy != LayoutCalPolicy::FIX_AT_IDEAL_SIZE && heightPolicy != LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        return;
+    }
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto& content = geometryNode->GetContent();
+    CHECK_NULL_VOID(content);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto contentSize = content->GetRect().GetSize();
+    AddPaddingToSize(padding, contentSize);
+    OptionalSizeF frameSize;
+    frameSize.UpdateIllegalSizeWithCheck(contentSize);
+    frameSize = UpdateOptionSizeByCalcLayoutConstraint(
+        frameSize, layoutProperty->GetCalcLayoutConstraint(), layoutProperty->GetLayoutConstraint()->percentReference);
+    auto fixSize = frameSize.ConvertToSizeT();
+    auto measureSize = geometryNode->GetFrameSize();
+    if (widthPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        measureSize.SetWidth(fixSize.Width());
+    }
+    if (heightPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        measureSize.SetHeight(fixSize.Height());
+    }
+    geometryNode->SetFrameSize(measureSize);
 }
 } // namespace OHOS::Ace::NG
