@@ -39,6 +39,7 @@ generated_sources = [
   "implementation/blank_modifier.cpp",
   "implementation/bounce_symbol_effect_accessor.cpp",
   "implementation/button_modifier.cpp",
+  "implementation/builder_node_ops_accessor.cpp",
   "implementation/calendar_controller_accessor.cpp",
   "implementation/calendar_modifier.cpp",
   "implementation/calendar_picker_dialog_accessor.cpp",

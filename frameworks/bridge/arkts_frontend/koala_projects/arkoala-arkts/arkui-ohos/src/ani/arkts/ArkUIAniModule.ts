@@ -47,6 +47,9 @@ export class ArkUIAniModule {
     // for CustomNode
     native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
 
+    // for BuilderNode
+    native static _BuilderProxyNode_Construct(id: KInt): KPointer
+
     // for ContentSlot
     native static _ContentSlot_construct(id: KInt): KPointer
 

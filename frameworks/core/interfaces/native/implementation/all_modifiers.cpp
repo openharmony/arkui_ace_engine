@@ -366,6 +366,7 @@ const GENERATED_ArkUIHierarchicalSymbolEffectAccessor* GetHierarchicalSymbolEffe
 const GENERATED_ArkUIAppearSymbolEffectAccessor* GetAppearSymbolEffectAccessor();
 const GENERATED_ArkUIDisappearSymbolEffectAccessor* GetDisappearSymbolEffectAccessor();
 const GENERATED_ArkUIBounceSymbolEffectAccessor* GetBounceSymbolEffectAccessor();
+const GENERATED_ArkUIBuilderNodeOpsAccessor* GetBuilderNodeOpsAccessor();
 const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor();
 const GENERATED_ArkUITabsControllerAccessor* GetTabsControllerAccessor();
 const GENERATED_ArkUITabContentTransitionProxyAccessor* GetTabContentTransitionProxyAccessor();
@@ -718,6 +719,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetAppearSymbolEffectAccessor,
         GetDisappearSymbolEffectAccessor,
         GetBounceSymbolEffectAccessor,
+        GetBuilderNodeOpsAccessor,
         GetPulseSymbolEffectAccessor,
         GetTabsControllerAccessor,
         GetTabContentTransitionProxyAccessor,

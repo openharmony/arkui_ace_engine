@@ -48,7 +48,7 @@ import { ChainEdgeEffect, ScrollState, ListAttribute, ListItemAlign, ListDivider
 import { ColorContent, DynamicRangeMode, ImageContent, ImageInterpolation, ImageRenderMode, ImageRotateOrientation, Type_ImageAttribute_onComplete_callback_event, ImageError, ImageSourceSize, ResizableOptions } from "./../image"
 import { ColorMode, LayoutDirection } from "./../stateManagement"
 import { Component3DAttribute, ModelType, SceneOptions } from "./../component3d"
-import { ComponentContent, UnifiedData, SystemBarStyle, Scene, Context, WorkerEventListener, Event, BaseContext, Context_getGroupDir_Callback, ErrorEvent, MessageEvents, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, CustomTheme } from "./../arkui-custom"
+import { BuilderNodeOps, BuilderNodeOptions, ComponentContent, UnifiedData, SystemBarStyle, Scene, Context, WorkerEventListener, Event, BaseContext, Context_getGroupDir_Callback, ErrorEvent, MessageEvents, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, CustomTheme } from "./../arkui-custom"
 import { ContentModifier, WrappedBuilder, CommonConfiguration, Callback_WrappedBuilder_Args_Void } from "./../arkui-wrapper-builder"
 import { ContentType, EnterKeyType, InputType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback, TextInputAttribute, OnSubmitCallback, TextInputStyle, PasswordIcon, UnderlineColor, TextInputController, TextInputOptions } from "./../textInput"
 import { CustomDialogController, CustomDialogControllerOptions } from "./../customDialogController"
@@ -1981,6 +1981,23 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof BreakpointsReference")
+        }
+    }
+    static isBuilderNodeOps(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof BuilderNodeOps")
+    }
+    static isBuilderNodeOptions(value: Object | string | number | undefined | boolean, duplicated_selfIdealSize: boolean, duplicated_type: boolean, duplicated_surfaceId: boolean): boolean {
+        if ((!duplicated_selfIdealSize) && (value?.hasOwnProperty("selfIdealSize"))) {
+            return true
+        }
+        else if ((!duplicated_type) && (value?.hasOwnProperty("type"))) {
+            return true
+        }
+        else if ((!duplicated_surfaceId) && (value?.hasOwnProperty("surfaceId"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof BuilderNodeOptions")
         }
     }
     static isBrightnessBlender(value: Object | string | number | undefined | boolean, duplicated_cubicRate: boolean, duplicated_quadraticRate: boolean, duplicated_linearRate: boolean, duplicated_degree: boolean, duplicated_saturation: boolean, duplicated_positiveCoefficient: boolean, duplicated_negativeCoefficient: boolean, duplicated_fraction: boolean): boolean {
