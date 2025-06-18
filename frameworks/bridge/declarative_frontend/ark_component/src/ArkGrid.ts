@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -174,6 +174,10 @@ class ArkGridComponent extends ArkScrollable<GridAttribute> implements GridAttri
   }
   alignItems(value: GridItemAlignment): this {
     modifierWithKey(this._modifiersWithKeys, GridAlignItemsModifier.identity, GridAlignItemsModifier, value);
+    return this;
+  }
+  syncLoad(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, GridSyncLoadModifier.identity, GridSyncLoadModifier, value);
     return this;
   }
   onWillScroll(callback: (xOffset: number, yOffset: number,
@@ -749,6 +753,20 @@ class GridAlignItemsModifier extends ModifierWithKey<GridItemAlignment> {
       getUINativeModule().grid.resetAlignItems(node);
     } else {
       getUINativeModule().grid.setAlignItems(node, this.value);
+    }
+  }
+}
+
+class GridSyncLoadModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('gridSyncLoad');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().grid.resetSyncLoad(node);
+    } else {
+      getUINativeModule().grid.setSyncLoad(node, this.value);
     }
   }
 }

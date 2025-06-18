@@ -366,6 +366,9 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    NavigationModel::GetInstance()->ResetResObj(NavigationPatternType::TITLE_BAR, "navigation.title.commonMainTitle");
+    NavigationModel::GetInstance()->ResetResObj(NavigationPatternType::TITLE_BAR, "navigation.title.commonSubTitle");
+    NavigationModel::GetInstance()->ResetResObj(NavigationPatternType::TITLE_BAR, "navigation.title.customtitle");
     // Resource and string type.
     std::string title;
     RefPtr<ResourceObject> mainResObj;
@@ -392,6 +395,8 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
     }
 
     NG::NavigationTitlebarOptions options;
+    NavigationModel::GetInstance()->ResetResObj(
+        NavigationPatternType::NAVIGATION, "navigation.navigationTitlebarOptions");
     JSNavigationUtils::ParseTitleBarOptions(info, true, options);
     NavigationModel::GetInstance()->SetTitlebarOptions(std::move(options));
 }
@@ -487,6 +492,9 @@ void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    NavigationModel::GetInstance()->ResetResObj(NavigationPatternType::TITLE_BAR, "navigation.backButtonIcon.icon");
+    NavigationModel::GetInstance()->ResetResObj(
+        NavigationPatternType::TITLE_BAR, "navigation.backButtonIcon.accessibilityText");
     std::string src;
     RefPtr<ResourceObject> backButtonIconResObj;
     auto noPixMap = ParseJsMedia(info[0], src, backButtonIconResObj);
@@ -587,6 +595,7 @@ void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
     bool hideText = false;
     JSNavigationUtils::ParseHideToolBarText(info, hideText);
     NavigationModel::GetInstance()->SetHideItemText(hideText);
+    NavigationModel::GetInstance()->ResetResObj(NavigationPatternType::NAV_BAR, "navigation.toolbarConfiguration");
     if (info[0]->IsUndefined() || info[0]->IsArray()) {
         if (NavigationModel::GetInstance()->NeedSetItems()) {
             std::vector<NG::BarItem> toolbarItems;
@@ -627,6 +636,7 @@ void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
     }
 
     NG::NavigationToolbarOptions options;
+    NavigationModel::GetInstance()->ResetResObj(NavigationPatternType::NAV_BAR, "navigation.navigationToolbarOptions");
     JSNavigationUtils::ParseToolbarOptions(info, options);
     NavigationModel::GetInstance()->SetToolbarOptions(std::move(options));
 }
@@ -637,6 +647,8 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
         return;
     }
 
+    NavigationModel::GetInstance()->ResetResObj(NavigationPatternType::NAV_BAR, "navigation.menuItems");
+    NavigationModel::GetInstance()->ResetResObj(NavigationPatternType::NAV_BAR, "navigation.navigationMenuOptions");
     NG::NavigationMenuOptions options;
     if (info.Length() > 1 && info[1]->IsObject()) {
         auto optObj = JSRef<JSObject>::Cast(info[1]);
@@ -754,6 +766,7 @@ void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
         return;
     }
 
+    NavigationModel::GetInstance()->ResetResObj(NavigationPatternType::NAVIGATION, "navigation.navBarWidth");
     if (info[0]->IsObject()) {
         JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
         CalcDimension value;
@@ -794,6 +807,7 @@ void JSNavigation::SetMinContentWidth(const JSCallbackInfo& info)
         return;
     }
 
+    NavigationModel::GetInstance()->ResetResObj(NavigationPatternType::NAVIGATION, "navigation.minContentWidth");
     CalcDimension minContentWidth;
     RefPtr<ResourceObject> minContentWidthResObj;
     if (!ParseJsDimensionVp(info[0], minContentWidth, minContentWidthResObj)) {
@@ -817,6 +831,10 @@ void JSNavigation::SetNavBarWidthRange(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    NavigationModel::GetInstance()->ResetResObj(
+        NavigationPatternType::NAVIGATION, "navigation.navBarWidthRange.maxNavBarWidth");
+    NavigationModel::GetInstance()->ResetResObj(
+        NavigationPatternType::NAVIGATION, "navigation.navBarWidthRange.minNavBarWidth");
     if (info[0]->IsNull() || info[0]->IsUndefined()) {
         NavigationModel::GetInstance()->SetMinNavBarWidth(NG::DEFAULT_MIN_NAV_BAR_WIDTH);
         NavigationModel::GetInstance()->SetMaxNavBarWidth(NG::DEFAULT_MAX_NAV_BAR_WIDTH);

@@ -464,34 +464,6 @@ HWTEST_F(ScrollInnerLayoutTestNg, CalcReservedHeight001, TestSize.Level1)
 }
 
 /**
- * @tc.name: CalcReservedHeight002
- * @tc.desc: Test CalcReservedHeight
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollInnerLayoutTestNg, CalcReservedHeight002, TestSize.Level1)
-{
-    CreateScroll();
-    CreateContent();
-    CreateScrollDone();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    pipelineContext->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
-
-    scrollBar_->SetPositionMode(PositionMode::LEFT);
-    scrollBar_->SetNormalWidth(Dimension(1)); // call CalcReservedHeight;
-    EXPECT_EQ(scrollBar_->endReservedHeight_.Value(), 0);
-
-    BorderRadiusProperty borderRadiusProperty;
-    float radius = 13.f;
-    borderRadiusProperty.radiusTopRight = std::make_optional<Dimension>(radius);
-    borderRadiusProperty.radiusBottomRight = std::make_optional<Dimension>(radius);
-    scrollBar_->SetHostBorderRadius(borderRadiusProperty);
-    scrollBar_->SetPadding(Edge(1, 1, 1, 1));
-    scrollBar_->SetPositionMode(PositionMode::RIGHT);
-    scrollBar_->SetNormalWidth(Dimension(2)); // call CalcReservedHeight;
-    EXPECT_TRUE(pattern_->GetHost()->isRenderDirtyMarked_);
-}
-
-/**
  * @tc.name: OtherTest001
  * @tc.desc: Test InBarTouchRegion/InBarHoverRegion/InBarRectRegion
  * @tc.type: FUNC

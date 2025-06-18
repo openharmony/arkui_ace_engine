@@ -2707,6 +2707,9 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
         delegate_->OnBlur();
     }
     OnQuickMenuDismissed();
+    if (webSelectOverlay_ && !webSelectOverlay_->IsSingleHandle()) {
+        SelectCancel();
+    }
     CloseContextSelectionMenu();
     if (!isVisible_ && isActive_ && IsDialogNested()) {
         TAG_LOGI(AceLogTag::ACE_WEB, "HandleBlurEvent, dialog nested blur but invisible while active, set inactive.");
@@ -5910,9 +5913,14 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
 
     isVisible_ = isVisible;
     if (!isVisible_) {
+        if (webSelectOverlay_) {
+            webSelectOverlay_->UpdateSingleHandleVisible(false);
+        }
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
         CloseSelectOverlay();
-        SelectCancel();
+        if (webSelectOverlay_ && !webSelectOverlay_->IsSingleHandle()) {
+            SelectCancel();
+        }
         DestroyAnalyzerOverlay();
         CloseDataDetectorMenu();
         OnTooltip("");
@@ -8034,6 +8042,31 @@ void WebPattern::SendPipEvent(int delegateId, int childId, int frameRoutingId, i
     }
 }
 
+bool WebPattern::CheckVisible()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+
+    if (!host->IsActive() || !host->IsVisible()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CheckVisible host is inactive or invisible");
+        return false;
+    }
+
+    auto parent = host->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        if (parent->IsWindowBoundary()) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CheckVisible IsWindowBoundary is true");
+            return true;
+        }
+        if (!parent->IsActive() || !parent->IsVisible()) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CheckVisible parent is inactive or invisible");
+            return false;
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return true;
+}
+
 bool WebPattern::Pip(int status,
     int delegateId, int childId, int frameRoutingId, int width, int height)
 {
@@ -8283,6 +8316,23 @@ void WebPattern::OnBypassVsyncConditionUpdate(WebBypassVsyncCondition condition)
 void WebPattern::SetDefaultBackgroundColor()
 {
     needSetDefaultBackgroundColor_ = true;
+}
+
+void WebPattern::UpdateSingleHandleVisible(bool isVisible)
+{
+    if (delegate_) {
+        delegate_->UpdateSingleHandleVisible(isVisible);
+    }
+}
+
+void WebPattern::OnShowMagnifier()
+{
+    ShowMagnifier(static_cast<int>(touchPointX), static_cast<int>(touchPointY));
+}
+
+void WebPattern::OnHideMagnifier()
+{
+    HideMagnifier();
 }
 
 } // namespace OHOS::Ace::NG

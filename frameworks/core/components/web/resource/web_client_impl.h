@@ -313,6 +313,10 @@ public:
         const std::string& url, const std::string& originalUrl, const std::string& referrer, bool isFatalError,
         bool isMainFrame, const std::vector<std::string>& certChainData) override;
 
+    void ShowMagnifier() override;
+
+    void HideMagnifier() override;
+
     void OnPageTitleV2(const std::string &title, bool isRealTitle) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;

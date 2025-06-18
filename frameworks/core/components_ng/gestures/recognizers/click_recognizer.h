@@ -38,6 +38,7 @@ public:
     ClickRecognizer() = default;
     ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold = std::numeric_limits<double>::infinity(),
     bool isLimitFingerCount_ = false);
+    ClickRecognizer(int32_t fingers, int32_t count, Dimension distanceThreshold, bool isLimitFingerCount_ = false);
 
     ~ClickRecognizer() override = default;
 
@@ -66,9 +67,18 @@ public:
 
     void SetDistanceThreshold(double distanceThreshold)
     {
+        distanceThreshold_ = Dimension(
+            Dimension(distanceThreshold, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
+        if (distanceThreshold <= 0) {
+            distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
+        }
+    }
+
+    void SetDistanceThreshold(Dimension distanceThreshold)
+    {
         distanceThreshold_ = distanceThreshold;
-        if (distanceThreshold_ <= 0) {
-            distanceThreshold_ = std::numeric_limits<double>::infinity();
+        if (distanceThreshold_.ConvertToPx() <= 0) {
+            distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
         }
     }
 
@@ -79,7 +89,7 @@ public:
 
     double GetDistanceThreshold() const
     {
-        return distanceThreshold_;
+        return distanceThreshold_.ConvertToPx();
     }
 
     GestureEventFunc GetTapActionFunc()
@@ -142,9 +152,10 @@ private:
     OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
     void RecordClickEventIfNeed(const GestureEvent& info) const;
     void AboutToAddToPendingRecognizers(const TouchEvent& event);
+    bool CheckReconcileFromProperties(const RefPtr<NGGestureRecognizer>& recognizer) override;
 
     int32_t count_ = 1;
-    double distanceThreshold_ = std::numeric_limits<double>::infinity();
+    Dimension distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
 
     // number of tap action.
     int32_t tappedCount_ = 0;

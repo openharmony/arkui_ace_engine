@@ -1893,6 +1893,7 @@ void JsAccessibilityManager::UpdateVirtualNodeChildAccessibilityElementInfo(
 
     nodeInfo.SetAccessibilityId(node->GetAccessibilityId());
     nodeInfo.SetComponentType(node->GetTag());
+    nodeInfo.SetUniqueId(node->GetId());
 
     nodeInfo.SetEnabled(node->GetFocusHub() ? node->GetFocusHub()->IsEnabled() : true);
     nodeInfo.SetFocused(node->GetFocusHub() ? node->GetFocusHub()->IsCurrentFocus() : false);
@@ -1935,6 +1936,7 @@ void JsAccessibilityManager::UpdateVirtualNodeAccessibilityElementInfo(
 
     nodeInfo.SetAccessibilityId(node->GetAccessibilityId());
     nodeInfo.SetComponentType(node->GetTag());
+    nodeInfo.SetUniqueId(node->GetId());
 
     nodeInfo.SetEnabled(node->GetFocusHub() ? node->GetFocusHub()->IsEnabled() : true);
     nodeInfo.SetFocused(node->GetFocusHub() ? node->GetFocusHub()->IsCurrentFocus() : false);
@@ -2123,6 +2125,8 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     UpdateChildrenOfAccessibilityElementInfo(node, commonProperty, nodeInfo);
     nodeInfo.SetAccessibilityId(node->GetAccessibilityId());
     nodeInfo.SetComponentType(node->GetTag());
+    nodeInfo.SetUniqueId(node->GetId());
+
     nodeInfo.SetEnabled(node->GetFocusHub() ? node->GetFocusHub()->IsEnabled() : true);
     nodeInfo.SetFocused(node->GetFocusHub() ? node->GetFocusHub()->IsCurrentFocus() : false);
     nodeInfo.SetAccessibilityFocus(node->GetRenderContext()->GetAccessibilityFocus().value_or(false));
@@ -2153,8 +2157,8 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
 }
 #ifdef WEB_SUPPORTED
 
-void WebSetScreenRect(const std::shared_ptr<NG::TransitionalNodeInfo>& node, const CommonProperty& commonProperty,
-    AccessibilityElementInfo& nodeInfo)
+void JsAccessibilityManager::WebSetScreenRect(const std::shared_ptr<NG::TransitionalNodeInfo>& node,
+    const CommonProperty& commonProperty, AccessibilityElementInfo& nodeInfo)
 {
     auto rotateTransformData = commonProperty.rotateTransform;
     auto currentDegree = rotateTransformData.rotateDegree;
@@ -2163,10 +2167,10 @@ void WebSetScreenRect(const std::shared_ptr<NG::TransitionalNodeInfo>& node, con
             node->GetRectWidth(), node->GetRectHeight());
         rotateRect.Rotate(rotateTransformData.innerCenterX, rotateTransformData.innerCenterY, currentDegree);
         rotateRect.ApplyTransformation(rotateTransformData, commonProperty.scaleX, commonProperty.scaleY);
-        Accessibility::Rect bounds { static_cast<int32_t>(rotateRect.GetX()),
-            static_cast<int32_t>(rotateRect.GetY()),
-            static_cast<int32_t>(rotateRect.GetX() + rotateRect.GetWidth()),
-            static_cast<int32_t>(rotateRect.GetY() + rotateRect.GetHeight()) };
+        Accessibility::Rect bounds { static_cast<int32_t>(std::floor(rotateRect.GetX())),
+            static_cast<int32_t>(std::floor(rotateRect.GetY())),
+            static_cast<int32_t>(std::floor(rotateRect.GetX() + rotateRect.GetWidth())),
+            static_cast<int32_t>(std::floor(rotateRect.GetY() + rotateRect.GetHeight())) };
         nodeInfo.SetRectInScreen(bounds);
     } else {
         NG::RectT<int32_t> rectInt {
@@ -2175,9 +2179,11 @@ void WebSetScreenRect(const std::shared_ptr<NG::TransitionalNodeInfo>& node, con
             node->GetRectWidth(),
             node->GetRectHeight()
         };
-        if (!NearZero(commonProperty.scaleX, 0) || !NearZero(commonProperty.scaleY, 0)) {
-            rectInt.SetRect(rectInt.GetX() * commonProperty.scaleX, rectInt.GetY() * commonProperty.scaleY,
-                rectInt.Width() * commonProperty.scaleX, rectInt.Height() * commonProperty.scaleY);
+        if (!NearZero(commonProperty.scaleX, 1.0f) || !NearZero(commonProperty.scaleY, 1.0f)) {
+            rectInt.SetRect(static_cast<int32_t>(std::floor(rectInt.GetX() * commonProperty.scaleX)),
+                static_cast<int32_t>(std::floor(rectInt.GetY() * commonProperty.scaleY)),
+                static_cast<int32_t>(std::floor(rectInt.Width() * commonProperty.scaleX)),
+                static_cast<int32_t>(std::floor(rectInt.Height() * commonProperty.scaleY)));
         }
         auto left = static_cast<int32_t>(rectInt.Left() + commonProperty.windowLeft);
         auto top = static_cast<int32_t>(rectInt.Top() + commonProperty.windowTop);
@@ -2492,8 +2498,12 @@ void HandleDidClickAccept(RefPtr<NG::FrameNode>& frameNode)
     NG::UIObserverHandler::GetInstance().NotifyDidClick(gestureEventInfo, clickInfo, frameNode);
 }
 
-bool ActClick(RefPtr<NG::FrameNode>& frameNode)
+bool ActClick(RefPtr<NG::FrameNode>& frameNode, const NG::SecCompEnhanceEvent& secEvent)
 {
+    if (NG::AccessibilityFunctionUtils::HandleClickBySecComponent(frameNode, secEvent)) {
+        return true;
+    }
+
     auto interceptResult =
         NG::AccessibilityFunctionUtils::HandleAccessibilityActionIntercept(
             frameNode, AccessibilityInterfaceAction::ACCESSIBILITY_CLICK);
@@ -3005,6 +3015,7 @@ void JsAccessibilityManager::DumpCommonPropertyNG(const AccessibilityElementInfo
     int64_t elementId = nodeInfo.GetAccessibilityId();
     AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, elementId);
     DumpLog::GetInstance().AddDesc("ID: ", elementId);
+    DumpLog::GetInstance().AddDesc("UniqueID: ", nodeInfo.GetUniqueId());
     int64_t parentId = nodeInfo.GetParentNodeId();
     AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, parentId);
     DumpLog::GetInstance().AddDesc("parent ID: ", parentId);
@@ -4248,6 +4259,7 @@ namespace {
 enum class InjectActionType : uint32_t {
     UNDEFINED_ACTION = 0,
     NOTIFY_CHILD_ACTION = 1,
+    SECURITY_CLICK_ACTION = 2,
 };
 
 bool CheckAndGetEventTestArgument(std::vector<std::string>::const_iterator start,
@@ -4313,6 +4325,9 @@ bool DumpProcessInjectActionParameters(
             ++arg;
             result = StringUtils::StringToInt(*arg);
             actionType = InjectActionType::NOTIFY_CHILD_ACTION;
+            return true;
+        }  else if (*arg == "--SecurityClickAction") {
+            actionType = InjectActionType::SECURITY_CLICK_ACTION;
             return true;
         }
     }
@@ -4382,7 +4397,7 @@ void JsAccessibilityManager::DumpInjectActionTest(const std::vector<std::string>
     int64_t nodeId = 0;
     int32_t result = 0;
     InjectActionType actionType = InjectActionType::UNDEFINED_ACTION;
-
+ 
     if (!DumpProcessInjectActionParameters(params, nodeId, result, actionType)) {
         return;
     }
@@ -4395,17 +4410,27 @@ void JsAccessibilityManager::DumpInjectActionTest(const std::vector<std::string>
     ngPipeline = FindPipelineByElementId(nodeId, frameNode);
     CHECK_NULL_VOID(ngPipeline);
     CHECK_NULL_VOID(frameNode);
-
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
     if (actionType == InjectActionType::NOTIFY_CHILD_ACTION) {
-        auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
-        CHECK_NULL_VOID(accessibilityProperty);
-        int64_t nodeId = frameNode->GetAccessibilityId();
-        accessibilityProperty->SetNotifyChildAction([nodeId, result] (const RefPtr<NG::FrameNode>& node,
+        accessibilityProperty->SetNotifyChildAction([nodeId, result] (
+            const RefPtr<NG::FrameNode>& node,
             NotifyChildActionType childActionType) {
                 TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "onNotifyChildAction callback: nodeid %{public}" \
                     PRId64 " result %{public}d", nodeId, result);
                 return static_cast<AccessibilityActionResult>(result);
         });
+    }
+    if (actionType == InjectActionType::SECURITY_CLICK_ACTION) {
+        accessibilityProperty->SetSecurityClickAction (
+            [nodeId] (const NG::SecCompEnhanceEvent& event) {
+                std::string hmac(event.dataBuffer.begin(), event.dataBuffer.end());
+                uint64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    event.time.time_since_epoch()).count();
+                TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "onSecurityClickAction callback: nodeid %{public}" \
+                    PRId64 " hmac %{public}s timesttamp %{public}" PRId64, nodeId, hmac.c_str(), time);
+            }
+        );
     }
     DumpLog::GetInstance().Print(std::string("Result: inject action done"));
 }
@@ -6307,6 +6332,29 @@ int32_t getArgumentByKey(const std::map<std::string, std::string>& actionArgumen
     return argument;
 }
 
+uint64_t GetUnsignedLongArgumentByKey(const std::map<std::string, std::string>& actionArguments,
+    const std::string& checkKey)
+{
+    auto iter = actionArguments.find(checkKey);
+    uint64_t argument = 0; // 0:default value
+    if (iter != actionArguments.end()) {
+        std::stringstream strArguments;
+        strArguments << iter->second;
+        strArguments >> argument;
+    }
+    return argument;
+}
+
+std::string GetStrArgumentByKey(const std::map<std::string, std::string>& actionArguments, const std::string& checkKey)
+{
+    std::string result;
+    auto iter = actionArguments.find(checkKey);
+    if (iter != actionArguments.end()) {
+        result = iter->second;
+    }
+    return result;
+}
+
 AccessibilityScrollType findAccessibilityScrollType(int32_t accessibilityScrollTypeValue)
 {
     switch (accessibilityScrollTypeValue) {
@@ -6317,6 +6365,20 @@ AccessibilityScrollType findAccessibilityScrollType(int32_t accessibilityScrollT
         default:
             return AccessibilityScrollType::SCROLL_DEFAULT;
     }
+}
+
+NG::SecCompEnhanceEvent GetAccessibilitySecCompEnhanceEvent(const std::map<std::string, std::string>& actionArguments)
+{
+    NG::SecCompEnhanceEvent secEvent;
+    auto hmac = GetStrArgumentByKey(actionArguments, ACTION_ARGU_CLICK_ENHANCE_DATA);
+    if (hmac.empty()) {
+        return secEvent;
+    }
+    auto time = GetUnsignedLongArgumentByKey(actionArguments, ACTION_ARGU_CLICK_TIMESTAMP);
+    secEvent.dataBuffer.assign(hmac.begin(), hmac.end());
+    std::chrono::microseconds microseconds(time);
+    secEvent.time = TimeStamp { microseconds };
+    return secEvent;
 }
 
 AccessibilityScrollType getAccessibilityScrollType(const std::map<std::string, std::string>& actionArguments,
@@ -6422,7 +6484,7 @@ bool JsAccessibilityManager::ExecuteActionNG(int64_t elementId,
         action != ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS) {
         return result;
     }
-    result = ConvertActionTypeToBoolen(action, frameNode, elementId, ngPipeline);
+    result = ConvertActionTypeToBoolen(action, frameNode, elementId, ngPipeline, actionArguments);
     if (!result) {
         auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         CHECK_NULL_RETURN(accessibilityProperty, false);
@@ -6435,9 +6497,10 @@ bool JsAccessibilityManager::ExecuteActionNG(int64_t elementId,
 }
 
 bool JsAccessibilityManager::ConvertActionTypeToBoolen(ActionType action, RefPtr<NG::FrameNode>& frameNode,
-    int64_t elementId, RefPtr<NG::PipelineContext>& context)
+    int64_t elementId, RefPtr<NG::PipelineContext>& context, const std::map<std::string, std::string>& actionArguments)
 {
     bool result = false;
+    NG::SecCompEnhanceEvent secEvent;
     switch (action) {
         case ActionType::ACCESSIBILITY_ACTION_FOCUS: {
             result = RequestFocus(frameNode);
@@ -6448,7 +6511,8 @@ bool JsAccessibilityManager::ConvertActionTypeToBoolen(ActionType action, RefPtr
             break;
         }
         case ActionType::ACCESSIBILITY_ACTION_CLICK: {
-            result = ActClick(frameNode);
+            secEvent = GetAccessibilitySecCompEnhanceEvent(actionArguments);
+            result = ActClick(frameNode, secEvent);
             break;
         }
         case ActionType::ACCESSIBILITY_ACTION_LONG_CLICK: {

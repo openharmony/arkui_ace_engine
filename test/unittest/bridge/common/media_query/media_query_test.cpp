@@ -62,5 +62,9 @@ HWTEST_F(MediaQueryTest, GetOrientationTest2, TestSize.Level1)
 
     SystemProperties::SetDeviceOrientation(1);
     EXPECT_EQ(Framework::MediaQueryInfo::GetOrientation(nullptr), "landscape");
+
+    // outliers don't change
+    SystemProperties::SetDeviceOrientation(-1);
+    EXPECT_EQ(Framework::MediaQueryInfo::GetOrientation(nullptr), "landscape");
 }
 } // namespace OHOS::Ace::NG

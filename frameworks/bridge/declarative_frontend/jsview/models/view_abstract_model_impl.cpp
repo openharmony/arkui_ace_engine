@@ -1051,6 +1051,39 @@ void ViewAbstractModelImpl::SetOnClick(
     }
 }
 
+void ViewAbstractModelImpl::SetOnClick(
+    GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc, Dimension distanceThreshold)
+{
+    auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();
+    CHECK_NULL_VOID(inspector);
+    auto impl = inspector->GetInspectorFunctionImpl();
+    RefPtr<Gesture> tapGesture = AceType::MakeRefPtr<TapGesture>(1, 1, distanceThreshold.ConvertToPx());
+    tapGesture->SetOnActionId([func = std::move(tapEventFunc), impl](GestureEvent& info) {
+        if (impl) {
+            impl->UpdateEventInfo(info);
+        }
+        func(info);
+    });
+    auto click = ViewStackProcessor::GetInstance()->GetBoxComponent();
+    click->SetOnClick(tapGesture);
+
+    auto onClickId = EventMarker([func = std::move(clickEventFunc), impl](const BaseEventInfo* info) {
+        const auto* clickInfo = TypeInfoHelper::DynamicCast<ClickInfo>(info);
+        if (!clickInfo) {
+            return;
+        }
+        auto newInfo = *clickInfo;
+        if (impl) {
+            impl->UpdateEventInfo(newInfo);
+        }
+        func(clickInfo);
+    });
+    auto focusableComponent = ViewStackProcessor::GetInstance()->GetFocusableComponent(false);
+    if (focusableComponent) {
+        focusableComponent->SetOnClickId(onClickId);
+    }
+}
+
 void ViewAbstractModelImpl::SetOnTouch(TouchEventFunc&& touchEventFunc)
 {
     auto inspector = ViewStackProcessor::GetInstance()->GetInspectorComposedComponent();

@@ -161,6 +161,7 @@ typedef Rosen::VisualEffect* (*OEMVisualEffectFunc)(const Rosen::VisualEffect* e
 
 class ACE_FORCE_EXPORT ViewAbstract {
 public:
+    static void RemoveResObj(const std::string& key);
     static void SetWidth(const CalcLength &width);
     static void SetWidth(const RefPtr<ResourceObject>& resObj);
     static void SetHeight(const CalcLength &height);
@@ -365,6 +366,7 @@ public:
     // event
     static void SetOnClick(GestureEventFunc &&clickEventFunc,
         double distanceThreshold = std::numeric_limits<double>::infinity());
+    static void SetOnClick(GestureEventFunc &&clickEventFunc, Dimension distanceThreshold);
     static void SetOnGestureJudgeBegin(GestureJudgeFunc &&gestureJudgeFunc);
     static void SetOnTouchIntercept(TouchInterceptFunc &&touchInterceptFunc);
     static void SetShouldBuiltInRecognizerParallelWith(
@@ -787,7 +789,6 @@ public:
         NG::TransitionFinishCallback&& finishCallback = nullptr);
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
-    static void CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
     static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching);
     static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);
@@ -810,6 +811,7 @@ public:
     static void SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback);
     static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc,
         double distanceThreshold = std::numeric_limits<double>::infinity());
+    static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc, Dimension distanceThreshold);
     static void SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventFunc);
     static void SetOnDragStart(FrameNode* frameNode,
         std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart);

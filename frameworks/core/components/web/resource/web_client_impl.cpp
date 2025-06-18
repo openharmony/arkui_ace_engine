@@ -1426,6 +1426,26 @@ bool WebClientImpl::OnAllSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSAllSs
     return jsResult;
 }
 
+void WebClientImpl::ShowMagnifier()
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnReceivedTitle(title, isRealTitle);
+    delegate->ShowMagnifier();
+}
+
+void WebClientImpl::HideMagnifier()
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->HideMagnifier();
+}
+
 void WebClientImpl::OnPageTitleV2(const std::string &title, bool isRealTitle)
 {
     auto delegate = webDelegate_.Upgrade();

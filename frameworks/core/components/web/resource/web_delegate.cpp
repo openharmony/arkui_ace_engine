@@ -48,7 +48,6 @@
 #include "nweb_adapter_helper.h"
 #include "nweb_handler.h"
 #include "nweb_helper.h"
-#include "nweb_snapshot_data_base.h"
 #include "parameters.h"
 #include "screen_manager/screen_types.h"
 #include "system_ability_definition.h"
@@ -5532,9 +5531,9 @@ void WebDelegate::AccessibilitySendPageChange()
                 return;
             }
             if (webNode->IsOnMainTree()) {
-                if (!accessibilityManager->CheckAccessibilityVisible(webNode)) {
+                if (!webPattern->CheckVisible()) {
                     TAG_LOGI(AceLogTag::ACE_WEB,
-                        "WebDelegate::AccessibilitySendPageChange CheckAcceessibilityVisible accessibilityId = "
+                        "WebDelegate::AccessibilitySendPageChange CheckVisible accessibilityId = "
                         "%{public}" PRId64,
                         webNode->GetAccessibilityId());
                     return;
@@ -8472,5 +8471,27 @@ void WebDelegate::UpdateBypassVsyncCondition(const WebBypassVsyncCondition& cond
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebBypassVsyncCondition");
+}
+
+void WebDelegate::UpdateSingleHandleVisible(bool isVisible)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->UpdateSingleHandleVisible(isVisible);
+}
+
+bool WebDelegate::ShowMagnifier()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    webPattern->OnShowMagnifier();
+    return true;
+}
+
+bool WebDelegate::HideMagnifier()
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, false);
+    webPattern->OnHideMagnifier();
+    return true;
 }
 } // namespace OHOS::Ace

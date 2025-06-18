@@ -384,7 +384,7 @@ HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerBaseTest001, TestSize.Level1)
      */
     panGestureOption->SetDistance(-1);
     panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
-    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN], 5);
+    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN].ConvertToPx(), 5);
     /**
      * @tc.steps: step3. create PanRecognizer with illegal direction.
      * @tc.expected: step3. direction_ equals.

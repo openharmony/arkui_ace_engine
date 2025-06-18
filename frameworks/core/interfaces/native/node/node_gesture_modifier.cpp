@@ -97,8 +97,9 @@ ArkUIGesture* createTapGestureWithDistanceThreshold(
     ArkUI_Int32 count, ArkUI_Int32 fingers, double distanceThreshold, bool limitFingerCount = false,
     void* userData = nullptr)
 {
-    distanceThreshold = Dimension(distanceThreshold, DimensionUnit::VP).ConvertToPx();
-    auto tapGestureObject = AceType::MakeRefPtr<TapGesture>(count, fingers, distanceThreshold, limitFingerCount);
+    auto distanceThresholdDimension = Dimension(distanceThreshold, DimensionUnit::VP);
+    auto tapGestureObject = AceType::MakeRefPtr<TapGesture>(
+        count, fingers, distanceThresholdDimension, limitFingerCount);
     tapGestureObject->SetUserData(userData);
     tapGestureObject->IncRefCount();
     return reinterpret_cast<ArkUIGesture*>(AceType::RawPtr(tapGestureObject));
@@ -1099,12 +1100,13 @@ ArkUI_Int32 getTapGestureDistanceThreshold(ArkUIGestureRecognizer* recognizer, d
 
 ArkUI_Int32 setDistanceMap(ArkUIGesture* gesture, int size, int* toolTypeArray, double* distanceArray)
 {
-    PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.Value() },
-        { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.Value() } };
+    PanDistanceMapDimension distanceMap = { { SourceTool::UNKNOWN,
+        Dimension(DEFAULT_PAN_DISTANCE.Value(), DimensionUnit::PX) },
+        { SourceTool::PEN, Dimension(DEFAULT_PEN_PAN_DISTANCE.Value(), DimensionUnit::PX) } };
     for (int i = 0; i < size; i++) {
         SourceTool st = ConvertCInputEventToolTypeToSourceTool(toolTypeArray[i]);
         if (st >= SourceTool::UNKNOWN && st <= SourceTool::JOYSTICK && GreatOrEqual(distanceArray[i], 0.0)) {
-            distanceMap[st] = distanceArray[i];
+            distanceMap[st] = Dimension(distanceArray[i], DimensionUnit::PX);
         }
     }
     auto gestureForDistanceMap = Referenced::Claim(reinterpret_cast<PanGesture*>(gesture));
@@ -1120,12 +1122,12 @@ ArkUI_Int32 getDistanceByToolType(ArkUIGestureRecognizer* recognizer, int toolTy
     auto gestureRecognizer = AceType::Claim(rawRecognizer);
     auto panRecognizer = AceType::DynamicCast<PanRecognizer>(gestureRecognizer);
     CHECK_NULL_RETURN(panRecognizer, ERROR_CODE_PARAM_INVALID);
-    PanDistanceMap distanceMap = panRecognizer->GetDistanceMap();
+    PanDistanceMapDimension distanceMap = panRecognizer->GetDistanceMap();
     auto iter = distanceMap.find(ConvertCInputEventToolTypeToSourceTool(toolType));
     if (iter == distanceMap.end()) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    *distance = static_cast<double>(iter->second);
+    *distance = static_cast<double>(iter->second.ConvertToPx());
     return ERROR_CODE_NO_ERROR;
 }
 

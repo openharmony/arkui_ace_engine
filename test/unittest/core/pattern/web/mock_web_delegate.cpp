@@ -1309,4 +1309,7 @@ void WebDelegate::SetPipNativeWindow(int delegate_id,
 void WebDelegate::SendPipEvent(int delegate_id,
     int child_id, int frame_routing_id, int event) {}
 
+void WebDelegate::UpdateSingleHandleVisible(bool isVisible) {}
+bool WebDelegate::ShowMagnifier() { return false; }
+bool WebDelegate::HideMagnifier() { return false; }
 } // namespace OHOS::Ace

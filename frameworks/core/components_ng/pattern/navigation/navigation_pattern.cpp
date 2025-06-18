@@ -1207,6 +1207,7 @@ void NavigationPattern::UpdateColorModeForNodes(
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
         CHECK_NULL_VOID(hostNode);
         auto lastIndex = hostNode->GetLastStandardIndex();
+        lastIndex = lastIndex < 0 ? 0 : lastIndex;
         auto pipelineContext = hostNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         auto colorMode = pipelineContext->GetColorMode() == ColorMode::DARK ? true : false;

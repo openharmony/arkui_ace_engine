@@ -69,6 +69,19 @@ void ParseAndSetWidth(const JSCallbackInfo& info, WidthType widthType)
     if (info.Length() < 1) {
         return;
     }
+    switch (widthType) {
+        case WidthType::SIDEBAR_WIDTH:
+            SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.sideBarWidth");
+            break;
+        case WidthType::MIN_SIDEBAR_WIDTH:
+            SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.minSideBarWidth");
+            break;
+        case WidthType::MAX_SIDEBAR_WIDTH:
+            SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.maxSideBarWidth");
+            break;
+        default:
+            break;
+    }
 
     CalcDimension value;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -337,6 +350,9 @@ void JSSideBar::JsControlButton(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.buttonIconOptions.shown");
+    SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.buttonIconOptions.hidden");
+    SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.buttonIconOptions.switching");
     if (info[0]->IsNull() || info[0]->IsUndefined()) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             // controlButton icon set default style and position when input illegal value
@@ -427,6 +443,10 @@ void JSSideBar::JsDivider(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.dividerStyle.strokeWidth");
+    SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.dividerStyle.color");
+    SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.dividerStyle.startMargin");
+    SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.dividerStyle.endMargin");
     if (info[0]->IsNull() || info[0]->IsUndefined()) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             // sideBar divider set default width when input illegal value
@@ -447,6 +467,7 @@ void JSSideBar::JsMinContentWidth(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    SideBarContainerModel::GetInstance()->ResetResObj("sideBarContainer.minContentWidth");
     if (info[0]->IsNull()) {
         SideBarContainerModel::GetInstance()->SetMinContentWidth(-1.0_vp);
         return;

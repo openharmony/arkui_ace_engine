@@ -3467,6 +3467,27 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest082, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RemoveResObj
+ * @tc.desc: Test RemoveResObj of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0083, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = false;
+    std::string key = "clipShape";
+    viewAbstractModelNG.RemoveResObj(key);
+    g_isConfigChangePerform = true;
+    viewAbstractModelNG.RemoveResObj(key);
+    g_isConfigChangePerform = false;
+    std::string maskShape = pattern->GetResCacheMapByKey("clipShape");
+    EXPECT_EQ(maskShape, "");
+}
+
+/**
  * @tc.name: ViewAbstractSetClickFocusTest001
  * @tc.desc: Test that container node becomes focusable when click event is set and no focusable children exist.
  * @tc.type: FUNC

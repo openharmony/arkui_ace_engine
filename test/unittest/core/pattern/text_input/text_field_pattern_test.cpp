@@ -2966,6 +2966,22 @@ HWTEST_F(TextFieldPatternTest, HandleOnDeleteCombTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ToJsonValue001
+ * @tc.desc: test capitalizationmode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, ToJsonValue001, TestSize.Level1)
+{
+    NG::InspectorFilter filter;
+    JsonValue jsonValue;
+
+    int32_t autoCapitalizationMode = static_cast<int32_t>(AutoCapitalizationMode::NONE);
+    bool ret = jsonValue.PutExtAttr("capitalizationmode", autoCapitalizationMode, filter);
+
+    EXPECT_TRUE(ret);
+}
+
+/**
  * @tc.name: HandleOnPageUpAndPageDownTest
  * @tc.desc: test handle on page up and page down function
  * @tc.type: FUNC
