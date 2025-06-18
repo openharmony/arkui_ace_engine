@@ -2818,4 +2818,71 @@ HWTEST_F(OverlayTestNg, BeforeCreateLayoutWrapperTest002, TestSize.Level1)
         modalNodeLayoutProperty->GetSafeAreaPaddingProperty();
     ASSERT_NE(modalSafeAreaPaddingProp, nullptr);
 }
+
+/**
+ * @tc.name: DialogWithNodeTest001
+ * @tc.desc: Test OverlayManager::OpenCustomDialog->UpdateCustomDialogWithNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, DialogWithNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and overlayManager.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    /**
+     * @tc.steps: step2. create dialog content node.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    DialogProperties dialogParam;
+    dialogParam.contentNode = contentNode;
+    dialogParam.alignment = DialogAlignment::TOP_START;
+    dialogParam.offset = DimensionOffset(Dimension(0.0), Dimension(0.0));
+    dialogParam.autoCancel = false;
+    auto contentNodeNew = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    DialogProperties dialogParamNew;
+    dialogParamNew.contentNode = contentNodeNew;
+    dialogParamNew.alignment = DialogAlignment::BOTTOM_END;
+    dialogParamNew.offset = DimensionOffset(Dimension(10.0), Dimension(10.0));
+    dialogParamNew.autoCancel = true;
+
+    /**
+     * @tc.steps: step3. call OpenCustomDialog and then check dialogLayoutProp.
+     * @tc.expected: OpenCustomDialog succeed and dialogLayoutProp is correct.
+     */
+    auto openCallback = [](int32_t dialogId) {};
+    overlayManager->OpenCustomDialog(dialogParam, openCallback);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 1);
+    auto dialogNode = overlayManager->GetDialogNodeWithExistContent(contentNode);
+    EXPECT_NE(dialogNode, nullptr);
+    auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
+    EXPECT_NE(dialogLayoutProp, nullptr);
+    EXPECT_EQ(dialogLayoutProp->propDialogAlignment_, DialogAlignment::TOP_START);
+    EXPECT_EQ(dialogLayoutProp->propDialogOffset_, DimensionOffset(Dimension(0.0), Dimension(0.0)));
+    EXPECT_EQ(dialogLayoutProp->propAutoCancel_, false);
+
+    /**
+     * @tc.steps: step4. call UpdateCustomDialog for contentNodeNew.
+     * @tc.expected: UpdateCustomDialog failed because contentNodeNew has not been opened.
+     */
+    auto updateCallbackFst = [](int32_t dialogId) {};
+    overlayManager->UpdateCustomDialogWithNode(contentNodeNew, dialogParamNew, updateCallbackFst);
+    EXPECT_EQ(dialogLayoutProp->propDialogAlignment_, DialogAlignment::TOP_START);
+    EXPECT_EQ(dialogLayoutProp->propDialogOffset_, DimensionOffset(Dimension(0.0), Dimension(0.0)));
+    EXPECT_EQ(dialogLayoutProp->propAutoCancel_, false);
+
+    /**
+     * @tc.steps: step5. call UpdateCustomDialog for contentNode.
+     * @tc.expected: UpdateCustomDialog succeed and dialogLayoutProp is updated.
+     */
+    auto updateCallbackSnd = [](int32_t dialogId) {};
+    overlayManager->UpdateCustomDialog(contentNode, dialogParamNew, updateCallbackSnd);
+    EXPECT_EQ(dialogLayoutProp->propDialogAlignment_, DialogAlignment::BOTTOM_END);
+    EXPECT_EQ(dialogLayoutProp->propDialogOffset_, DimensionOffset(Dimension(10.0), Dimension(10.0)));
+    EXPECT_EQ(dialogLayoutProp->propAutoCancel_, true);
+}
 } // namespace OHOS::Ace::NG
