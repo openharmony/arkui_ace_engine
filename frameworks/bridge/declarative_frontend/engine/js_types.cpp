@@ -101,14 +101,18 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
     auto index = 0;
     for (auto const &point : history) {
         Local<ObjectRef> touchObject = ObjectRef::New(info->GetVM());
-        auto x = PipelineBase::Px2VpWithCurrentDensity(point.GetLocalLocation().GetX());
-        auto y = PipelineBase::Px2VpWithCurrentDensity(point.GetLocalLocation().GetY());
-        auto globalX = PipelineBase::Px2VpWithCurrentDensity(point.GetGlobalLocation().GetX());
-        auto globalY = PipelineBase::Px2VpWithCurrentDensity(point.GetGlobalLocation().GetY());
-        auto displayX = PipelineBase::Px2VpWithCurrentDensity(point.GetScreenLocation().GetX());
-        auto displayY = PipelineBase::Px2VpWithCurrentDensity(point.GetScreenLocation().GetY());
-        auto globalDisplayX = PipelineBase::Px2VpWithCurrentDensity(point.GetGlobalDisplayLocation().GetX());
-        auto globalDisplayY = PipelineBase::Px2VpWithCurrentDensity(point.GetGlobalDisplayLocation().GetY());
+        const OHOS::Ace::Offset& globalLocation = point.GetGlobalLocation();
+        const OHOS::Ace::Offset& localLocation = point.GetLocalLocation();
+        const OHOS::Ace::Offset& screenLocation = point.GetScreenLocation();
+        const OHOS::Ace::Offset& globalDisplayLocation = point.GetGlobalDisplayLocation();
+        auto x = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX());
+        auto y = PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY());
+        auto globalX = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX());
+        auto globalY = PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY());
+        auto displayX = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX());
+        auto displayY = PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY());
+        auto globalDisplayX = PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX());
+        auto globalDisplayY = PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY());
         touchObject->Set(info->GetVM(), ToJSValue("id"), ToJSValue(point.GetFingerId()));
         touchObject->Set(info->GetVM(), ToJSValue("type"), ToJSValue(static_cast<int32_t>(point.GetTouchType())));
         touchObject->Set(info->GetVM(), ToJSValue("x"), ToJSValue(x));
