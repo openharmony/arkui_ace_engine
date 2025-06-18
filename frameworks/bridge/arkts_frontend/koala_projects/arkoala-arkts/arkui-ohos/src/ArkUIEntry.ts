@@ -300,10 +300,9 @@ export class Application {
         }
         if (root.peer.ptr) {
             ArkUINativeModule._MeasureLayoutAndDraw(root.peer.ptr);
+            // Call callbacks and sync
             callScheduledCallbacks();
         }
-        // Call callbacks and sync
-        callScheduledCallbacks()
     }
 
     updateStates(manager: StateManager, root: ComputableState<PeerNode>) {

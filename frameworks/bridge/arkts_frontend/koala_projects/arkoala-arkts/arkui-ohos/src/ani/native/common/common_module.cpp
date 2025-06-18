@@ -19,6 +19,8 @@
 
 #include "load.h"
 
+#include "base/utils/utils.h"
+
 namespace OHOS::Ace::Ani {
 
 ani_object GetHostContext([[maybe_unused]] ani_env* env)
