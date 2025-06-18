@@ -2620,6 +2620,10 @@ ArkUINativeModuleValue TextInputBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (ParseLayoutPolicy(vm, widthArg, true)) {
+        GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputWidth(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
     auto value = widthArg->ToString(vm)->ToString(vm);
     if (value.empty()) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputWidth(nativeNode);
@@ -2841,5 +2845,20 @@ ArkUINativeModuleValue TextInputBridge::ResetOnSecurityStateChange(ArkUIRuntimeC
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getTextInputModifier()->resetTextInputOnSecurityStateChange(nativeNode);
     return panda::JSValueRef::Undefined(vm);
+}
+
+bool TextInputBridge::ParseLayoutPolicy(EcmaVM* vm, const Local<JSValueRef> value, bool isWidth)
+{
+    if (value->IsObject(vm)) {
+        auto obj = value->ToObject(vm);
+        auto layoutPolicy = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id_"));
+        if (layoutPolicy->IsString(vm)) {
+            auto policy = CommonBridge::ParseLayoutPolicy(layoutPolicy->ToString(vm)->ToString(vm));
+            ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, isWidth);
+            return true;
+        }
+    }
+    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, isWidth);
+    return false;
 }
 } // namespace OHOS::Ace::NG
