@@ -697,6 +697,10 @@ public:
     {
         return false;
     }
+    virtual Rect GetGlobalScaledRect() const
+    {
+        return Rect();
+    }
 
     virtual Rect GetUIExtensionHostWindowRect()
     {

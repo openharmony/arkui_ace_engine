@@ -262,6 +262,7 @@ private:
     void UpdateHostWindowRect();
     void HandleKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow);
     void FitAvailableRect(LayoutWrapper* layoutWrapper, bool showInSubWindow);
+    void FitMouseOffset(LayoutWrapper* layoutWrapper);
 
     void UpdateTextNodeMaxLines(const RefPtr<LayoutWrapper>& childWrapper, const LayoutConstraintF& layoutConstraint);
     void MeasureTipsRegion(const RefPtr<LayoutWrapper>& childWrapper, const LayoutConstraintF& childContraint);
