@@ -2536,9 +2536,9 @@ export function deserializeAndCallTextPickerScrollStopCallback(thisDeserializer:
 }
 export function deserializeAndCallTextTimerAttribute_onTimer_event_type(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((utc: int64,elapsedTime: int64) => void))
-    let utc : int64 = thisDeserializer.readInt64()
-    let elapsedTime : int64 = thisDeserializer.readInt64()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((utc: number, elapsedTime: number) => void))
+    let utc : number = (thisDeserializer.readInt64() as number)
+    let elapsedTime : number = (thisDeserializer.readInt64() as number)
     _call(utc, elapsedTime)
 }
 export function deserializeAndCallTransitionFinishCallback(thisDeserializer: Deserializer): void {
