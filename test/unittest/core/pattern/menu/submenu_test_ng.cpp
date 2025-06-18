@@ -1167,4 +1167,25 @@ HWTEST_F(SubMenuTestNg, UpdateHoverRegion001, TestSize.Level1)
     ASSERT_NE(menuItemPattern, nullptr);
     ASSERT_FALSE(menuItemPattern->hoverRegions_.empty());
 }
+
+/**
+ * @tc.name: NormalizePositionY001
+ * @tc.desc: Verify NormalizePositionY.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubMenuTestNg, NormalizePositionY001, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        auto theme = AceType::MakeRefPtr<SelectTheme>();
+        theme->expandDisplay_ = true;
+        return theme;
+    });
+    SubMenuLayoutAlgorithm subMenuLayoutAlgorithm;
+    EXPECT_EQ(subMenuLayoutAlgorithm.NormalizePositionY(menuItemNode, 0.0f, 10.0f), 9.5f);
+}
 } // namespace OHOS::Ace::NG
