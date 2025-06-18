@@ -558,6 +558,7 @@ public:
     void TryForceSplitIfNeeded(const SizeF& frameSize);
     void SwapNavDestinationAndPlaceHolder(bool needFireLifecycle);
     bool IsPrimaryNode(const RefPtr<NavDestinationGroupNode>& destNode) const;
+    // Only used for the toolbar in 'container_modal' component
     void SetToolbarManagerNavigationMode(NavigationMode mode);
 
 private:

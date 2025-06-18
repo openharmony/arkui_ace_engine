@@ -116,6 +116,19 @@ std::optional<SizeF> VideoLayoutAlgorithm::MeasureContent(
     }
     auto layoutSize = contentConstraint.selfIdealSize.IsValid() ? contentConstraint.selfIdealSize.ConvertToSizeT()
                                                                 : contentConstraint.maxSize;
+    // if width or height is matchParent
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    if (layoutProperty) {
+        auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+        if (layoutPolicy.has_value()) {
+            if (layoutPolicy->IsWidthMatch() && contentConstraint.parentIdealSize.Width().has_value()) {
+                layoutSize.SetWidth(contentConstraint.parentIdealSize.Width().value());
+            }
+            if (layoutPolicy->IsHeightMatch() && contentConstraint.parentIdealSize.Height().has_value()) {
+                layoutSize.SetHeight(contentConstraint.parentIdealSize.Height().value());
+            }
+        }
+    }
     return layoutSize;
 }
 

@@ -868,6 +868,7 @@ void UIObserverListener::AddFingerInfosInfo(napi_value objValueClickEvent, const
     napi_create_array(env_, &napiFingerInfos);
     bool isArray = false;
     if (napi_is_array(env_, napiFingerInfos, &isArray) != napi_ok || !isArray) {
+        napi_close_handle_scope(env_, scope);
         return;
     }
     

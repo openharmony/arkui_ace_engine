@@ -263,6 +263,7 @@ void XComponentPatternV2::InitSurface()
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();
         renderSurface_->SetRenderContext(renderContextForSurface_);
+        renderContext->AddChild(renderContextForSurface_, 0);
     } else if (type_ == XComponentType::TEXTURE) {
         renderSurface_->SetRenderContext(renderContext);
         renderSurface_->SetIsTexture(true);

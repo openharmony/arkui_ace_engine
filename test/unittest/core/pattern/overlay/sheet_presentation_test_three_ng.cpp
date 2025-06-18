@@ -1562,4 +1562,27 @@ HWTEST_F(SheetPresentationTestThreeNg, CalculateSheetOffsetInOtherScenes001, Tes
     EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, sheetOffsetY);
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: StartSheetTransitionAnimation001
+ * @tc.desc: Increase the coverage of SheetPresentationPattern::StartSheetTransitionAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, StartSheetTransitionAnimation001, TestSize.Level1)
+{
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->sheetObject_, nullptr);
+    AnimationOption option;
+    float offset = 0.0f;
+    sheetPattern->StartSheetTransitionAnimation(option, false, offset);
+    auto overlayManager = sheetPattern->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    EXPECT_TRUE(overlayManager->modalStack_.empty());
+}
 } // namespace OHOS::Ace::NG

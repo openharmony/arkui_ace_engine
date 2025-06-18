@@ -56,7 +56,7 @@ void RotationRecognizer::OnAccepted()
     }
     
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Rotation accepted, tag = %{public}s",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "ROTATE RACC, T: %{public}s",
         node ? node->GetTag().c_str() : "null");
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;

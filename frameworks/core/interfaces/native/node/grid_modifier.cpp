@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -387,6 +387,27 @@ void ResetGridAlignItems(ArkUINodeHandle node)
     GridModelNG::SetAlignItems(frameNode, GridItemAlignment::DEFAULT);
 }
 
+void SetGridSyncLoad(ArkUINodeHandle node, ArkUI_Bool syncLoad)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetSyncLoad(frameNode, syncLoad);
+}
+
+void ResetGridSyncLoad(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetSyncLoad(frameNode, false);
+}
+
+ArkUI_Bool GetGridSyncLoad(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return GridModelNG::GetSyncLoad(frameNode);
+}
+
 ArkUI_CharPtr GetColumnsTemplate(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -558,6 +579,9 @@ const ArkUIGridModifier* GetGridModifier()
         .getCachedCount = GetCachedCount,
         .setGridAlignItems = SetGridAlignItems,
         .resetGridAlignItems = ResetGridAlignItems,
+        .setSyncLoad = SetGridSyncLoad,
+        .resetSyncLoad = ResetGridSyncLoad,
+        .getSyncLoad = GetGridSyncLoad,
         .setGridFadingEdge = SetGridFadingEdge,
         .resetGridFadingEdge = ResetGridFadingEdge,
         .setOnGridScrollIndexCallBack = SetOnGridScrollIndexCallBack,

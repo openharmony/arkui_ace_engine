@@ -1163,4 +1163,47 @@ HWTEST_F(RichEditorMouseTest, OnHandleMouseEvent002, TestSize.Level1)
     EXPECT_EQ(event.GetAction(), MouseAction::RELEASE);
 }
 
+/**
+ * @tc.name: AdjustMouseLocalOffset
+ * @tc.desc: test AdjustMouseLocalOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMouseTest, AdjustMouseLocalOffset, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(INIT_VALUE_1);
+    richEditorPattern->richTextRect_ = RectF(0, 0, 100, 140);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(140.0f));
+    auto offsetStart = Offset(0, 0);
+    auto offsetEnd = Offset(100, 200);
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(offsetStart, _)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(offsetEnd, _)).WillRepeatedly(Return(6));
+    PositionWithAffinity defaultPositionWithAffinity(0, TextAffinity::DOWNSTREAM);
+    EXPECT_CALL(*paragraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(defaultPositionWithAffinity));
+    richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 6 });
+
+    MouseInfo info;
+    info.localLocation_ = Offset(0, 0);
+    info.globalLocation_ = Offset(0, 0);
+    richEditorPattern->HandleMouseLeftButtonPress(info);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+    richEditorPattern->textSelector_.Update(3, 3);
+    richEditorPattern->HandleMouseLeftButtonMove(info);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 3);
+
+    richEditorPattern->ResetSelection();
+    info.localLocation_ = Offset(50, 200);
+    info.globalLocation_ = Offset(50, 200);
+    richEditorPattern->HandleMouseLeftButtonPress(info);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
+    richEditorPattern->textSelector_.Update(3, 3);
+    richEditorPattern->HandleMouseLeftButtonMove(info);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 3);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
+}
 }

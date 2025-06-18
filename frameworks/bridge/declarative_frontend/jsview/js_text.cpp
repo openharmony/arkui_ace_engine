@@ -170,8 +170,8 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     if (!fontFamily->IsNull() && !fontFamily->IsUndefined()) {
         std::vector<std::string> fontFamilies;
         RefPtr<ResourceObject> fontFamiliesResObj;
-        font.fontFamilies = fontFamilies;
         if (JSContainerBase::ParseJsFontFamilies(fontFamily, fontFamilies, fontFamiliesResObj)) {
+            font.fontFamilies = fontFamilies;
             if (SystemProperties::ConfigChangePerform() && fontFamiliesResObj) {
                 RegisterResource<std::vector<std::string>>(
                     "FontFamily", fontFamiliesResObj, fontFamilies);
@@ -204,8 +204,6 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
         auto theme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         fontSize = theme->GetTextStyle().GetFontSize();
- 
- 
     }
     UnRegisterResource("FontSize");
     TextModel::GetInstance()->SetFontSize(fontSize);
@@ -636,11 +634,20 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
     JSRef<JSVal> args = info[0];
-    if (!ParseJsDimensionFpNG(args, value, false)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsDimensionFpNG(args, value, resObj, false)) {
         value.Reset();
         TextModel::GetInstance()->SetLetterSpacing(value);
         return;
+    } else if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<CalcDimension>("LetterSpacing", resObj, value);
+        return;
     }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<CalcDimension>("LetterSpacing", resObj, value);
+        return;
+    }
+    UnRegisterResource("LetterSpacing");
     TextModel::GetInstance()->SetLetterSpacing(value);
 }
 
@@ -1136,6 +1143,7 @@ void JSText::SetTextVerticalAlign(const JSCallbackInfo& info)
 void JSText::SetShaderStyle(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
+        TextModel::GetInstance()->ResetGradientShaderStyle();
         return;
     }
     NG::Gradient gradient;
@@ -1146,15 +1154,14 @@ void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient
 {
     CalcDimension value;
     auto shaderStyleObj = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> center = shaderStyleObj->GetProperty(static_cast<int32_t>(ArkUIIndex::CENTER));
-    JSRef<JSVal> radius = shaderStyleObj->GetProperty(static_cast<int32_t>(ArkUIIndex::RADIUS));
-    JSRef<JSVal> colors = shaderStyleObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLORS));
-    if (center->IsArray() && (radius->IsNumber() || radius->IsString())) {
+    if (shaderStyleObj->HasProperty("center") && shaderStyleObj->HasProperty("radius")) {
         NewJsRadialGradient(info, gradient);
         TextModel::GetInstance()->SetGradientShaderStyle(gradient);
-    } else if (colors->IsArray()) {
+    } else if (shaderStyleObj->HasProperty("colors")) {
         NewJsLinearGradient(info, gradient);
         TextModel::GetInstance()->SetGradientShaderStyle(gradient);
+    } else {
+        TextModel::GetInstance()->ResetGradientShaderStyle();
     }
 }
 

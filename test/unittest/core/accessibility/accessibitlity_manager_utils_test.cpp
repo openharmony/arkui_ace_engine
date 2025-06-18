@@ -40,6 +40,15 @@ class AccessibilityManagerUtilsTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+protected:
+    const int32_t CONTAINER_ID_1 = 100;
+    const int32_t CONTAINER_ID_2 = 200;
+    const int32_t PAGE_ID_1 = 1;
+    const int32_t PAGE_ID_2 = 2;
+
+    AccessibilityEvent eventA_ { .nodeId = 1};
+    AccessibilityEvent eventB_ { .nodeId = 2};
+    AccessibilityEvent eventC_ { .nodeId = 3};
 };
 
 void AccessibilityManagerUtilsTest::SetUpTestCase()
@@ -393,5 +402,171 @@ HWTEST_F(AccessibilityManagerUtilsTest, AddToHoverTransparentCallbackList010, Te
     * @tc.expected: check CheckHoverTransparentCallbackListEmpty return false.
     */
     EXPECT_FALSE(controller.CheckHoverTransparentCallbackListEmpty(1));
+}
+
+
+/**
+ * @tc.name: PageEventControllerTest011
+ * @tc.desc: controller page event test basic event addition and existence checks
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTest, PageEventControllerTest011, TestSize.Level1)
+{
+    PageEventController controller;
+    // Initial state should have no events
+    EXPECT_FALSE(controller.HasAnyAccessibilityEvent(CONTAINER_ID_1));
+    EXPECT_FALSE(controller.HasAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_1));
+
+    // Add event to container1/page1
+    controller.AddAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_1, eventA_);
+    
+    // Verify existence
+    EXPECT_TRUE(controller.HasAnyAccessibilityEvent(CONTAINER_ID_1));
+    EXPECT_TRUE(controller.HasAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_1));
+    EXPECT_FALSE(controller.HasAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_2)); // Different page
+    
+    // Add second event to container1/page2
+    controller.AddAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_2, eventB_);
+    EXPECT_TRUE(controller.HasAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_2));
+}
+
+/**
+ * @tc.name: PageEventControllerTest012
+ * @tc.desc: controller page event Test container isolation
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTest, PageEventControllerTest012, TestSize.Level1)
+{
+    PageEventController controller;
+    controller.AddAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_1, eventA_);
+    controller.AddAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_1, eventB_);
+    controller.AddAccessibilityEvent(CONTAINER_ID_2, PAGE_ID_1, eventC_);
+
+    // Verify container isolation
+    EXPECT_TRUE(controller.HasAnyAccessibilityEvent(CONTAINER_ID_1));
+    EXPECT_TRUE(controller.HasAnyAccessibilityEvent(CONTAINER_ID_2));
+    EXPECT_FALSE(controller.HasAnyAccessibilityEvent(999)); // Non-existent container
+}
+
+/**
+ * @tc.name: PageEventControllerTest013
+ * @tc.desc: controller page event Test releasing events for a specific page
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTest, PageEventControllerTest013, TestSize.Level1)
+{
+    PageEventController controller;
+    controller.AddAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_1, eventA_);
+    controller.AddAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_1, eventB_);
+    controller.AddAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_2, eventC_);
+
+    std::list<std::pair<int32_t, AccessibilityEvent>> releasedEvents;
+    
+    // Release all events for page1
+    controller.ReleaseAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_1, releasedEvents);
+    
+    // Verify released events
+    ASSERT_EQ(releasedEvents.size(), 2);
+    EXPECT_EQ(releasedEvents.front().first, PAGE_ID_1);
+    EXPECT_EQ(releasedEvents.front().second.nodeId, eventA_.nodeId);
+    releasedEvents.pop_front();
+    EXPECT_EQ(releasedEvents.front().second.nodeId, eventB_.nodeId);
+    
+    // Verify container state
+    EXPECT_TRUE(controller.HasAnyAccessibilityEvent(CONTAINER_ID_1)); // page2 still has events
+    EXPECT_FALSE(controller.HasAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_1));
+    EXPECT_TRUE(controller.HasAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_2));
+}
+
+/**
+ * @tc.name: PageEventControllerTest014
+ * @tc.desc: controller page event Test releasing all events for a container
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTest, PageEventControllerTest014, TestSize.Level1)
+{
+    PageEventController controller;
+    controller.AddAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_1, eventA_);
+    controller.AddAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_2, eventB_);
+    controller.AddAccessibilityEvent(CONTAINER_ID_2, PAGE_ID_1, eventC_);
+
+    std::list<std::pair<int32_t, AccessibilityEvent>> releasedEvents;
+    
+    // Release entire container1
+    controller.ReleaseAllAccessibilityEvent(CONTAINER_ID_1, releasedEvents);
+        
+    // Verify released events
+    ASSERT_EQ(releasedEvents.size(), 2);
+    auto it = releasedEvents.begin();
+    EXPECT_EQ(it->first, PAGE_ID_1);
+    EXPECT_EQ(it->second.nodeId, eventA_.nodeId);
+    ++it;
+    EXPECT_EQ(it->first, PAGE_ID_2);
+    EXPECT_EQ(it->second.nodeId, eventB_.nodeId);
+
+    // Verify container state
+    EXPECT_FALSE(controller.HasAnyAccessibilityEvent(CONTAINER_ID_1));
+    EXPECT_TRUE(controller.HasAnyAccessibilityEvent(CONTAINER_ID_2)); // Other container should remain
+}
+
+/**
+ * @tc.name: PageEventControllerTest015
+ * @tc.desc: controller page event Test edge cases and invalid operations
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTest, PageEventControllerTest015, TestSize.Level1)
+{
+    PageEventController controller;
+    std::list<std::pair<int32_t, AccessibilityEvent>> releasedEvents;
+    
+    // Release non-existent container
+    controller.ReleaseAccessibilityEvent(999, 1, releasedEvents);
+    EXPECT_TRUE(releasedEvents.empty());
+    
+    // Release non-existent page in existing container
+    controller.AddAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_1, eventA_);
+    controller.ReleaseAccessibilityEvent(CONTAINER_ID_1, 999, releasedEvents); // Non-existent page
+    EXPECT_TRUE(releasedEvents.empty()); // Should release nothing
+    EXPECT_TRUE(controller.HasAnyAccessibilityEvent(CONTAINER_ID_1));
+    
+    // Test automatic container cleanup
+    controller.AddAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_1, eventA_);
+    controller.ReleaseAccessibilityEvent(CONTAINER_ID_1, PAGE_ID_1, releasedEvents);
+    EXPECT_FALSE(controller.HasAnyAccessibilityEvent(CONTAINER_ID_1)); // Container should be auto-removed
+}
+
+/**
+ * @tc.name: PageEventControllerTest016
+ * @tc.desc: test DeleteInstanceControllerByInstance
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTest, PageEventControllerTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    PageEventController controller;
+    auto frameNode1 = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    auto context1 = AceType::MakeRefPtr<NG::PipelineContext>();
+    CHECK_NULL_VOID(frameNode1);
+    CHECK_NULL_VOID(context1);
+    context1->instanceId_ = 1;
+    frameNode1->AttachContext(AceType::RawPtr(context1), false);
+    auto frameNode2 = FrameNode::CreateFrameNode("framenode", 2, AceType::MakeRefPtr<Pattern>(), false);
+    auto context2 = AceType::MakeRefPtr<NG::PipelineContext>();
+    CHECK_NULL_VOID(frameNode2);
+    CHECK_NULL_VOID(context2);
+    context2->instanceId_ = 2;
+    frameNode2->AttachContext(AceType::RawPtr(context2), false);
+    /**
+    * @tc.steps: step2. add controller with instanceId.
+    * @tc.expected: delete with instanceid 1.
+    */
+    controller.Add(frameNode1);
+    controller.Add(frameNode2);
+
+    controller.DeleteInstanceControllerByInstance(1);
+    EXPECT_TRUE(controller.CheckEmpty(1));
+    EXPECT_FALSE(controller.CheckEmpty(2));
 }
 } // namespace OHOS::Ace::NG

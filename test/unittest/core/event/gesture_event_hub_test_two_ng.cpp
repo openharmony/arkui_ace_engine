@@ -348,53 +348,6 @@ HWTEST_F(GestureEventHubTestNg, GestureRecognizerJudgeFunc001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetDragData001
- * @tc.desc: Test SetDragData function when user has not set the onDragStart callback.
- * @tc.type: FUNC
- */
-HWTEST_F(GestureEventHubTestNg, SetDragData001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create GestureEventHub.
-     * @tc.expected: gestureEventHub is not null.
-     */
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    EXPECT_TRUE(eventHub);
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    EXPECT_TRUE(gestureEventHub);
-
-    /**
-     * @tc.steps: step2. set OnDragStart for eventHub
-     *            case: user not set onDragStart callback function
-     */
-    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto defaultOnDragStart = [](const RefPtr<OHOS::Ace::DragEvent>& dragEvent, const std::string& /* param */) {
-        DragDropInfo dragDropInfo;
-        auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
-        dragEvent->SetData(unifiedData);
-        dragDropInfo.extraInfo = "default extraInfo";
-        return dragDropInfo;
-    };
-    eventHub->SetDefaultOnDragStart(std::move(defaultOnDragStart));
-    EXPECT_TRUE(eventHub->GetDefaultOnDragStart());
-
-    /**
-     * @tc.steps: step3. Call GetUnifiedData function
-     *            case: Do not set default onDragStart function
-     * @tc.expected: unifiedData is not null, extraInfo is not empty.
-     */
-    DragDropInfo dragDropInfo;
-    auto unifiedData = gestureEventHub->GetUnifiedData("", dragDropInfo, dragEvent);
-    EXPECT_TRUE(dragEvent->GetData());
-    EXPECT_EQ(dragDropInfo.extraInfo, "default extraInfo");
-
-    auto newUnifiedData = AceType::MakeRefPtr<MockUnifiedData>();
-    ASSERT_NE(newUnifiedData, nullptr);
-    std::string udKey;
-    auto ret = gestureEventHub->SetDragData(newUnifiedData, udKey);
-    EXPECT_NE(ret, -1);
-}
-/**
  * @tc.name: SetMouseDragMonitorState
  * @tc.desc: Test SetMouseDragMonitorState function
  * @tc.type: FUNC

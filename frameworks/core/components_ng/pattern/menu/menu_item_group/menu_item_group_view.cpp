@@ -50,13 +50,6 @@ void MenuItemGroupView::Create()
     stack->Push(menuItemGroup);
 }
 
-RefPtr<FrameNode> MenuItemGroupView::CreateFrameNode(int32_t nodeId)
-{
-    const std::function<RefPtr<Pattern>(void)>& patternCreator =
-        []() { return AceType::MakeRefPtr<MenuItemGroupPattern>(); };
-    return FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, nodeId, patternCreator);
-}
-
 void MenuItemGroupView::SetHeader(const RefPtr<UINode>& header)
 {
     CHECK_NULL_VOID(header);
@@ -144,92 +137,6 @@ void MenuItemGroupView::SetFooter(const std::string& footerStr)
     layoutProps->UpdateMaxLines(1);
     layoutProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     pattern->AddFooterContent(content);
-    pattern->AddFooter(row);
-}
-
-void MenuItemGroupView::SetHeader(FrameNode* frameNode, const std::optional<std::string>& header)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    auto content = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    CHECK_NULL_VOID(row && content);
-    UpdateRowPadding(row);
-    content->MountToParent(row);
-    auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(layoutProps);
-    layoutProps->UpdateContent(header.value_or(" "));
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        layoutProps->UpdateFontSize(theme->GetMenuItemGroupTitleTextFontSize());
-        layoutProps->UpdateFontWeight(FontWeight::BOLD);
-        layoutProps->UpdateTextColor(theme->GetMenuTextColor());
-    } else {
-        layoutProps->UpdateFontSize(theme->GetMenuFontSize());
-        layoutProps->UpdateTextColor(theme->GetSecondaryFontColor());
-    }
-    layoutProps->UpdateMaxLines(1);
-    layoutProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    pattern->AddHeaderContent(content);
-    pattern->AddHeader(row);
-}
-
-void MenuItemGroupView::SetFooter(FrameNode* frameNode, const std::optional<std::string>& footer)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    auto content = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    CHECK_NULL_VOID(row && content);
-    UpdateRowPadding(row);
-    content->MountToParent(row);
-    auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(layoutProps);
-    layoutProps->UpdateContent(footer.value_or(" "));
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    layoutProps->UpdateTextColor(theme->GetSecondaryFontColor());
-    layoutProps->UpdateFontSize(theme->GetMenuFontSize());
-    layoutProps->UpdateMaxLines(1);
-    layoutProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    pattern->AddFooterContent(content);
-    pattern->AddFooter(row);
-}
-
-void MenuItemGroupView::SetHeader(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    UpdateRowPadding(row);
-    RefPtr<UINode> unitNode = builder();
-    unitNode->MountToParent(row);
-    pattern->AddHeader(row);
-}
-
-void MenuItemGroupView::SetFooter(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    UpdateRowPadding(row);
-    RefPtr<UINode> unitNode = builder();
-    unitNode->MountToParent(row);
     pattern->AddFooter(row);
 }
 } // namespace OHOS::Ace::NG

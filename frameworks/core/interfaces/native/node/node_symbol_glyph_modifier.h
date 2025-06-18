@@ -21,6 +21,9 @@
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUISymbolGlyphModifier* GetSymbolGlyphModifier();
 const CJUISymbolGlyphModifier* GetCJUISymbolGlyphModifier();
+
+template<typename T>
+void ProcessResourceObj(FrameNode* frameNode, std::string key, T value, void* objRawPtr);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SYMBOL_GLYPH_MODIFIER_H

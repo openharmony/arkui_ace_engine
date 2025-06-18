@@ -34,23 +34,19 @@ std::optional<SizeF> ShapeContainerLayoutAlgorithm::MeasureContent(
     }
     auto newSize = contentConstraint.maxSize;
 
-    // When the width and height are both not specified, shape size is determined by viewport's size.
-    if (contentConstraint.selfIdealSize.IsNull()) {
-        if (GreatNotEqual(portWidth, 0.0) && GreatNotEqual(portHeight, 0.0)) {
-            return contentConstraint.Constrain(SizeF(portWidth, portHeight));
-        }
-    }
-
     // When the width and height are both specified, shape size will not be influenced by viewport.
     if (contentConstraint.selfIdealSize.IsValid()) {
         return contentConstraint.selfIdealSize.ConvertToSizeT();
     }
 
-    // When only the width is not specified, width = (contentSize.Height() / portHeight) * portWidth
-    // When only the height is not specified, height = (contentSize.Width() / portWidth) * portHeight
     bool hasDefineWidth = contentConstraint.selfIdealSize.Width().has_value();
     bool hasDefineHeight = contentConstraint.selfIdealSize.Height().has_value();
-    if (hasDefineWidth && !hasDefineHeight && GreatNotEqual(portWidth, 0.0)) {
+    // When the width and height are both not specified, shape size is determined by viewport's size.
+    // When only the width is not specified, width = (contentSize.Height() / portHeight) * portWidth
+    // When only the height is not specified, height = (contentSize.Width() / portWidth) * portHeight
+    if (contentConstraint.selfIdealSize.IsNull() && GreatNotEqual(portWidth, 0.0) && GreatNotEqual(portHeight, 0.0)) {
+        newSize = contentConstraint.Constrain(SizeF(portWidth, portHeight));
+    } else if (hasDefineWidth && !hasDefineHeight && GreatNotEqual(portWidth, 0.0)) {
         auto selfWidth = contentConstraint.selfIdealSize.Width().value();
         auto newHeight = (selfWidth / portWidth) * portHeight;
         newSize = contentConstraint.Constrain(SizeF(selfWidth, newHeight));
@@ -59,7 +55,20 @@ std::optional<SizeF> ShapeContainerLayoutAlgorithm::MeasureContent(
         auto newWidth = (selfHeight / portHeight) * portWidth;
         newSize = contentConstraint.Constrain(SizeF(newWidth, selfHeight));
     } else {
-        return contentConstraint.Constrain(GetChildrenSize(layoutWrapper, newSize));
+        newSize = contentConstraint.Constrain(GetChildrenSize(layoutWrapper, newSize));
+    }
+    // if width or height is matchParent
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    if (layoutProperty) {
+        auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+        if (layoutPolicy.has_value()) {
+            if (layoutPolicy->IsWidthMatch() && contentConstraint.parentIdealSize.Width().has_value()) {
+                newSize.SetWidth(contentConstraint.parentIdealSize.Width().value());
+            }
+            if (layoutPolicy->IsHeightMatch() && contentConstraint.parentIdealSize.Height().has_value()) {
+                newSize.SetHeight(contentConstraint.parentIdealSize.Height().value());
+            }
+        }
     }
     return newSize;
 }

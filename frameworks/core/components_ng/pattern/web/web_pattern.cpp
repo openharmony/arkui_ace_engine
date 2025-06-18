@@ -679,10 +679,12 @@ void WebPattern::RemovePreviewMenuNode()
 
 bool WebPattern::IsPreviewMenuNotNeedShowPreview()
 {
-    bool isNotNeedShowPreview = (isNewDragStyle_ && IsPreviewImageNodeExist()) || imageOverlayIsSelected_;
+    bool isNotNeedShowPreview =
+        ((isNewDragStyle_ || isAILinkMenuShow_) && IsPreviewImageNodeExist()) || imageOverlayIsSelected_;
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "IsPreviewMenuNotNeedShowPreview:%{public}d, temporarily for AI entity popup: %{public}d",
-        isNotNeedShowPreview, imageOverlayIsSelected_);
+        "IsPreviewMenuNotNeedShowPreview:%{public}d, for AI link preview menu %{public}d, for AI entity popup: "
+        "%{public}d",
+        isNotNeedShowPreview, isAILinkMenuShow_, imageOverlayIsSelected_);
     return isNotNeedShowPreview;
 }
 
@@ -700,6 +702,7 @@ void WebPattern::SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelecti
         webPattern->RemovePreviewMenuNode();
         CHECK_NULL_VOID(webPattern->contextMenuResult_);
         webPattern->contextMenuResult_->Cancel();
+        webPattern->SetAILinkMenuShow(false);
     };
     param->menuParam.onDisappear = std::move(onPreviewMenuDisappear);
     auto key = std::make_pair(param->type, param->responseType);
@@ -807,11 +810,14 @@ RefPtr<FrameNode> WebPattern::CreatePreviewImageFrameNode(bool isImage)
 void WebPattern::CreateSnapshotImageFrameNode(const std::string& snapshotPath)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CreateSnapshotImageFrameNode");
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "blankless already create snapshot image node!");
+        return;
+    }
     if (!IsSnapshotPathValid(snapshotPath)) {
         TAG_LOGE(AceLogTag::ACE_WEB, "blankless snapshot path is invalid!");
         return;
     }
-    RemoveSnapshotFrameNode();
     snapshotImageNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
     auto snapshotNode = FrameNode::GetOrCreateFrameNode(
         V2::IMAGE_ETS_TAG, snapshotImageNodeId_.value(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -845,11 +851,11 @@ void WebPattern::RemoveSnapshotFrameNode()
     }
     TAG_LOGI(AceLogTag::ACE_WEB, "RemoveSnapshotFrameNode");
     auto snapshotNode = FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, snapshotImageNodeId_.value());
+    snapshotImageNodeId_.reset();
     CHECK_NULL_VOID(snapshotNode);
     auto parent = snapshotNode->GetParent();
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(snapshotNode);
-    snapshotImageNodeId_.reset();
     parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -892,6 +898,11 @@ void WebPattern::UpdateImagePreviewParam()
     auto previewNode =
         FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, previewImageNodeId_.value());
     CHECK_NULL_VOID(previewNode);
+    if (curElementType_ == WebElementType::AILINK && GetDataDetectorEnable()) {
+        if (!webDataDetectorAdapter_->GetPreviewMenuBuilder(params->menuBuilder, params->previewBuilder)) {
+            return;
+        }
+    }
     ViewStackProcessor::GetInstance()->Push(previewNode);
     ViewAbstractModel::GetInstance()->BindContextMenu(
         curResponseType_, params->menuBuilder, params->menuParam, params->previewBuilder);
@@ -926,7 +937,8 @@ void WebPattern::ShowPreviewMenu(WebElementType type) {
         delegate_->OnContextMenuHide("");
         return;
     }
-
+    isAILinkMenuShow_ = (type == WebElementType::AILINK);
+    TAG_LOGI(AceLogTag::ACE_WEB, "ShowPreviewMenu for AI link: %{public}d", isAILinkMenuShow_);
     host->AddChild(previewNode);
     previewNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     previewNode->MarkModifyDone();
@@ -947,7 +959,13 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
     CHECK_NULL_VOID(contextMenuResult_);
     bool isImage = false;
     bool isHyperLink = false;
+    bool isAILink = !contextMenuParam_->GetLinkUrl().empty() && contextMenuParam_->IsAILink() &&
+                GetDataDetectorEnable() && webDataDetectorAdapter_->GetDataDetectorEnablePrewiew();
+    auto copyOption =
+        delegate_ ? delegate_->GetCopyOptionMode() : OHOS::NWeb::NWebPreference::CopyOptionMode::LOCAL_DEVICE;
+    isAILink = isAILink && copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY)) {
+        CHECK_NULL_VOID(delegate_);
         int hitTestResult = delegate_->GetLastHitTestResult();
         TAG_LOGI(AceLogTag::ACE_WEB, "OnContextMenuShow hitTestResult:%{public}d, isAILink:%{public}d", hitTestResult,
             contextMenuParam_->IsAILink());
@@ -983,18 +1001,25 @@ void WebPattern::OnContextMenuShow(const std::shared_ptr<BaseEventInfo>& info, b
         ShowContextSelectOverlay(RectF(), RectF());
         return;
     }
-    CHECK_NULL_VOID(isNewDragStyle_ && result);
+    CHECK_NULL_VOID((isNewDragStyle_ || isAILink) && result);
     TAG_LOGD(AceLogTag::ACE_WEB, "OnContextMenuShow isImage:%{public}d, isHyperLink:%{public}d", isImage, isHyperLink);
     if (isImage) {
         ShowPreviewMenu(WebElementType::IMAGE);
     } else if (isHyperLink) {
         ShowPreviewMenu(WebElementType::LINK);
+    } else if (isAILink) {
+        CHECK_NULL_VOID(webDataDetectorAdapter_);
+        if (!webDataDetectorAdapter_->SetPreviewMenuLink(contextMenuParam_->GetLinkUrl())) {
+            return;
+        }
+        ShowPreviewMenu(WebElementType::AILINK);
     }
 }
 
 void WebPattern::OnContextMenuHide()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern OnContextMenuHide");
+    isAILinkMenuShow_ = false;
     if (webData_) {
         CloseContextSelectionMenu();
         return;
@@ -1250,6 +1275,10 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void WebPattern::HandleFlingMove(const GestureEvent& event)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle fling move!");
+        return;
+    }
     if ((event.GetInputEventType() == InputEventType::AXIS) &&
         (event.GetSourceTool() == SourceTool::TOUCHPAD)) {
         CHECK_NULL_VOID(delegate_);
@@ -1268,6 +1297,10 @@ void WebPattern::HandleFlingMove(const GestureEvent& event)
 
 void WebPattern::HandleDragMove(const GestureEvent& event)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle drag move!");
+        return;
+    }
     if (event.GetInputEventType() == InputEventType::AXIS) {
         CHECK_NULL_VOID(delegate_);
         auto localLocation = event.GetLocalLocation();
@@ -1424,6 +1457,10 @@ bool WebPattern::ZoomOutAndIn(const double& curScale, double& scale)
 
 void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle scale gesture change!");
+        return;
+    }
     CHECK_NULL_VOID(delegate_);
 
     double curScale = event.GetScale();
@@ -1555,6 +1592,10 @@ double WebPattern::GetNewOriginScale(double originScale) const
 
 void WebPattern::HandleScaleGestureStart(const GestureEvent& event)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle scale gesture start!");
+        return;
+    }
     CHECK_NULL_VOID(delegate_);
 
     double scale = event.GetScale();
@@ -1571,6 +1612,10 @@ void WebPattern::HandleScaleGestureStart(const GestureEvent& event)
 
 void WebPattern::HandleScaleGestureEnd(const GestureEvent& event)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle scale gesture end!");
+        return;
+    }
     CHECK_NULL_VOID(delegate_);
 
     double scale = event.GetScale();
@@ -1587,6 +1632,10 @@ void WebPattern::HandleScaleGestureEnd(const GestureEvent& event)
 
 void WebPattern::HandleScaleGestureCancel(const GestureEvent& event)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle scale gesture cancel!");
+        return;
+    }
     CHECK_NULL_VOID(delegate_);
 
     double scale = event.GetScale();
@@ -1670,6 +1719,10 @@ void WebPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
 
 void WebPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle touch event!");
+        return;
+    }
     touchEventInfo_ = info;
     const auto& changedPoint = info.GetChangedTouches().front();
     if (changedPoint.GetTouchType() == TouchType::DOWN ||
@@ -1699,6 +1752,10 @@ void WebPattern::HandleTouchEvent(const TouchEventInfo& info)
 
 void WebPattern::HandleMouseEvent(MouseInfo& info)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle mouse event!");
+        return;
+    }
     if (info.GetAction() != MouseAction::MOVE) {
         TAG_LOGI(AceLogTag::ACE_WEB,
             "WebPattern::HandleMouseEvent, web id %{public}d, Action %{public}d, Button %{public}d",
@@ -1723,6 +1780,9 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
 
 void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        return;
+    }
     if (mouseEventDeviceId_ != info.GetDeviceId()) {
         mouseEventDeviceId_ = info.GetDeviceId();
     }
@@ -1944,6 +2004,10 @@ bool WebPattern::GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo)
 
 NG::DragDropInfo WebPattern::HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle on drag start!");
+        return NG::DragDropInfo();
+    }
     isDragging_ = true;
     isReceivedArkDrag_ = true;
     isDragStartFromWeb_ = true;
@@ -2007,6 +2071,10 @@ void WebPattern::OnDragFileNameStart(const RefPtr<UnifiedData>& aceUnifiedData, 
 
 void WebPattern::HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle on drag move!");
+        return;
+    }
     if (!isDragging_) {
         return;
     }
@@ -2209,7 +2277,7 @@ bool WebPattern::NotifyStartDragTask(bool isDelayed)
     auto gestureHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, false);
     CHECK_NULL_RETURN(delegate_, false);
-    if (curContextMenuResult_ && (!isNewDragStyle_ || !previewImageNodeId_.has_value())) {
+    if (curContextMenuResult_ && (!(isNewDragStyle_ || isAILinkMenuShow_) || !previewImageNodeId_.has_value())) {
         TAG_LOGI(AceLogTag::ACE_WEB,
             "preview menu is not displayed, and the app is notified to close the long-press menu");
         delegate_->OnContextMenuHide("");
@@ -2289,6 +2357,10 @@ void WebPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void WebPattern::HandleDragStart(int32_t x, int32_t y)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle drag start!");
+        return;
+    }
     TAG_LOGI(AceLogTag::ACE_WEB,
         "HandleDragStart DragDrop event actionStart, isDragStartFromWeb_:%{public}d, isMouseEvent_:%{public}d",
         (int)isDragStartFromWeb_, (int)isMouseEvent_);
@@ -2322,6 +2394,10 @@ void WebPattern::HandleDragStart(int32_t x, int32_t y)
 
 void WebPattern::HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle on drag enter!");
+        return;
+    }
     if (!delegate_) {
         return;
     }
@@ -2408,6 +2484,9 @@ void WebPattern::ResetDragStateValue()
 
 void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        return;
+    }
     ResetDragStateValue();
     CHECK_NULL_VOID(delegate_);
     auto host = GetHost();
@@ -2464,6 +2543,10 @@ void WebPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
 
 void WebPattern::HandleOnDragLeave(int32_t x, int32_t y)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle on drag leave!");
+        return;
+    }
     CHECK_NULL_VOID(delegate_);
     isDragging_ = false;
     isW3cDragEvent_ = false;
@@ -2481,6 +2564,10 @@ void WebPattern::HandleOnDragLeave(int32_t x, int32_t y)
 
 void WebPattern::HandleDragEnd(int32_t x, int32_t y)
 {
+    if (snapshotImageNodeId_.has_value()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "blankless during snapshot image, no need to handle drag end!");
+        return;
+    }
     CHECK_NULL_VOID(delegate_);
 
     isDragging_ = false;
@@ -2624,6 +2711,9 @@ void WebPattern::HandleBlurEvent(const BlurReason& blurReason)
         delegate_->OnBlur();
     }
     OnQuickMenuDismissed();
+    if (webSelectOverlay_ && !webSelectOverlay_->IsSingleHandle()) {
+        SelectCancel();
+    }
     CloseContextSelectionMenu();
     if (!isVisible_ && isActive_ && IsDialogNested()) {
         TAG_LOGI(AceLogTag::ACE_WEB, "HandleBlurEvent, dialog nested blur but invisible while active, set inactive.");
@@ -3418,10 +3508,6 @@ void WebPattern::OnAttachContext(PipelineContext *context)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int32_t nodeId = host->GetId();
-    auto dragDropManager = pipelineContext->GetDragDropManager();
-    if (dragDropManager) {
-        dragDropManager->AddDragFrameNode(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
-    }
 
     pipelineContext->AddWindowStateChangedCallback(nodeId);
     pipelineContext->AddWindowSizeChangeCallback(nodeId);
@@ -3455,11 +3541,6 @@ void WebPattern::OnDetachContext(PipelineContext *contextPtr)
 
     if (observer_) {
         observer_->OnDetachContext();
-    }
-
-    auto dragDropManager = context->GetDragDropManager();
-    if (dragDropManager) {
-        dragDropManager->RemoveDragFrameNode(nodeId);
     }
 
     if (tooltipId_ != -1) {
@@ -4042,15 +4123,33 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         height, keyboard, keyboardSafeAreaEnabled);
     if (!isFocus_ || !isVisible_) {
         UpdateOnFocusTextField(false);
-        ProcessVirtualKeyBoardHide(width, height, keyboardSafeAreaEnabled);
+        ProcessVirtualKeyBoardHideAvoidMenu(width, height, keyboardSafeAreaEnabled);
         return false;
     }
     UpdateOnFocusTextField(!NearZero(keyboard));
     if (NearZero(keyboard)) {
-        return ProcessVirtualKeyBoardHide(width, height, keyboardSafeAreaEnabled) && UpdateKeyboardSafeArea(true);
+        return ProcessVirtualKeyBoardHideAvoidMenu(width, height, keyboardSafeAreaEnabled);
     }
-    return ProcessVirtualKeyBoardShow(width, height, keyboard, keyboardSafeAreaEnabled) &&
-           UpdateKeyboardSafeArea(false, keyboard);
+    return ProcessVirtualKeyBoardShowAvoidMenu(width, height, keyboard, keyboardSafeAreaEnabled);
+}
+
+bool WebPattern::ProcessVirtualKeyBoardShowAvoidMenu(
+    int32_t width, int32_t height, double keyboard, bool safeAreaEnabled)
+{
+    if (ProcessVirtualKeyBoardShow(width, height, keyboard, safeAreaEnabled)) {
+        MenuAvoidKeyboard(false, keyboard);
+        return true;
+    }
+    return false;
+}
+
+bool WebPattern::ProcessVirtualKeyBoardHideAvoidMenu(int32_t width, int32_t height, bool safeAreaEnabled)
+{
+    if (ProcessVirtualKeyBoardHide(width, height, safeAreaEnabled)) {
+        MenuAvoidKeyboard(true);
+        return true;
+    }
+    return false;
 }
 
 void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate)
@@ -5118,7 +5217,7 @@ void WebPattern::CloseCustomKeyboard()
     keyboardOverlay_->CloseKeyboard(frameNode->GetId());
     isUsingCustomKeyboardAvoid_ = false;
     TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard CloseCustomKeyboard end");
-    UpdateKeyboardSafeArea(true);
+    MenuAvoidKeyboard(true);
 }
 
 void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp)
@@ -5818,9 +5917,14 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
 
     isVisible_ = isVisible;
     if (!isVisible_) {
+        if (webSelectOverlay_) {
+            webSelectOverlay_->UpdateSingleHandleVisible(false);
+        }
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
         CloseSelectOverlay();
-        SelectCancel();
+        if (webSelectOverlay_ && !webSelectOverlay_->IsSingleHandle()) {
+            SelectCancel();
+        }
         DestroyAnalyzerOverlay();
         CloseDataDetectorMenu();
         OnTooltip("");
@@ -7069,7 +7173,7 @@ void WebPattern::RemoveDataListNode()
 
 void WebPattern::CloseKeyboard()
 {
-    UpdateKeyboardSafeArea(true);
+    MenuAvoidKeyboard(true);
     InputMethodManager::GetInstance()->CloseKeyboard();
 }
 
@@ -7903,7 +8007,7 @@ void WebPattern::CloseDataDetectorMenu()
     CHECK_NULL_VOID(webDataDetectorAdapter_);
     webDataDetectorAdapter_->CloseAIMenu();
 }
-bool WebPattern::UpdateKeyboardSafeArea(bool hideOrClose, double height)
+bool WebPattern::MenuAvoidKeyboard(bool hideOrClose, double height)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -7911,12 +8015,12 @@ bool WebPattern::UpdateKeyboardSafeArea(bool hideOrClose, double height)
     CHECK_NULL_RETURN(pipeline, false);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, false);
-    auto keyboardInset = safeAreaManager->GetKeyboardInset();
+    auto keyboardInset = safeAreaManager->GetKeyboardWebInset();
     if (hideOrClose) {
         auto newBottom = std::optional<uint32_t>(keyboardInset.end);
-        safeAreaManager->UpdateKeyboardSafeArea(0, newBottom);
+        safeAreaManager->UpdateKeyboardWebSafeArea(0, newBottom);
     } else {
-        safeAreaManager->UpdateKeyboardSafeArea(height);
+        safeAreaManager->UpdateKeyboardWebSafeArea(height);
     }
     return true;
 }
@@ -7940,6 +8044,31 @@ void WebPattern::SendPipEvent(int delegateId, int childId, int frameRoutingId, i
     if (delegate_) {
         delegate_->SendPipEvent(delegateId, childId, frameRoutingId, event);
     }
+}
+
+bool WebPattern::CheckVisible()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+
+    if (!host->IsActive() || !host->IsVisible()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CheckVisible host is inactive or invisible");
+        return false;
+    }
+
+    auto parent = host->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        if (parent->IsWindowBoundary()) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CheckVisible IsWindowBoundary is true");
+            return true;
+        }
+        if (!parent->IsActive() || !parent->IsVisible()) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::CheckVisible parent is inactive or invisible");
+            return false;
+        }
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return true;
 }
 
 bool WebPattern::Pip(int status,
@@ -8191,6 +8320,23 @@ void WebPattern::OnBypassVsyncConditionUpdate(WebBypassVsyncCondition condition)
 void WebPattern::SetDefaultBackgroundColor()
 {
     needSetDefaultBackgroundColor_ = true;
+}
+
+void WebPattern::UpdateSingleHandleVisible(bool isVisible)
+{
+    if (delegate_) {
+        delegate_->UpdateSingleHandleVisible(isVisible);
+    }
+}
+
+void WebPattern::OnShowMagnifier()
+{
+    ShowMagnifier(static_cast<int>(touchPointX), static_cast<int>(touchPointY));
+}
+
+void WebPattern::OnHideMagnifier()
+{
+    HideMagnifier();
 }
 
 } // namespace OHOS::Ace::NG

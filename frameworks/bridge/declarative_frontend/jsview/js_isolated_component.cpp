@@ -140,7 +140,7 @@ void JSIsolatedComponent::JsOnError(const JSCallbackInfo& info)
             obj->SetProperty<std::string>("name", name);
             obj->SetProperty<std::string>("message", message);
             auto returnValue = JSRef<JSVal>::Cast(obj);
-            func->ExecuteJS(1, &returnValue);
+            func->ExecuteJSWithContext(1, &returnValue, execCtx);
         };
     UIExtensionModel::GetInstance()->SetPlatformOnError(std::move(onError));
 }

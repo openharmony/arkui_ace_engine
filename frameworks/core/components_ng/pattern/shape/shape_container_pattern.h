@@ -42,6 +42,11 @@ public:
         return true;
     }
 
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<ShapeContainerLayoutAlgorithm>();

@@ -64,6 +64,8 @@ public:
     static ArkUINativeModuleValue ResetOpacity(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetAlign(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetAlign(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetLayoutGravity(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetLayoutGravity(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackdropBlur(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackdropBlur(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetHueRotate(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -321,11 +323,9 @@ public:
         ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, bool& repeat, int32_t& duration,
         bool& limitFingerCount, uint32_t argNumber);
     static void GetPanGestureValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction,
-        PanDistanceMap& distanceMap, bool& limitFingerCount, uint32_t argNumber);
+        PanDistanceMapDimension& distanceMap, bool& limitFingerCount, uint32_t argNumber);
     static Local<panda::ObjectRef> CreateTapGestureLocationInfo(
         EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info);
-    static Local<panda::ObjectRef> CreateTapGestureLocationEvent(
-        EcmaVM* vm, GestureTypeName typeName, const std::shared_ptr<BaseGestureEvent>& info);    
     static void GetSwipeGestureValue(
         ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction, double& speed,
         bool& limitFingerCount, uint32_t argNumber);

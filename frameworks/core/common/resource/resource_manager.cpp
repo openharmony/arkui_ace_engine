@@ -30,7 +30,8 @@ ResourceManager& ResourceManager::GetInstance()
     return instance;
 }
 
-RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(const RefPtr<ResourceObject>& resourceObject)
+RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(const RefPtr<ResourceObject>& resourceObject,
+    bool fromTheme)
 {
     int32_t instanceId = resourceObject->GetInstanceId();
     std::string bundleName = resourceObject->GetBundleName();
@@ -38,7 +39,7 @@ RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(const RefPtr
 
     auto resourceAdapter = GetResourceAdapter(bundleName, moduleName, instanceId);
     if (resourceAdapter == nullptr) {
-        resourceAdapter = ResourceAdapter::CreateNewResourceAdapter(bundleName, moduleName);
+        resourceAdapter = ResourceAdapter::CreateNewResourceAdapter(bundleName, moduleName, fromTheme);
         if (!resourceAdapter) {
             return GetResourceAdapter(DEFAULT_BUNDLE_NAME, DEFAULT_MODULE_NAME, instanceId);
         }

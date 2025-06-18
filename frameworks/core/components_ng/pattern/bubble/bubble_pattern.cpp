@@ -263,9 +263,7 @@ void BubblePattern::ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& but
 {
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PopupTheme>();
+    auto theme = GetPopupTheme();
     CHECK_NULL_VOID(theme);
     isHover_ = isHover;
     auto hoverColor = theme->GetButtonHoverColor();
@@ -327,9 +325,7 @@ void BubblePattern::ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::F
     auto touchType = info.GetTouches().front().GetTouchType();
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PopupTheme>();
+    auto theme = GetPopupTheme();
     CHECK_NULL_VOID(theme);
     auto pressColor = theme->GetButtonPressColor();
     auto hoverColor = theme->GetButtonHoverColor();
@@ -446,7 +442,9 @@ void BubblePattern::PopTipsBubble()
 
 RefPtr<PopupTheme> BubblePattern::GetPopupTheme()
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, nullptr);
@@ -466,7 +464,9 @@ void BubblePattern::Animation(
 
 bool BubblePattern::PostTask(const TaskExecutor::Task& task, const std::string& name)
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);

@@ -333,12 +333,10 @@ abstract class ViewPU extends PUV2ViewBase
         this.onInactiveInternal();
       }
     }
-    for (const child of this.childrenWeakrefMap_.values()) {
-      const childView: IView | undefined = child.deref();
-      if (childView) {
-        childView.setActiveInternal(active, isReuse);
-      }
-    }
+    // Propagate state to all child View
+    this.propagateToChildren(this.childrenWeakrefMap_, active, isReuse);
+    // Propagate state to all child BuilderNode
+    this.propagateToChildren(this.builderNodeWeakrefMap_, active, isReuse);
     stateMgmtProfiler.end();
   }
 
@@ -387,7 +385,7 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtProfiler.end();
   }
 
-  public UpdateElement(elmtId: number): void {
+  public UpdateElement(elmtId: number, dirtElmtIdsFromRootNode: Array<number> = new Array<number>()): void {
     stateMgmtProfiler.begin('ViewPU.UpdateElement');
     if (elmtId === this.id__()) {
       // do not attempt to update itself.
@@ -417,7 +415,15 @@ abstract class ViewPU extends PUV2ViewBase
       stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: re-render of ${entry.getComponentName()} elmtId ${elmtId} start ...`);
       this.isRenderInProgress = true;
       stateMgmtProfiler.begin('ViewPU.updateFunc');
-      updateFunc(elmtId, /* isFirstRender */ false);
+      try {
+        updateFunc(elmtId, /* isFirstRender */ false);
+      } catch (error) {
+        for (const dirtEId of dirtElmtIdsFromRootNode) {
+          stateMgmtConsole.applicationError(`${this.debugInfo__()}: dirty element ${this.updateFuncByElmtId.get(dirtEId)?.getComponentName()} with id ${dirtEId}, isPending: ${this.updateFuncByElmtId.get(dirtEId)?.isPending()}`);
+        }
+        stateMgmtConsole.applicationError(`${this.debugInfo__()}: UpdateElement: re-render of ${entry.getComponentName()} elmtId ${elmtId} has error in update func: ${error.message}`);
+        throw error;
+      }
       stateMgmtProfiler.end();
       stateMgmtProfiler.begin('ViewPU.finishUpdateFunc (native)');
       this.finishUpdateFunc(elmtId);
@@ -638,11 +644,17 @@ abstract class ViewPU extends PUV2ViewBase
    * @returns initializing value of the @Consume backing store
    */
   protected initializeConsume<T>(providedPropName: string,
-    consumeVarName: string): ObservedPropertyAbstractPU<T> {
+    consumeVarName: string, defaultValue?: any): ObservedPropertyAbstractPU<T> {
     let providedVarStore: ObservedPropertyAbstractPU<any> = this.findProvidePU(providedPropName);
-    if (providedVarStore === undefined) {
-      throw new ReferenceError(`${this.debugInfo__()} missing @Provide property with name ${providedPropName}.
+    // '3' means that developer has initialized the @Consume decorated variable
+    if (!providedVarStore) {
+      if (arguments.length === 3) {
+        providedVarStore = new ObservedPropertySimplePU(defaultValue, this, consumeVarName);
+        providedVarStore.__setIsFake_ObservedPropertyAbstract_Internal(true);
+      } else {
+        throw new ReferenceError(`${this.debugInfo__()} missing @Provide property with name ${providedPropName}.
           Fail to resolve @Consume(${providedPropName}).`);
+      }
     }
 
     const factory = <T>(source: ObservedPropertyAbstract<T>) => {
@@ -689,9 +701,9 @@ abstract class ViewPU extends PUV2ViewBase
       // to newly created this.dirtDescendantElementIds_ Set
       dirtElmtIdsFromRootNode.forEach(elmtId => {
         if (this.hasRecycleManager()) {
-          this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId));
+          this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId), dirtElmtIdsFromRootNode);
         } else {
-          this.UpdateElement(elmtId);
+          this.UpdateElement(elmtId, dirtElmtIdsFromRootNode);
         }
         this.dirtDescendantElementIds_.delete(elmtId);
       });

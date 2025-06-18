@@ -27,6 +27,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/core/common/card_scope.h"
 #include "frameworks/core/common/resource/resource_configuration.h"
+#include "frameworks/core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -126,14 +127,14 @@ bool ArkTSUtils::ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRe
     return true;
 }
 
-bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result)
+bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, bool fromTheme)
 {
     RefPtr<ResourceObject> resourceObject;
-    return ParseJsColorAlpha(vm, value, result, resourceObject);
+    return ParseJsColorAlpha(vm, value, result, resourceObject, fromTheme);
 }
 
 bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
-    RefPtr<ResourceObject>& resourceObject)
+    RefPtr<ResourceObject>& resourceObject, bool fromTheme)
 {
     if (value->IsNumber()) {
         result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
@@ -146,7 +147,7 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
         if (ParseColorMetricsToColor(vm, value, result)) {
             return true;
         }
-        return ParseJsColorFromResource(vm, value, result, resourceObject);
+        return ParseJsColorFromResource(vm, value, result, resourceObject, fromTheme);
     }
     return false;
 }
@@ -275,12 +276,12 @@ RefPtr<OHOS::Ace::ThemeConstants> GetThemeConstants(const EcmaVM* vm, const Loca
 }
 
 RefPtr<ResourceWrapper> CreateResourceWrapper(const EcmaVM* vm, const Local<JSValueRef>& jsObj,
-    RefPtr<ResourceObject>& resourceObject)
+    RefPtr<ResourceObject>& resourceObject, bool fromTheme = false)
 {
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
     RefPtr<ThemeConstants> themeConstants = nullptr;
     if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject, fromTheme);
         if (!resourceAdapter) {
             return nullptr;
         }
@@ -499,14 +500,15 @@ void ArkTSUtils::CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef
     }
 }
 
-bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result)
+bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
+    bool fromTheme)
 {
     RefPtr<ResourceObject> resourceObject;
-    return ParseJsColorFromResource(vm, jsObj, result, resourceObject);
+    return ParseJsColorFromResource(vm, jsObj, result, resourceObject, fromTheme);
 }
 
 bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
-    RefPtr<ResourceObject>& resourceObject)
+    RefPtr<ResourceObject>& resourceObject, bool fromTheme)
 {
     auto obj = jsObj ->ToObject(vm);
     auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
@@ -516,7 +518,7 @@ bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueR
 
     CompleteResourceObject(vm, obj);
     resourceObject = GetResourceObject(vm, jsObj);
-    auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject);
+    auto resourceWrapper = CreateResourceWrapper(vm, jsObj, resourceObject, fromTheme);
     if (!resourceWrapper) {
         return false;
     }
@@ -1595,6 +1597,23 @@ void ArkTSUtils::ParsePadding(
     }
 }
 
+void ArkTSUtils::ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
+                              ArkUISizeType& result, RefPtr<ResourceObject>& resObj)
+{
+    if (ArkTSUtils::ParseJsDimensionVp(vm, value, dimen, resObj)) {
+        if (LessOrEqual(dimen.Value(), 0.0)) {
+            dimen.SetValue(0.0);
+            dimen.SetUnit(DimensionUnit::VP);
+        }
+        result.unit = static_cast<int8_t>(dimen.Unit());
+        if (dimen.CalcValue() != "") {
+            result.string = dimen.CalcValue().c_str();
+        } else {
+            result.value = dimen.Value();
+        }
+    }
+}
+
 panda::Local<panda::ObjectRef> ArkTSUtils::GetContext(EcmaVM* vm)
 {
     auto container = Container::Current();
@@ -1724,8 +1743,15 @@ double ArkTSUtils::parseShadowOffsetWithResObj(const EcmaVM* vm, const Local<JSV
 void ArkTSUtils::ParseOuterBorder(
     EcmaVM* vm, const Local<JSValueRef>& args, std::optional<CalcDimension>& optionalDimension)
 {
+    RefPtr<ResourceObject> resObj;
+    ParseOuterBorder(vm, args, optionalDimension, resObj);
+}
+
+void ArkTSUtils::ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args,
+    std::optional<CalcDimension>& optionalDimension, RefPtr<ResourceObject>& resObj)
+{
     CalcDimension valueDim;
-    if (!args->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, args, valueDim, false)) {
+    if (!args->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, args, valueDim, resObj, false)) {
         if (valueDim.IsNegative() || valueDim.Unit() == DimensionUnit::PERCENT) {
             valueDim.Reset();
         }
@@ -1961,8 +1987,92 @@ void ArkTSUtils::ParseOuterBorderRadius(
     PushOuterBorderDimensionVector(bottomRightOptional, values);
 }
 
+void ArkTSUtils::SetTextBackgroundStyle(std::shared_ptr<TextBackgroundStyle> style, Color color,
+    RefPtr<ResourceObject>& colorResObj, const ArkUI_Float32* values, const ArkUI_Int32* units)
+{
+    CHECK_NULL_VOID(style);
+    if (SystemProperties::ConfigChangePerform() && colorResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& colorResObj, TextBackgroundStyle& textBackgroundStyle) {
+            Color color;
+            ResourceParseUtils::ParseResColor(colorResObj, color);
+            textBackgroundStyle.backgroundColor = color;
+        };
+        style->AddResource("textBackgroundStyle.color", colorResObj, std::move(updateFunc));
+    }
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+    borderRadius.radiusTopRight = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
+    borderRadius.radiusBottomLeft = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
+    borderRadius.radiusBottomRight = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
+    style->backgroundColor = Color(color);
+    style->backgroundRadius = borderRadius;
+    style->backgroundRadius->multiValued = true;
+}
+
+void ArkTSUtils::RegisterTextBackgroundStyleResource(std::shared_ptr<TextBackgroundStyle> textBackgroundStyle,
+    RefPtr<ResourceObject>& resObjTopLeft, RefPtr<ResourceObject>& resObjTopRight,
+    RefPtr<ResourceObject>& resObjBottomLeft, RefPtr<ResourceObject>& resObjBottomRight)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    CHECK_NULL_VOID(textBackgroundStyle);
+    if (resObjTopLeft) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObjTopLeft,
+            TextBackgroundStyle& textBackgroundStyle) {
+            CalcDimension radius;
+            ResourceParseUtils::ParseResDimensionVp(resObjTopLeft, radius);
+            textBackgroundStyle.backgroundRadius->radiusTopLeft = radius;
+            textBackgroundStyle.backgroundRadius->multiValued = true;
+        };
+        textBackgroundStyle->AddResource("textBackgroundStyle.radiusTopLeft", resObjTopLeft,
+            std::move(updateFunc));
+    }
+    if (resObjTopRight) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObjTopRight,
+            TextBackgroundStyle& textBackgroundStyle) {
+            CalcDimension radius;
+            ResourceParseUtils::ParseResDimensionVp(resObjTopRight, radius);
+            textBackgroundStyle.backgroundRadius->radiusTopRight = radius;
+            textBackgroundStyle.backgroundRadius->multiValued = true;
+        };
+        textBackgroundStyle->AddResource("textBackgroundStyle.radiusTopRight", resObjTopRight,
+            std::move(updateFunc));
+    }
+    if (resObjBottomLeft) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObjBottomLeft,
+            TextBackgroundStyle& textBackgroundStyle) {
+            CalcDimension radius;
+            ResourceParseUtils::ParseResDimensionVp(resObjBottomLeft, radius);
+            textBackgroundStyle.backgroundRadius->radiusBottomLeft = radius;
+            textBackgroundStyle.backgroundRadius->multiValued = true;
+        };
+        textBackgroundStyle->AddResource("textBackgroundStyle.radiusBottomLeft", resObjBottomLeft,
+            std::move(updateFunc));
+    }
+    if (resObjBottomRight) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObjBottomRight,
+            TextBackgroundStyle& textBackgroundStyle) {
+            CalcDimension radius;
+            ResourceParseUtils::ParseResDimensionVp(resObjBottomRight, radius);
+            textBackgroundStyle.backgroundRadius->radiusBottomRight = radius;
+            textBackgroundStyle.backgroundRadius->multiValued = true;
+        };
+        textBackgroundStyle->AddResource("textBackgroundStyle.radiusBottomRight", resObjBottomRight,
+            std::move(updateFunc));
+    }
+}
+
 void ArkTSUtils::ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
     EcmaVM* vm, std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units, int32_t argsIndex)
+{
+    std::shared_ptr<TextBackgroundStyle> style = std::make_shared<TextBackgroundStyle>();
+    ParseOuterBorderRadius(runtimeCallInfo, vm, values, units, argsIndex, style);
+}
+
+void ArkTSUtils::ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
+    EcmaVM* vm, std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units, int32_t argsIndex,
+    std::shared_ptr<TextBackgroundStyle> textBackgroundStyle)
 {
     Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex);
     Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
@@ -1974,15 +2084,23 @@ void ArkTSUtils::ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
     std::optional<CalcDimension> bottomLeftOptional;
     std::optional<CalcDimension> bottomRightOptional;
 
-    ParseOuterBorder(vm, topLeftArgs, topLeftOptional);
-    ParseOuterBorder(vm, topRightArgs, topRightOptional);
-    ParseOuterBorder(vm, bottomLeftArgs, bottomLeftOptional);
-    ParseOuterBorder(vm, bottomRightArgs, bottomRightOptional);
+    RefPtr<ResourceObject> resObjTopLeft;
+    RefPtr<ResourceObject> resObjTopRight;
+    RefPtr<ResourceObject> resObjBottomLeft;
+    RefPtr<ResourceObject> resObjBottomRight;
+
+    ParseOuterBorder(vm, topLeftArgs, topLeftOptional, resObjTopLeft);
+    ParseOuterBorder(vm, topRightArgs, topRightOptional, resObjTopRight);
+    ParseOuterBorder(vm, bottomLeftArgs, bottomLeftOptional, resObjBottomLeft);
+    ParseOuterBorder(vm, bottomRightArgs, bottomRightOptional, resObjBottomRight);
 
     PushOuterBorderDimensionVector(topLeftOptional, values, units);
     PushOuterBorderDimensionVector(topRightOptional, values, units);
     PushOuterBorderDimensionVector(bottomLeftOptional, values, units);
     PushOuterBorderDimensionVector(bottomRightOptional, values, units);
+
+    RegisterTextBackgroundStyleResource(textBackgroundStyle, resObjTopLeft, resObjTopRight, resObjBottomLeft,
+        resObjBottomRight);
 }
 
 void ArkTSUtils::PushOuterBorderStyleVector(const std::optional<BorderStyle>& value, std::vector<uint32_t> &options)
@@ -2045,11 +2163,12 @@ void ArkTSUtils::SetBorderWidthArray(const EcmaVM* vm, const Local<JSValueRef>& 
     }
 }
 
-ArkUISizeType ArkTSUtils::ParseJsToArkUISize(const EcmaVM *vm, const Local<JSValueRef> &arg)
+ArkUISizeType ArkTSUtils::ParseJsToArkUISize(const EcmaVM *vm, const Local<JSValueRef> &arg,
+    RefPtr<ResourceObject>& resObj)
 {
     ArkUISizeType size = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
     CalcDimension dimen(0, DimensionUnit::VP);
-    if (ArkTSUtils::ParseJsDimensionVp(vm, arg, dimen)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, arg, dimen, resObj)) {
         size.unit = static_cast<int8_t>(dimen.Unit());
         if (dimen.CalcValue() != "") {
             size.string = dimen.CalcValue().c_str();

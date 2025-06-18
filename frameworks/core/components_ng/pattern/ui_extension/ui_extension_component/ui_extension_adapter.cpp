@@ -36,9 +36,6 @@ RefPtr<FrameNode> UIExtensionAdapter::CreateEmbeddedComponent(
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, frameNode);
     pipeline->AddWindowStateChangedCallback(nodeId);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_RETURN(dragDropManager, frameNode);
-    dragDropManager->AddDragFrameNode(nodeId, AceType::WeakClaim(AceType::RawPtr(frameNode)));
     return frameNode;
 }
 

@@ -482,7 +482,7 @@ private:
     void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
     ImageDfxConfig CreateImageDfxConfig(const ImageSourceInfo& src);
-    void ReportPerfData(const RefPtr<NG::FrameNode>& host, int state);
+    void ReportPerfData(const RefPtr<NG::FrameNode>& host, int32_t state);
     void LoadImage(const ImageSourceInfo& src, bool needLayout);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 

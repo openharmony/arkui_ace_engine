@@ -51,6 +51,7 @@ struct MenuDumpInfo {
     std::string defaultPlacement;
     OffsetF finalPosition;
     std::string finalPlacement = "NONE";
+    OffsetF anchorPosition;
 };
 class MenuLayoutProperty;
 class MenuPattern;

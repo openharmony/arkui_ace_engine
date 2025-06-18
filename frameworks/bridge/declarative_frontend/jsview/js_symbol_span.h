@@ -33,6 +33,9 @@ public:
     static void SetFontColor(const JSCallbackInfo& info);
     static void SetSymbolRenderingStrategy(const JSCallbackInfo& info);
     static void SetSymbolEffect(const JSCallbackInfo& info);
+    template<typename T>
+    static void RegisterSpanResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value);
+    static void UnregisterSpanResource(const std::string& key);
 };
 } // namespace OHOS::Ace::Framework
 

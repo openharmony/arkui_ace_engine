@@ -925,7 +925,8 @@ void WebClientImpl::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t 
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnFirstContentfulPaint(navigationStartTick, firstContentfulPaintMs);
-    delegate->RemoveSnapshotFrameNode();
+    int delayTime = 650; // 650为根据LCP和FCP时差估算的经验值
+    delegate->RemoveSnapshotFrameNode(delayTime);
 }
 
 void WebClientImpl::OnFirstMeaningfulPaint(
@@ -936,7 +937,6 @@ void WebClientImpl::OnFirstMeaningfulPaint(
     CHECK_NULL_VOID(details);
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnFirstMeaningfulPaint(details);
-    delegate->RemoveSnapshotFrameNode();
 }
 
 void WebClientImpl::OnLargestContentfulPaint(
@@ -1393,4 +1393,54 @@ void WebClientImpl::OnPip(int status, int delegate_id, int child_id,
     delegate->OnPip(status, delegate_id, child_id, frame_routing_id, width, height);
 }
 
+bool WebClientImpl::OnAllSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSAllSslErrorResult> result,
+    OHOS::NWeb::SslError error,
+    const std::string& url,
+    const std::string& originalUrl,
+    const std::string& referrer,
+    bool isFatalError,
+    bool isMainFrame,
+    const std::vector<std::string>& certChainData)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+
+    bool jsResult = false;
+    auto param = std::make_shared<WebAllSslErrorEvent>(AceType::MakeRefPtr<AllSslErrorResultOhos>(result),
+        static_cast<int32_t>(error), url, originalUrl, referrer, isFatalError, isMainFrame, certChainData);
+    auto task = delegate->GetTaskExecutor();
+    if (task == nullptr) {
+        return false;
+    }
+    task->PostSyncTask(
+        [webClient = this, &param, &jsResult] {
+            if (!webClient) {
+                return;
+            }
+            auto delegate = webClient->webDelegate_.Upgrade();
+            if (delegate) {
+                jsResult = delegate->OnAllSslErrorRequest(param);
+            }
+        }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientAllSslErrorRequest");
+    return jsResult;
+}
+
+void WebClientImpl::ShowMagnifier()
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->ShowMagnifier();
+}
+
+void WebClientImpl::HideMagnifier()
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->HideMagnifier();
+}
 } // namespace OHOS::Ace

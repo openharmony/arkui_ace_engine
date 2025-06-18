@@ -1364,7 +1364,7 @@ void WebPattern::OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode)
 
 
 void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-    const NG::OnMenuItemClickCallback&& onMenuItemClick)
+    const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
     // cross platform is not support now;
 }
@@ -1375,6 +1375,11 @@ void WebPattern::UpdateDataDetectorConfig(const TextDetectConfig& config)
 }
 
 void WebPattern::OnEnabledHapticFeedbackUpdate(bool enable)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnBypassVsyncConditionUpdate(WebBypassVsyncCondition condition)
 {
     // cross platform is not support now;
 }

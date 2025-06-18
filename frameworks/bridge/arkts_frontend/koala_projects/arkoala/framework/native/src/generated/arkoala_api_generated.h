@@ -10606,8 +10606,8 @@ typedef struct Opt_AsyncCallback_image_PixelMap_Void {
 } Opt_AsyncCallback_image_PixelMap_Void;
 typedef struct Callback_RangeUpdate {
     Ark_CallbackResource resource;
-    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 index, const Ark_NativePointer mark, const Ark_Int32 end);
-    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Int32 index, const Ark_NativePointer mark, const Ark_Int32 end);
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end);
 } Callback_RangeUpdate;
 typedef struct Opt_Callback_RangeUpdate {
     Ark_Tag tag;
@@ -15782,6 +15782,16 @@ typedef struct Opt_CalendarRequestedData {
     Ark_Tag tag;
     Ark_CalendarRequestedData value;
 } Opt_CalendarRequestedData;
+typedef struct Callback_CreateItem {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Pointer_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Pointer_Void continuation);
+} Callback_CreateItem;
+typedef struct Opt_Callback_CreateItem {
+    Ark_Tag tag;
+    Callback_CreateItem value;
+} Opt_Callback_CreateItem;
 typedef struct Callback_CalendarRequestedData_Void {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_CalendarRequestedData event);
@@ -19635,6 +19645,10 @@ typedef struct GENERATED_ArkUILazyForEachOpsAccessor {
                          Ark_Int32 startIndex,
                          Ark_Int32 endIndex,
                          Ark_Int32 count);
+    void (*Sync)(Ark_NativePointer node,
+                 Ark_Int32 totalCount,
+                 const Callback_CreateItem* creator,
+                 const Callback_RangeUpdate* updater);
 } GENERATED_ArkUILazyForEachOpsAccessor;
 
 typedef struct GENERATED_ArkUISystemOpsAccessor {

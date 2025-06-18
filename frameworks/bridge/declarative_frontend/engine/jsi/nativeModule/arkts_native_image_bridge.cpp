@@ -189,7 +189,7 @@ ArkUINativeModuleValue ImageBridge::SetImageShowSrc(ArkUIRuntimeCallInfo* runtim
     if (pixmap) {
         ImageModelNG::SetInitialPixelMap(reinterpret_cast<FrameNode*>(nativeNode), pixmap);
     } else {
-        nodeModifiers->getImageModifier()->setImageShowSrc(
+        nodeModifiers->getImageModifier()->setImageShowSrcRes(
             nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), (resId == -1), srcRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -749,7 +749,8 @@ ArkUINativeModuleValue ImageBridge::SetFillColor(ArkUIRuntimeCallInfo* runtimeCa
     RefPtr<ResourceObject> colorResObj;
     if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj)) {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
-        nodeModifiers->getImageModifier()->setFillColor(nativeNode, color.GetValue(), colorRawPtr);
+        nodeModifiers->getImageModifier()->setFillColorWithColorSpace(
+            nativeNode, color.GetValue(), color.GetColorSpace(), colorRawPtr);
     } else if (ArkTSUtils::ParseJsColorContent(vm, colorArg)) {
         nodeModifiers->getImageModifier()->resetImageFill(nativeNode);
     } else {
@@ -793,7 +794,7 @@ ArkUINativeModuleValue ImageBridge::SetAlt(ArkUIRuntimeCallInfo* runtimeCallInfo
     ArkTSUtils::GetJsMediaBundleInfo(vm, secondArg, bundleName, moduleName);
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getImageModifier()->setAlt(
+    nodeModifiers->getImageModifier()->setAltRes(
         nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), srcRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }

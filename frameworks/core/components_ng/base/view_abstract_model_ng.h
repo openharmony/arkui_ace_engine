@@ -715,6 +715,21 @@ public:
         ViewAbstract::SetAlign(alignment);
     }
 
+    void SetAlign(const std::string& localizedAlignment) override
+    {
+        ViewAbstract::SetAlign(localizedAlignment);
+    }
+
+    void SetLayoutGravity(const Alignment& alignment) override
+    {
+        ViewAbstract::SetLayoutGravity(alignment);
+    }
+
+    void SetIsMirrorable(const bool& isMirrorable) override
+    {
+        ViewAbstract::SetIsMirrorable(isMirrorable);
+    }
+
     void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) override
     {
         ViewAbstract::SetAlignRules(alignRules);
@@ -974,11 +989,6 @@ public:
         ViewAbstract::SetProgressMask(progress);
     }
 
-    void CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress) override
-    {
-        ViewAbstract::CreateWithMaskResourceObj(progress);
-    }
-
     void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
     {
         ViewAbstract::SetBackdropBlur(radius, blurOption, sysOptions);
@@ -1113,6 +1123,12 @@ public:
     }
 
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc, double distanceThreshold) override
+    {
+        ViewAbstract::SetOnClick(std::move(tapEventFunc), distanceThreshold);
+    }
+
+    void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+        Dimension distanceThreshold) override
     {
         ViewAbstract::SetOnClick(std::move(tapEventFunc), distanceThreshold);
     }
@@ -1647,6 +1663,10 @@ public:
         const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, PopupType type) override;
     virtual void CreateWithResourceObj(
         const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) override;
+    void RemoveResObj(const std::string& key) override
+    {
+        ViewAbstract::RemoveResObj(key);
+    }
     void SetForegroundColor(const Color& color) override
     {
         ViewAbstract::SetForegroundColor(color);

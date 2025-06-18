@@ -1562,11 +1562,11 @@ HWTEST_F(WebPatternSelectTestNg, CreateSnapshotImageFrameNode_001, TestSize.Leve
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     MockPipelineContext::SetUp();
-    std::string snapshotPath = "/data/storage/el2/base/cache/web/123456.png";
+    std::string snapshotPath = "/data/storage/el2/base/cache/web/snapshot/123456.png";
     webPattern->CreateSnapshotImageFrameNode(snapshotPath);
-    snapshotPath = "/data/storage/el2/base/cache/web/web_frame_123456";
+    snapshotPath = "/data/storage/el2/base/cache/web/snapshot/web_frame_123456";
     webPattern->CreateSnapshotImageFrameNode(snapshotPath);
-    snapshotPath = "/data/storage/el2/base/cache/web/web_frame_123456.png";
+    snapshotPath = "/data/storage/el2/base/cache/web/snapshot/web_frame_123456.png";
     webPattern->CreateSnapshotImageFrameNode(snapshotPath);
     webPattern->RemoveSnapshotFrameNode();
     webPattern->RemoveSnapshotFrameNode();

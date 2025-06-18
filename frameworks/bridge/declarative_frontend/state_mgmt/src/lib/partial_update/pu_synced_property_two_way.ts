@@ -52,6 +52,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
 
       // unregister from the ObservedObject
       ObservedObject.removeOwningProperty(this.source_.getUnmonitored(), this);
+      this.source_.__isFake_ObservedPropertyAbstract_Internal() && this.source_.aboutToBeDeleted();
     }
     super.aboutToBeDeleted();
   }

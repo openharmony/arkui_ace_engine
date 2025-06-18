@@ -541,6 +541,13 @@ int32_t RosenMediaPlayer::SetPlayRangeWithMode(int64_t startTime, int64_t endTim
     return mediaPlayer_->SetPlayRangeWithMode(startTime, endTime, ConvertToMediaSeekMode(mode));
 }
 
+int32_t RosenMediaPlayer::SetPlayRangeUsWithMode(int64_t startTime, int64_t endTime, SeekMode mode)
+{
+    LOGI("Media player start to SetPlayRangeUsWithMode.");
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
+    return mediaPlayer_->SetPlayRangeUsWithMode(startTime, endTime, ConvertToMediaSeekMode(mode));
+}
+
 int32_t RosenMediaPlayer::SetParameter(const std::string& key, int64_t value)
 {
     LOGI("Media player start to SetParameter.");

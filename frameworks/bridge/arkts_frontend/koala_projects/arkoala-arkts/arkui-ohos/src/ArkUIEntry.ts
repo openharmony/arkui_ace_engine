@@ -251,6 +251,8 @@ export class Application {
         this.computeRoot()
         for (const detachedRoot of detachedRoots.values())
             detachedRoot.value
+        updateLazyItems()
+
         if (partialUpdates.length > 0) {
             // If there are pending partial updates - we apply them one by one and provide update context.
             for (let update of partialUpdates) {

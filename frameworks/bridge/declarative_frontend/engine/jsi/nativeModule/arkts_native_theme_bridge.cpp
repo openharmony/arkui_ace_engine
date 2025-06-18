@@ -133,7 +133,7 @@ ArkUINativeModuleValue ThemeBridge::SetDefaultTheme(ArkUIRuntimeCallInfo* runtim
         Color color;
         auto colorParams = panda::ArrayRef::GetValueAt(vm, colorsArg, i);
         bool isColorAvailable = false;
-        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color)) {
+        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color, true)) {
             if (basisTheme) {
                 color = basisTheme->Colors()->GetByIndex(i);
                 isColorAvailable = true;

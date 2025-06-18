@@ -68,7 +68,10 @@ public:
         }
         images_ = std::move(images);
         durationTotal_ = 0;
-        for (const auto& childImage : images_) {
+        for (auto& childImage : images_) {
+            if (childImage.duration < 0) {
+                childImage.duration = 0;
+            }
             if ((!childImage.src.empty() || childImage.pixelMap != nullptr) && childImage.duration > 0) {
                 durationTotal_ += childImage.duration;
             }

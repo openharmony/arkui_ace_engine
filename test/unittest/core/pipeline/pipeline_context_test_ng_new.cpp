@@ -3638,53 +3638,131 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg252, TestSize.Level1)
 }
 
 /**
- * @tc.name: UITaskSchedulerTestNg015
- * @tc.desc: Test FlushRenderTask.
+ * @tc.name: PipelineContextTestNg253
+ * @tc.desc: Test the function SetAreaChangeNodeMinDepth.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg015, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg253, TestSize.Level1)
 {
     /**
-     * @tc.steps1: Create taskScheduler.
+     * @tc.expected: The initialize val is -1.
      */
-    UITaskScheduler taskScheduler;
+    context_->areaChangeNodeMinDepth_ = -1;
+    ASSERT_NE(context_, nullptr);
+    EXPECT_EQ(context_->areaChangeNodeMinDepth_, -1);
 
     /**
-     * @tc.steps2: Create dirtyRenderNodes_.
+     * @tc.steps2: Call the function SetAreaChangeNodeMinDepth and set val 10.
+     * @tc.expected: The areaChangeNodeMinDepth_ is equal to 10.
      */
-    taskScheduler.dirtyRenderNodes_[1].emplace(nullptr);
+    context_->SetAreaChangeNodeMinDepth(10);
+    EXPECT_EQ(context_->areaChangeNodeMinDepth_, 10);
 
     /**
-     * @tc.steps3: RemoveNodeFromDirtyRender.
+     * @tc.steps3: Call the function SetAreaChangeNodeMinDepth and set val 5.
+     * @tc.expected: The areaChangeNodeMinDepth_ is equal to 5.
      */
-    auto result = taskScheduler.RemoveNodeFromDirtyRender(-1, -1);
-    EXPECT_EQ(result, 0);
+    context_->SetAreaChangeNodeMinDepth(5);
+    EXPECT_EQ(context_->areaChangeNodeMinDepth_, 5);
+
+    /**
+     * @tc.steps4: Call the function SetAreaChangeNodeMinDepth and set val 10.
+     * @tc.expected: The areaChangeNodeMinDepth_ is equal to 5.
+     */
+    context_->SetAreaChangeNodeMinDepth(10);
+    EXPECT_EQ(context_->areaChangeNodeMinDepth_, 5);
+}
+
+
+/**
+ * @tc.name: PipelineContextTestNg254
+ * @tc.desc: Test the function SetIsDisappearChangeNodeMinDepth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg254, TestSize.Level1)
+{
+    /**
+     * @tc.expected: The initialize val is -1.
+     */
+    context_->isDisappearChangeNodeMinDepth_ = -1;
+    ASSERT_NE(context_, nullptr);
+    EXPECT_EQ(context_->isDisappearChangeNodeMinDepth_, -1);
+
+    /**
+     * @tc.steps2: Call the function SetIsDisappearChangeNodeMinDepth and set val 10.
+     * @tc.expected: The isDisappearChangeNodeMinDepth_ is equal to 10.
+     */
+    context_->SetIsDisappearChangeNodeMinDepth(10);
+    EXPECT_EQ(context_->isDisappearChangeNodeMinDepth_, 10);
+
+    /**
+     * @tc.steps3: Call the function SetIsDisappearChangeNodeMinDepth and set val 5.
+     * @tc.expected: The isDisappearChangeNodeMinDepth_ is equal to 5.
+     */
+    context_->SetIsDisappearChangeNodeMinDepth(5);
+    EXPECT_EQ(context_->isDisappearChangeNodeMinDepth_, 5);
+
+    /**
+     * @tc.steps4: Call the function SetIsDisappearChangeNodeMinDepth and set val 10.
+     * @tc.expected: The isDisappearChangeNodeMinDepth_ is equal to 5.
+     */
+    context_->SetIsDisappearChangeNodeMinDepth(10);
+    EXPECT_EQ(context_->isDisappearChangeNodeMinDepth_, 5);
 }
 
 /**
- * @tc.name: UITaskSchedulerTestNg016
+ * @tc.name: PipelineContextTestNg302
  * @tc.desc: Test FlushRenderTask.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg016, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg302, TestSize.Level1)
 {
     /**
-     * @tc.steps1: Create taskScheduler.
+     * @tc.steps1: Test CheckIfGetTheme.
      */
-    UITaskScheduler taskScheduler;
+    ASSERT_NE(context_, nullptr);
+    context_->SetIsJsCard(false);
+    context_->SetIsFormRender(false);
+    auto result = context_->CheckIfGetTheme();
+    EXPECT_TRUE(result);
 
-    /**
-     * @tc.steps2: Create removedDirtyRenderNodes_.
-     */
-    taskScheduler.removedDirtyRenderNodes_.emplace(0);
+    context_->SetIsJsCard(true);
+    context_->SetIsFormRender(false);
+    result = context_->CheckIfGetTheme();
+    EXPECT_FALSE(result);
 
-    /**
-     * @tc.steps3: RemoveDirtyRenderNodes and test.
-     */
-    auto result = taskScheduler.RemoveDirtyRenderNodes(0);
-    EXPECT_EQ(result, 1);
-    result = taskScheduler.RemoveDirtyRenderNodes(1);
-    EXPECT_EQ(result, 0);
+    context_->SetIsJsCard(false);
+    context_->SetIsFormRender(true);
+    result = context_->CheckIfGetTheme();
+    EXPECT_FALSE(result);
+
+    context_->SetIsJsCard(true);
+    context_->SetIsFormRender(true);
+    result = context_->CheckIfGetTheme();
+    EXPECT_FALSE(result);
+
+    auto container = MockContainer::Current();
+    EXPECT_TRUE(container);
+    container->SetUIContentType(UIContentType::DYNAMIC_COMPONENT);
+    context_->SetIsJsCard(false);
+    context_->SetIsFormRender(false);
+    result = context_->CheckIfGetTheme();
+    EXPECT_TRUE(result);
+
+    context_->SetIsJsCard(true);
+    context_->SetIsFormRender(false);
+    result = context_->CheckIfGetTheme();
+    EXPECT_FALSE(result);
+
+    context_->SetIsJsCard(false);
+    context_->SetIsFormRender(true);
+    result = context_->CheckIfGetTheme();
+    EXPECT_TRUE(result);
+
+    context_->SetIsJsCard(true);
+    context_->SetIsFormRender(true);
+    result = context_->CheckIfGetTheme();
+    EXPECT_FALSE(result);
 }
 } // namespace NG
 } // namespace OHOS::Ace

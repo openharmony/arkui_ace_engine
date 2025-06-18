@@ -61,6 +61,7 @@ public:
     void UpdateBadgePositionX(const CalcDimension& positionX, bool isFirstLoad = false);
     void UpdateBadgePositionY(const CalcDimension& positionY, bool isFirstLoad = false);
     void UpdateBorderWidth(const CalcDimension& borderWidth, bool isFirstLoad = false);
+    void OnColorConfigurationUpdate() override;
 
 private:
     void OnModifyDone() override;

@@ -71,15 +71,12 @@ void JSIndexer::ParseIndexerSelectedObject(
     const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal, bool isMethodProp = false)
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
-    auto vm = info.GetVm();
-    auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
-    auto func = jsFunc->GetLocalHandle();
-    auto changeEvent = [vm, func = panda::CopyableGlobal(vm, func)](const int32_t selected) {
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch trycatch(vm);
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const int32_t selected) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Indexer.SelectedChangeEvent");
-        panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, selected) };
-        func->Call(vm, func.ToLocal(), params, 1);
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(selected));
+        func->ExecuteJS(1, &newJSVal);
     };
 
     if (isMethodProp) {
@@ -305,6 +302,61 @@ void JSIndexer::SetFont(const JSCallbackInfo& args)
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::FONT_SIZE, textStyle.fontSizeResObj);
         IndexerModel::GetInstance()->CreateWithResourceObj(
             IndexerJsResourceType::FONT_FAMILY, textStyle.fontFamilyResObj);
+    }
+}
+
+void JSIndexer::JsOnSelected(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onSelected = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                              const int32_t selected) {
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+            auto params = ConvertToJSValues(selected);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        };
+        IndexerModel::GetInstance()->SetOnSelected(onSelected);
+    }
+}
+
+void JSIndexer::JsOnRequestPopupData(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto requestPopupData = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                    const int32_t selected) {
+            std::vector<std::string> popupData;
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, popupData);
+            auto params = ConvertToJSValues(selected);
+            JSRef<JSArray> result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+            if (result.IsEmpty()) {
+                return popupData;
+            }
+
+            if (!result->IsArray()) {
+                return popupData;
+            }
+
+            for (size_t i = 0; i < result->Length(); i++) {
+                if (result->GetValueAt(i)->IsString()) {
+                    auto item = result->GetValueAt(i);
+                    popupData.emplace_back(item->ToString());
+                }
+            }
+            return popupData;
+        };
+        IndexerModel::GetInstance()->SetOnRequestPopupData(requestPopupData);
+    }
+}
+
+void JSIndexer::JsOnPopupSelected(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onPopupSelected = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                   const int32_t selected) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto params = ConvertToJSValues(selected);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        };
+        IndexerModel::GetInstance()->SetOnPopupSelected(onPopupSelected);
     }
 }
 
@@ -645,6 +697,9 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::Declare("AlphabetIndexer");
     JSClass<JSIndexer>::StaticMethod("create", &JSIndexer::Create);
     JSClass<JSIndexer>::StaticMethod("createArc", &JSIndexer::CreateArc);
+    // API7 onSelected deprecated
+    JSClass<JSIndexer>::StaticMethod("onSelected", &JSIndexer::JsOnSelected);
+    JSClass<JSIndexer>::StaticMethod("onSelect", &JSIndexer::JsOnSelected);
     JSClass<JSIndexer>::StaticMethod("color", &JSIndexer::SetColor, opt);
     JSClass<JSIndexer>::StaticMethod("selectedColor", &JSIndexer::SetSelectedColor, opt);
     JSClass<JSIndexer>::StaticMethod("popupColor", &JSIndexer::SetPopupColor, opt);
@@ -656,6 +711,7 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("popupFont", &JSIndexer::SetPopupFont);
     JSClass<JSIndexer>::StaticMethod("itemSize", &JSIndexer::SetItemSize, opt);
     JSClass<JSIndexer>::StaticMethod("alignStyle", &JSIndexer::SetAlignStyle, opt);
+    JSClass<JSIndexer>::StaticMethod("onRequestPopupData", &JSIndexer::JsOnRequestPopupData, opt);
     JSClass<JSIndexer>::StaticMethod("selected", &JSIndexer::SetSelected, opt);
     JSClass<JSIndexer>::StaticMethod("popupPosition", &JSIndexer::SetPopupPosition, opt);
     JSClass<JSIndexer>::StaticMethod("popupSelectedColor", &JSIndexer::SetPopupSelectedColor, opt);
@@ -669,6 +725,8 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("popupTitleBackground", &JSIndexer::SetPopupTitleBackground, opt);
     JSClass<JSIndexer>::StaticMethod("width", &JSIndexer::SetWidth);
     JSClass<JSIndexer>::StaticMethod("enableHapticFeedback", &JSIndexer::SetEnableHapticFeedback, opt);
+    // keep compatible, need remove after
+    JSClass<JSIndexer>::StaticMethod("onPopupSelect", &JSIndexer::JsOnPopupSelected, opt);
     JSClass<JSIndexer>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSIndexer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSIndexer>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);

@@ -1793,6 +1793,31 @@ HWTEST_F(ImageTestTwoNg, TestCreate001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestSetResizableSlice001
+ * @tc.desc: test ImageModelNG::SetResizableSlice
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, TestSetResizableSlice001, TestSize.Level1)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto renderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(renderProperty, nullptr);
+    ImageResizableSlice imageResizableSlice {
+        .left = Dimension(1),
+    };
+    image.SetResizableSlice(imageResizableSlice);
+    EXPECT_EQ(renderProperty->GetImageResizableSlice().value(), imageResizableSlice);
+}
+
+/**
  * @tc.name: TestUpdateImageSourceinfo001
  * @tc.desc: Test ImagePattern::UpdateImageSourceinfo function.
  * @tc.type: FUNC
@@ -1870,5 +1895,25 @@ HWTEST_F(ImageTestTwoNg, TestUpdateImageAlt001, TestSize.Level1)
     imagePattern->UpdateImageAlt(sourceInfo);
     sourceInfo.src_ = "test_alt_source2";
     EXPECT_NE(imageLayoutProperty->GetAlt(), sourceInfo);
+}
+
+/**
+ * @tc.name: TestUpdateImageFill002
+ * @tc.desc: Test ImagePattern::UpdateImageFill function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, TestUpdateImageFill002, TestSize.Level1)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    Color testColor(Color::BLUE);
+    imagePattern->UpdateImageFill(testColor);
+
+    auto renderProperty = imagePattern->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(renderProperty, nullptr);
+    EXPECT_EQ(renderProperty->GetSvgFillColor(), testColor);
 }
 } // namespace OHOS::Ace::NG

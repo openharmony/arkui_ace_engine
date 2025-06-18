@@ -462,7 +462,7 @@ int32_t ReadDragDropFrameworkStatus()
 
 int32_t ReadTouchAccelarateMode()
 {
-    return system::GetIntParameter("debug.ace.touch.accelarate", 0);
+    return system::GetIntParameter("debug.ace.touch.accelarate", 2);
 }
 
 bool IsAscending(const std::vector<double>& nums)
@@ -687,11 +687,13 @@ bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentE
 int32_t SystemProperties::dragDropFrameworkStatus_ = ReadDragDropFrameworkStatus();
 int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
+bool SystemProperties::softPagetransition_ = false;
 bool SystemProperties::formSkeletonBlurEnabled_ = true;
 int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 bool SystemProperties::syncLoadEnabled_ = true;
+bool SystemProperties::whiteBlockEnabled_ = false;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -841,6 +843,7 @@ void SystemProperties::InitDeviceInfo(
     recycleImageEnabled_ = system::GetParameter(ENABLE_RECYCLE_IMAGE_KEY, "true") == "true";
     animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
     pageTransitionFrzEnabled_ = system::GetBoolParameter("const.arkui.pagetransitionfreeze", false);
+    softPagetransition_ = system::GetBoolParameter("const.arkui.softPagetransition", false);
     WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
     resourceDecoupling_ = IsResourceDecoupling();
     configChangePerform_ = IsConfigChangePerform();
@@ -855,6 +858,7 @@ void SystemProperties::InitDeviceInfo(
     formSharedImageCacheThreshold_ =
         system::GetIntParameter("const.form.shared_image.cache_threshold", DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD);
     syncLoadEnabled_ = system::GetBoolParameter("persist.ace.scrollable.syncload.enable", false);
+    whiteBlockEnabled_ = system::GetParameter("persist.resourceschedule.whiteblock", "0") == "1";
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -1303,6 +1307,11 @@ bool SystemProperties::IsPageTransitionFreeze()
     return pageTransitionFrzEnabled_;
 }
 
+bool SystemProperties::IsSoftPageTransition()
+{
+    return softPagetransition_;
+}
+
 bool SystemProperties::IsFormSkeletonBlurEnabled()
 {
     return formSkeletonBlurEnabled_;
@@ -1311,5 +1320,25 @@ bool SystemProperties::IsFormSkeletonBlurEnabled()
 int32_t SystemProperties::getFormSharedImageCacheThreshold()
 {
     return formSharedImageCacheThreshold_;
+}
+
+bool SystemProperties::IsWhiteBlockEnabled()
+{
+    return whiteBlockEnabled_;
+}
+
+bool SystemProperties::IsWhiteBlockIdleChange()
+{
+    return OHOS::system::GetParameter("persist.resourceschedule.whiteblock.idle", "0") == "1";
+}
+
+int32_t SystemProperties::GetWhiteBlockIndexValue()
+{
+    return std::stoi(OHOS::system::GetParameter("persist.resourceschedule.whiteblock.index", "0"));
+}
+
+int32_t SystemProperties::GetWhiteBlockCacheCountValue()
+{
+    return std::stoi(OHOS::system::GetParameter("persist.resourceschedule.whiteblock.cachedcount", "0"));
 }
 } // namespace OHOS::Ace

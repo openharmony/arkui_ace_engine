@@ -235,6 +235,11 @@ public:
         const int64_t nodeId,
         const RefPtr<PipelineBase>& context,
         GetInfoByNodeId& infoOfNode);
+    bool CachePageEventByController(
+        const AccessibilityEvent& accessibilityEvent,
+        const std::string& componentType,
+        int32_t pageId,
+        int32_t containerId);
 
     void SendCacheAccessibilityEvent(int32_t instanceId);
     void SendCacheAccessibilityEventForHost(const int32_t pageId);
@@ -580,8 +585,13 @@ private:
 
     bool ExecuteActionNG(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
         Accessibility::ActionType action, const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset);
-    bool ConvertActionTypeToBoolen(Accessibility::ActionType action, RefPtr<NG::FrameNode>& frameNode,
-        int64_t elementId, RefPtr<NG::PipelineContext>& context);
+    bool ConvertActionTypeToBoolen(
+        Accessibility::ActionType action,
+        RefPtr<NG::FrameNode>& frameNode,
+        int64_t elementId,
+        RefPtr<NG::PipelineContext>& context,
+        const std::map<std::string, std::string>& actionArguments);
+
     void SetSearchElementInfoByAccessibilityIdResult(Accessibility::AccessibilityElementOperatorCallback& callback,
         std::list<Accessibility::AccessibilityElementInfo>&& infos, const int32_t requestId, bool checkEmbed = false);
 
@@ -689,6 +699,9 @@ private:
         const SearchParameter& searchParam);
 #ifdef WEB_SUPPORTED
 
+    void WebSetScreenRect(const std::shared_ptr<NG::TransitionalNodeInfo>& node, const CommonProperty& commonProperty,
+        AccessibilityElementInfo& nodeInfo);
+
     void UpdateWebAccessibilityElementInfo(const std::shared_ptr<NG::TransitionalNodeInfo>& node,
         Accessibility::AccessibilityElementInfo& nodeInfo, int32_t treeId);
 
@@ -752,10 +765,12 @@ private:
         const std::vector<RefPtr<NG::FrameNode>>& pageNodes,
         const std::vector<std::string> pagePaths);
     
-    bool CheckPageEventValidInCache();
-    bool CheckPageEventByPageInCache(int32_t pageId);
-    void ReleaseAllCacheAccessibilityEvent();
-    void ReleaseCacheAccessibilityEvent(const int32_t pageId);
+    bool CheckPageEventValidInCache(int32_t containerId);
+    bool CheckPageEventByPageInCache(int32_t containerId, int32_t pageId);
+    void ReleaseAllCacheAccessibilityEvent(int32_t containerId);
+    void ReleaseCacheAccessibilityEvent(int32_t containerId, int32_t pageId);
+    void ReleaseAccessibilityEventList(
+        const std::list<std::pair<int32_t, AccessibilityEvent>>& eventList);
 
     SearchSurfaceIdRet SearchElementInfoBySurfaceId(
         const std::string& surfaceId, const int32_t windowId,

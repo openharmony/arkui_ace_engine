@@ -31,6 +31,7 @@
 namespace OHOS::Ace {
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+constexpr int32_t UNKNOWN_INSTANCE_ID = -1;
 constexpr int32_t UNKNOWN_RESOURCE_ID = -1;
 constexpr int32_t UNKNOWN_RESOURCE_TYPE = -1;
 const std::regex FLOAT_PATTERN(R"(-?(0|[1-9]\d*)(\.\d+))", std::regex::icase);
@@ -53,6 +54,7 @@ RefPtr<ThemeConstants> ResourceParseUtils::GetThemeConstants(const RefPtr<Resour
         moduleName = resObj->GetModuleName();
     }
 
+#if !defined(ACE_UNITTEST)
     auto cardId = CardScope::CurrentId();
     if (cardId != INVALID_CARD_ID) {
         auto container = Container::Current();
@@ -63,6 +65,7 @@ RefPtr<ThemeConstants> ResourceParseUtils::GetThemeConstants(const RefPtr<Resour
         CHECK_NULL_RETURN(cardThemeManager, nullptr);
         return cardThemeManager->GetThemeConstants(bundleName, moduleName);
     }
+#endif
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     if (Container::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID) {
@@ -351,6 +354,10 @@ bool ResourceParseUtils::ParseResFontFamilies(const RefPtr<ResourceObject>& resO
 bool ResourceParseUtils::ParseResColor(const RefPtr<ResourceObject>& resObj, Color& result)
 {
     CHECK_NULL_RETURN(resObj, false);
+
+    if (resObj->GetInstanceId() == UNKNOWN_INSTANCE_ID) {
+        resObj->SetInstanceId(Container::CurrentIdSafely());
+    }
     auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
     CHECK_NULL_RETURN(resourceWrapper, false);
     auto resId = resObj->GetId();

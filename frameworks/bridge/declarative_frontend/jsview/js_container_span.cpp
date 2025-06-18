@@ -15,10 +15,12 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/text/span_model.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 
 namespace OHOS::Ace::Framework {
+
 void JSContainerSpan::SetTextBackgroundStyle(const JSCallbackInfo& info)
 {
     auto textBackgroundStyle = JSContainerSpan::ParseTextBackgroundStyle(info);
@@ -41,27 +43,47 @@ TextBackgroundStyle JSContainerSpan::ParseTextBackgroundStyle(const JSRef<JSObje
     TextBackgroundStyle textBackgroundStyle;
     JSRef<JSVal> colorValue = obj->GetProperty("color");
     Color colorVal;
-    if (ParseJsColor(colorValue, colorVal)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (ParseJsColor(colorValue, colorVal, colorResObj)) {
         textBackgroundStyle.backgroundColor = colorVal;
+    }
+    if (SystemProperties::ConfigChangePerform() && colorResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& colorResObj, TextBackgroundStyle& textBackgroundStyle) {
+            Color color;
+            ResourceParseUtils::ParseResColor(colorResObj, color);
+            textBackgroundStyle.backgroundColor = color;
+        };
+        textBackgroundStyle.AddResource("textBackgroundStyle.color", colorResObj, std::move(updateFunc));
     }
     JSRef<JSVal> radiusValue = obj->GetProperty("radius");
     if (!radiusValue->IsString() && !radiusValue->IsNumber() && !radiusValue->IsObject()) {
         return textBackgroundStyle;
     }
     CalcDimension radius;
-    if (ParseJsDimensionVp(radiusValue, radius)) {
+    RefPtr<ResourceObject> radiusResObj;
+    if (ParseJsDimensionVp(radiusValue, radius, radiusResObj)) {
         if (radius.Unit() == DimensionUnit::PERCENT) {
             radius.Reset();
         }
         textBackgroundStyle.backgroundRadius = { radius, radius, radius, radius };
         textBackgroundStyle.backgroundRadius->multiValued = false;
+        if (SystemProperties::ConfigChangePerform() && radiusResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& radiusResObj,
+                TextBackgroundStyle& textBackgroundStyle) {
+                CalcDimension radius;
+                ResourceParseUtils::ParseResDimensionVp(radiusResObj, radius);
+                textBackgroundStyle.backgroundRadius = { radius, radius, radius, radius };
+                textBackgroundStyle.backgroundRadius->multiValued = false;
+            };
+            textBackgroundStyle.AddResource("textBackgroundStyle.radius", radiusResObj, std::move(updateFunc));
+        }
     } else if (radiusValue->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(radiusValue);
         CalcDimension topLeft;
         CalcDimension topRight;
         CalcDimension bottomLeft;
         CalcDimension bottomRight;
-        ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
+        ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight, textBackgroundStyle);
         textBackgroundStyle.backgroundRadius = { topLeft, topRight, bottomRight, bottomLeft };
         textBackgroundStyle.backgroundRadius->multiValued = true;
     }

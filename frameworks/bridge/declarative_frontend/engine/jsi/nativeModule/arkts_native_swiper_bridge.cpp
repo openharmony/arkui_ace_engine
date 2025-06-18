@@ -1128,9 +1128,9 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperOnAnimationStart(ArkUIRuntimeCallI
         panda::Local<panda::NumberRef> indexParam = panda::NumberRef::New(vm, index);
         panda::Local<panda::NumberRef> targetIndexParam = panda::NumberRef::New(vm, targetIndex);
         const char* keys[] = {"currentOffset", "targetOffset", "velocity"};
-        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, extraInfo.currentOffset.value()),
-            panda::NumberRef::New(vm, extraInfo.targetOffset.value()),
-            panda::NumberRef::New(vm, extraInfo.velocity.value()) };
+        Local<JSValueRef> values[] = { panda::NumberRef::New(vm, extraInfo.currentOffset.value_or(0.0f)),
+            panda::NumberRef::New(vm, extraInfo.targetOffset.value_or(0.0f)),
+            panda::NumberRef::New(vm, extraInfo.velocity.value_or(0.0f)) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         panda::Local<panda::JSValueRef> params[3] = { indexParam, targetIndexParam, eventObject }; // 3: Array length
         func->Call(vm, func.ToLocal(), params, 3); // 3: Array length
@@ -1310,18 +1310,13 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperCustomContentTransition(ArkUIRunti
 
     JSRef<JSVal> transition = transitionObj->GetProperty("transition");
     if (transition->IsFunction()) {
-        auto jsFunc = JSRef<JSFunc>::Cast(transition);
-        auto func = jsFunc->GetLocalHandle();
-        auto onTransition = [vm, func = panda::CopyableGlobal(vm, func)](
+        auto jsOnTransition =
+            AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(transition));
+        auto onTransition = [execCtx = info.GetExecutionContext(), func = std::move(jsOnTransition)](
                                 const RefPtr<SwiperContentTransitionProxy>& proxy) {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Swiper.customContentTransition");
-            JSRef<JSObject> proxyObj = JSClass<JsSwiperContentTransitionProxy>::NewInstance();
-            auto jsProxy = Referenced::Claim(proxyObj->Unwrap<JsSwiperContentTransitionProxy>());
-            jsProxy->SetProxy(proxy);
-            panda::Local<panda::JSValueRef> params[1] = { proxyObj->GetLocalHandle() };
-            func->Call(vm, func.ToLocal(), params, 1);
+            func->Execute(proxy);
         };
         transitionInfo.transition = std::move(onTransition);
     }

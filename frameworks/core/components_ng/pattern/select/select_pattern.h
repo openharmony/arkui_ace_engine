@@ -257,6 +257,7 @@ private:
     void InitFocusEvent();
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
+    void UpdateMenuScrollColorConfiguration(const RefPtr<FrameNode>& menuNode);
     bool HasRowNode() const
     {
         return rowId_.has_value();

@@ -35,7 +35,7 @@ public:
     bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
         const std::string& title, bool ignoreMainTitle = false) override;
     bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
-        const RefPtr<ResourceObject>& mainResObj, bool ignoreMainTitle = false) override;
+        const RefPtr<ResourceObject>& mainResObj) override;
     void UpdateMainTitle(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj) override;
     void UpdateSubTitle(
@@ -45,7 +45,7 @@ public:
     void SetTitlebarOptions(NavigationTitlebarOptions&& opt) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
     void SetTitleHeight(const Dimension& height, bool isValid = true) override;
-    void SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid = true) override;
+    void SetTitleHeight(const RefPtr<ResourceObject>& resObj) override;
     void SetTitleMode(NG::NavigationTitleMode mode) override;
     void SetSubtitle(const std::string& subtitle) override;
     void SetEnableModeChangeAnimation(bool isEnable) override;
@@ -109,6 +109,7 @@ public:
     void SetIsCustomAnimation(bool isCustom) override;
     void SetRecoverable(bool recoverable) override;
     void SetEnableDragBar(bool enableDragBar) override;
+    void ResetResObj(NavigationPatternType type, const std::string& key) override;
     void ResetSplitPlaceholder() override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -145,9 +146,8 @@ public:
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) override;
     static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo,
         bool ignoreMainTitle = false);
-    static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo,
-        const RefPtr<ResourceObject>& titleResObj, const RefPtr<ResourceObject>& subtitleResObj,
-        bool ignoreMainTitle = false);
+    static void ParseCommonTitle(
+        FrameNode* frameNode, const RefPtr<ResourceObject>& titleResObj, const RefPtr<ResourceObject>& subtitleResObj);
     static void UpdateMainTitleInfo(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj);
     static void UpdateSubTitleInfo(
@@ -174,6 +174,7 @@ public:
     static RefPtr<NG::NavigationStack> GetNavigationStack(FrameNode* frameNode);
     static void SetOnNavBarStateChange(FrameNode* frameNode, std::function<void(bool)>&& onNavBarStateChange);
     static CalcDimension ParseTitleHeight(const RefPtr<ResourceObject>& resObj);
+    static void ResetResObj(FrameNode* frameNode, NavigationPatternType type, const std::string& key);
 
 private:
     bool CreatePrimaryContentIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);
@@ -184,7 +185,7 @@ private:
     static void SetHideNavBarInner(const RefPtr<NavigationGroupNode>& navigationGroupNode, bool hideNavBar);
     static bool CreateBackButtonNode(RefPtr<FrameNode>& backButtonNode);
     static bool UpdateBackButtonProperty(const RefPtr<FrameNode>& backButtonNode);
-    void SetToolbarNavigationMode(NavigationMode mode);
+    void SetToolbarNavigationMode(NavigationMode mode); // Only used for the toolbar in 'container_modal' component
     static bool navBarWidthDoubleBind_;
 };
 } // namespace OHOS::Ace::NG

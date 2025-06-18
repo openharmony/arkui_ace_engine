@@ -144,6 +144,9 @@ void SetOnDragStart(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.bundleName = strdup(info->GetDragSource().c_str());
         event.dragEvent.isRemoteDev = info->isRemoteDev();
         SendArkUISyncEvent(&event);
+        RefPtr<DataLoadParams> udDataLoadParams =
+            UdmfClient::GetInstance()->TransformDataLoadParamsForNative(event.dragEvent.dataLoadParams);
+        info->SetDataLoadParams(udDataLoadParams);
         RefPtr<UnifiedData> udData =
             UdmfClient::GetInstance()->TransformUnifiedDataForNative(event.dragEvent.unifiedData);
 

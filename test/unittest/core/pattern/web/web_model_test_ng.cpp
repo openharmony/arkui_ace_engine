@@ -1261,23 +1261,6 @@ HWTEST_F(WebModelTestNg, NotifyPopupWindowResult012, TestSize.Level1)
 }
 
 /**
- * @tc.name: AddDragFrameNodeToManager013
- * @tc.desc: Test web_model_ng.cpp
- * @tc.type: FUNC
- */
-HWTEST_F(WebModelTestNg, AddDragFrameNodeToManager013, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    MockPipelineContext::SetUp();
-    WebModelNG webModelNG;
-    webModelNG.AddDragFrameNodeToManager();
-    auto ret = PipelineContext::GetCurrentContext()->GetDragDropManager()->dragFrameNodes_.empty();
-    EXPECT_EQ(ret, false);
-    MockPipelineContext::TearDown();
-#endif
-}
-
-/**
  * @tc.name: SetAudioResumeInterval014
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC
@@ -2101,7 +2084,7 @@ HWTEST_F(WebModelTestNg, SetOnDragLeave012, TestSize.Level1)
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     std::string extraParams = "extraParams";
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, dragEvent, extraParams);
-    EXPECT_TRUE(callbackCalled);
+    EXPECT_FALSE(callbackCalled);
 #endif
 }
 

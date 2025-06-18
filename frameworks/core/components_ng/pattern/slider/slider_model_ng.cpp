@@ -369,17 +369,10 @@ void SliderModelNG::SetShowTips(FrameNode* frameNode, bool value, const std::opt
     }
 }
 
-void SliderModelNG::SetThickness(FrameNode* frameNode, const std::optional<Dimension>& thickness)
+void SliderModelNG::SetThickness(FrameNode* frameNode, const Dimension& value)
 {
-    CHECK_NULL_VOID(frameNode);
-    auto value = Dimension();
-    if (thickness.has_value()) {
-        value = thickness.value();
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, frameNode);
-    }
-
     if (value.IsNonPositive()) {
+        CHECK_NULL_VOID(frameNode);
         auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
         auto pipeline = frameNode->GetContext();
@@ -400,42 +393,21 @@ void SliderModelNG::SetThickness(FrameNode* frameNode, const std::optional<Dimen
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Thickness, value, frameNode);
     }
 }
-void SliderModelNG::SetStepSize(FrameNode* frameNode, const std::optional<Dimension>& value)
+void SliderModelNG::SetStepSize(FrameNode* frameNode, const Dimension& value)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, StepSize, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(SliderPaintProperty, StepSize, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, StepSize, value, frameNode);
 }
-
-void SliderModelNG::SetBlockType(FrameNode* frameNode, const std::optional<BlockStyleType>& value)
+void SliderModelNG::SetBlockType(FrameNode* frameNode, BlockStyleType value)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockType, value.value(), frameNode);
-    } else {
-        SliderModelNG::ResetBlockType(frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockType, value, frameNode);
 }
 void SliderModelNG::SetBlockShape(FrameNode* frameNode, const RefPtr<BasicShape>& value)
 {
-    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockShape, value, frameNode);
 }
-
-void SliderModelNG::SetBlockSize(FrameNode* frameNode,
-    const std::optional<Dimension>& widthParam, const std::optional<Dimension>& heightParam)
+void SliderModelNG::SetBlockSize(FrameNode* frameNode, const Dimension& width, const Dimension& height)
 {
     CHECK_NULL_VOID(frameNode);
-    if (!widthParam.has_value() || !heightParam.has_value()) {
-        SliderModelNG::ResetBlockSize(frameNode);
-        return;
-    }
-    Dimension width = widthParam.value();
-    Dimension height = heightParam.value();
-
     auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto pipeline = frameNode->GetContext();
@@ -456,65 +428,29 @@ void SliderModelNG::SetBlockSize(FrameNode* frameNode,
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, BlockSize, blockSize, frameNode);
     }
 }
-
-void SliderModelNG::SetTrackBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& value)
+void SliderModelNG::SetTrackBorderRadius(FrameNode* frameNode, const Dimension& value)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBorderRadius, value.value(), frameNode);
-    } else {
-        ResetTrackBorderRadius(frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBorderRadius, value, frameNode);
 }
-
-void SliderModelNG::SetStepColor(FrameNode* frameNode, const std::optional<Color>& value)
+void SliderModelNG::SetStepColor(FrameNode* frameNode, const Color& value)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, StepColor, value.value(), frameNode);
-    } else {
-        ResetStepColor(frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, StepColor, value, frameNode);
 }
-
-void SliderModelNG::SetBlockBorderColor(FrameNode* frameNode, const std::optional<Color>& value)
+void SliderModelNG::SetBlockBorderColor(FrameNode* frameNode, const Color& value)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockBorderColor, value.value(), frameNode);
-    } else {
-        ResetBlockBorderColor(frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockBorderColor, value, frameNode);
 }
-
-void SliderModelNG::SetBlockBorderWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
+void SliderModelNG::SetBlockBorderWidth(FrameNode* frameNode, const Dimension& value)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockBorderWidth, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockBorderWidth, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockBorderWidth, value, frameNode);
 }
-
-void SliderModelNG::SetBlockColor(FrameNode* frameNode, const std::optional<Color>& value)
+void SliderModelNG::SetBlockColor(FrameNode* frameNode, const Color& value)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockColor, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockColor, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockColor, value, frameNode);
 }
-
-void SliderModelNG::SetTrackBackgroundColor(FrameNode* frameNode,
-    const std::optional<Gradient>& value, bool isResourceColor)
+void SliderModelNG::SetTrackBackgroundColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor)
 {
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, value, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundIsResourceColor, isResourceColor, frameNode);
 }
 void SliderModelNG::SetSelectColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor)
@@ -526,36 +462,23 @@ void SliderModelNG::SetShowSteps(FrameNode* frameNode, bool value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, ShowSteps, value, frameNode);
 }
-
-void SliderModelNG::SetSliderInteractionMode(FrameNode* frameNode, const std::optional<SliderInteraction>& mode)
+void SliderModelNG::SetSliderInteractionMode(FrameNode* frameNode, SliderInteraction mode)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (mode.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SliderInteractionMode, mode.value(), frameNode);
-    } else {
-        ResetSliderInteractionMode(frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SliderInteractionMode, mode, frameNode);
 }
-void SliderModelNG::SetMinResponsiveDistance(FrameNode* frameNode, const std::optional<float>& distance)
+void SliderModelNG::SetMinResponsiveDistance(FrameNode* frameNode, float value)
 {
     CHECK_NULL_VOID(frameNode);
-    
-    float value = 0.0f;
-    if (distance.has_value()) {
-        value = distance.value();
-        auto layoutProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        auto minResponse = 0.0f;
-        auto minValue = layoutProperty->GetMinValue(0.0f);
-        auto maxValue = layoutProperty->GetMaxValue(100.0f);
-        auto diff = maxValue - minValue;
-        if (LessOrEqual(value, diff) && GreatOrEqual(value, minResponse)) {
-            minResponse = value;
-        }
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, MinResponsiveDistance, minResponse, frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(SliderPaintProperty, MinResponsiveDistance, frameNode);
+    auto layoutProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto minResponse = 0.0f;
+    auto minValue = layoutProperty->GetMinValue(0.0f);
+    auto maxValue = layoutProperty->GetMaxValue(100.0f);
+    auto diff = maxValue - minValue;
+    if (LessOrEqual(value, diff) && GreatOrEqual(value, minResponse)) {
+        minResponse = value;
     }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, MinResponsiveDistance, minResponse, frameNode);
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -678,87 +601,41 @@ void SliderModelNG::SetSliderValue(FrameNode* frameNode, float value)
     pattern->UpdateValue(value);
 }
 
-void SliderModelNG::SetMinLabel(FrameNode* frameNode, const std::optional<float>& value)
+void SliderModelNG::SetMinLabel(FrameNode* frameNode, float value)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Min, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(SliderPaintProperty, Min, frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Min, value, frameNode);
+}
+void SliderModelNG::SetMaxLabel(FrameNode* frameNode, float value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Max, value, frameNode);
 }
 
-void SliderModelNG::SetMaxLabel(FrameNode* frameNode, const std::optional<float>& value)
+void SliderModelNG::SetSliderMode(FrameNode* frameNode, const SliderMode& value)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Max, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(SliderPaintProperty, Max, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, SliderMode, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SliderMode, value, frameNode);
+}
+void SliderModelNG::SetDirection(FrameNode* frameNode, Axis value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Direction, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Direction, value, frameNode);
+}
+void SliderModelNG::SetReverse(FrameNode* frameNode, bool value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Reverse, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Reverse, value, frameNode);
+}
+void SliderModelNG::SetStep(FrameNode* frameNode, float value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Step, value, frameNode);
 }
 
-void SliderModelNG::SetSliderMode(FrameNode* frameNode, const std::optional<SliderMode>& value)
+void SliderModelNG::SetValidSlideRange(FrameNode* frameNode, float from, float to)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, SliderMode, value.value(), frameNode);
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SliderMode, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, SliderMode, frameNode);
-        ACE_RESET_NODE_PAINT_PROPERTY(SliderPaintProperty, SliderMode, frameNode);
-    }
-}
-
-void SliderModelNG::SetDirection(FrameNode* frameNode, const std::optional<Axis>& value)
-{
-    CHECK_NULL_VOID(frameNode);
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Direction, value.value(), frameNode);
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Direction, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Direction, frameNode);
-        ACE_RESET_NODE_PAINT_PROPERTY(SliderPaintProperty, Direction, frameNode);
-    }
-}
-
-void SliderModelNG::SetReverse(FrameNode* frameNode, const std::optional<bool>& value)
-{
-    CHECK_NULL_VOID(frameNode);
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Reverse, value.value(), frameNode);
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Reverse, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(SliderLayoutProperty, Reverse, frameNode);
-        ACE_RESET_NODE_PAINT_PROPERTY(SliderPaintProperty, Reverse, frameNode);
-    }
-}
-
-void SliderModelNG::SetStep(FrameNode* frameNode, const std::optional<float>& value)
-{
-    CHECK_NULL_VOID(frameNode);
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, Step, value.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(SliderPaintProperty, Step, frameNode);
-    }
-}
-
-void SliderModelNG::SetValidSlideRange(FrameNode* frameNode,
-    const std::optional<float>& fromParam, const std::optional<float>& toParam)
-{
-    CHECK_NULL_VOID(frameNode);
-    if (!fromParam.has_value() || !toParam.has_value()) {
-        SliderModelNG::ResetValidSlideRange(frameNode);
-        return;
-    }
-    float from = fromParam.value();
-    float to = toParam.value();
-
     if (std::isnan(from) || std::isnan(to)) {
         return SliderModelNG::ResetValidSlideRange(frameNode);
     }
-
+    CHECK_NULL_VOID(frameNode);
     auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto minValue = paintProperty->GetMinValue(0.0f);
@@ -1002,14 +879,9 @@ Dimension SliderModelNG::GetThickness(FrameNode* frameNode)
     return trackThickness;
 }
 
-void SliderModelNG::SetSelectedBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& value)
+void SliderModelNG::SetSelectedBorderRadius(FrameNode* frameNode, const Dimension& value)
 {
-    CHECK_NULL_VOID(frameNode);
-    if (value.has_value()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectedBorderRadius, value.value(), frameNode);
-    } else {
-        ResetSelectedBorderRadius(frameNode);
-    }
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectedBorderRadius, value, frameNode);
 }
 
 void SliderModelNG::ResetSelectedBorderRadius(FrameNode* frameNode)

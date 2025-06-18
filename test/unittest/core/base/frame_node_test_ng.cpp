@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 #include "core/components_ng/pattern/marquee/marquee_paint_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 
@@ -954,25 +955,81 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest0026, TestSize.Level1)
     EXPECT_EQ(test, HitTestResult::OUT_OF_REGION);
 }
 
+class MockFrameNode : public FrameNode {
+    DECLARE_ACE_TYPE(MockFrameNode, FrameNode);
+
+public:
+    static RefPtr<MockFrameNode> CreateMockFrameNode(
+        const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+    {
+        auto frameNode = AceType::MakeRefPtr<MockFrameNode>(tag, nodeId, pattern);
+        ElementRegister::GetInstance()->AddUINode(frameNode);
+        frameNode->InitializePatternAndContext();
+        return frameNode;
+    }
+
+    MockFrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+        : FrameNode(tag, nodeId, pattern)
+    {}
+    ~MockFrameNode() override = default;
+
+    MOCK_METHOD(bool, IsOutOfTouchTestRegion, (const PointF&, const TouchEvent&, std::vector<RectF>*));
+    MOCK_METHOD(void, CollectSelfAxisResult,
+        (const PointF&, const PointF&, bool&, const PointF&, AxisTestResult&, bool&, HitTestResult&, TouchRestrict&));
+};
+
+using NiceMockFrameNode = NiceMock<MockFrameNode>;
+
 /**
  * @tc.name: FrameNodeTestNg_AxisTest0027
- * @tc.desc: Test frame node method
+ * @tc.desc: Test AxisTest
  * @tc.type: FUNC
  */
 HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest0027, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. callback AxisTest.
-     * @tc.expected: expect inputEventHub_ is run not null.
+     * @tc.steps: step1. construct tree
      */
-    const PointF globalPoint;
-    const PointF parentLocalPoint;
-    const PointF parentRevertPoint;
+    auto stackNode = NiceMockFrameNode::CreateMockFrameNode(
+        "stackNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    auto node1 = NiceMockFrameNode::CreateMockFrameNode(
+        "node1", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    auto node2 = NiceMockFrameNode::CreateMockFrameNode(
+        "node2", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    stackNode->frameChildren_.emplace(node1);
+    stackNode->frameChildren_.emplace(node2);
+
+    std::vector<RefPtr<MockFrameNode>> nodes = { stackNode, node1, node2 };
+    for (auto& item : nodes) {
+        item->isActive_ = true;
+        const auto& inputEventHub = item->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
+        inputEventHub->SetAxisEvent([&item](AxisInfo& info) {});
+        ON_CALL((*item), CollectSelfAxisResult(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_,
+                             testing::_, testing::_))
+            .WillByDefault(testing::Invoke([&inputEventHub](const PointF&, const PointF&, bool&, const PointF&,
+                                               AxisTestResult& axisResult, bool&, HitTestResult&, TouchRestrict&) {
+                axisResult.emplace_back(inputEventHub->axisEventActuator_->axisEventTarget_);
+            }));
+        ON_CALL((*item), IsOutOfTouchTestRegion(testing::_, testing::_, testing::_))
+            .WillByDefault(
+                testing::Invoke([](const PointF&, const TouchEvent&, std::vector<RectF>*) { return false; }));
+    }
+    node2->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+    const PointF globalPoint, parentLocalPoint, parentRevertPoint;
     TouchRestrict touchRestrict;
     AxisTestResult onAxisResult;
-    FRAME_NODE2->GetOrCreateEventHub<EventHub>()->GetOrCreateInputEventHub();
-    FRAME_NODE2->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
-    EXPECT_NE(FRAME_NODE2->GetOrCreateEventHub<EventHub>()->inputEventHub_, nullptr);
+
+    /**
+     * @tc.steps: step2. Trigger AxisTest.
+     * @tc.expected: expect the order of axis test sequence is correct.
+     */
+    stackNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
+    std::string expectSeq = node2->GetHostTag() + node1->GetHostTag() + stackNode->GetHostTag();
+    std::string triggerSeq;
+    for (auto& item : onAxisResult) {
+        triggerSeq.append(item->GetFrameName());
+    }
+    EXPECT_EQ(triggerSeq, expectSeq);
 }
 
 /**

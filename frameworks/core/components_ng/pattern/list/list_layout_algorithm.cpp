@@ -152,7 +152,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         ReviseSpace(listLayoutProperty);
         CheckJumpToIndex();
         CalculateLanes(listLayoutProperty, layoutConstraint, contentIdealSize.CrossSize(axis_), axis_);
-        if (posMap_) {
+        if (childrenSize_ && posMap_) {
             posMap_->UpdatePosMap(layoutWrapper, GetLanes(), spaceWidth_, childrenSize_);
         }
         ProcessStackFromEnd();
@@ -165,7 +165,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureList(layoutWrapper);
     } else {
         itemPosition_.clear();
-        if (posMap_) {
+        if (childrenSize_ && posMap_) {
             posMap_->ClearPosMap();
         }
     }
@@ -667,12 +667,67 @@ float ListLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper
     return mainLen;
 }
 
+std::pair<int32_t, float> ListLayoutAlgorithm::FindIndexAndDeltaInPosMap(float delta) const
+{
+    // If cannot find or inappropriate, return index -1 and delta 0.f.
+    // If a suitable location can be found based on posMap_, return the corresponding index and delta.
+    // The delta and index in the return value satisfies the following constraints:
+    // 1) delta >= -spaceWidth_;
+    // 2) delta < posMap[index].mainSize.
+    if (!posMap_) {
+        return { -1, 0.f };
+    }
+    // itemPosition_ has been checked nonNull before the func is called.
+    int32_t curIndex = itemPosition_.begin()->first;
+    float startPos = itemPosition_.begin()->second.startPos;
+    // Consume a portion of delta to align item with the top of the List.
+    if (Negative(delta) && LessOrEqual(startPos, delta)) {
+        return { curIndex, delta - startPos };
+    }
+    delta -= startPos;
+    float curPos = posMap_->GetPositionInfo(curIndex).mainPos;
+    float curSize = posMap_->GetPositionInfo(curIndex).mainSize;
+    // The abs value of the input param of the func is greater than 2 * contentMainSize_, so
+    // the delta here must not be 0.f
+    int32_t step = Negative(delta) ? -1 : 1;
+    while (!Negative(curPos)) { // if curIndex
+        if (LessOrEqual(-spaceWidth_, delta) && LessNotEqual(delta, curSize)) {
+            return { curIndex, delta };
+        }
+        curIndex += step;
+        curPos = posMap_->GetPositionInfo(curIndex).mainPos;
+        curSize = posMap_->GetPositionInfo(curIndex).mainSize;
+        float gap = curSize + spaceWidth_;
+        delta -= (step > 0 ? gap : -gap);
+    }
+    return { -1, 0.f };
+}
+
+bool ListLayoutAlgorithm::CanUseInfoInPosMap(int32_t index, float delta) const
+{
+    if (index < 0 || index > totalItemCount_ - 1 || !posMap_) {
+        return false;
+    }
+    const auto& info = posMap_->GetPositionInfo(index);
+    if (info.isGroup && GreatNotEqual(info.mainSize, contentMainSize_ * 2.0f)) {
+        return false;
+    }
+    return true;
+}
+
 void ListLayoutAlgorithm::CheckJumpToIndex()
 {
     if (jumpIndex_.has_value() || !isNeedCheckOffset_ || childrenSize_) {
         return;
     }
     if (LessOrEqual(std::abs(currentDelta_), contentMainSize_ * 2.0f) || itemPosition_.empty()) {
+        return;
+    }
+    auto [index, delta] = FindIndexAndDeltaInPosMap(currentDelta_);
+    if (CanUseInfoInPosMap(index, delta)) {
+        jumpIndex_ = index;
+        currentDelta_ = delta;
+        isNeedCheckOffset_ = false;
         return;
     }
     for (const auto& pos : itemPosition_) {
@@ -1175,8 +1230,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     }
     // adjust offset.
     UpdateSnapCenterContentOffset(layoutWrapper);
-    if (LessNotEqual(currentEndPos, endMainPos - contentEndOffset_) && !itemPosition_.empty() &&
-        itemPosition_.rbegin()->first == totalItemCount_ - 1) {
+    if (LessNotEqual(currentEndPos, endMainPos - contentEndOffset_) && !itemPosition_.empty()) {
         endMainPos_ = currentEndPos + contentEndOffset_;
         startMainPos_ = endMainPos_ - contentMainSize_;
         ReMeasureListItemGroup(layoutWrapper, true);
@@ -1254,8 +1308,7 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
     currentStartPos += chainOffset;
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
     UpdateSnapCenterContentOffset(layoutWrapper);
-    if (GreatNotEqual(currentStartPos, startMainPos_ + contentStartOffset_) && !itemPosition_.empty() &&
-        itemPosition_.begin()->first == 0) {
+    if (GreatNotEqual(currentStartPos, startMainPos_ + contentStartOffset_) && !itemPosition_.empty()) {
         auto itemTotalSize = GetEndPosition() - currentStartPos + contentEndOffset_ + contentStartOffset_;
         bool overBottom = (GetEndIndex() == totalItemCount_ - 1) && (LessNotEqual(itemTotalSize, contentMainSize_));
         if (overBottom && !mainSizeIsDefined_ && GreatNotEqual(contentMainSize_, itemTotalSize)) {
@@ -2668,7 +2721,7 @@ void ListLayoutAlgorithm::ProcessStackFromEnd()
         } else if (scrollAlign_ == ScrollAlign::END) {
             scrollAlign_ = ScrollAlign::START;
         }
-        if (posMap_) {
+        if (childrenSize_ && posMap_) {
             posMap_->ReversePosMap();
         }
     }

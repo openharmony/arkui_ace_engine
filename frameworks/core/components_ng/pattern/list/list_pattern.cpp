@@ -17,6 +17,7 @@
 
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"
+#include "base/utils/system_properties.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/list/list_theme.h"
@@ -36,6 +37,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -295,7 +297,6 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     DrivenRender(dirty);
-    UpdateLayoutRange(GetAxis(), !isInitialized_);
 
     SetScrollSource(SCROLL_FROM_NONE);
     MarkSelectedItems();
@@ -582,6 +583,9 @@ void ListPattern::FireOnScrollIndex(bool indexChanged, const OnScrollIndexEvent&
     CHECK_NULL_VOID(indexChanged && onScrollIndex);
     int32_t startIndex = startIndex_ == -1 ? 0 : startIndex_;
     int32_t endIndex = endIndex_ == -1 ? 0 : endIndex_;
+    if (SystemProperties::IsWhiteBlockEnabled()) {
+        endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(endIndex);
+    }
     onScrollIndex(startIndex, endIndex, centerIndex_);
     ReportOnItemListScrollEvent("onScrollIndex", startIndex, endIndex);
 }
@@ -686,8 +690,8 @@ void ListPattern::SetLayoutAlgorithmParams(
     CHECK_NULL_VOID(listLayoutProperty);
     if (childrenSize_) {
         listLayoutAlgorithm->SetListChildrenMainSize(childrenSize_);
-        listLayoutAlgorithm->SetListPositionMap(posMap_);
     }
+    listLayoutAlgorithm->SetListPositionMap(posMap_);
     SetLayoutAlgorithmJumpAlign(listLayoutAlgorithm, listLayoutProperty);
     if (targetIndex_) {
         listLayoutAlgorithm->SetTargetIndex(targetIndex_.value());
@@ -982,13 +986,6 @@ OverScrollOffset ListPattern::GetOutBoundaryOffset(float delta, bool useChainDel
     return offset;
 }
 
-void ListPattern::UpdateOffsetHelper(float lastDelta)
-{
-    auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
-    currentDelta_ = lastDelta + userOffset;
-    UpdateOffset(-userOffset);
-}
-
 bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
     // check edgeEffect is not springEffect
@@ -1010,7 +1007,8 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         MarkDirtyNodeSelf();
     }
     if (itemPosition_.empty() || !IsOutOfBoundary() || !isScrollable_) {
-        UpdateOffsetHelper(lastDelta);
+        auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
+        currentDelta_ = lastDelta + userOffset;
         return true;
     }
 
@@ -1024,7 +1022,8 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
         currentDelta_ = lastDelta - offset;
     }
 
-    UpdateOffsetHelper(lastDelta);
+    auto userOffset = FireOnWillScroll(currentDelta_ - lastDelta);
+    currentDelta_ = lastDelta + userOffset;
     MarkScrollBarProxyDirty();
     return true;
 }
@@ -1748,7 +1747,6 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             if (!AnimateToTarget(index, std::nullopt, align)) {
                 targetIndex_ = index;
                 scrollAlign_ = align;
-                RequestFillToTarget(*targetIndex_, scrollAlign_, extraOffset.value_or(0.0f));
             }
         } else {
             if (extraOffset.has_value()) {
@@ -1757,7 +1755,6 @@ void ListPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             jumpIndex_ = index;
             scrollAlign_ = align;
             jumpIndexInGroup_.reset();
-            RequestJump(*jumpIndex_, scrollAlign_, extraOffset.value_or(0.0f));
         }
         MarkDirtyNodeSelf();
     }
@@ -2281,8 +2278,10 @@ float ListPattern::UpdateTotalOffset(const RefPtr<ListLayoutAlgorithm>& listLayo
             calculate.SetPosMap(posMap_, true);
             calculate.GetEstimateHeightAndOffset(GetHost());
             currentOffset_ = calculate.GetEstimateOffset();
+            listTotalHeight_ = calculate.GetEstimateHeight();
             relativeOffset = 0;
             needReEstimateOffset_ = false;
+            heightEstimated_ = true;
         }
         CalculateCurrentOffset(relativeOffset, listLayoutAlgorithm->GetRecycledItemPosition());
     }
@@ -2413,6 +2412,7 @@ void ListPattern::UpdateScrollBarOffset()
 {
     CheckScrollBarOff();
     if (!GetScrollBar() && !GetScrollBarProxy()) {
+        heightEstimated_ = false;
         return;
     }
     auto host = GetHost();
@@ -2422,13 +2422,15 @@ void ListPattern::UpdateScrollBarOffset()
     Size size(frameSize.Width(), frameSize.Height());
     if (itemPosition_.empty()) {
         UpdateScrollBarRegion(0.f, 0.f, size, Offset(0.0f, 0.0f));
+        heightEstimated_ = false;
         return;
     }
     float currentOffset = 0.0f;
     float estimatedHeight = 0.0f;
-    if (childrenSize_) {
+    if (childrenSize_ || heightEstimated_) {
         currentOffset = currentOffset_;
         estimatedHeight = listTotalHeight_;
+        heightEstimated_ = false;
     } else {
         auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis(), itemStartIndex_);
         calculate.SetPosMap(posMap_);
@@ -3242,7 +3244,6 @@ void ListPattern::NotifyDataChange(int32_t index, int32_t count)
         }
     }
     needReEstimateOffset_ = true;
-    RequestReset(startIndex, contentStartOffset_);
 }
 
 bool ListPattern::CheckDataChangeOutOfStart(int32_t index, int32_t count, int32_t startIndex, int32_t endIndex)

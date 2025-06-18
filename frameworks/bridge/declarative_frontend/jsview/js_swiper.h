@@ -79,7 +79,7 @@ protected:
     static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static void GetAutoPlayOptionsInfo(const JSRef<JSObject>& obj, SwiperAutoPlayOptions& swiperAutoPlayOptions);
     static void SetIndicatorController(const JSCallbackInfo& info);
-    static void ResetSwiperNode();
+    static void ResetSwiperNode(const JSCallbackInfo& info);
     static void SetMaintainVisibleContentPosition(const JSCallbackInfo& info);
 
     private:

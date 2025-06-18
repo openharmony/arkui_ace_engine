@@ -882,24 +882,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         return;
     }
     std::string udKey;
-    auto unifiedData = dragEvent->GetData();
-    if (unifiedData) {
-        DragDropBehaviorReporter::GetInstance().UpdateRecordSize(unifiedData->GetSize());
-    }
-    int32_t recordsSize = GetBadgeNumber(unifiedData);
-    auto ret = SetDragData(unifiedData, udKey);
-    if (ret != 0) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF set data failed, return value is %{public}d", ret);
-        DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SET_DATA_FAIL);
-    }
-
     std::map<std::string, int64_t> summary;
     std::map<std::string, int64_t> detailedSummary;
-    ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
-    if (ret != 0) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF get summary failed, return value is %{public}d", ret);
-    }
-    dragDropManager->SetSummaryMap(summary);
+    int32_t ret = -1;
+    auto unifiedData = dragEvent->GetData();
+    DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, summary, detailedSummary, ret);
+    int32_t recordsSize = GetBadgeNumber(unifiedData);
     RefPtr<PixelMap> pixelMap = dragDropInfo.pixelMap;
     if (pixelMap) {
         SetPixelMap(pixelMap);
@@ -1222,13 +1210,6 @@ void GestureEventHub::HandleOnDragCancel()
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;
-}
-
-int32_t GestureEventHub::SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey)
-{
-    CHECK_NULL_RETURN(unifiedData, -1);
-    ACE_SCOPED_TRACE("drag: set drag data to udmf");
-    return UdmfClient::GetInstance()->SetData(unifiedData, udKey);
 }
 
 OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub)

@@ -688,16 +688,22 @@ ArkUINativeModuleValue TextBridge::SetTextShadow(ArkUIRuntimeCallInfo* runtimeCa
     auto offsetXArray = std::make_unique<double[]>(length);
     auto offsetYArray = std::make_unique<double[]>(length);
     auto fillArray = std::make_unique<uint32_t[]>(length);
-    bool radiusParseResult = ArkTSUtils::ParseArray<double>(
-        vm, radiusArg, radiusArray.get(), length, ArkTSUtils::parseShadowRadius);
+
+    std::vector<RefPtr<ResourceObject>> radiusResArr;
+    std::vector<RefPtr<ResourceObject>> colorResArr;
+    std::vector<RefPtr<ResourceObject>> offsetXResArr;
+    std::vector<RefPtr<ResourceObject>> offsetYResArr;
+
+    bool radiusParseResult = ArkTSUtils::ParseArrayWithResObj<double>(
+        vm, radiusArg, radiusArray.get(), length, ArkTSUtils::parseShadowRadiusWithResObj, radiusResArr);
     bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(
         vm, typeArg, typeArray.get(), length, ArkTSUtils::parseShadowType);
-    bool colorParseResult = ArkTSUtils::ParseArray<uint32_t>(
-        vm, colorArg, colorArray.get(), length, ArkTSUtils::parseShadowColor);
-    bool offsetXParseResult = ArkTSUtils::ParseArray<double>(
-        vm, offsetXArg, offsetXArray.get(), length, ArkTSUtils::parseShadowOffset);
-    bool offsetYParseResult = ArkTSUtils::ParseArray<double>(
-        vm, offsetYArg, offsetYArray.get(), length, ArkTSUtils::parseShadowOffset);
+    bool colorParseResult = ArkTSUtils::ParseArrayWithResObj<uint32_t>(
+        vm, colorArg, colorArray.get(), length, ArkTSUtils::parseShadowColorWithResObj, colorResArr);
+    bool offsetXParseResult = ArkTSUtils::ParseArrayWithResObj<double>(
+        vm, offsetXArg, offsetXArray.get(), length, ArkTSUtils::parseShadowOffsetWithResObj, offsetXResArr);
+    bool offsetYParseResult = ArkTSUtils::ParseArrayWithResObj<double>(
+        vm, offsetYArg, offsetYArray.get(), length, ArkTSUtils::parseShadowOffsetWithResObj, offsetYResArr);
     bool fillParseResult = ArkTSUtils::ParseArray<uint32_t>(
         vm, fillArg, fillArray.get(), length, ArkTSUtils::parseShadowFill);
     if (!radiusParseResult || !colorParseResult || !offsetXParseResult ||
@@ -714,7 +720,9 @@ ArkUINativeModuleValue TextBridge::SetTextShadow(ArkUIRuntimeCallInfo* runtimeCa
         textShadowArray[i].offsetY = offsetYArray[i];
         textShadowArray[i].fill = fillArray[i];
     }
-    GetArkUINodeModifiers()->getTextModifier()->setTextShadow(nativeNode, textShadowArray.get(), length);
+    GetArkUINodeModifiers()->getTextModifier()->setTextShadow(nativeNode, textShadowArray.get(), length,
+        static_cast<void*>(&radiusResArr), static_cast<void*>(&colorResArr),
+        static_cast<void*>(&offsetXResArr), static_cast<void*>(&offsetYResArr));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1356,20 +1364,23 @@ ArkUINativeModuleValue TextBridge::SetDataDetectorConfig(ArkUIRuntimeCallInfo* r
         };
         arkUITextDetectConfig.onResult = reinterpret_cast<void*>(&callback);
     }
-    ParseAIEntityColorAndPreview(runtimeCallInfo, arkUITextDetectConfig);
-    GetArkUINodeModifiers()->getTextModifier()->
-        setTextDataDetectorConfigWithEvent(nativeNode, &arkUITextDetectConfig);
+    RefPtr<ResourceObject> colorResObj;
+    RefPtr<ResourceObject> decColorResObj;
+    ParseAIEntityColorAndPreview(runtimeCallInfo, arkUITextDetectConfig, colorResObj, decColorResObj);
+    GetArkUINodeModifiers()->getTextModifier()->setTextDataDetectorConfigWithEvent(nativeNode,
+        &arkUITextDetectConfig, AceType::RawPtr(colorResObj), AceType::RawPtr(decColorResObj));
     return panda::JSValueRef::Undefined(vm);
 }
 
 void TextBridge::ParseAIEntityColorAndPreview(
-    ArkUIRuntimeCallInfo* runtimeCallInfo, struct ArkUITextDetectConfigStruct& arkUITextDetectConfig)
+    ArkUIRuntimeCallInfo* runtimeCallInfo, struct ArkUITextDetectConfigStruct& arkUITextDetectConfig,
+    RefPtr<ResourceObject>& colorResObj, RefPtr<ResourceObject>& decColorResObj)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
     TextDetectConfig textDetectConfig;
     Local<JSValueRef> entityColorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    ArkTSUtils::ParseJsColorAlpha(vm, entityColorArg, textDetectConfig.entityColor);
+    ArkTSUtils::ParseJsColorAlpha(vm, entityColorArg, textDetectConfig.entityColor, colorResObj);
     arkUITextDetectConfig.entityColor = textDetectConfig.entityColor.GetValue();
 
     Local<JSValueRef> entityDecorationTypeArg = runtimeCallInfo->GetCallArgRef(NUM_4);
@@ -1382,7 +1393,8 @@ void TextBridge::ParseAIEntityColorAndPreview(
     if (entityDecorationTypeArg->IsInt()) {
         arkUITextDetectConfig.entityDecorationType = entityDecorationTypeArg->Int32Value(vm);
     }
-    if (ArkTSUtils::ParseJsColorAlpha(vm, entityDecorationColorArg, textDetectConfig.entityDecorationColor)) {
+    if (ArkTSUtils::ParseJsColorAlpha(vm, entityDecorationColorArg, textDetectConfig.entityDecorationColor,
+        decColorResObj)) {
         arkUITextDetectConfig.entityDecorationColor = textDetectConfig.entityDecorationColor.GetValue();
     }
     if (entityDecorationStyleArg->IsInt()) {
@@ -1662,10 +1674,9 @@ ArkUINativeModuleValue TextBridge::SetShaderStyle(ArkUIRuntimeCallInfo* runtimeC
     auto directionArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     auto repeatingArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     auto colorsArg = runtimeCallInfo->GetCallArgRef(NUM_6);
-    
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (centerArg->IsArray(vm) && (radiusArg->IsNumber() || radiusArg->IsString(vm))) {
+    if (centerArg->BooleaValue(vm) && radiusArg->IsNumber()) {
         std::vector<ArkUIInt32orFloat32> values;
         ArkTSUtils::ParseGradientCenter(vm, centerArg, values);
         CalcDimension radius;
@@ -1679,7 +1690,7 @@ ArkUINativeModuleValue TextBridge::SetShaderStyle(ArkUIRuntimeCallInfo* runtimeC
         values.push_back({ .i32 = static_cast<ArkUI_Int32>(repeating) });
         GetArkUINodeModifiers()->getTextModifier()->setRadialGradient(
             nativeNode, values.data(), values.size(), colors.data(), colors.size());
-    } else if ((angleArg->IsNumber() || angleArg->IsString(vm)) || directionArg->IsNumber()) {
+    } else if (colorsArg->BooleaValue(vm)) {
         std::vector<ArkUIInt32orFloat32> values;
         ArkTSUtils::ParseGradientAngle(vm, angleArg, values);
         int32_t direction = static_cast<int32_t>(GradientDirection::NONE);
@@ -1692,6 +1703,8 @@ ArkUINativeModuleValue TextBridge::SetShaderStyle(ArkUIRuntimeCallInfo* runtimeC
         values.push_back({ .i32 = static_cast<ArkUI_Int32>(repeating) });
         GetArkUINodeModifiers()->getTextModifier()->setLinearGradient(
             nativeNode, values.data(), values.size(), colors.data(), colors.size());
+    } else {
+        GetArkUINodeModifiers()->getTextModifier()->resetTextGradient(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }

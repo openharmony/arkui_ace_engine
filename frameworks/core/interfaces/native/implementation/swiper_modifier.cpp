@@ -415,11 +415,11 @@ void OnChangeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto onEvent = [arkCallback = CallbackHelper(*value)](int32_t index) {
-        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(index));
-    };
-    SwiperModelNG::SetOnChange(frameNode, onEvent);
+    // CHECK_NULL_VOID(value);
+    // auto onEvent = [arkCallback = CallbackHelper(*value)](int32_t index) {
+    //     arkCallback.Invoke(Converter::ArkValue<Ark_Number>(index));
+    // };
+    // SwiperModelNG::SetOnChange(frameNode, onEvent);
 }
 void IndicatorStyleImpl(Ark_NativePointer node,
                         const Opt_IndicatorStyle* value)
@@ -614,11 +614,11 @@ void PrevMarginImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto optMargin = Converter::OptConvert<Dimension>(*value);
-    CHECK_NULL_VOID(optMargin);
-    auto optIgnore = ignoreBlank ? Converter::OptConvert<bool>(*ignoreBlank) : std::nullopt;
-    SwiperModelNG::SetPreviousMargin(frameNode, *optMargin, optIgnore);
+    // CHECK_NULL_VOID(value);
+    // auto optMargin = Converter::OptConvert<Dimension>(*value);
+    // CHECK_NULL_VOID(optMargin);
+    // auto optIgnore = ignoreBlank ? Converter::OptConvert<bool>(*ignoreBlank) : std::nullopt;
+    // SwiperModelNG::SetPreviousMargin(frameNode, *optMargin, optIgnore);
 }
 void NextMarginImpl(Ark_NativePointer node,
                     const Ark_Length* value,
@@ -626,26 +626,26 @@ void NextMarginImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto optMargin = Converter::OptConvert<Dimension>(*value);
-    CHECK_NULL_VOID(optMargin);
-    auto optIgnore = ignoreBlank ? Converter::OptConvert<bool>(*ignoreBlank) : std::nullopt;
-    SwiperModelNG::SetNextMargin(frameNode, *optMargin, optIgnore);
+    // CHECK_NULL_VOID(value);
+    // auto optMargin = Converter::OptConvert<Dimension>(*value);
+    // CHECK_NULL_VOID(optMargin);
+    // auto optIgnore = ignoreBlank ? Converter::OptConvert<bool>(*ignoreBlank) : std::nullopt;
+    // SwiperModelNG::SetNextMargin(frameNode, *optMargin, optIgnore);
 }
 void _onChangeEvent_indexImpl(Ark_NativePointer node,
                               const Callback_Number_Void* callback)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(callback);
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* info) {
-        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
-        CHECK_NULL_VOID(swiperInfo);
-        PipelineContext::SetCallBackNode(weakNode);
-        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(swiperInfo->GetIndex()));
-    };
-    SwiperModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
+    // CHECK_NULL_VOID(callback);
+    // WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    // auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* info) {
+    //     const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+    //     CHECK_NULL_VOID(swiperInfo);
+    //     PipelineContext::SetCallBackNode(weakNode);
+    //     arkCallback.Invoke(Converter::ArkValue<Ark_Number>(swiperInfo->GetIndex()));
+    // };
+    // SwiperModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // SwiperAttributeModifier
 const GENERATED_ArkUISwiperModifier* GetSwiperModifier()

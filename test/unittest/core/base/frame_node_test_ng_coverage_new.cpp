@@ -766,7 +766,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest007, TestSize.Level1)
     ASSERT_NE(childNode, nullptr);
     /**
      * @tc.steps: step3. callback AxisTest.
-     * @tc.expected: expect CheckChildHitTestReslut is true.
+     * @tc.expected: expect CheckChildHitTestResult is true.
      */
     childNode->isActive_ = true;
     auto childEventHub_ = AceType::MakeRefPtr<EventHub>();

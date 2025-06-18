@@ -204,6 +204,10 @@ public:
         const AnimationFinishCallback finishCallback, bool isNavBar = false);
     virtual void CreateAnimationWithPush(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
         const AnimationFinishCallback finishCallback, bool isNavBar = false);
+    void CreateSoftAnimationWithPush(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
+        const AnimationFinishCallback finishCallback, bool isNavBar = false);
+    void CreateSoftAnimationWithPop(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
+        const AnimationFinishCallback finishCallback, bool isNavBar = false);
     virtual void ResetSystemAnimationProperties(const RefPtr<FrameNode>& navDestinationNode);
 
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(
@@ -368,6 +372,15 @@ private:
     bool CheckNeedUpdateParentNode(const RefPtr<UINode>& node);
     void RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
         int32_t preAnimationId);
+
+    void StartSoftOpacityAnimationPush(const RefPtr<FrameNode>& curNode);
+    void StartSoftOpacityAnimationPop(const RefPtr<FrameNode>& preNode);
+    void SoftTransitionAnimationPush(const RefPtr<FrameNode>& preNode,
+        const RefPtr<FrameNode>& curNode, bool isNavBar, bool preUseCustomTransition, bool curUseCustomTransition,
+        const NavigationGroupNode::AnimationFinishCallback& callback);
+    void SoftTransitionAnimationPop(const RefPtr<FrameNode>& preNode,
+        const RefPtr<FrameNode>& curNode, bool isNavBar, bool preUseCustomTransition, bool curUseCustomTransition,
+        const NavigationGroupNode::AnimationFinishCallback& callback);
 
     RefPtr<UINode> primaryContentNode_;
     RefPtr<UINode> navBarNode_;

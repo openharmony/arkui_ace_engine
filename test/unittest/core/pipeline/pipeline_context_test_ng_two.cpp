@@ -2357,6 +2357,37 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg301, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PipelineContextTestNg303
+ * @tc.desc: Test the function OnMouseMoveEventForAxisEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg303, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: initialize pipeline, touch event.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    TouchEvent touchEventOne;
+    touchEventOne.id = 0;
+    touchEventOne.type = TouchType::MOVE;
+    TouchEvent touchEventTwo;
+    touchEventTwo.id = 1;
+    touchEventTwo.type = TouchType::MOVE;
+
+    /**
+     * @tc.steps2: Call the function CompensateTouchMoveEventBeforeDown.
+     * @tc.expected: Test if this function is available and the events is consumed.
+     */
+    context_->CompensateTouchMoveEventBeforeDown();
+    context_->touchEvents_.push_back(touchEventOne);
+    context_->touchEvents_.push_back(touchEventTwo);
+    context_->CompensateTouchMoveEventBeforeDown();
+    EXPECT_TRUE(context_->touchEvents_.empty());
+}
+
+/**
  * @tc.name: PipelineContextTestNg400
  * @tc.desc: Test the function RegisterAttachedNode.
  * @tc.type: FUNC

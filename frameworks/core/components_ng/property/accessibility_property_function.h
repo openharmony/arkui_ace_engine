@@ -27,6 +27,12 @@ class TouchEventInfo;
 
 namespace NG {
 class FrameNode;
+
+struct SecCompEnhanceEvent {
+    std::vector<uint8_t> dataBuffer;
+    TimeStamp time;
+};
+
 #define DEFINE_ACTION_FUNCTIONS(TYPE) \
 public: \
     void Set##TYPE(const Action##TYPE& action##TYPE) \
@@ -53,6 +59,8 @@ using ActionAccessibilityActionIntercept =
 using ActionAccessibilityTransparentCallback = std::function<void(TouchEventInfo& eventInfo)>;
 
 using ActionSpecificSupportActionCallback = std::function<void()>;
+
+using ActionSecurityClickAction = std::function<void(const SecCompEnhanceEvent& event)>;
 
 /**
  * @brief maintaining the callbacks for components
@@ -95,6 +103,20 @@ class ACE_FORCE_EXPORT AccessibilityPropertyInnerFunction {
      */
     DEFINE_ACTION_FUNCTIONS(SpecificSupportActionCallback);
 
+    /**
+     * @brief the click action will by handle in this callback with sec enhance data
+     *
+     * @details callback function prototype: ActionSecurityClickAction
+     *          register function: SetSecurityClickAction(const SecCompEnhanceEvent& event)
+     *          use register function to register callback.
+     *          when sec comp want to handle accessibility click with data.
+     * @param [in] SecCompEnhanceEvent the enhance data from accessibility
+     *
+     * @return void
+     *
+     * @attention it will be executed on the UI thread, so be aware of thread safety.
+     */
+    DEFINE_ACTION_FUNCTIONS(SecurityClickAction);
 public:
     AccessibilityPropertyInnerFunction() = default;
 

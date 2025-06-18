@@ -27,6 +27,7 @@
 
 #include "base/log/dump_log.h"
 #include "nweb_handler.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "oh_window_pip.h"
 
@@ -1309,15 +1310,9 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_003, TestSize.Level1)
     event.SetScale(-2);
     webPattern->preScale_ = 0;
     webPattern->zoomErrorCount_ = 1;
+
     webPattern->HandleScaleGestureChange(event);
-    EXPECT_NE(webPattern->zoomErrorCount_, 0);
-    webPattern->preScale_ = 1;
-    webPattern->HandleScaleGestureChange(event);
-    EXPECT_NE(webPattern->zoomErrorCount_, 0);
-    event.SetScale(1);
-    webPattern->preScale_ = 0;
-    webPattern->HandleScaleGestureChange(event);
-    EXPECT_NE(webPattern->zoomErrorCount_, 0);
+    EXPECT_NE(webPattern->zoomErrorCount_, 1);
     EXPECT_NE(webPattern, nullptr);
 #endif
 }
@@ -1348,7 +1343,7 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_004, TestSize.Level1)
     webPattern->preScale_ = 2;
 
     webPattern->HandleScaleGestureChange(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 2);
+    EXPECT_EQ(webPattern->zoomErrorCount_, 1);
     EXPECT_NE(webPattern, nullptr);
 #endif
 }
@@ -1379,7 +1374,7 @@ HWTEST_F(WebPatternTestNg, HandleScaleGestureChange_005, TestSize.Level1)
     webPattern->preScale_ = 4;
 
     webPattern->HandleScaleGestureChange(event);
-    EXPECT_EQ(webPattern->zoomErrorCount_, 0);
+    EXPECT_EQ(webPattern->zoomErrorCount_, 1);
     EXPECT_NE(webPattern, nullptr);
 #endif
 }
@@ -3172,8 +3167,8 @@ HWTEST_F(WebPatternTestNg, CreateSnapshotImageFrameNode_001, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
     MockPipelineContext::SetUp();
-    EXPECT_EQ(NWeb::IsSnapshotPathValid("/data/storage/el2/base/cache/web/web_frame_123456.png"), true);
-    std::string snapshotPath = "/data/storage/el2/base/cache/web/web_frame_123456.png";
+    EXPECT_EQ(NWeb::IsSnapshotPathValid("/data/storage/el2/base/cache/web/snapshot/web_frame_123456.png"), true);
+    std::string snapshotPath = "/data/storage/el2/base/cache/web/snapshot/web_frame_123456.png";
     webPattern->CreateSnapshotImageFrameNode(snapshotPath);
     webPattern->RemoveSnapshotFrameNode();
     webPattern->RemoveSnapshotFrameNode();
@@ -3294,4 +3289,116 @@ HWTEST_F(WebPatternTestNg, SetDefaultBackgroundColor001, TestSize.Level1)
     EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
 #endif
 }
+
+/**
+ * @tc.name: CheckVisible_001
+ * @tc.desc: CheckVisible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, CheckVisible_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    auto host = webPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto layoutProperty = host->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    EXPECT_EQ(layoutProperty->GetVisibility(), VisibleType::INVISIBLE);
+
+    EXPECT_FALSE(webPattern->CheckVisible());
+#endif
+}
+
+/**
+ * @tc.name: CheckVisible_002
+ * @tc.desc: CheckVisible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, CheckVisible_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    auto host = webPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    host->isActive_ = false;
+    EXPECT_FALSE(webPattern->CheckVisible());
+#endif
+}
+
+/**
+ * @tc.name: CheckVisible_003
+ * @tc.desc: CheckVisible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, CheckVisible_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto *stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    frameNode->SetParent(nullptr);
+    auto host = webPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto parent = host->GetParent();
+    EXPECT_EQ(parent, nullptr);
+    auto layoutProperty = host->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    EXPECT_EQ(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
+    host->isActive_ = true;
+
+    EXPECT_TRUE(webPattern->CheckVisible());
+#endif
+}
+
+/**
+ * @tc.name: CheckVisible_004
+ * @tc.desc: CheckVisible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, CheckVisible_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto *stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    auto host = webPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto layoutProperty = host->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    EXPECT_EQ(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
+    host->isActive_ = true;
+
+    auto parentNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(parentNode, nullptr);
+    stack->Push(parentNode);
+    frameNode->SetParent(parentNode);
+    parentNode->SetWindowBoundary(true);
+
+    EXPECT_TRUE(webPattern->CheckVisible());
+#endif
+}
+
 } // namespace OHOS::Ace::NG

@@ -27,6 +27,7 @@
 
 #include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/text_field/textfield_theme.h"
@@ -89,6 +90,8 @@ RefPtr<Theme> GetTheme(ThemeType type)
         return AceType::MakeRefPtr<IconTheme>();
     } else if (type == SelectTheme::TypeId()) {
         return AceType::MakeRefPtr<SelectTheme>();
+    } else if (type == ScrollBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<ScrollBarTheme>();
     } else {
         return nullptr;
     }

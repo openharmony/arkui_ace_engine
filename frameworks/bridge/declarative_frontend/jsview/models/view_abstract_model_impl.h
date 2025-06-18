@@ -110,6 +110,9 @@ public:
     void SetAspectRatio(float ratio) override;
     void ResetAspectRatio() override {};
     void SetAlign(const Alignment& alignment) override;
+    void SetAlign(const std::string& localizedAlignment) override {}
+    void SetLayoutGravity(const Alignment& alignment) override {}
+    void SetIsMirrorable(const bool& isMirrorable) override {}
     void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) override;
     void SetChainStyle(const ChainInfo& chainInfo) override {}
     void SetBias(const BiasPair& biasPair) override {}
@@ -196,6 +199,8 @@ public:
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override {}
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
         double distanceThreshold) override;
+    void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+        Dimension distanceThreshold) override;
     void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) override {}
     void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) override {}
     void SetShouldBuiltInRecognizerParallelWith(

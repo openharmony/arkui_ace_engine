@@ -30,7 +30,9 @@ public:
     static RefPtr<OverlayManager> GetEmbeddedOverlay(int32_t uniqueId, const RefPtr<PipelineContext>& context);
 
     static RefPtr<OverlayManager> FindPageNodeOverlay(const RefPtr<FrameNode>& currentNode);
-    
+
+    static RefPtr<PipelineContext> GetMainPipelineContext(const RefPtr<FrameNode>& frameNode);
+
     RefPtr<OverlayManager> GetEmbeddedOverlayWithNode(const RefPtr<UINode>& dialogNode);
 
     RefPtr<UINode> GetDialogNodeByContentNode(const RefPtr<UINode>& currentNode);

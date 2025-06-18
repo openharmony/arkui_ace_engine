@@ -43,6 +43,7 @@ public:
     virtual void SetShowControlButton(bool showControlButton);
     virtual void ParseAndSetWidth(WidthType widthType, Dimension& width, bool isDoubleBind = false);
     virtual void ParseAndSetWidth(WidthType widthType, const RefPtr<ResourceObject>& resObj) {};
+    virtual void ResetResObj(const std::string& key) {}
     virtual void SetSideBarWidth(const Dimension& sideBarWidth, bool isDoubleBind = false);
     virtual void SetMinSideBarWidth(const Dimension& minSideBarWidth);
     virtual void SetMaxSideBarWidth(const Dimension& maxSideBarWidth);

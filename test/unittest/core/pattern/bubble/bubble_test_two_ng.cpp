@@ -78,6 +78,8 @@ class BubbleTestTwoNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+protected:
+    static RefPtr<FrameNode> CreateTargetNode();
 };
 
 void BubbleTestTwoNg::SetUpTestCase()
@@ -95,6 +97,13 @@ void BubbleTestTwoNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+}
+
+RefPtr<FrameNode> BubbleTestTwoNg::CreateTargetNode()
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    return frameNode;
 }
 
 /**
@@ -152,5 +161,36 @@ HWTEST_F(BubbleTestTwoNg, CreateBubbleNode001, TestSize.Level1)
     EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
     BubbleView::CreateBubbleNode("test1", 1, param);
     EXPECT_TRUE(param->HasEnableHoverMode());
+}
+
+/**
+ * @tc.name: InitTargetSizeAndPosition
+ * @tc.desc: Test InitTargetSizeAndPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, InitTargetSizeAndPosition, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto id = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(id, targetTag));
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto bubbleLayoutProperty = bubblePattern->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(bubbleLayoutProperty, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    bool showInSubwindow = false;
+    layoutAlgorithm->InitTargetSizeAndPosition(showInSubwindow, AceType::RawPtr(layoutWrapper));
+    showInSubwindow = true;
+    layoutAlgorithm->InitTargetSizeAndPosition(showInSubwindow, AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutAlgorithm->targetOffset_, OffsetF(0.0f, 0.0f));
 }
 } // namespace OHOS::Ace::NG

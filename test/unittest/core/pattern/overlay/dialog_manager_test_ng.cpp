@@ -22,6 +22,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/event/frame_node_on_tree.h"
 
+#include "core/common/ace_engine.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -135,5 +136,27 @@ HWTEST_F(DialogManagerTestNg, DialogManagerTest003, TestSize.Level1)
     ret = dialogManager.GetEmbeddedOverlayWithNode(navDialogNode);
     EXPECT_EQ(ret, nullptr);
     dialogManager.GetDialogNodeByContentNode(columnNode);
+}
+
+/**
+ * @tc.name: DialogManagerTest004
+ * @tc.desc: Test GetMainPipelineContext
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerTest004, TestSize.Level1)
+{
+    auto context = DialogManager::GetMainPipelineContext(nullptr);
+    EXPECT_EQ(context, nullptr);
+    auto node = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    context = DialogManager::GetMainPipelineContext(node);
+    EXPECT_EQ(context, nullptr);
+    node->instanceId_ = 999;
+    context = DialogManager::GetMainPipelineContext(node);
+    EXPECT_EQ(context, nullptr);
+    auto container = Container::Current();
+    node->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+    context = DialogManager::GetMainPipelineContext(node);
+    ASSERT_NE(context, nullptr);
 }
 } // namespace OHOS::Ace::NG

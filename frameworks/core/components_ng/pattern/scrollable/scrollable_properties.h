@@ -497,6 +497,7 @@ using OnReachEvent = std::function<void()>;
 using OnScrollIndexEvent = std::function<void(int32_t, int32_t, int32_t)>;
 using ScrollIndexFunc = std::function<void(int32_t, int32_t)>;
 using OnScrollVisibleContentChangeEvent = std::function<void(ListItemIndex, ListItemIndex)>;
+using OnWillStopDraggingEvent = std::function<void(Dimension)>;
 
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEndCallback = std::function<void()>;

@@ -31,7 +31,8 @@ DynamicComponentRendererImpl::DynamicComponentRendererImpl(
     runtime_ = reinterpret_cast<NativeEngine*>(runtime);
 }
 
-void DynamicComponentRendererImpl::SetAdaptiveSize(bool adaptiveWidth, bool adaptiveHeight) {}
+void DynamicComponentRendererImpl::SetAdaptiveSize(
+    bool adaptiveWidth, bool adaptiveHeight) {}
 
 void DynamicComponentRendererImpl::CreateContent() {}
 

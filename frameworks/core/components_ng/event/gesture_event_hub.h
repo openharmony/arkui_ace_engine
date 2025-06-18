@@ -201,6 +201,7 @@ public:
     // Set by user define, which will replace old one.
     void SetUserOnClick(GestureEventFunc&& clickEvent,
         double distanceThreshold = std::numeric_limits<double>::infinity());
+    void SetUserOnClick(GestureEventFunc&& clickEvent, Dimension distanceThreshold);
     void SetNodeClickDistance(double distanceThreshold = std::numeric_limits<double>::infinity());
      // Set by JS FrameNode.
     void SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent);
@@ -301,7 +302,6 @@ public:
     RefPtr<LongPressRecognizer> GetLongPressRecognizer() const;
     void SetIsAllowMouse(bool isAllowMouse) const;
     const RefPtr<ClickEventActuator>& GetUserClickEventActuator();
-    int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
     void GenerateMousePixelMap(const GestureEvent& info);
     OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const PreparedInfoForDrag& dragInfoData,

@@ -82,6 +82,10 @@ void TextPickerPattern::SetLayoutDirection(TextDirection textDirection)
 
 bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (config.skipLayout || config.skipMeasure) {
+        return false;
+    }
+
     CHECK_NULL_RETURN(dirty, false);
     SetButtonIdeaSize();
     if (GetIsShowInDialog()) {
@@ -1791,6 +1795,9 @@ int32_t TextPickerPattern::CalculateIndex(RefPtr<FrameNode>& frameNode)
 float TextPickerPattern::CalculateColumnSize(int32_t index, float childCount, const SizeF& pickerContentSize)
 {
     float widthSum = 0.0f;
+    if (NearZero(pickerContentSize.Width())) {
+        return 0.0f;
+    }
     for (size_t i = 0; i < std::min(columnWidths_.size(), static_cast<size_t>(childCount)); i++) {
         columnWidths_[i] = columnWidths_[i].Unit() != DimensionUnit::PERCENT ?
             Dimension(columnWidths_[i].ConvertToPx(), DimensionUnit::PX) :

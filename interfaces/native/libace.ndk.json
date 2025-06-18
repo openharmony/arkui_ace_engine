@@ -2704,6 +2704,14 @@
         "name": "OH_ArkUI_DragEvent_StartDataLoading"
     },
     {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_DragEvent_SetDataLoadParams"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_DragAction_SetDataLoadParams"
+    },
+    {
         "first_introduced": "15",
         "name": "OH_ArkUI_CancelDataLoading"
     },

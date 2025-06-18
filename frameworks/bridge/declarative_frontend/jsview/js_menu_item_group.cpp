@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,9 +32,10 @@ void JSMenuItemGroup::Create(const JSCallbackInfo& info)
             if (headerProp->IsFunction()) {
                 RefPtr<NG::UINode> header;
                 {
-                    auto jsFunc = JSRef<JSFunc>::Cast(headerProp);
+                    auto headerBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(headerProp));
+                    CHECK_NULL_VOID(headerBuilderFunc);
                     NG::ScopedViewStackProcessor builderViewStackProcessor;
-                    jsFunc->Call(info.This());
+                    headerBuilderFunc->Execute();
                     header = NG::ViewStackProcessor::GetInstance()->Finish();
                     CHECK_NULL_VOID(header);
                 }
@@ -52,9 +53,10 @@ void JSMenuItemGroup::Create(const JSCallbackInfo& info)
             if (footerProp->IsFunction()) {
                 RefPtr<NG::UINode> footer;
                 {
-                    auto jsFunc = JSRef<JSFunc>::Cast(footerProp);
+                    auto footerBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerProp));
+                    CHECK_NULL_VOID(footerBuilderFunc);
                     NG::ScopedViewStackProcessor builderViewStackProcessor;
-                    jsFunc->Call(info.This());
+                    footerBuilderFunc->Execute();
                     footer = NG::ViewStackProcessor::GetInstance()->Finish();
                     CHECK_NULL_VOID(footer);
                 }

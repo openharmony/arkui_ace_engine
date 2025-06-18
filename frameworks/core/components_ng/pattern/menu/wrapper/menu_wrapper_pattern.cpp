@@ -1106,6 +1106,7 @@ void MenuWrapperPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("DefaultPlacement: " + dumpInfo_.defaultPlacement);
     DumpLog::GetInstance().AddDesc("FinalPosition: " + dumpInfo_.finalPosition.ToString());
     DumpLog::GetInstance().AddDesc("FinalPlacement: " + dumpInfo_.finalPlacement);
+    DumpLog::GetInstance().AddDesc("AnchorPosition: " + dumpInfo_.anchorPosition.ToString());
     auto modalMode = ConvertModalModeToString(menuParam_.modalMode);
     DumpLog::GetInstance().AddDesc("ModalMode: " + modalMode);
 }
@@ -1132,6 +1133,7 @@ void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("DefaultPlacement", dumpInfo_.defaultPlacement.c_str());
     json->Put("FinalPosition", dumpInfo_.finalPosition.ToString().c_str());
     json->Put("FinalPlacement", dumpInfo_.finalPlacement.c_str());
+    json->Put("AnchorPosition", dumpInfo_.anchorPosition.ToString().c_str());
     auto modalMode = ConvertModalModeToString(menuParam_.modalMode);
     json->Put("ModalMode", modalMode.c_str());
 }

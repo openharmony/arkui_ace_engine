@@ -176,6 +176,7 @@ ohos_unittest("ace_kit_test") {
     "resource_parser_test.cpp",
     "view_stack_processor_test.cpp",
     "view_test.cpp",
+    "ui_context_impl_test.cpp",
   ]
 
   cflags = [ "-fno-access-control" ]

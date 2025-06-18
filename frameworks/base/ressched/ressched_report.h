@@ -59,6 +59,7 @@ class ACE_EXPORT ResSchedReport final {
 public:
     static ResSchedReport& GetInstance();
     void ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param = {});
+    void TriggerModuleSerializer();
     void ResSchedDataReport(uint32_t resType, int32_t value = 0,
         const std::unordered_map<std::string, std::string>& payload = {});
     void ResScheSyncEventReport(const uint32_t resType, const int64_t value,
@@ -72,9 +73,9 @@ public:
     void OnAxisEvent(const AxisEvent& axisEvent);
     void AxisEventReportEnd();
     void HandlePageTransition(const std::string& fromPage, const std::string& toPage, const std::string& mode);
-    int64_t GetTid();
-    int64_t GetPid();
-    pthread_t GetPthreadSelf();
+    static std::atomic<int32_t> createPageCount; // not consider multi-instances.
+    static bool triggerExecuted; // not consider multi-instances.
+
 private:
     ResSchedReport();
     ~ResSchedReport() {}
@@ -104,6 +105,7 @@ private:
 
     ReportDataFunc reportDataFunc_ = nullptr;
     ReportSyncEventFunc reportSyncEventFunc_ = nullptr;
+    CancelableCallback<void()> delayTask_;
     bool loadPageOn_ = false;
     bool loadPageRequestFrameOn_ = false;
     ResEventInfo curTouchEvent_;

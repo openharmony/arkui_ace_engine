@@ -1207,6 +1207,7 @@ void NavigationPattern::UpdateColorModeForNodes(
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
         CHECK_NULL_VOID(hostNode);
         auto lastIndex = hostNode->GetLastStandardIndex();
+        lastIndex = lastIndex < 0 ? 0 : lastIndex;
         auto pipelineContext = hostNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         auto colorMode = pipelineContext->GetColorMode() == ColorMode::DARK ? true : false;
@@ -3560,7 +3561,7 @@ std::unique_ptr<JsonValue> NavigationPattern::GetTopNavdestinationJson(bool need
     topNavdestinationJson->Put("navigationId", hostNode->GetCurId().c_str());
     std::string param = "";
     if (needParam) {
-        param = navigationStack_->GetSerializedParamSafely(topNavDestinationNode->GetIndex());
+        param = navdestinationPattern->GetSerializedParam();
         topNavdestinationJson->Put("param", param.c_str());
     }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get top navDestinationInfo success, name: %{public}s, mode: %{public}d, "
@@ -4852,6 +4853,8 @@ void NavigationPattern::SetToolbarManagerNavigationMode(NavigationMode mode)
     auto navigationMode = toolbarManager_->GetNavigationMode();
     if (navigationMode != mode) {
         toolbarManager_->SetNavigationMode(mode);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "update navigationMode successful, new mode: %{public}d",
+            static_cast<int>(mode));
     }
 }
 

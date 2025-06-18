@@ -340,13 +340,13 @@ void ScrollSnapImpl(Ark_NativePointer node,
     auto paginationParams = ValidateDimensionArray(paginationParamsOpt);
     auto intervalSize = Converter::OptConvert<Dimension>(value->snapPagination);
     Validator::ValidateNonNegative(intervalSize);
-    ScrollModelNG::SetScrollSnap(
-        frameNode,
-        snapAlign,
-        intervalSize,
-        paginationParams,
-        enableSnapToStart,
-        enableSnapToEnd);
+    // ScrollModelNG::SetScrollSnap(
+    //     frameNode,
+    //     snapAlign,
+    //     intervalSize,
+    //     paginationParams,
+    //     enableSnapToStart,
+    //     enableSnapToEnd);
 }
 void EnablePagingImpl(Ark_NativePointer node,
                       Ark_Boolean value)

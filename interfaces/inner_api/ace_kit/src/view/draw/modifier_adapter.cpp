@@ -15,7 +15,9 @@
 
 #include "interfaces/inner_api/ace_kit/src/view/draw/modifier_adapter.h"
 
+#ifndef MODIFIER_NG
 #include "render_service_client/core/modifier/rs_modifier.h"
+#endif
 #include "ui/base/utils/utils.h"
 #include "ui/view/draw/content_modifier.h"
 #include "ui/view/draw/modifier.h"
@@ -25,11 +27,11 @@ namespace OHOS::Ace::Kit {
 ContentModifierAdapter::ContentModifierAdapter(const RefPtr<ContentModifier>& modifier) : modifier_(modifier) {}
 ContentModifierAdapter::~ContentModifierAdapter() {}
 
-void ContentModifierAdapter::Draw(Rosen::RSDrawingContext& context) const
+void ContentModifierAdapter::Draw(RSDrawingContext& context) const
 {
     auto modifier = modifier_.Upgrade();
     CHECK_NULL_VOID(modifier);
-    DrawingContext drawContext = { .canvas = context.canvas, .width = context.width, .height = context.height};
+    DrawingContext drawContext = { .canvas = context.canvas, .width = context.width, .height = context.height };
     modifier->OnDraw(drawContext);
 }
 
@@ -37,5 +39,4 @@ void ContentModifierAdapter::AttachRSProperty(const std::shared_ptr<Rosen::RSPro
 {
     AttachProperty(property);
 }
-
 } // namespace OHOS::Ace::Kit

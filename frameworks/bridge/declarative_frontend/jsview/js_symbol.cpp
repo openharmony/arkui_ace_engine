@@ -104,9 +104,15 @@ void JSSymbol::SetFontSize(const JSCallbackInfo& info)
     auto theme = GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
-    if (!ParseJsDimensionFpNG(info[0], fontSize, false)) {
+    RefPtr<ResourceObject> resObj;
+    UnRegisterResource("FontSize");
+    if (!ParseJsDimensionFpNG(info[0], fontSize, resObj, false)) {
         fontSize = theme->GetTextStyle().GetFontSize();
         SymbolModel::GetInstance()->SetFontSize(fontSize);
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<CalcDimension>("FontSize", resObj, fontSize);
         return;
     }
     if (fontSize.IsNegative()) {
@@ -131,6 +137,20 @@ void JSSymbol::SetSymbolRenderingStrategy(const JSCallbackInfo& info)
 void JSSymbol::SetFontColor(const JSCallbackInfo& info)
 {
     std::vector<Color> symbolColor;
+    if (SystemProperties::ConfigChangePerform()) {
+        std::vector<std::pair<int32_t, RefPtr<ResourceObject>>> resObjArr;
+        bool ret = ParseJsSymbolColor(info[0], symbolColor, true, resObjArr);
+        if (!resObjArr.empty()) {
+            SymbolModel::GetInstance()->RegisterSymbolFontColorResource("symbolColor",
+                symbolColor, resObjArr);
+            return;
+        }
+        if (ret) {
+            SymbolModel::GetInstance()->SetFontColor(symbolColor);
+        }
+        UnRegisterResource("symbolColor");
+        return;
+    }
     if (!ParseJsSymbolColor(info[0], symbolColor)) {
         return;
     }
@@ -172,7 +192,8 @@ void JSSymbol::SetSymbolEffectOptions(const JSCallbackInfo& info)
 void JSSymbol::SetMinFontScale(const JSCallbackInfo& info)
 {
     double minFontScale;
-    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale)) {
+    RefPtr<ResourceObject> resObj;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale, resObj)) {
         return;
     }
     if (LessOrEqual(minFontScale, 0.0f)) {
@@ -183,20 +204,32 @@ void JSSymbol::SetMinFontScale(const JSCallbackInfo& info)
         SymbolModel::GetInstance()->SetMinFontScale(1.0f);
         return;
     }
-    SymbolModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<float>("MinFontScale", resObj, static_cast<float>(minFontScale));
+    } else {
+        UnRegisterResource("MinFontScale");
+        SymbolModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
+    }
 }
 
 void JSSymbol::SetMaxFontScale(const JSCallbackInfo& info)
 {
     double maxFontScale;
-    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale)) {
+    RefPtr<ResourceObject> resObj;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale, resObj)) {
         return;
     }
     if (LessOrEqual(maxFontScale, 1.0f)) {
         SymbolModel::GetInstance()->SetMaxFontScale(1.0f);
         return;
     }
-    SymbolModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
+
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<float>("MaxFontScale", resObj, static_cast<float>(maxFontScale));
+    } else {
+        UnRegisterResource("MaxFontScale");
+        SymbolModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
+    }
 }
 
 void JSSymbol::parseSymbolEffect(const JSRef<JSObject> symbolEffectObj, NG::SymbolEffectOptions& symbolEffectOptions)

@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
+#include "base/utils/system_properties.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
@@ -25,16 +26,9 @@
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
-void WaterFlowPattern::OnAttachToFrameNode()
-{
-    auto* context = GetContext();
-    CHECK_NULL_VOID(context);
-    if (context->GetFrontendType() == FrontendType::ARK_TS) {
-        layoutInfo_ = WaterFlowLayoutInfoBase::Create(LayoutMode::SLIDING_WINDOW);
-    }
-}
 
 SizeF WaterFlowPattern::GetContentSize() const
 {
@@ -80,9 +74,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
     }
     delta = -FireOnWillScroll(-delta);
     layoutInfo_->UpdateOffset(delta);
-    if (!UpdateOffset(delta)) {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     MarkScrollBarProxyDirty();
     return true;
 };
@@ -339,7 +331,11 @@ void WaterFlowPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFun
     CHECK_NULL_VOID(indexChanged);
     itemRange_ = { layoutInfo_->FirstIdx(), layoutInfo_->endIndex_ };
     CHECK_NULL_VOID(onScrollIndex);
-    onScrollIndex(layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
+    int32_t endIndex = layoutInfo_->endIndex_;
+    if (SystemProperties::IsWhiteBlockEnabled()) {
+        endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(layoutInfo_->endIndex_);
+    }
+    onScrollIndex(layoutInfo_->FirstIdx(), endIndex);
 }
 
 bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -360,11 +356,8 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     layoutInfo_->duringPositionCalc_ = false;
     layoutInfo_->targetIndex_.reset();
     layoutInfo_->extraOffset_.reset();
-    RequestReset(layoutInfo_->jumpForRecompose_, -layoutInfo_->storedOffset_);
-    layoutInfo_->jumpForRecompose_ = WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX;
     UpdateScrollBarOffset();
     CheckScrollable();
-    UpdateLayoutRange(layoutInfo_->axis_, !isInitialized_);
 
     isInitialized_ = true;
 
@@ -600,14 +593,12 @@ void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign ali
                 CHECK_NULL_VOID(host);
                 host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             }
-            RequestFillToTarget(index, align, extraOffset.value_or(0.0f));
         } else {
             UpdateStartIndex(index);
             layoutInfo_->duringPositionCalc_ = true;
             if (extraOffset.has_value()) {
                 layoutInfo_->extraOffset_ = -extraOffset.value();
             }
-            RequestJump(index, align, extraOffset.value_or(0.0f));
         }
     }
     FireAndCleanScrollingListener();
@@ -737,11 +728,6 @@ void WaterFlowPattern::AddFooter(const RefPtr<NG::UINode>& footer)
 
 void WaterFlowPattern::SetLayoutMode(LayoutMode mode)
 {
-    auto* context = GetContext();
-    CHECK_NULL_VOID(context);
-    if (context->GetFrontendType() == FrontendType::ARK_TS) {
-        return; // fix layout mode to SLIDING_WINDOW in ArkTS
-    }
     if (!layoutInfo_ || mode != layoutInfo_->Mode()) {
         layoutInfo_ = WaterFlowLayoutInfoBase::Create(mode);
         MarkDirtyNodeSelf();

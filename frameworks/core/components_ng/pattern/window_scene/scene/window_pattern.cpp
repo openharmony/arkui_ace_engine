@@ -535,11 +535,13 @@ void WindowPattern::UpdateSnapshotWindowProperty()
     }
     auto imageLayoutProperty = snapshotWindow_->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    int32_t imageFit = 0;
+    int32_t persistentImageFit = 0;
     auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
-            session_->GetPersistentId(), imageFit);
+        session_->GetPersistentId(), persistentImageFit);
+    auto imageFit = static_cast<ImageFit>(persistentImageFit);
     if (isPersistentImageFit) {
-        imageLayoutProperty->UpdateImageFit(static_cast<ImageFit>(imageFit));
+        // ImageFit type COVER_TOP_LEFT is not support for api interface
+        imageLayoutProperty->UpdateImageFit(imageFit == ImageFit::COVER_TOP_LEFT ? ImageFit::MATRIX : imageFit);
     } else {
         imageLayoutProperty->UpdateImageFit(isExitSplitOnBackground ? ImageFit::CONTAIN : ImageFit::COVER_TOP_LEFT);
     }
@@ -610,6 +612,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         if (isSaveingSnapshot) {
             auto snapshotPixelMap = session_->GetSnapshotPixelMap();
             CHECK_NULL_VOID(snapshotPixelMap);
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "snapshotPixelMap id: %{public}d", snapshotPixelMap->GetUniqueId());
             auto pixelMap = PixelMap::CreatePixelMap(&snapshotPixelMap);
             sourceInfo = ImageSourceInfo(pixelMap);
             snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);

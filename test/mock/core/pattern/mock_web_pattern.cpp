@@ -16,9 +16,6 @@
 #include "mock_web_pattern.h"
 
 namespace OHOS::Ace::NG {
-void WebPattern::Backward()
-{
-}
 
 bool IsNWebEx()
 {

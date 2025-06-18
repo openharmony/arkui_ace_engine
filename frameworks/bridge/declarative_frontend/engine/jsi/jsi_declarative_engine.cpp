@@ -2799,6 +2799,30 @@ std::shared_ptr<void> JsiDeclarativeEngine::SerializeValue(
 #endif
 }
 
+void JsiDeclarativeEngine::TriggerModuleSerializer()
+{
+#ifdef USE_ARK_ENGINE
+    ContainerScope scope(instanceId_);
+    if (!engineInstance_) {
+        LOGW("TriggerModuleSerializer engineInstance is null.");
+        return;
+    }
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
+    if (!arkRuntime) {
+        LOGW("TriggerModuleSerializer arkRuntime is null.");
+        return;
+    }
+    auto vm = arkRuntime->GetEcmaVm();
+    if (!vm) {
+        LOGW("TriggerModuleSerializer vm is null.");
+        return;
+    }
+    panda::LocalScope jsScope(vm);
+    panda::JSNApi::PandaFileSerialize(vm);
+    panda::JSNApi::ModuleSerialize(vm);
+#endif
+}
+
 std::shared_ptr<JsValue> JsiDeclarativeEngine::Deserialize(const std::shared_ptr<void>& recoder)
 {
 #ifdef USE_ARK_ENGINE

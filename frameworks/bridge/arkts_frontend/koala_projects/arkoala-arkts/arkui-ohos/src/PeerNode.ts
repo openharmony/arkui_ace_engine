@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
-import { int32 } from "@koalaui/common"
+import { int32, KoalaCallsiteKey } from "@koalaui/common"
 import { Disposable, IncrementalNode, scheduleCallback } from "@koalaui/runtime"
 import { NativePeerNode } from "./NativePeerNode"
 import { nullptr, pointer } from "@koalaui/interop"
 import { ArkRootPeer } from "./generated/peers/ArkStaticComponentsPeer"
+import { ReusablePool } from "./ReusablePool"
 
 export const PeerNodeType = 11
-export const LazyForEachType = 13
+export const RootPeerType = 33
+export const LazyItemNodeType = 17 // LazyItems are detached node trees that are stored privately in LazyForEach
 const INITIAL_ID = 1000
 
 export class PeerNode extends IncrementalNode {
@@ -31,11 +33,15 @@ export class PeerNode extends IncrementalNode {
     protected static currentId: int32 = INITIAL_ID
     static nextId(): int32 { return PeerNode.currentId++ }
     private id: int32
-    private _onReuse?: () => void
-    private _onRecycle?: () => void
+    private _reuseCb?: () => void
+    private _recycleCb?: () => void
     // Pool to store recycled child scopes, grouped by type
-    private _reusePool?: Map<string, Array<Disposable>>
-    private _reusable: boolean = false
+    private _reusePool?: Map<string, ReusablePool>
+    reusable: boolean = false
+
+    getPeerPtr(): pointer {
+        return this.peer.ptr
+    }
 
     setId(id: int32) {
         PeerNode.peerNodeMap.delete(this.id)
@@ -48,52 +54,61 @@ export class PeerNode extends IncrementalNode {
     }
 
     onReuse(): void {
-        if (!this._reusable) {
-            this._reusable = true // becomes reusable after initial mount
-        } else {
-            this._onReuse?.() // could change states
+        if (!this.reusable) {
+            return
         }
-        // traverse subtree to notify all children
-        for (let child = this.firstChild; child; child = child!.nextSibling) {
-            if (child instanceof PeerNode)
-                (child as PeerNode)!.onReuse()
-        }
+        scheduleCallback(this._reuseCb) // could change states
     }
 
     onRecycle(): void {
-        this._onRecycle?.()
-        // traverse subtree to notify all children
-        for (let child = this.firstChild; child; child = child!.nextSibling) {
-            if (child instanceof PeerNode)
-                (child as PeerNode)!.onRecycle()
-        }
+        this._recycleCb?.()
     }
 
-    override reuse(reuseKey: string): Disposable | undefined {
+    updateReusePoolSize(size: number, reuseKey: string) {
+        this._reusePool?.get(reuseKey)?.setMaxSize(size)
+    }
+
+    /* reuse and recycle object on RootPeers */
+    override reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
+        if (!this.isKind(RootPeerType))
+            return this.parent?.reuse(reuseKey, id)
+
         if (this._reusePool === undefined)
             return undefined
         if (this._reusePool!.has(reuseKey)) {
-            const scopes = this._reusePool!.get(reuseKey)!;
-            return scopes.pop();
+            const pool = this._reusePool!.get(reuseKey)!;
+            return pool.get();
         }
         return undefined;
     }
 
-    override recycle(reuseKey: string, child: Disposable): boolean {
-        if (!this._reusePool)
-            this._reusePool = new Map<string, Array<Disposable>>()
-        if (!this._reusePool!.has(reuseKey)) {
-            this._reusePool!.set(reuseKey, new Array<Disposable>());
+    override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
+        if (!this.isKind(RootPeerType)) {
+            return this.parent?.recycle(reuseKey, child, id) ?? false
         }
-        this._reusePool!.get(reuseKey)!.push(child);
+        if (!this._reusePool)
+            this._reusePool = new Map<string, ReusablePool>()
+        if (!this._reusePool!.has(reuseKey)) {
+            this._reusePool!.set(reuseKey, new ReusablePool());
+        }
+        this._reusePool!.get(reuseKey)!.put(child);
         return true
     }
 
+    setReusePoolSize(size: number, reuseKey: string): void {
+        if (!this.isKind(RootPeerType)) {
+            if (this.parent?.isKind(PeerNodeType))
+                (this.parent! as PeerNode).setReusePoolSize(size, reuseKey)
+            return
+        }
+        this._reusePool?.get(reuseKey)?.setMaxSize(size)
+    }
+
     setOnRecycle(cb: () => void): void {
-        this._onRecycle = cb
+        this._recycleCb = cb
     }
     setOnReuse(cb: () => void): void {
-        this._onReuse = cb
+        this._reuseCb = cb
     }
 
     private static peerNodeMap = new Map<number, PeerNode>()
@@ -110,8 +125,8 @@ export class PeerNode extends IncrementalNode {
         this.insertDirection = upDirection ? 0 : 1
     }
 
-    constructor(peerPtr: pointer, id: int32, name: string, flags: int32) {
-        super(PeerNodeType)
+    constructor(peerPtr: pointer, id: int32, name: string, flags: int32, derivedNodeType?: int32) {
+        super(derivedNodeType ?? PeerNodeType)
         this.id = id
         this.peer = NativePeerNode.create(this, peerPtr, flags)
         PeerNode.peerNodeMap.set(this.id, this)
@@ -119,6 +134,7 @@ export class PeerNode extends IncrementalNode {
             // TODO: rework to avoid search
             let peer = findPeerNode(child)
             if (peer) {
+                peer.reusable ? peer!.onReuse() : peer.reusable = true // becomes reusable after initial mount
                 let peerPtr = peer.peer.ptr
                 if (this.insertMark != nullptr) {
                     if (this.insertDirection == 0) {
@@ -138,13 +154,13 @@ export class PeerNode extends IncrementalNode {
                     }
                 }
                 this.peer.insertChildAfter(peerPtr, sibling?.peer?.ptr ?? nullptr)
-                scheduleCallback(() => peer!.onReuse())
             }
         }
         this.onChildRemoved = (child: IncrementalNode) => {
             if (child.isKind(PeerNodeType) && !child.disposed) {
                 const peer = child as PeerNode
                 peer.onRecycle()
+                this.peer.removeChild(peer.peer.ptr)
             }
         }
         this.name = name
@@ -158,12 +174,12 @@ export class PeerNode extends IncrementalNode {
         }
         this.peer.close()
         PeerNode.peerNodeMap.delete(this.id)
-        this._reusePool?.forEach((value: Array<Disposable>) =>
-            value.forEach((disposable: Disposable) => disposable.dispose())
+        this._reusePool?.forEach((pool: ReusablePool) =>
+            pool.dispose()
         )
         this._reusePool = undefined
-        this._onRecycle = undefined
-        this._onReuse = undefined
+        this._recycleCb = undefined
+        this._reuseCb = undefined
         super.dispose()
     }
 }

@@ -100,6 +100,11 @@ public:
             responseTime_--;
         }
     }
+
+    auto Get()
+    {
+        return this;
+    }
 protected:
     float fontScale_ = 1.0f;
     bool isDeclarative_ = false;

@@ -1835,7 +1835,18 @@ void SelectPattern::OnColorConfigurationUpdate()
         child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     SetOptionBgColor(selectTheme->GetBackgroundColor());
+    UpdateMenuScrollColorConfiguration(menuNode);
     host->SetNeedCallChildrenUpdate(false);
+}
+
+void SelectPattern::UpdateMenuScrollColorConfiguration(const RefPtr<FrameNode>& menuNode)
+{
+    CHECK_NULL_VOID(menuNode);
+    auto scrollNode = AceType::DynamicCast<NG::FrameNode>(menuNode->GetChildAtIndex(0));
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern);
+    scrollPattern->OnColorConfigurationUpdate();
 }
 
 bool SelectPattern::OnThemeScopeUpdate(int32_t themeScopeId)
