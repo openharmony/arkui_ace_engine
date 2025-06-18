@@ -1432,8 +1432,6 @@ void WebClientImpl::ShowMagnifier()
     if (!delegate) {
         return;
     }
-    ContainerScope scope(delegate->GetInstanceId());
-    delegate->OnReceivedTitle(title, isRealTitle);
     delegate->ShowMagnifier();
 }
 
