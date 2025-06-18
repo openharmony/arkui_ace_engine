@@ -3049,4 +3049,18 @@ bool NavigationModelNG::IsDoubleBindBlock(const RefPtr<NavigationPattern>& navig
     return navBarWidthDoubleBind_ && navigationPattern->GetIsInDividerDrag();
 }
 
+void NavigationModelNG::SetBeforeCreateLayoutWrapperCallBack(
+    FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper)
+{
+    CHECK_NULL_VOID(beforeCreateLayoutWrapper);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+    CHECK_NULL_VOID(navBarPattern);
+    auto navBarEventHub = navBarPattern->GetOrCreateEventHub<NavBarEventHub>();
+    CHECK_NULL_VOID(navBarEventHub);
+    navBarEventHub->SetBeforeCreateLayoutWrapperCallBack(std::move(beforeCreateLayoutWrapper));
+}
 } // namespace OHOS::Ace::NG

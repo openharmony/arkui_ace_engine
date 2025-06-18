@@ -75,6 +75,8 @@ public:
 
     float GetTitleBarHeightLessThanMaxBarHeight() const override;
 
+    void BeforeCreateLayoutWrapper() override;
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 

@@ -175,6 +175,8 @@ public:
     static void SetOnNavBarStateChange(FrameNode* frameNode, std::function<void(bool)>&& onNavBarStateChange);
     static CalcDimension ParseTitleHeight(const RefPtr<ResourceObject>& resObj);
     static void ResetResObj(FrameNode* frameNode, NavigationPatternType type, const std::string& key);
+    static void SetBeforeCreateLayoutWrapperCallBack(
+        FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper);
 
 private:
     bool CreatePrimaryContentIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);

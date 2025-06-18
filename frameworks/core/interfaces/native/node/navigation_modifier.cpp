@@ -795,6 +795,18 @@ void ResetOnNavBarStateChange(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NavigationModelNG::SetOnNavBarStateChange(frameNode, nullptr);
 }
+
+void SetBeforeCreateLayoutWrapperCallBack(ArkUINodeHandle node, void (*beforeCreateLayoutWrapper)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto beforeCreateLayoutWrapperCallBack = [node = AceType::WeakClaim(frameNode), beforeCreateLayoutWrapper]() {
+        auto frameNode = node.Upgrade();
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        beforeCreateLayoutWrapper(nodeHandle);
+    };
+    NavigationModelNG::SetBeforeCreateLayoutWrapperCallBack(frameNode, std::move(beforeCreateLayoutWrapperCallBack));
+}
 namespace NodeModifier {
 const ArkUINavigationModifier* GetNavigationModifier()
 {
@@ -861,6 +873,7 @@ const ArkUINavigationModifier* GetNavigationModifier()
         .resetToolBar = ResetToolBar,
         .setOnNavBarStateChange = SetOnNavBarStateChange,
         .resetOnNavBarStateChange = ResetOnNavBarStateChange,
+        .setBeforeCreateLayoutWrapperCallBack = SetBeforeCreateLayoutWrapperCallBack,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
