@@ -83,7 +83,6 @@ export struct BindContentCoverTest {
   @State showVal2: boolean =false;
 
   @State height: SheetSize|Length = SheetSize.LARGE
-  // @State detents:[(SheetSize | Length), ( SheetSize | Length)?, (SheetSize | Length)?] = [100, 600]
   @State width:Dimension = '80%'
   @State showDragBar:boolean = true
   @State sheetType: SheetType = SheetType.BOTTOM

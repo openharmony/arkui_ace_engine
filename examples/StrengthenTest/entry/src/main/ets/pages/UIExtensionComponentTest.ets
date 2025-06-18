@@ -18,7 +18,6 @@ import {
   ButtonAttribute,
   ClickEvent,
   UserView,
-  // UIExtensionComponent, EmbeddedType, TerminationInfo,
   NavDestination,
   NavPathStack,
   NavDestinationContext,

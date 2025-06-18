@@ -75,7 +75,6 @@ class MyNodeController extends NodeController {
 @Entry
 @Component
 export struct ResourceTest {
-  // private controller = new MyNodeController()  编译无报错，运行闪退，hap中无abc
   @State isShow: boolean = true
   @State index_: number = 0
   private controller: MyNodeController = new MyNodeController()  // 运行正常

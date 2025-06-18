@@ -8,7 +8,7 @@ import {
   State,
   StateDecoratedVariable,
   stateOf,
-} from '@ohos.arkui.stateManagement' // should be insert by ui-plugins // should be insert by ui-plugins
+} from '@ohos.arkui.stateManagement' // should be insert by ui-plugins
 
 import {
   $r,
