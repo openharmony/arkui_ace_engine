@@ -12082,8 +12082,21 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._ClickEvent_setY(this.peer!.ptr, y)
     }
     private getHand_serialize(): InteractionHand | undefined {
-        const retval  = ArkUIGeneratedNativeModule._ClickEvent_getHand(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._ClickEvent_getHand(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const hand_buf_runtimeType = (retvalDeserializer.readInt8() as int32)
+        let hand_buf : InteractionHand | undefined
+        if ((RuntimeType.UNDEFINED) != (hand_buf_runtimeType)) {
+            hand_buf = TypeChecker.InteractionHand_FromNumeric(retvalDeserializer.readInt32())
+        }
+        return hand_buf;
     }
     private setHand_serialize(hand: InteractionHand): void {
         ArkUIGeneratedNativeModule._ClickEvent_setHand(this.peer!.ptr, TypeChecker.InteractionHand_ToNumeric(hand))
