@@ -7091,7 +7091,6 @@ ArkUI_Int32 PostTouchEvent(ArkUINodeHandle node, const ArkUITouchEvent* arkUITou
 void SetSingleHistoryEvent(std::array<ArkUIHistoryTouchEvent, MAX_HISTORY_EVENT_COUNT>& allHistoryEvents,
     const ArkUITouchEvent* arkUITouchEvent, size_t index)
 {
-    static_assert(MAX_HISTORY_EVENT_COUNT > 0, "MAX_HISTORY_EVENT_COUNT must be greater than 0");
     if (!arkUITouchEvent) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "SetSingleHistoryEvent touchevent is null!");
         return;
