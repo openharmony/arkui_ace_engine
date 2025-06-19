@@ -354,4 +354,43 @@ HWTEST_F(ImageAnimatorPatternTestNg, SetDuration, TestSize.Level1)
     pattern_->SetDuration(0);
     EXPECT_EQ(pattern_->durationTotal_, 1);
 }
+
+/**
+ * @tc.name: OnePicFinish001
+ * @tc.desc: test Finish.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorPatternTestNg, OnePicFinish001, TestSize.Level1)
+{
+    auto controlledAnimator = AceType::MakeRefPtr<ControlledAnimator>();
+    EXPECT_NE(controlledAnimator, nullptr);
+
+    controlledAnimator->iteration_ = 1;
+    controlledAnimator->duration_ = 0; // No animation duration, triggers finish immediately
+    controlledAnimator->controlStatus_ = ControlledAnimator::ControlStatus::RUNNING;
+    controlledAnimator->isReverse_ = true;
+    controlledAnimator->stopEvent_ = []() {};
+    std::vector<PictureInfo> frames { { 0.5f, 100 } };
+    controlledAnimator->AddInterpolator(frames);
+    // Add Finish Listener
+    int32_t numFlag1 = 0;
+    std::function<void()> func1 = [&numFlag1]() {
+        numFlag1 = 1;
+    };
+    controlledAnimator->stopEvent_ = func1;
+    // Add Running Listener
+    int32_t numFlag2 = 0;
+    std::function<void(int32_t)> func2 = [&numFlag2](int32_t num) {
+        numFlag2 = 1;
+    };
+    controlledAnimator->AddListener(func2);
+
+    controlledAnimator->Finish();
+    // Verify that the animator status is updated to STOPPED
+    EXPECT_TRUE(controlledAnimator->controlStatus_ == ControlledAnimator::ControlStatus::STOPPED);
+    // Check that stopEvent was triggered
+    EXPECT_TRUE(numFlag1 == 1);
+    // Check that playbackListener was triggered even though there's only one picture
+    EXPECT_TRUE(numFlag2 == 1);
+}
 } // namespace OHOS::Ace::NG

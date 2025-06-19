@@ -301,7 +301,9 @@ int32_t ControlledAnimator::CalFinishIdx(bool checkWithFillMode)
 void ControlledAnimator::MovePictureToRightPosition(bool checkWithFillMode)
 {
     auto finishIdx = CalFinishIdx(checkWithFillMode);
-    if (runningIdx_ != finishIdx) {
+    // Ensure the first picture is displayed when only one image exists;
+    // without this, the image may not show if runningIdx_ == finishIdx
+    if (runningIdx_ != finishIdx || pictureInfos_.size() == 1) {
         playbackListener_(pictureInfos_[finishIdx].second);
         runningIdx_ = finishIdx;
     }
