@@ -6940,7 +6940,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _UrlStyle_getUrl(ptr: KPointer): string
     @ani.unsafe.Direct
-    native static _MutableStyledString_ctor(): KPointer
+    native static _MutableStyledString_ctor(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _MutableStyledString_getFinalizer(): KPointer
     native static _MutableStyledString_replaceString(ptr: KPointer, start: number, length: number, other: KStringPtr): void

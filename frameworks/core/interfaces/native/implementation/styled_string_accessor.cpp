@@ -271,7 +271,7 @@ void FromHtmlImpl(Ark_VMContext vmContext,
 {
     ContainerScope scope(Container::CurrentIdSafely());
     StringArray errorsStr;
-    Ark_StyledString peer = GetMutableStyledStringAccessor()->ctor();
+    Ark_StyledString peer = GetStyledStringAccessor()->ctor(nullptr, nullptr);
 
     auto callback = [arkCallback = CallbackHelper(*outputArgumentForReturningPromise)]
         (Ark_StyledString peer, const StringArray& errors) {
