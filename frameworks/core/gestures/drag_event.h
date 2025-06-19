@@ -415,7 +415,7 @@ public:
         useDataLoadParams_ = useDataLoadParams;
     }
 
-    bool GetUseDataLoadParams()
+    bool IsUseDataLoadParams() const
     {
         return useDataLoadParams_;
     }

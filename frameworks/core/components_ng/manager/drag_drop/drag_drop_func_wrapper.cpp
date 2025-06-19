@@ -1527,11 +1527,11 @@ void DragDropFuncWrapper::ProcessDragDropData(const RefPtr<OHOS::Ace::DragEvent>
         DragDropBehaviorReporter::GetInstance().UpdateRecordSize(unifiedData->GetSize());
     }
     auto dataLoadParams = dragEvent->GetDataLoadParams();
-    auto useDataLoadParams = dragEvent->GetUseDataLoadParams();
-    if (dataLoadParams && useDataLoadParams) {
+    auto isUseDataLoadParams = dragEvent->IsUseDataLoadParams();
+    if (dataLoadParams && isUseDataLoadParams) {
         UdmfClient::GetInstance()->SetDelayInfo(dataLoadParams, udKey);
     }
-    if (unifiedData && !useDataLoadParams) {
+    if (unifiedData && !isUseDataLoadParams) {
         ACE_SCOPED_TRACE("drag: set drag data to udmf");
         if (UdmfClient::GetInstance()->SetData(unifiedData, udKey) != 0) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF set data failed, return value is %{public}d", ret);

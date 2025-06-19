@@ -1449,12 +1449,12 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage041
     ASSERT_NE(dragEvent->GetDataLoadParams(), nullptr);
     DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, summary, detailedSummary, ret);
     EXPECT_EQ(ret, 0);
-    EXPECT_EQ(dragEvent->GetUseDataLoadParams(), true);
+    EXPECT_EQ(dragEvent->IsUseDataLoadParams(), true);
 
     dragEvent->SetUseDataLoadParams(false);
     DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, summary, detailedSummary, ret);
     EXPECT_EQ(ret, 0);
-    EXPECT_EQ(dragEvent->GetUseDataLoadParams(), false);
+    EXPECT_EQ(dragEvent->IsUseDataLoadParams(), false);
 
     EXPECT_CALL(*mockUdmfClient, SetDelayInfo(_, _)).WillRepeatedly(testing::Return(1));
     EXPECT_CALL(*mockUdmfClient, SetData(_, _)).WillRepeatedly(testing::Return(1));
