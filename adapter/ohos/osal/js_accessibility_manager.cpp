@@ -57,6 +57,7 @@ constexpr int32_t CARD_BASE = 100000;
 constexpr int32_t DELAY_SEND_EVENT_MILLISECOND = 20;
 constexpr uint32_t SUB_TREE_OFFSET_IN_PAGE_ID = 16;
 constexpr int32_t MAX_PAGE_ID_WITH_SUB_TREE = (1 << SUB_TREE_OFFSET_IN_PAGE_ID);
+constexpr int32_t MIN_NUM = 2;
 constexpr int64_t INVALID_NODE_ID = -1;
 
 const std::string ACTION_ARGU_SCROLL_STUB = "scrolltype"; // wait for change
@@ -2425,6 +2426,11 @@ void JsAccessibilityManager::UpdateCacheInfoNG(std::list<AccessibilityElementInf
     UpdateChildrenNodeInCache(infos, commonProperty, ngPipeline, searchParam, children);
 }
 
+void JsAccessibilityManager::UpdateEventWhiteList(const std::vector<uint32_t>& eventList)
+{
+    eventWhiteList_ = eventList;
+}
+
 namespace {
 bool CanAccessibilityFocusedNG(const RefPtr<NG::FrameNode>& node)
 {
@@ -3092,6 +3098,7 @@ JsAccessibilityManager::~JsAccessibilityManager()
 {
     UnsubscribeStateObserver(AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED);
     UnsubscribeStateObserver(AccessibilityStateEventType::EVENT_SCREEN_READER_STATE_CHANGED);
+    UnsubscribeStateObserver(AccessibilityStateEventType::EVENT_CONFIG_EVENT_CHANGED);
 
     DeregisterInteractionOperation();
 }
@@ -3200,7 +3207,12 @@ void JsAccessibilityManager::InitializeCallback()
     bool isEnabled = false;
     client->IsEnabled(isEnabled);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(isEnabled);
+
+    client->SearchNeedEvents(eventWhiteList_);
+
+    SubscribeStateObserver(AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED);
     SubscribeStateObserver(AccessibilityStateEventType::EVENT_SCREEN_READER_STATE_CHANGED);
+    SubscribeStateObserver(AccessibilityStateEventType::EVENT_CONFIG_EVENT_CHANGED);
 
     auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
     if (container != nullptr && container->IsDynamicRender()) {
@@ -3219,7 +3231,6 @@ void JsAccessibilityManager::InitializeCallback()
         return;
     }
 
-    SubscribeStateObserver(AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED);
     if (isEnabled) {
         RegisterInteractionOperation(windowId_);
     }
@@ -3947,9 +3958,17 @@ bool JsAccessibilityManager::IsEventIgnoredByWorkMode(const AccessibilityEvent& 
 void JsAccessibilityManager::SendEventToAccessibilityWithNode(
     const AccessibilityEvent& accessibilityEvent, const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context)
 {
+    auto eventType = GetEventTypeByAccessibilityEvent(accessibilityEvent);
+    if (!CheckWhiteList(eventType)) {
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+            "send accessibility check whitelist failed event:%{public}d" PRId64, eventType);
+        return;
+    }
+
     if (IsEventIgnoredByWorkMode(accessibilityEvent) || !IsSendAccessibilityEvent(accessibilityEvent)) {
         return;
     }
+
     auto delayTime = GetDelayTimeBeforeSendEvent(accessibilityEvent, node);
     if ((delayTime > 0) && context) {
         context->GetTaskExecutor()->PostDelayedTask(
@@ -4032,9 +4051,16 @@ void GetRealEventWindowId(
 
 void JsAccessibilityManager::SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent)
 {
+    auto eventType = GetEventTypeByAccessibilityEvent(accessibilityEvent);
+    if (!CheckWhiteList(eventType)) {
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+            "send accessibility check whitelist failed event:%{public}d" PRId64, eventType);
+        return;
+    }
     if (IsEventIgnoredByWorkMode(accessibilityEvent) || !IsSendAccessibilityEvent(accessibilityEvent)) {
         return;
     }
+
     auto delayTime = GetDelayTimeBeforeSendEvent(accessibilityEvent, nullptr);
     if (delayTime > 0) {
         auto context = GetPipelineContext().Upgrade();
@@ -4399,6 +4425,36 @@ bool DumpProcessEmbedHoverParameters(
     }
     return false;
 }
+
+bool DumpProcessSetCheckListParameters(
+    const std::vector<std::string>& params,
+    std::vector<uint32_t>& vec)
+{
+    if (params.size() < MIN_NUM) {
+        return false;
+    }
+    auto arg = params.begin() + 1;
+    if (*arg != "--set-whitelist") {
+        return false;
+    }
+    for (++arg; arg != params.end();) {
+        vec.emplace_back(StringUtils::StringToUint(*arg++));
+    }
+    return true;
+}
+
+bool DumpProcessGetCheckListParameters(
+    const std::vector<std::string>& params)
+{
+    if (params.size() < MIN_NUM) {
+        return false;
+    }
+    auto arg = params.begin() + 1;
+    if (*arg != "--get-whitelist") {
+        return false;
+    }
+    return true;
+}
 } // DFX related
 
 void JsAccessibilityManager::DumpInjectActionTest(const std::vector<std::string>& params)
@@ -4534,6 +4590,29 @@ void JsAccessibilityManager::DumpEmbedHoverTestNG(const std::vector<std::string>
     accessibilityManagerNG->HandleAccessibilityHoverEventBySurfaceId(surfaceId, param);
 }
 
+void JsAccessibilityManager::DumpSetCheckListTest(const std::vector<std::string>& params)
+{
+    std::vector<uint32_t> vec;
+    if (!DumpProcessSetCheckListParameters(params, vec)) {
+        return;
+    }
+    UpdateEventWhiteList(vec);
+    DumpLog::GetInstance().Print("white list size: " + std::to_string(eventWhiteList_.size()));
+    DumpLog::GetInstance().Print(std::string("Result: Set White List Done"));
+}
+
+void JsAccessibilityManager::DumpGetCheckListTest(const std::vector<std::string>& params)
+{
+    if (!DumpProcessGetCheckListParameters(params)) {
+        return;
+    }
+    DumpLog::GetInstance().Print("white list size: " + std::to_string(eventWhiteList_.size()));
+    for (const auto& event : eventWhiteList_) {
+        DumpLog::GetInstance().Print("white list No: "+ std::to_string(event));
+    }
+    DumpLog::GetInstance().Print(std::string("Result: Get White List Done"));
+}
+
 void JsAccessibilityManager::DumpTreeNG(bool useWindowId, uint32_t windowId, int64_t rootId, bool isDumpSimplify)
 {
     if (!useWindowId && rootId == -1) {
@@ -4666,6 +4745,12 @@ bool JsAccessibilityManager::GetDumpInfoArgument(const std::vector<std::string>&
         return false;
     }
     argument.isDumpSimplify = params[0].compare("-simplify") == 0;
+    bool isArgument = DumpInfoParams(params, argument);
+    return isArgument;
+}
+
+bool JsAccessibilityManager::DumpInfoParams(const std::vector<std::string>& params, DumpInfoArgument& argument)
+{
     for (auto arg = params.begin() + 1; arg != params.end(); ++arg) {
         if (*arg == "-w") {
             argument.useWindowId = true;
@@ -4691,6 +4776,12 @@ bool JsAccessibilityManager::GetDumpInfoArgument(const std::vector<std::string>&
             break;
         } else if (*arg == "--embed-hover") {
             argument.mode = DumpMode::EMBED_HOVER_TEST;
+            break;
+        } else if (*arg == "--set-whitelist") {
+            argument.mode = DumpMode::SET_CHECKLIST_TEST;
+            break;
+        } else if (*arg == "--get-whitelist") {
+            argument.mode = DumpMode::GET_CHECKLIST_TEST;
             break;
         } else if (*arg == "-v") {
             argument.verbose = true;
@@ -4725,6 +4816,12 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
         TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "dump child element: %{public}" PRId64, argument.nodeId);
         return;
     }
+    ChooseDumpEvent(params, argument, windowId, hasJson);
+}
+
+void JsAccessibilityManager::ChooseDumpEvent(const std::vector<std::string>& params,
+    DumpInfoArgument& argument, uint32_t windowId, bool hasJson)
+{
     switch (argument.mode) {
         case DumpMode::TREE:
             isUseJson_ = hasJson;
@@ -4750,6 +4847,12 @@ void JsAccessibilityManager::OnDumpInfoNG(const std::vector<std::string>& params
             break;
         case DumpMode::EMBED_HOVER_TEST:
             DumpEmbedHoverTestNG(params, windowId);
+            break;
+        case DumpMode::SET_CHECKLIST_TEST:
+            DumpSetCheckListTest(params);
+            break;
+        case DumpMode::GET_CHECKLIST_TEST:
+            DumpGetCheckListTest(params);
             break;
         default:
             DumpLog::GetInstance().Print("Error: invalid arguments!");
@@ -7540,7 +7643,20 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const 
         [weak = accessibilityManager_, state, eventType = eventType_]() {
             auto jsAccessibilityManager = weak.Upgrade();
             CHECK_NULL_VOID(jsAccessibilityManager);
+
             if (eventType == AccessibilityStateEventType::EVENT_ACCESSIBILITY_STATE_CHANGED) {
+                auto client = AccessibilitySystemAbilityClient::GetInstance();
+                if (client) {
+                    std::vector<uint32_t> needEvents;
+                    client->SearchNeedEvents(needEvents);
+                    jsAccessibilityManager->UpdateEventWhiteList(needEvents);
+                }
+                auto pipelineRef = jsAccessibilityManager->GetPipelineContext().Upgrade();
+                CHECK_NULL_VOID(pipelineRef);
+                if (jsAccessibilityManager->ShouldSkipAccessibilityStateChange(pipelineRef)) {
+                    return;
+                }
+
                 if (state) {
                     jsAccessibilityManager->RegisterInteractionOperation(jsAccessibilityManager->GetWindowId());
                 } else {
@@ -7549,8 +7665,20 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const 
                 AceApplicationInfo::GetInstance().SetAccessibilityEnabled(state);
                 jsAccessibilityManager->NotifyAccessibilitySAStateChange(state);
             } else if (eventType == AccessibilityStateEventType::EVENT_SCREEN_READER_STATE_CHANGED) {
+                auto pipelineRef = jsAccessibilityManager->GetPipelineContext().Upgrade();
+                CHECK_NULL_VOID(pipelineRef);
+                if (jsAccessibilityManager->ShouldSkipAccessibilityStateChange(pipelineRef)) {
+                    return;
+                }
+
                 jsAccessibilityManager->isScreenReaderEnabledInitialized_ = true;
                 jsAccessibilityManager->isScreenReaderEnabled_ = state;
+            } else if (eventType == AccessibilityStateEventType::EVENT_CONFIG_EVENT_CHANGED) {
+                std::vector<uint32_t> needEvents;
+                auto client = AccessibilitySystemAbilityClient::GetInstance();
+                CHECK_NULL_VOID(client);
+                client->SearchNeedEvents(needEvents);
+                jsAccessibilityManager->UpdateEventWhiteList(needEvents);
             }
         },
         TaskExecutor::TaskType::UI, "ArkUIAccessibilityStateChanged");
@@ -7578,6 +7706,24 @@ void JsAccessibilityManager::JsInteractionOperation::FocusMoveSearch(
             jsAccessibilityManager->FocusMoveSearch(splitElementId, direction, requestId, callback, windowId);
         },
         TaskExecutor::TaskType::UI, "ArkUIAccessibilityFocusMoveSearch");
+}
+
+bool JsAccessibilityManager::ShouldSkipAccessibilityStateChange(const RefPtr<PipelineBase>& pipelineRef)
+{
+    CHECK_NULL_RETURN(pipelineRef, true);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineRef);
+    CHECK_NULL_RETURN(pipelineContext, true);
+    auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
+    if (container != nullptr && container->IsDynamicRender()) {
+        return true;
+    }
+    if (pipelineContext->IsFormRender() || pipelineContext->IsJsCard() || pipelineContext->IsJsPlugin()) {
+        return true;
+    }
+    if (container != nullptr && container->IsUIExtensionWindow()) {
+        return true;
+    }
+    return false;
 }
 
 void JsAccessibilityManager::FocusMoveSearch(const int64_t elementId, const int32_t direction, const int32_t requestId,
@@ -8678,5 +8824,22 @@ void JsAccessibilityManager::RemoveWebPatternBySurfaceId(const std::string& surf
             webPatternMap_.erase(it);
         }
     }
+}
+
+bool JsAccessibilityManager::CheckWhiteList(const uint32_t& eventType)
+{
+    auto whiteList = eventWhiteList_;
+    if (whiteList.size() == 0) {
+        return true;
+    }
+
+    if (whiteList.size() == 1) {
+        if (whiteList[0] == Accessibility::EventType::TYPE_VIEW_INVALID) {
+            return false;
+        } else if (whiteList[0] == Accessibility::EventType::TYPES_ALL_MASK) {
+            return true;
+        }
+    }
+    return std::find(whiteList.begin(), whiteList.end(), eventType) != whiteList.end();
 }
 } // namespace OHOS::Ace::Framework

@@ -2525,6 +2525,44 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager040, TestSize.Level1)
 }
 
 /**
+ * @tc.name: JsAccessibilityManager041
+ * @tc.desc: CheckDumpInfoParams,OnDumpInfoNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager041, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    std::vector<std::string> params = {};
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+
+    params = { "-inspector", "-accessibility", "-simplify", "--set-whitelist", "1"};
+    auto ret = jsAccessibilityManager->CheckDumpInfoParams(params);
+    EXPECT_EQ(ret, true);
+    jsAccessibilityManager->OnDumpInfoNG(params, 1, false);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager042
+ * @tc.desc: CheckDumpInfoParams,OnDumpInfoNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager042, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    std::vector<std::string> params = {};
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+
+    params = { "-inspector", "-accessibility", "-simplify", "--get-whitelist", "1"};
+    auto ret = jsAccessibilityManager->CheckDumpInfoParams(params);
+    EXPECT_EQ(ret, true);
+    jsAccessibilityManager->OnDumpInfoNG(params, 1, false);
+}
+
+/**
  * @tc.name: GetTransformDegreeRelativeToWindow001
  * @tc.desc: Test GetTransformDegreeRelativeToWindow
  * @tc.type: FUNC
