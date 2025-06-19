@@ -420,38 +420,44 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
         host->MarkDirtyNode(flag);
     }
     if (!ifPaintObscuration_) {
-        auto& canvas = drawingContext.canvas;
-        CHECK_NULL_VOID(contentSize_);
-        CHECK_NULL_VOID(contentOffset_);
-        auto contentSize = contentSize_->Get();
-        auto contentOffset = contentOffset_->Get();
-        canvas.Save();
-        if (clip_ && clip_->Get() &&
-            (!fontSize_.has_value() || !fontSizeFloat_ ||
-                NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()))) {
-            RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffset.GetY(),
-                contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
-            canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-        }
-        if (!marqueeSet_) {
-            auto paintOffsetY = paintOffset_.GetY();
-            auto paragraphs = pManager->GetParagraphs();
-            for (auto&& info : paragraphs) {
-                auto paragraph = info.paragraph;
-                CHECK_NULL_VOID(paragraph);
-                ChangeParagraphColor(paragraph);
-                paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
-                paintOffsetY += paragraph->GetHeight();
-            }
-        } else {
-            // Racing
-            DrawTextRacing(drawingContext, fadeoutInfo, pManager);
-        }
-        canvas.Restore();
+        DrawActualText(drawingContext, textPattern, pManager, fadeoutInfo);
     } else {
         DrawObscuration(drawingContext);
     }
     PaintCustomSpan(drawingContext);
+}
+
+void TextContentModifier::DrawActualText(DrawingContext& drawingContext, const RefPtr<TextPattern>& textPattern,
+    const RefPtr<ParagraphManager>& pManager, const FadeoutInfo& fadeoutInfo)
+{
+    auto& canvas = drawingContext.canvas;
+    CHECK_NULL_VOID(contentSize_);
+    CHECK_NULL_VOID(contentOffset_);
+    auto contentSize = contentSize_->Get();
+    auto contentOffset = contentOffset_->Get();
+    canvas.Save();
+    if (clip_ && clip_->Get() &&
+        (!fontSize_.has_value() || !fontSizeFloat_ ||
+            NearEqual(fontSize_.value().Value(), fontSizeFloat_->Get()))) {
+        RSRect clipInnerRect = RSRect(contentOffset.GetX(), contentOffset.GetY(),
+            contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
+        canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
+    }
+    if (!marqueeSet_) {
+        auto textEffect = textPattern->GetTextEffect();
+        if (!textEffect) {
+            DrawText(canvas, pManager);
+        } else {
+            if (SystemProperties::GetTextTraceEnabled()) {
+                ACE_TEXT_SCOPED_TRACE("TextContentModifier::DrawContent StartEffect");
+            }
+            textEffect->StartEffect(canvas, paintOffset_.GetX(), paintOffset_.GetY());
+        }
+    } else {
+        // Racing
+        DrawTextRacing(drawingContext, fadeoutInfo, pManager);
+    }
+    canvas.Restore();
 }
 
 #ifdef ACE_ENABLE_VK

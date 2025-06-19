@@ -410,7 +410,6 @@ bool TextLayoutAlgorithm::CreateParagraph(
     if (!paragraphManager_) {
         paragraphManager_ = AceType::MakeRefPtr<ParagraphManager>();
     }
-    paragraphManager_->Reset();
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TextPattern>();
@@ -435,12 +434,14 @@ bool TextLayoutAlgorithm::CreateParagraph(
     paraStyle.textStyleUid = frameNode->GetId();
     // SymbolGlyph
     if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        paragraphManager_->Reset();
         return UpdateSymbolTextStyle(textStyle, paraStyle, layoutWrapper, frameNode);
     }
     if (spans_.empty() || useExternalParagraph) {
         // only use for text.
         return UpdateSingleParagraph(layoutWrapper, paraStyle, textStyle, content, maxWidth);
     } else {
+        paragraphManager_->Reset();
         return UpdateParagraphBySpan(layoutWrapper, paraStyle, maxWidth, textStyle);
     }
 }
@@ -550,12 +551,16 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(TextStyle& textStyle, const s
             needReCreateParagraph_, needReLayout, textStyle.GetFontSize().ToString().c_str(),
             textStyle.GetTextColor().ColorToString().c_str());
     }
-
     if (needReCreateParagraph_ && !CreateParagraph(textStyle, content, layoutWrapper, maxSize.Width())) {
         return false;
     }
 
     if (!needReCreateParagraph_) {
+        auto frameNode = layoutWrapper->GetHostNode();
+        CHECK_NULL_RETURN(frameNode, false);
+        auto pattern = frameNode->GetPattern<TextPattern>();
+        CHECK_NULL_RETURN(pattern, false);
+        pattern->CheckWhetherNeedResetTextEffect();
         if (!ReLayoutParagraphs(textStyle, layoutWrapper, maxSize)) {
             CHECK_NULL_RETURN(CreateParagraph(textStyle, content, layoutWrapper, maxSize.Width()), false);
             CHECK_NULL_RETURN(LayoutParagraphs(maxSize.Width()), false);
@@ -754,13 +759,20 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
         static_cast<int32_t>(content.length()), maxWidth);
     auto pattern = host->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, false);
+    CHECK_NULL_RETURN(paragraphManager_, false);
+    RefPtr<Paragraph> oldParagraph;
     auto externalParagraph = pattern->GetExternalParagraph();
     RefPtr<Paragraph> paragraph;
     if (externalParagraph) {
         paragraph = Paragraph::Create(externalParagraph.value());
     } else {
         paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
+        auto paragraphs = paragraphManager_->GetParagraphs();
+        if (!paragraphs.empty()) {
+            oldParagraph = paragraphs.front().paragraph;
+        }
     }
+    paragraphManager_->Reset();
     CHECK_NULL_RETURN(paragraph, false);
     auto textStyleTmp = textStyle;
     textStyleTmp.ResetTextBaselineOffset();
@@ -779,12 +791,49 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
         }
     }
     paragraph->Build();
+    if (paragraph) {
+        CreateOrUpdateTextEffect(oldParagraph, paragraph, pattern, content);
+    }
     ApplyIndent(paraStyle, paragraph, maxWidth, textStyle);
     paragraphManager_->AddParagraph({ .paragraph = paragraph,
         .paragraphStyle = paraStyle,
         .start = 0,
         .end = content.length() });
     return true;
+}
+
+void TextLayoutAlgorithm::CreateOrUpdateTextEffect(const RefPtr<Paragraph>& oldParagraph,
+    const RefPtr<Paragraph>& newParagraph, const RefPtr<TextPattern>& textPattern, const std::u16string& content)
+{
+    bool needUpdateTypography = false;
+    auto textEffect = textPattern->GetOrCreateTextEffect(content, needUpdateTypography);
+    CHECK_NULL_VOID(textEffect);
+    auto frameNode = textPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::GetTextTraceEnabled()) {
+        ACE_TEXT_SCOPED_TRACE(
+            "TextLayoutAlgorithm::CreateOrUpdateTextEffect[id:%d][needUpdateTypography:%d][content:%s]",
+            frameNode->GetId(), needUpdateTypography, UtfUtils::Str16DebugToStr8(content).c_str());
+    }
+    newParagraph->SetParagraphSymbolAnimation(frameNode);
+    if (needUpdateTypography && oldParagraph) {
+        std::vector<std::pair<RefPtr<Paragraph>, RefPtr<Paragraph>>> paragraphs;
+        auto pair = std::make_pair(oldParagraph, newParagraph);
+        paragraphs.emplace_back(pair);
+        textEffect->UpdateTypography(paragraphs);
+    } else if (!needUpdateTypography) {
+        auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        std::unordered_map<TextEffectAttribute, std::string> configs;
+        auto flipDirection = textLayoutProperty->GetTextFlipDirectionValue(TextFlipDirection::DOWN);
+        auto enableBlur = textLayoutProperty->GetTextFlipEnableBlurValue(false);
+        configs[TextEffectAttribute::FLIP_DIRECTION] = StringUtils::ToString(flipDirection);
+        configs[TextEffectAttribute::BLUR_ENABLE] = enableBlur ? "true" : "false";
+        textEffect->UpdateEffectConfig(configs);
+        std::vector<RefPtr<Paragraph>> paragraphs;
+        paragraphs.emplace_back(newParagraph);
+        textEffect->AppendTypography(paragraphs);
+    }
 }
 
 bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,

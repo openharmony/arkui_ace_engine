@@ -686,6 +686,12 @@ let FlexWrap;
   FlexWrap[FlexWrap.WrapReverse = 2] = 'WrapReverse';
 })(FlexWrap || (FlexWrap = {}));
 
+let FlipDirection;
+(function (FlipDirection) {
+  FlipDirection[FlipDirection.DOWN = 0] = 'DOWN';
+  FlipDirection[FlipDirection.UP = 1] = 'UP';
+})(FlipDirection || (FlipDirection = {}));
+
 class LayoutPolicy {
   id_ = '';
 

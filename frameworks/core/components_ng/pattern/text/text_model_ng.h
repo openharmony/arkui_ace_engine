@@ -66,6 +66,8 @@ public:
     void SetAdaptMinFontSize(const Dimension& value) override;
     void SetAdaptMaxFontSize(const Dimension& value) override;
     void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) override;
+    void SetContentTransition(TextEffectStrategy value, TextFlipDirection direction, bool enableBlur) override;
+    void ResetContentTransition() override;
     void SetTextDetectEnable(bool value) override;
     void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) override;
     void SetOnClick(std::function<void(BaseEventInfo* info)>&& click, double distanceThreshold) override;
@@ -205,6 +207,9 @@ public:
     static void ResetTextGradient(FrameNode* frameNode);
     static void SetTextVerticalAlign(FrameNode* frameNode, TextVerticalAlign verticalAlign);
     static TextVerticalAlign GetTextVerticalAlign(FrameNode* frameNode);
+    static void SetContentTransition(
+        FrameNode* frameNode, TextEffectStrategy value, TextFlipDirection direction, bool enableBlur);
+    static void ResetContentTransition(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

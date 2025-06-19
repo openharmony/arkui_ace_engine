@@ -131,6 +131,8 @@ private:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double stepSize);
     bool IsAdaptExceedLimit(const SizeF& maxSize) override;
     bool IsParentSizeNearZero(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    void CreateOrUpdateTextEffect(const RefPtr<Paragraph>& oldParagraph, const RefPtr<Paragraph>& newParagraph,
+        const RefPtr<TextPattern>& textPattern, const std::u16string& content);
 
     RefPtr<PropertyBool> showSelect_;
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);

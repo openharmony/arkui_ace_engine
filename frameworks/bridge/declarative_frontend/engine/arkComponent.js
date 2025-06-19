@@ -14123,6 +14123,25 @@ class TextVerticalAlignModifier extends ModifierWithKey {
 }
 TextVerticalAlignModifier.identity = Symbol('textVerticalAlignIdentity');
 
+class TextContentTransitionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetTextContentTransition(node);
+    }
+    else {
+      getUINativeModule().text.setTextContentTransition(node, this.value.flipDirection, this.value.enableBlur);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.flipDirection, this.value.flipDirection) ||
+      !isBaseOrResourceEqual(this.stageValue.enableBlur, this.value.enableBlur);
+  }
+}
+TextContentTransitionModifier.identity = Symbol('textContentTransition');
+
 class ArkTextComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -14370,6 +14389,10 @@ class ArkTextComponent extends ArkComponent {
   }
   textVerticalAlign(value) {
     modifierWithKey(this._modifiersWithKeys, TextVerticalAlignModifier.identity, TextVerticalAlignModifier, value);
+    return this;
+  }
+  contentTransition(value) {
+    modifierWithKey(this._modifiersWithKeys, TextContentTransitionModifier.identity, TextContentTransitionModifier, value);
     return this;
   }
 }

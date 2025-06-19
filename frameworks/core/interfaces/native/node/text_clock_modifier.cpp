@@ -26,7 +26,7 @@ constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
 constexpr Dimension DEFAULT_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
-const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
+const std::string DEFAULT_FONT_FAMILY_CLOCK = "HarmonyOS Sans";
 
 namespace TextClockModifier {
 void SetFormat(ArkUINodeHandle node, ArkUI_CharPtr format)
@@ -193,7 +193,7 @@ void ResetFontFamily(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::string familiesStr = DEFAULT_FONT_FAMILY;
+    std::string familiesStr = DEFAULT_FONT_FAMILY_CLOCK;
     std::vector<std::string> fontFamilyResult = Framework::ConvertStrToFontFamilies(familiesStr);
     TextClockModelNG::SetFontFamily(frameNode, fontFamilyResult);
     if (SystemProperties::ConfigChangePerform()) {
