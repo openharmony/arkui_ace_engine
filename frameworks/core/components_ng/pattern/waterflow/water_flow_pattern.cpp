@@ -344,7 +344,9 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         return false;
     }
     prevOffset_ += layoutInfo_->CalibrateOffset(); // adjust prevOffset_ to keep in sync with calibrated TotalOffset
-    TriggerPostLayoutEvents();
+    if (!layoutInfo_->measureInNextFrame_) {
+        TriggerPostLayoutEvents();
+    }
 
     if (targetIndex_.has_value()) {
         ScrollToTargetIndex(targetIndex_.value());
@@ -359,8 +361,6 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     UpdateScrollBarOffset();
     CheckScrollable();
 
-    isInitialized_ = true;
-
     if (layoutInfo_->measureInNextFrame_) {
         GetContext()->AddAfterLayoutTask([weak = AceType::WeakClaim(this)]() {
             ACE_SCOPED_TRACE("WaterFlow MeasureInNextFrame");
@@ -370,6 +370,8 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
                 waterFlow->layoutInfo_->measureInNextFrame_ = false;
             }
         });
+    } else {
+        isInitialized_ = true;
     }
 
     if (layoutInfo_->startIndex_ == 0 && CheckMisalignment(layoutInfo_)) {
