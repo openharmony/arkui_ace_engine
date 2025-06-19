@@ -3377,6 +3377,14 @@
     },
     {
         "first_introduced": "20",
+        "name": "OH_ArkUI_InitModuleForArkTSEnv"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_NotifyArkTSEnvDestroy"
+    },
+    {
+        "first_introduced": "20",
         "name": "OH_ArkUI_AddSupportedUIStates"
     },
     {

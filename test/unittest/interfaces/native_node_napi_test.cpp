@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "napi/napi_runtime.cpp"
 #include "native_interface.h"
 #include "native_node_napi.h"
 #include "native_type.h"
@@ -302,6 +303,30 @@ HWTEST_F(NativeNodeNapiTest, NavigationAPITest013, TestSize.Level1)
 {
     auto ret = OH_ArkUI_GetRouterPageId(nullptr, nullptr, 0, nullptr);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: InitModuleForArkTSEnvAPITest001
+ * @tc.desc: Test OH_ArkUI_InitModuleForArkTSEnv function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, InitModuleForArkTSEnvAPITest001, TestSize.Level1)
+{
+    NativeEngineMock engine;
+
+    /**
+     * @tc.steps: step1. Call OH_ArkUI_InitModuleForArkTSEnv with a null environment.
+     * @tc.expected: The return value should be ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
+    auto ret = OH_ArkUI_InitModuleForArkTSEnv(nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step2. Call OH_ArkUI_InitModuleForArkTSEnv with a valid environment.
+     * @tc.expected: The return value should be ARKUI_ERROR_CODE_NO_ERROR.
+     */
+    ret = OH_ArkUI_InitModuleForArkTSEnv(napi_env(engine));
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**
