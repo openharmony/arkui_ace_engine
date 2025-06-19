@@ -851,6 +851,11 @@ void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
 
 void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
+    if (GetAxis() == Axis::FREE) {
+        gestureHub->RemoveTouchEvent(touchEvent_);
+        touchEvent_.Reset();
+        return;
+    }
     // use TouchEvent to receive next touch down event to stop animation.
     if (touchEvent_) {
         return;
