@@ -1904,7 +1904,8 @@ public:
         }
         callback_(g_pixelMap);
     }
-
+    void OnSurfaceCaptureHDR(std::shared_ptr<Media::PixelMap> pixelMap,
+        std::shared_ptr<Media::PixelMap> hdrPixelMap) override {}
     std::function<void(const RefPtr<PixelMap>&)> callback_;
 };
 

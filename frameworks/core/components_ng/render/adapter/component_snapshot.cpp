@@ -64,6 +64,9 @@ public:
         }
     }
 
+    void OnSurfaceCaptureHDR(std::shared_ptr<Media::PixelMap> pixelMap,
+        std::shared_ptr<Media::PixelMap> hdrPixelMap) override {}
+
 private:
     ComponentSnapshot::JsCallback callback_;
     WeakPtr<FrameNode> node_;
@@ -78,6 +81,9 @@ public:
         CHECK_NULL_VOID(callback_);
         callback_(pixelMap);
     }
+
+    void OnSurfaceCaptureHDR(std::shared_ptr<Media::PixelMap> pixelMap,
+        std::shared_ptr<Media::PixelMap> hdrPixelMap) override {}
 
 private:
     ComponentSnapshot::NormalCallback callback_;
@@ -102,6 +108,9 @@ public:
         std::unique_lock<std::mutex> lock(mutex_);
         cv_.notify_all();
     }
+
+    void OnSurfaceCaptureHDR(std::shared_ptr<Media::PixelMap> pixelMap,
+        std::shared_ptr<Media::PixelMap> hdrPixelMap) override {}
 
     std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetPixelMap(std::chrono::duration<int, std::milli> timeout)
     {

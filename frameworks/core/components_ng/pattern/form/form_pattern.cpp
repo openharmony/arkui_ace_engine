@@ -104,7 +104,8 @@ public:
         }
         formPattern_->OnSnapshot(pixelMap);
     }
-
+    void OnSurfaceCaptureHDR(std::shared_ptr<Media::PixelMap> pixelMap,
+        std::shared_ptr<Media::PixelMap> hdrPixelMap) override {}
 private:
     WeakPtr<FormPattern> weakFormPattern_ = nullptr;
 };
