@@ -46,6 +46,7 @@ public:
     RefPtr<PaintWrapper> CreateScrollDone(const RefPtr<FrameNode>& frameNode = nullptr);
     ScrollModelNG CreateScroll();
     void CreateContent(float mainSize = CONTENT_MAIN_SIZE);
+    void CreateFreeContent(const SizeF& size);
     void CreateContentChild(int32_t childNumber = 10);
     void ScrollBy(double pixelX, double pixelY, bool smooth = false) override;
 

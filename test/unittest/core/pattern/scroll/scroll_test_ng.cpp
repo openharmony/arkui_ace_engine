@@ -117,6 +117,14 @@ void ScrollTestNg::CreateContent(float mainSize)
     SetSize(axis, CalcLength(FILL_LENGTH), CalcLength(mainSize));
 }
 
+void ScrollTestNg::CreateFreeContent(const SizeF& size)
+{
+    RowModelNG rowModel;
+    rowModel.Create(Dimension(0), nullptr, "");
+    ViewAbstract::SetWidth(CalcLength(size.Width()));
+    ViewAbstract::SetHeight(CalcLength(size.Height()));
+}
+
 void ScrollTestNg::CreateContentChild(int32_t childNumber)
 {
     contentChildren_.clear();
