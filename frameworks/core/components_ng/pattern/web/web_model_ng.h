@@ -214,6 +214,7 @@ public:
     void SetDefaultFileSelectorShow(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) override;
     void SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) override;
     void SetOpenAppLinkFunction(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback) override;
+    void SetWebDetachFunction(std::function<void(int32_t)>&& jsCallback) override;
     void SetIntelligentTrackingPreventionResultId(
         std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&&
             intelligentTrackingPreventionResultId) override;

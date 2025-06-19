@@ -100,6 +100,7 @@ const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
 const std::string RESOURCE_CLIPBOARD_READ_WRITE = "TYPE_CLIPBOARD_READ_WRITE";
 const std::string RESOURCE_SENSOR = "TYPE_SENSOR";
 const std::string DEFAULT_CANONICAL_ENCODING_NAME = "UTF-8";
+constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
 
 constexpr uint32_t DRAG_DELAY_MILLISECONDS = 300;
 constexpr uint32_t ACCESSIBILITY_DELAY_MILLISECONDS = 100;
@@ -749,8 +750,8 @@ void WebDelegateObserver::NotifyDestory()
                     TAG_LOGD(AceLogTag::ACE_WEB, "NotifyDestory EventHandler destorying delegate");
                     observer->delegate_.Reset();
                 }
-            }
-        );
+            },
+            DESTRUCT_DELAY_MILLISECONDS);
         return;
     }
     auto taskExecutor = context->GetTaskExecutor();
@@ -758,7 +759,7 @@ void WebDelegateObserver::NotifyDestory()
         TAG_LOGE(AceLogTag::ACE_WEB, "NotifyDestory TaskExecutor is null");
         return;
     }
-    taskExecutor->PostTask(
+    taskExecutor->PostDelayedTask(
         [weak = WeakClaim(this), taskExecutor = taskExecutor]() {
             auto observer = weak.Upgrade();
             if (!observer) {
@@ -770,7 +771,7 @@ void WebDelegateObserver::NotifyDestory()
                 observer->delegate_.Reset();
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIWebNotifyDestory");
+        TaskExecutor::TaskType::UI, DESTRUCT_DELAY_MILLISECONDS, "ArkUIWebNotifyDestory");
 }
 
 void WebDelegateObserver::OnAttachContext(const RefPtr<NG::PipelineContext> &context)
