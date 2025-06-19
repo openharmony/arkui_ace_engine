@@ -69,6 +69,8 @@ constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int NUM_3 = 3;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
+constexpr float MIN_ANGEL = 0.0f;
+constexpr float MAX_ANGEL = 360.0f;
 const uint32_t FOCUS_PRIORITY_AUTO = 0;
 const uint32_t FOCUS_PRIORITY_PRIOR = 2000;
 const uint32_t FOCUS_PRIORITY_PREVIOUS = 3000;
@@ -394,6 +396,21 @@ auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_
         menuParam.isShowHoverImage = optParam->isShowHoverImage;
     }
 };
+
+Dimension ClampAngleDimension(const std::optional<Dimension>& angle, float minAngle, float maxAngle)
+{
+    if (!angle) {
+        return CalcDimension(0.0f, DimensionUnit::PX);
+    }
+
+    float value = angle.value().Value();
+    if (LessOrEqual(value, minAngle)) {
+        value = minAngle;
+    } else if (GreatOrEqual(value, maxAngle)) {
+        value = maxAngle;
+    }
+    return CalcDimension(value, DimensionUnit::PX);
+}
 
 namespace GeneratedModifier {
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
@@ -3984,11 +4001,11 @@ void SweepGradient0Impl(Ark_NativePointer node,
     auto startAngle = Converter::OptConvert<Dimension>(optValue->start);
     auto endAngle = Converter::OptConvert<Dimension>(optValue->end);
     auto rotation = Converter::OptConvert<Dimension>(optValue->rotation);
+    sweep->startAngle = ClampAngleDimension(Converter::OptConvert<Dimension>(optValue->start), MIN_ANGEL, MAX_ANGEL);
+    sweep->endAngle = ClampAngleDimension(Converter::OptConvert<Dimension>(optValue->end), MIN_ANGEL, MAX_ANGEL);
+    sweep->rotation = ClampAngleDimension(Converter::OptConvert<Dimension>(optValue->rotation), MIN_ANGEL, MAX_ANGEL);
     if (centerX) sweep->centerX = centerX.value();
     if (centerY) sweep->centerY = centerY.value();
-    if (startAngle) sweep->startAngle = startAngle.value();
-    if (endAngle) sweep->endAngle = endAngle.value();
-    if (rotation) sweep->rotation = rotation.value();
     Converter::AssignGradientColors(&gradient, &optValue->colors);
     ViewAbstract::SetSweepGradient(frameNode, gradient);
 }

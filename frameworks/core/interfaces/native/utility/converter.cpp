@@ -48,8 +48,9 @@ namespace {
     constexpr double NUM_DOUBLE_1 = 1.;
     constexpr double NUM_DOUBLE_100 = 100.;
     constexpr int32_t NUM_PERCENT_100 = 100;
-
     constexpr int32_t DEFAULT_MULTIPLE = 100;
+    constexpr float GRADIENT_MIN_POSITION = 0.0f;
+    constexpr float GRADIENT_DEFAULT_MIN_POSITION = 0.0f;
     int32_t ConvertToVariableFontWeight(OHOS::Ace::FontWeight fontWeight)
     {
         OHOS::Ace::FontWeight convertValue;
@@ -196,6 +197,9 @@ void AssignGradientColors(Gradient *gradient,
     for (int32_t i = 0; i < colors->length; i++) {
         auto color = OptConvert<Color>(colors->array[i].value0);
         auto position = Convert<float>(colors->array[i].value1);
+        if (LessOrEqual(position, GRADIENT_MIN_POSITION)) {
+            position = GRADIENT_DEFAULT_MIN_POSITION;
+        }
         if (color.has_value()) {
             NG::GradientColor gradientColor;
             gradientColor.SetColor(color.value());
