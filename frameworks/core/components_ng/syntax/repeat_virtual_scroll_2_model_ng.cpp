@@ -39,11 +39,6 @@ void RepeatVirtualScroll2ModelNG::Create(uint32_t arrLen, uint32_t totalCount,
     stack->PopContainer();
 }
 
-bool RepeatVirtualScroll2ModelNG::IsInAnimation()
-{
-    return AnimationUtils::IsImplicitAnimationOpen();
-}
-
 void RepeatVirtualScroll2ModelNG::RemoveNode(uint32_t rid)
 {
     auto* stack = ViewStackProcessor::GetInstance();
