@@ -2253,7 +2253,7 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow, Layo
     auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
     RefPtr<PipelineContext> pipelineContext;
     if (expandDisplay) {
-        pipelineContext = AceType::Claim(targetNode->GetContext());
+        pipelineContext = targetNode->GetContextRefPtr();
     } else {
         auto host = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(host);
