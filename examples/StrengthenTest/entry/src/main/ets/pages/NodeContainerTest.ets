@@ -103,7 +103,7 @@ class MyNodeController extends NodeController {
 @Entry
 @Component
 export struct NodeContainerTest {
-  private controllerArray: Array<MyNodeController> = []
+  private controllerArray: Array<MyNodeController> = new Array<MyNodeController>()
   @State idx: number = 0
   @State flag: boolean = true
 

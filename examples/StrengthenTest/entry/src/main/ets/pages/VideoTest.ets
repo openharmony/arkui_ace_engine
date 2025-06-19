@@ -1,5 +1,4 @@
 import {
-import {
   memo,
   __memo_context_type,
   __memo_id_type,
@@ -35,7 +34,6 @@ import {
   PlaybackInfo,
   FullscreenInfo,
   PreparedInfo,
-  Callback,
   PixelMap,
   Video,
   VideoOptions,

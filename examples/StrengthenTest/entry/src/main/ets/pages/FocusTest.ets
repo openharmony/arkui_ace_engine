@@ -54,8 +54,7 @@ import {
   PointerStyle,
   NavDestination,
   NavPathStack,
-  NavDestinationContext,
-  Callback
+  NavDestinationContext
 } from '@ohos.arkui.component' // TextAttribute should be insert by ui-plugins
 
 import hilog from '@ohos.hilog'

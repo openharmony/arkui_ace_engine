@@ -85,16 +85,12 @@ export struct Image002Test {
   @State pixelmap: PixelMap | string = ''
 
   aboutToAppear() {
-    从配置文件或数据库中读取图片地址
+    // 从配置文件或数据库中读取图片地址
     this.pixelmap = this.getConfiguredImageUrl();
   }
 
   getConfiguredImageUrl(): string {
-    return $r('app.string.image_url')
-  }
-
-  aboutToAppear() {
-   
+    return ''
   }
 
   build() {
