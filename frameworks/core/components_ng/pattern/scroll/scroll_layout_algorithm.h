@@ -33,15 +33,12 @@ class ACE_EXPORT ScrollLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(ScrollLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    explicit ScrollLayoutAlgorithm(float currentOffset) : currentOffset_(currentOffset) {}
+    explicit ScrollLayoutAlgorithm(float currentOffset, float crossOffset = 0.0f)
+        : crossOffset_(crossOffset), currentOffset_(currentOffset)
+    {}
     ~ScrollLayoutAlgorithm() override = default;
 
     void OnReset() override {}
-
-    void SetCurrentOffset(float offset)
-    {
-        currentOffset_ = offset;
-    }
 
     float GetCurrentOffset() const
     {
@@ -83,6 +80,7 @@ private:
     void UseInitialOffset(Axis axis, SizeF selfSize, LayoutWrapper* layoutWrapper);
     bool UnableOverScroll(LayoutWrapper* layoutWrapper) const;
 
+    const float crossOffset_;
     float currentOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
     float viewPortLength_ = 0.0f;
