@@ -16,6 +16,7 @@
 #include "image_base.h"
 #include "test/mock/base/mock_image_perf.h"
 #include "test/mock/base/mock_pixel_map.h"
+#include "test/mock/core/common/mock_image_analyzer_manager.h"
 
 #include "base/image/image_defines.h"
 
@@ -2377,6 +2378,47 @@ HWTEST_F(ImageTestNg, SetPixelMapMemoryName002, TestSize.Level0)
     */
     EXPECT_EQ(imagePattern->SetPixelMapMemoryName(pixMap), true);
     EXPECT_EQ(imagePattern->hasSetPixelMapMemoryName_, true);
+}
+
+/**
+ * @tc.name: TestKeyEvent001
+ * @tc.desc: Test KeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestKeyEvent001, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageAnalyzerManager = std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::IMAGE);
+    EXPECT_CALL(*imageAnalyzerManager, UpdateKeyEvent(_)).Times(0);
+    auto event = KeyEvent();
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_CTRL_LEFT;
+    imagePattern->OnKeyEvent(event);
+}
+
+/**
+ * @tc.name: TestKeyEvent002
+ * @tc.desc: Test KeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestKeyEvent002, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageAnalyzerManager = std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::IMAGE);
+    imageAnalyzerManager->SetSupportImageAnalyzerFeature(true);
+    imagePattern->imageAnalyzerManager_ = imageAnalyzerManager;
+    EXPECT_CALL(*imageAnalyzerManager, UpdateKeyEvent(_)).Times(1);
+    auto event = KeyEvent();
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_CTRL_LEFT;
+    imagePattern->OnKeyEvent(event);
+    imageAnalyzerManager->SetSupportImageAnalyzerFeature(false);
 }
 
 /**

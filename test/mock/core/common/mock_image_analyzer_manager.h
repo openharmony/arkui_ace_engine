@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_ADAPTER_OHOS_OSAL_MOCK_IMAGE_ANALYZER_MANAGER_H
 
 #include "core/common/ai/image_analyzer_manager.h"
+#include "gmock/gmock.h"
 
 namespace OHOS::Ace {
 class MockImageAnalyzerManager : public ImageAnalyzerManager {
@@ -30,6 +31,7 @@ public:
     {}
     void SetSupportImageAnalyzerFeature(bool isSupportImageAnalyzerFeature);
     void SetOverlayCreated(bool isOverlayCreated);
+    MOCK_METHOD(void, UpdateKeyEvent, (KeyEvent), (override));
     static void SetUp();
     static void TearDown() {}
 };
