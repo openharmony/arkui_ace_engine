@@ -1239,13 +1239,13 @@ void FrameNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConf
     if (!id.empty()) {
         json->Put(TreeKey::ID, id.c_str());
     }
-    if (!config.contentOnly) {
+    if (!config.contentOnly && config.callingOnMain) {
         auto eventHub = eventHub_ ? eventHub_->GetOrCreateGestureEventHub() : nullptr;
         if (eventHub) {
-            json->Put(TreeKey::CLICKABLE, eventHub->IsClickable());
-            json->Put(TreeKey::LONG_CLICKABLE, eventHub->IsLongClickable());
+            json->Put(TreeKey::CLICKABLE, eventHub->IsAccessibilityClickable());
+            json->Put(TreeKey::LONG_CLICKABLE, eventHub->IsAccessibilityLongClickable());
         }
-        if (config.callingOnMain && renderContext_) {
+        if (renderContext_) {
             json->Put("opacity", renderContext_->GetOpacityValue(1.0));
         }
     }
@@ -1256,6 +1256,9 @@ void FrameNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConf
         }
         if (!accessibilityProperty_->GetAccessibilityDescription().empty()) {
             json->Put("accessilityDescription", accessibilityProperty_->GetAccessibilityDescription().c_str());
+        }
+        if (!config.contentOnly) {
+            json->Put(TreeKey::SCROLLABLE, accessibilityProperty_->IsScrollable());
         }
     }
 }
