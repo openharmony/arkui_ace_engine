@@ -3712,7 +3712,7 @@ OffsetF FrameNode::GetGlobalPositionOnDisplay() const
     return offset;
 }
 
-OffsetF FrameNode::GetFinalOffsetRelativeToWindow(PipelineContext* pipelineContext)
+OffsetF FrameNode::GetFinalOffsetRelativeToWindow(PipelineContext* pipelineContext) const
 {
     auto offsetCurrent = GetOffsetRelativeToWindow();
     auto windowManager = pipelineContext->GetWindowManager();
