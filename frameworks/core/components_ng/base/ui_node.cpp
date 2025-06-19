@@ -134,9 +134,11 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
     bool silently, bool addDefaultTransition, bool addModalUiextension)
 {
     CHECK_NULL_VOID(child);
+    ACE_BUILD_TRACE_BEGIN("AddChild [child:%d][self:%d]", child->GetId(), GetId());
     if (child->GetAncestor() == this) {
         auto it = std::find(children_.begin(), children_.end(), child);
         if (it != children_.end()) {
+            ACE_BUILD_TRACE_END();
             return;
         }
     }
@@ -151,6 +153,7 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
             LOGW("Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d), "
                 "Current modalUiextension count is : %{public}d",
                 GetId(), child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
+            ACE_BUILD_TRACE_END();
             return;
         } else {
             LOGI("Child(tag %{public}s, id: %{public}d) must under modalUec, which count is: %{public}d",
@@ -158,6 +161,7 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
         }
     }
     DoAddChild(it, child, silently, addDefaultTransition);
+    ACE_BUILD_TRACE_END();
 }
 
 UINode* UINode::GetChildAfter(UINode* node)
@@ -226,12 +230,15 @@ void UINode::AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& si
 {
     CHECK_NULL_VOID(child);
     CHECK_NULL_VOID(siblingNode);
+    ACE_BUILD_TRACE_BEGIN("AddChildAfter [child:%d][sibling:%d][self:%d]",
+        child->GetId(), siblingNode->GetId(), GetId());
     if (child->GetAncestor() == this) {
         auto it = std::find(children_.begin(), children_.end(), child);
         if (it != children_.end()) {
             LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
                 "%{public}d",
                 (*it)->GetId(), child->GetTag().c_str(), child->GetId());
+            ACE_BUILD_TRACE_END();
             return;
         }
     }
@@ -241,23 +248,28 @@ void UINode::AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& si
     auto siblingNodeIter = std::find(children_.begin(), children_.end(), siblingNode);
     if (siblingNodeIter != children_.end()) {
         DoAddChild(++siblingNodeIter, child, false);
+        ACE_BUILD_TRACE_END();
         return;
     }
     auto it = children_.begin();
     std::advance(it, -1);
     DoAddChild(it, child, false);
+    ACE_BUILD_TRACE_END();
 }
 
 void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode)
 {
     CHECK_NULL_VOID(child);
     CHECK_NULL_VOID(siblingNode);
+    ACE_BUILD_TRACE_BEGIN("AddChildBefore [child:%d][sibling:%d][self:%d]",
+        child->GetId(), siblingNode->GetId(), GetId());
     if (child->GetAncestor() == this) {
         auto it = std::find(children_.begin(), children_.end(), child);
         if (it != children_.end()) {
             LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
                 "%{public}d",
                 (*it)->GetId(), child->GetTag().c_str(), child->GetId());
+            ACE_BUILD_TRACE_END();
             return;
         }
     }
@@ -266,11 +278,13 @@ void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& s
     auto siblingNodeIter = std::find(children_.begin(), children_.end(), siblingNode);
     if (siblingNodeIter != children_.end()) {
         DoAddChild(siblingNodeIter, child, false);
+        ACE_BUILD_TRACE_END();
         return;
     }
     auto it = children_.begin();
     std::advance(it, -1);
     DoAddChild(it, child, false);
+    ACE_BUILD_TRACE_END();
 }
 
 void UINode::TraversingCheck(RefPtr<UINode> node, bool withAbort)
