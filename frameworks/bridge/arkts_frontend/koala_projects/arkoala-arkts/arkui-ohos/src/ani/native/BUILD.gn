@@ -28,6 +28,7 @@ ohos_shared_library("arkoala_native_ani") {
     "custom_node/",
     "web/",
     "content_slot/",
+    "water_flow/",
     "drag_and_drop/",
     "componentSnapshot/",
   ]
@@ -41,6 +42,7 @@ ohos_shared_library("arkoala_native_ani") {
     "web/web_module_methods.cpp",
     "utils/convert_utils.cpp",
     "content_slot/content_slot_module.cpp",
+    "water_flow/waterFlowSection_module.cpp",
     "drag_and_drop/native_drag_drop_global.cpp",
     "componentSnapshot/componentSnapshot_module.cpp",
   ]
