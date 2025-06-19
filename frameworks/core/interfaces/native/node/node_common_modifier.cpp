@@ -9787,6 +9787,9 @@ void TriggerOnHoverEvent(void* extraParam, int32_t nodeId, bool isHover, HoverIn
     event.hoverEvent.rollAngle = info.GetRollAngle().value_or(0.0f);
     // stoppropagation
     event.hoverEvent.stopPropagation = false;
+    // globalDisplayX globalDisplayY
+    event.hoverEvent.globalDisplayX = info.GetGlobalDisplayLocation().GetX();
+    event.hoverEvent.globalDisplayY = info.GetGlobalDisplayLocation().GetY();
     SendArkUISyncEvent(&event);
     info.SetStopPropagation(event.hoverEvent.stopPropagation);
 }

@@ -1526,6 +1526,8 @@ struct ArkUIHoverEvent {
      *
      */
     bool stopPropagation;
+    ArkUI_Float64 globalDisplayX;
+    ArkUI_Float64 globalDisplayY;
 };
 
 struct ArkUINodeEvent {
