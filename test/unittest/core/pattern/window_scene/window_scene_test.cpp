@@ -491,4 +491,116 @@ HWTEST_F(WindowSceneTest, SetSubSessionVisible, TestSize.Level1)
     windowScene->SetSubSessionVisible();
     ASSERT_EQ(subSession->surfaceNode_->GetStagingProperties().GetVisible(), true);
 }
+
+/**
+ * @tc.name: CreateSnapshotWindow
+ * @tc.desc: CreateSnapshotWindow Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, CreateSnapshotWindow, TestSize.Level1)
+{
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = "ABILITY_NAME",
+        .bundleName_ = "BUNDLE_NAME",
+        .moduleName_ = "MODULE_NAME",
+    };
+    auto session = ssm_->RequestSceneSession(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    session->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("bundleName", 1);
+    auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+    windowScene->isBlankForSnapshot_ = true;
+    windowScene->CreateSnapshotWindow();
+    auto key = Rosen::defaultStatus;
+    session->scenePersistence_->SetHasSnapshot(true, key);
+    windowScene->CreateSnapshotWindow();
+    EXPECT_EQ(windowScene->isBlankForSnapshot_, false);
+}
+
+/**
+ * @tc.name: OnAttachToFrameNode
+ * @tc.desc: OnAttachToFrameNode Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, OnAttachToFrameNode, TestSize.Level1)
+{
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = "ABILITY_NAME",
+        .bundleName_ = "BUNDLE_NAME",
+        .moduleName_ = "MODULE_NAME",
+    };
+    auto session = ssm_->RequestSceneSession(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    session->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("bundleName", 1);
+    auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+
+    session->state_ == Rosen::SessionState::STATE_DISCONNECT;
+    session->SetShowRecent(true);
+    auto key = Rosen::defaultStatus;
+    session->scenePersistence_->isSavingSnapshot_[key.first][key.second] = true;
+    windowScene->OnAttachToFrameNode();
+    EXPECT_EQ(windowScene->GetShowRecent(), true);
+}
+
+/**
+ * @tc.name: TransformOrientationForMatchSnapshot
+ * @tc.desc: TransformOrientationForMatchSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, TransformOrientationForMatchSnapshot, TestSize.Level1)
+{
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = "ABILITY_NAME",
+        .bundleName_ = "BUNDLE_NAME",
+        .moduleName_ = "MODULE_NAME",
+    };
+    auto session = ssm_->RequestSceneSession(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    session->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("bundleName", 1);
+    auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
+    ASSERT_NE(windowScene, nullptr);
+
+    uint32_t lastRotation = 2;
+    uint32_t windowRotation = 0;
+    auto ret = TransformOrientationForMatchSnapshot(lastRotation, windowRotation);
+    EXPECT_EQ(ret, ImageRotateOrientation::UP);
+}
+
+/**
+ * @tc.name: TransformOrientationForDisMatchSnapshot
+ * @tc.desc: TransformOrientationForDisMatchSnapshot Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, TransformOrientationForDisMatchSnapshot, TestSize.Level1)
+{
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = "ABILITY_NAME",
+        .bundleName_ = "BUNDLE_NAME",
+        .moduleName_ = "MODULE_NAME",
+    };
+    auto session = ssm_->RequestSceneSession(sessionInfo);
+    ASSERT_NE(session, nullptr);
+    session->scenePersistence_ = sptr<ScenePersistence>::MakeSptr("bundleName", 1);
+    auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
+    ASSERT_NE(windowScene, nullptr);
+
+    uint32_t lastRotation = 3;
+    uint32_t windowRotation = 0;
+    uint32_t snapshotRotation = 0;
+    auto ret = TransformOrientationForDisMatchSnapshot(lastRotation, windowRotation, snapshotRotation);
+    EXPECT_EQ(ret, ImageRotateOrientation::UP);
+    
+    uint32_t lastRotation = 2;
+    auto ret = TransformOrientationForDisMatchSnapshot(lastRotation, windowRotation, snapshotRotation);
+    EXPECT_EQ(ret, ImageRotateOrientation::DOWN);
+}
 } // namespace OHOS::Ace::NG

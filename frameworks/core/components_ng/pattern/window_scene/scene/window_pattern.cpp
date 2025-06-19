@@ -59,6 +59,9 @@ constexpr uint32_t COLOR_TRANSLUCENT_WHITE = 0x66ffffff;
 constexpr uint32_t COLOR_TRANSLUCENT_BLACK = 0x66000000;
 constexpr Dimension SNAPSHOT_RADIUS = 16.0_vp;
 constexpr uint32_t SNAPSHOT_LOAD_COMPLETE = 1;
+constexpr uint32_t ROTATION_COUNT = 4;
+constexpr uint32_t ROTATION_COUNT_SNAPSHOT = 2;
+constexpr uint32_t VALUE_OFFSET = 1;
 } // namespace
 
 class LifecycleListener : public Rosen::ILifecycleListener {
@@ -193,14 +196,15 @@ void WindowPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto state = session_->GetSessionState();
+    auto key = session_->GetWindowStatus();
     TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode id: %{public}d, node id: %{public}d, "
         "name: %{public}s, state: %{public}u, in recents: %{public}d", session_->GetPersistentId(), host->GetId(),
         session_->GetSessionInfo().bundleName_.c_str(), state, session_->GetShowRecent());
     if (state == Rosen::SessionState::STATE_DISCONNECT) {
         CHECK_EQUAL_VOID(HasStartingPage(), false);
         if (session_->GetShowRecent() && session_->GetScenePersistence() &&
-            (session_->GetScenePersistence()->IsSnapshotExisted() ||
-            session_->GetScenePersistence()->IsSavingSnapshot())) {
+            (session_->GetScenePersistence()->IsSnapshotExisted(key) ||
+            session_->GetScenePersistence()->IsSavingSnapshot(key))) {
             CreateSnapshotWindow();
             AddChild(host, snapshotWindow_, snapshotWindowName_);
             return;
@@ -589,11 +593,13 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     auto imagePaintProperty = snapshotWindow_->GetPaintProperty<ImageRenderProperty>();
     imagePaintProperty->UpdateImageInterpolation(ImageInterpolation::LOW);
     snapshotWindow_->SetHitTestMode(HitTestMode::HTMNONE);
+    auto pattern = snapshotWindow_->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(pattern);
 
     if (snapshot) {
         auto pixelMap = PixelMap::CreatePixelMap(&snapshot.value());
         imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
-        snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);
+        pattern->SetSyncLoad(true);
     } else {
         if ((DeviceConfig::realDeviceType == DeviceType::PHONE) && session_->GetShowRecent()) {
             auto context = GetContext();
@@ -606,10 +612,21 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         ImageSourceInfo sourceInfo;
         auto scenePersistence = session_->GetScenePersistence();
         CHECK_NULL_VOID(scenePersistence);
-        auto isSaveingSnapshot = scenePersistence->IsSavingSnapshot();
+        auto key = session_->GetWindowStatus();
+        auto isSavingSnapshot = scenePersistence->IsSavingSnapshot(key);
+        auto hasSnapshot = scenePersistence->HasSnapshot(key);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-            "id: %{public}d isSaveingSnapshot: %{public}d", persistentId, isSaveingSnapshot);
-        if (isSaveingSnapshot) {
+            "id: %{public}d isSavingSnapshot: %{public}d, hasSnapshot: %{public}d",
+            persistentId, isSavingSnapshot, hasSnapshot);
+        auto matchSnapshot = isSavingSnapshot || hasSnapshot;
+        ImageRotateOrientation rotate;
+        auto lastRotation = session_->GetLastOrientation();
+        auto windowRotation = static_cast<uint32_t>(session_->GetWindowOrientation());
+        if (matchSnapshot) {
+            auto orientation = TransformOrientationForMatchSnapshot(lastRotation, windowRotation);
+            pattern->SetOrientation(orientation);
+        }
+        if (isSavingSnapshot) {
             auto snapshotPixelMap = session_->GetSnapshotPixelMap();
             CHECK_NULL_VOID(snapshotPixelMap);
             auto pixelMap = PixelMap::CreatePixelMap(&snapshotPixelMap);
@@ -617,7 +634,14 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);
             Rosen::SceneSessionManager::GetInstance().VisitSnapshotFromCache(persistentId);
         } else {
-            sourceInfo = ImageSourceInfo("file://" + scenePersistence->GetSnapshotFilePath());
+            sourceInfo = ImageSourceInfo("file://" + scenePersistence->GetSnapshotFilePath(key));
+            auto snapshotRotation =
+                static_cast<uint32_t>(scenePersistence->rotate_[key.first][key.second]);
+            if (!matchSnapshot) {
+                auto orientation = TransformOrientationForDisMatchSnapshot(lastRotation,
+                    windowRotation, snapshotRotation);
+                pattern->SetOrientation(orientation);
+            }
         }
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
         ClearImageCache(sourceInfo);
@@ -660,7 +684,7 @@ void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo)
     CHECK_NULL_VOID(frameNode);
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto imageCache = pipelineContext->GetImageCache();
+    auto imageCache = pipelineContext->GetImageCache(session_->GetWindowStatus());
     CHECK_NULL_VOID(imageCache);
     imageCache->ClearCacheImgObj(sourceInfo.GetKey());
     if (!Rosen::ScenePersistence::IsAstcEnabled()) {
@@ -747,5 +771,31 @@ void WindowPattern::RemoveChild(const RefPtr<FrameNode>& host, const RefPtr<Fram
     ACE_SCOPED_TRACE("WindowScene::RemoveChild[%s][self:%d]", nodeType.c_str(), host->GetId());
     host->RemoveChild(child, allowTransition);
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "RemoveChild %{public}s, %{public}d", nodeType.c_str(), host->GetId());
+}
+
+ImageRotateOrientation WindowPattern::TransformOrientationForMatchSnapshot(uint32_t lastRotation,
+    uint32_t windowRotation)
+{
+    auto orientation = static_cast<ImageRotateOrientation>((lastRotation - windowRotation + ROTATION_COUNT) %
+        ROTATION_COUNT + VALUE_OFFSET);
+    if (orientation == ImageRotateOrientation::DOWN) {
+        orientation = ImageRotateOrientation::UP;
+    }
+    return orientation;
+}
+
+ImageRotateOrientation WindowPattern::TransformOrientationDisForMatchSnapshot(uint32_t lastRotation,
+    uint32_t windowRotation, uint32_t snapshotRotation)
+{
+    ImageRotateOrientation orientation = ImageRotateOrientation::UP;
+    if (lastRotation != snapshotRotation && ((lastRotation - snapshotRotation + ROTATION_COUNT) %
+        ROTATION_COUNT_SNAPSHOT != 0)) {
+        orientation = static_cast<ImageRotateOrientation>((windowRotation - snapshotRotation +
+            ROTATION_COUNT) % ROTATION_COUNT + VALUE_OFFSET);
+    } else if (lastRotation != snapshotRotation && ((lastRotation - snapshotRotation + ROTATION_COUNT) %
+        ROTATION_COUNT_SNAPSHOT == 0)) {
+        orientation = ImageRotateOrientation::DOWN;
+    }
+    return orientation
 }
 } // namespace OHOS::Ace::NG
