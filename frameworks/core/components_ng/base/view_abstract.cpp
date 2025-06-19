@@ -4723,6 +4723,7 @@ void ViewAbstract::SetClipShape(const RefPtr<BasicShape>& basicShape)
             auto frameNode = weak.Upgrade();
             CHECK_NULL_VOID(frameNode);
             RefPtr<BasicShape>& basicShapeValue = const_cast<RefPtr<BasicShape>&>(basicShape);
+            CHECK_NULL_VOID(basicShapeValue);
             basicShapeValue->ReloadResources();
             CHECK_NULL_VOID(frameNode);
             auto target = frameNode->GetRenderContext();
@@ -4757,6 +4758,7 @@ void ViewAbstract::SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& 
             auto frameNode = weak.Upgrade();
             CHECK_NULL_VOID(frameNode);
             RefPtr<BasicShape>& basicShapeValue = const_cast<RefPtr<BasicShape>&>(basicShape);
+            CHECK_NULL_VOID(basicShapeValue);
             basicShapeValue->ReloadResources();
             CHECK_NULL_VOID(frameNode);
             auto target = frameNode->GetRenderContext();
@@ -4838,6 +4840,7 @@ void ViewAbstract::SetMask(const RefPtr<BasicShape>& basicShape)
             auto frameNode = weak.Upgrade();
             CHECK_NULL_VOID(frameNode);
             RefPtr<BasicShape>& basicShapeValue = const_cast<RefPtr<BasicShape>&>(basicShape);
+            CHECK_NULL_VOID(basicShapeValue);
             basicShapeValue->ReloadResources();
             auto target = frameNode->GetRenderContext();
             CHECK_NULL_VOID(target);
@@ -4875,6 +4878,7 @@ void ViewAbstract::SetProgressMask(const RefPtr<ProgressMaskProperty>& progress)
             auto frameNode = weak.Upgrade();
             CHECK_NULL_VOID(frameNode);
             RefPtr<ProgressMaskProperty>& progressValue = const_cast<RefPtr<ProgressMaskProperty>&>(progress);
+            CHECK_NULL_VOID(progressValue);
             progressValue->ReloadResources();
             auto target = frameNode->GetRenderContext();
             CHECK_NULL_VOID(target);
@@ -5322,6 +5326,7 @@ void ViewAbstract::SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basic
             auto frameNode = weak.Upgrade();
             CHECK_NULL_VOID(frameNode);
             RefPtr<BasicShape>& basicShapeValue = const_cast<RefPtr<BasicShape>&>(basicShape);
+            CHECK_NULL_VOID(basicShapeValue);
             basicShapeValue->ReloadResources();
             auto target = frameNode->GetRenderContext();
             CHECK_NULL_VOID(target);
@@ -5355,6 +5360,7 @@ void ViewAbstract::SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMa
             auto frameNode = weak.Upgrade();
             CHECK_NULL_VOID(frameNode);
             RefPtr<ProgressMaskProperty>& progressValue = const_cast<RefPtr<ProgressMaskProperty>&>(progress);
+            CHECK_NULL_VOID(progressValue);
             progressValue->ReloadResources();
             auto target = frameNode->GetRenderContext();
             CHECK_NULL_VOID(target);
