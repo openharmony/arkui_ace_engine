@@ -20,6 +20,7 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/event/ace_events.h"
 #include "core/gestures/gesture_info.h"
+#include "core/pipeline/base/constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -251,7 +252,7 @@ const std::vector<PanTestCase> TEST_CASES = {
 namespace {
 float DegreesToRadians(float degrees)
 {
-    return static_cast<float>(degrees * M_PI / HALF_CIRCLE);
+    return static_cast<float>(degrees * ACE_PI / HALF_CIRCLE);
 }
 
 void CalculateEndPoint(const PointF& startPoint, float distance, float angle, PointF& endPoint)

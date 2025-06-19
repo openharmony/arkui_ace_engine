@@ -20,6 +20,7 @@
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/components_ng/manager/event/json_report.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -49,7 +50,7 @@ double ComputeAngle(double x, double y)
         }
         return verticalAngle;
     }
-    return atan2(y, x) * STRAIGHT_ANGLE / M_PI;
+    return atan2(y, x) * STRAIGHT_ANGLE / ACE_PI;
 }
 } // namespace
 

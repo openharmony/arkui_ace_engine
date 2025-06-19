@@ -18,10 +18,6 @@
 
 #include <memory>
 
-#ifdef _USE_MATH_DEFINES
-#undef _USE_MATH_DEFINES
-#endif
-
 #if defined(MODIFIER_NG)
 #include "render_service_client/core/modifier_ng/custom/rs_content_style_modifier.h"
 #else

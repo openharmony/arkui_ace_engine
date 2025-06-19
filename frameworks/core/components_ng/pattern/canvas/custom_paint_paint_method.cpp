@@ -34,6 +34,7 @@
 #include "core/image/image_provider.h"
 #include "core/image/image_cache.h"
 #endif
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -229,7 +230,7 @@ std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(
         uint32_t colorsSize = gradientColors.size();
         std::vector<RSColor4f> colors(colorsSize, { 0, 0, 0, 0 });
         std::vector<RSScalar> pos(colorsSize, 0);
-        double angle = gradient.GetConicGradient().startAngle->Value() / M_PI * 180.0;
+        double angle = gradient.GetConicGradient().startAngle->Value() / ACE_PI * 180.0;
         RSScalar startAngle = static_cast<RSScalar>(angle);
         matrix.PreRotate(startAngle, centerX, centerY);
         for (uint32_t i = 0; i < colorsSize; ++i) {
@@ -891,8 +892,8 @@ void CustomPaintPaintMethod::Arc(const ArcParam& param)
     double top = param.y - param.radius;
     double right = param.x + param.radius;
     double bottom = param.y + param.radius;
-    double startAngle = param.startAngle * HALF_CIRCLE_ANGLE / M_PI;
-    double endAngle = param.endAngle * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = param.startAngle * HALF_CIRCLE_ANGLE / ACE_PI;
+    double endAngle = param.endAngle * HALF_CIRCLE_ANGLE / ACE_PI;
     double sweepAngle = endAngle - startAngle;
     if (param.anticlockwise) {
         sweepAngle =
@@ -957,12 +958,12 @@ void CustomPaintPaintMethod::AddRoundRect(const Rect& rect, const std::vector<do
 void CustomPaintPaintMethod::Ellipse(const EllipseParam& param)
 {
     // Init the start and end angle, then calculated the sweepAngle.
-    double startAngle = param.startAngle * HALF_CIRCLE_ANGLE / M_PI;
-    double endAngle = param.endAngle * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = param.startAngle * HALF_CIRCLE_ANGLE / ACE_PI;
+    double endAngle = param.endAngle * HALF_CIRCLE_ANGLE / ACE_PI;
     if (NearEqual(param.startAngle, param.endAngle)) {
         return; // Just return when startAngle is same as endAngle.
     }
-    double rotation = param.rotation * HALF_CIRCLE_ANGLE / M_PI;
+    double rotation = param.rotation * HALF_CIRCLE_ANGLE / ACE_PI;
     double sweepAngle = endAngle - startAngle;
     if (param.anticlockwise) {
         sweepAngle =
@@ -1105,8 +1106,8 @@ void CustomPaintPaintMethod::Path2DArc(const PathArgs& args)
 {
     RSPoint point1(args.para1 - args.para3, args.para2 - args.para3);
     RSPoint point2(args.para1 + args.para3, args.para2 + args.para3);
-    double startAngle = args.para4 * HALF_CIRCLE_ANGLE / M_PI;
-    double endAngle = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
+    double startAngle = args.para4 * HALF_CIRCLE_ANGLE / ACE_PI;
+    double endAngle = args.para5 * HALF_CIRCLE_ANGLE / ACE_PI;
     double sweepAngle = endAngle - startAngle;
     if (!NearZero(args.para6)) {
         sweepAngle =
@@ -1149,9 +1150,9 @@ void CustomPaintPaintMethod::Path2DEllipse(const PathArgs& args)
         return; // Just return when startAngle is same as endAngle.
     }
 
-    double rotation = args.para5 * HALF_CIRCLE_ANGLE / M_PI;
-    double startAngle = args.para6 * HALF_CIRCLE_ANGLE / M_PI;
-    double endAngle = args.para7 * HALF_CIRCLE_ANGLE / M_PI;
+    double rotation = args.para5 * HALF_CIRCLE_ANGLE / ACE_PI;
+    double startAngle = args.para6 * HALF_CIRCLE_ANGLE / ACE_PI;
+    double endAngle = args.para7 * HALF_CIRCLE_ANGLE / ACE_PI;
     bool anticlockwise = NearZero(args.para8) ? false : true;
     double sweepAngle = endAngle - startAngle;
     if (anticlockwise) {
@@ -1249,7 +1250,7 @@ void CustomPaintPaintMethod::Scale(double x, double y)
 void CustomPaintPaintMethod::Rotate(double angle)
 {
     CHECK_NULL_VOID(rsCanvas_);
-    rsCanvas_->Rotate(angle * 180 / M_PI);
+    rsCanvas_->Rotate(angle * 180 / ACE_PI);
 }
 
 void CustomPaintPaintMethod::ResetTransform()
@@ -1659,11 +1660,11 @@ void CustomPaintPaintMethod::SetHueRotateFilter(const std::string& filterParam)
     if (index != std::string::npos) {
         percent.resize(index);
         rad = StringUtils::StringToFloat(percent);
-        rad = rad / HALF_CIRCLE_ANGLE * M_PI;
+        rad = rad / HALF_CIRCLE_ANGLE * ACE_PI;
     } else if ((index = percent.find("turn")) != std::string::npos) {
         percent.resize(index);
         rad = StringUtils::StringToFloat(percent);
-        rad = rad * 2 * M_PI;
+        rad = rad * 2 * ACE_PI;
     } else if ((index = percent.find("rad")) != std::string::npos) {
         percent.resize(index);
         rad = StringUtils::StringToFloat(percent);
@@ -1990,7 +1991,7 @@ void CustomPaintPaintMethod::ResetLineDash()
 void CustomPaintPaintMethod::RotateMatrix(double angle)
 {
     RSMatrix matrix;
-    matrix.Rotate(angle * HALF_CIRCLE_ANGLE / M_PI, 0, 0);
+    matrix.Rotate(angle * HALF_CIRCLE_ANGLE / ACE_PI, 0, 0);
     matrix_.PreConcat(matrix);
 }
 

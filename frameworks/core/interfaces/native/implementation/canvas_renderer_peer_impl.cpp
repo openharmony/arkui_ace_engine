@@ -19,6 +19,7 @@
 #include "canvas_pattern_peer.h"
 #include "image_bitmap_peer_impl.h"
 #include "pixel_map_peer.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -326,7 +327,7 @@ std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateConicGradient
         auto gradient = std::make_shared<OHOS::Ace::Gradient>();
         gradient->SetType(Ace::GradientType::CONIC);
         gradient->GetConicGradient().startAngle =
-            Ace::AnimatableDimension(Ace::Dimension(fmod(startAngle, (MULTI_BY_2 * M_PI))));
+            Ace::AnimatableDimension(Ace::Dimension(fmod(startAngle, (MULTI_BY_2 * ACE_PI))));
         gradient->GetConicGradient().centerX = Ace::AnimatableDimension(Ace::Dimension(x * density));
         gradient->GetConicGradient().centerY = Ace::AnimatableDimension(Ace::Dimension(y * density));
         return gradient;

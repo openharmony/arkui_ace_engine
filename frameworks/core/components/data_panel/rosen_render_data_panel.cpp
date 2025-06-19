@@ -27,6 +27,7 @@
 #endif
 
 #include "core/pipeline/base/rosen_render_context.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -748,8 +749,8 @@ void RosenRenderProgressDataPanel::PaintEffectedLoadingProgress(RenderContext& c
     canvas->save();
     canvas->rotate(animateAngle, center.GetX(), center.GetY()); // animate
     for (int i = 0; i < CIRCLE_NUMBER; i++) {
-        dx = radius * std::sin((CIRCLE_NUMBER - i) * (angle / CIRCLE_NUMBER) * M_PI / 180.0);
-        dy = radius * std::cos((CIRCLE_NUMBER - i) * (angle / CIRCLE_NUMBER) * M_PI / 180.0);
+        dx = radius * std::sin((CIRCLE_NUMBER - i) * (angle / CIRCLE_NUMBER) * ACE_PI / 180.0);
+        dy = radius * std::cos((CIRCLE_NUMBER - i) * (angle / CIRCLE_NUMBER) * ACE_PI / 180.0);
         circlePaint.setColor(
             Color::LineColorTransition(GetStartColor(), GetEndColor(), static_cast<double>(i) / CIRCLE_NUMBER)
                 .GetValue());
@@ -760,8 +761,8 @@ void RosenRenderProgressDataPanel::PaintEffectedLoadingProgress(RenderContext& c
     canvas->Save();
     canvas->Rotate(animateAngle, center.GetX(), center.GetY()); // animate
     for (int i = 0; i < CIRCLE_NUMBER; i++) {
-        dx = radius * std::sin((CIRCLE_NUMBER - i) * (angle / CIRCLE_NUMBER) * M_PI / 180.0);
-        dy = radius * std::cos((CIRCLE_NUMBER - i) * (angle / CIRCLE_NUMBER) * M_PI / 180.0);
+        dx = radius * std::sin((CIRCLE_NUMBER - i) * (angle / CIRCLE_NUMBER) * ACE_PI / 180.0);
+        dy = radius * std::cos((CIRCLE_NUMBER - i) * (angle / CIRCLE_NUMBER) * ACE_PI / 180.0);
         circleBrush.SetColor(
             Color::LineColorTransition(GetStartColor(), GetEndColor(), static_cast<double>(i) / CIRCLE_NUMBER)
                 .GetValue());
@@ -808,7 +809,7 @@ void RosenRenderProgressDataPanel::PaintLoadingProgress(RenderContext& context, 
     botPaint.setAntiAlias(true);
 
     botPaint.setShader(SkGradientShader::MakeSweep(center.GetX(), center.GetY(), colors, pos, 2, SkTileMode::kDecal,
-        0.0, sweepDegree_ + 2 * PRECISION_CORRECTION + 180.0 / M_PI * std::asin(thickness / ((diameter) / 2)), 0,
+        0.0, sweepDegree_ + 2 * PRECISION_CORRECTION + 180.0 / ACE_PI * std::asin(thickness / ((diameter) / 2)), 0,
         nullptr));
     canvas->save();
     PaintTrackBackground(canvas, center, thickness, backgroundTrack_, diameter);
@@ -832,7 +833,7 @@ void RosenRenderProgressDataPanel::PaintLoadingProgress(RenderContext& context, 
 
     botPen.SetShaderEffect(
         RSShaderEffect::CreateSweepGradient(RSPoint(center.GetX(), center.GetY()), colors, pos, RSTileMode::DECAL, 0.0,
-            sweepDegree_ + 2 * PRECISION_CORRECTION + 180.0 / M_PI * std::asin(thickness / ((diameter) / 2)), nullptr));
+            sweepDegree_ + 2 * PRECISION_CORRECTION + 180.0 / ACE_PI * std::asin(thickness / ((diameter) / 2)), nullptr));
     canvas->Save();
     PaintTrackBackground(canvas, center, thickness, backgroundTrack_, diameter);
     canvas->Rotate(animateAngle, center.GetX(), center.GetY()); // animate

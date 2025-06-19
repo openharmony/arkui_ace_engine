@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1179,7 +1180,7 @@ HWTEST_F(SwiperIndicatorTestNg, CalculateAngleOffset004, TestSize.Level1)
     float centerY = 2.0f;
     float radius = 45.0f;
     double angle = 300.0f;
-    auto radians = std::abs(FULL_CIRCLE_ANGLE - angle) * M_PI / HALF_CIRCLE_ANGLE;
+    auto radians = std::abs(FULL_CIRCLE_ANGLE - angle) * ACE_PI / HALF_CIRCLE_ANGLE;
     float resultX = centerX + cos(radians) * radius;
     float resultY = centerY - sin(radians) * radius;
     OffsetF Offset = { resultX, resultY };

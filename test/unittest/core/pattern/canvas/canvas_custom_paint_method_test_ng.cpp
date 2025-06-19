@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_paint_method.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
+#include "core/pipeline/base/constants.h"
 #undef private
 #undef protected
 
@@ -961,7 +962,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest023, TestSize
     arcParam.endAngle = 1.0;
     EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
     paintMethod->Arc(arcParam);
-    arcParam.endAngle = M_PI * MAX_WIDTH;
+    arcParam.endAngle = ACE_PI * MAX_WIDTH;
     EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
     paintMethod->Arc(arcParam);
     arcParam.endAngle = END_ANGLE;
@@ -998,7 +999,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest024, TestSize
     EXPECT_CALL(matrix, Rotate(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(path, Transform(_)).WillRepeatedly(Return());
     paintMethod->Ellipse(param);
-    param.endAngle = M_PI * MAX_WIDTH;
+    param.endAngle = ACE_PI * MAX_WIDTH;
     EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
     paintMethod->Ellipse(param);
     param.endAngle = END_ANGLE;
@@ -1084,7 +1085,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest026, TestSize
     args.para5 = 1.0;
     EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
     paintMethod->Path2DArc(args);
-    args.para5 = M_PI * MAX_WIDTH;
+    args.para5 = ACE_PI * MAX_WIDTH;
     EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
     paintMethod->Path2DArc(args);
     args.para5 = END_ANGLE;
@@ -1120,7 +1121,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest027, TestSize
     EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
     paintMethod->Path2DEllipse(args);
     args.para8 = 1.0;
-    args.para7 = M_PI * MAX_WIDTH;
+    args.para7 = ACE_PI * MAX_WIDTH;
     EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
     paintMethod->Path2DEllipse(args);
     args.para8 = 0.0;
@@ -1325,7 +1326,7 @@ HWTEST_F(CanvasCustomPaintMethodTestNg, CanvasCustomPaintMethodTest032, TestSize
     EXPECT_CALL(matrix, Rotate(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(path, Transform(_)).WillRepeatedly(Return());
     paintMethod->Ellipse(param);
-    param.endAngle = M_PI * MAX_WIDTH;
+    param.endAngle = ACE_PI * MAX_WIDTH;
     EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
 }
 

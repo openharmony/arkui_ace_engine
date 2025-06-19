@@ -16,6 +16,7 @@
 #include "core/components/data_panel/render_data_panel.h"
 
 #include "core/animation/spring_animation.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -152,7 +153,7 @@ void RenderProgressDataPanel::Update(const RefPtr<Component>& component)
             if (!renderDataPanel) {
                 return;
             }
-            renderDataPanel->rotateAngle_ = 360 * (1 - std::cos(M_PI * value / 2.0) + value / 2.0) / 3;
+            renderDataPanel->rotateAngle_ = 360 * (1 - std::cos(ACE_PI * value / 2.0) + value / 2.0) / 3;
             if (value > 1.0) {
                 renderDataPanel->sweepDegree_ = 90.0 * (2 - value);
             } else {
