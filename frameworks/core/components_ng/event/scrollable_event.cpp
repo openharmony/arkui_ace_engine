@@ -15,10 +15,12 @@
 
 #include "core/components_ng/event/scrollable_event.h"
 
+#include "core/components_ng/event/target_component.h"
+#include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -168,14 +170,46 @@ void ScrollableActuator::InitClickRecognizer(const OffsetF& coordinateOffset,
     });
 }
 
+namespace {
+RefPtr<NGGestureRecognizer> GetExtraRecognizer(const RefPtr<FrameNode>& frameNode)
+{
+    auto scrollComponent = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(scrollComponent, nullptr);
+    return scrollComponent->GetExtraRecognizer();
+}
+} // namespace
+
 void ScrollableEvent::CollectScrollableTouchTarget(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
     const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
-    {
-        if (scrollable_) {
-            scrollable_->SetGetEventTargetImpl(getEventTargetImpl);
-            scrollable_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-            scrollable_->OnCollectTouchTarget(result, frameNode, targetComponent, responseLinkResult);
+{
+    if (scrollable_) {
+        scrollable_->SetGetEventTargetImpl(getEventTargetImpl);
+        scrollable_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+        scrollable_->OnCollectTouchTarget(result, frameNode, targetComponent, responseLinkResult);
+    }
+
+    if (auto extra = GetExtraRecognizer(frameNode)) {
+        std::vector<RefPtr<NGGestureRecognizer>> recognizers { extra };
+        if (!responseLinkResult.empty()) {
+            recognizers.emplace_back(responseLinkResult.back());
+        }
+        auto parallel = MakeRefPtr<ParallelRecognizer>(recognizers);
+        result.emplace_back(extra);
+        responseLinkResult.emplace_back(extra);
+        result.emplace_back(parallel);
+        responseLinkResult.emplace_back(parallel);
+        auto it = responseLinkResult.end();
+        std::advance(it, -2);
+        while (it != responseLinkResult.end()) {
+            auto& recognizer = *it;
+            recognizer->SetNodeId(frameNode->GetId());
+            recognizer->AttachFrameNode(frameNode);
+            recognizer->SetTargetComponent(targetComponent);
+            recognizer->SetIsSystemGesture(true);
+            recognizer->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+            ++it;
         }
     }
+}
 } // namespace OHOS::Ace::NG

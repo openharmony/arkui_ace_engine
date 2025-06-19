@@ -3560,7 +3560,7 @@ PositionMode ScrollablePattern::GetPositionMode()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, PositionMode::RIGHT);
     auto positionMode = PositionMode::RIGHT;
-    if (axis_ == Axis::HORIZONTAL) {
+    if (axis_ == Axis::HORIZONTAL || axis_ == Axis::FREE) {
         positionMode = PositionMode::BOTTOM;
     } else {
         auto isRtl = host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
