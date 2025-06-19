@@ -225,7 +225,7 @@ void SetWaterFlowFriction(ArkUINodeHandle node, ArkUI_Float32 friction, void* fr
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetFriction(frameNode, friction);
 
-    if (SystemProperties::ConfigChangePerform() && frictionRawPtr) {
+    if (SystemProperties::ConfigChangePerform()) {
         auto* friction = reinterpret_cast<ResourceObject*>(frictionRawPtr);
         auto frictionResObj = AceType::Claim(friction);
         WaterFlowModelNG::ParseResObjFriction(frameNode, frictionResObj);

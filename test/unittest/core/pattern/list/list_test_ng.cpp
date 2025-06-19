@@ -33,6 +33,8 @@ namespace OHOS::Ace::NG {
 void ListTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
     MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockAnimationManager::Enable(true);
@@ -65,12 +67,20 @@ void ListTestNg::SetUpTestSuite()
 void ListTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
 }
 
-void ListTestNg::SetUp() {}
+void ListTestNg::SetUp()
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
+}
 
 void ListTestNg::TearDown()
 {
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
     RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;

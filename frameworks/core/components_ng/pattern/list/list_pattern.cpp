@@ -3848,12 +3848,12 @@ void ListPattern::UpdateDefaultColor()
     CHECK_NULL_VOID(theme);
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
-    if (!listLayoutProperty->HasDividerColorSetByUser() ||
-        (listLayoutProperty->HasDividerColorSetByUser() && !listLayoutProperty->GetDividerColorSetByUserValue())) {
-        V2::ItemDivider value;
-        ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ListLayoutProperty, Divider, value, host, value);
-        value.color = theme->GetDividerColor();
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, value, host);
+    if (listLayoutProperty->GetDivider()->color != Color::TRANSPARENT &&
+        (!listLayoutProperty->HasDividerColorSetByUser() ||
+            !listLayoutProperty->GetDividerColorSetByUserValue(false))) {
+        V2::ItemDivider divider = listLayoutProperty->GetDivider().value_or(V2::ItemDivider());
+        divider.color = theme->GetDividerColor();
+        listLayoutProperty->UpdateDivider(divider);
     }
 }
 

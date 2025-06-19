@@ -235,12 +235,15 @@ void JSIndexer::SetPopupBackground(const JSCallbackInfo& args)
     std::optional<Color> colorOpt;
     Color popupBackground;
     RefPtr<ResourceObject> resObj;
+    bool setByUser = false;
     if (ParseJsColor(args[0], popupBackground, resObj)) {
         colorOpt = popupBackground;
+        setByUser = true;
     }
     IndexerModel::GetInstance()->SetPopupBackground(colorOpt);
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_BACKGROUND, resObj);
+        IndexerModel::GetInstance()->SetPopupBackgroundColorByUser(setByUser);
     }
 }
 
@@ -490,12 +493,15 @@ void JSIndexer::SetPopupSelectedColor(const JSCallbackInfo& args)
     std::optional<Color> colorOpt;
     Color popupSelectedColor;
     RefPtr<ResourceObject> resObj;
+    bool setByUser = false;
     if (ParseJsColor(args[0], popupSelectedColor, resObj)) {
         colorOpt = popupSelectedColor;
+        setByUser = true;
     }
     IndexerModel::GetInstance()->SetPopupSelectedColor(colorOpt);
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_SELECTED_COLOR, resObj);
+        IndexerModel::GetInstance()->SetPopupSelectedColorByUser(setByUser);
     }
 }
 
@@ -559,12 +565,15 @@ void JSIndexer::SetPopupItemBackgroundColor(const JSCallbackInfo& args)
     std::optional<Color> colorOpt;
     Color popupItemBackgroundColor;
     RefPtr<ResourceObject> resObj;
+    bool setByUser = false;
     if (ParseJsColor(args[0], popupItemBackgroundColor, resObj)) {
         colorOpt = popupItemBackgroundColor;
+        setByUser = true;
     }
     IndexerModel::GetInstance()->SetPopupItemBackground(colorOpt);
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_ITEM_BACKGROUND_COLOR, resObj);
+        IndexerModel::GetInstance()->SetPopupItemBackgroundColorByUser(setByUser);
     }
 }
 

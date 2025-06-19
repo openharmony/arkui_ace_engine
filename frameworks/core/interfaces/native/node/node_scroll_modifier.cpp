@@ -599,7 +599,6 @@ void CreateWithResourceObjFriction(ArkUINodeHandle node, void* resObj)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(resObj);
     auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
     ScrollModelNG::CreateWithResourceObjFriction(frameNode, AceType::Claim(resourceObj));
 }
@@ -608,7 +607,6 @@ void CreateWithResourceObjSnapPaginations(ArkUINodeHandle node, void* resObjs)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(resObjs);
     auto* resourceObj = reinterpret_cast<std::vector<RefPtr<ResourceObject>>*>(resObjs);
     ScrollModelNG::CreateWithResourceObjSnapPaginations(frameNode, *resourceObj);
 }
