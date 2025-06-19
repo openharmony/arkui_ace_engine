@@ -793,6 +793,7 @@ void SecurityComponentModelNG::SetAlign(const Alignment alignment)
 
 void SecurityComponentModelNG::SetAlign(FrameNode* frameNode, const std::optional<Alignment>& alignment)
 {
+    CHECK_NULL_VOID(frameNode);
     if (alignment) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, Alignment, alignment.value(), frameNode);
     } else {
@@ -807,6 +808,7 @@ void SecurityComponentModelNG::SetMaxFontScale(const float value)
 
 void SecurityComponentModelNG::SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, MaxFontScale, value.value(), frameNode);
     } else {
@@ -821,6 +823,7 @@ void SecurityComponentModelNG::SetMinFontScale(const float value)
 
 void SecurityComponentModelNG::SetMinFontScale(FrameNode* frameNode, const std::optional<float>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, MinFontScale, value.value(), frameNode);
     } else {
@@ -835,6 +838,7 @@ void SecurityComponentModelNG::SetMaxLines(const int32_t value)
 
 void SecurityComponentModelNG::SetMaxLines(FrameNode* frameNode, const std::optional<const int32_t>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, MaxLines, value.value(), frameNode);
     } else {
@@ -849,6 +853,7 @@ void SecurityComponentModelNG::SetAdaptMaxFontSize(const Dimension& value)
 
 void SecurityComponentModelNG::SetAdaptMaxFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, AdaptMaxFontSize, value.value(), frameNode);
     } else {
@@ -863,6 +868,7 @@ void SecurityComponentModelNG::SetAdaptMinFontSize(const Dimension& value)
 
 void SecurityComponentModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, AdaptMinFontSize, value.value(), frameNode);
     } else {
@@ -878,6 +884,7 @@ void SecurityComponentModelNG::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy 
 void SecurityComponentModelNG::SetHeightAdaptivePolicy(FrameNode* frameNode,
     const std::optional<TextHeightAdaptivePolicy>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (value) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, HeightAdaptivePolicy, value.value(),
             frameNode);
