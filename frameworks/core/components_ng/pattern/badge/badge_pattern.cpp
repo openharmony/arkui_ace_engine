@@ -392,4 +392,44 @@ void BadgePattern::UpdateBorderWidth(const CalcDimension& borderWidth, bool isFi
         layoutProperty->UpdateBadgeBorderWidth(borderWidth);
     }
 }
+
+void BadgePattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    CHECK_NULL_VOID(badgeTheme);
+    auto layoutProperty = GetLayoutProperty<BadgeLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (!layoutProperty->GetBadgePositionXByuser().value_or(false)) {
+        UpdateBadgePositionX(badgeTheme->GetBadgePositionX());
+    }
+    if (!layoutProperty->GetBadgePositionYByuser().value_or(false)) {
+        UpdateBadgePositionY(badgeTheme->GetBadgePositionY());
+    }
+    if (!layoutProperty->GetBadgeFontSizeByuser().value_or(false)) {
+        UpdateFontSize(badgeTheme->GetBadgeFontSize(), true);
+    }
+
+    if (!layoutProperty->GetBadgeCircleSizeByuser().value_or(false)) {
+        UpdateBadgeCircleSize(badgeTheme->GetBadgeCircleSize(), true);
+    }
+    if (!layoutProperty->GetBadgeBorderColorByuser().value_or(false)) {
+        UpdateBorderColor(badgeTheme->GetBadgeBorderColor());
+    }
+    if (!layoutProperty->GetBadgeBorderWidthByuser().value_or(false)) {
+        UpdateBorderWidth(badgeTheme->GetBadgeBorderWidth());
+    }
+    if (!layoutProperty->GetBadgeTextColorByuser().value_or(false)) {
+        UpdateColor(badgeTheme->GetBadgeTextColor());
+    }
+    if (!layoutProperty->GetBadgeColorByuser().value_or(false)) {
+        UpdateBadgeColor(badgeTheme->GetBadgeColor());
+    }
+}
 } // namespace OHOS::Ace::NG

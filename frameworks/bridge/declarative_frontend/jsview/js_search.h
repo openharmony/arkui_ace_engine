@@ -112,6 +112,7 @@ public:
     static void SetKeyboardAppearanceConfig(const JSCallbackInfo& info);
     static void SetSearchButtonOptions(const JSCallbackInfo& info);
     static void UnregisterResource(const std::string& key);
+    static void JsMargin(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {

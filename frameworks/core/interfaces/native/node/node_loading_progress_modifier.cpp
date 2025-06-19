@@ -36,6 +36,20 @@ void SetLoadingProgressColor(ArkUINodeHandle node, uint32_t colorValue)
     LoadingProgressModelNG::SetColor(frameNode, Color(colorValue));
 }
 
+void SetLoadingProgressColorPtr(ArkUINodeHandle node, uint32_t colorValue, void* colorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    LoadingProgressModelNG::SetColorParseFailed(frameNode, false);
+    LoadingProgressModelNG::SetColor(frameNode, Color(colorValue));
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+        auto colorResObj = AceType::Claim(color);
+        LoadingProgressModelNG::CreateWithResourceObj(frameNode, LoadingProgressResourceType::COLOR, colorResObj);
+    }
+}
+
 void ResetLoadingProgressColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -47,6 +61,10 @@ void ResetLoadingProgressColor(ArkUINodeHandle node)
         CHECK_NULL_VOID(theme);
         LoadingProgressModelNG::SetColorParseFailed(frameNode, true);
         LoadingProgressModelNG::SetColor(frameNode, theme->GetLoadingParseFailedColor());
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        LoadingProgressModelNG::SetColorByUser(frameNode, false);
+        LoadingProgressModelNG::CreateWithResourceObj(frameNode, LoadingProgressResourceType::COLOR, nullptr);
     }
 }
 
@@ -79,12 +97,31 @@ void SetLoadingProgressForegroundColor(ArkUINodeHandle node, ArkUI_Uint32 colorV
     LoadingProgressModelNG::SetForegroundColor(frameNode, Color(colorValue));
 }
 
+void SetLoadingProgressForegroundColorPtr(ArkUINodeHandle node, ArkUI_Uint32 colorValue, void* foregroundColorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    LoadingProgressModelNG::SetForegroundColorParseFailed(frameNode, false);
+    LoadingProgressModelNG::SetForegroundColor(frameNode, Color(colorValue));
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* color = reinterpret_cast<ResourceObject*>(foregroundColorRawPtr);
+        auto colorResObj = AceType::Claim(color);
+        LoadingProgressModelNG::CreateWithResourceObj(
+            frameNode, LoadingProgressResourceType::FOREGROUNDCOLOR, colorResObj);
+    }
+}
+
 void ResetLoadingProgressForegroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     LoadingProgressModelNG::SetForegroundColorParseFailed(frameNode, true);
     LoadingProgressModelNG::ResetForegroundColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        LoadingProgressModelNG::CreateWithResourceObj(
+            frameNode, LoadingProgressResourceType::FOREGROUNDCOLOR, nullptr);
+    }
 }
 } // namespace
 
@@ -95,11 +132,13 @@ const ArkUILoadingProgressModifier* GetLoadingProgressModifier()
     static const ArkUILoadingProgressModifier modifier = {
         .getColor = GetLoadingProgressColor,
         .setColor = SetLoadingProgressColor,
+        .setColorPtr = SetLoadingProgressColorPtr,
         .resetColor = ResetLoadingProgressColor,
         .getEnableLoading = GetEnableLoading,
         .setEnableLoading = SetEnableLoading,
         .resetEnableLoading = ResetEnableLoading,
         .setForegroundColor = SetLoadingProgressForegroundColor,
+        .setForegroundColorPtr = SetLoadingProgressForegroundColorPtr,
         .resetForegroundColor = ResetLoadingProgressForegroundColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
@@ -113,11 +152,13 @@ const CJUILoadingProgressModifier* GetCJUILoadingProgressModifier()
     static const CJUILoadingProgressModifier modifier = {
         .getColor = GetLoadingProgressColor,
         .setColor = SetLoadingProgressColor,
+        .setColorPtr = SetLoadingProgressColorPtr,
         .resetColor = ResetLoadingProgressColor,
         .getEnableLoading = GetEnableLoading,
         .setEnableLoading = SetEnableLoading,
         .resetEnableLoading = ResetEnableLoading,
         .setForegroundColor = SetLoadingProgressForegroundColor,
+        .setForegroundColorPtr = SetLoadingProgressForegroundColorPtr,
         .resetForegroundColor = ResetLoadingProgressForegroundColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line

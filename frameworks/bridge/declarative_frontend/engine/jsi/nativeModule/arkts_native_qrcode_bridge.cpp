@@ -28,10 +28,12 @@ ArkUINativeModuleValue QRCodeBridge::SetQRColor(ArkUIRuntimeCallInfo* runtimeCal
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, qrColorArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, qrColorArg, color, colorResObj)) {
         GetArkUINodeModifiers()->getQRCodeModifier()->resetQRColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getQRCodeModifier()->setQRColor(nativeNode, color.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getQRCodeModifier()->setQRColorPtr(nativeNode, color.GetValue(), colorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -56,10 +58,13 @@ ArkUINativeModuleValue QRCodeBridge::SetQRBackgroundColor(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, qrBackgroundColor, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, qrBackgroundColor, color, colorResObj)) {
         GetArkUINodeModifiers()->getQRCodeModifier()->resetQRBackgroundColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getQRCodeModifier()->setQRBackgroundColor(nativeNode, color.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getQRCodeModifier()->setQRBackgroundColorPtr(
+            nativeNode, color.GetValue(), colorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -83,11 +88,13 @@ ArkUINativeModuleValue QRCodeBridge::SetContentOpacity(ArkUIRuntimeCallInfo *run
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     double opacity;
-    if (!ArkTSUtils::ParseJsDouble(vm, qrContentOpacity, opacity)) {
+    RefPtr<ResourceObject> opacityResObj;
+    if (!ArkTSUtils::ParseJsDouble(vm, qrContentOpacity, opacity, opacityResObj)) {
         GetArkUINodeModifiers()->getQRCodeModifier()->resetContentOpacity(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getQRCodeModifier()->setContentOpacity(nativeNode,
-            static_cast<ArkUI_Float32>(opacity));
+        auto opacityRawPtr = AceType::RawPtr(opacityResObj);
+        GetArkUINodeModifiers()->getQRCodeModifier()->setContentOpacityPtr(
+            nativeNode, static_cast<ArkUI_Float32>(opacity), opacityRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }

@@ -416,4 +416,43 @@ HWTEST_F(RichEditorSelectOverlayTestNg, RefreshSelectOverlay001, TestSize.Level1
     richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
     EXPECT_EQ(richEditorPattern->HasFocus(), false);
 }
+
+/**
+ * @tc.name: OnOverlayTouchDownTest001
+ * @tc.desc: test OnHandleMoveDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, OnOverlayTouchDownTest001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    richEditorPattern->selectOverlay_->OnBind(manager);
+
+    // make double handle condition
+    manager->shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>();
+    manager->shareOverlayInfo_->isSingleHandle = false;
+    manager->shareOverlayInfo_->enableHandleLevel = true;
+    manager->shareOverlayInfo_->firstHandle.isShow = true;
+    manager->shareOverlayInfo_->secondHandle.isShow = true;
+
+    // make manager isOpen is true
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<Pattern>();
+    auto handleNode = AceType::MakeRefPtr<FrameNode>("", 0, pattern, false);
+    auto parentNode = AceType::MakeRefPtr<FrameNode>("", 0, pattern, false);
+    handleNode->SetParent(parentNode);
+    manager->handleNode_ = handleNode;
+
+    // make selection
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+    richEditorPattern->UpdateSelector(0, 1);
+
+    TouchEventInfo event("");
+    event.SetSourceTool(SourceTool::MOUSE);
+    richEditorPattern->selectOverlay_->OnOverlayTouchDown(event);
+
+    EXPECT_TRUE(richEditorPattern->textSelector_.SelectNothing());
+}
 } // namespace OHOS::Ace::NG

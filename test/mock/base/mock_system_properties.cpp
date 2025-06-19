@@ -99,6 +99,7 @@ bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;
 bool g_isNeedSymbol = true;
 bool g_isResourceDecoupling = true;
+bool g_isConfigChangePerform = false;
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 
@@ -291,7 +292,7 @@ bool SystemProperties::GetResourceDecoupling()
 
 bool SystemProperties::ConfigChangePerform()
 {
-    return false;
+    return g_isConfigChangePerform;
 }
 
 int32_t SystemProperties::GetDragDropFrameworkStatus()
@@ -328,4 +329,25 @@ int32_t SystemProperties::getFormSharedImageCacheThreshold()
 {
     return formSharedImageCacheThreshold_;
 }
+
+bool SystemProperties::IsWhiteBlockEnabled()
+{
+    return true;
+}
+
+bool SystemProperties::IsWhiteBlockIdleChange()
+{
+    return true;
+}
+
+int32_t SystemProperties::GetWhiteBlockIndexValue()
+{
+    return 1;
+}
+
+int32_t SystemProperties::GetWhiteBlockCacheCountValue()
+{
+    return 1;
+}
+
 } // namespace OHOS::Ace

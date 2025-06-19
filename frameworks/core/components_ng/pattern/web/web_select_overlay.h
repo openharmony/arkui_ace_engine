@@ -157,9 +157,12 @@ public:
     void OnHandleReverse(bool isReverse) override;
     void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
     void OnAfterSelectOverlayShow(bool isCreated) override;
+    void OnHandleIsHidden() override;
     // override SelectOverlayCallback end
     void DetectSelectedText(const std::string& text);
     void UpdateAISelectMenu(TextDataDetectType type, const std::string& content);
+    void UpdateSingleHandleVisible(bool isVisible);
+    bool IsSingleHandle();
 private:
     void UpdateSelectMenuOptions();
     void UpdateIsSelectAll();

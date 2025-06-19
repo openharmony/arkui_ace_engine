@@ -1230,8 +1230,6 @@ public:
         keyOcclusionNodes_[frameNodeId] = enable;
     }
     const RefPtr<NodeRenderStatusMonitor>& GetNodeRenderStatusMonitor();
-    void RemoveNodeFromDirtyRenderNode(int32_t nodeId, int32_t pageId);
-    void GetRemovedDirtyRenderAndErase(uint32_t id);
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1468,7 +1466,7 @@ private:
     WeakPtr<FrameNode> windowSceneNode_;
     uint32_t nextScheduleTaskId_ = 0;
     uint64_t resampleTimeStamp_ = 0;
-    bool touchAccelarate_ = false;
+    bool touchAccelarate_ = true;
     bool isEventsPassThrough_ = false;
     bool backgroundColorModeUpdated_ = false;  // Dark/light color switch flag
     uint64_t animationTimeStamp_ = 0;

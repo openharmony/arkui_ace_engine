@@ -1628,6 +1628,45 @@ class QuickReplaceSymbolEffect extends SymbolEffect {
   }
 }
 
+class ShaderStyle {
+}
+
+class RadialGradientStyle extends ShaderStyle {
+  constructor(options) {
+    super();
+    this.type = 'RadialGradientStyle';
+    this.options = options;
+  }
+  options(value) {
+    this.options = value;
+    return this;
+  }
+}
+
+class LinearGradientStyle extends ShaderStyle {
+  constructor(options) {
+    super();
+    this.type = 'LinearGradientStyle';
+    this.options = options;
+  }
+  options(value) {
+    this.options = value;
+    return this;
+  }
+}
+
+class ColorShaderStyle extends ShaderStyle {
+  constructor(color) {
+    super();
+    this.type = 'ColorShaderStyle';
+    this.color = color;
+  }
+  color(value) {
+    this.color = value;
+    return this;
+  }
+}
+
 let RichEditorSpanType;
 (function (RichEditorSpanType) {
   RichEditorSpanType[RichEditorSpanType.TEXT = 0] = 'TEXT';
@@ -4172,3 +4211,9 @@ let KeyboardFluidLightMode;
   KeyboardFluidLightMode[KeyboardFluidLightMode.NONE = 0] = 'NONE';
   KeyboardFluidLightMode[KeyboardFluidLightMode.BACKGROUND_FLUID_LIGHT = 1] = 'BACKGROUND_FLUID_LIGHT';
 })(KeyboardFluidLightMode || (KeyboardFluidLightMode = {}));
+
+let GestureFocusMode;
+(function (GestureFocusMode) {
+  GestureFocusMode[GestureFocusMode.DEFAULT = 0] = 'DEFAULT';
+  GestureFocusMode[GestureFocusMode.GESTURE_TAP_AND_LONG_PRESS = 1] = 'GESTURE_TAP_AND_LONG_PRESS';
+})(GestureFocusMode || (GestureFocusMode = {}));

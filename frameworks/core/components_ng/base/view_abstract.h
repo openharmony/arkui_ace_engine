@@ -161,6 +161,7 @@ typedef Rosen::VisualEffect* (*OEMVisualEffectFunc)(const Rosen::VisualEffect* e
 
 class ACE_FORCE_EXPORT ViewAbstract {
 public:
+    static void RemoveResObj(const std::string& key);
     static void SetWidth(const CalcLength &width);
     static void SetWidth(const RefPtr<ResourceObject>& resObj);
     static void SetHeight(const CalcLength &height);
@@ -365,6 +366,7 @@ public:
     // event
     static void SetOnClick(GestureEventFunc &&clickEventFunc,
         double distanceThreshold = std::numeric_limits<double>::infinity());
+    static void SetOnClick(GestureEventFunc &&clickEventFunc, Dimension distanceThreshold);
     static void SetOnGestureJudgeBegin(GestureJudgeFunc &&gestureJudgeFunc);
     static void SetOnTouchIntercept(TouchInterceptFunc &&touchInterceptFunc);
     static void SetShouldBuiltInRecognizerParallelWith(
@@ -621,13 +623,13 @@ public:
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);
     static void SetLightIntensity(FrameNode* frameNode, float value);
     static void SetLightColor(FrameNode* frameNode, const Color& value);
+    static void SetLightColor(FrameNode* frameNode, const Color& value, const RefPtr<ResourceObject>& resObj);
     static void SetLightIlluminated(FrameNode* frameNode, uint32_t value);
     static void SetIlluminatedBorderWidth(FrameNode* frameNode, const Dimension& value);
     static void SetBloom(FrameNode* frameNode, float value);
 
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj);
-    static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetWidth(FrameNode* frameNode, const CalcLength& width);
     static void SetHeight(FrameNode* frameNode, const CalcLength& height);
     static void ClearWidthOrHeight(FrameNode* frameNode, bool isWidth);
@@ -659,6 +661,11 @@ public:
     static void SetTransform3DMatrix(FrameNode* frameNode, const Matrix4& matrix);
     static void SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode);
     static void SetOpacity(FrameNode* frameNode, double opacity);
+    static void SetOpacity(FrameNode* frameNode, double opacity, const RefPtr<ResourceObject>& resObj);
+    static void UpdateBackgroundBlurStyle(
+        FrameNode* frameNode, const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions);
+    static void UpdateBackgroundEffect(
+        FrameNode* frameNode, const EffectOption& effectOption, const SysOptions& sysOptions);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
     static void SetLayoutGravity(FrameNode* frameNode, Alignment alignment);
@@ -669,6 +676,7 @@ public:
     static void SetSepia(FrameNode* frameNode, const Dimension& sepia);
     static void SetSaturate(FrameNode* frameNode, const Dimension& saturate);
     static void SetColorBlend(FrameNode* frameNode, const Color& colorBlend);
+    static void SetColorBlend(FrameNode* frameNode, const Color& colorBlend, const RefPtr<ResourceObject>& resObj);
     static void SetGrayScale(FrameNode* frameNode, const Dimension& grayScale);
     static void SetContrast(FrameNode* frameNode, const Dimension& contrast);
     static void SetBrightness(FrameNode* frameNode, const Dimension& brightness);
@@ -719,6 +727,7 @@ public:
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
     static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color);
+    static void SetForegroundColor(FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj);
     static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
     static void SetMotionPath(FrameNode* frameNode, const MotionPathOption& motionPath);
     static void SetFocusOnTouch(FrameNode* frameNode, bool isSet);
@@ -787,7 +796,6 @@ public:
         NG::TransitionFinishCallback&& finishCallback = nullptr);
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
-    static void CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
     static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching);
     static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);
@@ -810,6 +818,7 @@ public:
     static void SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback);
     static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc,
         double distanceThreshold = std::numeric_limits<double>::infinity());
+    static void SetOnClick(FrameNode* frameNode, GestureEventFunc &&clickEventFunc, Dimension distanceThreshold);
     static void SetOnTouch(FrameNode* frameNode, TouchEventFunc &&touchEventFunc);
     static void SetOnDragStart(FrameNode* frameNode,
         std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>&& onDragStart);

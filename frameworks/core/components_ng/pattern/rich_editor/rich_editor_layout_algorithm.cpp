@@ -29,7 +29,7 @@ namespace OHOS::Ace::NG {
 
 RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>> spans,
     RichEditorParagraphManager* paragraphs, LRUMap<std::uintptr_t, RefPtr<Paragraph>>* paraMapPtr,
-    std::unique_ptr<StyleManager>& styleManager, bool needShowPlaceholder, const std::map<int32_t, AISpan>& aiSpanMap)
+    std::unique_ptr<StyleManager>& styleManager, bool needShowPlaceholder, AISpanLayoutInfo aiSpanLayoutInfo)
     : pManager_(paragraphs), paraMapPtr_(paraMapPtr), styleManager_(styleManager),
     needShowPlaceholder_(needShowPlaceholder)
 {
@@ -63,52 +63,78 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
         spans_.push_back(std::move(spans));
     }
     AppendNewLineSpan();
-    HandleAISpan(allSpans_, aiSpanMap);
+    HandleAISpan(allSpans_, aiSpanLayoutInfo);
     HandleParagraphCache();
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "spans=%{public}s", SpansToString().c_str());
 }
 
 void RichEditorLayoutAlgorithm::HandleAISpan(
-    const std::list<RefPtr<SpanItem>>& spans, const std::map<int32_t, AISpan>& aiSpanMap)
+    const std::list<RefPtr<SpanItem>>& spans, const AISpanLayoutInfo& aiSpanLayoutInfo)
 {
     ACE_SCOPED_TRACE("RichEditorLayoutAlgorithm::HandleAISpan");
+    bool needShowAIDetect = aiSpanLayoutInfo.needShowAIDetect;
+    if (!needShowAIDetect) {
+        for (const auto& span : spans) {
+            CHECK_NULL_CONTINUE(span->aiSpanResultCount != 0);
+            span->aiSpanResultCount = 0;
+            span->needReLayout = true;
+        }
+        return;
+    }
+
+    // need show ai detect
+
+    // 1. record ai result count
+    std::vector<int> aiSpanCounts;
+    aiSpanCounts.reserve(spans.size());
+    for (const auto& span : spans) {
+        aiSpanCounts.push_back(span->aiSpanResultCount);
+        span->aiSpanResultCount = 0;
+    }
+
+    // 2. update ai result count
+    HandleAISpan(spans, aiSpanLayoutInfo.aiSpanMap);
+
+    // 3. mark need relayout if result count changed
+    auto spanIter = spans.begin();
+    auto countsIter = aiSpanCounts.begin();
+    for (; spanIter != spans.end() && countsIter != aiSpanCounts.end(); ++spanIter, ++countsIter) {
+        auto& span = (*spanIter);
+        IF_TRUE(span->aiSpanResultCount != 0, span->needReLayout |= span->needReLayoutParagraph);
+        IF_TRUE(span->aiSpanResultCount != (*countsIter), span->needReLayout = true);
+    }
+}
+
+void RichEditorLayoutAlgorithm::HandleAISpan(
+    const std::list<RefPtr<SpanItem>>& spans, const std::map<int32_t, AISpan>& aiSpanMap)
+{
     auto spanIter = spans.begin();
     auto aiSpanIter = aiSpanMap.begin();
-
     while (spanIter != spans.end() && aiSpanIter != aiSpanMap.end()) {
         const AISpan& aiSpan = aiSpanIter->second;
         const RefPtr<SpanItem>& span = *spanIter;
 
-        // range has no intersection
-        bool aiSpanRangeAhead = aiSpan.start > span->position;
-        bool spanRangeAhead = aiSpan.end < span->rangeStart;
-        if (aiSpanRangeAhead || spanRangeAhead) {
-            CLEAR_AI_EFFECT(span);
+        bool hasIntersection = span->rangeStart < aiSpan.end && aiSpan.start < span->position;
+        if (hasIntersection) {
+            ++span->aiSpanResultCount;
+            IF_TRUE(aiSpan.end <= span->position, ++aiSpanIter);
+            IF_TRUE(span->position <= aiSpan.end, ++spanIter);
+            continue;
+        }
+
+        if (!hasIntersection) {
+            bool aiSpanRangeAhead = aiSpan.start >= span->position;
+            bool spanRangeAhead = aiSpan.end <= span->rangeStart;
             IF_TRUE(aiSpanRangeAhead, ++spanIter);
             IF_TRUE(spanRangeAhead, ++aiSpanIter);
             continue;
         }
 
-        // range has intersection
-        bool aiStartInRange = span->rangeStart <= aiSpan.start && aiSpan.start <= span->position;
-        bool aiEndInRange = span->rangeStart <= aiSpan.end && aiSpan.end <= span->position;
-        if (aiStartInRange || aiEndInRange) {
-            ADD_AI_EFFECT(span);
-            ++spanIter;
-            continue;
-        }
         TAG_LOGE(AceLogTag::ACE_RICH_TEXT,
             "HandleAISpan range error, aiSpanRange=[%{public}d,%{public}d], spanRange=[%{public}d,%{public}d]",
             aiSpan.start, aiSpan.end, span->rangeStart, span->position);
         ++aiSpanIter;
         ++spanIter;
-    }
-    // ensure handle all span
-    if (aiSpanIter == aiSpanMap.end()) {
-        while (spanIter != spans.end()) {
-            CLEAR_AI_EFFECT(*spanIter);
-            ++spanIter;
-        }
     }
 }
 
@@ -119,7 +145,7 @@ void RichEditorLayoutAlgorithm::HandleParagraphCache()
         std::uintptr_t hash = 0;
         bool needReLayout = false;
         for (const auto& child : group) {
-            std::uintptr_t intValue = reinterpret_cast<std::uintptr_t>(Referenced::RawPtr(child));
+            std::uintptr_t intValue = reinterpret_cast<std::uintptr_t>(RawPtr(child));
             hash ^= intValue;
             needReLayout |= child->needReLayout;
         }
@@ -133,7 +159,7 @@ std::uintptr_t RichEditorLayoutAlgorithm::Hash(const std::list<RefPtr<SpanItem>>
 {
     std::uintptr_t hash = 0;
     for (const auto& child : spanGroup) {
-        hash ^= reinterpret_cast<std::uintptr_t>(Referenced::RawPtr(child));
+        hash ^= reinterpret_cast<std::uintptr_t>(RawPtr(child));
     }
     return hash;
 }
@@ -194,6 +220,7 @@ void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<Sp
         target->textLineStyle->UpdateLineHeight(source->textLineStyle->GetLineHeight());
         if (source->textLineStyle->HasLeadingMargin()) {
             auto leadingMargin = source->textLineStyle->GetLeadingMarginValue();
+            leadingMargin.pixmap.Reset();
             target->textLineStyle->UpdateLeadingMargin(leadingMargin);
         }
         target->textLineStyle->UpdateTextAlign(source->textLineStyle->GetTextAlign());

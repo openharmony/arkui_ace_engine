@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
+#include "base/utils/system_properties.h"
 #include "base/log/dump_log.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -29,6 +30,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -390,7 +392,11 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
 void GridPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex)
 {
     CHECK_NULL_VOID(indexChanged && onScrollIndex);
-    onScrollIndex(info_.startIndex_, info_.endIndex_);
+    int32_t endIndex = info_.endIndex_;
+    if (SystemProperties::IsWhiteBlockEnabled()) {
+        endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(info_.endIndex_);
+    }
+    onScrollIndex(info_.startIndex_, endIndex);
 }
 
 SizeF GridPattern::GetContentSize() const

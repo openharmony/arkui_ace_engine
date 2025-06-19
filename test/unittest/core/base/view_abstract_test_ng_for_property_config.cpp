@@ -1490,6 +1490,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractAddHoverEventForTipsTest002, TestSize.L
     ASSERT_NE(overlayManager, nullptr);
 
     auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
+    param->SetAnchorType(TipsAnchorType::CURSOR);
     ViewAbstract::AddHoverEventForTips(param, targetNode, popupInfo, false);
     auto eventHub = targetNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);

@@ -633,7 +633,7 @@ static napi_value GetDistanceMap(napi_env env, napi_callback_info info)
     napi_get_named_property(env, nativeMap, "set", &setFunc);
     napi_value result;
     for (const auto& item : panDistanceMap) {
-        double distance = context->ConvertPxToVp(Dimension(item.second, DimensionUnit::PX));
+        double distance = context->ConvertPxToVp(item.second);
         double roundedDistance = RoundToMaxPrecision(distance);
         napi_value key;
         napi_value value;

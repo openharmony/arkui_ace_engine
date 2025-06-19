@@ -93,7 +93,7 @@ void RenderingStrategyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<RenderingStrategy>(value); // for enums
+    auto convValue = Converter::OptConvert<Converter::RenderingStrategy>(value); // for enums
     // SymbolModelNG::SetRenderingStrategy(frameNode, EnumToInt(convValue));
 }
 bool ParseSymbolEffectOptions(NG::SymbolEffectOptions& options, Ark_SymbolEffect symbolEffect)

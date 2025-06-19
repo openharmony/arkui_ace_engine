@@ -344,6 +344,8 @@ public:
     virtual std::shared_ptr<void> SerializeValue(
         const std::shared_ptr<Framework::JsValue>& jsValue) { return nullptr; }
 
+    virtual void TriggerModuleSerializer() {}
+
     virtual void SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder) {}
 
     virtual void SetPkgNameList(const std::map<std::string, std::string>& map) {}

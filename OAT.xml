@@ -67,6 +67,7 @@ Note:If the text contains special characters, please escape them according to th
                 <filteritem type="filepath" name="frameworks/base/network/cacert.pem" desc="三方库libcurl使用的公钥证书文件，curl官网下载得到。"/>
             </filefilter>
             <filefilter name="binaryFileTypePolicyFilter" desc="二进制文件校验策略的过滤条件" >
+                <filteritem type="filepath" name="examples/StrengthenTest/entry/src/main/resources/base/media/img.png" desc="自造的二进制图片"/>	
                 <filteritem type="filepath" name="test/resource/graphicalbasicability/imageprovider/images/broken.bmp" desc="自造的二进制图片"/>
                 <filteritem type="filepath" name="test/resource/graphicalbasicability/imageprovider/images/broken.webp" desc="自造的二进制图片"/>
                 <filteritem type="filepath" name="test/resource/graphicalbasicability/imageprovider/images/unbroken.bmp" desc="自研图片"/>
@@ -157,6 +158,18 @@ Note:If the text contains special characters, please escape them according to th
 				<filteritem type="filepath" name="adapter/ohos/services/etc/timepicker.ogg" desc=" 自研的音振效果文件"/>
             </filefilter>
             <filefilter name="copyrightPolicyFilter" desc="copyright文件头校验策略的过滤条件" >
+                <filteritem type="filepath" name="examples/StrengthenTest/*.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/entry/build-profile.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/entry/oh-package.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/build-profile.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/oh-package-lock.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/hvigor/hvigor-config.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/AppScope/app.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/code-linter.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/AppScope/app.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/oh-package.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/entry/hvigorfile.ts" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/hvigorfile.ts" desc="json文件无法添加版权"/>
                 <filteritem type="filepath" name="frameworks/bridge/arkts_frontend/koala_projects/.*" desc="自研的前端框架资源，临时测试使用"/>
                 <filteritem type="filepath" name="frameworks/core/components/theme/theme.csv" desc="csv无法添加版权头"/>
                 <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt/parser.pegjs" desc="用于测试的文件无法添加License"/>
@@ -172,6 +185,18 @@ Note:If the text contains special characters, please escape them according to th
 				<filteritem type="filepath" name="test/component_test/test_cases/components/image_video_and_media/entry/src/main/resources/rawfile/video2.mp4" desc="自造的二进制文件无法添加版权头"/>
             </filefilter>
             <filefilter name="defaultPolicyFilter" desc="根目录LICENSE文件校验策略的过滤条件xxx" >
+                <filteritem type="filepath" name="examples/StrengthenTest/*.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/entry/build-profile.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/entry/oh-package.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/build-profile.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/oh-package-lock.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/hvigor/hvigor-config.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/AppScope/app.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/code-linter.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/AppScope/app.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/oh-package.json5" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/entry/hvigorfile.ts" desc="json文件无法添加版权"/>
+                <filteritem type="filepath" name="examples/StrengthenTest/hvigorfile.ts" desc="json文件无法添加版权"/>
                 <filteritem type="filepath" name="frameworks/bridge/arkts_frontend/koala_projects/.*" desc="自研的前端框架资源，临时测试使用"/>
                 <filteritem type="filepath" name="frameworks/core/components/theme/theme.csv" desc="csv无法添加License"/>
                 <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt/parser.pegjs" desc="用于测试的文件无法添加License"/>

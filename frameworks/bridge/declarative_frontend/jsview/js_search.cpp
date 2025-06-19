@@ -137,6 +137,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("editMenuOptions", &JSSearch::EditMenuOptions);
     JSClass<JSSearch>::StaticMethod("strokeWidth", &JSSearch::SetStrokeWidth);
     JSClass<JSSearch>::StaticMethod("strokeColor", &JSSearch::SetStrokeColor);
+    JSClass<JSSearch>::StaticMethod("margin", &JSSearch::JsMargin);
     JSBindMore();
     JSClass<JSSearch>::InheritAndBind<JSViewAbstract>(globalObj);
 }
@@ -340,6 +341,7 @@ void JSSearch::SetSearchButtonOptions(const JSCallbackInfo& info)
     if (info.Length() < 2 || !info[1]->IsObject()) { // 2 : args num
         SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetButtonFontSize());
         SearchModel::GetInstance()->ResetSearchButtonFontColor();
+        return;
     }
     
     auto param = JSRef<JSObject>::Cast(info[1]);
@@ -1805,5 +1807,11 @@ void JSSearch::UnregisterResource(const std::string& key)
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj(key);
+}
+
+void JSSearch::JsMargin(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsMargin(info);
+    SearchModel::GetInstance()->SetUserMargin();
 }
 } // namespace OHOS::Ace::Framework

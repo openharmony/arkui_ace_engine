@@ -838,48 +838,11 @@ HWTEST_F(TextClockPatternTestNG, TextClockCheckDateTimeElement001, TestSize.Leve
 }
 
 /**
- * @tc.name: TextClockUpdateColor001
- * @tc.desc: Test UpdateTextClockColor of TextClockPattern.
- * @tc.type: FUNC
- */
-HWTEST_F(TextClockPatternTestNG, TextClockUpdateColor001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create textClock frameNode.
-     */
-    TestProperty testProperty;
-    RefPtr<FrameNode> frameNode = CreateTextClockParagraph(testProperty);
-    ASSERT_NE(frameNode, nullptr);
-
-    /**
-     * @tc.steps: step2. get pattern and renderContext.
-     * @tc.expected: step2.
-     */
-    auto pattern = frameNode->GetPattern<TextClockPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-
-    /**
-     * @tc.steps: step3. call UpdateTextClockColor function.
-     * @tc.expected: step3. check color properties updated.
-     */
-    Color testColor = Color::BLUE;
-    pattern->UpdateTextClockColor(testColor);
-    
-    auto layoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    EXPECT_EQ(layoutProperty->GetTextColor().value(), testColor);
-    EXPECT_EQ(renderContext->GetForegroundColor().value(), testColor);
-    EXPECT_TRUE(renderContext->GetForegroundColorFlag().value());
-}
-
-/**
- * @tc.name: TextClockUpdateFontSize002
+ * @tc.name: TextClockUpdateFontSize001
  * @tc.desc: Test UpdateTextClockFontSize of TextClockPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockPatternTestNG, TextClockUpdateFontSize002, TestSize.Level1)
+HWTEST_F(TextClockPatternTestNG, TextClockUpdateFontSize001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -908,11 +871,11 @@ HWTEST_F(TextClockPatternTestNG, TextClockUpdateFontSize002, TestSize.Level1)
 }
 
 /**
- * @tc.name: TextClockUpdateFontFamily003
+ * @tc.name: TextClockUpdateFontFamily002
  * @tc.desc: Test UpdateTextClockFontFamily of TextClockPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(TextClockPatternTestNG, TextClockUpdateFontFamily003, TestSize.Level1)
+HWTEST_F(TextClockPatternTestNG, TextClockUpdateFontFamily002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create textClock frameNode.
@@ -937,5 +900,13 @@ HWTEST_F(TextClockPatternTestNG, TextClockUpdateFontFamily003, TestSize.Level1)
     std::vector<std::string> fontFamilies = {"Arial", "sans-serif"};
     pattern->UpdateTextClockFontFamily(fontFamilies);
     EXPECT_EQ(layoutProperty->GetFontFamily().value(), fontFamilies);
+
+    /**
+     * @tc.steps: step4. Execute font family update operation
+     * @tc.expected: Font specifications should be correctly applied
+     */
+    std::vector<std::string> typefaceOptions = {"Roboto", "Helvetica Neue"};
+    pattern->UpdateTextClockFontFamily(typefaceOptions);
+    EXPECT_EQ(layoutProperty->GetFontFamily().value(), typefaceOptions);
 }
 } // namespace OHOS::Ace::NG

@@ -780,7 +780,9 @@ HWTEST_F(ImagePatternTestNg, ImagePatternOnKeyEvent001, TestSize.Level1)
     auto frameNode = CreatePixelMapAnimator();
     ASSERT_NE(frameNode, nullptr);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
-    imagePattern->OnKeyEvent();
+    auto event = KeyEvent();
+    event.action = KeyAction::UNKNOWN;
+    imagePattern->OnKeyEvent(event);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     ASSERT_NE(focusHub, nullptr);
     EXPECT_EQ(focusHub->IsDefaultFocus(), false);
@@ -1884,6 +1886,24 @@ HWTEST_F(ImagePatternTestNg, ConvertOrientationToString006, TestSize.Level1)
     imagePattern->DumpInfo();
     auto res = imagePattern->GetOrientation();
     ImageRotateOrientation msg = ImageRotateOrientation::DOWN;
+    EXPECT_EQ(res, msg);
+}
+
+/**
+ * @tc.name: ConvertOrientationToString007
+ * @tc.desc: Test ConvertOrientationToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ConvertOrientationToString007, TestSize.Level1)
+{
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->SetOrientation(ImageRotateOrientation::DOWN_MIRRORED);
+    imagePattern->DumpInfo();
+    auto res = imagePattern->GetOrientation();
+    ImageRotateOrientation msg = ImageRotateOrientation::DOWN_MIRRORED;
     EXPECT_EQ(res, msg);
 }
 

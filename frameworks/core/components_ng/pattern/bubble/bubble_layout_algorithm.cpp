@@ -331,6 +331,47 @@ void BubbleLayoutAlgorithm::FitAvailableRect(LayoutWrapper* layoutWrapper, bool 
     }
 }
 
+void BubbleLayoutAlgorithm::FitMouseOffset(LayoutWrapper* layoutWrapper)
+{
+    CHECK_EQUAL_VOID(followCursor_, false);
+    CHECK_EQUAL_VOID(expandDisplay_, true);
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    RefPtr<PipelineContext> pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto containerId = pipelineContext->GetInstanceId();
+    auto container = AceEngine::Get().GetContainer(containerId);
+    CHECK_NULL_VOID(container);
+    RefPtr<Container> parentContainer;
+    if (container->IsSubContainer()) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+        CHECK_NULL_VOID(parentContainer);
+        pipelineContext = AceType::DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
+        CHECK_NULL_VOID(pipelineContext);
+    }
+    CHECK_NULL_VOID(parentContainer);
+    auto displayWindowRect = pipelineContext->GetDisplayWindowRectInfo();
+
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    if (container->IsSubContainer()) {
+        auto rect = parentContainer->GetGlobalScaledRect();
+        if (!NearZero(displayWindowRect.Width())) {
+            scaleX = rect.Width() / static_cast<float>(displayWindowRect.Width());
+        }
+        if (!NearZero(displayWindowRect.Height())) {
+            scaleY = rect.Height() / static_cast<float>(displayWindowRect.Height());
+        }
+    }
+    if (!NearZero(scaleX) && !NearZero(scaleY)) {
+        targetOffset_ -= OffsetF(displayWindowRect.GetOffset().GetX(), displayWindowRect.GetOffset().GetY());
+        targetOffset_.SetX(targetOffset_.GetX() / scaleX);
+        targetOffset_.SetY(targetOffset_.GetY() / scaleY);
+    }
+}
+
 void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -345,6 +386,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
     FitAvailableRect(layoutWrapper, showInSubWindow);
+    FitMouseOffset(layoutWrapper);
     const auto& layoutConstraint = bubbleLayoutProperty->GetLayoutConstraint();
     if (!layoutConstraint) {
         LOGE("fail to measure bubble due to layoutConstraint is nullptr");
@@ -1181,10 +1223,9 @@ void BubbleLayoutAlgorithm::MeasureTipsRegion(
         childPosition = GetPositionWithPlacementNew(childSize, topPosition, bottomPosition, arrowOffset);
         UpdateChildPosition(childPosition);
         position = FitToScreenNew(childPosition, ALIGNMENT_STEP_OFFSET, i, childSize, avoidArrowOffset, false);
-        if (NearEqual(position, OffsetF(0.0f, 0.0f))) {
-            continue;
+        if (!NearEqual(position, OffsetF(0.0f, 0.0f))) {
+            break;
         }
-        break;
     }
     if (placement_ == Placement::NONE) {
         SizeF newSize;

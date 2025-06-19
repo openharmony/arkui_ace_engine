@@ -1634,4 +1634,140 @@ HWTEST_F(ListPatternTestNg, UpdateScrollBarOffset001, TestSize.Level1)
     listPattern->UpdateScrollBarOffset();
     EXPECT_FALSE(listPattern->heightEstimated_);
 }
+
+/**
+ * @tc.name: VerifyFocusIndex01
+ * @tc.desc: Test ListPattern VerifyFocusIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, VerifyFocusIndex01, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    int32_t nextIndex = 2;
+    int32_t nextIndexInGroup = 2;
+    ListItemGroupPara param;
+    param.itemEndIndex = -1;
+    param.lanes = -1;
+    listPattern->VerifyFocusIndex(nextIndex, nextIndexInGroup, param);
+    EXPECT_EQ(nextIndexInGroup, -1);
+}
+
+/**
+ * @tc.name: VerifyFocusIndex02
+ * @tc.desc: Test ListPattern VerifyFocusIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, VerifyFocusIndex02, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    int32_t nextIndex = 2;
+    int32_t nextIndexInGroup = -2;
+    ListItemGroupPara param;
+    param.itemEndIndex = -1;
+    param.lanes = -1;
+    listPattern->VerifyFocusIndex(nextIndex, nextIndexInGroup, param);
+    EXPECT_EQ(nextIndexInGroup, -1);
+}
+
+/**
+ * @tc.name: VerifyFocusIndex03
+ * @tc.desc: Test ListPattern VerifyFocusIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, VerifyFocusIndex03, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    int32_t nextIndex = 2;
+    int32_t nextIndexInGroup = 2;
+    ListItemGroupPara param;
+    param.itemEndIndex = -1;
+    param.lanes = -1;
+    listPattern->VerifyFocusIndex(nextIndex, nextIndexInGroup, param);
+    EXPECT_EQ(nextIndexInGroup, -1);
+}
+
+/**
+ * @tc.name: VerifyFocusIndex04
+ * @tc.desc: Test ListPattern VerifyFocusIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, VerifyFocusIndex04, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    int32_t nextIndex = 2;
+    int32_t nextIndexInGroup = 2;
+    ListItemGroupPara param;
+    param.itemEndIndex = 3;
+    param.lanes = -1;
+    listPattern->VerifyFocusIndex(nextIndex, nextIndexInGroup, param);
+    EXPECT_EQ(nextIndexInGroup, 2);
+}
+
+/**
+ * @tc.name: VerifyFocusIndex05
+ * @tc.desc: Test ListPattern VerifyFocusIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, VerifyFocusIndex05, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    int32_t nextIndex = 2;
+    int32_t nextIndexInGroup = 2;
+    ListItemGroupPara param;
+    param.itemEndIndex = 1;
+    param.lanes = -1;
+    listPattern->VerifyFocusIndex(nextIndex, nextIndexInGroup, param);
+    EXPECT_EQ(nextIndexInGroup, -1);
+}
+
+/**
+ * @tc.name: VerifyFocusIndex06
+ * @tc.desc: Test ListPattern VerifyFocusIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, VerifyFocusIndex06, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    int32_t nextIndex = 2;
+    int32_t nextIndexInGroup = 2;
+    ListItemGroupPara param;
+    param.itemEndIndex = 1;
+    param.lanes = 5;
+    listPattern->VerifyFocusIndex(nextIndex, nextIndexInGroup, param);
+    EXPECT_EQ(nextIndexInGroup, 1);
+}
+
+/**
+ * @tc.name: VerifyFocusIndex07
+ * @tc.desc: Test ListPattern VerifyFocusIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, VerifyFocusIndex07, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    int32_t nextIndex = 2;
+    int32_t nextIndexInGroup = 2;
+    ListItemGroupPara param;
+    param.itemEndIndex = 1;
+    param.lanes = -1;
+    listPattern->VerifyFocusIndex(nextIndex, nextIndexInGroup, param);
+    EXPECT_EQ(nextIndexInGroup, -1);
+}
+
+/**
+ * @tc.name: VerifyFocusIndex08
+ * @tc.desc: Test ListPattern VerifyFocusIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, VerifyFocusIndex08, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    int32_t nextIndex = 2;
+    int32_t nextIndexInGroup = 3;
+    ListItemGroupPara param;
+    param.itemEndIndex = 3;
+    param.lanes = 2;
+    listPattern->VerifyFocusIndex(nextIndex, nextIndexInGroup, param);
+    EXPECT_EQ(nextIndexInGroup, 3);
+}
 } // namespace OHOS::Ace::NG

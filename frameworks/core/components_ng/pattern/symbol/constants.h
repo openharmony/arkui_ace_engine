@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_TEXT_SYMBOL_CONSTANTS_H
 
 #include <cstdint>
+#include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
 
@@ -31,13 +32,6 @@ enum class SymbolEffectType {
     REPLACE,
     Disable,
     QuickReplace,
-};
-
-// need check
-enum class RenderingStrategy {
-    SINGLE = 0,
-    MULTIPLE_COLOR,
-    MULTIPLE_OPACITY
 };
 
 enum class CommonSubType {
@@ -58,6 +52,86 @@ enum class FillStyle {
 enum class SymbolType {
     SYSTEM = 0,
     CUSTOM,
+};
+
+enum class SymbolGradientType {
+    COLOR_SHADER = 0,
+    RADIAL_GRADIENT,
+    LINEAR_GRADIENT,
+};
+
+struct Point2F {
+    float x{0.0f};
+    float y{0.0f};
+};
+
+enum class SDKGradientDirection {
+    Left,
+    Top,
+    Right,
+    Bottom,
+    LeftTop,
+    LeftBottom,
+    RightTop,
+    RightBottom,
+    None
+};
+
+static const std::unordered_map<SDKGradientDirection, float> GRADIENT_DIRECTION_TO_ANGLE = {
+    {SDKGradientDirection::Left,        270.0f},
+    {SDKGradientDirection::Top,           0.0f},
+    {SDKGradientDirection::Right,        90.0f},
+    {SDKGradientDirection::Bottom,      180.0f},
+    {SDKGradientDirection::LeftTop,     315.0f},
+    {SDKGradientDirection::LeftBottom,  225.0f},
+    {SDKGradientDirection::RightTop,     45.0f},
+    {SDKGradientDirection::RightBottom, 135.0f},
+    {SDKGradientDirection::None,          0.0f}
+};
+
+struct SymbolGradient {
+    SymbolGradientType type = SymbolGradientType::COLOR_SHADER;
+    Point2F center;
+    std::vector<Color> symbolColor;
+    std::vector<float> symbolOpacities;
+    bool repeating = false;
+    std::optional<float> angle;
+    float radius = 0.0f;
+
+    bool operator==(const SymbolGradient& other) const
+    {
+    return type == other.type &&
+           NearZero(center.x - other.center.x) &&
+           NearZero(center.y - other.center.y) &&
+           symbolColor == other.symbolColor &&
+           symbolOpacities.size() == other.symbolOpacities.size() &&
+           std::equal(symbolOpacities.begin(), symbolOpacities.end(), other.symbolOpacities.begin(),
+                     [](float a, float b) { return NearZero(a - b); }) &&
+           repeating == other.repeating &&
+           ((!angle && !other.angle) || (angle && other.angle && NearZero(*angle - *other.angle))) &&
+           NearZero(radius - other.radius);
+    }
+};
+
+struct SymbolShadow {
+    Color color = Color::BLACK;
+    std::pair<float, float> offset{0.0f, 0.0f};
+    float radius = 0.0f;
+    bool operator==(const SymbolShadow& other) const
+    {
+        return color == other.color &&
+               NearZero(offset.first - other.offset.first) &&
+               NearZero(offset.second - other.offset.second) &&
+               NearZero(radius - other.radius);
+    }
+
+    bool IsDefault() const
+    {
+        return color == Color::BLACK &&
+               NearZero(offset.first) &&
+               NearZero(offset.second) &&
+               NearZero(radius);
+    }
 };
 
 } // namespace OHOS::Ace

@@ -56,11 +56,12 @@ void ClickRecognizer::ForceCleanRecognizer()
 
 bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
 {
-    if (distanceThreshold_ < std::numeric_limits<double>::infinity()) {
+    auto distanceThreshold = distanceThreshold_.ConvertToPx();
+    if (distanceThreshold < std::numeric_limits<double>::infinity()) {
         Offset offset = event.GetScreenOffset() - touchPoints_[event.id].GetScreenOffset();
-        if (offset.GetDistance() > distanceThreshold_) {
+        if (offset.GetDistance() > distanceThreshold) {
             TAG_LOGI(AceLogTag::ACE_GESTURE, "Click move distance is larger than distanceThreshold_, "
-            "distanceThreshold_ is %{public}f", distanceThreshold_);
+            "distanceThreshold_ is %{public}f", distanceThreshold);
             extraInfo_ += "move distance out of distanceThreshold.";
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return false;
@@ -73,7 +74,9 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
     if (!frameNode.Invalid()) {
         auto host = frameNode.Upgrade();
         CHECK_NULL_RETURN(host, false);
-        TransformForRecognizer(localPoint, frameNode, false, isPostEventResult_, event.postEventNodeId);
+        bool needPostEvent = isPostEventResult_ || event.passThrough;
+        TransformForRecognizer(
+            localPoint, frameNode, false, needPostEvent, event.postEventNodeId);
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         auto paintRect = renderContext->GetPaintRectWithoutTransform();
@@ -91,13 +94,29 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
 }
 
 ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold, bool isLimitFingerCount)
+    : MultiFingersRecognizer(fingers, isLimitFingerCount), count_(count)
+{
+    if (fingers_ > MAX_TAP_FINGERS || fingers_ < DEFAULT_TAP_FINGERS) {
+        fingers_ = DEFAULT_TAP_FINGERS;
+    }
+    distanceThreshold_ = Dimension(
+        Dimension(distanceThreshold, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
+    if (distanceThreshold_.ConvertToPx() <= 0) {
+        distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
+    }
+
+    SetOnAccessibility(GetOnAccessibilityEventFunc());
+}
+
+ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, Dimension distanceThreshold, bool isLimitFingerCount)
     : MultiFingersRecognizer(fingers, isLimitFingerCount), count_(count), distanceThreshold_(distanceThreshold)
 {
     if (fingers_ > MAX_TAP_FINGERS || fingers_ < DEFAULT_TAP_FINGERS) {
         fingers_ = DEFAULT_TAP_FINGERS;
     }
-    if (distanceThreshold_ <= 0) {
-        distanceThreshold_ = std::numeric_limits<double>::infinity();
+    
+    if (distanceThreshold.ConvertToPx() <= 0) {
+        distanceThreshold_ = Dimension(std::numeric_limits<double>::infinity(), DimensionUnit::PX);
     }
 
     SetOnAccessibility(GetOnAccessibilityEventFunc());
@@ -133,6 +152,7 @@ ClickInfo ClickRecognizer::GetClickInfo()
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
+    info.SetGlobalDisplayLocation(touchPoint.GetGlobalDisplayOffset());
     info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(localOffset);
     info.SetSourceDevice(deviceType_);
     info.SetDeviceId(deviceId_);
@@ -186,10 +206,11 @@ void ClickRecognizer::OnAccepted()
         touchPoint = touchPoints_.begin()->second;
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
-        isPostEventResult_, touchPoint.postEventNodeId);
-    TransformForRecognizer(localPoint, GetAttachedNode(), false,
-        isPostEventResult_, touchPoint.postEventNodeId);
+    bool needPostEvent = isPostEventResult_ || touchPoint.passThrough;
+    localMatrix_ = NGGestureRecognizer::GetTransformMatrix(
+        GetAttachedNode(), false, needPostEvent, touchPoint.postEventNodeId);
+    TransformForRecognizer(
+        localPoint, GetAttachedNode(), false, needPostEvent, touchPoint.postEventNodeId);
     Offset localOffset(localPoint.GetX(), localPoint.GetY());
     if (onClick_) {
         ClickInfo info = GetClickInfo();
@@ -483,11 +504,13 @@ GestureEvent ClickRecognizer::GetGestureEventInfo()
         }
     }
     PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
-    TransformForRecognizer(localPoint, GetAttachedNode(), false,
-        isPostEventResult_, touchPoint.postEventNodeId);
+    bool needPostEvent = isPostEventResult_ || touchPoint.passThrough;
+    TransformForRecognizer(
+        localPoint, GetAttachedNode(), false, needPostEvent, touchPoint.postEventNodeId);
     info.SetTimeStamp(touchPoint.time);
     info.SetScreenLocation(touchPoint.GetScreenOffset());
     info.SetGlobalLocation(touchPoint.GetOffset()).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
+    info.SetGlobalDisplayLocation(touchPoint.GetGlobalDisplayOffset());
     info.SetSourceDevice(deviceType_);
     info.SetDeviceId(deviceId_);
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
@@ -633,6 +656,25 @@ GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
     return callback(gestureInfo_, info);
 }
 
+bool ClickRecognizer::CheckReconcileFromProperties(const RefPtr<NGGestureRecognizer>& recognizer)
+{
+    RefPtr<ClickRecognizer> curr = AceType::DynamicCast<ClickRecognizer>(recognizer);
+    if (!curr) {
+        return true;
+    }
+    if (curr->count_ != count_ || curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_) {
+        return true;
+    }
+    if (curr->distanceThreshold_.Value() == std::numeric_limits<double>::infinity() &&
+        distanceThreshold_.Value() == std::numeric_limits<double>::infinity()) {
+        return false;
+    }
+    if (curr->distanceThreshold_ != distanceThreshold_) {
+        return true;
+    }
+    return false;
+}
+
 bool ClickRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     RefPtr<ClickRecognizer> curr = AceType::DynamicCast<ClickRecognizer>(recognizer);
@@ -640,9 +682,7 @@ bool ClickRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
         ResetStatus();
         return false;
     }
-
-    if (curr->count_ != count_ || curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_ ||
-        curr->distanceThreshold_ != distanceThreshold_) {
+    if (CheckReconcileFromProperties(recognizer)) {
         ResetStatus();
         return false;
     }

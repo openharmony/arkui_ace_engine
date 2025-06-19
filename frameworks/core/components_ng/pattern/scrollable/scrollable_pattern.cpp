@@ -22,6 +22,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
+#include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -42,6 +43,7 @@
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -2901,6 +2903,10 @@ void ScrollablePattern::FireOnScroll(float finalOffset, OnScrollEvent& onScroll)
     auto offsetPX = Dimension(finalOffset);
     auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
     auto scrollState = GetScrollState();
+    if (SystemProperties::IsWhiteBlockEnabled() &&
+        ScrollAdjustmanager::GetInstance().ChangeScrollStateIfNeed(scrollState)) {
+        onScroll(0.0_vp, ScrollState::IDLE);
+    }
     bool isTriggered = false;
     if (!NearZero(finalOffset)) {
         onScroll(offsetVP, scrollState);

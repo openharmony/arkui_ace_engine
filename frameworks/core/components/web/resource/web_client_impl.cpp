@@ -488,7 +488,7 @@ bool WebClientImpl::OnFileSelectorShow(
     ContainerScope scope(delegate->GetInstanceId());
     bool jsResult = false;
     auto param = std::make_shared<FileSelectorEvent>(AceType::MakeRefPtr<FileSelectorParamOhos>(params),
-        AceType::MakeRefPtr<FileSelectorResultOhos>(callback));
+        AceType::MakeRefPtr<FileSelectorResultOhos>(callback, delegate));
     auto task = delegate->GetTaskExecutor();
     if (task == nullptr) {
         return false;
@@ -1424,5 +1424,33 @@ bool WebClientImpl::OnAllSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSAllSs
             }
         }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientAllSslErrorRequest");
     return jsResult;
+}
+
+void WebClientImpl::ShowMagnifier()
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->ShowMagnifier();
+}
+
+void WebClientImpl::HideMagnifier()
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    delegate->HideMagnifier();
+}
+
+void WebClientImpl::OnPageTitleV2(const std::string &title, bool isRealTitle)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return;
+    }
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnReceivedTitle(title, isRealTitle);
 }
 } // namespace OHOS::Ace

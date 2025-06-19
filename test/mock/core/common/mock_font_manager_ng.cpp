@@ -73,9 +73,4 @@ void FontManager::AddHybridRenderNode(const WeakPtr<NG::UINode>& node) {}
 void FontManager::RemoveHybridRenderNode(const WeakPtr<NG::UINode>& node) {}
 void FontManager::UpdateHybridRenderNodes() {}
 void FontManager::StartAbilityOnInstallAppInStore(const std::string& appName) const {}
-bool FontManager::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
-{
-    fontInfo.fullName = fontName;
-    return false;
-}
 } // namespace OHOS::Ace

@@ -732,4 +732,15 @@ bool TextFieldSelectOverlay::IsStopBackPress() const
     CHECK_NULL_RETURN(pattern, true);
     return pattern->IsStopBackPress();
 }
+
+void TextFieldSelectOverlay::BeforeOnPrepareMenu()
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto selectController = pattern->GetTextSelectController();
+    CHECK_NULL_VOID(selectController);
+    // If the onPrepareMenu property exists, the onTextSelectionChange event needs to be triggered first to ensure the
+    // application side can obtain the latest selected area.
+    selectController->FireSelectEvent();
+}
 } // namespace OHOS::Ace::NG

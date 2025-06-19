@@ -1459,4 +1459,308 @@ HWTEST_F(ScrollPatternTestNg, DoJump001, TestSize.Level1)
     scrollPattern->DoJump(1000.0f, SCROLL_FROM_JUMP);
     EXPECT_TRUE(scrollPattern->IsOutOfBoundary());
 }
+
+/**
+ * @tc.name: ValidateOffset01
+ * @tc.desc: Test ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, ValidateOffset01, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    scrollPattern->axis_ = Axis::NONE;
+    auto result = scrollPattern->ValidateOffset(4.0, 1.0f);
+    EXPECT_EQ(result, 1.0f);
+}
+
+/**
+ * @tc.name: ValidateOffset02
+ * @tc.desc: Test ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, ValidateOffset02, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    float scrollableDistance = 2.0f;
+    scrollPattern->scrollableDistance_ = scrollableDistance;
+    scrollPattern->axis_ = Axis::HORIZONTAL;
+    auto result = scrollPattern->ValidateOffset(4.0, 2.0f);
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: ValidateOffset03
+ * @tc.desc: Test ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, ValidateOffset03, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    float scrollableDistance = 2.0f;
+    scrollPattern->scrollableDistance_ = scrollableDistance;
+    FlexDirection direction = FlexDirection::ROW_REVERSE;
+    scrollPattern->SetDirection(direction);
+    scrollPattern->axis_ = Axis::HORIZONTAL;
+    auto result = scrollPattern->ValidateOffset(4.0, 2.0f);
+    EXPECT_EQ(result, 2.0f);
+}
+
+/**
+ * @tc.name: ValidateOffset04
+ * @tc.desc: Test ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, ValidateOffset04, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    float scrollableDistance = 2.0f;
+    scrollPattern->scrollableDistance_ = scrollableDistance;
+    EdgeEffect edgeEffect = EdgeEffect::SPRING;
+    scrollPattern->edgeEffect_ = edgeEffect;
+    FlexDirection direction = FlexDirection::ROW_REVERSE;
+    scrollPattern->SetDirection(direction);
+    scrollPattern->axis_ = Axis::HORIZONTAL;
+    auto result = scrollPattern->ValidateOffset(6.0, 2.0f);
+    EXPECT_EQ(result, 2.0f);
+}
+
+/**
+ * @tc.name: ValidateOffset05
+ * @tc.desc: Test ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, ValidateOffset05, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    float scrollableDistance = 2.0f;
+    scrollPattern->scrollableDistance_ = scrollableDistance;
+    EdgeEffect edgeEffect = EdgeEffect::FADE;
+    scrollPattern->edgeEffect_ = edgeEffect;
+    FlexDirection direction = FlexDirection::ROW_REVERSE;
+    scrollPattern->SetDirection(direction);
+    scrollPattern->axis_ = Axis::HORIZONTAL;
+    auto result = scrollPattern->ValidateOffset(6.0, 2.0f);
+    EXPECT_EQ(result, 2.0f);
+}
+
+/**
+ * @tc.name: ValidateOffset06
+ * @tc.desc: Test ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, ValidateOffset06, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    float scrollableDistance = 2.0f;
+    scrollPattern->scrollableDistance_ = scrollableDistance;
+    EdgeEffect edgeEffect = EdgeEffect::FADE;
+    scrollPattern->edgeEffect_ = edgeEffect;
+    FlexDirection direction = FlexDirection::ROW_REVERSE;
+    scrollPattern->SetDirection(direction);
+    scrollPattern->axis_ = Axis::HORIZONTAL;
+    auto result = scrollPattern->ValidateOffset(13.0, 2.0f);
+    EXPECT_EQ(result, 2.0f);
+}
+
+/**
+ * @tc.name: ValidateOffset07
+ * @tc.desc: Test ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, ValidateOffset07, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    float scrollableDistance = 2.0f;
+    scrollPattern->scrollableDistance_ = scrollableDistance;
+    EdgeEffect edgeEffect = EdgeEffect::FADE;
+    scrollPattern->edgeEffect_ = edgeEffect;
+    FlexDirection direction = FlexDirection::ROW_REVERSE;
+    scrollPattern->SetDirection(direction);
+    scrollPattern->axis_ = Axis::HORIZONTAL;
+    auto result = scrollPattern->ValidateOffset(8.0, 2.0f);
+    EXPECT_EQ(result, 2.0f);
+}
+
+/**
+ * @tc.name: ValidateOffset08
+ * @tc.desc: Test ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, ValidateOffset08, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    float scrollableDistance = 2.0f;
+    scrollPattern->scrollableDistance_ = scrollableDistance;
+    EdgeEffect edgeEffect = EdgeEffect::FADE;
+    scrollPattern->edgeEffect_ = edgeEffect;
+    FlexDirection direction = FlexDirection::ROW_REVERSE;
+    scrollPattern->SetDirection(direction);
+    scrollPattern->axis_ = Axis::HORIZONTAL;
+    auto result = scrollPattern->ValidateOffset(8.0, 2.0f);
+    EXPECT_EQ(result, 2.0f);
+}
+
+/**
+ * @tc.name: ValidateOffset09
+ * @tc.desc: Test ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, ValidateOffset09, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    scrollPattern->axis_ = Axis::NONE;
+    scrollPattern->currentOffset_ = 2.0f;
+    scrollPattern->ValidateOffset(4.0, 2.0f);
+    EXPECT_EQ(scrollPattern->currentOffset_, 2.0f);
+}
+
+/**
+ * @tc.name: ValidateOffset10
+ * @tc.desc: Test ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, ValidateOffset10, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    float scrollableDistance = 2.0f;
+    scrollPattern->scrollableDistance_ = scrollableDistance;
+    scrollPattern->axis_ = Axis::HORIZONTAL;
+    scrollPattern->currentOffset_ = 1.0f;
+    scrollPattern->ValidateOffset(4.0, 2.0f);
+    EXPECT_EQ(scrollPattern->currentOffset_, 1.0f);
+}
+
+/**
+ * @tc.name: ValidateOffset11
+ * @tc.desc: Test ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, ValidateOffset11, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    float scrollableDistance = 2.0f;
+    scrollPattern->scrollableDistance_ = scrollableDistance;
+    FlexDirection direction = FlexDirection::ROW_REVERSE;
+    scrollPattern->SetDirection(direction);
+    scrollPattern->axis_ = Axis::HORIZONTAL;
+    scrollPattern->currentOffset_ = 1.0f;
+    scrollPattern->ValidateOffset(4.0, 2.0f);
+    EXPECT_EQ(scrollPattern->currentOffset_, 1.0f);
+}
+
+/**
+ * @tc.name: ValidateOffset12
+ * @tc.desc: Test ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, ValidateOffset12, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    float scrollableDistance = 2.0f;
+    scrollPattern->scrollableDistance_ = scrollableDistance;
+    EdgeEffect edgeEffect = EdgeEffect::SPRING;
+    scrollPattern->edgeEffect_ = edgeEffect;
+    FlexDirection direction = FlexDirection::ROW_REVERSE;
+    scrollPattern->SetDirection(direction);
+    scrollPattern->axis_ = Axis::HORIZONTAL;
+    scrollPattern->currentOffset_ = 1.0f;
+    scrollPattern->ValidateOffset(6.0, 2.0f);
+    EXPECT_EQ(scrollPattern->currentOffset_, 1.0f);
+}
+
+/**
+ * @tc.name: ValidateOffset13
+ * @tc.desc: Test ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, ValidateOffset13, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    float scrollableDistance = 2.0f;
+    scrollPattern->scrollableDistance_ = scrollableDistance;
+    EdgeEffect edgeEffect = EdgeEffect::FADE;
+    scrollPattern->edgeEffect_ = edgeEffect;
+    FlexDirection direction = FlexDirection::ROW_REVERSE;
+    scrollPattern->SetDirection(direction);
+    scrollPattern->axis_ = Axis::HORIZONTAL;
+    scrollPattern->currentOffset_ = 1.0f;
+    scrollPattern->ValidateOffset(6.0, 2.0f);
+    EXPECT_EQ(scrollPattern->currentOffset_, 1.0f);
+}
+
+/**
+ * @tc.name: ValidateOffset14
+ * @tc.desc: Test ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, ValidateOffset14, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    float scrollableDistance = 2.0f;
+    scrollPattern->scrollableDistance_ = scrollableDistance;
+    EdgeEffect edgeEffect = EdgeEffect::FADE;
+    scrollPattern->edgeEffect_ = edgeEffect;
+    FlexDirection direction = FlexDirection::ROW_REVERSE;
+    scrollPattern->SetDirection(direction);
+    scrollPattern->axis_ = Axis::HORIZONTAL;
+    scrollPattern->currentOffset_ = 1.0f;
+    scrollPattern->ValidateOffset(13.0, 2.0f);
+    EXPECT_EQ(scrollPattern->currentOffset_, 1.0f);
+}
+
+/**
+ * @tc.name: ValidateOffset15
+ * @tc.desc: Test ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, ValidateOffs15, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    float scrollableDistance = 2.0f;
+    scrollPattern->scrollableDistance_ = scrollableDistance;
+    EdgeEffect edgeEffect = EdgeEffect::FADE;
+    scrollPattern->edgeEffect_ = edgeEffect;
+    FlexDirection direction = FlexDirection::ROW_REVERSE;
+    scrollPattern->SetDirection(direction);
+    scrollPattern->axis_ = Axis::HORIZONTAL;
+    scrollPattern->currentOffset_ = 1.0f;
+    scrollPattern->ValidateOffset(8.0, 2.0f);
+    EXPECT_EQ(scrollPattern->currentOffset_, 1.0f);
+}
+
+/**
+ * @tc.name: ValidateOffset16
+ * @tc.desc: Test ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTestNg, ValidateOffset16, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    float scrollableDistance = 2.0f;
+    scrollPattern->scrollableDistance_ = scrollableDistance;
+    EdgeEffect edgeEffect = EdgeEffect::FADE;
+    scrollPattern->edgeEffect_ = edgeEffect;
+    FlexDirection direction = FlexDirection::ROW_REVERSE;
+    scrollPattern->SetDirection(direction);
+    scrollPattern->axis_ = Axis::HORIZONTAL;
+    scrollPattern->currentOffset_ = 1.0f;
+    scrollPattern->ValidateOffset(11.0, 2.0f);
+    EXPECT_EQ(scrollPattern->currentOffset_, 1.0f);
+}
 } // namespace OHOS::Ace::NG

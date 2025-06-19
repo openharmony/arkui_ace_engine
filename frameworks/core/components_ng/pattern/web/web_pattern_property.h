@@ -90,6 +90,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(WebMediaAVSessionEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableDataDetector, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnableFollowSystemFontWeight, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(GestureFocusMode, GestureFocusMode);
 };
 
 } // namespace OHOS::Ace::NG

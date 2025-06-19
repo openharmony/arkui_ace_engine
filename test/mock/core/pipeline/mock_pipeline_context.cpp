@@ -14,7 +14,6 @@
  */
 
 #include "mock_pipeline_context.h"
-#include "test/mock/core/common/mock_font_manager.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -171,11 +170,6 @@ void MockPipelineContext::TearDown()
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
 {
     return pipeline_;
-}
-
-void MockPipelineContext::ResetFontManager()
-{
-    pipeline_->fontManager_ = MockFontManager::Create();
 }
 
 void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
@@ -1292,14 +1286,6 @@ void PipelineBase::SetFontScale(float fontScale)
     fontScale_ = fontScale;
 }
 
-bool PipelineBase::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
-{
-    if (fontManager_) {
-        return fontManager_->GetSystemFont(fontName, fontInfo);
-    }
-    return false;
-}
-
 bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
 {
     return false;
@@ -1400,10 +1386,6 @@ void NG::PipelineContext::SetWindowSizeChangeReason(WindowSizeChangeReason reaso
 }
 
 void NG::PipelineContext::NotifyColorModeChange(uint32_t colorMode) {}
-
-void NG::PipelineContext::RemoveNodeFromDirtyRenderNode(int32_t nodeId, int32_t pageId) {}
- 
-void NG::PipelineContext::GetRemovedDirtyRenderAndErase(uint32_t id) {}
 
 std::shared_ptr<Rosen::RSUIDirector> NG::PipelineContext::GetRSUIDirector()
 {

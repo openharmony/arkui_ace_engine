@@ -302,7 +302,7 @@ public:
     int32_t selectedEnd = -1;
     bool needReLayoutParagraph = false;
     bool needReLayout = false;
-    bool hasAISpanResult = false;
+    int32_t aiSpanResultCount = 0;
     // used for Span uiNode
     bool needReCreateParagraph_ = true;
     RefPtr<AccessibilityProperty> accessibilityProperty = MakeRefPtr<AccessibilityProperty>();
@@ -754,7 +754,7 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign, ChangeFlag::RE_LAYOUT);
-    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextVerticalAlign, TextVerticalAlign, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextVerticalAlign, TextVerticalAlign, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(WordBreak, WordBreak, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy, ChangeFlag::RE_LAYOUT);

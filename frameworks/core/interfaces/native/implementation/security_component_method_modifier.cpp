@@ -94,12 +94,12 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 void IconSizeImpl(Ark_NativePointer node,
                   const Ark_Length* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // CHECK_NULL_VOID(value);
-    // auto valueOpt = Converter::OptConvert<Dimension>(*value);
-    // Validator::ValidateNonNegative(valueOpt);
-    // SecurityComponentModelNG::SetIconSize(frameNode, valueOpt);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto valueOpt = Converter::OptConvert<Dimension>(*value);
+    Validator::ValidateNonNegative(valueOpt);
+    SecurityComponentModelNG::SetIconSize(frameNode, valueOpt);
 }
 void LayoutDirectionImpl(Ark_NativePointer node,
                          Ark_SecurityComponentLayoutDirection value)

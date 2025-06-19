@@ -63,6 +63,7 @@ constexpr int32_t PARAM_COUNT = 2;
 constexpr int32_t SM_COLUMN_NUM = 4;
 constexpr int32_t MD_COLUMN_NUM = 8;
 constexpr int32_t LG_COLUMN_NUM = 12;
+constexpr int32_t DEFAULT_CUSTOM_ANIMATION_TIMEOUT = 1000;
 const std::vector<BarPosition> BAR_POSITIONS = { BarPosition::START, BarPosition::END };
 
 const std::vector<BlurStyle> BAR_BLURSTYLE = {
@@ -81,6 +82,11 @@ const std::vector<BlurStyle> BAR_BLURSTYLE = {
     BlurStyle::COMPONENT_ULTRA_THICK,
 };
 
+JSRef<JSVal> TabContentChangeEventToJSValue(const TabContentChangeEvent& eventInfo)
+{
+    return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetIndex()));
+}
+
 RefPtr<Curve> CreateAnimationCurveByObject(const JSCallbackInfo& info)
 {
     RefPtr<Curve> curve;
@@ -91,15 +97,14 @@ RefPtr<Curve> CreateAnimationCurveByObject(const JSCallbackInfo& info)
     std::function<float(float)> customCallBack = nullptr;
     JSRef<JSVal> onCallBack = object->GetProperty("__curveCustomFunc");
     if (onCallBack->IsFunction()) {
-        auto vm = info.GetVm();
-        auto jsFunc = JSRef<JSFunc>::Cast(onCallBack);
-        auto func = jsFunc->GetLocalHandle();
-        customCallBack = [vm, func = panda::CopyableGlobal(vm, func), id = Container::CurrentId()](
-                             float time) -> float {
+        RefPtr<JsFunction> jsFuncCallBack =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCallBack));
+        customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentId()](float time) -> float {
             ContainerScope scope(id);
-            panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, time) };
-            auto result = func->Call(vm, func.ToLocal(), params, 1);
-            auto resultValue = result->IsNumber() ? static_cast<float>(result->ToNumber(vm)->Value()) : 1.0f;
+            JSRef<JSVal> params[1];
+            params[0] = JSRef<JSVal>::Make(ToJSValue(time));
+            auto result = func->ExecuteJS(1, params);
+            auto resultValue = result->IsNumber() ? result->ToNumber<float>() : 1.0f;
             return resultValue;
         };
     }
@@ -116,17 +121,163 @@ RefPtr<Curve> CreateAnimationCurveByObject(const JSCallbackInfo& info)
 }
 } // namespace
 
+void JSTabs::SetOnChange(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onChange = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler), node = targetNode](
+                        const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!tabsInfo) {
+            TAG_LOGW(AceLogTag::ACE_TABS, "Tabs onChange callback execute failed.");
+            return;
+        }
+        ACE_SCORING_EVENT("Tabs.onChange");
+        ACE_SCOPED_TRACE("Tabs.onChange index %d", tabsInfo->GetIndex());
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(*tabsInfo);
+    };
+    TabsModel::GetInstance()->SetOnChange(std::move(onChange));
+}
+
+void JSTabs::SetOnTabBarClick(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto changeHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onTabBarClick = [executionContext = info.GetExecutionContext(), func = std::move(changeHandler),
+                             node = targetNode](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!tabsInfo) {
+            TAG_LOGW(AceLogTag::ACE_TABS, "Tabs onTabBarClick callback execute failed.");
+            return;
+        }
+        ACE_SCORING_EVENT("Tabs.onTabBarClick");
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(*tabsInfo);
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Tabs.onTabBarClick");
+    };
+    TabsModel::GetInstance()->SetOnTabBarClick(std::move(onTabBarClick));
+}
+
+void JSTabs::SetOnUnselected(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto unselectedHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onUnselected = [executionContext = info.GetExecutionContext(), func = std::move(unselectedHandler),
+                          node = targetNode](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!tabsInfo) {
+            TAG_LOGW(AceLogTag::ACE_TABS, "Tabs onUnselected callback execute failed.");
+            return;
+        }
+        ACE_SCORING_EVENT("Tabs.onUnselected");
+        ACE_SCOPED_TRACE("Tabs.onUnselected index %d", tabsInfo->GetIndex());
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(*tabsInfo);
+    };
+    TabsModel::GetInstance()->SetOnUnselected(std::move(onUnselected));
+}
+
+void JSTabs::SetOnAnimationStart(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto animationStartHandler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onAnimationStart = [executionContext = info.GetExecutionContext(),
+                                func = std::move(animationStartHandler)](
+                                int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        ACE_SCORING_EVENT("Tabs.onAnimationStart");
+        func->Execute(index, targetIndex, info);
+    };
+    TabsModel::GetInstance()->SetOnAnimationStart(std::move(onAnimationStart));
+}
+
+void JSTabs::SetOnAnimationEnd(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto animationEndHandler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onAnimationEnd = [executionContext = info.GetExecutionContext(), func = std::move(animationEndHandler)](
+                              int32_t index, const AnimationCallbackInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        ACE_SCORING_EVENT("Tabs.onAnimationEnd");
+        func->Execute(index, info);
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Tabs.onAnimationEnd");
+    };
+    TabsModel::GetInstance()->SetOnAnimationEnd(std::move(onAnimationEnd));
+}
+
+void JSTabs::SetOnGestureSwipe(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto gestureSwipeHandler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onGestureSwipe = [executionContext = info.GetExecutionContext(), func = std::move(gestureSwipeHandler)](
+                              int32_t index, const AnimationCallbackInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        ACE_SCORING_EVENT("Tabs.onGestureSwipe");
+        func->Execute(index, info);
+    };
+    TabsModel::GetInstance()->SetOnGestureSwipe(std::move(onGestureSwipe));
+}
+
+void JSTabs::SetOnSelected(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto selectedHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onSelected = [executionContext = info.GetExecutionContext(), func = std::move(selectedHandler),
+                          node = targetNode](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!tabsInfo) {
+            TAG_LOGW(AceLogTag::ACE_TABS, "Tabs onSelected callback execute failed.");
+            return;
+        }
+        ACE_SCORING_EVENT("Tabs.onSelected");
+        ACE_SCOPED_TRACE("Tabs.onSelected index %d", tabsInfo->GetIndex());
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(*tabsInfo);
+    };
+    TabsModel::GetInstance()->SetOnSelected(std::move(onSelected));
+}
+
 void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
 {
     CHECK_NULL_VOID(!changeEventVal->IsUndefined() && changeEventVal->IsFunction());
 
-    auto vm = info.GetVm();
-    auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
-    auto func = jsFunc->GetLocalHandle();
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onChangeEvent = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](const BaseEventInfo* info) {
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch trycatch(vm);
+    auto onChangeEvent = [executionContext = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                             const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         if (!tabsInfo) {
             TAG_LOGW(AceLogTag::ACE_TABS, "ParseTabsIndexObject execute onChange event failed.");
@@ -134,8 +285,8 @@ void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& change
         }
         ACE_SCORING_EVENT("Tabs.onChangeEvent");
         PipelineContext::SetCallBackNode(node);
-        panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, tabsInfo->GetIndex()) };
-        func->Call(vm, func.ToLocal(), params, 1);
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(tabsInfo->GetIndex()));
+        func->ExecuteJS(1, &newJSVal);
     };
     TabsModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
 }
@@ -567,6 +718,79 @@ void JSTabs::SetBarGridAlign(const JSCallbackInfo& info)
     TabsModel::GetInstance()->CreateWithResourceObj(TabJsResType::BAR_GRID_MARGIN, marginResObj);
 }
 
+void JSTabs::SetCustomContentTransition(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        return;
+    }
+
+    auto customContentTransitionInfo = info[0];
+    if (customContentTransitionInfo->IsUndefined() || !customContentTransitionInfo->IsFunction()) {
+        TabsModel::GetInstance()->SetIsCustomAnimation(false);
+        return;
+    }
+
+    RefPtr<JsTabsFunction> jsCustomAnimationFunc =
+        AceType::MakeRefPtr<JsTabsFunction>(JSRef<JSFunc>::Cast(customContentTransitionInfo));
+    auto onCustomAnimation = [execCtx = info.GetExecutionContext(), func = std::move(jsCustomAnimationFunc)](
+                                 int32_t from, int32_t to) -> TabContentAnimatedTransition {
+        TabContentAnimatedTransition transitionInfo;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, transitionInfo);
+
+        auto ret = func->Execute(from, to);
+        if (!ret->IsObject()) {
+            return transitionInfo;
+        }
+
+        auto transitionObj = JSRef<JSObject>::Cast(ret);
+        JSRef<JSVal> timeoutProperty = transitionObj->GetProperty("timeout");
+        if (timeoutProperty->IsNumber()) {
+            auto timeout = timeoutProperty->ToNumber<int32_t>();
+            transitionInfo.timeout = timeout < 0 ? DEFAULT_CUSTOM_ANIMATION_TIMEOUT : timeout;
+        } else {
+            transitionInfo.timeout = DEFAULT_CUSTOM_ANIMATION_TIMEOUT;
+        }
+
+        JSRef<JSVal> transition = transitionObj->GetProperty("transition");
+        if (transition->IsFunction()) {
+            RefPtr<JsTabsFunction> jsOnTransition =
+                AceType::MakeRefPtr<JsTabsFunction>(JSRef<JSFunc>::Cast(transition));
+            auto onTransition = [execCtx, func = std::move(jsOnTransition)](
+                                    const RefPtr<TabContentTransitionProxy>& proxy) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("onTransition");
+                func->Execute(proxy);
+            };
+
+            transitionInfo.transition = std::move(onTransition);
+        }
+
+        return transitionInfo;
+    };
+    TabsModel::GetInstance()->SetIsCustomAnimation(true);
+    TabsModel::GetInstance()->SetOnCustomAnimation(std::move(onCustomAnimation));
+}
+
+void JSTabs::SetOnContentWillChange(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto handler = AceType::MakeRefPtr<JsTabsFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(handler)]
+        (int32_t currentIndex, int32_t comingIndex) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        ACE_SCORING_EVENT("Tabs.onContentWillChange");
+        auto ret = func->Execute(currentIndex, comingIndex);
+        if (!ret->IsBoolean()) {
+            return true;
+        }
+        return ret->ToBoolean();
+    };
+    TabsModel::GetInstance()->SetOnContentWillChange(std::move(callback));
+}
+
 void JSTabs::SetAnimateMode(const JSCallbackInfo& info)
 {
     JSRef<JSVal> args = info[0];
@@ -634,19 +858,58 @@ void JSTabs::SetBarModifier(const JSCallbackInfo& info, const JsiRef<JsiValue>& 
     if (!val->IsObject()) {
         return;
     }
+    JSRef<JSObject> modifierObj = JSRef<JSObject>::Cast(val);
     auto vm = info.GetVm();
     auto globalObj = JSNApi::GetGlobalObject(vm);
     auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyCommonModifierToNode"));
-    if (globalFunc->IsFunction(vm)) {
-        panda::Local<panda::FunctionRef> funcRef = globalFunc;
-        auto func = panda::CopyableGlobal(vm, funcRef);
-        auto tabsNode = AceType::DynamicCast<NG::TabsNode>(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        CHECK_NULL_VOID(tabsNode);
-        auto tabBarNode = AceType::DynamicCast<NG::FrameNode>(tabsNode->GetTabBar());
-        CHECK_NULL_VOID(tabBarNode);
-        panda::Local<panda::JSValueRef> params[PARAM_COUNT] = { val->GetLocalHandle(),
-            panda::NativePointerRef::New(vm, AceType::RawPtr(tabBarNode)) };
-        func->Call(vm, func.ToLocal(), params, PARAM_COUNT);
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    std::function<void(WeakPtr<NG::FrameNode>)> onApply = nullptr;
+    if (globalFuncRef->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+        onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                      modifierParam = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            CHECK_NULL_VOID(func);
+            auto node = frameNode.Upgrade();
+            CHECK_NULL_VOID(node);
+            JSRef<JSVal> params[2];
+            params[0] = modifierParam;
+            params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+            PipelineContext::SetCallBackNode(node);
+            func->ExecuteJS(2, params);
+        };
+    }
+    TabsModel::GetInstance()->SetBarModifier(std::move(onApply));
+}
+
+void JSTabs::SetBarModifierApply(const JSCallbackInfo& info,
+    std::function<void(WeakPtr<NG::FrameNode>)>& barModiferApply, const JSRef<JSVal> val)
+{
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyCommonModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    JSRef<JSObject> modifierObj = JSRef<JSObject>::Cast(val);
+    std::function<void(WeakPtr<NG::FrameNode>)> onApply = nullptr;
+    if (globalFuncRef->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+        onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                      modifierParam = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            CHECK_NULL_VOID(func);
+            auto node = frameNode.Upgrade();
+            CHECK_NULL_VOID(node);
+            JSRef<JSVal> params[PARAM_COUNT];
+            params[0] = modifierParam;
+            params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+            PipelineContext::SetCallBackNode(node);
+            func->ExecuteJS(PARAM_COUNT, params);
+        };
+        barModiferApply = onApply;
     }
 }
 
@@ -693,6 +956,12 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("animationCurve", &JSTabs::SetAnimationCurve);
     JSClass<JSTabs>::StaticMethod("animationDuration", &JSTabs::SetAnimationDuration);
     JSClass<JSTabs>::StaticMethod("divider", &JSTabs::SetDivider);
+    JSClass<JSTabs>::StaticMethod("onChange", &JSTabs::SetOnChange);
+    JSClass<JSTabs>::StaticMethod("onTabBarClick", &JSTabs::SetOnTabBarClick);
+    JSClass<JSTabs>::StaticMethod("onUnselected", &JSTabs::SetOnUnselected);
+    JSClass<JSTabs>::StaticMethod("onAnimationStart", &JSTabs::SetOnAnimationStart);
+    JSClass<JSTabs>::StaticMethod("onAnimationEnd", &JSTabs::SetOnAnimationEnd);
+    JSClass<JSTabs>::StaticMethod("onGestureSwipe", &JSTabs::SetOnGestureSwipe);
     JSClass<JSTabs>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSTabs>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTabs>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
@@ -708,10 +977,13 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("barBackgroundColor", &JSTabs::SetBarBackgroundColor);
     JSClass<JSTabs>::StaticMethod("clip", &JSTabs::SetClip);
     JSClass<JSTabs>::StaticMethod("barGridAlign", &JSTabs::SetBarGridAlign);
+    JSClass<JSTabs>::StaticMethod("customContentTransition", &JSTabs::SetCustomContentTransition);
+    JSClass<JSTabs>::StaticMethod("onContentWillChange", &JSTabs::SetOnContentWillChange);
     JSClass<JSTabs>::StaticMethod("animationMode", &JSTabs::SetAnimateMode);
     JSClass<JSTabs>::StaticMethod("edgeEffect", &JSTabs::SetEdgeEffect);
     JSClass<JSTabs>::StaticMethod("barBackgroundEffect", &JSTabs::SetBarBackgroundEffect);
     JSClass<JSTabs>::StaticMethod("pageFlipMode", &JSTabs::SetPageFlipMode);
+    JSClass<JSTabs>::StaticMethod("onSelected", &JSTabs::SetOnSelected);
     JSClass<JSTabs>::StaticMethod("cachedMaxCount", &JSTabs::SetCachedMaxCount);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);

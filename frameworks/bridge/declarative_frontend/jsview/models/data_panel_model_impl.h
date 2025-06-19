@@ -29,6 +29,7 @@ public:
     void SetStrokeWidth(const Dimension& strokeWidth) override {}
     void SetShadowOption(const OHOS::Ace::NG::DataPanelShadow& shadowOption) override {}
     void CreateWithResourceObj(DataPanelResourceType colorType, const RefPtr<ResourceObject>& resObj) override {}
+    void SetValueColorsSetByUser(bool value) override {};
 };
 
 } // namespace OHOS::Ace::Framework

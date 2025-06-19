@@ -51,6 +51,8 @@ public:
     virtual void SetMaxFontScale(const float value) = 0;
     virtual void SetFontFamilies(std::vector<std::string>& familyNames) = 0;
     virtual void SetSymbolType(SymbolType value) = 0;
+    virtual void SetSymbolShadow(const SymbolShadow& symbolShadow) = 0;
+    virtual void SetShaderStyle(const std::vector<SymbolGradient>& style) = 0;
 
     virtual void RegisterSymbolFontColorResource(const std::string& key, std::vector<Color>& symbolColor,
         const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr) = 0;

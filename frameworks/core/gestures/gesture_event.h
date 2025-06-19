@@ -126,6 +126,17 @@ public:
         return globalLocation_;
     }
 
+    GestureEvent& SetGlobalDisplayLocation(const Offset& globalDisplayLocation)
+    {
+        globalDisplayLocation_ = globalDisplayLocation;
+        return *this;
+    }
+
+    const Offset& GetGlobalDisplayLocation() const
+    {
+        return globalDisplayLocation_;
+    }
+
     const Offset& GetPinchCenter() const
     {
         return pinchCenter_;
@@ -374,6 +385,8 @@ private:
     Offset localLocation_;
     // Will be used in drag.
     Offset screenLocation_;
+    // The location where the touch point touches the screen when there are multiple screens.
+    Offset globalDisplayLocation_;
     // Raw last touchPoint global location.
     Offset rawGlobalLocation_;
     Offset pinchCenter_;

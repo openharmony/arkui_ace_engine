@@ -127,6 +127,21 @@ bool ArkTSUtils::ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRe
     return true;
 }
 
+bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& color,
+    std::vector<RefPtr<ResourceObject>>& resObjs)
+{
+    RefPtr<ResourceObject> resObj;
+    bool result = ArkTSUtils::ParseJsColorAlpha(vm, value, color, resObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        if (resObj) {
+            resObjs.push_back(resObj);
+        } else {
+            resObjs.push_back(nullptr);
+        }
+    }
+    return result;
+}
+
 bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, bool fromTheme)
 {
     RefPtr<ResourceObject> resourceObject;
@@ -1751,7 +1766,8 @@ void ArkTSUtils::ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args,
     std::optional<CalcDimension>& optionalDimension, RefPtr<ResourceObject>& resObj)
 {
     CalcDimension valueDim;
-    if (!args->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, args, valueDim, resObj, false)) {
+    auto outerBorder = ArkTSUtils::ParseJsDimensionVp(vm, args, valueDim, resObj, false);
+    if (!args->IsUndefined() && outerBorder) {
         if (valueDim.IsNegative() || valueDim.Unit() == DimensionUnit::PERCENT) {
             valueDim.Reset();
         }
@@ -2643,6 +2659,13 @@ bool ArkTSUtils::ParseJsInt32(const EcmaVM *vm, const Local<JSValueRef> &value, 
 void ArkTSUtils::ParseGradientCenter(
     const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& values)
 {
+    std::vector<RefPtr<ResourceObject>> vectorResObj;
+    ArkTSUtils::ParseGradientCenter(vm, value, values, vectorResObj);
+}
+
+void ArkTSUtils::ParseGradientCenter(const EcmaVM* vm, const Local<JSValueRef>& value,
+    std::vector<ArkUIInt32orFloat32>& values, std::vector<RefPtr<ResourceObject>>& vectorResObj)
+{
     bool hasValueX = false;
     bool hasValueY = false;
     CalcDimension valueX;
@@ -2651,10 +2674,24 @@ void ArkTSUtils::ParseGradientCenter(
         auto array = panda::Local<panda::ArrayRef>(value);
         auto length = array->Length(vm);
         if (length == NUM_2) {
+            RefPtr<ResourceObject> xResObj;
+            RefPtr<ResourceObject> yResObj;
             hasValueX =
-                ArkTSUtils::ParseJsDimensionVp(vm, panda::ArrayRef::GetValueAt(vm, array, NUM_0), valueX, false);
+                ArkTSUtils::ParseJsDimensionVp(vm, panda::ArrayRef::GetValueAt(vm, array, NUM_0), valueX,
+                xResObj, false);
             hasValueY =
-                ArkTSUtils::ParseJsDimensionVp(vm, panda::ArrayRef::GetValueAt(vm, array, NUM_1), valueY, false);
+                ArkTSUtils::ParseJsDimensionVp(vm, panda::ArrayRef::GetValueAt(vm, array, NUM_1), valueY,
+                yResObj, false);
+            if (xResObj) {
+                vectorResObj.push_back(xResObj);
+            } else {
+                vectorResObj.push_back(nullptr);
+            }
+            if (yResObj) {
+                vectorResObj.push_back(yResObj);
+            } else {
+                vectorResObj.push_back(nullptr);
+            }
         }
     }
     values.push_back({.i32 = static_cast<ArkUI_Int32>(hasValueX)});
@@ -2665,8 +2702,8 @@ void ArkTSUtils::ParseGradientCenter(
     values.push_back({.i32 = static_cast<ArkUI_Int32>(valueY.Unit())});
 }
 
-void ArkTSUtils::ParseGradientColorStops(
-    const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& colors)
+void ArkTSUtils::ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef>& value,
+    std::vector<ArkUIInt32orFloat32>& colors, std::vector<RefPtr<ResourceObject>>& vectorResObj)
 {
     if (!value->IsArray(vm)) {
         return;
@@ -2685,8 +2722,16 @@ void ArkTSUtils::ParseGradientColorStops(
         }
         Color color;
         auto colorParams = panda::ArrayRef::GetValueAt(vm, itemArray, NUM_0);
-        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color)) {
+        RefPtr<ResourceObject> resObj;
+        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color, resObj)) {
             continue;
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            if (resObj) {
+                vectorResObj.push_back(resObj);
+            } else {
+                vectorResObj.push_back(nullptr);
+            }
         }
         bool hasDimension = false;
         double dimension = 0.0;
@@ -2700,6 +2745,13 @@ void ArkTSUtils::ParseGradientColorStops(
         colors.push_back({.i32 = static_cast<ArkUI_Int32>(hasDimension)});
         colors.push_back({.f32 = static_cast<ArkUI_Float32>(dimension)});
     }
+}
+
+void ArkTSUtils::ParseGradientColorStops(
+    const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& colors)
+{
+    std::vector<RefPtr<ResourceObject>> vectorResObj;
+    ArkTSUtils::ParseGradientColorStops(vm, value, colors, vectorResObj);
 }
 
 void ArkTSUtils::ParseGradientAngle(

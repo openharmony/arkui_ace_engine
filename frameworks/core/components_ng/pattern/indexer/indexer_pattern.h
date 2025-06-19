@@ -104,6 +104,7 @@ protected:
     void RemoveBubble();
     void StartCollapseDelayTask(RefPtr<FrameNode>& hostNode, uint32_t duration = INDEXER_COLLAPSE_WAIT_DURATION);
     void OnSelect();
+    void ItemSelectedChangedAnimation();
     int32_t GetSkipChildIndex(int32_t step);
     void UpdatePopupOpacity(float ratio);
     void UpdatePopupVisibility(VisibleType visible);
@@ -189,7 +190,6 @@ private:
     void IndexerHoverInAnimation();
     void IndexerHoverOutAnimation();
     void IndexerPressInAnimation();
-    void ItemSelectedChangedAnimation();
     void IndexerPressOutAnimation();
     void SetActionSelect(RefPtr<FrameNode>& textNode, RefPtr<AccessibilityProperty>& accessibilityProperty);
     void SetActionClearSelection(RefPtr<FrameNode>& textNode, RefPtr<AccessibilityProperty>& accessibilityProperty);

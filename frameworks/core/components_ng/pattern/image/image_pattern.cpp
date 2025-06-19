@@ -937,14 +937,22 @@ void ImagePattern::InitOnKeyEvent()
     keyEventCallback_ = [weak = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        pattern->OnKeyEvent();
+        pattern->OnKeyEvent(event);
         return false;
     };
     focusHub->SetOnKeyEventInternal(std::move(keyEventCallback_));
 }
 
-void ImagePattern::OnKeyEvent()
+void ImagePattern::OnKeyEvent(const KeyEvent& event)
 {
+    if (imageAnalyzerManager_) {
+        auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto imageInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+        if (!imageInfo.IsSvg()) {
+            imageAnalyzerManager_->UpdateKeyEvent(event);
+        }
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
@@ -1957,6 +1965,25 @@ void ImagePattern::OnLanguageConfigurationUpdate()
 void ImagePattern::OnColorConfigurationUpdate()
 {
     OnConfigurationUpdate();
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID(theme);
+    auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetImageFillSetByUserValue(false)) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
+            return;
+        }
+        CHECK_NULL_VOID(theme);
+        auto color = theme->GetFillColor();
+        UpdateImageFill(color);
+    }
 }
 
 void ImagePattern::OnDirectionConfigurationUpdate()

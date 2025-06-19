@@ -1416,6 +1416,9 @@ std::vector<MenuOptionsParam> GetMenuOptionsParamsWithEditMenuOption(
 {
     std::vector<MenuOptionsParam> createMenuItems;
     CHECK_NULL_RETURN(info, createMenuItems);
+    if (info->onCreateCallback.onPrepareMenuCallback && info->onCreateCallback.beforeOnPrepareMenuCallback) {
+        info->onCreateCallback.beforeOnPrepareMenuCallback();
+    }
     if (info->onCreateCallback.onCreateMenuCallback) {
         createMenuItems = info->onCreateCallback.onCreateMenuCallback(systemMenuItemParams);
     }

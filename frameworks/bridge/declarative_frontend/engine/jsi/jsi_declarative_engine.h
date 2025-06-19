@@ -391,6 +391,8 @@ public:
 
     std::shared_ptr<void> SerializeValue(const std::shared_ptr<Framework::JsValue>& jsValue) override;
 
+    void TriggerModuleSerializer() override;
+
     void SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder) override;
 
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;

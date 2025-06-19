@@ -258,6 +258,16 @@ public:
             pattern->GetSelectIndex(start, end);
         };
         selectInfo.onCreateCallback.textRangeCallback = textRange;
+        if (onPrepareMenuCallback_) {
+            auto beforeOnPrepareMenu = [weak = WeakClaim(this)]() {
+                auto overlay = weak.Upgrade();
+                CHECK_NULL_VOID(overlay);
+                overlay->BeforeOnPrepareMenu();
+            };
+            selectInfo.onCreateCallback.beforeOnPrepareMenuCallback = beforeOnPrepareMenu;
+        } else {
+            selectInfo.onCreateCallback.beforeOnPrepareMenuCallback = nullptr;
+        }
     }
     bool GetClipHandleViewPort(RectF& rect);
     bool CalculateClippedRect(RectF& rect);
@@ -308,6 +318,7 @@ public:
         CHECK_NULL_RETURN(manager, std::optional<SelectOverlayInfo>());
         return manager->GetSelectOverlayInfo();
     }
+    virtual void BeforeOnPrepareMenu() {}
 
 protected:
     RectF MergeSelectedBoxes(
