@@ -6530,14 +6530,15 @@ void RichEditorPattern::DeleteContent(int32_t length)
 
 void RichEditorPattern::DeleteToMaxLength(std::optional<int32_t> length)
 {
-    if (length.value_or(INT_MAX) >= GetTextContentLength() || length.value_or(INT_MAX) <= 0) {
+    int maxLength = length.value_or(INT_MAX);
+    if (maxLength >= GetTextContentLength() || maxLength < 0) {
         return;
     }
     int32_t textContentLength = GetTextContentLength();
     if (isSpanStringMode_) {
-        DeleteValueInStyledString(length.value_or(INT_MAX), GetTextContentLength() - length.value_or(INT_MAX));
+        DeleteValueInStyledString(maxLength, GetTextContentLength() - maxLength);
     } else {
-        while (textContentLength > length.value_or(INT_MAX)) {
+        while (textContentLength > maxLength) {
             textContentLength -= CalculateDeleteLength(CUSTOM_CONTENT_LENGTH, true);
             DeleteContent(CUSTOM_CONTENT_LENGTH);
         }
