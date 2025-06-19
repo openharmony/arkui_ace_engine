@@ -2259,5 +2259,21 @@ HWTEST_F(TextPickerPatternTestNg, TextPickerPatternTest020, TestSize.Level1)
     SizeF pickerContentSize = SizeF(0.0f, 200.0f);
     auto columnSize = textPickerPattern_->CalculateColumnSize(index, childCount, pickerContentSize);
     EXPECT_FLOAT_EQ(columnSize, 0.0f);
+
+    std::vector<Dimension> width;
+    width.emplace_back(Dimension(10.0f, DimensionUnit::PX));
+    textPickerPattern_->SetColumnWidths(width);
+    index = 1;
+    childCount = 2.0f;
+    pickerContentSize = SizeF(100.0f, 200.0f);
+    columnSize = textPickerPattern_->CalculateColumnSize(index, childCount, pickerContentSize);
+    EXPECT_FLOAT_EQ(columnSize, 90.0f);
+
+    textPickerPattern_->SetColumnWidths(width);
+    index = 1;
+    childCount = 1.0f;
+    pickerContentSize = SizeF(100.0f, 200.0f);
+    columnSize = textPickerPattern_->CalculateColumnSize(index, childCount, pickerContentSize);
+    EXPECT_FLOAT_EQ(columnSize, 0.0f);
 }
 } // namespace OHOS::Ace::NG
