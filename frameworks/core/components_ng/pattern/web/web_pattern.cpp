@@ -8351,4 +8351,11 @@ void WebPattern::OnHideMagnifier()
     HideMagnifier();
 }
 
+
+void WebPattern::SetTouchHandleExistState(bool touchHandleExist)
+{
+    if (delegate_) {
+        delegate_->SetTouchHandleExistState(touchHandleExist);
+    }
+}
 } // namespace OHOS::Ace::NG
