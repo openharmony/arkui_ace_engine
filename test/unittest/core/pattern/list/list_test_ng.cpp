@@ -84,6 +84,7 @@ void ListTestNg::TearDown()
     RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
+    itemGroupPatters_.clear();
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
     paintProperty_ = nullptr;
@@ -166,6 +167,11 @@ ListItemGroupModelNG ListTestNg::CreateListItemGroup(V2::ListItemGroupStyle list
     groupModel.Create(listItemGroupStyle);
     auto listItemGroup = ViewStackProcessor::GetInstance()->GetMainElementNode();
     listItemGroup->SetParent(weakList);
+    auto listItemGroupFrameNode = AceType::DynamicCast<FrameNode>(listItemGroup);
+    auto groupPattern_ = listItemGroupFrameNode->GetPattern<ListItemGroupPattern>();
+    if (groupPattern_) {
+        itemGroupPatters_.emplace_back(groupPattern_);
+    }
     return groupModel;
 }
 

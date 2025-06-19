@@ -3985,8 +3985,8 @@ HWTEST_F(ListCommonTestNg, ScrollToLastFocusIndex002, TestSize.Level1)
     frameNode->focusHub_ = focusNode;
     list.focusIndex_ = 2;
     list.startIndex_ = 5;
-
     list.endIndex_ = 10;
+    list.maxListItemIndex_ = 10;
     auto result = list.ScrollToLastFocusIndex(KeyEvent(KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN));
     EXPECT_FALSE(result);
     EXPECT_EQ(list.scrollSource_, 7);
@@ -4017,6 +4017,199 @@ HWTEST_F(ListCommonTestNg, ScrollToFocusNodeIndex001, TestSize.Level1)
 
     focusNode = GetChildFocusHub(frameNode_, 2);
     EXPECT_TRUE(focusNode->IsCurrentFocus());
+}
+
+/**
+ * @tc.name: UpdateStartIndex001
+ * @tc.desc: Test ListFocus UpdateStartIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, UpdateStartIndex001, TestSize.Level1)
+{
+    ListPattern list;
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 2, listItemPattern);
+    RefPtr<PipelineContext> pipe = AceType::MakeRefPtr<PipelineContext>();
+    RefPtr<FocusManager> focusManager = AceType::MakeRefPtr<FocusManager>(pipe);
+    focusManager->isFocusActive_ = true;
+    pipe->focusManager_ = focusManager;
+    frameNode->context_ = AceType::RawPtr(pipe);
+    WeakPtr<FrameNode> node = frameNode;
+    listItemPattern->frameNode_ = frameNode;
+    list.frameNode_ = frameNode;
+    RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
+    focusNode->currentFocus_ = true;
+    auto listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    frameNode->layoutProperty_ = listLayoutProperty;
+    frameNode->focusHub_ = focusNode;
+    list.focusIndex_ = 2;
+    list.startIndex_ = 5;
+    list.endIndex_ = 10;
+    list.maxListItemIndex_ = 10;
+
+    /**
+     * @tc.steps: step1. Focus node outside the list index
+     * @tc.expected: do NOT scroll
+     */
+    auto result1 = list.UpdateStartIndex(-1, -1);
+    EXPECT_FALSE(result1);
+    EXPECT_EQ(list.scrollSource_, 0);
+
+    /**
+     * @tc.steps: step1. Focus node excute UpdateStartIndex
+     * @tc.expected: scroll to the node
+     */
+    auto result2 = list.UpdateStartIndex(2, -1);
+    EXPECT_FALSE(result2);
+    EXPECT_EQ(list.scrollSource_, 7);
+}
+
+/**
+ * @tc.name: FireFocus001
+ * @tc.desc: Test FireFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, FireFocus001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateFocusableListItems(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Focus node inside the viewport
+     * @tc.expected: request focus for this node
+     */
+    RefPtr<FocusHub> focusHub = frameNode_->GetFocusHub();
+    focusHub->currentFocus_ = true;
+
+    int32_t focusNodeIndex = 6;
+    pattern_->focusIndex_ = 2;
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 4;
+    pattern_->maxListItemIndex_ = 10;
+    pattern_->FireFocus();
+    FlushUITasks();
+    RefPtr<FocusHub> focusNode = GetChildFocusHub(frameNode_, focusNodeIndex);
+    EXPECT_FALSE(focusNode->IsCurrentFocus());
+    focusNode = GetChildFocusHub(frameNode_, 2);
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step2. Focus node outside the viewport
+     * @tc.expected: lost focus for this node
+     */
+    pattern_->focusIndex_ = 6;
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 4;
+    pattern_->maxListItemIndex_ = 10;
+    pattern_->FireFocus();
+    FlushUITasks();
+    focusNode = GetChildFocusHub(frameNode_, 2);
+    EXPECT_FALSE(focusNode->IsCurrentFocus());
+}
+
+/**
+ * @tc.name: FireFocusInListItemGroup001
+ * @tc.desc: Test FireFocusInListItemGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, FireFocusInListItemGroup001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateFocusableListItemGroups(3);
+    CreateDone();
+    if (itemGroupPatters_.size() < 0 || itemGroupPatters_.size() != 3) {
+        AssertionFailure() << "ItemGroupPatters count is NOT valid.";
+    }
+    /**
+     * @tc.steps: step1. Focus node inside the list item group viewport
+     * @tc.expected: request focus for this node
+     */
+
+    RefPtr<FocusHub> focusHub = frameNode_->GetFocusHub();
+    focusHub->currentFocus_ = true;
+
+    pattern_->focusIndex_ = 0;
+    pattern_->focusGroupIndex_ = 0;
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 4;
+    pattern_->maxListItemIndex_ = 10;
+
+    if (!itemGroupPatters_[0]) {
+        AssertionFailure() << "ItemGroupPatter[0]  is null.";
+    }
+    auto itemGoupHost = itemGroupPatters_[0]->GetHost();
+    if (!itemGoupHost) {
+        AssertionFailure() << "ItemGoupHost is null.";
+    }
+    auto groupHub = itemGoupHost->GetFocusHub();
+    itemGroupPatters_[0]->itemDisplayStartIndex_ = 0;
+    itemGroupPatters_[0]->itemDisplayEndIndex_ = 4;
+    RefPtr<FocusHub> focusNode = GetChildFocusHub(itemGoupHost, 0);
+    EXPECT_FALSE(focusNode->IsCurrentFocus());
+    pattern_->FireFocusInListItemGroup(0);
+    focusNode = GetChildFocusHub(itemGoupHost, 0);
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step2. Focus node outside the viewport
+     * @tc.expected: lost focus for this node
+     */
+    pattern_->focusIndex_ = 0;
+    pattern_->focusGroupIndex_ = 0;
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 4;
+    pattern_->maxListItemIndex_ = 10;
+    itemGroupPatters_[0]->itemDisplayStartIndex_ = 3;
+    itemGroupPatters_[0]->itemDisplayEndIndex_ = 5;
+    pattern_->FireFocusInListItemGroup(0);
+    focusNode = GetChildFocusHub(itemGoupHost, 0);
+    EXPECT_FALSE(focusNode->IsCurrentFocus());
+}
+
+/**
+ * @tc.name: NotifyDataChange001
+ * @tc.desc: Test NotifyDataChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, NotifyDataChange001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateFocusableListItemGroups(3);
+    CreateDone();
+    if (itemGroupPatters_.size() < 0 || itemGroupPatters_.size() != 3) {
+        AssertionFailure() << "ItemGroupPatters count is NOT valid.";
+    }
+
+    if (!itemGroupPatters_[0]) {
+        AssertionFailure() << "ItemGroupPatter[0]  is null.";
+    }
+
+    /**
+     * @tc.steps: step1. Focus node Notify Data Change, focusGroupIndex_ should also change.
+     * @tc.expected: focusGroupIndex_ should change.
+     */
+    pattern_->focusIndex_ = 0;
+    pattern_->focusGroupIndex_ = 0;
+
+    itemGroupPatters_[0]->NotifyDataChange(0, 1);
+    EXPECT_EQ(pattern_->focusGroupIndex_, 1);
+
+    /**
+     * @tc.steps: step1. Focus node Notify Data Change, but not the same with focusIndex_.
+     * @tc.expected: focusGroupIndex_ should NOT change.
+     */
+    itemGroupPatters_[0]->NotifyDataChange(2, 1);
+    EXPECT_EQ(pattern_->focusGroupIndex_, 1);
+
+    /**
+     * @tc.steps: step1. Focus node Notify Data Change, with boundary value.
+     * @tc.expected: focusGroupIndex_ should NOT change.
+     */
+    itemGroupPatters_[0]->NotifyDataChange(0, -2);
+    EXPECT_EQ(pattern_->focusGroupIndex_, 0);
 }
 
 void ListCommonTestNg::MapEventInLazyForEachForItemDragEvent(int32_t* actualDragStartIndex, int32_t* actualOnDropIndex,
