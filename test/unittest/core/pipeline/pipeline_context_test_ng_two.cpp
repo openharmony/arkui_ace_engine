@@ -2466,5 +2466,22 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg403, TestSize.Level1)
     context_->NotifyColorModeChange(colorMode);
     EXPECT_EQ(context_->instanceId_, Container::CurrentIdSafely());
 }
+
+/**
+ * @tc.name: PipelineContextTestNg404
+ * @tc.desc: Test the function NotifyColorModeChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg404, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    auto node = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_, nullptr);
+    ASSERT_NE(node, nullptr);
+    MouseEvent mouseEvent;
+    mouseEvent.action = MouseAction::HOVER;
+    context_->DispatchMouseToTouchEvent(mouseEvent, node);
+    EXPECT_TRUE(context_->eventManager_->touchTestResults_.empty());
+}
 } // namespace NG
 } // namespace OHOS::Ace

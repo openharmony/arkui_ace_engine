@@ -3874,8 +3874,14 @@ void PipelineContext::DispatchMouseToTouchEvent(const MouseEvent& event, const R
     } else {
         auto touchPoint = event.CreateTouchPoint();
         auto scalePoint = touchPoint.CreateScalePoint(GetViewScale());
-        auto rootOffset = GetRootRect().GetOffset();
-        eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
+        NG::OffsetF offset;
+        auto geometryNode = node->GetGeometryNode();
+        if (event.passThrough && geometryNode) {
+            offset = geometryNode->GetFrameRect().GetOffset();
+        } else {
+            offset = GetRootRect().GetOffset();
+        }
+        eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, offset);
     }
 }
 
