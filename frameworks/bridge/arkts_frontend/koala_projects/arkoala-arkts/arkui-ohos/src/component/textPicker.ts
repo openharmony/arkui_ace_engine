@@ -368,7 +368,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextPickerAttribute_selectedIndex1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    divider0Attribute(value: DividerOptions | undefined): void {
+    divider0Attribute(value: DividerOptions | null | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -380,7 +380,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextPickerAttribute_divider0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    divider1Attribute(value: DividerOptions | undefined): void {
+    divider1Attribute(value: DividerOptions | null | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -500,7 +500,7 @@ export interface TextPickerAttribute extends CommonMethod {
     onScrollStop(value: TextPickerScrollStopCallback | undefined): this
     onEnterSelectedArea(value: TextPickerEnterSelectedAreaCallback | undefined): this
     selectedIndex(value: number | Array<number> | undefined): this
-    divider(value: DividerOptions | undefined): this
+    divider(value: DividerOptions | null | undefined): this
     gradientHeight(value: Dimension | undefined): this
     enableHapticFeedback(value: boolean | undefined): this
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
@@ -564,7 +564,7 @@ export class ArkTextPickerStyle extends ArkCommonMethodStyle implements TextPick
     public selectedIndex(value: number | Array<number> | undefined): this {
         return this
     }
-    public divider(value: DividerOptions | undefined): this {
+    public divider(value: DividerOptions | null | undefined): this {
         return this
     }
     public gradientHeight(value: Dimension | undefined): this {
@@ -807,16 +807,16 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    public divider(value: DividerOptions | undefined): this {
+    public divider(value: DividerOptions | null | undefined): this {
         if (this.checkPriority("divider")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (DividerOptions | undefined)
+                const value_casted = value as (DividerOptions | null | undefined)
                 this.getPeer()?.divider0Attribute(value_casted)
                 return this
             }
             if ((RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (DividerOptions | undefined)
+                const value_casted = value as (DividerOptions | null | undefined)
                 this.getPeer()?.divider1Attribute(value_casted)
                 return this
             }
