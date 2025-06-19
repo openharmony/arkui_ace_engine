@@ -865,7 +865,7 @@ void ViewAbstract::SetBackgroundImagePosition(
             SetBackgroundImagePositionUpdateFunc(frameNode, bgImgPosition);
         }
     }
-    
+
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImagePosition, bgImgPosition, frameNode);
 }
 
@@ -3396,7 +3396,7 @@ void ViewAbstract::SetTransformMatrix(const Matrix4& matrix)
     ACE_UPDATE_RENDER_CONTEXT(TransformMatrix, matrix);
 }
 
-void ViewAbstract::UpdatePopupParamRescource(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& frameNode)
+void ViewAbstract::UpdatePopupParamResource(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& frameNode)
 {
 #ifndef ACE_UNITTEST
     if (SystemProperties::ConfigChangePerform()) {
@@ -3410,8 +3410,26 @@ void ViewAbstract::UpdatePopupParamRescource(const RefPtr<PopupParam>& param, co
         type = POPUPTYPE_MASKCOLOR;
         auto maskColorResourceObject = param->GetMaskColorResourceObject();
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, maskColorResourceObject, type);
-        auto maskResourceObject = param->GetMasResourceObject();
+        auto maskResourceObject = param->GetMaskResourceObject();
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, maskResourceObject);
+        auto widthResourceObject = param->GetWidthResourceObject();
+        PopupOptionsType optionsType = POPUP_OPTIONTYPE_WIDTH;
+        ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, widthResourceObject, optionsType);
+        auto arrowWidthResourceObject = param->GetArrowWidthResourceObject();
+        optionsType = POPUP_OPTIONTYPE_ARROWWIDTH;
+        ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, arrowWidthResourceObject, optionsType);
+        auto arrowHeightResourceObject = param->GeArrowHeightResourceObject();
+        optionsType = POPUP_OPTIONTYPE_ARROWHEIGHT;
+        ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, arrowHeightResourceObject, optionsType);
+        auto radiusResourceObject = param->GeRadiusResourceObject();
+        optionsType = POPUP_OPTIONTYPE_RADIUS;
+        ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, radiusResourceObject, optionsType);
+        auto outLineResourceObject = param->GeOutlineWidthResourceObject();
+        optionsType = POPUP_OPTIONTYPE_OUTLINEWIDTH;
+        ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, outLineResourceObject, optionsType);
+        auto borderResourceObject = param->GeBorderWidthResourceObject();
+        optionsType = POPUP_OPTIONTYPE_BORDERWIDTH;
+        ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, borderResourceObject, optionsType);
     }
 #endif
 }
@@ -3499,7 +3517,7 @@ void ViewAbstract::BindPopup(
             popupId = popupNode->GetId();
         }
 
-        UpdatePopupParamRescource(param, popupNode);
+        UpdatePopupParamResource(param, popupNode);
         if (!showInSubWindow) {
             // erase popup when target node destroy
             auto destructor = [id = targetNode->GetId(), weak = AceType::WeakClaim(context)]() {
