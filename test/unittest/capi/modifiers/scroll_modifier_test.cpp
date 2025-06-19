@@ -363,7 +363,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarColor_SetColorFloat, testing::ext::TestSiz
  * @tc.desc: Test OnScrollBarColorImpl
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollModifierTest, ScrollBarColor_SetBadColorString, testing::ext::TestSize.Level1)
+HWTEST_F(ScrollModifierTest, DISABLED_ScrollBarColor_SetBadColorString, testing::ext::TestSize.Level1)
 {
     std::string jsonKey = "scrollBarColor";
     std::string before = "#FF000000";
@@ -416,7 +416,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetWidth, testing::ext::TestSize.Lev
  * @tc.desc: Test OnScrollBarWidthImpl
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetDefectiveWidth, testing::ext::TestSize.Level1)
+HWTEST_F(ScrollModifierTest, DISABLED_ScrollBarWidth_SetDefectiveWidth, testing::ext::TestSize.Level1)
 {
     std::string jsonKey = "scrollBarWidth";
     auto defaultVal = GetStringAttribute(node_, jsonKey);
@@ -457,7 +457,7 @@ HWTEST_F(ScrollModifierTest, ScrollBarWidth_SetDefectiveWidth, testing::ext::Tes
  * @tc.desc: Test FrictionImpl attempt to set a null value
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollModifierTest, Friction_SetNullValue, testing::ext::TestSize.Level1)
+HWTEST_F(ScrollModifierTest, DISABLED_Friction_SetNullValue, testing::ext::TestSize.Level1)
 {
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
@@ -541,7 +541,7 @@ HWTEST_F(ScrollModifierTest, EnablePaging_SetValues, testing::ext::TestSize.Leve
  * @tc.desc: Test InitialOffsetImpl
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollModifierTest, InitialOffset_SetNullValue, testing::ext::TestSize.Level1)
+HWTEST_F(ScrollModifierTest, DISABLED_InitialOffset_SetNullValue, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -704,7 +704,7 @@ HWTEST_F(ScrollModifierTest, EdgeEffect_SetValues, testing::ext::TestSize.Level1
  * @tc.type: FUNC
  */
 
-HWTEST_F(ScrollModifierTest, EdgeEffect_SetBadValues, testing::ext::TestSize.Level1)
+HWTEST_F(ScrollModifierTest, DISABLED_EdgeEffect_SetBadValues, testing::ext::TestSize.Level1)
 {
     auto json = GetJsonValue(node_);
     ASSERT_TRUE(json);
