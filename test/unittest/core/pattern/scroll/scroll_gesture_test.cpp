@@ -36,7 +36,7 @@ public:
 };
 
 /**
- * @tc.name: FreeScroll001
+ * @tc.name: RecognizerOverride001
  * @tc.desc: Test gesture recognizer override when axis == FREE
  * @tc.type: FUNC
  */
