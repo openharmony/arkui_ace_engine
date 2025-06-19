@@ -141,7 +141,12 @@ public:
 
     uint32_t GetBackgroundIgnoresLayoutSafeAreaEdges() const
     {
-        return backgroundIgnoresLayoutSafeAreaEdges_.value_or(NG::SAFE_AREA_EDGE_NONE);
+        return backgroundIgnoresLayoutSafeAreaEdges_.value_or(NG::LAYOUT_SAFE_AREA_EDGE_NONE);
+    }
+
+    uint32_t GetLocalizedBackgroundIgnoresLayoutSafeAreaEdges() const
+    {
+        return localizedBackgroundIgnoresLayoutSafeAreaEdges_.value_or(NG::LAYOUT_SAFE_AREA_EDGE_NONE);
     }
 
     RefPtr<GeometryTransition> GetGeometryTransition() const;
@@ -448,6 +453,7 @@ public:
     void CheckLocalizedBorderImageOutset(const TextDirection& direction);
     void CheckLocalizedSafeAreaPadding(const TextDirection& direction);
     void CheckIgnoreLayoutSafeArea(const TextDirection& direction);
+    void CheckBackgroundLayoutSafeAreaEdges(const TextDirection& direction);
     void CheckLocalizedAlignment(const TextDirection& direction);
 
     virtual void OnPropertyChangeMeasure() {}
@@ -514,6 +520,7 @@ private:
     std::optional<RectF> layoutRect_;
     std::optional<Dimension> markAnchorStart_;
     std::optional<uint32_t> backgroundIgnoresLayoutSafeAreaEdges_;
+    std::optional<uint32_t> localizedBackgroundIgnoresLayoutSafeAreaEdges_;
 
     WeakPtr<GeometryTransition> geometryTransition_;
 
