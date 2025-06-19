@@ -398,7 +398,8 @@ bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& inner
 
 bool DialogLayoutAlgorithm::IsGetExpandDisplayValidHeight(const RefPtr<DialogLayoutProperty>& dialogProp)
 {
-    CHECK_NULL_RETURN(expandDisplay_ && isShowInSubWindow_ && dialogProp && !isModal_, false);
+    CHECK_NULL_RETURN(
+        expandDisplay_ && isShowInSubWindow_ && dialogProp && !(isModal_ && isUIExtensionSubWindow_), false);
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto dialog = dialogProp->GetHost();
