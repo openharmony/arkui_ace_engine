@@ -90,7 +90,7 @@ export struct Image002Test {
   }
 
   getConfiguredImageUrl(): string {
-    return 'http://p0.meituan.net/content/9543e34f59c343282a8f83926f72f585173498.jpg.webp@289w_289h_1e_1l'
+    return ''
   }
 
   build() {
