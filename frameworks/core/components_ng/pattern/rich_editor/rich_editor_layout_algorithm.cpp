@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/style_manager.h"
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
+#include "core/components_ng/pattern/text/paragraph_util.h"
 
 namespace {
 constexpr int32_t CHILDREN_SIZE = 1;
@@ -558,7 +559,7 @@ OffsetF RichEditorLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper
 ParagraphStyle RichEditorLayoutAlgorithm::GetEditorParagraphStyle(
     const TextStyle& textStyle, const std::u16string& content, LayoutWrapper* layoutWrapper) const
 {
-    auto style = MultipleParagraphLayoutAlgorithm::GetParagraphStyle(textStyle);
+    auto style = ParagraphUtil::GetParagraphStyle(textStyle);
     style.fontSize = textStyle.GetFontSize().ConvertToPx();
     style.maxLines = textStyle.GetMaxLines();
     if (!pManager_->minParagraphFontSize.has_value() ||

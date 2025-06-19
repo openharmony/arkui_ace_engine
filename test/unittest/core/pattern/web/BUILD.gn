@@ -531,6 +531,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/text/text_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_select_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_styles.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/paragraph_util.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/typed_text.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_area/text_area_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_clock/text_clock_accessibility_property.cpp",

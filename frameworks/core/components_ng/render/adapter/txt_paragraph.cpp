@@ -1003,6 +1003,11 @@ RSParagraph* TxtParagraph::GetParagraph()
     return externalParagraph_;
 }
 
+std::unique_ptr<RSParagraph> TxtParagraph::GetParagraphUniquePtr()
+{
+    return std::move(paragraph_);
+}
+
 void TxtParagraph::UpdateColor(size_t from, size_t to, const Color& color)
 {
     auto paragrah = GetParagraph();

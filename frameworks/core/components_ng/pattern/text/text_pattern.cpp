@@ -45,6 +45,7 @@
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/text/html_utils.h"
+#include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/text/text_emoji_processor.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components/custom_paint/rosen_render_custom_paint.h"
@@ -5643,7 +5644,7 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     auto options = imageItem->options;
-    imageLayoutProperty->UpdateImageSourceInfo(CreateImageSourceInfo(options));
+    imageLayoutProperty->UpdateImageSourceInfo(ParagraphUtil::CreateImageSourceInfo(options));
     imageNode->MountToParent(host, host->GetChildren().size());
     SetImageNodeGesture(imageNode);
     if (options.imageAttribute.has_value()) {
@@ -5692,38 +5693,6 @@ void TextPattern::SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode)
     auto gesture = imageNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     gesture->SetHitTestMode(HitTestMode::HTMNONE);
-}
-
-ImageSourceInfo TextPattern::CreateImageSourceInfo(const ImageSpanOptions& options)
-{
-    std::string src;
-    RefPtr<PixelMap> pixMap = nullptr;
-    std::string bundleName;
-    std::string moduleName;
-    if (options.image.has_value()) {
-        src = options.image.value();
-    }
-    if (options.imagePixelMap.has_value()) {
-        pixMap = options.imagePixelMap.value();
-    }
-    if (options.bundleName.has_value()) {
-        bundleName = options.bundleName.value();
-    }
-    if (options.moduleName.has_value()) {
-        moduleName = options.moduleName.value();
-    }
-    ImageSourceInfo info;
-#if defined(PIXEL_MAP_SUPPORTED)
-    if (!options.imagePixelMap.has_value()) {
-        info = ImageSourceInfo{ src, bundleName, moduleName };
-    } else {
-        info = ImageSourceInfo(pixMap);
-    }
-#else
-    info = ImageSourceInfo{ src, bundleName, moduleName };
-#endif
-    info.SetIsUriPureNumber(options.isUriPureNumber.value_or(false));
-    return info;
 }
 
 void TextPattern::ProcessSpanString()

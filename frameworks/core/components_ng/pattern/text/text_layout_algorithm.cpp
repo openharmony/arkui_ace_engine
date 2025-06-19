@@ -24,6 +24,7 @@
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text/paragraph_util.h"
 
 #ifdef ACE_ENABLE_VK
 #include "render_service_base/include/platform/common/rs_system_properties.h"
@@ -83,56 +84,10 @@ TextLayoutAlgorithm::TextLayoutAlgorithm(
         spans_.emplace_back(std::move(spans));
         return;
     }
-    ConstructParagraphSpanGroup(spans);
-    if (!spans.empty()) {
-        auto maxlines = spans.front()->textLineStyle->GetMaxLines().value_or(UINT32_MAX);
-        spanStringHasMaxLines_ |= maxlines != UINT32_MAX;
-        spans_.emplace_back(std::move(spans));
-    }
+    ParagraphUtil::ConstructParagraphSpanGroup(spans, spans_, spanStringHasMaxLines_);
 }
 
 TextLayoutAlgorithm::TextLayoutAlgorithm() = default;
-
-void TextLayoutAlgorithm::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>>& spans)
-{
-    // split spans into groups by mew paragraph style
-    auto it = spans.begin();
-    ParagraphStyle pStyle;
-    GetSpanParagraphStyle(nullptr, (*it), pStyle);
-    while (it != spans.end()) {
-        auto spanItem = *it;
-        if (!spanItem) {
-            ++it;
-            continue;
-        }
-        spanItem->SetNeedRemoveNewLine(false);
-        if (spanItem->content.back() == u'\n') {
-            if (std::next(it) == spans.end()) {
-                break;
-            }
-            auto next = *(std::next(it));
-            ParagraphStyle nextSpanParagraphStyle;
-            if (next) {
-                GetSpanParagraphStyle(nullptr, next, nextSpanParagraphStyle);
-            } else {
-                break;
-            }
-            if (pStyle != nextSpanParagraphStyle ||
-                (pStyle.leadingMargin.has_value() && pStyle.leadingMargin->pixmap) || Positive(pStyle.indent.Value()) ||
-                pStyle.maxLines != UINT32_MAX) {
-                std::list<RefPtr<SpanItem>> newGroup;
-                spanItem->SetNeedRemoveNewLine(true);
-                newGroup.splice(newGroup.begin(), spans, spans.begin(), std::next(it));
-                spanStringHasMaxLines_ |= pStyle.maxLines != UINT32_MAX;
-                spans_.emplace_back(std::move(newGroup));
-                it = spans.begin();
-                pStyle = nextSpanParagraphStyle;
-                continue;
-            }
-        }
-        ++it;
-    }
-}
 
 void TextLayoutAlgorithm::OnReset() {}
 
@@ -421,7 +376,7 @@ bool TextLayoutAlgorithm::CreateParagraph(
     }
     auto useExternalParagraph = pattern->GetExternalParagraph() && !pattern->NeedShowAIDetect();
     auto externalParagraphStyle = pattern->GetExternalParagraphStyle();
-    auto paraStyle = GetParagraphStyle(textStyle);
+    auto paraStyle = ParagraphUtil::GetParagraphStyle(textStyle);
     if (pattern->GetExternalParagraph()) {
         if (!useExternalParagraph && externalParagraphStyle) {
             paraStyle = externalParagraphStyle.value();
@@ -515,7 +470,7 @@ bool TextLayoutAlgorithm::ReLayoutParagraphs(
                 tempTextStyle.GetTextStyleUid(), tempTextStyle.GetReLayoutTextStyleBitmap().to_string().c_str());
         }
         textStyles.emplace_back(tempTextStyle);
-        parStyle = GetParagraphStyle(textStyle);
+        parStyle = ParagraphUtil::GetParagraphStyle(textStyle);
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             parStyle.fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
                 textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
