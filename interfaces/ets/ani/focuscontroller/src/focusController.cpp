@@ -45,11 +45,11 @@ static bool GetBooleanValue(ani_env* env, ani_object object, bool& value)
 {
     ani_boolean isUndefined;
     env->Reference_IsUndefined(object, &isUndefined);
-    if (!isUndefined) {
+    if (isUndefined) {
         return false;
     }
     ani_boolean aniValue;
-    if (ANI_OK != env->Object_CallMethodByName_Boolean(object, "unboxed", nullptr, &aniValue)) {
+    if (ANI_OK != env->Object_CallMethodByName_Boolean(object, "unboxed", ":z", &aniValue)) {
         return false;
     }
     value = static_cast<bool>(aniValue);
@@ -90,12 +90,11 @@ static void requestFocus([[maybe_unused]] ani_env* env, ani_string key)
     focusManager->ResetRequestFocusCallback();
 }
 
-static void activate(ani_env* env, ani_object isActive, ani_object autoInactive)
+static void activate(ani_env* env, ani_boolean isActive, ani_object autoInactive)
 {
-    bool isActiveValue = false;
+    bool isActiveValue = static_cast<bool>(isActive);
     bool autoInactiveValue = true;
 
-    GetBooleanValue(env, isActive, isActiveValue);
     GetBooleanValue(env, autoInactive, autoInactiveValue);
 
     auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
@@ -103,12 +102,9 @@ static void activate(ani_env* env, ani_object isActive, ani_object autoInactive)
     pipeline->SetIsFocusActive(isActiveValue, OHOS::Ace::NG::FocusActiveReason::USE_API, autoInactiveValue);
 }
 
-static void setAutoFocusTransfer(ani_env* env, ani_object isAutoFocusTransfer)
+static void setAutoFocusTransfer(ani_env* env, ani_boolean isAutoFocusTransfer)
 {
-    bool isAutoFocusTransferValue = true;
-    if (!GetBooleanValue(env, isAutoFocusTransfer, isAutoFocusTransferValue)) {
-        return;
-    }
+    bool isAutoFocusTransferValue = static_cast<bool>(isAutoFocusTransfer);
     auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto focusManager = pipeline->GetOrCreateFocusManager();
