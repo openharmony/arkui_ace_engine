@@ -139,8 +139,7 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
 
 void ScrollableActuator::InitClickRecognizer(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, const RefPtr<FrameNode>& frameNode,
-    const RefPtr<TargetComponent>& targetComponent,
-    const RefPtr<ScrollableEvent>& event, bool clickJudge,
+    const RefPtr<TargetComponent>& targetComponent, const RefPtr<ScrollableEvent>& event, bool clickJudge,
     const PointF& localPoint, SourceType source)
 {
     if (!clickRecognizer_) {
@@ -155,8 +154,7 @@ void ScrollableActuator::InitClickRecognizer(const OffsetF& coordinateOffset,
     clickRecognizer_->SetRecognizerType(GestureTypeName::TAP_GESTURE);
     clickRecognizer_->SetSysGestureJudge([clickJudge](const RefPtr<GestureInfo>& gestureInfo,
                                              const std::shared_ptr<BaseGestureEvent>&) -> GestureJudgeResult {
-        TAG_LOGI(
-            AceLogTag::ACE_SCROLLABLE, "Scrollable GestureJudge: clickJudge %{public}d", clickJudge);
+        TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scrollable GestureJudge: clickJudge %{public}d", clickJudge);
         return clickJudge ? GestureJudgeResult::CONTINUE : GestureJudgeResult::REJECT;
     });
     clickRecognizer_->SetOnClick([weak = WeakClaim(RawPtr(frameNode))](const ClickInfo&) {
@@ -171,7 +169,7 @@ void ScrollableActuator::InitClickRecognizer(const OffsetF& coordinateOffset,
 }
 
 namespace {
-RefPtr<NGGestureRecognizer> GetExtraRecognizer(const RefPtr<FrameNode>& frameNode)
+RefPtr<NGGestureRecognizer> GetOverrideRecognizer(const RefPtr<FrameNode>& frameNode)
 {
     auto scrollComponent = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_RETURN(scrollComponent, nullptr);
@@ -183,33 +181,22 @@ void ScrollableEvent::CollectScrollableTouchTarget(const OffsetF& coordinateOffs
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
     const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
 {
+    if (auto override = GetOverrideRecognizer(frameNode)) {
+        result.emplace_back(override);
+        responseLinkResult.emplace_back(override);
+        override->SetNodeId(frameNode->GetId());
+        override->AttachFrameNode(frameNode);
+        override->SetTargetComponent(targetComponent);
+        override->SetIsSystemGesture(true);
+        override->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+        override->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+        override->SetGetEventTargetImpl(getEventTargetImpl);
+        return;
+    }
     if (scrollable_) {
         scrollable_->SetGetEventTargetImpl(getEventTargetImpl);
         scrollable_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
         scrollable_->OnCollectTouchTarget(result, frameNode, targetComponent, responseLinkResult);
-    }
-
-    if (auto extra = GetExtraRecognizer(frameNode)) {
-        std::vector<RefPtr<NGGestureRecognizer>> recognizers { extra };
-        if (!responseLinkResult.empty()) {
-            recognizers.emplace_back(responseLinkResult.back());
-        }
-        auto parallel = MakeRefPtr<ParallelRecognizer>(recognizers);
-        result.emplace_back(extra);
-        responseLinkResult.emplace_back(extra);
-        result.emplace_back(parallel);
-        responseLinkResult.emplace_back(parallel);
-        auto it = responseLinkResult.end();
-        std::advance(it, -2);
-        while (it != responseLinkResult.end()) {
-            auto& recognizer = *it;
-            recognizer->SetNodeId(frameNode->GetId());
-            recognizer->AttachFrameNode(frameNode);
-            recognizer->SetTargetComponent(targetComponent);
-            recognizer->SetIsSystemGesture(true);
-            recognizer->SetRecognizerType(GestureTypeName::PAN_GESTURE);
-            ++it;
-        }
     }
 }
 } // namespace OHOS::Ace::NG

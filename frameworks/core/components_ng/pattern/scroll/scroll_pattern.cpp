@@ -1544,10 +1544,10 @@ void ScrollPattern::TriggerScrollBarDisplay()
 
 void ScrollPattern::InitFreeScroll()
 {
-    if (extraPanGesture_) {
+    if (freePanGesture_) {
         return;
     }
-    PanDirection panDirection { .type = PanDirection::VERTICAL };
+    PanDirection panDirection { .type = PanDirection::ALL };
     double distance = SystemProperties::GetScrollableDistance();
     PanDistanceMap distanceMap;
     if (Positive(distance)) {
@@ -1556,9 +1556,10 @@ void ScrollPattern::InitFreeScroll()
         distanceMap[SourceTool::UNKNOWN] = DEFAULT_PAN_DISTANCE.ConvertToPx();
         distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
     }
-    extraPanGesture_ = AceType::MakeRefPtr<NG::PanRecognizer>(DEFAULT_PAN_FINGER, panDirection, distanceMap);
-    extraPanGesture_->SetOnActionUpdate([this](const GestureEvent& event) {
-        crossOffset_ += static_cast<float>(event.GetMainDelta());
+    freePanGesture_ = AceType::MakeRefPtr<NG::PanRecognizer>(DEFAULT_PAN_FINGER, panDirection, distanceMap);
+    freePanGesture_->SetOnActionUpdate([this](const GestureEvent& event) {
+        crossOffset_ += static_cast<float>(event.GetDelta().GetY());
+        currentOffset_ += static_cast<float>(event.GetDelta().GetX());
         auto host = GetHost();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     });

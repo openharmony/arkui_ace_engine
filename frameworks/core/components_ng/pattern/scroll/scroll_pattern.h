@@ -438,13 +438,13 @@ public:
      */
     RefPtr<NGGestureRecognizer> GetExtraRecognizer() const
     {
-        return extraPanGesture_;
+        return freePanGesture_;
     }
 
 private:
     void InitFreeScroll();
 
-    RefPtr<PanRecognizer> extraPanGesture_; // extra recognizer governs the vertical axis in Free Scroll mode
+    RefPtr<PanRecognizer> freePanGesture_; // extra recognizer governs the vertical axis in Free Scroll mode
     float crossOffset_ = 0.0f; // offset on the vertical axis (currentOffset_ represents horizontal axis in Free Scroll mode)
     /* ============================================================================== */
 
