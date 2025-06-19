@@ -833,6 +833,7 @@ public:
     void UpdateSingleHandleVisible(bool isVisible);
     void OnShowMagnifier();
     void OnHideMagnifier();
+    void SetTouchHandleExistState(bool touchHandleExist);
 private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;

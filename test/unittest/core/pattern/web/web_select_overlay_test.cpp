@@ -5705,4 +5705,31 @@ HWTEST_F(WebSelectOverlayTest, RunQuickMenu_005, TestSize.Level1)
     MockPipelineContext::TearDown();
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: SetTouchHandleExistState
+ * @tc.desc: Test SetTouchHandleExistState.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, SetTouchHandleExistState, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    MockPipelineContext::SetUp();
+    webPattern->OnModifyDone();
+    WebSelectOverlay overlay(webPattern);
+    auto insertHandle = std::make_shared<NWebTouchHandleStateEndTestImpl>();
+    overlay.insertHandle_ = insertHandle;
+    overlay.OnHandleIsHidden();
+    overlay.SetTouchHandleExistState(true);
+    MockPipelineContext::TearDown();
+    EXPECT_TRUE(overlay.insertHandle_->IsEnable());
+}
 } // namespace OHOS::Ace::NG

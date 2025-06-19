@@ -1253,6 +1253,7 @@ public:
     bool ShowMagnifier();
     bool HideMagnifier();
     void UpdateSingleHandleVisible(bool isVisible);
+    void SetTouchHandleExistState(bool touchHandleExist);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
