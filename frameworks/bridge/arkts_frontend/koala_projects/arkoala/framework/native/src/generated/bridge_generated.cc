@@ -31765,6 +31765,36 @@ KOALA_INTEROP_DIRECT_V3(LinearIndicatorAttribute_onChange, Ark_NativePointer, KS
 
 // Accessors
 
+Ark_NativePointer impl_AlphabetIndexerOps_registerIndexerSelectedCallback(Ark_NativePointer node, KInteropNumber index, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        IndexerSelectedCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_IndexerSelectedCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_IndexerSelectedCallback))))};;
+        return GetAccessors()->getAlphabetIndexerOpsAccessor()->registerIndexerSelectedCallback(node, (const Ark_Number*) (&index), (const IndexerSelectedCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(AlphabetIndexerOps_registerIndexerSelectedCallback, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_TabsOps_registerIndexCallback(Ark_NativePointer node, KInteropNumber value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        IndexCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_IndexCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_IndexCallback))))};;
+        return GetAccessors()->getTabsOpsAccessor()->registerIndexCallback(node, (const Ark_Number*) (&value), (const IndexCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(TabsOps_registerIndexCallback, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_ListItemOps_registerSelectedCallback(Ark_NativePointer node, Ark_Boolean value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        SelectedCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SelectedCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SelectedCallback))))};;
+        return GetAccessors()->getListItemOpsAccessor()->registerSelectedCallback(node, value, (const SelectedCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(ListItemOps_registerSelectedCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_RefreshOps_registerRefreshingCallback(Ark_NativePointer node, Ark_Boolean value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        RefreshingCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean refreshing)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_RefreshingCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean refreshing)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_RefreshingCallback))))};;
+        return GetAccessors()->getRefreshOpsAccessor()->registerRefreshingCallback(node, value, (const RefreshingCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(RefreshOps_registerRefreshingCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_SwiperOps_registerIndexCallback(Ark_NativePointer node, KInteropNumber value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        IndexCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_IndexCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_IndexCallback))))};;
+        return GetAccessors()->getSwiperOpsAccessor()->registerIndexCallback(node, (const Ark_Number*) (&value), (const IndexCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(SwiperOps_registerIndexCallback, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KSerializerBuffer, int32_t)
 void impl_AnimationExtender_SetClipRect(Ark_NativePointer node, KFloat x, KFloat y, KFloat width, KFloat height) {
         GetAccessors()->getAnimationExtenderAccessor()->SetClipRect(node, x, y, width, height);
 }
