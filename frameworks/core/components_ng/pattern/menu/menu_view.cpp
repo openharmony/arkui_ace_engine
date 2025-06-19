@@ -1375,11 +1375,8 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
-    } else {
-        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
-            menuWrapperPattern->SetMenuParam(menuParam);
-        }
     }
+    menuWrapperPattern->SetMenuParam(menuParam);
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
