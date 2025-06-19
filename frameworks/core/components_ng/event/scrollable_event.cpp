@@ -171,9 +171,9 @@ void ScrollableActuator::InitClickRecognizer(const OffsetF& coordinateOffset,
 namespace {
 RefPtr<NGGestureRecognizer> GetOverrideRecognizer(const RefPtr<FrameNode>& frameNode)
 {
-    auto scrollComponent = frameNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_RETURN(scrollComponent, nullptr);
-    return scrollComponent->GetOverrideRecognizer();
+    auto scroll = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(scroll, nullptr);
+    return scroll->GetOverrideRecognizer();
 }
 } // namespace
 
@@ -181,16 +181,16 @@ void ScrollableEvent::CollectScrollableTouchTarget(const OffsetF& coordinateOffs
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
     const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
 {
-    if (auto override = GetOverrideRecognizer(frameNode)) {
-        result.emplace_back(override);
-        responseLinkResult.emplace_back(override);
-        override->SetNodeId(frameNode->GetId());
-        override->AttachFrameNode(frameNode);
-        override->SetTargetComponent(targetComponent);
-        override->SetIsSystemGesture(true);
-        override->SetRecognizerType(GestureTypeName::PAN_GESTURE);
-        override->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-        override->SetGetEventTargetImpl(getEventTargetImpl);
+    if (auto superRecognizer = GetOverrideRecognizer(frameNode)) {
+        result.emplace_back(superRecognizer);
+        responseLinkResult.emplace_back(superRecognizer);
+        superRecognizer->SetNodeId(frameNode->GetId());
+        superRecognizer->AttachFrameNode(frameNode);
+        superRecognizer->SetTargetComponent(targetComponent);
+        superRecognizer->SetIsSystemGesture(true);
+        superRecognizer->SetRecognizerType(GestureTypeName::PAN_GESTURE);
+        superRecognizer->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+        superRecognizer->SetGetEventTargetImpl(getEventTargetImpl);
         return;
     }
     if (scrollable_) {
