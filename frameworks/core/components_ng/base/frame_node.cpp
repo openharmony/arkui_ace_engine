@@ -3701,7 +3701,7 @@ OffsetF FrameNode::GetPositionToScreen()
 // returns a node's collected offset(see GetOffsetRelativeToWindow)
 // with offset of window to globalDisplay
 // ex. textInput component wrap offset relative to globalDisplay into a config and send to ime framework
-OffsetF FrameNode::GetGlobalPositionOnDisplay()
+OffsetF FrameNode::GetGlobalPositionOnDisplay() const
 {
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());

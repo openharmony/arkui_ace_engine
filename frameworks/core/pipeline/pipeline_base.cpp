@@ -892,9 +892,8 @@ void PipelineBase::SetGetWindowRectImpl(std::function<Rect()>&& callback)
 
 void PipelineBase::SetGetGlobalDisplayWindowRectImpl(std::function<Rect()>&& callback)
 {
-    if (window_) {
-        window_->SetGetGlobalDisplayWindowRectImpl(std::move(callback));
-    }
+    CHECK_NULL_VOID(window_);
+    window_->SetGetGlobalDisplayWindowRectImpl(std::move(callback));
 }
 
 void PipelineBase::ContainerModalUnFocus() {}
@@ -909,10 +908,8 @@ Rect PipelineBase::GetCurrentWindowRect() const
 
 Rect PipelineBase::GetGlobalDisplayWindowRect() const
 {
-    if (window_) {
-        return window_->GetGlobalDisplayWindowRect();
-    }
-    return {};
+    CHECK_NULL_RETURN(window_, {});
+    return window_->GetGlobalDisplayWindowRect();
 }
 
 bool PipelineBase::HasFloatTitle() const
