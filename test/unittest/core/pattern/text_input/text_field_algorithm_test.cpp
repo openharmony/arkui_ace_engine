@@ -710,5 +710,9 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextAreaMaxLines, TestSize.Level1)
     textFieldLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textAreaLayoutAlgorithm->UpdateTextAreaMaxLines(textStyle, textFieldLayoutProperty);
     EXPECT_EQ(textStyle.GetMaxLines(), 1);
+    
+    textFieldLayoutProperty->UpdateTextOverflow(TextOverflow::DEFAULT);
+    textAreaLayoutAlgorithm->UpdateTextAreaMaxLines(textStyle, textFieldLayoutProperty);
+    EXPECT_EQ(textStyle.GetMaxLines(), INT32_MAX);
 }
 } // namespace OHOS::Ace::NG //
