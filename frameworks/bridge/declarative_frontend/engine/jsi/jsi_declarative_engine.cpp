@@ -113,6 +113,8 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 const std::string OHMURL_START_TAG = "@bundle:";
+constexpr char ETS_TAG[] = "/ets/";
+constexpr int32_t ETS_TAG_LENGTH = 5;
 
 #if defined(ANDROID_PLATFORM)
 const std::string ARK_DEBUGGER_LIB_PATH = "libark_inspector.so";
@@ -416,6 +418,20 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
     }
 
     return true;
+}
+
+std::string GetRealPagePath(const std::string& pagePath)
+{
+    if (pagePath.empty()) {
+        return "";
+    }
+    auto etsTagIndex = pagePath.rfind(ETS_TAG);
+    if (etsTagIndex == std::string::npos) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "current pagePath %{public}s don't contain '/ets/'", pagePath.c_str());
+        return pagePath;
+    }
+    auto pageUrlIndex = etsTagIndex + ETS_TAG_LENGTH;
+    return pagePath.substr(pageUrlIndex, pagePath.size() - pageUrlIndex);
 }
 } // namespace
 
@@ -2092,7 +2108,7 @@ bool JsiDeclarativeEngine::GeneratePageByIntent(
         [&bundleName, &moduleName, &pagePath](const auto& item) {
             return item.second.bundleName == bundleName
                 && item.second.moduleName == moduleName
-                && item.second.pagePath == pagePath;
+                && (item.second.pagePath == pagePath || GetRealPagePath(item.second.pagePath) == pagePath);
         });
     if (iter == namedRouterRegisterMap_.end()) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "intent page not found in router page map!");
