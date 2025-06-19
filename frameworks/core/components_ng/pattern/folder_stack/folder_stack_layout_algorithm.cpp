@@ -345,6 +345,7 @@ void FolderStackLayoutAlgorithm::MeasureByStack(
     auto controlPartsWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(controlPartsWrapper);
     controlPartsWrapper->GetLayoutProperty()->UpdatePadding(padding);
+    MatchParentWhenChildrenMatch(layoutWrapper, controlPartsWrapper);
     StackLayoutAlgorithm::Measure(layoutWrapper);
     auto hoverNode = hostNode->GetHoverNode();
     CHECK_NULL_VOID(hoverNode);
@@ -355,4 +356,17 @@ void FolderStackLayoutAlgorithm::MeasureByStack(
     geometryNode->SetFrameSize(controlPartsWrapper->GetGeometryNode()->GetFrameSize());
 }
 
+
+void FolderStackLayoutAlgorithm::MatchParentWhenChildrenMatch(
+    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& controlPartsLayoutWrapper)
+{
+    for (auto&& child : controlPartsLayoutWrapper->GetAllChildrenWithBuild()) {
+        auto childLayoutProperty = child->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        auto layoutPolicy = childLayoutProperty->GetLayoutPolicyProperty();
+        if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
+            controlPartsLayoutWrapper->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -98,38 +98,22 @@ RefPtr<RenderNode> SvgUse::CreateRender(
     return renderBox;
 }
 
-#ifndef USE_ROSEN_DRAWING
-SkPath SvgUse::AsPath(const Size& viewPort) const
-#else
 RSPath SvgUse::AsPath(const Size& viewPort) const
-#endif
 {
     auto svgContext = svgContext_.Upgrade();
     if (!svgContext) {
         LOGE("asPath failed, svgContext is null");
-#ifndef USE_ROSEN_DRAWING
-        return SkPath();
-#else
         return RSPath();
-#endif
     }
     auto& declaration = component_->GetDeclaration();
     if (declaration->GetHref().empty()) {
         LOGE("href is empty");
-#ifndef USE_ROSEN_DRAWING
-        return SkPath();
-#else
         return RSPath();
-#endif
     }
     auto refSvgNode = svgContext->GetSvgNodeById(declaration->GetHref());
     if (!refSvgNode) {
         LOGE("refSvgNode is null");
-#ifndef USE_ROSEN_DRAWING
-        return SkPath();
-#else
         return RSPath();
-#endif
     }
     refSvgNode->Inherit(declaration);
     return refSvgNode->AsPath(viewPort);

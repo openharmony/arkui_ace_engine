@@ -201,6 +201,7 @@ public:
     virtual void MoveIndexToTop(int32_t index) {}
 
     virtual std::string GetStringifyParamByIndex(int32_t index) const { return ""; }
+    virtual std::string GetSerializedParamSafely(int32_t index) const { return ""; }
     virtual void SetPathArray(const std::vector<NavdestinationRecoveryInfo>& navdestinationsInfo) {}
     virtual void SetFromRecovery(int32_t index, bool fromRecovery) {}
     virtual bool IsFromRecovery(int32_t index) { return false; }
@@ -272,6 +273,8 @@ public:
     virtual void RemoveByIndexes(const std::vector<int32_t>& indexes) {}
 
     virtual void PushIntentNavDestination(const std::string& name, const std::string& params, bool needTransition) {}
+
+    virtual void CallPushDestinationInner(const NavdestinationRecoveryInfo& navdestinationsInfo) {}
 
 protected:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);

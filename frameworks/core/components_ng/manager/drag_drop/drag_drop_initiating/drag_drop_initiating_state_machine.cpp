@@ -213,7 +213,7 @@ void DragDropInitiatingStateMachine::SetThumbnailCallback(std::function<void(Off
 
 void DragDropInitiatingStateMachine::RequestStatusTransition(int32_t nextStatus)
 {
-    TAG_LOGD(AceLogTag::ACE_DRAG, "RequestStatusTransition from %{public}d to %{public}d.", currentState_, nextStatus);
+    TAG_LOGI(AceLogTag::ACE_DRAG, "RequestStatusTransition from %{public}d to %{public}d.", currentState_, nextStatus);
     CHECK_NULL_VOID(!dragDropInitiatingState_.empty());
     if (currentState_ != nextStatus) {
         CHECK_NULL_VOID(dragDropInitiatingState_[nextStatus]);

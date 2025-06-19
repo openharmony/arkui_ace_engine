@@ -46,6 +46,8 @@ namespace {
 const std::string NAME = "checkbox";
 const std::string GROUP_NAME = "checkboxGroup";
 const std::string TAG = "CHECKBOX_TAG";
+constexpr float SIZE_WIDTH_NEW = 50.0f;
+constexpr float SIZE_HEIGHT = 460.0f;
 } // namespace
 
 class CheckBoxPatternSubTestNG : public testing::Test {
@@ -767,5 +769,36 @@ HWTEST_F(CheckBoxPatternSubTestNG, OnInjectionEvent001, TestSize.Level1)
     CHECK_NULL_VOID(checkBoxPaintProperty);
     status = checkBoxPaintProperty->GetCheckBoxSelect().value_or(false);
     EXPECT_EQ(status, true);
+}
+
+/**
+ * @tc.name: SetModifierBoundsRect001
+ * @tc.desc: test SetModifierBoundsRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPatternSubTestNG, SetModifierBoundsRect001, TestSize.Level1)
+{
+    CheckBoxPaintMethod checkBoxPaintMethod;
+    checkBoxPaintMethod.checkboxModifier_ = AceType::MakeRefPtr<CheckBoxModifier>(true, Color::BLACK, Color::BLUE,
+        Color::GRAY, Color::TRANSPARENT, SizeF(20.0f, 20.0f), OffsetF(0.0f, 0.0f), 2.0f, 1.0f);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto checkBoxTheme = AceType::MakeRefPtr<CheckboxTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(checkBoxTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(checkBoxTheme));
+    checkBoxTheme->hotZoneHorizontalPadding_ = Dimension(0.0f);
+    checkBoxTheme->hotZoneVerticalPadding_ = Dimension(0.0f);
+    checkBoxPaintMethod.checkboxModifier_->rect_->x_ = 0.0f;
+    checkBoxPaintMethod.checkboxModifier_->rect_->y_ = 0.0f;
+    checkBoxPaintMethod.checkboxModifier_->rect_->width_ = SIZE_WIDTH_NEW;
+    checkBoxPaintMethod.checkboxModifier_->rect_->height_ = 0.0f;
+    SizeF size(SIZE_WIDTH_NEW, SIZE_HEIGHT);
+    OffsetF offset(0.0f, 0.0f);
+    RefPtr<CheckBoxPaintProperty> paintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    checkBoxPaintMethod.SetModifierBoundsRect(checkBoxTheme, size, offset, paintWrapper);
+    EXPECT_EQ(checkBoxPaintMethod.checkboxModifier_->rect_->height_, SIZE_HEIGHT);
 }
 } // namespace OHOS::Ace::NG

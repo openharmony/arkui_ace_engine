@@ -214,6 +214,19 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest003, TestSize.Level1)
     stateStyleMgr->HandleScrollingParent();
     hasScrollingParent = stateStyleMgr->GetHasScrollingParent();
     EXPECT_EQ(true, hasScrollingParent);
+    EXPECT_EQ(false, stateStyleMgr->isFastScrolling_);
+
+    /**
+     * @tc.steps: step3. Set list parent to current frame node and ShouldPreventChildPressedState is true.
+     * @tc.expected:  Should have scrolling parent and isFastScrolling_ is true.
+     */
+
+    auto listPattern = parent->GetPattern<ListPattern>();
+    listPattern->isHitTestBlock_ = true;
+    stateStyleMgr->HandleScrollingParent();
+    hasScrollingParent = stateStyleMgr->GetHasScrollingParent();
+    EXPECT_EQ(true, hasScrollingParent);
+    EXPECT_EQ(true, stateStyleMgr->isFastScrolling_);
 }
 
 /**

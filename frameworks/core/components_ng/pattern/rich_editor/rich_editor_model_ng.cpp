@@ -496,12 +496,13 @@ void RichEditorModelNG::SetOnShare(std::function<void(NG::TextCommonEvent&)>&& f
     eventHub->SetOnShare(std::move(func));
 }
 
-void RichEditorModelNG::SetSelectionMenuOptions(
-    const OnCreateMenuCallback&& onCreateMenuCallback, const OnMenuItemClickCallback&& onMenuItemClick)
+void RichEditorModelNG::SetSelectionMenuOptions(const OnCreateMenuCallback&& onCreateMenuCallback,
+    const OnMenuItemClickCallback&& onMenuItemClick, const OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    richEditorPattern->OnSelectionMenuOptionsUpdate(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 
 void RichEditorModelNG::SetRequestKeyboardOnFocus(bool needToRequest)
@@ -533,13 +534,15 @@ void RichEditorModelNG::SetSupportPreviewText(FrameNode* frameNode, bool value)
     pattern->SetSupportPreviewText(value);
 }
 
-void RichEditorModelNG::SetSelectionMenuOptions(FrameNode* frameNode, const OnCreateMenuCallback&& onCreateMenuCallback,
-    const OnMenuItemClickCallback&& onMenuItemClick)
+void RichEditorModelNG::SetSelectionMenuOptions(FrameNode* frameNode,
+    const OnCreateMenuCallback&& onCreateMenuCallback, const OnMenuItemClickCallback&& onMenuItemClick,
+    const OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
     CHECK_NULL_VOID(frameNode);
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    richEditorPattern->OnSelectionMenuOptionsUpdate(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 
 void RichEditorModelNG::SetPreviewMenuParam(TextSpanType spanType, std::function<void()>& buildFunc,
@@ -598,6 +601,16 @@ void RichEditorModelNG::SetMaxLines(uint32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MaxLines, value);
 }
 
+void RichEditorModelNG::SetEnableAutoSpacing(bool enabled)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, EnableAutoSpacing, enabled);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableAutoSpacing(enabled);
+}
+
 void RichEditorModelNG::SetStopBackPress(bool isStopBackPress)
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
@@ -621,6 +634,15 @@ void RichEditorModelNG::SetMaxLines(FrameNode* frameNode, uint32_t value)
     pattern->SetMaxLinesHeight(FLT_MAX);
     pattern->SetMaxLines(value);
     ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MaxLines, value);
+}
+
+void RichEditorModelNG::SetEnableAutoSpacing(FrameNode* frameNode, bool enabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, EnableAutoSpacing, enabled, frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEnableAutoSpacing(enabled);
 }
 
 void RichEditorModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPress)

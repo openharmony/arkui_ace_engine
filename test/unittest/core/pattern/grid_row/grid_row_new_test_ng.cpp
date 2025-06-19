@@ -16,6 +16,7 @@
 
 #include "core/components_ng/pattern//linear_layout/row_model_ng.h"
 #include "core/components_v2/grid_layout/grid_container_util_class.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -116,6 +117,7 @@ HWTEST_F(GridRowNewTestNG, GridRowIgnoreLayoutSafeArea001, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->SetMinPlatformVersion(12);
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto frameNode = CreateGridRow([this](GridRowModelNG model) {
         // step: set GridRowOptions
         V2::GridContainerSize col = V2::GridContainerSize(5);
@@ -185,6 +187,7 @@ HWTEST_F(GridRowNewTestNG, GridRowIgnoreLayoutSafeArea002, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->SetMinPlatformVersion(12);
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto frameNode = CreateGridRow([this](GridRowModelNG model) {
         // step: set GridRowOptions
         V2::GridContainerSize col = V2::GridContainerSize(5);
@@ -243,5 +246,39 @@ HWTEST_F(GridRowNewTestNG, GridRowIgnoreLayoutSafeArea002, TestSize.Level1)
     // @tc.expected: 8st grid col offset x = 2 * 52px + 2 * 5px = 114px, y = 10px + 30px = 40px
     EXPECT_EQ(frameNode->GetChildByIndex(EIGHTH_CHILD)->GetGeometryNode()->GetFrameOffset().GetX(), 124.0f);
     EXPECT_EQ(frameNode->GetChildByIndex(EIGHTH_CHILD)->GetGeometryNode()->GetFrameOffset().GetY(), 310.0f);
+}
+
+/**
+ * @tc.name: Create001
+ * @tc.desc: Test Create001 of GridRow
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridRowBaseTestNG, Create001, TestSize.Level1)
+{
+    GridRowModelNG gridRowModelNG;
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    auto gutter = AceType::MakeRefPtr<V2::Gutter>();
+    auto updateFunc = [](const RefPtr<ResourceObject>& resObj, RefPtr<V2::Gutter>& gutter) {
+        Dimension dimen(2.0);
+        gutter->xXs = dimen;
+    };
+    gutter->AddResource("gridrow.gutter.xXs", resObj, std::move(updateFunc));
+    auto col = Referenced::MakeRefPtr<V2::GridContainerSize>(NG::DEFAULT_COLUMN_NUMBER);
+    auto breakpoints = Referenced::MakeRefPtr<V2::BreakPoints>();
+    auto direction = V2::GridRowDirection::Row;
+    gridRowModelNG.Create(col, gutter, breakpoints, direction);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridRowLayoutPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnColorModeChange(1);
+    pattern->RemoveResObj("gridrow.gutter");
+    auto layoutProperty = frameNode->GetLayoutProperty<GridRowLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto gutterValue = layoutProperty->GetGutterValue();
+    Dimension dimen(2.0);
+    EXPECT_EQ(gutterValue.xXs, dimen);
 }
 } // namespace OHOS::Ace::NG

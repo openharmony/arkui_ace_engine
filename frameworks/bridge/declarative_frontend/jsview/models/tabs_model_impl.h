@@ -42,10 +42,12 @@ public:
     void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) override;
     void SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& onChange) override {};
     void SetDivider(const TabsItemDivider& divider) override {};
+    void SetDividerColorByUser(bool isByUser) override {};
     void SetFadingEdge(bool fadingEdge) override {};
     void SetBarOverlap(bool barOverlap) override {};
     void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent) override {};
     void SetBarBackgroundColor(const Color& backgroundColor) override {};
+    void SetBarBackgroundColorByUser(bool isByUser) override {};
     void SetClipEdge(bool clipEdge) override {};
     void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option) override {};
     void SetBarGridAlign(const BarGridColumnOptions& BarGridColumnOptions) override {};

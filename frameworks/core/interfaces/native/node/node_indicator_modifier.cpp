@@ -143,10 +143,12 @@ SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& di
     Color fontColor;
     parseOk = Color::ParseColorString(fontColorValue, fontColor);
     digitalParameters.fontColor =
-        parseOk ? fontColor : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+        parseOk ? (digitalParameters.parametersByUser.insert("fontColor"), fontColor)
+        : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
     parseOk = Color::ParseColorString(selectedFontColorValue, fontColor);
     digitalParameters.selectedFontColor =
-        parseOk ? fontColor : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+        parseOk ? (digitalParameters.parametersByUser.insert("selectedFontColor"), fontColor)
+        : swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
     GetFontContent(digitFontSize, digitFontWeight, false, digitalParameters);
     GetFontContent(selectedDigitFontSize, selectedDigitFontWeight, true, digitalParameters);
     if (SystemProperties::ConfigChangePerform()) {
@@ -238,8 +240,8 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
         indicatorParameters.resourceItemHeightValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_HEIGHT);
         indicatorParameters.resourceSelectedItemWidthValueObject =
             resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_WIDTH);
-            indicatorParameters.resourceSelectedItemHeightValueObject =
-        resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_HEIGHT);
+        indicatorParameters.resourceSelectedItemHeightValueObject =
+            resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_HEIGHT);
         indicatorParameters.resourceColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_COLOR);
         indicatorParameters.resourceSelectedColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_COLOR);
     }

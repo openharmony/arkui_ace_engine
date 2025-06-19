@@ -586,6 +586,7 @@ private:
     void UpdateColumnButtonStyles(const RefPtr<FrameNode>& columnNode, bool haveFocus, bool needMarkDirty);
     const RefPtr<FrameNode> GetFocusButtonNode() const;
     double CalculateHeight();
+    float GetColumnWidthSumForFirstIndexColumns(int32_t index);
 
     void ClearFocus();
     void SetDefaultFocus();
@@ -620,8 +621,8 @@ private:
     void CheckFocusID(int32_t childSize);
     bool ParseDirectionKey(RefPtr<TextPickerColumnPattern>& textPickerColumnPattern, KeyCode& code,
         uint32_t totalOptionCount, int32_t childSize);
-    RectF CalculatePaintRect(int32_t currentFocusIndex,
-        float centerX, float centerY, float paintRectWidth, float paintRectHeight, float columnWidth);
+    RectF CalculatePaintRect(int32_t currentFocusIndex, float centerX, float centerY, float paintRectWidth,
+        float paintRectHeight, float columnWidth);
     void AdjustFocusBoxOffset(float& centerX, float& centerY);
     float CalculateColumnSize(int32_t index, float childCount, const SizeF& pickerContentSize);
     int32_t CalculateIndex(RefPtr<FrameNode>& frameNode);

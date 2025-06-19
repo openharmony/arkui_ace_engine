@@ -81,6 +81,8 @@ public:
     static void TriggerPageUpdate(const shared_ptr<JsRuntime>&);
     static RefPtr<PipelineBase> GetPipelineContext(const shared_ptr<JsRuntime>& runtime);
     static void PreloadAceModule(void* runtime);
+    static void PreloadAceModuleForCustomRuntime(void* runtime);
+    static void RemoveInvalidEnv(void* env);
     static void PreloadAceModuleWorker(void* runtime);
     // crossPlatform Resets the module pre-load flag
     static void ResetModulePreLoadFlag();
@@ -213,6 +215,10 @@ public:
     static bool RegisterStringCacheTable(const EcmaVM* vm, int32_t size);
     static panda::Local<panda::StringRef> GetCachedString(const EcmaVM *vm, int32_t propertyIndex);
     static void SetCachedString(const EcmaVM* vm);
+    void CallAddAvailableInstanceIdFunc(
+        const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv);
+    void CallRemoveAvailableInstanceIdFunc(
+        const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv);
 
 private:
     void InitGlobalObjectTemplate();
@@ -387,6 +393,8 @@ public:
 
     std::shared_ptr<void> SerializeValue(const std::shared_ptr<Framework::JsValue>& jsValue) override;
 
+    void TriggerModuleSerializer() override;
+
     void SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder) override;
 
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
@@ -458,7 +466,7 @@ public:
     }
     // Support the hsp on the previewer
     void SetHspBufferTrackerCallback(
-        std::function<bool(const std::string&, uint8_t**, size_t*, std::string&)>&& callback);
+        std::function<bool(const std::string&, bool, uint8_t**, size_t*, std::string&)>&& callback);
     // Support to execute the ets code mocked by developer
     void SetMockModuleList(const std::map<std::string, std::string>& mockJsonInfo);
     bool IsComponentPreview() override;

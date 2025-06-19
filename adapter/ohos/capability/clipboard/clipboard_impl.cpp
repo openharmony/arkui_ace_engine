@@ -590,6 +590,7 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&, bo
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIClipboardGetDataAsync", PriorityType::IMMEDIATE);
 }
+#endif
 
 void ClipboardImpl::GetSpanStringData(
     const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback, bool syncMode)
@@ -603,6 +604,7 @@ void ClipboardImpl::GetSpanStringData(
 #endif
 }
 
+#ifdef SYSTEM_CLIPBOARD_SUPPORTED
 void ClipboardImpl::GetSpanStringDataHelper(
     const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback, bool syncMode)
 {

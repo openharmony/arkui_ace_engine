@@ -45,6 +45,8 @@
 namespace OHOS::Ace::Framework {
 namespace {
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
+const std::vector<TextVerticalAlign> TEXT_VERTICAL_ALIGNS = {
+    TextVerticalAlign::BASELINE, TextVerticalAlign::BOTTOM, TextVerticalAlign::CENTER, TextVerticalAlign::TOP };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
 const int32_t WORD_BREAK_TYPES_DEFAULT = 2;
@@ -218,21 +220,21 @@ void JSFontSpan::ParseJsFontStyle(const JSRef<JSObject>& obj, Font& font)
 
 void JSFontSpan::ParseJsStrokeWidth(const JSRef<JSObject>& obj, Font& font)
 {
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension width = theme->GetTextStyle().GetStrokeWidth();
     if (obj->HasProperty("strokeWidth")) {
-        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(context);
-        auto theme = context->GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
         auto strokeWidth = obj->GetProperty("strokeWidth");
-        CalcDimension width = theme->GetTextStyle().GetStrokeWidth();
         if (!strokeWidth->IsNull() && strokeWidth->IsObject()) {
             auto strokeWidthTmp = ParseLengthMetrics(strokeWidth, false);
             if (strokeWidthTmp.Unit() != DimensionUnit::PERCENT) {
                 width = strokeWidthTmp;
             }
         }
-        font.strokeWidth = width;
     }
+    font.strokeWidth = width;
 }
 
 void JSFontSpan::GetStrokeColorFallback(const JSRef<JSObject>& obj, const RefPtr<TextTheme>& theme, Color& color)
@@ -283,6 +285,8 @@ void JSFontSpan::ParseJsSuperscript(const JSRef<JSObject>& obj, Font& font)
             }
         }
         font.superscript = superscriptStyle;
+    } else {
+        font.superscript = SuperscriptStyle::NORMAL;
     }
 }
 
@@ -417,12 +421,7 @@ void JSDecorationSpan::Constructor(const JSCallbackInfo& args)
     auto decorationSpan = Referenced::MakeRefPtr<JSDecorationSpan>();
     decorationSpan->IncRefCount();
 
-    RefPtr<DecorationSpan> span;
-    if (args.Length() <= 0 || !args[0]->IsObject()) {
-        span = AceType::MakeRefPtr<DecorationSpan>();
-    } else {
-        span = JSDecorationSpan::ParseJsDecorationSpan(args);
-    }
+    RefPtr<DecorationSpan> span = JSDecorationSpan::ParseJsDecorationSpan(args);
     decorationSpan->decorationSpan_ = span;
     args.SetReturnValue(Referenced::RawPtr(decorationSpan));
 }
@@ -436,6 +435,9 @@ void JSDecorationSpan::Destructor(JSDecorationSpan* decorationSpan)
 
 RefPtr<DecorationSpan> JSDecorationSpan::ParseJsDecorationSpan(const JSCallbackInfo& args)
 {
+    if (args.Length() <= 0 || !args[0]->IsObject()) {
+        return AceType::MakeRefPtr<DecorationSpan>();
+    }
     auto obj = JSRef<JSObject>::Cast(args[0]);
     std::optional<Color> colorOption;
     Color color;
@@ -743,7 +745,7 @@ RefPtr<GestureSpan> JSGestureSpan::ParseJSGestureSpan(const JSCallbackInfo& args
         auto onTouch = [execCtx = args.GetExecutionContext(), func = jsOnTouchWeakFunc](TouchEventInfo& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("SpanString.onTouch");
-            JSRef<JSVal> param = JSRef<JSObject>::Cast(JsTouchFunction::CreateJSEventInfo(info));
+            JSRef<JSVal> param = JsTouchFunction::CreateJSEventInfo(info);
             func->ExecuteJS(1, &param);
         };
         gestureInfo.onTouch = std::move(onTouch);
@@ -1480,6 +1482,8 @@ void JSParagraphStyleSpan::JSBind(BindingTarget globalObj)
     JSClass<JSParagraphStyleSpan>::CustomProperty(
         "textAlign", &JSParagraphStyleSpan::GetTextAlign, &JSParagraphStyleSpan::SetTextAlign);
     JSClass<JSParagraphStyleSpan>::CustomProperty(
+        "textVerticalAlign", &JSParagraphStyleSpan::GetTextVerticalAlign, &JSParagraphStyleSpan::SetTextVerticalAlign);
+    JSClass<JSParagraphStyleSpan>::CustomProperty(
         "textIndent", &JSParagraphStyleSpan::GetTextIndent, &JSParagraphStyleSpan::SetTextIndent);
     JSClass<JSParagraphStyleSpan>::CustomProperty(
         "maxLines", &JSParagraphStyleSpan::GetMaxLines, &JSParagraphStyleSpan::SetMaxLines);
@@ -1521,6 +1525,7 @@ RefPtr<ParagraphStyleSpan> JSParagraphStyleSpan::ParseJsParagraphStyleSpan(const
 {
     SpanParagraphStyle paragraphStyle;
     ParseJsTextAlign(obj, paragraphStyle);
+    ParseJsTextVerticalAlign(obj, paragraphStyle);
     ParseJsTextIndent(obj, paragraphStyle);
     ParseJsMaxLines(obj, paragraphStyle);
     ParseJsTextOverflow(obj, paragraphStyle);
@@ -1544,6 +1549,22 @@ void JSParagraphStyleSpan::ParseJsTextAlign(const JSRef<JSObject>& obj, SpanPara
         value = 0;
     }
     paragraphStyle.align = TEXT_ALIGNS[value];
+}
+
+void JSParagraphStyleSpan::ParseJsTextVerticalAlign(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
+{
+    if (!obj->HasProperty("textVerticalAlign")) {
+        return;
+    }
+    auto textVerticalAlignObj = obj->GetProperty("textVerticalAlign");
+    int32_t value = 0;
+    if (!textVerticalAlignObj->IsNull() && textVerticalAlignObj->IsNumber()) {
+        value = textVerticalAlignObj->ToNumber<int32_t>();
+    }
+    if (value < 0 || value >= static_cast<int32_t>(TEXT_VERTICAL_ALIGNS.size())) {
+        value = 0;
+    }
+    paragraphStyle.textVerticalAlign = TEXT_VERTICAL_ALIGNS[value];
 }
 
 void JSParagraphStyleSpan::ParseJsTextIndent(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
@@ -1738,6 +1759,19 @@ void JSParagraphStyleSpan::GetTextAlign(const JSCallbackInfo& info)
 }
 
 void JSParagraphStyleSpan::SetTextAlign(const JSCallbackInfo& info) {}
+
+void JSParagraphStyleSpan::GetTextVerticalAlign(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(paragraphStyleSpan_);
+    if (!paragraphStyleSpan_->GetParagraphStyle().textVerticalAlign.has_value()) {
+        return;
+    }
+    auto ret = JSRef<JSVal>::Make(
+        JSVal(ToJSValue(static_cast<int32_t>(paragraphStyleSpan_->GetParagraphStyle().textVerticalAlign.value()))));
+    info.SetReturnValue(ret);
+}
+
+void JSParagraphStyleSpan::SetTextVerticalAlign(const JSCallbackInfo& info) {}
 
 void JSParagraphStyleSpan::GetTextIndent(const JSCallbackInfo& info)
 {

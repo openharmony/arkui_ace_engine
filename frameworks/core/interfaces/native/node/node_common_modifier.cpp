@@ -50,6 +50,7 @@
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/native/node/node_drag_modifier.h"
+#include "core/interfaces/native/node/node_gesture_modifier.h"
 #include "core/interfaces/native/node/touch_event_convertor.h"
 #include "core/interfaces/native/node/view_model.h"
 
@@ -259,41 +260,77 @@ int32_t ParseAlignmentToIndex(Alignment align)
     return ERROR_INT_CODE;
 }
 
-/**
- * @param colors color value
- * colors[0], colors[1], colors[2] : color[0](color, hasDimension, dimension)
- * colors[3], colors[4], colors[5] : color[1](color, hasDimension, dimension)
- * ...
- * @param colorsLength colors length
- */
-void SetGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
+void CheckGradientColorsResObj(NG::Gradient& gradient, const NG::GradientColor& gradientColor,
+    const RefPtr<ResourceObject> colorResObj, const int32_t index)
 {
-    if ((colors == nullptr) || (colorsLength % NUM_3) != 0) {
-        return;
-    }
-    for (int32_t index = 0; index < colorsLength; index += NUM_3) {
-        auto colorValue = colors[index].u32;
-        auto colorHasDimension = colors[index + NUM_1].i32;
-        auto colorDimension = colors[index + NUM_2].f32;
-        auto color = static_cast<uint32_t>(colorValue);
-        auto hasDimension = static_cast<bool>(colorHasDimension);
-        auto dimension = colorDimension;
-        NG::GradientColor gradientColor;
-        gradientColor.SetColor(Color(color));
-        gradientColor.SetHasValue(hasDimension);
-        if (hasDimension) {
-            gradientColor.SetDimension(CalcDimension(dimension * PERCENT_100, DimensionUnit::PERCENT));
+    auto&& updateFunc = [gradientColor, index](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+        std::vector<NG::GradientColor> colorVector = gradient.GetColors();
+        int32_t colorLength = colorVector.size();
+        gradient.ClearColors();
+        for (int32_t i = 0; i < colorLength; i++) {
+            NG::GradientColor gradColor = colorVector[i];
+            if (index == i) {
+                Color color;
+                ResourceParseUtils::ParseResColor(resObj, color);
+                gradColor.SetColor(color);
+            }
+            gradient.AddColor(gradColor);
         }
-        gradient.AddColor(gradientColor);
-    }
+    };
+    std::string key = "LinearGradient.gradient.color" + std::to_string(index);
+    gradient.AddResource(key, colorResObj, std::move(updateFunc));
 }
 
-void SetGradientColorsWithColorSpace(NG::Gradient& gradient,
-    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, ColorSpace colorSpace)
+void CheckSweepGradientColorsResObj(NG::Gradient& gradient, const NG::GradientColor& gradientColor,
+    const RefPtr<ResourceObject> colorResObj, const int32_t index)
+{
+    auto&& updateFunc = [gradientColor, index](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+        std::vector<NG::GradientColor> colorVector = gradient.GetColors();
+        int32_t colorLength = colorVector.size();
+        gradient.ClearColors();
+        for (int32_t i = 0; i < colorLength; i++) {
+            NG::GradientColor gradColor = colorVector[i];
+            if (index == i) {
+                Color color;
+                ResourceParseUtils::ParseResColor(resObj, color);
+                gradColor.SetColor(color);
+            }
+            gradient.AddColor(gradColor);
+        }
+    };
+    std::string key = "SweepGradient.gradient.color" + std::to_string(index);
+    gradient.AddResource(key, colorResObj, std::move(updateFunc));
+}
+
+void CheckRadialGradientColorsResObj(NG::Gradient& gradient, const NG::GradientColor& gradientColor,
+    const RefPtr<ResourceObject> colorResObj, const int32_t index)
+{
+    auto&& updateFunc = [gradientColor, index](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+        std::vector<NG::GradientColor> colorVector = gradient.GetColors();
+        int32_t colorLength = colorVector.size();
+        gradient.ClearColors();
+        for (int32_t i = 0; i < colorLength; i++) {
+            NG::GradientColor gradColor = colorVector[i];
+            if (index == i) {
+                Color color;
+                ResourceParseUtils::ParseResColor(resObj, color);
+                gradColor.SetColor(color);
+            }
+            gradient.AddColor(gradColor);
+        }
+    };
+    std::string key = "RadialGradient.gradient.color" + std::to_string(index);
+    gradient.AddResource(key, colorResObj, std::move(updateFunc));
+}
+
+void SetSweepGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength,
+    ColorSpace colorSpace, void* colorRawPtr)
 {
     if ((colors == nullptr) || (colorsLength % NUM_3) != 0) {
         return;
     }
+    int32_t startPos = NUM_2;
+    auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(colorRawPtr));
     for (int32_t index = 0; index < colorsLength; index += NUM_3) {
         auto colorValue = colors[index].u32;
         auto colorHasDimension = colors[index + NUM_1].i32;
@@ -311,6 +348,74 @@ void SetGradientColorsWithColorSpace(NG::Gradient& gradient,
             gradientColor.SetDimension(CalcDimension(dimension * PERCENT_100, DimensionUnit::PERCENT));
         }
         gradient.AddColor(gradientColor);
+        auto idx = index / NUM_3 + startPos;
+        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr && objs[idx] != nullptr) {
+            CheckSweepGradientColorsResObj(gradient, gradientColor, objs[idx], index / NUM_3);
+        }
+    }
+}
+
+void SetRadialGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength,
+    void* colorRawPtr)
+{
+    if ((colors == nullptr) || (colorsLength % NUM_3) != 0) {
+        return;
+    }
+    int32_t startPos = NUM_3;
+    auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(colorRawPtr));
+    for (int32_t index = 0; index < colorsLength; index += NUM_3) {
+        auto colorValue = colors[index].u32;
+        auto colorHasDimension = colors[index + NUM_1].i32;
+        auto colorDimension = colors[index + NUM_2].f32;
+        auto color = static_cast<uint32_t>(colorValue);
+        auto hasDimension = static_cast<bool>(colorHasDimension);
+        auto dimension = colorDimension;
+        NG::GradientColor gradientColor;
+        gradientColor.SetColor(Color(color));
+        gradientColor.SetHasValue(hasDimension);
+        if (hasDimension) {
+            gradientColor.SetDimension(CalcDimension(dimension * PERCENT_100, DimensionUnit::PERCENT));
+        }
+        gradient.AddColor(gradientColor);
+        auto idx = index / NUM_3 + startPos;
+        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr && objs[idx] != nullptr) {
+            CheckRadialGradientColorsResObj(gradient, gradientColor, objs[idx], index / NUM_3);
+        }
+    }
+}
+
+/**
+ * @param colors color value
+ * colors[0], colors[1], colors[2] : color[0](color, hasDimension, dimension)
+ * colors[3], colors[4], colors[5] : color[1](color, hasDimension, dimension)
+ * ...
+ * @param colorsLength colors length
+ */
+void SetGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength,
+    void* colorRawPtr)
+{
+    if ((colors == nullptr) || (colorsLength % NUM_3) != 0) {
+        return;
+    }
+    auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(colorRawPtr));
+    for (int32_t index = 0; index < colorsLength; index += NUM_3) {
+        auto colorValue = colors[index].u32;
+        auto colorHasDimension = colors[index + NUM_1].i32;
+        auto colorDimension = colors[index + NUM_2].f32;
+        auto color = static_cast<uint32_t>(colorValue);
+        auto hasDimension = static_cast<bool>(colorHasDimension);
+        auto dimension = colorDimension;
+        NG::GradientColor gradientColor;
+        gradientColor.SetColor(Color(color));
+        gradientColor.SetHasValue(hasDimension);
+        if (hasDimension) {
+            gradientColor.SetDimension(CalcDimension(dimension * PERCENT_100, DimensionUnit::PERCENT));
+        }
+        gradient.AddColor(gradientColor);
+        auto idx = index / NUM_3;
+        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr && objs[idx] != nullptr) {
+            CheckGradientColorsResObj(gradient, gradientColor, objs[idx], index / NUM_3);
+        }
     }
 }
 
@@ -420,6 +525,81 @@ ArkUI_Float32 CheckAngle(const ArkUI_Float32 angle)
     return angle;
 }
 
+void ParseSweepGradientCenterXResObj(NG::Gradient& gradient, RefPtr<ResourceObject>& centerXResObj)
+{
+    if (centerXResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            auto unit = static_cast<DimensionUnit>(dimension.Unit());
+            auto centerXValue = dimension.Value();
+            auto value = (unit == DimensionUnit::PERCENT) ? (centerXValue * PERCENT_100) : centerXValue;
+            gradient.GetSweepGradient()->centerX = CalcDimension(value, unit);
+        };
+        gradient.AddResource("SweepGradient.center.centerX", centerXResObj, std::move(updateFunc));
+    }
+}
+
+void ParseSweepGradientCenterYResObj(NG::Gradient& gradient, RefPtr<ResourceObject>& centerYResObj)
+{
+    if (centerYResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            auto unit = static_cast<DimensionUnit>(dimension.Unit());
+            auto centerYValue = dimension.Value();
+            auto value = (unit == DimensionUnit::PERCENT) ? (centerYValue * PERCENT_100) : centerYValue;
+            gradient.GetSweepGradient()->centerY = CalcDimension(value, unit);
+        };
+        gradient.AddResource("SweepGradient.center.centerY", centerYResObj, std::move(updateFunc));
+    }
+}
+
+void ParseRadialGradientCenterXResObj(NG::Gradient& gradient, RefPtr<ResourceObject>& centerXResObj)
+{
+    if (centerXResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            auto unit = static_cast<DimensionUnit>(dimension.Unit());
+            auto centerXValue = dimension.Value();
+            auto value = (unit == DimensionUnit::PERCENT) ? (centerXValue * PERCENT_100) : centerXValue;
+            gradient.GetRadialGradient()->radialCenterX = CalcDimension(value, unit);
+        };
+        gradient.AddResource("RadialGradient.center.centerX", centerXResObj, std::move(updateFunc));
+    }
+}
+
+void ParseRadialGradientCenterYResObj(NG::Gradient& gradient, RefPtr<ResourceObject>& centerYResObj)
+{
+    if (centerYResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            auto unit = static_cast<DimensionUnit>(dimension.Unit());
+            auto centerYValue = dimension.Value();
+            auto value = (unit == DimensionUnit::PERCENT) ? (centerYValue * PERCENT_100) : centerYValue;
+            gradient.GetRadialGradient()->radialCenterY = CalcDimension(value, unit);
+        };
+        gradient.AddResource("RadialGradient.center.centerY", centerYResObj, std::move(updateFunc));
+    }
+}
+
+void ParseRadialGradientRadiusResObj(NG::Gradient& gradient, RefPtr<ResourceObject>& radiusResObj)
+{
+    if (radiusResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            auto unit = static_cast<DimensionUnit>(dimension.Unit());
+            auto value = CheckAngle(dimension.Value());
+            gradient.GetRadialGradient()->radialVerticalSize = CalcDimension(value, unit);
+            gradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(value, unit);
+        };
+        gradient.AddResource("RadialGradient.radius", radiusResObj, std::move(updateFunc));
+    }
+}
+
 /**
  * @param values value value
  * values[0], values[1], values[2] : centerX Dimension: hasValue, value, unit
@@ -430,7 +610,8 @@ ArkUI_Float32 CheckAngle(const ArkUI_Float32 angle)
  * values[12] : repeating
  * @param valuesLength values length
  */
-void SetSweepGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength)
+void SetSweepGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
+    void* resRawPtr)
 {
     if ((values == nullptr) || (valuesLength != NUM_13)) {
         return;
@@ -448,15 +629,26 @@ void SetSweepGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* v
     auto rotationHasValue = values[NUM_10].i32;
     auto rotationValue = values[NUM_11].f32;
     auto repeating = values[NUM_12].i32;
+
+    auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(resRawPtr));
+    RefPtr<ResourceObject> centerXResObj = objs[NUM_0];
+    RefPtr<ResourceObject> centerYResObj = objs[NUM_1];
+
     if (static_cast<bool>(centerXHasValue)) {
         auto unit = static_cast<DimensionUnit>(centerXUnit);
         auto value = (unit == DimensionUnit::PERCENT) ? (centerXValue * PERCENT_100) : centerXValue;
         gradient.GetSweepGradient()->centerX = CalcDimension(value, unit);
+        if (SystemProperties::ConfigChangePerform() && centerXResObj) {
+            ParseSweepGradientCenterXResObj(gradient, centerXResObj);
+        }
     }
     if (static_cast<bool>(centerYHasValue)) {
         auto unit = static_cast<DimensionUnit>(centerYUnit);
         auto value = (unit == DimensionUnit::PERCENT) ? (centerYValue * PERCENT_100) : centerYValue;
         gradient.GetSweepGradient()->centerY = CalcDimension(value, unit);
+        if (SystemProperties::ConfigChangePerform() && centerYResObj) {
+            ParseSweepGradientCenterYResObj(gradient, centerYResObj);
+        }
     }
     if (static_cast<bool>(startHasValue)) {
         gradient.GetSweepGradient()->startAngle = CalcDimension(CheckAngle(startValue), DimensionUnit::PX);
@@ -478,7 +670,8 @@ void SetSweepGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* v
  * values[9] : repeating
  * @param valuesLength values length
  */
-void SetRadialGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength)
+void SetRadialGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
+    void* resRawPtr)
 {
     if ((values == nullptr) || (valuesLength != NUM_10)) {
         return;
@@ -494,22 +687,35 @@ void SetRadialGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* 
     auto radiusValue = values[NUM_7].f32;
     auto radiusUnit = values[NUM_8].i32;
     auto repeating = values[NUM_9].i32;
+    auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(resRawPtr));
+    RefPtr<ResourceObject> centerXResObj = objs[NUM_0];
+    RefPtr<ResourceObject> centerYResObj = objs[NUM_1];
+    RefPtr<ResourceObject> radiusResObj = objs[NUM_2];
 
     if (static_cast<bool>(centerXHasValue)) {
         auto unit = static_cast<DimensionUnit>(centerXUnit);
         auto value = (unit == DimensionUnit::PERCENT) ? (centerXValue * PERCENT_100) : centerXValue;
         gradient.GetRadialGradient()->radialCenterX = CalcDimension(value, unit);
+        if (SystemProperties::ConfigChangePerform() && centerXResObj) {
+            ParseRadialGradientCenterXResObj(gradient, centerXResObj);
+        }
     }
     if (static_cast<bool>(centerYHasValue)) {
         auto unit = static_cast<DimensionUnit>(centerYUnit);
         auto value = (unit == DimensionUnit::PERCENT) ? (centerYValue * PERCENT_100) : centerYValue;
         gradient.GetRadialGradient()->radialCenterY = CalcDimension(value, unit);
+        if (SystemProperties::ConfigChangePerform() && centerYResObj) {
+            ParseRadialGradientCenterYResObj(gradient, centerYResObj);
+        }
     }
     if (static_cast<bool>(radiusHasValue)) {
         auto unit = static_cast<DimensionUnit>(radiusUnit);
         auto value = CheckAngle(radiusValue);
         gradient.GetRadialGradient()->radialVerticalSize = CalcDimension(value, unit);
         gradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(value, unit);
+        if (SystemProperties::ConfigChangePerform() && radiusResObj) {
+            ParseRadialGradientRadiusResObj(gradient, radiusResObj);
+        }
     }
     gradient.SetRepeat(static_cast<bool>(repeating));
 }
@@ -1073,7 +1279,7 @@ void ResetBorderStyle(ArkUINodeHandle node)
     ViewAbstract::SetBorderStyle(frameNode, BorderStyle::SOLID);
 }
 
-bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
+bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow, FrameNode* frameNode)
 {
     if (shadowStyle == ShadowStyle::None) {
         return true;
@@ -1088,7 +1294,71 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
     CHECK_NULL_RETURN(shadowTheme, false);
     auto colorMode = container->GetColorMode();
     shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_RETURN(pattern, false);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [shadowStyle, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto container = Container::Current();
+            CHECK_NULL_VOID(container);
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+            CHECK_NULL_VOID(shadowTheme);
+            auto colorMode = container->GetColorMode();
+            Shadow shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadow, frameNode);
+        };
+        updateFunc(resObj);
+        pattern->AddResObj("shadowStyle", resObj, std::move(updateFunc));
+        return false;
+    }
     return true;
+}
+
+void CheckBackShadowResObj(const std::vector<RefPtr<ResourceObject>> objs, Shadow& shadow)
+{
+    RefPtr<ResourceObject> radiusResObj = objs[NUM_0];
+    RefPtr<ResourceObject> offsetXResObj = objs[NUM_1];
+    RefPtr<ResourceObject> offsetYResObj = objs[NUM_2];
+    RefPtr<ResourceObject> colorResObj = objs[NUM_3];
+    if (radiusResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow) {
+            double radius = 0.0;
+            ResourceParseUtils::ParseResDouble(radiusResObj, radius);
+            if (LessNotEqual(radius, 0.0)) {
+                radius = 0.0;
+            }
+            shadow.SetBlurRadius(radius);
+        };
+        shadow.AddResource("shadow.radius", radiusResObj, std::move(updateFunc));
+    }
+    if (offsetXResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& xResObj, Shadow& shadow) {
+            CalcDimension xValue;
+            ResourceParseUtils::ParseResResource(xResObj, xValue);
+            shadow.SetOffsetX(xValue.Value());
+        };
+        shadow.AddResource("shadow.offsetX", offsetXResObj, std::move(updateFunc));
+    }
+    if (offsetYResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& yResObj, Shadow& shadow) {
+            CalcDimension yValue;
+            ResourceParseUtils::ParseResResource(yResObj, yValue);
+            shadow.SetOffsetY(yValue.Value());
+        };
+        shadow.AddResource("shadow.offsetY", offsetYResObj, std::move(updateFunc));
+    }
+    if (colorResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& colorResObj, Shadow& shadow) {
+            Color colorValue;
+            ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+            shadow.SetColor(colorValue);
+        };
+        shadow.AddResource("shadow.colorValue", colorResObj, std::move(updateFunc));
+    }
 }
 
 /**
@@ -1098,15 +1368,17 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
  * shadows[4] : ShadowType, shadows[5] : Color, shadows[6] : IsFilled
  * @param length shadows length
  */
-void SetBackShadow(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length)
+void SetBackShadow(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "shadow");
+    ViewAbstractModelNG::RemoveResObj(frameNode, "shadowStyle");
     if (length == NUM_1) {
         Shadow shadow;
         auto shadowStyle = static_cast<ShadowStyle>(shadows[NUM_0].i32);
         auto style = static_cast<ShadowStyle>(shadowStyle);
-        if (GetShadowFromTheme(style, shadow)) {
+        if (GetShadowFromTheme(style, shadow, frameNode)) {
             ViewAbstract::SetBackShadow(frameNode, shadow);
         }
     }
@@ -1131,6 +1403,10 @@ void SetBackShadow(ArkUINodeHandle node, const ArkUIInt32orFloat32* shadows, Ark
     }
     shadow.SetShadowType(static_cast<ShadowType>(shadowType));
     shadow.SetIsFilled(static_cast<bool>(isFilled));
+    auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(resRawPtr));
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckBackShadowResObj(objs, shadow);
+    }
     ViewAbstract::SetBackShadow(frameNode, shadow);
 }
 
@@ -1138,6 +1414,7 @@ void ResetBackShadow(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "shadow");
     Shadow shadow;
     ViewAbstract::SetBackShadow(frameNode, shadow);
 }
@@ -1171,7 +1448,7 @@ void ResetZIndex(ArkUINodeHandle node)
     ViewAbstract::SetZIndex(frameNode, 0);
 }
 
-void SetOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
+void SetOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity, void* opacityRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1182,13 +1459,21 @@ void SetOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
     } else {
         opacity = std::clamp(opacity, 0.0f, 1.0f);
     }
-    ViewAbstract::SetOpacity(frameNode, opacity);
+    if (!SystemProperties::ConfigChangePerform() || !opacityRawPtr) {
+        ViewAbstract::SetOpacity(frameNode, opacity);
+    } else {
+        ViewAbstractModelNG::RemoveResObj(frameNode, "viewAbstract.opacity");
+        auto* opacityPtr = reinterpret_cast<ResourceObject*>(opacityRawPtr);
+        auto opacityResObj = AceType::Claim(opacityPtr);
+        ViewAbstract::SetOpacity(frameNode, opacity, opacityResObj);
+    }
 }
 
 void ResetOpacity(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "viewAbstract.opacity");
     ViewAbstract::SetOpacity(frameNode, 1.0f);
 }
 
@@ -1200,11 +1485,35 @@ void SetAlign(ArkUINodeHandle node, ArkUI_Int32 align)
     ViewAbstract::SetAlign(frameNode, alignment);
 }
 
+void SetLocalizedAlign(ArkUINodeHandle node, ArkUI_CharPtr align)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string localizedAlignment(align);
+    ViewAbstract::SetAlign(localizedAlignment);
+    ViewAbstract::SetIsMirrorable(true);
+}
+
 void ResetAlign(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetAlign(frameNode, Alignment::CENTER);
+}
+
+void SetLayoutGravity(ArkUINodeHandle node, ArkUI_CharPtr align)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Alignment alignment = BoxLayoutAlgorithm::MapLocalizedToAlignment(align);
+    ViewAbstract::SetLayoutGravity(frameNode, alignment);
+}
+
+void ResetLayoutGravity(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetLayoutGravity(frameNode, Alignment::CENTER);
 }
 
 void SetBackdropBlur(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues,
@@ -1317,17 +1626,25 @@ void ResetSaturate(ArkUINodeHandle node)
     ViewAbstract::SetSaturate(frameNode, value);
 }
 
-void SetColorBlend(ArkUINodeHandle node, uint32_t color)
+void SetColorBlend(ArkUINodeHandle node, uint32_t color, void* colorBlendRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetColorBlend(frameNode, Color(color));
+    if (!SystemProperties::ConfigChangePerform() || !colorBlendRawPtr) {
+        ViewAbstract::SetColorBlend(frameNode, Color(color));
+    } else {
+        ViewAbstractModelNG::RemoveResObj(frameNode, "viewAbstract.colorBlend");
+        auto* colorBlend = reinterpret_cast<ResourceObject*>(colorBlendRawPtr);
+        auto colorBlendResObj = AceType::Claim(colorBlend);
+        ViewAbstract::SetColorBlend(frameNode, Color(color), colorBlendResObj);
+    }
 }
 
 void ResetColorBlend(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "viewAbstract.colorBlend");
     Color colorBlend = Color::TRANSPARENT;
     ViewAbstract::SetColorBlend(frameNode, colorBlend);
 }
@@ -1439,17 +1756,18 @@ void ResetBlur(ArkUINodeHandle node)
  * @param colorsLength colors length
  */
 void SetLinearGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
-    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, void* colorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if ((values == nullptr) || (valuesLength != NUM_4) || ((colorsLength % NUM_3) != 0)) {
         return;
     }
+    ViewAbstractModelNG::RemoveResObj(frameNode, "LinearGradient.gradient");
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
     SetLinearGradientValues(gradient, values, valuesLength);
-    SetGradientColors(gradient, colors, colorsLength);
+    SetGradientColors(gradient, colors, colorsLength, colorRawPtr);
     ViewAbstract::SetLinearGradient(frameNode, gradient);
 }
 
@@ -1457,6 +1775,7 @@ void ResetLinearGradient(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "LinearGradient.gradient");
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
     ViewAbstract::SetLinearGradient(frameNode, gradient);
@@ -1478,20 +1797,21 @@ void ResetLinearGradient(ArkUINodeHandle node)
  * @param colorsLength colors length
  */
 void SetSweepGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
-    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, ArkUI_Int32 colorSpace)
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, ArkUI_Int32 colorSpace, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if ((values == nullptr) || (valuesLength != NUM_13) || ((colorsLength % NUM_3) != 0)) {
         return;
     }
+    ViewAbstractModelNG::RemoveResObj(frameNode, "SweepGradient.gradient");
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::SWEEP);
-    SetSweepGradientValues(gradient, values, valuesLength);
+    SetSweepGradientValues(gradient, values, valuesLength, resRawPtr);
     if (ColorSpace::DISPLAY_P3 == colorSpace) {
-        SetGradientColorsWithColorSpace(gradient, colors, colorsLength, ColorSpace::DISPLAY_P3);
+        SetSweepGradientColors(gradient, colors, colorsLength, ColorSpace::DISPLAY_P3, resRawPtr);
     } else {
-        SetGradientColorsWithColorSpace(gradient, colors, colorsLength, ColorSpace::SRGB);
+        SetSweepGradientColors(gradient, colors, colorsLength, ColorSpace::SRGB, resRawPtr);
     }
     ViewAbstract::SetSweepGradient(frameNode, gradient);
 }
@@ -1500,6 +1820,7 @@ void ResetSweepGradient(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "SweepGradient.gradient");
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::SWEEP);
     ViewAbstract::SetSweepGradient(frameNode, gradient);
@@ -1519,17 +1840,18 @@ void ResetSweepGradient(ArkUINodeHandle node)
  * @param colorsLength colors length
  */
 void SetRadialGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
-    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength)
+    const ArkUIInt32orFloat32* colors, ArkUI_Int32 colorsLength, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if ((values == nullptr) || (valuesLength != NUM_10) || ((colorsLength % NUM_3) != 0)) {
         return;
     }
+    ViewAbstractModelNG::RemoveResObj(frameNode, "RadialGradient.gradient");
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::RADIAL);
-    SetRadialGradientValues(gradient, values, valuesLength);
-    SetGradientColors(gradient, colors, colorsLength);
+    SetRadialGradientValues(gradient, values, valuesLength, resRawPtr);
+    SetRadialGradientColors(gradient, colors, colorsLength, resRawPtr);
     ViewAbstract::SetRadialGradient(frameNode, gradient);
 }
 
@@ -1537,6 +1859,7 @@ void ResetRadialGradient(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "RadialGradient.gradient");
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::RADIAL);
     ViewAbstract::SetRadialGradient(frameNode, gradient);
@@ -1672,7 +1995,7 @@ void SetBorderImageGradient(ArkUINodeHandle node, const ArkUIInt32orFloat32* val
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
     SetBorderImageGradientValues(gradient, values, valuesLength);
-    SetGradientColors(gradient, colors, colorsLength);
+    SetGradientColors(gradient, colors, colorsLength, nullptr);
     ViewAbstract::SetBorderImageGradient(frameNode, gradient);
 }
 
@@ -1799,12 +2122,31 @@ void ResetLinearGradientBlur(ArkUINodeHandle node)
     ViewAbstract::SetLinearGradientBlur(frameNode, blurPara);
 }
 
+void CheckBackgroundBlurStyleResObj(void* inactiveColorRawPtr, BlurStyleOption& bgBlurStyle)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* inactiveColorPtr = reinterpret_cast<ResourceObject*>(inactiveColorRawPtr);
+        auto inactiveColorResObj = AceType::Claim(inactiveColorPtr);
+        if (inactiveColorResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, BlurStyleOption& styleOption) {
+                Color inactiveColorValue;
+                ResourceParseUtils::ParseResColor(resObj, inactiveColorValue);
+                styleOption.inactiveColor = inactiveColorValue;
+                styleOption.isValidColor = true;
+            };
+            bgBlurStyle.AddResource("backgroundBlurStyle.backgroundBlurStyleOptions.inactiveColor", inactiveColorResObj,
+                std::move(updateFunc));
+        }
+    }
+}
+
 void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[5], ArkUI_Float32 scale,
     const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize, ArkUI_Bool isValidColor, ArkUI_Uint32 inactiveColorArg,
-    ArkUI_Bool disableSystemAdaptation)
+    ArkUI_Bool disableSystemAdaptation, void* inactiveColorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "backgroundBlurStyle.backgroundBlurStyleOptions");
     ArkUI_Int32 blurStyle = (*intArray)[NUM_0];
     ArkUI_Int32 colorMode = (*intArray)[NUM_1];
     ArkUI_Int32 adaptiveColor = (*intArray)[NUM_2];
@@ -1839,6 +2181,7 @@ void SetBackgroundBlurStyle(ArkUINodeHandle node, ArkUI_Int32 (*intArray)[5], Ar
     bgBlurStyle.inactiveColor = inactiveColor;
     SysOptions sysOptions;
     sysOptions.disableSystemAdaptation = disableSystemAdaptation;
+    CheckBackgroundBlurStyleResObj(inactiveColorRawPtr, bgBlurStyle);
     ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle, sysOptions);
 }
 
@@ -1867,6 +2210,7 @@ void ResetBackgroundBlurStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "backgroundBlurStyle.backgroundBlurStyleOptions");
     BlurStyleOption bgBlurStyle;
     ViewAbstract::SetBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
@@ -2001,6 +2345,7 @@ void SetBackgroundImagePositionUpdateFunc(
     auto* bgImage = reinterpret_cast<ResourceObject*>(bgImageRawPtr);
     auto resObj = AceType::Claim(bgImage);
     auto&& updateFunc = [direction](const RefPtr<ResourceObject>& resObj, BackgroundImagePosition& position) {
+        CHECK_NULL_VOID(resObj);
         CalcDimension dimension;
         double value;
         DimensionUnit type;
@@ -2016,8 +2361,9 @@ void SetBackgroundImagePositionUpdateFunc(
         (direction == "x") ? position.SetSizeX(AnimatableDimension(value, type, option))
                            : position.SetSizeY(AnimatableDimension(value, type, option));
     };
-    (direction == "x") ? bgImgPosition.AddResource("backgroundImagePositionX", resObj, std::move(updateFunc))
-                       : bgImgPosition.AddResource("backgroundImagePositionY", resObj, std::move(updateFunc));
+    auto& updater = bgImgPosition.GetResObjUpdater();
+    (direction == "x") ? updater.AddResource("backgroundImagePositionX", resObj, std::move(updateFunc))
+                       : updater.AddResource("backgroundImagePositionY", resObj, std::move(updateFunc));
 }
 
 void SetBackgroundImagePosition(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types,
@@ -2049,19 +2395,16 @@ void ResetBackgroundImagePosition(ArkUINodeHandle node)
     ViewAbstract::SetBackgroundImagePosition(frameNode, bgImgPosition, true);
 }
 
-void SetBackgroundImageResizableUpdateFunc(ImageResizableSlice& resizable, void* bgImageResizableRawPtr, ResizableOption direction)
+void SetBackgroundImageResizableUpdateFunc(
+    ImageResizableSlice& resizable, const RefPtr<ResourceObject> resObj, ResizableOption direction)
 {
-    CHECK_NULL_VOID(bgImageResizableRawPtr);
-    auto* bgImageResizable = reinterpret_cast<ResourceObject*>(bgImageResizableRawPtr);
-    auto resObj = AceType::Claim(bgImageResizable);
+    CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [direction](const RefPtr<ResourceObject>& resObj, ImageResizableSlice& resizable) {
-        std::optional<CalcDimension> optDimension;
+        CHECK_NULL_VOID(resObj);
+        std::optional<CalcDimension> optDimension(CalcDimension(0.0));
         CalcDimension dimension(CalcDimension(0.0));
-        CalcDimension defaultDimension(CalcDimension(0.0));
         if (ResourceParseUtils::ParseResDimensionVp(resObj, dimension)) {
             optDimension = dimension;
-        } else {
-            optDimension = defaultDimension;
         }
 
         auto hasValue = optDimension.has_value();
@@ -2102,8 +2445,8 @@ void SetBackgroundImageResizableUpdateFunc(ImageResizableSlice& resizable, void*
     }
 }
 
-void SetResizableFromVec(
-    ImageResizableSlice& resizable, const ArkUIStringAndFloat* options, std::vector<void*>& bgImageResizableArray)
+void SetResizableFromVec(ImageResizableSlice& resizable, const ArkUIStringAndFloat* options,
+    std::vector<RefPtr<ResourceObject>>& bgImageResizableArray)
 {
     std::vector<ResizableOption> directions = { ResizableOption::LEFT, ResizableOption::TOP, ResizableOption::RIGHT,
         ResizableOption::BOTTOM };
@@ -2121,11 +2464,13 @@ void SetResizableFromVec(
 }
 
 void SetBackgroundImageResizable(
-    ArkUINodeHandle node, ArkUIStringAndFloat* options, ArkUI_Int32 optionsSize,
-    std::vector<void*>& bgImageResizableArray)
+    ArkUINodeHandle node, ArkUIStringAndFloat* options, ArkUI_Int32 optionsSize, void* bgImageResizableResObjs)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+
+    auto bgImageResizableArray =
+        *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(bgImageResizableResObjs));
     ImageResizableSlice resizable;
     SetResizableFromVec(resizable, options, bgImageResizableArray);
     ViewAbstract::SetBackgroundImageResizableSlice(frameNode, resizable);
@@ -2380,6 +2725,17 @@ void GetRotate(ArkUINodeHandle node, ArkUIRotateType* rotateType)
     rotateType->sightDistance = rotate.v;
 }
 
+void GetRotateAngle(ArkUINodeHandle node, ArkUIRotateAngleType* rotateType)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto rotateAngle = ViewAbstract::GetRotateAngle(frameNode);
+    rotateType->angleX = rotateAngle.x;
+    rotateType->angleY = rotateAngle.y;
+    rotateType->angleZ = rotateAngle.z;
+    rotateType->sightDistance = rotateAngle.w;
+}
+
 ArkUI_Float32 GetBrightness(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2477,6 +2833,30 @@ void SetRotate(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 va
     ViewAbstract::SetPivot(frameNode, center);
 }
 
+void SetRotateAngle(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength, const ArkUI_Int32* units,
+    ArkUI_Int32 unitLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (valLength != NUM_7 || unitLength != NUM_3) {
+        return;
+    }
+    auto centerX = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+    auto centerY = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
+    auto centerZ = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
+    auto angleX = values[NUM_3];
+    auto angleY = values[NUM_4];
+    auto angleZ = values[NUM_5];
+    auto perspective = values[NUM_6];
+    ViewAbstract::SetRotateAngle(frameNode, NG::Vector4F(angleX, angleY, angleZ, perspective));
+
+    DimensionOffset center(centerX, centerY);
+    if (!NearZero(centerZ.Value())) {
+        center.SetZ(centerZ);
+    }
+    ViewAbstract::SetPivot(frameNode, center);
+}
+
 /**
  * @param values
  * values[0]: xDirection;values[1]: yDirection;values[2]: zDirection
@@ -2499,6 +2879,22 @@ void SetRotateWithoutTransformCenter(ArkUINodeHandle node, const ArkUI_Float32* 
     ViewAbstract::SetRotate(frameNode, NG::Vector5F(xDirection, yDirection, zDirection, angle, perspective));
 }
 
+void SetRotateAngleWithoutTransformCenter(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valLength)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    if (valLength < NUM_4) {
+        return;
+    }
+
+    auto angleX = values[NUM_0];
+    auto angleY = values[NUM_1];
+    auto angleZ = values[NUM_2];
+    auto perspective = values[NUM_3];
+    ViewAbstract::SetRotateAngle(frameNode, NG::Vector4F(angleX, angleY, angleZ, perspective));
+}
+
 void ResetRotate(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2512,6 +2908,30 @@ void ResetRotate(ArkUINodeHandle node)
         center.SetZ(rotate.centerZ);
     }
     ViewAbstract::SetPivot(frameNode, center);
+}
+
+void ResetRotateAngle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::RotateAngleOptions rotate(0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.0f, 0.0f);
+    ViewAbstract::SetRotate(
+        frameNode, NG::Vector5F(rotate.angleX, rotate.angleY, rotate.angleZ, 0.0, rotate.perspective));
+
+    DimensionOffset center(rotate.centerX, rotate.centerY);
+    if (!NearZero(rotate.centerZ.Value())) {
+        center.SetZ(rotate.centerZ);
+    }
+    ViewAbstract::SetPivot(frameNode, center);
+}
+
+void ResetRotateAngleWithoutTransformCenter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::RotateAngleOptions rotateAngle(0.0f, 0.0f, 0.0f, 0.5_pct, 0.5_pct, 0.0f, 0.0f);
+    ViewAbstract::SetRotateAngle(
+        frameNode, NG::Vector4F(rotateAngle.angleX, rotateAngle.angleY, rotateAngle.angleZ, rotateAngle.perspective));
 }
 
 void SetGeometryTransition(ArkUINodeHandle node, ArkUI_CharPtr id, const ArkUIGeometryTransitionOptions* options)
@@ -2542,6 +2962,15 @@ void ResetGeometryTransition(ArkUINodeHandle node)
     ViewAbstract::SetGeometryTransition(frameNode, "", false, true);
 }
 
+void SetTipsTimeParam(const RefPtr<PopupParam>& tipsParam, const ArkUIBindTipsOptionsTime& timeOptions)
+{
+    CHECK_NULL_VOID(tipsParam);
+    tipsParam->SetAppearingTime(timeOptions.appearingTime);
+    tipsParam->SetDisappearingTime(timeOptions.disappearingTime);
+    tipsParam->SetAppearingTimeWithContinuousOperation(timeOptions.appearingTimeWithContinuousOperation);
+    tipsParam->SetDisappearingTimeWithContinuousOperation(timeOptions.disappearingTimeWithContinuousOperation);
+}
+
 void SetBindTips(ArkUINodeHandle node, ArkUI_CharPtr message, ArkUIBindTipsOptionsTime timeOptions,
     ArkUIBindTipsOptionsArrow arrowOptions)
 {
@@ -2550,12 +2979,10 @@ void SetBindTips(ArkUINodeHandle node, ArkUI_CharPtr message, ArkUIBindTipsOptio
     auto tipsParam = AceType::MakeRefPtr<PopupParam>();
     tipsParam->SetMessage(std::string(message));
     tipsParam->SetShowInSubWindow(true);
-    tipsParam->SetAppearingTime(timeOptions.appearingTime);
-    tipsParam->SetDisappearingTime(timeOptions.disappearingTime);
-    tipsParam->SetAppearingTimeWithContinuousOperation(timeOptions.appearingTimeWithContinuousOperation);
-    tipsParam->SetDisappearingTimeWithContinuousOperation(timeOptions.disappearingTimeWithContinuousOperation);
+    SetTipsTimeParam(tipsParam, timeOptions);
     tipsParam->SetEnableArrow(arrowOptions.enableArrow);
     tipsParam->SetKeyBoardAvoidMode(PopupKeyboardAvoidMode::DEFAULT);
+    tipsParam->SetAnchorType(static_cast<TipsAnchorType>(arrowOptions.showAtAnchor));
     if (arrowOptions.arrowPointPosition && arrowOptions.enableArrow) {
         char* pEnd = nullptr;
         std::strtod(arrowOptions.arrowPointPosition, &pEnd);
@@ -2766,34 +3193,49 @@ void ResetSafeAreaPadding(ArkUINodeHandle node)
     ViewAbstract::ResetSafeAreaPadding(frameNode);
 }
 
-/**
- * @param values value value
- * values[0] : left, values[1] : top, values[2] : right, values[3] : bottom
- * @param units unit value
- * units[0] : left, units[1] : top, units[2] : right, units[3] : bottom
- * @param length values length
- */
-void SetPixelStretchEffect(
-    ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
+void CheckPixelStretchEffectResObj(PixStretchEffectOption& option, const std::vector<RefPtr<ResourceObject>>& objs)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (length != NUM_4) {
-        return;
+    RefPtr<ResourceObject> leftObj = objs[NUM_0];
+    RefPtr<ResourceObject> rightObj = objs[NUM_1];
+    RefPtr<ResourceObject> topObj = objs[NUM_2];
+    RefPtr<ResourceObject> bottomObj = objs[NUM_3];
+    if (leftObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& leftObj, PixStretchEffectOption& effectOption) {
+            CalcDimension left;
+            ResourceParseUtils::ParseResDimensionVp(leftObj, left);
+            effectOption.left = left;
+        };
+        option.AddResource("pixelStretchEffect.left", leftObj, std::move(updateFunc));
     }
-    auto leftValue = values[NUM_0];
-    auto leftUnit = units[NUM_0];
-    auto topValue = values[NUM_1];
-    auto topUnit = units[NUM_1];
-    auto rightValue = values[NUM_2];
-    auto rightUnit = units[NUM_2];
-    auto bottomValue = values[NUM_3];
-    auto bottomUnit = units[NUM_3];
-    Dimension left(leftValue, static_cast<DimensionUnit>(leftUnit));
-    Dimension top(topValue, static_cast<DimensionUnit>(topUnit));
-    Dimension right(rightValue, static_cast<DimensionUnit>(rightUnit));
-    Dimension bottom(bottomValue, static_cast<DimensionUnit>(bottomUnit));
-    bool illegalInput = false;
+    if (rightObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& rightObj, PixStretchEffectOption& effectOption) {
+            CalcDimension right;
+            ResourceParseUtils::ParseResDimensionVp(rightObj, right);
+            effectOption.right = right;
+        };
+        option.AddResource("pixelStretchEffect.right", rightObj, std::move(updateFunc));
+    }
+    if (topObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& topObj, PixStretchEffectOption& effectOption) {
+            CalcDimension top;
+            ResourceParseUtils::ParseResDimensionVp(topObj, top);
+            effectOption.top = top;
+        };
+        option.AddResource("pixelStretchEffect.top", topObj, std::move(updateFunc));
+    }
+    if (bottomObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& bottomObj, PixStretchEffectOption& effectOption) {
+            CalcDimension bottom;
+            ResourceParseUtils::ParseResDimensionVp(bottomObj, bottom);
+            effectOption.bottom = bottom;
+        };
+        option.AddResource("pixelStretchEffect.bottom", bottomObj, std::move(updateFunc));
+    }
+}
+
+void CheckPixelStretchEffectPercent(bool& illegalInput, Dimension& left, Dimension& right,
+    Dimension& top, Dimension& bottom)
+{
     if (left.Unit() == DimensionUnit::PERCENT || right.Unit() == DimensionUnit::PERCENT ||
         top.Unit() == DimensionUnit::PERCENT || bottom.Unit() == DimensionUnit::PERCENT) {
         if ((NearEqual(left.Value(), 0.0) || left.Unit() == DimensionUnit::PERCENT) &&
@@ -2808,6 +3250,38 @@ void SetPixelStretchEffect(
             illegalInput = true;
         }
     }
+}
+
+/**
+ * @param values value value
+ * values[0] : left, values[1] : top, values[2] : right, values[3] : bottom
+ * @param units unit value
+ * units[0] : left, units[1] : top, units[2] : right, units[3] : bottom
+ * @param length values length
+ */
+void SetPixelStretchEffect(
+    ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length, void* rawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (length != NUM_4) {
+        return;
+    }
+    ViewAbstractModelNG::RemoveResObj(frameNode, "pixelStretchEffect");
+    auto leftValue = values[NUM_0];
+    auto leftUnit = units[NUM_0];
+    auto topValue = values[NUM_1];
+    auto topUnit = units[NUM_1];
+    auto rightValue = values[NUM_2];
+    auto rightUnit = units[NUM_2];
+    auto bottomValue = values[NUM_3];
+    auto bottomUnit = units[NUM_3];
+    Dimension left(leftValue, static_cast<DimensionUnit>(leftUnit));
+    Dimension top(topValue, static_cast<DimensionUnit>(topUnit));
+    Dimension right(rightValue, static_cast<DimensionUnit>(rightUnit));
+    Dimension bottom(bottomValue, static_cast<DimensionUnit>(bottomUnit));
+    bool illegalInput = false;
+    CheckPixelStretchEffectPercent(illegalInput, left, right, top, bottom);
     PixStretchEffectOption option;
     if ((left.IsNonNegative() && top.IsNonNegative() && right.IsNonNegative() && bottom.IsNonNegative()) ||
         (left.IsNonPositive() && top.IsNonPositive() && right.IsNonPositive() && bottom.IsNonPositive())) {
@@ -2821,6 +3295,10 @@ void SetPixelStretchEffect(
     if (illegalInput) {
         option.ResetValue();
     }
+    auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckPixelStretchEffectResObj(option, objs);
+    }
     ViewAbstract::SetPixelStretchEffect(frameNode, option);
 }
 
@@ -2828,6 +3306,7 @@ void ResetPixelStretchEffect(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "pixelStretchEffect");
     PixStretchEffectOption option;
     option.ResetValue();
     ViewAbstract::SetPixelStretchEffect(frameNode, option);
@@ -2917,12 +3396,19 @@ void ResetUseEffect(ArkUINodeHandle node)
     ViewAbstract::SetUseEffect(frameNode, false, EffectType::DEFAULT);
 }
 
-void SetForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t color)
+void SetForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t color, void* fgColorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (isColor) {
-        ViewAbstract::SetForegroundColor(frameNode, Color(color));
+        if (SystemProperties::ConfigChangePerform() && fgColorRawPtr) {
+            ViewAbstractModelNG::RemoveResObj(frameNode, "foregroundColor");
+            auto* fgColor = reinterpret_cast<ResourceObject*>(fgColorRawPtr);
+            auto colorResObj = AceType::Claim(fgColor);
+            ViewAbstract::SetForegroundColor(frameNode, Color(color), colorResObj);
+        } else {
+            ViewAbstract::SetForegroundColor(frameNode, Color(color));
+        }
     } else {
         auto strategy = static_cast<ForegroundColorStrategy>(color);
         ViewAbstract::SetForegroundColorStrategy(frameNode, strategy);
@@ -2933,6 +3419,7 @@ void ResetForegroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "foregroundColor");
 }
 
 void SetMotionPath(ArkUINodeHandle node, ArkUI_CharPtr path, ArkUI_Float32 from, ArkUI_Float32 to, ArkUI_Bool rotatable)
@@ -3191,6 +3678,49 @@ void ResetAccessibilityText(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::SetAccessibilityText(frameNode, "");
+}
+
+void SetAccessibilityTextHint(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string valueStr = value;
+    ViewAbstractModelNG::SetAccessibilityTextHint(frameNode, valueStr);
+}
+
+void ResetAccessibilityTextHint(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityTextHint(frameNode, "");
+}
+
+void SetAccessibilityChecked(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityChecked(frameNode, value, false);
+}
+
+void ResetAccessibilityChecked(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityChecked(frameNode, false, true);
+}
+
+void SetAccessibilitySelected(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilitySelected(frameNode, value, false);
+}
+
+void ResetAccessibilitySelected(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilitySelected(frameNode, false, true);
 }
 
 void SetAllowDrop(ArkUINodeHandle node, ArkUI_CharPtr* allowDropCharArray, ArkUI_Int32 length)
@@ -3840,13 +4370,38 @@ void ResetForegroundEffect(ArkUINodeHandle node)
     ViewAbstract::SetForegroundEffect(frameNode, 0.0f);
 }
 
+void CheckBackgroundEffectResObj(EffectOption& option, void* colorRawPtr, void* inactiveColorRawPtr)
+{
+    auto* colorPtr = reinterpret_cast<ResourceObject*>(colorRawPtr);
+    auto colorResObj = AceType::Claim(colorPtr);
+    if (colorResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& colorResObj, EffectOption& effectOption) {
+            Color effectOptionColor;
+            ResourceParseUtils::ParseResColor(colorResObj, effectOptionColor);
+            effectOption.color = effectOptionColor;
+        };
+        option.AddResource("backgroundEffect.color", colorResObj, std::move(updateFunc));
+    }
+    auto* inactiveColorPtr = reinterpret_cast<ResourceObject*>(inactiveColorRawPtr);
+    auto inactiveColorResObj = AceType::Claim(inactiveColorPtr);
+    if (inactiveColorResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& inactiveColorObj, EffectOption& effectOption) {
+            Color effectOptionInactiveColor;
+            ResourceParseUtils::ParseResColor(inactiveColorObj, effectOptionInactiveColor);
+            effectOption.inactiveColor = effectOptionInactiveColor;
+        };
+        option.AddResource("backgroundEffect.inactiveColor", inactiveColorResObj, std::move(updateFunc));
+    }
+}
+
 void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Float32 saturationArg,
     ArkUI_Float32 brightnessArg, ArkUI_Uint32 colorArg, ArkUI_Int32 adaptiveColorArg, const ArkUI_Float32* blurValues,
     ArkUI_Int32 blurValuesSize, ArkUI_Int32 policy, ArkUI_Int32 blurType, ArkUI_Bool isValidColor,
-    ArkUI_Uint32 inactiveColorArg, ArkUI_Bool disableSystemAdaptation)
+    ArkUI_Uint32 inactiveColorArg, ArkUI_Bool disableSystemAdaptation, void* colorRawPtr, void* inactiveColorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "backgroundEffect");
     CalcDimension radius;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         radius = CalcDimension(radiusArg, DimensionUnit::VP);
@@ -3871,6 +4426,9 @@ void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Fl
     option.isValidColor = isValidColor;
     SysOptions sysOptions;
     sysOptions.disableSystemAdaptation = disableSystemAdaptation;
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckBackgroundEffectResObj(option, colorRawPtr, inactiveColorRawPtr);
+    }
     ViewAbstract::SetBackgroundEffect(frameNode, option, sysOptions);
 }
 
@@ -3878,6 +4436,7 @@ void ResetBackgroundEffect(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "backgroundEffect");
     CalcDimension radius;
     radius.SetValue(0.0f);
     double saturation = 1.0f;
@@ -4267,8 +4826,40 @@ void ResetKeyBoardShortCut(ArkUINodeHandle node)
     ViewAbstractModelNG::SetKeyboardShortcut(frameNode, "", std::vector<OHOS::Ace::ModifierKey>(), nullptr);
 }
 
+void SetPointLightPositionResObj(void* resRawPtr, NG::TranslateOptions& option)
+{
+    auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(resRawPtr));
+    RefPtr<ResourceObject> xResObj = objs[NUM_0];
+    RefPtr<ResourceObject> yResObj = objs[NUM_1];
+    RefPtr<ResourceObject> zResObj = objs[NUM_2];
+    if (xResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::TranslateOptions& option) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            option.x = dimension;
+        };
+        option.AddResource("pointLight.LightSource.PositionX", xResObj, std::move(updateFunc));
+    }
+    if (yResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::TranslateOptions& option) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            option.y = dimension;
+        };
+        option.AddResource("pointLight.LightSource.PositionY", yResObj, std::move(updateFunc));
+    }
+    if (zResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::TranslateOptions& option) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            option.z = dimension;
+        };
+        option.AddResource("pointLight.LightSource.PositionZ", zResObj, std::move(updateFunc));
+    }
+}
+
 void SetPointLightPosition(ArkUINodeHandle node, const struct ArkUISizeType* positionX,
-    const struct ArkUISizeType* positionY, const struct ArkUISizeType* positionZ)
+    const struct ArkUISizeType* positionY, const struct ArkUISizeType* positionZ, void* resRawPtr)
 {
 #ifdef POINT_LIGHT_ENABLE
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -4279,7 +4870,18 @@ void SetPointLightPosition(ArkUINodeHandle node, const struct ArkUISizeType* pos
     CalcDimension lightPositionX(positionX->value, static_cast<DimensionUnit>(positionX->unit));
     CalcDimension lightPositionY(positionY->value, static_cast<DimensionUnit>(positionY->unit));
     CalcDimension lightPositionZ(positionZ->value, static_cast<DimensionUnit>(positionZ->unit));
-    ViewAbstract::SetLightPosition(frameNode, lightPositionX, lightPositionY, lightPositionZ);
+    if (!SystemProperties::ConfigChangePerform()) {
+        ViewAbstract::SetLightPosition(frameNode, lightPositionX, lightPositionY, lightPositionZ);
+    } else {
+        ViewAbstractModelNG::RemoveResObj(frameNode, "pointLight.LightSource");
+        NG::TranslateOptions option;
+        option.x = lightPositionX;
+        option.y = lightPositionY;
+        option.z = lightPositionZ;
+
+        SetPointLightPositionResObj(resRawPtr, option);
+        ViewAbstract::SetLightPosition(frameNode, option);
+    }
 #endif
 }
 
@@ -4288,6 +4890,7 @@ void ResetPointLightPosition(ArkUINodeHandle node)
 #ifdef POINT_LIGHT_ENABLE
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "pointLight.LightSource");
     CalcDimension lightPositionX(0.0f, DimensionUnit::VP);
     CalcDimension lightPositionY(0.0f, DimensionUnit::VP);
     CalcDimension lightPositionZ(0.0f, DimensionUnit::VP);
@@ -4313,13 +4916,21 @@ void ResetPointLightIntensity(ArkUINodeHandle node)
 #endif
 }
 
-void SetPointLightColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+void SetPointLightColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr)
 {
 #ifdef POINT_LIGHT_ENABLE
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color colorValue(color);
-    ViewAbstract::SetLightColor(frameNode, colorValue);
+    if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
+        ViewAbstractModelNG::RemoveResObj(frameNode, "LightColorRes");
+        auto* lightColor = reinterpret_cast<ResourceObject*>(colorRawPtr);
+        auto colorResObj = AceType::Claim(lightColor);
+        ViewAbstract::SetLightColor(frameNode, colorValue, colorResObj);
+    } else {
+        ViewAbstract::SetLightColor(frameNode, colorValue);
+    }
+    
 #endif
 }
 
@@ -4328,6 +4939,7 @@ void ResetPointLightColor(ArkUINodeHandle node)
 #ifdef POINT_LIGHT_ENABLE
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "LightColorRes");
     ViewAbstract::SetLightColor(frameNode, Color::WHITE);
 #endif
 }
@@ -4360,6 +4972,7 @@ void SetPointLightBloom(ArkUINodeHandle node, ArkUI_Float32 bloom, ArkUI_Float32
 #ifdef POINT_LIGHT_ENABLE
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "shadow");
     ViewAbstract::SetBloom(frameNode, static_cast<float>(bloom));
     Shadow shadow;
     shadow.SetBlurRadius(bloom * static_cast<float>(bloomRadius));
@@ -4374,6 +4987,7 @@ void ResetPointLightBloom(ArkUINodeHandle node)
 #ifdef POINT_LIGHT_ENABLE
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "shadow");
     ViewAbstract::SetBloom(frameNode, 0.0f);
     Shadow shadow;
     shadow.SetBlurRadius(0);
@@ -4388,39 +5002,45 @@ void SetClip(ArkUINodeHandle node, ArkUI_Int32 isClip)
     ViewAbstract::SetClipEdge(frameNode, static_cast<bool>(isClip));
 }
 
+void SetRectClipShape(const ArkUI_Float32* attribute, ArkUI_Int32 length, ArkUI_Int32 unit, RefPtr<ShapeRect>& shape)
+{
+    auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto radiusWidth = Dimension(attribute[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(unit));
+    auto radiusHeight = Dimension(attribute[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(unit));
+    shape->SetWidth(width);
+    shape->SetHeight(height);
+    shape->SetRadiusWidth(radiusWidth);
+    shape->SetRadiusHeight(radiusHeight);
+    if (length > NUM_4) {
+        auto topLeftRadius = length > NUM_4
+                                    ? Dimension(attribute[NUM_4], static_cast<OHOS::Ace::DimensionUnit>(unit))
+                                    : Dimension(0);
+        auto bottomLeftRadius = length > NUM_5
+                                    ? Dimension(attribute[NUM_5], static_cast<OHOS::Ace::DimensionUnit>(unit))
+                                    : Dimension(0);
+        auto topRightRadius = length > NUM_6
+                                    ? Dimension(attribute[NUM_6], static_cast<OHOS::Ace::DimensionUnit>(unit))
+                                    : Dimension(0);
+        auto bottomRightRadius = length > NUM_7
+                                        ? Dimension(attribute[NUM_7], static_cast<OHOS::Ace::DimensionUnit>(unit))
+                                        : Dimension(0);
+        shape->SetTopLeftRadius(Radius(topLeftRadius));
+        shape->SetBottomLeftRadius(Radius(bottomLeftRadius));
+        shape->SetTopRightRadius(Radius(topRightRadius));
+        shape->SetBottomRightRadius(Radius(bottomRightRadius));
+    }
+}
+
 void SetClipShape(
     ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32* attribute, ArkUI_Int32 length, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "clipShape");
     if (std::strcmp(type, "rect") == 0) {
         auto shape = AceType::MakeRefPtr<ShapeRect>();
-        auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
-        auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(unit));
-        auto radiusWidth = Dimension(attribute[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(unit));
-        auto radiusHeight = Dimension(attribute[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(unit));
-        shape->SetWidth(width);
-        shape->SetHeight(height);
-        shape->SetRadiusWidth(radiusWidth);
-        shape->SetRadiusHeight(radiusHeight);
-        if (length > NUM_4) {
-            auto topLeftRadius = length > NUM_4
-                                     ? Dimension(attribute[NUM_4], static_cast<OHOS::Ace::DimensionUnit>(unit))
-                                     : Dimension(0);
-            auto bottomLeftRadius = length > NUM_5
-                                        ? Dimension(attribute[NUM_5], static_cast<OHOS::Ace::DimensionUnit>(unit))
-                                        : Dimension(0);
-            auto topRightRadius = length > NUM_6
-                                      ? Dimension(attribute[NUM_6], static_cast<OHOS::Ace::DimensionUnit>(unit))
-                                      : Dimension(0);
-            auto bottomRightRadius = length > NUM_7
-                                         ? Dimension(attribute[NUM_7], static_cast<OHOS::Ace::DimensionUnit>(unit))
-                                         : Dimension(0);
-            shape->SetTopLeftRadius(Radius(topLeftRadius));
-            shape->SetBottomLeftRadius(Radius(bottomLeftRadius));
-            shape->SetTopRightRadius(Radius(topRightRadius));
-            shape->SetBottomRightRadius(Radius(bottomRightRadius));
-        }
+        SetRectClipShape(attribute, length, unit, shape);
         ViewAbstract::SetClipShape(frameNode, shape);
     }
     if (std::strcmp(type, "circle") == 0) {
@@ -4446,6 +5066,7 @@ void SetClipPath(ArkUINodeHandle node, ArkUI_CharPtr type, const ArkUI_Float32 (
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "clipShape");
     auto path = AceType::MakeRefPtr<Path>();
     auto width = Dimension((*attribute)[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
     auto height = Dimension((*attribute)[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(unit));
@@ -4962,6 +5583,7 @@ void SetMaskShape(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, A
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "maskShape");
     std::string shapeType(type);
     auto strokeWidth_ = Dimension(strokeWidth, static_cast<OHOS::Ace::DimensionUnit>(unit));
     if (shapeType == "rect") {
@@ -5028,6 +5650,7 @@ void SetMaskPath(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Uint32 fill, Ar
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     auto strokeWidth_ = Dimension(strokeWidth, static_cast<OHOS::Ace::DimensionUnit>(unit));
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "maskShape");
     auto path = AceType::MakeRefPtr<Path>();
     auto width = Dimension((*attribute)[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(unit));
     auto height = Dimension((*attribute)[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(unit));
@@ -5045,6 +5668,7 @@ void SetProgressMask(ArkUINodeHandle node, const ArkUI_Float32* attribute, ArkUI
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "ProgressMask");
     auto progressMask = AceType::MakeRefPtr<NG::ProgressMaskProperty>();
     int value = attribute[NUM_0];
     int total = attribute[NUM_1];
@@ -5058,19 +5682,140 @@ void ResetMask(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "maskShape");
     ViewAbstract::SetMask(frameNode, nullptr);
 }
 
-void SetOutlineColor(ArkUINodeHandle node, const uint32_t* values, int32_t valuesSize)
+void CheckOuterBorderWidthResObj(NG::BorderWidthProperty& borderWidth, RefPtr<ResourceObject>& leftResObj,
+    RefPtr<ResourceObject>& rightResObj, RefPtr<ResourceObject>& topResObj, RefPtr<ResourceObject>& bottomResObj)
+{
+    borderWidth.resMap_.clear();
+    if (leftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            borderWidth.leftDimen = dimension;
+        };
+        borderWidth.AddResource("outLineWidth.EdgeOutlineWidths.left", leftResObj, std::move(updateFunc));
+    }
+    if (rightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            borderWidth.rightDimen = dimension;
+        };
+        borderWidth.AddResource("outLineWidth.EdgeOutlineWidths.right", rightResObj, std::move(updateFunc));
+    }
+    if (topResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            borderWidth.topDimen = dimension;
+        };
+        borderWidth.AddResource("outLineWidth.EdgeOutlineWidths.top", topResObj, std::move(updateFunc));
+    }
+    if (bottomResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            borderWidth.bottomDimen = dimension;
+        };
+        borderWidth.AddResource("outLineWidth.EdgeOutlineWidths.bottom", bottomResObj, std::move(updateFunc));
+    }
+}
+
+void CheckOuterBorderRadiusResObj(NG::BorderRadiusProperty& borderRadius,
+    RefPtr<ResourceObject>& topLeftResObj, RefPtr<ResourceObject>& topRightResObj,
+    RefPtr<ResourceObject>& bottomLeftResObj, RefPtr<ResourceObject>& bottomRightResObj)
+{
+    borderRadius.resMap_.clear();
+    if (topLeftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            borderRadius.radiusTopLeft = dimension;
+        };
+        borderRadius.AddResource("outLineRadius.radius.radiusTopLft", topLeftResObj, std::move(updateFunc));
+    }
+    if (topRightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            borderRadius.radiusTopRight = dimension;
+        };
+        borderRadius.AddResource("outLineRadius.radius.radiusTopRight", topRightResObj, std::move(updateFunc));
+    }
+    if (bottomLeftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            borderRadius.radiusBottomLeft = dimension;
+        };
+        borderRadius.AddResource("outLineRadius.radius.radiusBottomLeft", bottomLeftResObj, std::move(updateFunc));
+    }
+    if (bottomRightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+            CalcDimension dimension;
+            ResourceParseUtils::ParseResDimensionVp(resObj, dimension);
+            borderRadius.radiusBottomRight = dimension;
+        };
+        borderRadius.AddResource("outLineRadius.radius.radiusBottomRight", bottomRightResObj, std::move(updateFunc));
+    }
+}
+
+void CheckOuterBorderColorResObj(NG::BorderColorProperty& borderColors, RefPtr<ResourceObject>& leftResObj,
+    RefPtr<ResourceObject>& rightResObj, RefPtr<ResourceObject>& topResObj, RefPtr<ResourceObject>& bottomResObj)
+{
+    borderColors.resMap_.clear();
+    if (leftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color color;
+            ResourceParseUtils::ParseResColor(resObj, color);
+            borderColors.leftColor = color;
+        };
+        borderColors.AddResource("outLineColor.edgeColor.left", leftResObj, std::move(updateFunc));
+    }
+    if (rightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color color;
+            ResourceParseUtils::ParseResColor(resObj, color);
+            borderColors.rightColor = color;
+        };
+        borderColors.AddResource("outLineColor.edgeColor.right", rightResObj, std::move(updateFunc));
+    }
+    if (topResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color color;
+            ResourceParseUtils::ParseResColor(resObj, color);
+            borderColors.topColor = color;
+        };
+        borderColors.AddResource("outLineColor.edgeColor.top", topResObj, std::move(updateFunc));
+    }
+    if (bottomResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color color;
+            ResourceParseUtils::ParseResColor(resObj, color);
+            borderColors.bottomColor = color;
+        };
+        borderColors.AddResource("outLineColor.edgeColor.bottom", bottomResObj, std::move(updateFunc));
+    }
+}
+
+void SetOutlineColor(ArkUINodeHandle node, const uint32_t* values, int32_t valuesSize, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "outerBorderColor");
     int32_t colorOffset = NUM_0;
     NG::BorderColorProperty borderColors;
-    SetOptionalBorderColor(borderColors.topColor, values, valuesSize, colorOffset);
-    SetOptionalBorderColor(borderColors.rightColor, values, valuesSize, colorOffset);
-    SetOptionalBorderColor(borderColors.bottomColor, values, valuesSize, colorOffset);
     SetOptionalBorderColor(borderColors.leftColor, values, valuesSize, colorOffset);
+    SetOptionalBorderColor(borderColors.rightColor, values, valuesSize, colorOffset);
+    SetOptionalBorderColor(borderColors.topColor, values, valuesSize, colorOffset);
+    SetOptionalBorderColor(borderColors.bottomColor, values, valuesSize, colorOffset);
+    auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(resRawPtr));
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckOuterBorderColorResObj(borderColors, objs[NUM_0], objs[NUM_1], objs[NUM_2], objs[NUM_3]);
+    }
     borderColors.multiValued = true;
     ViewAbstract::SetOuterBorderColor(frameNode, borderColors);
 }
@@ -5079,6 +5824,7 @@ void ResetOutlineColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "outerBorderColor");
     ViewAbstract::SetOuterBorderColor(frameNode, Color::BLACK);
 }
 
@@ -5108,17 +5854,22 @@ ArkUI_Bool GetRenderGroup(ArkUINodeHandle node)
     return static_cast<ArkUI_Bool>(ViewAbstract::GetRenderGroup(frameNode));
 }
 
-void SetOutlineRadius(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t valuesSize)
+void SetOutlineRadius(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t valuesSize, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t radiusOffset = NUM_0;
 
+    ViewAbstractModelNG::RemoveResObj(frameNode, "outerBorderRadius");
     NG::BorderRadiusProperty borderRadius;
     SetOptionalBorder(borderRadius.radiusTopLeft, values, valuesSize, radiusOffset);
     SetOptionalBorder(borderRadius.radiusTopRight, values, valuesSize, radiusOffset);
     SetOptionalBorder(borderRadius.radiusBottomLeft, values, valuesSize, radiusOffset);
     SetOptionalBorder(borderRadius.radiusBottomRight, values, valuesSize, radiusOffset);
+    auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(resRawPtr));
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckOuterBorderRadiusResObj(borderRadius, objs[NUM_0], objs[NUM_1], objs[NUM_2], objs[NUM_3]);
+    }
     borderRadius.multiValued = true;
     ViewAbstract::SetOuterBorderRadius(frameNode, borderRadius);
 }
@@ -5127,14 +5878,16 @@ void ResetOutlineRadius(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "outerBorderRadius");
     Dimension value;
     ViewAbstract::SetOuterBorderRadius(frameNode, value);
 }
 
-void SetOutlineWidth(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t valuesSize)
+void SetOutlineWidth(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t valuesSize, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "outerBorderWidth");
     int32_t offset = NUM_0;
     NG::BorderWidthProperty borderWidth;
 
@@ -5142,6 +5895,10 @@ void SetOutlineWidth(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t 
     SetOptionalBorder(borderWidth.rightDimen, values, valuesSize, offset);
     SetOptionalBorder(borderWidth.topDimen, values, valuesSize, offset);
     SetOptionalBorder(borderWidth.bottomDimen, values, valuesSize, offset);
+    auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(resRawPtr));
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckOuterBorderWidthResObj(borderWidth, objs[NUM_0], objs[NUM_1], objs[NUM_2], objs[NUM_3]);
+    }
     borderWidth.multiValued = true;
     ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
 }
@@ -5151,6 +5908,7 @@ void SetOutlineWidthFloat(ArkUINodeHandle node, ArkUI_Float32 left, ArkUI_Float3
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "outerBorderWidth");
     NG::BorderWidthProperty borderWidth;
     borderWidth.leftDimen = Dimension(left, DimensionUnit::VP);
     borderWidth.topDimen = Dimension(top, DimensionUnit::VP);
@@ -5182,6 +5940,7 @@ void ResetOutlineWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::RemoveResObj(frameNode, "outerBorderWidth");
     Dimension value;
     ViewAbstract::SetOuterBorderWidth(frameNode, value);
 }
@@ -5230,14 +5989,18 @@ void ResetOutlineStyle(ArkUINodeHandle node)
  * @param optionsLength options colorAndStyleSize
  */
 void SetOutline(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t valuesSize, const uint32_t* colorAndStyle,
-    int32_t colorAndStyleSize)
+    int32_t colorAndStyleSize, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if ((values == nullptr) || (valuesSize != NUM_24) || (colorAndStyle == nullptr) || colorAndStyleSize != NUM_16) {
         return;
     }
+    ViewAbstractModelNG::RemoveResObj(frameNode, "outerBorderWidth");
+    ViewAbstractModelNG::RemoveResObj(frameNode, "outerBorderColor");
+    ViewAbstractModelNG::RemoveResObj(frameNode, "outerBorderRadius");
 
+    auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(resRawPtr));
     int32_t offset = NUM_0; // offset for outline width and outline radius
     NG::BorderWidthProperty borderWidth;
     SetOptionalBorder(borderWidth.leftDimen, values, valuesSize, offset);
@@ -5245,6 +6008,9 @@ void SetOutline(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t value
     SetOptionalBorder(borderWidth.topDimen, values, valuesSize, offset);
     SetOptionalBorder(borderWidth.bottomDimen, values, valuesSize, offset);
     borderWidth.multiValued = true;
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckOuterBorderWidthResObj(borderWidth, objs[NUM_0], objs[NUM_1], objs[NUM_2], objs[NUM_3]);
+    }
     ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
 
     NG::BorderRadiusProperty borderRadius;
@@ -5253,6 +6019,9 @@ void SetOutline(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t value
     SetOptionalBorder(borderRadius.radiusBottomLeft, values, valuesSize, offset);
     SetOptionalBorder(borderRadius.radiusBottomRight, values, valuesSize, offset);
     borderRadius.multiValued = true;
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckOuterBorderRadiusResObj(borderRadius, objs[NUM_4], objs[NUM_5], objs[NUM_6], objs[NUM_7]);
+    }
     ViewAbstract::SetOuterBorderRadius(frameNode, borderRadius);
 
     int32_t colorAndStyleOffset = NUM_0; // offset for outline color and outline style
@@ -5262,6 +6031,9 @@ void SetOutline(ArkUINodeHandle node, const ArkUI_Float32* values, int32_t value
     SetOptionalBorderColor(borderColors.topColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
     SetOptionalBorderColor(borderColors.bottomColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
     borderColors.multiValued = true;
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckOuterBorderColorResObj(borderColors, objs[NUM_8], objs[NUM_9], objs[NUM_10], objs[NUM_11]);
+    }
     ViewAbstract::SetOuterBorderColor(frameNode, borderColors);
 
     NG::BorderStyleProperty borderStyles;
@@ -6939,6 +7711,8 @@ ArkUI_Int32 PostTouchEvent(ArkUINodeHandle node, const ArkUITouchEvent* arkUITou
         point.y = touchPointes[index].nodeY;
         point.screenX = touchPointes[index].screenX * density;
         point.screenY = touchPointes[index].screenY * density;
+        point.globalDisplayX = touchPointes[index].globalDisplayX * density;
+        point.globalDisplayY = touchPointes[index].globalDisplayY * density;
         point.originalId = touchPointes[index].id;
         std::chrono::nanoseconds downNanoseconds(static_cast<int64_t>(touchPointes[index].pressedTime));
         TimeStamp downTime(downNanoseconds);
@@ -6951,10 +7725,39 @@ ArkUI_Int32 PostTouchEvent(ArkUINodeHandle node, const ArkUITouchEvent* arkUITou
     touchEvent.y = arkUITouchEvent->actionTouchPoint.nodeY;
     touchEvent.screenX = arkUITouchEvent->actionTouchPoint.screenX * density;
     touchEvent.screenY = arkUITouchEvent->actionTouchPoint.screenY * density;
+    touchEvent.globalDisplayX = arkUITouchEvent->actionTouchPoint.globalDisplayX * density;
+    touchEvent.globalDisplayY = arkUITouchEvent->actionTouchPoint.globalDisplayY * density;
     touchEvent.originalId = arkUITouchEvent->actionTouchPoint.id;
     MMI::PointerEvent* pointerEvent = reinterpret_cast<MMI::PointerEvent*>(arkUITouchEvent->rawPointerEvent);
     NG::SetPostPointerEvent(pointerEvent, touchEvent);
     return PostTouchEventToFrameNode(node, touchEvent);
+}
+
+void SetSingleHistoryEvent(std::array<ArkUIHistoryTouchEvent, MAX_HISTORY_EVENT_COUNT>& allHistoryEvents,
+    const ArkUITouchEvent* arkUITouchEvent, size_t index)
+{
+    if (!arkUITouchEvent) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "SetSingleHistoryEvent touchevent is null!");
+        return;
+    }
+    if (index >= MAX_HISTORY_EVENT_COUNT) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "SetSingleHistoryEvent index >= MAX!");
+        return;
+    }
+    allHistoryEvents[index].action = arkUITouchEvent->historyEvents[index].action;
+    allHistoryEvents[index].sourceType = arkUITouchEvent->historyEvents[index].sourceType;
+    allHistoryEvents[index].timeStamp = arkUITouchEvent->historyEvents[index].timeStamp;
+    allHistoryEvents[index].actionTouchPoint.nodeX = arkUITouchEvent->historyEvents[index].actionTouchPoint.nodeX;
+    allHistoryEvents[index].actionTouchPoint.nodeY = arkUITouchEvent->historyEvents[index].actionTouchPoint.nodeY;
+    allHistoryEvents[index].actionTouchPoint.windowX = arkUITouchEvent->historyEvents[index].actionTouchPoint.windowX;
+    allHistoryEvents[index].actionTouchPoint.windowY = arkUITouchEvent->historyEvents[index].actionTouchPoint.windowY;
+    allHistoryEvents[index].actionTouchPoint.screenX = arkUITouchEvent->historyEvents[index].actionTouchPoint.screenX;
+    allHistoryEvents[index].actionTouchPoint.screenY = arkUITouchEvent->historyEvents[index].actionTouchPoint.screenY;
+    allHistoryEvents[index].actionTouchPoint.globalDisplayX =
+        arkUITouchEvent->historyEvents[index].actionTouchPoint.globalDisplayX;
+    allHistoryEvents[index].actionTouchPoint.globalDisplayY =
+        arkUITouchEvent->historyEvents[index].actionTouchPoint.globalDisplayY;
+    allHistoryEvents[index].actionTouchPoint.pressure = arkUITouchEvent->historyEvents[index].actionTouchPoint.pressure;
 }
 
 void SetHistoryTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITouchEvent* arkUITouchEvent)
@@ -6963,17 +7766,7 @@ void SetHistoryTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITou
     std::array<std::array<ArkUITouchPoint, MAX_POINTS>, MAX_HISTORY_EVENT_COUNT> allHistoryPoints;
     if (arkUITouchEvent->historySize > 0) {
         for (size_t i = 0; i < arkUITouchEvent->historySize; i++) {
-            allHistoryEvents[i].action = arkUITouchEvent->historyEvents[i].action;
-            allHistoryEvents[i].sourceType = arkUITouchEvent->historyEvents[i].sourceType;
-            allHistoryEvents[i].timeStamp = arkUITouchEvent->historyEvents[i].timeStamp;
-            allHistoryEvents[i].actionTouchPoint.nodeX = arkUITouchEvent->historyEvents[i].actionTouchPoint.nodeX;
-            allHistoryEvents[i].actionTouchPoint.nodeY = arkUITouchEvent->historyEvents[i].actionTouchPoint.nodeY;
-            allHistoryEvents[i].actionTouchPoint.windowX = arkUITouchEvent->historyEvents[i].actionTouchPoint.windowX;
-            allHistoryEvents[i].actionTouchPoint.windowY = arkUITouchEvent->historyEvents[i].actionTouchPoint.windowY;
-            allHistoryEvents[i].actionTouchPoint.screenX = arkUITouchEvent->historyEvents[i].actionTouchPoint.screenX;
-            allHistoryEvents[i].actionTouchPoint.screenY = arkUITouchEvent->historyEvents[i].actionTouchPoint.screenY;
-            allHistoryEvents[i].actionTouchPoint.pressure =
-                arkUITouchEvent->historyEvents[i].actionTouchPoint.pressure;
+            SetSingleHistoryEvent(allHistoryEvents, arkUITouchEvent, i);
             for (size_t j = 0; j < arkUITouchEvent->historyEvents[i].touchPointSize; j++) {
                 allHistoryPoints[i][j].id = arkUITouchEvent->historyEvents[i].touchPointes[j].id;
                 allHistoryPoints[i][j].nodeX = arkUITouchEvent->historyEvents[i].touchPointes[j].nodeX;
@@ -6982,6 +7775,10 @@ void SetHistoryTouchEvent(ArkUITouchEvent* arkUITouchEventCloned, const ArkUITou
                 allHistoryPoints[i][j].windowY = arkUITouchEvent->historyEvents[i].touchPointes[j].windowY;
                 allHistoryPoints[i][j].screenX = arkUITouchEvent->historyEvents[i].touchPointes[j].screenX;
                 allHistoryPoints[i][j].screenY = arkUITouchEvent->historyEvents[i].touchPointes[j].screenY;
+                allHistoryPoints[i][j].globalDisplayX =
+                    arkUITouchEvent->historyEvents[i].touchPointes[j].globalDisplayX;
+                allHistoryPoints[i][j].globalDisplayY =
+                    arkUITouchEvent->historyEvents[i].touchPointes[j].globalDisplayY;
                 allHistoryPoints[i][j].contactAreaWidth =
                     arkUITouchEvent->historyEvents[i].touchPointes[j].contactAreaWidth;
                 allHistoryPoints[i][j].contactAreaHeight =
@@ -7322,6 +8119,45 @@ void ResetFreeze(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::SetFreeze(frameNode, false);
 }
+
+ArkUI_Int32 SetOnTouchTestDoneCallback(ArkUINodeHandle node, void* userData,
+    void (*touchTestDone)(
+        ArkUIGestureEvent* event, ArkUIGestureRecognizerHandleArray recognizers, int32_t count, void* userData))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if (!frameNode) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (!touchTestDone) {
+        ViewAbstract::SetOnTouchTestDone(frameNode, nullptr);
+        return ERROR_CODE_NO_ERROR;
+    }
+    auto callback = [node, userData, touchTestDone](const std::shared_ptr<BaseGestureEvent>& event,
+                        const std::list<RefPtr<NGGestureRecognizer>>& recognizers) {
+        ArkUIAPIEventGestureAsyncEvent gestureEvent;
+        ArkUITouchEvent rawInputEvent;
+        ArkUI_UIInputEvent inputEvent { ARKUI_UIINPUTEVENT_TYPE_TOUCH, C_TOUCH_EVENT_ID, nullptr };
+        std::array<ArkUITouchPoint, MAX_POINTS> points;
+        NodeModifier::GetBaseGestureEvent(&gestureEvent, rawInputEvent, inputEvent, event, points);
+        ArkUIGestureEvent arkUIGestureEvent { gestureEvent, node };
+        ArkUIGestureRecognizerHandleArray recognizerArray = nullptr;
+        auto count = static_cast<int32_t>(recognizers.size());
+        if (count <= 0) {
+            touchTestDone(&arkUIGestureEvent, recognizerArray, count, userData);
+            return;
+        }
+        recognizerArray = new ArkUIGestureRecognizerHandle[count];
+        int32_t index = 0;
+        for (const auto& value : recognizers) {
+            recognizerArray[index] = NodeModifier::CreateGestureRecognizer(value);
+            index++;
+        }
+        touchTestDone(&arkUIGestureEvent, recognizerArray, count, userData);
+        delete[] recognizerArray;
+    };
+    ViewAbstract::SetOnTouchTestDone(frameNode, callback);
+    return ERROR_CODE_NO_ERROR;
+}
 } // namespace
 
 namespace NodeModifier {
@@ -7333,6 +8169,7 @@ const ArkUICommonModifier* GetCommonModifier()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUICommonModifier modifier = {
+        .setOnTouchTestDoneCallback = SetOnTouchTestDoneCallback,
         .setBackgroundColor = SetBackgroundColor,
         .setBackgroundColorWithColorSpace = SetBackgroundColorWithColorSpace,
         .resetBackgroundColor = ResetBackgroundColor,
@@ -7365,7 +8202,10 @@ const ArkUICommonModifier* GetCommonModifier()
         .setOpacity = SetOpacity,
         .resetOpacity = ResetOpacity,
         .setAlign = SetAlign,
+        .setLocalizedAlign = SetLocalizedAlign,
         .resetAlign = ResetAlign,
+        .setLayoutGravity = SetLayoutGravity,
+        .resetLayoutGravity = ResetLayoutGravity,
         .setBackdropBlur = SetBackdropBlur,
         .resetBackdropBlur = ResetBackdropBlur,
         .setHueRotate = SetHueRotate,
@@ -7419,8 +8259,12 @@ const ArkUICommonModifier* GetCommonModifier()
         .setScaleWithoutTransformCenter = SetScaleWithoutTransformCenter,
         .resetScale = ResetScale,
         .setRotate = SetRotate,
+        .setRotateAngle = SetRotateAngle,
         .setRotateWithoutTransformCenter = SetRotateWithoutTransformCenter,
+        .setRotateAngleWithoutTransformCenter = SetRotateAngleWithoutTransformCenter,
+        .resetRotateAngleWithoutTransformCenter = ResetRotateAngleWithoutTransformCenter,
         .resetRotate = ResetRotate,
+        .resetRotateAngle = ResetRotateAngle,
         .setGeometryTransition = SetGeometryTransition,
         .resetGeometryTransition = ResetGeometryTransition,
         .setBindTips = SetBindTips,
@@ -7652,6 +8496,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .getLayoutWeight = GetLayoutWeight,
         .getScale = GetScale,
         .getRotate = GetRotate,
+        .getRotateAngle = GetRotateAngle,
         .getBrightness = GetBrightness,
         .getSaturate = GetSaturate,
         .getBackgroundImagePosition = GetBackgroundImagePosition,
@@ -7767,6 +8612,12 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetPrivacySensitive = ResetPrivacySensitve,
         .freezeUINodeById = FreezeUINodeById,
         .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
+        .setAccessibilityTextHint = SetAccessibilityTextHint,
+        .resetAccessibilityTextHint = ResetAccessibilityTextHint,
+        .setAccessibilityChecked = SetAccessibilityChecked,
+        .resetAccessibilityChecked = ResetAccessibilityChecked,
+        .setAccessibilitySelected = SetAccessibilitySelected,
+        .resetAccessibilitySelected = ResetAccessibilitySelected,
         .setVisualEffect = SetVisualEffect,
         .resetVisualEffect = ResetVisualEffect,
         .setBackgroundFilter = SetBackgroundFilter,
@@ -7818,6 +8669,8 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .resetOpacity = ResetOpacity,
         .setAlign = SetAlign,
         .resetAlign = ResetAlign,
+        .setLayoutGravity = SetLayoutGravity,
+        .resetLayoutGravity = ResetLayoutGravity,
         .setBackdropBlur = SetBackdropBlur,
         .resetBackdropBlur = ResetBackdropBlur,
         .setHueRotate = SetHueRotate,
@@ -8165,8 +9018,8 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .getExpandSafeArea = GetExpandSafeArea,
         .setTransition = SetTransition,
         .setDragPreview = SetDragPreview,
-        .resetDragPreview = ResetDragPreview,
         .freezeUINodeById = FreezeUINodeById,
+        .resetDragPreview = ResetDragPreview,
         .freezeUINodeByUniqueId = FreezeUINodeByUniqueId,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
@@ -8364,6 +9217,7 @@ void TriggerOnClickEvent(void* extraParam, int32_t nodeId, bool usePx, GestureEv
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
+    Offset globalDisplayOffset = info.GetGlobalDisplayLocation();
     ArkUINodeEvent event;
     event.kind = ArkUIEventCategory::CLICK_EVENT;
     event.extraParam = reinterpret_cast<intptr_t>(extraParam);
@@ -8379,6 +9233,10 @@ void TriggerOnClickEvent(void* extraParam, int32_t nodeId, bool usePx, GestureEv
         usePx ? screenOffset.GetX() : PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX());
     event.clickEvent.displayY =
         usePx ? screenOffset.GetY() : PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY());
+    event.clickEvent.globalDisplayX =
+        usePx ? globalDisplayOffset.GetX() : PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX());
+    event.clickEvent.globalDisplayY =
+        usePx ? globalDisplayOffset.GetY() : PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY());
     SetOnClickInfo(event, info, usePx);
     SendArkUISyncEvent(&event);
 }
@@ -8640,6 +9498,7 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     const OHOS::Ace::Offset& globalLocation = locationInfo.GetGlobalLocation();
     const OHOS::Ace::Offset& localLocation = locationInfo.GetLocalLocation();
     const OHOS::Ace::Offset& screenLocation = locationInfo.GetScreenLocation();
+    const OHOS::Ace::Offset& globalDisplayLocation = locationInfo.GetGlobalDisplayLocation();
     touchPoint.id = locationInfo.GetFingerId();
     double density = usePx ? 1 : PipelineBase::GetCurrentDensity();
     touchPoint.nodeX = localLocation.GetX() / density;
@@ -8648,6 +9507,8 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     touchPoint.windowY = globalLocation.GetY() / density;
     touchPoint.screenX = screenLocation.GetX() / density;
     touchPoint.screenY = screenLocation.GetY() / density;
+    touchPoint.globalDisplayX = globalDisplayLocation.GetX() / density;
+    touchPoint.globalDisplayY = globalDisplayLocation.GetY() / density;
     touchPoint.pressure = locationInfo.GetForce();
     touchPoint.contactAreaWidth = locationInfo.GetSize();
     touchPoint.contactAreaHeight = locationInfo.GetSize();
@@ -8684,6 +9545,10 @@ void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
             historyLoaction.GetScreenLocation().GetX() / density;
         points[i].screenY = NearEqual(density, 0.0) ? 0.0f :
             historyLoaction.GetScreenLocation().GetY() / density;
+        points[i].globalDisplayX = NearEqual(density, 0.0) ? 0.0 :
+            historyLoaction.GetGlobalDisplayLocation().GetX() / density;
+        points[i].globalDisplayY = NearEqual(density, 0.0) ? 0.0 :
+            historyLoaction.GetGlobalDisplayLocation().GetY() / density;
         points[i].contactAreaWidth = touchPoint.size;
         points[i].contactAreaHeight = touchPoint.size;
         points[i].pressure = touchPoint.force;
@@ -8801,6 +9666,8 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
                     NearEqual(density, 0.0) ? 0.0f : (*historyLoacationIterator).GetGlobalLocation().GetY() / density;
                 allHistoryEvents[i].actionTouchPoint.screenX = tempTouchEvent.screenX;
                 allHistoryEvents[i].actionTouchPoint.screenY = tempTouchEvent.screenY;
+                allHistoryEvents[i].actionTouchPoint.globalDisplayX = tempTouchEvent.globalDisplayX;
+                allHistoryEvents[i].actionTouchPoint.globalDisplayY = tempTouchEvent.globalDisplayY;
                 allHistoryEvents[i].actionTouchPoint.pressure = tempTouchEvent.force;
                 ConvertTouchPointsToPoints(
                     tempTouchEvent.pointers, allHistoryPoints[i], *historyLoacationIterator, usePx);
@@ -8978,6 +9845,10 @@ void SetOnHoverMove(ArkUINodeHandle node, void* extraParam)
         event.touchEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY();
         event.touchEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX();
         event.touchEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY();
+        event.touchEvent.actionTouchPoint.tiltX = info.GetTiltX().value_or(0.0f);
+        event.touchEvent.actionTouchPoint.tiltY = info.GetTiltY().value_or(0.0f);
+        event.touchEvent.actionTouchPoint.globalDisplayX = info.GetGlobalDisplayLocation().GetX();
+        event.touchEvent.actionTouchPoint.globalDisplayY = info.GetGlobalDisplayLocation().GetY();
         event.touchEvent.actionTouchPoint.rollAngle = info.GetRollAngle().value_or(0.0f);
         event.touchEvent.deviceId = info.GetDeviceId();
         event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
@@ -9041,6 +9912,8 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
         event.mouseEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY() / density;
         event.mouseEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX() / density;
         event.mouseEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
+        event.mouseEvent.actionTouchPoint.globalDisplayX = info.GetGlobalDisplayLocation().GetX() / density;
+        event.mouseEvent.actionTouchPoint.globalDisplayY = info.GetGlobalDisplayLocation().GetY() / density;
         event.mouseEvent.rawDeltaX = info.GetRawDeltaX() / density;
         event.mouseEvent.rawDeltaY = info.GetRawDeltaY() / density;
         event.mouseEvent.targetDisplayId = info.GetTargetDisplayId();
@@ -9057,6 +9930,28 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
         info.SetStopPropagation(event.mouseEvent.stopPropagation);
     };
     ViewAbstract::SetOnMouse(frameNode, onEvent);
+}
+
+void SetOnAxisInfo(ArkUINodeEvent& event, AxisInfo& info, bool usePx)
+{
+    const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
+    const auto& targetOrigin = info.GetTarget().origin;
+    if (usePx) {
+        event.axisEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
+        event.axisEvent.targetPositionY = targetLocalOffset.GetY().ConvertToPx();
+        event.axisEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
+        event.axisEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
+        event.axisEvent.width = info.GetTarget().area.GetWidth().ConvertToPx();
+        event.axisEvent.height = info.GetTarget().area.GetHeight().ConvertToPx();
+    } else {
+        event.axisEvent.targetPositionX = targetLocalOffset.GetX().ConvertToVp();
+        event.axisEvent.targetPositionY = targetLocalOffset.GetY().ConvertToVp();
+        event.axisEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToVp() + targetLocalOffset.GetX().ConvertToVp();
+        event.axisEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToVp() + targetLocalOffset.GetY().ConvertToVp();
+        event.axisEvent.width = info.GetTarget().area.GetWidth().ConvertToVp();
+        event.axisEvent.height = info.GetTarget().area.GetHeight().ConvertToVp();
+    }
+    event.axisEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
 }
 
 void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
@@ -9086,10 +9981,13 @@ void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
         event.axisEvent.actionTouchPoint.windowY = info.GetGlobalLocation().GetY() / density;
         event.axisEvent.actionTouchPoint.screenX = info.GetScreenLocation().GetX() / density;
         event.axisEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
+        event.axisEvent.actionTouchPoint.globalDisplayX = info.GetGlobalDisplayLocation().GetX() / density;
+        event.axisEvent.actionTouchPoint.globalDisplayY = info.GetGlobalDisplayLocation().GetY() / density;
         event.axisEvent.targetDisplayId = info.GetTargetDisplayId();
         event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
         event.axisEvent.deviceId = info.GetDeviceId();
 
+        SetOnAxisInfo(event, info, usePx);
         SendArkUISyncEvent(&event);
         info.SetStopPropagation(!event.axisEvent.propagation);
     };

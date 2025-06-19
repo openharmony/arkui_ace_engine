@@ -73,7 +73,7 @@ private:
     std::mutex providerMapMutex_;
     std::mutex cancelableCallbackMapMutex_;
     SharedImageMap sharedImageMap_;
-    int32_t sharedImageTotalSize_;
+    size_t sharedImageTotalSize_;
     int32_t sharedImageCacheThreshold_;
     ProviderMapToReload providerMapToReload_;
     std::function<void()> clearImageDataCallback_;

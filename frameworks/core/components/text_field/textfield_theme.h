@@ -215,8 +215,8 @@ public:
 
             theme->cancelButton_ = pattern->GetAttr<std::string>("textfield_accessibility_clear", "");
             theme->cancelImageText_ = pattern->GetAttr<std::string>("textfield_accessibility_property_clear", "");
-            theme->showPassword_ = pattern->GetAttr<std::string>("textfield_show_password_button", "");
-            theme->hidePassword_ = pattern->GetAttr<std::string>("textfield_hide_password_button", "");
+            theme->showPassword_ = pattern->GetAttr<std::string>("textfield_show_password", "");
+            theme->hidePassword_ = pattern->GetAttr<std::string>("textfield_hide_password", "");
             theme->hasShowedPassword_ = pattern->GetAttr<std::string>("textfield_has_showed_password", "");
             theme->hasHiddenPassword_ = pattern->GetAttr<std::string>("textfield_has_hidden_password", "");
             theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("textfield_writting_bundle_name", "");

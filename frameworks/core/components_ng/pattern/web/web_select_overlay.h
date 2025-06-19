@@ -77,6 +77,7 @@ public:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> startSelectionHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endSelectionHandle);
     void RegisterSelectOverlayEvent(SelectOverlayInfo& selectInfo);
+    void SetEditMenuOptions(SelectOverlayInfo& selectInfo);
     void UpdateSelectHandleInfo();
     bool IsSelectHandleReverse();
     // Check whether the handle status is valid.
@@ -156,10 +157,16 @@ public:
     void OnHandleReverse(bool isReverse) override;
     void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
     void OnAfterSelectOverlayShow(bool isCreated) override;
+    void OnHandleIsHidden() override;
     // override SelectOverlayCallback end
-    void UpdateAISelectMenu(TextDataDetectType type, std::string content);
+    void DetectSelectedText(const std::string& text);
+    void UpdateAISelectMenu(TextDataDetectType type, const std::string& content);
+    void UpdateSingleHandleVisible(bool isVisible);
+    bool IsSingleHandle();
+    void SetTouchHandleExistState(bool touchHandleExist);
 private:
     void UpdateSelectMenuOptions();
+    void UpdateIsSelectAll();
     bool isShowHandle_ = false;
     bool needResetHandleReverse_ = false;
     bool isSelectAll_ = false;

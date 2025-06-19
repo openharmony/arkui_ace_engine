@@ -472,6 +472,9 @@ HWTEST_F(ContainerModelTestNg, AccessibilityProperty001, TestSize.Level1)
 HWTEST_F(ContainerModelTestNg, VisibleTest009, TestSize.Level1)
 {
     CreateContainerModal();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(
+        "frameNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    pattern_->SetToolbarBuilder(frameNode, nullptr);
     auto customRow = pattern_->GetCustomTitleRow();
     ASSERT_NE(customRow, nullptr);
     auto customLayoutProperty = customRow->GetLayoutProperty();
@@ -944,5 +947,60 @@ HWTEST_F(ContainerModelTestNg, ConfigCustomWindowMask, TestSize.Level1)
     processor->SetCustomWindowMaskNode(buttonNode);
     EXPECT_TRUE(ContainerModalView::ConfigCustomWindowMask(pipeline, true));
     EXPECT_TRUE(ContainerModalView::ConfigCustomWindowMask(pipeline, false));
+}
+
+/**
+ * @tc.name: SetToolbarBuilder
+ * @tc.desc: Test SetToolbarBuilder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, SetToolbarBuilder, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(pattern_, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 100, AceType::MakeRefPtr<Pattern>());
+    pattern_->SetToolbarBuilder(frameNode, nullptr);
+    ASSERT_NE(pattern_->titleMgr_, nullptr);
+    ASSERT_NE(pattern_->floatTitleMgr_, nullptr);
+    pattern_->SetToolbarBuilder(frameNode, nullptr);
+}
+
+/**
+ * @tc.name: IsContainerModalTransparent
+ * @tc.desc: Test IsContainerModalTransparent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, IsContainerModalTransparent, TestSize.Level1)
+{
+    CreateContainerModal();
+    ASSERT_NE(pattern_, nullptr);
+    auto ret = pattern_->IsContainerModalTransparent();
+    EXPECT_FALSE(ret);
+    pattern_->activeColor_ = Color::TRANSPARENT;
+    pattern_->inactiveColor_ = Color::TRANSPARENT;
+    pattern_->isCustomColor_ = true;
+    ret = pattern_->IsContainerModalTransparent();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: SetWindowContainerColor
+ * @tc.desc: Test SetWindowContainerColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, SetWindowContainerColor, TestSize.Level1)
+{
+    CreateContainerModal();
+    auto title = pattern_->GetCustomTitleRow();
+    auto parentNode = FrameNode::CreateFrameNode("parentNode", 1, AceType::MakeRefPtr<Pattern>());
+    pattern_->SetToolbarBuilder(parentNode, nullptr);
+
+    pattern_->SetWindowContainerColor(Color::RED, Color::RED);
+    bool ret = pattern_->IsContainerModalTransparent();
+    EXPECT_FALSE(ret);
+
+    pattern_->SetWindowContainerColor(Color::TRANSPARENT, Color::TRANSPARENT);
+    ret = pattern_->IsContainerModalTransparent();
+    EXPECT_TRUE(ret);
 }
 } // namespace OHOS::Ace::NG

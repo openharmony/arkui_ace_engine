@@ -615,3 +615,43 @@ HWTEST_F(NodeExtenedTest, NodeExtenedTest033, TestSize.Level1)
     DisposeNode(nodeHandle);
     nodeHandle = nullptr;
 }
+
+/**
+ * @tc.name: NodeExtenedTest034
+ * @tc.desc: Test RegisterNodeCustomEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeExtenedTest, NodeExtenedTest034, TestSize.Level1)
+{
+    ArkUI_NodeHandle nodeHandle = CreateNode(ArkUI_NodeType::ARKUI_NODE_SWIPER);
+    ASSERT_NE(nodeHandle, nullptr);
+    nodeHandle->type = ArkUI_NodeType::ARKUI_NODE_CUSTOM;
+    void* userData = nullptr;
+    int32_t ret = RegisterNodeCustomEvent(nodeHandle, ArkUI_NodeCustomEventType::ARKUI_NODE_CUSTOM_EVENT_ON_DRAW_FRONT,
+                                          0, userData);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    UnregisterNodeCustomEvent(nodeHandle, ArkUI_NodeCustomEventType::ARKUI_NODE_CUSTOM_EVENT_ON_DRAW_FRONT);
+    ASSERT_EQ(nodeHandle->extraCustomData, nullptr);
+    DisposeNode(nodeHandle);
+    nodeHandle = nullptr;
+}
+
+/**
+ * @tc.name: NodeExtenedTest035
+ * @tc.desc: Test RegisterNodeCustomEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeExtenedTest, NodeExtenedTest035, TestSize.Level1)
+{
+    ArkUI_NodeHandle nodeHandle = CreateNode(ArkUI_NodeType::ARKUI_NODE_SWIPER);
+    ASSERT_NE(nodeHandle, nullptr);
+    nodeHandle->type = ArkUI_NodeType::ARKUI_NODE_CUSTOM;
+    void* userData = nullptr;
+    int32_t ret = RegisterNodeCustomEvent(nodeHandle, ArkUI_NodeCustomEventType::ARKUI_NODE_CUSTOM_EVENT_ON_DRAW_BEHIND,
+                                          0, userData);
+    ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    UnregisterNodeCustomEvent(nodeHandle, ArkUI_NodeCustomEventType::ARKUI_NODE_CUSTOM_EVENT_ON_DRAW_BEHIND);
+    ASSERT_EQ(nodeHandle->extraCustomData, nullptr);
+    DisposeNode(nodeHandle);
+    nodeHandle = nullptr;
+}

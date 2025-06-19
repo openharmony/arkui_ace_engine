@@ -49,6 +49,9 @@ void ScrollPattern::OnModifyDone()
     if (axis != GetAxis()) {
         SetAxis(axis);
         ResetPosition();
+        if (axis == Axis::FREE) {
+            InitFreeScroll();
+        }
     }
     if (!GetScrollableEvent()) {
         AddScrollEvent();
@@ -161,7 +164,7 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
         AddScrollLayoutInfo();
     }
 
-    if (LessNotEqual(scrollableDistance_, oldScrollableDistance)) {
+    if (LessNotEqual(scrollableDistance_, oldScrollableDistance) && !GetCanStayOverScroll()) {
         CheckRestartSpring(true);
     }
     auto axis = GetAxis();
@@ -438,6 +441,7 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
 void ScrollPattern::FireOnDidScroll(float scroll)
 {
     FireObserverOnDidScroll(scroll);
+    FireObserverOnScrollerAreaChange(scroll);
     auto eventHub = GetOrCreateEventHub<ScrollEventHub>();
     CHECK_NULL_VOID(eventHub);
     auto onScroll = eventHub->GetOnDidScrollEvent();
@@ -687,6 +691,7 @@ void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std:
         return;
     }
     float position = currentOffset_ + distance;
+    SetIsOverScroll(false);
     if (smooth) {
         AnimateTo(-position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, true, false, false);
         return;
@@ -721,13 +726,16 @@ void ScrollPattern::JumpToPosition(float position, int32_t source)
 
 void ScrollPattern::ScrollTo(float position)
 {
+    SetAnimateCanOverScroll(GetCanStayOverScroll());
     JumpToPosition(-position, SCROLL_FROM_JUMP);
+    SetIsOverScroll(GetCanStayOverScroll());
 }
 
 void ScrollPattern::DoJump(float position, int32_t source)
 {
     float setPosition = (GetAxis() == Axis::HORIZONTAL && IsRowReverse()) ? -position : position;
-    if (!NearEqual(currentOffset_, setPosition) && GreatOrEqual(scrollableDistance_, 0.0f)) {
+    if ((!NearEqual(currentOffset_, setPosition) && GreatOrEqual(scrollableDistance_, 0.0f)) ||
+        GetCanStayOverScroll()) {
         UpdateCurrentOffset(setPosition - currentOffset_, source);
     }
 }
@@ -1189,7 +1197,7 @@ float ScrollPattern::GetPagingOffset(float delta, float dragDistance, float velo
     // handle last page
     if (GreatNotEqual(lastPageLength_, 0.f) &&
         LessNotEqual(currentOffset_, -scrollableDistance_ + lastPageLength_)) {
-        auto offset = fmod(currentOffset_, lastPageLength_);
+        auto offset = fmod(currentOffset_, viewPortLength_);
         return currentOffset_ - offset + GetPagingDelta(offset, velocity, lastPageLength_);
     }
     // handle other pages
@@ -1532,5 +1540,28 @@ void ScrollPattern::TriggerScrollBarDisplay()
     CHECK_NULL_VOID(scrollBar);
     scrollBar->PlayScrollBarAppearAnimation();
     scrollBar->ScheduleDisappearDelayTask();
+}
+
+void ScrollPattern::InitFreeScroll()
+{
+    if (freePanGesture_) {
+        return;
+    }
+    PanDirection panDirection { .type = PanDirection::ALL };
+    double distance = SystemProperties::GetScrollableDistance();
+    PanDistanceMap distanceMap;
+    if (Positive(distance)) {
+        distanceMap[SourceTool::UNKNOWN] = distance;
+    } else {
+        distanceMap[SourceTool::UNKNOWN] = DEFAULT_PAN_DISTANCE.ConvertToPx();
+        distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
+    }
+    freePanGesture_ = AceType::MakeRefPtr<NG::PanRecognizer>(DEFAULT_PAN_FINGER, panDirection, distanceMap);
+    freePanGesture_->SetOnActionUpdate([this](const GestureEvent& event) {
+        crossOffset_ += static_cast<float>(event.GetDelta().GetY());
+        currentOffset_ += static_cast<float>(event.GetDelta().GetX());
+        auto host = GetHost();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    });
 }
 } // namespace OHOS::Ace::NG

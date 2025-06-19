@@ -220,6 +220,7 @@ public:
     ScrollAlign align_ = ScrollAlign::START;
     std::optional<int32_t> targetIndex_;
     std::optional<float> extraOffset_;
+    int32_t jumpForRecompose_ = EMPTY_JUMP_INDEX;
 
     int32_t startIndex_ = 0;
     int32_t endIndex_ = -1;
@@ -248,6 +249,8 @@ public:
 
     // unfold the LazyVGrid during the position calculation.
     bool duringPositionCalc_ = false;
+
+    bool measureInNextFrame_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(WaterFlowLayoutInfoBase);
 };

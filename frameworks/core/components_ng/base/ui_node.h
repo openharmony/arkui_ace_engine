@@ -141,7 +141,7 @@ public:
     int32_t GetChildIndex(const RefPtr<UINode>& child) const;
     [[deprecated]] void AttachToMainTree(bool recursive = false);
     void AttachToMainTree(bool recursive, PipelineContext* context);
-    void DetachFromMainTree(bool recursive = false);
+    void DetachFromMainTree(bool recursive = false, bool isRoot = true);
     virtual void FireCustomDisappear();
     // Traverse downwards to update system environment variables.
     void UpdateConfigurationUpdate();
@@ -221,12 +221,15 @@ public:
         return parent_.Upgrade();
     }
 
+    RefPtr<UINode> GetAncestor() const;
+
     void SetNeedCallChildrenUpdate(bool needCallChildrenUpdate)
     {
         needCallChildrenUpdate_ = needCallChildrenUpdate;
     }
 
     virtual void SetParent(const WeakPtr<UINode>& parent, bool needDetect = true);
+    void SetAncestor(const WeakPtr<UINode>& parent);
     // Tree operation end.
 
     // performance.
@@ -1035,6 +1038,37 @@ public:
         return drawChildrenParent_.Upgrade();
     }
 
+    bool IsFreeNode() const
+    {
+        return isFreeNode_;
+    }
+
+    bool IsFreeState() const
+    {
+        return isFreeState_;
+    }
+
+    bool IsFreeNodeTree()
+    {
+        if (!IsFreeNode()) {
+            return false;
+        }
+        for (const auto& child : GetChildren()) {
+            if (!child->IsFreeNodeTree()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void PostAfterAttachMainTreeTask(std::function<void()>&& task)
+    {
+        if (IsOnMainTree()) {
+            return;
+        }
+        afterAttachMainTreeTasks_.emplace_back(std::move(task));
+    }
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -1134,12 +1168,24 @@ private:
             child->ClearObserverParentForDrawChildren();
         }
     }
+    
+    void ExecuteAfterAttachMainTreeTasks()
+    {
+        for (auto& task : afterAttachMainTreeTasks_) {
+            if (task) {
+                task();
+            }
+        }
+        afterAttachMainTreeTasks_.clear();
+    }
+    virtual bool MaybeRelease() override;
 
     std::list<RefPtr<UINode>> children_;
     // disappearingChild、index、branchId
     std::list<std::tuple<RefPtr<UINode>, uint32_t, int32_t>> disappearingChildren_;
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
-    WeakPtr<UINode> parent_;
+    WeakPtr<UINode> parent_; // maybe wrong when not on the tree
+    WeakPtr<UINode> ancestor_; // always correct parent ptr, used to remove duplicates when inserting child nodes
     std::string tag_ = "UINode";
     int32_t depth_ = Infinity<int32_t>();
     int32_t hostRootId_ = 0;
@@ -1151,6 +1197,9 @@ private:
     int32_t themeScopeId_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
+    bool isFreeNode_ = false;
+    bool isFreeState_ = false; // the free node in free state can be operated by non UI threads
+    std::vector<std::function<void()>> afterAttachMainTreeTasks_;
     bool removeSilently_ = true;
     bool isInDestroying_ = false;
     bool isDisappearing_ = false;

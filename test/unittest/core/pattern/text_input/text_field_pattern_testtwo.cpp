@@ -1463,4 +1463,25 @@ HWTEST_F(TextFieldPatternTestTwo, AddTextFireOnChange002, TestSize.Level0)
     pattern->AddTextFireOnChange();
     EXPECT_EQ(pattern->textCache_, "abc");
 }
+
+/**
+ * @tc.name: AddTextFireOnChange003
+ * @tc.desc: Test AddTextFireOnChange No PasswordMode with content modified
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, AddTextFireOnChange003, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateTextInputType(TextInputType::USER_NAME);
+    pattern->contentController_->content_ = u"abcd content";
+    pattern->textCache_ = "abcdefg";
+    pattern->AddTextFireOnChange();
+    EXPECT_EQ(pattern->textCache_, "abcd content");
+}
 } // namespace OHOS::Ace::NG

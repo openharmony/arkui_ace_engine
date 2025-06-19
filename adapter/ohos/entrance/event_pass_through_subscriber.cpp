@@ -20,7 +20,7 @@ namespace {
 constexpr int32_t PUBLISHER_UID = 7800;
 const std::string TOUCH_EVENTS_PASS_THROUGH = "touch.events.pass.through";
 const std::string GAME_INFO_TO_GAME_RESAMPLE = "touch.events.game.resample";
-const std::string TOUCH_EVENTS_UGAME_START = "touch.events.ugame.start";
+const std::string TOUCH_EVENTS_UEGAME_START = "touch.events.uegame.start";
 } // namespace
 
 void EventPassThroughSubscribeProxy::SubscribeEvent(int32_t instanceId)
@@ -33,7 +33,7 @@ void EventPassThroughSubscribeProxy::SubscribeEvent(int32_t instanceId)
         // add common events
         matchingSkills.AddEvent(TOUCH_EVENTS_PASS_THROUGH);
         matchingSkills.AddEvent(GAME_INFO_TO_GAME_RESAMPLE);
-        matchingSkills.AddEvent(TOUCH_EVENTS_UGAME_START);
+        matchingSkills.AddEvent(TOUCH_EVENTS_UEGAME_START);
         CommonEventSubscribeInfo subscribeInfo(matchingSkills);
         subscribeInfo.SetPublisherUid(PUBLISHER_UID);
         subscribeInfo.SetThreadMode(EventFwk::CommonEventSubscribeInfo::ThreadMode::HANDLER);
@@ -100,7 +100,7 @@ void EventPassThroughSubscriber::OnReceiveEvent(const CommonEventData& data)
         return;
     }
 
-    if (action == TOUCH_EVENTS_UGAME_START) {
+    if (action == TOUCH_EVENTS_UEGAME_START) {
         TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "OnReceiveEvent %{public}s", action.c_str());
         AceApplicationInfo::GetInstance().SetTouchPadIdChanged(true);
         return;

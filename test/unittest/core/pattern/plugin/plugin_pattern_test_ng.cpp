@@ -235,7 +235,6 @@ HWTEST_F(PluginPatternTestNg, OnDirtyLayoutWrapperSwap2, TestSize.Level1)
     config.skipLayout = true;
     pattern->pluginInfo_.pluginName = "plugin";
     pattern->pluginManagerBridge_ = nullptr;
-    EXPECT_EQ(pattern->pluginManagerBridge_, nullptr);
     isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_EQ(isSwap, false);
 
@@ -616,7 +615,7 @@ HWTEST_F(PluginPatternTestNg, GetDrawDelegate, TestSize.Level1)
     drawRSFrame->DrawRSFrame(rsNode, Rect(100.0, 100.0, 100.0, 100.0));
 }
 
-/**s
+/**
  * @tc.name: PluginLayoutPropertyTestNg
  * @tc.desc: Test funcions in PluginLayoutProperty.
  * @tc.type: FUNC

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
+#include "base/utils/system_properties.h"
 #include "base/log/dump_log.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -29,6 +30,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -74,7 +76,6 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
         auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(
             info_, canOverScrollStart, canOverScrollEnd && (info_.repeatDifference_ == 0));
         algo->SetEnableSkip(!disableSkip);
-        algo->SetScrollSource(GetScrollSource());
         return algo;
     }
     RefPtr<GridScrollLayoutAlgorithm> result;
@@ -391,7 +392,11 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
 void GridPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex)
 {
     CHECK_NULL_VOID(indexChanged && onScrollIndex);
-    onScrollIndex(info_.startIndex_, info_.endIndex_);
+    int32_t endIndex = info_.endIndex_;
+    if (SystemProperties::IsWhiteBlockEnabled()) {
+        endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(info_.endIndex_);
+    }
+    onScrollIndex(info_.startIndex_, endIndex);
 }
 
 SizeF GridPattern::GetContentSize() const
@@ -469,7 +474,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         }
         auto userOffset = FireOnWillScroll(-offset);
         info_.currentOffset_ -= userOffset;
-
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (GreatNotEqual(info_.currentOffset_, GetMainContentSize() - itemsHeight)) {
@@ -486,7 +490,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         }
         auto userOffset = FireOnWillScroll(-offset);
         info_.currentOffset_ -= userOffset;
-
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (LessNotEqual(info_.currentOffset_, 0.0)) {
@@ -550,12 +553,16 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             GetScrollBar()->ScheduleDisappearDelayTask();
         }
     }
-    if (!preSpring_) {
+    if (!preSpring_ && !GetCanStayOverScroll()) {
         CheckRestartSpring(sizeDiminished);
     }
     CheckScrollable();
     MarkSelectedItems();
     isInitialized_ = true;
+    if (gridLayoutAlgorithm->MeasureInNextFrame()) {
+        ACE_SCOPED_TRACE("Grid MeasureInNextFrame");
+        MarkDirtyNodeSelf();
+    }
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
     return paintProperty->GetFadingEdge().value_or(false) || paintProperty->HasContentClip();
@@ -598,6 +605,7 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
         FireOnScroll(finalOffset, onScroll);
     }
     FireObserverOnDidScroll(finalOffset);
+    FireObserverOnScrollerAreaChange(finalOffset);
     auto onDidScroll = gridEventHub->GetOnDidScroll();
     if (onDidScroll) {
         FireOnScroll(finalOffset, onDidScroll);
@@ -713,6 +721,7 @@ std::function<bool(int32_t)> GridPattern::GetScrollIndexAbility()
 void GridPattern::ScrollBy(float offset)
 {
     StopAnimate();
+    SetIsOverScroll(false);
     UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
     // AccessibilityEventType::SCROLL_END
 }
@@ -822,7 +831,9 @@ void GridPattern::ScrollTo(float position)
     }
     TAG_LOGI(AceLogTag::ACE_GRID, "ScrollTo:%{public}f", position);
     StopAnimate();
+    SetAnimateCanOverScroll(GetCanStayOverScroll());
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
+    SetIsOverScroll(GetCanStayOverScroll());
     // AccessibilityEventType::SCROLL_END
 }
 

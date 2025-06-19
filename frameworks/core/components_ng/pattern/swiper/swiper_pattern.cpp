@@ -615,6 +615,10 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         SetIndicatorJumpIndex(jumpIndex_);
     }
     isVoluntarilyClear_ = false;
+    if (jumpIndexByUser_.has_value()) {
+        jumpIndex_ = jumpIndexByUser_;
+    }
+    jumpIndexByUser_.reset();
     if (jumpIndex_) {
         if ((jumpIndex_.value() < 0 || jumpIndex_.value() >= TotalCount()) && !IsLoop()) {
             jumpIndex_ = 0;
@@ -1300,7 +1304,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     oldRealTotalCount_ = RealTotalCount();
     needFireCustomAnimationEvent_ = true;
     prevFrameAnimationRunning_ = false;
-
+    SetLayoutDisplayCount(GetHost());
     if (windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION) {
         StartAutoPlay();
         windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
@@ -1777,7 +1781,8 @@ void SwiperPattern::FireSwiperCustomAnimationEvent()
     CHECK_NULL_VOID(transition);
 
     auto selectedIndex = GetCurrentIndex();
-    for (auto& item : itemPositionInAnimation_) {
+    auto itemPosition = itemPositionInAnimation_;
+    for (auto& item : itemPosition) {
         if (indexsInAnimation_.find(item.first) == indexsInAnimation_.end()) {
             continue;
         }
@@ -1896,6 +1901,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     StopSpringAnimationImmediately();
     StopIndicatorAnimation(true);
     jumpIndex_ = index;
+    jumpIndexByUser_ = index;
     AceAsyncTraceBeginCommercial(0, hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
     uiCastJumpIndex_ = index;
     MarkDirtyNodeSelf();
@@ -1972,9 +1978,7 @@ void SwiperPattern::SwipeTo(int32_t index)
     if (hasTabsAncestor_ && NeedFastAnimation()) {
         FastAnimation(targetIndex);
     }
-
     targetIndex_ = targetIndex;
-
     UpdateTabBarAnimationDuration(index);
     if (GetDuration() == 0 || !isVisible_) {
         SwipeToWithoutAnimation(index);
@@ -2199,7 +2203,7 @@ void SwiperPattern::ChangeIndex(int32_t index, SwiperAnimationMode mode)
             SetIndicatorChangeIndexStatus(false);
         }
 
-        SwipeToWithoutAnimation(GetLoopIndex(targetIndex));
+        SwipeToWithoutAnimation(CheckIndexRange(CheckTargetIndex(index)));
     } else if (mode == SwiperAnimationMode::DEFAULT_ANIMATION) {
         if (GetMaxDisplayCount() > 0) {
             SetIndicatorChangeIndexStatus(true);
@@ -2252,7 +2256,7 @@ void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
             SetIndicatorChangeIndexStatus(false);
         }
 
-        SwipeToWithoutAnimation(GetLoopIndex(targetIndex));
+        SwipeToWithoutAnimation(CheckIndexRange(CheckTargetIndex(index)));
     }
 }
 
@@ -4160,7 +4164,7 @@ void SwiperPattern::PlayIndicatorTranslateAnimation(float translate, std::option
         const auto& turnPageRateCallback = swiper->swiperController_->GetTurnPageRateCallback();
         auto firstItem = swiper->GetFirstItemInfoInVisibleArea();
         auto translateLength = firstItem.second.endPos - firstItem.second.startPos;
-        if (turnPageRateCallback && !NearZero(translateLength)) {
+        if (turnPageRateCallback && !NearZero(translateLength) && swiper->propertyAnimationIsRunning_) {
             turnPageRateCallback(firstItem.first, (-firstItem.second.startPos - value) / translateLength);
         }
     });
@@ -4856,6 +4860,24 @@ std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters() const
     return swiperParameters_;
 }
 
+std::shared_ptr<SwiperArrowParameters> SwiperPattern::GetSwiperArrowParameters() const
+{
+    if (swiperArrowParameters_ == nullptr) {
+        swiperArrowParameters_ = std::make_shared<SwiperArrowParameters>();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, swiperArrowParameters_);
+        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        CHECK_NULL_RETURN(swiperIndicatorTheme, swiperArrowParameters_);
+        swiperArrowParameters_->isShowBackground = false;
+        swiperArrowParameters_->isSidebarMiddle = false;
+        swiperArrowParameters_->backgroundSize = swiperIndicatorTheme->GetSmallArrowSize();
+        swiperArrowParameters_->backgroundColor = swiperIndicatorTheme->GetSmallArrowBackgroundColor();
+        swiperArrowParameters_->arrowSize = swiperIndicatorTheme->GetSmallArrowSize();
+        swiperArrowParameters_->arrowColor = swiperIndicatorTheme->GetSmallArrowColor();
+    }
+    return swiperArrowParameters_;
+}
+
 std::shared_ptr<SwiperDigitalParameters> SwiperPattern::GetSwiperDigitalParameters() const
 {
     if (swiperDigitalParameters_ == nullptr) {
@@ -4950,13 +4972,16 @@ std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetFirstItemInfoInVisibleArea(
         return std::make_pair(0, SwiperItemInfo {});
     }
     for (const auto& item : itemPosition_) {
-        if (item.second.startPos < 0 && item.second.endPos < 0) {
+        if (LessNotEqualCustomPrecision(item.second.startPos, 0, -0.01f) &&
+            LessNotEqualCustomPrecision(item.second.endPos, 0, -0.01f)) {
             continue;
         }
-        if (item.second.startPos <= 0 && item.second.endPos > 0) {
+        if (LessOrEqualCustomPrecision(item.second.startPos, 0, 0.01f) &&
+            GreatNotEqualCustomPrecision(item.second.endPos, 0, 0.01f)) {
             return std::make_pair(item.first, SwiperItemInfo { item.second.startPos, item.second.endPos });
         }
-        if (item.second.startPos > 0 && item.second.endPos > 0) {
+        if (GreatNotEqualCustomPrecision(item.second.startPos, 0, 0.01f) &&
+            GreatNotEqualCustomPrecision(item.second.endPos, 0, 0.01f)) {
             return std::make_pair(item.first, SwiperItemInfo { item.second.startPos, item.second.endPos });
         }
     }
@@ -5418,6 +5443,30 @@ void SwiperPattern::PostIdleTask(const RefPtr<FrameNode>& frameNode)
                 pattern->PostIdleTask(frameNode);
             }
         });
+}
+
+void SwiperPattern::SetLayoutDisplayCount(const RefPtr<FrameNode>& swiperNode)
+{
+    CHECK_NULL_VOID(swiperNode);
+    if (!IsAutoFill()) {
+        return;
+    }
+    if (HasLeftButtonNode()) {
+        auto leftArrowNode =
+            DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(leftButtonId_.value())));
+        CHECK_NULL_VOID(leftArrowNode);
+        auto leftArrowPattern = leftArrowNode->GetPattern<SwiperArrowPattern>();
+        CHECK_NULL_VOID(leftArrowPattern);
+        leftArrowPattern->SetLayoutDisplayCount(GetDisplayCount());
+    }
+    if (HasRightButtonNode()) {
+        auto rightArrowNode =
+            DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperNode->GetChildIndexById(rightButtonId_.value())));
+        CHECK_NULL_VOID(rightArrowNode);
+        auto rightArrowPattern = rightArrowNode->GetPattern<SwiperArrowPattern>();
+        CHECK_NULL_VOID(rightArrowPattern);
+        rightArrowPattern->SetLayoutDisplayCount(GetDisplayCount());
+    }
 }
 
 bool SwiperPattern::IsVisibleChildrenSizeLessThanSwiper() const
@@ -6806,15 +6855,17 @@ std::pair<float, float> SwiperPattern::CalcCurrentPageStatusOnRTL(float addition
             endPos += itemSpace;
         }
 
-        if (LessNotEqual((startPos + additionalOffset), 0) && LessNotEqual((endPos + additionalOffset), 0)) {
+        if (LessNotEqualCustomPrecision((startPos + additionalOffset), 0, -0.01f) &&
+            LessNotEqualCustomPrecision((endPos + additionalOffset), 0, -0.01f)) {
             continue;
         }
-        if (GreatOrEqual((startPos + additionalOffset), 0) && GreatNotEqual((endPos + additionalOffset), 0)) {
+        if (GreatOrEqualCustomPrecision((startPos + additionalOffset), 0, -0.01f) &&
+            GreatNotEqualCustomPrecision((endPos + additionalOffset), 0, 0.01f)) {
             firstIndex = iter->first;
             currentTurnPageRate = 0.0f;
             break;
         }
-        if (GreatNotEqual((endPos + additionalOffset), 0)) {
+        if (GreatNotEqualCustomPrecision((endPos + additionalOffset), 0, 0.01f)) {
             firstIndex = iter->first;
             currentTurnPageRate =
                 (NearEqual(endPos, startPos) ? 0 : ((startPos + additionalOffset) / (endPos - startPos)));
@@ -6839,17 +6890,17 @@ std::pair<float, float> SwiperPattern::CalcCurrentPageStatus(float additionalOff
     float currentTurnPageRate = FLT_MAX;
     auto firstIndex = currentFirstIndex_;
     for (const auto& iter : itemPosition_) {
-        if (LessNotEqual((iter.second.startPos + additionalOffset), 0) &&
-            LessNotEqual((iter.second.endPos + additionalOffset), 0)) {
+        if (LessNotEqualCustomPrecision((iter.second.startPos + additionalOffset), 0, -0.01f) &&
+            LessNotEqualCustomPrecision((iter.second.endPos + additionalOffset), 0, -0.01f)) {
             continue;
         }
-        if (GreatOrEqual((iter.second.startPos + additionalOffset), 0) &&
-            GreatNotEqual((iter.second.endPos + additionalOffset), 0)) {
+        if (GreatOrEqualCustomPrecision((iter.second.startPos + additionalOffset), 0, -0.01f) &&
+            GreatNotEqualCustomPrecision((iter.second.endPos + additionalOffset), 0, 0.01f)) {
             firstIndex = iter.first;
             currentTurnPageRate = 0.0f;
             break;
         }
-        if (GreatNotEqual((iter.second.endPos + additionalOffset), 0)) {
+        if (GreatNotEqualCustomPrecision((iter.second.endPos + additionalOffset), 0, 0.01f)) {
             firstIndex = iter.first;
             currentTurnPageRate =
                 (NearEqual(iter.second.endPos, iter.second.startPos)
@@ -7582,8 +7633,50 @@ void SwiperPattern::NotifyDataChange(int32_t index, int32_t count)
     }
 }
 
+void SwiperPattern::UpdateDefaultColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto swiperIndicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(swiperIndicatorTheme);
+    auto props = host->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    if (swiperDigitalParameters_ && !swiperDigitalParameters_->parametersByUser.count("fontColor")) {
+        swiperDigitalParameters_->fontColor = swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+    }
+    if (swiperDigitalParameters_ && !swiperDigitalParameters_->parametersByUser.count("selectedFontColor")) {
+        swiperDigitalParameters_->selectedFontColor =
+            swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+    }
+    if (swiperParameters_ && swiperParameters_->parametersByUser.count("dotIndicator") &&
+       !swiperParameters_->parametersByUser.count("colorVal")) {
+        swiperParameters_->colorVal = swiperIndicatorTheme->GetColor();
+    }
+    if (swiperParameters_ && swiperParameters_->parametersByUser.count("dotIndicator") &&
+        !swiperParameters_->parametersByUser.count("selectedColorVal")) {
+        swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
+    }
+    if (swiperArrowParameters_ && !swiperArrowParameters_->parametersByUser.count("backgroundColor")) {
+        if (props->GetIsSidebarMiddleValue()) {
+            props->UpdateBackgroundColor(swiperIndicatorTheme->GetBigArrowBackgroundColor());
+        } else {
+            props->UpdateBackgroundColor(swiperIndicatorTheme->GetSmallArrowBackgroundColor());
+        }
+    }
+    if (swiperArrowParameters_ && !swiperArrowParameters_->parametersByUser.count("arrowColor")) {
+        if (props->GetIsSidebarMiddleValue()) {
+            props->UpdateArrowColor(swiperIndicatorTheme->GetBigArrowColor());
+        } else {
+            props->UpdateArrowColor(swiperIndicatorTheme->GetSmallArrowColor());
+        }
+    }
+}
+
 void SwiperPattern::OnColorModeChange(uint32_t colorMode)
 {
+    UpdateDefaultColor();
     Pattern::OnColorModeChange(colorMode);
     auto swiperNode = GetHost();
     CHECK_NULL_VOID(swiperNode);

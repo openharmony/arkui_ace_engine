@@ -101,10 +101,7 @@ public:
      */
     void Clear();
 
-    ACE_FORCE_EXPORT ElementIdType MakeUniqueId()
-    {
-        return nextUniqueElementId_++;
-    }
+    ACE_FORCE_EXPORT ElementIdType MakeUniqueId();
 
     RefPtr<NG::GeometryTransition> GetOrCreateGeometryTransition(
         const std::string& id, bool followWithoutTransition = false, bool doRegisterSharedTransition = true);
@@ -127,6 +124,16 @@ public:
         }
     }
 
+    void RegisterJSUpdateDirty2ForAnimateTo(const std::function<void(void)>& jsCallback) {
+        jsUpdateDirty2ForAnimateTo_ = std::move(jsCallback);
+    }
+
+    void CallJSUpdateDirty2ForAnimateTo() {
+        if (jsUpdateDirty2ForAnimateTo_) {
+            jsUpdateDirty2ForAnimateTo_();
+        }
+    }
+
     uint32_t GetNodeNum() const
     {
         return itemMap_.size();
@@ -143,6 +150,16 @@ public:
 
     void RemoveFrameNodeByInspectorId(const std::string& key, int32_t nodeId);
 
+    void RegisterEmbedNode(const uint64_t surfaceId, const WeakPtr<NG::FrameNode>& node);
+
+    void UnregisterEmbedNode(const uint64_t surfaceId, const WeakPtr<NG::FrameNode>& node);
+
+    WeakPtr<NG::FrameNode> GetEmbedNodeBySurfaceId(const uint64_t surfaceId);
+
+    bool IsEmbedNode(NG::FrameNode* node);
+
+    uint64_t GetSurfaceIdByEmbedNode(NG::FrameNode* node);
+
 private:
     // private constructor
     ElementRegister() = default;
@@ -155,7 +172,7 @@ private:
 
     // ElementID assigned during initial render
     // first to Component, then synced to Element
-    ElementIdType nextUniqueElementId_ = 0;
+    static std::atomic<ElementIdType> nextUniqueElementId_;
 
     ElementIdType lastestElementId_ = 0;
 
@@ -173,7 +190,13 @@ private:
 
     std::function<void(int64_t)> jsCleanUpIdleTaskCallback_;
 
+    std::function<void(void)> jsUpdateDirty2ForAnimateTo_;
+
     ACE_DISALLOW_COPY_AND_MOVE(ElementRegister);
+
+    std::unordered_map<uint64_t, WeakPtr<NG::FrameNode>> surfaceIdEmbedNodeMap_;
+
+    std::unordered_map<NG::FrameNode*, uint64_t> embedNodeSurfaceIdMap_;
 };
 } // namespace OHOS::Ace
 #endif

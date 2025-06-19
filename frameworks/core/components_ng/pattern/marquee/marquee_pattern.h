@@ -97,6 +97,7 @@ public:
 
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
 
 private:
     void OnModifyDone() override;

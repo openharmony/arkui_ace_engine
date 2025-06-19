@@ -26,6 +26,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/search/search_layout_property.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/search/search_text_field.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -867,8 +868,8 @@ void SearchModelNG::SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo
     eventHub->SetOnDidDeleteEvent(std::move(func));
 }
 
-void SearchModelNG::SetSelectionMenuOptions(
-    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
+void SearchModelNG::SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+    const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -876,7 +877,8 @@ void SearchModelNG::SetSelectionMenuOptions(
     CHECK_NULL_VOID(textFieldChild);
     auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
-    textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    textFieldPattern->OnSelectionMenuOptionsUpdate(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 
 void SearchModelNG::SetEnablePreviewText(bool enablePreviewText)
@@ -1031,8 +1033,12 @@ void SearchModelNG::TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode)
     CHECK_NULL_VOID(textFieldLayoutProperty);
 
     auto renderContext = frameNode->GetRenderContext();
-    textFieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
-    textFieldPaintProperty->UpdateCursorWidth(textFieldTheme->GetCursorWidth());
+    if (!textFieldPaintProperty->HasCaretColorFlagByUser()) {
+        textFieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
+    }
+    if (!textFieldPaintProperty->HasCursorWidth()) {
+        textFieldPaintProperty->UpdateCursorWidth(textFieldTheme->GetCursorWidth());
+    }
     PaddingProperty padding({ CalcLength(0.0), CalcLength(0.0), CalcLength(0.0), CalcLength(0.0),
         std::nullopt, std::nullopt });
     textFieldLayoutProperty->UpdatePadding(padding);
@@ -2232,6 +2238,17 @@ void SearchModelNG::OnMenuItemClickCallbackUpdate(
     textFieldPattern->OnMenuItemClickCallbackUpdate(std::move(onMenuItemClick));
 }
 
+void SearchModelNG::OnPrepareMenuCallbackUpdate(
+    FrameNode* frameNode, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    textFieldPattern->OnPrepareMenuCallbackUpdate(std::move(onPrepareMenuCallback));
+}
+
 void SearchModelNG::SetEnablePreviewText(FrameNode* frameNode, bool enablePreviewText)
 {
     CHECK_NULL_VOID(frameNode);
@@ -2391,5 +2408,41 @@ bool SearchModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
         TextFieldLayoutProperty, EnableAutoSpacing, value, textFieldChild, value);
     return value;
+}
+
+void SearchModelNG::SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(textFieldEventHub);
+    textFieldEventHub->SetOnWillAttachIME(std::move(func));
+}
+
+void SearchModelNG::SetKeyboardAppearanceConfig(FrameNode* frameNode, KeyboardAppearanceConfig config)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetKeyboardAppearanceConfig(config);
+}
+
+void SearchModelNG::SetUserMargin()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetUserMargin(frameNode);
+}
+
+void SearchModelNG::SetUserMargin(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto& marginProp = layoutProperty->GetMarginProperty();
+    layoutProperty->ResetUserMargin();
+    CHECK_NULL_VOID(marginProp);
+    layoutProperty->UpdateUserMargin(*marginProp);
 }
 } // namespace OHOS::Ace::NG

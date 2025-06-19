@@ -963,7 +963,7 @@ void SwiperIndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
     auto displayCount = swiperLayoutProperty->GetDisplayCount().value_or(1);
-    if (swiperPattern->RealTotalCount() == displayCount) {
+    if (swiperPattern->RealTotalCount() <= displayCount) {
         return;
     }
     if (CheckIsTouchBottom(info)) {

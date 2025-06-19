@@ -27,6 +27,7 @@ namespace OHOS::Ace::Framework {
 class ACE_EXPORT SpanModelImpl : public SpanModel {
 public:
     void Create(const std::u16string& content) override;
+    void Create(const std::u16string& content, RefPtr<ResourceObject>& resObj) override;
     void SetFont(const Font& value) override;
     void ResetFont() override {};
     void SetFontSize(const Dimension& value) override;

@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG {
 
 constexpr float DEFAULT_SNAPSHOT_SCALE = 1.f;
 constexpr int32_t DEFAULT_DELAY_TIME = 300;
+using NodeIdentity = std::pair<std::string, int32_t>;
 
 enum SnapshotRegionMode {
     COMMON,

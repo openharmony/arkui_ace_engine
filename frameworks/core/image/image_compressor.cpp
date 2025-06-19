@@ -200,7 +200,8 @@ std::shared_ptr<RSData> ImageCompressor::GpuCompress(std::string key, RSBitmap& 
 
     clFinish(queue_);
 
-    uint32_t max_val = 0, sum_val = 0;
+    uint32_t max_val = 0;
+    uint32_t sum_val = 0;
     err = clEnqueueReadBuffer(queue_, clErrs, CL_TRUE, 0, sizeof(uint32_t) * numBlocks, blockErrs, 0, NULL, NULL);
     for (int32_t i = 0; i < numBlocks; i++) {
         sum_val += blockErrs[i];

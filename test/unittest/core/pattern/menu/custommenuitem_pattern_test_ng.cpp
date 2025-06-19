@@ -333,4 +333,60 @@ HWTEST_F(CustomMenuItemPatternTestNg, MenuItemPatternTestBasicNg028, TestSize.Le
     ASSERT_FALSE(touch->touchEvents_.empty());
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
+
+/**
+ * @tc.name: RegisterAccessibilityChildActionNotify001
+ * @tc.desc: Test callback function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomMenuItemPatternTestNg, RegisterAccessibilityChildActionNotify001, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    ASSERT_NE(wrapperNode, nullptr);
+    /**
+     * @tc.steps: step1. create outter menu and set show in subwindow true
+     */
+    auto outterMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, MENU_TAG, MenuType::MENU));
+    ASSERT_NE(outterMenuNode, nullptr);
+    auto outterMenuLayoutProps = outterMenuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(outterMenuLayoutProps, nullptr);
+    outterMenuLayoutProps->UpdateShowInSubWindow(true);
+    /**
+     * @tc.steps: step2. create inner menu and set show in subwindow false
+     */
+    auto innerMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, MENU_TAG, MenuType::MENU));
+    ASSERT_NE(innerMenuNode, nullptr);
+    auto innerMenuLayoutProps = innerMenuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(innerMenuLayoutProps, nullptr);
+    innerMenuLayoutProps->UpdateShowInSubWindow(false);
+    innerMenuLayoutProps->UpdateExpandingMode(SubMenuExpandingMode::STACK);
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4,
+        AceType::MakeRefPtr<CustomMenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(innerMenuNode);
+    innerMenuNode->MountToParent(outterMenuNode);
+    outterMenuNode->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<CustomMenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->expandingMode_ = innerMenuLayoutProps->GetExpandingMode().value_or(SubMenuExpandingMode::SIDE);
+    /**
+     * @tc.steps: step3. call ShowSubMenu to create submenu
+     * @tc.expected: expect subMenu's showInSubwindow param is true
+     */
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    menuItemPattern->SetSubBuilder(buildFun);
+    menuItemPattern->ShowSubMenu(ShowSubMenuType::LONG_PRESS);
+    auto menuitemAccessibilityProperty = menuItemNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(menuitemAccessibilityProperty, nullptr);
+    auto callback = menuitemAccessibilityProperty->GetNotifyChildActionFunc();
+    ASSERT_NE(callback, nullptr);
+    auto reuslt = callback(menuItemNode, NotifyChildActionType::ACTION_CLICK);
+    EXPECT_EQ(reuslt, AccessibilityActionResult::ACTION_RISE);
+}
 } // namespace OHOS::Ace::NG

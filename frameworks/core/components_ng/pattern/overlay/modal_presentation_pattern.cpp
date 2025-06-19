@@ -67,18 +67,18 @@ void ModalPresentationPattern::BeforeCreateLayoutWrapper()
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto inset = context->GetSafeAreaWithoutProcess();
-        builderLayoutProperty->UpdateSafeAreaInsets(inset);
+        NG::CalcLength safeAreaPaddingTop(inset.top_.Length());
+        NG::CalcLength safeAreaPaddingBottom(inset.bottom_.Length());
+        PaddingProperty safeAreaPadding;
+        safeAreaPadding.top = safeAreaPaddingTop;
+        safeAreaPadding.bottom = safeAreaPaddingBottom;
+        modalNodeLayoutProperty->UpdateSafeAreaPadding(safeAreaPadding);
         inset.top_ = { 0, 0 };
         inset.bottom_ = { 0, 0 };
         modalNodeLayoutProperty->UpdateSafeAreaInsets(inset);
-    } else {
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto inset = context->GetSafeAreaWithoutProcess();
-        inset.top_ = { 0, 0 };
-        modalNodeLayoutProperty->UpdateSafeAreaInsets(inset);
-        inset.bottom_ = { 0, 0 };
-        builderLayoutProperty->UpdateSafeAreaInsets(inset);
+        return;
     }
+    modalNodeLayoutProperty->ResetSafeAreaPadding();
+    ContentRootPattern::BeforeCreateLayoutWrapper();
 }
 } // namespace OHOS::Ace::NG

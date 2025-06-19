@@ -195,6 +195,7 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushRender();
     }
+
     auto dirtyRenderNodes = std::move(dirtyRenderNodes_);
     // Priority task creation
     int64_t time = 0;

@@ -20,6 +20,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/common/properties/popup_param.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -44,6 +45,7 @@ public:
         paintProperty->propPlacement_ = ClonePlacement();
         paintProperty->propPrimaryButtonShow_ = ClonePrimaryButtonShow();
         paintProperty->propSecondaryButtonShow_ = CloneSecondaryButtonShow();
+        paintProperty->propShowAtAnchor_ = CloneShowAtAnchor();
         return paintProperty;
     }
 
@@ -60,6 +62,7 @@ public:
         ResetArrowOffset();
         ResetPrimaryButtonShow();
         ResetSecondaryButtonShow();
+        ResetShowAtAnchor();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AutoCancel, bool, PROPERTY_UPDATE_RENDER);
@@ -72,6 +75,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowOffset, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PrimaryButtonShow, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SecondaryButtonShow, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowAtAnchor, TipsAnchorType, PROPERTY_UPDATE_RENDER);
 
     ACE_DISALLOW_COPY_AND_MOVE(BubbleRenderProperty);
 };

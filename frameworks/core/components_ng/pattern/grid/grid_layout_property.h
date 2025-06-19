@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,6 +47,7 @@ public:
         value->propCellLength_ = CloneCellLength();
         value->propScrollEnabled_ = CloneScrollEnabled();
         value->propLayoutOptions_ = CloneLayoutOptions();
+        value->propSyncLoad_ = CloneSyncLoad();
         return value;
     }
 
@@ -66,6 +67,7 @@ public:
         ResetCellLength();
         ResetScrollEnabled();
         ResetLayoutOptions();
+        ResetSyncLoad();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -149,6 +151,7 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Editable, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SyncLoad, bool, PROPERTY_UPDATE_NORMAL);
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AlignItems, GridItemAlignment);
     void OnAlignItemsUpdate(GridItemAlignment /* alignItems */) const

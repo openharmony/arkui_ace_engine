@@ -75,6 +75,7 @@ float ListLanesLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWr
         SetListItemGroupParam(wrapper, childIndex, 0.0f, true, listLayoutProperty, true);
         wrapper->Measure(groupLayoutConstraint_);
         mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
+        CheckGroupMeasureBreak(wrapper);
     } else {
         auto laneCeil = GetLanesCeil(layoutWrapper, childIndex);
         for (int32_t i = GetLanesFloor(layoutWrapper, childIndex); i <= laneCeil; i++) {
@@ -103,9 +104,10 @@ void ListLanesLayoutAlgorithm::MeasureGroup(LayoutWrapper* listWrapper, const Re
     auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(listWrapper->GetLayoutProperty());
     SetListItemGroupParam(groupWrapper, index, pos, forward, listLayoutProperty, false);
     groupWrapper->Measure(groupLayoutConstraint_);
-    if (forward && LessOrEqual(pos, 0.0f)) {
+    if (forward && (LessOrEqual(pos, 0.0f) || GetPrevMeasureBreak())) {
         AdjustStartPosition(groupWrapper, pos);
     }
+    CheckGroupMeasureBreak(groupWrapper);
 }
 
 void ListLanesLayoutAlgorithm::MeasureItem(const RefPtr<LayoutWrapper>& itemWrapper, int32_t index, bool forward)
@@ -642,6 +644,9 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
             pos.second.endPos = startPos + mainLen;
             LayoutCachedALine(layoutWrapper, pos, startIndex, crossSize);
         }
+        if (isStackFromEnd_) {
+            SetLaneIdx4Divider(cnt - 1);
+        }
         startPos = startPos + mainLen + GetSpaceWidth();
         curIndex += cnt;
     }
@@ -695,7 +700,9 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
             pos.second.startPos = endPos - mainLen;
             LayoutCachedALine(layoutWrapper, pos, startIndex, crossSize);
         }
-        SetLaneIdx4Divider(curIndex - startIndex + 1 - cnt);
+        if (!isStackFromEnd_) {
+            SetLaneIdx4Divider(curIndex - startIndex + 1 - cnt);
+        }
         endPos = endPos - mainLen - GetSpaceWidth();
         curIndex -= cnt;
     }

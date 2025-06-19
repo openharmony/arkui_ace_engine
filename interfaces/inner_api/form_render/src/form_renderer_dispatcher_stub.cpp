@@ -39,6 +39,8 @@ FormRendererDispatcherStub::FormRendererDispatcherStub()
         &FormRendererDispatcherStub::HandleOnAccessibilityTransferHoverEvent;
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::NOTIFY_DUMP_INFO)] =
         &FormRendererDispatcherStub::HandleOnNotifyDumpInfo;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDispatcher::Message::SET_MULTI_INSTANCE_ENABLED)] =
+        &FormRendererDispatcherStub::HandleSetMultiInstanceEnabled;
 }
 
 FormRendererDispatcherStub::~FormRendererDispatcherStub()
@@ -184,6 +186,16 @@ int32_t FormRendererDispatcherStub::HandleOnNotifyDumpInfo(MessageParcel &data, 
     if (!reply.WriteStringVector(info)) {
         HILOG_ERROR("WriteStringVector<dumpInfos> failed");
         return ERR_INVALID_VALUE;
+    }
+    return ERR_OK;
+}
+
+int32_t FormRendererDispatcherStub::HandleSetMultiInstanceEnabled(MessageParcel &data, MessageParcel &reply)
+{
+    bool isMultiInstanceEnabled = data.ReadBool();
+    SetMultiInstanceEnabled(isMultiInstanceEnabled);
+    if (!reply.WriteInt32(ERR_OK)) {
+        HILOG_ERROR("Write result failed");
     }
     return ERR_OK;
 }

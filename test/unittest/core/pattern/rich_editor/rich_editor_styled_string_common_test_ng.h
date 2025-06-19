@@ -40,8 +40,8 @@ const LeadingMarginSize TEST_LEADING_MARGIN_SIZE = { Dimension(5.0), Dimension(1
 const LeadingMargin TEST_LEADING_MARGIN = { .size = TEST_LEADING_MARGIN_SIZE };
 const Font TEST_FONT = { FONT_WEIGHT_BOLD, FONT_SIZE_VALUE, ITALIC_FONT_STYLE_VALUE, FONT_FAMILY_VALUE,
     OHOS::Ace::Color::RED, FONT_FAMILY_VALUE};
-const SpanParagraphStyle TEST_PARAGRAPH_STYLE = { TextAlign::END, TEST_MAX_LINE, WordBreak::BREAK_ALL,
-    TextOverflow::ELLIPSIS, TEST_LEADING_MARGIN, TEST_TEXT_INDENT};
+const SpanParagraphStyle TEST_PARAGRAPH_STYLE = { TextAlign::END, TextVerticalAlign::BASELINE, TEST_MAX_LINE,
+    WordBreak::BREAK_ALL, TextOverflow::ELLIPSIS, TEST_LEADING_MARGIN, TEST_TEXT_INDENT};
 StyledStringChangeValue onStyledStringWillChangeValue;
 StyledStringChangeValue onStyledStringDidChangeValue;
 } // namespace

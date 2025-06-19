@@ -350,7 +350,121 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation002,
      */
     TurnPageRateFunc callback = [](const int32_t i, float f) {};
     pattern_->swiperController_->SetTurnPageRateCallback(callback);
+    pattern_->propertyAnimationIsRunning_ = true;
     pattern_->PlayIndicatorTranslateAnimation(0.1f);
+    EXPECT_NE(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+
+    pattern_->propertyAnimationIsRunning_ = false;
+    pattern_->PlayIndicatorTranslateAnimation(0.1f);
+    EXPECT_NE(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+}
+
+/**
+ * @tc.name: SwiperPatternPlayIndicatorTranslateAnimation003
+ * @tc.desc: PlayIndicatorTranslateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation003, TestSize.Level1)
+{
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. call PlayIndicatorTranslateAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    pattern_->PlayIndicatorTranslateAnimation(0.1f);
+
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    const std::string indicatorPropertyName = "indicator";
+    ASSERT_NE(host->nodeAnimatablePropertyMap_.count(indicatorPropertyName), 0);
+    auto propertyBase = host->nodeAnimatablePropertyMap_[indicatorPropertyName];
+    ASSERT_NE(propertyBase, nullptr);
+    auto propertyFloat = AceType::DynamicCast<NodeAnimatablePropertyFloat>(propertyBase);
+    ASSERT_NE(propertyFloat, nullptr);
+    auto floatProperty = propertyFloat->GetProperty();
+    ASSERT_NE(floatProperty, nullptr);
+    auto aniPropertyFloat = AceType::DynamicCast<AnimatablePropertyFloat>(floatProperty);
+    ASSERT_NE(aniPropertyFloat, nullptr);
+    auto propertyCallback = aniPropertyFloat->GetUpdateCallback();
+    ASSERT_NE(propertyCallback, nullptr);
+
+    pattern_->itemPosition_.clear();
+
+    pattern_->propertyAnimationIsRunning_ = false;
+    propertyCallback(0.0f);
+    EXPECT_EQ(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+
+    pattern_->propertyAnimationIsRunning_ = true;
+    propertyCallback(0.0f);
+    EXPECT_EQ(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+
+    const float startPos = 10.0f;
+    pattern_->itemPosition_.insert(std::make_pair(0, SwiperItemInfo { startPos, 0.0f }));
+
+    pattern_->propertyAnimationIsRunning_ = false;
+    propertyCallback(0.0f);
+    EXPECT_EQ(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+
+    pattern_->propertyAnimationIsRunning_ = true;
+    propertyCallback(0.0f);
+    EXPECT_EQ(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+}
+
+/**
+ * @tc.name: SwiperPatternPlayIndicatorTranslateAnimation004
+ * @tc.desc: PlayIndicatorTranslateAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation004, TestSize.Level1)
+{
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. call PlayIndicatorTranslateAnimation.
+     * @tc.expected: Related function runs ok.
+     */
+    TurnPageRateFunc callback = [](const int32_t i, float f) {};
+    pattern_->swiperController_->SetTurnPageRateCallback(callback);
+    pattern_->PlayIndicatorTranslateAnimation(0.1f);
+    EXPECT_NE(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    const std::string indicatorPropertyName = "indicator";
+    ASSERT_NE(host->nodeAnimatablePropertyMap_.count(indicatorPropertyName), 0);
+    auto propertyBase = host->nodeAnimatablePropertyMap_[indicatorPropertyName];
+    ASSERT_NE(propertyBase, nullptr);
+    auto propertyFloat = AceType::DynamicCast<NodeAnimatablePropertyFloat>(propertyBase);
+    ASSERT_NE(propertyFloat, nullptr);
+    auto floatProperty = propertyFloat->GetProperty();
+    ASSERT_NE(floatProperty, nullptr);
+    auto aniPropertyFloat = AceType::DynamicCast<AnimatablePropertyFloat>(floatProperty);
+    ASSERT_NE(aniPropertyFloat, nullptr);
+    auto propertyCallback = aniPropertyFloat->GetUpdateCallback();
+    ASSERT_NE(propertyCallback, nullptr);
+
+    pattern_->itemPosition_.clear();
+
+    pattern_->propertyAnimationIsRunning_ = false;
+    propertyCallback(0.0f);
+    EXPECT_NE(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+
+    pattern_->propertyAnimationIsRunning_ = true;
+    propertyCallback(0.0f);
+    EXPECT_NE(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+
+    const float startPos = 10.0f;
+    pattern_->itemPosition_.insert(std::make_pair(0, SwiperItemInfo { startPos, 0.0f }));
+
+    pattern_->propertyAnimationIsRunning_ = false;
+    propertyCallback(0.0f);
+    EXPECT_NE(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
+
+    pattern_->propertyAnimationIsRunning_ = true;
+    propertyCallback(0.0f);
     EXPECT_NE(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
 }
 
@@ -1302,6 +1416,47 @@ HWTEST_F(SwiperIndicatorTestNg, HandleLongPress002, TestSize.Level1)
     indicatorPattern->isLongPressed_ = false;
     indicatorPattern->HandleLongPress(info);
     EXPECT_TRUE(indicatorPattern->isLongPressed_);
+}
+
+/**
+ * @tc.name: HandleLongPress003
+ * @tc.desc: Test SwiperIndicator HandleLongPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, HandleLongPress003, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step1. Touch and move right
+     * @tc.expected: Swipe to item(index:1)
+     */
+    LongPressIndicator(FIRST_POINT, FOURTH_POINT);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
+
+    /**
+     * @tc.steps: step1. Touch and move left
+     * @tc.expected: Swipe to item(index:0)
+     */
+    LongPressIndicator(FOURTH_POINT, SECOND_POINT);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+    /**
+     * @tc.steps: step1. Touch and move left, when RealTotalCount equals displayCount
+     * @tc.expected: Swipe to item(index:0)
+     */
+    layoutProperty_->UpdateDisplayCount(4);
+    LongPressIndicator(FIRST_POINT, FOURTH_POINT);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
+    /**
+     * @tc.steps: step1. Touch and move left, when RealTotalCount smaller displayCount
+     * @tc.expected: Swipe to item(index:0)
+     */
+    layoutProperty_->UpdateDisplayCount(8);
+    LongPressIndicator(FIRST_POINT, FOURTH_POINT);
+    EXPECT_EQ(pattern_->GetCurrentIndex(), 0);
 }
 
 /**

@@ -28,7 +28,7 @@ void WebAccessibilitySessionAdapter::TransferHoverEvent(
 {
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
-    webPattern->OnAccessibilityHoverEvent(point, eventType != AccessibilityHoverEventType::EXIT);
+    webPattern->OnAccessibilityHoverEvent(point, source, eventType, time);
 }
 
 bool WebAccessibilitySessionAdapter::IgnoreHostNode() const

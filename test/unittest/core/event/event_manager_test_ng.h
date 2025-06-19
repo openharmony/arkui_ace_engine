@@ -104,6 +104,12 @@ RefPtr<MockTaskExecutor> MOCK_TASK_EXECUTOR;
 const int32_t CONTAINER_INSTANCE_ID = 777;
 } // namespace
 
+struct MockMouseEvent {
+    MouseAction action;
+    MouseButton button;
+    bool expectedResult;
+};
+
 class EventManagerTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();

@@ -14,10 +14,12 @@
  */
 
 #include "gtest/gtest.h"
+#include "napi/napi_runtime.cpp"
 #include "native_interface.h"
 #include "native_node_napi.h"
 #include "native_type.h"
 #include "node_model.h"
+#include "node_model_safely.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -145,6 +147,19 @@ HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest009, TestSize.Level1)
     void* object = OH_ArkUI_QueryModuleInterfaceByName(
         static_cast<ArkUI_NativeAPIVariantKind>(ARKUI_NATIVE_GESTURE + 1), "");
     EXPECT_EQ(object, nullptr);
+}
+
+/**
+ * @tc.name: NativeNodeNapiTest010
+ * @tc.desc: Test OH_ArkUI_QueryModuleInterfaceByName function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, NativeNodeNapiTest010, TestSize.Level1)
+{
+    void* object = OH_ArkUI_QueryModuleInterfaceByName(ARKUI_MULTI_THREAD_NATIVE_NODE, "");
+    EXPECT_EQ(object, nullptr);
+    object = OH_ArkUI_QueryModuleInterfaceByName(ARKUI_MULTI_THREAD_NATIVE_NODE, "ArkUI_NativeNodeAPI_1");
+    EXPECT_NE(object, nullptr);
 }
 
 /**
@@ -291,6 +306,30 @@ HWTEST_F(NativeNodeNapiTest, NavigationAPITest013, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitModuleForArkTSEnvAPITest001
+ * @tc.desc: Test OH_ArkUI_InitModuleForArkTSEnv function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, InitModuleForArkTSEnvAPITest001, TestSize.Level1)
+{
+    NativeEngineMock engine;
+
+    /**
+     * @tc.steps: step1. Call OH_ArkUI_InitModuleForArkTSEnv with a null environment.
+     * @tc.expected: The return value should be ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
+    auto ret = OH_ArkUI_InitModuleForArkTSEnv(nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step2. Call OH_ArkUI_InitModuleForArkTSEnv with a valid environment.
+     * @tc.expected: The return value should be ARKUI_ERROR_CODE_NO_ERROR.
+     */
+    ret = OH_ArkUI_InitModuleForArkTSEnv(napi_env(engine));
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
  * @tc.name: PostFrameCallbackAPITest001
  * @tc.desc: Test OH_ArkUI_PostFrameCallback function.
  * @tc.type: FUNC
@@ -326,5 +365,55 @@ HWTEST_F(NativeNodeNapiTest, PostFrameCallbackAPITest003, TestSize.Level1)
     int userdata = 7;
     auto ret = OH_ArkUI_PostFrameCallback(nullptr, &userdata, CallBack);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PostAsyncUITaskAPITest001
+ * @tc.desc: Test OH_ArkUI_PostAsyncUITask function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, OH_ArkUI_PostAsyncUITaskAPITest001, TestSize.Level1)
+{
+    ArkUI_ContextHandle uiContext = new ArkUI_Context({.id=10000});
+    auto ret = OH_ArkUI_PostAsyncUITask(uiContext, nullptr, [](void* asyncUITaskData){}, [](void* asyncUITaskData){});
+    EXPECT_NE(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PostUITaskAPITest001
+ * @tc.desc: Test OH_ArkUI_PostUITask function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, OH_ArkUI_PostUITaskAPITest001, TestSize.Level1)
+{
+    ArkUI_ContextHandle uiContext = new ArkUI_Context({.id=10000});
+    auto ret = OH_ArkUI_PostUITask(uiContext, nullptr, [](void* asyncUITaskData){});
+    EXPECT_NE(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PostUITaskAndWaitAPITest001
+ * @tc.desc: Test OH_ArkUI_PostUITaskAndWait function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, OH_ArkUI_PostUITaskAndWaitAPITest001, TestSize.Level1)
+{
+    ArkUI_ContextHandle uiContext = new ArkUI_Context({.id=10000});
+    auto ret = OH_ArkUI_PostUITaskAndWait(uiContext, nullptr, [](void* asyncUITaskData){});
+    EXPECT_NE(ret, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: GreatOrEqualTargetAPIVersion001
+ * @tc.desc: Test GreatOrEqualTargetAPIVersion function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, GreatOrEqualTargetAPIVersion001, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto ret = OHOS::Ace::AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(
+        OHOS::Ace::PlatformVersion::VERSION_TWELVE);
+    auto ret1 = OHOS::Ace::NodeModel::GreatOrEqualTargetAPIVersion(OHOS::Ace::PlatformVersion::VERSION_TWELVE);
+    EXPECT_EQ(ret, ret1);
 }
 

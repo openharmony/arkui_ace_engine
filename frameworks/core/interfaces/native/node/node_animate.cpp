@@ -14,6 +14,7 @@
  */
 
 #include "core/interfaces/native/node/node_animate.h"
+#include "ui/animation/animation_constants.h"
 
 #include "base/error/error_code.h"
 #include "core/animation/animation_pub.h"
@@ -130,6 +131,8 @@ void AnimateToInner(ArkUIContext* context, AnimationOption& option, const std::f
         option.GetIteration());
     PrintNodeAnimationInfo(
         option, immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO, count);
+    option.SetAnimationInterface(
+        immediately ? AnimationInterface::ANIMATE_TO_IMMEDIATELY : AnimationInterface::ANIMATE_TO);
     if (!ViewStackModel::GetInstance()->IsEmptyStack()) {
         TAG_LOGW(AceLogTag::ACE_ANIMATION,
             "node_animate:when call animateTo, node stack is not empty, not suitable for animateTo."
@@ -332,6 +335,7 @@ void KeyframeAnimateTo(ArkUIContext* context, ArkUIKeyframeAnimateOption* animat
             "param is [duration:%{public}d, delay:%{public}d, iteration:%{public}d]",
             option.GetDuration(), option.GetDelay(), option.GetIteration());
     }
+    option.SetAnimationInterface(AnimationInterface::KEYFRAME_ANIMATE_TO);
     NG::ScopedViewStackProcessor scopedProcessor;
     StartKeyframeAnimation(pipelineContext, option, animateOption, count);
     pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();

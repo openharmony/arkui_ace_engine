@@ -67,6 +67,8 @@ public:
     UIContentErrorCode SetRouterIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
         const std::function<void()>&& loadPageCallback) override;
 
+    std::string GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam) override;
+
     void ReplacePage(const std::string& url, const std::string& params) override;
 
     void PushPage(const std::string& url, const std::string& params) override;

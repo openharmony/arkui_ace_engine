@@ -69,7 +69,7 @@ public:
         if (layoutProperty) {
             textDirection = layoutProperty->GetLayoutDirection();
         }
-        if ((HasPrefix() || HasSuffix()) && !contentModifierNode_) {
+        if ((HasPrefix() || HasSuffix()) && !contentModifierNode_ && !endsInitFlag_) {
             endsInitFlag_ = true;
             InitSliderEndsState();
         }
@@ -196,7 +196,7 @@ public:
     {
         isAccessibilityOn_ = value;
     }
-    void PlayHapticFeedback(bool isShowSteps, float step, float oldValue);
+    void PlayHapticFeedback(bool isShowSteps);
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     void DumpInfo() override;
 
@@ -258,10 +258,15 @@ public:
     void CalculateOffset();
     void MountToNavigation(RefPtr<FrameNode>& tipNode);
 
+    void UpdateSliderComponentColor(const Color& color, const SliderColorType sliderColorType, const Gradient& value);
+    void UpdateSliderComponentMedia();
+    void UpdateSliderComponentString(const bool isShowTips, const std::string& value);
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
+    void OnColorConfigurationUpdate() override;
     void CalcSliderValue();
     void CancelExceptionValue(float& min, float& max, float& step);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;
@@ -309,7 +314,6 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
-    void InitHapticController();
 #ifdef SUPPORT_DIGITAL_CROWN
     void InitDigitalCrownEvent(const RefPtr<FocusHub>& focusHub)
     {
@@ -334,29 +338,34 @@ private:
             event.action, event.degree);
         double mainDelta = GetCrownRotatePx(event);
         switch (event.action) {
-            case CrownAction::BEGIN:
-                crownMovingLength_ = valueRatio_ * sliderLength_;
-                crownEventNum_ = 0;
-                reachBoundary_ = false;
-                HandleCrownAction(mainDelta);
-                timeStampPre_ = GetCurrentTimestamp();
-                UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
-                FireChangeEvent(SliderChangeMode::Begin);
-                OpenTranslateAnimation(SliderStatus::MOVE);
-                break;
             case CrownAction::UPDATE:
-                HandleCrownAction(mainDelta);
-                StartVibrateFeedback();
-                UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
-                FireChangeEvent(SliderChangeMode::Moving);
-                OpenTranslateAnimation(SliderStatus::MOVE);
+                if (!isHandleCrownActionBegin_) {
+                    isHandleCrownActionBegin_ = true;
+                    crownMovingLength_ = valueRatio_ * sliderLength_;
+                    crownEventNum_ = 0;
+                    reachBoundary_ = false;
+                    HandleCrownAction(mainDelta);
+                    timeStampPre_ = GetCurrentTimestamp();
+                    UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                    FireChangeEvent(SliderChangeMode::Begin);
+                    OpenTranslateAnimation(SliderStatus::MOVE);
+                } else {
+                    HandleCrownAction(mainDelta);
+                    StartVibrateFeedback();
+                    UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                    FireChangeEvent(SliderChangeMode::Moving);
+                    OpenTranslateAnimation(SliderStatus::MOVE);
+                }
                 break;
             case CrownAction::END:
-            default:
+                isHandleCrownActionBegin_ = false;
                 bubbleFlag_ = false;
                 UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
                 FireChangeEvent(SliderChangeMode::End);
                 CloseTranslateAnimation();
+                break;
+            case CrownAction::BEGIN:
+            default:
                 break;
         }
     }
@@ -402,6 +411,7 @@ private:
     void UpdateParentNodeSize();
     std::string GetPointAccessibilityTxt(uint32_t pointIndex, float stepRatio, float min, float max);
     uint32_t GetCurrentStepIndex();
+    int32_t GetOffsetStepIndex(uint32_t index);
     SizeF GetStepPointAccessibilityVirtualNodeSize();
     void UpdateStepPointsAccessibilityVirtualNodeSelected();
     void SetStepPointsAccessibilityVirtualNodeEvent(
@@ -472,6 +482,7 @@ private:
     bool reachBoundary_ = false;
     int64_t timeStampCur_ = 0;
     int64_t timeStampPre_ = 0;
+    bool isHandleCrownActionBegin_ = false;
 #endif
 
     RefPtr<TouchEventImpl> touchEvent_;
@@ -521,7 +532,6 @@ private:
     uint64_t lastSendPostValueTime_ = 0;
     float accessibilityValue_ = 0.0f;
     bool isEnableHaptic_ = true;
-    bool hapticApiEnabled = false;
     double slipfactor_ = 0;
     RefPtr<FrameNode> sliderTipNode_ = nullptr;
     RefPtr<UINode> navigationNode_ = nullptr;

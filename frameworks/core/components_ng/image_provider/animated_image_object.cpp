@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/image_provider/animated_image_object.h"
-#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
+#include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "frameworks/core/components_ng/render/adapter/animated_image.h"
 

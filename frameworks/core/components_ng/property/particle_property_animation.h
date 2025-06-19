@@ -18,6 +18,7 @@
 #include <string>
 
 #include "core/animation/curve.h"
+#include "core/common/resource/resource_object.h"
 namespace OHOS::Ace::NG {
 template<typename T>
 struct ParticlePropertyAnimation {
@@ -71,6 +72,31 @@ public:
     {
         curve_ = curve;
     }
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, ParticlePropertyAnimation<T>&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        particleColorResMap_[key] = { resObj, std::move(updateFunc) };
+    }
+ 
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : particleColorResMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
+        }
+    }
+
+    void RemoveResource(const std::string& key)
+    {
+        auto iter = particleColorResMap_.find(key);
+        if (iter != particleColorResMap_.end()) {
+            particleColorResMap_.erase(iter);
+        }
+    }
 
     bool operator==(const ParticlePropertyAnimation<T>& other) const
     {
@@ -90,6 +116,11 @@ public:
     }
 
 private:
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        std::function<void(const RefPtr<ResourceObject>&, ParticlePropertyAnimation<T>&)> updateFunc;
+    };
+    std::unordered_map<std::string, ResourceUpdater> particleColorResMap_;
     T from_;
     T to_;
     int32_t startMills_ = 0;

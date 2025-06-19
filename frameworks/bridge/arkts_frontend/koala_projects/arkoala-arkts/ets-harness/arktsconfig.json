@@ -1,0 +1,29 @@
+{
+    "compilerOptions": {
+        "package": "@koalaui/ets-harness",
+        "outDir": "build/abc",
+        "rootDirs": ".",
+        "baseUrl": ".",
+        "paths": {
+            "#components": ["../arkui/build/unmemoized/src/generated/arkts"],
+            "#arkcompat/*": ["../../arkoala/arkui-common/build/unmemoized/src/arkts/*"],
+            "#arkstate": ["../../arkoala/arkui-common/build/unmemoized/src"],
+            "@koalaui/arkui-common": ["../../arkoala/arkui-common/build/unmemoized/src"],
+            "@koalaui/arkts-arkui": ["../arkui/build/unmemoized/src", "../arkui/build/unmemoized/src/peers"],
+            "@koalaui/interop": ["../../interop/src/arkts"],
+            "@koalaui/common": ["../../incremental/common/src"],
+            "@koalaui/compat": ["../../incremental/compat/src/arkts"],
+            "@koalaui/runtime": ["../../incremental/runtime/build/unmemoized/src"],
+            "@koalaui/harness": ["../../incremental/harness/src/arkts"]
+        }
+    },
+    "exclude": [
+        "build/unmemoized/src/loader.ts",
+        "build/unmemoized/src/test_entry.ts"
+    ],
+    "include": [
+        "src/EtsHarnessApplication.ts",
+        "build/unmemoized/src/*.ts",
+        "build/unmemoized/build/generated/pages/*.ts"
+    ]
+}

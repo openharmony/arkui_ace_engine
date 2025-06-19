@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,6 +52,9 @@ constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
 constexpr char CUSTOM_TITLE_KEY[] = "persist.sys.arkui.customtitle";
 constexpr char DISTRIBUTE_ENGINE_BUNDLE_NAME[] = "atomic.service.distribute.engine.bundle.name";
 constexpr char IS_OPINC_ENABLE[] = "persist.ddgr.opinctype";
+constexpr char LAYOUT_BREAKPOINT[] = "const.arkui.layoutbreakpoint";
+constexpr char LAYOUT_BREAKPOINT_DEFAULT[] = "320,600,1000,1440;0.8,1.2;";
+enum class LayoutBreakPointPart : uint32_t { WIDTH_PART = 0, HEIGHT_PART };
 constexpr int32_t ORIENTATION_PORTRAIT = 0;
 constexpr int32_t ORIENTATION_LANDSCAPE = 1;
 constexpr int DEFAULT_THRESHOLD_JANK = 15;
@@ -459,7 +462,82 @@ int32_t ReadDragDropFrameworkStatus()
 
 int32_t ReadTouchAccelarateMode()
 {
-    return system::GetIntParameter("debug.ace.touch.accelarate", 0);
+    return system::GetIntParameter("debug.ace.touch.accelarate", 2);
+}
+
+bool IsAscending(const std::vector<double>& nums)
+{
+    for (size_t i = 1; i < nums.size(); ++i) {
+        if (nums[i] < nums[i - 1]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool ParseBreakPoints(const std::string& input, const size_t expectedCount, std::vector<double>& breakpointsVec)
+{
+    std::vector<std::string> numStrVec;
+    StringUtils::StringSplitter(input, ',', numStrVec);
+    if (numStrVec.size() != expectedCount) {
+        return false;
+    }
+    for (const std::string& numStr : numStrVec) {
+        std::string s = StringUtils::TrimStr(numStr);
+        if (!StringUtils::IsFloat(s)) {
+            return false;
+        }
+        double num = StringUtils::StringToDouble(s);
+        if (LessOrEqual(num, 0)) {
+            return false;
+        }
+        breakpointsVec.push_back(num);
+    }
+    return IsAscending(breakpointsVec);
+}
+
+bool ParseWidthBreakPoints(const std::string& input, std::vector<double>& breakpointsVec)
+{
+    // 4 means that there are exactly 4 layout break points in the horizontal direction
+    return ParseBreakPoints(input, 4, breakpointsVec);
+}
+
+bool ParseHeightBreakPoints(const std::string& input, std::vector<double>& breakpointsVec)
+{
+    // 2 means that there are exactly 2 layout break points in the vertical direction
+    return ParseBreakPoints(input, 2, breakpointsVec);
+}
+
+void GetLayoutBreakpoints(WidthLayoutBreakPoint& widthLayoutBreakpoints,
+    HeightLayoutBreakPoint& heightLayoutBreakpoints)
+{
+    auto param = StringUtils::TrimStr(system::GetParameter(LAYOUT_BREAKPOINT, LAYOUT_BREAKPOINT_DEFAULT));
+    if (param == LAYOUT_BREAKPOINT_DEFAULT) {
+        return;
+    }
+
+    std::vector<std::string> parts;
+    StringUtils::StringSplitter(param, ';', parts);
+    // 2 means that "const.arkui.layoutbreakpoint" must have exactly two parts
+    if (parts.size() != 2) {
+        return;
+    }
+    bool parseRet = false;
+    std::vector<double> widthLayoutBreakpointsVec;
+    if (ParseWidthBreakPoints(parts[static_cast<uint32_t>(LayoutBreakPointPart::WIDTH_PART)],
+        widthLayoutBreakpointsVec)) {
+        widthLayoutBreakpoints = WidthLayoutBreakPoint(widthLayoutBreakpointsVec[0],
+        widthLayoutBreakpointsVec[1], widthLayoutBreakpointsVec[2], widthLayoutBreakpointsVec[3]);
+        parseRet = true;
+    }
+
+    std::vector<double> heightLayoutBreakpointsVec;
+    if (parseRet && ParseHeightBreakPoints(parts[static_cast<uint32_t>(LayoutBreakPointPart::HEIGHT_PART)],
+        heightLayoutBreakpointsVec)) {
+        heightLayoutBreakpoints = HeightLayoutBreakPoint(heightLayoutBreakpointsVec[0], heightLayoutBreakpointsVec[1]);
+    } else {
+        widthLayoutBreakpoints = WidthLayoutBreakPoint();
+    }
 }
 
 std::string InitSysBrand()
@@ -609,8 +687,13 @@ bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentE
 int32_t SystemProperties::dragDropFrameworkStatus_ = ReadDragDropFrameworkStatus();
 int32_t SystemProperties::touchAccelarate_ = ReadTouchAccelarateMode();
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
+bool SystemProperties::softPagetransition_ = false;
 bool SystemProperties::formSkeletonBlurEnabled_ = true;
 int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
+WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
+HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
+bool SystemProperties::syncLoadEnabled_ = true;
+bool SystemProperties::whiteBlockEnabled_ = false;
 
 bool SystemProperties::IsOpIncEnable()
 {
@@ -760,6 +843,7 @@ void SystemProperties::InitDeviceInfo(
     recycleImageEnabled_ = system::GetParameter(ENABLE_RECYCLE_IMAGE_KEY, "true") == "true";
     animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
     pageTransitionFrzEnabled_ = system::GetBoolParameter("const.arkui.pagetransitionfreeze", false);
+    softPagetransition_ = system::GetBoolParameter("const.arkui.softPagetransition", false);
     WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
     resourceDecoupling_ = IsResourceDecoupling();
     configChangePerform_ = IsConfigChangePerform();
@@ -773,12 +857,15 @@ void SystemProperties::InitDeviceInfo(
     formSkeletonBlurEnabled_ = system::GetBoolParameter("const.form.skeleton_view.blur_style_enable", true);
     formSharedImageCacheThreshold_ =
         system::GetIntParameter("const.form.shared_image.cache_threshold", DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD);
+    syncLoadEnabled_ = system::GetBoolParameter("persist.ace.scrollable.syncload.enable", false);
+    whiteBlockEnabled_ = system::GetParameter("persist.resourceschedule.whiteblock", "0") == "1";
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
         screenShape_ = ScreenShape::NOT_ROUND;
     }
     InitDeviceTypeBySystemProperty();
+    GetLayoutBreakpoints(widthLayoutBreakpoints_, heightLayoutBreakpoints_);
 }
 
 ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
@@ -906,6 +993,11 @@ bool SystemProperties::GetResourceDecoupling()
 bool SystemProperties::ConfigChangePerform()
 {
     return configChangePerform_;
+}
+
+void SystemProperties::SetConfigChangePerform()
+{
+    configChangePerform_ = true;
 }
 
 bool SystemProperties::GetTitleStyleEnabled()
@@ -1215,6 +1307,11 @@ bool SystemProperties::IsPageTransitionFreeze()
     return pageTransitionFrzEnabled_;
 }
 
+bool SystemProperties::IsSoftPageTransition()
+{
+    return softPagetransition_;
+}
+
 bool SystemProperties::IsFormSkeletonBlurEnabled()
 {
     return formSkeletonBlurEnabled_;
@@ -1223,5 +1320,25 @@ bool SystemProperties::IsFormSkeletonBlurEnabled()
 int32_t SystemProperties::getFormSharedImageCacheThreshold()
 {
     return formSharedImageCacheThreshold_;
+}
+
+bool SystemProperties::IsWhiteBlockEnabled()
+{
+    return whiteBlockEnabled_;
+}
+
+bool SystemProperties::IsWhiteBlockIdleChange()
+{
+    return OHOS::system::GetParameter("persist.resourceschedule.whiteblock.idle", "0") == "1";
+}
+
+int32_t SystemProperties::GetWhiteBlockIndexValue()
+{
+    return std::stoi(OHOS::system::GetParameter("persist.resourceschedule.whiteblock.index", "0"));
+}
+
+int32_t SystemProperties::GetWhiteBlockCacheCountValue()
+{
+    return std::stoi(OHOS::system::GetParameter("persist.resourceschedule.whiteblock.cachedcount", "0"));
 }
 } // namespace OHOS::Ace

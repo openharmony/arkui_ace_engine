@@ -59,6 +59,7 @@ const int32_t PARAM_ONE = 1;
 const int32_t PARAM_TWO = 2;
 constexpr Dimension PREVIEW_MENU_MARGIN_LEFT = 16.0_vp;
 constexpr Dimension PREVIEW_MENU_MARGIN_RIGHT = 16.0_vp;
+const int32_t WEB_AUDIO_SESSION_TYPE_AMBIENT = 3;
 
 void EraseSpace(std::string& data)
 {
@@ -434,8 +435,12 @@ public:
 
     void HandleCancel(const JSCallbackInfo& args)
     {
+        bool abortLoading = false;
+        if (args.Length() >= 1 && args[0]->IsBoolean()) {
+            abortLoading = args[0]->ToBoolean();
+        }
         if (result_) {
-            result_->HandleCancel();
+            result_->HandleCancel(abortLoading);
         }
     }
 
@@ -1770,6 +1775,9 @@ public:
         JSClass<JSContextMenuResult>::CustomMethod("paste", &JSContextMenuResult::Paste);
         JSClass<JSContextMenuResult>::CustomMethod("cut", &JSContextMenuResult::Cut);
         JSClass<JSContextMenuResult>::CustomMethod("selectAll", &JSContextMenuResult::SelectAll);
+        JSClass<JSContextMenuResult>::CustomMethod("undo", &JSContextMenuResult::Undo);
+        JSClass<JSContextMenuResult>::CustomMethod("redo", &JSContextMenuResult::Redo);
+        JSClass<JSContextMenuResult>::CustomMethod("pasteAndMatchStyle", &JSContextMenuResult::PasteAndMatchStyle);
         JSClass<JSContextMenuResult>::Bind(
             globalObj, &JSContextMenuResult::Constructor, &JSContextMenuResult::Destructor);
     }
@@ -1818,6 +1826,27 @@ public:
     {
         if (result_) {
             result_->SelectAll();
+        }
+    }
+
+    void Undo(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Undo();
+        }
+    }
+
+    void Redo(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->Redo();
+        }
+    }
+
+    void PasteAndMatchStyle(const JSCallbackInfo& args)
+    {
+        if (result_) {
+            result_->PasteAndMatchStyle();
         }
     }
 
@@ -1969,6 +1998,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSWeb>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSWeb>::StaticMethod("onWindowNew", &JSWeb::OnWindowNew);
+    JSClass<JSWeb>::StaticMethod("onActivateContent", &JSWeb::OnActivateContent);
     JSClass<JSWeb>::StaticMethod("onWindowExit", &JSWeb::OnWindowExit);
     JSClass<JSWeb>::StaticMethod("multiWindowAccess", &JSWeb::MultiWindowAccessEnabled);
     JSClass<JSWeb>::StaticMethod("allowWindowOpenMethod", &JSWeb::AllowWindowOpenMethod);
@@ -2037,7 +2067,9 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("enableWebAVSession", &JSWeb::EnableWebAVSession);
     JSClass<JSWeb>::StaticMethod("enableDataDetector", &JSWeb::EnableDataDetector);
     JSClass<JSWeb>::StaticMethod("dataDetectorConfig", &JSWeb::DataDetectorConfig);
+    JSClass<JSWeb>::StaticMethod("bypassVsyncCondition", &JSWeb::BypassVsyncCondition);
     JSClass<JSWeb>::StaticMethod("enableFollowSystemFontWeight", &JSWeb::EnableFollowSystemFontWeight);
+    JSClass<JSWeb>::StaticMethod("gestureFocusMode", &JSWeb::GestureFocusMode);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -2076,6 +2108,17 @@ JSRef<JSVal> LoadWebConsoleLogEventToJSValue(const LoadWebConsoleLogEvent& event
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> JSWeb::CreateConsoleHandler(const LoadWebConsoleLogEvent& eventInfo)
+{
+    JSRef<JSObject> messageObj = JSClass<JSWebConsoleLog>::NewInstance();
+    auto jsWebConsoleLog = Referenced::Claim(messageObj->Unwrap<JSWebConsoleLog>());
+    if (!jsWebConsoleLog) {
+        return messageObj;
+    }
+    jsWebConsoleLog->SetMessage(eventInfo.GetMessage());
+    return messageObj;
+}
+
 JSRef<JSVal> WebDialogEventToJSValue(const WebDialogEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -2094,7 +2137,7 @@ JSRef<JSVal> WebDialogEventToJSValue(const WebDialogEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
-JSRef<JSVal> JSWeb::CreatCommonDialogResultHandler(const WebDialogEvent& eventInfo)
+JSRef<JSVal> JSWeb::CreateCommonDialogResultHandler(const WebDialogEvent& eventInfo)
 {
     JSRef<JSObject> resultObj = JSClass<JSWebDialog>::NewInstance();
     auto jsWebDialog = Referenced::Claim(resultObj->Unwrap<JSWebDialog>());
@@ -2132,7 +2175,7 @@ JSRef<JSVal> FullScreenEnterEventToJSValue(const FullScreenEnterEvent& eventInfo
     return JSRef<JSVal>::Cast(obj);
 }
 
-JSRef<JSVal> JSWeb::CreatFullScreenEnterHandler(const FullScreenEnterEvent& eventInfo)
+JSRef<JSVal> JSWeb::CreateFullScreenEnterHandler(const FullScreenEnterEvent& eventInfo)
 {
     JSRef<JSObject> resultObj = JSClass<JSFullScreenExitHandler>::NewInstance();
     auto jsFullScreenExitHandler = Referenced::Claim(resultObj->Unwrap<JSFullScreenExitHandler>());
@@ -2163,6 +2206,7 @@ JSRef<JSVal> LoadWebTitleReceiveEventToJSValue(const LoadWebTitleReceiveEvent& e
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("title", eventInfo.GetTitle());
+    obj->SetProperty("isRealTitle", eventInfo.GetIsRealTitle());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -2183,6 +2227,17 @@ JSRef<JSVal> LoadInterceptEventToJSValue(const LoadInterceptEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> JSWeb::CreateLoadInterceptHandler(const LoadInterceptEvent& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    if (!requestEvent) {
+        return requestObj;
+    }
+    requestEvent->SetLoadInterceptEvent(eventInfo);
+    return requestObj;
+}
+
 JSRef<JSVal> LoadWebGeolocationHideEventToJSValue(const LoadWebGeolocationHideEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.GetOrigin()));
@@ -2199,7 +2254,7 @@ JSRef<JSVal> LoadWebGeolocationShowEventToJSValue(const LoadWebGeolocationShowEv
     return JSRef<JSVal>::Cast(obj);
 }
 
-JSRef<JSVal> JSWeb::CreatGeolocationShowHandler(const LoadWebGeolocationShowEvent& eventInfo)
+JSRef<JSVal> JSWeb::CreateGeolocationShowHandler(const LoadWebGeolocationShowEvent& eventInfo)
 {
     JSRef<JSObject> geolocationObj = JSClass<JSWebGeolocation>::NewInstance();
     auto geolocationEvent = Referenced::Claim(geolocationObj->Unwrap<JSWebGeolocation>());
@@ -2236,6 +2291,17 @@ JSRef<JSVal> WebHttpAuthEventToJSValue(const WebHttpAuthEvent& eventInfo)
     obj->SetProperty("host", eventInfo.GetHost());
     obj->SetProperty("realm", eventInfo.GetRealm());
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateHttpAuthRequestHandler(const WebHttpAuthEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSWebHttpAuth>::NewInstance();
+    auto jsWebHttpAuth = Referenced::Claim(resultObj->Unwrap<JSWebHttpAuth>());
+    if (!jsWebHttpAuth) {
+        return resultObj;
+    }
+    jsWebHttpAuth->SetResult(eventInfo.GetResult());
+    return resultObj;
 }
 
 JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
@@ -2306,7 +2372,52 @@ JSRef<JSVal> WebAllSslErrorEventToJSValue(const WebAllSslErrorEvent& eventInfo)
     obj->SetProperty("referrer", eventInfo.GetReferrer());
     obj->SetProperty("isFatalError", eventInfo.GetIsFatalError());
     obj->SetProperty("isMainFrame", eventInfo.GetIsMainFrame());
+
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine || !engine->GetNativeEngine()) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+    napi_env env = reinterpret_cast<napi_env>(engine->GetNativeEngine());
+    std::vector<std::string> certChainDerData = eventInfo.GetCertChainData();
+    JSRef<JSArray> certsArr = JSRef<JSArray>::New();
+    for (uint8_t i = 0; i < certChainDerData.size(); i++) {
+        if (i == UINT8_MAX) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Cert chain data array reach max.");
+            break;
+        }
+        void *data = nullptr;
+        napi_value buffer = nullptr;
+        napi_value item = nullptr;
+        napi_status status = napi_create_arraybuffer(env, certChainDerData[i].size(), &data, &buffer);
+        if (status != napi_ok) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Create array buffer failed, status = %{public}d.", status);
+            continue;
+        }
+        if (memcpy_s(data, certChainDerData[i].size(), certChainDerData[i].data(), certChainDerData[i].size()) != 0) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Cert chain data failed, index = %{public}u.", i);
+            continue;
+        }
+        status = napi_create_typedarray(env, napi_uint8_array, certChainDerData[i].size(), buffer, 0, &item);
+        if (status != napi_ok) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Create typed array failed, status = %{public}d.", status);
+            continue;
+        }
+        JSRef<JSVal> cert = JsConverter::ConvertNapiValueToJsVal(item);
+        certsArr->SetValueAt(i, cert);
+    }
+    obj->SetPropertyObject("certChainData", certsArr);
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateSslErrorEventHandler(const WebAllSslErrorEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSWebAllSslError>::NewInstance();
+    auto jsWebAllSslError = Referenced::Claim(resultObj->Unwrap<JSWebAllSslError>());
+    if (!jsWebAllSslError) {
+        return resultObj;
+    }
+    jsWebAllSslError->SetResult(eventInfo.GetResult());
+    return resultObj;
 }
 
 JSRef<JSVal> WebSslSelectCertEventToJSValue(const WebSslSelectCertEvent& eventInfo)
@@ -2357,6 +2468,17 @@ JSRef<JSVal> LoadOverrideEventToJSValue(const LoadOverrideEvent& eventInfo)
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
     requestEvent->SetLoadOverrideEvent(eventInfo);
     return JSRef<JSVal>::Cast(requestObj);
+}
+
+JSRef<JSVal> JSWeb::CreateOverrideUrlLoadingHandler(const LoadOverrideEvent& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    if (!requestEvent) {
+        return requestObj;
+    }
+    requestEvent->SetLoadOverrideEvent(eventInfo);
+    return requestObj;
 }
 
 JSRef<JSVal> AdsBlockedEventToJSValue(const AdsBlockedEvent& eventInfo)
@@ -2455,6 +2577,16 @@ void JSWeb::Create(const JSCallbackInfo& info)
             func->Call(webviewController, 1, argv);
         };
 
+        auto setWebDetachFunction = controller->GetProperty("setWebDetach");
+        std::function<void(int32_t)> setWebDetachCallback = nullptr;
+        if (setWebDetachFunction->IsFunction()) {
+            setWebDetachCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(setWebDetachFunction)](
+                                     int32_t webId) {
+                JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
+                func->Call(webviewController, 1, argv);
+            };
+        }
+
         auto setHapPathFunction = controller->GetProperty("innerSetHapPath");
         std::function<void(const std::string&)> setHapPathCallback = nullptr;
         if (setHapPathFunction->IsFunction()) {
@@ -2532,6 +2664,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
         WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));
         WebModel::GetInstance()->SetDefaultFileSelectorShow(std::move(fileSelectorShowFromUserCallback));
+        WebModel::GetInstance()->SetWebDetachFunction(std::move(setWebDetachCallback));
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         if (!getCmdLineFunction->IsFunction()) {
             return;
@@ -3068,6 +3201,28 @@ JSRef<JSVal> ReceivedErrorEventToJSValue(const ReceivedErrorEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> JSWeb::CreateErrorReceiveRequestHandler(const ReceivedErrorEvent& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    if (!requestEvent) {
+        return requestObj;
+    }
+    requestEvent->SetErrorEvent(eventInfo);
+    return requestObj;
+}
+
+JSRef<JSVal> JSWeb::CreateErrorReceiveErrorHandler(const ReceivedErrorEvent& eventInfo)
+{
+    JSRef<JSObject> errorObj = JSClass<JSWebResourceError>::NewInstance();
+    auto errorEvent = Referenced::Claim(errorObj->Unwrap<JSWebResourceError>());
+    if (!errorEvent) {
+        return errorObj;
+    }
+    errorEvent->SetEvent(eventInfo);
+    return errorObj;
+}
+
 JSRef<JSVal> ReceivedHttpErrorEventToJSValue(const ReceivedHttpErrorEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -3084,6 +3239,28 @@ JSRef<JSVal> ReceivedHttpErrorEventToJSValue(const ReceivedHttpErrorEvent& event
     obj->SetPropertyObject("response", responseObj);
 
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateHttpErrorReceiveRequestHandler(const ReceivedHttpErrorEvent& eventInfo)
+{
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    if (!requestEvent) {
+        return requestObj;
+    }
+    requestEvent->SetHttpErrorEvent(eventInfo);
+    return requestObj;
+}
+
+JSRef<JSVal> JSWeb::CreateHttpErrorReceiveResponseHandler(const ReceivedHttpErrorEvent& eventInfo)
+{
+    JSRef<JSObject> responseObj = JSClass<JSWebResourceResponse>::NewInstance();
+    auto responseEvent = Referenced::Claim(responseObj->Unwrap<JSWebResourceResponse>());
+    if (!responseEvent) {
+        return responseObj;
+    }
+    responseEvent->SetEvent(eventInfo);
+    return responseObj;
 }
 
 void JSWeb::OnErrorReceive(const JSCallbackInfo& args)
@@ -3250,6 +3427,22 @@ JSRef<JSVal> FileSelectorEventToJSValue(const FileSelectorEvent& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> JSWeb::CreateFileSelectorResultHandler(const FileSelectorEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSFileSelectorResult>::NewInstance();
+    auto fileSelectorResult = Referenced::Claim(resultObj->Unwrap<JSFileSelectorResult>());
+    fileSelectorResult->SetResult(eventInfo);
+    return resultObj;
+}
+
+JSRef<JSVal> JSWeb::CreateFileSelectorParamHandler(const FileSelectorEvent& eventInfo)
+{
+    JSRef<JSObject> paramObj = JSClass<JSFileSelectorParam>::NewInstance();
+    auto fileSelectorParam = Referenced::Claim(paramObj->Unwrap<JSFileSelectorParam>());
+    fileSelectorParam->SetParam(eventInfo);
+    return paramObj;
+}
+
 void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
@@ -3294,6 +3487,22 @@ JSRef<JSVal> ContextMenuEventToJSValue(const ContextMenuEvent& eventInfo)
     obj->SetPropertyObject("result", resultObj);
     obj->SetPropertyObject("param", paramObj);
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateContextMenuParamHandler(const ContextMenuEvent& eventInfo)
+{
+    JSRef<JSObject> paramObj = JSClass<JSContextMenuParam>::NewInstance();
+    auto contextMenuParam = Referenced::Claim(paramObj->Unwrap<JSContextMenuParam>());
+    contextMenuParam->SetParam(eventInfo);
+    return paramObj;
+}
+
+JSRef<JSVal> JSWeb::CreateContextMenuResultHandler(const ContextMenuEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSContextMenuResult>::NewInstance();
+    auto contextMenuResult = Referenced::Claim(resultObj->Unwrap<JSContextMenuResult>());
+    contextMenuResult->SetResult(eventInfo);
+    return resultObj;
 }
 
 void JSWeb::OnContextMenuShow(const JSCallbackInfo& args)
@@ -3374,7 +3583,8 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
         auto previewMenuOptions = menuOptions->GetProperty("previewMenuOptions");
         if (previewMenuOptions->IsObject()) {
-            auto hapticFeedbackMode = JSRef<JSObject>::Cast(previewMenuOptions)->GetProperty("hapticFeedbackMode");
+            auto previewMenuOptionsObj = JSRef<JSObject>::Cast(previewMenuOptions);
+            auto hapticFeedbackMode = previewMenuOptionsObj->GetProperty("hapticFeedbackMode");
             if (hapticFeedbackMode->IsNumber()) {
                 menuParam.hapticFeedbackMode = HapticFeedbackMode(hapticFeedbackMode->ToNumber<int32_t>());
             }
@@ -3392,8 +3602,8 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
     }
 }
 
-NG::MenuParam GetSelectionMenuParam(
-    const JSCallbackInfo& info, ResponseType responseType, std::function<void()> previewBuilder)
+NG::MenuParam GetSelectionMenuParam(const JSCallbackInfo &info, ResponseType responseType,
+    std::function<void()> &previewBuilder, WebElementType elementType)
 {
     NG::MenuParam menuParam;
     if (info.Length() > SELECTION_MENU_OPTION_PARAM_INDEX && info[SELECTION_MENU_OPTION_PARAM_INDEX]->IsObject()) {
@@ -3411,7 +3621,7 @@ NG::MenuParam GetSelectionMenuParam(
     paddings.end = NG::CalcLength(PREVIEW_MENU_MARGIN_RIGHT);
     menuParam.layoutRegionMargin = paddings;
     menuParam.disappearScaleToTarget = true;
-    menuParam.isPreviewContainScale = true;
+    menuParam.isPreviewContainScale = (elementType == WebElementType::IMAGE);
     menuParam.isShow = true;
     return menuParam;
 }
@@ -3466,7 +3676,7 @@ void JSWeb::BindSelectionMenu(const JSCallbackInfo& info)
     };
 
     std::function<void()> previewBuilder = nullptr;
-    NG::MenuParam menuParam = GetSelectionMenuParam(info, responseType, previewBuilder);
+    NG::MenuParam menuParam = GetSelectionMenuParam(info, responseType, previewBuilder, elementType);
     WebModel::GetInstance()->SetNewDragStyle(true);
     auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
         elementType, responseType, menuBuilder, previewBuilder, menuParam);
@@ -3575,6 +3785,12 @@ void JSWeb::NativeEmbedOptions(const JSCallbackInfo& args)
     if (enableJsValue->IsBoolean()) {
         enable = enableJsValue->ToBoolean();
         WebModel::GetInstance()->SetIntrinsicSizeEnabled(*enable);
+    }
+
+    auto cssDisplayChangeObj = paramObject->GetProperty("supportCssDisplayChange");
+    if (cssDisplayChangeObj->IsBoolean()) {
+        bool cssDisplayChange = cssDisplayChangeObj->ToBoolean();
+        WebModel::GetInstance()->SetCssDisplayChangeEnabled(cssDisplayChange);
     }
 }
 
@@ -3901,7 +4117,7 @@ JSRef<JSVal> PermissionRequestEventToJSValue(const WebPermissionRequestEvent& ev
     return JSRef<JSVal>::Cast(obj);
 }
 
-JSRef<JSVal> JSWeb::CreatPermissionRequestHandler(const WebPermissionRequestEvent& eventInfo)
+JSRef<JSVal> JSWeb::CreatePermissionRequestHandler(const WebPermissionRequestEvent& eventInfo)
 {
     JSRef<JSObject> permissionObj = JSClass<JSWebPermissionRequest>::NewInstance();
     auto permissionEvent = Referenced::Claim(permissionObj->Unwrap<JSWebPermissionRequest>());
@@ -3982,9 +4198,10 @@ void JSWeb::BackgroundColor(const JSCallbackInfo& info)
     }
     Color backgroundColor;
     if (!ParseJsColor(info[0], backgroundColor)) {
-        backgroundColor = WebModel::GetInstance()->GetDefaultBackgroundColor();
+        WebModel::GetInstance()->SetDefaultBackgroundColor();
+    } else {
+        WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
     }
-    WebModel::GetInstance()->SetBackgroundColor(backgroundColor);
 }
 
 void JSWeb::InitialScale(float scale)
@@ -4257,6 +4474,36 @@ void JSWeb::OnWindowNew(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetWindowNewEvent(jsCallback);
 }
 
+JSRef<JSVal> ActivateContentEventToJSValue(const WebActivateContentEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnActivateContent(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<WebActivateContentEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), ActivateContentEventToJSValue);
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const BaseEventInfo* info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<WebActivateContentEvent>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetActivateContentEventId(jsCallback);
+}
+
 JSRef<JSVal> WindowExitEventToJSValue(const WebWindowExitEvent& eventInfo)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
@@ -4445,6 +4692,17 @@ JSRef<JSVal> DataResubmittedEventToJSValue(const DataResubmittedEvent& eventInfo
     jsDataResubmitted->SetHandler(eventInfo.GetHandler());
     obj->SetPropertyObject("handler", resultObj);
     return JSRef<JSVal>::Cast(obj);
+}
+
+JSRef<JSVal> JSWeb::CreateDataResubmittedHandler(const DataResubmittedEvent& eventInfo)
+{
+    JSRef<JSObject> resultObj = JSClass<JSDataResubmitted>::NewInstance();
+    auto geolocationEvent = Referenced::Claim(resultObj->Unwrap<JSDataResubmitted>());
+    if (!geolocationEvent) {
+        return resultObj;
+    }
+    geolocationEvent->SetHandler(eventInfo.GetHandler());
+    return resultObj;
 }
 
 void JSWeb::OnDataResubmitted(const JSCallbackInfo& args)
@@ -4705,6 +4963,22 @@ void JSWeb::MediaOptions(const JSCallbackInfo& args)
         bool audioExclusive = audioExclusiveObj->ToBoolean();
         WebModel::GetInstance()->SetAudioExclusive(audioExclusive);
     }
+    auto audioSessionTypeObj = paramObject->GetProperty("audioSessionType");
+    auto audioSessionType = WebAudioSessionType::AUTO;
+    if (audioSessionTypeObj->IsNumber()) {
+        int32_t audioSessionTypeIntValue = audioSessionTypeObj->ToNumber<int32_t>();
+        switch (audioSessionTypeIntValue) {
+            case 0:
+                audioSessionType = WebAudioSessionType::AUTO;
+                break;
+            case WEB_AUDIO_SESSION_TYPE_AMBIENT:
+                audioSessionType = WebAudioSessionType::AMBIENT;
+                break;
+            default:
+                audioSessionType = WebAudioSessionType::AUTO;
+        }
+    }
+    WebModel::GetInstance()->SetAudioSessionType(audioSessionType);
 }
 
 JSRef<JSVal> FirstContentfulPaintEventToJSValue(const FirstContentfulPaintEvent& eventInfo)
@@ -5053,6 +5327,7 @@ JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventIn
     const OHOS::Ace::Offset& globalLocation = touchInfo.GetGlobalLocation();
     const OHOS::Ace::Offset& localLocation = touchInfo.GetLocalLocation();
     const OHOS::Ace::Offset& screenLocation = touchInfo.GetScreenLocation();
+    const OHOS::Ace::Offset& globalDisplayLocation = touchInfo.GetGlobalDisplayLocation();
     touchInfoObj->SetProperty<int32_t>("type", static_cast<int32_t>(touchInfo.GetTouchType()));
     touchInfoObj->SetProperty<int32_t>("id", touchInfo.GetFingerId());
     touchInfoObj->SetProperty<double>("displayX", screenLocation.GetX());
@@ -5063,6 +5338,8 @@ JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventIn
     touchInfoObj->SetProperty<double>("screenY", globalLocation.GetY());
     touchInfoObj->SetProperty<double>("x", localLocation.GetX());
     touchInfoObj->SetProperty<double>("y", localLocation.GetY());
+    touchInfoObj->SetProperty<double>("globalDisplayX", globalDisplayLocation.GetX());
+    touchInfoObj->SetProperty<double>("globalDisplayY", globalDisplayLocation.GetY());
     touchInfoObj->Wrap<TouchEventInfo>(&info);
     return touchInfoObj;
 }
@@ -5116,7 +5393,7 @@ JSRef<JSVal> NativeEmbeadTouchToJSValue(const NativeEmbeadTouchInfo& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
-JSRef<JSVal> JSWeb::CreatNativeEmbedGestureHandler(const NativeEmbeadTouchInfo& eventInfo)
+JSRef<JSVal> JSWeb::CreateNativeEmbedGestureHandler(const NativeEmbeadTouchInfo& eventInfo)
 {
     JSRef<JSObject> requestObj = JSClass<JSNativeEmbedGestureRequest>::NewInstance();
     auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSNativeEmbedGestureRequest>());
@@ -5724,8 +6001,10 @@ void JSWeb::EditMenuOptions(const JSCallbackInfo& info)
 {
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
-    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick);
-    WebModel::GetInstance()->SetEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
+    JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick, onPrepareMenuCallback);
+    WebModel::GetInstance()->SetEditMenuOptions(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 
 void JSWeb::EnableHapticFeedback(const JSCallbackInfo& args)
@@ -5777,8 +6056,36 @@ void JSWeb::DataDetectorConfig(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetDataDetectorConfig(textDetectConfig);
 }
 
+void JSWeb::BypassVsyncCondition(int32_t webBypassVsyncCondition)
+{
+    auto condition = WebBypassVsyncCondition::NONE;
+    switch (webBypassVsyncCondition) {
+        case 0:
+            condition = WebBypassVsyncCondition::NONE;
+            break;
+        case 1:
+            condition = WebBypassVsyncCondition::SCROLLBY_FROM_ZERO_OFFSET;
+            break;
+        default:
+            condition = WebBypassVsyncCondition::NONE;
+            break;
+    }
+    WebModel::GetInstance()->SetBypassVsyncCondition(condition);
+}
+
 void JSWeb::EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
 {
     WebModel::GetInstance()->SetEnableFollowSystemFontWeight(enableFollowSystemFontWeight);
+}
+
+void JSWeb::GestureFocusMode(int32_t gestureFocusMode)
+{
+    if (gestureFocusMode < static_cast<int32_t>(GestureFocusMode::DEFAULT) ||
+        gestureFocusMode > static_cast<int32_t>(GestureFocusMode::GESTURE_TAP_AND_LONG_PRESS)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "GestureFocusMode param err");
+        return;
+    }
+    auto mode = static_cast<enum GestureFocusMode>(gestureFocusMode);
+    WebModel::GetInstance()->SetGestureFocusMode(mode);
 }
 } // namespace OHOS::Ace::Framework

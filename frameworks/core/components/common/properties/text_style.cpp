@@ -144,6 +144,7 @@ std::string TextStyle::ToString() const
     JSON_STRING_PUT_INT(jsonValue, propTextAlign_);
     JSON_STRING_PUT_INT(jsonValue, propTextDecorationStyle_);
     JSON_STRING_PUT_INT(jsonValue, propTextDecoration_.size() > 0 ? propTextDecoration_[0] : TextDecoration::NONE);
+    JSON_STRING_PUT_INT(jsonValue, propLineThicknessScale_);
     JSON_STRING_PUT_INT(jsonValue, propWhiteSpace_);
     JSON_STRING_PUT_INT(jsonValue, propWordBreak_);
     JSON_STRING_PUT_INT(jsonValue, propTextCase_);

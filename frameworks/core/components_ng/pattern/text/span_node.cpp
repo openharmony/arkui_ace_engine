@@ -24,6 +24,7 @@
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/font_manager.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
@@ -359,8 +360,207 @@ void SpanItem::SpanDumpInfoAdvance()
                                     : "Na"));
 }
 
-int32_t SpanItem::UpdateParagraph(
-    const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder, const TextStyle& textStyle, bool isMarquee)
+#define DEFINE_SPAN_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                           \
+    {                                                                                           \
+        #KEY_TYPE, [](int32_t nodeId, RefPtr<PropertyValueBase> value) {                        \
+            auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById                 \
+                <SpanNode>(nodeId);                                                             \
+            CHECK_NULL_VOID(spanNode);                                                          \
+            if (auto castedVal = DynamicCast<PropertyValue<VALUE_TYPE>>(value)) {               \
+                spanNode->UPDATE_METHOD(castedVal->value);                                      \
+                                                                                                \
+            }                                                                                   \
+        }                                                                                       \
+    }
+
+#define DEFINE_CONTAINER_SPAN_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                 \
+    {                                                                                           \
+        #KEY_TYPE, [](int32_t nodeId, RefPtr<PropertyValueBase> value) {                        \
+            auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById                 \
+                <ContainerSpanNode>(nodeId);                                                    \
+            CHECK_NULL_VOID(spanNode);                                                          \
+            if (auto castedVal = DynamicCast<PropertyValue<VALUE_TYPE>>(value)) {               \
+                spanNode->UPDATE_METHOD(castedVal->value);                                      \
+            }                                                                                   \
+        }                                                                                       \
+    }
+
+template<typename T>
+void ContainerSpanNode::RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
+{
+    auto&& updateFunc = [weakptr = AceType::WeakClaim(this), key](const RefPtr<ResourceObject>& resObj) {
+        auto spanNode = weakptr.Upgrade();
+        CHECK_NULL_VOID(spanNode);
+        spanNode->UpdateSpanResource<T>(key, resObj);
+    };
+    AddResObj(key, resObj, std::move(updateFunc));
+    UpdateProperty<T>(key, value);
+}
+
+template void ContainerSpanNode::RegisterResource<Color>(
+    const std::string&, const RefPtr<ResourceObject>&, Color);
+template void ContainerSpanNode::RegisterResource<CalcDimension>(
+    const std::string&, const RefPtr<ResourceObject>&, CalcDimension);
+template void ContainerSpanNode::RegisterResource<std::vector<std::string>>(
+    const std::string&, const RefPtr<ResourceObject>&, std::vector<std::string>);
+template void ContainerSpanNode::RegisterResource<std::u16string>(
+    const std::string&, const RefPtr<ResourceObject>&, std::u16string);
+template void ContainerSpanNode::RegisterResource<FontWeight>(
+    const std::string&, const RefPtr<ResourceObject>&, FontWeight);
+
+
+template<typename T>
+void ContainerSpanNode::UpdateSpanResource(const std::string& key, const RefPtr<ResourceObject>& resObj)
+{
+    T Val = ParseResToObject<T>(resObj);
+    UpdateProperty<T>(key, Val);
+    MarkTextDirty();
+}
+
+using Handler = std::function<void(int32_t, RefPtr<PropertyValueBase>)>;
+
+template<typename T>
+void ContainerSpanNode::UpdateProperty(std::string key, T value)
+{
+    UpdatePropertyImpl(key, AceType::MakeRefPtr<PropertyValue<T>>(value));
+}
+
+void ContainerSpanNode::UpdatePropertyImpl(
+    const std::string& key, RefPtr<PropertyValueBase> value)
+{
+    return;
+}
+
+template<typename T>
+void SpanNode::RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
+{
+    auto&& updateFunc = [weakptr = AceType::WeakClaim(this), key](const RefPtr<ResourceObject>& resObj) {
+        auto spanNode = weakptr.Upgrade();
+        CHECK_NULL_VOID(spanNode);
+        spanNode->UpdateSpanResource<T>(key, resObj);
+    };
+    AddResObj(key, resObj, std::move(updateFunc));
+    UpdateProperty<T>(key, value);
+}
+
+template void SpanNode::RegisterResource<CalcDimension>(
+    const std::string&, const RefPtr<ResourceObject>&, CalcDimension);
+template void SpanNode::RegisterResource<Color>(
+    const std::string&, const RefPtr<ResourceObject>&, Color);
+template void SpanNode::RegisterResource<std::vector<std::string>>(
+    const std::string&, const RefPtr<ResourceObject>&, std::vector<std::string>);
+template void SpanNode::RegisterResource<std::u16string>(
+    const std::string&, const RefPtr<ResourceObject>&, std::u16string);
+template void SpanNode::RegisterResource<FontWeight>(
+    const std::string&, const RefPtr<ResourceObject>&, FontWeight);
+
+template<typename T>
+void SpanNode::UpdateSpanResource(const std::string& key, const RefPtr<ResourceObject>& resObj)
+{
+    T Val = ParseResToObject<T>(resObj);
+    UpdateProperty<T>(key, Val);
+    auto spanItem = GetSpanItem();
+    auto pattern = spanItem->GetTextPattern().Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textPattern = DynamicCast<TextPattern>(pattern);
+    CHECK_NULL_VOID(textPattern);
+    if (GetRerenderable()) {
+        textPattern->MarkDirtyNodeRender();
+        textPattern->MarkDirtyNodeMeasure();
+    }
+}
+
+template<typename T>
+T BaseSpan::ParseResToObject(const RefPtr<ResourceObject>& resObj)
+{
+    T value {};
+    CHECK_NULL_RETURN(resObj, value);
+    if constexpr (std::is_same_v<T, std::string>) {
+        ResourceParseUtils::ParseResString(resObj, value);
+    } else if constexpr(std::is_same_v<T, std::u16string>) {
+        ResourceParseUtils::ParseResString(resObj, value);
+    } else if constexpr(std::is_same_v<T, FontWeight>) {
+        std::string fontWeightStr;
+        ResourceParseUtils::ParseResString(resObj, fontWeightStr);
+        value = Framework::ConvertStrToFontWeight(fontWeightStr);
+    } else if constexpr(std::is_same_v<T, Color>) {
+        ResourceParseUtils::ParseResColor(resObj, value);
+    } else if constexpr(std::is_same_v<T, double>) {
+        ResourceParseUtils::ParseResDouble(resObj, value);
+    } else if constexpr(std::is_same_v<T, std::vector<std::string>>) {
+        ResourceParseUtils::ParseResFontFamilies(resObj, value);
+    } else if constexpr(std::is_same_v<T, CalcDimension>) {
+        ResourceParseUtils::ParseResDimensionNG(resObj, value, DimensionUnit::FP, false);
+    }
+    return value;
+}
+
+void SpanNode::UnregisterResource(const std::string& key)
+{
+    if (key == "symbolColor") {
+        for (auto index : symbolFontColorResObjIndexArr) {
+            auto storeKey = key + "_" + std::to_string(index);
+            RemoveResObj(storeKey);
+        }
+        symbolFontColorResObjIndexArr.clear();
+        return;
+    }
+    BaseSpan::UnregisterResource(key);
+}
+
+void SpanNode::RegisterSymbolFontColorResource(const std::string& key,
+    std::vector<Color>& symbolColor, const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr)
+{
+    for (auto i = 0; i < static_cast<int32_t>(resObjArr.size()); ++i) {
+        auto resObjIndex = resObjArr[i].first;
+        auto resObj = resObjArr[i].second;
+        auto storeKey = key + "_" + std::to_string(resObjIndex);
+        symbolFontColorResObjIndexArr.emplace_back(resObjIndex);
+        auto&& updateFunc = [weakptr = AceType::WeakClaim(this), storeKey, resObjIndex]
+            (const RefPtr<ResourceObject>& resObj) {
+            auto spanNode = weakptr.Upgrade();
+            CHECK_NULL_VOID(spanNode);
+            Color fontColor;
+            ResourceParseUtils::ParseResColor(resObj, fontColor);
+            auto colorVec = spanNode->GetSymbolColorList();
+            if (colorVec.has_value() && GreatNotEqual(colorVec.value().size(), resObjIndex)) {
+                auto colorVecArr = colorVec.value();
+                colorVecArr[resObjIndex] = fontColor;
+                spanNode->UpdateSymbolColorList(colorVecArr);
+            }
+        };
+        AddResObj(storeKey, resObj, std::move(updateFunc));
+    }
+    UpdateSymbolColorList(symbolColor);
+}
+
+template<typename T>
+void SpanNode::UpdateProperty(std::string key, T value)
+{
+    UpdatePropertyImpl(key, AceType::MakeRefPtr<PropertyValue<T>>(value));
+}
+
+void SpanNode::UpdatePropertyImpl(
+    const std::string& key, RefPtr<PropertyValueBase> value)
+{
+    static const std::unordered_map<std::string, Handler> span_handlers = {
+        DEFINE_SPAN_PROP_HANDLER(fontSize, CalcDimension, UpdateFontSize),
+        DEFINE_SPAN_PROP_HANDLER(fontColor, Color, UpdateTextColor),
+        DEFINE_SPAN_PROP_HANDLER(fontWeight, FontWeight, UpdateFontWeight),
+        DEFINE_SPAN_PROP_HANDLER(letterSpacing, CalcDimension, UpdateLetterSpacing),
+        DEFINE_SPAN_PROP_HANDLER(decorationColor, Color, UpdateTextDecorationColor),
+        DEFINE_SPAN_PROP_HANDLER(lineHeight, CalcDimension, UpdateLineHeight),
+        DEFINE_SPAN_PROP_HANDLER(value, std::u16string, UpdateContent),
+        DEFINE_SPAN_PROP_HANDLER(fontFamily, std::vector<std::string>, UpdateFontFamily),
+    };
+    auto it = span_handlers.find(key);
+    if (it != span_handlers.end()) {
+        it->second(GetId(), value);
+    }
+}
+
+int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
+    const TextStyle& textStyle, bool isMarquee)
 {
     CHECK_NULL_RETURN(builder, -1);
     CHECK_NULL_RETURN(frameNode, -1);
@@ -498,14 +698,24 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextBaseline, TextBaseline);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextOverflow, TextOverflow);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextAlign, TextAlign);
+    UPDATE_SPAN_TEXT_STYLE(textLineStyle, TextVerticalAlign, ParagraphVerticalAlign);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, MaxLines, MaxLines);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, WordBreak, WordBreak);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, EllipsisMode, EllipsisMode);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, LineBreakStrategy, LineBreakStrategy);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, IsOnlyBetweenLines, IsOnlyBetweenLines);
     UPDATE_SPAN_TEXT_STYLE(textLineStyle, ParagraphSpacing, ParagraphSpacing);
-    auto gradient = textStyle.GetGradient();
-    spanTextStyle.SetGradient(gradient);
+    UpdateReLayoutGradient(spanTextStyle, textStyle);
+}
+
+void SpanItem::UpdateReLayoutGradient(TextStyle& spanTextStyle, const TextStyle& textStyle)
+{
+    if (textStyle.GetGradient().has_value()) {
+        auto gradient = textStyle.GetGradient();
+        spanTextStyle.SetGradient(gradient);
+    } else {
+        spanTextStyle.SetGradient(std::nullopt);
+    }
 }
 
 bool SpanItem::UpdateSymbolSpanFontFamily(TextStyle& symbolSpanStyle)
@@ -824,6 +1034,7 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
     COPY_TEXT_STYLE(textLineStyle, BaselineOffset, UpdateBaselineOffset);
     COPY_TEXT_STYLE(textLineStyle, TextOverflow, UpdateTextOverflow);
     COPY_TEXT_STYLE(textLineStyle, TextAlign, UpdateTextAlign);
+    COPY_TEXT_STYLE(textLineStyle, TextVerticalAlign, UpdateTextVerticalAlign);
     COPY_TEXT_STYLE(textLineStyle, MaxLength, UpdateMaxLength);
     COPY_TEXT_STYLE(textLineStyle, MaxLines, UpdateMaxLines);
     COPY_TEXT_STYLE(textLineStyle, HeightAdaptivePolicy, UpdateHeightAdaptivePolicy);
@@ -974,6 +1185,8 @@ void SpanItem::EncodeTextLineStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(textLineStyle, LineBreakStrategy, TLV_SPAN_TEXT_LINE_STYLE_LINEBREAKSTRATEGY, LineBreakStrategy,
         LineBreakStrategy);
     WRITE_TLV_INHERIT(textLineStyle, EllipsisMode, TLV_SPAN_TEXT_LINE_STYLE_ELLIPSISMODE, EllipsisMode, EllipsisMode);
+    WRITE_TLV_INHERIT(textLineStyle, TextVerticalAlign, TLV_SPAN_TEXT_LINE_STYLE_TEXTVERTICALALIGN, TextVerticalAlign,
+        ParagraphVerticalAlign);
 }
 
 RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor)
@@ -1032,6 +1245,8 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateLineBreakStrategy,
                 TLV_SPAN_TEXT_LINE_STYLE_LINEBREAKSTRATEGY, LineBreakStrategy);
             READ_TEXT_STYLE_TLV(textLineStyle, UpdateEllipsisMode, TLV_SPAN_TEXT_LINE_STYLE_ELLIPSISMODE, EllipsisMode);
+            READ_TEXT_STYLE_TLV(textLineStyle, UpdateTextVerticalAlign, TLV_SPAN_TEXT_LINE_STYLE_TEXTVERTICALALIGN,
+                TextVerticalAlign);
 
             case TLV_SPAN_BACKGROUND_BACKGROUNDCOLOR: {
                 if (!sameSpan->backgroundStyle.has_value()) {
@@ -1059,6 +1274,7 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
                     pipelineContext->HyperlinkStartAbility(address);
                 };
                 sameSpan->SetUrlOnReleaseEvent(std::move(urlOnRelease));
+                break;
             }
             default:
                 break;
@@ -1068,6 +1284,9 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
         sameSpan->textLineStyle->ResetParagraphSpacing();
         sameSpan->urlAddress = std::nullopt;
         sameSpan->urlOnRelease = nullptr;
+    }
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        sameSpan->textLineStyle->ResetTextVerticalAlign();
     }
     return sameSpan;
 }
@@ -1211,6 +1430,9 @@ bool ImageSpanItem::UpdatePlaceholderRun(PlaceholderStyle placeholderStyle)
                 break;
             case VerticalAlign::BASELINE:
                 run.alignment = PlaceholderAlignment::ABOVEBASELINE;
+                break;
+            case VerticalAlign::FOLLOW_PARAGRAPH:
+                run.alignment = PlaceholderAlignment::FOLLOW_PARAGRAPH;
                 break;
             default:
                 run.alignment = PlaceholderAlignment::BOTTOM;
@@ -1534,6 +1756,7 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("TextOverflow", StringUtils::ToString(textStyle->GetTextOverflow()).c_str());
     json->Put("VerticalAlign", StringUtils::ToString(textStyle->GetTextVerticalAlign()).c_str());
     json->Put("TextAlign", StringUtils::ToString(textStyle->GetTextAlign()).c_str());
+    json->Put("TextVerticalAlign", StringUtils::ToString(textStyle->GetParagraphVerticalAlign()).c_str());
     json->Put("WordBreak", StringUtils::ToString(textStyle->GetWordBreak()).c_str());
     json->Put("TextCase", StringUtils::ToString(textStyle->GetTextCase()).c_str());
     json->Put("EllipsisMode", StringUtils::ToString(textStyle->GetEllipsisMode()).c_str());
@@ -1545,5 +1768,6 @@ void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
         json->Put("SymbolEffect",
             spanItem_->fontStyle->GetSymbolEffectOptions().value_or(NG::SymbolEffectOptions()).ToString().c_str());
     }
+    json->Put("LineThicknessScale", std::to_string(textStyle->GetLineThicknessScale()).c_str());
 }
 } // namespace OHOS::Ace::NG

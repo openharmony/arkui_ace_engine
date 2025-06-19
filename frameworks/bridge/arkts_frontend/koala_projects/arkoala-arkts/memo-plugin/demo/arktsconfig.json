@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "package": "@koalaui/runtime",
+        "outDir": "build/abc",
+        "baseUrl": ".",
+        "paths": {
+            "@koalaui/runtime": [
+                "../runtime-api"
+            ]
+        },
+        "plugins": [
+            {
+                "transform": "..",
+                "stage": "checked"
+            }
+        ]
+    },
+    "include": ["./demo.sts"]
+}

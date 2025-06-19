@@ -52,6 +52,7 @@ ace_unittest("TextInputTest") {
     "text_input_test.cpp",
     "text_input_update_test.cpp",
     "text_input_wordbreak_test.cpp",
+    "$ace_root/test/mock/core/common/mock_font_manager.cpp",
   ]
   cflags = [ "-fno-access-control" ]
 

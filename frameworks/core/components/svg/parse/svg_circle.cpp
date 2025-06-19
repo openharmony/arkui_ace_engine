@@ -71,16 +71,6 @@ RefPtr<RenderNode> SvgCircle::CreateRender(
     return renderBox;
 }
 
-#ifndef USE_ROSEN_DRAWING
-SkPath SvgCircle::AsPath(const Size& viewPort) const
-{
-    SkPath path;
-    path.addCircle(ConvertDimensionToPx(component_->GetCx(), viewPort, SvgLengthType::HORIZONTAL),
-        ConvertDimensionToPx(component_->GetCy(), viewPort, SvgLengthType::VERTICAL),
-        ConvertDimensionToPx(component_->GetR(), viewPort, SvgLengthType::OTHER));
-    return path;
-}
-#else
 RSPath SvgCircle::AsPath(const Size& viewPort) const
 {
     RSPath path;
@@ -89,6 +79,5 @@ RSPath SvgCircle::AsPath(const Size& viewPort) const
         ConvertDimensionToPx(component_->GetR(), viewPort, SvgLengthType::OTHER));
     return path;
 }
-#endif
 
 } // namespace OHOS::Ace

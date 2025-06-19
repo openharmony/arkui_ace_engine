@@ -81,7 +81,8 @@ void JSTabContent::CreateForPartialUpdate(const JSCallbackInfo& info)
     }
 
     JSRef<JSVal> builderFunctionJS = info[0];
-    auto builderFunc = [builder = std::move(builderFunctionJS)]() {
+    auto builderFunc = [context = info.GetExecutionContext(), builder = std::move(builderFunctionJS)]() {
+        JAVASCRIPT_EXECUTION_SCOPE(context)
         JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
     };
     TabContentModel::GetInstance()->Create(std::move(builderFunc));
@@ -94,6 +95,9 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     }
     auto tabBarInfo = info[0];
 
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TEXT_CONTENT, nullptr);
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TAB_BAR_OPTIONS_ICON, nullptr);
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::BOTTOM_TAB_BAR_STYLE_ICON, nullptr);
     RefPtr<ResourceObject> resTextObj;
     std::string infoStr;
     if (ParseJsString(tabBarInfo, infoStr, resTextObj)) {
@@ -133,14 +137,14 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     }
     JSRef<JSVal> builderFuncParam = paramObject->GetProperty("builder");
     if (builderFuncParam->IsFunction()) {
-        auto vm = info.GetVm();
-        auto jsFunc = JSRef<JSFunc>::Cast(builderFuncParam);
-        auto func = jsFunc->GetLocalHandle();
-        auto tabBarBuilderFunc = [vm, func = panda::CopyableGlobal(vm, func)]() {
-            ACE_SCOPED_TRACE("JSTabContent::Execute TabBar builder");
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
-            func->Call(vm, func.ToLocal(), nullptr, 0);
+        auto tabBarBuilder = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builderFuncParam));
+        auto tabBarBuilderFunc = [execCtx = info.GetExecutionContext(),
+                                     tabBarBuilderFunc = std::move(tabBarBuilder)]() {
+            if (tabBarBuilderFunc) {
+                ACE_SCOPED_TRACE("JSTabContent::Execute TabBar builder");
+                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                tabBarBuilderFunc->ExecuteJS();
+            }
         };
         TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
         TabContentModel::GetInstance()->SetTabBar(
@@ -183,13 +187,11 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
         if (ParseJsMedia(iconParam, icon, resIconObj)) {
             iconOpt = icon;
         }
-        if (SystemProperties::ConfigChangePerform()) {
-            TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::ICON, resIconObj);
-        }
     }
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
     TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, std::nullopt, nullptr, false);
     TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TAB_BAR_OPTIONS_ICON, resIconObj);
 }
 
 void JSTabContent::Pop()
@@ -221,6 +223,9 @@ void JSTabContent::SetIndicator(const JSRef<JSVal>& info)
         if (tabTheme) {
             indicator.color = tabTheme->GetActiveIndicatorColor();
         }
+        TabContentModel::GetInstance()->SetIndicatorColorByUser(false);
+    } else {
+        TabContentModel::GetInstance()->SetIndicatorColorByUser(true);
     }
     if (!info->IsObject() || !ParseJsDimensionVp(obj->GetProperty("height"), indicatorHeight, indicatorHightResObj) ||
         indicatorHeight.Value() < 0.0f || indicatorHeight.Unit() == DimensionUnit::PERCENT) {
@@ -404,6 +409,8 @@ void JSTabContent::SetLabelStyle(const JSRef<JSVal>& info, bool isSubTabStyle)
 void JSTabContent::SetIconStyle(const JSRef<JSVal>& info)
 {
     IconStyle iconStyle;
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::ICON_SELECT_COLOR, nullptr);
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::ICON_UNSELECT_COLOR, nullptr);
     if (info->IsObject()) {
         RefPtr<ResourceObject> unselectedColorResObj;
         RefPtr<ResourceObject> selectedColorResObj;
@@ -412,12 +419,18 @@ void JSTabContent::SetIconStyle(const JSRef<JSVal>& info)
         JSRef<JSVal> unselectedColorValue = obj->GetProperty("unselectedColor");
         if (ConvertFromJSValue(unselectedColorValue, unselectedColor, unselectedColorResObj)) {
             iconStyle.unselectedColor = unselectedColor;
+            TabContentModel::GetInstance()->SetIconUnselectedColorByUser(true);
+        } else {
+            TabContentModel::GetInstance()->SetIconUnselectedColorByUser(false);
         }
 
         Color selectedColor;
         JSRef<JSVal> selectedColorValue = obj->GetProperty("selectedColor");
         if (ConvertFromJSValue(selectedColorValue, selectedColor, selectedColorResObj)) {
             iconStyle.selectedColor = selectedColor;
+            TabContentModel::GetInstance()->SetIconSelectedColorByUser(true);
+        } else {
+            TabContentModel::GetInstance()->SetIconSelectedColorByUser(false);
         }
         if (SystemProperties::ConfigChangePerform()) {
             TabContentModel::GetInstance()->CreateWithResourceObj(
@@ -435,6 +448,9 @@ void JSTabContent::GetLabelUnselectedContent(const JSRef<JSVal> unselectedColorV
     RefPtr<ResourceObject> unselectColorResObj;
     if (ConvertFromJSValue(unselectedColorValue, unselectedColor, unselectColorResObj)) {
         labelStyle.unselectedColor = unselectedColor;
+        TabContentModel::GetInstance()->SetLabelUnselectedColorByUser(true);
+    } else {
+        TabContentModel::GetInstance()->SetLabelUnselectedColorByUser(false);
     }
     if (SystemProperties::ConfigChangePerform()) {
         TabContentModel::GetInstance()->CreateWithResourceObj(
@@ -448,6 +464,9 @@ void JSTabContent::GetLabelSelectedContent(const JSRef<JSVal> selectedColorValue
     RefPtr<ResourceObject> selectColorResObj;
     if (ConvertFromJSValue(selectedColorValue, selectedColor, selectColorResObj)) {
         labelStyle.selectedColor = selectedColor;
+        TabContentModel::GetInstance()->SetLabelSelectedColorByUser(true);
+    } else {
+        TabContentModel::GetInstance()->SetLabelSelectedColorByUser(false);
     }
     if (SystemProperties::ConfigChangePerform()) {
         TabContentModel::GetInstance()->CreateWithResourceObj(
@@ -575,7 +594,10 @@ void JSTabContent::SetPadding(const JSRef<JSVal>& info, bool isSubTabStyle)
     }
     TabContentModel::GetInstance()->SetPadding(padding);
     TabContentModel::GetInstance()->SetUseLocalizedPadding(useLocalizedPadding);
-    TabContentModel::GetInstance()->CreatePaddingWithResourceObj(resObjLeft, resObjRight, resObjTop, resObjBottom);
+    TabContentModel::GetInstance()->CreatePaddingHorWithResourceObj(resObjLeft, resObjRight,
+        isSubTabStyle, useLocalizedPadding);
+    TabContentModel::GetInstance()->CreatePaddingVerWithResourceObj(resObjTop, resObjBottom,
+        isSubTabStyle, useLocalizedPadding);
 }
 
 void JSTabContent::SetId(const JSRef<JSVal>& info)
@@ -663,9 +685,6 @@ void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
     if (ParseJsString(contentParam, content, resTextObj)) {
         contentOpt = content;
     }
-    if (SystemProperties::ConfigChangePerform()) {
-        TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TEXT_CONTENT, resTextObj);
-    }
 
     JSRef<JSVal> indicatorParam = paramObject->GetProperty("indicator");
     SetIndicator(indicatorParam);
@@ -685,6 +704,7 @@ void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
     JSRef<JSVal> idParam = paramObject->GetProperty("id");
     SetId(idParam);
 
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TEXT_CONTENT, resTextObj);
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     TabContentModel::GetInstance()->SetTabBar(contentOpt, std::nullopt, std::nullopt, nullptr, false);
     TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
@@ -752,10 +772,6 @@ void JSTabContent::SetBottomTabBarStyle(const JSCallbackInfo& info)
             tabBarSymbol = symbolApply;
         }
     }
-    if (SystemProperties::ConfigChangePerform()) {
-        TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TEXT_CONTENT, resTextObj);
-        TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::ICON, resIconObj);
-    }
 
     JSRef<JSVal> paddingParam = paramObject->GetProperty("padding");
     SetPadding(paddingParam, false);
@@ -777,9 +793,41 @@ void JSTabContent::SetBottomTabBarStyle(const JSCallbackInfo& info)
     JSRef<JSVal> idParam = paramObject->GetProperty("id");
     SetId(idParam);
 
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TEXT_CONTENT, resTextObj);
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::BOTTOM_TAB_BAR_STYLE_ICON, resIconObj);
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
     TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, tabBarSymbol, nullptr, false);
     TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
+}
+
+void JSTabContent::SetOnWillShow(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+    auto willShowHandler = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onWillShow = [executionContext = info.GetExecutionContext(), func = std::move(willShowHandler)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        ACE_SCORING_EVENT("TabContent.onWillShow");
+        func->Execute();
+    };
+    TabContentModel::GetInstance()->SetOnWillShow(std::move(onWillShow));
+}
+
+void JSTabContent::SetOnWillHide(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+    auto willHideHandler = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onWillHide = [executionContext = info.GetExecutionContext(), func = std::move(willHideHandler)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        ACE_SCORING_EVENT("TabContent.onWillHide");
+        func->Execute();
+    };
+    TabContentModel::GetInstance()->SetOnWillHide(std::move(onWillHide));
 }
 
 void JSTabContent::JSBind(BindingTarget globalObj)
@@ -800,6 +848,8 @@ void JSTabContent::JSBind(BindingTarget globalObj)
     JSClass<JSTabContent>::StaticMethod("width", &JSTabContent::SetTabContentWidth);
     JSClass<JSTabContent>::StaticMethod("height", &JSTabContent::SetTabContentHeight);
     JSClass<JSTabContent>::StaticMethod("size", &JSTabContent::SetTabContentSize);
+    JSClass<JSTabContent>::StaticMethod("onWillShow", &JSTabContent::SetOnWillShow);
+    JSClass<JSTabContent>::StaticMethod("onWillHide", &JSTabContent::SetOnWillHide);
     JSClass<JSTabContent>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSTabContent>::InheritAndBind<JSContainerBase>(globalObj);
 }

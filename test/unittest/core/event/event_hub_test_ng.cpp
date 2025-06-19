@@ -1021,6 +1021,7 @@ HWTEST_F(EventHubTestNg, EventHubTest007, TestSize.Level1)
     std::vector<double> ratios = { 0, 1.0 };
     eventHub->SetVisibleAreaRatiosAndCallback(callbackInfo, ratios, false);
 
+    eventHub->OnAttachContext(nullptr);
     auto context = MockPipelineContext::GetCurrent();
     eventHub->OnAttachContext(AceType::RawPtr(context));
     EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);

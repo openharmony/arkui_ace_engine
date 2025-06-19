@@ -141,7 +141,7 @@ private:
 
     private:
         struct StateInfo {
-            RefPtr<DragDropSpringLoadingStateBase> stateHandler;
+            RefPtr<DragDropSpringLoadingStateBase> stateHandler = nullptr;
             std::vector<DragDropSpringLoadingState> transitions;
         };
         std::unordered_map<DragDropSpringLoadingState, StateInfo> states_;
@@ -155,7 +155,7 @@ private:
     int32_t currentNotifySequence_ = -1;
     int32_t currentUpdateNotifyCount_ = 0;
     WeakPtr<DragDropSpringLoadingDetector> detector_;
-    RefPtr<DragSpringLoadingConfiguration> userConfig_;
+    RefPtr<DragSpringLoadingConfiguration> userConfig_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_DRAG_DROP_DRAG_DROP_SPRING_LOADING_STATE_MACHINE_H

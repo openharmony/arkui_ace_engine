@@ -20,7 +20,6 @@ namespace OHOS::Ace::NG {
 void GridRowBaseTestNG::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
-    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
 }
 
 void GridRowBaseTestNG::TearDownTestSuite()

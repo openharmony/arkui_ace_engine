@@ -59,6 +59,7 @@ public:
     bool IsRestrictedWorkerThread() override;
     bool CheckDCMaxConstraintInWorker(void *worker) override;
     bool CheckWorkerMaxConstraint(void *worker) override;
+    void OnAccessibilityParentRectInfoUpdate() override;
 
     void SearchElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;

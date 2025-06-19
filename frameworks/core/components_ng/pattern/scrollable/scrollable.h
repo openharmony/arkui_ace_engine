@@ -83,6 +83,7 @@ using IsReverseCallback = std::function<bool()>;
 using RemainVelocityCallback = std::function<bool(float)>;
 using GetSnapTypeCallback = std::function<SnapType()>;
 using FixScrollParamCallback = std::function<void(float mainPos, float& correctVelocity, float& finalPos)>;
+using OnWillStopDraggingCallback = std::function<void(float velocity)>;
 
 class FrameNode;
 class PipelineContext;
@@ -222,6 +223,14 @@ public:
     {
         return canOverScroll_;
     }
+    void SetCanStayOverScroll(bool value)
+    {
+        canStayOverScroll_ = value;
+    }
+    bool CanStayOverScroll() const
+    {
+        return canStayOverScroll_;
+    }
 
     void ProcessScrollMotionStop();
 
@@ -284,6 +293,16 @@ public:
     const DragCancelRefreshCallback& GetDragCancelCallback() const
     {
         return dragCancelCallback_;
+    }
+
+    const OnWillStopDraggingCallback& GetOnWillStopDraggingEndCallback() const
+    {
+        return onWillStopDraggingCallback_;
+    }
+
+    void SetOnWillStopDraggingCallback(const OnWillStopDraggingCallback& onWillStopDraggingCallback)
+    {
+        onWillStopDraggingCallback_ = onWillStopDraggingCallback;
     }
 
     void SetWatchFixCallback(const WatchFixCallback& watchFixCallback)
@@ -630,6 +649,7 @@ private:
     DragCancelRefreshCallback dragCancelCallback_;
     ContinuousSlidingCallback continuousSlidingCallback_;
     GetSnapTypeCallback getSnapTypeCallback_;
+    OnWillStopDraggingCallback onWillStopDraggingCallback_;
     Axis axis_ = Axis::VERTICAL;
     // used for ng structure.
     RefPtr<NG::PanRecognizer> panRecognizerNG_;
@@ -679,6 +699,7 @@ private:
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool canOverScroll_ = true;
+    bool canStayOverScroll_ = false;
 
     // scrollSnap
     bool needScrollSnapChange_ = false;

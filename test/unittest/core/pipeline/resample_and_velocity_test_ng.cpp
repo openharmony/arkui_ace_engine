@@ -87,10 +87,19 @@ double SmoothBy2ndOrderDiff(const std::vector<TouchEvent>& events)
 }
 
 // using linear
-double SmoothBy1stOrderDiff(const std::vector<TouchEvent>& events)
+double Monotonicity(const std::vector<TouchEvent>& events)
 {
     auto diff = Get1stOrderDiff(events);
-    return GetStdDev(diff);
+    if (diff.empty()) {
+        return 0.0;
+    }
+    PointerEvent& sign = diff[0];
+    for (auto& item : diff) {
+        if (item.x * sign.x < 0 || item.y * sign.y < 0) {
+            ADD_FAILURE();
+        }
+    }
+    return 0.0;
 }
 
 int64_t GetDeltaT(TimeStamp time, TimeStamp base)
@@ -141,8 +150,8 @@ void GenerateCSV(const std::string& fileName, TimeStamp baseTime, const std::vec
 }
 
 struct TestResult {
-    double stddevOfAcc; // evaluate smooth
-    double stddevAgainstPhy; // evaluate accuracy
+    double stddevOfAcc;          // evaluate smooth
+    double stddevAgainstPhy;     // evaluate accuracy
     double stddevOfUniformSpeed; // evalueate stability
 };
 
@@ -351,7 +360,7 @@ HWTEST_F(ResampleTestNg, ResampleTestFastFlick, TestSize.Level1)
     TestFastFlick(140, result);
     EXPECT_LT(result.stddevAgainstPhy, 0.226);
     EXPECT_LT(result.stddevOfAcc, 3.956);
-    
+
     pipeline_->touchAccelarate_ = false;
     TestFastFlick(60, result);
     EXPECT_LT(result.stddevAgainstPhy, 0.212);
@@ -392,7 +401,7 @@ HWTEST_F(ResampleTestNg, ResampleTestDeceleratingSlide, TestSize.Level1)
     TestDeceleratingSlide(140, result);
     EXPECT_LT(result.stddevAgainstPhy, 0.065);
     EXPECT_LT(result.stddevOfAcc, 0.357);
-    
+
     pipeline_->touchAccelarate_ = false;
     TestDeceleratingSlide(60, result);
     EXPECT_LT(result.stddevAgainstPhy, 0.098);
@@ -413,7 +422,7 @@ void ResampleTestNg::TestConstantSpeedSlide(int32_t vsyncPeriod, TestResult& res
         GenerateTouchEvents(1000);
         RunVsync(60);
         accumulateVar += GetCoordsDiffAgainstPhy();
-        accumulateSmooth += SmoothBy1stOrderDiff(events_);
+        accumulateSmooth += Monotonicity(events_);
     }
     result.stddevAgainstPhy = std::sqrt(accumulateVar / repeatTimes);
     result.stddevOfUniformSpeed = accumulateSmooth / repeatTimes;
@@ -434,7 +443,7 @@ HWTEST_F(ResampleTestNg, ResampleTestConstantSpeedSlide, TestSize.Level1)
     TestConstantSpeedSlide(140, result);
     EXPECT_LT(result.stddevAgainstPhy, NEAR_ZERO_DEV);
     EXPECT_LT(result.stddevOfUniformSpeed, 0.656);
-    
+
     pipeline_->touchAccelarate_ = false;
     TestConstantSpeedSlide(60, result);
     EXPECT_LT(result.stddevAgainstPhy, NEAR_ZERO_DEV);
@@ -454,7 +463,7 @@ void ResampleTestNg::TestSlowConstantSpeedSlide(int32_t vsyncPeriod, TestResult&
         GenerateTouchEvents(1000);
         RunVsync(60);
         accumulateVar += GetCoordsDiffAgainstPhy();
-        accumulateSmooth += SmoothBy1stOrderDiff(events_);
+        accumulateSmooth += Monotonicity(events_);
     }
     result.stddevAgainstPhy = std::sqrt(accumulateVar / repeatTimes);
     result.stddevOfUniformSpeed = accumulateSmooth / repeatTimes;
@@ -475,7 +484,7 @@ HWTEST_F(ResampleTestNg, ResampleTestSlowConstantSpeedSlide, TestSize.Level1)
     TestSlowConstantSpeedSlide(140, result);
     EXPECT_LT(result.stddevAgainstPhy, 0.013);
     EXPECT_LT(result.stddevOfUniformSpeed, 0.086);
-    
+
     pipeline_->touchAccelarate_ = false;
     TestSlowConstantSpeedSlide(60, result);
     EXPECT_LT(result.stddevAgainstPhy, NEAR_ZERO_DEV);
@@ -483,6 +492,87 @@ HWTEST_F(ResampleTestNg, ResampleTestSlowConstantSpeedSlide, TestSize.Level1)
     TestSlowConstantSpeedSlide(140, result);
     EXPECT_LT(result.stddevAgainstPhy, NEAR_ZERO_DEV);
     EXPECT_LT(result.stddevOfUniformSpeed, 0.164);
+}
+
+HWTEST_F(ResampleTestNg, ResampleTestRealData01, TestSize.Level1)
+{
+    pipeline_->touchAccelarate_ = true;
+    std::vector<TouchEvent> events;
+
+    TouchEvent event;
+    int64_t sinceEpoch = 343641809000; // real trace data
+    std::chrono::microseconds us_since_epoch(sinceEpoch);
+    TimeStamp stamp(us_since_epoch);
+    nowTime_ = stamp;
+    event.SetId(0.0).SetX(0.0).SetY(0.0).SetType(TouchType::DOWN).SetTime(stamp);
+    oriEvents_.clear();
+    oriEvents_.emplace_back(event);
+
+    event.SetType(TouchType::MOVE);
+    // real trace data
+    std::vector<std::vector<int64_t>> logPoints {
+        { 343641816000, 1735, 300 },
+        { 343641823000, 1736, 300 },
+        { 343641830000, 1738, 300 },
+        { 343641837000, 1739, 300 },
+        { 343641844000, 1740, 300 },
+        { 343641851000, 1742, 300 },
+        { 343641858000, 1743, 300 },
+        { 343641865000, 1745, 300 },
+        { 343641872000, 1746, 300 },
+        { 343641879000, 1747, 300 },
+        { 343641886000, 1749, 300 },
+        { 343641893000, 1750, 300 },
+        { 343641900000, 1752, 300 },
+        { 343641907000, 1753, 300 },
+        { 343641914000, 1754, 300 },
+        { 343641921000, 1756, 300 },
+        { 343641928000, 1757, 300 },
+        { 343641935000, 1759, 300 },
+        { 343641942000, 1760, 300 },
+        { 343641949000, 1761, 300 },
+        { 343641958000, 1763, 300 },
+        { 343641963000, 1764, 300 }
+    };
+    for (const auto& item : logPoints) {
+        std::chrono::microseconds msEpoch(item[0]);
+        TimeStamp t(msEpoch);
+        event.SetX(item[1]).SetY(item[2]).SetTime(t);
+        oriEvents_.emplace_back(event);
+    }
+    events_.clear();
+    pipeline_->touchEvents_.clear();
+
+    // real trace data
+    std::vector<int64_t> vsyncTime {
+        343641803424377,
+        343641820086409,
+        343641836748819,
+        343641853410582,
+        343641870072479,
+        343641886735032,
+        343641903397442,
+        343641920059816,
+        343641936722405,
+        343641953686073,
+        343641970348577,
+        343641987010997,
+        343642003671915
+    };
+    int32_t vsyncIdx = 0;
+    int32_t i = 0;
+    while (i < oriEvents_.size()) {
+        std::chrono::nanoseconds nsEpoch(vsyncTime[vsyncIdx]);
+        TimeStamp t(nsEpoch);
+        while (i < oriEvents_.size() && oriEvents_[i].time < t) {
+            pipeline_->touchEvents_.emplace_back(oriEvents_[i]);
+            i++;
+        }
+        pipeline_->SetVsyncTime(vsyncTime[vsyncIdx]);
+        pipeline_->FlushTouchEvents();
+        ++vsyncIdx;
+    }
+    Monotonicity(events_);
 }
 } // namespace NG
 } // namespace OHOS::Ace

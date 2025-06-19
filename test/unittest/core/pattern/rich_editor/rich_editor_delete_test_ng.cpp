@@ -913,14 +913,25 @@ HWTEST_F(RichEditorDeleteTestNg, InsertOrDeleteSpace002, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto changeReason = TextChangeReason::UNKNOWN;
+    auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
+        EXPECT_EQ(changeValue.changeReason_, TextChangeReason::STYLUS);
+        changeReason = changeValue.changeReason_;
+        return true;
+    };
+    eventHub->SetOnWillChange(onWillChange);
     size_t index = 0;
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
     spanItem->content = u"test";
     spanItem->rangeStart = 0;
     spanItem->position = 4;
     richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->isEditing_ = true;
     bool tag = richEditorPattern->InsertOrDeleteSpace(index);
     EXPECT_TRUE(tag);
+    EXPECT_EQ(changeReason, TextChangeReason::STYLUS);
 }
 
 /**
@@ -932,6 +943,15 @@ HWTEST_F(RichEditorDeleteTestNg, InsertOrDeleteSpace003, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto changeReason = TextChangeReason::UNKNOWN;
+    auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
+        EXPECT_EQ(changeValue.changeReason_, TextChangeReason::STYLUS);
+        changeReason = changeValue.changeReason_;
+        return true;
+    };
+    eventHub->SetOnWillChange(onWillChange);
     size_t index = 0;
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
     spanItem->content = u" test";
@@ -940,6 +960,7 @@ HWTEST_F(RichEditorDeleteTestNg, InsertOrDeleteSpace003, TestSize.Level1)
     richEditorPattern->spans_.push_back(spanItem);
     bool tag = richEditorPattern->InsertOrDeleteSpace(index);
     EXPECT_TRUE(tag);
+    EXPECT_EQ(changeReason, TextChangeReason::STYLUS);
 }
 
 /**

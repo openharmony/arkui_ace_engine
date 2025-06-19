@@ -118,7 +118,7 @@ int32_t UIDisplaySyncManager::GetVsyncRate() const
 
 bool UIDisplaySyncManager::SetVsyncPeriod(int64_t vsyncPeriod)
 {
-    if (vsyncPeriod < 0) {
+    if (vsyncPeriod <= 0) {
         return false;
     }
 

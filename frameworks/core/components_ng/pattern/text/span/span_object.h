@@ -51,6 +51,7 @@ enum class SpanType {
 
 struct SpanParagraphStyle {
     std::optional<TextAlign> align;
+    std::optional<TextVerticalAlign> textVerticalAlign;
     std::optional<int32_t> maxLines;
     std::optional<WordBreak> wordBreak;
     std::optional<TextOverflow> textOverflow;
@@ -60,7 +61,8 @@ struct SpanParagraphStyle {
 
     bool Equal(const SpanParagraphStyle& other) const
     {
-        auto flag = align == other.align && maxLines == other.maxLines && wordBreak == other.wordBreak &&
+        auto flag = align == other.align && textVerticalAlign == other.textVerticalAlign &&
+                    maxLines == other.maxLines && wordBreak == other.wordBreak &&
                     textOverflow == other.textOverflow && textIndent == other.textIndent &&
                     paragraphSpacing == other.paragraphSpacing;
         if (leadingMargin.has_value() && other.leadingMargin.has_value()) {
@@ -163,6 +165,7 @@ public:
     TextDecoration GetTextDecorationFirst() const;
     std::vector<TextDecoration> GetTextDecorationTypes() const;
     void SetTextDecorationTypes(const std::vector<TextDecoration>& types);
+    void RemoveTextDecorationType(TextDecoration value);
     void AddTextDecorationType(TextDecoration value);
     std::optional<Color> GetColor() const;
     std::optional<TextDecorationStyle> GetTextDecorationStyle() const;

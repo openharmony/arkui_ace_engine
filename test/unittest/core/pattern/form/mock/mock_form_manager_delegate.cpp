@@ -52,6 +52,8 @@ void FormManagerDelegate::AddUnTrustFormCallback(const UnTrustFormCallback& call
 
 void FormManagerDelegate::OnActionEvent(const std::string& action) {}
 
+void FormManagerDelegate::SetRSUIContext(std::shared_ptr<Rosen::RSUIContext> &rsUIContext) {}
+
 void FormManagerDelegate::SetFormUtils(const std::shared_ptr<FormUtils>& formUtils)
 {
     if (formUtils) {

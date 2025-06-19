@@ -618,6 +618,9 @@ public:
         return customNode_.Upgrade();
     }
 
+    void UpdateSelectOptionTextByIndex(int32_t index, const std::string& text);
+    void UpdateSelectOptionIconByIndex(int32_t index, const std::string& icon);
+
     void InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuTheme);
 
     float GetSelectMenuWidthFromTheme() const;
@@ -628,6 +631,44 @@ public:
     void RemoveLastNodeDivider(const RefPtr<UINode>& lastNode);
     void UpdateMenuItemDivider();
     void UpdateDividerProperty(const RefPtr<FrameNode>& dividerNode, const std::optional<V2::ItemDivider>& divider);
+    RefPtr<FrameNode> GetFirstMenuItem();
+    RefPtr<FrameNode> GetLastMenuItem();
+    std::pair<float, float> GetPreviewPositionY();
+
+    float GetTranslateYForStack()
+    {
+        return translateYForStack_;
+    }
+
+    void SetTranslateYForStack(float tmp)
+    {
+        translateYForStack_ = tmp;
+    }
+
+    float GetOriginMenuYForStack()
+    {
+        return originMenuYForStack_;
+    }
+
+    void SetOriginMenuYForStack(float tmp)
+    {
+        originMenuYForStack_ = tmp;
+    }
+
+    float GetOriginPreviewYForStack()
+    {
+        return originPreviewYForStack_;
+    }
+
+    void SetOriginPreviewYForStack(float tmp)
+    {
+        originPreviewYForStack_ = tmp;
+    }
+
+    void SetDisableMenuBgColor(bool ret = false)
+    {
+        isDisableMenuBgColor_ = ret;
+    }
 
 protected:
     void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
@@ -674,9 +715,11 @@ private:
     void ShowMenuAppearAnimation();
     void ShowStackMenuAppearAnimation();
     std::pair<OffsetF, OffsetF> GetMenuOffset(const RefPtr<FrameNode>& mainMenu,
-        bool isNeedRestoreNodeId = false) const;
-    MenuItemInfo GetInnerMenuOffset(const RefPtr<UINode>& child, bool isNeedRestoreNodeId) const;
-    MenuItemInfo GetMenuItemInfo(const RefPtr<UINode>& child, bool isNeedRestoreNodeId) const;
+        const RefPtr<FrameNode>& subMenu, bool isNeedRestoreNodeId = false) const;
+    MenuItemInfo GetInnerMenuOffset(const RefPtr<UINode>& child, const RefPtr<FrameNode>& subMenu,
+        bool isNeedRestoreNodeId) const;
+    MenuItemInfo GetMenuItemInfo(const RefPtr<UINode>& child, const RefPtr<FrameNode>& subMenu,
+        bool isNeedRestoreNodeId) const;
     void ShowStackMenuAppearOpacityAndBlurAnimation(const RefPtr<RenderContext>& mainMenuContext) const;
     void ShowStackMenuDisappearOpacityAndBlurAnimation(const RefPtr<FrameNode>& menuNode,
         const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const;
@@ -753,7 +796,10 @@ private:
     Rect menuWindowRect_;
     WeakPtr<UINode> customNode_ = nullptr;
     std::optional<MenuPathParams> pathParams_ = std::nullopt;
-
+    float translateYForStack_ = 0.0f;
+    float originMenuYForStack_ = 0.0f;
+    float originPreviewYForStack_ = 0.0f;
+    bool isDisableMenuBgColor_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };
 

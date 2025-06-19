@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "package": "@koalaui/runtime-tests",
+        "outDir": "build/unmemoized/abc",
+        "baseUrl": "./build/unmemoized",
+        "paths": {
+            "@koalaui/compat": [ "../../../compat/src/arkts" ],
+            "@koalaui/common": [ "../../../common/src" ],
+            "@koalaui/harness": [ "../../../harness/src/arkts" ]
+        }
+    },
+    "include": [
+        "build/unmemoized/src/**/*.ts",
+        "build/unmemoized/src/*.ts",
+        "build/unmemoized/test-arkts/**/*.ts",
+        "build/unmemoized/test-arkts/*.ts"
+    ],
+    "exclude": [
+        "build/unmemoized/test-arkts/states/state_basics.test.ts"
+    ]
+}

@@ -1,0 +1,32 @@
+{
+    "compilerOptions": {
+	"package0": "@koalaui/example",
+        "outDir": "./abc",
+        "baseUrl": ".",
+        "paths": {
+            "@koalaui/runtime": [
+                "../memo-plugin/runtime-api"
+            ]
+        },
+        "plugins": [
+            {
+                "transform": "./plugins/build/src/printer-plugin.js",
+                "stage": "parsed"
+            },
+            {
+                "transform": "./plugins/build/src/parsed-stage-plugin.js",
+                "stage": "parsed",
+                "arkui": "../../../arkui/src/sts"
+            },
+            {
+                "transform": "./plugins/build/src/checked-stage-plugin.js",
+                "stage": "checked"
+            },
+            {
+                "transform": "@koalaui/memo-plugin",
+                "stage": "checked",
+                "removeEtsglobal": true
+            }
+        ]
+    }
+}

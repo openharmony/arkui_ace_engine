@@ -76,6 +76,7 @@ public:
     void SetButtonVisible(bool visible);
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void SetLayoutDisplayCount(int32_t displayCount);
 
 private:
     std::tuple<bool, bool, bool> CheckHoverStatus();
@@ -101,6 +102,7 @@ private:
     std::shared_ptr<ChangeEvent> swiperChangeEvent_;
 
     int32_t index_ = 0;
+    int32_t displayCount_ = 1;
     bool isFirstCreate_ = true;
     Color hoverBeginColor_ = Color::TRANSPARENT;
     Color backgroundColor_ = Color::TRANSPARENT;

@@ -157,6 +157,45 @@ void SetEmbeddedComponentOption(ArkUINodeHandle node, ArkUIEmbeddedComponentOpti
     SetEmbeddedComponentOnError(frameNode, option);
     SetEmbeddedComponentOnTerminated(frameNode, option);
 }
+
+void SetOnTerminated(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onTerminated = reinterpret_cast<std::function<void(int32_t, const RefPtr<WantWrap>&)>*>(extraParam);
+        UIExtensionAdapter::SetEmbeddedComponentOnTerminated(frameNode, std::move(*onTerminated));
+    } else {
+        UIExtensionAdapter::SetEmbeddedComponentOnTerminated(frameNode, nullptr);
+    }
+}
+
+void ResetOnTerminated(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    UIExtensionAdapter::SetEmbeddedComponentOnTerminated(frameNode, nullptr);
+}
+
+void SetOnError(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onError =
+            reinterpret_cast<std::function<void(int32_t, const std::string&, const std::string&)>*>(extraParam);
+        UIExtensionAdapter::SetEmbeddedComponentOnError(frameNode, std::move(*onError));
+    } else {
+        UIExtensionAdapter::SetEmbeddedComponentOnError(frameNode, nullptr);
+    }
+}
+
+void ResetOnError(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    UIExtensionAdapter::SetEmbeddedComponentOnError(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -165,6 +204,10 @@ const ArkUIEmbeddedComponentModifier* GetEmbeddedComponentModifier()
     static const ArkUIEmbeddedComponentModifier modifier = {
         .setEmbeddedComponentWant = SetEmbeddedComponentWant,
         .setEmbeddedComponentOption = SetEmbeddedComponentOption,
+        .setOnTerminated = SetOnTerminated,
+        .resetOnTerminated = ResetOnTerminated,
+        .setOnError = SetOnError,
+        .resetOnError = ResetOnError,
     };
 
     return &modifier;

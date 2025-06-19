@@ -118,6 +118,13 @@ void SetDivider(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* v
     TabsModelNG::SetDivider(frameNode, divider);
 }
 
+void SetDividerColorByUser(ArkUINodeHandle node, ArkUI_Bool isByUser)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetDividerColorByUser(frameNode, isByUser);
+}
+
 void CreateDividerWithResourceObj(ArkUINodeHandle node,
     void* strokeWidthRawPtr, void* colorRawPtr, void* startMarginRawPtr, void* endMarginRawPtr)
 {
@@ -160,6 +167,7 @@ void SetBarBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarBackgroundColor(frameNode, Color(color));
+    TabsModelNG::SetBarBackgroundColorByUser(frameNode, true);
 }
 
 void CreateBarBackgroundColorWithResourceObj(ArkUINodeHandle node, void* bgColorRawPtr)
@@ -252,6 +260,17 @@ void SetTabsOptionsController(ArkUINodeHandle node, ArkUINodeHandle tabsControll
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetTabsController(frameNode,
         AceType::Claim(reinterpret_cast<OHOS::Ace::SwiperController*>(tabsController)));
+}
+void SetTabsOptionsBarModifier(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onApply = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(callback);
+        TabsModelNG::SetBarModifier(frameNode, std::move(*onApply));
+    } else {
+        TabsModelNG::SetBarModifier(frameNode, nullptr);
+    }
 }
 void SetScrollable(ArkUINodeHandle node, ArkUI_Bool scrollable)
 {
@@ -372,6 +391,7 @@ void ResetDivider(ArkUINodeHandle node)
     divider.isNull = true;
 
     TabsModelNG::SetDivider(frameNode, divider);
+    TabsModelNG::SetDividerColorByUser(frameNode, false);
 
     CreateDividerWithResourceObj(node, nullptr, nullptr, nullptr, nullptr);
 }
@@ -392,6 +412,7 @@ void ResetBarBackgroundColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetBarBackgroundColor(frameNode, Color::BLACK.BlendOpacity(0.0f));
+    TabsModelNG::SetBarBackgroundColorByUser(frameNode, false);
 
     CreateBarBackgroundColorWithResourceObj(node, nullptr);
 }
@@ -429,6 +450,13 @@ void ResetTabsOptionsIndex(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetTabBarIndex(frameNode, 0);
+}
+
+void ResetTabsOptionsBarModifier(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetBarModifier(frameNode, nullptr);
 }
 
 void ResetScrollable(ArkUINodeHandle node)
@@ -806,6 +834,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .setScrollableBarModeOptions = SetScrollableBarModeOptions,
         .setBarGridAlign = SetBarGridAlign,
         .setDivider = SetDivider,
+        .setDividerColorByUser = SetDividerColorByUser,
         .setFadingEdge = SetFadingEdge,
         .setTabOnUnselected = SetTabOnUnselected,
         .setBarBackgroundColor = SetBarBackgroundColor,
@@ -815,6 +844,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .setTabBarPosition = SetTabBarPosition,
         .setTabsOptionsIndex = SetTabsOptionsIndex,
         .setTabsOptionsController = SetTabsOptionsController,
+        .setTabsOptionsBarModifier = SetTabsOptionsBarModifier,
         .setScrollable = SetScrollable,
         .setTabBarWidth = SetTabBarWidth,
         .setTabBarHeight = SetTabBarHeight,
@@ -834,6 +864,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetIsVertical = ResetIsVertical,
         .resetTabBarPosition = ResetTabBarPosition,
         .resetTabsOptionsIndex = ResetTabsOptionsIndex,
+        .resetTabsOptionsBarModifier = ResetTabsOptionsBarModifier,
         .resetScrollable = ResetScrollable,
         .resetTabBarWidth = ResetTabBarWidth,
         .resetTabBarHeight = ResetTabBarHeight,
@@ -903,6 +934,7 @@ const CJUITabsModifier* GetCJUITabsModifier()
         .setTabBarPosition = SetTabBarPosition,
         .setTabsOptionsIndex = SetTabsOptionsIndex,
         .setTabsOptionsController = SetTabsOptionsController,
+        .setTabsOptionsBarModifier = SetTabsOptionsBarModifier,
         .setScrollable = SetScrollable,
         .setTabBarWidth = SetTabBarWidth,
         .setTabBarHeight = SetTabBarHeight,
@@ -919,6 +951,7 @@ const CJUITabsModifier* GetCJUITabsModifier()
         .resetIsVertical = ResetIsVertical,
         .resetTabBarPosition = ResetTabBarPosition,
         .resetTabsOptionsIndex = ResetTabsOptionsIndex,
+        .resetTabsOptionsBarModifier = ResetTabsOptionsBarModifier,
         .resetScrollable = ResetScrollable,
         .resetTabBarWidth = ResetTabBarWidth,
         .resetTabBarHeight = ResetTabBarHeight,

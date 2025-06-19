@@ -330,6 +330,7 @@ bool NavDestinationPattern::GetBackButtonState()
     auto index = stack->FindIndex(name_, customNode_, true);
     bool showBackButton = true;
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleBarNode, false);
     if (navDestinationLayoutProperty->GetHideBackButtonValue(false)) {
         showBackButton = false;
     }
@@ -365,6 +366,7 @@ void NavDestinationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    NavDestinationPatternBase::InitOnTouchEvent(host);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
             .edges = SAFE_AREA_EDGE_ALL };
@@ -389,6 +391,7 @@ void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
     pipeline->GetMemoryManager()->RemoveRecyclePageNode(id);
+    NavDestinationPatternBase::RemoveOnTouchEvent(frameNode);
 }
 
 void NavDestinationPattern::DumpInfo()

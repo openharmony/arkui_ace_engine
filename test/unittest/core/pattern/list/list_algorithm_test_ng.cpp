@@ -112,6 +112,7 @@ HWTEST_F(ListAlgorithmTestNg, Measure001, TestSize.Level1)
     ListPositionInfo positionInfo { 2.0f, 4.0f, true };
     listPositionMap->posMap_[0] = positionInfo;
     listLayoutAlgorithm->posMap_ = listPositionMap;
+    listLayoutAlgorithm->childrenSize_ = AceType::MakeRefPtr<ListChildrenMainSize>();
     listLayoutAlgorithm->totalItemCount_ = 0;
     listLayoutAlgorithm->Measure(&layoutWrapper);
     EXPECT_TRUE(listLayoutAlgorithm->itemPosition_.empty());
@@ -571,6 +572,7 @@ HWTEST_F(ListAlgorithmTestNg, CheckJumpToIndex001, TestSize.Level1)
     listLayoutAlgorithm->childrenSize_ = nullptr;
     listLayoutAlgorithm->currentDelta_ = 5.0f;
     listLayoutAlgorithm->contentMainSize_ = 1.0f;
+    listLayoutAlgorithm->posMap_ = AceType::MakeRefPtr<ListPositionMap>();
     ListItemGroupLayoutInfo groupInfo = { true, true, 4.0f, 2.0f, 4.0f, 2.0f };
     ListItemInfo listItemInfo = { 2, 2.0f, 4.0f, true, true, 1.0f, 2.0f, groupInfo };
     listLayoutAlgorithm->itemPosition_[0] = listItemInfo;
@@ -591,6 +593,7 @@ HWTEST_F(ListAlgorithmTestNg, CheckJumpToIndex002, TestSize.Level1)
     listLayoutAlgorithm->childrenSize_ = nullptr;
     listLayoutAlgorithm->currentDelta_ = 5.0f;
     listLayoutAlgorithm->contentMainSize_ = 1.0f;
+    listLayoutAlgorithm->posMap_ = AceType::MakeRefPtr<ListPositionMap>();
     ListItemInfo listItemInfo = { 2, 2.0f, 4.0f, true };
     listLayoutAlgorithm->itemPosition_[0] = listItemInfo;
     listLayoutAlgorithm->CheckJumpToIndex();
@@ -611,6 +614,7 @@ HWTEST_F(ListAlgorithmTestNg, CheckJumpToIndex003, TestSize.Level1)
     listLayoutAlgorithm->currentDelta_ = -1.0f;
     listLayoutAlgorithm->contentMainSize_ = 0.0f;
     listLayoutAlgorithm->totalItemCount_ = 3;
+    listLayoutAlgorithm->posMap_ = AceType::MakeRefPtr<ListPositionMap>();
     ListItemInfo listItemInfo = { 2, 2.0f, 4.0f, false };
     listLayoutAlgorithm->itemPosition_[2] = listItemInfo;
     listLayoutAlgorithm->CheckJumpToIndex();
@@ -1225,6 +1229,25 @@ HWTEST_F(ListAlgorithmTestNg, FixPredictSnapOffset002, TestSize.Level1)
     listLayoutAlgorithm->FixPredictSnapOffset(listLayoutProperty);
     EXPECT_EQ(listLayoutAlgorithm->predictSnapOffset_, 2.0f);
     EXPECT_EQ(listLayoutAlgorithm->predictSnapEndPos_, -2.0f);
+}
+
+/**
+ * @tc.name: FixPredictSnapOffset003
+ * @tc.desc: Test ListLayoutAlgorithm FixPredictSnapOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAlgorithmTestNg, FixPredictSnapOffset003, TestSize.Level1)
+{
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
+    RefPtr<ListLayoutProperty> listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    listLayoutAlgorithm->scrollSnapVelocity_ = 1000.0f;
+    listLayoutAlgorithm->predictSnapOffset_ = 10.0f;
+    listLayoutAlgorithm->scrollSnapAlign_ = ScrollSnapAlign::CENTER;
+    ListItemInfo listItemInfo = { 2, -100.0f, 100.0f, false };
+    listLayoutAlgorithm->itemPosition_[1] = listItemInfo;
+    listLayoutAlgorithm->FixPredictSnapOffset(listLayoutProperty);
+    EXPECT_EQ(listLayoutAlgorithm->predictSnapOffset_, 0.0f);
+    EXPECT_EQ(listLayoutAlgorithm->predictSnapEndPos_, 0.0f);
 }
 
 /**

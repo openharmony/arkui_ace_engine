@@ -37,6 +37,7 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
     std::replace(textContent_.begin(), textContent_.end(), u'\n', u' ');
 
     auto isInlineStyle = pattern->IsNormalInlineState();
+    isInlineFocus_ = isInlineStyle && pattern->HasFocus();
 
     direction_ = textFieldLayoutProperty->GetLayoutDirection();
 
@@ -139,6 +140,7 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
     MeasureAutoFillIcon(layoutWrapper);
+    MeasureCounterWithPolicy(layoutWrapper, responseAreaWidth + pattern->GetHorizontalPaddingAndBorderSum());
 }
 
 void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -421,5 +423,16 @@ void TextInputLayoutAlgorithm::LayoutAutoFillIcon(LayoutWrapper* layoutWrapper)
     OffsetF iconOffset(iconHorizontalOffset, iconVerticalOffset);
     iconGeometryNode->SetMarginFrameOffset(iconOffset);
     childWrapper->Layout();
+}
+
+void TextInputLayoutAlgorithm::MeasureCounterWithPolicy(LayoutWrapper* layoutWrapper, float nonContentWidth)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto widthLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+    if (widthLayoutPolicy != LayoutCalPolicy::NO_MATCH) {
+        auto frameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+        auto counterWidth = frameSize.Width() - nonContentWidth;
+        CounterNodeMeasure(counterWidth, layoutWrapper);
+    }
 }
 } // namespace OHOS::Ace::NG

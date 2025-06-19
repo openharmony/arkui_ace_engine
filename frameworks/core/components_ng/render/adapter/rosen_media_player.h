@@ -43,9 +43,7 @@ public:
     void SetRenderSurface(const RefPtr<RenderSurface>& renderSurface) override;
     void RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent, StateChangedEvent&& stateChangedEvent,
         CommonEvent&& errorEvent, CommonEvent&& resolutionChangeEvent, CommonEvent&& startRenderFrameEvent) override;
-    void RegisterMediaPlayerEvent(PositionUpdatedEvent&& positionUpdatedEvent, StateChangedEvent&& stateChangedEvent,
-        VideoErrorEvent&& errorEvent, CommonEvent&& resolutionChangeEvent,
-        CommonEvent&& startRenderFrameEvent) override;
+    void RegisterMediaPlayerVideoErrorEvent(VideoErrorEvent&& errorEvent) override;
     void RegisterMediaPlayerSeekDoneEvent(SeekDoneEvent&& seekDoneEvent) override;
     int32_t GetDuration(int32_t& duration) override;
     int32_t GetVideoWidth() override;
@@ -62,6 +60,7 @@ public:
     int32_t Seek(int32_t mSeconds, OHOS::Ace::SeekMode mode) override;
     int32_t SetPlayRange(int64_t startTime, int64_t endTime) override;
     int32_t SetPlayRangeWithMode(int64_t startTime, int64_t endTime, OHOS::Ace::SeekMode mode) override;
+    int32_t SetPlayRangeUsWithMode(int64_t startTime, int64_t endTime, SeekMode mode) override;
     int32_t SetParameter(const std::string& key, int64_t value) override;
 
 private:

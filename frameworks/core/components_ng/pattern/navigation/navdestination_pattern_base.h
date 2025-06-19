@@ -300,6 +300,15 @@ public:
     {
         return false;
     }
+
+    void SetNavigationNode(const RefPtr<UINode>& navigationNode)
+    {
+        navigationNode_ = AceType::WeakClaim(RawPtr(navigationNode));
+    }
+    RefPtr<UINode> GetNavigationNode()
+    {
+        return navigationNode_.Upgrade();
+    }
 protected:
     void AbortBarAnimation();
     void UpdateHideBarProperty();
@@ -311,6 +320,8 @@ protected:
     void UpdateLayoutPropertyBeforeAnimation(const RefPtr<NavDestinationNodeBase>& navNodeBase,
         bool needRunTitleBarAnimation, bool needRunToolBarAnimation, bool hideTitleBar, bool hideToolBar);
     bool CustomizeExpandSafeArea() override;
+    void InitOnTouchEvent(const RefPtr<FrameNode>& host);
+    void RemoveOnTouchEvent(FrameNode* frameNode);
 
     bool isHideToolbar_ = false;
     bool isHideTitlebar_ = false;
@@ -336,6 +347,9 @@ protected:
     std::unordered_map<int32_t, std::shared_ptr<AnimationUtils::Animation>> barAnimations_;
     std::optional<int32_t> preWidth_;
     NavigationMenuOptions menuOptions_;
+
+    WeakPtr<UINode> navigationNode_;
+    RefPtr<TouchEventImpl> touchListener_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

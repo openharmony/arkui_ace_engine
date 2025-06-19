@@ -38,6 +38,7 @@ public:
     void* GetRawPixelMapPtr() const override;
     std::shared_ptr<Media::PixelMap> GetPixelMapSharedPtr() override;
     bool IsHdr() const override;
+    void SetMemoryName(std::string pixelMapName) const override;
 
 private:
     std::shared_ptr<Media::PixelMap> pixmap_;
@@ -104,6 +105,12 @@ void* PixelMapImpl::GetRawPixelMapPtr() const
 std::shared_ptr<Media::PixelMap> PixelMapImpl::GetPixelMapSharedPtr()
 {
     return pixmap_;
+}
+
+void PixelMapImpl::SetMemoryName(std::string pixelMapName) const
+{
+    CHECK_NULL_VOID(pixmap_);
+    pixmap_->SetMemoryName(pixelMapName);
 }
 } // namespace Drawable
 } // namespace Ace

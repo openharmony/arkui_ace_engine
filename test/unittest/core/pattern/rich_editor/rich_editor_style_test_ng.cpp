@@ -1008,6 +1008,22 @@ HWTEST_F(RichEditorStyleTestNg, CopyTextSpanLineStyle001, TestSize.Level1)
     richEditorPattern->CopyTextSpanLineStyle(source, target, false);
     richEditorPattern->CopyTextSpanLineStyle(source, target, true);
     ASSERT_EQ(richEditorPattern->spans_.empty(), true);
+
+    margin.size = LeadingMarginSize(Dimension(5.0), Dimension(10.0));
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    ASSERT_NE(pixelMap, nullptr);
+    margin.pixmap = pixelMap;
+    source->UpdateLeadingMargin(margin);
+    richEditorPattern->CopyTextSpanLineStyle(source, target, true);
+    EXPECT_TRUE(target->HasLeadingMargin());
+    auto leadingMargin = target->GetLeadingMarginValue({});
+    ASSERT_NE(leadingMargin.pixmap, nullptr);
+
+    richEditorPattern->CopyTextSpanLineStyle(source, target, false);
+    EXPECT_TRUE(target->HasLeadingMargin());
+    leadingMargin = target->GetLeadingMarginValue({});
+    EXPECT_EQ(leadingMargin.pixmap, nullptr);
 }
 
 /**

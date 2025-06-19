@@ -44,6 +44,7 @@
     "src/lib/common/arkts_util.d.ts",
     "src/lib/common/finalization_registry.d.ts",
     "src/lib/common/weakref_pool.ts",
+    "src/lib/common/arkui_object_finalization_register_proxy.ts",
 
     // full_update specific
     "src/lib/full_update/fu_view_native.d.ts",

@@ -228,6 +228,7 @@ void JSShapeAbstract::SetWidth(const JSRef<JSVal>& jsValue)
 {
     CalcDimension value;
     if (jsValue->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
         return;
     }
@@ -237,7 +238,17 @@ void JSShapeAbstract::SetWidth(const JSRef<JSVal>& jsValue)
         }
     } else {
         if (!ParseJsDimensionVpNG(jsValue, value)) {
+            // JsWidth return, check if set LayoutPolicy before return.
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
+            if (jsValue->IsObject()) {
+                JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+                JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
+                if (layoutPolicy->IsString()) {
+                    auto policy = ParseLayoutPolicy(layoutPolicy->ToString());
+                    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, true);
+                    return;
+                }
+            }
             return;
         }
     }
@@ -261,6 +272,7 @@ void JSShapeAbstract::SetHeight(const JSRef<JSVal>& jsValue)
 {
     CalcDimension value;
     if (jsValue->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
         return;
     }
@@ -270,7 +282,17 @@ void JSShapeAbstract::SetHeight(const JSRef<JSVal>& jsValue)
         }
     } else {
         if (!ParseJsDimensionVpNG(jsValue, value)) {
+            // JsHeight return, check if set LayoutPolicy before return.
             ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
+            if (jsValue->IsObject()) {
+                JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+                JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
+                if (layoutPolicy->IsString()) {
+                    auto policy = ParseLayoutPolicy(layoutPolicy->ToString());
+                    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(policy, false);
+                    return;
+                }
+            }
             return;
         }
     }
@@ -511,6 +533,41 @@ void JSShapeAbstract::SetSize(const JSCallbackInfo& info)
     }
 }
 
+void JSShapeAbstract::ObjectPositionUpdate(DimensionOffset& position, RefPtr<ResourceObject>& xResObj,
+    RefPtr<ResourceObject>& yResObj)
+{
+    if (SystemProperties::ConfigChangePerform() && xResObj) {
+        auto&& updateFunc = [position](const RefPtr<ResourceObject>& resObj, BasicShape& basicShape) {
+            DimensionOffset& value = const_cast<DimensionOffset&>(position);
+            CalcDimension x;
+            CalcDimension y;
+            if (!ResourceParseUtils::ParseResDimensionVp(resObj, x)) {
+                x = basicShape.GetPosition().GetX();
+            }
+            y = basicShape.GetPosition().GetY();
+            value.SetX(x);
+            value.SetY(y);
+            basicShape.SetPosition(value);
+        };
+        basicShape_->AddResource("shapeAbstract.position.xResObj", xResObj, std::move(updateFunc));
+    }
+    if (SystemProperties::ConfigChangePerform() && yResObj) {
+        auto&& updateFunc = [position](const RefPtr<ResourceObject>& resObj, BasicShape& basicShape) {
+            DimensionOffset& value = const_cast<DimensionOffset&>(position);
+            CalcDimension x;
+            CalcDimension y;
+            x = basicShape.GetPosition().GetX();
+            if (!ResourceParseUtils::ParseResDimensionVp(resObj, y)) {
+                y = basicShape.GetPosition().GetY();
+            }
+            value.SetX(x);
+            value.SetY(y);
+            basicShape.SetPosition(value);
+        };
+        basicShape_->AddResource("shapeAbstract.position.yResObj", yResObj, std::move(updateFunc));
+    }
+}
+
 void JSShapeAbstract::ObjectPosition(const JSCallbackInfo& info)
 {
     info.ReturnSelf();
@@ -533,23 +590,7 @@ void JSShapeAbstract::ObjectPosition(const JSCallbackInfo& info)
     if (ParseJsDimensionVp(yVal, y, yResObj)) {
         position.SetY(y);
     }
-    if (SystemProperties::ConfigChangePerform() && (xResObj || yResObj)) {
-        auto&& updateFunc = [position](const RefPtr<ResourceObject>& resObj, BasicShape& basicShape) {
-            DimensionOffset& value = const_cast<DimensionOffset&>(position);
-            CalcDimension x;
-            CalcDimension y;
-            if (!ResourceParseUtils::ParseResDimensionVp(resObj, x)) {
-                x = basicShape.GetPosition().GetX();
-            }
-            if (!ResourceParseUtils::ParseResDimensionVp(resObj, y)) {
-                y = basicShape.GetPosition().GetY();
-            }
-            value.SetX(x);
-            value.SetY(y);
-            basicShape.SetPosition(value);
-        };
-        basicShape_->AddResource("shapeAbstract.position.xResObj", xResObj, std::move(updateFunc));
-    }
+    ObjectPositionUpdate(position, xResObj, yResObj);
     basicShape_->SetPosition(position);
 }
 

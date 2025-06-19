@@ -69,6 +69,8 @@ public:
     static void SetTextModifier(const JSCallbackInfo& info);
     static void SetOptionTextModifier(const JSCallbackInfo& info);
     static void SetSelectedOptionTextModifier(const JSCallbackInfo& info);
+    static void SetShowInSubWindow(const JSCallbackInfo& info);
+    static void SetShowDefaultSelectedIcon(const JSCallbackInfo& info);
 
     static void ParseFontSize(const JSRef<JSVal>& jsValue, SelectFontType type);
     static void ParseFontWeight(const JSRef<JSVal>& jsValue, SelectFontType type);

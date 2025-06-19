@@ -129,6 +129,7 @@ private:
     void ClearFocusStyle();
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
+    void OnColorConfigurationUpdate() override;
 
     Color defaultColor_;
     Color focusedColor_;

@@ -53,11 +53,7 @@ public:
         return component_;
     }
 
-#ifndef USE_ROSEN_DRAWING
-    SkPath AsPath(const Size& viewPort) const override;
-#else
     RSPath AsPath(const Size& viewPort) const override;
-#endif
 
 private:
     RefPtr<SvgGComponent> component_;

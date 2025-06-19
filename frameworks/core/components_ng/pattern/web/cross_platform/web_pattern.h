@@ -82,6 +82,7 @@ class WebPattern : public Pattern, public SelectionHost {
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
+    using SetWebDetachCallback = std::function<void(int32_t)>;
     using SetHapPathCallback = std::function<void(const std::string&)>;
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
@@ -204,6 +205,16 @@ public:
     SetWebIdCallback GetSetWebIdCallback() const
     {
         return setWebIdCallback_;
+    }
+
+    void SetSetWebDetachCallback(SetWebDetachCallback&& SetDetachCallback)
+    {
+        setWebDetachCallback_ = std::move(SetDetachCallback);
+    }
+
+    SetWebDetachCallback GetSetWebDetachCallback() const
+    {
+        return setWebDetachCallback_;
     }
 
     void SetRenderMode(RenderMode renderMode)
@@ -338,7 +349,8 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, FileFromUrlAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DatabaseAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextZoomRatio, int32_t);
-    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebDebuggingAccessEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebDebuggingAccessEnabledAndPort,
+        WebPatternProperty::WebDebuggingConfigType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BackgroundColor, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, InitialScale, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, PinchSmoothModeEnabled, bool);
@@ -360,6 +372,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ForceDarkAccess, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioResumeInterval, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioExclusive, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, AudioSessionType, WebAudioSessionType);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, HorizontalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, VerticalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollBarColor, std::string);
@@ -373,6 +386,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CopyOptionMode, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedModeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, IntrinsicSizeEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CssDisplayChangeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleTag, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedRuleType, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
@@ -381,7 +395,9 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OptimizeParserBudgetEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebMediaAVSessionEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDataDetector, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BypassVsyncCondition, WebBypassVsyncCondition);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, GestureFocusMode, GestureFocusMode);
     void RequestFullScreen();
     void ExitFullScreen();
     bool IsFullScreen() const
@@ -447,7 +463,7 @@ public:
     bool Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
     void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick);
+        const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     void UpdateDataDetectorConfig(const TextDetectConfig& config);
     WebInfoType GetWebInfoType();
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callabck);
@@ -503,7 +519,7 @@ public:
         const ScriptItemsByOrder& scriptItemsByOrder);
 
     void OnWebMediaAVSessionEnabledUpdate(bool enable);
-
+    void SetDefaultBackgroundColor();
 private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
@@ -537,7 +553,8 @@ private:
     void OnFileFromUrlAccessEnabledUpdate(bool value);
     void OnDatabaseAccessEnabledUpdate(bool value);
     void OnTextZoomRatioUpdate(int32_t value);
-    void OnWebDebuggingAccessEnabledUpdate(bool value);
+    void OnWebDebuggingAccessEnabledAndPortUpdate(
+        const WebPatternProperty::WebDebuggingConfigType& enabled_and_port);
     void OnPinchSmoothModeEnabledUpdate(bool value);
     void OnBackgroundColorUpdate(int32_t value);
     void OnInitialScaleUpdate(float value);
@@ -559,6 +576,7 @@ private:
     void OnForceDarkAccessUpdate(bool access);
     void OnAudioResumeIntervalUpdate(int32_t resumeInterval);
     void OnAudioExclusiveUpdate(bool audioExclusive);
+    void OnAudioSessionTypeUpdate(WebAudioSessionType value);
     void OnHorizontalScrollBarAccessEnabledUpdate(bool value);
     void OnVerticalScrollBarAccessEnabledUpdate(bool value);
     void OnScrollBarColorUpdate(const std::string& value);
@@ -573,6 +591,7 @@ private:
     void OnOptimizeParserBudgetEnabledUpdate(bool value);
     void OnEnableDataDetectorUpdate(bool enable);
     void OnEnableFollowSystemFontWeightUpdate(bool value);
+    void OnGestureFocusModeUpdate(GestureFocusMode mode);
 
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -597,9 +616,11 @@ private:
     void UpdateSlideOffset(bool isNeedReset = false);
     void OnNativeEmbedModeEnabledUpdate(bool value) {};
     void OnIntrinsicSizeEnabledUpdate(bool value);
+    void OnCssDisplayChangeEnabledUpdate(bool value);
     void OnNativeEmbedRuleTagUpdate(const std::string& tag);
     void OnNativeEmbedRuleTypeUpdate(const std::string& type);
     void OnCopyOptionModeUpdate(const int32_t value);
+    void OnBypassVsyncConditionUpdate(WebBypassVsyncCondition condition);
     int onDragMoveCnt = 0;
     std::chrono::time_point<std::chrono::system_clock> firstMoveInTime;
     std::chrono::time_point<std::chrono::system_clock> preMoveInTime;
@@ -636,6 +657,7 @@ private:
     std::optional<std::string> customScheme_;
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
+    SetWebDetachCallback setWebDetachCallback_ = nullptr;
     RenderMode renderMode_;
     bool incognitoMode_ = false;
     SetHapPathCallback setHapPathCallback_ = nullptr;
@@ -688,6 +710,7 @@ private:
     int32_t rootLayerHeight_ = 0;
     bool richTextInit_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
+    bool needSetDefaultBackgroundColor_ = false;
 };
 } // namespace OHOS::Ace::NG
 

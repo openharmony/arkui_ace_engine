@@ -16,9 +16,11 @@
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "base/log/log_wrapper.h"
 #include "base/log/dump_log.h"
+#include "core/components_ng/pattern/ui_extension/platform_utils.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "display_manager.h"
@@ -238,6 +240,12 @@ void DynamicPattern::InitializeRender(void* runtime)
 void DynamicPattern::SetBackgroundTransparent(bool backgroundTransparent)
 {
     backgroundTransparent_ = backgroundTransparent;
+}
+
+void DynamicPattern::OnAccessibilityParentRectInfoUpdate()
+{
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    dynamicComponentRenderer_->OnAccessibilityParentRectInfoUpdate();
 }
 
 void DynamicPattern::FireOnErrorCallbackOnUI(
@@ -725,5 +733,28 @@ void DynamicPattern::HandleVisibleAreaChange(bool visible, double ratio)
         }
     }
     TransferAccessibilityRectInfo();
+}
+
+bool DynamicPattern::HandleTouchEvent(
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_RETURN(pointerEvent, false);
+    auto originAction = pointerEvent->GetPointerAction();
+    if (originAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
+        originAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
+        return false;
+    }
+    return PlatformPattern::HandleTouchEvent(pointerEvent);
+}
+
+void DynamicPattern::HandleMouseEvent(const MouseInfo& info)
+{
+    if (info.GetSourceDevice() != SourceType::MOUSE) {
+        return;
+    }
+    if (info.GetPullAction() == MouseAction::PULL_MOVE || info.GetPullAction() == MouseAction::PULL_UP) {
+        return;
+    }
+    PlatformPattern::HandleMouseEvent(info);
 }
 } // namespace OHOS::Ace::NG

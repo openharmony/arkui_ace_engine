@@ -80,6 +80,7 @@ bool HoverEventTarget::HandlePenHoverEvent(bool isHovered, const TouchEvent& eve
     hoverInfo.SetLocalLocation(Offset(localX, localY));
     hoverInfo.SetGlobalLocation(Offset(event.x, event.y));
     hoverInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
+    hoverInfo.SetGlobalDisplayLocation(Offset(event.globalDisplayX, event.globalDisplayY));
     hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
     // onPenHoverEventCallback_ may be overwritten in its invoke so we copy it first
     auto onPenHoverEventCallback = onPenHoverEventCallback_;
@@ -114,6 +115,7 @@ bool HoverEventTarget::HandlePenHoverMoveEvent(const TouchEvent& event)
     hoverInfo.SetLocalLocation(Offset(localX, localY));
     hoverInfo.SetGlobalLocation(Offset(event.x, event.y));
     hoverInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
+    hoverInfo.SetGlobalDisplayLocation(Offset(event.globalDisplayX, event.globalDisplayY));
     hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
     // onPenHoverMoveEventCallback_ may be overwritten in its invoke so we copy it first
     auto onPenHoverMoveEventCallback = onPenHoverMoveEventCallback_;
@@ -140,6 +142,7 @@ void HoverEventTarget::HandleAccessibilityHoverEvent(bool isHovered, const Touch
     hoverInfo.SetLocalLocation(Offset(localX, localY));
     hoverInfo.SetGlobalLocation(Offset(event.x, event.y));
     hoverInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
+    hoverInfo.SetGlobalDisplayLocation(Offset(event.globalDisplayX, event.globalDisplayY));
     hoverInfo.SetActionType(ConvertAccessibilityHoverAction(event.type));
     hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
     // onAccessibilityHoverCallback_ may be overwritten in its invoke so we copy it first
@@ -186,11 +189,14 @@ bool MouseEventTarget::HandleMouseEvent(const MouseEvent& event)
     info.SetPullAction(event.pullAction);
     info.SetGlobalLocation(event.GetOffset());
     NG::PointF localPoint(event.x, event.y);
-    NG::NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+    bool needPostEvent = isPostEventResult_ || event.passThrough;
+    NG::NGGestureRecognizer::Transform(
+        localPoint, GetAttachedNode(), false, needPostEvent, event.postEventNodeId);
     auto localX = static_cast<float>(localPoint.GetX());
     auto localY = static_cast<float>(localPoint.GetY());
     info.SetLocalLocation(Offset(localX, localY));
     info.SetScreenLocation(event.GetScreenOffset());
+    info.SetGlobalDisplayLocation(event.GetGlobalDisplayOffset());
     info.SetTimeStamp(event.time);
     info.SetDeviceId(event.deviceId);
     info.SetTargetDisplayId(event.targetDisplayId);
@@ -226,6 +232,8 @@ MouseEvent MouseEvent::operator-(const Offset& offset) const
     mouseEvent.scrollZ = scrollZ;
     mouseEvent.screenX = screenX - offset.GetX();
     mouseEvent.screenY = screenY - offset.GetY();
+    mouseEvent.globalDisplayX = globalDisplayX - offset.GetX();
+    mouseEvent.globalDisplayY = globalDisplayY - offset.GetY();
     mouseEvent.action = action;
     mouseEvent.button = button;
     mouseEvent.pressedButtons = pressedButtons;

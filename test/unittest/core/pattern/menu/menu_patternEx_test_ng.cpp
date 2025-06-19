@@ -1887,15 +1887,19 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg042, TestSize.Level1)
     menuPattern->type_ = MenuType::CONTEXT_MENU;
     auto menuItemPattern = child->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
-    auto testInfo = menuPattern->GetMenuItemInfo(child, false);
+    RefPtr<FrameNode> subMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(2, "", TYPE); });
+    ASSERT_NE(subMenuNode, nullptr);
+    auto testInfo = menuPattern->GetMenuItemInfo(child, subMenuNode, false);
     EXPECT_FALSE(testInfo.isFindTargetId);
     menuItemPattern->SetClickMenuItemId(child->GetId());
-    testInfo = menuPattern->GetMenuItemInfo(child, false);
+    testInfo = menuPattern->GetMenuItemInfo(child, subMenuNode, false);
     EXPECT_TRUE(testInfo.isFindTargetId);
-    testInfo = menuPattern->GetMenuItemInfo(child, true);
+    testInfo = menuPattern->GetMenuItemInfo(child, subMenuNode, true);
     EXPECT_TRUE(testInfo.isFindTargetId);
 
-    testInfo = menuPattern->GetMenuItemInfo(menuNode, false);
+    testInfo = menuPattern->GetMenuItemInfo(menuNode, subMenuNode, false);
     EXPECT_FALSE(testInfo.isFindTargetId);
 }
 /**
@@ -1915,12 +1919,17 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg043, TestSize.Level1)
     child->MountToParent(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     menuPattern->type_ = MenuType::CONTEXT_MENU;
-    auto testInfo = menuPattern->GetInnerMenuOffset(child, false);
+
+    RefPtr<FrameNode> subMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(2, "", TYPE); });
+    ASSERT_NE(subMenuNode, nullptr);
+    auto testInfo = menuPattern->GetInnerMenuOffset(child, subMenuNode, false);
     EXPECT_FALSE(testInfo.isFindTargetId);
     /**
      * @tc.steps: step1+. test GetInnerMenuOffset and isNeedRestoreNodeId if true;
      */
-    testInfo = menuPattern->GetInnerMenuOffset(child, true);
+    testInfo = menuPattern->GetInnerMenuOffset(child, subMenuNode, true);
     EXPECT_FALSE(testInfo.isFindTargetId);
     /**
      * @tc.steps: step2. Create menuitemgroup node and isNeedRestoreNodeId if false;
@@ -1934,12 +1943,12 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg043, TestSize.Level1)
     itemchildOne->MountToParent(menuitemgroupNode);
     itemchildTwo->MountToParent(menuitemgroupNode);
     menuPattern = menuNode->GetPattern<MenuPattern>();
-    testInfo = menuPattern->GetInnerMenuOffset(menuitemgroupNode, false);
+    testInfo = menuPattern->GetInnerMenuOffset(menuitemgroupNode, subMenuNode, false);
     EXPECT_FALSE(testInfo.isFindTargetId);
     /**
      * @tc.steps: step2. Create menuitemgroup node and isNeedRestoreNodeId if true;
      */
-    testInfo = menuPattern->GetInnerMenuOffset(menuitemgroupNode, true);
+    testInfo = menuPattern->GetInnerMenuOffset(menuitemgroupNode, subMenuNode, true);
     EXPECT_EQ(testInfo.originOffset, OffsetF(0.0, 0.0));
     EXPECT_FALSE(testInfo.isFindTargetId);
 }
@@ -1965,6 +1974,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg044, TestSize.Level1)
     MneuModelInstance.SetItemDivider(ITEM_DIVIDER, DividerMode::FLOATING_ABOVE_MENU);
     MneuModelInstance.SetItemGroupDivider(ITEM_DIVIDER, DividerMode::FLOATING_ABOVE_MENU);
     MneuModelInstance.SetExpandingMode(SubMenuExpandingMode::STACK);
+    MneuModelInstance.SetExpandSymbol([](WeakPtr<NG::FrameNode> weakPtr) {});
 
     auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menuNode, nullptr);
@@ -1987,6 +1997,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg044, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
     ASSERT_TRUE(layoutProperty->GetItalicFontStyle().has_value());
     EXPECT_EQ(layoutProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+    EXPECT_NE(layoutProperty->GetExpandSymbol(), nullptr);
 }
 
 /**
@@ -2015,6 +2026,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg045, TestSize.Level1)
     MneuModelInstance.SetItemDivider(frameNode, ITEM_DIVIDER, DividerMode::FLOATING_ABOVE_MENU);
     MneuModelInstance.SetItemGroupDivider(frameNode, ITEM_DIVIDER, DividerMode::FLOATING_ABOVE_MENU);
     MneuModelInstance.ResetBorderRadius(frameNode);
+    MneuModelInstance.SetExpandSymbol(frameNode, [](WeakPtr<NG::FrameNode> weakPtr) {});
 
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
@@ -2032,6 +2044,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg045, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetFontColor().value(), Color::RED);
     ASSERT_TRUE(layoutProperty->GetItalicFontStyle().has_value());
     EXPECT_EQ(layoutProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+    EXPECT_NE(layoutProperty->GetExpandSymbol(), nullptr);
 
     MneuModelInstance.SetFontColor(frameNode, std::nullopt);
     ASSERT_FALSE(layoutProperty->GetFontColor().has_value());

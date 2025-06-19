@@ -433,7 +433,8 @@ void FfiOHOSAceFrameworkTextEditMenuOptions(CjOnCreateMenu cjOnCreateMenu, CjOnM
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
     ViewAbstract::ParseEditMenuOptions(cjOnCreateMenu, cjOnMenuItemClick, onCreateMenuCallback, onMenuItemClick);
-    TextModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    TextModel::GetInstance()->SetSelectionMenuOptions(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), nullptr);
 }
 
 VectorTextMenuItemHandle FFICJCreateVectorFfiTextMenuItem(int64_t size)

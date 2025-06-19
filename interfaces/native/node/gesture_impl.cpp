@@ -629,6 +629,36 @@ ArkUI_ErrorCode OH_ArkUI_PanGesture_SetDistanceMap(
     return ARKUI_ERROR_CODE_RECOGNIZER_TYPE_NOT_SUPPORTED;
 }
 
+ArkUI_ErrorCode OH_ArkUI_PreventGestureRecognizerBegin(ArkUI_GestureRecognizer* recognizer)
+{
+    if (!recognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+
+    auto* gestureRecognizer = reinterpret_cast<ArkUIGestureRecognizer*>(recognizer);
+    if (!gestureRecognizer) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto result = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->setPreventBegin(
+        gestureRecognizer);
+    return static_cast<ArkUI_ErrorCode>(result);
+}
+
+ArkUI_ErrorCode OH_ArkUI_SetTouchTestDoneCallback(ArkUI_NodeHandle node, void* userData,
+    void (*touchTestDone)(
+        ArkUI_GestureEvent* event, ArkUI_GestureRecognizerHandleArray recognizers, int32_t count, void* userData))
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !node) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto callback = reinterpret_cast<void (*)(ArkUIGestureEvent* event, ArkUIGestureRecognizerHandleArray recognizers,
+        int32_t count, void* userData)>(touchTestDone);
+    auto result = impl->getNodeModifiers()->getCommonModifier()->setOnTouchTestDoneCallback(
+        node->uiNodeHandle, userData, callback);
+    return static_cast<ArkUI_ErrorCode>(result);
+}
+
 ArkUI_ErrorCode OH_ArkUI_PanGesture_GetDistanceByToolType(
     ArkUI_GestureRecognizer* recognizer, int toolType, double* distance)
 {

@@ -212,6 +212,10 @@ const h2 = 'arkui_color_mode_locked';
 const i2 = 'arkui_button_right_offset_change';
 const k2 = 'arkui_button_icon_size_change';
 const p2 = 'arkui_button_background_corner_radius_change';
+const PC_TITLE_BAR_MAXIMIZE = 'pc_title_bar_maximize';
+const PC_TITLE_BAR_MINIMIZE = 'pc_title_bar_minimize';
+const PC_TITLE_BAR_RESTORE = 'pc_title_bar_restore';
+const PC_TITLE_BAR_CLOSE = 'pc_title_bar_close';
 const j2 = {
     bundleName: '',
     moduleName: '',
@@ -352,6 +356,10 @@ class c3 extends ViewPU {
         this.z3 = new ObservedPropertySimplePU(Visibility.Visible, this, "closeVisibility");
         this.a4 = new ObservedPropertySimplePU(true, this, "closeStatus");
         this.b4 = new ObservedPropertySimplePU(false, this, "isShowMenu");
+        this.__maximizeReadResource = new ObservedPropertySimplePU(PC_TITLE_BAR_MAXIMIZE, this, "maximizeReadResource");
+        this.__maximizeRead = new ObservedPropertySimplePU(this.getStringByResourceToken(PC_TITLE_BAR_MAXIMIZE), this, "maximizeRead");
+        this.__minimizeRead = new ObservedPropertySimplePU(this.getStringByResourceToken(PC_TITLE_BAR_MINIMIZE), this, "minimizeRead");
+        this.__closeRead = new ObservedPropertySimplePU(this.getStringByResourceToken(PC_TITLE_BAR_CLOSE), this, "closeRead");
         this.c4 = new ObservedPropertyObjectPU({
             bundleName: '',
             moduleName: '',
@@ -446,6 +454,18 @@ class c3 extends ViewPU {
         }
         if (params.isShowMenu !== undefined) {
             this.isShowMenu = params.isShowMenu;
+        }
+        if (params.maximizeReadResource !== undefined) {
+            this.maximizeReadResource = params.maximizeReadResource;
+        }
+        if (params.maximizeRead !== undefined) {
+            this.maximizeRead = params.maximizeRead;
+        }
+        if (params.minimizeRead !== undefined) {
+            this.minimizeRead = params.minimizeRead;
+        }
+        if (params.closeRead !== undefined) {
+            this.closeRead = params.closeRead;
         }
         if (params.leftSplitTitle !== undefined) {
             this.leftSplitTitle = params.leftSplitTitle;
@@ -691,6 +711,30 @@ class c3 extends ViewPU {
     set isShowMenu(newValue) {
         this.b4.set(newValue);
     }
+    get maximizeReadResource() {
+        return this.__maximizeReadResource.get();
+    }
+    set maximizeReadResource(newValue) {
+        this.__maximizeReadResource.set(newValue);
+    }
+    get maximizeRead() {
+        return this.__maximizeRead.get();
+    }
+    set maximizeRead(newValue) {
+        this.__maximizeRead.set(newValue);
+    }
+    get minimizeRead() {
+        return this.__minimizeRead.get();
+    }
+    set minimizeRead(newValue) {
+        this.__minimizeRead.set(newValue);
+    }
+    get closeRead() {
+        return this.__closeRead.get();
+    }
+    set closeRead(newValue) {
+        this.__closeRead.set(newValue);
+    }
     get leftSplitTitle() {
         return this.c4.get();
     }
@@ -915,6 +959,14 @@ class c3 extends ViewPU {
         }
         else {
             this.maximizeResource = j2;
+        }
+    }
+    setMaximizeReadIsRecover(isRecover) {
+        if (isRecover) {
+            this.maximizeReadResource = PC_TITLE_BAR_RESTORE;
+        }
+        else {
+            this.maximizeReadResource = PC_TITLE_BAR_MAXIMIZE;
         }
     }
     setMenuWidth(width) {
@@ -1180,6 +1232,10 @@ class c3 extends ViewPU {
                     }
                 });
             });
+            Button.accessibilityText(this.maximizeRead);
+            Button.onAccessibilityHover(() => {
+                this.maximizeRead = this.getStringByResourceToken(this.maximizeReadResource);
+            });
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.maximizeResource);
@@ -1227,6 +1283,10 @@ class c3 extends ViewPU {
                         this.minimizeScale = 1.0;
                     }
                 });
+            });
+            Button.accessibilityText(this.minimizeRead);
+            Button.onAccessibilityHover(() => {
+                this.minimizeRead = this.getStringByResourceToken(PC_TITLE_BAR_MINIMIZE);
             });
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1276,6 +1336,10 @@ class c3 extends ViewPU {
                     }
                 });
             });
+            Button.accessibilityText(this.minimizeRead);
+            Button.onAccessibilityHover(() => {
+                this.minimizeRead = this.getStringByResourceToken(PC_TITLE_BAR_MINIMIZE);
+            });
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.closeResource);
@@ -1289,6 +1353,16 @@ class c3 extends ViewPU {
         Button.pop();
         Row.pop();
         Row.pop();
+    }
+    getStringByResourceToken(f, ...g) {
+        if (f) {
+            try {
+                return getContext(this).resourceManager.getStringByNameSync(f, ...g);
+            } catch (h) {
+                console.error(`Ace SegmentButton getAccessibilityDescription, error: ${h.toString()}`);
+            }
+        }
+        return '';
     }
     rerender() {
         this.updateDirtyElements();

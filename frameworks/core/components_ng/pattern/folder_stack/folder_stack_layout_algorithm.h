@@ -64,6 +64,8 @@ private:
         LayoutWrapper* layoutWrapper);
     void OnHoverStatusChange(LayoutWrapper* layoutWrapper);
     void MeasureByStack(const RefPtr<FolderStackGroupNode>& hostNode, LayoutWrapper* layoutWrapper);
+    void MatchParentWhenChildrenMatch(
+        LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& ControlPartsLayoutWrapper);
     ACE_DISALLOW_COPY_AND_MOVE(FolderStackLayoutAlgorithm);
     float preHoverStackHeight_ = 0.0f;
     float preControlPartsStackHeight_ = 0.0f;

@@ -20,10 +20,10 @@
 
 #include "base/geometry/point.h"
 #include "base/memory/ace_type.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 class DragDropSpringLoadingStateMachine;
-class FrameNode;
 
 struct SpringLoadingParams {
     Point movePoint = Point(0, 0);
@@ -62,9 +62,11 @@ private:
 
     void Intercept(std::string extraInfo);
 
+    void ResetState();
+
     Point preMovePoint_ = Point(0, 0);
     uint64_t preTimeStamp_ = 0;
-    RefPtr<FrameNode> preTargetFrameNode_;
+    RefPtr<FrameNode> preTargetFrameNode_ = nullptr;
     RefPtr<DragDropSpringLoadingStateMachine> stateMachine_;
 };
 } // namespace OHOS::Ace::NG

@@ -487,6 +487,7 @@ constexpr char SCROLLER_FIX_VELOCITY_ANIMATION[] = "SCROLLER_FIX_VELOCITY_ANIMAT
 
 using OnScrollEvent = std::function<void(Dimension, ScrollState)>;
 using OnDidScrollEvent = std::function<void(Dimension, ScrollSource, bool, bool)>;
+using OnScrollerAreaChangeEvent = std::function<void(Dimension, ScrollSource, bool, bool)>;
 using OnWillScrollEvent = std::function<ScrollFrameResult(Dimension, ScrollState, ScrollSource)>;
 using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
 using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;
@@ -496,6 +497,7 @@ using OnReachEvent = std::function<void()>;
 using OnScrollIndexEvent = std::function<void(int32_t, int32_t, int32_t)>;
 using ScrollIndexFunc = std::function<void(int32_t, int32_t)>;
 using OnScrollVisibleContentChangeEvent = std::function<void(ListItemIndex, ListItemIndex)>;
+using OnWillStopDraggingEvent = std::function<void(Dimension)>;
 
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEndCallback = std::function<void()>;
@@ -510,6 +512,7 @@ struct ScrollerObserver {
     OnScrollStartEvent onScrollStartEvent;
     OnScrollStopEvent onScrollStopEvent;
     OnDidScrollEvent onDidScrollEvent;
+    OnScrollerAreaChangeEvent onScrollerAreaChangeEvent;
 };
 } // namespace OHOS::Ace
 

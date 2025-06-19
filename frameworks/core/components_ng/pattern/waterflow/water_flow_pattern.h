@@ -84,6 +84,16 @@ public:
 
     void ResetLayoutInfo();
 
+    bool GetItemStart() const
+    {
+        return layoutInfo_->itemStart_;
+    }
+
+    bool GetItemEnd() const
+    {
+        return layoutInfo_->itemEnd_;
+    }
+
     int32_t GetBeginIndex() const
     {
         return layoutInfo_->startIndex_;
@@ -207,6 +217,12 @@ public:
     }
 
     SizeF GetChildrenExpandedSize() override;
+
+    bool OnAttachAdapter(const RefPtr<FrameNode>& node, const RefPtr<UINode>& child) override
+    {
+        node->AddChild(child);
+        return true;
+    }
 
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override

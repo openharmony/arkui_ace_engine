@@ -86,7 +86,11 @@ public:
     {
         LOGE("OnError callback, errorCode: %{public}d, error message: %{public}s", errorCode, errorMsg.c_str());
         ContainerScope scope(instanceId_);
-        if (errorEvent_) {
+        if (videoErrorEvent_) {
+            auto newCode = OHOS::Media::MSErrorToExtErrorAPI9(static_cast<Media::MediaServiceErrCode>(errorCode));
+            auto newMsg = OHOS::Media::MSExtAVErrorToString(newCode) + errorMsg;
+            videoErrorEvent_(newCode, newMsg);
+        } else if (errorEvent_) {
             errorEvent_();
         }
     }
@@ -176,7 +180,10 @@ public:
         errorEvent_ = std::move(errorEvent);
     }
 
-    virtual void SetErrorEvent(VideoErrorEvent&& errorEvent) {}
+    void SetErrorEvent(VideoErrorEvent&& errorEvent)
+    {
+        videoErrorEvent_ = std::move(errorEvent);
+    }
 
     void SetResolutionChangeEvent(CommonEvent&& resolutionChangeEvent)
     {
@@ -199,43 +206,12 @@ private:
     CommonEvent endOfStreamEvent_;
     StateChangedEvent stateChangedEvent_;
     CommonEvent errorEvent_;
+    VideoErrorEvent videoErrorEvent_;
     CommonEvent resolutionChangeEvent_;
     CommonEvent startRenderFrameEvent_;
     int32_t instanceId_ = -1;
 };
 
-struct VideoMediaPlayerCallback : public MediaPlayerCallback {
-public:
-    using VideoErrorEvent = std::function<void(int32_t code, const std::string& message)>;
-
-    VideoMediaPlayerCallback() = default;
-    explicit VideoMediaPlayerCallback(int32_t instanceId)
-    {
-        instanceId_ = instanceId;
-    }
-
-    ~VideoMediaPlayerCallback() = default;
-
-    // Above api9
-    void OnError(int32_t errorCode, const std::string& errorMsg) override
-    {
-        auto newCode = OHOS::Media::MSErrorToExtErrorAPI9(static_cast<Media::MediaServiceErrCode>(errorCode));
-        auto newMsg = OHOS::Media::MSExtAVErrorToString(newCode) + errorMsg;
-        ContainerScope scope(instanceId_);
-        if (errorEvent_) {
-            errorEvent_(newCode, newMsg);
-        }
-    }
-
-    void SetErrorEvent(VideoErrorEvent&& errorEvent) override
-    {
-        errorEvent_ = std::move(errorEvent);
-    }
-
-private:
-    VideoErrorEvent errorEvent_;
-    int32_t instanceId_ = -1;
-};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_PLAYER_CALLBACK_H

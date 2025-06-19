@@ -152,7 +152,7 @@ void PipelineContext::FlushPipelineWithoutAnimation()
     FlushMessages();
 }
 
-void PipelineContext::FlushMessages()
+void PipelineContext::FlushMessages(std::function<void()> callback)
 {
     ACE_FUNCTION_TRACK();
     if (isFirstPage_) {
@@ -161,7 +161,11 @@ void PipelineContext::FlushMessages()
     }
 #ifdef ENABLE_ROSEN_BACKEND
     if (SystemProperties::GetRosenBackendEnabled() && rsUIDirector_) {
-        rsUIDirector_->SendMessages();
+        if (!callback) {
+            rsUIDirector_->SendMessages();
+        } else {
+            rsUIDirector_->SendMessages(callback);
+        }
     }
 #endif
 }
@@ -1537,7 +1541,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
         return;
     }
     auto scalePoint = point.CreateScalePoint(viewScale_);
-    ResSchedReport::GetInstance().OnTouchEvent(scalePoint);
+    ReportConfig config;
+    ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
     if (scalePoint.type == TouchType::DOWN) {
         eventManager_->HandleOutOfRectCallback(
             { scalePoint.x, scalePoint.y, scalePoint.sourceType }, rectCallbackList_);

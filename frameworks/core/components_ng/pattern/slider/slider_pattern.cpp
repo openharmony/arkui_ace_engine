@@ -186,7 +186,6 @@ void SliderPattern::OnModifyDone()
     AccessibilityVirtualNodeRenderTask();
     InitSliderAccessibilityEnabledRegister();
     InitOrRefreshSlipFactor();
-    InitHapticController();
 }
 
 void SliderPattern::InitSliderEnds()
@@ -257,6 +256,35 @@ void SliderPattern::MountToNavigation(RefPtr<FrameNode>& tipNode)
     }
 }
 
+void SliderPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto sliderTheme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(sliderTheme);
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (!paintProperty->GetBlockColorSetByUser().value_or(false)) {
+        paintProperty->UpdateBlockColor(sliderTheme->GetBlockColor());
+    }
+    if (!paintProperty->GetTrackBackgroundColorSetByUser().value_or(false)) {
+        Gradient defaultValue = SliderModelNG::CreateSolidGradient(sliderTheme->GetTrackBgColor());
+        paintProperty->UpdateTrackBackgroundColor(defaultValue);
+        paintProperty->UpdateTrackBackgroundIsResourceColor(true);
+    }
+    if (!paintProperty->GetSelectColorSetByUser().value_or(false)) {
+        paintProperty->UpdateSelectColor(sliderTheme->GetTrackSelectedColor());
+        paintProperty->UpdateSelectIsResourceColor(true);
+    }
+    host->MarkDirtyNode();
+}
+
 void SliderPattern::CalculateOffset()
 {
     if (sliderTipNode_) {
@@ -303,21 +331,13 @@ void SliderPattern::RemoveTipFromRoot()
     sliderTipNode_ = nullptr;
 }
 
-void SliderPattern::PlayHapticFeedback(bool isShowSteps, float step, float oldValue)
+void SliderPattern::PlayHapticFeedback(bool isShowSteps)
 {
-    if (!isEnableHaptic_ || !hapticApiEnabled) {
+    if (!isEnableHaptic_) {
         return;
     }
-    if (isShowSteps || NearEqual(valueRatio_, 1) || NearEqual(valueRatio_, 0)) {
+    if (isShowSteps) {
         VibratorUtils::StartViratorDirectly(SLIDER_EFFECT_ID_NAME);
-    }
-}
-void SliderPattern::InitHapticController()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        hapticApiEnabled = true;
     }
 }
 
@@ -480,6 +500,15 @@ bool SliderPattern::InitAccessibilityVirtualNode()
     }
     UpdateStepPointsAccessibilityVirtualNodeSelected();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    CHECK_NULL_RETURN(sliderContentModifier_, false);
+    if (sliderContentModifier_) {
+        sliderContentModifier_->SetUpdateAccessibilityCallback([weak = WeakClaim(this)]() {
+            auto sliderPattern = weak.Upgrade();
+            CHECK_NULL_VOID(sliderPattern);
+            sliderPattern->UpdateStepAccessibilityVirtualNode();
+            sliderPattern->UpdateStepPointsAccessibilityVirtualNodeSelected();
+        });
+    }
     return true;
 }
 
@@ -507,16 +536,10 @@ void SliderPattern::ModifyAccessibilityVirtualNode()
     if (pointAccessibilityNodeVec_.empty()) {
         return;
     }
-    AddStepPointsAccessibilityVirtualNode();
     UpdateStepAccessibilityVirtualNode();
-    UpdateParentNodeSize();
-    FrameNode::ProcessOffscreenNode(parentAccessibilityNode_);
+    UpdateStepPointsAccessibilityVirtualNodeSelected();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_VOID(accessibilityProperty);
-    accessibilityProperty->SaveAccessibilityVirtualNode(parentAccessibilityNode_);
-    UpdateStepPointsAccessibilityVirtualNodeSelected();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
@@ -524,9 +547,7 @@ void SliderPattern::AddStepPointsAccessibilityVirtualNode()
 {
     CHECK_NULL_VOID(parentAccessibilityNode_);
     CHECK_NULL_VOID(sliderContentModifier_);
-    while (!parentAccessibilityNode_->GetChildren().empty()) {
-        parentAccessibilityNode_->RemoveChild(parentAccessibilityNode_->GetChildren().back());
-    }
+    parentAccessibilityNode_->GetRenderContext()->ClearChildren();
     pointAccessibilityNodeVec_.clear();
     pointAccessibilityNodeEventVec_.clear();
     for (uint32_t i = 0; i < sliderContentModifier_->GetStepPointVec().size(); i++) {
@@ -629,7 +650,7 @@ void SliderPattern::UpdateStepPointsAccessibilityVirtualNodeSelected()
     auto unSelectedDesc = theme->GetUnselectedDesc();
     auto disabledDesc = theme->GetDisabelDesc();
     uint32_t indexPrefix = 0;
-    uint32_t indexSuffix = pointAccessibilityNodeVec_.size() - STEP_POINT_OFFSET;
+    uint32_t indexSuffix = static_cast<int32_t>(pointAccessibilityNodeVec_.size()) - STEP_POINT_OFFSET;
     for (uint32_t i = 0; i < pointCount; i++) {
         auto isDisabledDesc = false;
         bool isClickAbled = true;
@@ -698,7 +719,7 @@ void SliderPattern::SetStepPointsAccessibilityVirtualNodeEvent(
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->FireChangeEvent(SliderChangeMode::Begin);
-            auto offsetStep = index - pattern->GetCurrentStepIndex();
+            auto offsetStep = pattern->GetOffsetStepIndex(index);
             pattern->MoveStep(offsetStep);
             pattern->FireChangeEvent(SliderChangeMode::End);
             if (pattern->showTips_) {
@@ -728,6 +749,28 @@ uint32_t SliderPattern::GetCurrentStepIndex()
         return 0;
     }
     return static_cast<uint32_t>(std::ceil((currentValue - min) / step));
+}
+
+int32_t SliderPattern::GetOffsetStepIndex(uint32_t index)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_RETURN(sliderPaintProperty, 0);
+    const float step = sliderPaintProperty->GetStep().value_or(1.0f);
+    const float currentValue = sliderPaintProperty->GetValueValue(value_);
+    const double min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
+    if (NearZero(step)) {
+        return 0;
+    }
+    auto stepIndex = static_cast<uint32_t>(std::ceil((currentValue - min) / step));
+    auto diffValue = stepIndex * step + min - currentValue;
+    int32_t offsetStepIndex = index - stepIndex;
+    if (NearZero(diffValue) || offsetStepIndex <= 0) {
+        return offsetStepIndex;
+    } else {
+        return offsetStepIndex + 1;
+    }
 }
 
 SizeF SliderPattern::GetStepPointAccessibilityVirtualNodeSize()
@@ -869,6 +912,76 @@ bool SliderPattern::UpdateParameters()
     borderBlank_ = (length - sliderLength_) * HALF;
 
     return true;
+}
+
+void SliderPattern::UpdateSliderComponentColor(const Color& color, const SliderColorType sliderColorType,
+    const Gradient& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto* pipelineContext = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (sliderColorType) {
+            case SliderColorType::BLOCK_COLOR:
+                paintProperty->UpdateBlockColor(color);
+                break;
+            case SliderColorType::TRACK_COLOR:
+                paintProperty->UpdateTrackBackgroundColor(value);
+                paintProperty->UpdateTrackBackgroundIsResourceColor(true);
+                break;
+            case SliderColorType::SELECT_COLOR:
+                paintProperty->UpdateSelectColor(color);
+                paintProperty->UpdateSelectGradientColor(value);
+                paintProperty->UpdateSelectIsResourceColor(true);
+                break;
+            case SliderColorType::BLOCK_BORDER_COLOR:
+                paintProperty->UpdateBlockBorderColor(color);
+                break;
+            case SliderColorType::STEP_COLOR:
+                paintProperty->UpdateStepColor(color);
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void SliderPattern::UpdateSliderComponentMedia()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        UpdateBlock();
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void SliderPattern::UpdateSliderComponentString(const bool isShowTips, const std::string& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        paintProperty->UpdateShowTips(isShowTips);
+        paintProperty->UpdateCustomContent(value);
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 void SliderPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
@@ -1279,7 +1392,7 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     valueChangeFlag_ = !NearEqual(oldValue, value_);
     bool isShowSteps = sliderPaintProperty->GetShowStepsValue(false);
     if (valueChangeFlag_) {
-        PlayHapticFeedback(isShowSteps, step, oldValue);
+        PlayHapticFeedback(isShowSteps);
     }
     UpdateCircleCenterOffset();
 }
@@ -2293,8 +2406,8 @@ void SliderPattern::UpdateEndsIsShowStepsPosition(
     int32_t noneModePoint = 1;
     int32_t stepModePoint = 0;
     if (!side) {
-        noneModePoint = stepPoints_.size() - NONE_POINT_OFFSET;
-        stepModePoint = stepPoints_.size() - STEP_POINT_OFFSET;
+        noneModePoint = static_cast<int32_t>(stepPoints_.size()) - NONE_POINT_OFFSET;
+        stepModePoint = static_cast<int32_t>(stepPoints_.size()) - STEP_POINT_OFFSET;
     }
 
     if (stepPoints_.size() < 1) {
@@ -2405,7 +2518,6 @@ void SliderPattern::UpdateValue(float value)
 void SliderPattern::OnAttachToFrameNode()
 {
     RegisterVisibleAreaChange();
-    InitHapticController();
 }
 
 void SliderPattern::StartAnimation()

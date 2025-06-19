@@ -56,6 +56,10 @@ class ACE_FORCE_EXPORT UIEventObserver {
 public:
     virtual ~UIEventObserver() = default;
     virtual void NotifyUIEvent(int32_t eventType, const std::unordered_map<std::string, std::string>& eventParams) = 0;
+
+    virtual void NotifyUIEvent(
+        int32_t eventType, const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams)
+    {}
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_EVENT_OBSERVER_H

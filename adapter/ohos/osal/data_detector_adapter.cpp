@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#include "base/utils/utf_helper.h"
 #include "core/common/ai/data_detector_adapter.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
+#include "base/utils/utf_helper.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/ai/data_url_analyzer_mgr.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -30,6 +31,8 @@ constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
 constexpr uint8_t URL_DETECT_FINISH = (1 << 0);
 constexpr uint8_t OTHER_DETECT_FINISH = (1 << 1);
 constexpr uint8_t ALL_DETECT_FINISH = URL_DETECT_FINISH | OTHER_DETECT_FINISH;
+const std::string URL_HTTP = "http://";
+const std::string URL_HTTPS = "https://";
 
 const std::string ALL_TEXT_DETECT_TYPES = "phoneNum,url,email,location,datetime";
 const std::string TEXT_DETECT_TYPES_WITHOUT_URL = "phoneNum,email,location,datetime";
@@ -44,6 +47,21 @@ const std::unordered_map<std::string, TextDataDetectType> TEXT_DETECT_MAP_REVERS
     { "email", TextDataDetectType::EMAIL }, { "location", TextDataDetectType::ADDRESS },
     { "datetime", TextDataDetectType::DATE_TIME }
 };
+
+bool checkWebUrlType(const std::string& type)
+{
+    return std::regex_match(type, std::regex("^http(s)?:\\/\\/.+", std::regex_constants::icase));
+}
+
+bool checkHttpType(const std::string& type)
+{
+    return std::regex_match(type, std::regex("^http:\\/\\/.+", std::regex_constants::icase));
+}
+
+bool checkHttpsType(const std::string& type)
+{
+    return std::regex_match(type, std::regex("^https:\\/\\/.+", std::regex_constants::icase));
+}
 
 void DataDetectorAdapter::GetAIEntityMenu()
 {
@@ -61,8 +79,23 @@ void DataDetectorAdapter::GetAIEntityMenu()
         "ArkUITextInitDataDetect", PriorityType::VIP);
 }
 
-bool DataDetectorAdapter::ShowAIEntityMenu(const AISpan& aiSpan, const NG::RectF& aiRect,
-    const RefPtr<NG::FrameNode>& targetNode, bool isShowCopy, bool isShowSelectText)
+bool DataDetectorAdapter::ShowAIEntityMenu(
+    const AISpan& aiSpan, const NG::RectF& aiRect, const RefPtr<NG::FrameNode>& targetNode, AIMenuInfo info)
+{
+    std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
+    if (!GetAiEntityMenuOptions(aiSpan, targetNode, info, menuOptions)) {
+        return false;
+    }
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    return overlayManager->ShowAIEntityMenu(menuOptions, aiRect, targetNode);
+}
+
+bool DataDetectorAdapter::GetAiEntityMenuOptions(const AISpan& aiSpan, const RefPtr<NG::FrameNode>& targetNode,
+    AIMenuInfo info, std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
+    const std::function<void()>& onMenuDisappear)
 {
     if (textDetectResult_.menuOptionAndAction.empty()) {
         TAG_LOGW(AceLogTag::ACE_TEXT, "menu option is empty, please try again");
@@ -71,74 +104,115 @@ bool DataDetectorAdapter::ShowAIEntityMenu(const AISpan& aiSpan, const NG::RectF
     }
 
     mainContainerId_ = Container::CurrentId();
-    std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
     auto menuOptionAndAction = textDetectResult_.menuOptionAndAction[TEXT_DETECT_MAP.at(aiSpan.type)];
     if (menuOptionAndAction.empty()) {
         return false;
     }
-    if (!isShowSelectText) {
+    if (!info.isShowSelectText) {
         // delete the last option: selectText.
         menuOptionAndAction.pop_back();
-        if (!isShowCopy) {
-        // delete the last option: copy.
+        if (!info.isShowCopy) {
+            // delete the last option: copy.
             menuOptionAndAction.pop_back();
         }
     }
 
+    auto index = -1;
     for (auto menuOption : menuOptionAndAction) {
+        ++index;
         std::function<void()> onClickEvent = [aiSpan, menuOption, weak = AceType::WeakClaim(this),
-                                                 targetNodeWeak = AceType::WeakClaim(AceType::RawPtr(targetNode))]() {
+                                                 targetNodeWeak = AceType::WeakClaim(AceType::RawPtr(targetNode)),
+                                                 func = onMenuDisappear, mainId = Container::CurrentIdSafelyWithCheck(),
+                                                 index]() {
+            ContainerScope scope(mainId);
             auto dataDetectorAdapter = weak.Upgrade();
             CHECK_NULL_VOID(dataDetectorAdapter);
             auto targetNode = targetNodeWeak.Upgrade();
             CHECK_NULL_VOID(targetNode);
-            dataDetectorAdapter->OnClickAIMenuOption(aiSpan, menuOption, targetNode);
+            dataDetectorAdapter->OnClickAIMenuOption(aiSpan, menuOption, targetNode, func, index == 0);
         };
         menuOptions.push_back(std::make_pair(menuOption.first, onClickEvent));
     }
-    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(pipeline, false);
+    return true;
+}
+
+RefPtr<NG::FrameNode> DataDetectorAdapter::CreateAIEntityMenu(const AISpan& aiSpan,
+    const RefPtr<NG::FrameNode>& targetNode, AIMenuInfo info, const std::function<void()>& onMenuDisappear)
+{
+    std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
+    if (!GetAiEntityMenuOptions(aiSpan, targetNode, info, menuOptions, onMenuDisappear)) {
+        return nullptr;
+    }
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, nullptr);
     auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_RETURN(overlayManager, false);
-    return overlayManager->ShowAIEntityMenu(menuOptions, aiRect, targetNode);
+    CHECK_NULL_RETURN(overlayManager, nullptr);
+    auto theme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(theme, nullptr);
+    auto name = theme->GetAiMenuPreviewOptionName(aiSpan.type);
+    if (!menuOptions.empty() && !name.empty()) {
+        auto& option = menuOptions.front();
+        option.first = name;
+    }
+    auto menuNode = overlayManager->BuildAIEntityMenu(menuOptions);
+    CHECK_NULL_RETURN(menuNode, nullptr);
+    return menuNode;
 }
 
 void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
-    const std::pair<std::string, FuncVariant>& menuOption, const RefPtr<NG::FrameNode>& targetNode)
+    const std::pair<std::string, FuncVariant>& menuOption, const RefPtr<NG::FrameNode>& targetNode,
+    const std::function<void()>& onMenuDisappear, bool isFirst)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT, "Click AI menu option: %{public}s", menuOption.first.c_str());
-    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    if (targetNode) {
+    if (targetNode && !onMenuDisappear) {
         overlayManager->CloseAIEntityMenu(targetNode->GetId());
     }
     if (mainContainerId_ == -1) {
         mainContainerId_ = Container::CurrentId();
     }
     Container::UpdateCurrent(mainContainerId_);
-
     auto runtimeContext = Platform::AceContainer::GetRuntimeContext(pipeline->GetInstanceId());
     CHECK_NULL_VOID(runtimeContext);
     auto token = runtimeContext->GetToken();
     auto bundleName = runtimeContext->GetBundleName();
-
     hasClickedMenuOption_ = true;
-    if (onClickMenu_ && std::holds_alternative<std::function<std::string()>>(menuOption.second)) {
-        onClickMenu_(std::get<std::function<std::string()>>(menuOption.second)());
-    } else if (std::holds_alternative<std::function<void(sptr<IRemoteObject>, std::string)>>(menuOption.second)) {
-        std::get<std::function<void(sptr<IRemoteObject>, std::string)>>(menuOption.second)(token, aiSpan.content);
-    } else if (std::holds_alternative<std::function<void(int32_t, std::string)>>(menuOption.second)) {
-        std::get<std::function<void(int32_t, std::string)>>(menuOption.second)(mainContainerId_, aiSpan.content);
-    } else if (std::holds_alternative<std::function<void(int32_t, std::string, std::string, int32_t, std::string)>>(
-                   menuOption.second)) {
-        std::get<std::function<void(int32_t, std::string, std::string, int32_t, std::string)>>(menuOption.second)(
-            mainContainerId_, UtfUtils::Str16DebugToStr8(textForAI_), bundleName, aiSpan.start, aiSpan.content);
-        TAG_LOGI(AceLogTag::ACE_TEXT, "textForAI:%{public}d, start:%{public}d, aiSpan.length:%{public}d",
-            static_cast<int32_t>(textForAI_.length()), aiSpan.start, static_cast<int32_t>(aiSpan.content.length()));
+    if (isFirst && onMenuDisappear && aiSpan.type == TextDataDetectType::URL) {
+        std::string url = aiSpan.content;
+        if (!checkWebUrlType(url)) {
+            url = "https://" + url;
+        } else if (checkHttpType(url) && url.length() > URL_HTTP.length()) {
+            url.replace(0, URL_HTTP.length(), URL_HTTP);
+        } else if (checkHttpsType(url) && url.length() > URL_HTTPS.length()) {
+            url.replace(0, URL_HTTPS.length(), URL_HTTPS);
+        }
+        auto fontManager = pipeline->GetFontManager();
+        if (fontManager) {
+            fontManager->StartAbilityOnJumpBrowser(url);
+        }
     } else {
-        TAG_LOGW(AceLogTag::ACE_TEXT, "No matching menu option");
+        if (onClickMenu_ && std::holds_alternative<std::function<std::string()>>(menuOption.second)) {
+            onClickMenu_(std::get<std::function<std::string()>>(menuOption.second)());
+        } else if (std::holds_alternative<std::function<void(sptr<IRemoteObject>, std::string)>>(menuOption.second)) {
+            std::get<std::function<void(sptr<IRemoteObject>, std::string)>>(menuOption.second)(token, aiSpan.content);
+        } else if (std::holds_alternative<std::function<void(int32_t, std::string)>>(menuOption.second)) {
+            std::get<std::function<void(int32_t, std::string)>>(menuOption.second)(mainContainerId_, aiSpan.content);
+        } else if (std::holds_alternative<std::function<void(int32_t, std::string, std::string, int32_t, std::string)>>(
+                    menuOption.second)) {
+            std::get<std::function<void(int32_t, std::string, std::string, int32_t, std::string)>>(menuOption.second)(
+                mainContainerId_, UtfUtils::Str16DebugToStr8(textForAI_), bundleName, aiSpan.start, aiSpan.content);
+            TAG_LOGI(AceLogTag::ACE_TEXT, "textForAI:%{public}d, start:%{public}d, aiSpan.length:%{public}d",
+                static_cast<int32_t>(textForAI_.length()), aiSpan.start, static_cast<int32_t>(aiSpan.content.length()));
+        } else {
+            TAG_LOGW(AceLogTag::ACE_TEXT, "No matching menu option");
+        }
+    }
+    if (onMenuDisappear) {
+        onMenuDisappear();
     }
     hasClickedMenuOption_ = false;
 }

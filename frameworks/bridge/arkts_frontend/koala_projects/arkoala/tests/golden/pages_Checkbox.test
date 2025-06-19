@@ -1,0 +1,47 @@
+{
+  "rootElement": {
+    "nodeId": 1082,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1083,
+        "kind": "Checkbox",
+        "children": [],
+        "setCheckboxOptions_options": {
+          "name": "checkbox1",
+          "group": "checkboxGroup"
+        },
+        "select_value": 1,
+        "selectedColor_value": 15560481,
+        "shape_value": 1,
+        "unselectedColor_value": "#ff000000",
+        "mark_value": {
+          "strokeColor": "#ff182431",
+          "size": 17,
+          "strokeWidth": "5px"
+        },
+        "width_value": 30,
+        "height_value": 30
+      },
+      {
+        "nodeId": 1084,
+        "kind": "Checkbox",
+        "children": [],
+        "setCheckboxOptions_options": {
+          "name": "checkbox2",
+          "group": "checkboxGroup"
+        },
+        "select_value": 0,
+        "selectedColor_value": 3777243,
+        "shape_value": 0,
+        "mark_value": {
+          "strokeColor": "#ff182431",
+          "size": 17,
+          "strokeWidth": "5px"
+        },
+        "width_value": 30,
+        "height_value": 30
+      }
+    ]
+  }
+}

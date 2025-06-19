@@ -34,6 +34,7 @@ build_component_ng("render_ng") {
     "adapter/svg_canvas_image.cpp",
     "adapter/txt_font_collection.cpp",
     "adapter/txt_paragraph.cpp",
+    "adapter/txt_text_effect.cpp",
     "border_image_painter.cpp",
     "circle_painter.cpp",
     "debug_boundary_painter.cpp",

@@ -25,7 +25,7 @@ struct drawingLatticeTest {
   private yDivs: Array<number> = [1, 2, 200];
   private fXCount: number = 3;
   private fYCount: number = 3;
-  private DrawingLatticeFirst: DrawingLattice =
+  private drawingLatticeFirst: DrawingLattice =
     drawing.Lattice.createImageLattice(this.xDivs, this.yDivs, this.fXCount, this.fYCount);
 
   build() {
@@ -44,7 +44,7 @@ struct drawingLatticeTest {
             .width(260)
             .height(260)
             .resizable({
-              lattice: this.DrawingLatticeFirst
+              lattice: this.drawingLatticeFirst
             })
         }.width('100%')
       }.width('100%')

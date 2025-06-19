@@ -441,7 +441,7 @@ void LinearSplitLayoutAlgorithm::ColumnSplitChildConstrain(
 std::pair<float, float> LinearSplitLayoutAlgorithm::GetDividerMargin(LayoutWrapper* layoutWrapper)
 {
     auto listLayoutProperty = AceType::DynamicCast<LinearSplitLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    ItemDivider divider;
+    ColumnSplitDivider divider;
     if (listLayoutProperty->HasDivider()) {
         divider = listLayoutProperty->GetDivider().value();
     }

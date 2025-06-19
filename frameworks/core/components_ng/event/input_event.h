@@ -120,6 +120,16 @@ public:
         istips_ = istips;
     }
 
+    bool GetTipsFollowCursor() const
+    {
+        return followCursor_;
+    }
+
+    void SetTipsFollowCursor(bool followCursor)
+    {
+        followCursor_ = followCursor;
+    }
+
 private:
     OnMouseEventFunc onMouseCallback_;
     OnHoverEventFunc onHoverCallback_;
@@ -128,6 +138,7 @@ private:
     OnAxisEventFunc onAxisCallback_;
     OnAccessibilityHoverFunc onAccessibilityHoverFunc_;
     bool istips_ = false;
+    bool followCursor_ = false;
 };
 
 class ACE_EXPORT InputEventActuator : public virtual AceType {
@@ -235,6 +246,9 @@ public:
 
     void OnCollectMouseEvent(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result);
+
+    void OnCollectMouseEventForTips(
+        const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result);
 
     void OnCollectHoverEvent(
         const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result);

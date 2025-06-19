@@ -32,11 +32,21 @@ struct CJNavDestinationContext {
 };
 
 struct CJNavigationTitleOptions {
+    // backgroundColor
+    bool isBackgroundColorValid;
     uint32_t backgroundColor;
+    // backgroundBlurStyle
+    bool isBackgroundBlurStyleValid;
     int32_t backgroundBlurStyle;
+    // barStyle
+    bool isBarStyleValid;
     int32_t barStyle;
+    // paddingStart
+    bool isPaddingStartValid;
     double paddingStart;
     int32_t paddingStartUnit;
+    // paddingEnd
+    bool isPaddingEndValid;
     double paddingEnd;
     int32_t paddingEndUnit;
 };

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include <shared_mutex>
-#include "core/components_ng/image_provider/adapter/image_decoder.h"
+#include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 
 namespace OHOS::Ace::NG {

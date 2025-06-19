@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_info.h"
+
 #include <climits>
 
 #include "base/log/dump_log.h"
@@ -24,7 +25,7 @@ void LazyGridLayoutInfo::EstimateItemSize()
 {
     if (!posMap_.empty()) {
         float totalSize = posMap_.rbegin()->second.endPos + spaceWidth_ - posMap_.begin()->second.startPos;
-        int32_t totalCount = (posMap_.size() + lanes_ - 1) / lanes_;
+        int32_t totalCount = (static_cast<int32_t>(posMap_.size()) + lanes_ - 1) / lanes_;
         estimateItemSize_ = totalSize / totalCount - spaceWidth_;
     }
 }

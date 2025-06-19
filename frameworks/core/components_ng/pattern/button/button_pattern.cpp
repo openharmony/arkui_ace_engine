@@ -397,6 +397,174 @@ void ButtonPattern::UpdateTextLayoutProperty(
     UpdateTextStyle(layoutProperty, textLayoutProperty);
 }
 
+void ButtonPattern::UpdateComponentColor(const Color& color, const ButtonColorType buttonColorType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (buttonColorType) {
+            case ButtonColorType::FONT_COLOR:
+                layoutProperty->UpdateFontColor(color);
+                textRenderContext->UpdateForegroundColor(color);
+                textNode->MarkModifyDone();
+                textNode->MarkDirtyNode(PROPERTY_UPDATE_NORMAL);
+                break;
+            case ButtonColorType::BACKGROUND_COLOR:
+                renderContext->UpdateBackgroundColor(color);
+                break;
+            default:
+                break;
+        }
+    }
+
+    if (host->GetRerenderable()) {
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void ButtonPattern::UpdateComponentString(const std::string& value, const ButtonStringType buttonStringType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (buttonStringType) {
+            case ButtonStringType::LABEL:
+                textLayoutProperty->UpdateContent(value);
+                break;
+            default:
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void ButtonPattern::UpdateComponentFamilies(const std::vector<std::string>& value,
+    const ButtonStringType buttonStringType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (buttonStringType) {
+            case ButtonStringType::FONT_FAMILY:
+                textLayoutProperty->UpdateFontFamily(value);
+                break;
+            default:
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void ButtonPattern::UpdateComponentDimension(const CalcDimension value, const ButtonDimensionType buttonDimensionType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (buttonDimensionType) {
+            case ButtonDimensionType::MIN_FONT_SIZE:
+                textLayoutProperty->UpdateAdaptMinFontSize(value);
+                break;
+            case ButtonDimensionType::MAX_FONT_SIZE:
+                textLayoutProperty->UpdateAdaptMaxFontSize(value);
+                break;
+            default:
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void ButtonPattern::UpdateComponentDouble(const double value, const ButtonDoubleType buttonDoubleType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (buttonDoubleType) {
+            case ButtonDoubleType::MIN_FONT_SCALE:
+                textLayoutProperty->UpdateMinFontScale(value);
+                break;
+            case ButtonDoubleType::MAX_FONT_SCALE:
+                textLayoutProperty->UpdateMaxFontScale(value);
+                break;
+            default:
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+std::string ButtonPattern::VectorToString(const std::vector<std::string>& vec, const std::string& delimiter)
+{
+    std::ostringstream oss;
+    for (size_t i = 0; i < vec.size(); ++i) {
+        if (i != 0)
+            oss << delimiter;
+        oss << vec[i];
+    }
+    return oss.str();
+}
+
+std::vector<std::string> ButtonPattern::StringToVector(const std::string& str, char delimiter)
+{
+    std::vector<std::string> result;
+    std::stringstream ss(str);
+    std::string item;
+    while (std::getline(ss, item, delimiter)) {
+        result.push_back(item);
+    }
+    return result;
+}
+
 void ButtonPattern::UpdateTextStyle(
     RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<TextLayoutProperty>& textLayoutProperty)
 {

@@ -632,6 +632,15 @@ bool ParagraphManager::IsSelectLineHeadAndUseLeadingMargin(int32_t start) const
     return false;
 }
 
+void ParagraphManager::LayoutParagraphs(float maxWidth)
+{
+    for (auto&& info : paragraphs_) {
+        auto paragraph = info.paragraph;
+        CHECK_NULL_CONTINUE(paragraph);
+        paragraph->Layout(maxWidth);
+    }
+}
+
 std::vector<RectF> ParagraphManager::GetPlaceholderRects() const
 {
     std::vector<RectF> res;

@@ -32,7 +32,7 @@ std::string TextAccessibilityProperty::GetText() const
         }
         return value;
     }
-    auto children = frameNode->GetChildren();
+    auto children = GetChildren(frameNode);
     if (children.empty()) {
         auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textLayoutProperty, value);
@@ -42,6 +42,11 @@ std::string TextAccessibilityProperty::GetText() const
         value = UtfUtils::Str16DebugToStr8(textPattern->GetTextForDisplay());
     }
     return value;
+}
+
+const std::list<RefPtr<UINode>>& TextAccessibilityProperty::GetChildren(const RefPtr<FrameNode>& host) const
+{
+    return host->GetChildren();
 }
 
 bool TextAccessibilityProperty::IsSelected() const

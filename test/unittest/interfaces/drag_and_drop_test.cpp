@@ -20,6 +20,7 @@
 #define protected public
 #include "drag_and_drop.h"
 #include "event_converter.h"
+#include "udmf.h"
 #include "native_interface.h"
 #include "native_node.h"
 #include "native_type.h"
@@ -41,6 +42,8 @@ const float PREVIEW_RECT_WIDTH = 1.0f;
 const float PREVIEW_RECT_HEIGHT = 1.0f;
 const float DISPLAY_X = 1.0f;
 const float DISPLAY_Y = 1.0f;
+const float GLOBAL_DISPLAY_X = 1.0f;
+const float GLOBAL_DISPLAY_Y = 1.0f;
 const float VELOCITY_X = 1.0f;
 const float VELOCITY_Y = 1.0f;
 const float VELOCITY = 1.0f;
@@ -1206,5 +1209,239 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0043, TestSize.Level1)
      */
     EXPECT_EQ(ret1, ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(displayId, DISPLAYID);
+}
+
+/**
+ * @tc.name: DragAndDropTest0044
+ * @tc.desc: Test the OH_ArkUI_DragEvent_GetDragSource.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0044, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create DragEvent
+     */
+    char bundleNameError[10];
+    int32_t lengthError = 10;
+    ArkUIDragEvent dragEvent;
+    char dragEventBundleName[] = "com.example.tdd";
+    dragEvent.bundleName = dragEventBundleName;
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+
+    /**
+     * @tc.steps: step2.set bundleNameError length shorter than dragEventBundleName, related function is called.
+     */
+    auto ret1 = OH_ArkUI_DragEvent_GetDragSource(drag_Event, bundleNameError, lengthError);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step3.set ArkUI_DragEvent null, related function is called.
+     */
+    char bundleName[200];
+    int32_t length = 200;
+    auto ret2 = OH_ArkUI_DragEvent_GetDragSource(nullptr, bundleNameError, lengthError);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step3.set bundleName null, related function is called.
+     */
+    auto ret3 = OH_ArkUI_DragEvent_GetDragSource(drag_Event, nullptr, length);
+    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step4.set bundleName not null, related function is called.
+     */
+    auto ret4 = OH_ArkUI_DragEvent_GetDragSource(drag_Event, bundleName, length);
+    EXPECT_EQ(ret4, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(*bundleName, *dragEventBundleName);
+}
+
+/**
+ * @tc.name: DragAndDropTest0045
+ * @tc.desc: Test the OH_ArkUI_DragEvent_IsRemote.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0045, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create DragEvent
+     */
+    bool isRemote = false;
+    ArkUIDragEvent dragEvent;
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+
+    /**
+     * @tc.steps: step2.set ArkUI_DragEvent null, related function is called.
+     */
+    auto ret1 = OH_ArkUI_DragEvent_IsRemote(nullptr, &isRemote);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step2.set isRemote null, related function is called.
+     */
+    auto ret2 = OH_ArkUI_DragEvent_IsRemote(drag_Event, nullptr);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step3.set isRemote not null, related function is called.
+     */
+    dragEvent.isRemoteDev = true;
+    auto ret3 = OH_ArkUI_DragEvent_IsRemote(drag_Event, &isRemote);
+    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(isRemote, dragEvent.isRemoteDev);
+}
+
+/**
+ * @tc.name: DragAndDropTest0046
+ * @tc.desc: Test the OH_ArkUI_DragAction_SetDataLoadParams.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0046, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create dragAction
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto rootFrameNode = reinterpret_cast<ArkUI_Node*>(rootNode);
+    ASSERT_NE(rootFrameNode, nullptr);
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(rootFrameNode->uiNodeHandle);
+    ASSERT_NE(frameNode, nullptr);
+    auto context = NG::MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(context);
+    auto* dragAction = OH_ArkUI_CreateDragActionWithNode(rootNode);
+    ASSERT_NE(dragAction, nullptr);
+    OH_UdmfDataLoadParams* dataLoadParams = OH_UdmfDataLoadParams_Create();
+
+    /**
+     * @tc.steps: step2.set dragAction null, related function is called.
+     */
+    auto ret1 = OH_ArkUI_DragAction_SetDataLoadParams(nullptr, dataLoadParams);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step3.set dataLoadParams null, related function is called.
+     */
+    auto ret2 = OH_ArkUI_DragAction_SetDataLoadParams(dragAction, nullptr);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step4.set dragAction and dataLoadParams not null, related function is called.
+     */
+    auto ret3 = OH_ArkUI_DragAction_SetDataLoadParams(dragAction, dataLoadParams);
+    OH_UdmfDataLoadParams_Destroy(dataLoadParams);
+    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: DragAndDropTest0047
+ * @tc.desc: Test the OH_ArkUI_DragEvent_SetDataLoadParams.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0047, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create DragEvent, related function is called.
+     */
+    ArkUIDragEvent dragEvent;
+    dragEvent.key = "key_string";
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+    ASSERT_NE(drag_Event, nullptr);
+    OH_UdmfDataLoadParams* dataLoadParams = OH_UdmfDataLoadParams_Create();
+    ASSERT_NE(dataLoadParams, nullptr);
+
+    /**
+     * @tc.steps: step2.set dragAction null, related function is called.
+     */
+    auto ret1 = OH_ArkUI_DragEvent_SetDataLoadParams(nullptr, dataLoadParams);
+    EXPECT_EQ(ret1, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step3.set dataLoadParams null, related function is called.
+     */
+    auto ret2 = OH_ArkUI_DragEvent_SetDataLoadParams(drag_Event, nullptr);
+    EXPECT_EQ(ret2, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step4.set dragAction 、 dataLoadParams not null , related function is called.
+     */
+    OH_UdmfDataLoadInfo* info = OH_UdmfDataLoadInfo_Create();
+    OH_UdmfDataLoadInfo_SetRecordCount(info, 100);
+    OH_UdmfDataLoadParams_SetDataLoadInfo(dataLoadParams, info);
+    auto ret3 = OH_ArkUI_DragEvent_SetDataLoadParams(drag_Event, dataLoadParams);
+    OH_UdmfDataLoadInfo_Destroy(info);
+    OH_UdmfDataLoadParams_Destroy(dataLoadParams);
+    EXPECT_EQ(ret3, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: DragAndDropTest0048
+ * @tc.desc: test set DragEvent property function;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0048, TestSize.Level1)
+{
+    /**
+     *@tc.steps : step1.create and set property.
+     */
+    ArkUIDragEvent dragEvent;
+    dragEvent.windowX = WINDOW_X;
+    dragEvent.windowY = WINDOW_Y;
+    dragEvent.displayX = DISPLAY_X;
+    dragEvent.displayY = DISPLAY_Y;
+    dragEvent.globalDisplayX = static_cast<double>(GLOBAL_DISPLAY_X);
+    dragEvent.globalDisplayY = static_cast<double>(GLOBAL_DISPLAY_Y);
+    dragEvent.touchPointX = TOUCH_POINT_X;
+    dragEvent.touchPointY = TOUCH_POINT_Y;
+
+    dragEvent.previewRectWidth = PREVIEW_RECT_WIDTH;
+    dragEvent.previewRectHeight = PREVIEW_RECT_HEIGHT;
+    dragEvent.velocityX = VELOCITY_X;
+    dragEvent.velocityY = VELOCITY_Y;
+    dragEvent.velocity = VELOCITY;
+    auto* drag_Event = reinterpret_cast<ArkUI_DragEvent*>(&dragEvent);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointXToWindow(drag_Event), WINDOW_X);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointYToWindow(drag_Event), WINDOW_Y);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetPreviewTouchPointX(drag_Event), TOUCH_POINT_X);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetPreviewTouchPointY(drag_Event), TOUCH_POINT_Y);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointXToDisplay(drag_Event), DISPLAY_X);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointYToDisplay(drag_Event), DISPLAY_Y);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointXToGlobalDisplay(drag_Event), GLOBAL_DISPLAY_X);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointYToGlobalDisplay(drag_Event), GLOBAL_DISPLAY_Y);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetPreviewRectWidth(drag_Event), PREVIEW_RECT_WIDTH);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetPreviewRectHeight(drag_Event), PREVIEW_RECT_HEIGHT);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetVelocityX(drag_Event), VELOCITY_X);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetVelocityY(drag_Event), VELOCITY_Y);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetVelocity(drag_Event), VELOCITY);
+}
+
+/**
+ * @tc.name: DragAndDropTest0049
+ * @tc.desc: test set DragEvent property function;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAndDropTest, DragAndDropTest0049, TestSize.Level1)
+{
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointXToWindow(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointYToWindow(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetPreviewTouchPointX(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetPreviewTouchPointY(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointXToDisplay(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointYToDisplay(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointXToGlobalDisplay(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetTouchPointYToGlobalDisplay(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetPreviewRectWidth(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetPreviewRectHeight(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetVelocityX(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetVelocityY(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_DragEvent_GetVelocity(nullptr), 0.0f);
 }
 } // namespace OHOS::Ace

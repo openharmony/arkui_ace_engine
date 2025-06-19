@@ -253,7 +253,9 @@ void SwiperArrowPattern::InitNavigationArrow()
     host->AddChild(buttonNode);
     buttonNode->AddChild(imageNode);
     UpdateArrowContent();
-
+    auto pattern = buttonNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->HandleBackgroundColor();
     auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
     buttonLayoutProperty->UpdateType(ButtonType::CIRCLE);
@@ -359,6 +361,14 @@ void SwiperArrowPattern::ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHove
     }
 }
 
+void SwiperArrowPattern::SetLayoutDisplayCount(int32_t displayCount)
+{
+    if (displayCount_ != displayCount) {
+        displayCount_ = displayCount;
+        SetButtonVisible(isVisible_);
+    }
+}
+
 std::tuple<bool, bool, bool> SwiperArrowPattern::CheckHoverStatus()
 {
     auto host = GetHost();
@@ -370,12 +380,12 @@ std::tuple<bool, bool, bool> SwiperArrowPattern::CheckHoverStatus()
     auto swiperPattern = swiperNode ? swiperNode->GetPattern<SwiperPattern>() : nullptr;
     CHECK_NULL_RETURN(swiperPattern, std::make_tuple(false, false, true));
 
-    auto displayCount = swiperPattern->GetDisplayCount();
+    displayCount_ = swiperPattern->GetDisplayCount();
     bool leftArrowIsHidden = (index_ == 0);
-    bool rightArrowIsHidden = (index_ == swiperPattern->TotalCount() - displayCount);
+    bool rightArrowIsHidden = (index_ == swiperPattern->TotalCount() - displayCount_);
     if (!swiperPattern->IsAutoLinear() && swiperPattern->IsSwipeByGroup()) {
-        leftArrowIsHidden = (index_ < displayCount);
-        rightArrowIsHidden = (index_ >= swiperPattern->TotalCount() - displayCount);
+        leftArrowIsHidden = (index_ < displayCount_);
+        rightArrowIsHidden = (index_ >= swiperPattern->TotalCount() - displayCount_);
     }
     if (swiperPattern->IsHorizontalAndRightToLeft()) {
         std::swap(leftArrowIsHidden, rightArrowIsHidden);
@@ -384,7 +394,7 @@ std::tuple<bool, bool, bool> SwiperArrowPattern::CheckHoverStatus()
     auto isRightArrow = host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG;
     auto isLoop = swiperArrowLayoutProperty->GetLoopValue(true);
     auto needHideArrow = (((isLeftArrow && leftArrowIsHidden) || (isRightArrow && rightArrowIsHidden)) && !isLoop)
-        || (swiperPattern->RealTotalCount() <= displayCount);
+        || (swiperPattern->RealTotalCount() <= displayCount_);
     auto isHoverShow = swiperArrowLayoutProperty->GetHoverShowValue(false);
     auto isHoverNone = swiperPattern->IsHoverNone();
     return std::make_tuple(needHideArrow, isHoverShow, isHoverNone);

@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/menu/menu_divider/menu_divider_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_event_hub.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_row_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
@@ -207,6 +208,9 @@ void CustomMenuItemPattern::OnAttachToFrameNode()
     RegisterOnKeyEvent();
     RegisterOnTouch();
     CreateBottomDivider();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    MenuView::RegisterAccessibilityChildActionNotify(host);
 }
 
 void MenuItemPattern::CreateBottomDivider()
@@ -425,7 +429,7 @@ void MenuItemPattern::SetFocusStyle()
 
     auto paintProperty = GetPaintProperty<MenuItemPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (!paintProperty->HasOptionBgColor() && !paintProperty->HasSelectedOptionBgColor()) {
+    if (!paintProperty->HasOptionBgColor() && !paintProperty->HasSelectedOptionBgColor() && !showDefaultSelectedIcon_) {
         renderContext->UpdateBackgroundColor(selectTheme_->GetOptionFocusedBackgroundColor());
     }
     if (!paintProperty->HasOptionFontColor() && !paintProperty->HasSelectedOptionFontColor()) {
@@ -1426,7 +1430,7 @@ void MenuItemPattern::OnHover(bool isHover)
         props->UpdateHover(isHover);
         UpdateDividerHoverStatus(isHover);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        if (isHover || !IsSelected()) {
+        if ((isHover || !IsSelected()) && !showDefaultSelectedIcon_) {
             UpdateNextNodeDivider(!isHover);
         }
         PlayBgColorAnimation();
@@ -2986,6 +2990,9 @@ void MenuItemPattern::OnPress(const UIState& state)
         props->UpdatePress(true);
         UpdateDividerPressStatus(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        if (isOptionPattern_ && showDefaultSelectedIcon_) {
+            return;
+        }
         // disable next option node's divider
         UpdateNextNodeDivider(false);
     } else if (state == UI_STATE_NORMAL) {
@@ -3215,6 +3222,75 @@ void MenuItemPattern::SetOptionTextModifier(const std::function<void(WeakPtr<NG:
     }
 }
 
+RefPtr<FrameNode> MenuItemPattern::CreateCheckMarkNode(const RefPtr<FrameNode>& parent, uint32_t index)
+{
+    auto checkMarkNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_RETURN(checkMarkNode, nullptr);
+    auto checkLayoutProperty = checkMarkNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(checkLayoutProperty, nullptr);
+    auto pipeline = GetContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(selectTheme, nullptr);
+    checkLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo { selectTheme->GetCheckMarkIconId() });
+    checkLayoutProperty->UpdateSymbolColorList({ selectTheme->GetCheckMarkColor() });
+    checkLayoutProperty->UpdateFontSize(selectTheme->GetCheckMarkFontSize());
+    checkLayoutProperty->UpdateFontWeight(selectTheme->GetCheckMarkFontWeight());
+
+    checkLayoutProperty->UpdateAlignment(Alignment::CENTER_RIGHT);
+
+    checkMarkNode->MountToParent(parent, index);
+    checkMarkNode->MarkModifyDone();
+    return checkMarkNode;
+}
+
+void MenuItemPattern::UpdateCheckMarkColor(const Color& color)
+{
+    CHECK_NULL_VOID(checkMarkNode_);
+    auto checkLayoutProperty = checkMarkNode_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(checkLayoutProperty);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    checkLayoutProperty->UpdateSymbolColorList({ color });
+    checkMarkNode_->MarkModifyDone();
+}
+
+void MenuItemPattern::SetShowDefaultSelectedIcon(bool show)
+{
+    showDefaultSelectedIcon_ = show;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isOptionPattern_ && showDefaultSelectedIcon_ && !endRowNode_) {
+        auto endRow = FrameNode::CreateFrameNode(
+            V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuItemRowPattern>());
+        CHECK_NULL_VOID(endRow);
+        endRow->MountToParent(host);
+        auto rightRowLayoutProps = endRow->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_VOID(rightRowLayoutProps);
+        rightRowLayoutProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+        rightRowLayoutProps->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
+        auto checkMarkNode = CreateCheckMarkNode(endRow, endRow->GetChildren().size());
+        checkMarkNode_ = checkMarkNode;
+        SetCheckMarkVisibleType(isSelected_ ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
+        endRowNode_ = endRow;
+    } else if (isOptionPattern_ && !showDefaultSelectedIcon_) {
+        host->RemoveChild(endRowNode_);
+        checkMarkNode_ = nullptr;
+        endRowNode_ = nullptr;
+    }
+}
+
+void MenuItemPattern::SetCheckMarkVisibleType(VisibleType type)
+{
+    CHECK_NULL_VOID(checkMarkNode_);
+    auto checkMarkLayoutProps = checkMarkNode_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(checkMarkLayoutProps);
+    checkMarkLayoutProps->UpdateVisibility(type);
+}
+
 void MenuItemPattern::SetSelectedOptionTextModifier(
     const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply)
 {
@@ -3304,9 +3380,11 @@ void MenuItemPattern::ApplySelectedThemeStyles()
     auto selectedColor = selectTheme->GetSelectedColor();
     auto selectedBorderColor = selectTheme->GetOptionSelectedBorderColor();
     auto selectedBorderWidth = selectTheme->GetOptionSelectedBorderWidth();
-    SetFontColor(selectedColorText);
     SetFontSize(selectedFontSizeText);
-    SetBgColor(selectedColor);
+    if (!showDefaultSelectedIcon_) {
+        SetFontColor(selectedColorText);
+        SetBgColor(selectedColor);
+    }
     SetBorderColor(selectedBorderColor);
     SetBorderWidth(selectedBorderWidth);
 }
@@ -3327,6 +3405,10 @@ void MenuItemPattern::ApplyOptionThemeStyles()
     SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
     SetBorderColor(GetBorderColor());
     SetBorderWidth(GetBorderWidth());
+    if (IsSelectOption() && showDefaultSelectedIcon_ && !selectTheme->GetMenuBlendBgColor()) {
+        SetBgColor(Color::TRANSPARENT);
+        return;
+    }
     SetBgColor(selectTheme->GetBackgroundColor());
 }
 } // namespace OHOS::Ace::NG

@@ -15,6 +15,7 @@
 
 #include "uv_task_wrapper_impl.h"
 #include "base/utils/time_util.h"
+#include "core/common/container_scope.h"
 
 namespace OHOS::Ace::NG {
 
@@ -41,6 +42,7 @@ bool UVTaskWrapperImpl::WillRunOnCurrentThread()
 void UVTaskWrapperImpl::Call(const TaskExecutor::Task& task)
 {
     napi_send_event(env_, [work = std::make_shared<UVWorkWrapper>(task)] {
+        ContainerScope scope(ContainerScope::CurrentLocalId());
         (*work)();
     }, napi_eprio_high);
 }

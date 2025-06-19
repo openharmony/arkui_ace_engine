@@ -56,6 +56,12 @@ typedef enum {
     ARKUI_NATIVE_GESTURE,
     /** API related to animations. For details, see the struct definition in <arkui/native_animate.h>.*/
     ARKUI_NATIVE_ANIMATE,
+    /**
+     * API related to supported multi thread UI components.
+     * For details, see the struct definition in <arkui/native_node.h>.
+     * @since 20
+     */
+    ARKUI_MULTI_THREAD_NATIVE_NODE,
 } ArkUI_NativeAPIVariantKind;
 
 /**

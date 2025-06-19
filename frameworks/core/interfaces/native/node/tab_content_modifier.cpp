@@ -43,6 +43,9 @@ void SetTabContentLabel(ArkUINodeHandle node, ArkUI_CharPtr label)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabContentModelNG::SetTabBarLabel(frameNode, label);
+
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    TabContentModelNG::CreateTextContentWithResourceObj(frameNode, nullptr);
 }
 
 void SetTabContentOnWillShow(ArkUINodeHandle node, void* callback)

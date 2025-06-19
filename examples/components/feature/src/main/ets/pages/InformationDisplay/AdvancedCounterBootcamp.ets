@@ -101,10 +101,10 @@ export struct AdvancedCounterBootcamp {
   @Builder
   Content() {
     Column() {
-      if (this.counterType == 0) {
+      if (this.counterType == CounterType.LIST) {
         CounterComponent({
           options: {
-            type: useEnabledNumber(this.enableType, this.counterType, 0),
+            type: useEnabledNumber(this.enableType, this.counterType, CounterType.LIST),
             direction: useEnabled(this.enabledDirection, this.counterDirection),
             numberOptions: {
               label: 'Counter',
@@ -134,10 +134,10 @@ export struct AdvancedCounterBootcamp {
             }
           }
         })
-      } else if (this.counterType == 1) {
+      }else if (this.counterType == CounterType.COMPACT) {
         CounterComponent({
           options: {
-            type: useEnabledNumber(this.enableType, this.counterType, 0),
+            type: useEnabledNumber(this.enableType, this.counterType, CounterType.COMPACT),
             direction: useEnabled(this.enabledDirection, this.counterDirection),
             numberOptions: {
               label: 'Counter',
@@ -166,10 +166,10 @@ export struct AdvancedCounterBootcamp {
             }
           }
         })
-      } else if (this.counterType == 2) {
+      } else if (this.counterType == CounterType.INLINE) {
         CounterComponent({
           options: {
-            type: useEnabledNumber(this.enableType, this.counterType, 0),
+            type: useEnabledNumber(this.enableType, this.counterType, CounterType.INLINE),
             direction: useEnabled(this.enabledDirection, this.counterDirection),
             inlineOptions: {
               value: useEnabled(this.enabledValue, this.counterValue),
@@ -190,10 +190,10 @@ export struct AdvancedCounterBootcamp {
             }
           }
         })
-      } else {
+      } else if (this.counterType == CounterType.INLINE_DATE) {
         CounterComponent({
           options: {
-            type: useEnabledNumber(this.enableType, this.counterType, 0),
+            type: useEnabledNumber(this.enableType, this.counterType, CounterType.INLINE_DATE),
             direction: useEnabled(this.enabledDirection, this.counterDirection),
             dateOptions: {
               year: useEnabled(this.enabledYear, this.counterYear),
@@ -225,10 +225,10 @@ export struct AdvancedCounterBootcamp {
           isEnabled: $enableType,
           value: $counterType,
           dataSource: [
-            { label: 'LIST', value: 0 },
-            { label: 'COMPACT', value: 1 },
-            { label: 'INLINE', value: 2 },
-            { label: 'INLINE_DATE', value: 3 },
+            { label: 'LIST', value: CounterType.LIST },
+            { label: 'COMPACT', value: CounterType.COMPACT },
+            { label: 'INLINE', value: CounterType.INLINE },
+            { label: 'INLINE_DATE', value: CounterType.INLINE_DATE },
           ]
         })
 

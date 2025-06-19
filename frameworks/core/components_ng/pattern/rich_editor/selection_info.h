@@ -131,6 +131,7 @@ struct TextStyleResult {
     double lineSpacing = 0.0;
     bool optimizeTrailingSpace = false;
     std::optional<Dimension> paragraphSpacing;
+    std::optional<int32_t> textVerticalAlign;
     int32_t fontStyle = 0;
     int32_t fontWeight = 0;
     FONT_FEATURES_LIST fontFeature;
@@ -250,6 +251,7 @@ struct ParagraphInfo {
     int32_t lineBreakStrategy = static_cast<int32_t>(LineBreakStrategy::GREEDY);
     // unit of paragraphSpacing is fp
     std::optional<double> paragraphSpacing;
+    std::optional<int32_t> textVerticalAlign;
 
     std::pair<int32_t, int32_t> range;
 };

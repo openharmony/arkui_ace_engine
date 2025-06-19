@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -368,6 +368,26 @@ public:
         isNeedMeasureFormLastItem_ = needMeasureFormLastItem;
     }
 
+    void SetNeedSyncLoad(bool value)
+    {
+        isNeedSyncLoad_ = value;
+    }
+
+    void SetPrevMeasureBreak(bool value)
+    {
+        prevMeasureBreak_ = value;
+    }
+
+    bool MeasureInNextFrame() const
+    {
+        return measureInNextFrame_;
+    }
+
+    bool ReachResponseDeadline(LayoutWrapper* layoutWrapper) const
+    {
+        return !itemPosition_.empty() && !isNeedSyncLoad_ && layoutWrapper->ReachResponseDeadline();
+    }
+
     ListItemGroupLayoutInfo GetLayoutInfo() const;
 
     float GetAdjustReferenceDelta() const
@@ -534,6 +554,9 @@ private:
     bool needAdjustRefPos_ = false;
     bool isNeedCheckOffset_ = false;
     bool isNeedMeasureFormLastItem_ = false;
+    bool isNeedSyncLoad_ = false;
+    bool measureInNextFrame_ = false;
+    bool prevMeasureBreak_ = false;
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     LayoutConstraintF childLayoutConstraint_;
@@ -541,6 +564,7 @@ private:
 
     std::optional<ListItemGroupCacheParam> cacheParam_;
     PositionMap cachedItemPosition_;
+    PositionMap recycledItemPosition_;
 
     bool isStackFromEnd_ = false;
     bool isLayouted_ = true;

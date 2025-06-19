@@ -1,0 +1,80 @@
+import { Text } from "@ohos.arkui"
+import { Column, ColumnOptions } from "@ohos.arkui"
+import { Button } from "@ohos.arkui"
+import { Component, State, Entry, memo } from "@ohos.arkui"
+import { Color } from "@ohos.arkui"
+import { StateContext, GlobalStateManager, memoEntry, mutableState, updateStateManager, callScheduledCallbacks } from "@koalaui/runtime"
+
+class TextState {
+    static text = mutableState<string>("Hello")
+}
+
+@Entry
+@Component
+struct MyStateSample {
+    @State color: Color = "#ffffff"
+
+    build() {
+        Column({ /*space: 20*/ } as ColumnOptions) {
+            Text(TextState.text.value) {}
+                .fontColor(this.color)
+            Button('change') {}
+                .onClick(() => {
+                    this.color = "#ff0000"
+                    TextState.text.value = "ArkUI"
+                })
+
+        }
+            .width(100)
+            .height(300)
+    }
+}
+
+export class ArkUIEntry {
+
+    static memoEntry() {
+        const manager = GlobalStateManager.instance
+        // this call is used to init state before entring memo world
+        console.log(TextState.text.value)
+
+        console.log("Entring memo world")
+        const state0 = manager.computableState<Int>((context: StateContext): Int => {
+            memoEntry<void>(context, 0, ArkUIEntry.runStruct)
+            return 0
+        })
+        console.log(state0.value)
+        
+        callScheduledCallbacks()
+        updateStateManager()
+        console.log(state0.value)
+
+        updateStateManager()
+        console.log(state0.value)
+
+        TextState.text.value = "Test"
+
+        updateStateManager()
+        console.log(state0.value)
+
+        updateStateManager()
+        console.log(state0.value)
+   }
+
+    @memo
+    static runStruct() {
+        console.log("About to invoke the struct")
+        // The proper call fails because of a compiler frontend bug.
+        // MyStateSample({} as __Options_MyStateSample)
+        MyStateSample.instantiateImpl(
+            undefined,
+            (): MyStateSample => new MyStateSample(),
+            {} as __Options_MyStateSample,
+            undefined
+        )
+    }
+
+    static run()  {
+        ArkUIEntry.memoEntry()
+    }
+
+}

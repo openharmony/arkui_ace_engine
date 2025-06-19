@@ -21,6 +21,14 @@
 
 namespace OHOS::Ace::NG {
 class LayoutWrapper;
+
+struct MoveOffsetParam {
+    bool isVertical = false;
+    float contentStartOffset = 0;
+    float contentEndOffset = 0;
+    bool noNeedMargin = false;
+};
+
 struct ScrollableUtils {
     /**
      * @brief Checks if contentHeight needs to expand based on safeArea property.
@@ -54,9 +62,7 @@ struct ScrollableUtils {
     static float GetMoveOffset(
         const RefPtr<FrameNode>& parentFrameNode,
         const RefPtr<FrameNode>& curFrameNode,
-        bool isVertical,
-        float contentStartOffset,
-        float contentEndOffset);
+        const MoveOffsetParam& param);
 };
 } // namespace OHOS::Ace::NG
 

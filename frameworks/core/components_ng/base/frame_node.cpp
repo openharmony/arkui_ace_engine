@@ -44,6 +44,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
@@ -145,7 +146,7 @@ public:
             return;
         }
         totalCount_ = 0;
-        auto children = hostNode_->GetChildren();
+        const auto& children = hostNode_->GetChildren();
         int32_t startIndex = 0;
         int32_t count = 0;
         for (const auto& child : children) {
@@ -1244,12 +1245,17 @@ void FrameNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConf
             json->Put(TreeKey::CLICKABLE, eventHub->IsClickable());
             json->Put(TreeKey::LONG_CLICKABLE, eventHub->IsLongClickable());
         }
+        if (config.callingOnMain && renderContext_) {
+            json->Put("opacity", renderContext_->GetOpacityValue(1.0));
+        }
     }
-    auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
-    if (accessibilityProperty) {
-        auto accessibilityText = accessibilityProperty->GetAccessibilityText();
-        if (!accessibilityText.empty()) {
-            json->Put("accessilityContent", accessibilityText.c_str());
+    json->Put("accessilityId", GetAccessibilityId());
+    if (accessibilityProperty_) {
+        if (!accessibilityProperty_->GetAccessibilityText().empty()) {
+            json->Put("accessilityContent", accessibilityProperty_->GetAccessibilityText().c_str());
+        }
+        if (!accessibilityProperty_->GetAccessibilityDescription().empty()) {
+            json->Put("accessilityDescription", accessibilityProperty_->GetAccessibilityDescription().c_str());
         }
     }
 }
@@ -1364,8 +1370,8 @@ void FrameNode::NotifyColorModeChange(uint32_t colorMode)
     bool parentRerender = parentNode ? parentNode->GetRerenderable() : GetRerenderable();
     // bool parentActive = parentNode ? parentNode->IsActive() : true;
     SetRerenderable(parentRerender && ((IsVisible() && IsActive()) || CheckMeasureAnyway()));
-    
-    if (GetRerenderable()) {
+
+    if (GetRerenderable() && GetContext()) {
         SetDarkMode(GetContext()->GetColorMode() == ColorMode::DARK);
     }
 
@@ -1647,8 +1653,6 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         renderContext_->CreateBackgroundPixelMap(columnNode);
         builderFunc_ = nullptr;
         backgroundNode_ = columnNode;
-    } else {
-        renderContext_->UpdateCustomBackground();
     }
 
     // update focus state
@@ -1705,7 +1709,7 @@ void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
     eventHub_->SetOnAreaChanged(std::move(callback));
 }
 
-void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
+void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp, int32_t areaChangeMinDepth)
 {
     if (!IsActive()) {
         if (IsDebugInspectorId()) {
@@ -1724,7 +1728,7 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
 #endif
     if (eventHub_ && (eventHub_->HasOnAreaChanged() || eventHub_->HasInnerOnAreaChanged()) && lastFrameRect_ &&
         lastParentOffsetToWindow_) {
-        auto currFrameRect = geometryNode_->GetFrameRect();
+        auto currFrameRect = GetFrameRectWithSafeArea();
         if (renderContext_ && renderContext_->GetPositionProperty()) {
             if (renderContext_->GetPositionProperty()->HasPosition()) {
                 auto renderPosition = ContextPositionConvertToPX(
@@ -1735,7 +1739,7 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
         }
         bool logFlag = IsDebugInspectorId();
         auto currParentOffsetToWindow =
-            CalculateOffsetRelativeToWindow(nanoTimestamp, logFlag) - currFrameRect.GetOffset();
+            CalculateOffsetRelativeToWindow(nanoTimestamp, logFlag, areaChangeMinDepth) - currFrameRect.GetOffset();
         if (logFlag) {
             TAG_LOGD(AceLogTag::ACE_UIEVENT,
                 "OnAreaChange Node(%{public}s/%{public}d) rect:%{public}s lastRect:%{public}s "
@@ -1829,7 +1833,9 @@ void FrameNode::TriggerOnSizeChangeCallback()
                 eventHub_->FireInnerOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
             }
             eventHub_->FireJSFrameNodeOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
-            *lastFrameNodeRect_ = currFrameRect;
+            if (lastFrameNodeRect_) {
+                *lastFrameNodeRect_ = currFrameRect;
+            }
         }
     }
 }
@@ -1864,7 +1870,7 @@ bool FrameNode::IsFrameDisappear() const
     return !curIsVisible || !curFrameIsActive;
 }
 
-bool FrameNode::IsFrameDisappear(uint64_t timestamp)
+bool FrameNode::IsFrameDisappear(uint64_t timestamp, int32_t isVisibleChangeMinDepth)
 {
     auto context = GetContext();
     CHECK_NULL_RETURN(context, true);
@@ -1885,36 +1891,47 @@ bool FrameNode::IsFrameDisappear(uint64_t timestamp)
         cachedIsFrameDisappear_ = { timestamp, true };
         return true;
     }
-    auto result = IsFrameAncestorDisappear(timestamp);
+    auto result = IsFrameAncestorDisappear(timestamp, isVisibleChangeMinDepth);
     if (result) {
         SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::ANCESTOR_INVISIBLE);
     }
     return result;
 }
 
-bool FrameNode::IsFrameAncestorDisappear(uint64_t timestamp)
+bool FrameNode::IsFrameAncestorDisappear(uint64_t timestamp, int32_t isVisibleChangeMinDepth)
 {
     bool curFrameIsActive = isActive_;
     bool curIsVisible = IsVisible();
     bool result = !curIsVisible || !curFrameIsActive;
     RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(false);
-    if (!parentUi) {
+    if (!parentUi || result) {
         cachedIsFrameDisappear_ = { timestamp, result };
         return result;
     }
 
+    // MinDepth < 0, it do not work
+    // MinDepth >= 0, and this node have calculate once
+    // MinDepth = 0, no change from last frame, use cache directly
+    // MinDepth > 0, and parent->GetDepth < MinDepth, parent do not change, use cache directly
     auto parentIsFrameDisappear = parentUi->cachedIsFrameDisappear_;
-    if (parentIsFrameDisappear.first == timestamp) {
+    if ((parentIsFrameDisappear.first == timestamp) ||
+        ((isVisibleChangeMinDepth >= 0) && parentIsFrameDisappear.first && (isVisibleChangeMinDepth == 0 ||
+        ((isVisibleChangeMinDepth > 0) && (parentUi->GetDepth() < isVisibleChangeMinDepth))))) {
         result = result || parentIsFrameDisappear.second;
         cachedIsFrameDisappear_ = { timestamp, result };
         return result;
     }
-    result = result || (parentUi->IsFrameAncestorDisappear(timestamp));
+
+    // if this node have not calculate once, then it will calculate to root
+    isVisibleChangeMinDepth = parentIsFrameDisappear.first > 0 ? isVisibleChangeMinDepth : -1;
+    result = result || parentUi->IsFrameAncestorDisappear(timestamp, isVisibleChangeMinDepth);
+
     cachedIsFrameDisappear_ = { timestamp, result };
     return result;
 }
 
-void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceDisappear)
+void FrameNode::TriggerVisibleAreaChangeCallback(
+    uint64_t timestamp, bool forceDisappear, int32_t isVisibleChangeMinDepth)
 {
     auto context = GetContext();
     CHECK_NULL_VOID(context);
@@ -1929,7 +1946,7 @@ void FrameNode::TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceD
     auto& visibleAreaUserCallback = eventHub_->GetVisibleAreaCallback(true);
     auto& visibleAreaInnerRatios = eventHub_->GetVisibleAreaRatios(false);
     auto& visibleAreaInnerCallback = eventHub_->GetVisibleAreaCallback(false);
-    if (forceDisappear || IsFrameDisappear(timestamp)) {
+    if (forceDisappear || IsFrameDisappear(timestamp, isVisibleChangeMinDepth)) {
         if (IsDebugInspectorId()) {
             TAG_LOGD(AceLogTag::ACE_UIEVENT,
                 "OnVisibleAreaChange Node(%{public}s/%{public}d) lastRatio(User:%{public}s/Inner:%{public}s) "
@@ -2060,30 +2077,18 @@ void FrameNode::ThrottledVisibleTask()
 
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto visibleAreaRealTime = pipeline->GetVisibleAreaRealTime();
     auto visibleResult = GetCacheVisibleRect(pipeline->GetVsyncTime());
     RectF frameRect = visibleResult.frameRect;
     RectF visibleRect = visibleResult.visibleRect;
     double ratio = IsFrameDisappear() ? VISIBLE_RATIO_MIN
                                       : std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect),
                                           VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
-    if (visibleAreaRealTime) {
-        if (NearEqual(ratio, lastThrottledVisibleRatio_)) {
-            throttledCallbackOnTheWay_ = false;
-            return;
-        }
+    if (!NearEqual(ratio, lastThrottledVisibleRatio_)) {
         ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
         lastThrottledVisibleRatio_ = ratio;
-        throttledCallbackOnTheWay_ = false;
-        lastThrottledTriggerTime_ = GetCurrentTimestamp();
-    } else {
-        if (!NearEqual(ratio, lastThrottledVisibleRatio_)) {
-            ProcessAllVisibleCallback(userRatios, userCallback, ratio, lastThrottledVisibleCbRatio_, true);
-            lastThrottledVisibleRatio_ = ratio;
-        }
-        throttledCallbackOnTheWay_ = false;
-        lastThrottledTriggerTime_ = GetCurrentTimestamp();
     }
+    throttledCallbackOnTheWay_ = false;
+    lastThrottledTriggerTime_ = GetCurrentTimestamp();
 }
 
 void FrameNode::ProcessThrottledVisibleCallback(bool forceDisappear)
@@ -2137,8 +2142,15 @@ void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
         pattern_->OnInActive();
         isActive_ = false;
         activeChanged = true;
+        ClearCachedGlobalOffset();
     }
     CHECK_NULL_VOID(activeChanged);
+
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetIsDisappearChangeNodeMinDepth(GetDepth());
+    pipeline->SetAreaChangeNodeMinDepth(GetDepth());
+
     auto parent = GetAncestorNodeOfFrame(false);
     if (parent) {
         parent->MarkNeedSyncRenderTree();
@@ -2180,6 +2192,11 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread, LayoutType layoutTaskT
     if (!isLayoutDirtyMarked_ && (layoutTaskType == LayoutType::NONE)) {
         return;
     }
+
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->SetAreaChangeNodeMinDepth(GetDepth());
+
     SetRootMeasureNode(true);
     UpdateLayoutPropertyFlag();
     SetSkipSyncGeometryNode(false);
@@ -2236,6 +2253,13 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
         if (self->GetInspectorId() || (eventHub && eventHub->HasNDKDrawCompletedCallback())) {
             CHECK_NULL_VOID(pipeline);
             pipeline->SetNeedRenderNode(weak);
+        }
+        if (self->IsObservedByDrawChildren()) {
+            auto pipeline = self->GetContextRefPtr();
+            CHECK_NULL_VOID(pipeline);
+            auto frameNode = AceType::DynamicCast<FrameNode>(self->GetObserverParentForDrawChildren());
+            CHECK_NULL_VOID(frameNode);
+            pipeline->SetNeedRenderForDrawChildrenNode(WeakPtr<FrameNode>(frameNode));
         }
     };
     if (forceUseMainThread || wrapper->CheckShouldRunOnMain()) {
@@ -2466,7 +2490,7 @@ void FrameNode::RebuildRenderContextTree()
     needSyncRenderTree_ = false;
 }
 
-void FrameNode::MarkModifyDone()
+void FrameNode::MarkModifyDoneUnsafely()
 {
     pattern_->OnModifyDone();
     auto pipeline = PipelineContext::GetCurrentContextSafely();
@@ -2511,6 +2535,19 @@ void FrameNode::MarkModifyDone()
 #endif
 }
 
+void FrameNode::MarkModifyDone()
+{
+    if (!IsFreeState()) {
+        MarkModifyDoneUnsafely();
+    } else {
+        PostAfterAttachMainTreeTask([weak = WeakClaim(this)]() {
+            auto host = weak.Upgrade();
+            CHECK_NULL_VOID(host);
+            host->MarkModifyDoneUnsafely();
+        });
+    }
+}
+
 [[deprecated("using AfterMountToParent")]] void FrameNode::OnMountToParentDone()
 {
     pattern_->OnMountToParentDone();
@@ -2528,7 +2565,7 @@ void FrameNode::FlushUpdateAndMarkDirty()
     MarkDirtyNode();
 }
 
-void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
+void FrameNode::MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag)
 {
     if (IsFreeze()) {
         // store the flag.
@@ -2547,6 +2584,19 @@ void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
         return;
     }
     MarkDirtyNode(IsMeasureBoundary(), IsRenderBoundary(), extraFlag);
+}
+
+void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
+{
+    if (!IsFreeState()) {
+        MarkDirtyNodeUnsafely(extraFlag);
+    } else {
+        PostAfterAttachMainTreeTask([weak = WeakClaim(this), extraFlag]() {
+            auto host = weak.Upgrade();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNodeUnsafely(extraFlag);
+        });
+    }
 }
 
 void FrameNode::ProcessFreezeNode()
@@ -2903,7 +2953,9 @@ void FrameNode::AddNodeToRegisterTouchTest()
     CHECK_NULL_VOID(eventMgr);
     auto gestureEventHub = GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
-    CHECK_NULL_VOID(gestureEventHub->GetOnTouchTestDoneCallbackForInner());
+    if (!gestureEventHub->GetOnTouchTestDoneCallbackForInner() && !gestureEventHub->GetOnTouchTestDoneCallback()) {
+        return;
+    }
     eventMgr->AddTouchDoneFrameNode(AceType::WeakClaim(this));
 }
 
@@ -3351,7 +3403,7 @@ HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& pare
     return HitTestResult::BUBBLING;
 }
 
-bool CheckChildHitTestReslut(HitTestResult childHitResult, const RefPtr<OHOS::Ace::NG::FrameNode>& child,
+bool CheckChildHitTestResult(HitTestResult childHitResult, const RefPtr<OHOS::Ace::NG::FrameNode>& child,
     bool& preventBubbling, bool& consumed, bool isExclusiveEventForChild)
 {
     consumed = false;
@@ -3404,14 +3456,14 @@ HitTestResult FrameNode::AxisTest(const PointF& globalPoint, const PointF& paren
             continue;
         }
         auto childHitResult = child->AxisTest(globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets);
-        if (CheckChildHitTestReslut(childHitResult, child, preventBubbling, consumed, IsExclusiveEventForChild())) {
+        if (CheckChildHitTestResult(childHitResult, child, preventBubbling, consumed, IsExclusiveEventForChild())) {
             break;
         }
     }
     CollectSelfAxisResult(
-        globalPoint, localPoint, consumed, revertPoint, axisResult, preventBubbling, testResult, touchRestrict);
+        globalPoint, localPoint, consumed, revertPoint, newComingTargets, preventBubbling, testResult, touchRestrict);
 
-    axisResult.splice(axisResult.begin(), std::move(newComingTargets));
+    axisResult.splice(axisResult.end(), std::move(newComingTargets));
     if (!consumed) {
         return testResult;
     }
@@ -3779,14 +3831,15 @@ OffsetF FrameNode::GetTransformRelativeOffset() const
     return offset;
 }
 
-OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf, bool checkBoundary) const
+OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf, bool checkBoundary, bool checkScreen) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
     OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithTransform().GetOffset();
     auto parent = GetAncestorNodeOfFrame(checkBoundary);
     while (parent) {
-        if (!checkBoundary && parent->CheckTopWindowBoundary()) {
+        if ((!checkBoundary && parent->CheckTopWindowBoundary()) ||
+            (checkScreen && parent->CheckTopScreen())) {
             break;
         }
         auto renderContext = parent->GetRenderContext();
@@ -4815,7 +4868,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
             isLayoutDirtyMarked_ = true;
         }
         needSyncRsNode = false;
-    } else {
+    } else if (frameSizeChange && renderContext_->IsSynced()) {
         auto borderRadius = renderContext_->GetBorderRadius();
         if (borderRadius.has_value()) {
             renderContext_->SetBorderRadius(borderRadius.value());
@@ -4932,8 +4985,6 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
         renderContext_->CreateBackgroundPixelMap(columnNode);
         builderFunc_ = nullptr;
         backgroundNode_ = columnNode;
-    } else {
-        renderContext_->UpdateCustomBackground();
     }
 
     // update focus state
@@ -4952,6 +5003,11 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
+    if (arkoalaLazyAdapter_) {
+        auto node = arkoalaLazyAdapter_->GetOrCreateChild(index);
+        AddChild(node);
+        return node;
+    }
     auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
     if (child) {
         child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
@@ -4964,6 +5020,9 @@ RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool ad
 
 RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index, bool isCache)
 {
+    if (arkoalaLazyAdapter_) {
+        return arkoalaLazyAdapter_->GetChild(index);
+    }
     return frameProxy_->GetFrameNodeByIndex(index, false, isCache, false);
 }
 
@@ -5013,8 +5072,54 @@ void FrameNode::RemoveAllChildInRenderTree()
 
 void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
 {
+    if (arkoalaLazyAdapter_) {
+        int32_t startIndex = showCached ? std::max(0, start - cacheStart) : start;
+        int32_t endIndex = showCached ? std::min(GetTotalChildCount() - 1, end + cacheEnd) : end;
+        std::vector<RefPtr<UINode>> toRemove;
+        for (const auto& child : GetChildren()) {
+            const int32_t index = static_cast<int32_t>(arkoalaLazyAdapter_->GetIndexOfChild(DynamicCast<FrameNode>(child)));
+            if (index >= startIndex && index <= endIndex) {
+                child->SetActive(true);
+            } else {
+                toRemove.push_back(child);
+            }
+        }
+        for (auto&& node : toRemove) {
+            RemoveChild(node);
+        }
+        arkoalaLazyAdapter_->SetActiveRange(startIndex - cacheStart, endIndex + cacheEnd);
+        return;
+    }
     frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd, showCached);
 }
+
+/* ============================== Arkoala LazyForEach adapter section START ==============================*/
+void FrameNode::ArkoalaSynchronize(
+    LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount)
+{
+    if (!arkoalaLazyAdapter_) {
+        arkoalaLazyAdapter_ = std::make_unique<LazyComposeAdapter>();
+    }
+    arkoalaLazyAdapter_->SetCallbacks(std::move(creator), std::move(updater));
+    arkoalaLazyAdapter_->SetTotalCount(totalCount);
+}
+
+void FrameNode::ArkoalaRemoveItemsOnChange(int32_t changeIndex)
+{
+    CHECK_NULL_VOID(arkoalaLazyAdapter_);
+    std::vector<RefPtr<UINode>> toRemove;
+    for (const auto& child : GetChildren()) {
+        const int32_t index = static_cast<int32_t>(arkoalaLazyAdapter_->GetIndexOfChild(DynamicCast<FrameNode>(child)));
+        if (index >= changeIndex) {
+            toRemove.push_back(child);
+        }
+    }
+    for (auto&& node : toRemove) {
+        RemoveChild(node);
+    }
+    arkoalaLazyAdapter_->OnDataChange(changeIndex);
+}
+/* ============================== Arkoala LazyForEach adapter section END ================================*/
 
 void FrameNode::SetActiveChildRange(
     const std::optional<ActiveChildSets>& activeChildSets, const std::optional<ActiveChildRange>& activeChildRange)
@@ -5041,6 +5146,12 @@ bool FrameNode::CheckNeedForceMeasureAndLayout()
 {
     PropertyChangeFlag flag = layoutProperty_->GetPropertyChangeFlag();
     return CheckNeedMeasure(flag) || CheckNeedLayout(flag);
+}
+
+bool FrameNode::ReachResponseDeadline() const
+{
+    CHECK_NULL_RETURN(context_, false);
+    return context_->ReachResponseDeadline();
 }
 
 OffsetF FrameNode::GetOffsetInScreen()
@@ -5475,9 +5586,9 @@ OffsetF FrameNode::CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp
     return offset;
 }
 
-OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag)
+OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag, int32_t areaChangeMinDepth)
 {
-    auto currOffset = geometryNode_->GetFrameOffset();
+    auto currOffset = GetFrameRectWithSafeArea().GetOffset();
     if (renderContext_ && renderContext_->GetPositionProperty()) {
         if (renderContext_->GetPositionProperty()->HasPosition()) {
             auto renderPosition =
@@ -5490,11 +5601,20 @@ OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool 
     auto parent = GetAncestorNodeOfFrame(true);
     if (parent) {
         auto parentTimestampOffset = parent->GetCachedGlobalOffset();
-        if (parentTimestampOffset.first == nanoTimestamp) {
+        // MinDepth < 0, it do not work
+        // MinDepth >= 0, and this node have calculate once
+        // MinDepth = 0, no change from last frame, use cache directly
+        // MinDepth > 0, and parent->GetDepth < MinDepth, parent do not change, use cache directly
+        if ((parentTimestampOffset.first == nanoTimestamp) ||
+            ((areaChangeMinDepth >= 0) && parentTimestampOffset.first && (areaChangeMinDepth == 0 ||
+            ((areaChangeMinDepth > 0) && (parent->GetDepth() < areaChangeMinDepth))))) {
             currOffset = currOffset + parentTimestampOffset.second;
             SetCachedGlobalOffset({ nanoTimestamp, currOffset });
         } else {
-            currOffset = currOffset + parent->CalculateOffsetRelativeToWindow(nanoTimestamp, logFlag);
+            // if this node have not calculate once, then it will calculate to root
+            areaChangeMinDepth = parentTimestampOffset.first > 0 ? areaChangeMinDepth : -1;
+            currOffset = currOffset + parent->CalculateOffsetRelativeToWindow(
+                nanoTimestamp, logFlag, areaChangeMinDepth);
             SetCachedGlobalOffset({ nanoTimestamp, currOffset });
         }
     } else {
@@ -5591,6 +5711,7 @@ void SetChangeInfo(const TouchEvent& touchEvent, TouchLocationInfo &changedInfo)
 {
     changedInfo.SetGlobalLocation(Offset(touchEvent.x, touchEvent.y));
     changedInfo.SetScreenLocation(Offset(touchEvent.screenX, touchEvent.screenY));
+    changedInfo.SetGlobalDisplayLocation(Offset(touchEvent.globalDisplayX, touchEvent.globalDisplayY));
     changedInfo.SetTouchType(touchEvent.type);
     changedInfo.SetForce(touchEvent.force);
     changedInfo.SetPressedTime(touchEvent.pressedTime);
@@ -5654,6 +5775,8 @@ void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEv
         float globalY = item.y;
         float screenX = item.screenX;
         float screenY = item.screenY;
+        double globalDisplayX = item.globalDisplayX;
+        double globalDisplayY = item.globalDisplayY;
         PointF localPoint(globalX, globalY);
         NGGestureRecognizer::Transform(localPoint, Claim(this), false, false);
         auto localX = static_cast<float>(localPoint.GetX());
@@ -5662,6 +5785,7 @@ void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEv
         info.SetGlobalLocation(Offset(globalX, globalY));
         info.SetLocalLocation(Offset(localX, localY));
         info.SetScreenLocation(Offset(screenX, screenY));
+        info.SetGlobalDisplayLocation(Offset(globalDisplayX, globalDisplayY));
         info.SetTouchType(touchEvent.type);
         info.SetForce(item.force);
         info.SetPressedTime(item.downTime);
@@ -5685,6 +5809,12 @@ void FrameNode::ChangeSensitiveStyle(bool isSensitive)
 
 void FrameNode::AttachContext(PipelineContext* context, bool recursive)
 {
+    if (SystemProperties::GetMultiInstanceEnabled()) {
+        auto renderContext = GetRenderContext();
+        if (renderContext) {
+            renderContext->SetRSUIContext(context);
+        }
+    }
     UINode::AttachContext(context, recursive);
     if (eventHub_) {
         eventHub_->OnAttachContext(context);
@@ -6184,7 +6314,7 @@ void FrameNode::TriggerShouldParallelInnerWith(
 
 void FrameNode::GetInspectorValue()
 {
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(WEB_SUPPORTED) && defined(OHOS_PLATFORM)
     if (GetTag() == V2::WEB_ETS_TAG) {
         UiSessionManager::GetInstance()->WebTaskNumsChange(1);
         auto pattern = GetPattern<NG::WebPattern>();

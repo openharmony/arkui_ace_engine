@@ -312,6 +312,7 @@ HWTEST_F(RichEditorStyledUndoTestNg, RecordOperation005, TestSize.Level1)
     style1.wordBreak = WordBreak::BREAK_ALL;
     style1.lineBreakStrategy = LineBreakStrategy::HIGH_QUALITY;
     style1.paragraphSpacing = Dimension(10.0f, DimensionUnit::PX);
+    style1.textVerticalAlign = TextVerticalAlign::BASELINE;
     richEditorPattern->UpdateParagraphStyle(0, 8, style1);
     EXPECT_EQ(richEditorPattern->undoManager_->undoRecords_.size(), 1);
     auto undoRecord = undoRecords.back();

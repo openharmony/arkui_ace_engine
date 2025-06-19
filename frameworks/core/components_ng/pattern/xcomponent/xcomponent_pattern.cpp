@@ -146,6 +146,7 @@ void XComponentPattern::InitXComponent()
     if (isTypedNode_) {
         InitNativeXComponent();
         if (isNativeXComponent_) {
+            InitializeAccessibility();
             LoadNative();
         }
     }
@@ -201,6 +202,7 @@ void XComponentPattern::InitSurface()
         InitNativeWindow(initSize_.Width(), initSize_.Height());
     }
     surfaceId_ = renderSurface_->GetUniqueId();
+    initialSurfaceId_ = surfaceId_;
     UpdateTransformHint();
     RegisterSurfaceRenderContext();
 }
@@ -209,7 +211,14 @@ void XComponentPattern::RegisterSurfaceRenderContext()
 {
     if (type_ == XComponentType::SURFACE) {
         XComponentInnerSurfaceController::RegisterSurfaceRenderContext(
-            surfaceId_, WeakPtr(handlingSurfaceRenderContext_));
+            initialSurfaceId_, WeakPtr(handlingSurfaceRenderContext_));
+    }
+}
+
+void XComponentPattern::UnregisterSurfaceRenderContext()
+{
+    if (type_ == XComponentType::SURFACE) {
+        XComponentInnerSurfaceController::UnregisterSurfaceRenderContext(initialSurfaceId_);
     }
 }
 
@@ -253,8 +262,9 @@ void XComponentPattern::Initialize()
             InitNativeNodeCallbacks();
         }
     }
-
-    InitializeAccessibility();
+    if (!isTypedNode_) {
+        InitializeAccessibility();
+    }
 }
 
 void XComponentPattern::OnAttachToMainTree()
@@ -456,11 +466,9 @@ void XComponentPattern::OnRebuildFrame()
 
 void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    UnregisterSurfaceRenderContext();
     CHECK_NULL_VOID(frameNode);
     UninitializeAccessibility(frameNode);
-    if (type_ == XComponentType::SURFACE) {
-        XComponentInnerSurfaceController::UnregisterSurfaceRenderContext(surfaceId_);
-    }
     if (isTypedNode_) {
         if (surfaceCallbackMode_ == SurfaceCallbackMode::PIP) {
             HandleSurfaceDestroyed(frameNode);
@@ -476,17 +484,11 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
             OnSurfaceDestroyed();
             auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
             CHECK_NULL_VOID(eventHub);
-            {
-                ACE_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", GetId().c_str());
-                eventHub->FireDestroyEvent(GetId());
-            }
+            eventHub->FireDestroyEvent(GetId());
             if (id_.has_value()) {
                 eventHub->FireDetachEvent(id_.value());
             }
-            {
-                ACE_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", GetId().c_str());
-                eventHub->FireControllerDestroyedEvent(surfaceId_, GetId());
-            }
+            eventHub->FireControllerDestroyedEvent(surfaceId_, GetId());
 #ifdef RENDER_EXTRACT_SUPPORTED
             if (renderContextForSurface_) {
                 renderContextForSurface_->RemoveSurfaceChangedCallBack();
@@ -733,14 +735,8 @@ void XComponentPattern::XComponentSizeInit()
     if (id_.has_value()) {
         eventHub->FireSurfaceInitEvent(id_.value(), host->GetId());
     }
-    {
-        ACE_SCOPED_TRACE("XComponent[%s] FireLoadEvent", GetId().c_str());
-        eventHub->FireLoadEvent(GetId());
-    }
-    {
-        ACE_SCOPED_TRACE("XComponent[%s] FireControllerCreatedEvent", GetId().c_str());
-        eventHub->FireControllerCreatedEvent(surfaceId_, GetId());
-    }
+    eventHub->FireLoadEvent(GetId());
+    eventHub->FireControllerCreatedEvent(surfaceId_, GetId());
 }
 
 void XComponentPattern::XComponentSizeChange(const RectF& surfaceRect, bool needFireNativeEvent)
@@ -1649,10 +1645,7 @@ void XComponentPattern::OnNativeLoad(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
-    {
-        ACE_SCOPED_TRACE("XComponent[%s] FireLoadEvent", GetId().c_str());
-        eventHub->FireLoadEvent(GetId());
-    }
+    eventHub->FireLoadEvent(GetId());
 }
 
 void XComponentPattern::OnNativeUnload(FrameNode* frameNode)
@@ -1661,10 +1654,7 @@ void XComponentPattern::OnNativeUnload(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
     CHECK_NULL_VOID(eventHub);
-    {
-        ACE_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", GetId().c_str());
-        eventHub->FireDestroyEvent(GetId());
-    }
+    eventHub->FireDestroyEvent(GetId());
 }
 
 void XComponentPattern::OnSurfaceCreated()
@@ -1689,10 +1679,7 @@ void XComponentPattern::OnSurfaceCreated()
         CHECK_NULL_VOID(host);
         auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
-        {
-            ACE_SCOPED_TRACE("XComponent[%s] FireControllerCreatedEvent", GetId().c_str());
-            eventHub->FireControllerCreatedEvent(surfaceId_, GetId());
-        }
+        eventHub->FireControllerCreatedEvent(surfaceId_, GetId());
     }
 }
 
@@ -1722,10 +1709,7 @@ void XComponentPattern::OnSurfaceChanged(const RectF& surfaceRect, bool needResi
     } else {
         auto eventHub = host->GetOrCreateEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
-        {
-            ACE_SCOPED_TRACE("XComponent[%s] FireControllerChangedEvent[w:%f,h:%f]", GetId().c_str(), width, height);
-            eventHub->FireControllerChangedEvent(surfaceId_, surfaceRect);
-        }
+        eventHub->FireControllerChangedEvent(surfaceId_, surfaceRect, GetId());
     }
 }
 
@@ -1752,10 +1736,7 @@ void XComponentPattern::OnSurfaceDestroyed(FrameNode* frameNode)
         }
         auto eventHub = frameNode->GetOrCreateEventHub<XComponentEventHub>();
         CHECK_NULL_VOID(eventHub);
-        {
-            ACE_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", GetId().c_str());
-            eventHub->FireControllerDestroyedEvent(surfaceId_, GetId());
-        }
+        eventHub->FireControllerDestroyedEvent(surfaceId_, GetId());
     }
 }
 

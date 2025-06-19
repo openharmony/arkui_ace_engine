@@ -146,9 +146,27 @@ class ImageSpanColorFilterModifier extends ModifierWithKey<ColorFilter | Drawing
     return true;
   }
 }
+class ImageSpanSrcModifier extends ModifierWithKey<ResourceStr | PixelMap> {
+  constructor(value: ResourceStr | PixelMap) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageSpanShowSrc');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().imageSpan.setImageSpanSrc(node, '');
+    } else {
+      getUINativeModule().imageSpan.setImageSpanSrc(node, this.value);
+    }
+  }
+}
+
 class ArkImageSpanComponent extends ArkComponent implements ImageSpanAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  initialize(value: Object[]): ImageSpanAttribute {
+    modifierWithKey(this._modifiersWithKeys, ImageSpanSrcModifier.identity, ImageSpanSrcModifier, value[0]);
+    return this;
   }
   objectFit(value: ImageFit): ImageSpanAttribute {
     modifierWithKey(this._modifiersWithKeys, ImageSpanObjectFitModifier.identity, ImageSpanObjectFitModifier, value);

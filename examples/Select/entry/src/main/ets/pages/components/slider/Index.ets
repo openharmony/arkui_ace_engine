@@ -30,6 +30,14 @@ export struct SliderIndex {
     { name: 'SliderCustom', path: 'SliderCustom' },
     { name: 'SliderTips', path: 'SliderTips' },
     { name: 'SliderNormal', path: 'SliderNormal' },
+    { name: 'SliderLevel0', path: 'SliderLevel0' },
+    { name: 'SliderLevel01', path: 'SliderLevel01' },
+    { name: 'SliderLevel10', path: 'SliderLevel10' },
+    { name: 'SliderLevel11', path: 'SliderLevel11' },
+    { name: 'SliderLevel12', path: 'SliderLevel12' },
+    { name: 'SliderLevel13', path: 'SliderLevel13' },
+    { name: 'SliderLevel14', path: 'SliderLevel14' },
+    { name: 'SliderLevel15', path: 'SliderLevel15' },
   ]
 
   build() {

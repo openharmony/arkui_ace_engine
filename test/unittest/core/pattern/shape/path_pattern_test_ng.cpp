@@ -15,14 +15,19 @@
 
 #include <string>
 
-#include "base_shape_pattern_test_ng.h"
 #include "gtest/gtest.h"
+
+#define protected public
+#define private public
+#include "base_shape_pattern_test_ng.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
 #include "core/components_ng/pattern/shape/path_paint_property.h"
 #include "core/components_ng/pattern/shape/path_pattern.h"
+#undef private
+#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -117,5 +122,52 @@ HWTEST_F(PathPatternTestNg, COMMONDS001, TestSize.Level1)
 HWTEST_F(PathPatternTestNg, COMMONDS002, TestSize.Level1)
 {
     CheckCommands(false);
+}
+
+/**
+ * @tc.name: MeasureContent001
+ * @tc.desc: PathLayoutAlgorithm::MeasureContent
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(PathPatternTestNg, MeasureContent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    PathModelNG().Create();
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<PathPattern>();
+    ASSERT_TRUE(pattern);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_TRUE(layoutProperty);
+    auto layoutAlgorithm = AceType::DynamicCast<PathLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_TRUE(layoutAlgorithm);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutConstraintF contentConstraint;
+    auto layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
+
+    /**
+     * @tc.steps2: contentConstraint.selfIdealSize is (100, 200)
+     * @tc.expected: the return value of MeasureContent is (100, 200)
+     */
+    contentConstraint.selfIdealSize = OptionalSizeF(100, 200);
+    auto size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_TRUE(size.has_value());
+    EXPECT_EQ(size.value(), SizeF(100, 200));
+    contentConstraint.selfIdealSize.Reset();
+
+    /**
+     * @tc.steps3: Width is Zero and Height is Zero
+     * @tc.expected: the return value of MeasureContent is (0, 0)
+     */
+    auto paintProperty = frameNode->GetPaintProperty<PathPaintProperty>();
+    ASSERT_TRUE(paintProperty);
+    paintProperty->UpdateCommands("M0 0 L0 0");
+    size = layoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_TRUE(size.has_value());
+    EXPECT_EQ(size.value(), SizeF(0, 0));
 }
 } // namespace OHOS::Ace::NG

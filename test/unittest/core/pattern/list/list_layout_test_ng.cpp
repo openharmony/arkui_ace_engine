@@ -15,6 +15,7 @@
 
 #include "list_test_ng.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
@@ -969,6 +970,32 @@ HWTEST_F(ListLayoutTestNg, PaintMethod005, TestSize.Level1)
             EXPECT_EQ(child.second.length, WIDTH);
         }
     }
+}
+
+/**
+ * @tc.name: PaintMethod006
+ * @tc.desc: Test List paint method about UpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, PaintMethod006, TestSize.Level1)
+{
+    auto itemDivider = ITEM_DIVIDER;
+    ListModelNG model = CreateList();
+    model.SetDivider(itemDivider);
+    model.SetLanes(2);
+    model.SetStackFromEnd(true);
+    model.SetCachedCount(2);
+    model.SetInitialIndex(2);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
+    EXPECT_EQ(pattern_->laneIdx4Divider_, 0);
 }
 
 /**
@@ -2912,5 +2939,57 @@ HWTEST_F(ListLayoutTestNg, FadingEdge002, TestSize.Level1)
     paintMethod = UpdateContentModifier();
     EXPECT_TRUE(paintMethod->isFadingTop_);
     EXPECT_FALSE(paintMethod->isFadingBottom_);
+}
+
+/**
+ * @tc.name: InitialIndex001
+ * @tc.desc: Test the initialIndex and scrollToIndex priority.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, InitialIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List.
+     */
+    ListModelNG model = CreateList();
+    model.SetInitialIndex(1);
+    pattern_->ScrollToIndex(2);
+    int32_t settingApiVersion = 13;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    CreateListItems(TOTAL_ITEM_NUMBER * 2);
+    CreateDone();
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step2. Get the first ListItem index.
+     * @tc.expected: api version less than 14, initialIndex first.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetStartIndex(), 1));
+}
+
+/**
+ * @tc.name: InitialIndex002
+ * @tc.desc: Test the initialIndex and scrollToIndex priority.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, InitialIndex002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List.
+     */
+    ListModelNG model = CreateList();
+    model.SetInitialIndex(1);
+    pattern_->ScrollToIndex(2);
+    int32_t settingApiVersion = 14;
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    CreateListItems(TOTAL_ITEM_NUMBER * 2);
+    CreateDone();
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step2. Get the first ListItem index.
+     * @tc.expected: api version reach 14, scrollToIndex first.
+     */
+    EXPECT_TRUE(IsEqual(pattern_->GetStartIndex(), 2));
 }
 } // namespace OHOS::Ace::NG

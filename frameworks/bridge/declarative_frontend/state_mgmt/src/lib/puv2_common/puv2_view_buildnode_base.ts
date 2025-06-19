@@ -25,6 +25,8 @@
 abstract class ViewBuildNodeBase {
     protected isView_: boolean;
     protected childrenWeakrefMap_ = new Map<number, WeakRef<IView>>();
+    // Tracks all child BuilderNodes of this ViewBuildNodeBase instance using WeakRefs.
+    protected builderNodeWeakrefMap_ = new Map<number, WeakRef<ViewBuildNodeBase>>();
     protected updateFuncByElmtId = new UpdateFuncsByElmtId();
     protected id_: number;
     protected shareLocalStorage_: LocalStorage = undefined;
@@ -41,6 +43,7 @@ abstract class ViewBuildNodeBase {
     constructor(isView: boolean) {
         this.isView_ = isView;
         this.childrenWeakrefMap_ = new Map();
+        this.builderNodeWeakrefMap_ = new Map();
     }
     // globally unique id, this is different from compilerAssignedUniqueChildId!
     id__(): number {
@@ -78,6 +81,31 @@ abstract class ViewBuildNodeBase {
         }
         return true;
     }
+    /**
+     * Adds a child BuilderNode to this view
+     * @param child - The child node to add
+     * @returns True if added successfully, false if ID already exists
+     */
+    public addChildBuilderNode(child: ViewBuildNodeBase): boolean {
+        if (this.builderNodeWeakrefMap_.has(child.id__())) {
+            stateMgmtConsole.warn(`${this.debugInfo__()}: addChildBuilderNode '${child?.debugInfo__()}' elmtId already exists ${child.id__()}. Internal error!`);
+            return false;
+        }
+        this.builderNodeWeakrefMap_.set(child.id__(), new WeakRef(child));
+        return true;
+    }
+    /**
+     * Removes a child BuilderNode from this view by elmtId
+     * @param elmtId - The ID of the child node to remove
+     */
+    public removeChildBuilderNode(elmtId: number): void {
+        if (!this.builderNodeWeakrefMap_.has(elmtId)) {
+            stateMgmtConsole.warn(`${this.debugInfo__()}: removeChildBuilderNode(${elmtId}) no child with this elmtId. Internal error!`);
+            return;
+        }
+        this.builderNodeWeakrefMap_.delete(elmtId);
+    }
+
     protected purgeDeletedElmtIds(): void {
         stateMgmtConsole.debug(`purgeDeletedElmtIds ViewBuildNodeBase '${this.constructor.name}' (id: ${this.id__()}) start ...`);
         UINodeRegisterProxy.obtainDeletedElmtIds();
@@ -188,5 +216,28 @@ abstract class ViewBuildNodeBase {
     }
     public setShareLocalStorage(localStorage: LocalStorage): void {
         this.shareLocalStorage_ = localStorage;
+    }
+    /**
+     * Propagates the active state to all child nodes in the given weak reference map
+     * This generic method can handle child View or child BuilderNode
+     *
+     * @param weakRefMap - The map containing WeakRefs to children
+     * @param active - Whether the child nodes should be activated (true) or frozen (false)
+     * @param isReuse - Related to component reuse
+     */
+    protected propagateToChildren(weakRefMap: Map<number, WeakRef<IView | ViewBuildNodeBase>> | undefined,
+        active: boolean, isReuse: boolean): void {
+        if (weakRefMap) {
+            for (const child of weakRefMap.values()) {
+                child.deref()?.setActiveInternal(active, isReuse);
+            }
+        }
+    }
+    // overwritten by sub classes
+    public setActiveInternal(active: boolean, isReuse = false): void {
+        // Propagate state to all child View
+        this.propagateToChildren(this.childrenWeakrefMap_, active, isReuse);
+        // Propagate state to all child BuilderNode
+        this.propagateToChildren(this.builderNodeWeakrefMap_, active, isReuse);
     }
 }

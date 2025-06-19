@@ -16,13 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_ROSEN_RENDER_SVG_POLYGON_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SVG_ROSEN_RENDER_SVG_POLYGON_H
 
-#ifndef USE_ROSEN_DRAWING
-#include "include/core/SkCanvas.h"
-#include "include/core/SkPath.h"
-#include "include/core/SkPoint.h"
-#else
 #include "core/components_ng/render/drawing.h"
-#endif
 
 #include "frameworks/core/components/svg/render_svg_polygon.h"
 
@@ -43,17 +37,10 @@ public:
 
 private:
     Rect GetPaintBounds(const Offset& offset) override;
-#ifndef USE_ROSEN_DRAWING
-    bool GetPath(SkPath* out);
-    bool GetPathWithoutAnimate(SkPath* out);
-    bool CreateSkPath(const std::string& pointsStr, std::vector<SkPoint>& skPoints);
-    bool CreateSkPaths(const std::string& points1, const std::string& points2, double weight, SkPath* out);
-#else
     bool GetPath(RSPath* out);
     bool GetPathWithoutAnimate(RSPath* out);
     bool CreateRSPath(const std::string& pointsStr, std::vector<RSPoint>& rsPoints);
     bool CreateRSPaths(const std::string& points1, const std::string& points2, double weight, RSPath* out);
-#endif
 };
 
 } // namespace OHOS::Ace

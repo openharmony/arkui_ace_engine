@@ -212,6 +212,37 @@ HWTEST_F(TextInputCursorTest, CaretPosition007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: MaxLengthCrossPlatformTest001
+ * @tc.desc: Test the soft keyboard interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCursorTest, MaxLengthCrossPlatformTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize text input node and call text changed listener update edting value
+     */
+    CreateTextField("abc");
+
+    GetFocus();
+    auto textFieldLayoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    TextEditingValue value;
+    textFieldLayoutProperty->UpdateMaxLength(5);
+    TextSelection selection;
+    value.text = "ab123456c";
+    selection.baseOffset = 8;
+    selection.extentOffset = 8;
+    value.selection = selection;
+    pattern_->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.expected: Check if the new text and cursor position are correct
+     */
+    EXPECT_EQ(pattern_->GetTextValue().compare("ab12c"), 0);
+    EXPECT_EQ(pattern_->GetCaretIndex(), 4);
+}
+
+/**
  * @tc.name: OnTextChangedListenerCaretPosition001
  * @tc.desc: Test the soft keyboard interface
  * @tc.type: FUNC

@@ -161,8 +161,7 @@ void SheetObject::ClipSheetNode()
         renderContext->UpdateOuterBorderRadius(borderRadius);
     }
     if (sheetType == SheetType::SHEET_POPUP && pattern->GetSheetPopupInfo().showArrow) {
-        std::string clipPath;
-        clipPath = pattern->GetPopupStyleSheetClipPath(sheetSize, borderRadius);
+        std::string clipPath = pattern->GetPopupStyleSheetClipPath(sheetSize, borderRadius);
         auto path = AceType::MakeRefPtr<Path>();
         path->SetValue(clipPath);
         path->SetBasicShapeType(BasicShapeType::PATH);
@@ -320,10 +319,8 @@ void SheetObject::HandleDragUpdate(const GestureEvent& info)
         offset = pageHeight - sheetPattern->GetSheetMaxHeight();
         sheetPattern->SetCurrentOffset(height - sheetPattern->GetSheetMaxHeight());
     }
-    bool isNeedChangeScrollHeight = sheetPattern->GetScrollSizeMode() == ScrollSizeMode::CONTINUOUS &&
-        sheetPattern->GetCurrentOffset() < 0;
-    if (isNeedChangeScrollHeight) {
-        sheetPattern->ChangeScrollHeight(height - sheetPattern->GetCurrentOffset());
+    if (sheetPattern->IsNeedChangeScrollHeight(height - sheetPattern->GetCurrentOffset())) {
+        sheetPattern->ChangeSheetPage(height - sheetPattern->GetCurrentOffset());
     }
     sheetPattern->HandleFollowAccessibilityEvent(height - sheetPattern->GetCurrentOffset());
     auto renderContext = host->GetRenderContext();
@@ -370,13 +367,11 @@ void SheetObject::HandleDragEnd(float dragVelocity)
             } else {
                 sheetPattern->SetDetentsIndex(detentsLowerPos);
                 sheetPattern->ChangeSheetHeight(downHeight);
-                sheetPattern->ChangeSheetPage(height);
                 sheetPattern->SheetTransition(true, std::abs(dragVelocity));
             }
         } else if (LessNotEqual(std::abs(currentSheetHeight - upHeight), std::abs(currentSheetHeight - downHeight))) {
             sheetPattern->SetDetentsIndex(detentsUpperPos);
             sheetPattern->ChangeSheetHeight(upHeight);
-            sheetPattern->ChangeSheetPage(height);
             sheetPattern->SheetTransition(true, std::abs(dragVelocity));
         }
     } else {
@@ -387,13 +382,11 @@ void SheetObject::HandleDragEnd(float dragVelocity)
             } else {
                 sheetPattern->SetDetentsIndex(detentsLowerPos);
                 sheetPattern->ChangeSheetHeight(downHeight);
-                sheetPattern->ChangeSheetPage(height);
                 sheetPattern->SheetTransition(true, std::abs(dragVelocity));
             }
         } else {
             sheetPattern->SetDetentsIndex(detentsUpperPos);
             sheetPattern->ChangeSheetHeight(upHeight);
-            sheetPattern->ChangeSheetPage(height);
             sheetPattern->SheetTransition(true, std::abs(dragVelocity));
         }
     }
@@ -406,6 +399,128 @@ void SheetObject::HandleDragEnd(float dragVelocity)
         auto idx = static_cast<uint32_t>(std::distance(unSortedSheetDentents.begin(), pos));
         sheetPattern->SetDetentsFinalIndex(idx);
     }
+}
+
+void SheetObject::OnScrollStartRecursive(float position, float velocity)
+{
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->InitScrollProps();
+    if (sheetPattern->GetAnimation() && sheetPattern->GetAnimationProcess()) {
+        AnimationUtils::StopAnimation(sheetPattern->GetAnimation());
+        sheetPattern->SetAnimationBreak(true);
+    }
+    sheetPattern->SetCurrentOffset(0.0f);
+    isSheetNeedScroll_ = false;
+    sheetPattern->SetIsDirectionUp(true);
+    sheetPattern->GetCurrentBroadcastDetentsIndex();
+}
+
+ScrollResult SheetObject::HandleScroll(float scrollOffset, int32_t source, NestedState state, float velocity)
+{
+    ScrollResult result = {scrollOffset, true};
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_RETURN(sheetPattern, result);
+    if (state == NestedState::CHILD_CHECK_OVER_SCROLL) {
+        return {scrollOffset, true};
+    }
+    if (GreatOrEqual(sheetPattern->GetCurrentOffset(), 0.0) && (source == SCROLL_FROM_UPDATE) && !isSheetNeedScroll_) {
+        isSheetNeedScroll_ = true;
+    }
+    if (!isSheetNeedScroll_ || sheetPattern->IsScrollOutOfBoundary()) {
+        return {scrollOffset, true};
+    }
+    ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
+    if (state == NestedState::CHILD_SCROLL) {
+        if (scrollState == ScrollState::SCROLL) {
+            return HandleScrollWithSheet(scrollOffset);
+        }
+        HandleDragEnd(scrollOffset > 0 ? SHEET_VELOCITY_THRESHOLD : -SHEET_VELOCITY_THRESHOLD);
+        isSheetPosChanged_ = false;
+    } else if (state == NestedState::CHILD_OVER_SCROLL) {
+        isSheetNeedScroll_ = false;
+        return {scrollOffset, true};
+    }
+    return {0, true};
+}
+
+ScrollResult SheetObject::HandleScrollWithSheet(float scrollOffset)
+{
+    ScrollResult result = {scrollOffset, true};
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_RETURN(sheetPattern, result);
+    auto sheetType = sheetPattern->GetSheetType();
+    auto sheetDetentsSize = sheetPattern->GetSheetDetentHeight().size();
+    if ((sheetType == SheetType::SHEET_POPUP) || (sheetDetentsSize == 0) || sheetPattern->IsShowInSubWindowTwoInOne()) {
+        isSheetNeedScroll_ = false;
+        return {scrollOffset, true};
+    }
+    auto currentHeightPos = sheetPattern->GetSheetHeightBeforeDragUpdate();
+    bool isDraggingUp = LessNotEqual(scrollOffset, 0.0f);
+    bool isReachMaxSheetHeight = GreatOrEqual(currentHeightPos, sheetPattern->GetMaxSheetHeightBeforeDragUpdate());
+    // When dragging up the sheet, and sheet height is larger than sheet content height,
+    // the sheet height should be updated.
+    // When dragging up the sheet, and sheet height is less than or equal to sheet content height,
+    // the sheet content should scrolling.
+    if ((NearZero(sheetPattern->GetCurrentOffset())) && isDraggingUp && isReachMaxSheetHeight) {
+        isSheetNeedScroll_ = false;
+        return {scrollOffset, true};
+    }
+    // When dragging up the sheet, and sheet height is larger than max height,
+    // should set the coefficient of friction.
+    bool isExceedMaxSheetHeight = GreatNotEqual(
+        (currentHeightPos - sheetPattern->GetCurrentOffset()), sheetPattern->GetMaxSheetHeightBeforeDragUpdate());
+    bool isNeedCalculateFriction = isExceedMaxSheetHeight && isDraggingUp;
+    if (isNeedCalculateFriction && GreatNotEqual(sheetPattern->GetSheetMaxHeight(), 0.0f)) {
+        auto friction = sheetPattern->CalculateFriction(
+            (currentHeightPos - sheetPattern->GetCurrentOffset()) / sheetPattern->GetSheetMaxHeight(),
+            sheetPattern->GetRadio());
+        scrollOffset = scrollOffset * friction;
+    }
+
+    sheetPattern->SetCurrentOffset(sheetPattern->GetCurrentOffset() + scrollOffset);
+    auto pageHeight = sheetPattern->GetPageHeightWithoutOffset();
+    auto sheetOffsetInPage = pageHeight - currentHeightPos + sheetPattern->GetCurrentOffset();
+    if (LessOrEqual(sheetOffsetInPage, pageHeight - sheetPattern->GetSheetMaxHeight())) {
+        sheetOffsetInPage = pageHeight - sheetPattern->GetSheetMaxHeight();
+        sheetPattern->SetCurrentOffset(currentHeightPos - sheetPattern->GetSheetMaxHeight());
+    }
+    if (sheetPattern->IsNeedChangeScrollHeight(currentHeightPos - sheetPattern->GetCurrentOffset())) {
+        sheetPattern->ChangeSheetPage(currentHeightPos - sheetPattern->GetCurrentOffset());
+    }
+    sheetPattern->HandleFollowAccessibilityEvent(currentHeightPos - sheetPattern->GetCurrentOffset());
+    result = {0, true};
+    auto renderContext = sheetPattern->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, result);
+    renderContext->UpdateTransformTranslate({ 0.0f, sheetOffsetInPage, 0.0f });
+    isSheetPosChanged_ = NearZero(scrollOffset) ? false : true;
+    if (sheetPattern->IsSheetBottomStyle()) {
+        sheetPattern->OnHeightDidChange(sheetPattern->GetHeight() -
+            sheetPattern->GetCurrentOffset() + sheetPattern->GetSheetHeightUp());
+    }
+    isSheetPosChanged_ = true;
+    return result;
+}
+
+void SheetObject::OnScrollEndRecursive(const std::optional<float>& velocity)
+{
+    if (isSheetPosChanged_) {
+        HandleDragEnd(velocity.value_or(0.f));
+        isSheetPosChanged_ = false;
+    }
+}
+
+bool SheetObject::HandleScrollVelocity(float velocity)
+{
+    if (isSheetPosChanged_) {
+        HandleDragEnd(velocity);
+        isSheetPosChanged_ = false;
+    }
+    // Use child edge effect
+    if (!isSheetNeedScroll_) {
+        return false;
+    }
+    return true;
 }
 
 void SheetObject::ModifyFireSheetTransition(float dragVelocity)
@@ -454,13 +569,7 @@ void SheetObject::ModifyFireSheetTransition(float dragVelocity)
             auto ref = weak.Upgrade();
             CHECK_NULL_VOID(ref);
             if (renderContext) {
-                renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
                 ref->GetProperty()->Set(ref->GetHeight() + ref->GetSheetHeightUp());
-                bool isNeedChangeScrollHeight =
-                    ref->GetScrollSizeMode() == ScrollSizeMode::CONTINUOUS && ref->GetIsDirectionUp();
-                if (isNeedChangeScrollHeight) {
-                    ref->ChangeScrollHeight(ref->GetHeight());
-                }
             }
         },
         finishCallback);
@@ -474,10 +583,43 @@ void SheetObject::CreatePropertyCallback()
     if (sheetPattern->GetProperty()) {
         return;
     }
-    auto propertyCallback = [weak = AceType::WeakClaim(RawPtr(sheetPattern))](float position) {
+    auto host = sheetPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    auto propertyCallback = [weak = AceType::WeakClaim(RawPtr(sheetPattern)), renderContext](float position) {
         auto ref = weak.Upgrade();
         CHECK_NULL_VOID(ref);
         ref->OnHeightDidChange(static_cast<int>(position));
+
+        /*
+         * Variables in formulas:
+         *   position:        Current sheet position (Y coordinate)
+         *   position_delta:  Position change during drag gesture
+         *   sheetHeightUp_:  Additional height when sheet is dragged upward
+         *   height_:         Base height of the sheet component
+         *   offset:          Vertical translation offset for sheet positioning
+         *   pageHeight:      Full height of the containing page
+         *   currentOffset_:  Accumulated vertical offset during dragging
+         *   GetPageHeightWithoutOffset(): Gets page height excluding insets/offsets
+         *   GetSheetHeightBeforeDragUpdate(): Sheet height prior to drag updates
+         *
+         * Position derivation:
+         *   position = height_ - position_delta + sheetHeightUp_
+         *
+         * Offset calculation chain:
+         *   offset = pageHeight - height + currentOffset_
+         *          = GetPageHeightWithoutOffset() - GetSheetHeightBeforeDragUpdate() + position_delta
+         *          = GetPageHeightWithoutOffset() - (height_ + sheetHeightUp_) + position_delta
+         *          = GetPageHeightWithoutOffset() - (position + position_delta) + position_delta
+         *
+         * Simplified offset formula:
+         *   offset = GetPageHeightWithoutOffset() - position
+         */
+        float targetTranslateY = ref->GetPageHeightWithoutOffset() - position;
+        renderContext->UpdateTransformTranslate({0.0f, targetTranslateY, 0.0f});
+        ref->ChangeSheetPage(position);
     };
     auto property = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     sheetPattern->SetProperty(property);

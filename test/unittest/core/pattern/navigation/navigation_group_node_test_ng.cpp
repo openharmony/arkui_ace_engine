@@ -819,4 +819,50 @@ HWTEST_F(NavigationGroupNodeTestNg, ToDumpString004, TestSize.Level1)
     EXPECT_NE(dump.find("Mode: \"INVALID\""), string::npos);
     NavigationGroupNodeTestNg::TearDownTestCase();
 }
+
+/*
+ * @tc.name: RemoveDialogDestination
+ * @tc.desc: Branch: if (!iter->second) false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, RemoveDialogDestination, TestSize.Level1)
+{
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    /**
+     * @tc.steps: step1. create navigation group node.
+     */
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. mock push to add navDestination into navigation.
+     */
+    std::string destNameBase = "dest";
+    const int32_t testNumber = 1;
+    for (int32_t index = 0; index < testNumber; ++index) {
+        mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>(destNameBase + std::to_string(index)));
+    }
+    MockContainer::Current()->SetNavigationRoute(AceType::MakeRefPtr<MockNavigationRoute>(""));
+    RunNavigationStackSync(navigationPattern);
+    auto navigationContent = AceType::DynamicCast<FrameNode>(navigation->GetContentNode());
+    ASSERT_NE(navigationContent, nullptr);
+    ASSERT_EQ(static_cast<int32_t>(navigationContent->GetChildren().size()), testNumber);
+    auto fisrtChild = AceType::DynamicCast<NavDestinationGroupNode>(navigationContent->GetChildAtIndex(0));
+    ASSERT_NE(fisrtChild, nullptr);
+    navigation->hideNodes_.emplace_back(fisrtChild, true);
+    auto layoutProperty = navigationContent->GetLayoutProperty();
+    layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_NORMAL);
+
+    /**
+     * @tc.steps: step3. call RemoveDialogDestination. check the flag.
+     */
+    navigation->RemoveDialogDestination();
+    EXPECT_EQ(layoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE, PROPERTY_UPDATE_MEASURE);
+}
 } // namespace OHOS::Ace::NG

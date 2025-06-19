@@ -103,6 +103,7 @@ public:
     static void JsOnDrop(const JSCallbackInfo& info);
     static void PinchSmoothModeEnabled(bool isPinchSmoothModeEnabled);
     static void OnWindowNew(const JSCallbackInfo& args);
+    static void OnActivateContent(const JSCallbackInfo& args);
     static void OnWindowExit(const JSCallbackInfo& args);
     static void MultiWindowAccessEnabled(bool isMultiWindowAccessEnable);
     static void AllowWindowOpenMethod(bool isAllowWindowOpenMethod);
@@ -151,17 +152,32 @@ public:
     static void JavaScriptOnDocumentStart(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentEnd(const JSCallbackInfo& args);
     static void OptimizeParserBudgetEnabled(bool enable);
+    static void BypassVsyncCondition(int32_t webBypassVsyncCondition);
     static void RunJavaScriptOnDocumentStart(const JSCallbackInfo& args);
     static void RunJavaScriptOnDocumentEnd(const JSCallbackInfo& args);
     static void RunJavaScriptOnHeadEnd(const JSCallbackInfo& args);
     static JSRef<JSVal> CreateJSWindowNewHandler(const WebWindowNewEvent& eventInfo);
     static bool HandleWindowNewEvent(const WebWindowNewEvent* eventInfo);
     static JSRef<JSVal> CreateScreenCaptureHandler(const WebScreenCaptureRequestEvent& eventInfo);
-    static JSRef<JSVal> CreatPermissionRequestHandler(const WebPermissionRequestEvent& eventInfo);
-    static JSRef<JSVal> CreatGeolocationShowHandler(const LoadWebGeolocationShowEvent& eventInfo);
-    static JSRef<JSVal> CreatNativeEmbedGestureHandler(const NativeEmbeadTouchInfo& eventInfo);
-    static JSRef<JSVal> CreatFullScreenEnterHandler(const FullScreenEnterEvent& eventInfo);
-    static JSRef<JSVal> CreatCommonDialogResultHandler(const WebDialogEvent& eventInfo);
+    static JSRef<JSVal> CreatePermissionRequestHandler(const WebPermissionRequestEvent& eventInfo);
+    static JSRef<JSVal> CreateGeolocationShowHandler(const LoadWebGeolocationShowEvent& eventInfo);
+    static JSRef<JSVal> CreateNativeEmbedGestureHandler(const NativeEmbeadTouchInfo& eventInfo);
+    static JSRef<JSVal> CreateFullScreenEnterHandler(const FullScreenEnterEvent& eventInfo);
+    static JSRef<JSVal> CreateCommonDialogResultHandler(const WebDialogEvent& eventInfo);
+    static JSRef<JSVal> CreateFileSelectorResultHandler(const FileSelectorEvent& eventInfo);
+    static JSRef<JSVal> CreateFileSelectorParamHandler(const FileSelectorEvent& eventInfo);
+    static JSRef<JSVal> CreateContextMenuParamHandler(const ContextMenuEvent& eventInfo);
+    static JSRef<JSVal> CreateContextMenuResultHandler(const ContextMenuEvent& eventInfo);
+    static JSRef<JSVal> CreateErrorReceiveRequestHandler(const ReceivedErrorEvent& eventInfo);
+    static JSRef<JSVal> CreateErrorReceiveErrorHandler(const ReceivedErrorEvent& eventInfo);
+    static JSRef<JSVal> CreateLoadInterceptHandler(const LoadInterceptEvent& eventInfo);
+    static JSRef<JSVal> CreateHttpErrorReceiveRequestHandler(const ReceivedHttpErrorEvent& eventInfo);
+    static JSRef<JSVal> CreateHttpErrorReceiveResponseHandler(const ReceivedHttpErrorEvent& eventInfo);
+    static JSRef<JSVal> CreateOverrideUrlLoadingHandler(const LoadOverrideEvent& eventInfo);
+    static JSRef<JSVal> CreateHttpAuthRequestHandler(const WebHttpAuthEvent& eventInfo);
+    static JSRef<JSVal> CreateConsoleHandler(const LoadWebConsoleLogEvent& eventInfo);
+    static JSRef<JSVal> CreateSslErrorEventHandler(const WebAllSslErrorEvent& eventInfo);
+    static JSRef<JSVal> CreateDataResubmittedHandler(const DataResubmittedEvent& eventInfo);
 
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;
@@ -185,6 +201,7 @@ public:
     static void EnableDataDetector(const JSCallbackInfo& args);
     static void DataDetectorConfig(const JSCallbackInfo& args);
     static void EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight);
+    static void GestureFocusMode(int32_t gestureFocusMode);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

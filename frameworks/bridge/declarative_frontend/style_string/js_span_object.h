@@ -84,6 +84,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static RefPtr<ParagraphStyleSpan> ParseJsParagraphStyleSpan(const JSRef<JSObject>& obj);
     static void ParseJsTextAlign(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
+    static void ParseJsTextVerticalAlign(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseJsTextIndent(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseJsMaxLines(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
     static void ParseJsTextOverflow(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle);
@@ -94,6 +95,8 @@ public:
         std::optional<NG::LeadingMargin>& margin, const JsiRef<JsiValue>& leadingMargin);
     void GetTextAlign(const JSCallbackInfo& info);
     void SetTextAlign(const JSCallbackInfo& info);
+    void GetTextVerticalAlign(const JSCallbackInfo& info);
+    void SetTextVerticalAlign(const JSCallbackInfo& info);
     void SetTextIndent(const JSCallbackInfo& info);
     void GetTextIndent(const JSCallbackInfo& info);
     void SetMaxLines(const JSCallbackInfo& info);

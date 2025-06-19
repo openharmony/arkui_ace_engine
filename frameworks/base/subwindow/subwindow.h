@@ -255,12 +255,12 @@ public:
         std::function<void(const float)>&& onWidthDidChange,
         std::function<void(const float)>&& onTypeDidChange,
         std::function<void()>&& sheetSpringBack, const RefPtr<NG::FrameNode>& targetNode) = 0;
-    virtual void ShowDialogMaskNG(const RefPtr<NG::FrameNode>& dialog) = 0;
-    virtual void CloseDialogMaskNG(const RefPtr<NG::FrameNode>& dialog) = 0;
     virtual void SwitchFollowParentWindowLayout(bool freeMultiWindowEnable) = 0;
     virtual bool NeedFollowParentWindowLayout() = 0;
     virtual void AddFollowParentWindowLayoutNode(int32_t nodeId) = 0;
     virtual void RemoveFollowParentWindowLayoutNode(int32_t nodeId) = 0;
+    virtual void SetNodeId(int32_t nodeId) = 0;
+    virtual int32_t GetNodeId() const = 0;
 
 private:
     int32_t subwindowId_ = 0;

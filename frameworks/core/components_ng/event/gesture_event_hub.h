@@ -201,6 +201,7 @@ public:
     // Set by user define, which will replace old one.
     void SetUserOnClick(GestureEventFunc&& clickEvent,
         double distanceThreshold = std::numeric_limits<double>::infinity());
+    void SetUserOnClick(GestureEventFunc&& clickEvent, Dimension distanceThreshold);
     void SetNodeClickDistance(double distanceThreshold = std::numeric_limits<double>::infinity());
      // Set by JS FrameNode.
     void SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent);
@@ -215,6 +216,8 @@ public:
     void SetOnGestureJudgeNativeBeginForMenu(GestureJudgeFunc&& gestureJudgeFunc);
     TouchTestDoneCallback GetOnTouchTestDoneCallbackForInner() const;
     void SetOnTouchTestDoneCallbackForInner(TouchTestDoneCallback&& touchTestDoneFunc);
+    TouchTestDoneCallback GetOnTouchTestDoneCallback() const;
+    void SetOnTouchTestDoneCallback(TouchTestDoneCallback&& touchTestDoneFunc);
     GetEventTargetImpl CreateGetEventTargetImpl() const;
     GestureJudgeFunc GetOnGestureJudgeBeginCallback() const;
     GestureJudgeFunc GetOnGestureJudgeNativeBeginCallback();
@@ -299,7 +302,6 @@ public:
     RefPtr<LongPressRecognizer> GetLongPressRecognizer() const;
     void SetIsAllowMouse(bool isAllowMouse) const;
     const RefPtr<ClickEventActuator>& GetUserClickEventActuator();
-    int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
     void GenerateMousePixelMap(const GestureEvent& info);
     OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const PreparedInfoForDrag& dragInfoData,
@@ -497,6 +499,7 @@ private:
     GestureJudgeFunc gestureJudgeNativeFuncForMenu_;
 
     TouchTestDoneCallback touchTestDoneCallbackForInner_;
+    TouchTestDoneCallback touchTestDoneCallback_;
 
     TouchInterceptFunc touchInterceptFunc_;
 
@@ -516,6 +519,7 @@ private:
     bool monopolizeEvents_ = false;
     float menuPreviewScale_ = DEFALUT_DRAG_PPIXELMAP_SCALE;
     bool isDragNewFwk_ = false;
+    bool isRestoreDrag_ = false;
 };
 
 } // namespace OHOS::Ace::NG

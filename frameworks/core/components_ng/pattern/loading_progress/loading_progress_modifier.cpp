@@ -64,6 +64,9 @@ constexpr float FULL_OPACITY = 255.0f;
 constexpr float FAKE_DELTA = 0.01f;
 constexpr float BASE_SCALE = 0.707f; // std::sqrt(2)/2
 constexpr float REFRESH_DARK_MODE_RING_BLUR_RADIUS = 0.4f;
+constexpr int32_t ANIMATION_MIN_FFR = 15;
+constexpr int32_t ANIMATION_MAX_FFR = 60;
+constexpr int32_t ANIMATION_EXPECT_FFR = 30;
 } // namespace
 LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner)
     : enableLoading_(AceType::MakeRefPtr<PropertyBool>(true)),
@@ -269,6 +272,9 @@ void LoadingProgressModifier::StartRecycleRingAnimation()
     CHECK_NULL_VOID(context);
     auto previousStageCurve = AceType::MakeRefPtr<CubicCurve>(0.0f, 0.0f, 0.67f, 1.0f);
     AnimationOption option;
+    RefPtr<FrameRateRange> frameRateRange =
+            AceType::MakeRefPtr<FrameRateRange>(ANIMATION_MIN_FFR, ANIMATION_MAX_FFR, ANIMATION_EXPECT_FFR);
+    option.SetFrameRateRange(frameRateRange);
     option.SetDuration(isVisible_ ? LOADING_DURATION : 0);
     option.SetCurve(previousStageCurve);
     if (context->IsFormRender() && !IsDynamicComponent()) {
@@ -306,6 +312,9 @@ void LoadingProgressModifier::StartRecycleCometAnimation()
     CHECK_NULL_VOID(context);
     auto curve = AceType::MakeRefPtr<LinearCurve>();
     AnimationOption option;
+    RefPtr<FrameRateRange> frameRateRange =
+            AceType::MakeRefPtr<FrameRateRange>(ANIMATION_MIN_FFR, ANIMATION_MAX_FFR, ANIMATION_EXPECT_FFR);
+    option.SetFrameRateRange(frameRateRange);
     option.SetDuration(isVisible_ ? LOADING_DURATION : 0);
     option.SetCurve(curve);
     if (context->IsFormRender() && !IsDynamicComponent()) {
@@ -384,6 +393,9 @@ void LoadingProgressModifier::StartCometTailAnimation()
 {
     auto curve = AceType::MakeRefPtr<LinearCurve>();
     AnimationOption option;
+    RefPtr<FrameRateRange> frameRateRange =
+            AceType::MakeRefPtr<FrameRateRange>(ANIMATION_MIN_FFR, ANIMATION_MAX_FFR, ANIMATION_EXPECT_FFR);
+    option.SetFrameRateRange(frameRateRange);
     option.SetDuration(TAIL_ANIAMTION_DURATION);
     option.SetIteration(1);
     option.SetCurve(curve);
@@ -422,6 +434,9 @@ void LoadingProgressModifier::StartRecycle()
         isLoading_ = true;
         date_->Set(0.0f);
         AnimationOption option = AnimationOption();
+        RefPtr<FrameRateRange> frameRateRange =
+            AceType::MakeRefPtr<FrameRateRange>(ANIMATION_MIN_FFR, ANIMATION_MAX_FFR, ANIMATION_EXPECT_FFR);
+        option.SetFrameRateRange(frameRateRange);
         RefPtr<Curve> curve = AceType::MakeRefPtr<CubicCurve>(0.25f, 0.30f, 0.50f, 0.14f);
         option.SetDuration(isVisible_ ? LOADING_DURATION : 0);
         option.SetDelay(0);
@@ -450,6 +465,9 @@ void LoadingProgressModifier::StartTransToRecycleAnimation()
     sizeScale_->Set(1.0f);
     auto curve = AceType::MakeRefPtr<CubicCurve>(0.6f, 0.2f, 1.0f, 1.0f);
     AnimationOption option;
+    RefPtr<FrameRateRange> frameRateRange =
+            AceType::MakeRefPtr<FrameRateRange>(ANIMATION_MIN_FFR, ANIMATION_MAX_FFR, ANIMATION_EXPECT_FFR);
+    option.SetFrameRateRange(frameRateRange);
     option.SetDuration(TRANS_DURATION);
     option.SetIteration(1);
     option.SetCurve(curve);
@@ -507,6 +525,9 @@ void LoadingProgressModifier::CloseAnimation(float date, float cometLen, float c
     option.SetDuration(0);
     option.SetIteration(1);
     option.SetCurve(curve);
+    RefPtr<FrameRateRange> frameRateRange =
+            AceType::MakeRefPtr<FrameRateRange>(ANIMATION_MIN_FFR, ANIMATION_MAX_FFR, ANIMATION_EXPECT_FFR);
+    option.SetFrameRateRange(frameRateRange);
     date_->Set(date + FAKE_DELTA);
     cometTailLen_->Set(cometLen + FAKE_DELTA);
     cometOpacity_->Set(cometOpacity + FAKE_DELTA);

@@ -34,7 +34,7 @@ void DragDropInitiatingStatePress::HandlePreviewLongPressOnAction(const GestureE
 
 void DragDropInitiatingStatePress::HandleSequenceOnActionCancel(const GestureEvent& info)
 {
-    TAG_LOGD(AceLogTag::ACE_DRAG, "Drag event has been canceled.");
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Drag event has been canceled.");
     auto machine = GetStateMachine();
     CHECK_NULL_VOID(machine);
     auto params = machine->GetDragDropInitiatingParams();

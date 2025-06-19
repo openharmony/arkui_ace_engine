@@ -115,6 +115,7 @@ public:
     void SetIsEntryByIndex(int32_t index, bool isEntry) override;
 
     std::string GetStringifyParamByIndex(int32_t index) const override;
+    std::string GetSerializedParamSafely(int32_t index) const override;
     void SetPathArray(const std::vector<NG::NavdestinationRecoveryInfo>& navdestinationsInfo) override;
     bool IsFromRecovery(int32_t index) override;
     void SetFromRecovery(int32_t index, bool fromRecovery) override;
@@ -130,6 +131,7 @@ public:
     bool GetIsForceSet(int32_t index) override;
     void ResetIsForceSetFlag(int32_t index) override;
     void PushIntentNavDestination(const std::string& name, const std::string& params, bool needTransition) override;
+    void CallPushDestinationInner(const NG::NavdestinationRecoveryInfo& navdestinationsInfo) override;
 
     void RemoveByIndexes(const std::vector<int32_t>& indexes) override;
 
@@ -140,8 +142,8 @@ protected:
     std::function<void()> onStateChangedCallback_;
 
 private:
-    JSRef<JSArray> GetJsPathArray();
-    JSRef<JSObject> GetJsPathInfo(int32_t index);
+    JSRef<JSArray> GetJsPathArray() const;
+    JSRef<JSObject> GetJsPathInfo(int32_t index) const;
     std::string GetNameByIndex(int32_t index);
     JSRef<JSVal> GetOnPopByIndex(int32_t index) const;
     bool GetIsEntryByIndex(int32_t index);

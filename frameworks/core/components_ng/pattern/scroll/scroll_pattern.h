@@ -18,6 +18,7 @@
 
 #include "base/geometry/axis.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/pattern/scroll/scroll_accessibility_property.h"
 #include "core/components_ng/pattern/scroll/scroll_content_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
@@ -61,8 +62,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto layoutAlgorithm = MakeRefPtr<ScrollLayoutAlgorithm>(currentOffset_);
-        return layoutAlgorithm;
+        return MakeRefPtr<ScrollLayoutAlgorithm>(currentOffset_, crossOffset_);
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override;
@@ -239,6 +239,15 @@ public:
             snapPaginations_ = snapPaginations;
             scrollSnapUpdate_ = true;
         }
+    }
+    void SetKeepSnapPaginations(const std::vector<Dimension>& snapPaginations)
+    {
+        keepSnapPaginations_ = snapPaginations;
+    }
+
+    std::vector<Dimension> GetKeepSnapPaginations()
+    {
+        return keepSnapPaginations_;
     }
 
     std::vector<Dimension> GetSnapPaginations() const
@@ -431,9 +440,27 @@ private:
     SizeF viewPortExtent_;
     FlexDirection direction_ { FlexDirection::COLUMN };
 
+    /* ============================= Free Scroll Enhancements ============================= */
+public:
+    /**
+     * @return Pan gesture recognizer configured for Axis::FREE mode
+     */
+    RefPtr<NGGestureRecognizer> GetOverrideRecognizer() const
+    {
+        return freePanGesture_;
+    }
+
+private:
+    void InitFreeScroll();
+
+    RefPtr<PanRecognizer> freePanGesture_; // all-direction pan recognizer for free scroll mode
+    float crossOffset_ = 0.0f; // offset on the vertical axis (currentOffset_ represents horizontal axis in Free Scroll mode)
+    /* ============================================================================== */
+
     // scrollSnap
     std::vector<float> snapOffsets_;
     std::vector<Dimension> snapPaginations_;
+    std::vector<Dimension> keepSnapPaginations_;
     std::pair<bool, bool> enableSnapToSide_ = { true, true };
     Dimension intervalSize_;
     bool scrollSnapUpdate_ = false;

@@ -1,0 +1,80 @@
+{
+    "extends": "@koalaui/build-common/tsconfig.json",
+    "compilerOptions": {
+        "types": [],
+        "plugins": [
+            {
+                "transform": "@koalaui/compiler-plugin/build/lib/src/koala-transformer.js",
+                "trace": false,
+                "only_unmemoize": true,
+                "unmemoizeDir": "./build/unmemoized"
+            }
+        ],
+        "outDir": "./build/junk",
+        "baseUrl": ".",
+        "paths": {
+            "@koalaui/common": [
+                "../../incremental/common/src"
+            ],
+            "@koalaui/interop": [
+                "../../interop/src/interop"
+            ],
+            "@koalaui/runtime": [
+                "../../incremental/runtime/src"
+            ],
+            "@koalaui/compat": [
+                "../../incremental/compat/src"
+            ],
+            "@koalaui/arkui-common": [
+                "../../arkoala/arkui-common/src/arkts"
+            ],
+            "#arkcompat/*": [
+                "../../arkoala/arkui-common/src/arkts/*"
+            ],
+            "@ohos/arkui": [
+                "./src/generated"
+            ],
+            "#components": [
+                "./src/generated/ts"
+            ],
+            "@ohos/animator": [
+                "./ohos.animator.ts"
+            ],
+            "@ohos.arkui.UIContext": [
+                "./ohos.arkui.UIContext.ts"
+            ],
+            "@ohos.measure": [
+                "./ohos.measure.ts"
+            ],
+            "@ohos.font.font": [
+                "./ohos.font.ts"
+            ],
+            "global/resource": [
+                "./global/resource/resource.ts"
+            ]
+        },
+        "rootDir": "."
+    },
+    "include": [
+        "./src/**/*.ts",
+        "./ohos.measure.ts",
+        "./ohos.font.ts",
+        "./ohos.arkui.UIContext.ts",
+        "./ohos.animator.ts",
+        "./global/**/*.ts"
+    ],
+    "exclude": [
+        "./src/generated/arkts",
+        "./src/generated/common.ts",
+        "./src/generated/test_utils.ts",
+        "./src/generated/main.ts"
+    ],
+    "files": [
+        "../../incremental/tools/panda/arkts/std-lib/global.d.ts"
+    ],
+    "references": [
+        { "path": "../../arkoala/arkui-common" },
+        { "path": "../../arkoala/arkui-common/tsconfig-unmemoize.json" },
+        { "path": "../../interop" }
+    ]
+}

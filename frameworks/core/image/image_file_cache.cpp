@@ -23,7 +23,7 @@
 #include "base/thread/background_task_executor.h"
 #include "core/image/image_loader.h"
 
-#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
+#include "core/components_ng/image_provider/drawing_image_data.h"
 
 namespace OHOS::Ace {
 ImageFileCache::ImageFileCache() = default;

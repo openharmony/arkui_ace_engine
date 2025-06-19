@@ -93,6 +93,7 @@ public:
     virtual bool IsHdr() const;
     virtual void* GetRawPixelMapPtr() const;
     virtual std::shared_ptr<Media::PixelMap> GetPixelMapSharedPtr();
+    virtual void SetMemoryName(std::string pixelMapName) const;
 };
 } // namespace Drawable
 } // namespace Ace

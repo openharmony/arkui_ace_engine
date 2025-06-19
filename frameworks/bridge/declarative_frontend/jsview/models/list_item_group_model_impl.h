@@ -30,6 +30,7 @@ public:
     void SetDivider(const V2::ItemDivider& divider) override;
     void SetHeader(std::function<void()>&& header) override;
     void SetFooter(std::function<void()>&& footer) override;
+    void SetDividerColorByUser(bool isByUser) override {};
 };
 
 } // namespace OHOS::Ace::Framework

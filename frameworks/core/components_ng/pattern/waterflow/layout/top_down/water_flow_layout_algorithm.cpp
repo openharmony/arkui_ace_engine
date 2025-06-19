@@ -103,6 +103,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!matchChildren) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     }
+    syncLoad_ = layoutProperty->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren;
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
 
     GetExpandArea(layoutProperty, layoutInfo_);
@@ -147,6 +148,9 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     const int32_t cacheCnt = layoutProperty->GetCachedCountValue(layoutInfo_->defCachedCount_);
     layoutWrapper->SetCacheCount(cacheCnt);
+    if (layoutInfo_->measureInNextFrame_) {
+        return;
+    }
     if (layoutProperty->GetShowCachedItemsValue(false)) {
         SyncPreloadItems(layoutWrapper, layoutInfo_, cacheCnt);
     } else {
@@ -345,21 +349,15 @@ FlowItemPosition WaterFlowLayoutAlgorithm::GetItemPosition(int32_t index)
 
 void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layoutWrapper)
 {
-    if (layoutInfo_->currentOffset_ >= 0) {
-        if (!canOverScrollStart_) {
-            layoutInfo_->currentOffset_ = 0;
-        }
-        layoutInfo_->itemStart_ = true;
-    } else {
-        layoutInfo_->itemStart_ = false;
-    }
-
+    layoutInfo_->UpdateItemStart(canOverScrollStart_);
     layoutInfo_->UpdateStartIndex();
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     const float expandMainSize = mainSize + layoutInfo_->expandHeight_;
     auto currentIndex = layoutInfo_->startIndex_;
     auto position = GetItemPosition(currentIndex);
     bool fill = false;
+    const float prevOffset = layoutWrapper->GetHostNode()->GetPattern<WaterFlowPattern>()->GetPrevOffset();
+    auto notScrolling = NearEqual(layoutInfo_->currentOffset_, prevOffset);
     while (LessNotEqual(position.startMainPos + layoutInfo_->currentOffset_, expandMainSize) ||
            layoutInfo_->jumpIndex_ != WaterFlowLayoutInfoBase::EMPTY_JUMP_INDEX) {
         auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(currentIndex));
@@ -418,6 +416,10 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
         }
         position = GetItemPosition(++currentIndex);
         fill = true;
+        if (!syncLoad_ && notScrolling && layoutWrapper->ReachResponseDeadline()) {
+            layoutInfo_->measureInNextFrame_ = true;
+            break;
+        }
     }
     layoutInfo_->endIndex_ = !fill ? currentIndex : currentIndex - 1;
 

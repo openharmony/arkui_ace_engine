@@ -1451,4 +1451,32 @@ HWTEST_F(SwiperArrowTestNg, UpdateArrowContent004, TestSize.Level1)
     EXPECT_EQ(leftButtonNode->GetTag(), V2::BUTTON_ETS_TAG);
     g_isNeedSymbol = true;
 }
+
+/**
+ * @tc.name: SetLayoutDisplayCount001
+ * @tc.desc: Test SetLayoutDisplayCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, SetLayoutDisplayCount001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(AceType::RawPtr(frameNode_), 3);
+    model.SetDisplayArrow(true); // show arrow
+    model.SetHoverShow(false);
+    model.SetArrowStyle(ARROW_PARAMETERS);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    pattern_->SetLayoutDisplayCount(frameNode_);
+    auto leftArrowPattern = leftArrowNode_->GetPattern<SwiperArrowPattern>();
+    EXPECT_EQ(leftArrowPattern->displayCount_, 3);
+    auto rightArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
+    EXPECT_EQ(rightArrowPattern->displayCount_, 3);
+    /**
+     * @tc.steps: step1 SetLayoutDisplayCount.
+     */
+    leftArrowPattern->SetLayoutDisplayCount(5);
+    EXPECT_EQ(leftArrowPattern->displayCount_, 3);
+    rightArrowPattern->SetLayoutDisplayCount(5);
+    EXPECT_EQ(rightArrowPattern->displayCount_, 3);
+}
 } // namespace OHOS::Ace::NG

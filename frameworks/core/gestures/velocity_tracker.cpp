@@ -206,8 +206,8 @@ void VelocityTracker::DumpVelocityPoints() const
         auto baseVal = yVal[0];
         for (int32_t cnt = VelocityTracker::POINT_NUMBER; i > 0 && cnt > 0; --cnt) {
             --i;
-            LOGI("%{public}s last tracker points[%{public}d] x=%{public}f y=%{public}f", str, cnt, xVal[i],
-                yVal[i] - baseVal);
+            TAG_LOGI(AceLogTag::ACE_GESTURE, "%{public}s last tracker points[%{public}d] x=%{public}f y=%{public}f",
+                str, cnt, xVal[i], yVal[i] - baseVal);
         }
     };
     func(xAxis_, "xAxis");

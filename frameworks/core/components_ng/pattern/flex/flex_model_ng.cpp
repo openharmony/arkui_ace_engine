@@ -102,14 +102,44 @@ void FlexModelNG::SetMainAxisAlign(FlexAlign align)
     ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAxisAlign, align);
 }
 
+void FlexModelNG::SetMainAxisAlign(FrameNode* frameNode, std::optional<FlexAlign>& align)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (align.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAxisAlign, align.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAxisAlign, frameNode);
+    }
+}
+
 void FlexModelNG::SetWrapMainAlignment(WrapAlignment value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAlignment, value);
 }
 
+void FlexModelNG::SetWrapMainAlignment(FrameNode* frameNode, std::optional<WrapAlignment>& align)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (align.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAlignment, align.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAlignment, frameNode);
+    }
+}
+
 void FlexModelNG::SetCrossAxisAlign(FlexAlign align)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAxisAlign, align);
+}
+
+void FlexModelNG::SetWrapCrossAlignment(FrameNode* frameNode, std::optional<WrapAlignment>& align)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (align.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAlignment, align.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAlignment, frameNode);
+    }
 }
 
 void FlexModelNG::SetWrapCrossAlignment(WrapAlignment value)
@@ -159,6 +189,7 @@ void FlexModelNG::SetAlignContent(int32_t value)
 
 void FlexModelNG::SetFlexRow(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, FlexDirection, FlexDirection::ROW, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAxisAlign, FlexAlign::FLEX_START, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAxisAlign, FlexAlign::FLEX_START, frameNode);
@@ -169,6 +200,7 @@ void FlexModelNG::SetFlexRow(FrameNode* frameNode)
 
 void FlexModelNG::SetFlexWrap(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, WrapDirection, WrapDirection::HORIZONTAL, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, Alignment, WrapAlignment::START, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAlignment, WrapAlignment::START, frameNode);
@@ -180,16 +212,29 @@ void FlexModelNG::SetFlexWrap(FrameNode* frameNode)
 
 void FlexModelNG::SetFlexDirection(FrameNode* frameNode, FlexDirection value)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, FlexDirection, value, frameNode);
+}
+
+void FlexModelNG::SetFlexDirection(FrameNode* frameNode, std::optional<FlexDirection>& layoutDirection)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (layoutDirection) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, FlexDirection, layoutDirection.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, FlexDirection, frameNode);
+    }
 }
 
 void FlexModelNG::SetFlexWrapDirection(FrameNode* frameNode, WrapDirection value)
 {
+    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, WrapDirection, value, frameNode);
 }
 
 void FlexModelNG::SetFlexJustifyContent(FrameNode* frameNode, int32_t value)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<FlexLayoutPattern>();
     if (!pattern->GetIsWrap()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAxisAlign, static_cast<FlexAlign>(value), frameNode);
@@ -198,8 +243,19 @@ void FlexModelNG::SetFlexJustifyContent(FrameNode* frameNode, int32_t value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, MainAlignment, static_cast<WrapAlignment>(value), frameNode);
 }
 
+void FlexModelNG::SetCrossAxisAlign(FrameNode* frameNode, std::optional<FlexAlign>& align)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (align.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAxisAlign, align.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAxisAlign, frameNode);
+    }
+}
+
 void FlexModelNG::SetFlexAlignItems(FrameNode* frameNode, int32_t value)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<FlexLayoutPattern>();
     if (!pattern->GetIsWrap()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossAxisAlign, static_cast<FlexAlign>(value), frameNode);
@@ -210,11 +266,42 @@ void FlexModelNG::SetFlexAlignItems(FrameNode* frameNode, int32_t value)
 
 void FlexModelNG::SetFlexAlignContent(FrameNode* frameNode, int32_t value)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<FlexLayoutPattern>();
     if (!pattern->GetIsWrap()) {
         return;
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, Alignment, static_cast<WrapAlignment>(value), frameNode);
+}
+
+void FlexModelNG::SetFlexAlignContent(FrameNode* frameNode, std::optional<WrapAlignment>& align)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (align.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, Alignment, align.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, Alignment, frameNode);
+    }
+}
+
+void FlexModelNG::SetWidthLayoutPolicy(uint8_t widthLayoutPolicy)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, WidthLayoutPolicy, widthLayoutPolicy);
+}
+
+void FlexModelNG::SetWidthLayoutPolicy(FrameNode* frameNode, uint8_t widthLayoutPolicy)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, WidthLayoutPolicy, widthLayoutPolicy, frameNode);
+}
+
+void FlexModelNG::SetHeightLayoutPolicy(uint8_t heightLayoutPolicy)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, HeightLayoutPolicy, heightLayoutPolicy);
+}
+
+void FlexModelNG::SetHeightLayoutPolicy(FrameNode* frameNode, uint8_t heightLayoutPolicy)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, HeightLayoutPolicy, heightLayoutPolicy, frameNode);
 }
 
 int FlexModelNG::GetFlexWrap(FrameNode* frameNode)
@@ -299,6 +386,7 @@ void FlexModelNG::SetCrossSpace(const std::optional<Dimension>& space)
 
 void FlexModelNG::SetMainSpace(FrameNode* frameNode, const std::optional<Dimension>& space)
 {
+    CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(space);
     if (GreatOrEqual(space->Value(), 0.0)) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, Space, space.value(), frameNode);
@@ -307,6 +395,7 @@ void FlexModelNG::SetMainSpace(FrameNode* frameNode, const std::optional<Dimensi
 
 void FlexModelNG::SetCrossSpace(FrameNode* frameNode, const std::optional<Dimension>& space)
 {
+    CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(space);
     if (GreatOrEqual(space->Value(), 0.0)) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, CrossSpace, space.value(), frameNode);

@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//build/ohos_var.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 
@@ -27,14 +28,20 @@ template("ace_osal_ohos_source_set") {
         vendor_configs.use_ext_surface) {
       defines += [ "EXT_SURFACE_ENABLE" ]
     }
+    if (use_new_skia) {
+      defines += [ "USE_NEW_SKIA" ]
+    }
     if (is_ohos_standard_system) {
       external_deps = [
         "hilog:libhilog",
         "hitrace:hitrace_meter",
-        "imf:inputmethod_client",
         "init:libbeget_proxy",
         "init:libbegetutil",
       ]
+      if (defined(config.enable_standard_input) &&
+          config.enable_standard_input) {
+        external_deps += [ "imf:inputmethod_client" ]
+      }
       configs = [ "$ace_root:ace_config" ]
     } else {
       external_deps = [
@@ -68,6 +75,7 @@ template("ace_osal_ohos_source_set") {
       "image_analyzer_loader.cpp",
       "image_analyzer_manager.cpp",
       "image_analyzer_mgr.cpp",
+      "image_perf_ohos.cpp",
       "input_method_manager_ohos.cpp",
       "layout_inspector.cpp",
       "log_wrapper.cpp",
@@ -98,6 +106,7 @@ template("ace_osal_ohos_source_set") {
     external_deps += [
       "ability_runtime:app_manager",
       "hicollie:libhicollie",
+      "hiview:libperfmonitor",
       "i18n:intl_util",
       "init:libbegetutil",
     ]

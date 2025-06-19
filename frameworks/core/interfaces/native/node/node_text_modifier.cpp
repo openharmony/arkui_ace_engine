@@ -14,11 +14,12 @@
  */
 #include "core/interfaces/native/node/node_text_modifier.h"
 
-#include "base/utils/utils.h"
 #include "base/utils/utf_helper.h"
+#include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/common/properties/text_style_parser.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -27,7 +28,6 @@
 #include "frameworks/core/components/common/layout/constants.h"
 #include "frameworks/core/components/common/properties/text_style.h"
 #include "frameworks/core/components_ng/pattern/text/text_model_ng.h"
-#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG {
 constexpr int DEFAULT_SELECTION = -1;
@@ -95,12 +95,13 @@ FontWeight ConvertStrToFontWeight(const char* weight, FontWeight defaultFontWeig
 namespace {
 
 std::string g_strValue;
-void SetTextContent(ArkUINodeHandle node, ArkUI_CharPtr value)
+void SetTextContent(ArkUINodeHandle node, ArkUI_CharPtr value, void* contentRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::u16string content = UtfUtils::Str8DebugToStr16(std::string(value));
     TextModelNG::InitText(frameNode, content);
+    NodeModifier::ProcessResourceObj<std::u16string>(frameNode, "Content", content, contentRawPtr);
 }
 
 const char* GetTextContent(ArkUINodeHandle node)
@@ -147,7 +148,7 @@ void SetImmutableFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
 
 void SetOnClick(ArkUINodeHandle node, void* callback)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GestureEventFunc* click = nullptr;
     if (callback) {
@@ -160,7 +161,7 @@ void SetOnClick(ArkUINodeHandle node, void* callback)
 
 void ResetOnClick(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ClearOnClick(frameNode);
 }
@@ -188,7 +189,7 @@ void SetResponseRegion(ArkUINodeHandle node, const ArkUI_Float32* values, const 
 
 void ResetResponseRegion(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ClearResponseRegion(frameNode);
 }
@@ -243,11 +244,12 @@ void ResetTextAlign(ArkUINodeHandle node)
     TextModelNG::SetTextAlign(frameNode, OHOS::Ace::TextAlign::START);
 }
 
-void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontColorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetTextColor(frameNode, Color(color));
+    NodeModifier::ProcessResourceObj<Color>(frameNode, "TextColor", Color(color), fontColorRawPtr);
 }
 
 void ResetFontColor(ArkUINodeHandle node)
@@ -255,6 +257,11 @@ void ResetFontColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ResetTextColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("TextColor");
+    }
 }
 
 uint32_t GetFontColor(ArkUINodeHandle node)
@@ -282,12 +289,11 @@ void ResetTextForegroundColor(ArkUINodeHandle node)
     ResetFontColor(node);
 }
 
-void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, ArkUI_Int32 unit)
+void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, ArkUI_Int32 unit, void* fontSizeRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
-
     if (fontSize < 0 || unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC ||
         unitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
         auto theme = GetTheme<TextTheme>();
@@ -295,7 +301,9 @@ void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSize, ArkUI_Int32 unit)
         CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
         TextModelNG::SetFontSize(frameNode, fontSize);
     } else {
-        TextModelNG::SetFontSize(frameNode, Dimension(fontSize, static_cast<OHOS::Ace::DimensionUnit>(unit)));
+        auto fontSizeValue = Dimension(fontSize, static_cast<OHOS::Ace::DimensionUnit>(unit));
+        TextModelNG::SetFontSize(frameNode, fontSizeValue);
+        NodeModifier::ProcessResourceObj<CalcDimension>(frameNode, "FontSize", fontSizeValue, fontSizeRawPtr);
     }
 }
 
@@ -307,13 +315,20 @@ void ResetFontSize(ArkUINodeHandle node)
     CHECK_NULL_VOID(theme);
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
     TextModelNG::SetFontSize(frameNode, fontSize);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("FontSize");
+    }
 }
 
-void SetTextLineHeight(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
+void SetTextLineHeight(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* lineHeightRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetLineHeight(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+    NodeModifier::ProcessResourceObj<Dimension>(
+        frameNode, "LineHeight", Dimension(number, static_cast<DimensionUnit>(unit)), lineHeightRawPtr);
 }
 
 float GetTextLineHeight(ArkUINodeHandle node)
@@ -328,6 +343,11 @@ void ResetTextLineHeight(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetLineHeight(frameNode, DEFAULT_LINE_HEIGHT);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("LineHeight");
+    }
 }
 
 void SetTextTextOverflow(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -353,20 +373,22 @@ void ResetTextTextOverflow(ArkUINodeHandle node)
     TextModelNG::SetTextOverflow(frameNode, TextOverflow::NONE);
 }
 
-void SetTextDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration,
-    ArkUI_Uint32 color, ArkUI_Int32 style, ArkUI_Float32 lineThicknessScale = 1.0f)
+void SetTextDecoration(
+    ArkUINodeHandle node, ArkUI_Int32 decoration,
+    ArkUI_Uint32 color, void* colorRawPtr, ArkUI_Int32 style, ArkUI_Float32 lineThicknessScale = 1.0f)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetTextDecoration(frameNode, static_cast<TextDecoration>(decoration));
     TextModelNG::SetTextDecorationColor(frameNode, Color(color));
+    NodeModifier::ProcessResourceObj<Color>(frameNode, "TextDecorationColor", Color(color), colorRawPtr);
     TextModelNG::SetTextDecorationStyle(frameNode, static_cast<TextDecorationStyle>(style));
     TextModelNG::SetLineThicknessScale(frameNode, lineThicknessScale);
 }
 
 void SetTextDecoration(ArkUINodeHandle node, ArkUI_Int32 decoration, ArkUI_Uint32 color, ArkUI_Int32 style)
 {
-    SetTextDecoration(node, decoration, color, style, 1.0f); // make cj happy
+    SetTextDecoration(node, decoration, color, nullptr, style, 1.0f); // make cj happy
 }
 
 void GetTextDecoration(ArkUINodeHandle node, ArkUITextDecorationType* decoration)
@@ -386,6 +408,11 @@ void ResetTextDecoration(ArkUINodeHandle node)
     TextModelNG::SetTextDecoration(frameNode, DEFAULT_TEXT_DECORATION);
     TextModelNG::SetTextDecorationColor(frameNode, DEFAULT_DECORATION_COLOR);
     TextModelNG::SetTextDecorationStyle(frameNode, DEFAULT_DECORATION_STYLE);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("TextDecorationColor");
+    }
 }
 
 void SetTextTextCase(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -431,11 +458,13 @@ void ResetTextMaxLines(ArkUINodeHandle node)
     TextModelNG::SetMaxLines(frameNode, DEFAULT_MAX_LINE);
 }
 
-void SetTextMinFontSize(ArkUINodeHandle node, ArkUI_Float32 number, const ArkUI_Int32 unit)
+void SetTextMinFontSize(ArkUINodeHandle node, ArkUI_Float32 number, const ArkUI_Int32 unit, void* minFontSizeRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetAdaptMinFontSize(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+    NodeModifier::ProcessResourceObj<Dimension>(
+        frameNode, "AdaptMinFontSize", Dimension(number, static_cast<DimensionUnit>(unit)), minFontSizeRawPtr);
 }
 
 void ResetTextMinFontSize(ArkUINodeHandle node)
@@ -443,6 +472,11 @@ void ResetTextMinFontSize(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetAdaptMinFontSize(frameNode, DEFAULT_MIN_FONT_SIZE);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("AdaptMinFontSize");
+    }
 }
 
 void SetTextDraggable(ArkUINodeHandle node, ArkUI_Uint32 draggable)
@@ -475,11 +509,13 @@ void ResetTextPrivacySensitve(ArkUINodeHandle node)
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SetTextMaxFontSize(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
+void SetTextMaxFontSize(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* maxFontSizeRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetAdaptMaxFontSize(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+    NodeModifier::ProcessResourceObj<Dimension>(
+        frameNode, "AdapttMaxFontSize", Dimension(number, static_cast<DimensionUnit>(unit)), maxFontSizeRawPtr);
 }
 
 void ResetTextMaxFontSize(ArkUINodeHandle node)
@@ -487,13 +523,19 @@ void ResetTextMaxFontSize(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetAdaptMaxFontSize(frameNode, DEFAULT_MAX_FONT_SIZE);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("AdapttMaxFontSize");
+    }
 }
 
-void SetTextMinFontScale(ArkUINodeHandle node, ArkUI_Float32 number)
+void SetTextMinFontScale(ArkUINodeHandle node, ArkUI_Float32 number, void* minFontScaleRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetMinFontScale(frameNode, number);
+    NodeModifier::ProcessResourceObj<float>(frameNode, "MinFontScale", number, minFontScaleRawPtr);
 }
 
 void ResetTextMinFontScale(ArkUINodeHandle node)
@@ -501,13 +543,19 @@ void ResetTextMinFontScale(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetMinFontScale(frameNode, DEFAULT_MIN_FONT_SCALE);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("MinFontScale");
+    }
 }
 
-void SetTextMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 number)
+void SetTextMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 number, void* maxFontScaleRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetMaxFontScale(frameNode, number);
+    NodeModifier::ProcessResourceObj<float>(frameNode, "MinFontScale", number, maxFontScaleRawPtr);
 }
 
 void ResetTextMaxFontScale(ArkUINodeHandle node)
@@ -515,9 +563,14 @@ void ResetTextMaxFontScale(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetMaxFontScale(frameNode, DEFAULT_MAX_FONT_SCALE);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("MaxFontScale");
+    }
 }
 
-void SetTextFontFamily(ArkUINodeHandle node, const char** fontFamilies, ArkUI_Uint32 length)
+void SetTextFontFamily(ArkUINodeHandle node, const char** fontFamilies, ArkUI_Uint32 length, void* fontFamilyRawPtr)
 {
     CHECK_NULL_VOID(fontFamilies);
     if (length <= 0) {
@@ -533,6 +586,7 @@ void SetTextFontFamily(ArkUINodeHandle node, const char** fontFamilies, ArkUI_Ui
         }
     }
     TextModelNG::SetFontFamily(frameNode, families);
+    NodeModifier::ProcessResourceObj<std::vector<std::string>>(frameNode, "FontFamily", families, fontFamilyRawPtr);
 }
 
 void ResetTextFontFamily(ArkUINodeHandle node)
@@ -542,6 +596,11 @@ void ResetTextFontFamily(ArkUINodeHandle node)
     std::vector<std::string> families;
     families.emplace_back(DEFAULT_FAMILY);
     TextModelNG::SetFontFamily(frameNode, families);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("FontFamily");
+    }
 }
 
 void SetTextCopyOption(ArkUINodeHandle node, ArkUI_Int32 copyOption)
@@ -558,12 +617,33 @@ void ResetTextCopyOption(ArkUINodeHandle node)
     TextModelNG::SetCopyOption(frameNode, DEFAULT_COPY_OPTION);
 }
 
-void SetTextTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length)
+void SetTextTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length,
+    const void* radiusResArrs, const void* colorResArrs,
+    const void* offsetXResArrs, const void* offsetYResArrs)
 {
     CHECK_NULL_VOID(shadows);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<Shadow> shadowList(length);
+    std::vector<RefPtr<ResourceObject>> radiusResArr;
+    std::vector<RefPtr<ResourceObject>> colorResArr;
+    std::vector<RefPtr<ResourceObject>> offsetXResArr;
+    std::vector<RefPtr<ResourceObject>> offsetYResArr;
+    if (radiusResArrs != nullptr) {
+        radiusResArr = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(radiusResArrs));
+    }
+    if (colorResArrs != nullptr) {
+        colorResArr =
+            *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(colorResArrs));
+    }
+    if (offsetXResArrs != nullptr) {
+        offsetXResArr =
+            *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(offsetXResArrs));
+    }
+    if (offsetYResArrs != nullptr) {
+        offsetYResArr =
+        *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(offsetYResArrs));
+    }
     for (uint32_t i = 0; i < length; i++) {
         Shadow shadow;
         ArkUITextShadowStruct* shadowStruct = shadows + i;
@@ -573,6 +653,11 @@ void SetTextTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shado
         shadow.SetOffsetX(shadowStruct->offsetX);
         shadow.SetOffsetY(shadowStruct->offsetY);
         shadow.SetIsFilled(static_cast<bool>(shadowStruct->fill));
+        RefPtr<ResourceObject> radiusObject = (radiusResArr.size() > i) ? radiusResArr[i] : nullptr;
+        RefPtr<ResourceObject> colorObject = (colorResArr.size() > i) ? colorResArr[i] : nullptr;
+        RefPtr<ResourceObject> offsetXObject = (offsetXResArr.size() > i) ? offsetXResArr[i] : nullptr;
+        RefPtr<ResourceObject> offsetYObject = (offsetYResArr.size() > i) ? offsetYResArr[i] : nullptr;
+        Shadow::RegisterShadowResourceObj(shadow, radiusObject, colorObject, offsetXObject, offsetYObject);
         shadowList.at(i) = shadow;
     }
     TextModelNG::SetTextShadow(frameNode, shadowList);
@@ -596,10 +681,10 @@ void GetTextShadow(ArkUINodeHandle node, ArkUITextShadowStruct* shadow, uint32_t
             *(shadow + i) = { static_cast<float>(textShadowVector[i].GetBlurRadius()),
                 static_cast<int32_t>(textShadowVector[i].GetShadowType()), textShadowVector[i].GetColor().GetValue(),
                 textShadowVector[i].GetOffset().GetX(), textShadowVector[i].GetOffset().GetY(),
-                textShadowVector[i].GetIsFilled()};
+                textShadowVector[i].GetIsFilled() };
         } else {
-            *(shadow + i) = { 0.0f, static_cast<int32_t>(ShadowType::COLOR),
-                Color::TRANSPARENT.GetValue(), 0.0f, 0.0f, 0 };
+            *(shadow + i) = { 0.0f, static_cast<int32_t>(ShadowType::COLOR), Color::TRANSPARENT.GetValue(), 0.0f, 0.0f,
+                0 };
         }
     }
 }
@@ -629,11 +714,13 @@ void ResetTextHeightAdaptivePolicy(ArkUINodeHandle node)
     TextModelNG::SetHeightAdaptivePolicy(frameNode, TextHeightAdaptivePolicy::MAX_LINES_FIRST);
 }
 
-void SetTextTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
+void SetTextTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* textIndentRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetTextIndent(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+    NodeModifier::ProcessResourceObj<Dimension>(
+        frameNode, "TextIndent", Dimension(number, static_cast<DimensionUnit>(unit)), textIndentRawPtr);
 }
 
 float GetTextTextIndent(ArkUINodeHandle node)
@@ -648,13 +735,20 @@ void ResetTextTextIndent(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetTextIndent(frameNode, CalcDimension(0, DimensionUnit::FP));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("TextIndent");
+    }
 }
 
-void SetTextBaselineOffset(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
+void SetTextBaselineOffset(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* baselineOffsetRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetBaselineOffset(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
+    NodeModifier::ProcessResourceObj<Dimension>(
+        frameNode, "BaselineOffset", Dimension(number, static_cast<DimensionUnit>(unit)), baselineOffsetRawPtr);
 }
 
 void ResetTextBaselineOffset(ArkUINodeHandle node)
@@ -662,6 +756,11 @@ void ResetTextBaselineOffset(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetBaselineOffset(frameNode, DEFAULT_BASELINE_OFFSET);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("BaselineOffset");
+    }
 }
 
 ArkUI_Float32 GetTextBaselineOffset(ArkUINodeHandle node)
@@ -795,7 +894,7 @@ ArkUI_CharPtr GetFontFamily(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, nullptr);
     std::vector<std::string> fontFamilies = TextModelNG::GetFontFamily(frameNode);
     std::string families;
-    //set index start
+    // set index start
     uint32_t index = 0;
     for (auto& family : fontFamilies) {
         families += family;
@@ -849,7 +948,7 @@ void GetFont(ArkUINodeHandle node, ArkUITextFont* font)
     }
     if (!value.fontFamilies.empty()) {
         std::string families;
-        //set index start
+        // set index start
         std::size_t index = 0;
         for (auto& family : value.fontFamilies) {
             families += family;
@@ -995,23 +1094,24 @@ void ResetTextLineSpacing(ArkUINodeHandle node)
     TextModelNG::SetLineSpacing(frameNode, DEFAULT_LINE_SPACING, false);
 }
 
-void SetTextCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+void SetTextCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* caretColorRawPtr)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetCaretColor(frameNode, Color(color));
+    NodeModifier::ProcessResourceObj<Color>(frameNode, "TextCaretColor", Color(color), caretColorRawPtr);
 }
 
 ArkUI_Uint32 GetTextCaretColor(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, Color::BLACK.GetValue());
     return TextModelNG::GetCaretColor(frameNode).GetValue();
 }
 
 void ResetTextCaretColor(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -1019,27 +1119,39 @@ void ResetTextCaretColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(theme);
     auto caretColor = static_cast<int32_t>(theme->GetCaretColor().GetValue());
     TextModelNG::SetCaretColor(frameNode, Color(caretColor));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("TextCaretColor");
+    }
 }
 
-void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* selectedBackgroundColorRawPtr)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetSelectedBackgroundColor(frameNode, Color(color));
+    NodeModifier::ProcessResourceObj<Color>(
+        frameNode, "SelectedBackgroundColor", Color(color), selectedBackgroundColorRawPtr);
 }
 
 ArkUI_Uint32 GetTextSelectedBackgroundColor(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, Color::BLACK.GetValue());
     return TextModelNG::GetSelectedBackgroundColor(frameNode).GetValue();
 }
 
 void ResetTextSelectedBackgroundColor(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ResetSelectedBackgroundColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("SelectedBackgroundColor");
+    }
 }
 
 void SetLineBreakStrategy(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy)
@@ -1114,7 +1226,8 @@ void ResetTextSelectableMode(ArkUINodeHandle node)
 }
 
 void SetTextDataDetectorConfigWithEvent(
-    ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig)
+    ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig, void* entityColorRawPtr,
+    void* entityDecorationColorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1128,7 +1241,18 @@ void SetTextDataDetectorConfigWithEvent(
     textDetectConfig.entityDecorationType = TextDecoration(arkUITextDetectConfig->entityDecorationType);
     textDetectConfig.entityDecorationColor = Color(arkUITextDetectConfig->entityDecorationColor);
     textDetectConfig.entityDecorationStyle = TextDecorationStyle(arkUITextDetectConfig->entityDecorationStyle);
+    textDetectConfig.enablePreviewMenu = arkUITextDetectConfig->entityEnablePreviewMenu;
     TextModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
+    if (SystemProperties::ConfigChangePerform()) {
+        if (entityColorRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(entityColorRawPtr));
+            TextDetectConfig::RegisterColorResource(textDetectConfig, resObj);
+        }
+        if (entityDecorationColorRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(entityDecorationColorRawPtr));
+            TextDetectConfig::RegisterDecoColorResource(textDetectConfig, resObj);
+        }
+    }
 }
 
 void ResetTextDataDetectorConfigWithEvent(ArkUINodeHandle node)
@@ -1137,6 +1261,11 @@ void ResetTextDataDetectorConfigWithEvent(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextDetectConfig textDetectConfig;
     TextModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("dataDetectorConfig");
+    }
 }
 
 void SetTextOnCopy(ArkUINodeHandle node, void* callback)
@@ -1153,7 +1282,7 @@ void SetTextOnCopy(ArkUINodeHandle node, void* callback)
 
 void ResetTextOnCopy(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetOnCopy(frameNode, nullptr);
 }
@@ -1172,12 +1301,13 @@ void SetTextOnTextSelectionChange(ArkUINodeHandle node, void* callback)
 
 void ResetTextOnTextSelectionChange(ArkUINodeHandle node)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetOnTextSelectionChange(frameNode, nullptr);
 }
 
-void SetTextSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback)
+void SetTextSelectionMenuOptions(
+    ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback, void* onPrepareMenuCallback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1194,6 +1324,18 @@ void SetTextSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallbac
     } else {
         TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, nullptr);
     }
+    if (onPrepareMenuCallback) {
+        NG::OnPrepareMenuCallback onPrepareMenu =
+            *(reinterpret_cast<NG::OnPrepareMenuCallback*>(onPrepareMenuCallback));
+        TextModelNG::OnPrepareMenuCallbackUpdate(frameNode, std::move(onPrepareMenu));
+    } else {
+        TextModelNG::OnPrepareMenuCallbackUpdate(frameNode, nullptr);
+    }
+}
+
+void SetTextSelectionMenuOptionsForCJ(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback)
+{
+    SetTextSelectionMenuOptions(node, onCreateMenuCallback, onMenuItemClickCallback, nullptr);
 }
 
 void ResetTextSelectionMenuOptions(ArkUINodeHandle node)
@@ -1202,8 +1344,10 @@ void ResetTextSelectionMenuOptions(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
+    NG::OnPrepareMenuCallback onPrepareMenuCallback;
     TextModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenuCallback));
     TextModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
+    TextModelNG::OnPrepareMenuCallbackUpdate(frameNode, std::move(onPrepareMenuCallback));
 }
 
 void SetTextHalfLeading(ArkUINodeHandle node, ArkUI_Bool value)
@@ -1611,6 +1755,42 @@ ArkUI_Int32 GetTextRadialGradient(ArkUINodeHandle node, ArkUI_Float32 (*values)[
     }
     return index;
 }
+
+void SetTextVerticalAlign(ArkUINodeHandle node, ArkUI_Uint32 textVerticalAlign)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextVerticalAlign(frameNode, static_cast<TextVerticalAlign>(textVerticalAlign));
+}
+
+void ResetTextVerticalAlign(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextVerticalAlign(frameNode, TextVerticalAlign::BASELINE);
+}
+
+ArkUI_Uint32 GetTextVerticalAlign(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, static_cast<uint32_t>(TextVerticalAlign::BASELINE));
+    return static_cast<ArkUI_Uint32>(TextModelNG::GetTextVerticalAlign(frameNode));
+}
+
+void SetTextContentTransition(ArkUINodeHandle node, ArkUI_Int32 flipDirection, ArkUI_Bool enableBlur)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetContentTransition(frameNode, TextEffectStrategy::FLIP,
+        static_cast<TextFlipDirection>(flipDirection), static_cast<bool>(enableBlur));
+}
+
+void ResetTextContentTransition(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetContentTransition(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1759,6 +1939,11 @@ const ArkUITextModifier* GetTextModifier()
         .setRadialGradient = SetTextRadialGradient,
         .getRadialGradient = GetTextRadialGradient,
         .resetTextGradient = ResetTextGradient,
+        .setTextVerticalAlign = SetTextVerticalAlign,
+        .resetTextVerticalAlign = ResetTextVerticalAlign,
+        .getTextVerticalAlign = GetTextVerticalAlign,
+        .setTextContentTransition = SetTextContentTransition,
+        .resetTextContentTransition = ResetTextContentTransition
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -1880,7 +2065,7 @@ const CJUITextModifier* GetCJUITextModifier()
         .resetTextMinFontScale = ResetTextMinFontScale,
         .setTextMaxFontScale = SetTextMaxFontScale,
         .resetTextMaxFontScale = ResetTextMaxFontScale,
-        .setTextSelectionMenuOptions = SetTextSelectionMenuOptions,
+        .setTextSelectionMenuOptions = SetTextSelectionMenuOptionsForCJ,
         .resetTextSelectionMenuOptions = ResetTextSelectionMenuOptions,
         .setTextHalfLeading = SetTextHalfLeading,
         .resetTextHalfLeading = ResetTextHalfLeading,
@@ -1915,6 +2100,20 @@ void ResetOnDetectResultUpdate(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetOnDetectResultUpdate(frameNode, nullptr);
+}
+
+template<typename T>
+void ProcessResourceObj(FrameNode* frameNode, std::string key, T value, void* objRawPtr)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    if (SystemProperties::ConfigChangePerform() && objRawPtr) {
+        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(objRawPtr));
+        pattern->RegisterResource<T>(key, resObj, value);
+    } else {
+        pattern->UnRegisterResource(key);
+    }
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

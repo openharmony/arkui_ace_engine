@@ -30,6 +30,9 @@ public:
     void SetUp() override;
     void TearDown() override;
     static void TearDownTestSuite();
+private:
+    int32_t CheckMaxLines(int32_t maxLines);
+    float CheckMaxLinesHeight(float maxLinesHeight);
 };
 
 void RichEditorPatternTestFourNg::SetUp()
@@ -72,8 +75,63 @@ HWTEST_F(RichEditorPatternTestFourNg, AddImageSpan001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     ImageSpanOptions options;
-    int32_t res = richEditorPattern->AddImageSpan(options, true, 0, false);
+    int32_t res = richEditorPattern->AddImageSpan(options, TextChangeReason::UNKNOWN, true, 0, false);
     ASSERT_EQ(res, 0);
+}
+
+/**
+ * @tc.name: SetMenuParam001
+ * @tc.desc: test SetMenuParam
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, SetMenuParam001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto contentNode = richEditorNode_->GetChildAtIndex(0);
+    ASSERT_NE(contentNode, nullptr);
+    AddImageSpan();
+    std::function<void()> tempFunc = []() { };
+    std::function<void()>& func = tempFunc;
+    SelectMenuParam menuParam;
+    richEditorPattern->SetPreviewMenuParam(TextSpanType::IMAGE, func, menuParam);
+    EXPECT_TRUE(static_cast<bool>(richEditorPattern->oneStepDragController_));
+}
+
+/**
+ * @tc.name: AddImageSpan002
+ * @tc.desc: test AddImageSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, AddImageSpan002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    ImageSpanOptions options;
+    options.image = IMAGE_VALUE;
+    options.bundleName = BUNDLE_NAME;
+    options.moduleName = MODULE_NAME;
+    ImageSpanAttribute imageStyle;
+    imageStyle.verticalAlign = VerticalAlign::FOLLOW_PARAGRAPH;
+    options.imageAttribute = imageStyle;
+    auto index = richEditorController->AddImageSpan(options);
+    EXPECT_EQ(index, 0);
+    auto spanItem = richEditorPattern->spans_.front();
+    auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(spanItem);
+    ASSERT_NE(imageSpanItem, nullptr);
+    auto imageAttribute = imageSpanItem->options.imageAttribute;
+    bool hasImageAttribute = imageAttribute.has_value();
+    EXPECT_TRUE(hasImageAttribute);
+    auto verticalAlign = imageAttribute.value().verticalAlign;
+    auto hasVerticalAlign = verticalAlign.has_value();
+    EXPECT_TRUE(hasVerticalAlign);
+    EXPECT_EQ(verticalAlign.value(), VerticalAlign::FOLLOW_PARAGRAPH);
 }
 
 /**
@@ -209,6 +267,14 @@ HWTEST_F(RichEditorPatternTestFourNg, SetMaxLength002, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->GetMaxLength(), INT_MAX);
 }
 
+int32_t RichEditorPatternTestFourNg::CheckMaxLines(int32_t maxLines)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->SetMaxLines(maxLines);
+    return richEditorPattern->GetMaxLines();
+}
+
+
 /**
  * @tc.name: SetMaxLines001
  * @tc.desc: test SetMaxLines
@@ -217,10 +283,7 @@ HWTEST_F(RichEditorPatternTestFourNg, SetMaxLength002, TestSize.Level1)
 HWTEST_F(RichEditorPatternTestFourNg, SetMaxLines001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    int32_t maxLines = 1;
-    richEditorPattern->SetMaxLines(maxLines);
-    EXPECT_EQ(richEditorPattern->GetMaxLines(), 1);
+    EXPECT_EQ(CheckMaxLines(1), 1);
 }
 
 /**
@@ -232,9 +295,7 @@ HWTEST_F(RichEditorPatternTestFourNg, SetMaxLines002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    int32_t maxLines = 0;
-    richEditorPattern->SetMaxLines(maxLines);
-    EXPECT_EQ(richEditorPattern->GetMaxLines(), 0);
+    EXPECT_EQ(CheckMaxLines(0), 0);
 }
 
 /**
@@ -248,6 +309,13 @@ HWTEST_F(RichEditorPatternTestFourNg, SetMaxLines003, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->GetMaxLines(), INT_MAX);
 }
 
+float RichEditorPatternTestFourNg::CheckMaxLinesHeight(float maxLinesHeight)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->SetMaxLinesHeight(maxLinesHeight);
+    return richEditorPattern->GetMaxLinesHeight();
+}
+
 /**
  * @tc.name: SetMaxLinesHeight001
  * @tc.desc: test SetMaxLinesHeight
@@ -256,10 +324,7 @@ HWTEST_F(RichEditorPatternTestFourNg, SetMaxLines003, TestSize.Level1)
 HWTEST_F(RichEditorPatternTestFourNg, SetMaxLinesHeight001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    float height = 0.0f;
-    richEditorPattern->SetMaxLinesHeight(height);
-    EXPECT_EQ(richEditorPattern->GetMaxLinesHeight(), 0.0f);
+    EXPECT_EQ(CheckMaxLinesHeight(0.0f), 0.0f);
 }
 
 /**
@@ -270,10 +335,7 @@ HWTEST_F(RichEditorPatternTestFourNg, SetMaxLinesHeight001, TestSize.Level1)
 HWTEST_F(RichEditorPatternTestFourNg, SetMaxLinesHeight002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    float height = 10.0f;
-    richEditorPattern->SetMaxLinesHeight(height);
-    EXPECT_EQ(richEditorPattern->GetMaxLinesHeight(), 10.0f);
+    EXPECT_EQ(CheckMaxLinesHeight(10.0f), 10.0f);
 }
 
 /**

@@ -352,28 +352,6 @@ public:
 
     void OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode);
     RefPtr<OverlayManager> GetEmbeddedOverlay(const RefPtr<OverlayManager>& context);
-    void MountUECMask();
-    void CloseDialog();
-    void CloseDialogByEvent(DialogDismissReason reason = DialogDismissReason::DIALOG_TOUCH_OUTSIDE);
-    void SetUECHostMaskInfo(UECHostMaskInfo maskInfo)
-    {
-        hostMaskInfo_ = maskInfo;
-    }
-
-    UECHostMaskInfo GetUECHostMaskInfo()
-    {
-        return hostMaskInfo_;
-    }
-
-    void SetUECMaskNode(const RefPtr<FrameNode>& dialogNode)
-    {
-        uecMaskNode_ = dialogNode;
-    }
-
-    const RefPtr<FrameNode> GetUECMaskNode()
-    {
-        return uecMaskNode_.Upgrade();
-    }
     void UpdateDialogColor(const Color& color, const DialogResourceType type);
     void UpdateContentValue(std::string& text, const DialogResourceType type);
     void UpdateLayoutContent(const CalcDimension& value, const DialogResourceType type);
@@ -387,7 +365,7 @@ public:
     void UpdateContent(const Color& color, ActionSheetType type);
     void UpdateBorderWidth(const NG::BorderWidthProperty& width);
     void UpdateBorderColor(const NG::BorderColorProperty& color);
-    void UpdateCornerRadius(const NG::BorderRadiusProperty& radius);
+    void UpdateCornerRadius(NG::BorderRadiusProperty& radius);
     void UpdateButtonBackgroundColor(const Color& color, int32_t buttonIndex);
     void UpdateButtonFontColor(const std::string colorStr, int32_t buttonIndex);
     void UpdateButtonText(const std::string text, int32_t buttonIndex);
@@ -475,6 +453,7 @@ private:
     void OnDetachFromMainTree() override;
     void AddFollowParentWindowLayoutNode();
     void RemoveFollowParentWindowLayoutNode();
+    void RegisterButtonOnKeyEvent(const ButtonInfo& params, RefPtr<FrameNode>& buttonNode, int32_t buttonIdx);
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;
@@ -519,8 +498,6 @@ private:
     bool isUIExtensionSubWindow_ = false;
     bool isDialogDisposed_ = false;
     RectF hostWindowRect_;
-    UECHostMaskInfo hostMaskInfo_;
-    WeakPtr<FrameNode> uecMaskNode_;
 };
 } // namespace OHOS::Ace::NG
 

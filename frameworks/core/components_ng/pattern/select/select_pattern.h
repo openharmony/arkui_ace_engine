@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/select/select_accessibility_property.h"
 #include "core/components_ng/pattern/select/select_event_hub.h"
 #include "core/components_ng/pattern/select/select_layout_algorithm.h"
+#include "core/components_ng/pattern/select/select_layout_property.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/select/select_paint_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -185,6 +186,11 @@ public:
         return isHover_;
     }
 
+    void SetShowInSubWindow(bool isShowInSubWindow);
+    void ResetShowInSubWindow();
+    void SetShowDefaultSelectedIcon(bool show);
+    void ResetShowDefaultSelectedIcon();
+
     void SetItemSelected(int index, const std::string& value);
     void PlayBgColorAnimation(bool isHoverChange = true);
     void SetSpace(const Dimension& value);
@@ -198,7 +204,8 @@ public:
     void OnColorConfigurationUpdate() override;
     void OnLanguageConfigurationUpdate() override;
     void ShowSelectMenu();
-    
+    void ShowSelectMenuInSubWindow();
+
     Dimension GetFontSize();
     void SetOptionWidth(const Dimension& value);
     void SetOptionHeight(const Dimension& value);
@@ -214,6 +221,10 @@ public:
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
         return MakeRefPtr<SelectPaintProperty>();
+    }
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        return MakeRefPtr<SelectLayoutProperty>();
     }
     void ResetFontColor();
     void SetMenuOutline(const MenuParam& menuParam);
@@ -233,6 +244,19 @@ public:
     void UpdateSelectedOptionFontFromPattern(const RefPtr<MenuItemPattern>& optionPattern);
     void DumpInfo() override;
 
+    void UpdateComponentColor(const Color& color, const SelectColorType selectColorType);
+    void SetColorByUser(const RefPtr<FrameNode>& host);
+    void UpdateMenuOption(int32_t index, const std::string& value, const SelectOptionType optionType);
+    void SetNormalOptionBgColorResource(bool flag)
+    {
+        isNormalOptionBgColorFlag_ = flag;
+    }
+
+    bool IsNormalOptionBgColorResource()
+    {
+        return isNormalOptionBgColorFlag_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
@@ -241,11 +265,14 @@ private:
     void HandleFocusStyleTask();
     void HandleBlurStyleTask();
     void SetFocusStyle();
+    void SetMenuBackgroundColorByUser(Color themeColor);
+    void SetOptionBgColorByUser(Color themeColor);
     void ClearFocusStyle();
     void ModFocusIconStyle(RefPtr<SelectTheme> selectTheme, bool focusedFlag);
     void InitFocusEvent();
     void AddIsFocusActiveUpdateEvent();
     void RemoveIsFocusActiveUpdateEvent();
+    void UpdateMenuScrollColorConfiguration(const RefPtr<FrameNode>& menuNode);
     bool HasRowNode() const
     {
         return rowId_.has_value();
@@ -291,6 +318,8 @@ private:
     void RegisterOnHover();
     // add click event to show menu
     void RegisterOnClick();
+    void BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub);
+    bool CheckSkipMenuShow(const RefPtr<FrameNode>& targetNode);
 
     void RegisterOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
@@ -368,6 +397,8 @@ private:
     std::function<void(WeakPtr<NG::FrameNode>)> textApply_ = nullptr;
     std::function<void(WeakPtr<NG::FrameNode>)> textOptionApply_ = nullptr;
     std::function<void(WeakPtr<NG::FrameNode>)> textSelectOptionApply_ = nullptr;
+    bool isNormalOptionBgColorFlag_ = false;
+    std::optional<Color> menuBackgroundColor_;
 };
 
 } // namespace OHOS::Ace::NG

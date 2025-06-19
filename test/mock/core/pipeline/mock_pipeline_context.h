@@ -78,6 +78,32 @@ public:
     }
     void SetEnableSwipeBack(bool isEnable) {}
 
+    void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
+
+    bool ReachResponseDeadline() const override
+    {
+        if (responseTime_ > 0) {
+            return false;
+        }
+        return true;
+    }
+
+    void SetResponseTime(int32_t time)
+    {
+        responseTime_ = time;
+    }
+
+    void DecResponseTime()
+    {
+        if (responseTime_ > 0 && responseTime_ != INT32_MAX) {
+            responseTime_--;
+        }
+    }
+
+    auto Get()
+    {
+        return this;
+    }
 protected:
     float fontScale_ = 1.0f;
     bool isDeclarative_ = false;
@@ -85,6 +111,7 @@ protected:
     std::function<void()> backCallback_;
     RefPtr<TaskExecutor> taskExecutor_;
     bool useFlushUITasks_ = false;
+    int32_t responseTime_ = INT32_MAX;
 };
 } // namespace OHOS::Ace::NG
 

@@ -80,6 +80,13 @@ public:
         return isPlayByController_;
     }
 
+    float GetHdrBrightness()
+    {
+        return hdrBrightness_;
+    }
+ 
+    void SetHdrBrightness(float hdrBrightness);
+
     void OnVisibleChange(bool isVisible) override;
 
     void OnAreaChangedInner() override;
@@ -113,6 +120,11 @@ public:
     void SetWaterMask(bool enabled)
     {
         isPlayWithMask_ = enabled;
+    }
+
+    bool GetWaterMask()
+    {
+        return isPlayWithMask_;
     }
 
     int64_t GetCurrentDateModified()
@@ -274,6 +286,7 @@ private:
     SharedFd fd_;
     int64_t autoPlayPeriodStartTime_ = -1;
     int64_t autoPlayPeriodEndTime_ = -1;
+    float hdrBrightness_ = 1.0f;
     std::string uri_ = "";
     int32_t xmageModeValue_ = 0;
     bool isXmageMode_ = false;

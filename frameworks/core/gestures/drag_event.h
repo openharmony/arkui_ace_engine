@@ -21,6 +21,7 @@
 #include "base/geometry/rect.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "core/common/udmf/data_load_params.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/event/ace_events.h"
 #include "core/gestures/velocity.h"
@@ -171,6 +172,26 @@ public:
     void SetDisplayY(double y)
     {
         displayY_ = y;
+    }
+
+    double GetGlobalDisplayX() const
+    {
+        return globalDisplayX_;
+    }
+
+    double GetGlobalDisplayY() const
+    {
+        return globalDisplayY_;
+    }
+
+    void SetGlobalDisplayX(double x)
+    {
+        globalDisplayX_ = x;
+    }
+
+    void SetGlobalDisplayY(double y)
+    {
+        globalDisplayY_ = y;
     }
 
     void SetDescription(const std::string& description)
@@ -358,7 +379,7 @@ public:
         return requestId_;
     }
 
-    void SetDragSource(std::string& bundleName)
+    void SetDragSource(const std::string& bundleName)
     {
         bundleName_ = bundleName;
     }
@@ -389,6 +410,26 @@ public:
         return displayId_;
     }
 
+    void SetNeedDoInternalDropAnimation(bool needDoInternalDropAnimation)
+    {
+        needDoInternalDropAnimation_ = needDoInternalDropAnimation;
+    }
+
+    bool GetNeedDoInternalDropAnimation() const
+    {
+        return needDoInternalDropAnimation_;
+    }
+
+    void SetDataLoadParams(const RefPtr<DataLoadParams>& dataLoadParams)
+    {
+        dataLoadParams_ = dataLoadParams;
+    }
+
+    RefPtr<DataLoadParams> GetDataLoadParams() const
+    {
+        return dataLoadParams_;
+    }
+
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
@@ -397,6 +438,8 @@ private:
     double y_ = 0.0;
     double displayX_ = 0.0;
     double displayY_ = 0.0;
+    double globalDisplayX_ = 0.0;
+    double globalDisplayY_ = 0.0;
     std::string description_;
     RefPtr<PixelMap> pixelMap_;
     std::map<std::string, int64_t> summary_;
@@ -419,6 +462,8 @@ private:
     std::string bundleName_;
     bool isRemoteDev_ { false };
     int32_t displayId_ = -1;
+    bool needDoInternalDropAnimation_ = false;
+    RefPtr<DataLoadParams> dataLoadParams_ = nullptr;
 };
 
 class NotifyDragEvent : public DragEvent {

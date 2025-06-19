@@ -45,10 +45,11 @@ public:
     static void SetStatus(bool layoutInspectorStatus);
     static void GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonValue>& message);
     static void RegisterConnectCallback();
-    static void ProcessMessages(const std::string& message);
+    static std::pair<uint32_t, int32_t> ProcessMessages(const std::string& message);
 
     static void CreateContainer3DLayoutInfo(RefPtr<Container>& container);
     static void Create3DLayoutInfoByWinId(uint32_t windId);
+    static void SendInspctorAbilities();
 
     // state profiler
     static bool GetStateProfilerStatus();

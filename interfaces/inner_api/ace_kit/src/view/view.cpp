@@ -52,4 +52,8 @@ void View::SetHeight(const CalcDimension& height)
     }
 }
 
+void View::SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara)
+{
+    NG::ViewAbstract::SetLinearGradientBlur(reinterpret_cast<AceNode*>(node_->GetHandle()), blurPara);
+}
 } // namespace OHOS::Ace::Kit

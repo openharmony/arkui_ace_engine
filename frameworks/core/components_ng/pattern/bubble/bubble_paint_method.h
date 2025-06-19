@@ -26,6 +26,7 @@
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/shadow_config.h"
+#include "core/components/popup/popup_theme.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
@@ -189,23 +190,23 @@ private:
     float GetArrowOffset(const Placement& placement);
     void InitEdgeSize(Edge& edge);
 
-    void BuildCompletePath(RSPath& path);
-    void BuildCornerPath(RSPath& path, const Placement& placement, float radius);
-    void BuildTopLinePath(RSPath& path, float arrowOffset, float radius);
-    void BuildRightLinePath(RSPath& path, float arrowOffset, float radius);
-    void BuildBottomLinePath(RSPath& path, float arrowOffset, float radius);
-    void BuildLeftLinePath(RSPath& path, float arrowOffset, float radius);
+    void BuildCompletePath(RSPath& path, const RefPtr<PopupTheme>& popupTheme);
+    void BuildCornerPath(RSPath& path, const Placement& placement, float radius, const RefPtr<PopupTheme>& popupTheme);
+    void BuildTopLinePath(RSPath& path, float arrowOffset, float radius, const RefPtr<PopupTheme>& popupTheme);
+    void BuildRightLinePath(RSPath& path, float arrowOffset, float radius, const RefPtr<PopupTheme>& popupTheme);
+    void BuildBottomLinePath(RSPath& path, float arrowOffset, float radius, const RefPtr<PopupTheme>& popupTheme);
+    void BuildLeftLinePath(RSPath& path, float arrowOffset, float radius, const RefPtr<PopupTheme>& popupTheme);
     void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas);
     void ClipBubbleWithPath(const RefPtr<FrameNode>& frameNode);
 
-    void BuildDoubleBorderPath(RSPath& path);
-    void BuildTopDoubleBorderPath(RSPath& path, float radius);
-    void BuildRightDoubleBorderPath(RSPath& path, float radius);
-    void BuildBottomDoubleBorderPath(RSPath& path, float radius);
-    void BuildLeftDoubleBorderPath(RSPath& path, float radius);
+    void BuildDoubleBorderPath(RSPath& path, const RefPtr<PopupTheme>& popupTheme);
+    void BuildTopDoubleBorderPath(RSPath& path, float radius, const RefPtr<PopupTheme>& popupTheme);
+    void BuildRightDoubleBorderPath(RSPath& path, float radius, const RefPtr<PopupTheme>& popupTheme);
+    void BuildBottomDoubleBorderPath(RSPath& path, float radius, const RefPtr<PopupTheme>& popupTheme);
+    void BuildLeftDoubleBorderPath(RSPath& path, float radius, const RefPtr<PopupTheme>& popupTheme);
 
-    float GetInnerBorderOffset();
-    float GetBorderOffset();
+    float GetInnerBorderOffset(const RefPtr<PopupTheme>& popupTheme);
+    float GetBorderOffset(const RefPtr<PopupTheme>& popupTheme);
     float outerBorderWidth_ = Dimension(0.8_vp).ConvertToPx();
     float innerBorderWidth_ = Dimension(0.6_vp).ConvertToPx();
     bool needPaintOuterBorder_ = false;

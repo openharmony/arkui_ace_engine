@@ -18,8 +18,8 @@
 #include "base/log/log_wrapper.h"
 #include "base/network/download_manager.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "core/components_ng/image_provider/adapter/image_decoder.h"
-#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
+#include "core/components_ng/image_provider/image_decoder.h"
+#include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/components_ng/image_provider/animated_image_object.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/image_provider/image_object.h"
@@ -58,7 +58,7 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
     // Attempt to acquire a timed lock (maximum wait time: 1000ms)
     auto lock = imageObj->GetPrepareImageDataLock();
     if (!lock.owns_lock()) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "Failed to acquire lock within timeout. %{private}s-%{public}s.",
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Lock timeout. %{private}s-%{public}s.",
             dfxConfig.GetImageSrc().c_str(), dfxConfig.ToStringWithoutSrc().c_str());
         return false;
     }
@@ -69,7 +69,7 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
 
     auto container = Container::Current();
     if (container && container->IsSubContainer()) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "%{private}s-%{public}s. subContainer's pipeline's dataProviderManager is null.",
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "%{private}s-%{public}s. subContainer's dataProviderManager is null.",
             dfxConfig.GetImageSrc().c_str(), dfxConfig.ToStringWithoutSrc().c_str());
         auto currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
         container = Container::GetContainer(currentId);
@@ -80,7 +80,7 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
     // if image object has no skData, reload data.
     auto imageLoader = ImageLoader::CreateImageLoader(imageObj->GetSourceInfo());
     if (!imageLoader) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "Failed to create loader in prepareImageData. %{public}s-[%{private}s]",
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Loader create fail. %{public}s-[%{private}s]",
             dfxConfig.ToStringWithoutSrc().c_str(), dfxConfig.GetImageSrc().c_str());
         return false;
     }
@@ -222,9 +222,7 @@ void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
 bool ImageProvider::RegisterTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx)
 {
     if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "Failed to acquire mutex within %{public}" PRIu64 "milliseconds, proceeding without registerTask access.",
-            MAX_WAITING_TIME_FOR_TASKS);
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Lock timeout in registerTask.");
         return false;
     }
     // Adopt the already acquired lock
@@ -242,9 +240,7 @@ bool ImageProvider::RegisterTask(const std::string& key, const WeakPtr<ImageLoad
 std::set<WeakPtr<ImageLoadingContext>> ImageProvider::EndTask(const std::string& key, bool isErase)
 {
     if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "Failed to acquire mutex within %{public}" PRIu64 "milliseconds, proceeding without endTask access.",
-            MAX_WAITING_TIME_FOR_TASKS);
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Lock timeout in endTask.");
         return {};
     }
     // Adopt the already acquired lock
@@ -255,9 +251,6 @@ std::set<WeakPtr<ImageLoadingContext>> ImageProvider::EndTask(const std::string&
         return {};
     }
     auto ctxs = it->second.ctxs_;
-    if (ctxs.empty()) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "registered task has empty context %{private}s", key.c_str());
-    }
     if (isErase) {
         tasks_.erase(it);
     }
@@ -267,9 +260,7 @@ std::set<WeakPtr<ImageLoadingContext>> ImageProvider::EndTask(const std::string&
 bool ImageProvider::CancelTask(const std::string& key, const WeakPtr<ImageLoadingContext>& ctx)
 {
     if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "Failed to acquire mutex within %{public}" PRIu64 "milliseconds, proceeding without cancelTask access.",
-            MAX_WAITING_TIME_FOR_TASKS);
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Lock timeout in cancelTask.");
         return false;
     }
     // Adopt the already acquired lock
@@ -433,10 +424,7 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
         CreateImageObjHelper(src, true);
     } else {
         if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "Failed to acquire mutex within %{public}" PRIu64
-                "milliseconds, proceeding without createImageObject access.",
-                MAX_WAITING_TIME_FOR_TASKS);
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "Lock timeout in createObj.");
             return;
         }
         // Adopt the already acquired lock
@@ -456,7 +444,7 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(
 {
     auto imageDfxConfig = src.GetImageDfxConfig();
     if (!data) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE, "data is null when try ParseImageObjectType, [%{private}s]-%{public}s.",
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "data is null when build obj, [%{private}s]-%{public}s.",
             imageDfxConfig.GetImageSrc().c_str(), imageDfxConfig.ToStringWithoutSrc().c_str());
         return nullptr;
     }
@@ -478,10 +466,9 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(
     auto codec = rosenImageData->Parse();
     if (!codec.imageSize.IsPositive()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "Image of src: %{private}s, imageData's size = %{public}d is invalid, and the parsed size is invalid "
-            "%{private}s, frameCount is %{public}d, nodeId = %{public}s.",
-            src.ToString().c_str(), static_cast<int32_t>(data->GetSize()), codec.imageSize.ToString().c_str(),
-            codec.frameCount, imageDfxConfig.ToStringWithoutSrc().c_str());
+            "%{private}s - %{public}s dataSize is invalid : %{public}d-%{public}s-%{public}d.", src.ToString().c_str(),
+            imageDfxConfig.ToStringWithoutSrc().c_str(), static_cast<int32_t>(data->GetSize()),
+            codec.imageSize.ToString().c_str(), codec.frameCount);
         if (errorInfo.errorCode == ImageErrorCode::DEFAULT) {
             errorInfo = { ImageErrorCode::BUILD_IMAGE_DATA_SIZE_INVALID, "image data size is invalid." };
         }
@@ -510,10 +497,7 @@ void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPt
         MakeCanvasImageHelper(obj, size, key, imageDecoderOptions);
     } else {
         if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE,
-                "Failed to acquire mutex within %{public}" PRIu64
-                "milliseconds, proceeding without makeCanvasImage access.",
-                MAX_WAITING_TIME_FOR_TASKS);
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "Lock timeout in makeCanvasImage.");
             return;
         }
         // Adopt the already acquired lock

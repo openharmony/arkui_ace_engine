@@ -118,10 +118,16 @@ void AnimatablePath::OnAnimationCallback(double value)
     SkParsePath::FromSVGString(pathTo_.c_str(), &skPathTo);
 
     SkPath out;
+#ifndef USE_NEW_SKIA
     SkString outString;
+#endif
     if (skPathTo.interpolate(skPathFrom, value, &out)) {
+#ifdef USE_NEW_SKIA
+        SetValue(SkParsePath::ToSVGString(out).c_str());
+#else
         SkParsePath::ToSVGString(out, &outString);
         SetValue(outString.c_str());
+#endif
     } else {
         SetValue(pathTo_);
     }
@@ -135,11 +141,17 @@ void AnimatablePath::OnAnimationCallback(double value)
 // e.g. 'M0 20 L50 50 L50 100 Z' --> 'M0 20L50 50L50 100L0 20Z'
 std::string AnimatablePath::FormatPathString(const std::string& path)
 {
+#ifdef USE_NEW_SKIA
+    SkPath skPath;
+    SkParsePath::FromSVGString(path.c_str(), &skPath);
+    return SkParsePath::ToSVGString(skPath).c_str();
+#else
     SkPath skPath;
     SkString outString;
     SkParsePath::FromSVGString(path.c_str(), &skPath);
     SkParsePath::ToSVGString(skPath, &outString);
     return outString.c_str();
+#endif
 }
 
 }

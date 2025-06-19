@@ -187,6 +187,7 @@ ace_wearable_defines = [ "WEARABLE_PRODUCT" ]
 ace_ivi_defines = [ "IVI_PRODUCT" ]
 
 ace_common_defines = [ "ACE_LOG_TAG=\"Ace\"" ]
+ace_common_defines += [ "MODIFIER_NG" ]
 
 if (use_hilog) {
   ace_common_defines += [ "USE_HILOG" ]
@@ -244,6 +245,13 @@ if (defined(global_parts_info)) {
   } else {
     frame_trace_support = false
   }
+}
+
+if (defined(global_parts_info) &&
+  defined(global_parts_info.resourceschedule_ffrt) && current_os == "ohos") {
+  ffrt_support = true
+} else {
+  ffrt_support = false
 }
 
 if (defined(global_parts_info.multimedia_camera_framework)) {

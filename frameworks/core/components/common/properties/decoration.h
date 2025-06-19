@@ -102,6 +102,12 @@ enum class HapticFeedbackMode {
     AUTO,
 };
 
+enum class ModalMode {
+    AUTO = 0,
+    NONE = 1,
+    TARGET_WINDOW = 2,
+};
+
 struct SysOptions {
     bool disableSystemAdaptation = true;
     bool operator==(const SysOptions& other) const

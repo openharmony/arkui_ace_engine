@@ -51,7 +51,9 @@ public:
         OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea,
         NG::FrameNode* node = nullptr) override;
     void SetAutoScale(bool autoScale) override;
-        
+    void ParseResObjStartArea(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjEndArea(const RefPtr<ResourceObject>& resObj) override;
+
     static void SetDeleteArea(FrameNode* frameNode, FrameNode* footerNode, OnDeleteEvent&& onDelete,
         OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
         OnStateChangedEvent&& onStateChangeEvent, const Dimension& length, bool isStartArea);

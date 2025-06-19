@@ -1555,11 +1555,91 @@ HWTEST_F(SheetPresentationTestThreeNg, CalculateSheetOffsetInOtherScenes001, Tes
         SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx() + (2000.0f - SHEET_HOVERMODE_UP_HEIGHT.ConvertToPx() - 300.0f) / 2;
     EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, sheetOffsetY);
 
-    sheetLayoutAlgorithm->sheetMaxHeight_ = 3000.0f;
+    sheetLayoutAlgorithm->sheetMaxHeight_ = 2800.0f;
     sheetLayoutAlgorithm->hoverModeArea_ = HoverModeAreaType::BOTTOM_SCREEN;
     sheetLayoutAlgorithm->CalculateSheetOffsetInOtherScenes(Referenced::RawPtr(layoutWrapper));
-    sheetOffsetY = 2200.0f + (3000.0f - SHEET_HOVERMODE_DOWN_HEIGHT.ConvertToPx() - 2200.0f - 300.0f) / 2;
+    sheetOffsetY = 2200.0f + (2800.0f - SHEET_HOVERMODE_DOWN_HEIGHT.ConvertToPx() - 2200.0f - 300.0f) / 2;
     EXPECT_EQ(sheetLayoutAlgorithm->sheetOffsetY_, sheetOffsetY);
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: StartSheetTransitionAnimation001
+ * @tc.desc: Increase the coverage of SheetPresentationPattern::StartSheetTransitionAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, StartSheetTransitionAnimation001, TestSize.Level1)
+{
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->sheetObject_, nullptr);
+    AnimationOption option;
+    float offset = 0.0f;
+    sheetPattern->StartSheetTransitionAnimation(option, false, offset);
+    auto overlayManager = sheetPattern->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    EXPECT_TRUE(overlayManager->modalStack_.empty());
+}
+
+/**
+ * @tc.name: SetWindowUseImplicitAnimation001
+ * @tc.desc: Branch: if (sheetStyle.showInSubWindow.value_or(false))
+ *           Condition: sheetStyle.showInSubWindow = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, SetWindowUseImplicitAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 301, AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set sheetStyle.showInSubWindow true.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.showInSubWindow = true;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto windowManager = pipelineContext->windowManager_;
+    pipelineContext->windowManager_ = nullptr;
+
+    /**
+     * @tc.steps: step2. set useImplicitAnimationCallback_.
+     * @tc.expected: isUseImplicit will be changed.
+     */
+    pipelineContext->windowManager_ = windowManager;
+    bool isUseImplicit = false;
+    pipelineContext->windowManager_->useImplicitAnimationCallback_ = [&isUseImplicit](bool m) { isUseImplicit = m; };
+
+    /**
+     * @tc.expected: isUseImplicit is false.
+     */
+    sheetPattern->SetWindowUseImplicitAnimation(AceType::RawPtr(sheetNode), true);
+    EXPECT_EQ(isUseImplicit, false);
+
+    /**
+     * @tc.steps: step3. set sheetStyle.showInSubWindow false.
+     * @tc.expected: isUseImplicit is true.
+     */
+    sheetStyle.showInSubWindow = false;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    sheetPattern->SetWindowUseImplicitAnimation(AceType::RawPtr(sheetNode), true);
+    EXPECT_EQ(isUseImplicit, true);
+    pipelineContext->windowManager_->useImplicitAnimationCallback_ = nullptr;
+    pipelineContext->windowManager_ = nullptr;
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

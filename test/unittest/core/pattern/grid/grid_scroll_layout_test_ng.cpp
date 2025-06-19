@@ -1431,7 +1431,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest001, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -126.00447);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -57.300961);
 
     /**
      * @tc.steps: step2. play spring animation frame by frame, and increase grid height during animation
@@ -1441,7 +1441,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest001, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT + 50))));
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -63.002243);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -28.650482);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
@@ -1484,7 +1484,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest002, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -126.00447);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -57.300961);
 
     /**
      * @tc.steps: step2. play spring animation frame by frame, and decrease grid height during animation
@@ -1493,7 +1493,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest002, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT - 50))));
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -63.002243);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -28.650482);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
@@ -1536,7 +1536,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest003, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 279.38562);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 216.41699);
 
     /**
      * @tc.steps: step2. play spring animation frame by frame, and increase grid height during animation
@@ -1545,7 +1545,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest003, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT + 50))));
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 139.69281);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 108.2085);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
@@ -1588,7 +1588,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest004, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 279.38562);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 216.41699);
 
     /**
      * @tc.steps: step2. play spring animation frame by frame, and decrease grid height during animation
@@ -1597,7 +1597,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest004, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT - 50))));
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 139.69281);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 108.2085);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
@@ -1642,7 +1642,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest005, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -79.385628);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -16.417);
 
     /**
      * @tc.steps: step2. play spring animation frame by frame, and decrease grid height during animation
@@ -1651,7 +1651,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest005, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT + 50))));
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -89.692818);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -58.208496);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
@@ -1696,7 +1696,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest006, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -79.385628);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -16.417);
     EXPECT_TRUE(pattern_->IsAtBottom());
 
     /**
@@ -1707,7 +1707,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest006, TestSize.Level1)
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT - 50))));
     FlushUITasks();
     // the value of (currentOffset + gridMainSizeDelta) is greater than lineHeight(200), so move to next line
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -89.692818);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, -58.208504);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
@@ -1750,7 +1750,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest007, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 279.38562);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 216.41699);
 
     /**
      * @tc.steps: step2. play spring animation frame by frame, and decrease grid height during animation
@@ -1759,7 +1759,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest007, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT + 50))));
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 139.69281);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 108.2085);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
@@ -1802,7 +1802,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest008, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 279.38562);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 216.41699);
 
     /**
      * @tc.steps: step2. play spring animation frame by frame, and decrease grid height during animation
@@ -1811,7 +1811,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest008, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(Dimension(HEIGHT - 50))));
     FlushUITasks();
-    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 139.69281);
+    EXPECT_FLOAT_EQ(pattern_->info_.currentOffset_, 108.2085);
 
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();

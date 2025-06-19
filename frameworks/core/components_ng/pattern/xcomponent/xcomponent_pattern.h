@@ -61,6 +61,11 @@ public:
         float initHeight = 0.0f, bool isTypedNode = false);
     ~XComponentPattern() override = default;
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     bool IsAtomicNode() const override
     {
         return type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE || type_ == XComponentType::NODE;
@@ -112,7 +117,6 @@ public:
             nativeXComponentImpl_ = AceType::MakeRefPtr<NativeXComponentImpl>();
             nativeXComponent_ = std::make_shared<OH_NativeXComponent>(AceType::RawPtr(nativeXComponentImpl_));
         }
-        hasGotNativeXComponent_ = true;
         return std::make_pair(nativeXComponentImpl_, nativeXComponent_);
     }
 
@@ -301,6 +305,11 @@ public:
         return isNativeXComponentDisabled_;
     }
 
+    void SetHasGotNativeXComponent(bool hasGotNativeXComponent)
+    {
+        hasGotNativeXComponent_ = hasGotNativeXComponent;
+    }
+
     void SetExportTextureSurfaceId(const std::string& surfaceId);
     void FireExternalEvent(RefPtr<NG::PipelineContext> context,
         const std::string& componentId, const uint32_t nodeId, const bool isDestroy);
@@ -462,6 +471,7 @@ private:
     void RegisterSurfaceCallbackModeEvent();
     void RegisterTransformHintCallback(PipelineContext* context);
     void RegisterSurfaceRenderContext();
+    void UnregisterSurfaceRenderContext();
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);
@@ -521,6 +531,8 @@ private:
     // record displaySync_->DelFromPipelineOnContainer() from OnDetachFromMainTree
     bool isNativeImageAnalyzing_ = false;
     WeakPtr<PipelineContext> initialContext_ = nullptr;
+    // record the initial surfaceId_ in InitSurface, this variable should not be modified after the initial assignment
+    std::string initialSurfaceId_;
 };
 } // namespace OHOS::Ace::NG
 

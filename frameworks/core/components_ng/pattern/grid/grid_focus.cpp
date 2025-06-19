@@ -119,6 +119,7 @@ WeakPtr<FocusHub> GridFocus::GetNextFocusSimplified(FocusStep step, const RefPtr
 WeakPtr<FocusHub> GridFocus::GetNextFocusNode(
     FocusStep step, const WeakPtr<FocusHub>& currentFocusNode, bool isMainSkip)
 {
+    step = HandleDirectionStep(step);
     if (!GetCurrentFocusInfo(step, currentFocusNode)) {
         return nullptr;
     }
@@ -138,10 +139,13 @@ WeakPtr<FocusHub> GridFocus::GetNextFocusNode(
         }
         auto nextMaxCrossCount = info_.crossCount_;
         auto flag = (step == FocusStep::LEFT_END) || (step == FocusStep::RIGHT_END);
+        auto nextMain = (step == FocusStep::RIGHT_END && curFocusIndexInfo_.mainSpan > 1)
+                            ? curFocusIndexInfo_.mainEnd
+                            : curFocusIndexInfo_.mainStart;
         auto weakChild = info_.hasBigItem_
                              ? (GetFocusWrapMode() == FocusWrapMode::WRAP_WITH_ARROW && CheckIsCrossDirectionFocus(step)
                                        ? SearchBigItemFocusableChildInCross(
-                                           curFocusIndexInfo_.mainStart,
+                                           nextMain,
                                            nextCrossIndex,
                                            step,
                                            isMainSkip)
@@ -159,6 +163,28 @@ WeakPtr<FocusHub> GridFocus::GetNextFocusNode(
         nextCrossIndex = indexes.second;
     }
     return nullptr;
+}
+
+FocusStep GridFocus::HandleDirectionStep(FocusStep step)
+{
+    auto host = grid_.GetHost();
+    CHECK_NULL_RETURN(host, step);
+    auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(gridLayoutProperty, step);
+    bool isRtl = gridLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (isRtl) {
+        switch (step) {
+            case FocusStep::LEFT:
+                step = FocusStep::RIGHT;
+                break;
+            case FocusStep::RIGHT:
+                step = FocusStep::LEFT;
+                break;
+            default:
+                break;
+        }
+    }
+    return step;
 }
 
 bool GridFocus::GetCurrentFocusInfo(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode)

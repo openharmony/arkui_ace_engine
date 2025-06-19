@@ -54,6 +54,8 @@ public:
     void GetJsPasteData(const JSCallbackInfo& args);
     void GetScreenX(const JSCallbackInfo& args);
     void GetScreenY(const JSCallbackInfo& args);
+    void GetGlobalDisplayX(const JSCallbackInfo& args);
+    void GetGlobalDisplayY(const JSCallbackInfo& args);
     void GetDisplayId(const JSCallbackInfo& args);
     void GetX(const JSCallbackInfo& args);
     void GetY(const JSCallbackInfo& args);
@@ -88,6 +90,8 @@ public:
         return dragEvent_;
     }
     void StartDataLoading(const JSCallbackInfo& args);
+    void EnableInternalDropAnimation(const JSCallbackInfo& args);
+    void SetDataLoadParams(const JSCallbackInfo& args);
 
 private:
     static void Constructor(const JSCallbackInfo& args);

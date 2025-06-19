@@ -527,7 +527,8 @@ void FfiOHOSAceFrameworkSearchEditMenuOptions(CjOnCreateMenu cjOnCreateMenu, CjO
     NG::OnCreateMenuCallback onCreateMenuCallback;
     NG::OnMenuItemClickCallback onMenuItemClick;
     ViewAbstract::ParseEditMenuOptions(cjOnCreateMenu, cjOnMenuItemClick, onCreateMenuCallback, onMenuItemClick);
-    SearchModel::GetInstance()->SetSelectionMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    SearchModel::GetInstance()->SetSelectionMenuOptions(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), nullptr);
 }
 
 SearchTextMenuItemHandle FfiOHOSAceFrameworkSearchCreateTextMenuItem(int64_t size)

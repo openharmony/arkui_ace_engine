@@ -22,16 +22,16 @@ using std::chrono_literals::operator""s;
 using std::chrono_literals::operator""ms;
 const std::string AUDIO_TEST_URI = "/system/etc/arkui/timepicker.ogg";
 const std::string EFFECT_ID_NAME = "haptic.slide";
-constexpr size_t SPEED_MAX = 5000;
 constexpr size_t SPEED_THRESHOLD = 1560;
 constexpr size_t TREND_COUNT = 3;
-constexpr std::chrono::milliseconds DEFAULT_DELAY(40);
-constexpr std::chrono::milliseconds EXTENDED_DELAY(50);
 #ifdef SUPPORT_DIGITAL_CROWN
 constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength2";
 #else
-constexpr size_t SPEED_PLAY_ONCE = 0;
+constexpr size_t SPEED_MAX = 5000;
+constexpr std::chrono::milliseconds DEFAULT_DELAY(40);
+constexpr std::chrono::milliseconds EXTENDED_DELAY(50);
 #endif
+constexpr size_t SPEED_PLAY_ONCE = 0;
 } // namespace
 
 PickerHapticController::PickerHapticController(const std::string& uri, const std::string& effectId) noexcept
@@ -112,7 +112,6 @@ bool PickerHapticController::IsThreadNone()
 
 void PickerHapticController::InitPlayThread()
 {
-#ifndef SUPPORT_DIGITAL_CROWN
     ThreadRelease();
     playThreadStatus_ = ThreadStatus::START;
     playThread_ = std::make_unique<std::thread>(&PickerHapticController::ThreadLoop, this);
@@ -122,7 +121,6 @@ void PickerHapticController::InitPlayThread()
     } else {
         playThreadStatus_ = ThreadStatus::NONE;
     }
-#endif
 }
 
 void PickerHapticController::ThreadLoop()
@@ -135,6 +133,10 @@ void PickerHapticController::ThreadLoop()
                 return;
             }
         }
+#ifdef SUPPORT_DIGITAL_CROWN
+        playThreadStatus_ = ThreadStatus::READY;
+        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
+#else
         CHECK_NULL_VOID(audioGroupMngr_);
         CHECK_NULL_VOID(effectAudioHapticPlayer_);
         isInHapticLoop_ = true;
@@ -143,19 +145,12 @@ void PickerHapticController::ThreadLoop()
             AudioStandard::AudioVolumeType::STREAM_RING, vol, AudioStandard::DEVICE_TYPE_SPEAKER);
 
         // Set different volumes for different sliding speeds:
-        //    sound effect loudness
-        //    (dB) = 0.6f + (maxVolume - 0.6f) *
-        //                  ((screen movement speed (mm/s) - SPEED_THRESHOLD) / (SPEED_MAX - SPEED_THRESHOLD))
-        //    the range of volume interface setting is [0.0f, 1.0f]
         float maxVolume = 0.6f + 0.4f * userVolume;
         float volume = 0.6f + (maxVolume - 0.6f) * ((static_cast<float>(absSpeedInMm_) - SPEED_THRESHOLD) /
                                                        (SPEED_MAX - SPEED_THRESHOLD));
         volume = std::clamp(volume, 0.6f, 1.f);
 
         // Different vibration parameters for different sliding speeds:
-        //    the frequency is between 260~300Hz and fixed, the vibration amount
-        //    (g) = screen movement speed (mm/s) * 0.01f + 50.f
-        //    the range of haptic intensity interface setting is [50.0f, 98.0f]
         float haptic = absSpeedInMm_ * 0.01f + 50.f;
         haptic = std::clamp(haptic, 50.f, 98.f);
         effectAudioHapticPlayer_->SetVolume(volume);
@@ -175,6 +170,7 @@ void PickerHapticController::ThreadLoop()
             }
         }
         isInHapticLoop_ = false;
+#endif
     }
 }
 
@@ -196,9 +192,6 @@ void PickerHapticController::Play(size_t speed)
 
 void PickerHapticController::PlayOnce()
 {
-#ifdef SUPPORT_DIGITAL_CROWN
-    VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
-#else
     if (IsThreadPlaying()) {
         return;
     }
@@ -215,6 +208,7 @@ void PickerHapticController::PlayOnce()
     if (needNotify) {
         threadCv_.notify_one();
     }
+#ifndef SUPPORT_DIGITAL_CROWN
     isHapticCanLoopPlay_ = true;
 #endif
 }

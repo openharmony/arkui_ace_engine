@@ -37,7 +37,8 @@ public:
         const std::string& surfaceId, const WeakPtr<RenderContext>& renderContext);
     static void UnregisterSurfaceRenderContext(const std::string& surfaceId);
 private:
-    static std::unordered_map<std::string, WeakPtr<RenderContext>> SurfaceRenderContextMap;
+    static std::unordered_map<std::string, WeakPtr<RenderContext>> surfaceRenderContextMap;
+    static std::mutex mutex;
 };
 
 } // namespace OHOS::Ace::NG

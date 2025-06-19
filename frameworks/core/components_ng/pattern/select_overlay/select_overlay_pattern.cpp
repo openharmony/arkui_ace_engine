@@ -566,11 +566,17 @@ void SelectOverlayPattern::UpdateFirstAndSecondHandleInfo(
     if (info_->firstHandle == firstInfo && info_->secondHandle == secondInfo) {
         return;
     }
+    bool needUpdate = false;
     if (info_->firstHandle != firstInfo && !firstHandleDrag_) {
         info_->firstHandle = firstInfo;
+        needUpdate = true;
     }
     if (info_->secondHandle != secondInfo && !secondHandleDrag_) {
         info_->secondHandle = secondInfo;
+        needUpdate = true;
+    }
+    if (!needUpdate) {
+        return;
     }
     CheckHandleReverse();
     UpdateHandleHotZone();
@@ -670,7 +676,7 @@ void SelectOverlayPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrappe
     CHECK_NULL_VOID(GetIsMenuShowInSubWindow());
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
-    if (!IsMenuShow()) {
+    if (!IsMenuShow() || !host->IsOnMainTree()) {
         SubwindowManager::GetInstance()->DeleteSelectOverlayHotAreas(GetContainerId(), host->GetId());
         return;
     }

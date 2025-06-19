@@ -325,6 +325,10 @@ void JSBaseNode::PostInputEvent(const JSCallbackInfo& info)
 
 bool JSBaseNode::GetTouches(const JSCallbackInfo& info, TouchEvent& touchEvent)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "TouchEvent params invalid");
+        return false;
+    }
     auto obj = JSRef<JSObject>::Cast(info[0]);
     if (obj->IsUndefined() || obj.IsEmpty()) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "TouchEvent params invalid");
@@ -335,9 +339,7 @@ bool JSBaseNode::GetTouches(const JSCallbackInfo& info, TouchEvent& touchEvent)
         JSRef<JSArray> touchesArray = JSRef<JSArray>::Cast(touchesJsVal);
         for (auto index = 0; index < static_cast<int32_t>(touchesArray->Length()); index++) {
             JSRef<JSVal> item = touchesArray->GetValueAt(index);
-            if (!item->IsObject()) {
-                continue;
-            }
+            if (!item->IsObject()) { continue; }
             JSRef<JSObject> itemObj = JSRef<JSObject>::Cast(item);
             TouchPoint point;
             point.id = itemObj->GetPropertyValue<int32_t>("id", 0);
@@ -345,6 +347,8 @@ bool JSBaseNode::GetTouches(const JSCallbackInfo& info, TouchEvent& touchEvent)
             point.y = itemObj->GetPropertyValue<float>("y", 0.0f);
             point.screenX = itemObj->GetPropertyValue<float>("screenX", 0.0f);
             point.screenY = itemObj->GetPropertyValue<float>("screenY", 0.0f);
+            point.globalDisplayX = itemObj->GetPropertyValue<double>("globalDisplayX", 0.0);
+            point.globalDisplayY = itemObj->GetPropertyValue<double>("globalDisplayY", 0.0);
             point.originalId = itemObj->GetPropertyValue<int32_t>("id", 0);
             touchEvent.pointers.emplace_back(point);
         }
@@ -377,6 +381,10 @@ bool JSBaseNode::GetTouches(const JSCallbackInfo& info, TouchEvent& touchEvent)
 // only postInputEvent call this function
 bool JSBaseNode::GetChangedTouches(const JSCallbackInfo& info, TouchEvent& touchEvent)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "TouchEvent params invalid");
+        return false;
+    }
     auto obj = JSRef<JSObject>::Cast(info[0]);
     auto changedTouchesJsVal = obj->GetProperty("changedTouches");
     if (!changedTouchesJsVal->IsArray() || changedTouchesJsVal->IsEmpty()) {
@@ -401,17 +409,27 @@ bool JSBaseNode::GetChangedTouches(const JSCallbackInfo& info, TouchEvent& touch
     touchEvent.screenX = itemObj->GetPropertyValue<float>("displayX", 0.0f);
     touchEvent.screenY = itemObj->GetPropertyValue<float>("displayY", 0.0f);
     touchEvent.originalId = itemObj->GetPropertyValue<int32_t>("id", 0);
+    touchEvent.width = itemObj->GetPropertyValue<float>("width", 0);
+    touchEvent.height = itemObj->GetPropertyValue<float>("height", 0);
     auto pressedTimeJsVal = itemObj->GetProperty("pressedTime");
     if (pressedTimeJsVal->IsNumber()) {
         std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(pressedTimeJsVal->ToNumber<double>()));
         TimeStamp time(nanoseconds);
         touchEvent.pressedTime = time;
     }
+    auto handJsVal = itemObj->GetProperty("hand");
+    if (handJsVal->IsNumber()) {
+        touchEvent.operatingHand = handJsVal->ToNumber<int32_t>();
+    }
     return true;
 }
 
 bool JSBaseNode::GetInputTouches(const JSCallbackInfo& info, TouchEvent& touchEvent)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "TouchEvent params invalid");
+        return false;
+    }
     auto obj = JSRef<JSObject>::Cast(info[0]);
     auto touchesJsVal = obj->GetProperty("touches");
     if (!touchesJsVal->IsArray() || touchesJsVal->IsEmpty()) {
@@ -431,7 +449,10 @@ bool JSBaseNode::GetInputTouches(const JSCallbackInfo& info, TouchEvent& touchEv
         point.screenX = itemObj->GetPropertyValue<float>("displayX", 0.0f);
         point.screenY = itemObj->GetPropertyValue<float>("displayY", 0.0f);
         point.originalId = itemObj->GetPropertyValue<int32_t>("id", 0);
-        point.force = itemObj->GetPropertyValue<int32_t>("pressure", 0);
+        point.force = itemObj->GetPropertyValue<float>("pressure", 0);
+        point.width = itemObj->GetPropertyValue<float>("width", 0);
+        point.height = itemObj->GetPropertyValue<float>("height", 0);
+        point.operatingHand = itemObj->GetPropertyValue<int32_t>("hand", 0);
         auto pressedTimeJsVal = itemObj->GetProperty("pressedTime");
         if (pressedTimeJsVal->IsNumber()) {
             std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(pressedTimeJsVal->ToNumber<double>()));
@@ -445,6 +466,10 @@ bool JSBaseNode::GetInputTouches(const JSCallbackInfo& info, TouchEvent& touchEv
 
 bool JSBaseNode::InitTouchEvent(const JSCallbackInfo& info, TouchEvent& touchEvent, bool isPostTouchEvent)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "TouchEvent params invalid");
+        return false;
+    }
     auto obj = JSRef<JSObject>::Cast(info[0]);
     if (obj->IsUndefined() || obj.IsEmpty()) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "TouchEvent params invalid");
@@ -480,13 +505,10 @@ bool JSBaseNode::InitTouchEvent(const JSCallbackInfo& info, TouchEvent& touchEve
     if (targetDisplayIdJsVal->IsNumber()) {
         touchEvent.targetDisplayId = targetDisplayIdJsVal->ToNumber<int32_t>();
     }
-    auto titleXJsVal = obj->GetProperty("tiltX");
-    if (titleXJsVal->IsNumber()) {
-        touchEvent.tiltX = titleXJsVal->ToNumber<float>();
-    }
-    auto titleYJsVal = obj->GetProperty("tiltY");
-    if (titleYJsVal->IsNumber()) {
-        touchEvent.tiltY = titleYJsVal->ToNumber<float>();
+    ParamTouchEvent(info, touchEvent);
+    BaseEventInfo* baseEventInfo = obj->Unwrap<BaseEventInfo>();
+    if (baseEventInfo) {
+        touchEvent.SetPressedKeyCodes(baseEventInfo->GetPressedKeyCodes());
     }
     if (isPostTouchEvent) {
         return GetTouches(info, touchEvent);
@@ -498,8 +520,38 @@ bool JSBaseNode::InitTouchEvent(const JSCallbackInfo& info, TouchEvent& touchEve
     return GetChangedTouches(info, touchEvent);
 }
 
+bool JSBaseNode::ParamTouchEvent(const JSCallbackInfo& info, TouchEvent& touchEvent)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "TouchEvent params invalid");
+        return false;
+    }
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    if (obj->IsUndefined() || obj.IsEmpty()) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "TouchEvent params invalid");
+        return false;
+    }
+    auto titleXJsVal = obj->GetProperty("tiltX");
+    if (titleXJsVal->IsNumber()) {
+        touchEvent.tiltX = titleXJsVal->ToNumber<float>();
+    }
+    auto titleYJsVal = obj->GetProperty("tiltY");
+    if (titleYJsVal->IsNumber()) {
+        touchEvent.tiltY = titleYJsVal->ToNumber<float>();
+    }
+    auto rollAngleJsVal = obj->GetProperty("rollAngle");
+    if (rollAngleJsVal->IsNumber()) {
+        touchEvent.rollAngle = rollAngleJsVal->ToNumber<float>();
+    }
+    return true;
+}
+
 bool JSBaseNode::InitMouseEvent(const JSCallbackInfo& info, MouseEvent& mouseEvent)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "MouseEvent params invalid");
+        return false;
+    }
     auto obj = JSRef<JSObject>::Cast(info[0]);
     if (obj->IsUndefined() || obj.IsEmpty()) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "MouseEvent params invalid");
@@ -551,6 +603,10 @@ bool JSBaseNode::InitMouseEvent(const JSCallbackInfo& info, MouseEvent& mouseEve
 
 bool JSBaseNode::ParamMouseEvent(const JSCallbackInfo& info, MouseEvent& mouseEvent)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "MouseEevent params invalid");
+        return false;
+    }
     auto obj = JSRef<JSObject>::Cast(info[0]);
     if (obj->IsUndefined() || obj.IsEmpty()) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "MouseEvent params invalid");
@@ -572,6 +628,10 @@ bool JSBaseNode::ParamMouseEvent(const JSCallbackInfo& info, MouseEvent& mouseEv
     if (rawDeltaYJsVal->IsNumber()) {
         mouseEvent.rawDeltaY = rawDeltaYJsVal->ToNumber<float>();
     }
+    BaseEventInfo* baseEventInfo = obj->Unwrap<BaseEventInfo>();
+    if (baseEventInfo) {
+        mouseEvent.pressedKeyCodes_ = baseEventInfo->GetPressedKeyCodes();
+    }
     auto pressedButtonsJsVal = obj->GetProperty("pressedButtons");
     if (pressedButtonsJsVal->IsArray()) {
         JSRef<JSArray> pressedButtonsArray = JSRef<JSArray>::Cast(pressedButtonsJsVal);
@@ -580,8 +640,8 @@ bool JSBaseNode::ParamMouseEvent(const JSCallbackInfo& info, MouseEvent& mouseEv
             if (!item->IsNumber()) {
                 continue;
             }
-            auto pressedButton = item->ToNumber<MouseButton>();
-            mouseEvent.pressedButtonsArray.push_back(pressedButton);
+            auto pressedButton = item->ToNumber<int32_t>();
+            mouseEvent.pressedButtonsArray.push_back(static_cast<MouseButton>(pressedButton));
         }
     }
     return true;
@@ -589,6 +649,10 @@ bool JSBaseNode::ParamMouseEvent(const JSCallbackInfo& info, MouseEvent& mouseEv
 
 bool JSBaseNode::InitAxisEvent(const JSCallbackInfo& info, AxisEvent& axisEvent)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "AxisEvent params invalid");
+        return false;
+    }
     auto obj = JSRef<JSObject>::Cast(info[0]);
     if (obj->IsUndefined() || obj.IsEmpty()) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "AxisEvent params invalid");
@@ -636,6 +700,20 @@ bool JSBaseNode::InitAxisEvent(const JSCallbackInfo& info, AxisEvent& axisEvent)
     if (screenYJsVal->IsNumber()) {
         axisEvent.screenY = screenYJsVal->ToNumber<float>();
     }
+
+    AxisInfo* axisInfo = obj->Unwrap<AxisInfo>();
+    auto pinchAxisScale = obj->GetProperty("pinchAxisScale");
+    if (pinchAxisScale->IsNumber()) {
+        axisEvent.pinchAxisScale = pinchAxisScale->ToNumber<float>();
+    } else if (axisInfo) {
+        axisEvent.pinchAxisScale = axisInfo->GetPinchAxisScale();
+    }
+    auto rotateAxisAngle = obj->GetProperty("rotateAxisAngle");
+    if (rotateAxisAngle->IsNumber()) {
+        axisEvent.rotateAxisAngle = rotateAxisAngle->ToNumber<float>();
+    } else if (axisInfo) {
+        axisEvent.rotateAxisAngle = axisInfo->GetRotateAxisAngle();
+    }
     if (!ParamAxisEvent(info, axisEvent)) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "AxisEvent params invalid");
         return false;
@@ -645,6 +723,10 @@ bool JSBaseNode::InitAxisEvent(const JSCallbackInfo& info, AxisEvent& axisEvent)
 
 bool JSBaseNode::ParamAxisEvent(const JSCallbackInfo& info, AxisEvent& axisEvent)
 {
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "AxisEvent params invalid");
+        return false;
+    }
     auto obj = JSRef<JSObject>::Cast(info[0]);
     if (obj->IsUndefined() || obj.IsEmpty()) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "AxisEvent params invalid");
@@ -661,6 +743,10 @@ bool JSBaseNode::ParamAxisEvent(const JSCallbackInfo& info, AxisEvent& axisEvent
     auto verticalAxisJsVal = obj->GetProperty("axisVertical");
     if (verticalAxisJsVal->IsNumber()) {
         axisEvent.verticalAxis = verticalAxisJsVal->ToNumber<float>();
+    }
+    BaseEventInfo* baseEventInfo = obj->Unwrap<BaseEventInfo>();
+    if (baseEventInfo) {
+        axisEvent.pressedCodes = baseEventInfo->GetPressedKeyCodes();
     }
     return true;
 }

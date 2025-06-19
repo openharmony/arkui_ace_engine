@@ -361,7 +361,6 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentPasteButtonSymbolTest002
     SecurityComponentHandler::InitChildInfo(buttonInfo, frameNode);
     ASSERT_EQ(NearEqual(buttonInfo.iconSize_, DEFAULT_SYMBOL_FONT_SIZE), true);
     ASSERT_EQ(buttonInfo.iconColor_.value, DEFAULT_SYMBOL_ICON_COLOR);
-
 }
 
 /**

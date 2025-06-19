@@ -30,6 +30,13 @@ public:
     static RefPtr<CustomNode> GetOrCreateFrameNode(const std::string& tag);
     ~CustomNode() override;
     CustomNode(const RefPtr<FrameNode> aceNode);
+
+    static void SetOnWindowFocusedCallback(const NodeHandle node, void (*onWindowFocused)(NodeHandle node));
+    static void SetOnWindowUnfocusedCallback(const NodeHandle node, void (*onWindowUnfocused)(NodeHandle node));
+    static void SetOnAttachToMainTreeCallback(const NodeHandle node, void (*onAttachToMainTree)(NodeHandle node));
+    static void SetOnDetachFromMainTreeCallback(const NodeHandle node, void (*onDetachFromMainTree)(NodeHandle node));
+    static void SetOnAvoidInfoChangeCallback(const NodeHandle node, void (*onAvoidInfoChange)(NodeHandle node));
+    static void SetIsNeedRegisterAvoidInfoChangeListener(const NodeHandle node, bool isRegister);
 };
 
 } // namespace OHOS::Ace::Kit

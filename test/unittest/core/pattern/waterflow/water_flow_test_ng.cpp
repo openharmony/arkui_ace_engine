@@ -36,6 +36,9 @@
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
 #include "core/components_ng/syntax/syntax_item.h"
+#include "core/common/resource/resource_parse_utils.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/base/mock_system_properties.h"
 #undef private
 #undef protected
 #include "test/mock/core/animation/mock_animation_manager.h"
@@ -45,6 +48,8 @@ namespace OHOS::Ace::NG {
 void WaterFlowTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
     MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -70,15 +75,21 @@ void WaterFlowTestNg::SetUpTestSuite()
 void WaterFlowTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
 }
 
 void WaterFlowTestNg::SetUp()
 {
     MockAnimationManager::GetInstance().Reset();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
 }
 
 void WaterFlowTestNg::TearDown()
 {
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
     RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
@@ -89,6 +100,7 @@ void WaterFlowTestNg::TearDown()
     ClearOldNodes(); // Each testCase will create new list at begin
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
     ViewStackProcessor::GetInstance()->ClearStack();
+    MockPipelineContext::GetCurrent()->SetResponseTime(INT32_MAX);
 }
 
 void WaterFlowTestNg::GetWaterFlow()
@@ -115,6 +127,7 @@ WaterFlowModelNG WaterFlowTestNg::CreateWaterFlow()
     RefPtr<ScrollControllerBase> positionController = model.CreateScrollController();
     RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
     model.SetScroller(positionController, scrollBarProxy);
+    model.SetSyncLoad(true);
 #ifdef TEST_WATER_FLOW_SW
     model.SetLayoutMode(WaterFlowLayoutMode::SLIDING_WINDOW);
 #endif
@@ -203,6 +216,11 @@ WaterFlowItemModelNG WaterFlowTestNg::CreateWaterFlowItem(float mainSize)
         axis = Axis::HORIZONTAL;
     }
     SetSize(axis, CalcLength(FILL_LENGTH), CalcLength(mainSize));
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    frameNode->measureCallback_ = [](RefPtr<Kit::FrameNode>& node) {
+        NG::MockPipelineContext::GetCurrent()->DecResponseTime();
+    };
     return waterFlowItemModel;
 }
 
@@ -378,6 +396,40 @@ HWTEST_F(WaterFlowTestNg, Layout001, TestSize.Level1)
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 7), RectF(0, 500, 240, 200)));
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 8), RectF(240, 500, 240, 100)));
     EXPECT_TRUE(IsEqual(GetChildRect(frameNode_, 9), RectF(240, 600, 240, 200)));
+}
+
+/**
+ * @tc.name: WaterFlowGetItemStartTest001
+ * @tc.desc: Test GetItemStart func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowGetItemStartTest001, TestSize.Level1)
+{
+    int32_t colNumber = 4;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER * colNumber);
+    CreateDone();
+
+    EXPECT_TRUE(pattern_->GetItemStart());
+    EXPECT_FALSE(pattern_->GetItemEnd());
+}
+
+/**
+ * @tc.name: WaterFlowGetItemStartTest002
+ * @tc.desc: Test GetItemStart func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowGetItemStartTest002, TestSize.Level1)
+{
+    int32_t colNumber = 1;
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    CreateWaterFlowItems(colNumber);
+    CreateDone();
+
+    EXPECT_TRUE(pattern_->GetItemStart());
+    EXPECT_TRUE(pattern_->GetItemEnd());
 }
 
 /**
@@ -2171,5 +2223,113 @@ HWTEST_F(WaterFlowTestNg, Delete001, TestSize.Level1)
     // should layout at the end.
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 30);
     EXPECT_EQ(GetChildRect(frameNode_, 30).Bottom(), WATER_FLOW_HEIGHT);
+}
+
+/**
+ * @tc.name: CreateWithResourceObjFriction
+ * @tc.desc: Test CreateWithResourceObjFriction in WaterFlowTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, CreateWithResourceObjFriction001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    const double defaultiction = 10000000.0f;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+
+    // remove callback function
+    model.ParseResObjFriction(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    model.ParseResObjFriction(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    model.ParseResObjFriction(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    std::vector<ResourceObjectParams> params;
+    resObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+
+    // add callback function
+    model.ParseResObjFriction(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    model.ParseResObjFriction(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+}
+
+/**
+ * @tc.name: CreateWithResourceObjFriction
+ * @tc.desc: Test CreateWithResourceObjFriction in WaterFlowTestNg
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, CreateWithResourceObjFriction002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    const double defaultiction = 10000000.0f;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+
+    WaterFlowModelNG::ParseResObjFriction(nullptr, nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    WaterFlowModelNG::ParseResObjFriction(nullptr, resObj);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    WaterFlowModelNG::ParseResObjFriction(nullptr, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_, nullptr);
+    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    std::vector<ResourceObjectParams> params;
+    resObj = AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+
+    WaterFlowModelNG::ParseResObjFriction(nullptr, resObj);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    WaterFlowModelNG::ParseResObjFriction(nullptr, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_, nullptr);
+    WaterFlowModelNG::ParseResObjFriction(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -524,8 +524,8 @@ class ArkStarStyle {
 }
 
 class ArkRegisterNativeEmbedRule {
-  tag: string;
-  type: string;
+  tag: string | undefined;
+  type: string | undefined;
 
   constructor() {
     this.tag = undefined;
@@ -1100,6 +1100,44 @@ class ArkNestedScrollOptions {
   }
 }
 
+class ArkNestedScrollOptionsExt {
+  scrollUp: NestedScrollMode | undefined;
+  scrollDown: NestedScrollMode | undefined;
+  scrollLeft: NestedScrollMode | undefined;
+  scrollRight: NestedScrollMode | undefined;
+  constructor() {
+      this.scrollUp = undefined;
+      this.scrollDown = undefined;
+      this.scrollLeft = undefined;
+      this.scrollRight = undefined;
+  }
+  isEqual(another: ArkNestedScrollOptionsExt): boolean {
+    return (
+      (this.scrollUp === another.scrollUp) &&
+      (this.scrollDown === another.scrollDown) &&
+      (this.scrollLeft === another.scrollLeft) &&
+      (this.scrollRight === another.scrollRight)
+      );
+  }
+}
+
+class ArkWebScriptItem {
+  scripts: Array<string> | undefined;
+  scriptRules: Array<Array<string>> | undefined;
+
+  constructor() {
+    this.scripts = undefined;
+    this.scriptRules = undefined;
+  }
+
+  isEqual(another: ArkWebScriptItem): boolean {
+    return (
+      this.scripts === another.scripts &&
+      this.scriptRules === another.scriptRules
+    );
+  }
+}
+
 class ArkConstraintSizeOptions {
   minWidth?: Length | undefined;
   maxWidth?: Length | undefined;
@@ -1136,6 +1174,19 @@ class ArkTextFieldShowCounter {
     return (this.value === another.value) &&
       (this.highlightBorder === another.highlightBorder) &&
       (this.thresholdPercentage === another.thresholdPercentage);
+  }
+}
+
+class ArkTextFieldMaxLines {
+  value: number | undefined;
+  overflowMode?: MaxLinesMode;
+  constructor() {
+    this.value = undefined;
+    this.overflowMode = undefined;
+  }
+  isEqual(another: ArkTextFieldMaxLines): boolean {
+    return (this.value === another.value) &&
+      (this.overflowMode === another.overflowMode);
   }
 }
 
@@ -1618,6 +1669,22 @@ class ArkDragPreview {
       this.onlyForLifting === another.onlyForLifting && 
       this.pixelMap === another.pixelMap &&
       this.extraInfo === another.extraInfo
+    );
+  }
+}
+
+class ArkOnDrop {
+  event: (event?: DragEvent, extraParams?: string) => void;
+  disableDataPrefetch: boolean | undefined;
+  constructor() {
+    this.event = undefined;
+    this.disableDataPrefetch = false;
+  }
+
+  isEqual(another: ArkOnDrop): boolean {
+    return (
+      this.event === another.event &&
+      this.disableDataPrefetch === another.disableDataPrefetch
     );
   }
 }

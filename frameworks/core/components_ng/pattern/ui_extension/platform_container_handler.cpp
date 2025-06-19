@@ -19,6 +19,20 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+void SetParentRectInfoParam(HandlerReply& reply, const AccessibilityParentRectInfo& rectInfo)
+{
+    reply.SetParam<int32_t>("left", rectInfo.left);
+    reply.SetParam<int32_t>("top", rectInfo.top);
+    reply.SetParam<float>("scaleX", rectInfo.scaleX);
+    reply.SetParam<float>("scaleY", rectInfo.scaleY);
+    reply.SetParam<int32_t>("centerX", rectInfo.rotateTransform.centerX);
+    reply.SetParam<int32_t>("centerY", rectInfo.rotateTransform.centerY);
+    reply.SetParam<int32_t>("innerCenterX", rectInfo.rotateTransform.innerCenterX);
+    reply.SetParam<int32_t>("innerCenterY", rectInfo.rotateTransform.innerCenterY);
+    reply.SetParam<int32_t>("rotateDegree", rectInfo.rotateTransform.rotateDegree);
+}
+} // namespace
 
 bool PlatformContainerHandler::GetAccessibilityParentRect(HandlerReply& reply)
 {
@@ -44,18 +58,10 @@ bool PlatformContainerHandler::GetAccessibilityParentRect(HandlerReply& reply)
             if (pipeline) {
                 auto accessibilityManager = pipeline->GetAccessibilityManager();
                 if (accessibilityManager) {
-                    auto windowInfo = accessibilityManager->GenerateWindowInfo(hostNode, pipeline);
-                    parentRectInfo.left =
-                        static_cast<int32_t>(parentRectInfo.left * windowInfo.scaleX + windowInfo.left);
-                    parentRectInfo.top = static_cast<int32_t>(parentRectInfo.top * windowInfo.scaleY + windowInfo.top);
-                    parentRectInfo.scaleX *= windowInfo.scaleX;
-                    parentRectInfo.scaleY *= windowInfo.scaleY;
+                    parentRectInfo = accessibilityManager->GetTransformRectInfoRelativeToWindow(hostNode, pipeline);
                 }
             }
-            reply.SetParam<int32_t>("left", parentRectInfo.left);
-            reply.SetParam<int32_t>("top", parentRectInfo.top);
-            reply.SetParam<float>("scaleX", parentRectInfo.scaleX);
-            reply.SetParam<float>("scaleY", parentRectInfo.scaleY);
+            SetParentRectInfoParam(reply, parentRectInfo);
             TAG_LOGD(AceLogTag::ACE_DYNAMIC_COMPONENT,
                 "Transform DC rect param[left:%{public}d, top:%{public}d, scaleX:%{public}f, scaleY:%{public}f].",
                 parentRectInfo.left, parentRectInfo.top, parentRectInfo.scaleX, parentRectInfo.scaleY);
@@ -85,15 +91,13 @@ void PlatformContainerHandler::UpdateAccessibilityParentRectInfo(
 {
     std::unique_lock<std::shared_mutex> lock(rectInfoMutex_);
     rectInfo_ = info;
+    OnAccessibilityParentRectInfoUpdate();
 }
 
 void PlatformContainerHandler::GetDCAccessibilityParentRect(HandlerReply& reply)
 {
     std::shared_lock<std::shared_mutex> lock(rectInfoMutex_);
-    reply.SetParam<int32_t>("left", rectInfo_.left);
-    reply.SetParam<int32_t>("top", rectInfo_.top);
-    reply.SetParam<float>("scaleX", rectInfo_.scaleX);
-    reply.SetParam<float>("scaleY", rectInfo_.scaleY);
+    SetParentRectInfoParam(reply, rectInfo_);
 }
 
 } // namespace OHOS::Ace::NG

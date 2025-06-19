@@ -236,6 +236,7 @@ public:
     bool FireNavigationIntentActively(int32_t pageId, bool needTransition);
     void SetRouterIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
         const std::function<void()>&& loadPageCallback);
+    std::string GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam);
 
 protected:
     class RouterOptScope {

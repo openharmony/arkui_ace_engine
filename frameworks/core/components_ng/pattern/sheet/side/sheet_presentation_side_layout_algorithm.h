@@ -54,20 +54,20 @@ public:
     void LayoutCloseIcon(LayoutWrapper* layoutWrapper);
     float GetSheetDefaultWidth(const RefPtr<SheetPresentationPattern>& sheetPattern);
 
-    float GetSideSheetMaxHeight()
+    float GetSideSheetMaxHeight() const
     {
         return sheetMaxHeight_;
     }
-    float GetSideSheetMaxWidth()
+    float GetSideSheetMaxWidth() const
     {
         return sheetMaxWidth_;
     }
-    float GetSideSheetWidth()
+    float GetSideSheetWidth() const
     {
         return sheetWidth_;
     }
 
-    float GetCenterHeight()
+    float GetCenterHeight() const
     {
         return sheetHeight_;
     }

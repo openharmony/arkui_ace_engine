@@ -22,6 +22,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/list/list_children_main_size.h"
@@ -59,6 +60,11 @@ public:
     {
         return;
     }
+    virtual void ParseResObjDividerStrokeWidth(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseResObjDividerColor(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseResObjDividerStartMargin(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ParseResObjDividerEndMargin(const RefPtr<ResourceObject>& resObj) {};
+    virtual void SetDividerColorByUser(bool isByUser) = 0;
 
 private:
     static std::unique_ptr<ListItemGroupModel> instance_;

@@ -63,7 +63,7 @@ void PipelineContextTestNg::SetUpTestSuite()
     ElementRegister::GetInstance()->AddUINode(frameNode_);
     auto window = std::make_shared<MockWindow>();
     EXPECT_CALL(*window, RequestFrame()).Times(AnyNumber());
-    EXPECT_CALL(*window, FlushTasks()).Times(AnyNumber());
+    EXPECT_CALL(*window, FlushTasks(testing::_)).Times(AnyNumber());
     EXPECT_CALL(*window, OnHide()).Times(AnyNumber());
     EXPECT_CALL(*window, RecordFrameTime(_, _)).Times(AnyNumber());
     EXPECT_CALL(*window, OnShow()).Times(AnyNumber());
@@ -751,7 +751,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
     auto frameNodeId_017 = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_017, nullptr);
     ASSERT_NE(frameNode, nullptr);
-    manager->AddDragFrameNode(frameNode->GetId(), frameNode);
 
     /**
      * @tc.steps2: Call the function OnDragEvent with isDragged_=true, currentId_=DEFAULT_INT1 and
@@ -1004,7 +1003,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     auto frameNodeId_022 = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_022, nullptr);
     ASSERT_NE(frameNode, nullptr);
-    eventManager->AddDragFrameNode(frameNode->GetId(), frameNode);
     KeyEvent event;
 
     /**
@@ -2397,6 +2395,23 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg122, TestSize.Level1)
     context_->SetIsTransFlag(true);
     context_->FlushMouseEventForHover();
     EXPECT_FALSE(context_->lastMouseEvent_->pointerEvent);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg123
+ * @tc.desc: Test SetIsTransFlag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, SetIsTransFlagTest, TestSize.Level1)
+{
+    context_->SetIsTransFlag(true);
+    context_->SetIsTransFlag(false);
+    context_->SetIsTransFlag(true);
+    EXPECT_TRUE(context_->isTransFlag_);
+    context_->SetIsTransFlag(false);
+    context_->SetIsTransFlag(true);
+    context_->SetIsTransFlag(false);
+    EXPECT_FALSE(context_->isTransFlag_);
 }
 } // namespace NG
 } // namespace OHOS::Ace

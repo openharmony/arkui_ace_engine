@@ -266,7 +266,7 @@ bool MediaPlayerImpl::IsPlaying()
 int32_t MediaPlayerImpl::Play()
 {
     CHECK_NULL_RETURN(player_, -1);
-    LOGI("Media player start to play.");
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Media player start to play.");
     player_->Start();
     return 0;
 }
@@ -274,7 +274,7 @@ int32_t MediaPlayerImpl::Play()
 int32_t MediaPlayerImpl::Pause()
 {
     CHECK_NULL_RETURN(player_, -1);
-    LOGI("Media player start to pause.");
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Media player start to pause.");
     player_->Pause();
     return 0;
 }
@@ -282,7 +282,7 @@ int32_t MediaPlayerImpl::Pause()
 int32_t MediaPlayerImpl::Stop()
 {
     CHECK_NULL_RETURN(player_, -1);
-    LOGI("Media player start to stop.");
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Media player start to stop.");
     player_->Stop();
     return 0;
 }
@@ -290,7 +290,7 @@ int32_t MediaPlayerImpl::Stop()
 int32_t MediaPlayerImpl::Seek(int32_t mSeconds, OHOS::Ace::SeekMode mode)
 {
     CHECK_NULL_RETURN(player_, -1);
-    LOGI("Media player start to seek.");
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Media player start to seek.");
     player_->SeekTo(mSeconds, static_cast<uint32_t>(mode));
     return 0;
 }
@@ -298,20 +298,20 @@ int32_t MediaPlayerImpl::Seek(int32_t mSeconds, OHOS::Ace::SeekMode mode)
 int32_t MediaPlayerImpl::FullScreenChange(bool isFullScreen)
 {
     CHECK_NULL_RETURN(player_, -1);
-    LOGI("Media player change fullscreen");
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Media player change fullscreen");
     player_->SetFullScreenChange(isFullScreen);
     return 0;
 }
 
 void MediaPlayerImpl::ProcessSurfaceCreate()
 {
-    LOGI("Media player ProcessSurfaceCreate.");
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Media player ProcessSurfaceCreate.");
     SetSurface();
 }
 
 void MediaPlayerImpl::ProcessSurfaceChange(int32_t width, int32_t height)
 {
-    LOGI("Media player ProcessSurfaceChange (%{public}d, %{public}d)", width, height);
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Media player ProcessSurfaceChange (%{public}d, %{public}d)", width, height);
     if (resolutionChangeCallback_) {
         resolutionChangeCallback_();
     }

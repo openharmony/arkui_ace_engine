@@ -62,6 +62,13 @@ bool ScrollableController::AnimateTo(
     return false;
 }
 
+void ScrollableController::SetCanStayOverScroll(bool canStayOverScroll)
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCanStayOverScroll(canStayOverScroll);
+}
+
 Offset ScrollableController::GetCurrentOffset() const
 {
     auto pattern = scroll_.Upgrade();
@@ -92,6 +99,7 @@ void ScrollableController::ScrollBy(double pixelX, double pixelY, bool /* smooth
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("ScrollBy, offset:%f, id:%d, tag:%s", static_cast<float>(-offset),
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+    pattern->SetIsOverScroll(false);
     pattern->UpdateCurrentOffset(static_cast<float>(-offset), SCROLL_FROM_JUMP);
 }
 
@@ -99,6 +107,8 @@ void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, float vel
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
+    pattern->SetIsOverScroll(false);
+    pattern->SetCanStayOverScroll(false);
     if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
         pattern->ScrollAtFixedVelocity(velocity);
     } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
@@ -110,6 +120,8 @@ void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smoo
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
+    pattern->SetIsOverScroll(false);
+    pattern->SetCanStayOverScroll(false);
     if (pattern->GetAxis() != Axis::NONE) {
         pattern->ScrollToEdge(scrollEdgeType, smooth);
     }
@@ -130,6 +142,8 @@ void ScrollableController::ScrollPage(bool reverse, bool smooth)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
+    pattern->SetIsOverScroll(false);
+    pattern->SetCanStayOverScroll(false);
     if (pattern->GetAxis() == Axis::NONE) {
         return;
     }

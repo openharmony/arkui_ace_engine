@@ -797,4 +797,37 @@ HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest023, TestSize.Level
     bool res = manager_->OnBackPressed();
     EXPECT_TRUE(res);
 }
+/**
+ * @tc.name: SharedOverlayManagerTest024
+ * @tc.desc: StartSharedTransition
+ * @tc.type: FUNC
+ */
+HWTEST_F(SharedOverlayManagerTestNg, SharedOverlayManagerTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare the environment variables for the function.
+     */
+    auto destNodeShareId = CreateSharedNode(SHARE_ID1, DEST_DURATION, DEST_SIZE);
+    ASSERT_NE(destNodeShareId, nullptr);
+    auto renderContext = destNodeShareId->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto transitionOption = renderContext->GetSharedTransitionOption();
+    ASSERT_NE(transitionOption, nullptr);
+    transitionOption->type = SharedTransitionEffectType::SHARED_EFFECT_STATIC;
+
+    /**
+     * @tc.steps: step2. verify the animationType of the controller in the effect.
+     */
+    auto pagePattern = destPage_->GetPattern<PagePattern>();
+    ASSERT_NE(pagePattern, nullptr);
+    pagePattern->sharedTransitionMap_.emplace(SHARE_ID1, destNodeShareId);
+    ASSERT_NE(manager_, nullptr);
+    manager_->StartSharedTransition(srcPage_, destPage_);
+    ASSERT_FALSE(manager_->effects_.empty());
+    auto effect = *manager_->effects_.begin();
+    ASSERT_NE(effect, nullptr);
+    auto controller = effect->GetController();
+    ASSERT_NE(controller, nullptr);
+    EXPECT_EQ(controller->GetAnimationType(), AnimationInterface::SHARED_TRANSITION);
+}
 } // namespace OHOS::Ace::NG

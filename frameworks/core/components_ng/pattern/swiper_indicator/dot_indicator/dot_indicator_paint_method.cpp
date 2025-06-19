@@ -138,6 +138,15 @@ bool DotIndicatorPaintMethod::NeedBottomAnimation() const
     }
 
     if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
+        if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
+            if (currentIndexActual == 0 && targetIndex_ && targetIndex_.value() == 0 &&
+                std::abs(touchBottomPageRate_) < FIFTY_PERCENT) {
+                return true;
+            }
+
+            return false;
+        }
+
         if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT) {
             if (currentIndexActual == firstIndex && std::abs(touchBottomPageRate_) > FIFTY_PERCENT) {
                 return false;

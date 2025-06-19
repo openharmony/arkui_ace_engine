@@ -15,6 +15,7 @@
 
 #include "scroll_test_ng.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 class ScrollControllerTestNg : public ScrollTestNg, public testing::WithParamInterface<bool> {};
@@ -193,8 +194,12 @@ HWTEST_P(ScrollControllerTestNg, ScrollPage001, TestSize.Level1)
      * @tc.steps: step1. ScrollPage up with animation
      * @tc.expected: Scroll up with animation
      */
+    pattern_->SetIsOverScroll(true);
+    pattern_->SetCanStayOverScroll(true);
     ScrollPage(true, smooth);
     EXPECT_TRUE(TickPosition(0));
+    EXPECT_FALSE(pattern_->GetIsOverScroll());
+    EXPECT_FALSE(pattern_->GetCanStayOverScroll());
 }
 
 INSTANTIATE_TEST_SUITE_P(Smooth, ScrollControllerTestNg, testing::Bool());
@@ -291,8 +296,12 @@ HWTEST_F(ScrollControllerTestNg, ScrollToEdge001, TestSize.Level1)
      * @tc.steps: step2. SCROLL_TOP
      * @tc.expected: Scroll to top with animation
      */
+    pattern_->SetIsOverScroll(true);
+    pattern_->SetCanStayOverScroll(true);
     ScrollToEdge(ScrollEdgeType::SCROLL_TOP, 200.f);
     EXPECT_TRUE(Position(0));
+    EXPECT_FALSE(pattern_->GetIsOverScroll());
+    EXPECT_FALSE(pattern_->GetCanStayOverScroll());
 }
 
 /**
@@ -358,5 +367,157 @@ HWTEST_F(ScrollControllerTestNg, GetInfo001, TestSize.Level1)
     EXPECT_TRUE(IsEqual(GetCurrentOffset(), Offset(0, VERTICAL_SCROLLABLE_DISTANCE)));
     EXPECT_TRUE(IsAtEnd());
     EXPECT_TRUE(IsEqual(GetItemRect(0), Rect(0, -VERTICAL_SCROLLABLE_DISTANCE, WIDTH, CONTENT_MAIN_SIZE)));
+}
+
+/**
+ * @tc.name: CreateWithResourceObjFriction
+ * @tc.desc: Test CreateWithResourceObjFriction in ScrollModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollControllerTestNg, CreateWithResourceObjFriction001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    const double defaultiction = 10000000.0f;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+
+    // remove callback function
+    model.CreateWithResourceObjFriction(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    model.CreateWithResourceObjFriction(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    model.CreateWithResourceObjFriction(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    resObj->id_ = 0;
+    resObj->type_ = static_cast<int32_t>(ResourceType::INTEGER);
+
+    // add callback function
+    model.CreateWithResourceObjFriction(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    model.CreateWithResourceObjFriction(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+}
+
+/**
+ * @tc.name: CreateWithResourceObjFriction
+ * @tc.desc: Test CreateWithResourceObjFriction in ScrollModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollControllerTestNg, CreateWithResourceObjFriction002, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    const double defaultiction = 10000000.0f;
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+
+    ScrollModelNG::CreateWithResourceObjFriction(nullptr, nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    ScrollModelNG::CreateWithResourceObjFriction(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    ScrollModelNG::CreateWithResourceObjFriction(nullptr, resObj);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    ScrollModelNG::CreateWithResourceObjFriction(AceType::RawPtr(frameNode_), resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    ScrollModelNG::CreateWithResourceObjFriction(nullptr, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_, nullptr);
+    ScrollModelNG::CreateWithResourceObjFriction(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    resObj->id_ = 0;
+    resObj->type_ = static_cast<int32_t>(ResourceType::INTEGER);
+
+    ScrollModelNG::CreateWithResourceObjFriction(nullptr, resObj);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    // add callback function
+    ScrollModelNG::CreateWithResourceObjFriction(AceType::RawPtr(frameNode_), resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+    pattern_->friction_ = defaultiction;
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->friction_, defaultiction);
+
+    // remove callback function
+    ScrollModelNG::CreateWithResourceObjFriction(nullptr, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_, nullptr);
+    ScrollModelNG::CreateWithResourceObjFriction(AceType::RawPtr(frameNode_), nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+}
+
+/**
+ * @tc.name: CreateWithResourceObjIntervalSize
+ * @tc.desc: Test CreateWithResourceObjIntervalSize in ScrollModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollControllerTestNg, CreateWithResourceObjIntervalSize001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_EQ(pattern_->resourceMgr_, nullptr);
+
+    const CalcDimension DEFAULT_INTERVAL_SIZE = CalcDimension(100.0);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+
+    model.CreateWithResourceObjIntervalSize(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    model.CreateWithResourceObjIntervalSize(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    pattern_->SetIntervalSize(DEFAULT_INTERVAL_SIZE);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->GetIntervalSize(), DEFAULT_INTERVAL_SIZE);
+
+    model.CreateWithResourceObjIntervalSize(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
+
+    resObj->id_ = 0;
+    resObj->type_ = static_cast<int32_t>(ResourceType::INTEGER);
+
+    model.CreateWithResourceObjIntervalSize(resObj);
+    ASSERT_NE(pattern_->resourceMgr_, nullptr);
+    EXPECT_NE(pattern_->resourceMgr_->resMap_.size(), 0);
+
+    pattern_->SetIntervalSize(DEFAULT_INTERVAL_SIZE);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_NE(pattern_->GetIntervalSize(), DEFAULT_INTERVAL_SIZE);
+
+    model.CreateWithResourceObjIntervalSize(nullptr);
+    EXPECT_EQ(pattern_->resourceMgr_, nullptr);
 }
 } // namespace OHOS::Ace::NG

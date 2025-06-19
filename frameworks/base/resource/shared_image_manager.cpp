@@ -23,7 +23,7 @@ namespace {
 constexpr uint32_t DELAY_TIME_FOR_IMAGE_DATA_CLEAN = 30000;
 constexpr char MEMORY_IMAGE_HEAD[] = "memory://";
 
-constexpr uint32_t MAX_SIZE_FOR_TOTAL_IMAGE = 10000000;
+constexpr size_t MAX_SIZE_FOR_TOTAL_IMAGE = 10000000;
 
 } // namespace
 
@@ -121,8 +121,8 @@ bool SharedImageManager::UpdateImageMap(const std::string& name, const SharedIma
     bool isClear = false;
     auto iter = sharedImageMap_.find(name);
     if (iter != sharedImageMap_.end()) {
-        int32_t diffSize = sharedImage.size() - iter->second.size();
-        sharedImageTotalSize_ += diffSize;
+        sharedImageTotalSize_ -= iter->second.size();
+        sharedImageTotalSize_ += sharedImage.size();
         iter->second = sharedImage;
     } else {
         sharedImageTotalSize_ += sharedImage.size();
@@ -135,7 +135,7 @@ bool SharedImageManager::UpdateImageMap(const std::string& name, const SharedIma
     }
     if (sharedImageTotalSize_ > MAX_SIZE_FOR_TOTAL_IMAGE) {
         LOGW("will clear %{public}s cache, sharedImageTotalSize_ size %{public}d",
-            name.c_str(), sharedImageTotalSize_);
+            name.c_str(), static_cast<int32_t>(sharedImageTotalSize_));
         isClear = true;
     }
     return isClear;

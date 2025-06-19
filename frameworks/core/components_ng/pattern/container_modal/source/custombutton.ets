@@ -40,6 +40,11 @@ const EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE: string = 'arkui_button_right_offset
 const EVENT_NAME_BUTTON_ICON_SIZE_CHANGE: string = 'arkui_button_icon_size_change'
 const EVENT_NAME_BUTTON_BACKGROUND_CORNER_RADIUS_CHANGE: string = 'arkui_button_background_corner_radius_change'
 
+const PC_TITLE_BAR_MAXIMIZE: string = 'pc_title_bar_maximize'
+const PC_TITLE_BAR_MINIMIZE: string = 'pc_title_bar_minimize'
+const PC_TITLE_BAR_RESTORE: string = 'pc_title_bar_restore'
+const PC_TITLE_BAR_CLOSE: string = 'pc_title_bar_close'
+
 const maximizeNormalResource: Resource = {
   bundleName: '',
   moduleName: '',
@@ -191,6 +196,10 @@ struct custombutton {
   @State closeVisibility: Visibility = Visibility.Visible
   @State closeStatus: boolean = true
   @State isShowMenu: boolean = false
+  @State maximizeReadResource: string = PC_TITLE_BAR_MAXIMIZE
+  @State maximizeRead: string = this.getStringByResourceToken(PC_TITLE_BAR_MAXIMIZE)
+  @State minimizeRead: string = this.getStringByResourceToken(PC_TITLE_BAR_MINIMIZE)
+  @State closeRead: string = this.getStringByResourceToken(PC_TITLE_BAR_CLOSE)
   @State leftSplitTitle: Resource = {
     bundleName: '',
     moduleName: '',
@@ -263,6 +272,7 @@ struct custombutton {
       this.setCloseStatus(this.parseBoolean(param))
     } else if (eventName === EVENT_NAME_MAXIMIZE_IS_RECOVER) {
       this.setMaximizeIsRecover(this.parseBoolean(param))
+      this.setMaximizeReadIsRecover(this.parseBoolean(param))
     } else if (eventName === EVENT_NAME_MENU_WIDTH_CHANGE) {
       this.setMenuWidth(param)
     } else if (eventName === EVENT_NAME_BUTTON_SPACING_CHANGE) {
@@ -396,6 +406,14 @@ struct custombutton {
       this.maximizeResource = recoverNormalResource
     } else {
       this.maximizeResource = maximizeNormalResource
+    }
+  }
+
+  setMaximizeReadIsRecover(isRecover: boolean) {
+    if (isRecover) {
+      this.maximizeReadResource = PC_TITLE_BAR_RESTORE
+    } else {
+      this.maximizeReadResource = PC_TITLE_BAR_MAXIMIZE
     }
   }
 
@@ -621,6 +639,10 @@ struct custombutton {
             }
           })
         })
+        .accessibilityText(this.maximizeRead)
+        .onAccessibilityHover(() => {
+          this.maximizeRead = this.getStringByResourceToken(this.maximizeReadResource);
+        })
 
         Button() {
           Image(this.minimizeResource)
@@ -660,6 +682,10 @@ struct custombutton {
               this.minimizeScale = 1.0
             }
           })
+        })
+        .accessibilityText(this.minimizeRead)
+        .onAccessibilityHover(() => {
+          this.minimizeRead = this.getStringByResourceToken(PC_TITLE_BAR_MINIMIZE);
         })
 
         Button() {
@@ -701,7 +727,10 @@ struct custombutton {
             }
           })
         })
-
+        .accessibilityText(this.closeRead)
+        .onAccessibilityHover(() => {
+          this.closeRead = this.getStringByResourceToken(PC_TITLE_BAR_CLOSE);
+        })
       }.id('containerModalButtonRowId')
       .height('100%')
       .padding({ left: BUTTON_ELEMENT_MARGIN_HORIZONTAL, right: this.buttonRightOffset + 'vp' })
@@ -724,5 +753,16 @@ struct custombutton {
     .onAppear(() => {
       this.addButtonPointLightAnim()
     })
+  }
+
+  getStringByResourceToken(f, ...g) {
+      if (f) {
+          try {
+              return getContext(this).resourceManager.getStringByNameSync(f, ...g);
+          } catch (h) {
+              console.error(`Ace SegmentButton getAccessibilityDescription, error: ${h.toString()}`);
+          }
+      }
+      return '';
   }
 }

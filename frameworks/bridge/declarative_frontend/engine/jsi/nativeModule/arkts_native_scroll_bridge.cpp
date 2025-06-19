@@ -62,6 +62,42 @@ bool ParsePagination(const EcmaVM* vm, const Local<JSValueRef>& paginationValue,
     return true;
 }
 
+bool ParsePaginationNG(const EcmaVM* vm, const Local<JSValueRef>& paginationValue,
+    std::vector<ArkUI_Float32>& vPaginationValue, std::vector<RefPtr<ResourceObject>>& resObjs,
+    std::vector<int32_t>& vPaginationUnit)
+{
+    uint32_t pLength = 0;
+    resObjs.clear();
+    if (paginationValue->IsArray(vm)) {
+        auto paginationArray = panda::Local<panda::ArrayRef>(paginationValue);
+        pLength = paginationArray->Length(vm);
+        if (pLength <= 0) {
+            return false;
+        }
+        resObjs.resize(pLength);
+        for (uint32_t i = 0; i < pLength; i++) {
+            CalcDimension dims;
+            Local<JSValueRef> xValue = panda::ArrayRef::GetValueAt(vm, paginationArray, i);
+            if (!ArkTSUtils::ParseJsDimensionVpNG(vm, xValue, dims, resObjs[i], true)) {
+                continue;
+            }
+            vPaginationValue.push_back(static_cast<ArkUI_Float32>(dims.Value()));
+            vPaginationUnit.push_back(static_cast<int32_t>(dims.Unit()));
+        }
+    } else {
+        CalcDimension intervalSize;
+        resObjs.resize(1);
+        if (!ArkTSUtils::ParseJsDimensionVp(vm, paginationValue, intervalSize, resObjs[0]) ||
+            intervalSize.IsNegative()) {
+            intervalSize = CalcDimension(0.0);
+        }
+        vPaginationValue.push_back(static_cast<ArkUI_Float32>(intervalSize.Value()));
+        vPaginationUnit.push_back(static_cast<int32_t>(intervalSize.Unit()));
+    }
+
+    return true;
+}
+
 ArkUINativeModuleValue ScrollBridge::SetNestedScroll(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -131,11 +167,16 @@ ArkUINativeModuleValue ScrollBridge::SetFriction(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     double friction = FRICTION_DEFAULT;
-    if (!ArkTSUtils::ParseJsDouble(vm, scrollFrictionArg, friction)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ArkTSUtils::ParseJsDouble(vm, scrollFrictionArg, friction, resObj)) {
         GetArkUINodeModifiers()->getScrollModifier()->resetScrollFriction(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getScrollModifier()->setScrollFriction(nativeNode,
-            static_cast<ArkUI_Float32>(friction));
+        if (SystemProperties::ConfigChangePerform()) {
+            GetArkUINodeModifiers()->getScrollModifier()->createWithResourceObjFriction(
+                nativeNode, reinterpret_cast<void*>(AceType::RawPtr(resObj)));
+        }
+        GetArkUINodeModifiers()->getScrollModifier()->setScrollFriction(
+            nativeNode, static_cast<ArkUI_Float32>(friction));
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -148,6 +189,9 @@ ArkUINativeModuleValue ScrollBridge::ResetFriction(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getScrollModifier()->resetScrollFriction(nativeNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getScrollModifier()->createWithResourceObjFriction(nativeNode, nullptr);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -171,7 +215,8 @@ ArkUINativeModuleValue ScrollBridge::SetScrollSnap(ArkUIRuntimeCallInfo* runtime
     }
     std::vector<ArkUI_Float32> vPaginationValue;
     std::vector<int32_t> vPaginationUnit;
-    if (!ParsePagination(vm, paginationValue, vPaginationValue, vPaginationUnit)) {
+    std::vector<RefPtr<ResourceObject>> resObjs;
+    if (!ParsePaginationNG(vm, paginationValue, vPaginationValue, resObjs, vPaginationUnit)) {
         GetArkUINodeModifiers()->getScrollModifier()->resetScrollScrollSnap(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -185,6 +230,10 @@ ArkUINativeModuleValue ScrollBridge::SetScrollSnap(ArkUIRuntimeCallInfo* runtime
     vPaginationUnit.push_back(static_cast<int32_t>(enableSnapToEndValue->ToBoolean(vm)->Value()));
     vPaginationUnit.push_back(static_cast<int32_t>(isArray));
     auto uLength = pLength + 4;
+
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getScrollModifier()->createWithResourceObjSnapPaginations(nativeNode, &resObjs);
+    }
     GetArkUINodeModifiers()->getScrollModifier()->setScrollScrollSnap(
         nativeNode, vPaginationValue.data(), pLength, vPaginationUnit.data(), uLength);
     return panda::JSValueRef::Undefined(vm);
@@ -198,6 +247,9 @@ ArkUINativeModuleValue ScrollBridge::ResetScrollSnap(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getScrollModifier()->resetScrollScrollSnap(nativeNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        GetArkUINodeModifiers()->getScrollModifier()->createWithResourceObjSnapPaginations(nativeNode, nullptr);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 

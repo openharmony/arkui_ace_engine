@@ -130,9 +130,10 @@ public:
     void UpdateTextColor(const Color& color);
     void UpdateFontSize(const CalcDimension& fontSize);
     void UpdateFontFamily(const std::vector<std::string>& fontFamilies);
-    void UpdateTextClockColor(const Color& color);
+    void UpdateTextClockColor(const Color& color, bool isFirstLoad = false);
     void UpdateTextClockFontSize(const CalcDimension& fontSize);
     void UpdateTextClockFontFamily(const std::vector<std::string>& fontFamilies);
+    void UpdateTextClockFormat(const std::string& format);
 
 private:
     void OnModifyDone() override;
@@ -141,6 +142,7 @@ private:
     void OnLanguageConfigurationUpdate() override;
     void DumpInfo() override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override {}
+    void OnColorConfigurationUpdate() override;
     void InitTextClockController();
 
     void InitUpdateTimeTextCallBack();

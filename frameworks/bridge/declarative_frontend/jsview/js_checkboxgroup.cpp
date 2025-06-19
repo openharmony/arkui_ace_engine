@@ -209,12 +209,15 @@ void JSCheckboxGroup::SelectedColor(const JSCallbackInfo& info)
         return;
     }
     Color selectedColor;
-    if (!ParseJsColor(info[0], selectedColor)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], selectedColor, resObj)) {
         CheckBoxGroupModel::GetInstance()->ResetSelectedColor();
-        return;
+    } else {
+        CheckBoxGroupModel::GetInstance()->SetSelectedColor(selectedColor);
     }
-
-    CheckBoxGroupModel::GetInstance()->SetSelectedColor(selectedColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckBoxGroupModel::GetInstance()->CreateWithColorResourceObj(resObj, CheckBoxGroupColorType::SELECTED_COLOR);
+    }
 }
 
 void JSCheckboxGroup::UnSelectedColor(const JSCallbackInfo& info)
@@ -223,12 +226,16 @@ void JSCheckboxGroup::UnSelectedColor(const JSCallbackInfo& info)
         return;
     }
     Color unSelectedColor;
-    if (!ParseJsColor(info[0], unSelectedColor)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], unSelectedColor, resObj)) {
         CheckBoxGroupModel::GetInstance()->ResetUnSelectedColor();
-        return;
+    } else {
+        CheckBoxGroupModel::GetInstance()->SetUnSelectedColor(unSelectedColor);
     }
-
-    CheckBoxGroupModel::GetInstance()->SetUnSelectedColor(unSelectedColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckBoxGroupModel::GetInstance()->CreateWithColorResourceObj(
+            resObj, CheckBoxGroupColorType::UN_SELECTED_COLOR);
+    }
 }
 
 void JSCheckboxGroup::Mark(const JSCallbackInfo& info)

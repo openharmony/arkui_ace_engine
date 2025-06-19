@@ -80,6 +80,8 @@ typedef struct FontConfigJsonInfo {
     FallbackGroupSet fallbackGroupSet;
 } FontConfigJsonInfo;
 
+using ExternalLoadFontPair = std::pair<std::string, std::function<void()>>;
+
 class FontManager : public virtual AceType {
     DECLARE_ACE_TYPE(FontManager, AceType);
 
@@ -131,6 +133,21 @@ public:
     void RemoveHybridRenderNode(const WeakPtr<NG::UINode>& node);
     void UpdateHybridRenderNodes();
 
+    using StartAbilityOnInstallAppInStoreHandler = std::function<void(const std::string& appName)>;
+    void SetStartAbilityOnInstallAppInStoreHandler(StartAbilityOnInstallAppInStoreHandler&& listener)
+    {
+        startAbilityOnInstallAppInStoreHandler_ = std::move(listener);
+    }
+
+    using StartAbilityOnJumpBrowserHandler = std::function<void(const std::string& appName)>;
+    void SetStartAbilityOnJumpBrowserHandler(StartAbilityOnJumpBrowserHandler&& listener)
+    {
+        startAbilityOnJumpBrowserHandler_ = std::move(listener);
+    }
+
+    void StartAbilityOnJumpBrowser(const std::string& address) const;
+    void StartAbilityOnInstallAppInStore(const std::string& appName) const;
+
 protected:
     static float fontWeightScale_;
     static bool isDefaultFontChanged_;
@@ -138,6 +155,8 @@ protected:
 
 private:
     void FontNodeChangeStyleNG();
+    void RegisterLoadFontCallbacks();
+    void OnLoadFontChanged(const WeakPtr<PipelineBase>& context, const std::string& fontName);
 
     std::list<RefPtr<FontLoader>> fontLoaders_;
     std::vector<std::string> fontNames_;
@@ -147,6 +166,11 @@ private:
     std::set<WeakPtr<RenderNode>> variationNodes_;
     std::set<WeakPtr<NG::UINode>> variationNodesNG_;
     std::set<WeakPtr<FontChangeObserver>> observers_;
+    std::map<WeakPtr<NG::UINode>, ExternalLoadFontPair> externalLoadCallbacks_;
+    bool hasRegisterLoadFontCallback_ = false;
+    
+    StartAbilityOnInstallAppInStoreHandler startAbilityOnInstallAppInStoreHandler_;
+    StartAbilityOnJumpBrowserHandler startAbilityOnJumpBrowserHandler_;
 
 #ifdef ACE_ENABLE_VK
     std::mutex hybridRenderNodesMutex_;

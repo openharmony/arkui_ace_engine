@@ -47,6 +47,16 @@ enum class CaretUpdateType {
     VISIBLE_PASSWORD_ICON,
     DOUBLE_CLICK
 };
+
+enum class AIResetSelectionReason {
+    INIT_SELECTION = 0,
+    SHOW_FOR_CANCEL = 1,
+    LONG_PRESS = 2,
+    CLICK = 3,
+    DRAG_START = 4,
+    DRAG_START_ON_CHILDREN = 5,
+    CLOSE_CONTEXT_MENU = 6
+};
 /**
  * Stands for selection indexes
  * We use base/destination to indicate the start/end position because of uncertain direction.
@@ -197,6 +207,12 @@ struct TextSelector {
         return IsValid() && GetTextStart() <= range.first && range.second <= GetTextEnd();
     }
 
+    void ResetAiSelected()
+    {
+        aiStart = std::nullopt;
+        aiEnd = std::nullopt;
+    }
+
     std::string ToString()
     {
         std::string result;
@@ -226,6 +242,9 @@ struct TextSelector {
     // When paints caret, this is where the caret position is.
     int32_t destinationOffset = -1;
     OffsetF selectionDestinationOffset;
+
+    std::optional<int32_t> aiStart;
+    std::optional<int32_t> aiEnd;
 
     int32_t charCount = 0;
     RectF firstHandle;

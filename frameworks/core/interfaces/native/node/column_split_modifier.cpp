@@ -41,7 +41,7 @@ void SetColumnSplitDivider(ArkUINodeHandle node, ArkUI_Float32 stVal, int32_t st
     CHECK_NULL_VOID(frameNode);
     Dimension startMarginDimension(stVal, static_cast<DimensionUnit>(stUnit));
     Dimension endMarginDimension(endVal, static_cast<DimensionUnit>(endUnit));
-    ItemDivider divider = { startMarginDimension, endMarginDimension };
+    ColumnSplitDivider divider = { startMarginDimension, endMarginDimension };
     LinearSplitModelNG::SetDivider(frameNode, SplitType::COLUMN_SPLIT, divider);
 }
 

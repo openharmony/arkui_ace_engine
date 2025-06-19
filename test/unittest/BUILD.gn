@@ -219,20 +219,21 @@ ohos_source_set("ace_components_base") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [
-    "$ace_root/adapter/preview/entrance/ui_session/ui_session_json_util.cpp",
-    "$ace_root/interfaces/inner_api/ace_kit/src/view/theme/token_colors.cpp",
-    "$ace_root/frameworks/core/common/resource/resource_manager.cpp",
-    "$ace_root/frameworks/core/common/resource/resource_wrapper.cpp",
+    "$ace_root/adapter/ohos/entrance/ui_session/ui_session_json_util.cpp",
+    "$ace_root/frameworks/core/common/card_scope.cpp",
+    "$ace_root/frameworks/core/common/multi_thread_build_manager.cpp",
     "$ace_root/frameworks/core/common/resource/pattern_resource_manager.cpp",
+    "$ace_root/frameworks/core/common/resource/resource_manager.cpp",
     "$ace_root/frameworks/core/common/resource/resource_parse_utils.cpp",
+    "$ace_root/frameworks/core/common/resource/resource_wrapper.cpp",
     "$ace_root/frameworks/core/components/theme/shadow_theme.cpp",
-    "$ace_root/frameworks/core/components_ng/token_theme/token_theme_storage.cpp",
     "$ace_root/frameworks/core/components_ng/base/distributed_ui.cpp",
     "$ace_root/frameworks/core/components_ng/base/extension_handler.cpp",
     "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/inspector.cpp",
     "$ace_root/frameworks/core/components_ng/base/inspector_filter.cpp",
+    "$ace_root/frameworks/core/components_ng/base/lazy_compose_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/base/modifier.cpp",
     "$ace_root/frameworks/core/components_ng/base/navigation_register.cpp",
     "$ace_root/frameworks/core/components_ng/base/node_render_status_monitor.cpp",
@@ -246,6 +247,8 @@ ohos_source_set("ace_components_base") {
     "$ace_root/frameworks/core/components_ng/base/view_stack_processor.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/token_theme/token_theme_storage.cpp",
+    "$ace_root/interfaces/inner_api/ace_kit/src/view/theme/token_colors.cpp",
   ]
   if (ace_engine_feature_enable_split_mode &&
       defined(
@@ -258,8 +261,13 @@ ohos_source_set("ace_components_base") {
   }
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
   configs = [ ":ace_unittest_config" ]
+  external_deps = [ "cJSON:cjson" ]
   if (current_os == "ohos") {
-    external_deps = [ "c_utils:utils" ]
+    external_deps += [ "c_utils:utils" ]
+  }
+  if (defined(ffrt_support) && ffrt_support) {
+    defines = [ "FFRT_SUPPORT" ]
+    external_deps += [ "ffrt:libffrt" ]
   }
 }
 
@@ -476,8 +484,8 @@ ohos_source_set("ace_components_token_theme") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [
-    "$ace_root/interfaces/inner_api/ace_kit/src/view/theme/token_colors.cpp",
     "$ace_root/frameworks/core/components_ng/token_theme/token_theme_storage.cpp",
+    "$ace_root/interfaces/inner_api/ace_kit/src/view/theme/token_colors.cpp",
   ]
   configs = [ ":ace_unittest_config_ext" ]
 }
@@ -706,6 +714,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/base/mock_foldable_window.cpp",
     "$ace_root/test/mock/base/mock_frame_report.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
+    "$ace_root/test/mock/base/mock_image_perf.cpp",
     "$ace_root/test/mock/base/mock_image_source.cpp",
     "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
     "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
@@ -775,6 +784,7 @@ ohos_source_set("ace_components_mock") {
     "$ace_root/test/mock/core/render/mock_render_context.cpp",
     "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
     "$ace_root/test/mock/core/render/mock_render_surface_creator.cpp",
+    "$ace_root/test/mock/core/render/mock_texteffect.cpp",
     "$ace_root/test/mock/core/rosen/testing_typography_style.cpp",
     "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
     "$ace_root/test/mock/interfaces/mock_content_modifier.cpp",
@@ -902,7 +912,6 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/dialog/dialog_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/dialog/dialog_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/dialog/dialog_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/dialog/dialog_mask_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/dialog/dialog_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/dialog/dialog_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/divider/divider_layout_algorithm.cpp",
@@ -961,6 +970,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/grid_row/grid_row_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_row/grid_row_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/hyperlink/hyperlink_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/hyperlink/hyperlink_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/hyperlink/hyperlink_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/image/image_layout_algorithm.cpp",
@@ -1107,7 +1117,6 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/overlay/modal_presentation_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/overlay_container_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/overlay_manager.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/overlay/overlay_mask_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/popup_base_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_drag_bar_pattern.cpp",
@@ -1180,6 +1189,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_select_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_undo_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/preview_menu_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/rich_editor_drag_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/rich_editor_drag_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.cpp",
@@ -1221,6 +1231,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/search/search_gesture_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/search/search_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_text_field.cpp",
@@ -1307,6 +1318,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/symbol/symbol_effect_options.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/symbol/symbol_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/symbol/symbol_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/symbol/symbol_source_info.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tab_bar_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tab_bar_layout_algorithm.cpp",
@@ -1322,6 +1334,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tabs_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/base_text_select_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/image_span_view.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/image_span_view_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/multiple_click_recognizer.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span/mutable_span_string.cpp",
@@ -1329,8 +1342,10 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/text/span/span_string.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span/tlv_util.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/span_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/symbol_span_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/symbol_span_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_adapt_font_sizer.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_base.cpp",
@@ -1339,6 +1354,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/text/text_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/text_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_pattern.cpp",
@@ -1364,6 +1380,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_paint_property.cpp",
@@ -1439,16 +1456,17 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_controller_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_utils.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.cpp",
     "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp",
     "$ace_root/test/mock/core/pattern/mock_picker_haptic_factory.cpp",
     "$ace_root/test/mock/core/pattern/mock_web_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/scroll_adjust/scroll_adjust_manager.cpp"
   ]
   if (ace_engine_feature_enable_split_mode &&
       defined(

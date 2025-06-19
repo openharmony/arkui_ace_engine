@@ -71,15 +71,12 @@ void JSIndexer::ParseIndexerSelectedObject(
     const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal, bool isMethodProp = false)
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
-    auto vm = info.GetVm();
-    auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
-    auto func = jsFunc->GetLocalHandle();
-    auto changeEvent = [vm, func = panda::CopyableGlobal(vm, func)](const int32_t selected) {
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch trycatch(vm);
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](const int32_t selected) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Indexer.SelectedChangeEvent");
-        panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, selected) };
-        func->Call(vm, func.ToLocal(), params, 1);
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(selected));
+        func->ExecuteJS(1, &newJSVal);
     };
 
     if (isMethodProp) {
@@ -158,12 +155,15 @@ void JSIndexer::SetSelectedColor(const JSCallbackInfo& args)
     std::optional<Color> colorOpt;
     Color selectedColor;
     RefPtr<ResourceObject> resObj;
+    bool setByUser = false;
     if (ParseJsColor(args[0], selectedColor, resObj)) {
         colorOpt = selectedColor;
+        setByUser = true;
     }
     IndexerModel::GetInstance()->SetSelectedColor(colorOpt);
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::SELECTED_COLOR, resObj);
+        IndexerModel::GetInstance()->SetSelectedColorByUser(setByUser);
     }
 }
 
@@ -175,11 +175,14 @@ void JSIndexer::SetColor(const JSCallbackInfo& args)
     std::optional<Color> colorOpt;
     Color color;
     RefPtr<ResourceObject> resObj;
+    bool setByUser = false;
     if (ParseJsColor(args[0], color, resObj)) {
         colorOpt = color;
+        setByUser = true;
     }
     IndexerModel::GetInstance()->SetColor(colorOpt);
     if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->SetColorByUser(setByUser);
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::COLOR, resObj);
     }
 }
@@ -192,11 +195,14 @@ void JSIndexer::SetPopupColor(const JSCallbackInfo& args)
     std::optional<Color> colorOpt;
     Color popupColor;
     RefPtr<ResourceObject> resObj;
+    bool setByUser = false;
     if (ParseJsColor(args[0], popupColor, resObj)) {
         colorOpt = popupColor;
+        setByUser = true;
     }
     IndexerModel::GetInstance()->SetPopupColor(colorOpt);
     if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->SetPopupColorByUser(setByUser);
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_COLOR, resObj);
     }
 }
@@ -209,12 +215,15 @@ void JSIndexer::SetSelectedBackgroundColor(const JSCallbackInfo& args)
     std::optional<Color> colorOpt;
     Color selectedBackgroundColor;
     RefPtr<ResourceObject> resObj;
+    bool setByUser = false;
     if (ParseJsColor(args[0], selectedBackgroundColor, resObj)) {
         colorOpt = selectedBackgroundColor;
+        setByUser = true;
     }
     IndexerModel::GetInstance()->SetSelectedBackgroundColor(colorOpt);
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::SELECTED_BACKGROUND_COLOR, resObj);
+        IndexerModel::GetInstance()->SetSelectedBGColorByUser(setByUser);
     }
 }
 
@@ -226,12 +235,15 @@ void JSIndexer::SetPopupBackground(const JSCallbackInfo& args)
     std::optional<Color> colorOpt;
     Color popupBackground;
     RefPtr<ResourceObject> resObj;
+    bool setByUser = false;
     if (ParseJsColor(args[0], popupBackground, resObj)) {
         colorOpt = popupBackground;
+        setByUser = true;
     }
     IndexerModel::GetInstance()->SetPopupBackground(colorOpt);
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_BACKGROUND, resObj);
+        IndexerModel::GetInstance()->SetPopupBackgroundColorByUser(setByUser);
     }
 }
 
@@ -296,6 +308,61 @@ void JSIndexer::SetFont(const JSCallbackInfo& args)
     }
 }
 
+void JSIndexer::JsOnSelected(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onSelected = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                              const int32_t selected) {
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+            auto params = ConvertToJSValues(selected);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        };
+        IndexerModel::GetInstance()->SetOnSelected(onSelected);
+    }
+}
+
+void JSIndexer::JsOnRequestPopupData(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto requestPopupData = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                    const int32_t selected) {
+            std::vector<std::string> popupData;
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, popupData);
+            auto params = ConvertToJSValues(selected);
+            JSRef<JSArray> result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+            if (result.IsEmpty()) {
+                return popupData;
+            }
+
+            if (!result->IsArray()) {
+                return popupData;
+            }
+
+            for (size_t i = 0; i < result->Length(); i++) {
+                if (result->GetValueAt(i)->IsString()) {
+                    auto item = result->GetValueAt(i);
+                    popupData.emplace_back(item->ToString());
+                }
+            }
+            return popupData;
+        };
+        IndexerModel::GetInstance()->SetOnRequestPopupData(requestPopupData);
+    }
+}
+
+void JSIndexer::JsOnPopupSelected(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onPopupSelected = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                   const int32_t selected) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto params = ConvertToJSValues(selected);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+        };
+        IndexerModel::GetInstance()->SetOnPopupSelected(onPopupSelected);
+    }
+}
+
 void JSIndexer::GetFontContent(const JSCallbackInfo& args, IndexerTextStyle& textStyle)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
@@ -356,12 +423,12 @@ void JSIndexer::SetAlignStyle(const JSCallbackInfo& args)
     }
     IndexerModel::GetInstance()->SetAlignStyle(value);
     CalcDimension popupHorizontalSpace(-1.0);
+    RefPtr<ResourceObject> resObj;
     if (args.Length() > 1) {
-        RefPtr<ResourceObject> resObj;
         ParseJsDimensionVp(args[1], popupHorizontalSpace, resObj);
-        if (SystemProperties::ConfigChangePerform()) {
-            IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::ALIGN_OFFSET, resObj);
-        }
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::ALIGN_OFFSET, resObj);
     }
     IndexerModel::GetInstance()->SetPopupHorizontalSpace(popupHorizontalSpace);
 }
@@ -426,12 +493,15 @@ void JSIndexer::SetPopupSelectedColor(const JSCallbackInfo& args)
     std::optional<Color> colorOpt;
     Color popupSelectedColor;
     RefPtr<ResourceObject> resObj;
+    bool setByUser = false;
     if (ParseJsColor(args[0], popupSelectedColor, resObj)) {
         colorOpt = popupSelectedColor;
+        setByUser = true;
     }
     IndexerModel::GetInstance()->SetPopupSelectedColor(colorOpt);
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_SELECTED_COLOR, resObj);
+        IndexerModel::GetInstance()->SetPopupSelectedColorByUser(setByUser);
     }
 }
 
@@ -443,12 +513,15 @@ void JSIndexer::SetPopupUnselectedColor(const JSCallbackInfo& args)
     std::optional<Color> colorOpt;
     Color popupUnselectedColor;
     RefPtr<ResourceObject> resObj;
+    bool setByUser = false;
     if (ParseJsColor(args[0], popupUnselectedColor, resObj)) {
         colorOpt = popupUnselectedColor;
+        setByUser = true;
     }
     IndexerModel::GetInstance()->SetPopupUnselectedColor(colorOpt);
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_UNSELECTED_COLOR, resObj);
+        IndexerModel::GetInstance()->SetPopupUnselectedColorByUser(setByUser);
     }
 }
 
@@ -492,12 +565,15 @@ void JSIndexer::SetPopupItemBackgroundColor(const JSCallbackInfo& args)
     std::optional<Color> colorOpt;
     Color popupItemBackgroundColor;
     RefPtr<ResourceObject> resObj;
+    bool setByUser = false;
     if (ParseJsColor(args[0], popupItemBackgroundColor, resObj)) {
         colorOpt = popupItemBackgroundColor;
+        setByUser = true;
     }
     IndexerModel::GetInstance()->SetPopupItemBackground(colorOpt);
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_ITEM_BACKGROUND_COLOR, resObj);
+        IndexerModel::GetInstance()->SetPopupItemBackgroundColorByUser(setByUser);
     }
 }
 
@@ -593,12 +669,15 @@ void JSIndexer::SetPopupTitleBackground(const JSCallbackInfo& args)
     std::optional<Color> colorOpt;
     Color popupTitleBackground;
     RefPtr<ResourceObject> resObj;
+    bool setByUser = false;
     if (ParseJsColor(args[0], popupTitleBackground, resObj)) {
         colorOpt = popupTitleBackground;
+        setByUser = true;
     }
     IndexerModel::GetInstance()->SetPopupTitleBackground(colorOpt);
     if (SystemProperties::ConfigChangePerform()) {
         IndexerModel::GetInstance()->CreateWithResourceObj(IndexerJsResourceType::POPUP_TITLE_BACKGROUND, resObj);
+        IndexerModel::GetInstance()->SetPopupTitleBackgroundByUser(setByUser);
     }
 }
 
@@ -627,6 +706,9 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::Declare("AlphabetIndexer");
     JSClass<JSIndexer>::StaticMethod("create", &JSIndexer::Create);
     JSClass<JSIndexer>::StaticMethod("createArc", &JSIndexer::CreateArc);
+    // API7 onSelected deprecated
+    JSClass<JSIndexer>::StaticMethod("onSelected", &JSIndexer::JsOnSelected);
+    JSClass<JSIndexer>::StaticMethod("onSelect", &JSIndexer::JsOnSelected);
     JSClass<JSIndexer>::StaticMethod("color", &JSIndexer::SetColor, opt);
     JSClass<JSIndexer>::StaticMethod("selectedColor", &JSIndexer::SetSelectedColor, opt);
     JSClass<JSIndexer>::StaticMethod("popupColor", &JSIndexer::SetPopupColor, opt);
@@ -638,6 +720,7 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("popupFont", &JSIndexer::SetPopupFont);
     JSClass<JSIndexer>::StaticMethod("itemSize", &JSIndexer::SetItemSize, opt);
     JSClass<JSIndexer>::StaticMethod("alignStyle", &JSIndexer::SetAlignStyle, opt);
+    JSClass<JSIndexer>::StaticMethod("onRequestPopupData", &JSIndexer::JsOnRequestPopupData, opt);
     JSClass<JSIndexer>::StaticMethod("selected", &JSIndexer::SetSelected, opt);
     JSClass<JSIndexer>::StaticMethod("popupPosition", &JSIndexer::SetPopupPosition, opt);
     JSClass<JSIndexer>::StaticMethod("popupSelectedColor", &JSIndexer::SetPopupSelectedColor, opt);
@@ -651,6 +734,8 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     JSClass<JSIndexer>::StaticMethod("popupTitleBackground", &JSIndexer::SetPopupTitleBackground, opt);
     JSClass<JSIndexer>::StaticMethod("width", &JSIndexer::SetWidth);
     JSClass<JSIndexer>::StaticMethod("enableHapticFeedback", &JSIndexer::SetEnableHapticFeedback, opt);
+    // keep compatible, need remove after
+    JSClass<JSIndexer>::StaticMethod("onPopupSelect", &JSIndexer::JsOnPopupSelected, opt);
     JSClass<JSIndexer>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSIndexer>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSIndexer>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);

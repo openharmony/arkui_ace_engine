@@ -36,6 +36,7 @@
 #include "core/common/resource/resource_configuration.h"
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/bridge/common/utils/utils.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_context_module.h"
 #include "frameworks/bridge/js_frontend/js_frontend.h"
 #include "frameworks/core/common/ace_engine.h"
 #ifdef COMPONENT_TEST_ENABLED
@@ -281,6 +282,7 @@ std::unique_ptr<AceAbility> AceAbility::CreateInstance(AceRunArgs& runArgs)
     u_setDataDirectory(icuPath.c_str());
 #endif
     AceApplicationInfo::GetInstance().SetLocale(runArgs.language, runArgs.region, runArgs.script, "");
+    Ace::Framework::JsiContextModule::GetInstance()->IsPreview();
     SetFontMgrConfig(runArgs.containerSdkPath);
     EventDispatcher::GetInstance().Initialize();
     auto aceAbility = std::make_unique<AceAbility>(runArgs);

@@ -31,6 +31,9 @@ namespace OHOS::Ace::NG {
 // and position(outNode identity), animates to the final size and position of inNode(outNode active). Although
 // we have two transitions but these two transitions fit together perfectly, so the appearance looks like a
 // single view move from its old position to its new position, thus visual focus guidance is completed.
+namespace {
+    constexpr char OCCLUSION_SCENE[] = "_occlusion";
+}
 GeometryTransition::GeometryTransition(
     const std::string& id, bool followWithoutTransition, bool doRegisterSharedTransition) : id_(id),
     followWithoutTransition_(followWithoutTransition), doRegisterSharedTransition_(doRegisterSharedTransition) {}
@@ -321,6 +324,17 @@ void GeometryTransition::ModifyLayoutConstraint(const RefPtr<LayoutWrapper>& lay
     }
 }
 
+void GeometryTransition::HandleOcclusionScene(const RefPtr<FrameNode>& node, bool flag)
+{
+    CHECK_NULL_VOID(node);
+    if (node->GetInspectorId().value_or("").find(OCCLUSION_SCENE) == std::string::npos) {
+        return;
+    }
+    ACE_SCOPED_TRACE("occlusion contentNode id: %d, name: %s setSuccess",
+        node->GetId(), node->GetInspectorId().value_or("").c_str());
+    node->AddToOcclusionMap(flag);
+}
+
 void GeometryTransition::SyncGeometry(bool isNodeIn)
 {
     auto [self, target] = GetMatchedPair(isNodeIn);
@@ -387,7 +401,7 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
         std::string traceTag = "ACE_GEOMETRY_TRANSITION, node " + std::to_string(nodeId) + " animation";
         AceAsyncTraceBeginCommercial(currentTraceTaskId, traceTag.c_str());
     };
-    auto finishCallback = [currentTraceTaskId, nodeWeak = WeakClaim(RawPtr(self))]() {
+    auto finishCallback = [currentTraceTaskId, nodeWeak = WeakClaim(RawPtr(self)), weak = WeakClaim(this)]() {
         auto node = nodeWeak.Upgrade();
         CHECK_NULL_VOID(node);
         auto renderContext = node->GetRenderContext();
@@ -396,7 +410,11 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
         TAG_LOGD(AceLogTag::ACE_GEOMETRY_TRANSITION, "node %{public}d animation completed", node->GetId());
         std::string traceTag = "ACE_GEOMETRY_TRANSITION, node " + std::to_string(node->GetId()) + " animation";
         AceAsyncTraceEndCommercial(currentTraceTaskId, traceTag.c_str());
+        auto occlusion = weak.Upgrade();
+        CHECK_NULL_VOID(occlusion);
+        occlusion->HandleOcclusionScene(node, false);
     };
+    HandleOcclusionScene(self, true);
     if (!isNodeIn && inNodeAbsRect_) {
         AnimationUtils::Animate(animationOption_, propertyCallback, finishCallback);
         inNodeAbsRect_.reset();

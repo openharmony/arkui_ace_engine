@@ -205,6 +205,11 @@ public:
 
     virtual bool CheckNeedForceMeasureAndLayout() = 0;
 
+    virtual bool ReachResponseDeadline() const
+    {
+        return false;
+    }
+
     void SetIsOverlayNode(bool isOverlayNode)
     {
         isOverlayNode_ = isOverlayNode;

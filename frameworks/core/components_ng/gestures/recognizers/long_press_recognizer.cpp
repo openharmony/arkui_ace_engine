@@ -58,7 +58,7 @@ void LongPressRecognizer::OnAccepted()
     }
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "LongPress accepted, tag = %{public}s",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "LONG RACC, T: %{public}s",
         node ? node->GetTag().c_str() : "null");
     if (onAccessibilityEventFunc_) {
         auto onAccessibilityEventFunc = onAccessibilityEventFunc_;
@@ -123,6 +123,7 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     extraInfo_ = "";
+    lastAction_ = static_cast<int32_t>(TouchType::DOWN);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -188,6 +189,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+    lastAction_ = static_cast<int32_t>(TouchType::UP);
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
@@ -205,7 +207,6 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         }
         if (static_cast<int32_t>(touchPoints_.size()) == 0) {
             hasRepeated_ = false;
-            SendCallbackMsg(onActionEnd_, false, GestureCallbackType::END);
             int64_t overTime = GetSysTimestamp();
             int64_t inputTime = overTime;
             if (firstInputTime_.has_value()) {
@@ -229,6 +230,7 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     lastTouchEvent_.pressedKeyCodes_ = event.pressedKeyCodes_;
+    lastAction_ = static_cast<int32_t>(TouchType::MOVE);
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         return;
     }
@@ -253,6 +255,7 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::FAIL) {
         return;
     }
+    lastAction_ = static_cast<int32_t>(TouchType::CANCEL);
     lastTouchEvent_ = event;
     if (touchPoints_.find(event.id) != touchPoints_.end()) {
         touchPoints_.erase(event.id);
@@ -397,8 +400,15 @@ void LongPressRecognizer::SendCallbackMsg(
     if (type == GestureCallbackType::START) {
         isOnActionTriggered_ = true;
     }
+    TriggerCallbackMsg(callback, isRepeat, type);
+}
+
+void LongPressRecognizer::TriggerCallbackMsg(
+    const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, GestureCallbackType type)
+{
     if (callback && *callback) {
         GestureEvent info;
+        info.SetLastAction(lastAction_);
         info.SetGestureTypeName(GestureTypeName::LONG_PRESS_GESTURE);
         info.SetTimeStamp(time_);
         info.SetRepeat(isRepeat);
@@ -410,6 +420,7 @@ void LongPressRecognizer::SendCallbackMsg(
         info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
         info.SetGlobalLocation(lastTouchEvent_.GetOffset())
             .SetLocalLocation(lastTouchEvent_.GetOffset() - coordinateOffset_);
+        info.SetGlobalDisplayLocation(lastTouchEvent_.GetGlobalDisplayOffset());
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         info.SetForce(lastTouchEvent_.force);
         if (lastTouchEvent_.tiltX.has_value()) {
@@ -429,6 +440,7 @@ void LongPressRecognizer::SendCallbackMsg(
         info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
+        HandleGestureAccept(info, type);
         callbackFunction(info);
         HandleReports(info, type);
         if (type == GestureCallbackType::START && longPressRecorder_ && *longPressRecorder_) {
@@ -574,6 +586,10 @@ GestureJudgeResult LongPressRecognizer::TriggerGestureJudgeCallback()
         info->SetRollAngle(trackPoint.rollAngle.value());
     }
     info->SetSourceTool(trackPoint.sourceTool);
+    info->SetRawInputEventType(inputEventType_);
+    info->SetRawInputEvent(lastPointEvent_);
+    info->SetRawInputDeviceId(deviceId_);
+    info->SetLastAction(lastAction_);
     if (gestureRecognizerJudgeFunc &&
         gestureRecognizerJudgeFunc(info, Claim(this), responseLinkRecognizer_) == GestureJudgeResult::REJECT) {
         return GestureJudgeResult::REJECT;

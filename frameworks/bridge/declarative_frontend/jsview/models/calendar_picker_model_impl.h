@@ -24,8 +24,7 @@ class CalendarPickerModelImpl : public OHOS::Ace::CalendarPickerModel {
 public:
     void Create(const NG::CalendarSettingData& settingData) override {};
     void SetEdgeAlign(const NG::CalendarEdgeAlign& alignType, const DimensionOffset& offset) override {};
-    void SetEdgeAlign(const NG::CalendarEdgeAlign& alignType, const DimensionOffset& offset,
-        const std::vector<RefPtr<ResourceObject>>& resArray) override {};
+    void ParseEdgeAlignResObj(const std::vector<RefPtr<ResourceObject>>& resArray) override {};
     void SetTextStyle(const NG::PickerTextStyle& textStyle) override {};
     void SetOnChange(NG::SelectedChangeEvent&& onChange) override {};
     void SetChangeEvent(NG::SelectedChangeEvent&& onChange) override {};

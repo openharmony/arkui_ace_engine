@@ -37,6 +37,9 @@
 #include "core/event/pointer_event.h"
 #include "core/common/container_consts.h"
 
+struct _ArkUINodeAdapter;
+typedef _ArkUINodeAdapter* ArkUINodeAdapterHandle;
+
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 class AccessibilityEventInfo;
@@ -64,7 +67,7 @@ public:
 private:
     std::function<void()> callback_;
 };
-
+ 
 // Pattern is the base class for different measure, layout and paint behavior.
 class ACE_FORCE_EXPORT Pattern : public virtual AceType {
     DECLARE_ACE_TYPE(Pattern, AceType);
@@ -616,6 +619,7 @@ public:
     virtual void OnAttachContext(PipelineContext *context) {}
     virtual void OnDetachContext(PipelineContext *context) {}
     virtual void SetFrameRateRange(const RefPtr<FrameRateRange>& rateRange, SwiperDynamicSyncSceneType type) {}
+
     void CheckLocalized()
     {
         auto host = GetHost();
@@ -639,10 +643,12 @@ public:
         layoutProperty->CheckLocalizedBorderImageSlice(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageWidth(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageOutset(layoutDirection);
+        layoutProperty->CheckLocalizedAlignment(layoutDirection);
         // Reset for safeAreaExpand's Cache in GeometryNode
         host->ResetSafeAreaPadding();
         layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
         layoutProperty->CheckIgnoreLayoutSafeArea(layoutDirection);
+        layoutProperty->CheckBackgroundLayoutSafeAreaEdges(layoutDirection);
     }
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
@@ -728,10 +734,42 @@ public:
     {
         return false;
     }
-    virtual bool OnAttachAtapter(const RefPtr<FrameNode>& node, const RefPtr<UINode>& child)
+
+    virtual void UnRegisterResource(const std::string& key);
+
+    template<typename T>
+    void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
+    {
+        if (resourceMgr_ == nullptr) {
+            resourceMgr_ = MakeRefPtr<PatternResourceManager>();
+        }
+        auto&& propUpdateFunc = [weakptr = AceType::WeakClaim(this)](
+                                    const std::string& key, const RefPtr<PropertyValueBase>& valueBase) {
+            auto pattern = weakptr.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->UpdatePropertyImpl(key, valueBase);
+        };
+        resourceMgr_->RegisterResource<T>(std::move(propUpdateFunc), key, resObj, value);
+    }
+
+    virtual void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> valueBase) {};
+
+    virtual bool OnAttachAdapter(const RefPtr<FrameNode>& node, const RefPtr<UINode>& child)
     {
         return false;
     }
+
+    virtual void UpdateBorderResource() {};
+    virtual void UpdateMarginResource() {};
+    virtual bool DetachHostNodeAdapter(const RefPtr<FrameNode>& node)
+    {
+        return false;
+    }
+    virtual bool GetNodeAdapterComponent(ArkUINodeAdapterHandle handle, const RefPtr<FrameNode>& node)
+    {
+        return false;
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

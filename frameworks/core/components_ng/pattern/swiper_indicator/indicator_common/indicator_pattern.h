@@ -264,6 +264,7 @@ private:
     void SaveDotIndicatorProperty();
     void SaveDigitIndicatorProperty();
     void UpdatePaintProperty();
+    void UpdateDefaultColor();
     RefPtr<IndicatorController> indicatorController_;
     mutable std::shared_ptr<SwiperParameters> swiperParameters_;
     mutable std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;

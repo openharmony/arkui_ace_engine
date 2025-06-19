@@ -258,6 +258,14 @@ void FrontendDelegateDeclarative::SetRouterIntentInfo(const std::string& intentI
         TaskExecutor::TaskType::JS, "ArkUISetRouterIntentInfo");
 }
 
+std::string FrontendDelegateDeclarative::GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam)
+{
+    if (pageRouterManager_) {
+        return pageRouterManager_->GetTopNavDestinationInfo(onlyFullScreen, needParam);
+    }
+    return "{}";
+}
+
 void FrontendDelegateDeclarative::ChangeLocale(const std::string& language, const std::string& countryOrRegion)
 {
     taskExecutor_->PostTask(
@@ -2207,6 +2215,10 @@ void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogA
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show action menu enter with attr");
     DialogProperties dialogProperties = {
+        .onDidAppear = dialogAttr.onDidAppear,
+        .onDidDisappear = dialogAttr.onDidDisappear,
+        .onWillAppear = dialogAttr.onWillAppear,
+        .onWillDisappear = dialogAttr.onWillDisappear,
         .title = dialogAttr.title,
         .autoCancel = true,
         .isMenu = true,
@@ -3622,6 +3634,16 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative
     return NG::ComponentSnapshot::GetSyncByUniqueId(uniqueId, options);
 #endif
     return {ERROR_CODE_INTERNAL_ERROR, nullptr};
+}
+
+void FrontendDelegateDeclarative::GetSnapshotWithRange(const NG::NodeIdentity startID, const NG::NodeIdentity endID,
+    const bool isStartRect,
+    std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    const NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    NG::ComponentSnapshot::GetWithRange(startID, endID, isStartRect, std::move(callback), options);
+#endif
 }
 
 void FrontendDelegateDeclarative::CreateSnapshot(

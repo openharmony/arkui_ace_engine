@@ -90,6 +90,18 @@ public:
     {
         onError_ = std ::move(onError);
     }
+    void FireErrorEvent()
+    {
+        auto json = JsonUtil::Create(true);
+        json->Put("error", "");
+        auto param = json->ToString();
+        if (onError_) {
+            // onError_ may be overwritten in its invoke so we copy it first
+            auto onError = onError_;
+            onError(param);
+        }
+        RecorderOnEvent(Recorder::EventType::VIDEO_ERROR, param);
+    }
     void FireErrorEvent(int32_t code, const std::string& message)
     {
         auto json = JsonUtil::Create(true);

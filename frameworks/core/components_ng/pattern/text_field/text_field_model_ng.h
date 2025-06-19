@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_MODEL_NG_H
 
 #include "core/components_ng/pattern/text_field/text_content_type.h"
+#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::NG {
@@ -87,9 +88,17 @@ public:
     void SetMaxViewLines(uint32_t value) override;
     void SetNormalMaxViewLines(uint32_t value) override;
     void SetMinLines(uint32_t value) override;
+    void SetOverflowMode(OverflowMode value) override;
 
     void SetShowUnderline(bool showUnderLine) override;
     void SetNormalUnderlineColor(const Color& normalColor) override;
+    void SetTypingUnderlineColor(const Color& normalColor) override;
+    void SetErrorUnderlineColor(const Color& normalColor) override;
+    void SetDisableUnderlineColor(const Color& normalColor) override;
+    void ResetNormalUnderlineColor() override;
+    void ResetTypingUnderlineColor() override;
+    void ResetErrorUnderlineColor() override;
+    void ResetDisableUnderlineColor() override;
     void SetUserUnderlineColor(UserUnderlineColor userColor) override;
     void SetShowCounter(bool value) override;
     void SetCounterType(int32_t value) override;
@@ -98,7 +107,7 @@ public:
     void SetBackgroundColor(const Color& color, bool tmp) override;
     void ResetBackgroundColor() override;
     void SetHeight(const Dimension& value) override;
-    void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) override;
+    void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp, bool hasRegist = false) override;
     void SetMargin() override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void SetSelectionMenuHidden(bool contextMenuHidden) override;
@@ -133,7 +142,8 @@ public:
     void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override;
     void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override;
     void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
+        const NG::OnMenuItemClickCallback&& onMenuItemClick,
+        const NG::OnPrepareMenuCallback&& onPrepareMenuCallback) override;
     void SetEnablePreviewText(bool enablePreviewText) override;
     void SetEnableHapticFeedback(bool state) override;
     void SetStopBackPress(bool isStopBackPress) override;
@@ -142,6 +152,7 @@ public:
     void SetStrokeColor(const Color& value) override;
     void ResetStrokeColor() override;
     void SetEnableAutoSpacing(bool enabled) override;
+    void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func) override;
 
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
@@ -175,6 +186,7 @@ public:
     static void SetMaxViewLines(FrameNode* frameNode, uint32_t value);
     static void SetNormalMaxViewLines(FrameNode* frameNode, uint32_t value);
     static void SetMinLines(FrameNode* frameNode, uint32_t value);
+    static void SetOverflowMode(FrameNode* frameNode, OverflowMode value);
     static void SetType(FrameNode* frameNode, TextInputType value);
     static void SetContentType(const FrameNode* frameNode, const TextContentType& value);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);
@@ -254,6 +266,7 @@ public:
     static void SetShowCounterBorder(FrameNode* frameNode, bool value);
     static bool GetShowCounter(FrameNode* frameNode);
     static int GetCounterType(FrameNode* frameNode);
+    static uint32_t GetMinLines(FrameNode* frameNode);
     static bool GetShowCounterBorder(FrameNode* frameNode);
     static void SetTextSelection(FrameNode* frameNode, int32_t start, int32_t end);
     static int32_t GetTextSelectionIndex(FrameNode* frameNode, bool isEnd);
@@ -314,6 +327,8 @@ public:
     static void OnCreateMenuCallbackUpdate(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback);
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    static void OnPrepareMenuCallbackUpdate(
+        FrameNode* frameNode, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     static void SetJSTextEditableController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
     static RefPtr<Referenced> GetJSTextEditableController(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
@@ -331,6 +346,7 @@ public:
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
     static void SetOnSecurityStateChange(FrameNode* frameNode, std::function<void(bool)>&& func);
+    static void SetKeyboardAppearanceConfig(FrameNode* frameNode, KeyboardAppearanceConfig config);
 
 private:
     void AddDragFrameNodeToManager() const;

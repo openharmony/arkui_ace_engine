@@ -29,7 +29,7 @@ const char KEY_METHOD[] = "method";
 const char KEY_PARAMS[] = "params";
 
 const uint32_t INVALID_WINDOW_ID = 0;
-const uint32_t INVALID_METHOD_ID = -1;
+const int32_t INVALID_METHOD_ID = -1;
 class InspectorFilter;
 using InspectorTreeMap = std::unordered_map<int32_t, RefPtr<RecNode>>;
 
@@ -37,6 +37,7 @@ struct InspectorChildrenParameters {
     int32_t pageId = 0;
     bool isActive = false;
     bool isLayoutInspector = false;
+    bool needHandleInternal = false;
 };
 
 class ACE_FORCE_EXPORT Inspector {

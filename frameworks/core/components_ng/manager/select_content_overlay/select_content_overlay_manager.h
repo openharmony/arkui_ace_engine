@@ -105,6 +105,7 @@ public:
     bool IsSelectOverlaySubWindowMenu();
     void FocusFirstFocusableChildInMenu();
     void NotifyAccessibilityOwner();
+    static bool IsPasteOption(const RefPtr<UINode>& node);
 
 private:
     void SetHolder(const RefPtr<SelectOverlayHolder>& holder);

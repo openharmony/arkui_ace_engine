@@ -20,8 +20,12 @@
 #include <optional>
 #include <vector>
 
-#include "base/geometry/dimension.h"
 #include "common/rs_vector4.h"
+#if defined(MODIFIER_NG)
+#include "render_service_client/core/modifier_ng/custom/rs_background_style_modifier.h"
+#endif
+
+#include "base/geometry/dimension.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 
@@ -74,7 +78,13 @@ private:
     std::vector<Dimension> colorStops_;
 };
 
-class [[deprecated]] GradientStyleModifier : public Rosen::RSBackgroundStyleModifier {
+#if defined(MODIFIER_NG)
+using RSBackgroundStyleModifier = Rosen::ModifierNG::RSBackgroundStyleModifier;
+#else
+using RSBackgroundStyleModifier = Rosen::RSBackgroundStyleModifier;
+#endif
+
+class [[deprecated]] GradientStyleModifier : public RSBackgroundStyleModifier {
 public:
     explicit GradientStyleModifier(const WeakPtr<RosenRenderContext>& context) : renderContext_(context) {}
     ~GradientStyleModifier() override = default;

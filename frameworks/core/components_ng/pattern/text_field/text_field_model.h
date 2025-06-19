@@ -341,7 +341,8 @@ public:
     virtual void SetBackgroundColor(const Color& color, bool tmp) = 0;
     virtual void ResetBackgroundColor() = 0;
     virtual void SetHeight(const Dimension& value) = 0;
-    virtual void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) = 0;
+    virtual void SetPadding(
+        const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp, bool hasRegist = false) = 0;
     virtual void SetMargin() {};
     virtual void SetBackBorder() {};
     virtual void SetEllipsisMode(EllipsisMode modal) {};
@@ -355,9 +356,17 @@ public:
     virtual void SetMaxViewLines(uint32_t value) {};
     virtual void SetNormalMaxViewLines(uint32_t value) {};
     virtual void SetMinLines(uint32_t value) {};
+    virtual void SetOverflowMode(OverflowMode value) {};
 
     virtual void SetShowUnderline(bool showUnderLine) {};
     virtual void SetNormalUnderlineColor(const Color& normalColor) {};
+    virtual void SetTypingUnderlineColor(const Color& normalColor) {};
+    virtual void SetErrorUnderlineColor(const Color& normalColor) {};
+    virtual void SetDisableUnderlineColor(const Color& normalColor) {};
+    virtual void ResetNormalUnderlineColor() {};
+    virtual void ResetTypingUnderlineColor() {};
+    virtual void ResetErrorUnderlineColor() {};
+    virtual void ResetDisableUnderlineColor() {};
     virtual void SetUserUnderlineColor(UserUnderlineColor userColor) {};
     virtual void SetShowCounter(bool value) {};
     virtual void SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func) = 0;
@@ -398,8 +407,9 @@ public:
     virtual void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) = 0;
     virtual void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) = 0;
     virtual void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) = 0;
-    virtual void SetSelectionMenuOptions(
-        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
+    virtual void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick,
+        const NG::OnPrepareMenuCallback&& onPrepareMenuCallback) {};
     virtual void SetEnablePreviewText(bool enablePreviewText) = 0;
     virtual void SetEnableHapticFeedback(bool state) = 0;
     virtual void SetStopBackPress(bool isStopBackPress) {};
@@ -408,6 +418,7 @@ public:
     virtual void SetStrokeColor(const Color& value) {};
     virtual void ResetStrokeColor() {};
     virtual void SetEnableAutoSpacing(bool enabled) = 0;
+    virtual void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func) = 0;
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

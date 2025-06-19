@@ -180,7 +180,7 @@ void JSListItemGroup::Create(const JSCallbackInfo& args)
             NG::ListItemGroupModelNG::GetInstance()->RemoveHeader();
         }
     } else {
-        if (!SetHeaderBuilder(args.GetVm(), obj)) {
+        if (!SetHeaderBuilder(obj)) {
             NG::ListItemGroupModelNG::GetInstance()->RemoveHeader();
         }
     }
@@ -191,7 +191,7 @@ void JSListItemGroup::Create(const JSCallbackInfo& args)
             NG::ListItemGroupModelNG::GetInstance()->RemoveFooter();
         }
     } else {
-        if (!SetFooterBuilder(args.GetVm(), obj)) {
+        if (!SetFooterBuilder(obj)) {
             NG::ListItemGroupModelNG::GetInstance()->RemoveFooter();
         }
     }
@@ -204,19 +204,39 @@ void JSListItemGroup::SetDivider(const JSCallbackInfo& args)
     V2::ItemDivider divider;
     if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-        if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
+        RefPtr<ResourceObject> resObjStrokeWidth;
+        RefPtr<ResourceObject> resObjColor;
+        RefPtr<ResourceObject> resObjStartMargin;
+        RefPtr<ResourceObject> resObjEndMargin;
+
+        if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth, resObjStrokeWidth)) {
             LOGW("Invalid strokeWidth of divider");
             divider.strokeWidth.Reset();
         }
-        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+
+        bool setByUser = false;
+        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color, resObjColor)) {
             // Failed to get color from param, using default color defined in theme
             RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
             if (listTheme) {
                 divider.color = listTheme->GetDividerColor();
+                setByUser = false;
             }
+        } else {
+            setByUser = true;
         }
-        ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin);
-        ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin);
+        NG::ListItemGroupModelNG::GetInstance()->SetDividerColorByUser(setByUser);
+
+        ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin, resObjStartMargin);
+
+        ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin, resObjEndMargin);
+
+        if (SystemProperties::ConfigChangePerform()) {
+            NG::ListItemGroupModelNG::GetInstance()->ParseResObjDividerStrokeWidth(resObjStrokeWidth);
+            NG::ListItemGroupModelNG::GetInstance()->ParseResObjDividerColor(resObjColor);
+            NG::ListItemGroupModelNG::GetInstance()->ParseResObjDividerStartMargin(resObjStartMargin);
+            NG::ListItemGroupModelNG::GetInstance()->ParseResObjDividerEndMargin(resObjEndMargin);
+        }
     }
     ListItemGroupModel::GetInstance()->SetDivider(divider);
     args.ReturnSelf();
@@ -253,34 +273,24 @@ bool JSListItemGroup::ParseHeaderAndFooterContent(const JSRef<JSVal>& contentPar
     return true;
 }
 
-bool JSListItemGroup::SetHeaderBuilder(const panda::ecmascript::EcmaVM* vm, const JSRef<JSObject>& obj)
+bool JSListItemGroup::SetHeaderBuilder(const JSRef<JSObject>& obj)
 {
     auto headerObject = obj->GetProperty("header");
     if (headerObject->IsFunction()) {
-        auto jsFunc = JSRef<JSFunc>::Cast(headerObject);
-        auto func = jsFunc->GetLocalHandle();
-        auto headerAction = [vm, func = panda::CopyableGlobal(vm, func)]() {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
-            func->Call(vm, func.ToLocal(), nullptr, 0);
-        };
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(headerObject));
+        auto headerAction = [builderFunc]() { builderFunc->Execute(); };
         ListItemGroupModel::GetInstance()->SetHeader(headerAction);
         return true;
     }
     return false;
 }
 
-bool JSListItemGroup::SetFooterBuilder(const panda::ecmascript::EcmaVM* vm, const JSRef<JSObject>& obj)
+bool JSListItemGroup::SetFooterBuilder(const JSRef<JSObject>& obj)
 {
     auto footerObject = obj->GetProperty("footer");
     if (footerObject->IsFunction()) {
-        auto jsFunc = JSRef<JSFunc>::Cast(footerObject);
-        auto func = jsFunc->GetLocalHandle();
-        auto footerAction = [vm, func = panda::CopyableGlobal(vm, func)]() {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
-            func->Call(vm, func.ToLocal(), nullptr, 0);
-        };
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerObject));
+        auto footerAction = [builderFunc]() { builderFunc->Execute(); };
         ListItemGroupModel::GetInstance()->SetFooter(footerAction);
         return true;
     }

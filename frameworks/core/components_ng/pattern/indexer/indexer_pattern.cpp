@@ -808,7 +808,8 @@ void IndexerPattern::UpdateChildTextStyle(RefPtr<IndexerLayoutProperty>& layoutP
     CHECK_NULL_VOID(pipelineContext);
     auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
-    TextStyle unselectedFontStyle, selectedFontStyle;
+    TextStyle unselectedFontStyle;
+    TextStyle selectedFontStyle;
     UpdateFontStyle(layoutProperty, indexerTheme, unselectedFontStyle, selectedFontStyle);
     Color unselectedTextColor = layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor());
     auto total = host->GetTotalChildCount();
@@ -2138,11 +2139,59 @@ void IndexerPattern::OnColorConfigurationUpdate()
     UpdateBubbleView();
 }
 
+void IndexerPattern::UpdateThemeColor()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!layoutProperty->GetSetColorByUserValue(false)) {
+        layoutProperty->ResetColor();
+    }
+    if (!layoutProperty->GetSetSelectedColorByUserValue(false)) {
+        layoutProperty->ResetSelectedColor();
+    }
+    if (!layoutProperty->GetSetPopupColorByUserValue(false)) {
+        layoutProperty->ResetPopupColor();
+    }
+    if (!layoutProperty->GetSetSelectedBGColorByUserValue(false)) {
+        paintProperty->ResetSelectedBackgroundColor();
+    }
+    if (!layoutProperty->GetSetPopupUnselectedColorByUserValue(false)) {
+        paintProperty->ResetPopupUnselectedColor();
+    }
+    if (!layoutProperty->GetSetPopupTitleBackgroundByUserValue(false)) {
+        paintProperty->ResetPopupTitleBackground();
+    }
+    if (!layoutProperty->GetSetPopupSelectedColorByUserValue(false)) {
+        paintProperty->ResetPopupSelectedColor();
+    }
+    if (!layoutProperty->GetSetPopupBackgroundColorByUserValue(false)) {
+        paintProperty->ResetPopupBackground();
+    }
+    if (!layoutProperty->GetSetPopupItemBackgroundColorByUserValue(false)) {
+        paintProperty->ResetPopupItemBackground();
+    }
+}
+
 void IndexerPattern::OnColorModeChange(uint32_t colorMode)
 {
     Pattern::OnColorModeChange(colorMode);
+    UpdateThemeColor();
     ApplyIndexChanged(true, false);
     UpdateBubbleView();
+    if (popupNode_) {
+        popupNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void IndexerPattern::DumpInfo()

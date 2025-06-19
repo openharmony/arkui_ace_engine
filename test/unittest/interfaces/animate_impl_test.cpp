@@ -49,7 +49,7 @@ void AnimateCompleteCallback(void* userData) {}
 HWTEST_F(AnimateImplTest, AnimateImplTest001, TestSize.Level1)
 {
     ArkUI_CurveHandle curve = InitCurve(ArkUI_AnimationCurve::ARKUI_CURVE_EASE);
-    ASSERT_EQ(curve, nullptr);
+    ASSERT_NE(curve, nullptr);
 
     DisposeCurve(curve);
 }
@@ -62,7 +62,9 @@ HWTEST_F(AnimateImplTest, AnimateImplTest001, TestSize.Level1)
 HWTEST_F(AnimateImplTest, AnimateImplTest002, TestSize.Level1)
 {
     ArkUI_CurveHandle curve = CubicBezierCurve(0.0f, 0.0f, 0.0f, 0.0f);
-    ASSERT_EQ(curve, nullptr);
+    ASSERT_NE(curve, nullptr);
+
+    DisposeCurve(curve);
 }
 
 /**
@@ -73,7 +75,9 @@ HWTEST_F(AnimateImplTest, AnimateImplTest002, TestSize.Level1)
 HWTEST_F(AnimateImplTest, AnimateImplTest003, TestSize.Level1)
 {
     ArkUI_CurveHandle curve = SpringCurve(0.0f, 0.0f, 0.0f, 0.0f);
-    ASSERT_EQ(curve, nullptr);
+    ASSERT_NE(curve, nullptr);
+
+    DisposeCurve(curve);
 }
 
 /**
@@ -84,7 +88,9 @@ HWTEST_F(AnimateImplTest, AnimateImplTest003, TestSize.Level1)
 HWTEST_F(AnimateImplTest, AnimateImplTest004, TestSize.Level1)
 {
     ArkUI_CurveHandle curve = SpringMotion(0.0f, 0.0f, 0.0f);
-    ASSERT_EQ(curve, nullptr);
+    ASSERT_NE(curve, nullptr);
+
+    DisposeCurve(curve);
 }
 
 /**
@@ -95,7 +101,9 @@ HWTEST_F(AnimateImplTest, AnimateImplTest004, TestSize.Level1)
 HWTEST_F(AnimateImplTest, AnimateImplTest005, TestSize.Level1)
 {
     ArkUI_CurveHandle curve = InterpolatingSpring(0.0f, 0.0f, 0.0f, 0.0f);
-    ASSERT_EQ(curve, nullptr);
+    ASSERT_NE(curve, nullptr);
+
+    DisposeCurve(curve);
 }
 
 /**
@@ -106,7 +114,9 @@ HWTEST_F(AnimateImplTest, AnimateImplTest005, TestSize.Level1)
 HWTEST_F(AnimateImplTest, AnimateImplTest006, TestSize.Level1)
 {
     ArkUI_CurveHandle curve = ResponsiveSpringMotion(0.0f, 0.0f, 0.0f);
-    ASSERT_EQ(curve, nullptr);
+    ASSERT_NE(curve, nullptr);
+
+    DisposeCurve(curve);
 }
 
 /**
@@ -117,7 +127,9 @@ HWTEST_F(AnimateImplTest, AnimateImplTest006, TestSize.Level1)
 HWTEST_F(AnimateImplTest, AnimateImplTest007, TestSize.Level1)
 {
     ArkUI_CurveHandle curve = CustomCurve(nullptr, InterpolateCallback);
-    ASSERT_EQ(curve, nullptr);
+    ASSERT_NE(curve, nullptr);
+
+    DisposeCurve(curve);
 }
 
 /**

@@ -274,6 +274,11 @@ int32_t FormRendererDelegateProxy::OnGetRectRelativeToWindow(AccessibilityParent
     reply.ReadInt32(parentRectInfo.left);
     reply.ReadFloat(parentRectInfo.scaleX);
     reply.ReadFloat(parentRectInfo.scaleY);
+    reply.ReadInt32(parentRectInfo.rotateTransform.centerX);
+    reply.ReadInt32(parentRectInfo.rotateTransform.centerY);
+    reply.ReadInt32(parentRectInfo.rotateTransform.innerCenterX);
+    reply.ReadInt32(parentRectInfo.rotateTransform.innerCenterY);
+    reply.ReadInt32(parentRectInfo.rotateTransform.rotateDegree);
     return ERR_OK;
 }
 

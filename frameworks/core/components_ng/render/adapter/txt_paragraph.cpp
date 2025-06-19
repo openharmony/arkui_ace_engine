@@ -18,6 +18,7 @@
 #include "base/log/ace_performance_monitor.h"
 #include "core/components/font/constants_converter.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/txt_font_collection.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
@@ -43,6 +44,19 @@ RefPtr<Paragraph> Paragraph::Create(void* rsParagraph)
     return AceType::MakeRefPtr<TxtParagraph>(rsParagraph);
 }
 
+void TxtParagraph::SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode)
+{
+    auto context = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+    auto rsNode = context->GetRSNode();
+    rsSymbolAnimation_ = RSSymbolAnimation();
+    rsSymbolAnimation_.SetNode(rsNode);
+
+    std::function<bool(const std::shared_ptr<RSSymbolAnimationConfig>& symbolAnimationConfig)> scaleCallback =
+        std::bind(&RSSymbolAnimation::SetSymbolAnimation, rsSymbolAnimation_, std::placeholders::_1);
+
+    SetAnimation(scaleCallback);
+}
+
 bool TxtParagraph::IsValid()
 {
     return GetParagraph() != nullptr;
@@ -62,6 +76,7 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
 {
     style.textDirection = Constants::ConvertTxtTextDirection(paraStyle.direction);
     style.textAlign = Constants::ConvertTxtTextAlign(paraStyle.align);
+    style.verticalAlignment = Constants::ConvertTxtTextVerticalAlign(paraStyle.verticalAlign);
     style.maxLines = paraStyle.maxLines == UINT32_MAX ? UINT32_MAX - 1 : paraStyle.maxLines;
     style.fontSize = paraStyle.fontSize; // Rosen style.fontSize
     style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);

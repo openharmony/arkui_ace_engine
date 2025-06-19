@@ -598,6 +598,7 @@ bool GestureEventHub::IsNeedSwitchToSubWindow(const PreparedInfoForDrag& dragInf
 
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
+    isRestoreDrag_ = false;
     TAG_LOGD(AceLogTag::ACE_DRAG, "Start handle onDragStart.");
     auto frameNode = GetFrameNode();
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -628,6 +629,17 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
      */
     DragDropInfo dragPreviewInfo;
     auto dragDropInfo = GetDragDropInfo(info, frameNode, dragPreviewInfo, event);
+    auto callAnsyncEnd = [weak = WeakClaim(this), frameNode](DragStartRequestStatus dragStatus) {
+        if (dragStatus == DragStartRequestStatus::WAITING) {
+            auto gestureEventHub = weak.Upgrade();
+            CHECK_NULL_VOID(gestureEventHub);
+            auto pipeline = frameNode->GetContextRefPtr();
+            CHECK_NULL_VOID(pipeline);
+            auto eventHub = gestureEventHub->eventHub_.Upgrade();
+            CHECK_NULL_VOID(eventHub);
+            gestureEventHub->FireCustomerOnDragEnd(pipeline, eventHub);
+        }
+    };
     auto continueFunc = [id = Container::CurrentId(), weak = WeakClaim(this), dragPreviewInfo, info, event,
         dragDropInfo, frameNode, pipeline]() {
         ContainerScope scope(id);
@@ -640,10 +652,13 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     };
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->ResetBundleInfo();
     if (DragDropGlobalController::GetInstance().GetDragStartRequestStatus() == DragStartRequestStatus::READY) {
+        isRestoreDrag_ = true;
         DoOnDragStartHandling(info, frameNode, dragDropInfo, event, dragPreviewInfo, pipeline);
     } else {
         dragDropManager->SetDelayDragCallBack(continueFunc);
+        dragDropManager->SetCallAnsyncDragEnd(callAnsyncEnd);
         TAG_LOGI(AceLogTag::ACE_DRAG, "drag start pended");
     }
 }
@@ -867,24 +882,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         return;
     }
     std::string udKey;
-    auto unifiedData = dragEvent->GetData();
-    if (unifiedData) {
-        DragDropBehaviorReporter::GetInstance().UpdateRecordSize(unifiedData->GetSize());
-    }
-    int32_t recordsSize = GetBadgeNumber(unifiedData);
-    auto ret = SetDragData(unifiedData, udKey);
-    if (ret != 0) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF set data failed, return value is %{public}d", ret);
-        DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SET_DATA_FAIL);
-    }
-
     std::map<std::string, int64_t> summary;
     std::map<std::string, int64_t> detailedSummary;
-    ret = UdmfClient::GetInstance()->GetSummary(udKey, summary, detailedSummary);
-    if (ret != 0) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF get summary failed, return value is %{public}d", ret);
-    }
-    dragDropManager->SetSummaryMap(summary);
+    int32_t ret = -1;
+    auto unifiedData = dragEvent->GetData();
+    DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, summary, detailedSummary, ret);
+    int32_t recordsSize = GetBadgeNumber(unifiedData);
     RefPtr<PixelMap> pixelMap = dragDropInfo.pixelMap;
     if (pixelMap) {
         SetPixelMap(pixelMap);
@@ -978,10 +981,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto windowId = container->GetWindowId();
     ShadowInfoCore shadowInfo { pixelMapDuplicated, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
     auto dragMoveLastPoint = dragDropManager->GetDragMoveLastPointByCurrentPointer(info.GetPointerId());
+    auto screenX = isRestoreDrag_ ? info.GetScreenLocation().GetX() : dragMoveLastPoint.GetScreenX();
+    auto screenY = isRestoreDrag_ ? info.GetScreenLocation().GetY() : dragMoveLastPoint.GetScreenY();
+
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
-        dragMoveLastPoint.GetScreenX(), dragMoveLastPoint.GetScreenY(), info.GetTargetDisplayId(),
-        windowId, true, false, summary, false, detailedSummary };
+        screenX, screenY, info.GetTargetDisplayId(), windowId, true, false, summary, false, detailedSummary };
     if (AceApplicationInfo::GetInstance().IsMouseTransformEnable() && (info.GetSourceTool() == SourceTool::MOUSE) &&
         (info.GetSourceDevice() == SourceType::TOUCH)) {
         dragData.sourceType = static_cast<int32_t>(SourceType::MOUSE);
@@ -1189,6 +1194,8 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
             }
             event->SetScreenX(info.GetScreenLocation().GetX());
             event->SetScreenY(info.GetScreenLocation().GetY());
+            event->SetGlobalDisplayX(info.GetGlobalDisplayLocation().GetX());
+            event->SetGlobalDisplayY(info.GetGlobalDisplayLocation().GetY());
             event->SetPressedKeyCodes(info.GetPressedKeyCodes());
             eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event);
             eventHub->HandleInternalOnDrop(event, "");
@@ -1205,13 +1212,6 @@ void GestureEventHub::HandleOnDragCancel()
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;
-}
-
-int32_t GestureEventHub::SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey)
-{
-    CHECK_NULL_RETURN(unifiedData, -1);
-    ACE_SCOPED_TRACE("drag: set drag data to udmf");
-    return UdmfClient::GetInstance()->SetData(unifiedData, udKey);
 }
 
 OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub)
@@ -1820,6 +1820,8 @@ RefPtr<OHOS::Ace::DragEvent> GestureEventHub::CreateDragEvent(const GestureEvent
     event->SetScreenY(info.GetScreenLocation().GetY());
     event->SetDisplayX(info.GetScreenLocation().GetX());
     event->SetDisplayY(info.GetScreenLocation().GetY());
+    event->SetGlobalDisplayX(info.GetGlobalDisplayLocation().GetX());
+    event->SetGlobalDisplayY(info.GetGlobalDisplayLocation().GetY());
     event->SetSourceTool(info.GetSourceTool());
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, event);

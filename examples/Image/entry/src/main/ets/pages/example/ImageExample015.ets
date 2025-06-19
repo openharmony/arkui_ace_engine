@@ -22,7 +22,7 @@ struct Index {
   @State borderRadiusValue: number = 10;
   build() {
     Column() {
-      Image($r("app.media.sky"))
+      Image($r('app.media.sky'))
         .renderMode(ImageRenderMode.Template)
         .height(300)
         .width(300)

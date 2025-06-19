@@ -190,6 +190,8 @@ public:
     {
         return true;
     }
+    void UpdateRadioComponentColor(const Color& color, const RadioColorType radioColorType);
+    void OnColorConfigurationUpdate() override;
 
 private:
     void OnAttachToFrameNode() override;

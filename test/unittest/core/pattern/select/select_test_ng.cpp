@@ -27,6 +27,7 @@
 
 #include "core/common/ace_application_info.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
 #include "core/components/text_field/textfield_theme.h"
@@ -89,6 +90,8 @@ RefPtr<Theme> GetTheme(ThemeType type)
         return AceType::MakeRefPtr<IconTheme>();
     } else if (type == SelectTheme::TypeId()) {
         return AceType::MakeRefPtr<SelectTheme>();
+    } else if (type == ScrollBarTheme::TypeId()) {
+        return AceType::MakeRefPtr<ScrollBarTheme>();
     } else {
         return nullptr;
     }
@@ -1933,5 +1936,38 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest007, TestSize.Level1)
         row->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(row->GetChildAtIndex(0)) : nullptr;
     EXPECT_NE(icon, nullptr);
     EXPECT_EQ(icon->GetTag(), V2::SYMBOL_ETS_TAG);
+}
+
+/**
+ * @tc.name: SelectMenuOutline001
+ * @tc.desc: Test SelectModelNG SelectMenuOutline.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SelectMenuOutline001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build select model instance an parameters.
+     * @tc.expected: Objects are created successfully.
+     */
+    Dimension outlineWidthVaule = Dimension(10.0f, DimensionUnit::VP);
+    Color outlineColorValue = Color::RED;
+    MenuParam menuParam;
+    menuParam.outlineWidth->SetBorderWidth(outlineWidthVaule);
+    menuParam.outlineColor->SetColor(outlineColorValue);
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step2. Call SetMenuOutline.
+     */
+    selectModelInstance.SetMenuOutline(menuParam);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    /**
+     * @tc.steps: step3. Call SetMenuOutline.
+     * @tc.expected: Attributes are called successfully.
+     */
+    auto menu = selectPattern->GetMenuNode();
+    auto renderContext = menu->GetRenderContext();
+    EXPECT_EQ(renderContext->GetOuterBorderColor(), menuParam.outlineColor);
+    EXPECT_EQ(renderContext->GetOuterBorderWidth(), menuParam.outlineWidth);
 }
 } // namespace OHOS::Ace::NG

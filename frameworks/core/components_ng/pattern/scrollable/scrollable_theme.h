@@ -54,8 +54,7 @@ public:
             theme->friction_ = pattern->GetAttr<double>("scroll_able_friction", 0.75f);
             theme->flingVelocityScale_ = pattern->GetAttr<double>("scroll_able_fling_velocity_scale", 1.5f);
             theme->springVelocityScale_ = pattern->GetAttr<double>("scroll_able_spring_velocity_scale", 1.5f);
-            theme->ratioGreatApi_ = pattern->GetAttr<double>("scroll_able_over_edge_following_ratio_api_twenty", 5.0f);
-            theme->ratio_ = pattern->GetAttr<double>("scroll_able_over_edge_following_ratio", 1.848f);
+            theme->ratio_ = pattern->GetAttr<double>("scroll_able_over_edge_following_ratio_api_twenty", 5.0f);
             theme->springResponse_ = pattern->GetAttr<double>("scroll_able_spring_response", 0.417f);
             theme->touchPadVelocityScaleRate_ =
                 pattern->GetAttr<double>("scroll_able_touch_pad_velocity_scale_rate", 1.0f);
@@ -84,11 +83,6 @@ public:
         return ratio_;
     }
 
-    float GetGreatApiRatio() const
-    {
-        return ratioGreatApi_;
-    }
-
     float GetSpringResponse() const
     {
         return springResponse_;
@@ -106,8 +100,7 @@ private:
     float friction_ = 0.75f;
     float flingVelocityScale_ = 1.5f;
     float springVelocityScale_ = 1.5f;
-    float ratio_ = 1.848f;
-    float ratioGreatApi_ = 5.0f;
+    float ratio_ = 5.0f;
     float springResponse_ = 0.416f;
     float touchPadVelocityScaleRate_ = 1.0f;
 };

@@ -31,12 +31,14 @@ public:
     using OnScrollStartEvent = std::function<void()>;
     using OnScrollStopEvent = std::function<void()>;
     using OnDidScrollEvent = std::function<void(Dimension, ScrollSource, bool, bool)>;
+    using OnScrollerAreaChangeEvent = std::function<void(Dimension, ScrollSource, bool, bool)>;
     struct Observer {
         OnReachEvent onReachStartEvent;
         OnReachEvent onReachEndEvent;
         OnScrollStartEvent onScrollStartEvent;
         OnScrollStopEvent onScrollStopEvent;
         OnDidScrollEvent onDidScrollEvent;
+        OnScrollerAreaChangeEvent onScrollerAreaChangeEvent;
     };
     Scroller() = default;
     virtual ~Scroller() = default;

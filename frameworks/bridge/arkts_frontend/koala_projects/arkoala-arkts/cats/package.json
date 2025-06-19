@@ -1,0 +1,29 @@
+{
+    "name": "@koalaui/application",
+    "version": "1.4.1",
+    "description": "",
+    "scripts": {
+        "clean": "rimraf application/entry/build application/generated application/oh_modules application/.hvigor && npm run clean --prefix user",
+
+        "ets-plugin": "npm run arkoala:plugin  --prefix ../..",
+
+        "arkoala:har:arm32": "npm run arkoala:har-arm32  --prefix ../../arkoala-arkts",
+        "arkoala:har:arm64": "npm run arkoala:har-arm64  --prefix ../../arkoala-arkts",
+        "arkoala:har:universal": "npm run arkoala:har-universal  --prefix ../../arkoala-arkts",
+
+        "user:har:arm32": "npm run har-arm32  --prefix ./user",
+        "user:har:arm64": "npm run har-arm64  --prefix ./user",
+        "user:har:universal": "npm run har-universal  --prefix ./user",
+
+        "install": "cd application && DEVECO_TOOLS_HOME=../../har/command-line-tools node ../../../arkoala/ohos-sdk/scripts/cli.mjs oh-build --install-ohpm-deps-only",
+        "build": "cd application && DEVECO_TOOLS_HOME=../../har/command-line-tools node ../../../arkoala/ohos-sdk/scripts/cli.mjs oh-build",
+        "rebuild": "npm run clean && npm run build",
+        "sign": "cd application && DEVECO_TOOLS_HOME=../../har/command-line-tools node ../../../arkoala/ohos-sdk/scripts/cli.mjs oh-sign",
+        "exec": "cd application && DEVECO_TOOLS_HOME=../../har/command-line-tools node ../../../arkoala/ohos-sdk/scripts/cli.mjs oh-exec -i -r",
+        "launch": "npm run install && npm run build && npm run sign && npm run exec",
+        "relaunch": "npm run clean && npm run launch",
+
+        "all:arm32": "npm run clean && npm run ets-plugin && npm run arkoala:har:arm32 && npm run user:har:arm32 && npm run launch",
+        "all:arm64": "npm run clean && npm run ets-plugin && npm run arkoala:har:arm64 && npm run user:har:arm64 && npm run launch"
+    }
+}

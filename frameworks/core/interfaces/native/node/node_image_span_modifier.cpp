@@ -242,6 +242,14 @@ void ResetImageSpanBorderRadius(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ImageSpanView::ResetBorderRadius(frameNode);
 }
+
+void SetImageSpanSrc(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName,
+    ArkUI_Bool isUriPureNumber)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageSpanView::SetSrc(frameNode, src, bundleName, moduleName, isUriPureNumber);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -269,6 +277,7 @@ const ArkUIImageSpanModifier* GetImageSpanModifier()
         .setImageSpanBorderRadius = SetImageSpanBorderRadius,
         .resetImageSpanBorderRadius = ResetImageSpanBorderRadius,
         .getImageSpanBaselineOffset = GetImageSpanBaselineOffset,
+        .setImageSpanSrc = SetImageSpanSrc,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -293,6 +302,7 @@ const CJUIImageSpanModifier* GetCJUIImageSpanModifier()
         .resetImageSpanOnComplete = ResetImageSpanOnComplete,
         .setImageSpanOnError = SetImageSpanOnError,
         .resetImageSpanOnError = ResetImageSpanOnError,
+        .setImageSpanSrc = SetImageSpanSrc,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

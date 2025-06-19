@@ -565,6 +565,13 @@ void WebPattern::OnAudioExclusiveUpdate(bool audioExclusive)
     }
 }
 
+void WebPattern::OnAudioSessionTypeUpdate(WebAudioSessionType value)
+{
+    if (delegate_) {
+        delegate_->UpdateAudioSessionType(value);
+    }
+}
+
 void WebPattern::OnOverviewModeAccessEnabledUpdate(bool value)
 {
     if (delegate_) {
@@ -593,10 +600,12 @@ void WebPattern::OnTextZoomRatioUpdate(int32_t value)
     }
 }
 
-void WebPattern::OnWebDebuggingAccessEnabledUpdate(bool value)
+void WebPattern::OnWebDebuggingAccessEnabledAndPortUpdate(
+    const WebPatternProperty::WebDebuggingConfigType& enabled_and_port)
 {
     if (delegate_) {
-        delegate_->UpdateWebDebuggingAccess(value);
+        bool enabled = std::get<0>(enabled_and_port);
+        delegate_->UpdateWebDebuggingAccess(enabled);
     }
 }
 
@@ -845,11 +854,16 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateForceDarkAccess(GetForceDarkAccessValue(false));
         delegate_->UpdateAudioResumeInterval(GetAudioResumeIntervalValue(-1));
         delegate_->UpdateAudioExclusive(GetAudioExclusiveValue(true));
+        delegate_->UpdateAudioSessionType(GetAudioSessionTypeValue(WebAudioSessionType::AUTO));
         delegate_->UpdateOverviewModeEnabled(GetOverviewModeAccessEnabledValue(true));
         delegate_->UpdateFileFromUrlEnabled(GetFileFromUrlAccessEnabledValue(false));
         delegate_->UpdateDatabaseEnabled(GetDatabaseAccessEnabledValue(false));
         delegate_->UpdateTextZoomRatio(GetTextZoomRatioValue(DEFAULT_TEXT_ZOOM_RATIO));
-        delegate_->UpdateWebDebuggingAccess(GetWebDebuggingAccessEnabledValue(false));
+        auto webDebugingConfig = GetWebDebuggingAccessEnabledAndPort();
+        if (webDebugingConfig) {
+            bool enabled = std::get<0>(webDebugingConfig.value());
+            delegate_->UpdateWebDebuggingAccess(enabled);
+        }
         delegate_->UpdateMediaPlayGestureAccess(GetMediaPlayGestureAccessValue(true));
         delegate_->UpdatePinchSmoothModeEnabled(GetPinchSmoothModeEnabledValue(false));
         delegate_->UpdateMultiWindowAccess(GetMultiWindowAccessEnabledValue(false));
@@ -1320,6 +1334,11 @@ void WebPattern::OnIntrinsicSizeEnabledUpdate(bool value)
     // cross platform is not support now;
 }
 
+void WebPattern::OnCssDisplayChangeEnabledUpdate(bool value)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::OnNativeEmbedRuleTagUpdate(const std::string& tag)
 {
     // cross platform is not support now;
@@ -1342,7 +1361,7 @@ void WebPattern::OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode)
 
 
 void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-    const NG::OnMenuItemClickCallback&& onMenuItemClick)
+    const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
     // cross platform is not support now;
 }
@@ -1353,6 +1372,11 @@ void WebPattern::UpdateDataDetectorConfig(const TextDetectConfig& config)
 }
 
 void WebPattern::OnEnabledHapticFeedbackUpdate(bool enable)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnBypassVsyncConditionUpdate(WebBypassVsyncCondition condition)
 {
     // cross platform is not support now;
 }
@@ -1423,6 +1447,16 @@ void WebPattern::OnEnableDataDetectorUpdate(bool enable)
 }
 
 void WebPattern::OnEnableFollowSystemFontWeightUpdate(bool value)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::SetDefaultBackgroundColor()
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnGestureFocusModeUpdate(GestureFocusMode mode)
 {
     // cross platform is not support now;
 }

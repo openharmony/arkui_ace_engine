@@ -36,6 +36,9 @@
 #include "core/components/form/resource/form_utils.h"
 #endif
 
+namespace OHOS::Rosen {
+    class RSUIContext;
+}
 namespace OHOS::Ace {
 class FormCallbackClient;
 class FormSurfaceCallbackClient;
@@ -140,6 +143,8 @@ public:
     void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
     bool CheckFormBundleForbidden(const std::string& bundleName);
     void NotifyFormDump(const std::vector<std::string>& params, std::vector<std::string>& info);
+    void SetRSUIContext(std::shared_ptr<Rosen::RSUIContext> &rsUIContext);
+    void SetMultiInstanceFlag(bool isMultiInstanceEnable);
     bool IsFormBundleExempt(int64_t formId);
     bool IsFormBundleProtected(const std::string &bundleName, int64_t formId);
 #ifdef OHOS_STANDARD_SYSTEM
@@ -211,6 +216,8 @@ private:
     RecycleStatus recycleStatus_ = RecycleStatus::RECOVERED;
     std::vector<std::shared_ptr<MMI::PointerEvent>> pointerEventCache_;
     NotifySurfaceChangeFailedRecord notifySurfaceChangeFailedRecord_;
+    std::shared_ptr<Rosen::RSUIContext> rsUIContext_ = nullptr;
+    bool isMultiInstanceEnable_ = false;
 #ifdef OHOS_STANDARD_SYSTEM
     void OnRouterActionEvent(const std::string& action);
     void OnCallActionEvent(const std::string& action);

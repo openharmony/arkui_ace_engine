@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
+#include <cmath>
+#include "ui/base/utils/utils.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -25,6 +27,7 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/font_manager.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/auto_fill_controller.h"
@@ -176,6 +179,11 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(const Layout
             paragraph_->Layout(std::min(static_cast<float>(paragraphLongestLine), paragraph_->GetMaxWidth()));
         }
         contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph_);
+        auto widthLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+        if (widthLayoutPolicy == LayoutCalPolicy::WRAP_CONTENT ||
+            widthLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+            contentWidth = std::max(contentWidth, contentConstraint.minSize.Width());
+        }
         // calc inline status in advance
         auto widthOffSet = contentConstraint.selfIdealSize.Width().has_value()?
             pattern->GetPaddingLeft() + pattern->GetPaddingRight() - safeBoundary : 0.0f - safeBoundary;
@@ -252,7 +260,7 @@ void TextFieldLayoutAlgorithm::ApplyIndent(LayoutWrapper* layoutWrapper, double 
             return;
         }
     } else {
-        indentValue = width * textIndent_.Value();
+        indentValue = GetMaxIndent(layoutWrapper, width) * textIndent_.Value();
     }
     indent_ = static_cast<float>(indentValue);
     std::vector<float> indents;
@@ -283,6 +291,22 @@ float TextFieldLayoutAlgorithm::ConstraintWithMinWidth(
 {
     CHECK_NULL_RETURN(paragraph, 0.0f);
     CHECK_NULL_RETURN(layoutWrapper, 0.0f);
+    if (!isInlineFocus_) {
+        auto widthPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+        if (widthPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE || widthPolicy == LayoutCalPolicy::WRAP_CONTENT) {
+            auto longestLine = paragraph->GetLongestLineWithIndent();
+            auto width = std::max(contentConstraint.minSize.Width() - removeValue, longestLine);
+            if (width != longestLine) {
+                paragraph->Layout(width);
+                return std::max(paragraph->GetMaxWidth(), 0.0f);
+            }
+            if (LessNotEqual(longestLine, paragraph->GetMaxWidth())) {
+                paragraph->Layout(std::ceil(longestLine));
+            }
+            return GetVisualTextWidth();
+        }
+    }
+
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
         !layoutWrapper->GetLayoutProperty()->GetLayoutRect()) {
         const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
@@ -368,6 +392,13 @@ SizeF TextFieldLayoutAlgorithm::TextAreaMeasureContent(const LayoutConstraintF& 
                       : std::max(preferredHeight_, paragraph_->GetHeight());
 
     auto contentHeight = std::min(contentConstraint.maxSize.Height() - counterNodeHeight, height);
+    auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(textFieldLayoutProperty, SizeF());
+    auto lineCount = paragraph_->GetLineCount() != 0 ? paragraph_->GetLineCount() : 1;
+    if (textFieldLayoutProperty->HasNormalMaxViewLines() && ShouldUseInfiniteMaxLines(textFieldLayoutProperty)) {
+        auto maxline = (height / lineCount) * textFieldLayoutProperty->GetNormalMaxViewLines().value();
+        contentHeight = std::min(contentHeight, maxline);
+    }
 
     textRect_.SetSize(SizeF(GetVisualTextWidth(), paragraph_->GetHeight()));
     return SizeF(contentWidth, contentHeight);
@@ -392,19 +423,16 @@ float TextFieldLayoutAlgorithm::CalculateContentWidth(const LayoutConstraintF& c
     auto textFieldWidth = contentWidth;
 
     std::optional<SizeF> minSize;
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        !layoutWrapper->GetLayoutProperty()->GetLayoutRect()) {
-        const auto &calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
-        if (calcLayoutConstraint && calcLayoutConstraint->minSize.has_value() &&
-            calcLayoutConstraint->minSize->Width().has_value() &&
-            !contentConstraint.selfIdealSize.Width().has_value()) {
-            minSize = contentConstraint.minSize;
-        }
+    auto widthPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+    auto isWrapContent = widthPolicy == LayoutCalPolicy::WRAP_CONTENT;
+    auto isFixAtIdealSize = widthPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    if (HasCalcMinWidthVersion11OrLarger(layoutWrapper, contentConstraint)) {
+        minSize = contentConstraint.minSize;
     }
     if (minSize.has_value()) {
         auto minWidth = minSize.value().Width();
         paragraph_->Layout(std::max(std::ceil(paragraph_->GetLongestLineWithIndent()), minWidth));
-    } else if (autoWidth_) {
+    } else if (autoWidth_ || isWrapContent || isFixAtIdealSize) {
         paragraph_->Layout(std::ceil(paragraph_->GetLongestLineWithIndent()));
     } else {
         paragraph_->Layout(std::max(std::ceil(paragraph_->GetLongestLineWithIndent()), textFieldWidth));
@@ -414,23 +442,19 @@ float TextFieldLayoutAlgorithm::CalculateContentWidth(const LayoutConstraintF& c
     if (autoWidth_ || IsNeedUpdateCounterWidth(contentConstraint, maxParagraphWidth, contentWidth)) {
         counterWidth = maxParagraphWidth;
     }
-    CounterNodeMeasure(counterWidth, layoutWrapper);
-    if (autoWidth_) {
+    if (widthPolicy == LayoutCalPolicy::NO_MATCH) {
+        CounterNodeMeasure(counterWidth, layoutWrapper);
+    }
+    if (autoWidth_ || isWrapContent || isFixAtIdealSize) {
         double minWidth = INLINE_MIN_WITH.ConvertToPx();
         contentWidth = GreatNotEqual(contentWidth, minWidth) ? contentWidth : minWidth;
         contentWidth = std::min(contentWidth, std::ceil(paragraph_->GetLongestLineWithIndent()));
     }
 
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        !layoutWrapper->GetLayoutProperty()->GetLayoutRect()) {
-        const auto &calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
-        if (calcLayoutConstraint && calcLayoutConstraint->minSize.has_value() &&
-            calcLayoutConstraint->minSize->Width().has_value() &&
-            !contentConstraint.selfIdealSize.Width().has_value()) {
-            contentWidth = std::min(contentConstraint.maxSize.Width() - imageWidth,
-                std::max(std::ceil(paragraph_->GetLongestLineWithIndent()),
-                contentConstraint.minSize.Width() - imageWidth));
-        }
+    if (HasCalcMinWidthVersion11OrLarger(layoutWrapper, contentConstraint)) {
+        auto longestLine = std::ceil(paragraph_->GetLongestLineWithIndent());
+        auto maxWidth = std::max(longestLine, contentConstraint.minSize.Width() - imageWidth);
+        contentWidth = std::min(contentConstraint.maxSize.Width() - imageWidth, maxWidth);
     }
     return contentWidth;
 }
@@ -645,6 +669,7 @@ LayoutConstraintF TextFieldLayoutAlgorithm::CalculateContentMaxSizeWithCalculate
     auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(contentConstraint.maxSize.Width());
     auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
     auto maxIdealSize = SizeF { idealWidth, idealHeight };
+    CalculateContentMaxSizeWithPolicy(layoutWrapper, textFieldContentConstraint, maxIdealSize);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) &&
         !layoutWrapper->GetLayoutProperty()->GetLayoutRect()) {
         auto frameIdealSize = maxIdealSize + SizeF(pattern->GetHorizontalPaddingAndBorderSum(),
@@ -1246,5 +1271,97 @@ bool TextFieldLayoutAlgorithm::IsAdaptExceedLimit(const SizeF& maxSize)
         GreatNotEqual(paragraph->GetLongestLine(), maxSize.Width()) ||
         IsAdaptFontSizeExceedLineHeight(paragraph) ||
            GreatNotEqual(paragraph->GetHeight(), maxSize.Height());
+}
+
+void TextFieldLayoutAlgorithm::UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* layoutWrapper, OptionalSizeF& frameSize)
+{
+    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_;
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_;
+        const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(layoutConstraint.value(),
+            widthLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH),
+            heightLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH), Axis::HORIZONTAL)
+                                    .ConvertToSizeT();
+        frameSize.UpdateSizeWithCheck(layoutPolicySize);
+    }
+}
+
+void TextFieldLayoutAlgorithm::UpdateTextAreaMaxLines(
+    TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty)
+{
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (ShouldUseInfiniteMaxLines(textFieldLayoutProperty)) {
+        textStyle.SetMaxLines(INT32_MAX);
+    } else {
+        textStyle.SetMaxLines(textFieldLayoutProperty->GetNormalMaxViewLines().value());
+    }
+}
+
+bool TextFieldLayoutAlgorithm::ShouldUseInfiniteMaxLines(const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty)
+{
+    CHECK_NULL_RETURN(textFieldLayoutProperty, false);
+    return textFieldLayoutProperty->HasOverflowMode() &&
+           textFieldLayoutProperty->GetOverflowMode() == OverflowMode::SCROLL &&
+           (textFieldLayoutProperty->GetTextOverflow() == TextOverflow::NONE ||
+               textFieldLayoutProperty->GetTextOverflow() == TextOverflow::CLIP ||
+               textFieldLayoutProperty->GetTextOverflow() == TextOverflow::DEFAULT);
+}
+
+void TextFieldLayoutAlgorithm::CalculateContentMaxSizeWithPolicy(
+    LayoutWrapper* layoutWrapper, LayoutConstraintF& contentConstraint, SizeF& maxIdealSize)
+{
+    if (isInlineFocus_) {
+        return;
+    }
+    CHECK_NULL_VOID(layoutWrapper);
+    auto widthLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+    if (widthLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        maxIdealSize.SetWidth(std::numeric_limits<double>::infinity());
+    } else if (widthLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
+        maxIdealSize.SetWidth(contentConstraint.parentIdealSize.Width().value_or(0.0f));
+        contentConstraint.selfIdealSize.SetWidth(maxIdealSize.Width());
+    }
+    auto heightLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
+    if (!contentConstraint.selfIdealSize.Height().has_value() &&
+        heightLayoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        maxIdealSize.SetHeight(std::numeric_limits<double>::infinity());
+    } else if (heightLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
+        maxIdealSize.SetHeight(contentConstraint.parentIdealSize.Height().value_or(0.0f));
+        contentConstraint.selfIdealSize.SetHeight(maxIdealSize.Height());
+    }
+}
+
+double TextFieldLayoutAlgorithm::GetMaxIndent(LayoutWrapper* layoutWrapper, double width)
+{
+    CHECK_NULL_RETURN(layoutWrapper, width);
+    auto widthPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+    if (widthPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE && std::isinf(width)) {
+        auto layoutProperty = layoutWrapper->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProperty, width);
+        auto contentConstraint = layoutProperty->GetContentLayoutConstraint();
+        CHECK_NULL_RETURN(contentConstraint, width);
+        return contentConstraint->maxSize.Width();
+    }
+    return width;
+}
+
+bool TextFieldLayoutAlgorithm::HasCalcMinWidthVersion11OrLarger(
+    LayoutWrapper* layoutWrapper, const LayoutConstraintF& contentConstraint)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto frameNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(frameNode, false);
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) &&
+        !layoutWrapper->GetLayoutProperty()->GetLayoutRect()) {
+        const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
+        if (calcLayoutConstraint && calcLayoutConstraint->minSize.has_value() &&
+            calcLayoutConstraint->minSize->Width().has_value() &&
+            !contentConstraint.selfIdealSize.Width().has_value()) {
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

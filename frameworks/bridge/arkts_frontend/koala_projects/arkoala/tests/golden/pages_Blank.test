@@ -1,0 +1,46 @@
+{
+  "rootElement": {
+    "nodeId": 1253,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1254,
+        "kind": "Blank",
+        "children": [],
+        "color_value": "#ff0000ff"
+      },
+      {
+        "nodeId": 1255,
+        "kind": "Blank",
+        "children": [],
+        "setBlankOptions_min": 10,
+        "color_value": 333
+      },
+      {
+        "nodeId": 1256,
+        "kind": "Blank",
+        "children": [],
+        "setBlankOptions_min": "11px",
+        "color_value": "#123456"
+      },
+      {
+        "nodeId": 1257,
+        "kind": "Blank",
+        "children": [],
+        "setBlankOptions_min": "12lpx"
+      },
+      {
+        "nodeId": 1258,
+        "kind": "Blank",
+        "children": [],
+        "setBlankOptions_min": "13fp"
+      },
+      {
+        "nodeId": 1259,
+        "kind": "Blank",
+        "children": [],
+        "setBlankOptions_min": "14%"
+      }
+    ]
+  }
+}

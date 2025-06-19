@@ -62,6 +62,16 @@ enum class ResponseType : int32_t {
 };
 class SpanString;
 enum PopupType { POPUPTYPE_TEXTCOLOR, POPUPTYPE_POPUPCOLOR, POPUPTYPE_MASKCOLOR };
+enum PopupOptionsType {
+    POPUP_OPTIONTYPE_WIDTH,
+    POPUP_OPTIONTYPE_ARROWWIDTH,
+    POPUP_OPTIONTYPE_ARROWHEIGHT,
+    POPUP_OPTIONTYPE_RADIUS,
+    POPUP_OPTIONTYPE_OUTLINEWIDTH,
+    POPUP_OPTIONTYPE_BORDERWIDTH,
+    POPUP_OPTIONTYPE_OFFSETDX,
+    POPUP_OPTIONTYPE_OFFSETDY,
+};
 class ACE_FORCE_EXPORT ViewAbstractModel {
 public:
     static ViewAbstractModel* GetInstance();
@@ -72,6 +82,7 @@ public:
     virtual void CreateWithOuterBorderRadiusResourceObj(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithLightColorResourceObj(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithOuterBorderWidthResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ResetResObj(const std::string& key) {};
     
     // basic size
     virtual void SetWidth(const CalcDimension& width) = 0;
@@ -93,15 +104,16 @@ public:
 
     // box props
     virtual void SetBackgroundColor(const Color& color) = 0;
-    virtual void SetBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) = 0;
+    virtual void SetBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) = 0;
-    virtual void SetBackgroundImageWithResourceObj(const RefPtr<ResourceObject>& resObj, std::string& bundleName,
-        std::string& moduleName, RefPtr<ThemeConstants> themeConstant) = 0;
+    virtual void SetBackgroundImageWithResourceObj(
+        const RefPtr<ResourceObject>& resObj, const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) = 0;
     virtual void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) = 0;
     virtual void SetBackgroundImageSize(BackgroundImageSize& bgImgSize) = 0;
     virtual void SetBackgroundImageSizeUpdateFunc(
         BackgroundImageSize& bgImgSize, const RefPtr<ResourceObject>& resObj, const std::string direction) = 0;
     virtual void SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition) = 0;
+    virtual void ClearResObj(const std::string resObjName) = 0;
     virtual void SetBackgroundBlurStyle(
         const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions()) = 0;
     virtual void SetBackgroundEffect(const EffectOption& effectOption, const SysOptions& sysOptions = SysOptions()) {}
@@ -198,6 +210,9 @@ public:
     virtual void SetAspectRatio(float ratio) = 0;
     virtual void ResetAspectRatio() = 0;
     virtual void SetAlign(const Alignment& alignment) = 0;
+    virtual void SetAlign(const std::string& localizedAlignment) = 0;
+    virtual void SetLayoutGravity(const Alignment& alignment) = 0;
+    virtual void SetIsMirrorable(const bool& isMirrorable) = 0;
     virtual void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) = 0;
     virtual void SetChainStyle(const ChainInfo& chainInfo) = 0;
     virtual void SetBias(const BiasPair& biasPair) = 0;
@@ -226,6 +241,7 @@ public:
     virtual void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
     virtual void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) = 0;
     virtual void SetRotate(float x, float y, float z, float angle, float perspective = 0.0f) = 0;
+    virtual void SetRotateAngle(float x, float y, float z, float perspective = 0.0f) = 0;
     virtual void SetTransformMatrix(const std::vector<float>& matrix) = 0;
     virtual void SetTransform3DMatrix(const std::vector<float>& matrix) = 0;
 
@@ -301,12 +317,15 @@ public:
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
         double distanceThreshold = std::numeric_limits<double>::infinity()) = 0;
+    virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+        Dimension distanceThreshold) = 0;
     virtual void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) = 0;
     virtual void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) = 0;
     virtual void SetShouldBuiltInRecognizerParallelWith(
         NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc) = 0;
     virtual void SetOnGestureRecognizerJudgeBegin(
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) = 0;
+    virtual void SetOnTouchTestDone(NG::TouchTestDoneCallback&& touchTestDoneCallback) = 0;
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
     virtual void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) = 0;
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -424,6 +443,7 @@ public:
     virtual void SetBackground(std::function<void()>&& buildFunc) = 0;
     virtual void SetBackgroundAlign(const Alignment& align) = 0;
     virtual void SetCustomBackgroundColor(const Color& color) = 0;
+    virtual void SetCustomBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t edges) = 0;
     virtual void SetIsTransitionBackground(bool val) = 0;
     virtual void SetIsBuilderBackground(bool val) = 0;
@@ -489,7 +509,6 @@ public:
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;
-    virtual void CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress) {};
     // foregroundColor
     virtual void SetForegroundColor(const Color& color) = 0;
     virtual void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) = 0;
@@ -520,14 +539,13 @@ public:
     virtual void SetMarkAnchorStart(Dimension& markAnchorStart) = 0;
     virtual void ResetMarkAnchorStart() = 0;
     virtual void SetOffsetLocalizedEdges(bool needLocalized) = 0;
-    virtual void CreateWithColorResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, PopupType& type) = 0;
-    virtual void CreateWithBoolResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj) = 0;
-    virtual void CreateWithResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, PopupType type) = 0;
+    virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& resourceObj, const PopupType& type) = 0;
     virtual void CreateWithResourceObj(
         const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) = 0;
+    virtual void RemoveResObj(const std::string& key) {};
+    virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& resourceObj, const PopupOptionsType& type) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H

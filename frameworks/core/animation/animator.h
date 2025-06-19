@@ -200,6 +200,18 @@ public:
     // Get Iteration
     int32_t GetIteration() const;
 
+    // Set AnimationType
+    void SetAnimationType(AnimationInterface type)
+    {
+        animationType_ = type;
+    }
+
+    // Get AnimationType
+    AnimationInterface GetAnimationType()
+    {
+        return animationType_;
+    }
+
     void PreventFrameJank() {
         needFrameJankReport_ = false;
     }
@@ -273,6 +285,7 @@ private:
     bool isBothBackwards = false;
     std::shared_ptr<AceAsyncScopedTrace> asyncTrace_;
     std::string animatorName_ = "Animator";
+    AnimationInterface animationType_ = AnimationInterface::UNKNOWN;
 };
 
 } // namespace OHOS::Ace

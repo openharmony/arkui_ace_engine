@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,8 +71,10 @@ public:
     void SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex) override;
     void SetOnReachStart(OnReachEvent&& onReachStart) override;
     void SetOnReachEnd(OnReachEvent&& onReachEnd) override;
+    void SetSyncLoad(bool syncLoad) override;
     RefPtr<ScrollControllerBase> CreatePositionController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
+    void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) override;
 
     DisplayMode GetDisplayMode() const override;
 
@@ -135,7 +137,10 @@ public:
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
     static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
+    static void CreateWithResourceObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 
+    static void SetSyncLoad(FrameNode* frameNode, bool syncLoad);
+    static bool GetSyncLoad(FrameNode* frameNode);
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };

@@ -1048,6 +1048,22 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetTargetDisplayId006, TestSize
 }
 
 /**
+ * @tc.name: OH_ArkUI_UIInputEvent_GetTargetDisplayId007
+ * @tc.desc: test OH_ArkUI_UIInputEvent_GetTargetDisplayId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_UIInputEvent_GetTargetDisplayId007, TestSize.Level1)
+{
+    auto event = std::make_unique<ArkUI_UIInputEvent>();
+    event->eventTypeId = C_AXIS_EVENT_ID;
+    auto axisEvent = std::make_unique<ArkUIAxisEvent>();
+    axisEvent->targetDisplayId = 0;
+    event->inputEvent = axisEvent.get();
+    auto result = OH_ArkUI_UIInputEvent_GetTargetDisplayId(event.get());
+    EXPECT_EQ(result, 0);
+}
+
+/**
  * @tc.name: OH_ArkUI_MouseEvent_GetRawDeltaX001
  * @tc.desc: test OH_ArkUI_MouseEvent_GetRawDeltaX
  * @tc.type: FUNC
@@ -3607,6 +3623,9 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetTiltX001, TestSize.Level1)
     setEvent.eventTypeId = C_TOUCH_EVENT_ID;
     auto res = OH_ArkUI_PointerEvent_GetTiltX(nullptr, -1);
     EXPECT_EQ(res, 0);
+    touchEvent.subKind = ON_HOVER_MOVE;
+    res = OH_ArkUI_PointerEvent_GetTiltX(&setEvent, 0);
+    EXPECT_EQ(res, 0);
     res = OH_ArkUI_PointerEvent_GetTiltX(&setEvent, -1);
     setEvent.eventTypeId = TOUCH_EVENT_ID;
     res = OH_ArkUI_PointerEvent_GetTiltX(&setEvent, 0);
@@ -3656,6 +3675,9 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetTiltY001, TestSize.Level1)
     setEvent.inputEvent = &touchEvent;
     setEvent.eventTypeId = C_TOUCH_EVENT_ID;
     auto res = OH_ArkUI_PointerEvent_GetTiltY(nullptr, -1);
+    EXPECT_EQ(res, 0);
+    touchEvent.subKind = ON_HOVER_MOVE;
+    res = OH_ArkUI_PointerEvent_GetTiltY(&setEvent, 0);
     EXPECT_EQ(res, 0);
     res = OH_ArkUI_PointerEvent_GetTiltY(&setEvent, -1);
     setEvent.eventTypeId = TOUCH_EVENT_ID;

@@ -189,6 +189,11 @@ public:
         firstIndex_ = index;
     }
 
+    void SetTargetIndex(const std::optional<int32_t>& targetIndex)
+    {
+        targetIndex_ = targetIndex;
+    }
+
 protected:
     struct StarAndEndPointCenter {
         float startLongPointLeftCenterX = 0.0f;
@@ -233,6 +238,7 @@ protected:
     PointF hoverPoint_;
     std::optional<int32_t> hoverIndex_ = std::nullopt;
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
+    std::optional<int32_t> targetIndex_ = std::nullopt;
     Axis axis_ = Axis::HORIZONTAL;
     int32_t currentIndex_ = 0;
     int32_t currentIndexActual_ = 0;

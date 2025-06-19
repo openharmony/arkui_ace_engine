@@ -302,6 +302,7 @@ public:
     int32_t selectedEnd = -1;
     bool needReLayoutParagraph = false;
     bool needReLayout = false;
+    int32_t aiSpanResultCount = 0;
     // used for Span uiNode
     bool needReCreateParagraph_ = true;
     RefPtr<AccessibilityProperty> accessibilityProperty = MakeRefPtr<AccessibilityProperty>();
@@ -314,6 +315,7 @@ public:
     bool CheckSpanNeedReCreate(int32_t index);
     void UpdateReLayoutTextStyle(
         TextStyle& spanTextStyle, const TextStyle& textStyle, bool isSymbol);
+    void UpdateReLayoutGradient(TextStyle& spanTextStyle, const TextStyle& textStyle);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(const std::u16string& content, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, const TextStyle& aiSpanStyle);
@@ -415,6 +417,11 @@ public:
     void SetTextPattern(const RefPtr<Pattern>& pattern)
     {
         pattern_ = pattern;
+    }
+
+    WeakPtr<Pattern> GetTextPattern()
+    {
+        return pattern_;
     }
 
     bool UpdateSpanTextColor(Color color);
@@ -535,8 +542,59 @@ public:
         return hasTextBackgroundStyle_;
     }
 
+    RefPtr<PatternResourceManager> GetResourceManager()
+    {
+        return resourceMgr_;
+    }
+
+    template<typename T>
+    T ParseResToObject(const RefPtr<ResourceObject>& resObj);
+
+    virtual void UnregisterResource(const std::string& key)
+    {
+        RemoveResObj(key);
+    }
+
+    void AddResObj(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc)
+    {
+        if (resourceMgr_ == nullptr) {
+            resourceMgr_ = MakeRefPtr<PatternResourceManager>();
+        }
+        resourceMgr_->AddResource(key, resObj, std::move(updateFunc));
+    }
+
+    void AddResCache(const std::string& key, const std::string& value)
+    {
+        if (resourceMgr_ == nullptr) {
+            resourceMgr_ = MakeRefPtr<PatternResourceManager>();
+        }
+        resourceMgr_->AddResCache(key, value);
+    }
+
+    std::string GetResCacheMapByKey(const std::string& key)
+    {
+        if (resourceMgr_ == nullptr) {
+            return "";
+        }
+        return resourceMgr_->GetResCacheMapByKey(key);
+    }
+
+    void RemoveResObj(const std::string& key)
+    {
+        if (resourceMgr_) {
+            resourceMgr_->RemoveResource(key);
+            if (resourceMgr_->Empty()) {
+                resourceMgr_ = nullptr;
+            }
+        }
+    }
+
 private:
     std::optional<TextBackgroundStyle> textBackgroundStyle_;
+    RefPtr<PatternResourceManager> resourceMgr_;
     int32_t groupId_ = 0;
     bool hasTextBackgroundStyle_ = false;
 };
@@ -585,6 +643,26 @@ public:
     {
         return spanItem_;
     }
+
+    void NotifyColorModeChange(uint32_t colorMode) override
+    {
+        UINode::NotifyColorModeChange(colorMode);
+        auto resourceMgr = GetResourceManager();
+        if (resourceMgr) {
+            resourceMgr->ReloadResources();
+        }
+    }
+
+    void UnregisterResource(const std::string& key) override;
+    void RegisterSymbolFontColorResource(const std::string& key, std::vector<Color>& symbolColor,
+        const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr);
+    template<typename T>
+    void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value);
+    template<typename T>
+    void UpdateSpanResource(const std::string& key, const RefPtr<ResourceObject>& resObj);
+    template<typename T>
+    void UpdateProperty(std::string key, T value);
+    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value);
 
     void UpdateContent(const uint32_t& unicode)
     {
@@ -676,6 +754,7 @@ public:
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(BaselineOffset, Dimension, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign, ChangeFlag::RE_LAYOUT);
+    DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextVerticalAlign, TextVerticalAlign, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(WordBreak, WordBreak, ChangeFlag::RE_LAYOUT);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin, ChangeFlag::RE_CREATE);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineBreakStrategy, LineBreakStrategy, ChangeFlag::RE_LAYOUT);
@@ -756,6 +835,7 @@ protected:
 private:
     std::list<RefPtr<SpanNode>> spanChildren_;
     RefPtr<SpanItem> spanItem_ = MakeRefPtr<SpanItem>();
+    std::vector<int32_t> symbolFontColorResObjIndexArr;
 
     ACE_DISALLOW_COPY_AND_MOVE(SpanNode);
 };
@@ -1070,6 +1150,23 @@ public:
     {
         SpanNode::RequestTextFlushDirty(Claim(this));
     }
+
+    void NotifyColorModeChange(uint32_t colorMode) override
+    {
+        UINode::NotifyColorModeChange(colorMode);
+        auto resourceMgr = GetResourceManager();
+        if (resourceMgr) {
+            resourceMgr->ReloadResources();
+        }
+    }
+
+    template<typename T>
+    void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value);
+    template<typename T>
+    void UpdateSpanResource(const std::string& key, const RefPtr<ResourceObject>& resObj);
+    template<typename T>
+    void UpdateProperty(std::string key, T value);
+    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ContainerSpanNode);

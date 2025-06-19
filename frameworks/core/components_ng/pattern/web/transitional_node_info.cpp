@@ -257,4 +257,9 @@ namespace OHOS::Ace::NG {
     {
         return node_->GetIsAccessibilityGroup();
     }
+
+    std::string TransitionalNodeInfo::GetHtmlElementId()
+    {
+        return node_->GetHtmlElementId();
+    }
 } // namespace OHOS::Ace::NG

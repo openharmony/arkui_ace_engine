@@ -33,6 +33,10 @@ namespace OHOS::Ace {
 class UnifiedData;
 class GridColumnInfo;
 }
+namespace OHOS::Rosen {
+class RSSyncTransactionController;
+class RSSyncTransactionHandler;
+} // namespace OHOS::Rosen
 namespace OHOS::Ace::NG {
 class DragDropSpringLoadingDetector;
 enum class DragDropMgrState : int32_t {
@@ -67,11 +71,6 @@ public:
     RefPtr<DragDropProxy> CreateAndShowItemDragOverlay(
         const RefPtr<UINode>& customNode, const GestureEvent& info, const RefPtr<EventHub>& eventHub);
     RefPtr<DragDropProxy> CreateTextDragDropProxy();
-
-    void AddDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
-    {
-        dragFrameNodes_.try_emplace(id, dragFrameNode);
-    }
 
     void RemoveDragFrameNode(int32_t id);
 
@@ -167,6 +166,8 @@ public:
         const RefPtr<FrameNode>& node = nullptr);
     void OnTextDragEnd(float globalX, float globalY, const std::string& extraInfo);
     void onDragCancel();
+    void OnDragAsyncEnd();
+    void SetCallAnsyncDragEnd(const std::function<void(DragStartRequestStatus)>& cb);
     void OnItemDragStart(float globalX, float globalY, const RefPtr<FrameNode>& frameNode);
     void OnItemDragMove(float globalX, float globalY, int32_t draggedIndex, DragType dragType);
     void OnItemDragEnd(float globalX, float globalY, int32_t draggedIndex, DragType dragType);
@@ -723,7 +724,7 @@ private:
     bool isTimeLimited(const DragPointerEvent& pointerEvent, const Point& point);
     bool ReachMoveLimit(const DragPointerEvent& pointerEvent, const Point& point);
     bool IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node);
-    bool IsUIExtensionComponent(const RefPtr<NG::UINode>& node);
+    bool IsUIExtensionOrDynamicComponent(const RefPtr<NG::UINode>& node);
     void HandleUIExtensionDragEvent(
         const RefPtr<FrameNode>& frameNode, const DragPointerEvent& pointerEvent, DragEventType type);
     int32_t GetWindowId();
@@ -737,8 +738,10 @@ private:
         DragType dragType, const RefPtr<FrameNode>& dragFrameNode, double dropPositionX, double dropPositionY);
     void NotifyDragSpringLoadingMove(const RefPtr<FrameNode>& dragFrameNode, const std::string& extraInfo);
     void NotifyDragSpringLoadingIntercept(std::string_view extraParams);
+    void SetRSSyncTransaction(OHOS::Rosen::RSSyncTransactionController** transactionController,
+        std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler,
+        const RefPtr<NG::PipelineContext>& pipeline);
 
-    std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> listDragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> textFieldDragFrameNodes_;

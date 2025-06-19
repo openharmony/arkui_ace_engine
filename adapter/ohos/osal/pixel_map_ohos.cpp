@@ -466,4 +466,10 @@ bool PixelMapOhos::GetIsWideColorGamut() const
 #endif
     return false;
 }
+
+void PixelMapOhos::SetMemoryName(std::string pixelMapName) const
+{
+    CHECK_NULL_VOID(pixmap_);
+    pixmap_->SetMemoryName(pixelMapName);
+}
 } // namespace OHOS::Ace

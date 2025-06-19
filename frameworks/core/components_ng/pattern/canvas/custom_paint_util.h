@@ -21,7 +21,12 @@
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
+#ifdef USE_NEW_SKIA
+#include "include/core/SkStream.h"
+#include "src/base/SkBase64.h"
+#else
 #include "include/utils/SkBase64.h"
+#endif
 #include "core/components/common/painter/rosen_decoration_painter.h"
 #endif
 

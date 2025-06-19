@@ -88,7 +88,7 @@ private:
     float maxFontScale_;
     float minFontScale_;
     double searchHeight_;
-
+    float searchWidthReducedLength_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(SearchLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

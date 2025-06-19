@@ -119,4 +119,24 @@ HWTEST_F(ExtensionHandlerTestNg, ExtensionHandlerTest005, TestSize.Level1)
     test.OverlayDraw(context);
     EXPECT_EQ(context.width, 0);
 }
+
+/**
+ * @tc.name: ExtensionHandlerTest006
+ * @tc.desc: OverlayDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(ExtensionHandlerTestNg, ExtensionHandlerTest006, TestSize.Level1)
+{
+    class ExtensionHandler test;
+    RSCanvas canvas;
+    float width = 0;
+    float height = 0;
+    DrawingContext context { canvas, width, height };
+    bool isFunc = false;
+    RefPtr<NG::DrawModifier> drawModifier = AceType::MakeRefPtr<NG::DrawModifier>();
+    drawModifier->drawForegroundFunc = [&isFunc](NG::DrawingContext& drawingContext) { isFunc = true; };
+    test.SetDrawModifier(drawModifier);
+    test.ForegroundDraw(context);
+    EXPECT_TRUE(isFunc);
+}
 }

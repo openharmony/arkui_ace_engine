@@ -1281,7 +1281,10 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest002, TestSize.Level1)
         checkBoxPaintProperty->UpdateCheckBoxCheckMarkWidth(CHECK_MARK_WIDTH);
     }
 
-    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    auto renderContext_ = AceType::MakeRefPtr<RenderContext>();
+    renderContext_->host_ = std::move(frameNode);
+    WeakPtr<RenderContext> renderContext = AceType::WeakClaim(AceType::RawPtr(renderContext_));
+    PaintWrapper paintWrapper(renderContext, geometryNode, checkBoxPaintProperty);
     auto checkBoxModifier = AceType::MakeRefPtr<CheckBoxModifier>(
         false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR, SizeF(), OffsetF(), 0.0, 0.0);
     ASSERT_NE(checkBoxModifier, nullptr);
@@ -1319,7 +1322,10 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest003, TestSize.Level1)
         checkBoxPaintProperty->UpdateCheckBoxCheckMarkSize(CHECK_MARK_SIZE_INCORRECT_VALUE);
     }
 
-    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    auto renderContext_ = AceType::MakeRefPtr<RenderContext>();
+    renderContext_->host_ = std::move(frameNode);
+    WeakPtr<RenderContext> renderContext = AceType::WeakClaim(AceType::RawPtr(renderContext_));
+    PaintWrapper paintWrapper(renderContext, geometryNode, checkBoxPaintProperty);
     auto checkBoxModifier = AceType::MakeRefPtr<CheckBoxModifier>(
         false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR, SizeF(), OffsetF(), 0.0, 0.0);
     ASSERT_NE(checkBoxModifier, nullptr);
@@ -1851,7 +1857,10 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest008, TestSize.Level1)
     /**
      * @tc.steps: create PaintWrapper of CheckBoxPaintProperty
      */
-    PaintWrapper paintWrapper(nullptr, geometryNode, checkBoxPaintProperty);
+    auto renderContext_ = AceType::MakeRefPtr<RenderContext>();
+    renderContext_->host_ = std::move(frameNode);
+    WeakPtr<RenderContext> renderContext = AceType::WeakClaim(AceType::RawPtr(renderContext_));
+    PaintWrapper paintWrapper(renderContext, geometryNode, checkBoxPaintProperty);
     auto checkBoxModifier = AceType::MakeRefPtr<CheckBoxModifier>(
         false, BOARD_COLOR, CHECK_COLOR, BORDER_COLOR, SHADOW_COLOR, SizeF(), OffsetF(), 0.0, 0.0);
     ASSERT_NE(checkBoxModifier, nullptr);

@@ -510,7 +510,7 @@ bool CreateToolbarItemNodeAndMenuNode(BarItemNodeParam itemNodeParam, std::vecto
     BuildToolbarMoreItemNode(barItemNode, itemNodeParam.enabled, itemNodeParam.hideText);
     MenuParam menuParam;
     menuParam.isShowInSubWindow = false;
-     if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
+    if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
         menuParam.isShowInSubWindow = true;
         menuParam.placement = Placement::TOP_LEFT;
     }
@@ -712,9 +712,9 @@ void NavigationToolbarUtil::SetToolbarOptions(
         return;
     }
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-    auto&& updateFunc = [weakNodeBase = AceType::WeakClaim(AceType::RawPtr(nodeBase)),
-                            weakToolBarPattern = AceType::WeakClaim(AceType::RawPtr(toolBarPattern)),
-                            opt](const RefPtr<ResourceObject>& resObj) mutable {
+    auto updateFunc = [weakNodeBase = AceType::WeakClaim(AceType::RawPtr(nodeBase)),
+                          weakToolBarPattern = AceType::WeakClaim(AceType::RawPtr(toolBarPattern)),
+                          opt](const RefPtr<ResourceObject>& resObj) mutable {
         opt.bgOptions.ReloadResources();
         if (opt.bgOptions.blurStyleOption.has_value()) {
             opt.bgOptions.blurStyleOption->ReloadResources();

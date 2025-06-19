@@ -25,11 +25,13 @@
 #include "transaction/rs_transaction.h"
 
 #include "base/log/log.h"
+#include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/components_ng/gestures/gesture_group.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/gestures/gesture_info.h"
 #include "frameworks/base/json/json_util.h"
+#include "render_service_client/core/ui/rs_ui_context.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
 #include "form_callback_client.h"
@@ -161,6 +163,15 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
         CreatePlatformResource(context, info);
     }
 #endif
+}
+
+void FormManagerDelegate::SetRSUIContext(std::shared_ptr<Rosen::RSUIContext>& rsUIContext)
+{
+    if (rsUIContext == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "FormManagerDelegate: rsUIContext is nullptr");
+        return;
+    }
+    rsUIContext_ = rsUIContext;
 }
 
 void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo,
@@ -772,15 +783,30 @@ void FormManagerDelegate::NotifySurfaceChange(float width, float height, float b
     if (FormManager::GetInstance().IsSizeChangeByRotate()) {
         sizeChangeReason = WindowSizeChangeReason::ROTATION;
     }
-    std::shared_ptr<Rosen::RSTransaction> transaction;
-    if (FormManager::GetInstance().GetRSTransaction().lock()) {
-        transaction = FormManager::GetInstance().GetRSTransaction().lock();
-    } else if (auto transactionController = Rosen::RSSyncTransactionController::GetInstance()) {
-        transaction = transactionController->GetRSTransaction();
+    bool isMultiInstanceEnabled = SystemProperties::GetMultiInstanceEnabled();
+    std::shared_ptr<Rosen::RSTransaction> transaction = nullptr;
+    std::shared_ptr<Rosen::RSSyncTransactionHandler> transactionControllerHandler = nullptr;
+    Rosen::RSSyncTransactionController* transactionController = nullptr;
+    if (isMultiInstanceEnabled) {
+        if (rsUIContext_ == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "NotifySurfaceChange: rsUIContext_ is nullptr");
+            return;
+        }
+        transactionControllerHandler = rsUIContext_->GetSyncTransactionHandler();
+    } else {
+        transactionController = Rosen::RSSyncTransactionController::GetInstance();
     }
 
+    if (FormManager::GetInstance().GetRSTransaction().lock()) {
+        transaction = FormManager::GetInstance().GetRSTransaction().lock();
+    } else if (transactionController != nullptr) {
+        transaction = transactionController->GetRSTransaction();
+    } else if (transactionControllerHandler != nullptr) {
+        transaction = transactionControllerHandler->GetRSTransaction();
+    }
     formRendererDispatcher_->DispatchSurfaceChangeEvent(width, height,
         static_cast<uint32_t>(sizeChangeReason), transaction, borderWidth);
+    formRendererDispatcher_->SetMultiInstanceEnabled(isMultiInstanceEnabled);
 }
 
 void FormManagerDelegate::OnFormSurfaceChange(float width, float height, float borderWidth)

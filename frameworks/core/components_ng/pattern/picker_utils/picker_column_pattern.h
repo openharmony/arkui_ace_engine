@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
+#include "core/components_ng/pattern/picker_utils/picker_layout_property.h"
 #include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -35,9 +36,9 @@ struct TextProperties {
     Dimension upFontSize;
     Dimension fontSize;
     Dimension downFontSize;
-    FontWeight upFontWeight;
-    FontWeight fontWeight;
-    FontWeight downFontWeight;
+    FontWeight upFontWeight = FontWeight::W100;
+    FontWeight fontWeight = FontWeight::W100;
+    FontWeight downFontWeight = FontWeight::W100;
     Color upColor;
     Color currentColor;
     Color downColor;
@@ -86,8 +87,8 @@ public:
         }
     }
 
-    virtual void FlushCurrentOptions(
-        bool isDown = false, bool isUpateTextContentOnly = false, bool isUpdateAnimationProperties = false) = 0;
+    virtual void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false,
+        bool isUpdateAnimationProperties = false, bool isTossPlaying = false) = 0;
     virtual void InitHapticController(const RefPtr<FrameNode>& host) = 0;
     virtual void UpdateColumnChildPosition(double offsetY) = 0;
     virtual void UpdateSelectedTextColor(const RefPtr<PickerTheme>& pickerTheme) = 0;
@@ -99,6 +100,7 @@ public:
     virtual const Color& GetButtonBgColor() const = 0;
     virtual const Color& GetButtonPressColor() const = 0;
     virtual bool CanMove(bool isDown) const = 0;
+    virtual std::string GetCurrentOption() const = 0;
 
     virtual uint32_t GetShowCount() const
     {
@@ -241,7 +243,7 @@ public:
         clickBreak_ = value;
     }
 
-    virtual bool IsStartEndTimeDefined()
+    virtual bool IsTossNeedToStop()
     {
         return false;
     }
@@ -295,6 +297,12 @@ public:
     virtual bool NotLoopOptions() const;
     virtual void TossStoped();
     virtual void ScrollOption(double delta, bool isJump = false);
+    virtual void UpdateDisappearTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerLayoutProperty>& pickerLayoutProperty);
+    virtual void UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerLayoutProperty>& pickerLayoutProperty);
+    virtual void UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<PickerLayoutProperty>& pickerLayoutProperty);
     virtual void HandleEnterSelectedArea(double scrollDelta, float shiftDistance, PickerScrollDirection dir) {}
     virtual void HandleDragMove(const GestureEvent& event);
     virtual void PlayRestAnimation();
@@ -346,6 +354,7 @@ protected:
     bool isEnableHaptic_ = true;
     bool isHapticPlayOnce_ = true;
     bool wheelModeEnabled_ = true;
+    bool isTossPlaying_ = false;
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
     RefPtr<NodeAnimatablePropertyFloat> scrollProperty_;
     RefPtr<TossAnimationController> tossAnimationController_ = AceType::MakeRefPtr<TossAnimationController>();
@@ -360,6 +369,7 @@ protected:
     uint32_t currentIndex_ = 0;
     ColumnChangeCallback changeCallback_;
     EventCallback EventCallback_;
+    FontWeight SelectedWeight_ = FontWeight::MEDIUM;
 
 public:
     PickerColumnPatternCircleUtils<PickerColumnPattern>* circleUtils_ = nullptr;

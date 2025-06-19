@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -219,11 +219,17 @@ void ResetWaterFlowNestedScroll(ArkUINodeHandle node)
     WaterFlowModelNG::SetNestedScroll(frameNode, nestedOpt);
 }
 
-void SetWaterFlowFriction(ArkUINodeHandle node, ArkUI_Float32 friction)
+void SetWaterFlowFriction(ArkUINodeHandle node, ArkUI_Float32 friction, void* frictionRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetFriction(frameNode, friction);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* friction = reinterpret_cast<ResourceObject*>(frictionRawPtr);
+        auto frictionResObj = AceType::Claim(friction);
+        WaterFlowModelNG::ParseResObjFriction(frameNode, frictionResObj);
+    }
 }
 
 void ResetWaterFlowFriction(ArkUINodeHandle node)
@@ -231,6 +237,9 @@ void ResetWaterFlowFriction(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     WaterFlowModelNG::SetFriction(frameNode, FRICTION_DEFAULT);
+    if (SystemProperties::ConfigChangePerform()) {
+        WaterFlowModelNG::ParseResObjFriction(frameNode, nullptr);
+    }
 }
 
 void SetEdgeEffect(ArkUINodeHandle node, int32_t edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 edge)
@@ -359,6 +368,27 @@ ArkUI_Bool GetShowCached(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, false);
     return WaterFlowModelNG::GetShowCached(frameNode);
+}
+
+void SetWaterFlowSyncLoad(ArkUINodeHandle node, ArkUI_Bool syncLoad)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetSyncLoad(frameNode, syncLoad);
+}
+
+void ResetWaterFlowSyncLoad(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WaterFlowModelNG::SetSyncLoad(frameNode, false);
+}
+
+ArkUI_Bool GetWaterFlowSyncLoad(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return WaterFlowModelNG::GetSyncLoad(frameNode);
 }
 
 void SetWaterFlowScrollBar(ArkUINodeHandle node, ArkUI_Int32 barState)
@@ -702,6 +732,9 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         .setShowCached = SetShowCached,
         .resetShowCached = ResetShowCached,
         .getShowCached = GetShowCached,
+        .setSyncLoad = SetWaterFlowSyncLoad,
+        .resetSyncLoad = ResetWaterFlowSyncLoad,
+        .getSyncLoad = GetWaterFlowSyncLoad,
         .setEdgeEffect = SetEdgeEffect,
         .resetEdgeEffect = ResetEdgeEffect,
         .setWaterFlowScrollBar = SetWaterFlowScrollBar,

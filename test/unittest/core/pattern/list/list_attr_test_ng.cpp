@@ -56,6 +56,7 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
     EXPECT_EQ(json->GetString("listDirection"), "Axis.Vertical");
     EXPECT_TRUE(json->GetBool("editMode"));
     EXPECT_TRUE(json->GetBool("chainAnimation"));
+    EXPECT_TRUE(json->GetBool("syncLoad"));
     EXPECT_EQ(json->GetString("divider"), "");
     EXPECT_EQ(json->GetString("lanes"), "3");
     EXPECT_EQ(Dimension::FromString(json->GetString("laneMinLength")), Dimension(40));
@@ -75,6 +76,7 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
     model.SetSticky(V2::StickyStyle::FOOTER);
     model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     model.SetDivider(ITEM_DIVIDER);
+    model.SetSyncLoad(false);
     CreateDone();
     json = JsonUtil::Create(true);
     layoutProperty_->ToJsonValue(json, filter);
@@ -82,6 +84,7 @@ HWTEST_F(ListAttrTestNg, ListLayoutProperty001, TestSize.Level1)
     EXPECT_EQ(json->GetString("alignListItem"), "ListItemAlign.End");
     EXPECT_EQ(json->GetString("sticky"), "StickyStyle.Footer");
     EXPECT_EQ(json->GetString("scrollSnapAlign"), "ScrollSnapAlign.CENTER");
+    EXPECT_FALSE(json->GetBool("syncLoad"));
     auto dividerJson = json->GetObject("divider");
     EXPECT_EQ(Dimension::FromString(dividerJson->GetString("strokeWidth")), Dimension(STROKE_WIDTH));
     EXPECT_EQ(Dimension::FromString(dividerJson->GetString("startMargin")), Dimension(10));

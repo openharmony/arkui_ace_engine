@@ -80,4 +80,14 @@ void ScrollerObserverManager::HandleOnDidScrollEvent(
         }
     }
 }
+
+void ScrollerObserverManager::HandleOnScrollerAreaChangeEvent(
+    Dimension dimension, ScrollSource source, bool isAtTop, bool isAtBottom)
+{
+    for (const auto& pair : observers_) {
+        if (pair.second.onScrollerAreaChangeEvent) {
+            pair.second.onScrollerAreaChangeEvent(dimension, source, isAtTop, isAtBottom);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

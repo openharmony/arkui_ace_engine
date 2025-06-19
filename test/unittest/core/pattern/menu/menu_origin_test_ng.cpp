@@ -1986,4 +1986,69 @@ HWTEST_F(MenuTestNg, CreateMenuTest001, TestSize.Level1)
     auto layoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     ASSERT_NE(layoutProps, nullptr);
 }
+
+/**
+ * @tc.name: MenuViewTestNg009
+ * @tc.desc: Verify MenuView::Create when mask is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuViewTestNg009, TestSize.Level1)
+{
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(customNode, nullptr);
+    auto targetParentNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(targetParentNode, nullptr);
+    auto targetNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 11, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(targetNode, nullptr);
+    targetParentNode->SetDepth(1);
+    targetNode->SetParent(targetParentNode);
+    customNode->SetDepth(2);
+    targetParentNode->SetParent(customNode);
+
+    MenuParam menuParam;
+    menuParam.type = MenuType::MENU;
+    menuParam.maskEnable = true;
+    menuParam.isShowInSubWindow = true;
+    std::vector<OptionParam> optionParams;
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto pipeline = MockPipelineContext::GetCurrent();
+    pipeline->SetThemeManager(themeManager);
+
+    auto container = MockContainer::Current();
+    container->pipelineContext_ = pipeline;
+
+    RefPtr<MenuTheme> menuTheme = AceType::MakeRefPtr<MenuTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
+
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 11, V2::TEXT_ETS_TAG, MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern->GetFilterColumnNode(), nullptr);
+}
+
+/**
+ * @tc.name: MenuViewTestNg010
+ * @tc.desc: Verify MenuView::Create when mask is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuViewTestNg010, TestSize.Level1)
+{
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(customNode, nullptr);
+    MenuParam menuParam;
+    menuParam.type = MenuType::MENU;
+    menuParam.maskEnable = false;
+
+    auto menuWrapperNode = MenuView::Create(textNode, 11, V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_EQ(menuWrapperPattern->GetFilterColumnNode(), nullptr);
+}
 } // namespace OHOS::Ace::NG

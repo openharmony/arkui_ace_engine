@@ -153,9 +153,7 @@ void ScrollableUtils::RecycleItemsOutOfBoundary(
 float ScrollableUtils::GetMoveOffset(
     const RefPtr<FrameNode>& parentFrameNode,
     const RefPtr<FrameNode>& curFrameNode,
-    bool isVertical,
-    float contentStartOffset,
-    float contentEndOffset)
+    const MoveOffsetParam& param)
 {
     constexpr float notMove = 0.0f;
     CHECK_NULL_RETURN(parentFrameNode, notMove);
@@ -171,14 +169,15 @@ float ScrollableUtils::GetMoveOffset(
     CHECK_NULL_RETURN(curGeometry, notMove);
     auto curFrameSize = curGeometry->GetFrameSize();
 
-    float diffToTarFrame = isVertical ? offsetToTarFrame.GetY() : offsetToTarFrame.GetX();
+    float diffToTarFrame = param.isVertical ? offsetToTarFrame.GetY() : offsetToTarFrame.GetX();
     if (NearZero(diffToTarFrame)) {
         return notMove;
     }
-    float curFrameLength = isVertical ? curFrameSize.Height() : curFrameSize.Width();
-    float parentFrameLength = isVertical ? parentFrameSize.Height() : parentFrameSize.Width();
-    float focusMarginStart = std::max(static_cast<float>(FOCUS_SCROLL_MARGIN.ConvertToPx()), contentStartOffset);
-    float focusMarginEnd = std::max(static_cast<float>(FOCUS_SCROLL_MARGIN.ConvertToPx()), contentEndOffset);
+    float focusMargin = param.noNeedMargin ? 0 : static_cast<float>(FOCUS_SCROLL_MARGIN.ConvertToPx());
+    float curFrameLength = param.isVertical ? curFrameSize.Height() : curFrameSize.Width();
+    float parentFrameLength = param.isVertical ? parentFrameSize.Height() : parentFrameSize.Width();
+    float focusMarginStart = std::max(focusMargin, param.contentStartOffset);
+    float focusMarginEnd = std::max(focusMargin, param.contentEndOffset);
 
     bool totallyShow = LessOrEqual(curFrameLength + focusMarginStart + focusMarginEnd, (parentFrameLength));
     float startAlignOffset = -diffToTarFrame + focusMarginStart;

@@ -46,6 +46,7 @@ Rosen::RSAnimationTimingProtocol OptionToTimingProtocol(const AnimationOption& o
                                   option.GetAnimationDirection() == AnimationDirection::ALTERNATE_REVERSE);
     timingProtocol.SetFillMode(static_cast<Rosen::FillMode>(option.GetFillMode()));
     timingProtocol.SetFinishCallbackType(ToAnimationFinishCallbackType(option.GetFinishCallbackType()));
+    timingProtocol.SetInterfaceName(option.GetAnimationInterfaceString());
     auto rateRange = option.GetFrameRateRange();
     if (rateRange) {
         timingProtocol.SetFrameRateRange({ rateRange->min_, rateRange->max_, rateRange->preferred_, 0,
@@ -160,6 +161,13 @@ bool AnimationUtils::CloseImplicitCancelAnimation(const RefPtr<PipelineBase>& co
 {
     auto rsUIContext = GetRSUIContext(context);
     return Rosen::RSNode::CloseImplicitCancelAnimation(rsUIContext);
+}
+
+CancelAnimationStatus AnimationUtils::CloseImplicitCancelAnimationReturnStatus(const RefPtr<PipelineBase>& context)
+{
+    auto rsUIContext = GetRSUIContext(context);
+    auto status = Rosen::RSNode::CloseImplicitCancelAnimationReturnStatus(rsUIContext);
+    return static_cast<CancelAnimationStatus>(status);
 }
 
 bool AnimationUtils::IsImplicitAnimationOpen(const RefPtr<PipelineBase>& context)

@@ -18,6 +18,8 @@
 
 #include "rosen_text/typography_types.h"
 #include "SkColor.h"
+#include "symbol_constants.h"
+#include "symbol_gradient.h"
 
 #include "core/components/common/properties/text_style.h"
 #include "core/pipeline/pipeline_base.h"
@@ -68,6 +70,8 @@ OHOS::Rosen::TextBaseline ConvertTxtTextBaseline(TextBaseline textBaseline);
 
 OHOS::Rosen::TextAlign ConvertTxtTextAlign(TextAlign textAlign);
 
+Rosen::TextVerticalAlign ConvertTxtTextVerticalAlign(TextVerticalAlign textVerticalAlign);
+
 OHOS::Rosen::TextRectHeightStyle ConvertTxtRectHeightStyle(RectHeightStyle heightStyle);
 
 OHOS::Rosen::TextRectWidthStyle ConvertTxtRectWidthStyle(RectWidthStyle widthStyle);
@@ -91,16 +95,11 @@ OHOS::Rosen::PlaceholderVerticalAlignment ConvertPlaceholderAlignment(Placeholde
 void ConvertPlaceholderRun(const PlaceholderRun& span, OHOS::Rosen::PlaceholderSpan& txtSpan);
 
 SkColor ConvertSkColor(Color color);
-void UpdateShaderStyle(const TextStyle& textStyle, OHOS::Rosen::TextStyle& txtStyle);
 void ConvertForegroundPaint(const TextStyle& textStyle, double width, double height, Rosen::TextStyle& txtStyle);
-void UpdateOffset(Offset& firstPoint, Offset& secondPoint, LinearGradient& linearGradient, const Rect& rect);
-void EndPointsFromAngle(float angle, const Rect& rect, Offset& firstPoint, Offset& secondPoint);
-Offset DirectionToPoint(const std::optional<OHOS::Ace::GradientDirection>& x,
-    const std::optional<OHOS::Ace::GradientDirection>& y, const Rect& rect);
-float Deg2rad(float deg);
-float Rad2deg(float rad);
-
 float GetVariableFontWeight(FontWeight fontWeight);
+std::vector<Rosen::Drawing::ColorQuad> ConvertColors(const std::vector<Color>& colors);
+std::shared_ptr<Rosen::SymbolGradient> CreateNativeGradient(const SymbolGradient& grad);
+std::optional<Rosen::SymbolShadow> ConvertToNativeSymbolShadow(const SymbolShadow& shadow);
 } // namespace Constants
 
 } // namespace OHOS::Ace

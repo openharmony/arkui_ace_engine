@@ -1,0 +1,27 @@
+{
+    "name": "@koalaui/arkts-arkui-test",
+    "version": "1.4.1",
+    "description": "",
+    "scripts": {
+        "clean": "rimraf build generated unmemoized js_output abc lib app/test/build",
+        "compile:plugin": "cd ../../arkoala/ets-plugin && npm run compile",
+        "compile:ets": "npm run compile:plugin && cd src/ets && ets-tsc -p ./etsconfig.json",
+        "unmemoize": "npm run compile:ets && ets-tsc -p tsconfig-unmemoize.json",
+        "unmemoize:passed": "npm run compile:ets && ets-tsc -p tsconfig-unmemoize-passed.json",
+        "unmemoize:runtime": "npm run unmemoize --prefix ../../incremental/runtime",
+        "unmemoize:arkui-no-common": "npm run unmemoize --prefix ../arkui",
+        "unmemoize:arkui-common": "npm run unmemoize --prefix ../../arkoala/arkui-common",
+        "unmemoize:all": "npm run unmemoize:runtime && npm run unmemoize:arkui-no-common && npm run unmemoize:arkui-common && npm run unmemoize",
+        "unmemoize:all:passed": "npm run unmemoize:runtime && npm run unmemoize:arkui-no-common && npm run unmemoize:arkui-common && npm run unmemoize:passed",
+        "build:test": "npm run unmemoize:all && npm run build:test:inc",
+        "build:test:passed": "npm run unmemoize:all:passed && npm run build:test:inc",
+        "build:test:inc": "fast-arktsc --input-files ./arktsconfig-run-unmemoized.json --output-dir ./build --compiler ../../incremental/tools/panda/arkts/arktsc --link-name test && ninja ${NINJA_OPTIONS} -f build/build.ninja",
+
+        "pack": "npm run cli-tools:download && cd app && DEVECO_SDK_HOME=../../../arkoala/ohos-sdk/ohos-sdk ../command-line-tools/hvigor/bin/hvigorw --no-daemon --mode module -p product=default -p module=test@default assembleHar",
+        "har-arm32": "npm run build:test && npm run --prefix ../../arkoala/ohos-sdk download && node scripts/build-har.mjs --name test --arch arm32 && npm run pack",
+        "har-arm64": "npm run build:test && npm run --prefix ../../arkoala/ohos-sdk download && node scripts/build-har.mjs --name test --arch arm64 && npm run pack",
+        "har-universal": "npm run build:test && npm run --prefix ../../arkoala/ohos-sdk download && node scripts/build-har-universal.mjs --name test && npm run pack",
+
+        "cli-tools:download": "node ../ohos-sdk/scripts/oh-sdk-cli.mjs cli-tools"
+    }
+}

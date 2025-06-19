@@ -60,10 +60,12 @@ public:
     void SetOnGestureSwipe(GestureSwipeEvent&& gestureSwipe) override;
     void SetOnSelected(std::function<void(const BaseEventInfo*)>&& onSelected) override;
     void SetDivider(const TabsItemDivider& divider) override;
+    void SetDividerColorByUser(bool isByUser) override;
     void SetFadingEdge(bool fadingEdge) override;
     void SetBarOverlap(bool barOverlap) override;
     void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent) override;
     void SetBarBackgroundColor(const Color& backgroundColor) override;
+    void SetBarBackgroundColorByUser(bool isByUser) override;
     void SetClipEdge(bool clipEdge) override;
     void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option) override;
     void ResetScrollableBarModeOptions() override;
@@ -87,9 +89,11 @@ public:
     static void SetBarGridAlign(FrameNode* frameNode, const BarGridColumnOptions& BarGridColumnOptions);
     static void SetOnUnselected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected);
     static void SetDivider(FrameNode* frameNode, const TabsItemDivider& divider);
+    static void SetDividerColorByUser(FrameNode* frameNode, bool isByUser);
     static void SetEffectNodeOption(FrameNode* frameNode, const TabsEffectNodeOption& option);
     static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge);
     static void SetBarBackgroundColor(FrameNode* frameNode, const Color& backgroundColor);
+    static void SetBarBackgroundColorByUser(FrameNode* frameNode, bool isByUser);
     static void SetBarBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& styleOption);
     static void SetBarOverlap(FrameNode* frameNode, bool barOverlap);
     static void SetIsVertical(FrameNode* frameNode, bool isVertical);
@@ -107,6 +111,7 @@ public:
     static void SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect);
     static void SetTabBarIndex(FrameNode* frameNode, int32_t index);
     static void SetTabsController(FrameNode* frameNode, const RefPtr<SwiperController>& tabsController);
+    static void SetBarModifier(FrameNode* frameNode, std::function<void(WeakPtr<NG::FrameNode>)>&& onApply);
     static void SetBarBackgroundEffect(FrameNode* frameNode, const EffectOption& effectOption);
     static void SetPageFlipMode(FrameNode* frameNode, int32_t options);
     static void SetCachedMaxCount(FrameNode* frameNode, std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode);

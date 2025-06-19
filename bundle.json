@@ -80,6 +80,7 @@
                 "common_event_service",
                 "data_share",
                 "resource_management",
+                "runtime_core",
                 "i18n",
                 "hicollie",
                 "netmanager_base",

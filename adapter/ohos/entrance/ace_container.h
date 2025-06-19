@@ -303,6 +303,7 @@ public:
     std::shared_ptr<Framework::JsValue> GetJsContext();
     void SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext);
     std::shared_ptr<void> SerializeValue(const std::shared_ptr<Framework::JsValue>& jsValue);
+    void TriggerModuleSerializer() override;
     void SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder);
     std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContext();
 
@@ -366,6 +367,8 @@ public:
 
     void SetLocalStorage(NativeReference* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
 
+    void SetAniLocalStorage(void* storage, const std::shared_ptr<OHOS::AbilityRuntime::Context>& context);
+
     void CheckAndSetFontFamily() override;
 
     void OnFinish()
@@ -386,6 +389,20 @@ public:
     {
         if (abilityOnQueryCallback_) {
             abilityOnQueryCallback_(queryWord);
+        }
+    }
+
+    void OnStartAbilityOnInstallAppInStore(const std::string& appName)
+    {
+        if (abilityOnInstallAppInStore_) {
+            abilityOnInstallAppInStore_(appName);
+        }
+    }
+
+    void OnStartAbilityOnJumpBrowser(const std::string& address)
+    {
+        if (abilityOnJumpBrowser_) {
+            abilityOnJumpBrowser_(address);
         }
     }
 
@@ -481,6 +498,16 @@ public:
     void SetAbilityOnSearch(AbilityOnQueryCallback&& callback)
     {
         abilityOnQueryCallback_ = std::move(callback);
+    }
+
+    void SetAbilityOnInstallAppInStore(AbilityOnQueryCallback&& callback)
+    {
+        abilityOnInstallAppInStore_ = std::move(callback);
+    }
+
+    void SetAbilityOnJumpBrowser(AbilityOnQueryCallback&& callback)
+    {
+        abilityOnJumpBrowser_ = std::move(callback);
     }
 
     static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
@@ -586,6 +613,8 @@ public:
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void ProcessColorModeUpdate(
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
+    void CheckForceVsync(const ParsedConfig& parsedConfig);
+    void OnFrontUpdated(const ConfigurationChange& configurationChange, const std::string& configuration);
     void UpdateConfiguration(
         const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel = false);
     void UpdateConfigurationSyncForAll(
@@ -789,16 +818,25 @@ public:
         return uiWindow_->GetFreeMultiWindowModeEnabledState();
     }
 
+    Rect GetGlobalScaledRect() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, Rect());
+        Rosen::Rect rect{};
+        uiWindow_->GetGlobalScaledRect(rect);
+        return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    }
+
     bool IsWaterfallWindow() const override
     {
         CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->IsWaterfallModeEnabled();
     }
 
-    Rect GetUIExtensionHostWindowRect(int32_t instanceId) override
+    Rect GetUIExtensionHostWindowRect() override
     {
         CHECK_NULL_RETURN(IsUIExtensionWindow(), Rect());
-        auto rect = uiWindow_->GetHostWindowRect(instanceId);
+        auto hostWindowId = uiWindow_->GetRealParentId();
+        auto rect = uiWindow_->GetHostWindowRect(hostWindowId);
         return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
     }
     void UpdateColorMode(uint32_t colorMode) override;
@@ -899,6 +937,8 @@ private:
     static bool SetSystemBarEnabled(const sptr<OHOS::Rosen::Window>& window, SystemBarType type,
         std::optional<bool> enable, std::optional<bool> animation);
 
+    void FlushReloadTask(bool needReloadTransition, const ConfigurationChange& configurationChange);
+
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -961,6 +1001,8 @@ private:
     bool installationFree_ = false;
     SharePanelCallback sharePanelCallback_ = nullptr;
     AbilityOnQueryCallback abilityOnQueryCallback_ = nullptr;
+    AbilityOnQueryCallback abilityOnInstallAppInStore_ = nullptr;
+    AbilityOnQueryCallback abilityOnJumpBrowser_ = nullptr;
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
 

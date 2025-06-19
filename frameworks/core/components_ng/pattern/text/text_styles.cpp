@@ -91,6 +91,8 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
         UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolEffectStrategy, EffectStrategy);
         UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolEffectOptions, SymbolEffectOptions);
         UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolType, SymbolType);
+        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, SymbolShadow, SymbolShadow);
+        UPDATE_TEXT_STYLE_WITH_THEME(fontStyle, ShaderStyle, ShaderStyle);
     }
 
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, LineHeight, LineHeight);
@@ -100,6 +102,7 @@ void UseSelfStyleWithTheme(const RefPtr<TextLayoutProperty>& property, TextStyle
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextBaseline, TextBaseline);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextOverflow, TextOverflow);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextAlign, TextAlign);
+    UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, TextVerticalAlign, ParagraphVerticalAlign);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, MaxLines, MaxLines);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, WordBreak, WordBreak);
     UPDATE_TEXT_STYLE_WITH_THEME(textLineStyle, EllipsisMode, EllipsisMode);
@@ -150,6 +153,8 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
             UPDATE_TEXT_STYLE(fontStyle, SymbolEffectStrategy, SetEffectStrategy);
             UPDATE_TEXT_STYLE(fontStyle, SymbolEffectOptions, SetSymbolEffectOptions);
             UPDATE_TEXT_STYLE(fontStyle, SymbolType, SetSymbolType);
+            UPDATE_TEXT_STYLE(fontStyle, SymbolShadow, SetSymbolShadow);
+            UPDATE_TEXT_STYLE(fontStyle, ShaderStyle, SetShaderStyle);
         }
     }
     if (textLineStyle) {
@@ -163,6 +168,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle, const std::unique
         UPDATE_TEXT_STYLE(textLineStyle, TextBaseline, SetTextBaseline);
         UPDATE_TEXT_STYLE(textLineStyle, TextOverflow, SetTextOverflow);
         UPDATE_TEXT_STYLE(textLineStyle, TextAlign, SetTextAlign);
+        UPDATE_TEXT_STYLE(textLineStyle, TextVerticalAlign, SetParagraphVerticalAlign);
         UPDATE_TEXT_STYLE(textLineStyle, MaxLines, SetMaxLines);
         UPDATE_TEXT_STYLE(textLineStyle, WordBreak, SetWordBreak);
         UPDATE_TEXT_STYLE(textLineStyle, EllipsisMode, SetEllipsisMode);

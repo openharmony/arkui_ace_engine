@@ -115,7 +115,8 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::RADIO_DOT_SVG, "radio_dot_svg" },
     { InternalResource::ResourceId::IC_TAKEPHOTO_SVG, "ic_public_camera" },
     { InternalResource::ResourceId::APP_LOCK_SVG, "app_lock_picture"},
-    { InternalResource::ResourceId::IC_TIME_LIMIT_SVG, "ic_time_limit_picture"}};
+    { InternalResource::ResourceId::IC_TIME_LIMIT_SVG, "ic_time_limit_picture"},
+    { InternalResource::ResourceId::IC_PERSON_FILL_SVG, "ic_person_fill"}};
 }
 
 RefPtr<IconTheme> IconTheme::Builder::Build(const RefPtr<ThemeConstants>& themeConstants) const

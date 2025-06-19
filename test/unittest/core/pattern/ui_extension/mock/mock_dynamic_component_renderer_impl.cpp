@@ -31,7 +31,8 @@ DynamicComponentRendererImpl::DynamicComponentRendererImpl(
     runtime_ = reinterpret_cast<NativeEngine*>(runtime);
 }
 
-void DynamicComponentRendererImpl::SetAdaptiveSize(bool adaptiveWidth, bool adaptiveHeight) {}
+void DynamicComponentRendererImpl::SetAdaptiveSize(
+    bool adaptiveWidth, bool adaptiveHeight) {}
 
 void DynamicComponentRendererImpl::CreateContent() {}
 
@@ -107,6 +108,8 @@ void DynamicComponentRendererImpl::NotifyUieDump(const std::vector<std::string>&
     std::vector<std::string>& info) {}
 
 void DynamicComponentRendererImpl::SetBackgroundTransparent(bool backgroundTransparent) {}
+
+void DynamicComponentRendererImpl::OnAccessibilityParentRectInfoUpdate() {}
 
 bool DynamicComponentRendererImpl::GetBackgroundTransparent() const
 {

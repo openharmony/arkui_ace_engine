@@ -31,8 +31,18 @@ constexpr int32_t CALC_BIT_LENGTH = 4;
 constexpr uint32_t COLOR_DEFAULT = 0xff;
 constexpr char HEX[] = "0123456789ABCDEF";
 } // namespace
+
+struct TestingColor4f {
+    typedef float scalar;
+    scalar redF_ = 0;
+    scalar greenF_ = 0;
+    scalar blueF_ = 0;
+    scalar alphaF_ = 0;
+};
+
 class TestingColor {
 public:
+    typedef float scalar;
     constexpr static uint32_t COLOR_TRANSPARENT = 0;
     constexpr static uint32_t COLOR_BLACK = 0xFF000000;
     constexpr static uint32_t COLOR_DKGRAY = 0xFF444444;
@@ -45,6 +55,7 @@ public:
     constexpr static uint32_t COLOR_YELLOW = 0xFFFFFF00;
     constexpr static uint32_t COLOR_CYAN = 0xFF00FFFF;
     constexpr static uint32_t COLOR_MAGENTA = 0xFFFF00FF;
+    constexpr static uint32_t RGB_MAX = 255;
     TestingColor() = default;
     TestingColor(uint32_t red, uint32_t green, uint32_t blue, uint32_t alpha)
         : red_(red), green_(green), blue_(blue), alpha_(alpha)
@@ -111,10 +122,40 @@ public:
         return colorStr;
     }
 
+    scalar GetRedF() const
+    {
+        return static_cast<scalar>(red_) / RGB_MAX;
+    }
+
+    scalar GetGreenF() const
+    {
+        return static_cast<scalar>(green_) / RGB_MAX;
+    }
+
+    scalar GetBlueF() const
+    {
+        return static_cast<scalar>(blue_) / RGB_MAX;
+    }
+
+    scalar GetAlphaF() const
+    {
+        return static_cast<scalar>(alpha_) / RGB_MAX;
+    }
+
+    const TestingColor4f& GetColor4f()
+    {
+        color4f_.redF_ = GetRedF();
+        color4f_.greenF_ = GetGreenF();
+        color4f_.blueF_ = GetBlueF();
+        color4f_.alphaF_ = GetAlphaF();
+        return color4f_;
+    }
+
     uint32_t red_;
     uint32_t green_;
     uint32_t blue_;
     uint32_t alpha_;
+    TestingColor4f color4f_;
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_COLOR_H

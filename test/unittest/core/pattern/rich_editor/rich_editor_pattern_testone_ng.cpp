@@ -26,13 +26,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-namespace {
-int32_t testOnReadyEvent = 0;
-int32_t testAboutToIMEInput = 0;
-int32_t testOnIMEInputComplete = 0;
-int32_t testAboutToDelete = 0;
-int32_t testOnDeleteComplete = 0;
-} // namespace
 
 class RichEditorPatternTestOneNg : public RichEditorCommonTestNg {
 public:
@@ -62,11 +55,6 @@ void RichEditorPatternTestOneNg::SetUp()
 void RichEditorPatternTestOneNg::TearDown()
 {
     richEditorNode_ = nullptr;
-    testOnReadyEvent = 0;
-    testAboutToIMEInput = 0;
-    testOnIMEInputComplete = 0;
-    testAboutToDelete = 0;
-    testOnDeleteComplete = 0;
     MockParagraph::TearDown();
 }
 
@@ -408,7 +396,7 @@ HWTEST_F(RichEditorPatternTestOneNg, AddTextSpan001, TestSize.Level1)
     richEditorPattern->previewTextRecord_.startOffset = 0;
     richEditorPattern->previewTextRecord_.endOffset = 0;
     EXPECT_EQ(richEditorPattern->previewTextRecord_.IsValid(), true);
-    int32_t res = richEditorPattern->AddTextSpan(options, true, 0);
+    int32_t res = richEditorPattern->AddTextSpan(options, TextChangeReason::UNKNOWN, true, 0);
     EXPECT_EQ(res, 0);
 }
 

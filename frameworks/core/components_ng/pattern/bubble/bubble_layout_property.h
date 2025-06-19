@@ -18,6 +18,7 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components/common/properties/popup_param.h"
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -47,6 +48,7 @@ public:
         value->propIsCaretMode_ = CloneIsCaretMode();
         value->propEnableHoverMode_ = CloneEnableHoverMode();
         value->propFollowTransformOfTarget_ = CloneFollowTransformOfTarget();
+        value->propShowAtAnchor_ = CloneShowAtAnchor();
         return value;
     }
 
@@ -68,6 +70,7 @@ public:
         ResetIsCaretMode();
         ResetEnableHoverMode();
         ResetFollowTransformOfTarget();
+        ResetShowAtAnchor();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableArrow, bool, PROPERTY_UPDATE_MEASURE);
@@ -85,6 +88,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCaretMode, bool, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EnableHoverMode, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FollowTransformOfTarget, bool, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowAtAnchor, TipsAnchorType, PROPERTY_UPDATE_MEASURE);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(BubbleLayoutProperty);

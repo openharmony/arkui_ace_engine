@@ -137,5 +137,8 @@ using RSPicture = Testing::TestingPicture;
 using RSTextRectHeightStyle = Testing::TestingTypographyProperties::TextRectHeightStyle;
 using RSTextRectWidthStyle = Testing::TestingTypographyProperties::TextRectWidthStyle;
 using RSTextRect = Testing::TestingTypographyProperties::TextRect;
+using RSColor4f = Testing::TestingColor4f;
+using RSCMSTransferFuncType = Testing::TestingCMSTransferFuncType;
+using RSCMSMatrixType = Testing::TestingCMSMatrixType;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_DRAWING_MOCK_H

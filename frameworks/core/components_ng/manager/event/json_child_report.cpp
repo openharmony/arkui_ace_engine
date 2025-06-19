@@ -167,20 +167,28 @@ std::shared_ptr<InspectorJsonValue> SwipeJsonReport::GetJsonData() const
     auto upValue = InspectorJsonUtil::CreateArray();
     for (auto& fingerList : GetFingerList()) {
         auto point = fingerList.globalLocation_;
-        upValue->Put(point.GetX());
-        upValue->Put(point.GetY());
+        auto upTouchValueChild = InspectorJsonUtil::CreateArray();
+        upTouchValueChild->Put(point.GetX());
+        upTouchValueChild->Put(point.GetY());
+        upValue->Put(upTouchValueChild);
     }
     auto downValue = InspectorJsonUtil::CreateArray();
     for (auto& downEvent : touchEvents_) {
         auto point = downEvent.second;
-        downValue->Put(point.x);
-        downValue->Put(point.y);
+        auto downTouchValueChild = InspectorJsonUtil::CreateArray();
+        downTouchValueChild->Put(point.x);
+        downTouchValueChild->Put(point.y);
+        downValue->Put(downTouchValueChild);
     }
     auto value = InspectorJsonUtil::Create();
     value->Put("GestureType", "Swipe");
     value->Put("id", GetId());
     value->Put("upPoint", upValue);
-    value->Put("downPoint", downValue);
+    if (downValue->ToString() == "[]") {
+        value->Put("downPoint", upValue);
+    } else {
+        value->Put("downPoint", downValue);
+    }
     value->Put("direction", direction_);
     value->Put("speed", speed);
     value->Put("actualSpeed", resultSpeed);
@@ -209,7 +217,7 @@ std::shared_ptr<InspectorJsonValue> DragJsonReport::GetJsonData() const
         touchValue->Put(startPoint_.GetX());
         touchValue->Put(startPoint_.GetY());
         value->Put("GestureType", "DragStart");
-        value->Put("id", GetId());
+        value->Put("id", startId_);
         value->Put("point", touchValue);
         value->Put("hostName", hostName_.c_str());
         value->Put("actualDuration", actualDuration_);
@@ -221,7 +229,7 @@ std::shared_ptr<InspectorJsonValue> DragJsonReport::GetJsonData() const
         value->Put("point", touchValue);
         if (dropResult_ == DropResult::DROP_SUCCESS) {
             value->Put("dropResult", "success");
-            value->Put("id", GetId());
+            value->Put("id", dropId_);
         } else {
             value->Put("dropResult", "fail");
         }

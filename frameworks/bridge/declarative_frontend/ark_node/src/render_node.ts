@@ -421,7 +421,7 @@ class ShapeMask extends BaseShape {
   public strokeWidth: number = 0;
 }
 
-class RenderNode {
+class RenderNode extends Disposable {
   private childrenList: Array<RenderNode>;
   private nodePtr: NodePtr;
   private parentRenderNode: WeakRef<RenderNode> | null;
@@ -454,6 +454,7 @@ class RenderNode {
   private apiTargetVersion: number;
 
   constructor(type: string) {
+    super();
     this.nodePtr = null;
     this.childrenList = [];
     this.parentRenderNode = null;
@@ -805,11 +806,15 @@ class RenderNode {
     this._nativeRef = null;
   }
   dispose() {
+    super.dispose();
     this._nativeRef?.dispose();
     this.baseNode_?.disposeNode();
     this._frameNode?.deref()?.resetNodePtr();
     this._nativeRef = null;
     this.nodePtr = null;
+  }
+  isDisposed(): boolean {
+    return super.isDisposed() && (this._nativeRef === undefined || this._nativeRef === null);
   }
   getNodePtr(): NodePtr {
     return this.nodePtr;

@@ -71,6 +71,7 @@
 #include "core/components_ng/pattern/text_field/text_select_controller.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
+#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -603,6 +604,7 @@ public:
     float GetBorderBottom(BorderWidthProperty border) const;
     float GetBorderRight(BorderWidthProperty border) const;
 
+    void OnDragNodeDetachFromMainTree() override;
     const RectF& GetTextRect() const override
     {
         return textRect_;
@@ -705,6 +707,7 @@ public:
     void ToJsonValueForFontFeature(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueForOption(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonValueForStroke(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
     void InitEditingValueText(std::u16string content);
     bool InitValueText(std::u16string content);
@@ -911,10 +914,6 @@ public:
         return dragContents_;
     }
 
-    void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode);
-
-    void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode);
-
     bool IsDragging() const
     {
         return dragStatus_ == DragStatus::DRAGGING;
@@ -928,6 +927,8 @@ public:
     bool CloseCustomKeyboard();
 
     // xts
+    std::string GetStrokeWidth() const;
+    std::string GetStrokeColor() const;
     std::string TextInputTypeToString() const;
     std::string TextInputActionToString() const;
     std::string AutoCapTypeToString() const;
@@ -959,6 +960,7 @@ public:
     std::u16string GetPlaceHolder() const;
     uint32_t GetMaxLength() const;
     uint32_t GetMaxLines() const;
+    uint32_t GetMinLines() const;
     std::string GetInputFilter() const;
     std::string GetCopyOptionString() const;
     std::string GetInputStyleString() const;
@@ -1073,9 +1075,44 @@ public:
         underlineColor_ = underlineColor;
     }
 
+    void SetTypingUnderlineColor(const Color& normalColor)
+    {
+        userUnderlineColor_.typing = normalColor;
+    }
+
+    void ResetTypingUnderlineColor()
+    {
+        userUnderlineColor_.typing = std::nullopt;
+    }
+
     void SetNormalUnderlineColor(const Color& normalColor)
     {
         userUnderlineColor_.normal = normalColor;
+    }
+
+    void ResetNormalUnderlineColor()
+    {
+        userUnderlineColor_.normal = std::nullopt;
+    }
+
+    void SetErrorUnderlineColor(const Color& normalColor)
+    {
+        userUnderlineColor_.error = normalColor;
+    }
+
+    void ResetErrorUnderlineColor()
+    {
+        userUnderlineColor_.error = std::nullopt;
+    }
+
+    void SetDisableUnderlineColor(const Color& normalColor)
+    {
+        userUnderlineColor_.disable = normalColor;
+    }
+
+    void ResetDisableUnderlineColor()
+    {
+        userUnderlineColor_.disable = std::nullopt;
     }
 
     void SetUserUnderlineColor(UserUnderlineColor userUnderlineColor)
@@ -1417,8 +1454,8 @@ public:
         return showKeyBoardOnFocus_;
     }
 
-    void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    void OnSelectionMenuOptionsUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
 
     void OnCreateMenuCallbackUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback)
     {
@@ -1428,6 +1465,11 @@ public:
     void OnMenuItemClickCallbackUpdate(const NG::OnMenuItemClickCallback&& onMenuItemClick)
     {
         selectOverlay_->OnMenuItemClickCallbackUpdate(std::move(onMenuItemClick));
+    }
+
+    void OnPrepareMenuCallbackUpdate(const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
+    {
+        selectOverlay_->OnPrepareMenuCallbackUpdate(std::move(onPrepareMenuCallback));
     }
 
     void SetSupportPreviewText(bool isSupported)
@@ -1574,7 +1616,8 @@ public:
     void AfterLayoutProcessCleanResponse(
         const RefPtr<CleanNodeResponseArea>& cleanNodeResponseArea);
     void StopContentScroll();
-    void UpdateContentScroller(const Offset& localOffset);
+    void UpdateContentScroller(const Offset& localOffset, float delay = 0.0f);
+    Offset AdjustAutoScrollOffset(const Offset& offset);
     void SetIsInitTextRect(bool isInitTextRect)
     {
         initTextRect_ = isInitTextRect;
@@ -1609,6 +1652,7 @@ public:
     void AddInsertCommand(const std::u16string& insertValue, InputReason reason);
     void AddInputCommand(const InputCommandInfo& inputCommandInfo);
     void ExecuteInputCommand(const InputCommandInfo& inputCommandInfo);
+    void FilterInitializeText();
     void SetIsFilterChanged(bool isFilterChanged)
     {
         isFilterChanged_ = isFilterChanged;
@@ -1626,6 +1670,19 @@ public:
         auto isCancelMode = IsShowCancelButtonMode() && !(cleanNodeStyle == CleanNodeStyle::INVISIBLE);
         return IsUnderlineMode() && (isCancelMode || IsInPasswordMode());
     }
+
+    void SetKeyboardAppearanceConfig(const KeyboardAppearanceConfig& config)
+    {
+        imeGradientMode_ = config.gradientMode;
+        imeFluidLightMode_ = config.fluidLightMode;
+    }
+
+    void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
+    void UpdateBorderResource() override;
+    void UpdateMarginResource() override;
+    void SetBackBorderRadius();
+    void OnColorModeChange(uint32_t colorMode) override;
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1667,6 +1724,7 @@ protected:
     // 是否独立控制键盘
     bool independentControlKeyboard_ = false;
     RefPtr<AutoFillController> autoFillController_;
+    virtual IMEClient GetIMEClientInfo();
 
 private:
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
@@ -1760,8 +1818,6 @@ private:
     void AddTextFireOnChange();
     void RecordTextInputEvent();
 
-    void FilterInitializeText();
-
     void UpdateCaretPositionByLastTouchOffset();
     bool UpdateCaretPosition();
     void UpdateCaretRect(bool isEditorValueChanged);
@@ -1795,6 +1851,7 @@ private:
     void SetAccessibilityAction() override;
     void SetAccessibilityActionGetAndSetCaretPosition();
     void SetAccessibilityActionOverlayAndSelection();
+    void SetAccessibilityEditAction();
     void SetAccessibilityMoveTextAction();
     void SetAccessibilityErrotText();
     void SetAccessibilityClearAction();
@@ -1937,7 +1994,7 @@ private:
     bool NeedsSendFillContent();
     void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
-    std::pair<std::string, std::string> GetTextDiffObscured(const std::string& latestContent);
+    void FireOnWillAttachIME();
 
     RectF frameRect_;
     RectF textRect_;
@@ -2154,6 +2211,8 @@ private:
     bool isFilterChanged_ = false;
     std::optional<bool> showPasswordState_;
     bool cancelButtonTouched_ = false;
+    KeyboardGradientMode imeGradientMode_ = KeyboardGradientMode::NONE;
+    KeyboardFluidLightMode imeFluidLightMode_ = KeyboardFluidLightMode::NONE;
 };
 } // namespace OHOS::Ace::NG
 

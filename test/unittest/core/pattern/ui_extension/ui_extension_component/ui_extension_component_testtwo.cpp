@@ -23,6 +23,8 @@
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_touch_delegate.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
@@ -159,7 +161,6 @@ HWTEST_F(UIExtensionComponentTestTwoNg, SetEventProxyFlagTest001, TestSize.Level
     int32_t flag = 0X00000000;
     EXPECT_EQ(flag, EventProxyFlag::EVENT_NONE);
     pattern->platformEventProxy_ = nullptr;
-    ASSERT_EQ(pattern->platformEventProxy_, nullptr);
     pattern->SetEventProxyFlag(flag);
 
     // False - True
@@ -1106,5 +1107,84 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTabFocus, TestSize.L
     pattern->HandleBlurEvent();
     EXPECT_EQ(pattern->GetForceProcessOnKeyEventInternal(), false);
 #endif
+}
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern HandleOcclusionScene
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, OnHandleOcclusionScene001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+    * @tc.steps: step1. construct a UIExtensionComponent Node
+    */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+    * @tc.steps: step2. test HandleOcclusionScene
+    */
+    pattern->frameNode_ = uiExtensionNode;
+    ASSERT_NE(pattern->frameNode_.Upgrade(), nullptr);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    ASSERT_NE(WindowSceneHelper::FindWindowScene(host), nullptr);
+    pattern->HandleOcclusionScene(host, false);
+    std::string id = host->GetInspectorId().value_or("");
+    host->UpdateInspectorId(id.append("_occlusion"));
+    pattern->HandleOcclusionScene(host, false);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test UIExtensionComponent Touch Delegate
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTouchDelegate, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct pointer event
+    */
+    PointF globalPoint;
+    PointF parentLocalPoint;
+    PointF parentRevertPoint;
+    TouchRestrict touchRestrict;
+    touchRestrict.hitTestType = SourceType::TOUCH;
+    TouchTestResult result;
+    int32_t touchId = 0;
+    ResponseLinkResult responseLinkResult;
+    bool isDispatch = false;
+    /**
+    * @tc.steps: step2. construct UIExtensionNode
+    */
+    auto uiextensionNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, 1,
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiextensionNode, nullptr);
+    /**
+    * @tc.steps: step3. test UIExtensionNode TouchTest
+    */
+    auto res = uiextensionNode->TouchTest(globalPoint, parentLocalPoint,
+        parentRevertPoint, touchRestrict, result, touchId, responseLinkResult, isDispatch);
+    EXPECT_EQ(res, HitTestResult::OUT_OF_REGION);
+    auto pattern = uiextensionNode->GetPattern<UIExtensionPattern>();
+    EXPECT_NE(pattern, nullptr);
+    /**
+    * @tc.steps: step4. construct uiExtensionTouchDelegate by UIExtensionNode pattern
+    */
+    UIExtensionTouchDelegate uiExtensionTouchDelegate(pattern);
+    /**
+    * @tc.steps: step5. test DelegateTouchEvent
+    */
+    TouchEvent touchEvent;
+    uiExtensionTouchDelegate.DelegateTouchEvent(touchEvent);
+    EXPECT_EQ(uiExtensionTouchDelegate.pattern_.Upgrade(), pattern);
 }
 } // namespace OHOS::Ace::NG

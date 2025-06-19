@@ -188,6 +188,11 @@ public:
         return rawPtr_ != nullptr;
     }
 
+    T* GetRawPtr() const
+    {
+        return rawPtr_;
+    }
+
     // Use 'Swap' to implement overloaded operator '='.
     // Construct a temporary 'RefPtr' by different parameters to increase strong reference count of the new instance,
     // swap with 'this', and then decrease strong reference of the old instance while destroying the temporary 'RefPtr'.
@@ -451,6 +456,17 @@ public:
     {
         return refCounter_ < other.refCounter_;
     }
+
+    // Hash function for WeakPtr to be used in unordered containers like std::unordered_map or std::unordered_set.
+    struct Hash {
+        std::size_t operator()(const WeakPtr& k) const
+        {
+            using std::hash;
+            using std::size_t;
+
+            return hash<void*>()(k.refCounter_);
+        }
+    };
 
 private:
     // Construct instance by raw pointer.

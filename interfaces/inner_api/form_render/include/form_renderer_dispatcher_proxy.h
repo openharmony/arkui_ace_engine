@@ -38,6 +38,7 @@ public:
         SerializedGesture& serializedGesture) override;
 
     void SetAllowUpdate(bool allowUpdate) override;
+    void SetMultiInstanceEnabled(bool isMultiInstanceEnabled) override;
 
     void DispatchSurfaceChangeEvent(float width, float height, uint32_t reason = 0,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, float borderWidth = 0.0) override;

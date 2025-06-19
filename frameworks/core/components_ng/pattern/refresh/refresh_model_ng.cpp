@@ -112,18 +112,17 @@ void RefreshModelNG::CreateWithResourceObj(const RefPtr<ResourceObject>& resObj)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RefreshPattern>();
     CHECK_NULL_VOID(pattern);
-    if (!resObj) {
-        pattern->RemoveResObj("refresh.promptText");
-        return;
-    }
+    pattern->RemoveResObj("refresh.promptText");
+    CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);
         std::string result;
         if (!ResourceParseUtils::ParseResString(resObj, result)) {
-            return;
+            ACE_RESET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, AceType::RawPtr(node));
+        } else {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, result, AceType::RawPtr(node));
         }
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingText, result, AceType::RawPtr(node));
     };
     pattern->AddResObj("refresh.promptText", resObj, std::move(updateFunc));
 }

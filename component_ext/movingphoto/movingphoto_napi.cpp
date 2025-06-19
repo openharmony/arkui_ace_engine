@@ -35,6 +35,7 @@ static constexpr int32_t ARG_NUM_ONE = 1;
 static constexpr int32_t ARG_NUM_TWO = 2;
 static constexpr int32_t PARAM_INDEX_ZERO = 0;
 static constexpr int32_t PARAM_INDEX_ONE = 1;
+static constexpr int32_t US_CONVERT = 1000;
 } // namespace
 
 std::unique_ptr<NG::MovingPhotoModelNG> NG::MovingPhotoModelNG::instance_ = nullptr;
@@ -73,6 +74,7 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
     napi_value jsData = nullptr;
     napi_get_named_property(env, argv[0], "movingPhoto", &jsData);
     if (!ExtNapiUtils::CheckTypeForNapiValue(env, jsData, napi_object)) {
+        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "when create movingphoto is null.");
         return ExtNapiUtils::CreateNull(env);
     }
 
@@ -80,27 +82,14 @@ napi_value JsCreate(napi_env env, napi_callback_info info)
     napi_get_named_property(env, argv[0], "imageAIOptions", &jsImageAIOptions);
     NG::MovingPhotoModelNG::GetInstance()->SetImageAIOptions(jsImageAIOptions);
 
-    napi_value jsMovingPhotoFormat = nullptr;
-    napi_get_named_property(env, argv[0], "movingPhotoFormat", &jsMovingPhotoFormat);
-    auto format = MovingPhotoFormat::UNKNOWN;
-    if (ExtNapiUtils::CheckTypeForNapiValue(env, jsMovingPhotoFormat, napi_number)) {
-        format = static_cast<MovingPhotoFormat>(ExtNapiUtils::GetCInt32(env, jsMovingPhotoFormat));
-        NG::MovingPhotoModelNG::GetInstance()->SetMovingPhotoFormat(format);
-    }
-
-    napi_value jsDynamicRangeMode = nullptr;
-    napi_get_named_property(env, argv[0], "dynamicRangeMode", &jsDynamicRangeMode);
-    auto rangeMode = DynamicRangeMode::HIGH;
-    if (ExtNapiUtils::CheckTypeForNapiValue(env, jsDynamicRangeMode, napi_number)) {
-        rangeMode = static_cast<DynamicRangeMode>(ExtNapiUtils::GetCInt32(env, jsDynamicRangeMode));
-        NG::MovingPhotoModelNG::GetInstance()->SetDynamicRangeMode(rangeMode);
-    }
-
+    SetDynamicRangeMode(env, argv[0]);
+    SetMovingPhotoFormat(env, argv[0]);
     SetWaterMask(env, argv[0]);
 
     napi_value getUri = nullptr;
     napi_get_named_property(env, jsData, "getUri", &getUri);
     if (!ExtNapiUtils::CheckTypeForNapiValue(env, getUri, napi_function)) {
+        TAG_LOGE(AceLogTag::ACE_MOVING_PHOTO, "when create getUri type is error.");
         return ExtNapiUtils::CreateNull(env);
     }
     napi_value imageUri;
@@ -119,6 +108,30 @@ napi_value SetWaterMask(napi_env env, napi_value object)
     if (ExtNapiUtils::CheckTypeForNapiValue(env, jsWaterMask, napi_boolean)) {
         waterMask = ExtNapiUtils::GetBool(env, jsWaterMask);
         NG::MovingPhotoModelNG::GetInstance()->SetWaterMask(waterMask);
+    }
+    return ExtNapiUtils::CreateNull(env);
+}
+
+napi_value SetMovingPhotoFormat(napi_env env, napi_value object)
+{
+    napi_value jsMovingPhotoFormat = nullptr;
+    napi_get_named_property(env, object, "movingPhotoFormat", &jsMovingPhotoFormat);
+    auto format = MovingPhotoFormat::UNKNOWN;
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, jsMovingPhotoFormat, napi_number)) {
+        format = static_cast<MovingPhotoFormat>(ExtNapiUtils::GetCInt32(env, jsMovingPhotoFormat));
+        NG::MovingPhotoModelNG::GetInstance()->SetMovingPhotoFormat(format);
+    }
+    return ExtNapiUtils::CreateNull(env);
+}
+
+napi_value SetDynamicRangeMode(napi_env env, napi_value object)
+{
+    napi_value jsDynamicRangeMode = nullptr;
+    napi_get_named_property(env, object, "dynamicRangeMode", &jsDynamicRangeMode);
+    auto rangeMode = DynamicRangeMode::HIGH;
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, jsDynamicRangeMode, napi_number)) {
+        rangeMode = static_cast<DynamicRangeMode>(ExtNapiUtils::GetCInt32(env, jsDynamicRangeMode));
+        NG::MovingPhotoModelNG::GetInstance()->SetDynamicRangeMode(rangeMode);
     }
     return ExtNapiUtils::CreateNull(env);
 }
@@ -279,6 +292,7 @@ napi_value InitView(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("autoPlay", JsAutoPlay),
         DECLARE_NAPI_FUNCTION("repeatPlay", JsRepeatPlay),
         DECLARE_NAPI_FUNCTION("enableAnalyzer", JsEnableAnalyzer),
+        DECLARE_NAPI_FUNCTION("hdrBrightness", JsHdrBrightness),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
@@ -373,11 +387,11 @@ napi_value JsAutoPlayPeriod(napi_env env, napi_callback_info info)
 
     int64_t startTime = 0;
     if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[PARAM_INDEX_ZERO], napi_number)) {
-        startTime = ExtNapiUtils::GetCInt64(env, argv[PARAM_INDEX_ZERO]);
+        startTime = static_cast<int64_t>(ExtNapiUtils::GetDouble(env, argv[PARAM_INDEX_ZERO]) * US_CONVERT);
     }
     int64_t endTime = 0;
     if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[PARAM_INDEX_ONE], napi_number)) {
-        endTime = ExtNapiUtils::GetCInt64(env, argv[PARAM_INDEX_ONE]);
+        endTime = static_cast<int64_t>(ExtNapiUtils::GetDouble(env, argv[PARAM_INDEX_ONE]) * US_CONVERT);
     }
     NG::MovingPhotoModelNG::GetInstance()->AutoPlayPeriod(startTime, endTime);
 
@@ -413,6 +427,23 @@ napi_value JsEnableAnalyzer(napi_env env, napi_callback_info info)
     }
     NG::MovingPhotoModelNG::GetInstance()->EnableAnalyzer(enabled);
 
+    return ExtNapiUtils::CreateNull(env);
+}
+
+napi_value JsHdrBrightness(napi_env env, napi_callback_info info)
+{
+    size_t argc = MAX_ARG_NUM;
+    napi_value argv[MAX_ARG_NUM] = { nullptr };
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    NAPI_ASSERT(env, argc >= ARG_NUM_ONE, "Wrong number of arguments");
+ 
+    float hdrBrightness = 1.0f;
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_number)) {
+        hdrBrightness = static_cast<float>(ExtNapiUtils::GetDouble(env, argv[0]));
+        hdrBrightness = (hdrBrightness >= 0.0f && hdrBrightness <= 1.0f) ? hdrBrightness : 1.0f;
+    }
+    NG::MovingPhotoModelNG::GetInstance()->SetHdrBrightness(hdrBrightness);
+ 
     return ExtNapiUtils::CreateNull(env);
 }
 

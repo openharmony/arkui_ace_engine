@@ -37,18 +37,24 @@ public:
     void Create() override;
     void Pop() override;
     void CreateWithResourceObj(TabContentJsType jsType, const RefPtr<ResourceObject>& resObj) override;
-    void CreatePaddingWithResourceObj(const RefPtr<ResourceObject>& resObjLeft,
-        const RefPtr<ResourceObject>& resObjRight, const RefPtr<ResourceObject>& resObjTop,
-        const RefPtr<ResourceObject>& resObjBottom) override;
+    void CreatePaddingHorWithResourceObj(const RefPtr<ResourceObject>& resObjLeft,
+        const RefPtr<ResourceObject>& resObjRight, bool isSubTabStyle, bool useLocalizedPadding) override;
+    void CreatePaddingVerWithResourceObj(const RefPtr<ResourceObject>& resObjTop,
+        const RefPtr<ResourceObject>& resObjBottom, bool isSubTabStyle, bool useLocalizedPadding) override;
     void SetTabBar(const std::optional<std::string> &text, const std::optional<std::string> &icon,
         const std::optional<TabBarSymbol> &tabBarSymbol, TabBarBuilderFunc &&builder, bool useContentOnly) override;
     void SetTabBarWithContent(const RefPtr<NG::UINode>& content) override;
     void SetTabBarStyle(TabBarStyle tabBarStyle) override;
     void SetIndicator(const IndicatorStyle& indicator) override;
+    void SetIndicatorColorByUser(bool isByUser) override;
     void SetBoard(const BoardStyle& board) override;
     void SetSelectedMode(SelectedMode selectedMode) override;
     void SetLabelStyle(const LabelStyle& labelStyle) override;
+    void SetLabelUnselectedColorByUser(bool isByUser) override;
+    void SetLabelSelectedColorByUser(bool isByUser) override;
     void SetIconStyle(const IconStyle& iconStyle) override;
+    void SetIconUnselectedColorByUser(bool isByUser) override;
+    void SetIconSelectedColorByUser(bool isByUser) override;
     void SetPadding(const NG::PaddingProperty& padding) override;
     void SetUseLocalizedPadding(bool useLocalizedPadding) override;
     void SetLayoutMode(LayoutMode layoutMode) override;
@@ -70,13 +76,30 @@ public:
     static void UpdateSymbolEffect(RefPtr<TextLayoutProperty> symbolProperty, bool isActive);
     static void SetOnWillShow(FrameNode* node,  std::function<void()>&& onWillShow);
     static void SetOnWillHide(FrameNode* node, std::function<void()>&& onWillHide);
-    static bool CreatePaddingLeftWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObjLeft);
-    static bool CreatePaddingRightWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObjRight);
-    static bool CreatePaddingTopWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObjTop);
-    static bool CreatePaddingBottomWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObjBottom);
+    static bool CreateIconWithResourceObjWithKey(FrameNode* frameNode, const std::string key,
+        const RefPtr<ResourceObject>& resObj);
+    static bool CreatePaddingWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static bool CreateTextContentWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static bool CreatePaddingLeftWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObjLeft,
+        bool isSubTabStyle = false, bool useLocalizedPadding = false);
+    static bool CreatePaddingRightWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObjRight,
+        bool isSubTabStyle = false, bool useLocalizedPadding = false);
+    static bool CreatePaddingTopWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObjTop,
+        bool isSubTabStyle = false, bool useLocalizedPadding = false);
+    static bool CreatePaddingBottomWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObjBottom,
+        bool isSubTabStyle = false, bool useLocalizedPadding = false);
+    static bool CreateBoardStyleBorderRadiusWithResourceObj(FrameNode* frameNode,
+        const RefPtr<ResourceObject>& resObj);
+    static bool CreateIndicatorColorWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static bool CreateIndicatorHeightWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static bool CreateIndicatorWidthWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static bool CreateIndicatorBorderRadiusWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static bool CreateIndicatorMarginTopWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
 
 private:
     static void UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<TextLayoutProperty> textLayoutProperty);
+    static void CreateMoreWithResourceObj(TabContentJsType jsType, FrameNode* frameNode,
+        const RefPtr<ResourceObject>& resObj);
 };
 
 } // namespace OHOS::Ace::NG

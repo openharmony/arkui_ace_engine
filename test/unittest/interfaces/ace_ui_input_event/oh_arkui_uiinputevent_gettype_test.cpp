@@ -15,7 +15,7 @@
 
 #include "../ui_input_event_test.h"
 
-#include "frameworks/core/common/ace_application_info.h"
+#include "core/common/ace_application_info.h"
 
 using namespace testing;
 using namespace testing::ext;

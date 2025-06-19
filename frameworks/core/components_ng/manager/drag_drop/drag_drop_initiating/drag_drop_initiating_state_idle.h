@@ -55,6 +55,7 @@ private:
     void StartGatherTask();
     void StartPreDragStatusCallback(const TouchEvent& touchEvent);
     void StartCreateTextThumbnailPixelMap();
+    void HideGatherNode();
 };
 } // namespace OHOS::Ace::NG
 

@@ -171,7 +171,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
         panRecognizerNG_->SetOnActionCancel(actionCancel);
     } else {
         panRecognizer_ = AceType::MakeRefPtr<PanRecognizer>(
-            context, DEFAULT_PAN_FINGER, panDirection, DEFAULT_PAN_DISTANCE.ConvertToPx());
+            context, DEFAULT_PAN_FINGER, panDirection, 5); /* 5: DEFAULT_PAN_DISTANCE:5px */
         panRecognizer_->SetOnActionStart(actionStart);
         panRecognizer_->SetOnActionUpdate(actionUpdate);
         panRecognizer_->SetOnActionEnd(actionEnd);
@@ -605,7 +605,8 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     touchUp_ = false;
     scrollPause_ = false;
     lastVelocity_ = info.GetMainVelocity();
-    double correctVelocity = std::clamp(info.GetMainVelocity(), MIN_VELOCITY + slipFactor_, MAX_VELOCITY - slipFactor_);
+    double correctVelocity =
+        std::clamp(info.GetMainVelocity(), MIN_VELOCITY + slipFactor_, MAX_VELOCITY - slipFactor_);
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     correctVelocity = correctVelocity * sVelocityScale_ * GetGain(GetDragOffset());
     currentVelocity_ = correctVelocity;

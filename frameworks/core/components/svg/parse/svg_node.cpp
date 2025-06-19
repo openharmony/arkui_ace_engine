@@ -61,15 +61,8 @@ std::string SvgNode::AsClipPathCommands(const Size& viewPort,
         LOGE("refSvgNode is null");
         return "";
     }
-#ifndef USE_ROSEN_DRAWING
-    auto skPath = refSvgNode->AsPath(viewPort);
-    SkString outString;
-    SkParsePath::ToSVGString(skPath, &outString);
-    return outString.c_str();
-#else
     auto rsPath = refSvgNode->AsPath(viewPort);
     return rsPath.ConvertToSVGString();
-#endif
 }
 
 std::optional<Gradient> SvgNode::GetGradient(const std::string& href)

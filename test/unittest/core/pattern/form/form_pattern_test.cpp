@@ -53,6 +53,8 @@ RequestFormInfo formInfo;
 const std::string INIT_VALUE_1 = "hello1";
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double TRANSPARENT_VAL = 0;
+constexpr char TIME_LIMIT_RESOURCE_NAME[] = "form_disable_time_limit";
+constexpr char APP_LOCKED_RESOURCE_NAME[] = "form_disable_app_locked";
 }
 class FormPatternTest : public testing::Test {
 public:
@@ -108,7 +110,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_001, TestSize.Level1)
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
-    
+
     EXPECT_EQ(pattern->scopeId_, 0);
     auto  host = pattern->GetHost();
     EXPECT_NE(host, nullptr);
@@ -148,7 +150,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_003, TestSize.Level1)
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
-    
+
     auto host = pattern->GetHost();
     EXPECT_NE(host, nullptr);
     pattern->OnAttachToFrameNode();
@@ -181,7 +183,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_004, TestSize.Level1)
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
-    
+
     EXPECT_FALSE(pattern->shouldResponseClick_);
     auto host = pattern->GetHost();
     EXPECT_NE(host, nullptr);
@@ -231,7 +233,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_005, TestSize.Level1)
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
-    
+
     TouchEventInfo event("onTouchDown");
     TouchLocationInfo touchLocationInfo(1);
     touchLocationInfo.SetTouchType(TouchType::DOWN);
@@ -411,7 +413,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_011, TestSize.Level1)
     RefPtr<FrameNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
-    
+
     auto host = pattern->GetHost();
     pattern->SnapshotSurfaceNode();
     EXPECT_NE(host, nullptr);
@@ -565,7 +567,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_017, TestSize.Level1)
     EXPECT_NE(result, nullptr);
     int32_t num = formNode->GetTotalChildCount();
     EXPECT_EQ(num, 1);
-    
+
     result = pattern->CreateImageNode();
     num = formNode->GetTotalChildCount();
     EXPECT_EQ(num, 2);
@@ -637,7 +639,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_020, TestSize.Level1)
     int32_t num = renderContext->GetHost()->GetChildren().size();
     pattern->OnRebuildFrame();
     EXPECT_EQ(num, 0);
-    
+
     pattern->isSnapshot_ = true;
     pattern->frameNode_ = nullptr;
     pattern->OnRebuildFrame();
@@ -1678,7 +1680,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_043, TestSize.Level1)
     RefPtr<FormNode> formNode = CreateFromNode();
     auto pattern = formNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
-    
+
     pattern->FireFormSurfaceDetachCallback();
     EXPECT_TRUE(pattern->isFrsNodeDetached_);
 }
@@ -1997,5 +1999,76 @@ HWTEST_F(FormPatternTest, FormPatternTest_054, TestSize.Level1)
     res = pattern->CreateColumnNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
     EXPECT_NE(res, nullptr);
     EXPECT_EQ(res->GetTag(), "Column");
+}
+
+/**
+ * @tc.name: FormPatternTest_055
+ * @tc.desc: LoadFormSkeleton
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_055, TestSize.Level1)
+{
+    RefPtr<FormNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    pattern->frameNode_ = formNode;
+    EXPECT_NE(pattern, nullptr);
+    auto host = pattern->GetHost();
+    EXPECT_NE(host, nullptr);
+    pattern->isUnTrust_ = false;
+    pattern->cardInfo_.dimension = 3;
+    pattern->LoadFormSkeleton(true);
+    int32_t num = host->GetTotalChildCount();
+    EXPECT_EQ(num, 1);
+
+    pattern->isUnTrust_ = true;
+    pattern->LoadFormSkeleton(true);
+    num = host->GetTotalChildCount();
+    EXPECT_EQ(num, 1);
+}
+
+/**
+ * @tc.name: GetRectRelativeToWindow001
+ * @tc.desc: GetRectRelativeToWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, GetRectRelativeToWindow001, TestSize.Level1)
+{
+    RefPtr<FormNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    auto renderContext = formNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    auto pipeline = AceType::MakeRefPtr<NG::PipelineContext>();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->instanceId_ = 1;
+    formNode->AttachContext(AceType::RawPtr(pipeline), false);
+
+    AccessibilityParentRectInfo parentRectInfo;
+    pattern->GetRectRelativeToWindow(parentRectInfo);
+    auto rectInfoDegree = parentRectInfo.rotateTransform.rotateDegree;
+    EXPECT_EQ(rectInfoDegree, static_cast<int32_t>(Rotation::ROTATION_0));
+}
+
+/**
+ * @tc.name: FormPatternTest_056
+ * @tc.desc: LoadFormSkeleton
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_056, TestSize.Level1)
+{
+    RefPtr<FormNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    pattern->frameNode_ = formNode;
+    EXPECT_NE(pattern, nullptr);
+    auto textNode = pattern->CreateForbiddenTextNode(TIME_LIMIT_RESOURCE_NAME, true);
+    EXPECT_NE(textNode, nullptr);
+    textNode = pattern->CreateForbiddenTextNode(TIME_LIMIT_RESOURCE_NAME, false);
+    EXPECT_NE(textNode, nullptr);
+    textNode = pattern->CreateForbiddenTextNode(APP_LOCKED_RESOURCE_NAME, true);
+    EXPECT_NE(textNode, nullptr);
+    textNode = pattern->CreateForbiddenTextNode(APP_LOCKED_RESOURCE_NAME, false);
+    EXPECT_NE(textNode, nullptr);
 }
 } // namespace OHOS::Ace::NG

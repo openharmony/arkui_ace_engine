@@ -159,57 +159,83 @@ void FfiOHOSAceFrameworkNavdestinationSetTitleWithHeight(void (*builder)(), doub
     }
 }
 
-void ParseTitlebarOptions(CJNavigationTitleOptions options)
+void ParseTitlebarOptions(const CJNavigationTitleOptions& info, NG::NavigationTitlebarOptions& options)
 {
-    NG::NavigationTitlebarOptions titlebarOptions;
-    titlebarOptions.bgOptions.color.reset();
-    titlebarOptions.bgOptions.color = Color(options.backgroundColor);
-    titlebarOptions.bgOptions.blurStyleOption.reset();
-    BlurStyleOption blurStyleOption;
-    blurStyleOption.blurStyle = static_cast<BlurStyle>(options.backgroundBlurStyle);
-    titlebarOptions.bgOptions.blurStyleOption = blurStyleOption;
-    titlebarOptions.brOptions.paddingStart.reset();
-    titlebarOptions.brOptions.paddingStart =
-        CalcDimension(options.paddingStart, static_cast<DimensionUnit>(options.paddingStartUnit));
-    titlebarOptions.brOptions.paddingEnd.reset();
-    titlebarOptions.brOptions.paddingEnd =
-        CalcDimension(options.paddingEnd, static_cast<DimensionUnit>(options.paddingEndUnit));
-    titlebarOptions.brOptions.barStyle.reset();
-    titlebarOptions.brOptions.barStyle = static_cast<NG::BarStyle>(options.barStyle);
-    NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(titlebarOptions));
+    options.bgOptions.color.reset();
+    options.bgOptions.blurStyleOption.reset();
+    options.brOptions.barStyle.reset();
+    options.brOptions.paddingStart.reset();
+    options.brOptions.paddingEnd.reset();
+    options.textOptions.Reset();
+
+    if (info.isBackgroundColorValid) {
+        options.bgOptions.color = Color(info.backgroundColor);
+    }
+    if (info.isBackgroundBlurStyleValid) {
+        if (info.backgroundBlurStyle >= static_cast<int32_t>(BlurStyle::NO_MATERIAL) &&
+            info.backgroundBlurStyle <= static_cast<int32_t>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            BlurStyleOption blurStyleOption;
+            blurStyleOption.blurStyle = static_cast<BlurStyle>(info.backgroundBlurStyle);
+            options.bgOptions.blurStyleOption = blurStyleOption;
+        }
+    }
+    if (info.isBarStyleValid) {
+        if (info.barStyle >= static_cast<int32_t>(NG::BarStyle::STANDARD) &&
+            info.barStyle <= static_cast<int32_t>(NG::BarStyle::SAFE_AREA_PADDING)) {
+            options.brOptions.barStyle = static_cast<NG::BarStyle>(info.barStyle);
+        } else {
+            options.brOptions.barStyle = NG::BarStyle::STANDARD;
+        }
+    }
+    if (info.isPaddingStartValid) {
+        options.brOptions.paddingStart = CalcDimension(info.paddingStart, DimensionUnit(info.paddingStartUnit));
+    }
+    if (info.isPaddingEndValid) {
+        options.brOptions.paddingEnd = CalcDimension(info.paddingEnd, DimensionUnit(info.paddingEndUnit));
+    }
 }
 
 void FfiOHOSAceFrameworkNavdestinationSetTitleWithStringOptions(const char* value, CJNavigationTitleOptions options)
 {
     FfiOHOSAceFrameworkNavdestinationSetTitleWithString(value);
-    ParseTitlebarOptions(options);
+    NG::NavigationTitlebarOptions optionsNG;
+    ParseTitlebarOptions(options, optionsNG);
+    NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(optionsNG));
 }
 
 void FfiOHOSAceFrameworkNavdestinationSetTitleWithBuilderOptions(void (*builder)(), CJNavigationTitleOptions options)
 {
     FfiOHOSAceFrameworkNavdestinationSetTitleWithBuilder(builder);
-    ParseTitlebarOptions(options);
+    NG::NavigationTitlebarOptions optionsNG;
+    ParseTitlebarOptions(options, optionsNG);
+    NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(optionsNG));
 }
 
 void FfiOHOSAceFrameworkNavdestinationSetTitleWithCommonTitleOptions(
     const char* main, const char* sub, CJNavigationTitleOptions options)
 {
     FfiOHOSAceFrameworkNavdestinationSetTitleWithCommonTitle(main, sub);
-    ParseTitlebarOptions(options);
+    NG::NavigationTitlebarOptions optionsNG;
+    ParseTitlebarOptions(options, optionsNG);
+    NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(optionsNG));
 }
 
 void FfiOHOSAceFrameworkNavdestinationSetTitleWithTitleHeightOptions(
     void (*builder)(), int32_t titleHeightMode, CJNavigationTitleOptions options)
 {
     FfiOHOSAceFrameworkNavdestinationSetTitleWithTitleHeight(builder, titleHeightMode);
-    ParseTitlebarOptions(options);
+    NG::NavigationTitlebarOptions optionsNG;
+    ParseTitlebarOptions(options, optionsNG);
+    NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(optionsNG));
 }
 
 void FfiOHOSAceFrameworkNavdestinationSetTitleWithHeightOptions(
     void (*builder)(), double height, int32_t heightUnit, CJNavigationTitleOptions options)
 {
     FfiOHOSAceFrameworkNavdestinationSetTitleWithHeight(builder, height, heightUnit);
-    ParseTitlebarOptions(options);
+    NG::NavigationTitlebarOptions optionsNG;
+    ParseTitlebarOptions(options, optionsNG);
+    NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(optionsNG));
 }
 
 void FfiOHOSAceFrameworkNavdestinationSetHideTitleBar(bool value)

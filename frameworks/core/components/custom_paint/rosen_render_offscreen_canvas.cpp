@@ -30,7 +30,11 @@
 #include "include/encode/SkJpegEncoder.h"
 #include "include/encode/SkPngEncoder.h"
 #include "include/encode/SkWebpEncoder.h"
+#ifdef USE_NEW_SKIA
+#include "src/base/SkBase64.h"
+#else
 #include "include/utils/SkBase64.h"
+#endif
 
 #include "base/i18n/localization.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
@@ -1038,7 +1042,11 @@ std::string RosenRenderOffscreenCanvas::ToDataURL(const std::string& type, const
         return UNSUPPORTED;
     }
     SkString info(len);
+#ifdef USE_NEW_SKIA
+    SkBase64::Encode(result->data(), result->size(), info.data());
+#else
     SkBase64::Encode(result->data(), result->size(), info.writable_str());
+#endif
     return std::string(URL_PREFIX).append(mimeType).append(URL_SYMBOL).append(info.c_str());
 }
 

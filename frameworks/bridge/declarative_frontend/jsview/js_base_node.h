@@ -61,6 +61,7 @@ private:
     bool InitAxisEvent(const JSCallbackInfo& info, AxisEvent& axisEvent);
     bool GetTouches(const JSCallbackInfo& info, TouchEvent& touchEvent);
     bool GetInputTouches(const JSCallbackInfo& info, TouchEvent& touchEvent);
+    bool ParamTouchEvent(const JSCallbackInfo& info, TouchEvent& touchEvent);
     bool ParamMouseEvent(const JSCallbackInfo& info, MouseEvent& mouseEvent);
     bool ParamAxisEvent(const JSCallbackInfo& info, AxisEvent& axisEvent);
     bool GetChangedTouches(const JSCallbackInfo& info, TouchEvent& touchEvent);

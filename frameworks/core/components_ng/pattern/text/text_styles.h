@@ -225,6 +225,8 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineThicknessScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontForegroudGradiantColor, FontForegroudGradiantColor);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(GradientShaderStyle, Gradient);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolShadow, SymbolShadow);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ShaderStyle, std::vector<SymbolGradient>);
     
     void UpdateColorByResourceId();
 
@@ -245,8 +247,10 @@ struct TextLineStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BaselineOffset, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextOverflow, TextOverflow);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextAlign, TextAlign);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextVerticalAlign, TextVerticalAlign);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxLength, uint32_t);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MaxLines, uint32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(OverflowMode, OverflowMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(HeightAdaptivePolicy, TextHeightAdaptivePolicy);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TextIndent, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LeadingMargin, LeadingMargin);

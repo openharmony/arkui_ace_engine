@@ -15,6 +15,7 @@
 
 #include "interfaces/inner_api/ace/ui_content.h"
 
+#include "constants.h"
 #include "utils.h"
 #include "ace_forward_compatibility.h"
 
@@ -25,7 +26,7 @@
 namespace OHOS::Ace {
 
 using CreateCardFunc = UIContent* (*)(void*, void*, bool);
-using CreateFunc = UIContent* (*)(void*, void*);
+using CreateFunc = UIContent* (*)(void*, void*, int32_t);
 using CreateFunction = UIContent* (*)(void*);
 using GetUIContentFunc = UIContent* (*)(int32_t);
 using GetCurrentUIStackInfoFunction = char* (*)();
@@ -53,7 +54,7 @@ UIContent* CreateUIContent(void* context, void* runtime, bool isFormRender)
     return content;
 }
 
-UIContent* CreateUIContent(void* context, void* runtime)
+UIContent* CreateUIContent(void* context, void* runtime, VMType vmType)
 {
     LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
     if (handle == nullptr) {
@@ -66,7 +67,7 @@ UIContent* CreateUIContent(void* context, void* runtime)
         return nullptr;
     }
 
-    auto content = entry(context, runtime);
+    auto content = entry(context, runtime, static_cast<int32_t>(vmType));
 #ifdef UICAST_COMPONENT_SUPPORTED
     UICastEventSubscribeProxy::GetInstance()->SubscribeStartEvent(content);
 #endif
@@ -97,8 +98,13 @@ UIContent* CreateUIContent(void* ability)
 
 std::unique_ptr<UIContent> UIContent::Create(OHOS::AbilityRuntime::Context* context, NativeEngine* runtime)
 {
+    return UIContent::CreateWithAnyRuntime(context, reinterpret_cast<void*>(runtime));
+}
+
+std::unique_ptr<UIContent> UIContent::CreateWithAnyRuntime(OHOS::AbilityRuntime::Context* context, void* runtime)
+{
     std::unique_ptr<UIContent> content;
-    content.reset(CreateUIContent(reinterpret_cast<void*>(context), reinterpret_cast<void*>(runtime)));
+    content.reset(CreateUIContent(reinterpret_cast<void*>(context), reinterpret_cast<void*>(runtime), VMType::NORMAL));
     return content;
 }
 
@@ -116,6 +122,14 @@ std::unique_ptr<UIContent> UIContent::Create(OHOS::AppExecFwk::Ability* ability)
     content.reset(CreateUIContent(reinterpret_cast<void*>(ability)));
     return content;
 }
+
+std::unique_ptr<UIContent> UIContent::CreateWithAniEnv(OHOS::AbilityRuntime::Context* context, ani_env* env)
+{
+    std::unique_ptr<UIContent> content;
+    content.reset(CreateUIContent(reinterpret_cast<void*>(context), reinterpret_cast<void*>(env), VMType::ARK_NATIVE));
+    return content;
+}
+
 
 void UIContent::ShowDumpHelp(std::vector<std::string>& info)
 {

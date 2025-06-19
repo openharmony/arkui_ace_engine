@@ -770,4 +770,54 @@ HWTEST_F(RenderPropertyTestNg, RenderPropertyTest009, TestSize.Level1)
     pointLightProperty.ToJsonValue(jsonValue, testFilter);
     EXPECT_EQ(jsonValue->GetValue("pointLight")->GetString("lightIntensity"), "");
 }
+
+/**
+ * @tc.name: RenderPropertyTest010
+ * @tc.desc: Branch: if (propSysOptionsForBlur.has_value()) == true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPropertyTestNg, RenderPropertyTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object foregroundProperty.
+     */
+    NG::ForegroundProperty foregroundProperty;
+    SysOptions sysOps = { .disableSystemAdaptation = true };
+    NG::InspectorFilter testFilter;
+    auto jsonValue = JsonUtil::Create(true);
+    foregroundProperty.propSysOptionsForBlur = sysOps;
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     */
+    foregroundProperty.ToJsonValue(jsonValue, testFilter);
+    auto obj = jsonValue->GetValue("foregroundSysOptions");
+    ASSERT_NE(obj, nullptr);
+    EXPECT_EQ(obj->GetBool("disableSystemAdaptation"), true);
+}
+
+/**
+ * @tc.name: RenderPropertyTest011
+ * @tc.desc: Branch: if (propSysOptions.has_value()) == true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RenderPropertyTestNg, RenderPropertyTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Build a object backgroundProperty.
+     */
+    NG::BackgroundProperty backgroundProperty;
+    SysOptions sysOps = { .disableSystemAdaptation = true };
+    NG::InspectorFilter testFilter;
+    auto jsonValue = JsonUtil::Create(true);
+    backgroundProperty.propSysOptions = sysOps;
+
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     */
+    backgroundProperty.ToJsonValue(jsonValue, testFilter);
+    auto obj = jsonValue->GetValue("backgroundSysOptions");
+    ASSERT_NE(obj, nullptr);
+    EXPECT_EQ(obj->GetBool("disableSystemAdaptation"), true);
+}
 } // namespace OHOS::Ace

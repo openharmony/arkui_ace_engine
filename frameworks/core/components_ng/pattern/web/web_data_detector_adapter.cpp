@@ -23,7 +23,9 @@
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_mgr.h"
+#include "core/components_ng/pattern/rich_editor_drag/preview_menu_controller.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -72,6 +74,10 @@ const std::unordered_map<TextDecorationStyle, std::string> TEXT_DECORATION_STYLE
 
 constexpr char COPY[] = "copy";
 constexpr char SELECT_TEXT[] = "selectText";
+
+constexpr Dimension PREVIEW_MENU_MARGIN_LEFT = 16.0_vp;
+constexpr Dimension PREVIEW_MENU_MARGIN_RIGHT = 16.0_vp;
+constexpr Dimension MENU_WIDTH = 224.0_vp;
 } // namespace
 
 WebDataDetectorAdapter::WebDataDetectorAdapter(const WeakPtr<Pattern>& pattern, size_t cacheSize)
@@ -109,6 +115,9 @@ void WebDataDetectorAdapter::SetDataDetectorConfig(const TextDetectConfig& confi
     TAG_LOGD(AceLogTag::ACE_WEB,
         "WebDataDetectorAdapter::UpdateDataDetectorConfig dataDetectTextDecorationStyle_ : %{public}s",
         newConfig_.textDecorationStyle.c_str());
+    newConfig_.enablePreview = config.enablePreviewMenu;
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::UpdateDataDetectorConfig enablePreview : %{public}d",
+        newConfig_.enablePreview);
 }
 
 void WebDataDetectorAdapter::Init()
@@ -221,8 +230,8 @@ void WebDataDetectorAdapter::ProcessRequest(const std::string& jsonStr)
     requestData.requestId = requestId;
     auto nodesValue = requestJson->GetValue("nodes");
     if (nodesValue && nodesValue->IsArray()) {
-        size_t arraySize = nodesValue->GetArraySize();
-        for (size_t i = 0; i < arraySize; ++i) {
+        int32_t arraySize = nodesValue->GetArraySize();
+        for (int32_t i = 0; i < arraySize; ++i) {
             auto nodeValue = nodesValue->GetArrayItem(i);
             if (!nodeValue || !nodeValue->IsObject()) {
                 continue;
@@ -327,8 +336,13 @@ void WebDataDetectorAdapter::ParseAIResultByType(std::shared_ptr<DataDetectorReq
         if (!item || !item->IsObject()) {
             continue;
         }
+        auto charOffset = item->GetInt("charOffset");
+        if (charOffset < 0) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::ParseAIResultByType charOffset invalid");
+            continue;
+        }
         EntityMatch mat;
-        mat.start = item->GetInt("charOffset"); // u16 offset
+        mat.start = static_cast<size_t>(charOffset); // u16 offset
         mat.clean = item->GetString("oriText"); // u8 string
         mat.end = mat.start + UtfUtils::Str8DebugToStr16(mat.clean).length(); // u16 offset not include
         mat.entityType = detectType;
@@ -508,6 +522,22 @@ void WebDataDetectorAdapter::InitAIMenu()
         return;
     }
     GetAIMenu();
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.contextMenuRegisterType = ContextMenuRegisterType::CUSTOM_TYPE;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    PaddingProperty paddings;
+    paddings.start = CalcLength(PREVIEW_MENU_MARGIN_LEFT);
+    paddings.end = CalcLength(PREVIEW_MENU_MARGIN_RIGHT);
+    menuParam.layoutRegionMargin = paddings;
+    menuParam.disappearScaleToTarget = true;
+    menuParam.isShow = true;
+
+    auto param = std::make_shared<WebPreviewSelectionMenuParam>(
+        WebElementType::AILINK, ResponseType::LONG_PRESS, nullptr, nullptr, menuParam);
+    auto pattern = DynamicCast<WebPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPreviewSelectionMenu(param);
     initAIMenu_ = true;
 }
 
@@ -546,20 +576,21 @@ RectF WebDataDetectorAdapter::CalcAIMenuRect(double left, double top, double rig
     return rect;
 }
 
-bool WebDataDetectorAdapter::ShowAIMenu(const AIMenuInfo& info)
+bool WebDataDetectorAdapter::GetAIMenuOptions(
+    const AIMenuInfo& info, std::vector<std::pair<std::string, std::function<void()>>>& menuOptions)
 {
     if (textDetectResult_.menuOptionAndAction.empty()) {
         GetAIMenu();
         return false;
     }
     auto instanceId = Container::CurrentIdSafely();
-    std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
+    menuOptions.clear();
     auto menuOptionAndAction = textDetectResult_.menuOptionAndAction[info.entityType];
     if (menuOptionAndAction.empty()) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::ShowAIMenu menuOption empty");
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::GetAIMenuOptions menuOption empty");
         return false;
     }
-    TAG_LOGD(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::ShowAIMenu option size: %{public}zu",
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::GetAIMenuOptions option size: %{public}zu",
         menuOptionAndAction.size());
 
     for (auto menuOption : menuOptionAndAction) {
@@ -570,6 +601,15 @@ bool WebDataDetectorAdapter::ShowAIMenu(const AIMenuInfo& info)
                 CHECK_NULL_VOID(adapter);
                 adapter->OnClickAIMenuOption(info, menuOption);
             }));
+    }
+    return true;
+}
+
+bool WebDataDetectorAdapter::ShowAIMenu(const AIMenuInfo& info)
+{
+    std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
+    if (!GetAIMenuOptions(info, menuOptions)) {
+        return false;
     }
     auto pipeline = PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_RETURN(pipeline, false);
@@ -613,7 +653,7 @@ void WebDataDetectorAdapter::OnClickAIMenuOption(
             func(containerId, info.content);
         } else if constexpr (std::is_same_v<T, std::function<void(int32_t, std::string, std::string, int32_t,
                                                    std::string)>>) { // datetime
-            func(containerId, "", bundleName, 0, info.content);
+            func(containerId, info.content, bundleName, 0, info.content);
         }
     };
     std::visit(visitor, menuOption.second);
@@ -672,17 +712,6 @@ void WebDataDetectorAdapter::DetectSelectedText(const std::string& detectText)
         return;
     }
 
-    if (resultCache_) {
-        DataDetectorResult result;
-        if (resultCache_->Get(detectText, result)) {
-            if (result.size() != 1) {
-                return;
-            }
-            UpdateAISelectMenu(result[0].entityType, result[0].clean);
-            return;
-        }
-    }
-
     // ui thread
     auto instanceId = Container::CurrentIdSafely();
     auto resultFunc = [weak = AceType::WeakClaim(this), instanceId](const TextDataDetectResult result) {
@@ -719,13 +748,16 @@ DataDetectorResult WebDataDetectorAdapter::ParseAIResultJson(std::unique_ptr<Jso
             if (!item || !item->IsObject()) {
                 continue;
             }
+            auto charOffset = item->GetInt("charOffset");
+            if (charOffset < 0) {
+                TAG_LOGE(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::ParseAIResultJson charOffset invalid");
+                continue;
+            }
             EntityMatch mat;
-            mat.start = item->GetInt("charOffset"); // u16 offset
+            mat.start = static_cast<size_t>(charOffset); // u16 offset
             mat.clean = item->GetString("oriText"); // u8 string
             mat.end = mat.start + UtfUtils::Str8DebugToStr16(mat.clean).length(); // u16 offset not include
             mat.entityType = detectType;
-            TAG_LOGI(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::ParseAIResultJson clean: %{public}s",
-                mat.clean.c_str());
             result.emplace_back(std::move(mat));
         }
     }
@@ -758,12 +790,11 @@ void WebDataDetectorAdapter::OnDetectSelectedTextDone(const TextDataDetectResult
 void WebDataDetectorAdapter::UpdateAISelectMenu(const std::string& entityType, const std::string& content)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::UpdateAISelectMenu type: %{public}s", entityType.c_str());
-    size_t index = std::distance(
-        TEXT_DETECT_LIST.begin(), std::find(TEXT_DETECT_LIST.begin(), TEXT_DETECT_LIST.end(), entityType));
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::UpdateAISelectMenu index: %{public}zu", index);
-    if (index >= TEXT_DETECT_LIST.size()) {
+    auto it = std::find(TEXT_DETECT_LIST.begin(), TEXT_DETECT_LIST.end(), entityType);
+    if (it == TEXT_DETECT_LIST.end()) {
         return;
     }
+    auto index = std::distance(TEXT_DETECT_LIST.begin(), it);
     TextDataDetectType type = static_cast<TextDataDetectType>(index);
     auto pattern = DynamicCast<WebPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
@@ -772,6 +803,126 @@ void WebDataDetectorAdapter::UpdateAISelectMenu(const std::string& entityType, c
     if (selectOverlay->IsShowHandle()) {
         selectOverlay->UpdateAISelectMenu(type, content);
     }
+}
+
+std::string WebDataDetectorAdapter::UrlDecode(const std::string& str)
+{
+    std::string decoded;
+    decoded.reserve(str.size());
+
+    for (size_t i = 0; i < str.size(); ++i) {
+        if (str[i] == '+') {
+            decoded += ' ';
+        } else if (str[i] == '%' && i + 2 < str.size()) {
+            if (std::isxdigit(str[i + 1]) && std::isxdigit(str[i + 2])) {
+                std::istringstream hexStream(str.substr(i + 1, 2));
+                int charCode;
+                hexStream >> std::hex >> charCode;
+
+                decoded += static_cast<char>(charCode);
+                i += 2;
+            } else {
+                decoded += str[i];
+            }
+        } else {
+            decoded += str[i];
+        }
+    }
+    return decoded;
+}
+
+std::string WebDataDetectorAdapter::ReplaceARGBToRGBA(const std::string& text)
+{
+    const std::regex argbRegex("#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})\\b");
+    std::string result = std::regex_replace(text, argbRegex, "#$2$3$4$1");
+    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+    return result;
+}
+
+bool WebDataDetectorAdapter::SetPreviewMenuLink(const std::string& link)
+{
+    if (!GetDataDetectorEnable()) {
+        return false;
+    }
+    previewMenuType_ = TextDataDetectType::URL;
+    for (size_t i = 0; i < TEXT_DETECT_LIST.size(); ++i) {
+        if (i == static_cast<int32_t>(TextDataDetectType::URL)) {
+            continue;
+        }
+        auto entityType = TEXT_DETECT_LIST[i];
+        auto prefix = TEXT_DETECT_MAP_TO_HREF.at(entityType);
+        if (link.compare(0, prefix.length(), prefix) == 0) {
+            previewMenuType_ = static_cast<TextDataDetectType>(i);
+            previewMenuContent_ = link.substr(prefix.length());
+            break;
+        }
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::SetPreviewMenuLink type: %{public}d",
+        static_cast<int32_t>(previewMenuType_));
+    if (previewMenuType_ == TextDataDetectType::URL) {
+        previewMenuContent_ = link;
+    }
+    previewMenuContent_ = UrlDecode(previewMenuContent_);
+    return true;
+}
+
+bool WebDataDetectorAdapter::GetPreviewMenuBuilder(
+    std::function<void()>& menuBuilder, std::function<void()>& previewBuilder)
+{
+    if (!GetDataDetectorEnable() || previewMenuType_ == TextDataDetectType::INVALID) {
+        return false;
+    }
+    AIMenuInfo info;
+    info.entityType = TEXT_DETECT_LIST[static_cast<size_t>(previewMenuType_)];
+    info.content = previewMenuContent_;
+    info.outerHTML = GetLinkOuterHTML(info.entityType, info.content);
+    auto menuNode = GetPreviewMenuNode(info);
+    CHECK_NULL_RETURN(menuNode, false);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::GetPreviewMenuBuilder success");
+    menuBuilder = [menuNode, instanceId = Container::CurrentIdSafely()]() {
+        ContainerScope scope(instanceId);
+        std::optional<CalcLength> width = CalcLength(MENU_WIDTH);
+        auto layoutProperty = menuNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(width, std::nullopt));
+        ViewStackProcessor::GetInstance()->Push(menuNode);
+    };
+    previewBuilder = [menuType = previewMenuType_, menuContent = previewMenuContent_,
+                         instanceId = Container::CurrentIdSafely()]() {
+        ContainerScope scope(instanceId);
+        // arkui create preview menu static func
+        PreviewMenuController::CreatePreviewMenu(menuType, menuContent, nullptr);
+    };
+    previewMenuType_ = TextDataDetectType::INVALID;
+    previewMenuContent_ = "";
+    return true;
+}
+
+std::string WebDataDetectorAdapter::GetLinkOuterHTML(const std::string& entityType, const std::string& content)
+{
+    return R"(<a href=")" + entityType + ":" + content + R"(" style="color: )" + ReplaceARGBToRGBA(config_.color) +
+           R"(; text-decoration: )" + ReplaceARGBToRGBA(config_.textDecorationStyle) + R"(;">)" + content + R"(</a>)";
+}
+
+RefPtr<FrameNode> WebDataDetectorAdapter::GetPreviewMenuNode(const AIMenuInfo& info)
+{
+    std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
+    if (!GetAIMenuOptions(info, menuOptions)) {
+        return nullptr;
+    }
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, nullptr);
+
+    if (auto theme = pipeline->GetTheme<TextOverlayTheme>()) {
+        auto name = theme->GetAiMenuPreviewOptionName(previewMenuType_);
+        if (!menuOptions.empty() && !name.empty()) {
+            auto& option = menuOptions.front();
+            option.first = name;
+        }
+    }
+    return overlayManager->BuildAIEntityMenu(menuOptions);
 }
 
 void WebDataDetectorAdapter::CloseAIMenu()

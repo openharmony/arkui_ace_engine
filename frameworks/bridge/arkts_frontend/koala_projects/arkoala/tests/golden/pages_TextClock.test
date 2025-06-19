@@ -1,0 +1,81 @@
+{
+  "rootElement": {
+    "nodeId": 1174,
+    "kind": "ComponentRoot",
+    "children": [
+      {
+        "nodeId": 1175,
+        "kind": "TextClock",
+        "children": [],
+        "setTextClockOptions_options": {
+          "timeZoneOffset": 2
+        },
+        "format_value": "hh:mm:ss",
+        "fontFeature_value": "normal",
+        "fontColor_value": "#ff0000ff",
+        "fontSize_value": 30,
+        "fontFamily_value": "Arial",
+        "fontStyle_value": 0,
+        "fontWeight_value": 0,
+        "textShadow_value": {
+          "radius": 24,
+          "type": 0,
+          "color": "#ff000000",
+          "offsetX": 15,
+          "offsetY": 25
+        }
+      },
+      {
+        "nodeId": 1176,
+        "kind": "TextClock",
+        "children": [],
+        "setTextClockOptions_options": {
+          "timeZoneOffset": 11
+        },
+        "format_value": "yyyy/mm/dd",
+        "fontColor_value": 333,
+        "fontSize_value": "20vp",
+        "fontStyle_value": 1,
+        "fontWeight_value": "Bolder",
+        "textShadow_value": {
+          "radius": 48,
+          "type": 1,
+          "color": 333,
+          "offsetX": 25,
+          "offsetY": 15
+        }
+      },
+      {
+        "nodeId": 1177,
+        "kind": "TextClock",
+        "children": [],
+        "setTextClockOptions_options": {
+          "timeZoneOffset": -5
+        },
+        "fontColor_value": "#404040",
+        "fontSize_value": "40px",
+        "fontWeight_value": 400
+      },
+      {
+        "nodeId": 1178,
+        "kind": "TextClock",
+        "children": [],
+        "setTextClockOptions_options": {
+          "timeZoneOffset": -10
+        },
+        "fontSize_value": "25lpx",
+        "fontWeight_value": 900
+      },
+      {
+        "nodeId": 1179,
+        "kind": "TextClock",
+        "children": [],
+        "setTextClockOptions_options": {
+          "timeZoneOffset": 0
+        },
+        "fontSize_value": "5%",
+        "fontWeight_value": 10
+      }
+    ]
+  }
+}

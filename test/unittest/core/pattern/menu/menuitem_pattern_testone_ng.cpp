@@ -1614,7 +1614,7 @@ HWTEST_F(MenuItemPatternTestOneNg, ISNeedAddExpandIcon001, TestSize.Level1)
 
 /**
  * @tc.name: AddExpandIcon002
- * @tc.desc: Verify AddExpandIcon()
+ * @tc.desc: Verify AddExpandIcon().
  * @tc.type: FUNC
  */
 HWTEST_F(MenuItemPatternTestOneNg, AddExpandIcon002, TestSize.Level1)
@@ -1657,7 +1657,6 @@ HWTEST_F(MenuItemPatternTestOneNg, AddExpandIcon002, TestSize.Level1)
     EXPECT_EQ(menuItemPattern->expandIcon_->GetTag(), V2::SYMBOL_ETS_TAG);
     EXPECT_EQ(rightRow->GetChildren().size(), 1);
 
-    menuItemPattern->expandIcon_ = nullptr;
     menuItemPattern->expandingMode_ = SubMenuExpandingMode::STACK;
     menuItemPattern->AddExpandIcon(rightRow);
     EXPECT_NE(menuItemPattern->expandIcon_, nullptr);

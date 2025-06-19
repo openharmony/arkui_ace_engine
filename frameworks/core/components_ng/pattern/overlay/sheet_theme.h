@@ -157,6 +157,10 @@ public:
             theme->closeIconButtonStyle_ =
                 sheetPattern->GetAttr<int>("sheet_close_icon_button_style", SHEET_CLOSE_ICON_BUTTON_STYLE);
             theme->sheetClose_ = sheetPattern->GetAttr<std::string>("sheet_close", "");
+            theme->operationAreaHeightDouble_ =
+                sheetPattern->GetAttr<Dimension>("operation_area_height_double", SHEET_OPERATION_AREA_HEIGHT_DOUBLE);
+            theme->bigWindowMinHeight_ =
+                sheetPattern->GetAttr<Dimension>("big_window_min_height", SHEET_BIG_WINDOW_MIN_HEIGHT);
         }
     };
     ~SheetTheme() override = default;
@@ -392,6 +396,16 @@ public:
     {
         return sheetClose_;
     }
+
+    const Dimension& GetOperationAreaHeightDouble() const
+    {
+        return operationAreaHeightDouble_;
+    }
+
+    const Dimension& GetBigWindowMinHeight() const
+    {
+        return bigWindowMinHeight_;
+    }
 protected:
     SheetTheme() = default;
 
@@ -441,6 +455,9 @@ private:
     double mediumPercent_ = 0.6; // 0.6 is default value
     bool heightApplyFullScreen_ = false;
     bool showCloseIcon_ = true;
+
+    Dimension operationAreaHeightDouble_ = SHEET_OPERATION_AREA_HEIGHT_DOUBLE;
+    Dimension bigWindowMinHeight_ = SHEET_BIG_WINDOW_MIN_HEIGHT;
 };
 } // namespace OHOS::Ace::NG
 

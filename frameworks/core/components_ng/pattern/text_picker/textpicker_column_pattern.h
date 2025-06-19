@@ -418,6 +418,7 @@ public:
     void SetSelectedMark(bool focus = true, bool notify = true, bool reRender = true);
     void SetSelectedMarkId(const int strColumnId);
     void UpdateUserSetSelectColor(void);
+    void StopHaptic();
 #ifdef SUPPORT_DIGITAL_CROWN
     int32_t& GetSelectedColumnId();
     bool IsCrownEventEnded();
@@ -615,6 +616,7 @@ private:
     bool isDisableTextStyleAnimation_ = false;
     bool isShow_ = true;
     bool isEnableHaptic_ = true;
+    bool stopHaptic_ = false;
     bool isHapticPlayOnce_ = true;
     bool selectedMarkPaint_ = false;
     std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;

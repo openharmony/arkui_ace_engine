@@ -197,7 +197,7 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         auto menuItemNode = NavigationTitleUtil::CreateMenuItemButton(theme);
         MenuParam menuParam;
         menuParam.isShowInSubWindow = false;
-         if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
+        if (SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE) {
             menuParam.isShowInSubWindow = true;
         }
         auto targetId = barItemNode->GetId();
@@ -376,6 +376,7 @@ void NavBarPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    NavDestinationPatternBase::InitOnTouchEvent(host);
     auto pipelineContext = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
@@ -504,6 +505,7 @@ void NavBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = frameNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
+    NavDestinationPatternBase::RemoveOnTouchEvent(frameNode);
 }
 
 bool NavBarPattern::CanCoordScrollUp(float offset) const

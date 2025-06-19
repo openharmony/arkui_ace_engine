@@ -19,6 +19,7 @@
         "src/data_panel_modifier.ts",
         "src/date_picker_modifier.ts",
         "src/divider_modifier.ts",
+        "src/embedded_component_modifier.ts",
         "src/flex_modifier.ts",
         "src/form_component_modifier.ts",
         "src/gauge_modifier.ts",

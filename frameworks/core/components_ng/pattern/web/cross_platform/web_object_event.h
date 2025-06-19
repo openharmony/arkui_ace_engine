@@ -26,6 +26,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/singleton.h"
+#include "core/components/web/web_event.h"
 
 namespace OHOS::Ace {
 class WebResourceRequestObject : public Referenced {
@@ -182,6 +183,7 @@ class WebObjectEventManager : public Singleton<WebObjectEventManager> {
 public:
     using EventObJectCallback = std::function<void(const std::string&, void *object)>;
     using EventObjectWithBoolReturnCallback = std::function<bool(const std::string&, void *object)>;
+    using EventObjectWithResponseReturnCallback = std::function<RefPtr<WebResponse>(const std::string&, void *object)>;
 
     void RegisterObjectEvent(const std::string& eventId, const EventObJectCallback&& eventCallback)
     {
@@ -195,6 +197,12 @@ public:
         eventObjectWithBoolReturnMap_[eventId] = std::move(eventCallback);
     }
 
+    void RegisterObjectEventWithResponseReturn(
+        const std::string& eventId, const EventObjectWithResponseReturnCallback&& eventCallback)
+    {
+        eventObjectWithResponseReturnMap_[eventId] = std::move(eventCallback);
+    }
+
     void UnRegisterObjectEvent(const std::string& eventId)
     {
         eventObjectMap_.erase(eventId);
@@ -203,6 +211,11 @@ public:
     void UnRegisterObjectEventWithBoolReturn(const std::string& eventId)
     {
         eventObjectWithBoolReturnMap_.erase(eventId);
+    }
+
+    void UnRegisterObjectEventWithResponseReturn(const std::string& eventId)
+    {
+        eventObjectWithResponseReturnMap_.erase(eventId);
     }
 
     void OnObjectEvent(const std::string& eventId, const std::string& param, void *jObject)
@@ -225,6 +238,18 @@ public:
             LOGW("failed to find object eventIdWithBoolReturn = %{public}s", eventId.c_str());
         }
         return false;
+    }
+
+    RefPtr<WebResponse> OnObjectEventWithResponseReturn(
+        const std::string& eventId, const std::string& param, void* jObject)
+    {
+        auto event = eventObjectWithResponseReturnMap_.find(eventId);
+        if (event != eventObjectWithResponseReturnMap_.end() && event->second) {
+            return event->second(param, jObject);
+        } else {
+            LOGW("failed to find object eventIdWithResponseReturn = %{public}s", eventId.c_str());
+        }
+        return nullptr;
     }
 
     const RefPtr<WebResourceRequestObject>& GetResourceRequestObject()
@@ -395,6 +420,7 @@ private:
     RefPtr<WebFullScreenEnterObject> fullScreenEnterObject_;
     RefPtr<WebFullScreenExitObject> fullScreenExitObject_;
     std::unordered_map<std::string, EventObjectWithBoolReturnCallback> eventObjectWithBoolReturnMap_;
+    std::unordered_map<std::string, EventObjectWithResponseReturnCallback> eventObjectWithResponseReturnMap_;
 };
 inline WebObjectEventManager::WebObjectEventManager() = default;
 inline WebObjectEventManager::~WebObjectEventManager() = default;

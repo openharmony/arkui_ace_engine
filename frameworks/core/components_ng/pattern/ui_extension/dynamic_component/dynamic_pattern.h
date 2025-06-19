@@ -74,6 +74,7 @@ public:
         const std::vector<std::string>& params, std::vector<std::string>& info) const override;
     void TransferAccessibilityRectInfo(bool isForce = false);
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
+    void OnAccessibilityParentRectInfoUpdate() override;
 
     void InitializeAccessibility();
     void ResetAccessibilityChildTreeCallback();
@@ -86,6 +87,8 @@ public:
     }
 
     void HandleVisibleAreaChange(bool visible, double ratio);
+
+    bool HandleTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
 
 private:
     void InitializeRender(void* runtime);
@@ -114,6 +117,8 @@ private:
     void UnRegisterSingleHandTransformChangedCallback(int32_t instanceId);
 
     void RegisterVisibleAreaChange();
+
+    void HandleMouseEvent(const MouseInfo& info) override;
 
     RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;
     bool adaptiveWidth_ = false;

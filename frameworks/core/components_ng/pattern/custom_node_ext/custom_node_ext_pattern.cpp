@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/custom_node_ext/custom_node_ext_pattern.h"
+#include "frameworks/core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -63,6 +64,20 @@ void CustomNodeExtPattern::OnModifyDone()
 {
     if (onModifyDoneCallback_) {
         onModifyDoneCallback_();
+    }
+}
+
+void CustomNodeExtPattern::OnWindowFocused()
+{
+    if (onWindowFocusedCallback_) {
+        onWindowFocusedCallback_();
+    }
+}
+
+void CustomNodeExtPattern::OnWindowUnfocused()
+{
+    if (onWindowUnfocusedCallback_) {
+        onWindowUnfocusedCallback_();
     }
 }
 
@@ -122,6 +137,81 @@ void CustomNodeExtPattern::OnFontScaleConfigurationUpdate()
 {
     if (onConfigUpdate_) {
         onConfigUpdate_(ConfigurationType::FONT_SCALE_UPDATE);
+    }
+}
+
+void CustomNodeExtPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto id = host->GetId();
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowFocusChangedCallback(id);
+}
+
+void CustomNodeExtPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto id = frameNode->GetId();
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowFocusChangedCallback(id);
+}
+
+void CustomNodeExtPattern::OnAttachToMainTree()
+{
+    if (onAttachToMainTreeCallback_) {
+        onAttachToMainTreeCallback_();
+    }
+    if (isNeedRegisterAvoidInfoChangeListener_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        RegisterAvoidInfoChangeListener(host);
+    }
+}
+
+void CustomNodeExtPattern::OnDetachFromMainTree()
+{
+    if (onDetachFromMainTreeCallback_) {
+        onDetachFromMainTreeCallback_();
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    UnregisterAvoidInfoChangeListener(host);
+}
+
+void CustomNodeExtPattern::OnAvoidInfoChange(const ContainerModalAvoidInfo& info)
+{
+    if (onAvoidInfoChangeCallback_) {
+        onAvoidInfoChangeCallback_();
+    }
+}
+
+void CustomNodeExtPattern::RegisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode)
+{
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->AddAvoidInfoListener(WeakClaim(this));
+}
+
+void CustomNodeExtPattern::UnregisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode)
+{
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->RemoveAvoidInfoListener(WeakClaim(this));
+}
+
+void CustomNodeExtPattern::BeforeCreateLayoutWrapper()
+{
+    if (beforeCreateLayoutWrapperCallback_) {
+        beforeCreateLayoutWrapperCallback_();
     }
 }
 } // OHOS::Ace::NG

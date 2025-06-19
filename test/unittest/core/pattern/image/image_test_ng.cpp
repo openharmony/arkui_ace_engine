@@ -14,6 +14,9 @@
  */
 
 #include "image_base.h"
+#include "test/mock/base/mock_image_perf.h"
+#include "test/mock/base/mock_pixel_map.h"
+#include "test/mock/core/common/mock_image_analyzer_manager.h"
 
 #include "base/image/image_defines.h"
 
@@ -47,7 +50,7 @@ public:
  * @tc.desc: Create ImagePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImagePatternCreator001, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImagePatternCreator001, TestSize.Level0)
 {
     auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -61,7 +64,7 @@ HWTEST_F(ImageTestNg, ImagePatternCreator001, TestSize.Level1)
  * @tc.desc: Create ImagePattern with sync load.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImagePatternCreator002, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImagePatternCreator002, TestSize.Level0)
 {
     auto frameNode = ImageTestNg::CreateSyncImageNode();
     ASSERT_NE(frameNode, nullptr);
@@ -75,7 +78,7 @@ HWTEST_F(ImageTestNg, ImagePatternCreator002, TestSize.Level1)
  * @tc.desc: Create ImagePattern with web image and sync mode.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImagePatternCreator003, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImagePatternCreator003, TestSize.Level0)
 {
     auto frameNode = ImageTestNg::CreateSyncWebImageNode();
     ASSERT_NE(frameNode, nullptr);
@@ -89,7 +92,7 @@ HWTEST_F(ImageTestNg, ImagePatternCreator003, TestSize.Level1)
  * @tc.desc: When ImageComponent update its all properties, it will enter pattern's onModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImagePatternModifyDone001, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImagePatternModifyDone001, TestSize.Level0)
 {
     auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -106,7 +109,7 @@ HWTEST_F(ImageTestNg, ImagePatternModifyDone001, TestSize.Level1)
  * @tc.desc: When enter pattern's onModifyDone, check obscured and events.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImagePatternModifyDone002, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImagePatternModifyDone002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -147,7 +150,7 @@ HWTEST_F(ImageTestNg, ImagePatternModifyDone002, TestSize.Level1)
  * @tc.desc: Verify that ImagePattern can load correct resource Icon.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, UpdateInternalResource001, TestSize.Level1)
+HWTEST_F(ImageTestNg, UpdateInternalResource001, TestSize.Level0)
 {
     auto frameNode = ImageTestNg::CreateImageNode("", ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -186,7 +189,7 @@ HWTEST_F(ImageTestNg, UpdateInternalResource001, TestSize.Level1)
  * @tc.desc: When Image upload successfully, ImagePattern will set ImagePaintConfig to CanvasImage.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, SetImagePaintConfig001, TestSize.Level1)
+HWTEST_F(ImageTestNg, SetImagePaintConfig001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -252,7 +255,7 @@ HWTEST_F(ImageTestNg, SetImagePaintConfig001, TestSize.Level1)
  * @tc.desc: Verify that ImagePattern will set correct ImagePaintConfig to CanvasImage.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, SetImagePaintConfig002, TestSize.Level1)
+HWTEST_F(ImageTestNg, SetImagePaintConfig002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode and CanvasImage.
@@ -289,7 +292,7 @@ HWTEST_F(ImageTestNg, SetImagePaintConfig002, TestSize.Level1)
  * @tc.desc: trigger image load fail.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImagePatternCallback001, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImagePatternCallback001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -325,7 +328,7 @@ HWTEST_F(ImageTestNg, ImagePatternCallback001, TestSize.Level1)
  * @tc.desc: Verify that ImagePattern's Failcallback is common.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImagePatternCallback002, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImagePatternCallback002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -358,7 +361,7 @@ HWTEST_F(ImageTestNg, ImagePatternCallback002, TestSize.Level1)
  * @tc.desc: Verify that ImagePattern can do different data cleaning operation according to level.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImagePatternOnNotifyMemoryLevelFunction001, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImagePatternOnNotifyMemoryLevelFunction001, TestSize.Level0)
 {
     auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -406,7 +409,7 @@ HWTEST_F(ImageTestNg, ImagePatternOnNotifyMemoryLevelFunction001, TestSize.Level
  * @tc.desc: When ImageComponent load successfully, it will Create NodePaintMethod.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod001, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod001, TestSize.Level0)
 {
     auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -446,7 +449,7 @@ HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod001, TestSize.Level1)
  * @tc.desc: When SrcImage and AltImage are not loaded, check return of CreateNodePaintMethod.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod002, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -486,7 +489,7 @@ HWTEST_F(ImageTestNg, ImagePatternCreateNodePaintMethod002, TestSize.Level1)
  * @tc.desc: Check CreateObscuredImage method if will create ObscuredImage
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImagePatternCreateObscuredImageIfNeed001, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImagePatternCreateObscuredImageIfNeed001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -555,7 +558,7 @@ HWTEST_F(ImageTestNg, ImagePatternCreateObscuredImageIfNeed001, TestSize.Level1)
  * @tc.desc: Test OnDirtyLayoutWrapperSwap function.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
+HWTEST_F(ImageTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level0)
 {
     auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -586,7 +589,7 @@ HWTEST_F(ImageTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
  * @tc.desc: Create Image.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageCreator001, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageCreator001, TestSize.Level0)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -605,7 +608,7 @@ HWTEST_F(ImageTestNg, ImageCreator001, TestSize.Level1)
  * @tc.desc: Verify that ImageCreator can parse json with no attributes set.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageCreator002, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageCreator002, TestSize.Level0)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -634,7 +637,7 @@ HWTEST_F(ImageTestNg, ImageCreator002, TestSize.Level1)
  * @tc.desc: Verify that ImageCreator can parse json with all attributes set.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageCreator003, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageCreator003, TestSize.Level0)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -690,7 +693,7 @@ HWTEST_F(ImageTestNg, ImageCreator003, TestSize.Level1)
  *           Ensure that the fill color can be modified and correctly reflected in the render properties.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageFillColor001, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageFillColor001, TestSize.Level0)
 {
     // Create an ImageModelNG instance and finalize its setup in the ViewStackProcessor.
     ImageModelNG image;
@@ -737,7 +740,7 @@ HWTEST_F(ImageTestNg, ImageFillColor001, TestSize.Level1)
  *           Ensure that the fill color can be modified and correctly reflected in the render properties.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageFillColor002, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageFillColor002, TestSize.Level0)
 {
     // Create an ImageModelNG instance and finalize its setup in the ViewStackProcessor.
     ImageModelNG image;
@@ -779,11 +782,64 @@ HWTEST_F(ImageTestNg, ImageFillColor002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ImageFillColor003
+ * @tc.desc: Verify the functionality of setting and resetting the fill color for an Image component.
+ *           Ensure that the fill color can be modified and correctly reflected in the render properties.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageFillColor003, TestSize.Level0)
+{
+    // Create an ImageModelNG instance and finalize its setup in the ViewStackProcessor.
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    ASSERT_NE(frameNode, nullptr); // Ensure the FrameNode is created successfully.
+
+    // Verify that the FrameNode tag matches the expected IMAGE_ETS_TAG.
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+
+    // Obtain the ImageRenderProperty associated with the FrameNode.
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr); // Ensure the render property is valid.
+
+    ViewStackProcessor::GetInstance()->Push(element);
+    // Test resetting the image fill color.
+    image.ResetImageFill();
+    EXPECT_EQ(imageRenderProperty->HasSvgFillColor(), false); // Fill color should not exist after reset.
+
+    // Test setting the image fill color to black.
+    auto fillColor = Color::BLACK;
+    fillColor.SetColorSpace(ColorSpace::SRGB);
+    image.SetImageFill(fillColor);
+    EXPECT_EQ(imageRenderProperty->HasSvgFillColor(), true); // Fill color should be set.
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), fillColor); // Verify the fill color is fillColor.
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value().GetColorSpace(),
+        ColorSpace::SRGB); // Verify the color space is SRGB.
+    // Test updating the image fill color to blue.
+    fillColor.SetColorSpace(ColorSpace::DISPLAY_P3); // Change color space to DISPLAY_P3
+    image.SetImageFill(fillColor);
+    EXPECT_EQ(imageRenderProperty->HasSvgFillColor(), true);              // Fill color should still exist.
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value(), fillColor); // Verify the fill color is fillColor.
+    EXPECT_EQ(imageRenderProperty->GetSvgFillColor().value().GetColorSpace(),
+        ColorSpace::DISPLAY_P3); // Verify the color space is DISPLAY_P3.
+
+    // Test resetting the image fill color again.
+    image.ResetImageFill();
+    EXPECT_EQ(imageRenderProperty->HasSvgFillColor(), false); // Fill color should not exist after reset.
+}
+
+/**
  * @tc.name: ImageCreator004
  * @tc.desc: Verify that CreateFrameNode reset.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageCreator004, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageCreator004, TestSize.Level0)
 {
     auto nodeId = int32_t(1);
     RefPtr<PixelMap> pixMap = nullptr;
@@ -804,7 +860,7 @@ HWTEST_F(ImageTestNg, ImageCreator004, TestSize.Level1)
  * @tc.desc: Test Image onComplete event.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageEventTest001, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageEventTest001, TestSize.Level0)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -836,7 +892,7 @@ HWTEST_F(ImageTestNg, ImageEventTest001, TestSize.Level1)
  * @tc.desc: Test Image onError event.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageEventTest002, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageEventTest002, TestSize.Level0)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -865,7 +921,7 @@ HWTEST_F(ImageTestNg, ImageEventTest002, TestSize.Level1)
  * @tc.desc: Test svg FillColor is set correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageSvgTest001, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageSvgTest001, TestSize.Level0)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -899,7 +955,7 @@ HWTEST_F(ImageTestNg, ImageSvgTest001, TestSize.Level1)
  * @tc.desc: Test image ColorFilter is set correctly.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageColorFilterTest001, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageColorFilterTest001, TestSize.Level0)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -949,7 +1005,7 @@ HWTEST_F(ImageTestNg, ImageColorFilterTest001, TestSize.Level1)
  * @tc.desc: Verify that ImageComponent can resize with selfSize, whether has src or alt.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageLayout001, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageLayout001, TestSize.Level0)
 {
     auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
@@ -998,7 +1054,7 @@ HWTEST_F(ImageTestNg, ImageLayout001, TestSize.Level1)
  * @tc.desc: Verify that Image which has no SelfSize can resize with ContainerSize.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageLayout002, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageLayout002, TestSize.Level0)
 {
     ImageModelNG image;
     auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
@@ -1043,7 +1099,7 @@ HWTEST_F(ImageTestNg, ImageLayout002, TestSize.Level1)
  * @tc.desc: Verify that, when there is no srcImage, ImageComponent which has no SelfSize can resize with AltImageSize .
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageLayout003, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageLayout003, TestSize.Level0)
 {
     ImageModelNG image;
     auto altloadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
@@ -1076,7 +1132,7 @@ HWTEST_F(ImageTestNg, ImageLayout003, TestSize.Level1)
  *           whether there is an Alt or not.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageLayout004, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageLayout004, TestSize.Level0)
 {
     auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
         ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
@@ -1150,7 +1206,7 @@ HWTEST_F(ImageTestNg, ImageLayout004, TestSize.Level1)
  *           with AltImageSize and its aspectRatio.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageLayout005, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageLayout005, TestSize.Level0)
 {
     auto altloadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
         ImageSourceInfo(ALT_SRC_URL, ALT_SOURCEINFO_WIDTH, ALT_SOURCEINFO_HEIGHT),
@@ -1197,7 +1253,7 @@ HWTEST_F(ImageTestNg, ImageLayout005, TestSize.Level1)
  *           whether there is src or alt.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageLayout006, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageLayout006, TestSize.Level0)
 {
     auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
@@ -1248,7 +1304,7 @@ HWTEST_F(ImageTestNg, ImageLayout006, TestSize.Level1)
  *           LayoutConstraint, whether there is src or alt.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageLayout007, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageLayout007, TestSize.Level0)
 {
     ImageModelNG image;
     auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
@@ -1314,7 +1370,7 @@ HWTEST_F(ImageTestNg, ImageLayout007, TestSize.Level1)
  *           whether there is an Alt or not, although fitOriginSize is false.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageLayout008, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageLayout008, TestSize.Level0)
 {
     ImageModelNG image;
     auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
@@ -1388,7 +1444,7 @@ HWTEST_F(ImageTestNg, ImageLayout008, TestSize.Level1)
  *           with ImageSize and its aspectRatio, although fitOriginalSize is false.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageLayout009, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageLayout009, TestSize.Level0)
 {
     ImageModelNG image;
     auto altloadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
@@ -1435,7 +1491,7 @@ HWTEST_F(ImageTestNg, ImageLayout009, TestSize.Level1)
  *           default. FitOriginalSize is false by default.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageLayout010, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageLayout010, TestSize.Level0)
 {
     ImageModelNG image;
     auto loadingCtx = AceType::MakeRefPtr<ImageLoadingContext>(
@@ -1481,7 +1537,7 @@ HWTEST_F(ImageTestNg, ImageLayout010, TestSize.Level1)
  *           not resize its size.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageLayout011, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageLayout011, TestSize.Level0)
 {
     auto imageLayoutProperty = AceType::MakeRefPtr<ImageLayoutProperty>();
     ASSERT_NE(imageLayoutProperty, nullptr);
@@ -1503,7 +1559,7 @@ HWTEST_F(ImageTestNg, ImageLayout011, TestSize.Level1)
  * @tc.desc: Verify that ImageLayoutAlgorithm's Layout can carry out successfully.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageLayoutFunction001, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageLayoutFunction001, TestSize.Level0)
 {
     auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     auto pattern = frameNode->GetPattern<ImagePattern>();
@@ -1525,7 +1581,7 @@ HWTEST_F(ImageTestNg, ImageLayoutFunction001, TestSize.Level1)
  * @tc.desc: Test image copyOption.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, CopyOption001, TestSize.Level1)
+HWTEST_F(ImageTestNg, CopyOption001, TestSize.Level0)
 {
     auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     auto pattern = frameNode->GetPattern<ImagePattern>();
@@ -1582,7 +1638,7 @@ HWTEST_F(ImageTestNg, CopyOption001, TestSize.Level1)
  * @tc.desc: Test image reload Resource url when language changes.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, Resource001, TestSize.Level1)
+HWTEST_F(ImageTestNg, Resource001, TestSize.Level0)
 {
     auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
     auto pattern = frameNode->GetPattern<ImagePattern>();
@@ -1599,7 +1655,7 @@ HWTEST_F(ImageTestNg, Resource001, TestSize.Level1)
  * @tc.name: OnAttachToFrameNode001
  * @tc.desc: Test OnAttachToFrameNode Func.
  */
-HWTEST_F(ImageTestNg, OnAttachToFrameNode001, TestSize.Level1)
+HWTEST_F(ImageTestNg, OnAttachToFrameNode001, TestSize.Level0)
 {
     auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
     auto pattern = frameNode->GetPattern<ImagePattern>();
@@ -1635,7 +1691,7 @@ HWTEST_F(ImageTestNg, OnAttachToFrameNode001, TestSize.Level1)
  * @tc.name: InitCopy001
  * @tc.desc: Test InitCopy Func.
  */
-HWTEST_F(ImageTestNg, InitCopy001, TestSize.Level1)
+HWTEST_F(ImageTestNg, InitCopy001, TestSize.Level0)
 {
     auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
     auto pattern = frameNode->GetPattern<ImagePattern>();
@@ -1675,7 +1731,7 @@ HWTEST_F(ImageTestNg, InitCopy001, TestSize.Level1)
  * @tc.name: HandleCopy001
  * @tc.desc: Test HandleCopy Func.
  */
-HWTEST_F(ImageTestNg, HandleCopy001, TestSize.Level1)
+HWTEST_F(ImageTestNg, HandleCopy001, TestSize.Level0)
 {
     auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
     auto pattern = frameNode->GetPattern<ImagePattern>();
@@ -1690,7 +1746,7 @@ HWTEST_F(ImageTestNg, HandleCopy001, TestSize.Level1)
  * @tc.desc: Test image copyOption.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, TestCopyOption001, TestSize.Level1)
+HWTEST_F(ImageTestNg, TestCopyOption001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1731,7 +1787,7 @@ HWTEST_F(ImageTestNg, TestCopyOption001, TestSize.Level1)
  * @tc.desc: Test image syncLoad.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, TestSyncLoad001, TestSize.Level1)
+HWTEST_F(ImageTestNg, TestSyncLoad001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1758,7 +1814,7 @@ HWTEST_F(ImageTestNg, TestSyncLoad001, TestSize.Level1)
  * @tc.desc: Test image syncLoad.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, TestSyncLoad002, TestSize.Level1)
+HWTEST_F(ImageTestNg, TestSyncLoad002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1788,7 +1844,7 @@ HWTEST_F(ImageTestNg, TestSyncLoad002, TestSize.Level1)
  * @tc.desc: Test image draggable.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, TestDraggable001, TestSize.Level1)
+HWTEST_F(ImageTestNg, TestDraggable001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1814,7 +1870,7 @@ HWTEST_F(ImageTestNg, TestDraggable001, TestSize.Level1)
  * @tc.desc: test image measure and layout.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, TestMeasureAndLayoutTest001, TestSize.Level1)
+HWTEST_F(ImageTestNg, TestMeasureAndLayoutTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create image.
@@ -1852,7 +1908,7 @@ HWTEST_F(ImageTestNg, TestMeasureAndLayoutTest001, TestSize.Level1)
  * @tc.desc: Test image fit.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, TestImageFit001, TestSize.Level1)
+HWTEST_F(ImageTestNg, TestImageFit001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1900,7 +1956,7 @@ HWTEST_F(ImageTestNg, TestImageFit001, TestSize.Level1)
  * @tc.desc: Test image matrix.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, TestImageMatrix001, TestSize.Level1)
+HWTEST_F(ImageTestNg, TestImageMatrix001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1937,7 +1993,7 @@ HWTEST_F(ImageTestNg, TestImageMatrix001, TestSize.Level1)
  * @tc.desc: Test image resizable.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, TestImageResizable001, TestSize.Level1)
+HWTEST_F(ImageTestNg, TestImageResizable001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1975,7 +2031,7 @@ HWTEST_F(ImageTestNg, TestImageResizable001, TestSize.Level1)
  * @tc.desc: Test CreateModifierContent.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImagePatternCreateModifierContent001, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImagePatternCreateModifierContent001, TestSize.Level0)
 {
     auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -2013,7 +2069,7 @@ HWTEST_F(ImageTestNg, ImagePatternCreateModifierContent001, TestSize.Level1)
  * @tc.desc: Test ImageReset.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, ImageReset001, TestSize.Level1)
+HWTEST_F(ImageTestNg, ImageReset001, TestSize.Level0)
 {
     ImageModelNG image;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -2038,7 +2094,7 @@ HWTEST_F(ImageTestNg, ImageReset001, TestSize.Level1)
  * @tc.desc: Test SetBorderRadius
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, TestSetBorderRadius001, TestSize.Level1)
+HWTEST_F(ImageTestNg, TestSetBorderRadius001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -2076,7 +2132,7 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius001, TestSize.Level1)
  * @tc.desc: Test SetBorderRadius
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, TestSetBorderRadius002, TestSize.Level1)
+HWTEST_F(ImageTestNg, TestSetBorderRadius002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -2117,7 +2173,7 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius002, TestSize.Level1)
  * @tc.desc: Test SetBorderRadius
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, TestSetBorderRadius003, TestSize.Level1)
+HWTEST_F(ImageTestNg, TestSetBorderRadius003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -2157,7 +2213,7 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius003, TestSize.Level1)
  * @tc.desc: Test SetBorderRadius
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, TestSetBorderRadius004, TestSize.Level1)
+HWTEST_F(ImageTestNg, TestSetBorderRadius004, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -2203,7 +2259,7 @@ HWTEST_F(ImageTestNg, TestSetBorderRadius004, TestSize.Level1)
  * @tc.desc: Test IsSurportCachePixelmap
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap001, TestSize.Level1)
+HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image Info.
@@ -2224,7 +2280,7 @@ HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap001, TestSize.Level1)
  * @tc.desc: Test IsSurportCachePixelmap
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap002, TestSize.Level1)
+HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image Info.
@@ -2245,7 +2301,7 @@ HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap002, TestSize.Level1)
  * @tc.desc: Test IsSurportCachePixelmap
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap003, TestSize.Level1)
+HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap003, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image Info.
@@ -2259,5 +2315,141 @@ HWTEST_F(ImageTestNg, TestIsSurportCachePixelmap003, TestSize.Level1)
      */
     bool result = sourceInfo.IsSurportCachePixelmap();
     EXPECT_EQ(result, true);
+}
+
+/**
+* @tc.name: SetPixelMapMemoryName001
+* @tc.desc: SetPixelMapMemoryName001
+* @tc.type: FUNC
+*/
+HWTEST_F(ImageTestNg, SetPixelMapMemoryName001, TestSize.Level0)
+{
+    /**
+    * @tc.steps: step1. create Image frameNode.
+    */
+    RefPtr<PixelMap> pixMap = nullptr;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<FrameNode> parent = FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(parent, nullptr);
+    frameNode->SetParent(parent);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(imageLayoutProperty, nullptr);
+    /**
+    * @tc.steps: step2. call SetPixelMapMemoryName.
+    * @tc.expected: Returned value is false.
+    */
+    EXPECT_EQ(imagePattern->SetPixelMapMemoryName(pixMap), false);
+    EXPECT_EQ(imagePattern->hasSetPixelMapMemoryName_, false);
+}
+
+/**
+* @tc.name: SetPixelMapMemoryName002
+* @tc.desc: SetPixelMapMemoryName002
+* @tc.type: FUNC
+*/
+HWTEST_F(ImageTestNg, SetPixelMapMemoryName002, TestSize.Level0)
+{
+    /**
+    * @tc.steps: step1. create Image frameNode.
+    */
+    RefPtr<PixelMap> pixMap = AceType::MakeRefPtr<MockPixelMap>();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    RefPtr<FrameNode> parent = FrameNode::CreateFrameNode("parent", 0, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(parent, nullptr);
+    frameNode->SetParent(parent);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    EXPECT_NE(imageLayoutProperty, nullptr);
+    frameNode->UpdateInspectorId("123");
+    /**
+    * @tc.steps: step2. call SetPixelMapMemoryName.
+    * @tc.expected: Returned value is true.
+    */
+    EXPECT_EQ(imagePattern->SetPixelMapMemoryName(pixMap), true);
+    EXPECT_EQ(imagePattern->hasSetPixelMapMemoryName_, true);
+}
+
+/**
+ * @tc.name: TestKeyEvent001
+ * @tc.desc: Test KeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestKeyEvent001, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageAnalyzerManager = std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::IMAGE);
+    EXPECT_CALL(*imageAnalyzerManager, UpdateKeyEvent(_)).Times(0);
+    auto event = KeyEvent();
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_CTRL_LEFT;
+    imagePattern->OnKeyEvent(event);
+}
+
+/**
+ * @tc.name: TestKeyEvent002
+ * @tc.desc: Test KeyEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestKeyEvent002, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto imageAnalyzerManager = std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::IMAGE);
+    imageAnalyzerManager->SetSupportImageAnalyzerFeature(true);
+    imagePattern->imageAnalyzerManager_ = imageAnalyzerManager;
+    EXPECT_CALL(*imageAnalyzerManager, UpdateKeyEvent(_)).Times(1);
+    auto event = KeyEvent();
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_CTRL_LEFT;
+    imagePattern->OnKeyEvent(event);
+    imageAnalyzerManager->SetSupportImageAnalyzerFeature(false);
+}
+
+/**
+ * @tc.name: TestReportPerfData001
+ * @tc.desc: Test ReportPerfData
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestReportPerfData001, TestSize.Level0)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto mockImagePerf = reinterpret_cast<MockImagePerf*>(MockImagePerf::GetPerfMonitor());
+    EXPECT_CALL(*mockImagePerf, EndRecordImageLoadStat(_, _, _, _)).Times(AtLeast(1));
+    imagePattern->ReportPerfData(frameNode, 1);
+}
+
+/**
+ * @tc.name: TestReportPerfData002
+ * @tc.desc: Test ReportPerfData
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestReportPerfData002, TestSize.Level0)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    auto mockImagePerf = reinterpret_cast<MockImagePerf*>(MockImagePerf::GetPerfMonitor());
+    EXPECT_CALL(*mockImagePerf, StartRecordImageLoadStat(_)).Times(AtLeast(1));
+    imagePattern->LoadImage(ImageSourceInfo(""), false);
 }
 } // namespace OHOS::Ace::NG

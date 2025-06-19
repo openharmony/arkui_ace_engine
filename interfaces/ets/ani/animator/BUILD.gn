@@ -1,0 +1,56 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+
+config("ani_config") {
+  include_dirs = [
+    "${ace_root}/frameworks",
+    "${ace_root}/interfaces",
+    "${ace_root}",
+  ]
+}
+
+ohos_shared_library("animator_ani") {
+  public_configs = [ ":ani_config" ]
+  sources = [ "./src/sts_animator.cpp" ]
+  deps = [ "$ace_root/build:libace_compatible" ]
+  external_deps = [ "runtime_core:ani" ]
+  part_name = "ace_engine"
+  subsystem_name = "arkui"
+  output_extension = "so"
+}
+
+generate_static_abc("animator_ani_abc") {
+  base_url = "./ets"
+  files = [
+    "./ets/@ohos.animator.ets",
+    "./ets/arkui.component.common.ets",
+  ]
+  paths_keys = [ "@ohos.animator" ]
+  paths_values = [ "./ets/@ohos.animator.ets" ]
+  dst_file = target_out_dir + "/animator_ani.abc"
+  out_puts = [ target_out_dir + "/animator_ani.abc" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/animator_ani.abc"
+}
+
+ohos_prebuilt_etc("animator_ani_abc_etc") {
+  source = target_out_dir + "/animator_ani.abc"
+  deps = [ ":animator_ani_abc" ]
+  module_install_dir = "framework"
+  subsystem_name = "arkui"
+  part_name = "ace_engine"
+}

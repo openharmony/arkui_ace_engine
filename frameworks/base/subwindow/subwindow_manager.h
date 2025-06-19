@@ -42,11 +42,12 @@ struct SubwindowKey {
     FoldStatus foldStatus;
     SubwindowType windowType = SubwindowType::TYPE_DIALOG;
     int32_t subwindowType;
+    int32_t nodeId = -1;
 
     bool operator==(const SubwindowKey& other) const
     {
         return other.instanceId == instanceId && other.displayId == displayId && other.foldStatus == foldStatus &&
-            other.windowType == windowType;
+            other.windowType == windowType && other.nodeId == nodeId;
     }
 
     std::string ToString() const
@@ -55,6 +56,8 @@ struct SubwindowKey {
         json->Put("instanceId", instanceId);
         json->Put("displayId", (double)displayId);
         json->Put("windowType", subwindowType);
+        json->Put("foldStatus", static_cast<int32_t>(foldStatus));
+        json->Put("nodeId", nodeId);
         return json->ToString();
     }
 };
@@ -139,6 +142,8 @@ public:
     ACE_FORCE_EXPORT void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback);
     ACE_FORCE_EXPORT void UpdateCustomDialogNG(
         const WeakPtr<NG::UINode>& node, const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback);
+    ACE_FORCE_EXPORT void UpdateCustomDialogNGWithNode(
+        const WeakPtr<NG::UINode>& node, const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback);
     ACE_FORCE_EXPORT std::optional<double> GetTopOrder();
     ACE_FORCE_EXPORT std::optional<double> GetBottomOrder();
     void HideSubWindowNG();
@@ -168,7 +173,7 @@ public:
         std::function<void(int32_t, int32_t)>&& napiCallback, const std::set<std::string>& dialogCallbacks);
     ACE_FORCE_EXPORT void ShowActionMenu(const std::string& title, const std::vector<ButtonInfo>& button,
         std::function<void(int32_t, int32_t)>&& callback);
-    void CloseDialog(int32_t instanceId);
+    void CloseDialog(int32_t parentInstanceId);
     ACE_FORCE_EXPORT void OpenCustomDialog(const PromptDialogAttr &dialogAttr, std::function<void(int32_t)> &&callback);
     void CloseCustomDialog(const int32_t dialogId);
     void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback);
@@ -215,30 +220,31 @@ public:
     bool IsWindowEnableSubWindowMenu(const int32_t instanceId, const RefPtr<NG::FrameNode>& callerFrameNode);
     void OnDestroyContainer(int32_t subInstanceId);
     bool GetIsExpandDisplay();
-    const RefPtr<Subwindow> GetSubwindowByType(int32_t instanceId, SubwindowType windowType);
-    void AddSubwindow(int32_t instanceId, SubwindowType windowType, RefPtr<Subwindow> subwindow);
+    const RefPtr<Subwindow> GetSubwindowByType(int32_t instanceId, SubwindowType windowType, int32_t nodeId = -1);
+    void AddSubwindow(int32_t instanceId, SubwindowType windowType, RefPtr<Subwindow> subwindow, int32_t nodeId = -1);
     const std::vector<RefPtr<Subwindow>> GetSortSubwindow(int32_t instanceId);
-    void AddMaskSubwindowMap(int32_t dialogId, const RefPtr<Subwindow>& subwindow);
-    void RemoveMaskSubwindowMap(int32_t dialogId);
-    const RefPtr<Subwindow> GetMaskSubwindow(int32_t dialogId);
-    void ShowDialogMaskNG(const RefPtr<NG::FrameNode>& dialog);
-    void CloseDialogMaskNG(const RefPtr<NG::FrameNode>& dialog);
-    void CloseMaskSubwindow(int32_t dialogId);
+    void RemoveSubwindowByNodeId(const int32_t nodeId);
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
+    RefPtr<Subwindow> GetSubwindowByNodeId(int32_t instanceId, SubwindowType windowType, int32_t nodeId);
+    RefPtr<Subwindow> GetOrCreateSubWindowByType(SubwindowType windowType, bool isModal = true);
+    RefPtr<Subwindow> GetSubwindowBySearchkey(int32_t instanceId, const SubwindowKey& searchKey);
     RefPtr<Subwindow> GetOrCreateSystemSubWindow(int32_t containerId);
     RefPtr<Subwindow> GetOrCreateToastWindow(int32_t containerId, const NG::ToastShowMode& showMode);
     RefPtr<Subwindow> GetOrCreateToastWindowNG(int32_t containerId, const ToastWindowType& windowType,
         uint32_t mainWindowId);
     const std::vector<RefPtr<NG::OverlayManager>> GetAllSubOverlayManager();
-    SubwindowKey GetCurrentSubwindowKey(int32_t instanceId, SubwindowType windowType);
+    SubwindowKey GetCurrentSubwindowKey(int32_t instanceId, SubwindowType windowType, int32_t nodeId = -1);
     void MarkSetSubwindowRect(const NG::RectF& rect, int32_t instanceId, SubwindowType type);
     void AddInstanceSubwindowMap(int32_t subInstanceId, RefPtr<Subwindow> subwindow);
     RefPtr<Subwindow> GetSubwindowBySearchKey(const SubwindowKey& searchKey);
     RefPtr<Subwindow> CheckSubwindowDisplayId(const SubwindowKey& searchKey, const RefPtr<Subwindow>& subwindow);
     void RemoveSubwindowBySearchKey(const SubwindowKey& searchKey);
     void AddSubwindowBySearchKey(const SubwindowKey& searchKey, const RefPtr<Subwindow>& subwindow);
+    RefPtr<Subwindow> RemoveSubwindowMapByNodeId(const int32_t nodeId);
+    const std::vector<RefPtr<Subwindow>> RemoveSubwindowMapByInstanceId(const int32_t instanceId);
+    const std::vector<RefPtr<Subwindow>> GetAllSubwindow();
     static std::mutex instanceMutex_;
     static std::shared_ptr<SubwindowManager> instance_;
 
@@ -263,10 +269,6 @@ private:
     RefPtr<Subwindow> currentDialogSubwindow_;
     Rect uiExtensionWindowRect_;
     bool isSuperFoldDisplayDevice_ = false;
-
-    std::mutex maskSubwindowMutex_;
-    std::unordered_map<int32_t, RefPtr<Subwindow>> maskSubWindowMap_;
-
 };
 
 } // namespace OHOS::Ace

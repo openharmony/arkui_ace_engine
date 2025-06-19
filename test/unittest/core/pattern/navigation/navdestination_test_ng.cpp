@@ -36,6 +36,8 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "mock_navdestination_scrollable_processor.h"
 #include "mock_navigation_stack.h"
 
 using namespace testing;
@@ -46,6 +48,8 @@ const std::string NAVIGATION_TITLE = "NavdestinationTestNg";
 const std::string NAVIGATION_SUBTITLE = "NavdestinationSubtitle";
 constexpr float TITLEBAR_WIDTH = 480.0f;
 constexpr float TITLEBAR_HEIGHT = 100.0f;
+constexpr float TOOLBAR_WIDTH = 400.0f;
+constexpr float TOOLBAR_HEIGHT = 150.0f;
 constexpr Dimension MAX_PADDING_START = 28.0_vp;
 constexpr float BACK_BUTTON_FRAME_SIZE = 32.0f;
 constexpr float TITLE_FRAME_WIDTH = 60.0f;
@@ -54,6 +58,7 @@ constexpr float SUBTITLE_FRAME_WIDTH = 60.0f;
 constexpr float SUBTITLE_FRAME_HEIGHT = 20.0f;
 const CalcDimension DEFAULT_PADDING = 24.0_vp;
 const Dimension DEFAULT_MENU_BUTTON_PADDING = 8.0_vp;
+const TranslateOptions DEFAULT_TRANSLATEOPTIONS = TranslateOptions(0.0f, 0.0f, 0.0f);
 
 struct UIComponents {
     RefPtr<LayoutWrapperNode> layoutWrapper = nullptr;
@@ -1701,5 +1706,327 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest016, TestSize.Level1)
     info.SetSourceDevice(SourceType::MOUSE);
     clickListener->callback_(info);
     EXPECT_FALSE(isClick);
+}
+
+/**
+ * @tc.name: SetScrollableProcessor001
+ * @tc.desc: Test SetScrollableProcessor function of NavDestinationModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetScrollableProcessor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Get processor from Pattern.
+     * @tc.expected: No processor was setted.
+     */
+    auto processor = pattern->GetScrollableProcessor();
+    ASSERT_EQ(processor, nullptr);
+
+    /**
+     * @tc.steps: step3. create mock Processor.
+     * @tc.expected: success to create processor.
+     */
+    auto newProcessor = AceType::MakeRefPtr<MockNavDestinationScrollableProcessor>();
+    ASSERT_NE(newProcessor, nullptr);
+    int32_t createTimes = 0;
+    auto creator = [&newProcessor, &createTimes]() {
+        createTimes++;
+        return newProcessor;
+    };
+    EXPECT_CALL(*newProcessor, SetNodeId(_)).Times(1);
+    EXPECT_CALL(*newProcessor, SetNavDestinationPattern(_)).Times(1);
+
+    /**
+     * @tc.steps: step4. Call NavDestinationModelNG::SetScrollableProcessor with creator.
+     *                   Branch: if (!pattern->GetScrollableProcessor()) {
+     *                   Condition: !pattern->GetScrollableProcessor() => true
+     * @tc.expected: creator function will be called only once time,
+     *               processor of pattern will be setted to expected value,
+     *               SetNodeId & SetNavDestinationPattern of pattern will be called only once time.
+     */
+    navDestinationModelNG.SetScrollableProcessor(creator);
+    ASSERT_EQ(createTimes, 1);
+    auto processor2 = pattern->GetScrollableProcessor();
+    ASSERT_EQ(newProcessor, processor2);
+
+    /**
+     * @tc.steps: step5. Call NavDestinationModelNG::SetScrollableProcessor with creator again.
+     *                   Branch: if (!pattern->GetScrollableProcessor()) {
+     *                   Condition: !pattern->GetScrollableProcessor() => false
+     * @tc.expected: creator function will not be called.
+     */
+    navDestinationModelNG.SetScrollableProcessor(creator);
+    ASSERT_EQ(createTimes, 1);
+    processor2 = pattern->GetScrollableProcessor();
+    ASSERT_EQ(newProcessor, processor2);
+}
+
+/**
+ * @tc.name: UpdateBindingWithScrollable001
+ * @tc.desc: Test UpdateBindingWithScrollable function of NavDestinationModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, UpdateBindingWithScrollable001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set processor to pattern.
+     * @tc.expected: success to set processor.
+     */
+    auto processor = AceType::MakeRefPtr<MockNavDestinationScrollableProcessor>();
+    pattern->scrollableProcessor_ = processor;
+    ASSERT_NE(pattern->scrollableProcessor_, nullptr);
+
+    /**
+     * @tc.steps: step3. Call UpdateBindingWithScrollable function.
+     * @tc.expected: callback function will be called, the processor argument equal to that one created in step2.
+     */
+    int32_t callTimes = 0;
+    bool isSameProcessor = false;
+    auto callback = [&callTimes, &processor, &isSameProcessor](
+        const RefPtr<NG::NavDestinationScrollableProcessor>& processorIn) {
+        callTimes++;
+        isSameProcessor = processor == processorIn;
+    };
+    auto callback2 = callback;
+    navDestinationModelNG.UpdateBindingWithScrollable(std::move(callback2));
+    ASSERT_EQ(callTimes, 1);
+    ASSERT_TRUE(isSameProcessor);
+
+    /**
+     * @tc.steps: step4. Call UpdateBindingWithScrollable function again.
+     * @tc.expected: callback function will be called again, the processor argument equal to that one created in step2.
+     */
+    navDestinationModelNG.UpdateBindingWithScrollable(std::move(callback));
+    ASSERT_EQ(callTimes, 2);
+    ASSERT_TRUE(isSameProcessor);
+}
+
+/**
+ * @tc.name: UpdateBindingRelation001
+ * @tc.desc: Test UpdateBindingRelation function of NavDestinationScrollableProcessor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, UpdateBindingRelation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set processor to pattern.
+     * @tc.expected: success to set processor.
+     */
+    auto processor = AceType::MakeRefPtr<MockNavDestinationScrollableProcessor>();
+    pattern->scrollableProcessor_ = processor;
+    ASSERT_NE(pattern->scrollableProcessor_, nullptr);
+
+    /**
+     * @tc.steps: step3. Call OnModifyDone twice.
+     *                   Branch: if (scrollableProcessor_) { in NavDestinationPattern::OnModifyDone
+     *                   Condition: scrollableProcessor_ => true
+     * @tc.expected: pattern will update binding relation for twice.
+     */
+    EXPECT_CALL(*processor, UpdateBindingRelation()).Times(2);
+    pattern->OnModifyDone();
+    pattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step4. Destroy NavDestationGroupNode & NavDestinationPattern.
+     *                   Branch: if (scrollableProcessor_) { in NavDestinationPattern::~NavDestinationPattern
+     *                   Condition: scrollableProcessor_ => true
+     * @tc.expected: pattern will unbind all scrollers.
+     */
+    EXPECT_CALL(*processor, UnbindAllScrollers()).Times(1);
+    pattern = nullptr;
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
+ * @tc.name: CancelShowTitleAndToolBarTask001
+ * @tc.desc: Test CancelShowTitleAndToolBarTask function of NavDestinationPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, CancelShowTitleAndToolBarTask001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern, has no task for showing titleBar.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_FALSE(pattern->titleBarSwipeContext_.showBarTask);
+
+    /**
+     * @tc.steps: step2. Set show titleBar task.
+     * @tc.expected: pattern has task for showing titleBar.
+     */
+    pattern->titleBarSwipeContext_.showBarTask.Reset([]() {});
+    ASSERT_TRUE(pattern->titleBarSwipeContext_.showBarTask);
+
+    /**
+     * @tc.steps: step3. Call pattern::CancelShowTitleAndToolBarTask.
+     *                   Branch: if (titleBarSwipeContext_.showBarTask) {
+     *                   Condition: titleBarSwipeContext_.showBarTask => true
+     * @tc.expected: Task for showing titleBar will be cancel and reseted.
+     */
+    pattern->CancelShowTitleAndToolBarTask();
+    ASSERT_FALSE(pattern->titleBarSwipeContext_.showBarTask);
+
+    /**
+     * @tc.steps: step4. Set show toolBar task.
+     * @tc.expected: pattern has task for showing toolBar.
+     */
+    pattern->toolBarSwipeContext_.showBarTask.Reset([]() {});
+    ASSERT_TRUE(pattern->toolBarSwipeContext_.showBarTask);
+
+    /**
+     * @tc.steps: step5. Call pattern::CancelShowTitleAndToolBarTask.
+     *                   Branch: if (toolBarSwipeContext_.showBarTask) {
+     *                   Condition: toolBarSwipeContext_.showBarTask => true
+     * @tc.expected: Task for showing toolBar will be cancel and reseted.
+     */
+    pattern->CancelShowTitleAndToolBarTask();
+    ASSERT_FALSE(pattern->toolBarSwipeContext_.showBarTask);
+}
+
+/**
+ * @tc.name: StartHideOrShowBarInner001
+ * @tc.desc: Test StartHideOrShowBarInner function of NavDestinationPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, StartHideOrShowBarInner001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto nodeBase = AceType::WeakClaim(node).Upgrade();
+    ASSERT_NE(nodeBase, nullptr);
+    auto titleNode = AceType::DynamicCast<FrameNode>(nodeBase->GetTitleBarNode());
+    ASSERT_NE(titleNode, nullptr);
+    auto renderContext = titleNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdatePaintRect(RectF(0.0f, 0.0f, TITLEBAR_WIDTH, TITLEBAR_HEIGHT));
+    renderContext->UpdateTransformTranslate(DEFAULT_TRANSLATEOPTIONS);
+
+    /**
+     * @tc.steps: step2. Start hide titleBar
+     *                   Branch: float translate = isHide ? (isTitle ? -barHeight : barHeight) : 0.0f;
+     *                   Condition: isHide: true, isTitle: true
+     * @tc.expected: titleBar should has translate: -TITLEBAR_HEIGHT.
+     */
+    constexpr float TITLEBAR_TRANSLATE = -50.0f;
+    pattern->StartHideOrShowBarInner(nodeBase, TITLEBAR_HEIGHT, TITLEBAR_TRANSLATE, true, true);
+    auto translateY = renderContext->GetTransformTranslateValue(DEFAULT_TRANSLATEOPTIONS).y.ConvertToPx();
+    ASSERT_TRUE(NearEqual(-TITLEBAR_HEIGHT, translateY));
+
+    /**
+     * @tc.steps: step3. Start show titleBar
+     *                   Branch: float translate = isHide ? (isTitle ? -barHeight : barHeight) : 0.0f;
+     *                   Condition: isHide: false, isTitle: true
+     * @tc.expected: titleBar should has translate: 0.0f.
+     */
+    pattern->StartHideOrShowBarInner(nodeBase, TITLEBAR_HEIGHT, TITLEBAR_TRANSLATE, true, false);
+    translateY = renderContext->GetTransformTranslateValue(DEFAULT_TRANSLATEOPTIONS).y.ConvertToPx();
+    ASSERT_TRUE(NearEqual(0.0f, translateY));
+}
+
+/**
+ * @tc.name: StartHideOrShowBarInner002
+ * @tc.desc: Test StartHideOrShowBarInner function of NavDestinationPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, StartHideOrShowBarInner002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto nodeBase = AceType::WeakClaim(node).Upgrade();
+    ASSERT_NE(nodeBase, nullptr);
+    auto toolNode = AceType::DynamicCast<FrameNode>(nodeBase->GetToolBarNode());
+    ASSERT_NE(toolNode, nullptr);
+    auto renderContext = toolNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->UpdatePaintRect(RectF(0.0f, 0.0f, TOOLBAR_WIDTH, TOOLBAR_HEIGHT));
+    renderContext->UpdateTransformTranslate(DEFAULT_TRANSLATEOPTIONS);
+
+    /**
+     * @tc.steps: step2. Start hide toolBar
+     *                   Branch: float translate = isHide ? (isTitle ? -barHeight : barHeight) : 0.0f;
+     *                   Condition: isHide: true, isTitle: false
+     * @tc.expected: toolBar should has translate: TOOLBAR_HEIGHT.
+     */
+    constexpr float TOOLBAR_TRANSLATE = 50.0f;
+    pattern->StartHideOrShowBarInner(nodeBase, TOOLBAR_HEIGHT, TOOLBAR_TRANSLATE, false, true);
+    auto translateY = renderContext->GetTransformTranslateValue(DEFAULT_TRANSLATEOPTIONS).y.ConvertToPx();
+    ASSERT_TRUE(NearEqual(TOOLBAR_HEIGHT, translateY));
+
+    /**
+     * @tc.steps: step3. Start show toolBar
+     *                   Branch: float translate = isHide ? (isTitle ? -barHeight : barHeight) : 0.0f;
+     *                   Condition: isHide: false, isTitle: false
+     * @tc.expected: toolBar should has translate: 0.0f.
+     */
+    pattern->StartHideOrShowBarInner(nodeBase, TOOLBAR_HEIGHT, TOOLBAR_TRANSLATE, false, false);
+    translateY = renderContext->GetTransformTranslateValue(DEFAULT_TRANSLATEOPTIONS).y.ConvertToPx();
+    ASSERT_TRUE(NearEqual(0.0f, translateY));
 }
 } // namespace OHOS::Ace::NG

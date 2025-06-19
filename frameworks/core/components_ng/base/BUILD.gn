@@ -22,6 +22,7 @@ build_component_ng("base_ng") {
     "geometry_node.cpp",
     "inspector.cpp",
     "inspector_filter.cpp",
+    "lazy_compose_adapter.cpp",
     "modifier.cpp",
     "node_render_status_monitor.cpp",
     "observer_handler.cpp",

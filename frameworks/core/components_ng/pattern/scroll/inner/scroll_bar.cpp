@@ -26,6 +26,7 @@ constexpr double BAR_ADAPT_EPSLION = 1.0;
 constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
 constexpr int32_t LONG_PRESS_TIME_THRESHOLD_MS = 500;
 constexpr int32_t SCROLL_BAR_LAYOUT_INFO_COUNT = 30;
+constexpr int32_t OGN_FIGNERID = -1;
 #ifdef ARKUI_WEARABLE
 constexpr char SCROLL_BAR_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength3";
 #endif
@@ -203,8 +204,10 @@ void ScrollBar::SetBarRegion(const Offset& offset, const Size& size)
 {
     if (shapeMode_ == ShapeMode::RECT) {
         double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
-        auto scrollBarMarginStart = scrollBarMargin_.value_or(ScrollBarMargin()).start_.ConvertToPxWithSize(mainSize);
-        auto scrollBarMarginEnd = scrollBarMargin_.value_or(ScrollBarMargin()).end_.ConvertToPxWithSize(mainSize);
+        auto scrollBarMarginStart =
+            scrollBarMargin_.has_value() ? scrollBarMargin_.value().start_.ConvertToPxWithSize(mainSize) : 0.0;
+        auto scrollBarMarginEnd =
+            scrollBarMargin_.has_value() ? scrollBarMargin_.value().end_.ConvertToPxWithSize(mainSize) : 0.0;
         double reserved = NormalizeToPx(startReservedHeight_) + NormalizeToPx(endReservedHeight_) +
             scrollBarMarginStart + scrollBarMarginEnd;
         double height = std::max(size.Height() - reserved, 0.0);
@@ -227,8 +230,10 @@ void ScrollBar::SetRectTrickRegion(
     const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight, int32_t scrollSource)
 {
     double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
-    auto scrollBarMarginStart = scrollBarMargin_.value_or(ScrollBarMargin()).start_.ConvertToPxWithSize(mainSize);
-    auto scrollBarMarginEnd = scrollBarMargin_.value_or(ScrollBarMargin()).end_.ConvertToPxWithSize(mainSize);
+    auto scrollBarMarginStart =
+        scrollBarMargin_.has_value() ? scrollBarMargin_.value().start_.ConvertToPxWithSize(mainSize) : 0.0;
+    auto scrollBarMarginEnd =
+        scrollBarMargin_.has_value() ? scrollBarMargin_.value().end_.ConvertToPxWithSize(mainSize) : 0.0;
     barRegionSize_ = std::max(mainSize - NormalizeToPx(endReservedHeight_) - NormalizeToPx(startReservedHeight_) -
         scrollBarMarginStart - scrollBarMarginEnd, 0.0);
     if (LessOrEqual(estimatedHeight, 0.0)) {
@@ -236,7 +241,9 @@ void ScrollBar::SetRectTrickRegion(
     }
     double activeBarSize = barRegionSize_ * mainSize / estimatedHeight;
     double activeSize = activeBarSize - outBoundary_;
-    if (LessNotEqual(barRegionSize_, NormalizeToPx(minHeight_)) && scrollBarMargin_.has_value()) {
+    bool hideBarForSmallRegionWithMargin =
+        LessNotEqual(barRegionSize_, NormalizeToPx(minHeight_)) && scrollBarMargin_.has_value();
+    if (hideBarForSmallRegionWithMargin) {
         activeSize = 0.0;
     } else {
         if (!NearZero(outBoundary_)) {
@@ -265,7 +272,9 @@ void ScrollBar::SetRectTrickRegion(
     // Avoid crossing the top or bottom boundary.
     double activeMainOffset = std::min(offsetScale_ * lastMainOffset, barRegionSize_ - activeSize) +
         NormalizeToPx(startReservedHeight_) + scrollBarMarginStart;
-    activeMainOffset = !isReverse_ ? activeMainOffset : barRegionSize_ - activeSize - activeMainOffset;
+    activeMainOffset = !isReverse_ ? activeMainOffset
+                                   : barRegionSize_ - activeSize - activeMainOffset +
+                                         NormalizeToPx(startReservedHeight_) + NormalizeToPx(endReservedHeight_);
     bool canUseAnimation = NearZero(outBoundary_) && !positionModeUpdate_ && scrollSource != SCROLL_FROM_JUMP;
     double inactiveSize = 0.0;
     double inactiveMainOffset = 0.0;
@@ -274,7 +283,7 @@ void ScrollBar::SetRectTrickRegion(
     AddScrollBarLayoutInfo();
     // If the scrollBar length changes, start the adaptation animation
     if (!NearZero(inactiveSize) && !NearEqual(activeSize, inactiveSize, BAR_ADAPT_EPSLION) && canUseAnimation &&
-        !Negative(inactiveMainOffset) && !normalWidthUpdate_) {
+        !Negative(inactiveMainOffset) && !normalWidthUpdate_ && !hideBarForSmallRegionWithMargin) {
         PlayScrollBarAdaptAnimation();
     } else {
         needAdaptAnimation_ = false;
@@ -412,6 +421,9 @@ void ScrollBar::SetGestureEvent()
                     inRegion = scrollBar->InBarHoverRegion(point);
                     scrollBar->MarkNeedRender();
                 }
+                if (inRegion) {
+                    scrollBar->fingerId_ = touch.GetFingerId();
+                }
                 if (!scrollBar->IsPressed()) {
                     scrollBar->SetPressed(inRegion);
                 }
@@ -421,12 +433,13 @@ void ScrollBar::SetGestureEvent()
             }
             if ((info.GetTouches().front().GetTouchType() == TouchType::UP ||
                     info.GetTouches().front().GetTouchType() == TouchType::CANCEL) &&
-                    (info.GetTouches().size() <= 1)) {
+                    (scrollBar->fingerId_ == info.GetTouches().front().GetFingerId())) {
                 if (scrollBar->IsPressed() && !scrollBar->IsHover()) {
                     scrollBar->PlayScrollBarShrinkAnimation();
                     scrollBar->ScheduleDisappearDelayTask();
                 }
                 scrollBar->SetPressed(false);
+                scrollBar->fingerId_ = OGN_FIGNERID;
                 scrollBar->MarkNeedRender();
             }
         });

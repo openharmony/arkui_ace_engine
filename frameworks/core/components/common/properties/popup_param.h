@@ -29,6 +29,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/property/transition_property.h"
+#include "core/components_ng/pattern/select/select_model.h"
 #include "core/event/ace_event_handler.h"
 #include "core/event/touch_event.h"
 
@@ -51,13 +52,18 @@ struct PopupGradientColor {
 };
 
 struct PopupLinearGradientProperties {
-    GradientDirection popupDirection;
+    GradientDirection popupDirection = GradientDirection::BOTTOM;
     std::vector<PopupGradientColor> gradientColors;
 };
 
 enum class PopupKeyboardAvoidMode {
     DEFAULT,
     NONE
+};
+
+enum class TipsAnchorType {
+    TARGET = 0, // anchor to target node
+    CURSOR = 1  // anchor to cursor position
 };
 
 using StateChangeFunc = std::function<void(const std::string&)>;
@@ -87,6 +93,16 @@ public:
     bool HasAction() const
     {
         return hasAction_;
+    }
+
+    void SetHasPlacement(bool hasPlacement)
+    {
+        hasPlacement_ = hasPlacement;
+    }
+
+    bool HasPlacement() const
+    {
+        return hasPlacement_;
     }
 
     void SetPlacement(const Placement& placement)
@@ -565,6 +581,16 @@ public:
         return keyboardAvoidMode_;
     }
 
+    void SetAvoidTarget(AvoidanceMode avoidTarget)
+    {
+        avoidTarget_ = avoidTarget;
+    }
+    
+    std::optional<AvoidanceMode> GetAvoidTarget() const
+    {
+        return avoidTarget_;
+    }
+
     StateChangeFunc GetDoubleBindCallback()
     {
         return doubleBindCallback_;
@@ -674,19 +700,91 @@ public:
         return resourceMaskColorObj_;
     }
 
-    void SetMasResourceObject(RefPtr<ResourceObject>& obj)
+    void SetMaskResourceObject(RefPtr<ResourceObject>& obj)
     {
         resourceMaskObj_ = obj;
     }
 
-    const RefPtr<ResourceObject>& GetMasResourceObject()
+    const RefPtr<ResourceObject>& GetMaskResourceObject()
     {
         return resourceMaskObj_;
     }
 
+    void SetAnchorType(TipsAnchorType anchorType)
+    {
+        anchorType_ = anchorType;
+    }
+
+    TipsAnchorType GetAnchorType() const
+    {
+        return anchorType_;
+    }
+
+    void SetWidthResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceWidthObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetWidthResourceObject()
+    {
+        return resourceWidthObj_;
+    }
+
+    void SetArrowWidthResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceArrowWidthObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetArrowWidthResourceObject()
+    {
+        return resourceArrowWidthObj_;
+    }
+
+    void SetArrowHeightResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceArrowHeightObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GeArrowHeightResourceObject()
+    {
+        return resourceArrowHeightObj_;
+    }
+
+    void SetRadiusResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceRadiusObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GeRadiusResourceObject()
+    {
+        return resourceRadiusObj_;
+    }
+
+    void SetOutlineWidthObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceOutlineWidthObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GeOutlineWidthResourceObject()
+    {
+        return resourceOutlineWidthObj_;
+    }
+
+    void SetBorderWidthObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceBorderWidthObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GeBorderWidthResourceObject()
+    {
+        return resourceBorderWidthObj_;
+    }
+
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
+    bool hasPlacement_ = false;
     bool enableArrow_ = true;
     bool isMaskColorSetted_ = false;
     bool isBackgroundColorSetted_ = false;
@@ -702,6 +800,7 @@ private:
     std::optional<bool> enableHoverMode_ = std::nullopt;
     bool followTransformOfTarget_ = false;
     bool isTips_ = false;
+    TipsAnchorType anchorType_ = TipsAnchorType::TARGET;
     int32_t appearingTime_ = 700;
     int32_t disappearingTime_ = 300;
     int32_t appearingTimeWithContinuousOperation_ = 300;
@@ -741,6 +840,7 @@ private:
     RefPtr<NG::ChainedTransitionEffect> transitionEffects_ = nullptr;
     StateChangeFunc doubleBindCallback_;
     PopupKeyboardAvoidMode keyboardAvoidMode_ = PopupKeyboardAvoidMode::NONE;
+    std::optional<AvoidanceMode> avoidTarget_ = AvoidanceMode::COVER_TARGET;
     std::optional<Dimension> outlineWidth_;
     std::optional<Dimension> innerBorderWidth_;
     PopupLinearGradientProperties outlineLinearGradient_;
@@ -749,6 +849,12 @@ private:
     RefPtr<ResourceObject> resourcePopupColorObj_;
     RefPtr<ResourceObject> resourceMaskColorObj_;
     RefPtr<ResourceObject> resourceMaskObj_;
+    RefPtr<ResourceObject> resourceWidthObj_;
+    RefPtr<ResourceObject> resourceArrowWidthObj_;
+    RefPtr<ResourceObject> resourceArrowHeightObj_;
+    RefPtr<ResourceObject> resourceRadiusObj_;
+    RefPtr<ResourceObject> resourceOutlineWidthObj_;
+    RefPtr<ResourceObject> resourceBorderWidthObj_;
 };
 
 } // namespace OHOS::Ace

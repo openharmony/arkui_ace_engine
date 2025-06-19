@@ -55,6 +55,7 @@
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components/text_overlay/text_overlay_theme_wrapper.h"
 #include "core/components/theme/advanced_pattern_theme.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
@@ -204,7 +205,8 @@ const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<Th
         { NavigationBarTheme::TypeId(), &ThemeWrapperBuildFunc<NG::NavigationBarThemeWrapper::WrapperBuilder> },
         { AgingAdapationDialogTheme::TypeId(),
             &ThemeWrapperBuildFunc<NG::AgingAdapationDialogThemeWrapper::WrapperBuilder> },
-        { NG::SideBarTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SideBarThemeWrapper::WrapperBuilder> }
+        { NG::SideBarTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SideBarThemeWrapper::WrapperBuilder> },
+        { TextOverlayTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextOverlayThemeWrapper::WrapperBuilder> }
     };
 
 std::unordered_map<ThemeType, Ace::Kit::BuildFunc> THEME_BUILDERS_KIT;
@@ -249,26 +251,7 @@ RefPtr<Theme> ThemeManagerImpl::GetThemeOrigin(ThemeType type)
     if (builderIter == THEME_BUILDERS.end()) {
         return nullptr;
     }
-
-    if (auto pipelineContext = NG::PipelineContext::GetCurrentContext(); pipelineContext) {
-        ColorMode localMode = pipelineContext->GetLocalColorMode();
-        ColorMode systemMode = pipelineContext->GetColorMode();
-        bool needRestore = false;
-        if (localMode != ColorMode::COLOR_MODE_UNDEFINED && localMode != systemMode) {
-            // Ordinary themes should work in system color mode. Only theme wrappers support local color mode.
-            ResourceManager::GetInstance().UpdateColorMode(systemMode);
-            pipelineContext->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
-            needRestore = true;
-        }
-        auto theme = builderIter->second(themeConstants_);
-        if (needRestore) {
-            pipelineContext->SetLocalColorMode(localMode);
-            ResourceManager::GetInstance().UpdateColorMode(localMode);
-        }
-        themes_.emplace(type, theme);
-        return theme;
-    }
-    
+  
     auto theme = builderIter->second(themeConstants_);
     themes_.emplace(type, theme);
     return theme;

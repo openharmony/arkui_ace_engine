@@ -17,6 +17,7 @@ ace_unittest("text_test_ng") {
   type = "new"
   sources = [
     "paragraph_manager_test_ng.cpp",
+    "preview_menu_controller_test_ng.cpp",
     "span_accessibility_test_ng.cpp",
     "span_string_test_ng.cpp",
     "span_string_test_two_ng.cpp",

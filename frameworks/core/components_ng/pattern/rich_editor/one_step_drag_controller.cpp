@@ -211,7 +211,7 @@ bool OneStepDragController::SetMenuParam(TextSpanType spanType, const Builder& b
 
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, false);
-    auto host = pattern->GetHost();
+    auto host = pattern->GetContentHost();
     CHECK_NULL_RETURN(host, false);
     const auto& tagFilter = dragParam->tagFilter_;
     CHECK_NULL_RETURN(tagFilter, false);

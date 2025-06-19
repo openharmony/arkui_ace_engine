@@ -622,7 +622,7 @@ HWTEST_F(GridOptionLayoutTestNg, GetEndOffset004, TestSize.Level1)
         UpdateCurrentOffset(-50.0f);
         EXPECT_EQ(pattern_->GetEndOffset(), info.startMainLineIndex_ * 105.0f);
     }
-    EXPECT_LE(info.currentOffset_, -1000.0f);
+    EXPECT_LE(info.currentOffset_, -228.052094f);
     EXPECT_GE(info.startMainLineIndex_, 3);
 }
 
@@ -871,7 +871,7 @@ HWTEST_F(GridOptionLayoutTestNg, OutOfBounds001, TestSize.Level1)
     UpdateCurrentOffset(-50);
     EXPECT_TRUE(pattern_->IsOutOfBoundary(true));
 
-    UpdateCurrentOffset(75);
+    UpdateCurrentOffset(175);
     EXPECT_GT(GetChildRect(frameNode_, 29).Bottom(), HEIGHT);
     EXPECT_FALSE(pattern_->IsOutOfBoundary(true));
 }
@@ -1056,13 +1056,13 @@ HWTEST_F(GridOptionLayoutTestNg, Refresh001, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(refreshNode->GetGeometryNode()->GetFrameOffset().GetY(), 0);
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameOffset().GetY(), 0);
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "163.00px"); // friction
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "128.65px"); // friction
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_FALSE(pattern_->OutBoundaryCallback());
 
     scrollable->HandleDragEnd(info);
     FlushUITasks();
-    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "210.09px");
+    EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.ToString(), "148.68px");
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
 }
@@ -1167,7 +1167,6 @@ HWTEST_F(GridOptionLayoutTestNg, OverScroll001, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(15);
     CreateDone();
-
     GestureEvent info;
     info.SetMainVelocity(-1000.f);
     info.SetMainDelta(-100.f);
@@ -1192,7 +1191,7 @@ HWTEST_F(GridOptionLayoutTestNg, OverScroll001, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_EQ(pattern_->info_.startIndex_, 3);
-    EXPECT_EQ(GetChildY(frameNode_, 6), 90.0f);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 6), 90.0f);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
 }
 
@@ -1355,7 +1354,7 @@ HWTEST_F(GridOptionLayoutTestNg, OverScroll005, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     EXPECT_EQ(pattern_->info_.startIndex_, 0);
-    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_NEAR(GetChildY(frameNode_, 0), 0.0f, 2e-5);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
 }
 

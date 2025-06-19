@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
-
+#include "core/components_ng/pattern/ui_extension/preview_ui_extension_component/preview_session_wrapper_impl.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_session_wrapper_impl.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/session_wrapper_impl.h"
 
@@ -32,6 +32,12 @@ RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(SessionType s
 RefPtr<SessionWrapper> SessionWrapperFactory::CreateSessionWrapper(
     SessionType sessionType, const SessionCreateParam& sessionCreateParam)
 {
+    if (sessionType == SessionType::PREVIEW_UI_EXTENSION_ABILITY) {
+        return AceType::MakeRefPtr<PreviewSessionWrapperImpl>(
+            AceType::DynamicCast<PreviewUIExtensionPattern>(sessionCreateParam.hostPattern.Upgrade()),
+            sessionCreateParam.instanceId,
+            sessionCreateParam.isTransferringCaller, sessionType);
+    }
     if (sessionType == SessionType::SECURITY_UI_EXTENSION_ABILITY) {
         return AceType::MakeRefPtr<SecuritySessionWrapperImpl>(
             sessionCreateParam.hostPattern, sessionCreateParam.instanceId,

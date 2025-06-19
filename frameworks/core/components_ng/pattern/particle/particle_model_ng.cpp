@@ -18,6 +18,83 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/particle/particle_pattern.h"
 namespace OHOS::Ace::NG {
+namespace {
+void ReloadParticleResources(const ParticleOption& particleOption,
+    std::list<ParticleOption>& updatedArrayValue)
+{
+    // reloadResources EmitterOptions: position、size.
+    auto emitterOptionOpt = particleOption.GetEmitterOption();
+    emitterOptionOpt.ReloadResources();
+
+    std::optional<ParticleColorPropertyUpdater> updater;
+    ParticleColorPropertyUpdaterConfig updaterConfig;
+    std::list<ParticlePropertyAnimation<Color>> animationArrayValue;
+
+    // reloadResources ParticleColorPropertyOptions: range.
+    auto particlrColorOpt = particleOption.GetParticleColorOption();
+    if (particlrColorOpt.has_value()) {
+        particlrColorOpt->ReloadResources();
+
+        // reloadResources ParticleUpdater.CURVE: from、to.
+        updater = particlrColorOpt.value().GetUpdater();
+        if (updater.has_value()) {
+            updaterConfig = updater.value().GetConfig();
+            auto animationArray = updaterConfig.GetAnimationArray();
+            for (auto& fromTo : animationArray) {
+                fromTo.ReloadResources();
+                animationArrayValue.push_back(fromTo);
+            }
+        }
+    }
+
+    // reloadResources ImageParticleParameters: src、size.
+    auto particle = emitterOptionOpt.GetParticle();
+    auto particleConfig = particle.GetConfig();
+    auto imageParameter = particleConfig.GetImageParticleParameter();
+    imageParameter.ReloadResources();
+
+    ParticleOption updatedParticleOption = particleOption;
+    
+    // set src and size after reloadResources.
+    particleConfig.SetImageParticleParameter(imageParameter);
+    particle.SetConfig(particleConfig);
+    emitterOptionOpt.SetParticle(particle);
+
+    // set position and size after reloadResources.
+    updatedParticleOption.SetEmitterOption(emitterOptionOpt);
+
+    // set range and from-to after reloadResources.
+    if (particlrColorOpt.has_value() && updater.has_value()) {
+        updaterConfig.SetAnimationArray(animationArrayValue);
+        updater.value().SetConfig(updaterConfig);
+        particlrColorOpt.value().SetUpdater(updater.value());
+        updatedParticleOption.SetParticleColorOption(particlrColorOpt.value());
+    }
+    updatedArrayValue.push_back(updatedParticleOption);
+}
+
+void CreateParticleResObj(std::list<ParticleOption>& arrayValue,
+    const RefPtr<FrameNode> frameNode)
+{
+    if (!SystemProperties::ConfigChangePerform() || !frameNode) {
+        return;
+    }
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    auto updateFunc = [arrayValue, weakNode = WeakPtr<FrameNode>(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        std::list<ParticleOption> updatedArrayValue;
+        for (auto& particleOption : arrayValue) {
+            ReloadParticleResources(particleOption, updatedArrayValue);
+        }
+        auto context = frameNode->GetRenderContext();
+        context->UpdateParticleOptionArray(updatedArrayValue);
+    };
+    auto pattern = AceType::DynamicCast<ParticlePattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->AddResObj("particle.Create", resObj, std::move(updateFunc));
+}
+}
 void ParticleModelNG::Create(std::list<ParticleOption>& arrayValue)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -27,6 +104,7 @@ void ParticleModelNG::Create(std::list<ParticleOption>& arrayValue)
         [count = arrayValue.size()]() { return AceType::MakeRefPtr<ParticlePattern>(count); });
     stack->Push(frameNode);
     ACE_UPDATE_RENDER_CONTEXT(ParticleOptionArray, arrayValue);
+    CreateParticleResObj(arrayValue, frameNode);
 }
 
 void ParticleModelNG::DisturbanceField(const std::vector<ParticleDisturbance>& disturbanceArray, FrameNode* frameNode)

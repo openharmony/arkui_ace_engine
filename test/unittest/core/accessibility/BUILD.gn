@@ -123,24 +123,50 @@ ace_unittest("accessibility_adapter_test_ng") {
     defines = [ "OHOS_STANDARD_SYSTEM" ]
     defines += [ "WINDOW_SCENE_SUPPORTED" ]
     external_deps = [
+      "ability_base:view_data",
       "ability_base:want",
       "ability_runtime:abilitykit_native",
+      "ability_runtime:app_context",
+      "ability_runtime:app_manager",
       "accessibility:accessibilityclient",
       "accessibility:accessibilityconfig",
       "ace_engine:ace_uicontent",
+      "app_file_service:fileuri_native",
       "c_utils:utils",
+      "egl:libEGL",
       "ffrt:libffrt",
+      "graphic_2d:EGL",
+      "graphic_2d:GLESv3",
       "graphic_2d:librender_service_base",
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
+      "init:libbegetutil",
       "input:libmmi-client",
+      "ipc:ipc_core",
       "ipc:ipc_single",
       "napi:ace_napi",
+      "opengles:libGLES",
       "window_manager:libdm",
+      "window_manager:libpip_ndk",
       "window_manager:libwm",
       "window_manager:scene_session",
       "window_manager:scene_session_manager",
     ]
+  }
+  if (defined(global_parts_info.inputmethod_imf)) {
+    external_deps += [ "imf:inputmethod_client" ]
+  }
+  if (defined(global_parts_info.web_webview)) {
+    external_deps += [
+      "webview:cj_webview_ffi",
+      "webview:libnweb",
+    ]
+    sources += [
+      "$ace_root/frameworks/core/components_ng/pattern/web/transitional_node_info.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/web/web_pattern.cpp",
+      "$ace_root/frameworks/core/components/web/resource/web_delegate.cpp",
+    ]
+    defines += [ "WEB_SUPPORTED" ]
   }
 }
 

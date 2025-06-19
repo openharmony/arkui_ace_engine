@@ -34,30 +34,6 @@ const std::vector<float> DEFAULT_COLOR_FILTER_MATRIX = {
     1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
     0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f
 };
-
-void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values,
-    std::vector<ArkUI_Int32>& units, int32_t argsIndex)
-{
-    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex);
-    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
-    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
-    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
-
-    std::optional<CalcDimension> topLeftOptional;
-    std::optional<CalcDimension> topRightOptional;
-    std::optional<CalcDimension> bottomLeftOptional;
-    std::optional<CalcDimension> bottomRightOptional;
-
-    ArkTSUtils::ParseOuterBorder(vm, topLeftArgs, topLeftOptional);
-    ArkTSUtils::ParseOuterBorder(vm, topRightArgs, topRightOptional);
-    ArkTSUtils::ParseOuterBorder(vm, bottomLeftArgs, bottomLeftOptional);
-    ArkTSUtils::ParseOuterBorder(vm, bottomRightArgs, bottomRightOptional);
-
-    ArkTSUtils::PushOuterBorderDimensionVector(topLeftOptional, values, units);
-    ArkTSUtils::PushOuterBorderDimensionVector(topRightOptional, values, units);
-    ArkTSUtils::PushOuterBorderDimensionVector(bottomLeftOptional, values, units);
-    ArkTSUtils::PushOuterBorderDimensionVector(bottomRightOptional, values, units);
-}
 } // namespace
 
 ArkUINativeModuleValue ImageSpanBridge::SetVerticalAlign(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -134,10 +110,13 @@ ArkUINativeModuleValue ImageSpanBridge::SetTextBackgroundStyle(ArkUIRuntimeCallI
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    std::shared_ptr<TextBackgroundStyle> style = std::make_shared<TextBackgroundStyle>();
+    RefPtr<ResourceObject> colorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
         color = Color::TRANSPARENT;
     }
-    ParseOuterBorderRadius(runtimeCallInfo, vm, radiusArray, valueUnits, NUM_2); // Border Radius args start index
+    ArkTSUtils::ParseOuterBorderRadius(runtimeCallInfo, vm, radiusArray, valueUnits, NUM_2, style);
+    ArkTSUtils::SetTextBackgroundStyle(style, color, colorResObj, radiusArray.data(), valueUnits.data());
     GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanTextBackgroundStyle(
         nativeNode, color.GetValue(), radiusArray.data(), valueUnits.data(), static_cast<int32_t>(radiusArray.size()));
     return panda::JSValueRef::Undefined(vm);
@@ -413,10 +392,8 @@ ArkUINativeModuleValue ImageSpanBridge::SetBorderRadius(ArkUIRuntimeCallInfo *ru
         ArkTSUtils::ParseAllBorder(vm, bottomRightArgs, bottomRight);
     }
     auto directionChanged = false;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-        directionChanged = isRightToLeft && isLengthMetrics;
-    }
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    directionChanged = isRightToLeft && isLengthMetrics;
     uint32_t size = SIZE_OF_FOUR;
     ArkUI_Float32 values[size];
     int units[size];
@@ -442,6 +419,63 @@ ArkUINativeModuleValue ImageSpanBridge::ResetBorderRadius(ArkUIRuntimeCallInfo *
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getImageSpanModifier()->resetImageSpanBorderRadius(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+bool CheckIsCard()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, false);
+    return context->IsFormRender() && !container->IsDynamicRender();
+}
+
+ArkUINativeModuleValue ImageSpanBridge::SetImageSpanSrc(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    int32_t resId = 0;
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        Framework::JSRef<Framework::JSObject> jsObj = Framework::JSRef<Framework::JSObject>::Cast(info[1]);
+        Framework::JSRef<Framework::JSVal> tmp = jsObj->GetProperty("id");
+        if (!tmp->IsNull() && tmp->IsNumber()) {
+            resId = tmp->ToNumber<int32_t>();
+        }
+    }
+    bool isCard = CheckIsCard();
+    std::string src;
+    bool srcValid = ArkTSUtils::ParseJsMedia(vm, secondArg, src);
+    if (isCard && secondArg->IsString(vm)) {
+        SrcType srcType = ImageSourceInfo::ResolveURIType(src);
+        bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
+        if (notSupport) {
+            src.clear();
+        }
+    }
+    std::string bundleName;
+    std::string moduleName;
+    ArkTSUtils::GetJsMediaBundleInfo(vm, secondArg, bundleName, moduleName);
+    RefPtr<PixelMap> pixmap = nullptr;
+    if (!srcValid) {
+#if defined(PIXEL_MAP_SUPPORTED)
+        pixmap = Framework::CreatePixelMapFromNapiValue(info[1]);
+#endif
+    }
+    if (pixmap) {
+        ImageSpanView::SetPixelMap(reinterpret_cast<FrameNode*>(nativeNode), pixmap);
+    } else {
+        nodeModifiers->getImageSpanModifier()->setImageSpanSrc(
+            nativeNode, src.c_str(), bundleName.c_str(), moduleName.c_str(), (resId == -1));
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

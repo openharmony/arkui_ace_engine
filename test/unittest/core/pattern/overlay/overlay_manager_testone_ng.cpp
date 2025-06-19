@@ -316,7 +316,7 @@ HWTEST_F(OverlayManagerTestOneNG, SheetSpringBack001, TestSize.Level1)
     auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->UpdateSheetType();
-    pattern->UpdateSheetObject(pattern->GetSheetTypeNoProcess());
+    pattern->InitSheetObject();
     ASSERT_NE(pattern->GetSheetObject(), nullptr);
     overlayManager->dismissTarget_ = DismissTarget(SheetKey(-1));
     overlayManager->sheetMap_.emplace(SheetKey(-1), Ace::Referenced::WeakClaim(Ace::Referenced::RawPtr(sheetNode)));
@@ -445,7 +445,7 @@ HWTEST_F(OverlayManagerTestOneNG, UpdateSheetPage001, TestSize.Level1)
     auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetNodePattern, nullptr);
     sheetNodePattern->UpdateSheetType();
-    sheetNodePattern->UpdateSheetObject(sheetNodePattern->GetSheetTypeNoProcess());
+    sheetNodePattern->InitSheetObject();
     ASSERT_NE(sheetNodePattern->GetSheetObject(), nullptr);
     overlayManager->UpdateSheetPage(sheetNode, sheetStyle, 2, false, false, nullptr, nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, nullptr, nullptr, nullptr);

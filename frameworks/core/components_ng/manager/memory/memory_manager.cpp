@@ -25,10 +25,7 @@ constexpr int32_t RECYCLE_PAGE_IMAGE_NUM = 20;
 namespace OHOS::Ace::NG {
 MemoryManager::MemoryManager()
 {
-    if (!SystemProperties::GetRecycleImageEnabled() ||
-        !Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        isTrimMemWork_ = false;
-    }
+    isTrimMemWork_ = false;
 }
 
 void MemoryManager::AddRecyclePageNode(const RefPtr<FrameNode>& node)

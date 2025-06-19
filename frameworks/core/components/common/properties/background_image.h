@@ -39,6 +39,55 @@ enum class ACE_EXPORT BackgroundImageSizeType {
     PERCENT,
 };
 
+template <class T>
+class ResObjUpdater {
+public:
+    ResObjUpdater() = default;
+    ~ResObjUpdater() = default;
+    
+    void BindResObj(T *obj)
+    {
+        if (!resObj_) {
+            resObj_ = obj;
+        }
+    }
+
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, T&)>&& updateFunc)
+    {
+        if (resObj && updateFunc) {
+            resMap_[key] = { resObj, std::move(updateFunc) };
+        }
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            CHECK_NULL_VOID(resObj_);
+            resourceUpdater.updateFunc(resourceUpdater.obj, *resObj_);
+        }
+    }
+
+    void RemoveResource(const std::string& key)
+    {
+        auto iter = resMap_.find(key);
+        if (iter != resMap_.end()) {
+            resMap_.erase(iter);
+        }
+    }
+
+private:
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> obj;
+        std::function<void(const RefPtr<ResourceObject>&, T&)> updateFunc;
+    };
+    std::unordered_map<std::string, ResourceUpdater> resMap_;
+    T* resObj_;
+};
+
+
 class ACE_FORCE_EXPORT BackgroundImageSize final {
 public:
     BackgroundImageSize() = default;
@@ -67,21 +116,9 @@ public:
 
     std::string ToString() const;
 
-    void AddResource(
-        const std::string& key,
-        const RefPtr<ResourceObject>& resObj,
-        std::function<void(const RefPtr<ResourceObject>&, BackgroundImageSize&)>&& updateFunc)
+    ResObjUpdater<BackgroundImageSize>& GetResObjUpdater()
     {
-        if (resObj && updateFunc) {
-            resMap_[key] = { resObj, std::move(updateFunc) };
-        }
-    }
-
-    void ReloadResources()
-    {
-        for (const auto& [key, resourceUpdater] : resMap_) {
-            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
-        }
+        return resObjUpdater_;
     }
 
 private:
@@ -89,11 +126,7 @@ private:
     double valueX_ = 0.0;
     BackgroundImageSizeType typeY_ { BackgroundImageSizeType::AUTO };
     double valueY_ = 0.0;
-    struct ResourceUpdater {
-        RefPtr<ResourceObject> obj;
-        std::function<void(const RefPtr<ResourceObject>&, BackgroundImageSize&)> updateFunc;
-    };
-    std::unordered_map<std::string, ResourceUpdater> resMap_;
+    ResObjUpdater<BackgroundImageSize> resObjUpdater_;
 };
 
 enum class ACE_EXPORT BackgroundImagePositionType {
@@ -204,21 +237,9 @@ public:
 
     std::string ToString() const;
 
-    void AddResource(
-        const std::string& key,
-        const RefPtr<ResourceObject>& resObj,
-        std::function<void(const RefPtr<ResourceObject>&, BackgroundImagePosition&)>&& updateFunc)
+    ResObjUpdater<BackgroundImagePosition>& GetResObjUpdater()
     {
-        if (resObj && updateFunc) {
-            resMap_[key] = { resObj, std::move(updateFunc) };
-        }
-    }
-
-    void ReloadResources()
-    {
-        for (const auto& [key, resourceUpdater] : resMap_) {
-            resourceUpdater.updateFunc(resourceUpdater.obj, *this);
-        }
+        return resObjUpdater_;
     }
 
 private:
@@ -227,11 +248,7 @@ private:
     AnimatableDimension valueX_ = AnimatableDimension(-1.0);
     AnimatableDimension valueY_ = AnimatableDimension(0.0);
     bool isAlign_ = false;
-    struct ResourceUpdater {
-        RefPtr<ResourceObject> obj;
-        std::function<void(const RefPtr<ResourceObject>&, BackgroundImagePosition&)> updateFunc;
-    };
-    std::unordered_map<std::string, ResourceUpdater> resMap_;
+    ResObjUpdater<BackgroundImagePosition> resObjUpdater_;
 };
 
 class ImageObjectPosition final : public BackgroundImagePosition {};

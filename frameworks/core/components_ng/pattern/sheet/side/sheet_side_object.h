@@ -21,6 +21,8 @@
 namespace OHOS::Ace::NG {
 
 class SheetSideObject : public SheetObject {
+    DECLARE_ACE_TYPE(SheetSideObject, SheetObject);
+
 public:
     SheetSideObject(SheetType sheetType) : SheetObject(sheetType) {}
     NG::BorderWidthProperty PostProcessBorderWidth(const NG::BorderWidthProperty& borderWidth) override;
@@ -41,6 +43,17 @@ public:
     void HandleDragEnd(float dragVelocity) override;
     void ModifyFireSheetTransition(float dragVelocity) override;
     void CreatePropertyCallback() override;
+
+    ScrollResult HandleScroll(float scrollOffset, int32_t source, NestedState state, float velocity = 0.f) override
+    {
+        return { scrollOffset, true };
+    }
+    void OnScrollStartRecursive(float position, float dragVelocity = 0.0f) override {};
+    void OnScrollEndRecursive(const std::optional<float>& velocity) override {};
+    bool HandleScrollVelocity(float velocity) override
+    {
+        return false;
+    }
 
     virtual uint32_t GetPanDirection() override
     {

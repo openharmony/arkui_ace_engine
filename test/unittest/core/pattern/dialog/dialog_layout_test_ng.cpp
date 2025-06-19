@@ -1574,7 +1574,7 @@ HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmIsGetExpandDisplayValidHeight,
     ASSERT_NE(dialog, nullptr);
     auto dialogProp = dialog->GetLayoutProperty<DialogLayoutProperty>();
     ASSERT_NE(dialogProp, nullptr);
-    EXPECT_TRUE(dialogLayoutAlgorithm.IsGetExpandDisplayValidHeight(dialogProp));
+    EXPECT_FALSE(dialogLayoutAlgorithm.IsGetExpandDisplayValidHeight(dialogProp));
 }
 
 /**
@@ -1932,5 +1932,12 @@ HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmMeasure002, TestSize.Level1)
     realSize.UpdateIllegalSizeWithCheck(parentIdealSize);
     EXPECT_TRUE(realSize.IsValid());
     dialogLayoutAlgorithm.Measure(layoutWrapper);
+    // dialog avoid screen
+    OffsetF topLeftPoint = {100.0f, 100.0f};
+    SizeF childSize = {50.0f, 50.0f};
+    auto dialogProp = dialogWithCustom->GetLayoutProperty<DialogLayoutProperty>();
+    ASSERT_NE(dialogProp, nullptr);
+    dialogLayoutAlgorithm.AvoidScreen(topLeftPoint, dialogProp, childSize);
+    EXPECT_EQ(topLeftPoint, OffsetF(100.0f, 100.0f));
 }
 } // namespace OHOS::Ace::NG

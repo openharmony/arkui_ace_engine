@@ -20,5 +20,6 @@ ace_unittest("progress_test_ng") {
     "progress_content_modifier_test_ng.cpp",
     "progress_modifier_test_ng.cpp",
     "progress_test_ng.cpp",
+    "progress_test_tojson.cpp",
   ]
 }

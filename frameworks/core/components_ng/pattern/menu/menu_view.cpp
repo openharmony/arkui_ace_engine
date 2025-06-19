@@ -163,7 +163,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
 {
     // use wrapper to detect click events outside menu
     auto wrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(targetId));
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(targetId, targetTag));
 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto menuNode = FrameNode::CreateFrameNode(
@@ -890,11 +890,8 @@ static void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNod
         CHECK_NULL_VOID(columnNode);
         // set filter
         menuWrapperPattern->SetFilterColumnNode(columnNode);
-        auto menuNode = menuWrapperPattern->GetMenu();
-        auto menuPattern = menuNode ? menuNode->GetPattern<MenuPattern>() : nullptr;
-        auto layoutProperty = menuPattern ? menuPattern->GetLayoutProperty<MenuLayoutProperty>() : nullptr;
-        CHECK_NULL_VOID(layoutProperty);
-        auto isShowInSubWindow = layoutProperty->GetShowInSubWindowValue(true);
+        auto isShowInSubWindow =
+            menuWrapperPattern->GetMenuParam().isShowInSubWindow || menuWrapperPattern->IsContextMenu();
         if (container->IsSceneBoardWindow()) {
             auto windowScene = manager->FindWindowScene(targetNode);
             manager->MountFilterToWindowScene(columnNode, windowScene);
@@ -1378,19 +1375,17 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
-    } else {
-        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
-            menuWrapperPattern->SetMenuParam(menuParam);
-        }
     }
+    menuWrapperPattern->SetMenuParam(menuParam);
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
         menuProperty->UpdatePositionOffset(menuParam.positionOffset);
-        if (menuParam.placement.has_value()) {
+        if (menuParam.placement.has_value() && !menuParam.isAnchorPosition) {
             menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
+        menuProperty->UpdateAnchorPosition(menuParam.anchorPosition);
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
     auto scroll = CreateMenuScroll(column);
@@ -1563,10 +1558,11 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
         menuProperty->UpdatePositionOffset(menuParam.positionOffset);
-        if (menuParam.placement.has_value()) {
+        if (menuParam.placement.has_value() && !menuParam.isAnchorPosition) {
             menuProperty->UpdateMenuPlacement(menuParam.placement.value());
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
+        menuProperty->UpdateAnchorPosition(menuParam.anchorPosition);
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
 }
@@ -1859,6 +1855,10 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, std::vector<Op
     }
     if (params[index].value == buttonPasteText) {
         CreatePasteButton(optionsHasIcon, option, row, params[index].action);
+        auto accessibilityProperty = option->GetAccessibilityProperty<AccessibilityProperty>();
+        if (accessibilityProperty) {
+            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        }
     } else {
         CreateOption(optionsHasIcon, params, index, row, option);
     }
@@ -1887,6 +1887,10 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(const OptionValueInfo& value,
     }
     if (value.content == buttonPasteText) {
         CreatePasteButton(value.optionsHasIcon, option, row, onClickFunc, icon);
+        auto accessibilityProperty = option->GetAccessibilityProperty<AccessibilityProperty>();
+        if (accessibilityProperty) {
+            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        }
     } else {
         CreateOption({ .optionsHasIcon = value.optionsHasIcon,
                        .content = value.content, .isAIMenuOption = value.isAIMenuOption },
@@ -2421,15 +2425,15 @@ void MenuView::UpdateMenuOutlineWithArrow(
     menuWrapperPattern->SetMenuParam(menuParam);
 }
 
-void MenuView::TouchEventGernerator(const RefPtr<FrameNode>& actionNode, TouchEvent& event)
+void MenuView::TouchEventGenerator(const RefPtr<FrameNode>& actionNode, TouchEvent& event)
 {
     CHECK_NULL_VOID(actionNode);
     event.id = actionNode->GetId();
     event.originalId = actionNode->GetId();
     auto childOffset = actionNode->GetPaintRectOffset(false, true);
     auto rectWithRender = actionNode->GetRectWithRender();
-    event.x = childOffset.GetX() + rectWithRender.Width() / HALF_DIVIDE;
-    event.y = childOffset.GetY() + rectWithRender.Height() / HALF_DIVIDE;
+    event.x = childOffset.GetX() + static_cast<double>(rectWithRender.Width()) / HALF_DIVIDE;
+    event.y = childOffset.GetY() + static_cast<double>(rectWithRender.Height()) / HALF_DIVIDE;
     event.postEventNodeId = actionNode->GetId();
     event.isInterpolated = true;
     std::chrono::microseconds microseconds(GetMicroTickCount());
@@ -2437,7 +2441,7 @@ void MenuView::TouchEventGernerator(const RefPtr<FrameNode>& actionNode, TouchEv
     event.time = time;
 }
 
-void MenuView::TouchPointGernerator(const RefPtr<FrameNode>& actionNode, TouchPoint& point)
+void MenuView::TouchPointGenerator(const RefPtr<FrameNode>& actionNode, TouchPoint& point)
 {
     CHECK_NULL_VOID(actionNode);
     auto childOffset = actionNode->GetPaintRectOffset(false, true);
@@ -2445,10 +2449,10 @@ void MenuView::TouchPointGernerator(const RefPtr<FrameNode>& actionNode, TouchPo
     auto globalOffset = actionNode->GetPaintRectGlobalOffsetWithTranslate();
     point.id = actionNode->GetId();
     point.originalId = actionNode->GetId();
-    point.x = globalOffset.first.GetX() + rectWithRender.Width() / HALF_DIVIDE;
-    point.y = globalOffset.first.GetY() + rectWithRender.Height() / HALF_DIVIDE;
-    point.screenX = childOffset.GetX() + rectWithRender.Width() / HALF_DIVIDE;
-    point.screenY = childOffset.GetY() + rectWithRender.Height() / HALF_DIVIDE;
+    point.x = globalOffset.first.GetX() + static_cast<double>(rectWithRender.Width()) / HALF_DIVIDE;
+    point.y = globalOffset.first.GetY() + static_cast<double>(rectWithRender.Height()) / HALF_DIVIDE;
+    point.screenX = childOffset.GetX() + static_cast<double>(rectWithRender.Width()) / HALF_DIVIDE;
+    point.screenY = childOffset.GetY() + static_cast<double>(rectWithRender.Height()) / HALF_DIVIDE;
     std::chrono::microseconds microseconds(GetMicroTickCount());
     TimeStamp time(microseconds);
     point.downTime = time;
@@ -2471,9 +2475,9 @@ void MenuView::RegisterAccessibilityChildActionNotify(const RefPtr<FrameNode>& m
             CHECK_NULL_RETURN(gesture, result);
             TouchEvent event;
             event.type = TouchType::DOWN;
-            MenuView::TouchEventGernerator(node, event);
+            MenuView::TouchEventGenerator(node, event);
             TouchPoint eventPoint;
-            MenuView::TouchPointGernerator(node, eventPoint);
+            MenuView::TouchPointGenerator(node, eventPoint);
             event.pointers.push_back(eventPoint);
             auto actionResult = gesture->TriggerTouchEvent(event);
             event.type = TouchType::UP;

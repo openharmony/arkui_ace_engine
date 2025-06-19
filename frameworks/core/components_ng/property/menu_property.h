@@ -66,6 +66,10 @@ struct MenuParam {
     std::function<void()> onDisappear;
     std::function<void()> aboutToAppear;
     std::function<void()> aboutToDisappear;
+    std::function<void()> onWillAppear;
+    std::function<void()> onDidAppear;
+    std::function<void()> onWillDisappear;
+    std::function<void()> onDidDisappear;
     std::optional<bool> enableArrow;
     std::optional<Dimension> arrowOffset;
     bool isShowInSubWindow = true;
@@ -95,6 +99,9 @@ struct MenuParam {
     std::optional<NG::BorderColorProperty> outlineColor;
     std::optional<bool> maskEnable;
     std::optional<MenuMaskType> maskType;
+    std::optional<ModalMode> modalMode;
+    OffsetF anchorPosition;
+    bool isAnchorPosition = false;
 };
 
 } // namespace OHOS::Ace::NG

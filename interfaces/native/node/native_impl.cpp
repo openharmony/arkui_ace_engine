@@ -18,6 +18,7 @@
 #include "node/dialog_model.h"
 #include "node/gesture_impl.h"
 #include "node/node_model.h"
+#include "node/node_model_safely.h"
 #include "node_extened.h"
 
 #include "base/log/log_wrapper.h"
@@ -91,6 +92,50 @@ ArkUI_NativeNodeAPI_1 nodeImpl_1 = {
     OHOS::Ace::NodeModel::SetLengthMetricUnit,
     OHOS::Ace::NodeModel::GetParent,
     OHOS::Ace::NodeModel::RemoveAllChildren,
+};
+
+ArkUI_NativeNodeAPI_1 multiThreadNodeImpl_1 = {
+    .version = CURRENT_NATIVE_NODE_API_VERSION,
+    .createNode = OHOS::Ace::NodeModel::CreateNodeSafely,
+    .disposeNode = OHOS::Ace::NodeModel::DisposeNodeSafely,
+    .addChild = OHOS::Ace::NodeModel::AddChildSafely,
+    .removeChild = OHOS::Ace::NodeModel::RemoveChildSafely,
+    .insertChildAfter = OHOS::Ace::NodeModel::InsertChildAfterSafely,
+    .insertChildBefore = OHOS::Ace::NodeModel::InsertChildBeforeSafely,
+    .insertChildAt = OHOS::Ace::NodeModel::InsertChildAtSafely,
+    .setAttribute = OHOS::Ace::NodeModel::SetAttributeSafely,
+    .getAttribute = OHOS::Ace::NodeModel::GetAttributeSafely,
+    .resetAttribute = OHOS::Ace::NodeModel::ResetAttributeSafely,
+    .registerNodeEvent = OHOS::Ace::NodeModel::RegisterNodeEventSafely,
+    .unregisterNodeEvent = OHOS::Ace::NodeModel::UnregisterNodeEventSafely,
+    .registerNodeEventReceiver = OHOS::Ace::NodeModel::RegisterOnEventSafely,
+    .unregisterNodeEventReceiver = OHOS::Ace::NodeModel::UnregisterOnEventSafely,
+    .markDirty = OHOS::Ace::NodeModel::MarkDirtySafely,
+    .getTotalChildCount = OHOS::Ace::NodeModel::GetTotalChildCountSafely,
+    .getChildAt = OHOS::Ace::NodeModel::GetChildAtSafely,
+    .getFirstChild = OHOS::Ace::NodeModel::GetFirstChildSafely,
+    .getLastChild = OHOS::Ace::NodeModel::GetLastChildSafely,
+    .getPreviousSibling = OHOS::Ace::NodeModel::GetPreviousSiblingSafely,
+    .getNextSibling = OHOS::Ace::NodeModel::GetNextSiblingSafely,
+    .registerNodeCustomEvent = OHOS::Ace::NodeModel::RegisterNodeCustomEventSafely,
+    .unregisterNodeCustomEvent = OHOS::Ace::NodeModel::UnregisterNodeCustomEventSafely,
+    .registerNodeCustomEventReceiver = OHOS::Ace::NodeModel::RegisterNodeCustomReceiverSafely,
+    .unregisterNodeCustomEventReceiver = OHOS::Ace::NodeModel::UnregisterNodeCustomEventReceiverSafely,
+    .setMeasuredSize = OHOS::Ace::NodeModel::SetMeasuredSizeSafely,
+    .setLayoutPosition = OHOS::Ace::NodeModel::SetLayoutPositionSafely,
+    .getMeasuredSize = OHOS::Ace::NodeModel::GetMeasuredSizeSafely,
+    .getLayoutPosition = OHOS::Ace::NodeModel::GetLayoutPositionSafely,
+    .measureNode = OHOS::Ace::NodeModel::MeasureNodeSafely,
+    .layoutNode = OHOS::Ace::NodeModel::LayoutNodeSafely,
+    .addNodeEventReceiver = OHOS::Ace::NodeModel::AddNodeEventReceiverSafely,
+    .removeNodeEventReceiver = OHOS::Ace::NodeModel::RemoveNodeEventReceiverSafely,
+    .addNodeCustomEventReceiver = OHOS::Ace::NodeModel::AddNodeCustomEventReceiverSafely,
+    .removeNodeCustomEventReceiver = OHOS::Ace::NodeModel::RemoveNodeCustomEventReceiverSafely,
+    .setUserData = OHOS::Ace::NodeModel::SetUserDataSafely,
+    .getUserData = OHOS::Ace::NodeModel::GetUserDataSafely,
+    .setLengthMetricUnit = OHOS::Ace::NodeModel::SetLengthMetricUnitSafely,
+    .getParent = OHOS::Ace::NodeModel::GetParentSafely,
+    .removeAllChildren = OHOS::Ace::NodeModel::RemoveAllChildrenSafely,
 };
 
 ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
@@ -283,6 +328,11 @@ void* OH_ArkUI_QueryModuleInterfaceByName(ArkUI_NativeAPIVariantKind type, const
         case ARKUI_NATIVE_ANIMATE:
             if (strcmp(structName, "ArkUI_NativeAnimateAPI_1") == 0) {
                 return &animateImpl_1;
+            }
+            break;
+        case ARKUI_MULTI_THREAD_NATIVE_NODE:
+            if (strcmp(structName, "ArkUI_NativeNodeAPI_1") == 0) {
+                return &multiThreadNodeImpl_1;
             }
             break;
         default:

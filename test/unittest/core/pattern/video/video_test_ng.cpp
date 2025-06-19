@@ -95,6 +95,7 @@ const std::string VIDEO_SEEKED_EVENT = "seeked";
 const std::string VIDEO_UPDATE_EVENT = "update";
 const std::string VIDEO_FULLSCREEN_EVENT = "fullScreen";
 const std::string EXTRA_INFO_KEY = "extraInfo";
+const std::string VIDEO_ERROR_ID = "";
 const int32_t VIDEO_CODE = 1;
 const std::string VIDEO_MESSAGE = "message";
 const std::string VIDEO_CALLBACK_RESULT = "result_ok";
@@ -1162,6 +1163,9 @@ HWTEST_F(VideoTestNg, VideoPatternEventTest001, TestSize.Level1)
     auto errorCallback = [&result](const std::string& error) { result = VIDEO_CALLBACK_RESULT; };
     auto eventHub = pattern->GetOrCreateEventHub<VideoEventHub>();
     eventHub->SetOnError(std::move(errorCallback));
+    pattern->OnError(VIDEO_ERROR_ID);
+    EXPECT_EQ(result, VIDEO_CALLBACK_RESULT);
+    result = "";
     pattern->OnError(VIDEO_CODE, VIDEO_MESSAGE);
     EXPECT_EQ(result, VIDEO_CALLBACK_RESULT);
 }

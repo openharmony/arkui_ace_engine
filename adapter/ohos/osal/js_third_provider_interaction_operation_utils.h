@@ -42,7 +42,7 @@ void TransformAccessbilityElementInfo(
     for (const auto& actionItem : actionList) {
         auto action = OHOS::Accessibility::AccessibleAction(
             static_cast<OHOS::Accessibility::ActionType>(actionItem.actionType),
-            actionItem.description);
+            actionItem.description ? actionItem.description : "");
         accessibilityElementInfo.AddAction(action);
     }
 

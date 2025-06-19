@@ -86,4 +86,18 @@ void ToolbarManager::OnChangeSideBarColor()
         sideBarColorChangeCallbackFuncCopy(sideBarBgColor_, sideBarContainerBgColor_, sideBarBlurStyle_);
     }
 }
+
+void ToolbarManager::SetNavigationModeChangeCallback(const std::function<void()>&& callback)
+{
+    navigationModeChangeCallbackFuncs_.emplace_back(std::move(callback));
+}
+
+void ToolbarManager::OnNavigationModeChange()
+{
+    for (auto navigationModeChangeCallbackFuncCopy : navigationModeChangeCallbackFuncs_) {
+        if (navigationModeChangeCallbackFuncCopy) {
+            navigationModeChangeCallbackFuncCopy();
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

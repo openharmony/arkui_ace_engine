@@ -40,7 +40,7 @@ public:
         const RefPtr<UINode>& customNode, const RefPtr<PopupParam>& param);
     static RefPtr<FrameNode> CreateMessage(const std::string& message, bool isUseCustom);
     static RefPtr<FrameNode> CreateCombinedChild(
-        const RefPtr<PopupParam>& param, int32_t popupId, int32_t targetId, const RefPtr<FrameNode>& bobbleNode);
+        const RefPtr<PopupParam>& param, int32_t popupId, int32_t targetId, const RefPtr<FrameNode>& bubbleNode);
     static RefPtr<FrameNode> CreateButtons(const RefPtr<PopupParam>& param, int32_t popupId, int32_t targetId);
     static RefPtr<FrameNode> CreateButton(
         ButtonProperties& buttonParam, int32_t popupId, int32_t targetId, const RefPtr<PopupParam>& param,

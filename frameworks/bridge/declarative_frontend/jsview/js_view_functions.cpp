@@ -803,7 +803,7 @@ std::string ViewFunctions::ExecuteOnFormRecycle()
         std::string statusData = ret->ToString();
         return statusData.empty() ? EMPTY_STATUS_DATA : statusData;
     }
-    LOGE("ExecuteOnFormRecycle failed");
+    TAG_LOGE(AceLogTag::ACE_FORM, "ExecuteOnFormRecycle failed");
     return "";
 }
 
@@ -811,7 +811,7 @@ void ViewFunctions::ExecuteOnFormRecover(const std::string& statusData)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     if (jsOnFormRecoverFunc_.IsEmpty()) {
-        LOGE("jsOnFormRecoverFunc_ is null");
+        TAG_LOGE(AceLogTag::ACE_FORM, "jsOnFormRecoverFunc_ is null");
         return;
     }
 

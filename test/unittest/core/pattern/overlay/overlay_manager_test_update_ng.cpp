@@ -1993,7 +1993,7 @@ HWTEST_F(OverlayManagerTestUpdateNg, OnBindSheet032, TestSize.Level1)
     ASSERT_NE(buttonNode, nullptr);
     auto iconNode = buttonNode->GetChildAtIndex(0);
     ASSERT_NE(iconNode, nullptr);
-    ASSERT_EQ(iconNode->GetTag(), V2::IMAGE_ETS_TAG);
+    ASSERT_EQ(iconNode->GetTag(), V2::COLUMN_ETS_TAG);
     /**
      * @tc.steps: step3. Change SDK Version.
      * @tc.expected: closeIcon is Symbol.
@@ -2013,7 +2013,7 @@ HWTEST_F(OverlayManagerTestUpdateNg, OnBindSheet032, TestSize.Level1)
     ASSERT_NE(buttonNode, nullptr);
     iconNode = buttonNode->GetChildAtIndex(0);
     ASSERT_NE(iconNode, nullptr);
-    ASSERT_EQ(iconNode->GetTag(), V2::SYMBOL_ETS_TAG);
+    ASSERT_EQ(iconNode->GetTag(), V2::COLUMN_ETS_TAG);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
 }
 

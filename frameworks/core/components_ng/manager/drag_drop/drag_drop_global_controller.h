@@ -70,6 +70,10 @@ public:
     void SetAsyncDragCallback(std::function<void()> asyncDragCallbac);
 
     std::function<void()> GetAsyncDragCallback();
+
+    void SetCallAnsyncDragEnd(std::function<void(DragStartRequestStatus)> callSyncDragEnd);
+
+    std::function<void(DragStartRequestStatus)> GetCallAnsyncEnd();
 private:
     DragDropGlobalController() = default;
 
@@ -87,6 +91,7 @@ private:
 
     DragStartRequestStatus dragStartRequestStatus_{DragStartRequestStatus::READY};
     std::function<void()> asyncDragCallback_;
+    std::function<void(DragStartRequestStatus)> callSyncDragEnd_;
 
     // use for async on drop
     bool isOnOnDropPhase_ = false;

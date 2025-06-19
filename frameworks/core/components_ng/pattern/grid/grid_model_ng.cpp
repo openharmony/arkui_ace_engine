@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,9 +15,12 @@
 
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 
+#include "base/utils/system_properties.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
+#include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -136,7 +139,11 @@ void GridModelNG::SetScrollBarWidth(const std::string& value)
 
 void GridModelNG::SetCachedCount(int32_t value, bool show)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, value);
+    int32_t count = value;
+    if (SystemProperties::IsWhiteBlockEnabled()) {
+        count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, count);
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ShowCachedItems, show);
 }
 
@@ -461,7 +468,11 @@ void GridModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optional<Co
 void GridModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
 {
     if (cachedCount >= 0) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, cachedCount, frameNode);
+        int32_t count = cachedCount;
+        if (SystemProperties::IsWhiteBlockEnabled()) {
+            count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, count, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, frameNode);
     }
@@ -762,6 +773,24 @@ void GridModelNG::AddDragFrameNodeToManager(FrameNode* frameNode)
     dragDropManager->AddGridDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
+void GridModelNG::CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("GridFriction");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        double friction = -1.0;
+        ResourceParseUtils::ParseResDouble(resObj, friction);
+        pattern->SetFriction(friction);
+    };
+    pattern->AddResObj("GridFriction", resObj, std::move(updateFunc));
+}
+
 void GridModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin)
 {
     CHECK_NULL_VOID(frameNode);
@@ -808,5 +837,40 @@ void GridModelNG::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
     auto eventHub = frameNode->GetOrCreateEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScroll(std::move(onScroll));
+}
+
+void GridModelNG::CreateWithResourceObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("GridFriction");
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        double friction = -1.0;
+        ResourceParseUtils::ParseResDouble(resObj, friction);
+        pattern->SetFriction(friction);
+    };
+    pattern->AddResObj("GridFriction", resObj, std::move(updateFunc));
+}
+
+void GridModelNG::SetSyncLoad(bool syncLoad)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, SyncLoad, syncLoad);
+}
+
+void GridModelNG::SetSyncLoad(FrameNode* frameNode, bool syncLoad)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, SyncLoad, syncLoad, frameNode);
+}
+
+bool GridModelNG::GetSyncLoad(FrameNode* frameNode)
+{
+    bool result = false;
+    CHECK_NULL_RETURN(frameNode, result);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(GridLayoutProperty, SyncLoad, result, frameNode, false);
+    return result;
 }
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
+#include "base/utils/system_properties.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
@@ -25,8 +26,10 @@
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
+
 SizeF WaterFlowPattern::GetContentSize() const
 {
     auto host = GetHost();
@@ -256,6 +259,7 @@ void WaterFlowPattern::TriggerPostLayoutEvents()
     float delta = layoutInfo_->GetDelta(prevOffset_);
     PrintOffsetLog(AceLogTag::ACE_WATERFLOW, host->GetId(), delta);
     FireObserverOnDidScroll(delta);
+    FireObserverOnScrollerAreaChange(delta);
     auto onScroll = eventHub->GetOnScroll();
     if (onScroll) {
         FireOnScroll(delta, onScroll);
@@ -327,7 +331,11 @@ void WaterFlowPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFun
     CHECK_NULL_VOID(indexChanged);
     itemRange_ = { layoutInfo_->FirstIdx(), layoutInfo_->endIndex_ };
     CHECK_NULL_VOID(onScrollIndex);
-    onScrollIndex(layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
+    int32_t endIndex = layoutInfo_->endIndex_;
+    if (SystemProperties::IsWhiteBlockEnabled()) {
+        endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(layoutInfo_->endIndex_);
+    }
+    onScrollIndex(layoutInfo_->FirstIdx(), endIndex);
 }
 
 bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -352,6 +360,17 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     CheckScrollable();
 
     isInitialized_ = true;
+
+    if (layoutInfo_->measureInNextFrame_) {
+        GetContext()->AddAfterLayoutTask([weak = AceType::WeakClaim(this)]() {
+            ACE_SCOPED_TRACE("WaterFlow MeasureInNextFrame");
+            auto waterFlow = weak.Upgrade();
+            if (waterFlow) {
+                waterFlow->MarkDirtyNodeSelf();
+                waterFlow->layoutInfo_->measureInNextFrame_ = false;
+            }
+        });
+    }
 
     if (layoutInfo_->startIndex_ == 0 && CheckMisalignment(layoutInfo_)) {
         MarkDirtyNodeSelf();

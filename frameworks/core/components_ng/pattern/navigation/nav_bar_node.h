@@ -45,6 +45,10 @@ public:
     void SystemTransitionPushAction(bool isFinish);
     void StartSystemTransitionPush();
     void StartSystemTransitionPop();
+    void SoftTransitionPushAction(bool isStart);
+    void StartSoftTransitionPush();
+    void StartSoftTransitionPop();
+    void InitSoftTransitionPop();
     bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
     RefPtr<UINode> GetNavigationNode() override;
 };

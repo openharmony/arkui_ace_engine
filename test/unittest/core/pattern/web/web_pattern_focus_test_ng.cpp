@@ -526,9 +526,116 @@ HWTEST_F(WebPatternFocusTestNg, OnAccessibilityHoverEvent, TestSize.Level1)
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
 
-    PointF point(20.0f, 100.0f);
-    webPattern->OnAccessibilityHoverEvent(point, true);
+    const NG::PointF point(20, 100);
+    SourceType sourceType = SourceType::NONE;
+    AccessibilityHoverEventType eventType = AccessibilityHoverEventType::MOVE;
+    TimeStamp time;
+    webPattern->OnAccessibilityHoverEvent(point, sourceType, eventType, time);
     ASSERT_NE(webPattern->delegate_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: GetSurfaceIdByHtmlElementId001
+ * @tc.desc: GetSurfaceIdByHtmlElementId delegate_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternFocusTestNg, GetSurfaceIdByHtmlElementId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    ASSERT_EQ(webPattern->delegate_, nullptr);
+
+    std::string htmlElementId = "testElementId";
+    std::string result = webPattern->GetSurfaceIdByHtmlElementId(htmlElementId);
+    ASSERT_EQ(result, "");
+#endif
+}
+
+/**
+ * @tc.name: GetSurfaceIdByHtmlElementId002
+ * @tc.desc: GetSurfaceIdByHtmlElementId delegate_ is not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternFocusTestNg, GetSurfaceIdByHtmlElementId002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    std::string result1 = webPattern->GetSurfaceIdByHtmlElementId("existhtmlElementId");
+    ASSERT_EQ(result1, "existSurfaceId");
+    std::string result2 = webPattern->GetSurfaceIdByHtmlElementId("existhtmlElementIdOther");
+    ASSERT_EQ(result2, "existSurfaceIdOther");
+    std::string result3 = webPattern->GetSurfaceIdByHtmlElementId("noExisthtmlElementId");
+    ASSERT_EQ(result3, "");
+#endif
+}
+
+/**
+ * @tc.name: GetWebAccessibilityIdBySurfaceId001
+ * @tc.desc: GetWebAccessibilityIdBySurfaceId delegate_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternFocusTestNg, GetWebAccessibilityIdBySurfaceId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    ASSERT_EQ(webPattern->delegate_, nullptr);
+
+    std::string surfaceId = "testSurfaceId";
+    auto result = webPattern->GetWebAccessibilityIdBySurfaceId(surfaceId);
+    ASSERT_EQ(result, -1);
+#endif
+}
+
+/**
+ * @tc.name: GetWebAccessibilityIdBySurfaceId002
+ * @tc.desc: GetWebAccessibilityIdBySurfaceId delegate_ is not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternFocusTestNg, GetWebAccessibilityIdBySurfaceId002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    auto result1 = webPattern->GetWebAccessibilityIdBySurfaceId("existSurfaceId");
+    ASSERT_EQ(result1, 123);
+    auto result2 = webPattern->GetWebAccessibilityIdBySurfaceId("existSurfaceIdOther");
+    ASSERT_EQ(result2, 456);
+    auto result3 = webPattern->GetWebAccessibilityIdBySurfaceId("noexistSurfaceId");
+    ASSERT_EQ(result3, -1);
 #endif
 }
 

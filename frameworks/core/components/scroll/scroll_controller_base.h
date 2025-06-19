@@ -92,6 +92,7 @@ public:
     {
         return true;
     }
+    virtual void SetCanStayOverScroll(bool canStayOverScroll) {}
     virtual void ScrollBy(double pixelX, double pixelY, bool smooth) {}
     virtual void ScrollToEdge(ScrollEdgeType scrollEdgeType, float velocity) {}
     virtual void ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth) {}

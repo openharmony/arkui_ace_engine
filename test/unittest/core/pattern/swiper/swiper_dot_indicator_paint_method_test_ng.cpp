@@ -910,4 +910,43 @@ HWTEST_F(SwiperIndicatorTestNg, UpdateBackground003, TestSize.Level1)
     paintMethod->UpdateBackground(&paintWrapper);
     EXPECT_EQ(paintMethod->circleDotIndicatorModifier_->vectorBlackPointAngle_->value_[0], 52);
 }
+
+/**
+ * @tc.name: NeedBottomAnimation001
+ * @tc.desc: Test NeedBottomAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, NeedBottomAnimation001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    paintMethod->targetIndex_ = 0;
+    paintMethod->touchBottomPageRate_ = 0;
+    paintMethod->currentIndexActual_ = 0;
+    EXPECT_TRUE(paintMethod->NeedBottomAnimation());
+
+    paintMethod->targetIndex_ = 3;
+    EXPECT_FALSE(paintMethod->NeedBottomAnimation());
+
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    paintMethod->touchBottomPageRate_ = 0;
+    paintMethod->currentIndexActual_ = 0;
+    paintMethod->firstIndex_ = 0;
+    EXPECT_TRUE(paintMethod->NeedBottomAnimation());
+
+    paintMethod->touchBottomPageRate_ = 0.6;
+    EXPECT_FALSE(paintMethod->NeedBottomAnimation());
+
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    paintMethod->touchBottomPageRate_ = 0;
+    paintMethod->currentIndexActual_ = 0;
+    paintMethod->firstIndex_ = 3;
+    paintMethod->itemCount_ = 4;
+    EXPECT_TRUE(paintMethod->NeedBottomAnimation());
+}
 } // namespace OHOS::Ace::NG

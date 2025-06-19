@@ -33,13 +33,9 @@ namespace OHOS::Ace::Framework {
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetXComponentController(void* jsController, void* controller)
 {
     auto* jsXComponentController = static_cast<Framework::JSXComponentController*>(jsController);
-    if (!jsXComponentController) {
-        return;
-    }
+    CHECK_NULL_VOID(jsXComponentController);
     auto xComponentController = reinterpret_cast<std::shared_ptr<InnerXComponentController>*>(controller);
-    if (!xComponentController) {
-        return;
-    }
+    CHECK_NULL_VOID(xComponentController);
     *xComponentController = jsXComponentController->GetController();
 }
 
@@ -160,20 +156,18 @@ void JSXComponentController::Constructor(const JSCallbackInfo& args)
 
 void JSXComponentController::Destructor(JSXComponentController* xcomponentController)
 {
-    if (xcomponentController) {
-        xcomponentController->DecRefCount();
-    }
+    CHECK_NULL_VOID(xcomponentController);
+    xcomponentController->DecRefCount();
 }
 
 void JSXComponentController::GetSurfaceId(const JSCallbackInfo& args)
 {
-    if (xcomponentController_) {
-        auto surfaceId = xcomponentController_->GetSurfaceId();
-        auto returnValue = JSVal(ToJSValue(surfaceId));
-        auto returnPtr = JSRef<JSVal>::Make(returnValue);
-        TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Controller GetSurfaceId:%{public}s", surfaceId.c_str());
-        args.SetReturnValue(returnPtr);
-    }
+    CHECK_NULL_VOID(xcomponentController_);
+    auto surfaceId = xcomponentController_->GetSurfaceId();
+    auto returnValue = JSVal(ToJSValue(surfaceId));
+    auto returnPtr = JSRef<JSVal>::Make(returnValue);
+    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Controller GetSurfaceId:%{public}s", surfaceId.c_str());
+    args.SetReturnValue(returnPtr);
 }
 
 void JSXComponentController::SetSurfaceConfig(const JSCallbackInfo& args)
@@ -192,16 +186,13 @@ void JSXComponentController::SetSurfaceConfig(const JSCallbackInfo& args)
         return;
     }
 
-    if (xcomponentController_) {
-        xcomponentController_->ConfigSurface(surfaceWidth, surfaceHeight);
-    }
+    CHECK_NULL_VOID(xcomponentController_);
+    xcomponentController_->ConfigSurface(surfaceWidth, surfaceHeight);
 }
 
 void JSXComponentController::GetXComponentSurfaceRect(const JSCallbackInfo& args)
 {
-    if (!xcomponentController_) {
-        return;
-    }
+    CHECK_NULL_VOID(xcomponentController_);
     auto retObj = JSRef<JSObject>::New();
     float offsetX = 0.0f;
     float offsetY = 0.0f;
@@ -221,9 +212,7 @@ void JSXComponentController::SetXComponentSurfaceRect(const JSCallbackInfo& args
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
     }
-    if (!xcomponentController_) {
-        return;
-    }
+    CHECK_NULL_VOID(xcomponentController_);
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     auto jsSurfaceWidth = obj->GetProperty("surfaceWidth");

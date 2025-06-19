@@ -282,6 +282,102 @@ void NavDestinationGroupNode::InitSystemTransitionPush(bool transitionIn)
     }
 }
 
+void NavDestinationGroupNode::InitSoftTransitionPush(bool transitionIn)
+{
+    bool needContentAnimation = IsNeedContentTransition();
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
+    if (transitionIn) {
+        SetIsOnAnimation(true);
+        SetTransitionType(PageTransitionType::ENTER_PUSH);
+        auto translate = CalcTranslateForTransitionPushStart(frameSizeWithSafeArea, true);
+        if (needContentAnimation) {
+            renderContext->UpdateTranslateInXY(translate);
+        }
+        return;
+    }
+    SetTransitionType(PageTransitionType::EXIT_PUSH);
+    SetIsOnAnimation(true);
+    auto translate = CalcTranslateForTransitionPushStart(frameSize, false);
+    if (needContentAnimation) {
+        renderContext->UpdateTranslateInXY(translate);
+    }
+    if (NeedRemoveInPush()) {
+        GetEventHub<EventHub>()->SetEnabledInternal(false);
+    }
+}
+
+void NavDestinationGroupNode::StartSoftTransitionPush(bool transitionIn)
+{
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
+    bool needContentAnimation = IsNeedContentTransition();
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (transitionIn) {
+        auto translate = CalcTranslateForTransitionPushEnd(frameSizeWithSafeArea, true);
+        if (needContentAnimation) {
+            renderContext->UpdateTranslateInXY(translate);
+        }
+        return;
+    }
+    auto translate = CalcTranslateForTransitionPushEnd(frameSizeWithSafeArea, false);
+    if (needContentAnimation) {
+        renderContext->UpdateTranslateInXY(translate);
+    }
+}
+
+void NavDestinationGroupNode::InitSoftTransitionPop(bool isTransitionIn)
+{
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
+    bool needContentAnimation = IsNeedContentTransition();
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (isTransitionIn) {
+        SetTransitionType(PageTransitionType::ENTER_POP);
+        auto translate = CalcTranslateForTransitionPopStart(frameSizeWithSafeArea, true);
+        if (needContentAnimation) {
+            renderContext->UpdateTranslateInXY(translate);
+        }
+        return;
+    }
+    SetIsOnAnimation(true);
+    SetTransitionType(PageTransitionType::EXIT_POP);
+    GetEventHub<EventHub>()->SetEnabledInternal(false);
+    auto translate = CalcTranslateForTransitionPopStart(frameSizeWithSafeArea, false);
+    if (needContentAnimation) {
+        renderContext->UpdateTranslateInXY(translate);
+    }
+}
+
+void NavDestinationGroupNode::StartSoftTransitionPop(bool transitionIn)
+{
+    bool needContentAnimation = IsNeedContentTransition();
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
+    if (transitionIn) {
+        auto translate = CalcTranslateForTransitionPopEnd(frameSizeWithSafeArea, true);
+        if (needContentAnimation) {
+            renderContext->UpdateTranslateInXY(translate);
+        }
+        return;
+    }
+    auto translate = CalcTranslateForTransitionPopEnd(frameSizeWithSafeArea, false);
+    if (needContentAnimation) {
+        renderContext->UpdateTranslateInXY(translate);
+    }
+}
+
 void NavDestinationGroupNode::StartSystemTransitionPush(bool transitionIn)
 {
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
@@ -693,6 +789,21 @@ std::string NavDestinationGroupNode::ToDumpString()
     std::string dumpString;
     auto navDestinationPattern = GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(navDestinationPattern, dumpString);
+    std::string navDestinationType;
+    switch (destType_) {
+        case NavDestinationType::DETAIL:
+            navDestinationType = "DETAIL";
+            break;
+        case NavDestinationType::HOME:
+            navDestinationType = "HOME";
+            break;
+        case NavDestinationType::PLACE_HOLDER:
+            navDestinationType = "PLACE_HOLDER";
+            break;
+        default:
+            navDestinationType = "INVALID";
+            break;
+    }
     dumpString.append("| [");
     dumpString.append(std::to_string(index_));
     dumpString.append("]{ ID: ");
@@ -703,6 +814,8 @@ std::string NavDestinationGroupNode::ToDumpString()
     dumpString.append(mode_ == NavDestinationMode::STANDARD ? "STANDARD" : "DIALOG");
     dumpString.append("\", IsOnShow: \"");
     dumpString.append(navDestinationPattern->GetIsOnShow() ? "TRUE" : "FALSE");
+    dumpString.append("\", navDestinationType: \"");
+    dumpString.append(navDestinationType);
     dumpString.append("\" }");
     return dumpString;
 }
@@ -1085,9 +1198,9 @@ RefPtr<NavDestinationGroupNode> NavDestinationGroupNode::GetOrCreatePlaceHolder(
     auto phNode = ForceSplitUtils::CreatePlaceHolderNavDestination(context);
     CHECK_NULL_RETURN(phNode, nullptr);
     phNode->SetPrimaryNode(WeakClaim(this));
-    auto phPattern = phNode->GetPattern<NavDestinationGroupNode>();
+    auto phPattern = phNode->GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(phPattern, nullptr);
-    phPattern->SetIndex(index_, false);
+    phPattern->SetIndex(index_);
     placeHolderNode_ = phNode;
     return placeHolderNode_;
 }

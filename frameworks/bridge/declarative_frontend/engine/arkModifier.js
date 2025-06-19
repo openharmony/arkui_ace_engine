@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,7 +64,7 @@ class ModifierUtils {
   static mergeMapsEmplace(stageMap, newMap, componentOverrideMap) {
     newMap.forEach((value, key) => {
       if (!key) {
-        ArkLogConsole.info('key of modifier map is undefined, ModifierWithKey is ' +
+        ArkLogConsole.debug('key of modifier map is undefined, ModifierWithKey is ' +
           (value ? value.constructor.name.toString() : 'undefined'));
       } else {
         if (componentOverrideMap.has(key.toString())) {
@@ -109,7 +109,7 @@ class ModifierUtils {
           attributeModifierWithKey.value === null)
       );
     } else {
-      ArkLogConsole.info('pointer is invalid when putDirtyModifier in ' + (arkModifier ?
+      ArkLogConsole.debug('pointer is invalid when putDirtyModifier in ' + (arkModifier ?
         arkModifier.constructor.name.toString() : 'undefined') + ' of ' + (attributeModifierWithKey ?
         attributeModifierWithKey.constructor.name.toString() : 'undefined'));
     }
@@ -225,7 +225,7 @@ class AttributeUpdater {
   onComponentChanged(instance) {}
   updateConstructorParams(...args) {
     if (!this.attribute) {
-      ArkLogConsole.info('AttributeUpdater has not been initialized before updateConstructorParams.');
+      ArkLogConsole.debug('AttributeUpdater has not been initialized before updateConstructorParams.');
       return;
     }
     this.attribute.initialize(args);
@@ -368,6 +368,16 @@ class DatePickerModifier extends ArkDatePickerComponent {
   }
 }
 class DividerModifier extends ArkDividerComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    this._modifiersWithKeys = new ModifierMap();
+  }
+  applyNormalAttribute(instance) {
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier(instance, this);
+  }
+}
+class EmbeddedComponentModifier extends ArkEmbeddedComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
@@ -1134,5 +1144,5 @@ export default {
   SwiperModifier, TabsModifier, TextAreaModifier, TextModifier, TextClockModifier, TextInputModifier, TextPickerModifier, TextTimerModifier, TimePickerModifier,
   ToggleModifier, VideoModifier, WaterFlowModifier, FlexModifier, PluginComponentModifier, RefreshModifier, TabContentModifier, ModifierUtils, AttributeUpdater,
   ParticleModifier, MediaCachedImageModifier, SymbolGlyphModifier, SymbolSpanModifier, Component3DModifier, ContainerSpanModifier, LinearIndicatorModifier,
-  IndicatorComponentModifier, LazyVGridLayoutModifier, ModifierMap, StepperModifier
+  IndicatorComponentModifier, LazyVGridLayoutModifier, ModifierMap, StepperModifier, EmbeddedComponentModifier
 };

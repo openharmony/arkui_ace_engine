@@ -17,6 +17,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -1955,7 +1956,6 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest031, TestSize.Level1)
     ASSERT_NE(subTitleNode, nullptr);
     EXPECT_EQ(titleNode->GetTag(), V2::ROW_ETS_TAG);
     EXPECT_EQ(subTitleNode->GetTag(), V2::ROW_ETS_TAG);
-
     /**
      * @tc.steps: step2. get titleTextNode && subTitleTextNode.
      * @tc.expected: The text padding is equal to dialogTheme->GetPaddingTopTitle() when have title && subTitle.
@@ -2097,5 +2097,31 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest033, TestSize.Level1)
     ASSERT_NE(subTitleProp, nullptr);
     EXPECT_EQ(titleProp->GetMaxFontScale().value(), FONT_SIZE_SCALE_TEST1);
     EXPECT_EQ(subTitleProp->GetMaxFontScale().value(), FONT_SIZE_SCALE_TEST1);
+}
+
+/**
+ * @tc.name: DialogPatternTest034
+ * @tc.desc: Test AdjustHoverModeForWaterfall
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogPatternTestNg, DialogPatternTest034, TestSize.Level1)
+{
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(frameNode, nullptr);
+    auto dialogLayoutProperty = AceType::MakeRefPtr<DialogLayoutProperty>();
+    ASSERT_NE(dialogLayoutProperty, nullptr);
+    dialogLayoutProperty->UpdateEnableHoverMode(true);
+    frameNode->layoutProperty_ = dialogLayoutProperty;
+    dialogLayoutAlgorithm.AdjustHoverModeForWaterfall(frameNode);
+    EXPECT_FALSE(dialogLayoutAlgorithm.isHoverMode_);
+    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
+    RefPtr<MockContainer> containerOne = AceType::MakeRefPtr<MockContainer>();
+    RefPtr<MockContainer> containerTwo = AceType::MakeRefPtr<MockContainer>();
+    MockContainer::Current()->GetMockDisplayInfo()->SetFoldStatus(FoldStatus::HALF_FOLD);
+    AceEngine::Get().AddContainer(0, containerOne);
+    AceEngine::Get().AddContainer(1, containerTwo);
+    dialogLayoutAlgorithm.AdjustHoverModeForWaterfall(frameNode);
+    EXPECT_TRUE(dialogLayoutAlgorithm.isHoverMode_);
 }
 } // namespace OHOS::Ace::NG

@@ -74,6 +74,7 @@ public:
     bool GetMediaById(const int32_t& resId, std::string& mediaPath) const override;
     uint32_t GetResourceLimitKeys() const override;
     uint32_t GetSymbolById(uint32_t resId) const override;
+    uint32_t GetResId(const std::string &resTypeName) const override;
 
 private:
     std::string GetActualResourceName(const std::string& resName) const;

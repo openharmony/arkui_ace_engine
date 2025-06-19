@@ -48,8 +48,10 @@ PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, dou
     : MultiFingersRecognizer(fingers, isLimitFingerCount), direction_(direction), distance_(distance),
     mouseDistance_(distance), newFingers_(fingers_), newDistance_(distance_), newDirection_(direction_)
 {
-    distanceMap_[SourceTool::UNKNOWN] = distance_;
-    newDistanceMap_[SourceTool::UNKNOWN] = distance_;
+    distanceMap_[SourceTool::UNKNOWN] = Dimension(
+        Dimension(distance_, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
+    newDistanceMap_[SourceTool::UNKNOWN] = Dimension(
+        Dimension(distance_, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
     panVelocity_.SetDirection(direction_.type);
     if (fingers_ > MAX_PAN_FINGERS || fingers_ < DEFAULT_PAN_FINGERS) {
         fingers_ = DEFAULT_PAN_FINGERS;
@@ -58,6 +60,18 @@ PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, dou
 
 PanRecognizer::PanRecognizer(
     int32_t fingers, const PanDirection& direction, const PanDistanceMap& distanceMap, bool isLimitFingerCount)
+    : MultiFingersRecognizer(fingers, isLimitFingerCount), direction_(direction), newFingers_(fingers_),
+      newDirection_(direction_)
+{
+    SetDistanceMap(distanceMap);
+    panVelocity_.SetDirection(direction_.type);
+    if (fingers_ > MAX_PAN_FINGERS || fingers_ < DEFAULT_PAN_FINGERS) {
+        fingers_ = DEFAULT_PAN_FINGERS;
+    }
+}
+
+PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction,
+    const PanDistanceMapDimension& distanceMap, bool isLimitFingerCount)
     : MultiFingersRecognizer(fingers, isLimitFingerCount), direction_(direction), newFingers_(fingers_),
       newDirection_(direction_), distanceMap_(distanceMap), newDistanceMap_(distanceMap)
 {
@@ -75,10 +89,10 @@ RefPtr<Gesture> PanRecognizer::CreateGestureFromRecognizer() const
 void PanRecognizer::ResetDistanceMap()
 {
     for (auto& iter : distanceMap_) {
-        distanceMap_[iter.first] = LessNotEqual(iter.second, 0.0) ? DEFAULT_PAN_DISTANCE.ConvertToPx() : iter.second;
+        distanceMap_[iter.first] = LessNotEqual(iter.second.ConvertToPx(), 0.0) ? DEFAULT_PAN_DISTANCE : iter.second;
     }
     if (distanceMap_.find(SourceTool::UNKNOWN) == distanceMap_.end()) {
-        distanceMap_[SourceTool::UNKNOWN] = DEFAULT_PAN_DISTANCE.ConvertToPx();
+        distanceMap_[SourceTool::UNKNOWN] = DEFAULT_PAN_DISTANCE;
     }
 }
 
@@ -143,7 +157,7 @@ void PanRecognizer::OnAccepted()
 
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
-        "Pan accepted, tag = %{public}s, averageDistance is x %{public}f, y %{public}f",
+        "PAN RACC, T: %{public}s, DIS x %{public}f, y %{public}f",
         node ? node->GetTag().c_str() : "null", averageDistance_.GetX(), averageDistance_.GetY());
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
@@ -228,6 +242,7 @@ void PanRecognizer::UpdateAxisPointInVelocityTracker(const AxisEvent& event, boo
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     extraInfo_ = "";
+    lastAction_ = static_cast<int32_t>(TouchType::DOWN);
     isTouchEventFinished_ = false;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
@@ -281,6 +296,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
     extraInfo_ = "";
+    lastAction_ = static_cast<int32_t>(AxisAction::BEGIN);
     isTouchEventFinished_ = false;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
@@ -327,6 +343,7 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     extraInfo_ = "currentFingers: " + std::to_string(currentFingers_) + " fingers: " + std::to_string(fingers_);
+    lastAction_ = static_cast<int32_t>(TouchType::UP);
     fingersId_.erase(event.id);
     if (currentFingers_ < fingers_) {
         if (isNeedResetVoluntarily_ && currentFingers_ == 1) {
@@ -383,6 +400,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
     isTouchEventFinished_ = false;
+    lastAction_ = static_cast<int32_t>(AxisAction::END);
     // if axisEvent received rotateEvent, no need to active Pan recognizer.
     if (event.isRotationEvent) {
         return;
@@ -422,6 +440,7 @@ void PanRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     isTouchEventFinished_ = false;
+    lastAction_ = static_cast<int32_t>(TouchType::MOVE);
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         return;
     }
@@ -495,6 +514,7 @@ void PanRecognizer::UpdateAxisDeltaTransform(const AxisEvent& event)
 void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
     isTouchEventFinished_ = false;
+    lastAction_ = static_cast<int32_t>(AxisAction::UPDATE);
     if (fingers_ != AXIS_PAN_FINGERS || event.isRotationEvent) {
         return;
     }
@@ -571,6 +591,7 @@ bool PanRecognizer::HandlePanAccept()
 
 void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+    lastAction_ = static_cast<int32_t>(TouchType::CANCEL);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -590,6 +611,7 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
     isTouchEventFinished_ = false;
+    lastAction_ = static_cast<int32_t>(AxisAction::CANCEL);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -776,6 +798,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetMainDelta(mainDelta_ / static_cast<double>(touchPoints_.size()));
     if (inputEventType_ == InputEventType::AXIS) {
         info.SetScreenLocation(lastAxisEvent_.GetScreenOffset());
+        info.SetGlobalDisplayLocation(lastAxisEvent_.GetGlobalDisplayOffset());
         info.SetSourceTool(lastAxisEvent_.sourceTool);
         info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
         info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
@@ -784,6 +807,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
         info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
     } else {
         info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
+        info.SetGlobalDisplayLocation(lastTouchEvent_.GetGlobalDisplayOffset());
         info.SetSourceTool(lastTouchEvent_.sourceTool);
         info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         info.SetPointerEventId(lastTouchEvent_.touchEventId);
@@ -799,6 +823,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetPointerEvent(lastPointEvent_);
     info.SetIsPostEventResult(isPostEventResult_);
     info.SetPostEventNodeId(lastTouchEvent_.postEventNodeId);
+    info.SetLastAction(lastAction_);
     return info;
 }
 
@@ -820,11 +845,21 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         GestureEvent info = GetGestureEventInfo();
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
-        HandlePanGestureAccept(info, PanGestureState::BEFORE, callback);
+        HandleCallbackReports(info, type, PanGestureState::BEFORE);
         callbackFunction(info);
-        HandleReports(info, type);
-        HandlePanGestureAccept(info, PanGestureState::AFTER, callback);
+        HandleCallbackReports(info, type, PanGestureState::AFTER);
     }
+}
+
+void PanRecognizer::HandleCallbackReports(
+    const GestureEvent& info, GestureCallbackType type, PanGestureState panGestureState)
+{
+    if (panGestureState == PanGestureState::BEFORE) {
+        HandleGestureAccept(info, type);
+    } else if (panGestureState == PanGestureState::AFTER) {
+        HandleReports(info, type);
+    }
+    HandlePanGestureAccept(info, panGestureState, type);
 }
 
 void PanRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
@@ -874,6 +909,10 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
     }
     info->SetTarget(GetEventTarget().value_or(EventTarget()));
     info->SetForce(lastTouchEvent_.force);
+    info->SetRawInputEventType(inputEventType_);
+    info->SetRawInputEvent(lastPointEvent_);
+    info->SetRawInputDeviceId(deviceId_);
+    info->SetLastAction(lastAction_);
     if (lastTouchEvent_.tiltX.has_value()) {
         info->SetTiltX(lastTouchEvent_.tiltX.value());
     }
@@ -984,10 +1023,12 @@ void PanRecognizer::ChangeDistance(double distance)
         distanceMap_.clear();
         newDistanceMap_.clear();
         if (refereeState_ == RefereeState::READY || refereeState_ == RefereeState::DETECTING) {
-            distanceMap_[SourceTool::UNKNOWN] = distance;
+            distanceMap_[SourceTool::UNKNOWN] = Dimension(
+                Dimension(distance, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
             distance_ = distance;
         }
-        newDistanceMap_[SourceTool::UNKNOWN] = distance;
+        newDistanceMap_[SourceTool::UNKNOWN] = Dimension(
+            Dimension(distance, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
         newDistance_ = distance;
         mouseDistance_ = distance;
     }
@@ -995,10 +1036,12 @@ void PanRecognizer::ChangeDistance(double distance)
 
 void PanRecognizer::SetMouseDistance(double distance)
 {
-    distanceMap_[SourceTool::MOUSE] = distance;
-    distanceMap_[SourceTool::TOUCHPAD] = distance;
-    newDistanceMap_[SourceTool::MOUSE] = distance;
-    newDistanceMap_[SourceTool::TOUCHPAD] = distance;
+    Dimension distanceDimension = Dimension(
+        Dimension(distance, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
+    distanceMap_[SourceTool::MOUSE] = distanceDimension;
+    distanceMap_[SourceTool::TOUCHPAD] = distanceDimension;
+    newDistanceMap_[SourceTool::MOUSE] = distanceDimension;
+    newDistanceMap_[SourceTool::TOUCHPAD] = distanceDimension;
     mouseDistance_ = distance;
 }
 
@@ -1010,12 +1053,24 @@ double PanRecognizer::GetDistance() const
 double PanRecognizer::GetDistanceConfigFor(SourceTool sourceTool) const
 {
     if (distanceMap_.find(sourceTool) != distanceMap_.end()) {
-        return distanceMap_.at(sourceTool);
+        return distanceMap_.at(sourceTool).ConvertToPx();
     }
     if (distanceMap_.find(SourceTool::UNKNOWN) != distanceMap_.end()) {
-        return distanceMap_.at(SourceTool::UNKNOWN);
+        return distanceMap_.at(SourceTool::UNKNOWN).ConvertToPx();
     }
     return distance_;
+}
+
+void PanRecognizer::SetDistanceMap(const PanDistanceMap& distanceMap)
+{
+    distanceMap_.clear();
+    newDistanceMap_.clear();
+    for (auto& iter : distanceMap) {
+        auto distanceDimension = Dimension(
+            Dimension(iter.second, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
+        distanceMap_[iter.first] = distanceDimension;
+        newDistanceMap_[iter.first] = distanceDimension;
+    }
 }
 
 double PanRecognizer::GetMainAxisDelta()
@@ -1041,7 +1096,7 @@ RefPtr<GestureSnapshot> PanRecognizer::Dump() const
         << "distanceMap: [";
     for (auto iter : distanceMap_) {
         oss << "sourceTool: " << std::to_string(static_cast<int32_t>(iter.first)) << ", "
-            << "distance: " << iter.second << ", ";
+            << "distance: " << iter.second.ConvertToPx() << ", ";
     }
     oss << "], distance: " << GetDistanceConfigFor(deviceTool_) << ", "
         << "fingers: " << fingers_ << ", "
@@ -1181,14 +1236,14 @@ void PanRecognizer::DumpVelocityInfo(int32_t fingerId)
 }
 
 void PanRecognizer::HandlePanGestureAccept(
-    const GestureEvent& info, PanGestureState panGestureState, const std::unique_ptr<GestureEventFunc>& callback)
+    const GestureEvent& info, PanGestureState panGestureState, GestureCallbackType type)
 {
-    if (callback == onActionStart_) {
+    if (type == GestureCallbackType::START) {
         currentCallbackState_ = CurrentCallbackState::START;
         auto node = GetAttachedNode().Upgrade();
         UIObserverHandler::GetInstance().NotifyPanGestureStateChange(
             info, Claim(this), node, { panGestureState, currentCallbackState_ });
-    } else if (callback == onActionEnd_) {
+    } else if (type == GestureCallbackType::END) {
         currentCallbackState_ = CurrentCallbackState::END;
         auto node = GetAttachedNode().Upgrade();
         UIObserverHandler::GetInstance().NotifyPanGestureStateChange(

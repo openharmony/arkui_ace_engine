@@ -608,6 +608,53 @@ HWTEST_F(NavigationPatternTestThreeNg, IsLastStdChange006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: isNodeVisible
+ * @tc.desc: Test node visible
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestThreeNg, isNodeVisible, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create navigation stack, and add navBar
+    */
+    MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+   
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    ASSERT_NE(navigationNode, nullptr);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode("NavBar", 201,
+        []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    navigationNode->navBarNode_ = navBarNode;
+
+    /**
+     * @tc.steps: step2. set navigationMode stack
+    */
+    navigationPattern->SetNavigationMode(NavigationMode::STACK);
+    auto navDestinationA = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->Add("A", navDestinationA);
+    auto navDestinationB = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    navigationStack->Add("B", navDestinationB);
+    navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
+    navigationNode->UpdateLastStandardIndex();
+    
+    auto navBarNode2 = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    EXPECT_NE(navBarNode2, nullptr);
+    bool isInvisible = navBarNode2->IsNodeInvisible(navigationNode);
+    ASSERT_EQ(isInvisible, true);
+}
+
+/**
  * @tc.name: HandleTouchEvent001
  * @tc.desc: Branch: if (touchType == TouchType::DOWN) = false
  *           Branch: if (touchType == TouchType::UP || touchType == TouchType::CANCEL) = false

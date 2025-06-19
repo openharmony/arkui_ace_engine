@@ -842,6 +842,44 @@ ArkUI_ErrorCode OH_ArkUI_PanGesture_SetDistanceMap(
     ArkUI_GestureRecognizer* recognizer, int size, int* toolTypeArray, double* distanceArray);
 
 /**
+ * @brief Registers a callback to be executed after all gesture recognizers have been collected.
+ * When the user begins touching the screen, the system performs hit testing and collects gesture
+ * recognizers based on the touch location.
+ * Subsequently, before processing any move events, the component can use this API to determine
+ * the gesture recognizers that will participate in the recognition and compete with each other.
+ *
+ * @param node Node to set the callback for gesture collection completion.
+ * @param userData Indicates the custom data.
+ * @param recognizerCollected Callback for gesture collection completion.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+ArkUI_ErrorCode OH_ArkUI_SetTouchTestDoneCallback(
+    ArkUI_NodeHandle node,
+    void* userData,
+    void (*touchTestDone)(
+        ArkUI_GestureEvent* event,
+        ArkUI_GestureRecognizerHandleArray recognizers,
+        int32_t count,
+        void* userData
+    )
+);
+
+/**
+ * @brief Prevents a gesture recognizer from participating in the current gesture recognition
+ * before all fingers are lifted. If the system has already determined the result of this gesture
+ * recognizer (whether successful or not), calling this API will have no effect.
+ *
+ * @param recognizer Pointer to the gesture recognizer.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+ArkUI_ErrorCode OH_ArkUI_PreventGestureRecognizerBegin(ArkUI_GestureRecognizer* recognizer);
+
+/**
 * @brief Obtains the movement threshold for gestures to be recognized by a gesture recognizer for a specific tool type.
 *
 * @param recognizer Indicates the pointer to a gesture recognizer.

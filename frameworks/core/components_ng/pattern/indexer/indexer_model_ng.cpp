@@ -211,6 +211,14 @@ void IndexerModelNG::SetPopupItemBackground(const std::optional<Color>& popupIte
     }
 }
 
+void IndexerModelNG::RemovePopupItemBackground(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("indexer.PopupItemBackground");
+}
+
 void IndexerModelNG::SetPopupSelectedColor(const std::optional<Color>& popupSelectedColor)
 {
     if (popupSelectedColor.has_value()) {
@@ -220,6 +228,14 @@ void IndexerModelNG::SetPopupSelectedColor(const std::optional<Color>& popupSele
     }
 }
 
+void IndexerModelNG::RemovePopupSelectedColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("indexer.PopupSelectedColor");
+}
+
 void IndexerModelNG::SetPopupUnselectedColor(const std::optional<Color>& popupUnselectedColor)
 {
     if (popupUnselectedColor.has_value()) {
@@ -227,6 +243,14 @@ void IndexerModelNG::SetPopupUnselectedColor(const std::optional<Color>& popupUn
     } else {
         ACE_RESET_PAINT_PROPERTY_WITH_FLAG(IndexerPaintProperty, PopupUnselectedColor, PROPERTY_UPDATE_RENDER);
     }
+}
+
+void IndexerModelNG::RemovePopupUnselectedColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("indexer.PopupUnselectedColor");
 }
 
 void IndexerModelNG::SetFontSize(const Dimension& fontSize)
@@ -289,13 +313,32 @@ void IndexerModelNG::SetCreatChangeEvent(std::function<void(const int32_t select
     eventHub->SetCreatChangeEvent(std::move(changeEvent));
 }
 
-template<typename T>
-void ParseType(const RefPtr<ResourceObject>& resObj, T& result)
+template<typename T, typename... Args>
+void ParseType(std::string type, const RefPtr<ResourceObject>& resObj, T& result, Args... args)
 {
-    if constexpr (std::is_same_v<T, Color>) {
-        ResourceParseUtils::ParseResColor(resObj, result);
-    } else if constexpr (std::is_same_v<T, CalcDimension>) {
-        ResourceParseUtils::ParseResDimensionNG(resObj, result, DimensionUnit::PX);
+    if constexpr (std::is_same_v<T, std::optional<Color>>) {
+        Color color;
+        if (ResourceParseUtils::ParseResColor(resObj, color)) {
+            result = color;
+        }
+    } else if constexpr (std::is_same_v<T, CalcDimension> && sizeof...(Args) == 1) {
+        auto tuple = std::make_tuple(args...);
+        DimensionUnit unit = std::get<0>(tuple);
+        if (unit == DimensionUnit::VP) {
+            ResourceParseUtils::ParseResDimensionVp(resObj, result);
+        } else if (unit == DimensionUnit::FP) {
+            if (type != "FontSize") {
+                ResourceParseUtils::ParseResDimensionFp(resObj, result);
+                return;
+            }
+            CalcDimension fontSize;
+            if (ResourceParseUtils::ParseResDimensionFp(resObj, fontSize) && !fontSize.IsNegative() &&
+                fontSize.Unit() != DimensionUnit::PERCENT) {
+                result = fontSize;
+            }
+        } else if (unit == DimensionUnit::PX) {
+            ResourceParseUtils::ParseResDimensionPx(resObj, result);
+        }
     } else if constexpr (std::is_same_v<T, Dimension>) {
         ResourceParseUtils::ParseResDimensionFpNG(resObj, result);
     } else if constexpr (std::is_same_v<T, std::vector<std::string>>) {
@@ -303,95 +346,126 @@ void ParseType(const RefPtr<ResourceObject>& resObj, T& result)
     }
 }
 
-#define UPDATE_VALUE(type, name, resObj, resultType)                                \
-    case type:                                                                      \
-        do {                                                                        \
-            auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode(); \
-            REGISTER_UPDATE_FUNC(frameNode, name, resObj, resultType);              \
-        } while (false);                                                            \
+template<typename T>
+void FontSizeParseFail(std::string type, const RefPtr<FrameNode>& frameNode, T& result)
+{
+    if constexpr (std::is_same_v<T, CalcDimension>) {
+        auto pipelineContext = frameNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto indexerTheme = pipelineContext->GetTheme<IndexerTheme>();
+        CHECK_NULL_VOID(indexerTheme);
+        if (type == "FontSize" && result.IsNegative()) {
+            result = indexerTheme->GetDefaultTextStyle().GetFontSize();
+        } else if (type == "PopupItemFontSize" && result.IsNegative()) {
+            result = indexerTheme->GetPopupTextStyle().GetFontSize();
+        } else if (type == "SelectedFontSize" && result.IsNegative()) {
+            result = indexerTheme->GetSelectTextStyle().GetFontSize();
+        } else if (type == "PopupFontSize" && result.IsNegative()) {
+            result = indexerTheme->GetPopupTextStyle().GetFontSize();
+        }
+    }
+}
+
+#define UPDATE_VALUE(type, name, resObj, resultType, ...)                             \
+    case type:                                                                        \
+        do {                                                                          \
+            auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();   \
+            REGISTER_UPDATE_FUNC(frameNode, name, resObj, resultType, ##__VA_ARGS__); \
+        } while (false);                                                              \
         break
 
-#define UPDATE_NODE_VALUE(type, frameNode, name, resObj, resultType)   \
-    case type:                                                         \
-        do {                                                           \
-            REGISTER_UPDATE_FUNC(frameNode, name, resObj, resultType); \
-        } while (false);                                               \
+#define UPDATE_NODE_VALUE(type, frameNode, name, resObj, resultType, ...)             \
+    case type:                                                                        \
+        do {                                                                          \
+            REGISTER_UPDATE_FUNC(frameNode, name, resObj, resultType, ##__VA_ARGS__); \
+        } while (false);                                                              \
         break
 
-#define REGISTER_UPDATE_FUNC(frameNode, name, resObj, resultType)               \
-    do {                                                                        \
-        CHECK_NULL_BREAK(frameNode);                                            \
-        auto pattern = frameNode->GetPattern();                                 \
-        CHECK_NULL_BREAK(pattern);                                              \
-        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) { \
-            auto node = weak.Upgrade();                                         \
-            CHECK_NULL_VOID(node);                                              \
-            resultType result;                                                  \
-            ParseType(resObj, result);                                          \
-            IndexerModelNG::Set##name(AceType::RawPtr(node), result);                       \
-        };                                                                      \
-        pattern->AddResObj("indexer." #name, resObj, std::move(updateFunc));    \
-    } while (false)
-
-#define REGISTER_RESOURCE_UPDATE_FONT_FUNC(caseType, fontType, name, resObj, resultType)       \
-    case caseType:                                                                             \
-        do {                                                                                   \
-            auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();            \
-            REGISTER_RESOURCE_FONT_UPDATE_FUNC(frameNode, fontType, name, resObj, resultType); \
-        } while (false);                                                                       \
-        break
-
-#define REGISTER_RESOURCE_NODE_UPDATE_FONT_FUNC(caseType, frameNode, fontType, name, resObj, resultType) \
-    case caseType:                                                                                       \
-        do {                                                                                             \
-            REGISTER_RESOURCE_FONT_UPDATE_FUNC(frameNode, fontType, name, resObj, resultType);           \
-        } while (false);                                                                                 \
-        break
-
-#define REGISTER_RESOURCE_FONT_UPDATE_FUNC(frameNode, fontType, name, resObj, resultType)                  \
+#define REGISTER_UPDATE_FUNC(frameNode, name, resObj, resultType, ...)                                     \
     do {                                                                                                   \
         CHECK_NULL_BREAK(frameNode);                                                                       \
         auto pattern = frameNode->GetPattern();                                                            \
         CHECK_NULL_BREAK(pattern);                                                                         \
+        pattern->RemoveResObj("indexer." #name);                                                           \
+        CHECK_NULL_VOID(resObj);                                                                           \
+        CHECK_NULL_BREAK(SystemProperties::ConfigChangePerform());                                         \
         auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) { \
-            auto node = weak.Upgrade();                                                                    \
-            CHECK_NULL_VOID(node);                                                                         \
+            auto frameNode = weak.Upgrade();                                                               \
+            CHECK_NULL_VOID(frameNode);                                                                    \
             resultType result;                                                                             \
-            ParseType(resObj, result);                                                                     \
-            TextStyle textStyle;                                                                           \
-            ACE_GET_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, fontType, textStyle, AceType::RawPtr(node));           \
-            textStyle.SetFont##name(result);                                                               \
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, fontType, textStyle, AceType::RawPtr(node));        \
+            ParseType(#name, resObj, result, ##__VA_ARGS__);                                               \
+            FontSizeParseFail(#name, frameNode, result);                                                   \
+            IndexerModelNG::Set##name(AceType::RawPtr(frameNode), result);                                 \
         };                                                                                                 \
-        pattern->AddResObj("indexer." #fontType #name, resObj, std::move(updateFunc));                     \
+        pattern->AddResObj("indexer." #name, resObj, std::move(updateFunc));                               \
+    } while (false)
+
+#define REGISTER_RESOURCE_UPDATE_FONT_FUNC(caseType, fontType, name, resObj, resultType, ...)                 \
+    case caseType:                                                                                            \
+        do {                                                                                                  \
+            auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();                           \
+            REGISTER_RESOURCE_FONT_UPDATE_FUNC(frameNode, fontType, name, resObj, resultType, ##__VA_ARGS__); \
+        } while (false);                                                                                      \
+        break
+
+#define REGISTER_RESOURCE_NODE_UPDATE_FONT_FUNC(caseType, frameNode, fontType, name, resObj, resultType, ...) \
+    case caseType:                                                                                            \
+        do {                                                                                                  \
+            REGISTER_RESOURCE_FONT_UPDATE_FUNC(frameNode, fontType, name, resObj, resultType, ##__VA_ARGS__); \
+        } while (false);                                                                                      \
+        break
+
+#define REGISTER_RESOURCE_FONT_UPDATE_FUNC(frameNode, fontType, name, resObj, resultType, ...)      \
+    do {                                                                                            \
+        CHECK_NULL_BREAK(frameNode);                                                                \
+        auto pattern = frameNode->GetPattern();                                                     \
+        CHECK_NULL_BREAK(pattern);                                                                  \
+        pattern->RemoveResObj("indexer." #fontType #name);                                          \
+        CHECK_NULL_VOID(resObj);                                                                    \
+        CHECK_NULL_BREAK(SystemProperties::ConfigChangePerform());                                  \
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) { \
+            auto frameNode = weak.Upgrade();                                                               \
+            CHECK_NULL_VOID(frameNode);                                                                    \
+            resultType result;                                                                      \
+            ParseType(#name, resObj, result, ##__VA_ARGS__);                                        \
+            TextStyle textStyle;                                                                    \
+            FontSizeParseFail(#fontType #name, frameNode, result);                                  \
+            ACE_GET_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, fontType, textStyle, frameNode);    \
+            textStyle.SetFont##name(result);                                                        \
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, fontType, textStyle, frameNode); \
+        };                                                                                          \
+        pattern->AddResObj("indexer." #fontType #name, resObj, std::move(updateFunc));              \
     } while (false)
 
 void IndexerModelNG::CreateWithResourceObj(IndexerJsResourceType jsType, const RefPtr<ResourceObject>& resObj)
 {
-    CHECK_NULL_VOID(resObj);
     switch (jsType) {
-        UPDATE_VALUE(IndexerJsResourceType::COLOR, Color, resObj, Color);
-        UPDATE_VALUE(IndexerJsResourceType::SELECTED_COLOR, SelectedColor, resObj, Color);
-        UPDATE_VALUE(IndexerJsResourceType::POPUP_COLOR, PopupColor, resObj, Color);
-        UPDATE_VALUE(IndexerJsResourceType::SELECTED_BACKGROUND_COLOR, SelectedBackgroundColor, resObj, Color);
-        UPDATE_VALUE(IndexerJsResourceType::POPUP_BACKGROUND, PopupBackground, resObj, Color);
-        UPDATE_VALUE(IndexerJsResourceType::ALIGN_OFFSET, PopupHorizontalSpace, resObj, CalcDimension);
-        UPDATE_VALUE(IndexerJsResourceType::POPUP_POSITION_X, PopupPositionX, resObj, CalcDimension);
-        UPDATE_VALUE(IndexerJsResourceType::POPUP_POSITION_Y, PopupPositionY, resObj, CalcDimension);
-        UPDATE_VALUE(IndexerJsResourceType::POPUP_SELECTED_COLOR, PopupSelectedColor, resObj, Color);
-        UPDATE_VALUE(IndexerJsResourceType::POPUP_UNSELECTED_COLOR, PopupUnselectedColor, resObj, Color);
-        UPDATE_VALUE(IndexerJsResourceType::POPUP_ITEM_BACKGROUND_COLOR, PopupItemBackground, resObj, Color);
-        UPDATE_VALUE(IndexerJsResourceType::POPUP_TITLE_BACKGROUND, PopupTitleBackground, resObj, Color);
-        UPDATE_VALUE(IndexerJsResourceType::POPUP_ITEM_FONT_SIZE, FontSize, resObj, CalcDimension);
+        UPDATE_VALUE(IndexerJsResourceType::COLOR, Color, resObj, std::optional<Color>);
+        UPDATE_VALUE(IndexerJsResourceType::SELECTED_COLOR, SelectedColor, resObj, std::optional<Color>);
+        UPDATE_VALUE(IndexerJsResourceType::POPUP_COLOR, PopupColor, resObj, std::optional<Color>);
+        UPDATE_VALUE(
+            IndexerJsResourceType::SELECTED_BACKGROUND_COLOR, SelectedBackgroundColor, resObj, std::optional<Color>);
+        UPDATE_VALUE(IndexerJsResourceType::POPUP_BACKGROUND, PopupBackground, resObj, std::optional<Color>);
+        UPDATE_VALUE(
+            IndexerJsResourceType::ALIGN_OFFSET, PopupHorizontalSpace, resObj, CalcDimension, DimensionUnit::VP);
+        UPDATE_VALUE(IndexerJsResourceType::POPUP_POSITION_X, PopupPositionX, resObj, CalcDimension, DimensionUnit::VP);
+        UPDATE_VALUE(IndexerJsResourceType::POPUP_POSITION_Y, PopupPositionY, resObj, CalcDimension, DimensionUnit::VP);
+        UPDATE_VALUE(IndexerJsResourceType::POPUP_SELECTED_COLOR, PopupSelectedColor, resObj, std::optional<Color>);
+        UPDATE_VALUE(IndexerJsResourceType::POPUP_UNSELECTED_COLOR, PopupUnselectedColor, resObj, std::optional<Color>);
+        UPDATE_VALUE(
+            IndexerJsResourceType::POPUP_ITEM_BACKGROUND_COLOR, PopupItemBackground, resObj, std::optional<Color>);
+        UPDATE_VALUE(IndexerJsResourceType::POPUP_TITLE_BACKGROUND, PopupTitleBackground, resObj, std::optional<Color>);
+        UPDATE_VALUE(IndexerJsResourceType::POPUP_ITEM_FONT_SIZE, FontSize, resObj, CalcDimension, DimensionUnit::FP);
         REGISTER_RESOURCE_UPDATE_FONT_FUNC(
-            IndexerJsResourceType::SELECTED_FONT_SIZE, SelectedFont, Size, resObj, CalcDimension);
+            IndexerJsResourceType::SELECTED_FONT_SIZE, SelectedFont, Size, resObj, CalcDimension, DimensionUnit::FP);
         REGISTER_RESOURCE_UPDATE_FONT_FUNC(
             IndexerJsResourceType::SELECTED_FONT_FAMILY, SelectedFont, Families, resObj, std::vector<std::string>);
         REGISTER_RESOURCE_UPDATE_FONT_FUNC(
-            IndexerJsResourceType::POPUP_FONT_SIZE, PopupFont, Size, resObj, CalcDimension);
+            IndexerJsResourceType::POPUP_FONT_SIZE, PopupFont, Size, resObj, CalcDimension, DimensionUnit::FP);
         REGISTER_RESOURCE_UPDATE_FONT_FUNC(
             IndexerJsResourceType::POPUP_FONT_FAMILY, PopupFont, Families, resObj, std::vector<std::string>);
-        REGISTER_RESOURCE_UPDATE_FONT_FUNC(IndexerJsResourceType::FONT_SIZE, Font, Size, resObj, CalcDimension);
+        REGISTER_RESOURCE_UPDATE_FONT_FUNC(
+            IndexerJsResourceType::FONT_SIZE, Font, Size, resObj, CalcDimension, DimensionUnit::FP);
         REGISTER_RESOURCE_UPDATE_FONT_FUNC(
             IndexerJsResourceType::FONT_FAMILY, Font, Families, resObj, std::vector<std::string>);
         default:
@@ -403,35 +477,41 @@ void IndexerModelNG::CreateWithResourceObj(
     FrameNode* frameNode, IndexerJsResourceType jsType, const RefPtr<ResourceObject>& resObj)
 {
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(resObj);
     switch (jsType) {
-        UPDATE_NODE_VALUE(IndexerJsResourceType::COLOR, frameNode, Color, resObj, Color);
-        UPDATE_NODE_VALUE(IndexerJsResourceType::SELECTED_COLOR, frameNode, SelectedColor, resObj, Color);
-        UPDATE_NODE_VALUE(IndexerJsResourceType::POPUP_COLOR, frameNode, PopupColor, resObj, Color);
+        UPDATE_NODE_VALUE(IndexerJsResourceType::COLOR, frameNode, Color, resObj, std::optional<Color>);
         UPDATE_NODE_VALUE(
-            IndexerJsResourceType::SELECTED_BACKGROUND_COLOR, frameNode, SelectedBackgroundColor, resObj, Color);
-        UPDATE_NODE_VALUE(IndexerJsResourceType::POPUP_BACKGROUND, frameNode, PopupBackground, resObj, Color);
-        UPDATE_NODE_VALUE(IndexerJsResourceType::ALIGN_OFFSET, frameNode, PopupHorizontalSpace, resObj, CalcDimension);
-        UPDATE_NODE_VALUE(IndexerJsResourceType::POPUP_POSITION_X, frameNode, PopupPositionX, resObj, CalcDimension);
-        UPDATE_NODE_VALUE(IndexerJsResourceType::POPUP_POSITION_Y, frameNode, PopupPositionY, resObj, CalcDimension);
-        UPDATE_NODE_VALUE(IndexerJsResourceType::POPUP_SELECTED_COLOR, frameNode, PopupSelectedColor, resObj, Color);
+            IndexerJsResourceType::SELECTED_COLOR, frameNode, SelectedColor, resObj, std::optional<Color>);
+        UPDATE_NODE_VALUE(IndexerJsResourceType::POPUP_COLOR, frameNode, PopupColor, resObj, std::optional<Color>);
+        UPDATE_NODE_VALUE(IndexerJsResourceType::SELECTED_BACKGROUND_COLOR, frameNode, SelectedBackgroundColor, resObj,
+            std::optional<Color>);
         UPDATE_NODE_VALUE(
-            IndexerJsResourceType::POPUP_UNSELECTED_COLOR, frameNode, PopupUnselectedColor, resObj, Color);
+            IndexerJsResourceType::POPUP_BACKGROUND, frameNode, PopupBackground, resObj, std::optional<Color>);
+        UPDATE_NODE_VALUE(IndexerJsResourceType::ALIGN_OFFSET, frameNode, PopupHorizontalSpace, resObj, CalcDimension,
+            DimensionUnit::VP);
+        UPDATE_NODE_VALUE(IndexerJsResourceType::POPUP_POSITION_X, frameNode, PopupPositionX, resObj, CalcDimension,
+            DimensionUnit::VP);
+        UPDATE_NODE_VALUE(IndexerJsResourceType::POPUP_POSITION_Y, frameNode, PopupPositionY, resObj, CalcDimension,
+            DimensionUnit::VP);
         UPDATE_NODE_VALUE(
-            IndexerJsResourceType::POPUP_ITEM_BACKGROUND_COLOR, frameNode, PopupItemBackground, resObj, Color);
+            IndexerJsResourceType::POPUP_SELECTED_COLOR, frameNode, PopupSelectedColor, resObj, std::optional<Color>);
+        UPDATE_NODE_VALUE(IndexerJsResourceType::POPUP_UNSELECTED_COLOR, frameNode, PopupUnselectedColor, resObj,
+            std::optional<Color>);
+        UPDATE_NODE_VALUE(IndexerJsResourceType::POPUP_ITEM_BACKGROUND_COLOR, frameNode, PopupItemBackground, resObj,
+            std::optional<Color>);
+        UPDATE_NODE_VALUE(IndexerJsResourceType::POPUP_TITLE_BACKGROUND, frameNode, PopupTitleBackground, resObj,
+            std::optional<Color>);
         UPDATE_NODE_VALUE(
-            IndexerJsResourceType::POPUP_TITLE_BACKGROUND, frameNode, PopupTitleBackground, resObj, Color);
-        UPDATE_NODE_VALUE(IndexerJsResourceType::POPUP_ITEM_FONT_SIZE, frameNode, FontSize, resObj, CalcDimension);
-        REGISTER_RESOURCE_NODE_UPDATE_FONT_FUNC(
-            IndexerJsResourceType::SELECTED_FONT_SIZE, frameNode, SelectedFont, Size, resObj, CalcDimension);
+            IndexerJsResourceType::POPUP_ITEM_FONT_SIZE, frameNode, FontSize, resObj, CalcDimension, DimensionUnit::FP);
+        REGISTER_RESOURCE_NODE_UPDATE_FONT_FUNC(IndexerJsResourceType::SELECTED_FONT_SIZE, frameNode, SelectedFont,
+            Size, resObj, CalcDimension, DimensionUnit::FP);
         REGISTER_RESOURCE_NODE_UPDATE_FONT_FUNC(IndexerJsResourceType::SELECTED_FONT_FAMILY, frameNode, SelectedFont,
             Families, resObj, std::vector<std::string>);
-        REGISTER_RESOURCE_NODE_UPDATE_FONT_FUNC(
-            IndexerJsResourceType::POPUP_FONT_SIZE, frameNode, PopupFont, Size, resObj, CalcDimension);
+        REGISTER_RESOURCE_NODE_UPDATE_FONT_FUNC(IndexerJsResourceType::POPUP_FONT_SIZE, frameNode, PopupFont, Size,
+            resObj, CalcDimension, DimensionUnit::FP);
         REGISTER_RESOURCE_NODE_UPDATE_FONT_FUNC(
             IndexerJsResourceType::POPUP_FONT_FAMILY, frameNode, PopupFont, Families, resObj, std::vector<std::string>);
         REGISTER_RESOURCE_NODE_UPDATE_FONT_FUNC(
-            IndexerJsResourceType::FONT_SIZE, frameNode, Font, Size, resObj, CalcDimension);
+            IndexerJsResourceType::FONT_SIZE, frameNode, Font, Size, resObj, CalcDimension, DimensionUnit::FP);
         REGISTER_RESOURCE_NODE_UPDATE_FONT_FUNC(
             IndexerJsResourceType::FONT_FAMILY, frameNode, Font, Families, resObj, std::vector<std::string>);
         default:
@@ -486,6 +566,46 @@ void IndexerModelNG::SetPopupTitleBackground(const std::optional<Color>& color)
 void IndexerModelNG::SetAdaptiveWidth(bool state)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, AdaptiveWidth, state);
+}
+
+void IndexerModelNG::SetSelectedColorByUser(bool isByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetSelectedColorByUser, isByUser);
+}
+void IndexerModelNG::SetColorByUser(bool isByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetColorByUser, isByUser);
+}
+void IndexerModelNG::SetPopupColorByUser(bool isByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetPopupColorByUser, isByUser);
+}
+void IndexerModelNG::SetSelectedBGColorByUser(bool isByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetSelectedBGColorByUser, isByUser);
+}
+void IndexerModelNG::SetPopupUnselectedColorByUser(bool isByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetPopupUnselectedColorByUser, isByUser);
+}
+void IndexerModelNG::SetPopupTitleBackgroundByUser(bool isByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetPopupTitleBackgroundByUser, isByUser);
+}
+
+void IndexerModelNG::SetPopupSelectedColorByUser(bool isByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetPopupSelectedColorByUser, isByUser);
+}
+
+void IndexerModelNG::SetPopupItemBackgroundColorByUser(bool isByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetPopupItemBackgroundColorByUser, isByUser);
+}
+
+void IndexerModelNG::SetPopupBackgroundColorByUser(bool isByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetPopupBackgroundColorByUser, isByUser);
 }
 
 RefPtr<FrameNode> IndexerModelNG::CreateFrameNode(int32_t nodeId, bool isArc)
@@ -545,6 +665,14 @@ void IndexerModelNG::SetPopupTitleBackground(FrameNode* frameNode, const std::op
         ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
             IndexerPaintProperty, PopupTitleBackground, PROPERTY_UPDATE_RENDER, frameNode);
     }
+}
+
+void IndexerModelNG::RemovePopupTitleBackground(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("indexer.PopupTitleBackground");
 }
 
 void IndexerModelNG::SetFontSize(FrameNode* frameNode, const Dimension& fontSize)
@@ -643,6 +771,14 @@ void IndexerModelNG::SetColor(FrameNode* frameNode, const std::optional<Color>& 
     }
 }
 
+void IndexerModelNG::RemoveColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("indexer.Color");
+}
+
 void IndexerModelNG::SetPopupColor(FrameNode* frameNode, const std::optional<Color>& popupColor)
 {
     if (popupColor.has_value()) {
@@ -650,6 +786,14 @@ void IndexerModelNG::SetPopupColor(FrameNode* frameNode, const std::optional<Col
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(IndexerLayoutProperty, PopupColor, PROPERTY_UPDATE_NORMAL, frameNode);
     }
+}
+
+void IndexerModelNG::RemovePopupColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("indexer.PopupColor");
 }
 
 void IndexerModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor)
@@ -662,6 +806,14 @@ void IndexerModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<
     }
 }
 
+void IndexerModelNG::RemoveSelectedColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("indexer.SelectedColor");
+}
+
 void IndexerModelNG::SetPopupBackground(FrameNode* frameNode, const std::optional<Color>& popupBackground)
 {
     if (popupBackground.has_value()) {
@@ -670,6 +822,14 @@ void IndexerModelNG::SetPopupBackground(FrameNode* frameNode, const std::optiona
         ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
             IndexerPaintProperty, PopupBackground, PROPERTY_UPDATE_RENDER, frameNode);
     }
+}
+
+void IndexerModelNG::RemovePopupBackground(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("indexer.PopupBackground");
 }
 
 void IndexerModelNG::SetSelectedBackgroundColor(
@@ -682,6 +842,14 @@ void IndexerModelNG::SetSelectedBackgroundColor(
         ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
             IndexerPaintProperty, SelectedBackgroundColor, PROPERTY_UPDATE_RENDER, frameNode);
     }
+}
+
+void IndexerModelNG::RemoveSelectedBackgroundColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("indexer.SelectedBackgroundColor");
 }
 
 void IndexerModelNG::SetAlignStyle(FrameNode* frameNode, int32_t value)
@@ -806,4 +974,50 @@ void IndexerModelNG::SetCreatChangeEvent(FrameNode* frameNode,
     CHECK_NULL_VOID(eventHub);
     eventHub->SetCreatChangeEvent(std::move(changeEvent));
 }
+
+void IndexerModelNG::SetSelectedColorByUser(FrameNode* frameNode, bool isByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetSelectedColorByUser, isByUser, frameNode);
+}
+
+void IndexerModelNG::SetColorByUser(FrameNode* frameNode, bool isByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetColorByUser, isByUser, frameNode);
+}
+
+void IndexerModelNG::SetPopupColorByUser(FrameNode* frameNode, bool isByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetPopupColorByUser, isByUser, frameNode);
+}
+
+void IndexerModelNG::SetSelectedBGColorByUser(FrameNode* frameNode, bool isByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetSelectedBGColorByUser, isByUser, frameNode);
+}
+
+void IndexerModelNG::SetPopupUnselectedColorByUser(FrameNode* frameNode, bool isByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetPopupUnselectedColorByUser, isByUser, frameNode);
+}
+
+void IndexerModelNG::SetPopupSelectedColorByUser(FrameNode* frameNode, bool isByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetPopupSelectedColorByUser, isByUser, frameNode);
+}
+
+void IndexerModelNG::SetPopupTitleBackgroundByUser(FrameNode* frameNode, bool isByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetPopupTitleBackgroundByUser, isByUser, frameNode);
+}
+
+void IndexerModelNG::SetPopupItemBackgroundByUser(FrameNode* frameNode, bool isByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetPopupItemBackgroundColorByUser, isByUser, frameNode);
+}
+
+void IndexerModelNG::SetPopupBackgroundByUser(FrameNode* frameNode, bool isByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, SetPopupBackgroundColorByUser, isByUser, frameNode);
+}
+
 } // namespace OHOS::Ace::NG

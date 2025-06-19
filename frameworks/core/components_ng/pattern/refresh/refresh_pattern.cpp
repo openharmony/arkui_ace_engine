@@ -504,11 +504,7 @@ float RefreshPattern::CalculatePullDownRatio()
     }
     if (!ratio_.has_value()) {
         CHECK_NULL_RETURN(refreshTheme_, 1.0f);
-        if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-            ratio_ = refreshTheme_->GetGreatApiRatio();
-        } else {
-            ratio_ = refreshTheme_->GetRatio();
-        }
+        ratio_ = refreshTheme_->GetRatio();
     }
     auto gamma = scrollOffset_ / contentHeight;
     if (GreatOrEqual(gamma, 1.0)) {
@@ -577,29 +573,10 @@ void RefreshPattern::FireOnOffsetChange(float value)
         value = 0.0f;
     }
     if (!NearEqual(lastScrollOffset_, value)) {
-        UpdateCustomBuilderVisibility();
         auto refreshEventHub = GetOrCreateEventHub<RefreshEventHub>();
         CHECK_NULL_VOID(refreshEventHub);
         refreshEventHub->FireOnOffsetChange(Dimension(value).ConvertToVp());
         lastScrollOffset_ = value;
-    }
-}
-
-void RefreshPattern::UpdateCustomBuilderVisibility()
-{
-    if (!isCustomBuilderExist_) {
-        return;
-    }
-    CHECK_NULL_VOID(customBuilder_);
-    auto customBuilderLayoutProperty = customBuilder_->GetLayoutProperty();
-    CHECK_NULL_VOID(customBuilderLayoutProperty);
-    if (customBuilderLayoutProperty->IsUserSetVisibility()) {
-        return;
-    }
-    if (LessOrEqual(scrollOffset_, 0.0f)) {
-        customBuilderLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-    } else {
-        customBuilderLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     }
 }
 
@@ -642,7 +619,6 @@ void RefreshPattern::AddCustomBuilderNode(const RefPtr<NG::UINode>& builder)
     }
     customBuilder_ = AceType::DynamicCast<FrameNode>(builder);
     isCustomBuilderExist_ = true;
-    UpdateCustomBuilderVisibility();
 }
 
 void RefreshPattern::SetAccessibilityAction()
@@ -746,6 +722,9 @@ void RefreshPattern::InitOffsetProperty()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto scrollOffsetLimit = std::clamp(scrollOffset, 0.0f, pattern->GetMaxPullDownDistance());
+            if (NearEqual(scrollOffsetLimit, pattern->scrollOffset_, 1.f)) {
+                pattern->BeginTrailingTrace();
+            }
             pattern->scrollOffset_ = scrollOffsetLimit;
             pattern->UpdateFirstChildPlacement();
             pattern->FireOnOffsetChange(scrollOffsetLimit);
@@ -899,6 +878,7 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
             if (recycle) {
                 pattern->UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, pattern->GetFollowRatio());
             }
+            pattern->EndTrailingTrace();
         });
     auto context = GetContext();
     CHECK_NULL_VOID(context);
@@ -941,7 +921,12 @@ void RefreshPattern::QuickFirstChildAppear()
     option.SetCurve(DEFAULT_CURVE);
     option.SetDuration(LOADING_ANIMATION_DURATION);
     animation_ = AnimationUtils::StartAnimation(
-        option, [&]() { offsetProperty_->Set(static_cast<float>(refreshOffset_.ConvertToPx())); });
+        option, [&]() { offsetProperty_->Set(static_cast<float>(refreshOffset_.ConvertToPx())); },
+        [weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->EndTrailingTrace();
+        });
 }
 
 void RefreshPattern::QuickFirstChildDisappear()
@@ -956,6 +941,7 @@ void RefreshPattern::QuickFirstChildDisappear()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->SpeedAnimationFinish();
+            pattern->EndTrailingTrace();
         });
 }
 
@@ -982,6 +968,10 @@ void RefreshPattern::ResetAnimation()
                 auto offsetProperty = pattern->offsetProperty_;
                 CHECK_NULL_VOID(offsetProperty);
                 offsetProperty->Set(offset);
+            }, [weak = AceType::WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->EndTrailingTrace();
             });
     } else {
         AnimationUtils::StopAnimation(animation_);
@@ -1319,6 +1309,30 @@ void RefreshPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
         parent->OnScrollEndRecursive(velocity);
     }
     SetIsNestedInterrupt(false);
+}
+
+void RefreshPattern::BeginTrailingTrace()
+{
+    if (!hasBeginTrailingTrace_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto id = host->GetAccessibilityId();
+        AceAsyncTraceBeginCommercial(
+            id, (TRAILING_ANIMATION + std::to_string(id) + std::string(" ") + host->GetTag()).c_str());
+        hasBeginTrailingTrace_ = true;
+    }
+}
+
+void RefreshPattern::EndTrailingTrace()
+{
+    if (hasBeginTrailingTrace_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto id = host->GetAccessibilityId();
+        AceAsyncTraceEndCommercial(
+            id, (TRAILING_ANIMATION + std::to_string(id) + std::string(" ") + host->GetTag()).c_str());
+        hasBeginTrailingTrace_ = false;
+    }
 }
 
 float RefreshPattern::GetLoadingProgressOpacity()

@@ -237,11 +237,15 @@ void JSSlider::SetBlockColor(const JSCallbackInfo& info)
         return;
     }
     Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], colorVal, resObj)) {
         SliderModel::GetInstance()->ResetBlockColor();
-        return;
+    } else {
+        SliderModel::GetInstance()->SetBlockColor(colorVal);
     }
-    SliderModel::GetInstance()->SetBlockColor(colorVal);
+    if (SystemProperties::ConfigChangePerform()) {
+        SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::BLOCK_COLOR);
+    }
 }
 
 void JSSlider::SetTrackColor(const JSCallbackInfo& info)
@@ -253,14 +257,21 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
     bool isResourceColor = false;
     if (!ConvertGradientColor(info[0], gradient)) {
         Color colorVal;
-        if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal)) {
+        RefPtr<ResourceObject> resObj;
+        if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal, resObj)) {
             SliderModel::GetInstance()->ResetTrackColor();
+            if (SystemProperties::ConfigChangePerform()) {
+                SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::TRACK_COLOR);
+            }
             return;
         }
         isResourceColor = true;
         gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
         // Set track color to Framework::SliderModelImpl. Need to backward compatibility with old pipeline.
         SliderModel::GetInstance()->SetTrackBackgroundColor(colorVal);
+        if (SystemProperties::ConfigChangePerform()) {
+            SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::TRACK_COLOR);
+        }
     }
     // Set track gradient color to NG::SliderModelNG
     SliderModel::GetInstance()->SetTrackBackgroundColor(gradient, isResourceColor);
@@ -306,13 +317,20 @@ void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
     bool isResourceColor = false;
     if (!ConvertGradientColor(info[0], gradient)) {
         Color colorVal;
-        if (!ParseJsColor(info[0], colorVal)) {
+        RefPtr<ResourceObject> resObj;
+        if (!ParseJsColor(info[0], colorVal, resObj)) {
             SliderModel::GetInstance()->ResetSelectColor();
+            if (SystemProperties::ConfigChangePerform()) {
+                SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::SELECT_COLOR);
+            }
             return;
         }
         isResourceColor = true;
         gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
         SliderModel::GetInstance()->SetSelectColor(colorVal);
+        if (SystemProperties::ConfigChangePerform()) {
+            SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::SELECT_COLOR);
+        }
     }
     SliderModel::GetInstance()->SetSelectColor(gradient, isResourceColor);
 }
@@ -425,11 +443,15 @@ void JSSlider::SetShowTips(const JSCallbackInfo& info)
     }
 
     std::optional<std::string> content;
+    RefPtr<ResourceObject> resObj;
     if (info.Length() == SLIDER_SHOW_TIPS_MAX_PARAMS) {
         std::string str;
-        if (ParseJsString(info[1], str)) {
+        if (ParseJsString(info[1], str, resObj)) {
             content = str;
         }
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        SliderModel::GetInstance()->CreateWithStringResourceObj(resObj, showTips);
     }
 
     SliderModel::GetInstance()->SetShowTips(showTips, content);
@@ -442,11 +464,15 @@ void JSSlider::SetBlockBorderColor(const JSCallbackInfo& info)
     }
 
     Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], colorVal, resObj)) {
         SliderModel::GetInstance()->ResetBlockBorderColor();
-        return;
+    } else {
+        SliderModel::GetInstance()->SetBlockBorderColor(colorVal);
     }
-    SliderModel::GetInstance()->SetBlockBorderColor(colorVal);
+    if (SystemProperties::ConfigChangePerform()) {
+        SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::BLOCK_BORDER_COLOR);
+    }
 }
 
 void JSSlider::SetBlockBorderWidth(const JSCallbackInfo& info)
@@ -474,11 +500,15 @@ void JSSlider::SetStepColor(const JSCallbackInfo& info)
     }
 
     Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], colorVal, resObj)) {
         SliderModel::GetInstance()->ResetStepColor();
-        return;
+    } else {
+        SliderModel::GetInstance()->SetStepColor(colorVal);
     }
-    SliderModel::GetInstance()->SetStepColor(colorVal);
+    if (SystemProperties::ConfigChangePerform()) {
+        SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::STEP_COLOR);
+    }
 }
 
 void JSSlider::SetTrackBorderRadius(const JSCallbackInfo& info)
@@ -564,15 +594,19 @@ void JSSlider::SetBlockStyle(const JSCallbackInfo& info)
     auto type = static_cast<SliderModel::BlockStyleType>(getType->ToNumber<int32_t>());
     if (type == SliderModel::BlockStyleType::IMAGE) {
         std::string src;
+        RefPtr<ResourceObject> resObj;
         auto image = jsObj->GetProperty("image");
-        if (!ParseJsMedia(image, src)) {
-            ResetBlockStyle();
-            return;
-        }
         std::string bundleName;
         std::string moduleName;
-        GetJsMediaBundleInfo(image, bundleName, moduleName);
-        SliderModel::GetInstance()->SetBlockImage(src, bundleName, moduleName);
+        if (!ParseJsMedia(image, src, resObj)) {
+            ResetBlockStyle();
+        } else {
+            GetJsMediaBundleInfo(image, bundleName, moduleName);
+            SliderModel::GetInstance()->SetBlockImage(src, bundleName, moduleName);
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            SliderModel::GetInstance()->CreateWithMediaResourceObj(resObj, bundleName, moduleName);
+        }
     } else if (type == SliderModel::BlockStyleType::SHAPE) {
         auto shape = jsObj->GetProperty("shape");
         if (!shape->IsObject()) {
@@ -647,7 +681,7 @@ void JSSlider::SetEnableHapticFeedback(const JSCallbackInfo& info)
 RefPtr<NG::UINode> SetPrefix_SuffixWithFrameNode(const JSRef<JSObject>& sliderJsObject)
 {
     JSRef<JSVal> builderNodeParam = sliderJsObject->GetProperty("builderNode_");
-    if (!builderNodeParam->IsEmpty()) {
+    if (builderNodeParam->IsObject()) {
         auto builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
         JSRef<JSVal> nodePtr = builderNodeObject->GetProperty("nodePtr_");
         if (!nodePtr.IsEmpty()) {
@@ -672,32 +706,36 @@ void JSSlider::SetPrefix(const JSCallbackInfo& args)
     }
 
     RefPtr<NG::UINode> refPtrUINode = nullptr;
-    auto sliderContentObject = JSRef<JSObject>::Cast(args[0]);
-    if (!sliderContentObject->IsEmpty()) {
+    JSRef<JSObject> sliderContentObject;
+    if (args.Length() >= 1 && args[0]->IsObject()) {
+        sliderContentObject = JSRef<JSObject>::Cast(args[0]);
         refPtrUINode = SetPrefix_SuffixWithFrameNode(sliderContentObject);
     }
 
     NG::SliderPrefixOptions prefixOption;
-    if (args.Length() > 1) {
+    if (args.Length() > 1 && args[1]->IsObject() && !args[1]->IsNull()) {
         auto prefixOptions = JSRef<JSObject>::Cast(args[1]);
         if (!prefixOptions->IsEmpty() && !prefixOptions->IsUndefined()) {
             auto accessibilityTextProperty = prefixOptions->GetProperty("accessibilityText");
-            if (!accessibilityTextProperty->IsEmpty()) {
-                prefixOption.accessibilityText = accessibilityTextProperty->ToString();
+            std::string accessibilityText;
+            if (!accessibilityTextProperty->IsNull() &&
+                JSSlider::ParseJsString(accessibilityTextProperty, accessibilityText)) {
+                prefixOption.accessibilityText = accessibilityText;
             }
-
             auto accessibilityDescriptionProperty = prefixOptions->GetProperty("accessibilityDescription");
-            if (!accessibilityDescriptionProperty->IsEmpty()) {
-                prefixOption.accessibilityDescription = accessibilityDescriptionProperty->ToString();
+            std::string accessibilityDescription;
+            if (!accessibilityDescriptionProperty->IsNull() &&
+                JSSlider::ParseJsString(accessibilityDescriptionProperty, accessibilityDescription)) {
+                prefixOption.accessibilityDescription = accessibilityDescription;
             }
-
             auto accessibilityLevelProperty = prefixOptions->GetProperty("accessibilityLevel");
-            if (!accessibilityLevelProperty->IsEmpty()) {
-                prefixOption.accessibilityLevel = accessibilityLevelProperty->ToString();
+            std::string accessibilityLevel;
+            if (!accessibilityLevelProperty->IsNull() &&
+                JSSlider::ParseJsString(accessibilityLevelProperty, accessibilityLevel)) {
+                prefixOption.accessibilityLevel = accessibilityLevel;
             }
-
             auto accessibilityGroupProperty = prefixOptions->GetProperty("accessibilityGroup");
-            if (!accessibilityGroupProperty->IsEmpty()) {
+            if (!accessibilityGroupProperty->IsNull() && !accessibilityGroupProperty->IsEmpty()) {
                 prefixOption.accessibilityGroup = accessibilityGroupProperty->ToBoolean();
             }
         }
@@ -715,32 +753,39 @@ void JSSlider::SetSuffix(const JSCallbackInfo& args)
     }
 
     RefPtr<NG::UINode> refPtrUINode = nullptr;
-    auto sliderContentObject = JSRef<JSObject>::Cast(args[0]);
-    if (!sliderContentObject->IsEmpty()) {
+    JSRef<JSObject> sliderContentObject;
+    if (args.Length() >= 1 && args[0]->IsObject()) {
+        sliderContentObject = JSRef<JSObject>::Cast(args[0]);
         refPtrUINode = SetPrefix_SuffixWithFrameNode(sliderContentObject);
     }
 
     NG::SliderSuffixOptions suffixOption;
-    if (args.Length() > 1) {
+    if (args.Length() > 1 && args[1]->IsObject() && !args[1]->IsNull()) {
         JSRef<JSObject> suffixOptions = JSRef<JSObject>::Cast(args[1]);
         if (!suffixOptions->IsEmpty() && !suffixOptions->IsUndefined()) {
             auto accessibilityTextProperty = suffixOptions->GetProperty("accessibilityText");
-            if (!accessibilityTextProperty->IsEmpty()) {
-                suffixOption.accessibilityText = accessibilityTextProperty->ToString();
+            std::string accessibilityText;
+            if (!accessibilityTextProperty->IsNull() &&
+                JSSlider::ParseJsString(accessibilityTextProperty, accessibilityText)) {
+                suffixOption.accessibilityText = accessibilityText;
             }
 
             auto accessibilityDescriptionProperty = suffixOptions->GetProperty("accessibilityDescription");
-            if (!accessibilityDescriptionProperty->IsEmpty()) {
-                suffixOption.accessibilityDescription = accessibilityDescriptionProperty->ToString();
+            std::string accessibilityDescription;
+            if (!accessibilityDescriptionProperty->IsNull() &&
+                JSSlider::ParseJsString(accessibilityDescriptionProperty, accessibilityDescription)) {
+                suffixOption.accessibilityDescription = accessibilityDescription;
             }
 
             auto accessibilityLevelProperty = suffixOptions->GetProperty("accessibilityLevel");
-            if (!accessibilityLevelProperty->IsEmpty()) {
-                suffixOption.accessibilityLevel = accessibilityLevelProperty->ToString();
+            std::string accessibilityLevel;
+            if (!accessibilityLevelProperty->IsNull() &&
+                JSSlider::ParseJsString(accessibilityLevelProperty, accessibilityLevel)) {
+                suffixOption.accessibilityLevel = accessibilityLevel;
             }
 
             auto accessibilityGroupProperty = suffixOptions->GetProperty("accessibilityGroup");
-            if (!accessibilityGroupProperty->IsEmpty()) {
+            if (!accessibilityGroupProperty->IsNull() && !accessibilityGroupProperty->IsEmpty()) {
                 suffixOption.accessibilityGroup = accessibilityGroupProperty->ToBoolean();
             }
         }

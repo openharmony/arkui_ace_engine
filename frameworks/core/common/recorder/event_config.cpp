@@ -60,19 +60,19 @@ void EventConfig::Init(const std::string& config)
     }
 }
 
-void FillSwitch(std::vector<bool>& switches, const std::unique_ptr<JsonValue>& jsonObj)
+void FillSwitch(std::vector<bool>& switches, const std::unique_ptr<JsonValue>& jsonObj, bool defaultValue = false)
 {
-    switches[static_cast<int32_t>(EventCategory::CATEGORY_PAGE)] = jsonObj->GetBool("page", false);
-    switches[static_cast<int32_t>(EventCategory::CATEGORY_COMPONENT)] = jsonObj->GetBool("component", false);
-    switches[static_cast<int32_t>(EventCategory::CATEGORY_EXPOSURE)] = jsonObj->GetBool("exposure", false);
-    switches[static_cast<int32_t>(EventCategory::CATEGORY_PAGE_PARAM)] = jsonObj->GetBool("pageParam", false);
-    switches[static_cast<int32_t>(EventCategory::CATEGORY_SCROLL)] = jsonObj->GetBool("scroll", false);
-    switches[static_cast<int32_t>(EventCategory::CATEGORY_ANIMATION)] = jsonObj->GetBool("animation", false);
-    switches[static_cast<int32_t>(EventCategory::CATEGORY_RECT)] = jsonObj->GetBool("rect", false);
-    switches[static_cast<int32_t>(EventCategory::CATEGORY_WEB)] = jsonObj->GetBool("web", false);
-    switches[static_cast<int32_t>(EventCategory::CATEGORY_TEXT_INPUT)] = jsonObj->GetBool("textInput", false);
-    switches[static_cast<int32_t>(EventCategory::CATEGORY_POINT)] = jsonObj->GetBool("point", false);
-    switches[static_cast<int32_t>(EventCategory::CATEGORY_PARENT_TEXT)] = jsonObj->GetBool("parentText", false);
+    switches[static_cast<int32_t>(EventCategory::CATEGORY_PAGE)] = jsonObj->GetBool("page", defaultValue);
+    switches[static_cast<int32_t>(EventCategory::CATEGORY_COMPONENT)] = jsonObj->GetBool("component", defaultValue);
+    switches[static_cast<int32_t>(EventCategory::CATEGORY_EXPOSURE)] = jsonObj->GetBool("exposure", defaultValue);
+    switches[static_cast<int32_t>(EventCategory::CATEGORY_PAGE_PARAM)] = jsonObj->GetBool("pageParam", defaultValue);
+    switches[static_cast<int32_t>(EventCategory::CATEGORY_SCROLL)] = jsonObj->GetBool("scroll", defaultValue);
+    switches[static_cast<int32_t>(EventCategory::CATEGORY_ANIMATION)] = jsonObj->GetBool("animation", defaultValue);
+    switches[static_cast<int32_t>(EventCategory::CATEGORY_RECT)] = jsonObj->GetBool("rect", defaultValue);
+    switches[static_cast<int32_t>(EventCategory::CATEGORY_WEB)] = jsonObj->GetBool("web", defaultValue);
+    switches[static_cast<int32_t>(EventCategory::CATEGORY_TEXT_INPUT)] = jsonObj->GetBool("textInput", defaultValue);
+    switches[static_cast<int32_t>(EventCategory::CATEGORY_POINT)] = jsonObj->GetBool("point", defaultValue);
+    switches[static_cast<int32_t>(EventCategory::CATEGORY_PARENT_TEXT)] = jsonObj->GetBool("parentText", defaultValue);
 }
 
 void EventConfig::ParseSwitch(const std::unique_ptr<JsonValue>& jsonObj)
@@ -84,7 +84,9 @@ void EventConfig::ParseSwitch(const std::unique_ptr<JsonValue>& jsonObj)
     }
     auto globalSwitchVal = jsonObj->GetValue("globalSwitch");
     if (globalSwitchVal && globalSwitchVal->IsObject()) {
-        FillSwitch(EventRecorder::Get().globalSwitch_, globalSwitchVal);
+        std::vector<bool> globalSwitch(static_cast<int32_t>(EventCategory::CATEGORY_END), true);
+        FillSwitch(globalSwitch, globalSwitchVal, true);
+        EventRecorder::Get().UpdateGlobalEventSwitch(globalSwitch);
     }
 }
 

@@ -46,6 +46,7 @@ struct WebEvent : Event {
     EventMarker searchResultReceiveEventId;
     EventMarker scrollId;
     EventMarker fullScreenExitEventId;
+    EventMarker activateContentId;
     EventMarker windowExitId;
     EventMarker overScrollId;
     EventMarker nativeEmbedLifecycleChangeId;
@@ -310,6 +311,18 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.searchResultReceiveEventId;
+    }
+
+    void SetActivateContentEventId(const EventMarker& activateContentId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.activateContentId = activateContentId;
+    }
+
+    const EventMarker& GetActivateContentEventId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.activateContentId;
     }
 
     void SetWindowExitEventId(const EventMarker& windowExitId)

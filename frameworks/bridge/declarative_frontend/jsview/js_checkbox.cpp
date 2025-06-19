@@ -251,11 +251,15 @@ void JSCheckbox::SelectedColor(const JSCallbackInfo& info)
         return;
     }
     Color selectedColor;
-    if (!ParseJsColor(info[0], selectedColor)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], selectedColor, resObj)) {
         CheckBoxModel::GetInstance()->ResetSelectedColor();
-        return;
+    } else {
+        CheckBoxModel::GetInstance()->SetSelectedColor(selectedColor);
     }
-    CheckBoxModel::GetInstance()->SetSelectedColor(selectedColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckBoxModel::GetInstance()->CreateWithColorResourceObj(resObj, CheckBoxColorType::SELECTED_COLOR);
+    }
 }
 
 void JSCheckbox::UnSelectedColor(const JSCallbackInfo& info)
@@ -264,12 +268,15 @@ void JSCheckbox::UnSelectedColor(const JSCallbackInfo& info)
         return;
     }
     Color unSelectedColor;
-    if (!ParseJsColor(info[0], unSelectedColor)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], unSelectedColor, resObj)) {
         CheckBoxModel::GetInstance()->ResetUnSelectedColor();
-        return;
+    } else {
+        CheckBoxModel::GetInstance()->SetUnSelectedColor(unSelectedColor);
     }
-
-    CheckBoxModel::GetInstance()->SetUnSelectedColor(unSelectedColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckBoxModel::GetInstance()->CreateWithColorResourceObj(resObj, CheckBoxColorType::UN_SELECTED_COLOR);
+    }
 }
 
 void JSCheckbox::SetCheckboxStyle(int32_t checkBoxStyle)

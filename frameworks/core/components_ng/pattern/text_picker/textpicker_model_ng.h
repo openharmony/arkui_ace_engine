@@ -98,11 +98,6 @@ public:
     void SetSelectedBackgroundStyle(const NG::PickerBackgroundStyle& value) override;
     void UpdateUserSetSelectColor() override;
     void ParseGradientHeight(const RefPtr<ResourceObject>& resObj) override;
-    void ParseDividerResObj() override;
-    void ParseDisappearTextStyleResObj(const PickerTextStyle& textStyleOpt) override;
-    void ParseSelectedTextStyleResObj(const PickerTextStyle& textStyleOpt) override;
-    void ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt) override;
-    void ParseDefaultTextStyleResObj(const PickerTextStyle& textStyleOpt) override;
     void ParseColumnWidthsResourceObj(const std::vector<RefPtr<ResourceObject>>& widthResObjs) override;
     void ParseSingleRangeResourceObj(const RefPtr<ResourceObject>& resultResObj,
         const RefPtr<ResourceObject>& valueResObj) override;
@@ -164,6 +159,9 @@ public:
     static bool GetEnableHapticFeedback(FrameNode* frameNode);
     static void SetSelectedBackgroundStyle(FrameNode* frameNode, const NG::PickerBackgroundStyle& value);
     static PickerBackgroundStyle GetSelectedBackgroundStyle(FrameNode* frameNode);
+    static void ParseGradientHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseDividerResObj(FrameNode* frameNode, const NG::ItemDivider& divider);
+    static void TextPickerRemoveResObj(FrameNode* frameNode, const std::string& key);
 
 private:
     void SetUnCascadeColumns(const std::vector<NG::TextCascadePickerOptions>& options);
@@ -175,8 +173,12 @@ private:
     static RefPtr<FrameNode> CreateColumnNode(uint32_t columnKind, uint32_t showCount);
     static void SetUnCascadeColumnsNode(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
     static void SetCascadeColumnsNode(FrameNode* frameNode, const std::vector<NG::TextCascadePickerOptions>& options);
-    void ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
+    static void ParseResTextStyle(const PickerTextStyle& textStyleOpt, const std::string& textStyleType,
         std::function<void(const PickerTextStyle&)> updateTextStyleFunc);
+    static void ParseDisappearTextStyleResObj(const PickerTextStyle& textStyleOpt);
+    static void ParseSelectedTextStyleResObj(const PickerTextStyle& textStyleOpt);
+    static void ParseNormalTextStyleResObj(const PickerTextStyle& textStyleOpt);
+    static void ParseDefaultTextStyleResObj(const PickerTextStyle& textStyleOpt);
 
     uint32_t maxCount_ = 0;
     std::vector<uint32_t> kinds_;

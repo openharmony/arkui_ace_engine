@@ -164,7 +164,7 @@ bool GridLayoutInfo::IsOutOfEnd(float mainGap, bool irregular) const
     }
     const float endPos = currentOffset_ + totalHeightOfItemsInView_;
     return !atOrOutOfStart && (endIndex_ == childrenCount_ - 1) &&
-           LessNotEqual(endPos, lastMainSize_ - contentEndPadding_);
+           LessNotEqualCustomPrecision(endPos, lastMainSize_ - contentEndPadding_, -0.01f);
 }
 
 float GridLayoutInfo::GetCurrentOffsetOfRegularGrid(float mainGap) const
@@ -364,6 +364,9 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, int32_t
     }
     if (Negative(irregularHeight)) {
         irregularHeight = regularHeight;
+    }
+    if (Negative(regularHeight)) {
+        regularHeight = irregularHeight;
     }
     // get line count
     float totalHeight = 0;
@@ -1109,4 +1112,12 @@ bool GridLayoutInfo::IsAllItemsMeasured() const
     return allItemsMeasured;
 }
 
+std::string GridLayoutInfo::ToString() const
+{
+    return "startMainLine = " + std::to_string(startMainLineIndex_) + ", offset = " + std::to_string(currentOffset_) +
+           ", endMainLine = " + std::to_string(endMainLineIndex_) + ", startIndex = " + std::to_string(startIndex_) +
+           ", endIndex = " + std::to_string(endIndex_) + ", jumpIndex = " + std::to_string(jumpIndex_) +
+           ", gridMatrix size = " + std::to_string(gridMatrix_.size()) +
+           ", lineHeightMap size = " + std::to_string(lineHeightMap_.size());
+}
 } // namespace OHOS::Ace::NG

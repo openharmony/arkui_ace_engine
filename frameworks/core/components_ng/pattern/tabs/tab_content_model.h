@@ -127,7 +127,8 @@ enum class TabContentJsType {
     MIN_FONT_SIZE,
     MAX_FONT_SIZE,
     TEXT_CONTENT,
-    ICON,
+    TAB_BAR_OPTIONS_ICON,
+    BOTTOM_TAB_BAR_STYLE_ICON,
     ICON_UNSELECT_COLOR,
     ICON_SELECT_COLOR,
     LABEL_UNSELECT_COLOR,
@@ -149,18 +150,24 @@ public:
     virtual void Create(std::function<void()>&& deepRenderFunc) = 0;
     virtual void Pop() = 0;
     virtual void CreateWithResourceObj(TabContentJsType jsType, const RefPtr<ResourceObject>& resObj) {};
-    virtual void CreatePaddingWithResourceObj(const RefPtr<ResourceObject>& resObjLeft,
-        const RefPtr<ResourceObject>& resObjRight, const RefPtr<ResourceObject>& resObjTop,
-        const RefPtr<ResourceObject>& resObjBottom) {};
+    virtual void CreatePaddingHorWithResourceObj(const RefPtr<ResourceObject>& resObjLeft,
+        const RefPtr<ResourceObject>& resObjRight, bool isSubTabStyle, bool useLocalizedPadding) {};
+    virtual void CreatePaddingVerWithResourceObj(const RefPtr<ResourceObject>& resObjTop,
+        const RefPtr<ResourceObject>& resObjBottom, bool isSubTabStyle, bool useLocalizedPadding) {};
     virtual void SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
         const std::optional<TabBarSymbol>& tabBarSymbol, std::function<void()>&& builder, bool useContentOnly) = 0;
     virtual void SetTabBarWithContent(const RefPtr<NG::UINode>& content) = 0;
     virtual void SetTabBarStyle(TabBarStyle tabBarStyle) = 0;
     virtual void SetIndicator(const IndicatorStyle& indicator) = 0;
+    virtual void SetIndicatorColorByUser(bool isByUser) = 0;
     virtual void SetBoard(const BoardStyle& board) = 0;
     virtual void SetSelectedMode(SelectedMode selectedMode) = 0;
     virtual void SetLabelStyle(const LabelStyle& labelStyle) = 0;
+    virtual void SetLabelUnselectedColorByUser(bool isByUser) = 0;
+    virtual void SetLabelSelectedColorByUser(bool isByUser) = 0;
     virtual void SetIconStyle(const IconStyle& iconStyle)  {}
+    virtual void SetIconUnselectedColorByUser(bool isByUser) = 0;
+    virtual void SetIconSelectedColorByUser(bool isByUser) = 0;
     virtual void SetPadding(const NG::PaddingProperty& padding) = 0;
     virtual void SetUseLocalizedPadding(bool useLocalizedPadding) = 0;
     virtual void SetLayoutMode(LayoutMode layoutMode) = 0;

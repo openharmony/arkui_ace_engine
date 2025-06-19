@@ -19,6 +19,7 @@
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 #include "interfaces/inner_api/ace_kit/src/view/overlay/overlay_manager_impl.h"
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/thread/task_executor.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_application_info.h"
@@ -124,4 +125,18 @@ bool UIContextImpl::GreatOrEqualTargetAPIVersion(int32_t version)
     return AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(static_cast<PlatformVersion>(version));
 }
 
+int32_t UIContextImpl::GetContainerModalTitleHeight()
+{
+    CHECK_NULL_RETURN(context_, 0);
+    return context_->GetContainerModalTitleHeight();
+}
+
+int32_t UIContextImpl::GetContainerModalButtonsWidth()
+{
+    CHECK_NULL_RETURN(context_, 0);
+    Ace::NG::RectF containerModal;
+    Ace::NG::RectF buttonsRect;
+    context_->GetContainerModalButtonsRect(containerModal, buttonsRect);
+    return static_cast<int32_t>(buttonsRect.Width());
+}
 } // namespace OHOS::Ace::Kit

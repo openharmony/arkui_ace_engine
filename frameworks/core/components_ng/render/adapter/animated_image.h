@@ -25,7 +25,7 @@
 
 #include "base/image/image_source.h"
 #include "base/thread/cancelable_callback.h"
-#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
+#include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/drawing_image.h"
 

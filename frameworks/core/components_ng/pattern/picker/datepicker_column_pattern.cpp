@@ -52,7 +52,6 @@ const Dimension FONT_SIZE = Dimension(2.0);
 const float TEXT_HEIGHT_NUMBER = 3.0f;
 const float TEXT_WEIGHT_NUMBER = 6.0f;
 const int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
-const Dimension FOCUS_SIZE = Dimension(1.0);
 constexpr char MEASURE_SIZE_STRING[] = "TEST";
 constexpr float FONTWEIGHT = 0.5f;
 constexpr int32_t BUFFER_NODE_NUMBER = 2;
@@ -268,7 +267,7 @@ void DatePickerColumnPattern::InitTextFontFamily()
 }
 
 void DatePickerColumnPattern::FlushCurrentOptions(
-    bool isDown, bool isUpateTextContentOnly, bool isUpdateAnimationProperties)
+    bool isDown, bool isUpateTextContentOnly, bool isUpdateAnimationProperties, bool isTossPlaying)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -331,16 +330,20 @@ void DatePickerColumnPattern::FlushCurrentOptions(
         bool virtualIndexValidate = virtualIndex >= 0 && virtualIndex < static_cast<int32_t>(totalOptionCount);
         if ((NotLoopOptions() || !isLoop_) && !virtualIndexValidate) {
             textLayoutProperty->UpdateContent(u"");
-            textNode->MarkModifyDone();
-            textNode->MarkDirtyNode();
+            if (!isTossPlaying) {
+                textNode->MarkModifyDone();
+                textNode->MarkDirtyNode();
+            }
             continue;
         }
         auto date = datePickerPattern->GetAllOptions(host)[optionIndex];
         auto optionValue = DatePickerPattern::GetFormatString(date);
         textLayoutProperty->UpdateContent(optionValue);
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-        textNode->MarkModifyDone();
-        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        if (!isTossPlaying) {
+            textNode->MarkModifyDone();
+            textNode->MarkDirtyNode();
+        }
     }
     if (isUpateTextContentOnly && isUpdateAnimationProperties) {
         FlushAnimationTextProperties(isDown);
@@ -378,82 +381,26 @@ void DatePickerColumnPattern::UpdatePickerTextProperties(uint32_t index, uint32_
 
 void DatePickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerTheme>& pickerTheme,
     const RefPtr<TextLayoutProperty>& textLayoutProperty,
-    const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
+    const RefPtr<PickerLayoutProperty>& pickerLayoutProperty)
 {
     UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
-    auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
-    textLayoutProperty->UpdateTextColor(dataPickerRowLayoutProperty->GetDisappearColor().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetTextColor()));
-    if (dataPickerRowLayoutProperty->HasDisappearFontSize()) {
-        textLayoutProperty->UpdateFontSize(dataPickerRowLayoutProperty->GetDisappearFontSize().value());
-    } else {
-        textLayoutProperty->UpdateAdaptMaxFontSize(normalOptionSize);
-        textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(false, false).GetAdaptMinFontSize());
-    }
-    textLayoutProperty->UpdateFontWeight(dataPickerRowLayoutProperty->GetDisappearWeight().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
-    textLayoutProperty->UpdateFontFamily(dataPickerRowLayoutProperty->GetDisappearFontFamily().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
-    textLayoutProperty->UpdateItalicFontStyle(dataPickerRowLayoutProperty->GetDisappearFontStyle().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
+    PickerColumnPattern::UpdateDisappearTextProperties(pickerTheme, textLayoutProperty, pickerLayoutProperty);
 }
 
 void DatePickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
     const RefPtr<TextLayoutProperty>& textLayoutProperty,
-    const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
+    const RefPtr<PickerLayoutProperty>& pickerLayoutProperty)
 {
     UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
-    auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
-    textLayoutProperty->UpdateTextColor(
-        dataPickerRowLayoutProperty->GetColor().value_or(pickerTheme->GetOptionStyle(false, false).GetTextColor()));
-    if (dataPickerRowLayoutProperty->HasFontSize()) {
-        textLayoutProperty->UpdateFontSize(dataPickerRowLayoutProperty->GetFontSize().value());
-    } else {
-        textLayoutProperty->UpdateAdaptMaxFontSize(focusOptionSize);
-        textLayoutProperty->UpdateAdaptMinFontSize(
-            pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize() - FOCUS_SIZE);
-    }
-    textLayoutProperty->UpdateFontWeight(
-        dataPickerRowLayoutProperty->GetWeight().value_or(pickerTheme->GetOptionStyle(false, false).GetFontWeight()));
-    CandidateWeight_ =
-        dataPickerRowLayoutProperty->GetWeight().value_or(pickerTheme->GetOptionStyle(false, false).GetFontWeight());
-    textLayoutProperty->UpdateFontFamily(dataPickerRowLayoutProperty->GetFontFamily().value_or(
-        pickerTheme->GetOptionStyle(false, false).GetFontFamilies()));
-    textLayoutProperty->UpdateItalicFontStyle(
-        dataPickerRowLayoutProperty->GetFontStyle().value_or(pickerTheme->GetOptionStyle(false, false).GetFontStyle()));
+    PickerColumnPattern::UpdateCandidateTextProperties(pickerTheme, textLayoutProperty, pickerLayoutProperty);
 }
 
 void DatePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
     const RefPtr<TextLayoutProperty>& textLayoutProperty,
-    const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
+    const RefPtr<PickerLayoutProperty>& pickerLayoutProperty)
 {
     UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
-    auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
-    if (pickerTheme->IsCircleDial() && !isUserSetSelectColor_) {
-        if (selectedMarkPaint_) {
-            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, true).GetTextColor());
-        } else {
-            textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(false, false).GetTextColor());
-        }
-    } else {
-        textLayoutProperty->UpdateTextColor(dataPickerRowLayoutProperty->GetSelectedColor().value_or(
-            pickerTheme->GetOptionStyle(true, false).GetTextColor()));
-    }
-
-    if (dataPickerRowLayoutProperty->HasSelectedFontSize()) {
-        textLayoutProperty->UpdateFontSize(dataPickerRowLayoutProperty->GetSelectedFontSize().value());
-    } else {
-        textLayoutProperty->UpdateAdaptMaxFontSize(selectedOptionSize);
-        textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize());
-    }
-    textLayoutProperty->UpdateFontWeight(dataPickerRowLayoutProperty->GetSelectedWeight().value_or(
-        pickerTheme->GetOptionStyle(true, false).GetFontWeight()));
-    SelectedWeight_ = dataPickerRowLayoutProperty->GetSelectedWeight().value_or(
-        pickerTheme->GetOptionStyle(true, false).GetFontWeight());
-    textLayoutProperty->UpdateFontFamily(dataPickerRowLayoutProperty->GetSelectedFontFamily().value_or(
-        pickerTheme->GetOptionStyle(true, false).GetFontFamilies()));
-    textLayoutProperty->UpdateItalicFontStyle(dataPickerRowLayoutProperty->GetSelectedFontStyle().value_or(
-        pickerTheme->GetOptionStyle(true, false).GetFontStyle()));
+    PickerColumnPattern::UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, pickerLayoutProperty);
 }
 
 void DatePickerColumnPattern::SetDividerHeight(uint32_t showOptionCount)
@@ -580,20 +527,13 @@ bool DatePickerColumnPattern::CanMove(bool isDown) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
-    CHECK_NULL_RETURN(blendNode, false);
-    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
-    CHECK_NULL_RETURN(stackNode, false);
-    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
-    CHECK_NULL_RETURN(parentNode, false);
-    auto dataPickerRowLayoutProperty = parentNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    bool canLoop = GetCanLoopFromLayoutProperty();
     // When CanLoop is true and NotLoopOptions is false(which means LoopOptions are satisfied), CanMove returns true;
     // otherwise, validate the index legality.
-    if (dataPickerRowLayoutProperty->GetCanLoopValue(true) && !NotLoopOptions()) {
-
+    if (canLoop && !NotLoopOptions()) {
         return true;
     }
-    int totalOptionCount = GetOptionCount();
+    int totalOptionCount = static_cast<int>(GetOptionCount());
 
     auto datePickerColumnPattern = host->GetPattern<DatePickerColumnPattern>();
     CHECK_NULL_RETURN(datePickerColumnPattern, false);
@@ -690,5 +630,43 @@ bool DatePickerColumnPattern::GetOptionItemCount(uint32_t& itemCounts)
 bool DatePickerColumnPattern::IsLanscape(uint32_t itemCount)
 {
     return (itemCount == OPTION_COUNT_PHONE_LANDSCAPE + BUFFER_NODE_NUMBER);
+}
+
+bool DatePickerColumnPattern::GetCanLoopFromLayoutProperty() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_RETURN(blendNode, false);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_RETURN(stackNode, false);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_RETURN(parentNode, false);
+    auto dataPickerRowLayoutProperty = parentNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    return dataPickerRowLayoutProperty->GetCanLoopValue(true);
+}
+
+bool DatePickerColumnPattern::IsTossNeedToStop()
+{
+    return !GetCanLoopFromLayoutProperty();
+}
+
+std::string DatePickerColumnPattern::GetCurrentOption() const
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, "");
+    auto pattern = frameNode->GetPattern<DatePickerColumnPattern>();
+    CHECK_NULL_RETURN(pattern, "");
+    auto index = pattern->GetCurrentIndex();
+    auto options = pattern->GetOptions();
+    auto it = options.find(frameNode);
+    if (it != options.end()) {
+        if (it->second.size() <= index) {
+            return "";
+        }
+        auto date = it->second.at(index);
+        return DatePickerPattern::GetFormatString(date);
+    }
+    return "";
 }
 } // namespace OHOS::Ace::NG

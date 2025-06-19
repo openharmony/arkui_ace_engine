@@ -829,4 +829,34 @@ HWTEST_F(SelectOverlayManagerTestTwoNg, FocusFirstFocusableChildInMenu001, TestS
     EXPECT_TRUE(frameNode->GetContext()->taskScheduler_->afterLayoutCallbacksInImplicitAnimationTask_.empty());
     EXPECT_TRUE(frameNode->GetContext()->taskScheduler_->afterLayoutTasks_.empty());
 }
+
+/**
+ * @tc.name: DestroySelectOverlayNode
+ * @tc.desc: test select_content_overlay_manager.cpp DestroySelectOverlayNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestTwoNg, DestroySelectOverlayNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init SelectContentOverlayManager
+     */
+    Init();
+    auto content = SelectContentOverlayManager(root_);
+    SelectOverlayInfo selectInfo;
+    content.shareOverlayInfo_ = std::make_shared<SelectOverlayInfo>(selectInfo);
+    ASSERT_NE(content.shareOverlayInfo_, nullptr);
+
+    /**
+     * @tc.steps: step2. CreateSelectOverlayNode
+     */
+    auto menuNode =
+        SelectOverlayNode::CreateSelectOverlayNode(content.shareOverlayInfo_, SelectOverlayMode::MENU_ONLY);
+    ASSERT_NE(menuNode, nullptr);
+    menuNode->MountToParent(root_);
+    /**
+     * @tc.steps: step3. call DestroySelectOverlayNode
+     */
+    content.DestroySelectOverlayNode(menuNode);
+    EXPECT_TRUE(menuNode->IsInDestroying());
+}
 } // namespace OHOS::Ace::NG

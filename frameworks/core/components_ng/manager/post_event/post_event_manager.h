@@ -47,6 +47,8 @@ private:
     bool PostDownEvent(const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent);
     bool PostMoveEvent(const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent);
     bool PostUpEvent(const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent);
+    bool CheckTouchEvent(const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent);
+    void ClearPostInputActions(const RefPtr<NG::UINode>& targetNode, int32_t id);
 
     void HandlePostEvent(const RefPtr<NG::UINode>& targetNode, const TouchEvent& touchEvent);
 
@@ -55,6 +57,7 @@ private:
     bool HaveReceiveDownEvent(const RefPtr<NG::UINode>& targetNode, int32_t id);
     bool HaveReceiveUpOrCancelEvent(const RefPtr<NG::UINode>& targetNode, int32_t id);
     std::list<PostEventAction> postEventAction_;
+    std::list<PostEventAction> postInputEventAction_;
     std::map<int32_t, PostEventAction> lastEventMap_;
     bool passThroughResult_ = false;
 };

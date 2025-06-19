@@ -69,17 +69,6 @@ RefPtr<RenderNode> SvgLine::CreateRender(
     return renderBox;
 }
 
-#ifndef USE_ROSEN_DRAWING
-SkPath SvgLine::AsPath(const Size& viewPort) const
-{
-    SkPath path;
-    path.moveTo(ConvertDimensionToPx(component_->GetX1(), viewPort, SvgLengthType::HORIZONTAL),
-        ConvertDimensionToPx(component_->GetY1(), viewPort, SvgLengthType::VERTICAL));
-    path.lineTo(ConvertDimensionToPx(component_->GetX2(), viewPort, SvgLengthType::HORIZONTAL),
-        ConvertDimensionToPx(component_->GetY2(), viewPort, SvgLengthType::VERTICAL));
-    return path;
-}
-#else
 RSPath SvgLine::AsPath(const Size& viewPort) const
 {
     RSPath path;
@@ -89,6 +78,5 @@ RSPath SvgLine::AsPath(const Size& viewPort) const
         ConvertDimensionToPx(component_->GetY2(), viewPort, SvgLengthType::VERTICAL));
     return path;
 }
-#endif
 
 } // namespace OHOS::Ace

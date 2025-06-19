@@ -754,8 +754,9 @@ HWTEST_F(TextTestTwoNg, ShowSelectOverlay004, TestSize.Level1)
     pattern->textSelector_.Update(0, 20);
     OnCreateMenuCallback onCreateMenuCallback;
     OnMenuItemClickCallback onMenuItemClick;
-    pattern->selectOverlay_->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
-
+    OnPrepareMenuCallback onPrepareMenuCallback;
+    pattern->selectOverlay_->OnSelectionMenuOptionsUpdate(
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
     /**
      * @tc.steps: step2. call ShowSelectOverlay function
      * @tc.expected: the property of selectInfo is assigned.
@@ -1019,6 +1020,9 @@ HWTEST_F(TextTestTwoNg, TextDecorationToJsonValue001, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
     auto json = JsonUtil::Create(true);
     textLayoutProperty->ToJsonValue(json, filter);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("decoration"));
@@ -1052,6 +1056,9 @@ HWTEST_F(TextTestTwoNg, TextDecorationToJsonValue002, TestSize.Level1)
     ASSERT_NE(textLayoutProperty, nullptr);
     auto json = JsonUtil::Create(true);
     textLayoutProperty->ToJsonValue(json, filter);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->ToJsonValue(json, filter);
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("decoration"));

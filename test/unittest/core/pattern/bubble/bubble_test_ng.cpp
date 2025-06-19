@@ -35,6 +35,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/popup/popup_theme.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
@@ -1113,7 +1114,7 @@ HWTEST_F(BubbleTestNg, BubblePatternTest013, TestSize.Level1)
     /**
      * @tc.steps: step3. set properties and call MarkModifyDone function.
      */
-    auto layoutNode = BubbleView::CreateButtons(popupParam, targetNode->GetId(), popupNode->GetId());
+    auto layoutNode = BubbleView::CreateButtons(popupParam, popupNode->GetId(), targetNode->GetId());
     auto buttons = layoutNode->GetChildren();
     BubbleView::UpdateBubbleButtons(buttons, popupParam);
     pattern->mouseEventInitFlag_ = true;
@@ -1628,6 +1629,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest004, TestSize.Level1)
     auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode =
         FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    EXPECT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. get pattern and layoutAlgorithm.
      * @tc.expected: step2. related function is called.
@@ -1638,7 +1640,12 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest004, TestSize.Level1)
     EXPECT_FALSE(bubbleLayoutProperty == nullptr);
     auto bubbleLayoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
     EXPECT_FALSE(bubbleLayoutAlgorithm == nullptr);
-
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto childWrapper = layoutWrapper;
+    EXPECT_FALSE(childWrapper == nullptr);
     /**
      * @tc.steps: step3. update layoutProp and arrowPlacement.
      * @tc.expected: step3. check whether the function is executed.
@@ -1660,7 +1667,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest004, TestSize.Level1)
     bubbleLayoutAlgorithm->bCaretMode_ = true;
     bubbleLayoutAlgorithm->bHorizontal_ = true;
     SizeF childSizeFull(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
-    bubbleLayoutAlgorithm->GetChildPositionNew(childSizeFull, bubbleLayoutProperty);
+    bubbleLayoutAlgorithm->GetChildPositionNew(childSizeFull, bubbleLayoutProperty, childWrapper);
 }
 
 /**
@@ -1870,6 +1877,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
     auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode =
         FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    EXPECT_NE(frameNode, nullptr);
     /**
      * @tc.steps: step2. get pattern and layoutAlgorithm.
      * @tc.expected: step2. related function is called.
@@ -1877,6 +1885,12 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
     auto bubblePattern = frameNode->GetPattern<BubblePattern>();
     auto bubbleLayoutProperty = bubblePattern->GetLayoutProperty<BubbleLayoutProperty>();
     auto bubbleLayoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto childWrapper = layoutWrapper;
+    EXPECT_FALSE(childWrapper == nullptr);
 
     /**
      * @tc.steps: step3. excute GetIfNeedArrow GetChildPosition
@@ -1904,7 +1918,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
          * @tc.steps: step4. excute GetChildPosition
          * @tc.expected: step4. GetChildPosition returns the result as the bubble position.
          */
-        auto resultOffset = bubbleLayoutAlgorithm->GetChildPositionNew(childSize, bubbleLayoutProperty);
+        auto resultOffset = bubbleLayoutAlgorithm->GetChildPositionNew(childSize, bubbleLayoutProperty, childWrapper);
         EXPECT_EQ(resultOffset, DISPLAY_WINDOW_OFFSET);
         OffsetF arrowPosition;
         /**
@@ -2106,18 +2120,291 @@ HWTEST_F(BubbleTestNg, BubbleBorderTest001, TestSize.Level1)
      */
     bubblePaintMethod.SetShowArrow(true);
     bubblePaintMethod.enableArrow_ = true;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    auto popupTheme = AceType::MakeRefPtr<PopupTheme>();
+    ASSERT_NE(popupTheme, nullptr);
 
     /**
      * @tc.steps: step3. Excute function for border offset.
      */
     if (popupTheme->GetPopupDoubleBorderEnable()) {
         if (bubblePaintMethod.needPaintOuterBorder_) {
-            EXPECT_EQ(bubblePaintMethod.GetBorderOffset(), -bubblePaintMethod.outerBorderWidth_);
+            EXPECT_EQ(bubblePaintMethod.GetBorderOffset(popupTheme), -bubblePaintMethod.outerBorderWidth_);
         } else {
-            EXPECT_EQ(bubblePaintMethod.GetBorderOffset(), bubblePaintMethod.innerBorderWidth_);
+            EXPECT_EQ(bubblePaintMethod.GetBorderOffset(popupTheme), bubblePaintMethod.innerBorderWidth_);
         }
     }
+}
+
+
+/**
+ * @tc.name: BorderLinearGradientPointTest001
+ * @tc.desc: Test BorderLinearGradientPoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BorderLinearGradientPointTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the BubblePaintMethod.
+     */
+    BubblePaintMethod bubblePaintMethod;
+    /**
+     * @tc.steps: step2. Set condition.
+     */
+    bubblePaintMethod.childOffset_ = OffsetF(10.0f, 10.0f);
+    bubblePaintMethod.childSize_.SetWidth(10.0f);
+    bubblePaintMethod.childSize_.SetHeight(8.0f);
+    PopupLinearGradientProperties outlineLinearGradient;
+    outlineLinearGradient.popupDirection = OHOS::Ace::GradientDirection::TOP;
+    outlineLinearGradient.gradientColors.push_back(PopupGradientColor { Color::RED, 0.0 });
+    outlineLinearGradient.gradientColors.push_back(PopupGradientColor { Color::GRAY, 1.0 });
+    bubblePaintMethod.SetOutlineLinearGradient(outlineLinearGradient);
+    /**
+     * @tc.steps: step3. execute BorderLinearGradientPoint function get result.
+     */
+    int popupOuterBorderDirectionInt =
+        static_cast<int>(bubblePaintMethod.GetOutlineLinearGradient().popupDirection);
+    std::vector<RSPoint> points = bubblePaintMethod.BorderLinearGradientPoint(popupOuterBorderDirectionInt);
+    auto half = 2;
+    auto childSizeWidth = bubblePaintMethod.childSize_.Width();
+    auto childSizeHeight = bubblePaintMethod.childSize_.Height();
+    auto childOffsetX = bubblePaintMethod.childOffset_.GetX();
+    auto childOffsetY = bubblePaintMethod.childOffset_.GetY();
+    RSPoint startPoint(childOffsetX + childSizeWidth / half, childOffsetY + childSizeHeight);
+    RSPoint endPoint(childOffsetX + childSizeWidth / half, childOffsetY);
+    /**
+     * @tc.steps: step4. Compare function return values.
+     */
+    EXPECT_EQ(startPoint.GetX(), points[0].GetX());
+    EXPECT_EQ(endPoint.GetY(), points[1].GetY());
+}
+
+/**
+ * @tc.name: BorderLinearGradientPointTest002
+ * @tc.desc: Test BorderLinearGradientPoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BorderLinearGradientPointTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the BubblePaintMethod.
+     */
+    BubblePaintMethod bubblePaintMethod;
+    /**
+     * @tc.steps: step2. Set condition.
+     */
+    bubblePaintMethod.childOffset_ = OffsetF(10.0f, 10.0f);
+    bubblePaintMethod.childSize_.SetWidth(10.0f);
+    bubblePaintMethod.childSize_.SetHeight(8.0f);
+    PopupLinearGradientProperties innerBorderLinearGradient;
+    innerBorderLinearGradient.popupDirection = OHOS::Ace::GradientDirection::NONE;
+    innerBorderLinearGradient.gradientColors.push_back(PopupGradientColor { Color::RED, 0.0 });
+    innerBorderLinearGradient.gradientColors.push_back(PopupGradientColor { Color::GRAY, 1.0 });
+    bubblePaintMethod.SetInnerBorderLinearGradient(innerBorderLinearGradient);
+    /**
+     * @tc.steps: step3. execute BorderLinearGradientPoint function get result.
+     */
+    int popupInnerBorderDirectionInt =
+        static_cast<int>(bubblePaintMethod.GetInnerBorderLinearGradient().popupDirection);
+    std::vector<RSPoint> points = bubblePaintMethod.BorderLinearGradientPoint(popupInnerBorderDirectionInt);
+    auto half = 2;
+    auto childSizeWidth = bubblePaintMethod.childSize_.Width();
+    auto childSizeHeight = bubblePaintMethod.childSize_.Height();
+    auto childOffsetX = bubblePaintMethod.childOffset_.GetX();
+    auto childOffsetY = bubblePaintMethod.childOffset_.GetY();
+    RSPoint startPoint(childOffsetX + childSizeWidth / half, childOffsetY);
+    RSPoint endPoint(childOffsetX + childSizeWidth / half, childOffsetY + childSizeHeight);
+    /**
+     * @tc.steps: step4. Compare function return values.
+     */
+    EXPECT_EQ(startPoint.GetX(), points[0].GetX());
+    EXPECT_EQ(endPoint.GetY(), points[1].GetY());
+}
+
+/**
+ * @tc.name: BorderLinearGradientColorsTest001
+ * @tc.desc: Test BorderLinearGradientColors
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BorderLinearGradientColorsTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the BubblePaintMethod.
+     */
+    BubblePaintMethod bubblePaintMethod;
+    /**
+     * @tc.steps: step2. Set condition.
+     */
+    PopupLinearGradientProperties innerBorderLinearGradient;
+    innerBorderLinearGradient.popupDirection = OHOS::Ace::GradientDirection::LEFT;
+    innerBorderLinearGradient.gradientColors.push_back(PopupGradientColor { Color::GREEN, 0.0 });
+    innerBorderLinearGradient.gradientColors.push_back(PopupGradientColor { Color::BLUE, 1.0 });
+    bubblePaintMethod.SetInnerBorderLinearGradient(innerBorderLinearGradient);
+    std::vector<PopupGradientColor> gradientColors =
+        bubblePaintMethod.GetInnerBorderLinearGradient().gradientColors;
+    /**
+     * @tc.steps: step3. execute BorderLinearGradientColors function get result.
+     */
+    std::pair<std::vector<uint32_t>, std::vector<float>> colors =
+        bubblePaintMethod.BorderLinearGradientColors(gradientColors);
+    std::vector<uint32_t> colorQuads = colors.first;
+    std::vector<float> positions = colors.second;
+    /**
+     * @tc.steps: step4. Compare function return values.
+     */
+    EXPECT_EQ(Color::GREEN.GetValue(), colorQuads[0]);
+    EXPECT_EQ(1.0, positions[1]);
+}
+
+/**
+ * @tc.name: BorderLinearGradientColorsTest002
+ * @tc.desc: Test BorderLinearGradientColors
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BorderLinearGradientColorsTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the BubblePaintMethod.
+     */
+    BubblePaintMethod bubblePaintMethod;
+    /**
+     * @tc.steps: step2. Set condition.
+     */
+    PopupLinearGradientProperties outlineLinearGradient;
+    outlineLinearGradient.popupDirection = OHOS::Ace::GradientDirection::LEFT;
+    outlineLinearGradient.gradientColors.push_back(PopupGradientColor { Color::BLACK, 0.0 });
+    outlineLinearGradient.gradientColors.push_back(PopupGradientColor { Color::RED, 1.0 });
+    bubblePaintMethod.SetOutlineLinearGradient(outlineLinearGradient);
+    std::vector<PopupGradientColor> gradientColors =
+        bubblePaintMethod.GetOutlineLinearGradient().gradientColors;
+    /**
+     * @tc.steps: step3. execute BorderLinearGradientColors function get result.
+     */
+    std::pair<std::vector<uint32_t>, std::vector<float>> colors =
+        bubblePaintMethod.BorderLinearGradientColors(gradientColors);
+    std::vector<uint32_t> colorQuads = colors.first;
+    std::vector<float> positions = colors.second;
+    /**
+     * @tc.steps: step4. Compare function return values.
+     */
+    EXPECT_EQ(Color::RED.GetValue(), colorQuads[1]);
+    EXPECT_EQ(0.0, positions[0]);
+}
+
+/**
+ * @tc.name: BubbleLayoutTest011
+ * @tc.desc: Test the Bubble created by message Measure and Layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubbleLayoutTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create targetNode and get frameNode.
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    popupParam->SetMessage(BUBBLE_MESSAGE);
+    popupParam->SetUseCustomComponent(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_FALSE);
+    Dimension radius = 1000.0_vp;
+    Dimension arrowWidth = 1000.0_vp;
+    popupParam->SetRadius(radius);
+    popupParam->SetArrowWidth(arrowWidth);
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    // set popupTheme and  buttonTheme to themeManager before using themeManager
+    auto themeManagerOne = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerOne);
+    EXPECT_CALL(*themeManagerOne, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<PopupTheme>()));
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    EXPECT_FALSE(frameNode == nullptr);
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: step2. related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    EXPECT_FALSE(geometryNode == nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    EXPECT_FALSE(bubblePattern == nullptr);
+    auto bubbleLayoutProperty = bubblePattern->GetLayoutProperty<BubbleLayoutProperty>();
+    EXPECT_FALSE(bubbleLayoutProperty == nullptr);
+    auto bubbleLayoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    EXPECT_FALSE(bubbleLayoutAlgorithm == nullptr);
+    bubbleLayoutAlgorithm->targetTag_ = targetTag;
+    bubbleLayoutAlgorithm->targetNodeId_ = targetId;
+
+    /**
+     * @tc.steps: step3. update layoutWrapper and layoutProperty.
+     */
+    bubbleLayoutProperty->UpdateEnableArrow(BUBBLE_LAYOUT_PROPERTY_ENABLE_ARROW_TRUE);
+    bubbleLayoutProperty->UpdateUseCustom(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_FALSE);
+    bubbleLayoutProperty->UpdatePlacement(BUBBLE_LAYOUT_PROPERTY_PLACEMENT);
+    bubbleLayoutProperty->UpdateUseCustom(BUBBLE_LAYOUT_PROPERTY_USE_CUSTOM_TRUE);
+    bubbleLayoutProperty->UpdateShowInSubWindow(BUBBLE_LAYOUT_PROPERTY_SHOW_IN_SUBWINDOW);
+
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FULL_SCREEN_WIDTH), CalcLength(FULL_SCREEN_HEIGHT)));
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.selfIdealSize.SetSize(SizeF(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    childLayoutConstraint.minSize = SizeF(ZERO, ZERO);
+
+    /**
+     * @tc.steps: step4. create bubble child and child's layoutWrapper.
+     */
+    auto textFrameNode = BubbleView::CreateMessage(popupParam->GetMessage(), popupParam->IsUseCustom());
+    EXPECT_FALSE(textFrameNode == nullptr);
+    RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    textGeometryNode->Reset();
+    RefPtr<LayoutWrapperNode> textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    textLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    textLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(BUBBLE_WIDTH), CalcLength(BUBBLE_HEIGHT)));
+    auto boxLayoutAlgorithm = textFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    EXPECT_FALSE(boxLayoutAlgorithm == nullptr);
+    textLayoutWrapper->SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(boxLayoutAlgorithm));
+    frameNode->AddChild(textFrameNode);
+    layoutWrapper->AppendChild(textLayoutWrapper);
+    /**
+     * @tc.steps: step5. use layoutAlgorithm to measure and layout.
+     * @tc.expected: step5. check whether the value of the bubble child's frameSize and frameOffset is correct.
+     */
+
+    MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    theme->expandDisplay_ = true;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+    bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(BUBBLE_WIDTH_CHANGE, BUBBLE_HEIGHT_CHANGE));
+    EXPECT_DOUBLE_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), 0.0f);
+
+    int32_t settingApiVersion = 12;
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    auto wrapperBubbleLayoutProperty = AceType::DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    wrapperBubbleLayoutProperty->UpdateUseCustom(false);
+    bubbleLayoutAlgorithm->targetTag_ = V2::TEXTAREA_ETS_TAG;
+    bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+    bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+    bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
+
+    MockPipelineContext::TearDown();
 }
 } // namespace OHOS::Ace::NG

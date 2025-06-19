@@ -83,7 +83,7 @@ public:
     void SetBackgroundColor(const Color& color, bool tmp) override;
     void ResetBackgroundColor() override {};
     void SetHeight(const Dimension& value) override;
-    void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) override;
+    void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp, bool hasRegist = false) override;
     void SetBackBorder() override;
     void SetHoverEffect(HoverEffectType value) override;
     void SetOnClick(std::function<void(const ClickInfo&)>&& func) override;
@@ -112,6 +112,7 @@ public:
     void SetEnableHapticFeedback(bool state) override {};
     void SetKeyboardAppearance(KeyboardAppearance value) override {};
     void SetEnableAutoSpacing(bool enabled) override {};
+    void SetOnWillAttachIME(std::function<void(const IMEClient&)>&& func) override {};
 
 private:
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

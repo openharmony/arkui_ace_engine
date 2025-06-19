@@ -332,8 +332,12 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnPaste001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    auto pipeline = MockPipelineContext::GetCurrent();
-    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(taskExecutor);
     richEditorPattern->clipboard_ = clipboard;
     AddSpan("testHandleOnPaste1");
     richEditorPattern->HandleOnPaste();
@@ -347,6 +351,10 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnPaste001, TestSize.Level1)
     richEditorPattern->textSelector_.destinationOffset = 1;
     richEditorPattern->OnCopyOperation(true);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
+
+    richEditorPattern->ResetSelection();
+    richEditorPattern->OnCopyOperation(true);
+    EXPECT_EQ(taskExecutor->GetTotalTaskNum(TaskExecutor::TaskType::BACKGROUND), 0);
 }
 
 /**
@@ -376,9 +384,20 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, ResetAfterPaste001, TestSize.Level1)
 HWTEST_F(RichEditorCopyCutPasteTestNg, PasteStr001, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    auto eventHub = richEditorPattern->GetOrCreateEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto changeReason = TextChangeReason::UNKNOWN;
+    auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
+        EXPECT_EQ(changeValue.changeReason_, TextChangeReason::PASTE);
+        changeReason = changeValue.changeReason_;
+        return true;
+    };
+    eventHub->SetOnWillChange(onWillChange);
+
     ASSERT_NE(richEditorPattern, nullptr);
     std::string text = "text";
     richEditorPattern->PasteStr(text);
+    EXPECT_EQ(changeReason, TextChangeReason::PASTE);
     EXPECT_FALSE(richEditorPattern->previewLongPress_);
 }
 
@@ -443,6 +462,15 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut004, TestSize.Level1)
         event.SetPreventDefault(true);
     };
     richEditorModel.SetOnCut(std::move(onCutWithEvent));
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+
+    auto changeReason = TextChangeReason::UNKNOWN;
+    auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
+        EXPECT_EQ(changeValue.changeReason_, TextChangeReason::CUT);
+        changeReason = changeValue.changeReason_;
+        return true;
+    };
+    richEditorModel.SetOnWillChange(onWillChange);
 
     /**
      * @tc.steps: step2. call the callback function
@@ -454,6 +482,7 @@ HWTEST_F(RichEditorCopyCutPasteTestNg, HandleOnCut004, TestSize.Level1)
     richEditorPattern->textSelector_.destinationOffset = 1;
     richEditorPattern->previewLongPress_ = true;
     richEditorPattern->HandleOnCut();
+    EXPECT_EQ(changeReason, TextChangeReason::UNKNOWN); // preventDefault
     EXPECT_NE(richEditorPattern->caretUpdateType_, CaretUpdateType::PRESSED);
     EXPECT_EQ(isEventCalled, true);
 }

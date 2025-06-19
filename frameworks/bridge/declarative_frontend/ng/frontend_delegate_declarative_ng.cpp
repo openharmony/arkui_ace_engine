@@ -250,6 +250,14 @@ void FrontendDelegateDeclarativeNG::SetRouterIntentInfo(const std::string& inten
         TaskExecutor::TaskType::JS, "ArkUISetRouterIntentInfo");
 }
 
+std::string FrontendDelegateDeclarativeNG::GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam)
+{
+    if (pageRouterManager_) {
+        return pageRouterManager_->GetTopNavDestinationInfo(onlyFullScreen, needParam);
+    }
+    return "{}";
+}
+
 void FrontendDelegateDeclarativeNG::OnConfigurationUpdated(const std::string& data)
 {
     // only support mediaQueryUpdate
@@ -1387,6 +1395,16 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative
     return NG::ComponentSnapshot::GetSyncByUniqueId(uniqueId, options);
 #endif
     return {ERROR_CODE_INTERNAL_ERROR, nullptr};
+}
+
+void FrontendDelegateDeclarativeNG::GetSnapshotWithRange(const NG::NodeIdentity startID, const NG::NodeIdentity endID,
+    const bool isStartRect,
+    std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    const NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    NG::ComponentSnapshot::GetWithRange(startID, endID, isStartRect, std::move(callback), options);
+#endif
 }
 
 void FrontendDelegateDeclarativeNG::CreateSnapshotFromComponent(const RefPtr<NG::UINode>& nodeWk,

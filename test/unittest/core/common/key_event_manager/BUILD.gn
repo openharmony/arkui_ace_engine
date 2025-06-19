@@ -45,6 +45,7 @@ ohos_unittest("key_event_manager_test") {
   if (is_ohos_standard_system) {
     external_deps += [
       "form_fwk:fmskit_native",
+      "graphic_2d:librender_service_base",
       "graphic_2d:librender_service_client",
     ]
   }

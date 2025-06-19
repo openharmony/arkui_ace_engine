@@ -21,6 +21,8 @@
 #include <cstdint>
 #include <string>
 
+#include "ui/base/macros.h"
+
 #define CHECK_NULL_VOID(ptr) \
     do {                     \
         if (!(ptr)) {        \
@@ -320,7 +322,7 @@ inline bool IsDarkColor(uint32_t color)
 
 bool RealPath(const std::string& fileName, char* realPath);
 
-double RoundToMaxPrecision(double value);
+ACE_FORCE_EXPORT double RoundToMaxPrecision(double value);
 
 } // namespace OHOS::Ace
 

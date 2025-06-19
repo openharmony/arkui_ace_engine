@@ -1,0 +1,18 @@
+{
+    "name": "@koalaui/sts-memo-plugin",
+    "version": "",
+    "description": "",
+    "scripts": {
+        "clean": "rimraf build",
+        "unmemoize": "ets-tsc -p tsconfig-unmemoize.json",
+        "ts-like:compile": "npm run unmemoize && fast-arktsc --input-files ./arktsconfig-unmemoized.json --output-dir ./build --compiler ../../../incremental/tools/panda/arkts/arktsc --link-name stub && ninja ${NINJA_OPTIONS} -f build/build.ninja",
+        "arkts-like:compile": "../../../incremental/tools/panda/arkts/arktsc --arktsconfig ./arktsconfig.json --output ./build/demo.abc ./demo.sts",
+        "arkts-like:compile:capi": "../../../incremental/tools/panda/arkts/arktsc-capi --arktsconfig ./arktsconfig-stub.json --output ./build/stub-no-use.abc --file ./stub/sts/stub.sts --dump-plugin-ast --restart-stages --generate-decl && ../../../incremental/tools/panda/arkts/arktsc-capi --arktsconfig ./arktsconfig-demo.json --output ./build/demo.abc --file ./demo/demo.sts --dump-plugin-ast --restart-stages --decl-arktsconfig ./arktsconfig-demo-post.json",
+        "run": "../../../incremental/tools/panda/arkts/ark ./build/demo.abc --ark-boot-files ../../../incremental/runtime/build/incremental.abc:build/stub.abc --ark-entry-point @demo.demo.ETSGLOBAL::main",
+        "disasm": "$(find build -name '*.abc' -exec ../../../incremental/tools/panda/arkts/arkdisasm {} \\;)"
+    },
+    "devDependencies": {
+        "@koalaui/ets-tsc": "4.9.5-r4",
+        "@koalaui/fast-arktsc": "next"
+    }
+}

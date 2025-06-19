@@ -22,6 +22,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll_bar/scroll_proxy.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 
@@ -64,6 +65,9 @@ public:
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide) = 0;
     virtual void SetEnablePaging(bool enablePaging) = 0;
     virtual void SetInitialOffset(const NG::OffsetT<CalcDimension>& offset) = 0;
+    virtual void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithResourceObjIntervalSize(const RefPtr<ResourceObject>& resObj) {};
+    virtual void CreateWithResourceObjSnapPaginations(std::vector<RefPtr<ResourceObject>>& resObjs) {};
 
 private:
     static std::unique_ptr<ScrollModel> instance_;

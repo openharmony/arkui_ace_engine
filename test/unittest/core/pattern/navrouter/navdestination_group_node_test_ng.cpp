@@ -80,6 +80,193 @@ void NavDestinationGroupNodeTestNg::TearDownTestCase()
 }
 
 /**
+ * @tc.name: SetIndex001
+ * @tc.desc: Branch: if (destType_ == NavDestinationType::PLACE_HOLDER && updatePrimary) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, SetIndex001, TestSize.Level1)
+{
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    auto primaryNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(primaryNode, nullptr);
+    destNode->primaryNode_ = WeakPtr(primaryNode);
+    destNode->destType_ = NavDestinationType::PLACE_HOLDER;
+
+    destNode->SetIndex(1, true);
+    EXPECT_EQ(destNode->index_, 1);
+    EXPECT_EQ(primaryNode->index_, 1);
+}
+
+/**
+ * @tc.name: SetIndex002
+ * @tc.desc: Branch: if (destType_ == NavDestinationType::PLACE_HOLDER && updatePrimary) { => false
+ *                   } else if (placeHolderNode_) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, SetIndex002, TestSize.Level1)
+{
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    destNode->placeHolderNode_ = nullptr;
+    destNode->destType_ = NavDestinationType::DETAIL;
+
+    destNode->SetIndex(2, true);
+    EXPECT_EQ(destNode->index_, 2);
+}
+
+/**
+ * @tc.name: SetIndex003
+ * @tc.desc: Branch: if (destType_ == NavDestinationType::PLACE_HOLDER && updatePrimary) { => false
+ *                   } else if (placeHolderNode_) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, SetIndex003, TestSize.Level1)
+{
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    auto phNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(phNode, nullptr);
+    destNode->placeHolderNode_ = phNode;
+    destNode->destType_ = NavDestinationType::DETAIL;
+
+    destNode->SetIndex(1, true);
+    EXPECT_EQ(destNode->index_, 1);
+    EXPECT_EQ(phNode->index_, 1);
+}
+
+/**
+ * @tc.name: SetCanReused001
+ * @tc.desc: Branch: if (destType_ == NavDestinationType::PLACE_HOLDER) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, SetCanReused001, TestSize.Level1)
+{
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    ASSERT_TRUE(destNode->canReused_);
+    auto primaryNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(primaryNode, nullptr);
+    ASSERT_TRUE(primaryNode->canReused_);
+    destNode->primaryNode_ = WeakPtr(primaryNode);
+    destNode->destType_ = NavDestinationType::PLACE_HOLDER;
+
+    destNode->SetCanReused(false);
+    EXPECT_FALSE(destNode->canReused_);
+    EXPECT_FALSE(primaryNode->canReused_);
+}
+
+/**
+ * @tc.name: SetCanReused002
+ * @tc.desc: Branch: if (destType_ == NavDestinationType::PLACE_HOLDER) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, SetCanReused002, TestSize.Level1)
+{
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    ASSERT_TRUE(destNode->canReused_);
+    auto primaryNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(primaryNode, nullptr);
+    ASSERT_TRUE(primaryNode->canReused_);
+    destNode->primaryNode_ = WeakPtr(primaryNode);
+    destNode->destType_ = NavDestinationType::DETAIL;
+
+    destNode->SetCanReused(false);
+    EXPECT_FALSE(destNode->canReused_);
+    EXPECT_TRUE(primaryNode->canReused_);
+}
+
+/**
+ * @tc.name: GetCanReused001
+ * @tc.desc: Branch: if (destType_ == NavDestinationType::PLACE_HOLDER) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, GetCanReused001, TestSize.Level1)
+{
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    destNode->canReused_ = true;
+    auto primaryNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(primaryNode, nullptr);
+    primaryNode->canReused_ = false;
+    destNode->primaryNode_ = WeakPtr(primaryNode);
+    destNode->destType_ = NavDestinationType::PLACE_HOLDER;
+    EXPECT_FALSE(destNode->GetCanReused());
+}
+
+/**
+ * @tc.name: GetCanReused002
+ * @tc.desc: Branch: if (destType_ == NavDestinationType::PLACE_HOLDER) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, GetCanReused002, TestSize.Level1)
+{
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    destNode->canReused_ = true;
+    auto primaryNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(primaryNode, nullptr);
+    primaryNode->canReused_ = false;
+    destNode->primaryNode_ = WeakPtr(primaryNode);
+    destNode->destType_ = NavDestinationType::DETAIL;
+    EXPECT_TRUE(destNode->GetCanReused());
+}
+
+/**
+ * @tc.name: GetNavDestinationMode001
+ * @tc.desc: Branch: if (destType_ == NavDestinationType::PLACE_HOLDER) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, GetNavDestinationMode001, TestSize.Level1)
+{
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    destNode->mode_ = NavDestinationMode::STANDARD;
+    auto primaryNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(primaryNode, nullptr);
+    primaryNode->mode_ = NavDestinationMode::DIALOG;
+    destNode->primaryNode_ = WeakPtr(primaryNode);
+    destNode->destType_ = NavDestinationType::PLACE_HOLDER;
+    EXPECT_EQ(destNode->GetNavDestinationMode(), NavDestinationMode::DIALOG);
+}
+
+/**
+ * @tc.name: GetNavDestinationMode002
+ * @tc.desc: Branch: if (destType_ == NavDestinationType::PLACE_HOLDER) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, GetNavDestinationMode002, TestSize.Level1)
+{
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 1, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+    destNode->mode_ = NavDestinationMode::STANDARD;
+    auto primaryNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 2, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(primaryNode, nullptr);
+    primaryNode->mode_ = NavDestinationMode::DIALOG;
+    destNode->primaryNode_ = WeakPtr(primaryNode);
+    destNode->destType_ = NavDestinationType::DETAIL;
+    EXPECT_EQ(destNode->GetNavDestinationMode(), NavDestinationMode::STANDARD);
+}
+
+/**
  * @tc.name: SetSystemTransitionTest001
  * @tc.desc: Branch: if navDestinationTransitionDelegate_ == nullptr
  *           Expect: reset navDestinationTransitionDelegate_ to nullptr

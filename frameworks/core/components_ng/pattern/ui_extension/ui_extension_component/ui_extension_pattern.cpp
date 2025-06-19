@@ -27,9 +27,9 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/overlay/overlay_mask_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/ui_extension/platform_utils.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.h"
@@ -75,6 +75,7 @@ constexpr double SHOW_START = 0.0;
 constexpr double SHOW_FULL = 1.0;
 constexpr uint32_t REMOVE_PLACEHOLDER_DELAY_TIME = 32;
 constexpr uint32_t PLACEHOLDER_TIMEOUT = 6000;
+constexpr char OCCLUSION_SCENE[] = "_occlusion";
 
 bool StartWith(const std::string &source, const std::string &prefix)
 {
@@ -102,7 +103,6 @@ UIExtensionPattern::~UIExtensionPattern()
     }
     NotifyDestroy();
     FireModalOnDestroy();
-    OverlayMaskManager::GetInstance().OnUIExtDestroy(uiExtensionId_);
     UIExtensionIdUtility::GetInstance().RecycleExtensionId(uiExtensionId_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -485,6 +485,17 @@ void UIExtensionPattern::ReDispatchWantParams()
     sessionWrapper_->ReDispatchWantParams();
 }
 
+void UIExtensionPattern::HandleOcclusionScene(const RefPtr<FrameNode>& node, bool flag)
+{
+    CHECK_NULL_VOID(node);
+    if (node->GetInspectorId().value_or("").find(OCCLUSION_SCENE) == std::string::npos) {
+        return;
+    }
+    ACE_SCOPED_TRACE("occlusion contentNode id: %d, name: %s setSuccess",
+        node->GetId(), node->GetInspectorId().value_or("").c_str());
+    node->AddToOcclusionMap(flag);
+}
+
 void UIExtensionPattern::OnConnect()
 {
     CHECK_RUN_ON(UI);
@@ -547,6 +558,7 @@ void UIExtensionPattern::OnConnect()
     ReDispatchDisplayArea();
     InitBusinessDataHandleCallback();
     NotifyHostWindowMode();
+    HandleOcclusionScene(host, true);
 }
 
 void UIExtensionPattern::InitBusinessDataHandleCallback()
@@ -554,7 +566,6 @@ void UIExtensionPattern::InitBusinessDataHandleCallback()
     RegisterEventProxyFlagCallback();
     RegisterGetAvoidInfoCallback();
     RegisterReplyPageModeCallback();
-    OverlayMaskManager::GetInstance().RegisterOverlayHostMaskMountCallback(uiExtensionId_, GetHost());
 }
 
 void UIExtensionPattern::ReplacePlaceholderByContent()
@@ -951,7 +962,7 @@ void UIExtensionPattern::InitKeyEventOnFocus(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnFocusInternal([weak = WeakClaim(this)](FocusReason reason) {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Focus Internal.");
+            TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Focus Internal.");
             pattern->HandleFocusEvent();
         }
     });
@@ -973,7 +984,7 @@ void UIExtensionPattern::InitKeyEventOnClearFocusState(const RefPtr<FocusHub>& f
     focusHub->SetOnClearFocusStateInternal([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Clear FocusState Internal.");
+            TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Clear FocusState Internal.");
             pattern->DispatchFocusActiveEvent(false);
         }
     });
@@ -1158,24 +1169,30 @@ void UIExtensionPattern::HandleBlurEvent()
     uiExtensionManager->RegisterUIExtensionInFocus(nullptr, nullptr);
 }
 
+bool UIExtensionPattern::HandleTouchEvent(
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_RETURN(pointerEvent, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto newPointerEvent =
+        PlatformUtils::CopyPointerEventWithExtraProperty(pointerEvent, AceLogTag::ACE_UIEXTENSIONCOMPONENT);
+    CHECK_NULL_RETURN(newPointerEvent, false);
+    Platform::CalculatePointerEvent(newPointerEvent, host);
+    DispatchPointerEvent(newPointerEvent);
+    return true;
+}
+
 void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     if (info.GetSourceDevice() != SourceType::TOUCH) {
         UIEXT_LOGE("The source type is not TOUCH, type %{public}d.", info.GetSourceDevice());
         return;
     }
-    const auto pointerEvent = info.GetPointerEvent();
-    if (!pointerEvent) {
-        UIEXT_LOGE("The pointerEvent is empty.");
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    std::shared_ptr<MMI::PointerEvent> newPointerEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
-    Platform::CalculatePointerEvent(newPointerEvent, host);
-    AceExtraInputData::InsertInterpolatePoints(info);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     bool ret = true;
@@ -1188,8 +1205,12 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
             UIEXT_LOGW("RequestFocusImmediately failed when HandleTouchEvent.");
         }
     }
-    DispatchPointerEvent(newPointerEvent);
-    if (focusState_ && newPointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
+    const auto pointerEvent = info.GetPointerEvent();
+    if (!pointerEvent) {
+        UIEXT_LOGE("The pointerEvent is empty.");
+        return;
+    }
+    if (focusState_ && pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
         if (needReSendFocusToUIExtension_) {
             HandleFocusEvent();
             needReSendFocusToUIExtension_ = false;
@@ -1801,7 +1822,7 @@ const char* UIExtensionPattern::ToString(AbilityState state)
 void UIExtensionPattern::DumpInfo()
 {
     CHECK_NULL_VOID(sessionWrapper_);
-    UIEXT_LOGI("Dump UIE Info In String Format");
+    UIEXT_LOGD("Dump UIE Info In String Format");
     DumpLog::GetInstance().AddDesc(std::string("focusWindowId: ").append(std::to_string(focusWindowId_)));
     DumpLog::GetInstance().AddDesc(std::string("realHostWindowId: ").append(std::to_string(realHostWindowId_)));
     DumpLog::GetInstance().AddDesc(std::string("want: ").append(want_));
@@ -2129,7 +2150,7 @@ void UIExtensionPattern::TransferAccessibilityRectInfo(bool isForce)
     data.SetParam("innerCenterX", parentRectInfo.rotateTransform.innerCenterX);
     data.SetParam("innerCenterY", parentRectInfo.rotateTransform.innerCenterY);
     data.SetParam("rotateDegree", parentRectInfo.rotateTransform.rotateDegree);
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+    TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
         "UEC Transform rect param[scaleX:%{public}f, scaleY:%{public}f], rotateDegree: %{public}d.",
         parentRectInfo.scaleX, parentRectInfo.scaleY, parentRectInfo.rotateTransform.rotateDegree);
     SendBusinessData(UIContentBusinessCode::TRANSFORM_PARAM, data, BusinessDataSendType::ASYNC);

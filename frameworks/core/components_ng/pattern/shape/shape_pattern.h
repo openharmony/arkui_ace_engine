@@ -38,6 +38,11 @@ public:
     ShapePattern() = default;
     ~ShapePattern() override = default;
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
         return MakeRefPtr<ShapeLayoutAlgorithm>();

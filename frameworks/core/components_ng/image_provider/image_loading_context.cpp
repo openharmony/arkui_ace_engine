@@ -18,7 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/image_provider/adapter/drawing_image_data.h"
+#include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
 #include "core/components_ng/image_provider/static_image_object.h"
@@ -133,7 +133,7 @@ void ImageLoadingContext::OnDataLoading()
 {
     auto obj = ImageProvider::QueryImageObjectFromCache(src_);
     if (obj) {
-        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{private}s hit cache, not need create object", src_.GetSrc().c_str());
+        TAG_LOGD(AceLogTag::ACE_IMAGE, "%{private}s obj hit cache", src_.GetSrc().c_str());
         DataReadyCallback(obj);
         return;
     }
@@ -236,7 +236,7 @@ void ImageLoadingContext::FailCallback(const std::string& errorMsg, const ImageE
     errorInfo_ = errorInfo;
     errorMsg_ = errorMsg;
     needErrorCallBack_ = true;
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "ImageLoadFail-%{private}s-%{public}s-%{public}s", src_.ToString().c_str(),
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "fail-%{private}s-%{public}s-%{public}s", src_.ToString().c_str(),
         errorMsg.c_str(), imageDfxConfig_.ToStringWithoutSrc().c_str());
     CHECK_NULL_VOID(measureFinish_);
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
@@ -401,8 +401,7 @@ std::optional<SizeF> ImageLoadingContext::GetSourceSize() const
 {
     CHECK_NULL_RETURN(sourceSizePtr_, std::nullopt);
     if (sourceSizePtr_->Width() <= 0.0 || sourceSizePtr_->Height() <= 0.0) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "Property SourceSize is at least One invalid! Use the Image Size to calculate resize target");
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Invalid SourceSize, using image size.");
         return std::nullopt;
     }
     return { *sourceSizePtr_ };

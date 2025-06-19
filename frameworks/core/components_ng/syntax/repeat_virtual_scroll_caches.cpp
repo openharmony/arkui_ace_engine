@@ -233,6 +233,7 @@ void RepeatVirtualScrollCaches::AddKeyToL1(const std::string& key, bool shouldTr
 void RepeatVirtualScrollCaches::AddKeyToL1WithNodeUpdate(const std::string& key, uint32_t index,
     bool shouldTriggerRecycle)
 {
+    NG::ScopedViewStackProcessor scopedViewStackProcessor;
     onUpdateNode_(key, index);
     AddKeyToL1(key, shouldTriggerRecycle);
 }
@@ -350,6 +351,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::UpdateFromL2(uint32_t forIndex)
         static_cast<int32_t>(forIndex), oldKey.value().c_str());
 
     // call TS to do the RepeatItem update
+    NG::ScopedViewStackProcessor scopedViewStackProcessor;
     onUpdateNode_(oldKey.value(), forIndex);
 
     TAG_LOGD(AceLogTag::ACE_REPEAT,
@@ -362,6 +364,7 @@ RefPtr<UINode> RepeatVirtualScrollCaches::UpdateFromL2(uint32_t forIndex)
 void RepeatVirtualScrollCaches::UpdateSameKeyItem(const std::string& key, uint32_t index)
 {
     // call TS to do the RepeatItem update
+    NG::ScopedViewStackProcessor scopedViewStackProcessor;
     onUpdateNode_(key, index);
 }
 

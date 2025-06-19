@@ -84,6 +84,7 @@ private:
         const std::function<void()>& propertyCallback, const AnimationOption& option);
     void SyncGeometryPropertiesAfterLayout(const RefPtr<FrameNode>& syncNode);
     RefPtr<FrameNode> GetWindowBoundaryNode(const RefPtr<FrameNode>& node) const;
+    void HandleOcclusionScene(const RefPtr<FrameNode>& node, bool flag);
 
     static constexpr int32_t RESYNC_DURATION = 1;
     std::string id_;

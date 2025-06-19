@@ -79,6 +79,8 @@ HWTEST_F(TextTestFourNg, SetLineSpacing001, TestSize.Level1)
     TextModelNG::SetLineSpacing(frameNode, LINE_SPACING_VALUE_1, true);
     EXPECT_EQ(textLayoutProperty->GetLineSpacing(), LINE_SPACING_VALUE_1);
     EXPECT_EQ(textLayoutProperty->GetIsOnlyBetweenLines(), true);
+    textModelNG.SetIsOnlyBetweenLines(false);
+    EXPECT_EQ(textLayoutProperty->GetIsOnlyBetweenLines(), false);
 }
 
 /**

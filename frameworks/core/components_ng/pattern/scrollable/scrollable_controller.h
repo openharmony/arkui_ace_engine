@@ -40,6 +40,7 @@ public:
     void ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset) override;
     bool AnimateTo(const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth,
         bool canOverScroll = false) override;
+    void SetCanStayOverScroll(bool canStayOverScroll) override;
     Offset GetCurrentOffset() const override;
     Axis GetScrollDirection() const override;
     void ScrollBy(double pixelX, double pixelY, bool smooth) override;

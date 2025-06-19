@@ -448,6 +448,7 @@ HWTEST_F(RichEditorParagraphMgrTestNg, GetLineMetrics002, TestSize.Level1)
     int32_t lineNumber = 3;
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(3));
+    richEditorPattern->spans_.push_back(AceType::MakeRefPtr<SpanItem>());
     richEditorPattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 2 });
     richEditorPattern->richTextRect_.SetRect(1, 1, 1, 1);
     auto lineMetrics1 = richEditorPattern->paragraphs_.GetLineMetrics(lineNumber);

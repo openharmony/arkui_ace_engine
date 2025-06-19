@@ -1240,7 +1240,6 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest005, TestSize.Level
      * @tc.steps: step2. Test DumpInfo
      */
     pattern->platformEventProxy_ = nullptr;
-    ASSERT_EQ(pattern->platformEventProxy_, nullptr);
     pattern->DumpInfo();
 
     pattern->platformEventProxy_ = AceType::MakeRefPtr<PlatformEventProxy>();
@@ -1408,7 +1407,6 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest007, TestSize.Level
     pattern->DispatchPointerEvent(pointerEvent);
 
     pattern->sessionWrapper_ = nullptr;
-    ASSERT_EQ(pattern->sessionWrapper_, nullptr);
     pattern->DispatchPointerEvent(pointerEvent);
 #endif
 }
@@ -1497,20 +1495,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest009, TestSize.Level
     InValidSession(pattern);
     ASSERT_FALSE(pattern->sessionWrapper_->IsSessionValid());
 
-    pattern->state_ = OHOS::Ace::NG::UIExtensionPattern::AbilityState::BACKGROUND;
-    EXPECT_EQ(pattern->state_, OHOS::Ace::NG::UIExtensionPattern::AbilityState::BACKGROUND);
-
     pattern->state_ = OHOS::Ace::NG::UIExtensionPattern::AbilityState::FOREGROUND;
-    EXPECT_EQ(pattern->state_, OHOS::Ace::NG::UIExtensionPattern::AbilityState::FOREGROUND);
-
     pattern->instanceId_ = 6;
-
-    pattern->sessionType_ = SessionType::EMBEDDED_UI_EXTENSION;
-    pattern->hasMountToParent_ = true;
-
-    pattern->sessionType_ = SessionType::EMBEDDED_UI_EXTENSION;
-    pattern->hasMountToParent_ = false;
-
     pattern->sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     pattern->isModal_ = true;
     pattern->hasMountToParent_ = true;
@@ -1688,7 +1674,6 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest010, TestSize.Level
     pattern->OnExtensionDetachToDisplay();
 
     pattern->contentNode_ = nullptr;
-    ASSERT_EQ(pattern->contentNode_, nullptr);
     pattern->OnExtensionDetachToDisplay();
 #endif
 }

@@ -17,7 +17,9 @@
 
 #include "cj_lambda.h"
 #include "pixel_map_impl.h"
+#include "base/utils/utils.h"
 
+#include "core/components_ng/property/safe_area_insets.h"
 #include "base/system_bar/system_bar_style.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_collection_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_navigation_stack_ffi.h"
@@ -29,6 +31,14 @@ using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace {
+const std::vector<Dimension> TITLE_HEIGHT = { NG::SINGLE_LINE_TITLEBAR_HEIGHT, NG::DOUBLE_LINE_TITLEBAR_HEIGHT };
+
+constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
+constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
+constexpr uint32_t SAFE_AREA_EDGE_SYSTEM = 0;
+constexpr uint32_t SAFE_AREA_EDGE_TOP = 0;
+constexpr uint32_t SAFE_AREA_EDGE_BOTTOM = 1;
+
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
@@ -354,10 +364,21 @@ void FfiOHOSAceFrameworkNavigationSetHideToolBar(bool isHide)
     NavigationModel::GetInstance()->SetHideToolBar(isHide);
 }
 
+void FfiOHOSAceFrameworkNavigationSetHideToolBarWithAnimated(bool isHide, bool animated)
+{
+    NavigationModel::GetInstance()->SetHideToolBar(isHide, animated);
+}
+
 void FfiOHOSAceFrameworkNavigationSetHideTitleBar(bool isHide)
 {
     NavigationModel::GetInstance()->SetHideTitleBar(isHide);
 }
+
+void FfiOHOSAceFrameworkNavigationSetHideTitleBarWithAnimated(bool isHide, bool animated)
+{
+    NavigationModel::GetInstance()->SetHideTitleBar(isHide, animated);
+}
+
 
 void FfiOHOSAceFrameworkNavigationSetHideBackButton(bool isHide)
 {
@@ -486,5 +507,54 @@ void FfiOHOSAceFrameworkNavigationSetOnTitleModeChanged(void (*callback)(int32_t
         func(static_cast<int32_t>(mode));
     };
     NavigationModel::GetInstance()->SetOnTitleModeChange(std::move(onTitleModeChange), std::move(eventInfoFunc));
+}
+
+void FfiOHOSAceFrameworkNavigationSetRecoverable(bool recoverable)
+{
+    NavigationModel::GetInstance()->SetRecoverable(recoverable);
+}
+
+void FfiOHOSAceFrameworkNavigationSetEnableDragBar(bool isEnable)
+{
+    NavigationModel::GetInstance()->SetEnableDragBar(isEnable);
+}
+
+void FfiOHOSAceFrameworkNavigationSetEnableModeChangeAnimation(bool isEnable)
+{
+    NavigationModel::GetInstance()->SetEnableModeChangeAnimation(isEnable);
+}
+
+void FfiOHOSAceFrameworkNavigationSetIgnoreLayoutSafeArea(VectorInt32Ptr types, VectorInt32Ptr edges)
+{
+    const auto& typesArray = *reinterpret_cast<std::vector<int32_t>*>(types);
+    const auto& edgeArray = *reinterpret_cast<std::vector<int32_t>*>(edges);
+    NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
+    if (typesArray.size() > 0) {
+        uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
+        for (size_t i = 0; i < typesArray.size(); ++i) {
+            auto value = typesArray.at(i);
+            if (value >= static_cast<int32_t>(SAFE_AREA_TYPE_LIMIT)||
+                value == static_cast<int32_t>(SAFE_AREA_EDGE_SYSTEM)) {
+                safeAreaType = NG::SAFE_AREA_TYPE_SYSTEM;
+                break;
+            }
+        }
+        opts.type = safeAreaType;
+    }
+    if (edgeArray.size() > 0) {
+        uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
+        for (size_t i = 0; i < edgeArray.size(); ++i) {
+            auto value = edgeArray.at(i);
+            if (value >= static_cast<int32_t>(SAFE_AREA_EDGE_LIMIT)) {
+                safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
+                break;
+            }
+            if (value == SAFE_AREA_EDGE_TOP || value == SAFE_AREA_EDGE_BOTTOM) {
+                safeAreaEdge |= (1 << (uint32_t)value);
+            }
+        }
+        opts.edges = safeAreaEdge;
+    }
+    NavigationModel::GetInstance()->SetIgnoreLayoutSafeArea(opts);
 }
 }

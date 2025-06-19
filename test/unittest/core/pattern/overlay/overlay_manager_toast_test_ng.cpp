@@ -1947,11 +1947,11 @@ HWTEST_F(OverlayManagerToastTestNg, ToastPatternOnDirtyLayoutWrapperSwap, TestSi
 }
 
 /**
- * @tc.name: ToastPatternUpdateHoverModeRect
+ * @tc.name: ToastPatternUpdateHoverModeRect001
  * @tc.desc: Test UpdateHoverModeRect
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerToastTestNg, ToastPatternUpdateHoverModeRect, TestSize.Level1)
+HWTEST_F(OverlayManagerToastTestNg, ToastPatternUpdateHoverModeRect001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. ready toastInfo.
@@ -1976,6 +1976,42 @@ HWTEST_F(OverlayManagerToastTestNg, ToastPatternUpdateHoverModeRect, TestSize.Le
     auto displayInfo = container->GetDisplayInfo();
     auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
     EXPECT_TRUE(foldCreaseRects.empty());
+    safeAreaManager->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
+    safeAreaManager->keyboardInset_ = { .start = 0, .end = 1 };
+    EXPECT_TRUE(safeAreaManager->GetKeyboardInset().IsValid());
+    toastProps->propHoverModeArea_ = HoverModeAreaType::BOTTOM_SCREEN;
+    toastPattern->UpdateHoverModeRect(toastProps, safeAreaManager, 0.0f, 0.0f);
+}
+
+/**
+ * @tc.name: ToastPatternUpdateHoverModeRect002
+ * @tc.desc: Test UpdateHoverModeRect with empty displayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastPatternUpdateHoverModeRect002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    toastPattern->wrapperRect_ = Rect(DOUBLEONE, DOUBLEONE, DOUBLEONE, DOUBLEONE);
+    auto layoutWrapper = toastNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto toastProps = AceType::DynamicCast<ToastLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    ASSERT_NE(toastProps, nullptr);
+    auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    ASSERT_NE(safeAreaManager, nullptr);
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetDisplayInfo(nullptr);
     safeAreaManager->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
     safeAreaManager->keyboardInset_ = { .start = 0, .end = 1 };
     EXPECT_TRUE(safeAreaManager->GetKeyboardInset().IsValid());

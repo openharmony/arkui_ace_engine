@@ -164,6 +164,11 @@ public:
         return textSelector_.IsValid() && !textSelector_.StartEqualToDest();
     }
 
+    virtual bool CanAIEntityDrag()
+    {
+        return false;
+    }
+
     MouseStatus GetMouseStatus() const
     {
         return mouseStatus_;
@@ -271,6 +276,27 @@ public:
     std::u16string TruncateText(const std::u16string& text, const size_t& length) const;
     size_t CountUtf16Chars(const std::u16string& s);
     std::pair<std::string, std::string> DetectTextDiff(const std::string& latestContent);
+    static LayoutCalPolicy GetLayoutCalPolicy(LayoutWrapper* layoutWrapper, bool isHorizontal);
+    static float GetConstraintMaxLength(
+        LayoutWrapper* layoutWrapper, const LayoutConstraintF& constraint, bool isHorizontal);
+    template <typename Callback>
+    void ProcessAccessibilityTextChange(const std::string& currentContent,
+        Callback&& callback, const AceLogTag& logTag)
+    {
+        if (suppressAccessibilityEvent_) {
+            auto [addedText, removedText] = DetectTextDiff(currentContent);
+            TAG_LOGI(logTag,  "addedLen=%{public}d, removedLen=%{public}d",
+                static_cast<int>(addedText.length()), static_cast<int>(removedText.length()));
+            if (!removedText.empty()) {
+                callback(TextChangeType::REMOVE, removedText);
+            }
+            if (!addedText.empty()) {
+                callback(TextChangeType::ADD, addedText);
+            }
+        }
+        textCache_ = currentContent;
+        suppressAccessibilityEvent_ = true;
+    }
 
 protected:
     TextSelector textSelector_;

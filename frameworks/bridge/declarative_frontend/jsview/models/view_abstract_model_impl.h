@@ -47,15 +47,16 @@ public:
     void ResetMaxSize(bool resetWidth) override {};
 
     void SetBackgroundColor(const Color& color) override;
-    void SetBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) override {};
+    void SetBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj) override {};
     void SetBackgroundImage(const ImageSourceInfo& src, RefPtr<ThemeConstants> themeConstant) override;
-    void SetBackgroundImageWithResourceObj(const RefPtr<ResourceObject> &resObj, std::string &bundleName,
-        std::string &moduleName, RefPtr<ThemeConstants> themeConstant) override {};
+    void SetBackgroundImageWithResourceObj(const RefPtr<ResourceObject>& resObj, const ImageSourceInfo& src,
+        RefPtr<ThemeConstants> themeConstant) override {};
     void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override;
     void SetBackgroundImageSize(BackgroundImageSize& bgImgSize) override;
     void SetBackgroundImageSizeUpdateFunc(
         BackgroundImageSize& bgImgSize, const RefPtr<ResourceObject>& resObj, const std::string direction) override {};
     void SetBackgroundImagePosition(BackgroundImagePosition& bgImgPosition) override;
+    void ClearResObj(const std::string resObjName) override {};
     void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions) override;
     void SetPadding(const CalcDimension& value) override;
     void SetPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
@@ -109,6 +110,9 @@ public:
     void SetAspectRatio(float ratio) override;
     void ResetAspectRatio() override {};
     void SetAlign(const Alignment& alignment) override;
+    void SetAlign(const std::string& localizedAlignment) override {}
+    void SetLayoutGravity(const Alignment& alignment) override {}
+    void SetIsMirrorable(const bool& isMirrorable) override {}
     void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) override;
     void SetChainStyle(const ChainInfo& chainInfo) override {}
     void SetBias(const BiasPair& biasPair) override {}
@@ -131,6 +135,7 @@ public:
     void SetPivot(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetTranslate(const Dimension& x, const Dimension& y, const Dimension& z) override;
     void SetRotate(float x, float y, float z, float angle, float perspective = 0.0f) override;
+    void SetRotateAngle(float x, float y, float z, float perspective = 0.0f) override;
     void SetTransformMatrix(const std::vector<float>& matrix) override;
     void SetTransform3DMatrix(const std::vector<float>& matrix) override {};
 
@@ -194,6 +199,8 @@ public:
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override {}
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
         double distanceThreshold) override;
+    void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+        Dimension distanceThreshold) override;
     void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) override {}
     void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) override {}
     void SetShouldBuiltInRecognizerParallelWith(
@@ -201,6 +208,7 @@ public:
     {}
     void SetOnGestureRecognizerJudgeBegin(
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) override {}
+    void SetOnTouchTestDone(NG::TouchTestDoneCallback&& touchTestDoneCallback) override {}
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) override;
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -291,6 +299,7 @@ public:
     void SetBackground(std::function<void()>&& buildFunc) override {};
     void SetBackgroundAlign(const Alignment& align) override {};
     void SetCustomBackgroundColor(const Color& color) override {};
+    void SetCustomBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) override {};
     void SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t edges) override {};
     void SetIsTransitionBackground(bool val) override {};
     void SetIsBuilderBackground(bool val) override {};
@@ -410,14 +419,12 @@ public:
     void SetMarkAnchorStart(Dimension& markAnchorStart) override {};
     void ResetMarkAnchorStart() override {};
     void SetOffsetLocalizedEdges(bool needLocalized) override {};
-    void CreateWithColorResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, PopupType& type) override {};
-    void CreateWithBoolResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj) override {};
-    void CreateWithResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, PopupType type) override {};
+    void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj,
+        const PopupType& type) override {};
     void CreateWithResourceObj(
         const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) override {};
+    void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& resourceObj, const PopupOptionsType& type) override {};
 };
 
 } // namespace OHOS::Ace::Framework

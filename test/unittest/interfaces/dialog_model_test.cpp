@@ -49,7 +49,7 @@ bool OnWillDismissEvent(int32_t reason)
 HWTEST_F(DialogModelTest, DialogModelTest001, TestSize.Level1)
 {
     ArkUI_NativeDialogHandle nativeDialogHandle = Create();
-    ASSERT_EQ(nativeDialogHandle, nullptr);
+    ASSERT_NE(nativeDialogHandle, nullptr);
 
     Dispose(nativeDialogHandle);
 }
@@ -709,6 +709,56 @@ HWTEST_F(DialogModelTest, DialogModelTest046, TestSize.Level1)
     ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue) };
     int32_t ret = SetBackgroundEffect(nativeDialogHandle, &item);
     ASSERT_EQ(ret, OHOS::Ace::ERROR_CODE_NO_ERROR);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest047
+ * @tc.desc: Test SetKeyboardAvoidDistance function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest047, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    ArkUI_LengthMetricUnit unit = ARKUI_LENGTH_METRIC_UNIT_DEFAULT;
+    float distance = 1.0f;
+    int32_t ret = SetKeyboardAvoidDistance(nativeDialogHandle, distance, unit);
+    ASSERT_NE(ret, 1);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest048
+ * @tc.desc: Test RegisterOnWillAppear function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest048, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = RegisterOnWillAppear(nativeDialogHandle, nullptr, nullptr);
+    ASSERT_NE(ret, 1);
+    Dispose(nativeDialogHandle);
+    nativeDialogHandle = nullptr;
+}
+
+/**
+ * @tc.name: DialogModelTest049
+ * @tc.desc: Test RegisterOnDidAppear function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogModelTest, DialogModelTest049, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    ArkUI_NativeDialogHandle nativeDialogHandle = Create();
+    ASSERT_NE(nativeDialogHandle, nullptr);
+    int32_t ret = RegisterOnDidAppear(nativeDialogHandle, nullptr, nullptr);
+    ASSERT_NE(ret, 1);
     Dispose(nativeDialogHandle);
     nativeDialogHandle = nullptr;
 }

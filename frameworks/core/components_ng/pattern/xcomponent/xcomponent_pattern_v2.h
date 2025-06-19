@@ -19,6 +19,14 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_surface_holder.h"
 #include "core/accessibility/native_interface_accessibility_provider.h"
 
+namespace OHOS::Rosen {
+class Session;
+class RSNode;
+class RSTransaction;
+class RSTransactionHandler;
+class RSUIContext;
+} // namespace OHOS::Rosen
+
 namespace OHOS::Ace::NG {
 class XComponentPatternV2 : public XComponentPattern {
     DECLARE_ACE_TYPE(XComponentPatternV2, XComponentPattern);
@@ -83,6 +91,9 @@ private:
     void HandleSurfaceChangeEvent(bool offsetChanged, bool sizeChanged, bool frameOffsetChange);
     void XComponentSizeChange(const RectF& surfaceRect);
     void OnSurfaceChanged(const RectF& surfaceRect);
+    std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(const RefPtr<FrameNode>& frameNode);
+    void FlushImplicitTransaction(const RefPtr<FrameNode>& frameNode);
+    std::shared_ptr<Rosen::RSTransactionHandler> GetRSTransactionHandler(const RefPtr<FrameNode>& frameNode);
 
     void OnSurfaceShow();
     void OnSurfaceHide();

@@ -36,6 +36,7 @@ public:
     void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge = EffectEdge::ALL) override;
     void SetEditMode(bool editMode) override;
     void SetDivider(const V2::ItemDivider& divider) override;
+    void SetDividerColorByUser(bool isByUser) override;
     void SetChainAnimation(bool enableChainAnimation) override;
     void SetChainAnimationOptions(const ChainAnimationOptions& options) override;
     void SetLanes(int32_t lanes) override;
@@ -55,8 +56,10 @@ public:
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void SetScrollEnabled(bool scrollEnabled) override;
     void SetFriction(double friction) override;
+    void SetFocusWrapMode(FocusWrapMode focusWrapMode) override;
     void SetMaintainVisibleContentPosition(bool enabled) override;
     void SetStackFromEnd(bool enabled) override;
+    void SetSyncLoad(bool enabled) override;
     void SetOnScroll(OnScrollEvent&& onScroll) override;
     void SetOnScrollBegin(OnScrollBeginEvent&& onScrollBegin) override;
     void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& onScrollFrameBegin) override;
@@ -74,6 +77,14 @@ public:
     void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) override;
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize() override;
+    void ParseResObjDividerStrokeWidth(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjDividerColor(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjDividerStartMargin(const RefPtr<ResourceObject>& resObj) override;
+    void ParseResObjDividerEndMargin(const RefPtr<ResourceObject>& resObj) override;
+    void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) override;
+    void CreateWithResourceObjLaneGutter(const RefPtr<ResourceObject>& resObj) override;
+    void CreateWithResourceObjLaneConstrain(const RefPtr<ResourceObject>& resObjMinLengthValue,
+        const RefPtr<ResourceObject>& resObjMaxLengthValue) override;
 
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);
@@ -109,6 +120,8 @@ public:
     static void SetLaneMinLength(FrameNode* frameNode, const Dimension& laneMinLength);
     static float GetLaneMinLength(FrameNode* frameNode);
     static void SetLaneMaxLength(FrameNode* frameNode, const Dimension& laneMaxLength);
+    static FocusWrapMode GetFocusWrapMode(FrameNode* frameNode);
+    static void SetFocusWrapMode(FrameNode* frameNode, FocusWrapMode focusWrapMode);
     static float GetLaneMaxLength(FrameNode* frameNode);
     static void SetLaneGutter(FrameNode* frameNode, const Dimension& laneGutter);
     static float GetLaneGutter(FrameNode* frameNode);
@@ -128,12 +141,15 @@ public:
     static int32_t GetEdgeEffect(FrameNode* frameNode);
     static void SetListStackFromEnd(FrameNode* frameNode, bool enabled);
     static bool GetListStackFromEnd(FrameNode* frameNode);
+    static void SetListSyncLoad(FrameNode* frameNode, bool enabled);
+    static bool GetListSyncLoad(FrameNode* frameNode);
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
     static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
     static void SetOnScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& onScrollIndex);
     static NestedScrollOptions GetListNestedScroll(FrameNode* frameNode);
+    static void SetDividerColorByUser(FrameNode* frameNode, bool isByUser);
     DisplayMode GetDisplayMode() const override;
     void SetHeader(const RefPtr<FrameNode>& headerNode) override;
     void ResetListChildrenMainSize() override;
@@ -164,6 +180,14 @@ public:
     static void ScrollToItemInGroup(
         FrameNode* frameNode, int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align);
     static void SetHeader(FrameNode* frameNode, FrameNode* headerNode);
+    static void CreateWithResourceObjFriction(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseResObjDividerStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseResObjDividerColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseResObjDividerStartMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ParseResObjDividerEndMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void CreateWithResourceObjLaneConstrain(FrameNode* frameNode,
+        const RefPtr<ResourceObject>& resObjMinLengthValue, const RefPtr<ResourceObject>& resObjMaxLengthValue);
+
 private:
     void AddDragFrameNodeToManager() const;
     static void AddDragFrameNodeToManager(FrameNode* frameNode);

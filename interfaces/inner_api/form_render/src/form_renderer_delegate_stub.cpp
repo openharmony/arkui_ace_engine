@@ -214,6 +214,11 @@ int32_t FormRendererDelegateStub::HandleOnGetRectRelativeToWindow(MessageParcel&
     reply.WriteInt32(parentRectInfo.left);
     reply.WriteFloat(parentRectInfo.scaleX);
     reply.WriteFloat(parentRectInfo.scaleY);
+    reply.WriteInt32(parentRectInfo.rotateTransform.centerX);
+    reply.WriteInt32(parentRectInfo.rotateTransform.centerY);
+    reply.WriteInt32(parentRectInfo.rotateTransform.innerCenterX);
+    reply.WriteInt32(parentRectInfo.rotateTransform.innerCenterY);
+    reply.WriteInt32(parentRectInfo.rotateTransform.rotateDegree);
     return ERR_OK;
 }
 

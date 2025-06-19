@@ -145,10 +145,12 @@ public:
     virtual void SetOnGestureSwipe(GestureSwipeEvent&& gestureSwipe) {}
     virtual void SetOnSelected(std::function<void(const BaseEventInfo*)>&& onSelected) {}
     virtual void SetDivider(const TabsItemDivider& divider) = 0;
+    virtual void SetDividerColorByUser(bool isByUser) = 0;
     virtual void SetFadingEdge(bool fadingEdge) = 0;
     virtual void SetBarOverlap(bool barOverlap) = 0;
     virtual void SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& onChangeEvent) = 0;
     virtual void SetBarBackgroundColor(const Color& backgroundColor) = 0;
+    virtual void SetBarBackgroundColorByUser(bool isByUser) = 0;
     virtual void SetClipEdge(bool clipEdge) = 0;
     virtual void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option) = 0;
     virtual void ResetScrollableBarModeOptions() = 0;

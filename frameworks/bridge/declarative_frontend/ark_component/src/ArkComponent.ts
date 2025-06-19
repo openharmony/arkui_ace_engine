@@ -712,8 +712,8 @@ class OpacityModifier extends ModifierWithKey<number | Resource> {
   }
 }
 
-class AlignModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class AlignModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
     super(value);
   }
   static identity: Symbol = Symbol('align');
@@ -725,6 +725,20 @@ class AlignModifier extends ModifierWithKey<number> {
     }
   }
 }
+
+class LayoutGravityModifier extends ModifierWithKey<string> {
+    constructor(value: string) {
+      super(value);
+    }
+    static identity: Symbol = Symbol('layoutGravity');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        getUINativeModule().common.resetLayoutGravity(node);
+      } else {
+        getUINativeModule().common.setLayoutGravity(node, this.value);
+      }
+    }
+  }
 
 class BackdropBlurModifier extends ModifierWithKey<ArkBlurOptions> {
   constructor(value: ArkBlurOptions) {
@@ -1554,8 +1568,8 @@ class ScaleModifier extends ModifierWithKey<ScaleOptions> {
   }
 }
 
-class RotateModifier extends ModifierWithKey<RotateOptions> {
-  constructor(value: RotateOptions) {
+class RotateModifier extends ModifierWithKey<RotateOptions | RotateAngleOptions> {
+  constructor(value: RotateOptions | RotateAngleOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('rotate');
@@ -1563,12 +1577,35 @@ class RotateModifier extends ModifierWithKey<RotateOptions> {
     if (reset) {
       getUINativeModule().common.resetRotate(node);
     } else {
-      getUINativeModule().common.setRotate(node, this.value.x, this.value.y, this.value.z, this.value.angle,
-        this.value.centerX, this.value.centerY, this.value.centerY, this.value.perspective);
+      if ('angle' in this.value) {
+        getUINativeModule().common.setRotate(
+          node,
+          this.value.x,
+          this.value.y,
+          this.value.z,
+          this.value.angle,
+          this.value.centerX,
+          this.value.centerY,
+          this.value.centerZ,
+          this.value.perspective
+        );
+      } else {
+        getUINativeModule().common.setRotateAngle(
+          node,
+          this.value.angleX,
+          this.value.angleY,
+          this.value.angleZ,
+          this.value.centerX,
+          this.value.centerY,
+          this.value.centerZ,
+          this.value.perspective
+        );
+      }
     }
   }
   checkObjectDiff(): boolean {
-    return !(
+    if ('angle' in this.value) {
+      return !(
       this.value.x === this.stageValue.x &&
       this.value.y === this.stageValue.y &&
       this.value.z === this.stageValue.z &&
@@ -1577,7 +1614,18 @@ class RotateModifier extends ModifierWithKey<RotateOptions> {
       this.value.centerY === this.stageValue.centerY &&
       this.value.centerZ === this.stageValue.centerZ &&
       this.value.perspective === this.stageValue.perspective
-    );
+      );
+    } else {
+      return !(
+        this.value.angleX === this.stageValue.angleX &&
+        this.value.angleY === this.stageValue.angleY &&
+        this.value.angleZ === this.stageValue.angleZ &&
+        this.value.centerX === (this.stageValue.centerX) &&
+        this.value.centerY === (this.stageValue.centerY) &&
+        this.value.centerZ === (this.stageValue.centerZ) &&
+        this.value.perspective === this.stageValue.perspective
+      );
+    }
   }
 }
 
@@ -1900,9 +1948,8 @@ class DragLeaveModifier extends ModifierWithKey<DragLeaveCallback> {
   }
 }
 
-declare type DropCallback = (event?: DragEvent, extraParams?: string) => void;
-class DropModifier extends ModifierWithKey<DropCallback> {
-  constructor(value: DropCallback) {
+class DropModifier extends ModifierWithKey<ArkOnDrop> {
+  constructor(value: ArkOnDrop) {
     super(value);
   }
   static identity: Symbol = Symbol('onDrop');
@@ -1910,7 +1957,7 @@ class DropModifier extends ModifierWithKey<DropCallback> {
     if (reset) {
       getUINativeModule().common.resetOnDrop(node);
     } else {
-      getUINativeModule().common.setOnDrop(node, this.value);
+      getUINativeModule().common.setOnDrop(node, this.value.event, this.value.disableDataPrefetch);
     }
   }
 }
@@ -2193,6 +2240,21 @@ class OnGestureRecognizerJudgeBeginModifier extends ModifierWithKey<GestureRecog
       getUINativeModule().common.resetOnGestureRecognizerJudgeBegin(node);
     } else {
       getUINativeModule().common.setOnGestureRecognizerJudgeBegin(node, this.value);
+    }
+  }
+}
+
+declare type TouchTestDoneCallback = (event: BaseGestureEvent, recognizers: Array<GestureRecognizer>) => void;
+class OnTouchTestDoneModifier extends ModifierWithKey<TouchTestDoneCallback> {
+  constructor(value: TouchTestDoneCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onTouchTestDone');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnOnTouchTestDone(node);
+    } else {
+      getUINativeModule().common.setOnTouchTestDone(node, this.value);
     }
   }
 }
@@ -2586,6 +2648,48 @@ class AccessibilityHoverTransparentModifier extends ModifierWithKey<Accessibilit
       getUINativeModule().common.resetAccessibilityHoverTransparent(node);
     } else {
       getUINativeModule().common.setAccessibilityHoverTransparent(node, this.value);
+    }
+  }
+}
+
+class AccessibilityTextHintModifier extends ModifierWithKey<string> {
+  constructor(value: string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityTextHint');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityTextHint(node);
+    } else {
+      getUINativeModule().common.setAccessibilityTextHint(node, this.value);
+    }
+  }
+}
+
+class AccessibilityCheckedModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityChecked');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityChecked(node);
+    } else {
+      getUINativeModule().common.setAccessibilityChecked(node, this.value);
+    }
+  }
+}
+
+class AccessibilitySelectedModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilitySelected');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilitySelected(node);
+    } else {
+      getUINativeModule().common.setAccessibilitySelected(node, this.value);
     }
   }
 }
@@ -3214,7 +3318,8 @@ class BindTipsModifier extends ModifierWithKey<ArkBindTipsOptions> {
         this.value.options?.enableArrow,
         this.value.options?.arrowPointPosition,
         this.value.options?.arrowWidth,
-        this.value.options?.arrowHeight
+        this.value.options?.arrowHeight,
+        this.value.options?.showAtAnchor
       );
     }
   }
@@ -3252,6 +3357,10 @@ class BindTipsModifier extends ModifierWithKey<ArkBindTipsOptions> {
       !isBaseOrResourceEqual(
         this.stageValue.options.arrowHeight,
         this.value.options.arrowHeight
+      ) ||
+      !isBaseOrResourceEqual(
+        this.stageValue.options.showAtAnchor,
+        this.value.options.showAtAnchor
       )
     );
   }
@@ -3915,6 +4024,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   private _onAreaChange: AreaChangeEventCallback = null;
   private _onGestureJudgeBegin: GestureJudgeBeginCallback = null;
   private _onGestureRecognizerJudgeBegin: GestureRecognizerJudgeBeginCallback = null;
+  private _onTouchTestDone: TouchTestDoneCallback = null;
   private _shouldBuiltInRecognizerParallelWith: ShouldBuiltInRecognizerParallelWithCallback = null;
   private _onFocusAxisEvent: FocusAxisEventCallback = null;
 
@@ -4015,6 +4125,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     touchRecognizers?: Array<TouchRecognizer>) => GestureJudgeResult): this {
     this._onGestureRecognizerJudgeBegin = callback;
     modifierWithKey(this._modifiersWithKeys, OnGestureRecognizerJudgeBeginModifier.identity, OnGestureRecognizerJudgeBeginModifier, callback);
+    return this;
+  }
+  onTouchTestDone(callback: (event: BaseGestureEvent, recognizers: Array<GestureRecognizer>) => void): this {
+    this._onTouchTestDone = callback;
+    modifierWithKey(this._modifiersWithKeys, OnTouchTestDoneModifier.identity, OnTouchTestDoneModifier, callback);
     return this;
   }
   shouldBuiltInRecognizerParallelWith(callback: (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer): this {
@@ -4953,11 +5068,20 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  align(value: Alignment): this {
-    if (isNumber(value)) {
-      modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, value);
-    } else {
+  align(value: Alignment | LocalizedAlignment): this {
+    if (!isNumber(value) && !isString(value)) {
       modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, value);
+    }
+    return this;
+  }
+
+  layoutGravity(value:string): this {
+    if (!isString(value)) {
+      modifierWithKey(this._modifiersWithKeys, LayoutGravityModifier.identity, LayoutGravityModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, LayoutGravityModifier.identity, LayoutGravityModifier, value);
     }
     return this;
   }
@@ -5127,8 +5251,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  onDrop(event: (event?: DragEvent, extraParams?: string) => void): this {
-    modifierWithKey(this._modifiersWithKeys, DropModifier.identity, DropModifier, event);
+  onDrop(event: (event?: DragEvent, extraParams?: string) => void, dropOptions: DropOptions): this {
+    let arkOnDrop = new ArkOnDrop();
+    if (typeof event === 'function') {
+      arkOnDrop.event = event;
+    }
+    if (typeof dropOptions === 'object') {
+      arkOnDrop.disableDataPrefetch = dropOptions.disableDataPrefetch;
+    }
+    modifierWithKey(this._modifiersWithKeys, DropModifier.identity, DropModifier, arkOnDrop);
     return this;
   }
 
@@ -5490,6 +5621,37 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       modifierWithKey(this._modifiersWithKeys, AccessibilityScrollTriggerableModifier.identity, AccessibilityScrollTriggerableModifier, value);
     } else {
       modifierWithKey(this._modifiersWithKeys, AccessibilityScrollTriggerableModifier.identity, AccessibilityScrollTriggerableModifier, undefined);
+    }
+    return this;
+  }
+
+  accessibilityTextHint(value: string): this {
+    if (typeof value === 'string') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityTextHintModifier.identity, AccessibilityTextHintModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityTextHintModifier.identity, AccessibilityTextHintModifier, undefined);
+    }
+    return this;
+  }
+
+  accessibilityVirtualNode(builder: CustomBuilder): this {
+    throw new Error('Method not implemented.');
+  }
+
+  accessibilityChecked(isCheck: boolean): this {
+    if (typeof isCheck === 'boolean') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityCheckedModifier.identity, AccessibilityCheckedModifier, isCheck);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityCheckedModifier.identity, AccessibilityCheckedModifier, undefined);
+    }
+    return this;
+  }
+  
+  accessibilitySelected(isCheck: boolean): this {
+    if (typeof isCheck === 'boolean') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilitySelectedModifier.identity, AccessibilitySelectedModifier, isCheck);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilitySelectedModifier.identity, AccessibilitySelectedModifier, undefined);
     }
     return this;
   }

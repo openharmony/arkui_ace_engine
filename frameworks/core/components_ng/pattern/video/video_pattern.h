@@ -46,6 +46,11 @@ public:
     explicit VideoPattern(const RefPtr<VideoControllerV2>& videoController);
     ~VideoPattern() override;
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<VideoEventHub>();
@@ -219,6 +224,8 @@ public:
     void OnPlayerStatus(PlaybackStatus status);
 
     void OnCurrentTimeChange(uint32_t currentPos);
+
+    void OnError(const std::string& errorId);
 
     void OnError(int32_t code, const std::string& message);
 

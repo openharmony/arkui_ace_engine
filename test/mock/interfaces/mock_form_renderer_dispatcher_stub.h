@@ -25,6 +25,7 @@ public:
     MOCK_METHOD2(DispatchPointerEvent,
         void(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, Ace::SerializedGesture& serializedGesture));
     MOCK_METHOD1(SetAllowUpdate, void(bool allowUpdate));
+    MOCK_METHOD1(SetMultiInstanceEnabled, void(bool isMultiInstanceEnabled));
     MOCK_METHOD5(DispatchSurfaceChangeEvent, void(float width, float height, uint32_t reason,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, float borderWidth));
     MOCK_METHOD1(SetObscured, void(bool isObscured));

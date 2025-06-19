@@ -754,6 +754,14 @@ UIContentErrorCode DeclarativeFrontend::SetRouterIntentInfo(const std::string& i
     return UIContentErrorCode::NULL_POINTER;
 }
 
+std::string DeclarativeFrontend::GetTopNavDestinationInfo(bool onlyFullScreen, bool needParam)
+{
+    if (delegate_) {
+        return delegate_->GetTopNavDestinationInfo(onlyFullScreen, needParam);
+    }
+    return "{}";
+}
+
 void DeclarativeFrontend::ReplacePage(const std::string& url, const std::string& params)
 {
     if (delegate_) {

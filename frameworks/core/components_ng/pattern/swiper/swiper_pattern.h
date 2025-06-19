@@ -77,6 +77,7 @@ constexpr float SWIPER_CURVE_DAMPING = 34.0f;
 class SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
 
+
 public:
     using CustomContentTransitionPtr = std::shared_ptr<std::function<TabContentAnimatedTransition(int32_t, int32_t)>>;
     using PanEventFunction = std::function<void(const GestureEvent& info)>;
@@ -332,6 +333,11 @@ public:
         swiperParameters_ = std::make_shared<SwiperParameters>(swiperParameters);
     }
 
+    void SetSwiperArrowParameters(const SwiperArrowParameters& swiperArrowParameters)
+    {
+        swiperArrowParameters_ = std::make_shared<SwiperArrowParameters>(swiperArrowParameters);
+    }
+
     void SetSwiperDigitalParameters(const SwiperDigitalParameters& swiperDigitalParameters)
     {
         swiperDigitalParameters_ = std::make_shared<SwiperDigitalParameters>(swiperDigitalParameters);
@@ -505,6 +511,7 @@ public:
     }
 
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
+    std::shared_ptr<SwiperArrowParameters> GetSwiperArrowParameters() const;
     virtual std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const { return nullptr; }
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
@@ -648,8 +655,8 @@ public:
         isIndicatorInteractive_ = isInteractive;
     }
 
-    bool IsAtStart() const;
-    bool IsAtEnd() const;
+    ACE_FORCE_EXPORT bool IsAtStart() const;
+    ACE_FORCE_EXPORT bool IsAtEnd() const;
 
     bool IsIndicatorInteractive() const
     {
@@ -827,6 +834,12 @@ public:
 
     void OnColorModeChange(uint32_t colorMode) override;
     void ResetOnForceMeasure();
+
+    std::optional<int32_t> GetTargetIndex() const
+    {
+        return targetIndex_;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
@@ -1221,6 +1234,7 @@ private:
     void SetIndicatorIsInFast(std::optional<bool> isInFast);
 
     void PostIdleTask(const RefPtr<FrameNode>& frameNode);
+    void SetLayoutDisplayCount(const RefPtr<FrameNode>& swiperNode);
 
     float AdjustIgnoreBlankOverScrollOffSet(bool isStartOverScroll) const;
     void UpdateIgnoreBlankOffsetWithIndex();
@@ -1273,6 +1287,7 @@ private:
     void UpdateBottomTypeOnMultiple(int32_t currentFirstIndex);
     void UpdateBottomTypeOnMultipleRTL(int32_t currentFirstIndex);
     void CheckTargetPositon(float& correctOffset);
+    void UpdateDefaultColor();
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -1356,6 +1371,7 @@ private:
     AnimationEndEventPtr animationEndEvent_;
 
     mutable std::shared_ptr<SwiperParameters> swiperParameters_;
+    mutable std::shared_ptr<SwiperArrowParameters> swiperArrowParameters_;
     mutable std::shared_ptr<SwiperDigitalParameters> swiperDigitalParameters_;
 
     WeakPtr<FrameNode> lastWeakShowNode_;
@@ -1380,6 +1396,7 @@ private:
 
     std::optional<int32_t> uiCastJumpIndex_;
     std::optional<int32_t> jumpIndex_;
+    std::optional<int32_t> jumpIndexByUser_;
     std::optional<int32_t> runningTargetIndex_;
     std::optional<int32_t> pauseTargetIndex_;
     std::optional<int32_t> oldChildrenSize_;

@@ -239,7 +239,7 @@ public:
     }
 
     static RefPtr<ResourceAdapter> CreateNewResourceAdapter(
-        const std::string& bundleName, const std::string& moduleName);
+        const std::string& bundleName, const std::string& moduleName, bool fromTheme = false);
 
     virtual void UpdateColorMode(ColorMode colorMode) {}
 
@@ -262,6 +262,11 @@ public:
     virtual bool ExistDarkResByName(const std::string& resourceName, const std::string& resourceType)
     {
         return false;
+    }
+
+    virtual uint32_t GetResId(const std::string &resTypeName) const
+    {
+        return -1;
     }
 };
 

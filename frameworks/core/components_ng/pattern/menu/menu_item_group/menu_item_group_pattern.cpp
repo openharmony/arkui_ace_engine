@@ -79,6 +79,13 @@ void MenuItemGroupPattern::AddHeader(const RefPtr<NG::UINode>& header)
     auto frameNode = AceType::DynamicCast<FrameNode>(header);
     CHECK_NULL_VOID(frameNode);
     if (headerContent_) {
+        auto pipeline = headerContent_->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
+        auto headerProperty = headerContent_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(headerProperty);
+        headerProperty->UpdateWordBreak(theme->GetWordBreak());
         headerContent_->MarkModifyDone();
         headerContent_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -98,6 +105,13 @@ void MenuItemGroupPattern::AddFooter(const RefPtr<NG::UINode>& footer)
     auto frameNode = AceType::DynamicCast<FrameNode>(footer);
     CHECK_NULL_VOID(frameNode);
     if (footerContent_) {
+        auto pipeline = footerContent_->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
+        auto footerProperty = footerContent_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(footerProperty);
+        footerProperty->UpdateWordBreak(theme->GetWordBreak());
         footerContent_->MarkModifyDone();
         footerContent_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }

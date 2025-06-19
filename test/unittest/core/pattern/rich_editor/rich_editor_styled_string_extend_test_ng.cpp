@@ -481,7 +481,8 @@ HWTEST_F(RichEditorStyledStringExtendTestNg, HandleSelectFontStyle, TestSize.Lev
     decorationSpan =
         AceType::DynamicCast<DecorationSpan>(richEditorPattern->styledString_->GetSpan(2, 4, SpanType::Decoration));
     ASSERT_NE(decorationSpan, nullptr);
-    EXPECT_EQ(decorationSpan->GetTextDecorationFirst(), TextDecoration::NONE);
+    bool ret = V2::HasTextDecoration(decorationSpan->GetTextDecorationTypes(), TextDecoration::UNDERLINE);
+    EXPECT_FALSE(ret);
 }
 
 /**

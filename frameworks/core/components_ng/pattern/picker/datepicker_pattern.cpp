@@ -85,6 +85,10 @@ void DatePickerPattern::OnAttachToFrameNode()
 
 bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    if (config.skipLayout || config.skipMeasure) {
+        return false;
+    }
+
     CHECK_NULL_RETURN(dirty, false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -804,7 +808,7 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto centerX = leftTotalColumnWidth + FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
     auto centerY = (host->GetGeometryNode()->GetFrameSize().Height() - dividerSpacing) / RATE +
         FOCUS_INTERVAL.ConvertToPx() + LINE_WIDTH.ConvertToPx();
-
+    AdjustFocusBoxOffset(centerX);
     paintRect.SetRect(RectF(centerX, centerY, paintRectWidth, paintRectHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
@@ -814,6 +818,17 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
     paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()),
         static_cast<RSScalar>(PRESS_RADIUS.ConvertToPx()));
+}
+
+void DatePickerPattern::AdjustFocusBoxOffset(double& centerX)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    if (geometryNode->GetPadding()) {
+        centerX += geometryNode->GetPadding()->left.value_or(0.0);
+    }
 }
 
 bool DatePickerPattern::OnKeyEvent(const KeyEvent& event)
@@ -876,10 +891,12 @@ bool DatePickerPattern::ParseDirectionKey(
 {
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (code == KeyCode::KEY_DPAD_UP) {
+        pattern->StopHaptic();
         pattern->InnerHandleScroll(false, false);
         return true;
     }
     if (code == KeyCode::KEY_DPAD_DOWN) {
+        pattern->StopHaptic();
         pattern->InnerHandleScroll(true, false);
         return true;
     }

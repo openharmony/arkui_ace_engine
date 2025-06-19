@@ -45,6 +45,7 @@ namespace {
 const InspectorFilter filter;
 const std::string CONNECTER = "-";
 const std::vector<int> DEFAULT_MONTH_DAY = { 1, 2, 3 };
+const std::vector<int> DEFAULT_VALUE = { 1970, 1971, 1972 };
 const int MIDDLE_OF_COUNTS = 2;
 constexpr double COLUMN_WIDTH = 200.0;
 constexpr double SECLECTED_TEXTNODE_HEIGHT = 84.0;
@@ -1884,5 +1885,86 @@ HWTEST_F(DatePickerColumnTest, DatePickerPatternTest021, TestSize.Level1)
     pickerPattern->SetDateOrder("y-d-M");
     pickerPattern->LunarColumnsBuilding(current);
     EXPECT_NE(pickerPattern->lunar_, false);
+}
+
+/**
+ * @tc.name: CreateItemTouchEventListener001
+ * @tc.desc: Test DatePickerColumn CreateItemTouchEventListener.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerColumnTest, CreateItemTouchEventListener001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create columnNode and columnPattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(pickerFrameNode, nullptr);
+    pickerFrameNode->MarkModifyDone();
+    auto blendNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(blendNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
+    ASSERT_NE(columnNode, nullptr);
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    columnPattern->stopHaptic_ = false;
+    auto testImpl = columnPattern->CreateItemTouchEventListener();
+    ASSERT_NE(testImpl, nullptr);
+    TouchEventInfo info("touch");
+    info.SetSourceTool(SourceTool::MOUSE);
+    TouchLocationInfo touchLocationInfoUp(1);
+    touchLocationInfoUp.SetTouchType(TouchType::DOWN);
+    info.AddTouchLocationInfo(std::move(touchLocationInfoUp));
+    testImpl->GetTouchEventCallback()(info);
+    EXPECT_TRUE(columnPattern->stopHaptic_);
+    info.SetSourceTool(SourceTool::FINGER);
+    testImpl->GetTouchEventCallback()(info);
+    EXPECT_FALSE(columnPattern->stopHaptic_);
+}
+
+/**
+ * @tc.name: DatePickerGetCurrentOption001
+ * @tc.desc: Test DatePickerColumnPattern GetCurrentOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerColumnTest, DatePickerGetCurrentOption001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto pickerFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(pickerFrameNode, nullptr);
+    pickerFrameNode->MarkModifyDone();
+    auto blendNode = AceType::DynamicCast<FrameNode>(pickerFrameNode->GetFirstChild()->GetChildAtIndex(1));
+    ASSERT_NE(blendNode, nullptr);
+    auto yearColumnNode = AceType::DynamicCast<FrameNode>(blendNode->GetLastChild());
+    ASSERT_NE(yearColumnNode, nullptr);
+
+    auto pickerPattern = pickerFrameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pickerPattern, nullptr);
+
+    auto columnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+    columnPattern->SetCurrentIndex(1);
+
+    auto options = columnPattern->GetOptions();
+    options[yearColumnNode].clear();
+    columnPattern->SetOptions(options);
+    EXPECT_EQ(columnPattern->GetCurrentOption(), "");
+
+    for (auto& Value : DEFAULT_VALUE) {
+        options[yearColumnNode].emplace_back(PickerDateF::CreateYear(Value));
+    }
+    columnPattern->SetOptions(options);
+    DateTime date;
+    date.year = DEFAULT_VALUE.at(1);
+    EXPECT_EQ(columnPattern->GetCurrentOption(), Localization::GetInstance()->FormatDateTime(date, "y"));
+    options[yearColumnNode].clear();
+    columnPattern->SetOptions(options);
+    EXPECT_EQ(columnPattern->GetCurrentOption(), "");
+    options.erase(yearColumnNode);
+    columnPattern->SetOptions(options);
+    EXPECT_EQ(columnPattern->GetCurrentOption(), "");
 }
 } // namespace OHOS::Ace::NG

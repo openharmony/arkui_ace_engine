@@ -20,6 +20,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -34,6 +35,7 @@
 #include "base/utils/utils.h"
 #include "base/log/dump_log.h"
 #include "base/window/foldable_window.h"
+#include "core/common/ace_engine.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
@@ -87,6 +89,8 @@ const std::string BOTTOMSTRING = "test";
 constexpr int32_t START_YEAR_BEFORE = 1990;
 constexpr int32_t SELECTED_YEAR = 2000;
 constexpr int32_t END_YEAR = 2090;
+const std::int32_t TARGET_ID = 1;
+const std::int32_t TARGET_ID_NEW = 2;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 } // namespace
 class OverlayNewTestNg : public testing::Test {
@@ -1654,5 +1658,101 @@ HWTEST_F(OverlayNewTestNg, GetFirstFrameNodeOfBuilder001, TestSize.Level1)
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     auto sheetContent = sheetPattern->GetFirstFrameNodeOfBuilder();
     EXPECT_NE(sheetContent, nullptr);
+}
+
+/**
+ * @tc.name: IsNeedAvoidFoldCrease001
+ * @tc.desc: Test IsNeedAvoidFoldCrease.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayNewTestNg, IsNeedAvoidFoldCrease001, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, TARGET_ID,
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "Menu", MenuType::MENU); });
+    ASSERT_NE(frameNode, nullptr);
+    OverlayManager overlayManager(frameNode);
+    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
+    RefPtr<MockContainer> containerOne = AceType::MakeRefPtr<MockContainer>();
+    RefPtr<MockContainer> containerTwo = AceType::MakeRefPtr<MockContainer>();
+    containerOne->isSubContainer_ = true;
+    AceEngine::Get().AddContainer(0, containerOne);
+    AceEngine::Get().AddContainer(1, containerTwo);
+    std::optional<bool> enableHoverMode = true;
+    EXPECT_FALSE(overlayManager.IsNeedAvoidFoldCrease(frameNode, true, true, enableHoverMode));
+}
+
+/**
+ * @tc.name: IsNeedAvoidFoldCrease002
+ * @tc.desc: Test IsNeedAvoidFoldCrease.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayNewTestNg, IsNeedAvoidFoldCrease002, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, TARGET_ID_NEW,
+        []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID_NEW, "MenuTest", MenuType::MENU); });
+    ASSERT_NE(frameNode, nullptr);
+    OverlayManager overlayManager(frameNode);
+    MockSystemProperties::g_isSuperFoldDisplayDevice = true;
+    RefPtr<MockContainer> containerOne = AceType::MakeRefPtr<MockContainer>();
+    RefPtr<MockContainer> containerTwo = AceType::MakeRefPtr<MockContainer>();
+    containerOne->isSubContainer_ = true;
+    AceEngine::Get().AddContainer(0, containerOne);
+    AceEngine::Get().AddContainer(-1, containerTwo);
+    std::optional<bool> enableHoverMode = true;
+    EXPECT_FALSE(overlayManager.IsNeedAvoidFoldCrease(frameNode, true, true, enableHoverMode));
+}
+
+/**
+ * @tc.name: HandleModalShow001
+ * @tc.desc: if (contentCoverParam.transitionEffect != nullptr)
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayNewTestNg, HandleModalShow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create modal page node.
+     */
+    auto builderFunc = []() -> RefPtr<UINode> {
+        auto frameNode =
+            FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+                []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+        auto childFrameNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        frameNode->AddChild(childFrameNode);
+        return frameNode;
+    };
+
+    ModalStyle modalStyle;
+    bool isShow = true;
+    std::function<void(int32_t info)> onWillDismiss = [](int32_t info) {};
+    RefPtr<NG::ChainedTransitionEffect> effect = AceType::MakeRefPtr<NG::ChainedOpacityEffect>(1.0);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    /**
+     * @tc.steps: step3. set the transitionEffect.
+     * @tc.expected: GetVisibility is VISIBLE.
+     */
+    ContentCoverParam contentCoverParam;
+    contentCoverParam.onWillDismiss = onWillDismiss;
+    contentCoverParam.transitionEffect = std::move(effect);
+    overlayManager->OnBindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr,
+        nullptr, contentCoverParam, targetNode);
+    auto topModalNode = overlayManager->modalStack_.top().Upgrade();
+    auto topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
+    topModalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
+
+    const auto& layoutProperty = topModalNode->GetLayoutProperty();
+    EXPECT_EQ(layoutProperty->GetVisibility(), VisibleType::VISIBLE);
 }
 } // namespace OHOS::Ace::NG
