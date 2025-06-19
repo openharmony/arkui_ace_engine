@@ -132,7 +132,11 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     viewPort_ = size;
     auto childSize = childGeometryNode->GetMarginFrameSize();
     auto contentEndOffset = layoutProperty->GetScrollContentEndOffsetValue(.0f);
-    scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(viewPort_, axis) + contentEndOffset;
+    if (axis == Axis::FREE) { // horizontal is the main axis in Free mode
+        scrollableDistance_ = childSize.Width() - viewPort_.Width() + contentEndOffset;
+    } else {
+        scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(viewPort_, axis) + contentEndOffset;
+    }
     if (UnableOverScroll(layoutWrapper)) {
         if (scrollableDistance_ > 0.0f) {
             currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
@@ -141,7 +145,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
     viewPortExtent_ = childSize;
-    viewPortLength_ = GetMainAxisSize(viewPort_, axis);
+    viewPortLength_ = axis == Axis::FREE ? viewPort_.Width() : GetMainAxisSize(viewPort_, axis);
     auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, crossOffset_);
     if (layoutDirection == TextDirection::RTL && axis == Axis::HORIZONTAL) {
         currentOffset = OffsetF(std::min(size.Width() - childSize.Width(), 0.f) - currentOffset_, 0.0f);
