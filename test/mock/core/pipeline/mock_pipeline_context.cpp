@@ -1257,6 +1257,11 @@ Rect PipelineBase::GetCurrentWindowRect() const
     return NG::windowRect_;
 }
 
+Rect PipelineBase::GetGlobalDisplayWindowRect() const
+{
+    return NG::windowRect_;
+}
+
 void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
 {
     textFieldManager_ = manager;
