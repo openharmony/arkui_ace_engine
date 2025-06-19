@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -233,6 +233,20 @@ class WaterFlowCachedCountModifier extends ModifierWithKey<ArkScrollableCacheOpt
   }
 }
 
+class WaterFlowSyncLoadModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('waterFlowSyncLoad');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().waterFlow.resetSyncLoad(node);
+    } else {
+      getUINativeModule().waterFlow.setSyncLoad(node, this.value);
+    }
+  }
+}
+
 class WaterFlowFlingSpeedLimitModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -447,6 +461,10 @@ class ArkWaterFlowComponent extends ArkScrollable<WaterFlowAttribute> implements
   cachedCount(count: number, show?: boolean): WaterFlowAttribute {
     let opt = new ArkScrollableCacheOptions(count, show ? show : false);
     modifierWithKey(this._modifiersWithKeys, WaterFlowCachedCountModifier.identity, WaterFlowCachedCountModifier, opt);
+    return this;
+  }
+  syncLoad(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowSyncLoadModifier.identity, WaterFlowSyncLoadModifier, value);
     return this;
   }
   onReachStart(event: () => void): this {

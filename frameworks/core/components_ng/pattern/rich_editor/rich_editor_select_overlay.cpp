@@ -329,6 +329,7 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
     }
     selectInfo.menuInfo.responseType = static_cast<int32_t>(responseType);
     selectInfo.menuInfo.editorType = static_cast<int32_t>(pattern->GetEditorType());
+    selectInfo.menuInfo.hasOnPrepareMenuCallback = onPrepareMenuCallback_ ? true : false;
     selectInfo.callerFrameNode = pattern->GetHost();
     selectInfo.isNewAvoid = true;
     selectInfo.selectArea = GetSelectArea();
@@ -598,6 +599,7 @@ void RichEditorSelectOverlay::OnOverlayTouchDown(const TouchEventInfo& event)
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     if (event.GetSourceTool() == SourceTool::MOUSE && IsHandleShow()) {
+        pattern->ResetSelection();
         pattern->CloseSelectOverlay();
     }
     pattern->RequestFocusWhenSelected();

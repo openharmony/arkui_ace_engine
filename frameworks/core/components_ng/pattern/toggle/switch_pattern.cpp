@@ -405,6 +405,58 @@ void SwitchPattern::UpdateColorWhenIsOn(bool isOn)
     }
 }
 
+void SwitchPattern::UpdateComponentColor(const Color& color, const ToggleColorType toggleColorType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (toggleColorType) {
+            case ToggleColorType::SELECTED_COLOR:
+                paintProperty->UpdateSelectedColor(color);
+                break;
+            case ToggleColorType::SWITCH_POINT_COLOR:
+                paintProperty->UpdateSwitchPointColor(color);
+                break;
+            case ToggleColorType::UN_SELECTED_COLOR:
+                paintProperty->UpdateUnselectedColor(color);
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void SwitchPattern::UpdateComponentDimension(const CalcDimension& dimension,
+    const ToggleDimensionType toggleDimensionType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (toggleDimensionType) {
+            case ToggleDimensionType::POINT_RADIUS:
+                paintProperty->UpdatePointRadius(dimension);
+                break;
+            case ToggleDimensionType::TRACK_BORDER_RADIUS:
+                paintProperty->UpdateTrackBorderRadius(dimension);
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
 void SwitchPattern::OnTouchDown()
 {
     if (UseContentModifier()) {
@@ -734,6 +786,26 @@ void SwitchPattern::OnColorConfigurationUpdate()
     auto switchModifier = paintMethod_->GetSwitchModifier();
     CHECK_NULL_VOID(switchModifier);
     switchModifier->InitializeParam(host->GetThemeScopeId());
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pipeline = host->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SwitchTheme>();
+        CHECK_NULL_VOID(theme);
+        auto pops = host->GetPaintProperty<SwitchPaintProperty>();
+        CHECK_NULL_VOID(pops);
+        if (!pops->GetSelectedColorSetByUserValue(false)) {
+            Color color = theme->GetActiveColor();
+            pops->UpdateSelectedColor(color);
+        }
+        if (!pops->GetSwitchPointColorSetByUserValue(false)) {
+            Color color = theme->GetPointColor();
+            pops->UpdateSwitchPointColor(color);
+        }
+        if (!pops->GetUnselectedColorSetByUserValue(false)) {
+            Color color = theme->GetInactiveColor();
+            pops->UpdateUnselectedColor(color);
+        }
+    }
     host->MarkDirtyNode();
     host->SetNeedCallChildrenUpdate(false);
 }

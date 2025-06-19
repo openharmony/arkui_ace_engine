@@ -140,6 +140,18 @@ void SwiperTestNg::CreateSwiperItems(int32_t itemNumber)
     }
 }
 
+RefPtr<FrameNode> SwiperTestNg::CreateSwiper(const std::function<void(SwiperModelNG)>& callback)
+{
+    SwiperModelNG model;
+    model.Create();
+    if (callback) {
+        callback(model);
+    }
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ViewStackProcessor::GetInstance()->PopContainer();
+    return AceType::DynamicCast<FrameNode>(element);
+}
+
 void SwiperTestNg::CreateItemWithSize(float width, float height)
 {
     ButtonModelNG buttonModelNG;

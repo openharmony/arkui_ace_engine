@@ -40,6 +40,7 @@ void JSColumnSplit::JsDivider(const JSCallbackInfo& args)
         return;
     }
 
+    LinearSplitModel::GetInstance()->ResetResObj("columnSplit.divider");
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     NG::ColumnSplitDivider divider;
     RefPtr<ResourceObject> startResObj;
@@ -52,7 +53,7 @@ void JSColumnSplit::JsDivider(const JSCallbackInfo& args)
             ResourceParseUtils::ParseResDimensionVp(resObj, result);
             divider.startMargin = result;
         };
-        divider.AddResource("ColumnSplit.divider.startMargin", startResObj, std::move(updateFunc));
+        divider.AddResource("columnSplit.divider.startMargin", startResObj, std::move(updateFunc));
     }
     if (SystemProperties::ConfigChangePerform() && endResObj) {
         auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::ColumnSplitDivider& divider) {
@@ -60,7 +61,7 @@ void JSColumnSplit::JsDivider(const JSCallbackInfo& args)
             ResourceParseUtils::ParseResDimensionVp(resObj, result);
             divider.endMargin = result;
         };
-        divider.AddResource("ColumnSplit.divider.endMargin", endResObj, std::move(updateFunc));
+        divider.AddResource("columnSplit.divider.endMargin", endResObj, std::move(updateFunc));
     }
     LinearSplitModel::GetInstance()->SetDivider(NG::SplitType::COLUMN_SPLIT, divider);
 

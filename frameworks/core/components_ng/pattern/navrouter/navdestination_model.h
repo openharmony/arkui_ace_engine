@@ -29,6 +29,10 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 namespace OHOS::Ace {
+enum class NavDestinationPatternType {
+    TITLE_BAR = 0,
+    NAV_DESTINATION,
+};
 class ACE_FORCE_EXPORT NavDestinationModel {
 public:
     static NavDestinationModel* GetInstance();
@@ -114,8 +118,9 @@ public:
     virtual void SetPreferredOrientation(const std::optional<Orientation>& ori) {}
     virtual void SetEnableStatusBar(const std::optional<std::pair<bool, bool>>& statusBar) {}
     virtual void SetEnableNavigationIndicator(const std::optional<bool>& navigationIndicator) {}
+    virtual void ResetResObj(NavDestinationPatternType type, const std::string& key) {}
     virtual bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
-        const RefPtr<ResourceObject>& mainResObj, bool ignoreMainTitle = false) {return false;};
+        const RefPtr<ResourceObject>& mainResObj) {return false;};
     virtual void UpdateMainTitle(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj) {};
     virtual void UpdateSubTitle(

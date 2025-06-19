@@ -86,6 +86,21 @@
       "buildFunction": "SelectLevel11Builder"
     },
     {
+      "name": "SelectLevel2",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel2.ets",
+      "buildFunction": "SelectLevel2Builder"
+    },
+    {
+      "name": "SelectLevel3",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel3.ets",
+      "buildFunction": "SelectLevel3Builder"
+    },
+    {
+      "name": "SelectLevel4",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel4.ets",
+      "buildFunction": "SelectLevel4Builder"
+    },
+    {
       "name": "ButtonIndex",
       "pageSourceFile": "src/main/ets/pages/components/button/Index.ets",
       "buildFunction": "ButtonIndexBuilder"
@@ -269,6 +284,31 @@
       "name": "CheckboxMultiTestLevel0",
       "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxMultiTestLevel0.ets",
       "buildFunction": "CheckboxMultiTestLevel0Builder"
+    },
+    {
+      "name": "CheckboxLevel0",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxLevel0.ets",
+      "buildFunction": "CheckboxLevel0Builder"
+    },
+    {
+      "name": "CheckboxLevel1",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxLevel1.ets",
+      "buildFunction": "CheckboxLevel1Builder"
+    },
+    {
+      "name": "CheckboxLevel2",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxLevel2.ets",
+      "buildFunction": "CheckboxLevel2Builder"
+    },
+    {
+      "name": "CheckboxLevel3",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxLevel3.ets",
+      "buildFunction": "CheckboxLevel3Builder"
+    },
+    {
+      "name": "CheckboxLevel4",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxLevel4.ets",
+      "buildFunction": "CheckboxLevel4Builder"
     },
     {
       "name": "RatingIndex",

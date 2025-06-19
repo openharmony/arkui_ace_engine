@@ -2069,6 +2069,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("dataDetectorConfig", &JSWeb::DataDetectorConfig);
     JSClass<JSWeb>::StaticMethod("bypassVsyncCondition", &JSWeb::BypassVsyncCondition);
     JSClass<JSWeb>::StaticMethod("enableFollowSystemFontWeight", &JSWeb::EnableFollowSystemFontWeight);
+    JSClass<JSWeb>::StaticMethod("gestureFocusMode", &JSWeb::GestureFocusMode);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -2205,6 +2206,7 @@ JSRef<JSVal> LoadWebTitleReceiveEventToJSValue(const LoadWebTitleReceiveEvent& e
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("title", eventInfo.GetTitle());
+    obj->SetProperty("isRealTitle", eventInfo.GetIsRealTitle());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -2575,6 +2577,16 @@ void JSWeb::Create(const JSCallbackInfo& info)
             func->Call(webviewController, 1, argv);
         };
 
+        auto setWebDetachFunction = controller->GetProperty("setWebDetach");
+        std::function<void(int32_t)> setWebDetachCallback = nullptr;
+        if (setWebDetachFunction->IsFunction()) {
+            setWebDetachCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(setWebDetachFunction)](
+                                     int32_t webId) {
+                JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
+                func->Call(webviewController, 1, argv);
+            };
+        }
+
         auto setHapPathFunction = controller->GetProperty("innerSetHapPath");
         std::function<void(const std::string&)> setHapPathCallback = nullptr;
         if (setHapPathFunction->IsFunction()) {
@@ -2652,6 +2664,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
         WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));
         WebModel::GetInstance()->SetDefaultFileSelectorShow(std::move(fileSelectorShowFromUserCallback));
+        WebModel::GetInstance()->SetWebDetachFunction(std::move(setWebDetachCallback));
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         if (!getCmdLineFunction->IsFunction()) {
             return;
@@ -5314,6 +5327,7 @@ JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventIn
     const OHOS::Ace::Offset& globalLocation = touchInfo.GetGlobalLocation();
     const OHOS::Ace::Offset& localLocation = touchInfo.GetLocalLocation();
     const OHOS::Ace::Offset& screenLocation = touchInfo.GetScreenLocation();
+    const OHOS::Ace::Offset& globalDisplayLocation = touchInfo.GetGlobalDisplayLocation();
     touchInfoObj->SetProperty<int32_t>("type", static_cast<int32_t>(touchInfo.GetTouchType()));
     touchInfoObj->SetProperty<int32_t>("id", touchInfo.GetFingerId());
     touchInfoObj->SetProperty<double>("displayX", screenLocation.GetX());
@@ -5324,6 +5338,8 @@ JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventIn
     touchInfoObj->SetProperty<double>("screenY", globalLocation.GetY());
     touchInfoObj->SetProperty<double>("x", localLocation.GetX());
     touchInfoObj->SetProperty<double>("y", localLocation.GetY());
+    touchInfoObj->SetProperty<double>("globalDisplayX", globalDisplayLocation.GetX());
+    touchInfoObj->SetProperty<double>("globalDisplayY", globalDisplayLocation.GetY());
     touchInfoObj->Wrap<TouchEventInfo>(&info);
     return touchInfoObj;
 }
@@ -6060,5 +6076,16 @@ void JSWeb::BypassVsyncCondition(int32_t webBypassVsyncCondition)
 void JSWeb::EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
 {
     WebModel::GetInstance()->SetEnableFollowSystemFontWeight(enableFollowSystemFontWeight);
+}
+
+void JSWeb::GestureFocusMode(int32_t gestureFocusMode)
+{
+    if (gestureFocusMode < static_cast<int32_t>(GestureFocusMode::DEFAULT) ||
+        gestureFocusMode > static_cast<int32_t>(GestureFocusMode::GESTURE_TAP_AND_LONG_PRESS)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "GestureFocusMode param err");
+        return;
+    }
+    auto mode = static_cast<enum GestureFocusMode>(gestureFocusMode);
+    WebModel::GetInstance()->SetGestureFocusMode(mode);
 }
 } // namespace OHOS::Ace::Framework

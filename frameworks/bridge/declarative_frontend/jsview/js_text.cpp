@@ -883,7 +883,7 @@ void JSText::Create(const JSCallbackInfo& info)
         jsController->SetController(controller);
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
             auto styledString = jsController->GetStyledString();
-            if (styledString) {
+            if (styledString && controller) {
                 controller->SetStyledString(styledString, false);
                 jsController->ClearStyledString();
             }
@@ -1165,6 +1165,30 @@ void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient
     }
 }
 
+void JSText::SetContentTransition(const JSCallbackInfo& info)
+{
+    if (info.Length() > 0 && !info[0]->IsObject()) {
+        TextModel::GetInstance()->ResetContentTransition();
+        return;
+    }
+    auto contentTransitionObj = JSRef<JSObject>::Cast(info[0]);
+    TextFlipDirection direction = TextFlipDirection::DOWN;
+    bool enableBlur = false;
+    if (contentTransitionObj->HasProperty("flipDirection")) {
+        auto directionObj = contentTransitionObj->GetProperty("flipDirection");
+        if (directionObj->IsNumber()) {
+            direction = static_cast<TextFlipDirection>(directionObj->ToNumber<int32_t>());
+        }
+    }
+    if (contentTransitionObj->HasProperty("enableBlur")) {
+        auto enableBlurObj = contentTransitionObj->GetProperty("enableBlur");
+        if (enableBlurObj->IsBoolean()) {
+            enableBlur = enableBlurObj->ToBoolean();
+        }
+    }
+    TextModel::GetInstance()->SetContentTransition(TextEffectStrategy::FLIP, direction, enableBlur);
+}
+
 void JSText::JSBind(BindingTarget globalObj)
 {
     JSClass<JSText>::Declare("Text");
@@ -1202,6 +1226,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("selectedBackgroundColor", &JSText::SetSelectedBackgroundColor);
     JSClass<JSText>::StaticMethod("decoration", &JSText::SetDecoration);
     JSClass<JSText>::StaticMethod("heightAdaptivePolicy", &JSText::SetHeightAdaptivePolicy);
+    JSClass<JSText>::StaticMethod("contentTransition", &JSText::SetContentTransition);
     JSClass<JSText>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSText>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSText>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);

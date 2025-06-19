@@ -553,6 +553,26 @@ void GestureEventHub::CheckClickActuator()
 
 void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent, double distanceThreshold)
 {
+    auto dimensionDistanceThreshold = Dimension(
+        Dimension(distanceThreshold, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
+    CheckClickActuator();
+    if (parallelCombineClick) {
+        userParallelClickEventActuator_->SetUserCallback(std::move(clickEvent));
+        SetFocusClickEvent(userParallelClickEventActuator_->GetClickEvent());
+        auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
+        clickRecognizer->SetDistanceThreshold(dimensionDistanceThreshold);
+        clickEventActuator_->AddDistanceThreshold(dimensionDistanceThreshold);
+    } else {
+        clickEventActuator_->SetUserCallback(std::move(clickEvent));
+        SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+        auto clickRecognizer = clickEventActuator_->GetClickRecognizer();
+        clickRecognizer->SetDistanceThreshold(dimensionDistanceThreshold);
+        clickEventActuator_->AddDistanceThreshold(dimensionDistanceThreshold);
+    }
+}
+
+void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent, Dimension distanceThreshold)
+{
     CheckClickActuator();
     if (parallelCombineClick) {
         userParallelClickEventActuator_->SetUserCallback(std::move(clickEvent));
@@ -571,15 +591,17 @@ void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent, double dista
 
 void GestureEventHub::SetNodeClickDistance(double distanceThreshold)
 {
+    auto dimensionDistanceThreshold = Dimension(
+        Dimension(distanceThreshold, DimensionUnit::PX).ConvertToVp(), DimensionUnit::VP);
     CheckClickActuator();
     if (parallelCombineClick) {
         auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
-        clickRecognizer->SetDistanceThreshold(distanceThreshold);
-        clickEventActuator_->AddDistanceThreshold(distanceThreshold);
+        clickRecognizer->SetDistanceThreshold(dimensionDistanceThreshold);
+        clickEventActuator_->AddDistanceThreshold(dimensionDistanceThreshold);
     } else {
         auto clickRecognizer = clickEventActuator_->GetClickRecognizer();
-        clickRecognizer->SetDistanceThreshold(distanceThreshold);
-        clickEventActuator_->AddDistanceThreshold(distanceThreshold);
+        clickRecognizer->SetDistanceThreshold(dimensionDistanceThreshold);
+        clickEventActuator_->AddDistanceThreshold(dimensionDistanceThreshold);
     }
 }
 

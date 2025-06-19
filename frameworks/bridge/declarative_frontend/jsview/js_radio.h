@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,12 +32,18 @@ public:
     static void JsResponseRegion(const JSCallbackInfo& info);
     static void JsSize(const JSCallbackInfo& args);
     static void JsOnClick(const JSCallbackInfo& args);
+    static void OnChange(const JSCallbackInfo& info);
     static void JsHoverEffect(const JSCallbackInfo& info);
     static NG::PaddingPropertyF GetOldPadding(const JSCallbackInfo& info);
     static NG::PaddingProperty GetNewPadding(const JSCallbackInfo& info);
     static NG::PaddingProperty GetPadding(const std::optional<CalcDimension>& top,
         const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
         const std::optional<CalcDimension>& right);
+private:
+    static void CreateWithResourceObj(const RefPtr<ResourceObject>& resObj, const int32_t colorType);
+    static void SetCheckedBackgroundColor(const JSCallbackInfo& info, const RefPtr<RadioTheme>& theme);
+    static void SetUncheckedBorderColor(const JSCallbackInfo& info, const RefPtr<RadioTheme>& theme);
+    static void SetIndicatorColor(const JSCallbackInfo& info, const RefPtr<RadioTheme>& theme);
 };
 
 } // namespace OHOS::Ace::Framework

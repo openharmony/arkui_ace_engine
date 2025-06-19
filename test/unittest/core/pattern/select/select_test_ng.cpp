@@ -22,10 +22,12 @@
 #define protected public
 #define private public
 
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/select/select_theme.h"
@@ -40,6 +42,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
@@ -522,6 +525,313 @@ HWTEST_F(SelectTestNg, ShowSelectMenuTest001, TestSize.Level1)
     auto offset = pattern->GetHost()->GetPaintRectOffset();
     EXPECT_EQ(offset.GetY(), pattern->selectSize_.Height());
 }
+
+/**
+ * @tc.name: ShowSelectMenuTest004
+ * @tc.desc: Test SelectPattern ShowSelectMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ShowSelectMenuTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pipeline, select theme, select model and parameters of select.
+     * @tc.expected: Objects are created successfully.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(pipeline->GetThemeManager());
+    ASSERT_NE(themeManager, nullptr);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(selectTheme));
+
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto menuNode = pattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr); // Menu node should be created
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto selectLayoutProperty = select->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(selectLayoutProperty, nullptr);
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProps, nullptr);
+    EXPECT_EQ(menuLayoutProps->GetShowInSubWindowValue(false), false);
+
+    MockContainer::SetUp();
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    AceEngine::Get().AddContainer(Container::CurrentId(), container);
+
+    /**
+     * @tc.steps: step2. Configure the Select component to show its menu in a sub-window.
+     */
+    SelectModelNG::SetShowInSubWindow(select, true);
+    EXPECT_EQ(selectLayoutProperty->GetShowInSubWindowValue(false), true);
+    selectTheme->expandDisplay_ = true;
+    EXPECT_EQ(selectTheme->GetExpandDisplay(), true);
+    pattern->ShowSelectMenu();
+    EXPECT_EQ(menuLayoutProps->GetShowInSubWindowValue(false), true);
+
+    /**
+     * @tc.steps: step3. Configure the Select component not to show its menu in a sub-window.
+     */
+    SelectModelNG::SetShowInSubWindow(select, false);
+    EXPECT_EQ(selectLayoutProperty->GetShowInSubWindowValue(false), false);
+    selectTheme->expandDisplay_ = true;
+    EXPECT_EQ(selectTheme->GetExpandDisplay(), true);
+    pattern->ShowSelectMenu();
+    EXPECT_EQ(menuLayoutProps->GetShowInSubWindowValue(false), false);
+
+    AceEngine::Get().RemoveContainer(Container::CurrentId());
+}
+
+/**
+ * @tc.name: ShowSelectMenuTest005
+ * @tc.desc: Test SelectPattern ShowSelectMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ShowSelectMenuTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pipeline, select theme, select model and parameters of select.
+     * @tc.expected: Objects are created successfully.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(pipeline->GetThemeManager());
+    ASSERT_NE(themeManager, nullptr);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(selectTheme));
+
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto menuNode = pattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr); // Menu node should be created
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto selectLayoutProperty = select->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(selectLayoutProperty, nullptr);
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProps, nullptr);
+    EXPECT_EQ(menuLayoutProps->GetShowInSubWindowValue(false), false);
+
+    MockContainer::SetUp();
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    AceEngine::Get().AddContainer(Container::CurrentId(), container);
+
+    /**
+     * @tc.steps: step2. Configure the Select component not to show its menu in a sub-window.
+     */
+    SelectModelNG::SetShowInSubWindow(select, true);
+    EXPECT_EQ(selectLayoutProperty->GetShowInSubWindowValue(false), true);
+    selectTheme->expandDisplay_ = false;
+    EXPECT_EQ(selectTheme->GetExpandDisplay(), false);
+    pattern->ShowSelectMenu();
+    EXPECT_EQ(menuLayoutProps->GetShowInSubWindowValue(false), true);
+
+
+    /**
+     * @tc.steps: step3. Configure the Select component not to show its menu in a sub-window.
+     */
+    SelectModelNG::SetShowInSubWindow(select, false);
+    EXPECT_EQ(selectLayoutProperty->GetShowInSubWindowValue(false), false);
+    selectTheme->expandDisplay_ = false;
+    EXPECT_EQ(selectTheme->GetExpandDisplay(), false);
+    pattern->ShowSelectMenu();
+    EXPECT_EQ(menuLayoutProps->GetShowInSubWindowValue(false), false);
+
+    AceEngine::Get().RemoveContainer(Container::CurrentId());
+}
+
+/**
+ * @tc.name: ShowSelectMenuInSubWindow001
+ * @tc.desc: Test SelectPattern ShowSelectMenu when configured for sub-window.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ShowSelectMenuInSubWindow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pipeline, select theme, select model and parameters of select.
+     * @tc.expected: Objects are created successfully.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+
+    /**
+     * @tc.steps: step2. Call Create() of select model and get select frame node and select pattern.
+     * @tc.expected: Objects are created and gotten successfully and select pattern should not be null.
+     */
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto menuNode = pattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr); // Menu node should be created
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Configure the Select component to show its menu in a sub-window.
+     */
+    SelectModelNG::SetShowInSubWindow(select, true);
+    auto selectLayoutProperty = select->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(selectLayoutProperty, nullptr);
+    EXPECT_EQ(selectLayoutProperty->GetShowInSubWindowValue(false), true);
+    selectTheme->expandDisplay_ = true;
+    EXPECT_EQ(selectTheme->GetExpandDisplay(), true);
+
+    /**
+     * @tc.steps: step4. Call ShowSelectMenu function.
+     * @tc.expected: The function executes, and the menu is configured for sub-window display.
+     */
+    pattern->ShowSelectMenu();
+
+    /**
+     * @tc.steps: step5. Verify menu properties related to sub-window display.
+     */
+
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProps, nullptr);
+    EXPECT_EQ(menuLayoutProps->GetShowInSubWindowValue(false), true);
+}
+
+/**
+ * @tc.name: RegisterOnClickTest001
+ * @tc.desc: Verify bindMenu gesture event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, RegisterOnClickTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pipeline, select theme, select model and parameters of select.
+     * @tc.expected: Objects are created successfully.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+
+    /**
+     * @tc.steps: step2. Call Create() of select model and get select frame node and select pattern.
+     * @tc.expected: Objects are created and gotten successfully and select pattern should not be null.
+     */
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto menuNode = pattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr); // Menu node should be created
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Get pattern and set value.
+     * @tc.expected: Function RegisterOnClick is called.
+     */
+    pattern->selected_ = 2;
+    pattern->isSelected_ = false;
+    pattern->RegisterOnClick();
+
+    /**
+     * @tc.steps: step4. bindMenuGesture with optionParams.
+     * @tc.expected: check the menu event is not nullptr.
+     */
+    auto gestureHub = select->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    EXPECT_NE(gestureHub->showMenu_, nullptr);
+    EXPECT_NE(gestureHub->bindMenuTouch_, nullptr);
+}
+
+/**
+ * @tc.name: ResumeMenuShowTest001
+ * @tc.desc: Test SelectPattern ResumeMenuShow for regular sub-window display.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ResumeMenuShowTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pipeline, select theme, select model and parameters of select.
+     * @tc.expected: Objects are created successfully.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
+
+    /**
+     * @tc.steps: step2. Call Create() of select model and get select frame node and select pattern.
+     * @tc.expected: Objects are created and gotten successfully and select pattern should not be null.
+     */
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto menuNode = pattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr); // Menu node should be created
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    pattern->selected_ = 2;
+    pattern->isSelected_ = false;
+    pattern->RegisterOnClick();
+
+    /**
+     * @tc.steps: step3. Configure the Select component to show its menu in a sub-window.
+     */
+    SelectModelNG::SetShowInSubWindow(select, true);
+    auto selectLayoutProperty = select->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(selectLayoutProperty, nullptr);
+    EXPECT_EQ(selectLayoutProperty->GetShowInSubWindowValue(false), true);
+    selectTheme->expandDisplay_ = true;
+    EXPECT_EQ(selectTheme->GetExpandDisplay(), true);
+    auto targetId = select->GetId();
+    auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(wrapperPattern);
+    wrapperPattern->menuStatus_ = MenuStatus::SHOW;
+
+    /**
+     * @tc.steps: step4. Simulate a TouchType::DOWN event to trigger the target logic.
+     */
+    TouchEvent event;
+    event.type = TouchType::DOWN;
+    event.originalId = targetId;
+    auto gestureHub = select->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    EXPECT_EQ(gestureHub->TriggerTouchEvent(event), true);
+    auto overlayManager = pipeline->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    EXPECT_EQ(overlayManager->CheckSkipMenuShow(targetId), true);
+
+    /**
+     * @tc.steps: step4. Simulate a TouchType::UP event to trigger the target logic.
+     */
+    event.type = TouchType::UP;
+    event.originalId = targetId;
+    EXPECT_EQ(gestureHub->TriggerTouchEvent(event), true);
+    EXPECT_EQ(overlayManager->CheckSkipMenuShow(targetId), false);
+}
+
 /**
  * @tc.name: SelectLayoutPropertyTest005
  * @tc.desc: Test Select Layout Algorithm Measure.

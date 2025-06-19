@@ -1902,7 +1902,8 @@ HWTEST_F(MenuLayout2TestNg, IsSelectMenuShowInSubWindow005, TestSize.Level1)
 
 /**
  * @tc.name: IsSelectMenuShowInSubWindow006
- * @tc.desc: test theme->GetExpandDisplay()为true but menuLayoutProperty->GetShowInSubWindowValue(false) is false, return false
+ * @tc.desc: test theme->GetExpandDisplay() is true but menuLayoutProperty->GetShowInSubWindowValue(false) is false,
+ * return false
  * @tc.type: FUNC
  */
 HWTEST_F(MenuLayout2TestNg, IsSelectMenuShowInSubWindow006, TestSize.Level1)

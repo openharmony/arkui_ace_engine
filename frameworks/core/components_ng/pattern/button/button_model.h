@@ -16,12 +16,29 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_BUTTON_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_BUTTON_MODEL_H
 
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/button/button_request_data.h"
 
 namespace OHOS::Ace {
+enum class ButtonColorType {
+    FONT_COLOR,
+    BACKGROUND_COLOR
+};
+enum class ButtonStringType {
+    LABEL,
+    FONT_FAMILY
+};
+enum class ButtonDimensionType {
+    MIN_FONT_SIZE,
+    MAX_FONT_SIZE
+};
+enum class ButtonDoubleType {
+    MIN_FONT_SCALE,
+    MAX_FONT_SCALE
+};
 class ACE_FORCE_EXPORT ButtonModel {
 public:
     static ButtonModel* GetInstance();
@@ -61,6 +78,16 @@ public:
     virtual void SetCreateWithLabel(bool isLabelButton) {}
     virtual void SetMinFontScale(float minFontScale) {}
     virtual void SetMaxFontScale(float maxFontScale) {}
+    virtual void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+        const ButtonColorType buttonColorType) = 0;
+    virtual void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj,
+        const ButtonStringType buttonStringType) = 0;
+    virtual void CreateWithDimensionFpResourceObj(const RefPtr<ResourceObject>& resObj,
+        const ButtonDimensionType buttonDimensionType) = 0;
+    virtual void CreateWithDoubleResourceObj(const RefPtr<ResourceObject>& resObj,
+        const ButtonDoubleType buttonDoubleType) = 0;
+    virtual void CreateWithFamiliesResourceObj(const RefPtr<ResourceObject>& resObj,
+        const ButtonStringType buttonStringType) = 0;
 
 private:
     static std::unique_ptr<ButtonModel> instance_;

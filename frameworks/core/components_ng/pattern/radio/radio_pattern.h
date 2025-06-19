@@ -181,6 +181,9 @@ public:
 
     void DumpInfo() override;
 
+    void UpdateRadioComponentColor(const Color& color, const RadioColorType radioColorType);
+    void OnColorConfigurationUpdate() override;
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

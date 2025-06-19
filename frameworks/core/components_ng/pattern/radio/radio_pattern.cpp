@@ -1010,6 +1010,29 @@ void RadioPattern::DumpInfo ()
     }
 }
 
+void RadioPattern::UpdateRadioComponentColor(const Color& color, const RadioColorType radioColorType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    switch (radioColorType) {
+        case RadioColorType::CHECKED_BACKGROUND_COLOR:
+            paintProperty->UpdateRadioCheckedBackgroundColor(color);
+            break;
+        case RadioColorType::UNCHECKED_BORDER_COLOR:
+            paintProperty->UpdateRadioUncheckedBorderColor(color);
+            break;
+        case RadioColorType::INDICATOR_COLOR:
+            paintProperty->UpdateRadioIndicatorColor(color);
+            ImageNodeCreate();
+            break;
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void RadioPattern::FireBuilder()
 {
     auto host = GetHost();
@@ -1065,5 +1088,35 @@ void RadioPattern::SetPrePageIdToLastPageId()
         CHECK_NULL_VOID(pageNode);
         SetPrePageId(pageNode->GetId());
     }
+}
+
+void RadioPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_VOID(radioTheme);
+    if (!paintProperty->GetRadioCheckedBackgroundColorSetByUser().value_or(false)) {
+        auto activeColor = radioTheme->GetActiveColor();
+        paintProperty->UpdateRadioCheckedBackgroundColor(activeColor);
+    }
+    if (!paintProperty->GetRadioUncheckedBorderColorSetByUser().value_or(false)) {
+        auto inActiveColor = radioTheme->GetInactiveColor();
+        paintProperty->UpdateRadioUncheckedBorderColor(inActiveColor);
+    }
+    if (!paintProperty->GetRadioIndicatorColorSetByUser().value_or(false)) {
+        auto pointColor = radioTheme->GetPointColor();
+        paintProperty->UpdateRadioIndicatorColor(pointColor);
+        ImageNodeCreate();
+    }
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG

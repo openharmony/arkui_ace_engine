@@ -314,6 +314,7 @@ private:
 
     uint32_t GetMaxLength() const;
     std::string SearchTypeToString() const;
+    void InitMargin(const RefPtr<SearchLayoutProperty>& property);
     std::string searchButton_;
     SizeF searchSize_;
     OffsetF searchOffset_;

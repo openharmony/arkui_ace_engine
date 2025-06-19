@@ -494,7 +494,6 @@ void WindowPattern::CreateStartingWindow()
         lastParentSize_ = { 0.0f, 0.0f };
         startingWindow_ = startingWindowLayoutHelper_->CreateStartingWindowNode(
             startingWindowInfo, sessionInfo.bundleName_, sessionInfo.moduleName_);
-        startingWindow_->GetPattern<ImagePattern>()->SetSyncLoad(syncStartingWindow_);
         return;
     }
     startingWindow_ = FrameNode::CreateFrameNode(
@@ -510,7 +509,6 @@ void WindowPattern::CreateStartingWindow()
     imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     startingWindow_->GetRenderContext()->UpdateBackgroundColor(color);
     imageLayoutProperty->UpdateImageFit(ImageFit::NONE);
-    startingWindow_->GetPattern<ImagePattern>()->SetSyncLoad(syncStartingWindow_);
     startingWindow_->MarkModifyDone();
 }
 
@@ -629,6 +627,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         if (isSavingSnapshot) {
             auto snapshotPixelMap = session_->GetSnapshotPixelMap();
             CHECK_NULL_VOID(snapshotPixelMap);
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "snapshotPixelMap id: %{public}d", snapshotPixelMap->GetUniqueId());
             auto pixelMap = PixelMap::CreatePixelMap(&snapshotPixelMap);
             sourceInfo = ImageSourceInfo(pixelMap);
             snapshotWindow_->GetPattern<ImagePattern>()->SetSyncLoad(true);
@@ -684,11 +683,11 @@ void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo)
     CHECK_NULL_VOID(frameNode);
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto imageCache = pipelineContext->GetImageCache(session_->GetWindowStatus());
+    auto imageCache = pipelineContext->GetImageCache();
     CHECK_NULL_VOID(imageCache);
     imageCache->ClearCacheImgObj(sourceInfo.GetKey());
     if (!Rosen::ScenePersistence::IsAstcEnabled()) {
-        auto snapshotSize = session_->GetScenePersistence()->GetSnapshotSize();
+        auto snapshotSize = session_->GetScenePersistence()->GetSnapshotSize(session_->GetWindowStatus());
         imageCache->ClearCacheImage(
             ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.first, snapshotSize.second)));
         imageCache->ClearCacheImage(

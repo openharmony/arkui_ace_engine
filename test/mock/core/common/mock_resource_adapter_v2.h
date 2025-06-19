@@ -28,34 +28,57 @@ public:
 
     Color GetColor(uint32_t resId) override
     {
-        return Color();
+        Color data;
+        return GetMockResourceData(resId, data) ? data : Color();
     }
 
     Dimension GetDimension(uint32_t resId) override
     {
-        return Dimension();
+        Dimension data;
+        return GetMockResourceData(resId, data) ? data : Dimension();
     }
 
     std::string GetString(uint32_t resId) override
     {
-        return "";
+        std::string data;
+        return GetMockResourceData(resId, data) ? data : "";
     }
 
     std::vector<std::string> GetStringArray(uint32_t resId) const override
     {
-        return std::vector<std::string>();
+        std::vector<std::string> data;
+        return GetMockResourceData(resId, data) ? data : std::vector<std::string>();
     }
 
     double GetDouble(uint32_t resId) override
     {
-        return 0;
+        double data = 0.0f;
+        return GetMockResourceData(resId, data) ? data : 0;
     }
 
     int32_t GetInt(uint32_t resId) override
     {
-        return 0;
+        int32_t data = 0;
+        return GetMockResourceData(resId, data) ? data : 0;
     }
+
+private:
+    static bool GetMockResourceData(uint32_t id, Color& data);
+    static bool GetMockResourceData(uint32_t id, Dimension& data);
+    static bool GetMockResourceData(uint32_t id, std::string& data);
+    static bool GetMockResourceData(uint32_t id, std::vector<std::string>& data);
+    static bool GetMockResourceData(uint32_t id, double& data);
+    static bool GetMockResourceData(uint32_t id, int32_t& data);
 };
+
+void ResetMockResourceData();
+void AddMockResourceData(uint32_t id, const Color& data);
+void AddMockResourceData(uint32_t id, const Dimension& data);
+void AddMockResourceData(uint32_t id, const std::string& data);
+void AddMockResourceData(uint32_t id, const std::vector<std::string>& data);
+void AddMockResourceData(uint32_t id, const double& data);
+void AddMockResourceData(uint32_t id, const int32_t& data);
+
 } // namespace OHOS::Ace
 
 #endif

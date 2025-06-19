@@ -42,7 +42,6 @@ public:
         const std::function<void(int32_t, int32_t, int32_t, int32_t, bool, bool)>& onActiveRange,
         const std::function<void(int32_t, int32_t)>& onMoveFromTo, const std::function<void()>& onPurge) = 0;
 
-    virtual bool IsInAnimation() = 0;
     virtual void RemoveNode(uint32_t rid) = 0;
     virtual void SetInvalid(int32_t repeatElmtId, uint32_t rid) = 0;
 

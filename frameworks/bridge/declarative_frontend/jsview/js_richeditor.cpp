@@ -661,7 +661,7 @@ void JSRichEditor::EditMenuOptions(const JSCallbackInfo& info)
     NG::OnPrepareMenuCallback onPrepareMenuCallback;
     JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick, onPrepareMenuCallback);
     RichEditorModel::GetInstance()->SetSelectionMenuOptions(
-        std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 
 void JSRichEditor::SetOnShare(const JSCallbackInfo& info)

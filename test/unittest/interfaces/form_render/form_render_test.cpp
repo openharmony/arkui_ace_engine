@@ -23,6 +23,7 @@
 #include "interfaces/inner_api/form_render/include/form_renderer.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_group.h"
+#include "interfaces/inner_api/form_render/include/form_renderer_event_report.h"
 #include "interfaces/inner_api/ace/serialized_gesture.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -580,7 +581,7 @@ HWTEST_F(FormRenderTest, FormRenderTest018, TestSize.Level1)
 {
     auto formRenderer = GetInstance("formRenderTest018");
     ASSERT_TRUE(formRenderer);
-    
+
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
     OHOS::AAFwk::Want want;
     want.SetParam(FORM_RENDERER_COMP_ID, FORM_COMPONENT_ID_1);
@@ -841,6 +842,20 @@ HWTEST_F(FormRenderTest, FormRenderTest030, TestSize.Level1)
     EXPECT_TRUE(formRenderer->uiContent_);
     bool res = formRenderer->IsManagerDelegateValid(want);
     EXPECT_EQ(res, true);
+}
+
+HWTEST_F(FormRenderTest, FormRenderTest031, TestSize.Level1)
+{
+    int64_t formId = 100;
+    std::string bundleName = "testBundleName";
+    std::string formName = "testFormName";
+    FormRenderEventReport::StartSurfaceNodeTimeoutReportTimer(formId, bundleName, formName);
+    EXPECT_NE(FormRenderEventReport::waitSurfaceNodeTimerMap_.find(formId),
+        FormRenderEventReport::waitSurfaceNodeTimerMap_.end());
+
+    FormRenderEventReport::StopTimer(formId);
+    EXPECT_EQ(FormRenderEventReport::waitSurfaceNodeTimerMap_.find(formId),
+        FormRenderEventReport::waitSurfaceNodeTimerMap_.end());
 }
 
 } // namespace OHOS::Ace

@@ -139,6 +139,7 @@ using PanDirectionFuncType = OnPanDirectionFunc::FunctionType;
 using OnPanDistanceFunc = EventCallback<void(double distance)>;
 using PanDistanceFuncType = OnPanDistanceFunc::FunctionType;
 using PanDistanceMap = std::unordered_map<SourceTool, double>;
+using PanDistanceMapDimension = std::unordered_map<SourceTool, Dimension>;
 
 class PanGestureOption : public AceType {
     DECLARE_ACE_TYPE(PanGestureOption, AceType);
@@ -163,18 +164,18 @@ public:
     void SetDistance(double distance)
     {
         distance_ = distance;
-        distanceMap_[SourceTool::UNKNOWN] = distance;
+        distanceMap_[SourceTool::UNKNOWN] = Dimension(distance_, DimensionUnit::PX);
         for (const auto& callback : onPanDistanceIds_) {
             (callback.second.GetCallback())(distance);
         }
     }
 
-    void SetDistanceMap(const PanDistanceMap& distanceMap)
+    void SetDistanceMap(const PanDistanceMapDimension& distanceMap)
     {
         distanceMap_ = distanceMap;
     }
 
-    const PanDistanceMap& GetPanDistanceMap() const
+    const PanDistanceMapDimension& GetPanDistanceMap() const
     {
         return distanceMap_;
     }
@@ -240,7 +241,7 @@ public:
 private:
     PanDirection direction_;
     double distance_ = DEFAULT_PAN_DISTANCE.ConvertToPx();
-    PanDistanceMap distanceMap_;
+    PanDistanceMapDimension distanceMap_;
     int32_t fingers_ = 1;
     bool isLimitFingerCount_ = false;
     std::unordered_map<typename OnPanFingersFunc::IdType, OnPanFingersFunc> onPanFingersIds_;
@@ -274,6 +275,8 @@ struct FingerInfo {
 
     //screen position at which the touch point contacts the screen.
     Offset screenLocation_;
+    // The location where the touch point touches the screen when there are multiple screens.
+    Offset globalDisplayLocation_;
     SourceType sourceType_ = SourceType::NONE;
     SourceTool sourceTool_ = SourceTool::UNKNOWN;
 };

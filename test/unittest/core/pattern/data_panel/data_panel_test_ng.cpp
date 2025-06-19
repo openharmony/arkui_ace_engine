@@ -117,6 +117,10 @@ void DataPanelTestNg::SetUpTestCase()
 {
     MockContainer::SetUp();
     MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto dataPanelTheme = AceType::MakeRefPtr<DataPanelTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(dataPanelTheme));
 }
 
 void DataPanelTestNg::TearDownTestCase()

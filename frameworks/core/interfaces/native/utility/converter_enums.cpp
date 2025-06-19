@@ -1400,14 +1400,14 @@ template<> void AssignCast(std::optional<ScrollSizeMode>& dst, const Ark_ScrollS
 }
 
 template<>
-void AssignCast(std::optional<OHOS::Ace::RenderingStrategy>& dst, const Ark_SymbolRenderingStrategy& src)
+void AssignCast(std::optional<Converter::RenderingStrategy>& dst, const Ark_SymbolRenderingStrategy& src)
 {
     switch (src) {
-        case ARK_SYMBOL_RENDERING_STRATEGY_SINGLE: dst = OHOS::Ace::RenderingStrategy::SINGLE; break;
+        case ARK_SYMBOL_RENDERING_STRATEGY_SINGLE: dst = Converter::RenderingStrategy::SINGLE; break;
         case ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_COLOR:
-            dst = OHOS::Ace::RenderingStrategy::MULTIPLE_COLOR; break;
+            dst = Converter::RenderingStrategy::MULTIPLE_COLOR; break;
         case ARK_SYMBOL_RENDERING_STRATEGY_MULTIPLE_OPACITY:
-            dst = OHOS::Ace::RenderingStrategy::MULTIPLE_OPACITY; break;
+            dst = Converter::RenderingStrategy::MULTIPLE_OPACITY; break;
         default: LOGE("Unexpected enum value in Ark_SymbolRenderingStrategy: %{public}d", src);
     }
 }

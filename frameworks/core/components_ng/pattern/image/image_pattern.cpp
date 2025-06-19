@@ -937,14 +937,22 @@ void ImagePattern::InitOnKeyEvent()
     keyEventCallback_ = [weak = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        pattern->OnKeyEvent();
+        pattern->OnKeyEvent(event);
         return false;
     };
     focusHub->SetOnKeyEventInternal(std::move(keyEventCallback_));
 }
 
-void ImagePattern::OnKeyEvent()
+void ImagePattern::OnKeyEvent(const KeyEvent& event)
 {
+    if (imageAnalyzerManager_) {
+        auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto imageInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+        if (!imageInfo.IsSvg()) {
+            imageAnalyzerManager_->UpdateKeyEvent(event);
+        }
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();

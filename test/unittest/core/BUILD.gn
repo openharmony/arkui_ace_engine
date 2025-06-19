@@ -45,6 +45,7 @@ group("scroll_test") {
     "pattern/grid:grid_test_ng",
     "pattern/grid:grid_test_regular",
     "pattern/list:list_test_ng",
+    "pattern/scroll:scroll_test_ng",
     "pattern/swiper:swiper_test_ng",
     "pattern/waterflow:water_flow_test_original",
     "pattern/waterflow:water_flow_test_segmented",

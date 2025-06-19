@@ -32,6 +32,8 @@ public:
     PanRecognizer(int32_t fingers, const PanDirection& direction, double distance, bool isLimitFingerCount = false);
     PanRecognizer(int32_t fingers, const PanDirection& direction, const PanDistanceMap& distanceMap,
         bool isLimitFingerCount = false);
+    PanRecognizer(int32_t fingers, const PanDirection& direction, const PanDistanceMapDimension& distanceMap,
+        bool isLimitFingerCount = false);
 
     explicit PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption);
 
@@ -80,12 +82,14 @@ public:
         return direction_;
     }
 
-    void SetDistanceMap(const PanDistanceMap& distanceMap)
+    void SetDistanceMap(const PanDistanceMap& distanceMap);
+
+    void SetDistanceMap(const PanDistanceMapDimension& distanceMap)
     {
         distanceMap_ = distanceMap;
     }
 
-    PanDistanceMap GetDistanceMap() const
+    PanDistanceMapDimension GetDistanceMap() const
     {
         return distanceMap_;
     }
@@ -182,8 +186,8 @@ private:
     int32_t newFingers_ = 1;
     double newDistance_ = 0.0;
     PanDirection newDirection_;
-    PanDistanceMap distanceMap_;
-    PanDistanceMap newDistanceMap_;
+    PanDistanceMapDimension distanceMap_;
+    PanDistanceMapDimension newDistanceMap_;
 
     AxisEvent lastAxisEvent_;
     Offset averageDistance_;

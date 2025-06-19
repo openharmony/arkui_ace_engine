@@ -48,7 +48,6 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     CHECK_NULL_VOID(IsMainWindow());
     CHECK_NULL_VOID(session_);
     initWindowMode_ = session_->GetWindowMode();
-    syncStartingWindow_ = Rosen::SceneSessionManager::GetInstance().IsSyncLoadStartingWindow();
     session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
@@ -725,7 +724,7 @@ void WindowScene::OnLayoutFinished()
         CHECK_NULL_VOID(host);
         ACE_SCOPED_TRACE("WindowScene::OnLayoutFinished[id:%d][self:%d][enabled:%d]",
             self->session_->GetPersistentId(), host->GetId(), self->session_->GetBufferAvailableCallbackEnable());
-        if (self->startingWindow_) {
+        if (self->startingWindow_ && (!self->session_->GetShowRecent())) {
             self->BufferAvailableCallback();
             return;
         }

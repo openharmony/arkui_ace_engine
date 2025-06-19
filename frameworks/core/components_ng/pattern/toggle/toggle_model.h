@@ -20,6 +20,7 @@
 #include <mutex>
 
 #include "base/geometry/dimension.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/toggle/switch_event_hub.h"
 #include "frameworks/core/components_ng/property/measure_property.h"
@@ -35,7 +36,15 @@ enum class ToggleType {
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
-
+enum class ToggleColorType {
+    SELECTED_COLOR,
+    SWITCH_POINT_COLOR,
+    UN_SELECTED_COLOR
+};
+enum class ToggleDimensionType {
+    POINT_RADIUS,
+    TRACK_BORDER_RADIUS
+};
 class ACE_FORCE_EXPORT ToggleModel {
 public:
     static ToggleModel* GetInstance();
@@ -59,6 +68,10 @@ public:
     virtual void SetTrackBorderRadius(const Dimension& borderRadius) {};
     virtual void ResetTrackBorderRadius() {};
     virtual void Pop();
+    virtual void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+        const ToggleColorType toggleColorType) {};
+    virtual void CreateWithDimensionVpResourceObj(const RefPtr<ResourceObject>& resObj,
+        const ToggleDimensionType toggleDimensionType) {};
 
 private:
     static std::unique_ptr<ToggleModel> instance_;

@@ -43,6 +43,7 @@ namespace {
 const SizeF CONTAINER_SIZE(720.0f, 1136.f);
 const SizeF PARENT_IDEAL_SIZE(720.0f, 1136.f);
 const SizeF SELF_IDEAL_SIZE(600.0f, 1000.f);
+const Dimension ENTRY_BUTTON_WIDTH = Dimension(100.0, DimensionUnit::PX);
 } // namespace
 
 class CalendarPickerLayoutAlgorithmTest : public testing::Test {
@@ -623,6 +624,44 @@ HWTEST_F(CalendarPickerLayoutAlgorithmTest, CalendarPickerContentMeasure002, Tes
 
     SizeF geometryFrameSize = contentGeometryNode->GetFrameSize();
     EXPECT_EQ(geometryFrameSize, PARENT_IDEAL_SIZE);
+}
+
+/**
+ * @tc.name: SelfMeasure001
+ * @tc.desc: Test SelfMeasure Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerLayoutAlgorithmTest, SelfMeasure001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CalendarPicker.
+     */
+    CreateCalendarPicker();
+    ASSERT_NE(frameNode_, nullptr);
+
+    /**
+     * @tc.steps: step2. Get CalendarPicker layout algorithm.
+     */
+    GetCalendarPickerLayoutAlgorithm();
+    ASSERT_NE(calendarPickerLayoutAlgorithm_, nullptr);
+
+    /**
+     * @tc.steps: step3. Set entryButtonWidth_ and contentMeasure_.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+
+    theme->entryButtonWidth_ = ENTRY_BUTTON_WIDTH;
+    calendarPickerLayoutAlgorithm_->contentMeasure_ = CONTAINER_SIZE;
+
+    /**
+     * @tc.steps: step4. Call SelfMeasure function.
+     */
+    calendarPickerLayoutAlgorithm_->SelfMeasure(AceType::RawPtr(layoutWrapper_));
+    EXPECT_EQ(calendarPickerLayoutAlgorithm_->flexMeasure_.Width(), ENTRY_BUTTON_WIDTH.Value());
+    EXPECT_EQ(calendarPickerLayoutAlgorithm_->flexMeasure_.Height(), CONTAINER_SIZE.Height());
 }
 
 } // namespace OHOS::Ace::NG

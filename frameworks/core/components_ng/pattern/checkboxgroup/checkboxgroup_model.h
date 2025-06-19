@@ -18,10 +18,15 @@
 
 #include <mutex>
 
+#include "core/common/resource/resource_object.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_event_hub.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model.h"
 
 namespace OHOS::Ace {
+enum class CheckBoxGroupColorType {
+    SELECTED_COLOR,
+    UN_SELECTED_COLOR
+};
 class ACE_FORCE_EXPORT CheckBoxGroupModel {
 public:
     static CheckBoxGroupModel* GetInstance();
@@ -44,6 +49,8 @@ public:
     virtual void ResetSelectedColor() {};
     virtual void ResetUnSelectedColor() {};
     virtual void ResetCheckMarkColor() {};
+    virtual void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+        const CheckBoxGroupColorType checkBoxGroupColorType) {};
 
 private:
     static std::unique_ptr<CheckBoxGroupModel> instance_;

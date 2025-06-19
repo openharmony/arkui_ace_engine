@@ -395,10 +395,10 @@ void RosenRenderContext::SetPivot(float xPivot, float yPivot, float zPivot)
     if (pivotModifier_) {
         auto pivot = pivotModifier_->GetPivot();
         changed = pivot[0] != xPivot || pivot[1] != yPivot;
-        pivotModifier_->SetPivot({ xPivot, yPivot });
+        pivotModifier_->SetPivot({ xPivot, yPivot }, false);
     } else {
         pivotModifier_ = std::make_shared<Rosen::ModifierNG::RSTransformModifier>();
-        pivotModifier_->SetPivot({ xPivot, yPivot });
+        pivotModifier_->SetPivot({ xPivot, yPivot }, false);
         rsNode_->AddModifier(pivotModifier_);
     }
 #else
@@ -1235,6 +1235,40 @@ void RosenRenderContext::UpdateBackgroundEffect(
     }
 }
 
+void RosenRenderContext::UpdateForeBlurStyleForColorMode(
+    const std::optional<BlurStyleOption>& fgBlurStyle, const SysOptions& sysOptions)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [weak = AceType::WeakClaim(this), fgBlurStyle, sysOptions](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto render = weak.Upgrade();
+        CHECK_NULL_VOID(render);
+        CHECK_NULL_VOID(render->rsNode_);
+        const auto& groupProperty = render->GetOrCreateForeground();
+        if (groupProperty->CheckBlurStyleOption(fgBlurStyle) && groupProperty->CheckSysOptionsForBlurSame(sysOptions)) {
+            // Same with previous value.
+            // If colorMode is following system and has valid blurStyle, still needs updating
+            if (fgBlurStyle->colorMode != ThemeColorMode::SYSTEM) {
+                return;
+            }
+            if (fgBlurStyle->blurOption.grayscale.size() > 1) {
+                Rosen::Vector2f grayScale(fgBlurStyle->blurOption.grayscale[0], fgBlurStyle->blurOption.grayscale[1]);
+                render->rsNode_->SetGreyCoef(grayScale);
+            }
+        } else {
+            groupProperty->propBlurStyleOption = fgBlurStyle;
+            groupProperty->propSysOptionsForBlur = sysOptions;
+        }
+        render->SetFrontBlurFilter();
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("foregroundBlurStyle.blurStyle", resObj, std::move(updateFunc));
+}
+
 void RosenRenderContext::UpdateFrontBlurStyle(
     const std::optional<BlurStyleOption>& fgBlurStyle, const SysOptions& sysOptions)
 {
@@ -1253,6 +1287,9 @@ void RosenRenderContext::UpdateFrontBlurStyle(
     } else {
         groupProperty->propBlurStyleOption = fgBlurStyle;
         groupProperty->propSysOptionsForBlur = sysOptions;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        UpdateForeBlurStyleForColorMode(fgBlurStyle, sysOptions);
     }
     SetFrontBlurFilter();
 }
@@ -1818,7 +1855,7 @@ void RosenRenderContext::OnOpacityUpdate(double opacity)
         }
     }
 #if defined(MODIFIER_NG)
-    SetAnimatableProperty<Rosen::ModifierNG::RSAlphaModifier, &Rosen::ModifierNG::RSAlphaModifier::SetAlpha, float>(
+    AddOrUpdateModifier<Rosen::ModifierNG::RSAlphaModifier, &Rosen::ModifierNG::RSAlphaModifier::SetAlpha, float>(
         alphaUserModifier_, opacity);
 #else
     SetAnimatableProperty<Rosen::RSAlphaModifier, float>(alphaUserModifier_, opacity);
@@ -1976,7 +2013,7 @@ bool RosenRenderContext::GetPixelMap(const std::shared_ptr<Media::PixelMap>& pix
 
 #if defined(MODIFIER_NG)
 template<typename ModifierName, auto Setter, typename T>
-void RosenRenderContext::SetAnimatableProperty(std::shared_ptr<ModifierName>& modifier, const T& value)
+void RosenRenderContext::AddOrUpdateModifier(std::shared_ptr<ModifierName>& modifier, const T& value)
 {
     if (modifier != nullptr) {
         (*modifier.*Setter)(value);
@@ -2035,7 +2072,7 @@ void RosenRenderContext::OnTransformScaleUpdate(const VectorF& scale)
         }
     }
 #if defined(MODIFIER_NG)
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetScale,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetScale,
         Rosen::Vector2f>(scaleXYUserModifier_, { scale.x, scale.y });
 #else
     SetAnimatableProperty<Rosen::RSScaleModifier, Rosen::Vector2f>(scaleXYUserModifier_, { scale.x, scale.y });
@@ -2088,9 +2125,9 @@ void RosenRenderContext::OnTransformTranslateUpdate(const TranslateOptions& tran
         }
     }
 #if defined(MODIFIER_NG)
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetTranslate,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetTranslate,
         Rosen::Vector2f>(translateXYUserModifier_, { translateVec.x, translateVec.y });
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier,
         &Rosen::ModifierNG::RSTransformModifier::SetTranslateZ, float>(translateZUserModifier_, translateVec.z);
 #else
     SetAnimatableProperty<Rosen::RSTranslateModifier, Rosen::Vector2f>(
@@ -2110,13 +2147,13 @@ void RosenRenderContext::OnTransformRotateUpdate(const Vector5F& rotate)
         norm = 1.0f;
     }
 #if defined(MODIFIER_NG)
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotationX,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotationX,
         float>(rotationXUserModifier_, -rotate.w * rotate.x / norm);
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotationY,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotationY,
         float>(rotationYUserModifier_, -rotate.w * rotate.y / norm);
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotation,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotation,
         float>(rotationZUserModifier_, rotate.w * rotate.z / norm);
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier,
         &Rosen::ModifierNG::RSTransformModifier::SetCameraDistance, float>(cameraDistanceUserModifier_, rotate.v);
 #else
     SetAnimatableProperty<Rosen::RSRotationXModifier, float>(rotationXUserModifier_, -rotate.w * rotate.x / norm);
@@ -2132,13 +2169,13 @@ void RosenRenderContext::OnTransformRotateAngleUpdate(const Vector4F& rotate)
 {
     CHECK_NULL_VOID(rsNode_);
 #if defined(MODIFIER_NG)
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotationX,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotationX,
         float>(rotationXUserModifier_, -rotate.x);
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotationY,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotationY,
         float>(rotationYUserModifier_, -rotate.y);
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotation,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotation,
         float>(rotationZUserModifier_, rotate.z);
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier,
         &Rosen::ModifierNG::RSTransformModifier::SetCameraDistance, float>(cameraDistanceUserModifier_, rotate.w);
 #else
     SetAnimatableProperty<Rosen::RSRotationXModifier, float>(rotationXUserModifier_, -rotate.x);
@@ -2171,7 +2208,7 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
 {
     CHECK_NULL_VOID(rsNode_);
 #if defined(MODIFIER_NG)
-    // Do nothing, transformModifier_ will be create and add to node in function SetAnimatableProperty.
+    // Do nothing, transformModifier_ will be create and add to node in function AddOrUpdateModifier.
 #else
     if (!transformModifier_.has_value()) {
         transformModifier_ = TransformMatrixModifier();
@@ -2183,10 +2220,10 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
         Rosen::Vector2f xyTranslateValue { static_cast<float>(matrix.Get(0, 3)), static_cast<float>(matrix.Get(1, 3)) };
         Rosen::Vector2f scaleValue { 0.0f, 0.0f };
 #if defined(MODIFIER_NG)
-        SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier,
+        AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier,
             &Rosen::ModifierNG::RSTransformModifier::SetTranslate, Rosen::Vector2f>(
             transformModifier_, xyTranslateValue);
-        SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetScale,
+        AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetScale,
             Rosen::Vector2f>(transformModifier_, scaleValue);
 #else
         AddOrChangeTranslateModifier(
@@ -2202,16 +2239,16 @@ void RosenRenderContext::OnTransformMatrixUpdate(const Matrix4& matrix)
         Rosen::Vector2f xyScaleValue { transform.scale[0], transform.scale[1] };
         Rosen::Vector3f skewValue { transform.skew[0], transform.skew[1], 0.0f };
 #if defined(MODIFIER_NG)
-        SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetPersp,
+        AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetPersp,
             Rosen::Vector4f>(transformModifier_, perspectiveValue);
-        SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier,
+        AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier,
             &Rosen::ModifierNG::RSTransformModifier::SetTranslate, Rosen::Vector2f>(
             transformModifier_, xyTranslateValue);
-        SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetScale,
+        AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetScale,
             Rosen::Vector2f>(transformModifier_, xyScaleValue);
-        SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetSkew,
+        AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetSkew,
             Rosen::Vector3f>(transformModifier_, skewValue);
-        SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier,
+        AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier,
             &Rosen::ModifierNG::RSTransformModifier::SetQuaternion, Rosen::Quaternion>(transformModifier_, quaternion);
 #else
         AddOrChangePerspectiveModifier(
@@ -2232,7 +2269,7 @@ void RosenRenderContext::OnTransform3DMatrixUpdate(const Matrix4& matrix)
 {
     CHECK_NULL_VOID(rsNode_);
 #if defined(MODIFIER_NG)
-    // Do nothing, transformModifier_ will be create and add to node in function SetAnimatableProperty.
+    // Do nothing, transformModifier_ will be create and add to node in function AddOrUpdateModifier.
 #else
     if (!transformModifier_.has_value()) {
         transformModifier_ = TransformMatrixModifier();
@@ -2245,10 +2282,10 @@ void RosenRenderContext::OnTransform3DMatrixUpdate(const Matrix4& matrix)
             static_cast<float>(matrix.Get(INDEX_1, INDEX_3)) };
         Rosen::Vector2f scaleValue { FLOAT_ZERO, FLOAT_ZERO };
 #if defined(MODIFIER_NG)
-        SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier,
+        AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier,
             &Rosen::ModifierNG::RSTransformModifier::SetTranslate, Rosen::Vector2f>(
             transformModifier_, xyTranslateValue);
-        SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetScale,
+        AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetScale,
             Rosen::Vector2f>(transformModifier_, scaleValue);
 #else
         AddOrChangeTranslateModifier(
@@ -2266,21 +2303,21 @@ void RosenRenderContext::OnTransform3DMatrixUpdate(const Matrix4& matrix)
         Rosen::Vector3f skewValue { transform.skew[0], transform.skew[1], transform.skew[INDEX_2] };
 
 #if defined(MODIFIER_NG)
-        SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetPersp,
+        AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetPersp,
             Rosen::Vector4f>(transformModifier_, perspectiveValue);
-        SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier,
+        AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier,
             &Rosen::ModifierNG::RSTransformModifier::SetTranslate, Rosen::Vector2f>(
             transformModifier_, xyTranslateValue);
-        SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier,
+        AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier,
             &Rosen::ModifierNG::RSTransformModifier::SetTranslateZ, float>(
             transformModifier_, transform.translate[INDEX_2]);
-        SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetScale,
+        AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetScale,
             Rosen::Vector2f>(transformModifier_, xyScaleValue);
-        SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier,
+        AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier,
             &Rosen::ModifierNG::RSTransformModifier::SetScaleZ, float>(transformModifier_, transform.scale[INDEX_2]);
-        SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetSkew,
+        AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetSkew,
             Rosen::Vector3f>(transformModifier_, skewValue);
-        SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier,
+        AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier,
             &Rosen::ModifierNG::RSTransformModifier::SetQuaternion, Rosen::Quaternion>(transformModifier_, quaternion);
 #else
         AddOrChangePerspectiveModifier(
@@ -2841,7 +2878,7 @@ void RosenRenderContext::OpacityAnimation(const AnimationOption& option, double 
 {
     CHECK_NULL_VOID(rsNode_);
 #if defined(MODIFIER_NG)
-    SetAnimatableProperty<Rosen::ModifierNG::RSAlphaModifier, &Rosen::ModifierNG::RSAlphaModifier::SetAlpha, float>(
+    AddOrUpdateModifier<Rosen::ModifierNG::RSAlphaModifier, &Rosen::ModifierNG::RSAlphaModifier::SetAlpha, float>(
         alphaUserModifier_, begin);
 #else
     SetAnimatableProperty<Rosen::RSAlphaModifier, float>(alphaUserModifier_, begin);
@@ -2850,7 +2887,7 @@ void RosenRenderContext::OpacityAnimation(const AnimationOption& option, double 
         option,
         [this, end]() {
 #if defined(MODIFIER_NG)
-            SetAnimatableProperty<Rosen::ModifierNG::RSAlphaModifier, &Rosen::ModifierNG::RSAlphaModifier::SetAlpha,
+            AddOrUpdateModifier<Rosen::ModifierNG::RSAlphaModifier, &Rosen::ModifierNG::RSAlphaModifier::SetAlpha,
                 float>(alphaUserModifier_, end);
 #else
             SetAnimatableProperty<Rosen::RSAlphaModifier, float>(alphaUserModifier_, end);
@@ -5348,7 +5385,7 @@ void RosenRenderContext::PaintClipShape(const std::unique_ptr<ClipProperty>& cli
     auto rsPath = DrawingDecorationPainter::DrawingCreatePath(basicShape, frameSize);
     auto shapePath = Rosen::RSPath::CreateRSPath(rsPath);
 #if defined(MODIFIER_NG)
-    SetAnimatableProperty<Rosen::ModifierNG::RSBoundsClipModifier,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSBoundsClipModifier,
         &Rosen::ModifierNG::RSBoundsClipModifier::SetClipBounds, std::shared_ptr<Rosen::RSPath>>(
         clipBoundModifier_, shapePath);
 #else
@@ -5379,7 +5416,7 @@ void RosenRenderContext::PaintClipMask(const std::unique_ptr<ClipProperty>& clip
     auto maskPath =
         Rosen::RSMask::CreatePathMask(rsPath, pen, DrawingDecorationPainter::CreateMaskDrawingBrush(basicShape));
 #if defined(MODIFIER_NG)
-    SetAnimatableProperty<Rosen::ModifierNG::RSMaskModifier, &Rosen::ModifierNG::RSMaskModifier::SetMask,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSMaskModifier, &Rosen::ModifierNG::RSMaskModifier::SetMask,
         std::shared_ptr<Rosen::RSMask>>(clipMaskModifier_, maskPath);
 #else
     if (!clipMaskModifier_) {
@@ -5522,7 +5559,7 @@ void RosenRenderContext::SetContentClip(const std::variant<RectF, RefPtr<ShapeRe
         clipRect = Rosen::Vector4f { x, y, x + width, y + height };
     }
 #if defined(MODIFIER_NG)
-    SetAnimatableProperty<Rosen::ModifierNG::RSFrameClipModifier,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSFrameClipModifier,
         &Rosen::ModifierNG::RSFrameClipModifier::SetCustomClipToFrame, Rosen::Vector4f>(
         customClipToFrameModifier_, clipRect);
 #else
@@ -5744,7 +5781,7 @@ void RosenRenderContext::OnBloomUpdate(const float bloomIntensity)
 void RosenRenderContext::SetSharedTranslate(float xTranslate, float yTranslate)
 {
 #if defined(MODIFIER_NG)
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetTranslate,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetTranslate,
         Rosen::Vector2f>(sharedTransitionModifier_, { xTranslate, yTranslate });
 #else
     if (!sharedTransitionModifier_) {
@@ -6884,11 +6921,11 @@ void RosenRenderContext::SetRotation(float rotationX, float rotationY, float rot
 {
     CHECK_NULL_VOID(rsNode_);
 #if defined(MODIFIER_NG)
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotationX,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotationX,
         float>(rotationXUserModifier_, rotationX);
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotationY,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotationY,
         float>(rotationYUserModifier_, rotationY);
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotation,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotation,
         float>(rotationZUserModifier_, rotationZ);
 #else
     SetAnimatableProperty<Rosen::RSRotationXModifier, float>(rotationXUserModifier_, rotationX);
@@ -6937,7 +6974,7 @@ void RosenRenderContext::SetScale(float scaleX, float scaleY)
 {
     CHECK_NULL_VOID(rsNode_);
 #if defined(MODIFIER_NG)
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetScale,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetScale,
         Rosen::Vector2f>(scaleXYUserModifier_, { scaleX, scaleY });
 #else
     SetAnimatableProperty<Rosen::RSScaleModifier, Rosen::Vector2f>(scaleXYUserModifier_, { scaleX, scaleY });
@@ -6968,7 +7005,7 @@ void RosenRenderContext::SetOpacity(float opacity)
 {
     CHECK_NULL_VOID(rsNode_);
 #if defined(MODIFIER_NG)
-    SetAnimatableProperty<Rosen::ModifierNG::RSAlphaModifier, &Rosen::ModifierNG::RSAlphaModifier::SetAlpha, float>(
+    AddOrUpdateModifier<Rosen::ModifierNG::RSAlphaModifier, &Rosen::ModifierNG::RSAlphaModifier::SetAlpha, float>(
         alphaUserModifier_, opacity);
 #else
     SetAnimatableProperty<Rosen::RSAlphaModifier, float>(alphaUserModifier_, opacity);
@@ -6980,7 +7017,7 @@ void RosenRenderContext::SetOpacityMultiplier(float opacity)
 {
     CHECK_NULL_VOID(rsNode_);
 #if defined(MODIFIER_NG)
-    SetAnimatableProperty<Rosen::ModifierNG::RSAlphaModifier, &Rosen::ModifierNG::RSAlphaModifier::SetAlpha, float>(
+    AddOrUpdateModifier<Rosen::ModifierNG::RSAlphaModifier, &Rosen::ModifierNG::RSAlphaModifier::SetAlpha, float>(
         alphaModifier_, opacity);
 #else
     SetAnimatableProperty<Rosen::RSAlphaModifier, float>(alphaModifier_, opacity);
@@ -6991,10 +7028,10 @@ void RosenRenderContext::SetTranslate(float translateX, float translateY, float 
 {
     CHECK_NULL_VOID(rsNode_);
 #if defined(MODIFIER_NG)
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetTranslate,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetTranslate,
         Rosen::Vector2f>(translateXYUserModifier_, { translateX, translateY });
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier,
-        &Rosen::ModifierNG::RSTransformModifier::SetTranslateZ, float>(translateZUserModifier_, translateZ);
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetTranslateZ,
+        float>(translateZUserModifier_, translateZ);
 #else
     SetAnimatableProperty<Rosen::RSTranslateModifier, Rosen::Vector2f>(
         translateXYUserModifier_, { translateX, translateY });
@@ -7039,7 +7076,7 @@ void RosenRenderContext::SetBaseTranslateInXY(const OffsetF& offset)
 {
     CHECK_NULL_VOID(rsNode_);
 #if defined(MODIFIER_NG)
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetTranslate,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetTranslate,
         Rosen::Vector2f>(baseTranslateInXYModifier_, { offset.GetX(), offset.GetY() });
 #else
     SetAnimatableProperty<Rosen::RSTranslateModifier, Rosen::Vector2f>(
@@ -7068,7 +7105,7 @@ void RosenRenderContext::SetBaseRotateInZ(float degree)
 {
     CHECK_NULL_VOID(rsNode_);
 #if defined(MODIFIER_NG)
-    SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotation,
+    AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier, &Rosen::ModifierNG::RSTransformModifier::SetRotation,
         float>(baseRotateInZModifier_, degree);
 #else
     SetAnimatableProperty<Rosen::RSRotationModifier, float>(baseRotateInZModifier_, degree);
@@ -7338,8 +7375,10 @@ void RosenRenderContext::UpdateWindowBlur()
                      (static_cast<uint32_t>((std::clamp<uint16_t>(maskColor.GetGreen(), 0, UINT8_MAX)) << 16)) |
                      (static_cast<uint32_t>((std::clamp<uint16_t>(maskColor.GetRed(), 0, UINT8_MAX)) << 24));
 #if defined(MODIFIER_NG)
+    bool needAddModifier = false;
     if (!windowBlurModifier_) {
         windowBlurModifier_ = std::make_shared<Rosen::ModifierNG::RSBehindWindowFilterModifier>();
+        needAddModifier = true;
     }
 #else
     if (!windowBlurModifier_.has_value()) {
@@ -7365,7 +7404,9 @@ void RosenRenderContext::UpdateWindowBlur()
     windowBlurModifier_->SetBehindWindowFilterSaturation(blurParam->saturation);
     windowBlurModifier_->SetBehindWindowFilterBrightness(blurParam->brightness);
     windowBlurModifier_->SetBehindWindowFilterMaskColor(Rosen::RSColor(rgbaColor));
-    rsNodeTmp->AddModifier(windowBlurModifier_);
+    if (needAddModifier) {
+        rsNodeTmp->AddModifier(windowBlurModifier_);
+    }
 #else
     WindowBlurModifier::AddOrChangeRadiusModifier(
         rsNodeTmp, windowBlurModifier_->radius, windowBlurModifier_->radiusValue, blurParam->radius);
@@ -7863,11 +7904,11 @@ void RosenRenderContext::SetAnimationPropertyValue(AnimationPropertyType propert
         case AnimationPropertyType::ROTATION: {
             if (value.size() == ROTATION_PARAM_SIZE) {
                 // rotationX and rotationY are opposite between arkui and rs.
-                SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier,
+                AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier,
                     &Rosen::ModifierNG::RSTransformModifier::SetRotationX, float>(rotationXUserModifier_, -value[0]);
-                SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier,
+                AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier,
                     &Rosen::ModifierNG::RSTransformModifier::SetRotationY, float>(rotationYUserModifier_, -value[1]);
-                SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier,
+                AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier,
                     &Rosen::ModifierNG::RSTransformModifier::SetRotation, float>(
                     rotationZUserModifier_, value[2]); // 2 is index of value
                 NotifyHostTransformUpdated();
@@ -7876,7 +7917,7 @@ void RosenRenderContext::SetAnimationPropertyValue(AnimationPropertyType propert
         }
         case AnimationPropertyType::TRANSLATION: {
             if (value.size() == TRANSLATION_PARAM_SIZE) {
-                SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier,
+                AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier,
                     &Rosen::ModifierNG::RSTransformModifier::SetTranslate, Rosen::Vector2f>(
                     translateXYUserModifier_, { value[0], value[1] });
                 NotifyHostTransformUpdated();
@@ -7885,7 +7926,7 @@ void RosenRenderContext::SetAnimationPropertyValue(AnimationPropertyType propert
         }
         case AnimationPropertyType::SCALE: {
             if (value.size() == SCALE_PARAM_SIZE) {
-                SetAnimatableProperty<Rosen::ModifierNG::RSTransformModifier,
+                AddOrUpdateModifier<Rosen::ModifierNG::RSTransformModifier,
                     &Rosen::ModifierNG::RSTransformModifier::SetScale, Rosen::Vector2f>(
                     scaleXYUserModifier_, { value[0], value[1] });
                 NotifyHostTransformUpdated();
@@ -7894,7 +7935,7 @@ void RosenRenderContext::SetAnimationPropertyValue(AnimationPropertyType propert
         }
         case AnimationPropertyType::OPACITY: {
             if (value.size() == OPACITY_PARAM_SIZE) {
-                SetAnimatableProperty<Rosen::ModifierNG::RSAlphaModifier, &Rosen::ModifierNG::RSAlphaModifier::SetAlpha,
+                AddOrUpdateModifier<Rosen::ModifierNG::RSAlphaModifier, &Rosen::ModifierNG::RSAlphaModifier::SetAlpha,
                     float>(alphaUserModifier_, value[0]);
                 MarkNeedDrawNode(value[0] < 1.0);
             }

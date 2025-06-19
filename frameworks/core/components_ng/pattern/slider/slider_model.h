@@ -24,6 +24,7 @@
 #include "base/geometry/axis.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/property/gradient_property.h"
@@ -35,6 +36,13 @@
 #endif
 
 namespace OHOS::Ace {
+enum class SliderColorType {
+    BLOCK_COLOR,
+    TRACK_COLOR,
+    SELECT_COLOR,
+    BLOCK_BORDER_COLOR,
+    STEP_COLOR
+};
 class ACE_FORCE_EXPORT SliderModel {
 public:
     enum class SliderMode {
@@ -128,6 +136,11 @@ public:
     virtual void SetValidSlideRange(float fromValue, float toValue) {};
     virtual void SetPrefix(const RefPtr<NG::UINode>& content, const NG::SliderPrefixOptions& options) = 0;
     virtual void SetSuffix(const RefPtr<NG::UINode>& content, const NG::SliderSuffixOptions& options) = 0;
+    virtual void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+        const SliderColorType sliderColorType) = 0;
+    virtual void CreateWithMediaResourceObj(const RefPtr<ResourceObject>& resObj, const std::string& bundleName,
+        const std::string& moduleName) = 0;
+    virtual void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj, const bool isShowTips) = 0;
 #ifdef SUPPORT_DIGITAL_CROWN
     virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {};
 #endif

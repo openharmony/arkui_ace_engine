@@ -18,6 +18,7 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components/list/list_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -242,14 +243,16 @@ void ListItemGroupModelNG::ParseResObjDividerStrokeWidth(const RefPtr<ResourceOb
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj("listItemGroup.divider.strokeWidth");
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
         CalcDimension result;
         if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
-            return;
+            result.Reset();
         }
-        V2::ItemDivider divider = GetDivider(frameNode);
+        V2::ItemDivider divider = GetDivider(AceType::RawPtr(node));
         divider.strokeWidth = result;
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, node);
     };
     pattern->AddResObj("listItemGroup.divider.strokeWidth", resObj, std::move(updateFunc));
 }
@@ -262,13 +265,21 @@ void ListItemGroupModelNG::ParseResObjDividerColor(const RefPtr<ResourceObject>&
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj("listItemGroup.divider.color");
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         Color result;
+        V2::ItemDivider divider = GetDivider(AceType::RawPtr(frameNode));
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
-            return;
+            auto pipeline = frameNode->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            auto listTheme = pipeline->GetTheme<ListTheme>();
+            if (listTheme) {
+                divider.color = listTheme->GetDividerColor();
+            }
+        } else {
+            divider.color = result;
         }
-        V2::ItemDivider divider = GetDivider(frameNode);
-        divider.color = result;
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
     };
     pattern->AddResObj("listItemGroup.divider.color", resObj, std::move(updateFunc));
@@ -282,17 +293,18 @@ void ListItemGroupModelNG::ParseResObjDividerStartMargin(const RefPtr<ResourceOb
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj("listItemGroup.divider.startMargin");
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         CalcDimension result;
-        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
-            return;
-        }
-        V2::ItemDivider divider = GetDivider(frameNode);
+        ResourceParseUtils::ParseResDimensionVp(resObj, result);
+        V2::ItemDivider divider = GetDivider(AceType::RawPtr(frameNode));
         divider.startMargin = result;
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
     };
     pattern->AddResObj("listItemGroup.divider.startMargin", resObj, std::move(updateFunc));
 }
+
 void ListItemGroupModelNG::ParseResObjDividerEndMargin(const RefPtr<ResourceObject>& resObj)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -301,12 +313,12 @@ void ListItemGroupModelNG::ParseResObjDividerEndMargin(const RefPtr<ResourceObje
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj("listItemGroup.divider.endMargin");
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         CalcDimension result;
-        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
-            return;
-        }
-        V2::ItemDivider divider = GetDivider(frameNode);
+        ResourceParseUtils::ParseResDimensionVp(resObj, result);
+        V2::ItemDivider divider = GetDivider(AceType::RawPtr(frameNode));
         divider.endMargin = result;
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
     };
@@ -320,12 +332,15 @@ void ListItemGroupModelNG::ParseResObjDividerStrokeWidth(FrameNode* frameNode, c
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj("listItemGroup.divider.strokeWidth");
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         CalcDimension result;
-        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
-            return;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result) || LessNotEqual(result.Value(), 0.0f) ||
+            result.Unit() == DimensionUnit::PERCENT) {
+            result.Reset();
         }
-        V2::ItemDivider divider = GetDivider(frameNode);
+        V2::ItemDivider divider = GetDivider(AceType::RawPtr(frameNode));
         divider.strokeWidth = result;
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
     };
@@ -339,13 +354,21 @@ void ListItemGroupModelNG::ParseResObjDividerColor(FrameNode* frameNode, const R
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj("listItemGroup.divider.color");
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         Color result;
+        V2::ItemDivider divider = GetDivider(AceType::RawPtr(frameNode));
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
-            return;
+            auto pipeline = frameNode->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            auto listTheme = pipeline->GetTheme<ListTheme>();
+            if (listTheme) {
+                divider.color = listTheme->GetDividerColor();
+            }
+        } else {
+            divider.color = result;
         }
-        V2::ItemDivider divider = GetDivider(frameNode);
-        divider.color = result;
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
     };
     pattern->AddResObj("listItemGroup.divider.color", resObj, std::move(updateFunc));
@@ -353,18 +376,20 @@ void ListItemGroupModelNG::ParseResObjDividerColor(FrameNode* frameNode, const R
 
 void ListItemGroupModelNG::ParseResObjDividerStartMargin(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
-
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj("listItemGroup.divider.startMargin");
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         CalcDimension result;
-        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
-            return;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result) || LessNotEqual(result.Value(), 0.0f) ||
+            result.Unit() == DimensionUnit::PERCENT) {
+            result.Reset();
         }
-        V2::ItemDivider divider = GetDivider(frameNode);
+        V2::ItemDivider divider = GetDivider(AceType::RawPtr(frameNode));
         divider.startMargin = result;
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
     };
@@ -378,12 +403,15 @@ void ListItemGroupModelNG::ParseResObjDividerEndMargin(FrameNode* frameNode, con
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj("listItemGroup.divider.endMargin");
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [frameNode](const RefPtr<ResourceObject>& resObj) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
         CalcDimension result;
-        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result)) {
-            return;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result) || LessNotEqual(result.Value(), 0.0f) ||
+            result.Unit() == DimensionUnit::PERCENT) {
+            result.Reset();
         }
-        V2::ItemDivider divider = GetDivider(frameNode);
+        V2::ItemDivider divider = GetDivider(AceType::RawPtr(frameNode));
         divider.endMargin = result;
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
     };

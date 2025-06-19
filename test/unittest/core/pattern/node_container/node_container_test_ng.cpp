@@ -1176,5 +1176,11 @@ HWTEST_F(NodeContainerTestNg, HandleTextureExport002, TestSize.Level1)
     auto surfaceIdGet = elementRegister->GetSurfaceIdByEmbedNode(AceType::RawPtr(exportNode));
     EXPECT_EQ(surfaceIdGet, 1U);
     EXPECT_TRUE(elementRegister->IsEmbedNode(AceType::RawPtr(exportNode)));
+    /**
+     * @tc.steps: step4: GetSurfaceIdByEmbedNode for nullptr.
+     * @tc.expected: get surfaceId equals 0U.
+     */
+    auto surfaceIdNull = elementRegister->GetSurfaceIdByEmbedNode(nullptr);
+    EXPECT_EQ(surfaceIdNull, 0U);
 }
 } // namespace OHOS::Ace::NG

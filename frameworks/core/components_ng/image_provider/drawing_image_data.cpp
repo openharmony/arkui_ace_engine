@@ -17,6 +17,7 @@
 
 #include "include/codec/SkCodec.h"
 #ifdef USE_NEW_SKIA
+#include "include/codec/SkEncodedImageFormat.h"
 #include "include/core/SkStream.h"
 #endif
 

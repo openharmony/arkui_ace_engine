@@ -103,6 +103,9 @@ public:
     static void SetScrollBarProxy(FrameNode* frameNode, const RefPtr<ScrollProxy>& proxy);
     static void CreateWithResourceObjSnapPaginations(
         FrameNode* frameNode, std::vector<RefPtr<ResourceObject>>& resObjs);
+private:
+    static bool CheckSnapPaginations(const std::vector<Dimension>& snapPaginations);
+    static bool HasResObj(const std::vector<RefPtr<ResourceObject>>& resObjs);
 };
 
 } // namespace OHOS::Ace::NG

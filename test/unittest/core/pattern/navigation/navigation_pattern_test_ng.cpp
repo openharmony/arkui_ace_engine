@@ -2037,5 +2037,8 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_018, TestSize.Level1)
     PerfMonitor::GetPerfMonitor()->End("ABILITY_OR_PAGE_SWITCH", PerfActionType::UNKNOWN_ACTION);
     ResSchedReport::GetInstance().ResSchedDataReport("ability_or_page_switch_end");
     EXPECT_EQ(ResSchedReport::GetInstance().keyEventCountMS, 156);
+    EXPECT_NE(ResSchedReport::GetInstance().loadPageOn_, true);
+    ResSchedReport::GetInstance().TriggerModuleSerializer();
+    EXPECT_EQ(ResSchedReport::GetInstance().loadPageOn_, true);
 }
 } // namespace OHOS::Ace::NG

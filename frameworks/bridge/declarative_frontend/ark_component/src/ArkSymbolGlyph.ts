@@ -98,6 +98,34 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
     }
   }
 
+  class SymbolShadowModifier extends ModifierWithKey<Optional<ShadowOptions>> {
+    constructor(value: Optional<ShadowOptions>) {
+      super(value);
+    }
+    static identity: Symbol = Symbol('symbolGlyphSymbolShadow');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        getUINativeModule().symbolGlyph.resetSymbolShadow(node);
+      } else {
+        getUINativeModule().symbolGlyph.setSymbolShadow(node, this.value);
+      }
+    }
+  }
+
+  class ShaderStyleModifier extends ModifierWithKey<ShaderStyle> {
+    constructor(value: ShaderStyle) {
+      super(value);
+    }
+    static identity: Symbol = Symbol('symbolGlyphShaderStyle');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        getUINativeModule().symbolGlyph.resetShaderStyle(node);
+      } else {
+        getUINativeModule().symbolGlyph.setShaderStyle(node, this.value);
+      }
+    }
+  }
+
   class SymbolMinFontScaleModifier extends ModifierWithKey<Optional<number | Resource>> {
     constructor(value: Optional<number | Resource>) {
       super(value);
@@ -184,6 +212,14 @@ class SymbolFontColorModifier extends ModifierWithKey<object> {
       symbolEffect.action = action;
       modifierWithKey(this._modifiersWithKeys, SymbolEffectModifier.identity, SymbolEffectModifier, symbolEffect);
       return this;
+    }
+    symbolShadow(value: SymbolShadow): SymbolGlyphAttribute {
+        modifierWithKey(this._modifiersWithKeys, SymbolShadowModifier.identity, SymbolShadowModifier, value);
+        return this;
+    }
+    shaderStyle(value: ShaderStyle): SymbolGlyphAttribute {
+        modifierWithKey(this._modifiersWithKeys, ShaderStyleModifier.identity, ShaderStyleModifier, value);
+        return this;
     }
   }
     

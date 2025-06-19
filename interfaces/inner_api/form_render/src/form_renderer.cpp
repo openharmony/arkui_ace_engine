@@ -16,7 +16,7 @@
 #include "form_renderer.h"
 
 #include "form_renderer_hilog.h"
-
+#include "form_renderer_event_report.h"
 #include "base/utils/utils.h"
 
 namespace OHOS {
@@ -357,7 +357,10 @@ void FormRenderer::OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInf
         isRecoverFormToHandleClickEvent);
     auto rsSurfaceNode = uiContent_->GetFormRootNode();
     HILOG_INFO("Form OnSurfaceCreate!");
-    formRendererDelegate_->OnSurfaceCreate(rsSurfaceNode, formJsInfo, newWant);
+    int32_t ret = formRendererDelegate_->OnSurfaceCreate(rsSurfaceNode, formJsInfo, newWant);
+    if (ret == ERR_OK) {
+        FormRenderEventReport::StopTimer(formJsInfo.formId);
+    }
 }
 
 void FormRenderer::OnSurfaceReuse(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
@@ -378,8 +381,11 @@ void FormRenderer::OnSurfaceReuse(const OHOS::AppExecFwk::FormJsInfo& formJsInfo
     OHOS::AAFwk::Want newWant;
     newWant.SetParam(FORM_RENDERER_DISPATCHER, formRendererDispatcherImpl_->AsObject());
     HILOG_INFO("Form OnSurfaceReuse.");
-    formRendererDelegate_->OnSurfaceReuse(rsSurfaceNode->GetId(), formJsInfo, newWant);
+    int32_t ret = formRendererDelegate_->OnSurfaceReuse(rsSurfaceNode->GetId(), formJsInfo, newWant);
     formRendererDelegate_->OnFormLinkInfoUpdate(cachedInfos_);
+    if (ret == ERR_OK) {
+        FormRenderEventReport::StopTimer(formJsInfo.formId);
+    }
 }
 
 void FormRenderer::OnSurfaceDetach()

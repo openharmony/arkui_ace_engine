@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,20 +72,18 @@ DoubleBindCallback JSViewPopups::ParseDoubleBindCallback(const JSCallbackInfo& i
     if (!arrowFunc->IsFunction()) {
         return {};
     }
-    auto vm = info.GetVm();
-    auto jsFunc = JSRef<JSFunc>::Cast(arrowFunc);
-    auto func = jsFunc->GetLocalHandle();
+    RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(arrowFunc));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto callback = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](const std::string& param) {
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch trycatch(vm);
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                        const std::string& param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         if (param != "true" && param != "false") {
             return;
         }
         PipelineContext::SetCallBackNode(node);
         bool newValue = StringToBool(param);
-        panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, newValue) };
-        func->Call(vm, func.ToLocal(), params, 1);
+        JSRef<JSVal> newJSVal = JSRef<JSVal>::Make(ToJSValue(newValue));
+        func->ExecuteJS(1, &newJSVal);
     };
     return callback;
 }
@@ -97,8 +95,10 @@ void SetPopupMessageOptions(const JSRef<JSObject> messageOptionsObj, const RefPt
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (JSViewAbstract::ParseJsColor(colorValue, textColor, resObj)) {
-            popupParam->SetTextColorResourceObject(resObj);
-            popupParam->SetTextColor(textColor);
+            if (popupParam) {
+                popupParam->SetTextColorResourceObject(resObj);
+                popupParam->SetTextColor(textColor);
+            }
         }
     } else {
         if (JSViewAbstract::ParseJsColor(colorValue, textColor)) {
@@ -234,23 +234,33 @@ void SetBorderLinearGradientColors(const JSRef<JSObject>& obj,
     }
 }
 
-void SetPopupBorderWidthInfo(const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam,
-    const int32_t& borderWidthParamFlag)
+void SetPopupBorderWidthInfo(
+    const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam, const int32_t& borderWidthParamFlag)
 {
     auto popupBorderWidthVal = popupObj->GetProperty(BORDER_WIDTH_TYPE[borderWidthParamFlag].c_str());
     if (popupBorderWidthVal->IsNull()) {
         return;
     }
     CalcDimension popupBorderWidth;
-    if (!JSViewAbstract::ParseJsDimensionVp(popupBorderWidthVal, popupBorderWidth)) {
-        return;
+    RefPtr<ResourceObject> widthResObj = nullptr;
+    if (SystemProperties::ConfigChangePerform()) {
+        if (!JSViewAbstract::ParseJsDimensionVp(popupBorderWidthVal, popupBorderWidth, widthResObj)) {
+            return;
+        }
+    } else {
+        if (!JSViewAbstract::ParseJsDimensionVp(popupBorderWidthVal, popupBorderWidth)) {
+            return;
+        }
     }
+
     if (popupBorderWidth.Value() < 0) {
         return;
     }
     if (OUTER_BORDER_WIDTH == borderWidthParamFlag) {
+        popupParam->SetOutlineWidthObject(widthResObj);
         popupParam->SetOutlineWidth(popupBorderWidth);
     } else {
+        popupParam->SetBorderWidthObject(widthResObj);
         popupParam->SetInnerBorderWidth(popupBorderWidth);
     }
 }
@@ -270,6 +280,123 @@ void SetPopupBorderLinearGradientInfo(const JSRef<JSObject>& popupObj, const Ref
             popupParam->SetInnerBorderLinearGradient(popupBorderLinearGradient);
         }
     }
+}
+
+void ParsePopupMask(const RefPtr<PopupParam>& popupParam, bool maskValueBool, JSRef<JSVal>& maskValue)
+{
+    if (!popupParam) {
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (JSViewAbstract::ParseJsBool(maskValue, maskValueBool, resObj)) {
+            popupParam->SetMaskResourceObject(resObj);
+            popupParam->SetBlockEvent(maskValueBool);
+        }
+    } else {
+        if (maskValue->IsBoolean()) {
+            popupParam->SetBlockEvent(maskValue->ToBoolean());
+        }
+    }
+}
+
+void ParsePopupChildWidth(const RefPtr<PopupParam>& popupParam, JSRef<JSVal>& childWidthVal)
+{
+    if (!popupParam) {
+        return;
+    }
+
+    CalcDimension width;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> widthResObj = nullptr;
+        if (JSViewAbstract::ParseJsDimensionVp(childWidthVal, width, widthResObj)) {
+            popupParam->SetWidthResourceObject(widthResObj);
+            if (width.Value() > 0) {
+                popupParam->SetChildWidth(width);
+            }
+        }
+    } else {
+        if (JSViewAbstract::ParseJsDimensionVp(childWidthVal, width)) {
+            if (width.Value() > 0) {
+                popupParam->SetChildWidth(width);
+            }
+        }
+    }
+}
+
+void ParseArrowWidth(const RefPtr<PopupParam>& popupParam, JSRef<JSVal>& arrowWidthVal)
+{
+    bool setError = true;
+    CalcDimension arrowWidth;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> arrowWidthhResObj = nullptr;
+        if (JSViewAbstract::ParseJsDimensionVp(arrowWidthVal, arrowWidth, arrowWidthhResObj)) {
+            popupParam->SetArrowWidthResourceObject(arrowWidthhResObj);
+            if (arrowWidth.Value() > 0 && arrowWidth.Unit() != DimensionUnit::PERCENT) {
+                popupParam->SetArrowWidth(arrowWidth);
+                setError = false;
+            }
+        }
+    } else {
+        if (JSViewAbstract::ParseJsDimensionVp(arrowWidthVal, arrowWidth)) {
+            if (arrowWidth.Value() > 0 && arrowWidth.Unit() != DimensionUnit::PERCENT) {
+                popupParam->SetArrowWidth(arrowWidth);
+                setError = false;
+            }
+        }
+    }
+
+    popupParam->SetErrorArrowWidth(setError);
+}
+
+void ParseArrowHeight(const RefPtr<PopupParam>& popupParam, JSRef<JSVal>& arrowHeightVal)
+{
+    bool setError = true;
+    CalcDimension arrowHeight;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> arrowHeighthResObj = nullptr;
+        if (JSViewAbstract::ParseJsDimensionVp(arrowHeightVal, arrowHeight, arrowHeighthResObj)) {
+            popupParam->SetArrowHeightResourceObject(arrowHeighthResObj);
+            if (arrowHeight.Value() > 0 && arrowHeight.Unit() != DimensionUnit::PERCENT) {
+                popupParam->SetArrowHeight(arrowHeight);
+                setError = false;
+            }
+        }
+    } else {
+        if (JSViewAbstract::ParseJsDimensionVp(arrowHeightVal, arrowHeight)) {
+            if (arrowHeight.Value() > 0 && arrowHeight.Unit() != DimensionUnit::PERCENT) {
+                popupParam->SetArrowHeight(arrowHeight);
+                setError = false;
+            }
+        }
+    }
+
+    popupParam->SetErrorArrowHeight(setError);
+}
+
+void ParseRadius(const RefPtr<PopupParam>& popupParam, JSRef<JSVal>& radiusVal)
+{
+    bool setError = true;
+    CalcDimension radius;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> radiusResObj = nullptr;
+        if (JSViewAbstract::ParseJsDimensionVp(radiusVal, radius, radiusResObj)) {
+            popupParam->SetRadiusResourceObject(radiusResObj);
+            if (radius.Value() >= 0) {
+                popupParam->SetRadius(radius);
+                setError = false;
+            }
+        }
+    } else {
+        if (JSViewAbstract::ParseJsDimensionVp(radiusVal, radius)) {
+            if (radius.Value() >= 0) {
+                popupParam->SetRadius(radius);
+                setError = false;
+            }
+        }
+    }
+
+    popupParam->SetErrorRadius(setError);
 }
 
 void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj,
@@ -356,19 +483,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
 
     JSRef<JSVal> maskValue = popupObj->GetProperty("mask");
     bool maskValueBool = false;
-    if (SystemProperties::ConfigChangePerform()) {
-        RefPtr<ResourceObject> resObj;
-        if (JSViewAbstract::ParseJsBool(maskValue, maskValueBool, resObj)) {
-            popupParam->SetMasResourceObject(resObj);
-            popupParam->SetBlockEvent(maskValueBool);
-        }
-    } else {
-        if (maskValue->IsBoolean()) {
-            if (popupParam) {
-                popupParam->SetBlockEvent(maskValue->ToBoolean());
-            }
-        }
-    }
+    ParsePopupMask(popupParam, maskValueBool, maskValue);
 
     if (maskValue->IsObject()) {
         auto maskObj = JSRef<JSObject>::Cast(maskValue);
@@ -378,7 +493,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             RefPtr<ResourceObject> resObj;
             if (JSViewAbstract::ParseJsColor(colorValue, maskColor, resObj)) {
                 popupParam->SetMaskColorResourceObject(resObj);
-                popupParam->SetTextColor(maskColor);
+                popupParam->SetMaskColor(maskColor);
             }
         } else {
             if (JSViewAbstract::ParseJsColor(colorValue, maskColor)) {
@@ -400,7 +515,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
         }
         if (popupParam) {
             auto onStateChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys,
-                node = targetNode](const std::string& param) {
+                                             node = targetNode](const std::string& param) {
                 JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("Popup.onStateChange");
                 PipelineContext::SetCallBackNode(node);
@@ -450,51 +565,22 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
 
     auto childWidthVal = popupObj->GetProperty("width");
     if (!childWidthVal->IsNull()) {
-        CalcDimension width;
-        if (JSViewAbstract::ParseJsDimensionVp(childWidthVal, width)) {
-            if (width.Value() > 0) {
-                popupParam->SetChildWidth(width);
-            }
-        }
+        ParsePopupChildWidth(popupParam, childWidthVal);
     }
 
     auto arrowWidthVal = popupObj->GetProperty("arrowWidth");
     if (!arrowWidthVal->IsNull()) {
-        bool setError = true;
-        CalcDimension arrowWidth;
-        if (JSViewAbstract::ParseJsDimensionVp(arrowWidthVal, arrowWidth)) {
-            if (arrowWidth.Value() > 0 && arrowWidth.Unit() != DimensionUnit::PERCENT) {
-                popupParam->SetArrowWidth(arrowWidth);
-                setError = false;
-            }
-        }
-        popupParam->SetErrorArrowWidth(setError);
+        ParseArrowWidth(popupParam, arrowWidthVal);
     }
 
     auto arrowHeightVal = popupObj->GetProperty("arrowHeight");
     if (!arrowHeightVal->IsNull()) {
-        bool setError = true;
-        CalcDimension arrowHeight;
-        if (JSViewAbstract::ParseJsDimensionVp(arrowHeightVal, arrowHeight)) {
-            if (arrowHeight.Value() > 0 && arrowHeight.Unit() != DimensionUnit::PERCENT) {
-                popupParam->SetArrowHeight(arrowHeight);
-                setError = false;
-            }
-        }
-        popupParam->SetErrorArrowHeight(setError);
+        ParseArrowHeight(popupParam, arrowHeightVal);
     }
 
     auto radiusVal = popupObj->GetProperty("radius");
     if (!radiusVal->IsNull()) {
-        bool setError = true;
-        CalcDimension radius;
-        if (JSViewAbstract::ParseJsDimensionVp(radiusVal, radius)) {
-            if (radius.Value() >= 0) {
-                popupParam->SetRadius(radius);
-                setError = false;
-            }
-        }
-        popupParam->SetErrorRadius(setError);
+        ParseRadius(popupParam, radiusVal);
     }
 
     auto defaultShadowStyle = GetPopupDefaultShadowStyle();
@@ -869,7 +955,6 @@ std::vector<NG::OptionParam> JSViewPopups::ParseBindOptionParam(const JSCallback
     auto paramArrayLength = paramArray->Length();
     std::vector<NG::OptionParam> params(paramArrayLength);
     // parse paramArray
-    auto vm = info.GetVm();
     for (size_t i = 0; i < paramArrayLength; ++i) {
         if (!paramArray->GetValueAt(i)->IsObject()) {
             return std::vector<NG::OptionParam>();
@@ -881,17 +966,16 @@ std::vector<NG::OptionParam> JSViewPopups::ParseBindOptionParam(const JSCallback
         if (!actionFunc->IsFunction()) {
             return params;
         }
-
-        auto jsFunc = JSRef<JSFunc>::Cast(actionFunc);
-        auto func = jsFunc->GetLocalHandle();
+        auto action = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(actionFunc));
         auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         // set onClick function
-        params[i].action = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode]() {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
+        params[i].action = [func = std::move(action), context = info.GetExecutionContext(), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context);
             ACE_SCORING_EVENT("menu.action");
             PipelineContext::SetCallBackNode(node);
-            func->Call(vm, func.ToLocal(), nullptr, 0);
+            if (func) {
+                func->Execute();
+            }
         };
         std::string iconPath;
         if (JSViewAbstract::ParseJsMedia(indexObject->GetProperty(static_cast<int32_t>(ArkUIIndex::ICON)), iconPath)) {
@@ -1220,57 +1304,55 @@ void JSViewPopups::ParseMenuParam(
     }
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onAppearValue = menuOptions->GetProperty("onAppear");
-    auto vm = info.GetVm();
     if (onAppearValue->IsFunction()) {
-        auto jsFunc = JSRef<JSFunc>::Cast(onAppearValue);
-        auto func = jsFunc->GetLocalHandle();
-        auto onAppear = [vm, func = panda::CopyableGlobal(vm, func), node = frameNode]() {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
+        RefPtr<JsFunction> jsOnAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAppearValue));
+        auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc), node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onAppear");
             PipelineContext::SetCallBackNode(node);
-            func->Call(vm, func.ToLocal(), nullptr, 0);
+            func->Execute();
         };
         menuParam.onAppear = std::move(onAppear);
     }
 
     auto onDisappearValue = menuOptions->GetProperty("onDisappear");
     if (onDisappearValue->IsFunction()) {
-        auto jsFunc = JSRef<JSFunc>::Cast(onDisappearValue);
-        auto func = jsFunc->GetLocalHandle();
-        auto onDisappear = [vm, func = panda::CopyableGlobal(vm, func), node = frameNode]() {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
+        RefPtr<JsFunction> jsOnDisAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDisappearValue));
+        auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc),
+                               node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("onDisappear");
             PipelineContext::SetCallBackNode(node);
-            func->Call(vm, func.ToLocal(), nullptr, 0);
+            func->Execute();
         };
         menuParam.onDisappear = std::move(onDisappear);
     }
     auto aboutToAppearValue = menuOptions->GetProperty("aboutToAppear");
     if (aboutToAppearValue->IsFunction()) {
-        auto jsFunc = JSRef<JSFunc>::Cast(aboutToAppearValue);
-        auto func = jsFunc->GetLocalHandle();
-        auto aboutToAppear = [vm, func = panda::CopyableGlobal(vm, func), node = frameNode]() {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
+        RefPtr<JsFunction> jsAboutToAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(aboutToAppearValue));
+        auto aboutToAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToAppearFunc),
+                                 node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("aboutToAppear");
             PipelineContext::SetCallBackNode(node);
-            func->Call(vm, func.ToLocal(), nullptr, 0);
+            func->Execute();
         };
         menuParam.aboutToAppear = std::move(aboutToAppear);
     }
 
     auto aboutToDisAppearValue = menuOptions->GetProperty("aboutToDisappear");
     if (aboutToDisAppearValue->IsFunction()) {
-        auto jsFunc = JSRef<JSFunc>::Cast(aboutToDisAppearValue);
-        auto func = jsFunc->GetLocalHandle();
-        auto aboutToDisappear = [vm, func = panda::CopyableGlobal(vm, func), node = frameNode]() {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
+        RefPtr<JsFunction> jsAboutToDisAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(aboutToDisAppearValue));
+        auto aboutToDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsAboutToDisAppearFunc),
+                                    node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("aboutToDisappear");
             PipelineContext::SetCallBackNode(node);
-            func->Call(vm, func.ToLocal(), nullptr, 0);
+            func->Execute();
         };
         menuParam.aboutToDisappear = std::move(aboutToDisappear);
     }
@@ -1421,16 +1503,15 @@ void ParseBindContentOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>&
             ParsePreviewBorderRadiusParam(menuContentOptions, menuParam);
         }
     } else {
-        auto vm = info.GetVm();
-        auto jsFunc = JSRef<JSFunc>::Cast(preview);
-        auto func = jsFunc->GetLocalHandle();
+        previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
+        CHECK_NULL_VOID(previewBuilderFunc);
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        previewBuildFunc = [vm, func = panda::CopyableGlobal(vm, func), node = frameNode]() {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch tryCatch(vm);
+        previewBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(previewBuilderFunc),
+                               node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("BuildContextMenuPreviwer");
             PipelineContext::SetCallBackNode(node);
-            func->Call(vm, func.ToLocal(), nullptr, 0);
+            func->Execute();
         };
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
         ParseContentPreviewAnimationOptionsParam(info, menuContentOptions, menuParam);
@@ -1646,22 +1727,21 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     if (!builder->IsFunction()) {
         return;
     }
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
 
-    auto vm = info.GetVm();
-    auto jsFunc = JSRef<JSFunc>::Cast(builder);
-    auto func = jsFunc->GetLocalHandle();
     ResponseType responseType = ResponseType::LONG_PRESS;
     if (!info[NUM_ZERO]->IsBoolean() && info.Length() >= PARAMETER_LENGTH_SECOND && info[NUM_FIRST]->IsNumber()) {
         auto response = info[NUM_FIRST]->ToNumber<int32_t>();
         responseType = static_cast<ResponseType>(response);
     }
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    std::function<void()> buildFunc = [vm, func = panda::CopyableGlobal(vm, func), node = frameNode]() {
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch tryCatch(vm);
+    std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
+                                          node = frameNode]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("BuildContextMenu");
         PipelineContext::SetCallBackNode(node);
-        func->Call(vm, func.ToLocal(), nullptr, 0);
+        func->Execute();
     };
 
     menuParam.previewMode = MenuPreviewMode::NONE;
@@ -1699,17 +1779,14 @@ void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
     if (!builder->IsFunction()) {
         return;
     }
-
-    auto vm = info.GetVm();
-    auto jsFunc = JSRef<JSFunc>::Cast(builder);
-    auto func = jsFunc->GetLocalHandle();
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto buildFunc = [vm, func = panda::CopyableGlobal(vm, func), node = frameNode]() {
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch tryCatch(vm);
+    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = frameNode]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("BindContentCover");
         PipelineContext::SetCallBackNode(node);
-        func->Call(vm, func.ToLocal(), nullptr, 0);
+        func->Execute();
     };
 
     // parse ModalTransition
@@ -1809,16 +1886,14 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     auto builder = obj->GetProperty("builder");
     if (!builder->IsFunction())
         return;
-
-    auto vm = info.GetVm();
-    auto func = JSRef<JSFunc>::Cast(builder)->GetLocalHandle();
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto buildFunc = [vm, func = panda::CopyableGlobal(vm, func), node = frameNode]() {
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch tryCatch(vm);
+    auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = frameNode]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("BindSheet");
         PipelineContext::SetCallBackNode(node);
-        func->Call(vm, func.ToLocal(), nullptr, 0);
+        func->Execute();
     };
     // parse SheetStyle and callbacks
     NG::SheetStyle sheetStyle;
@@ -2121,7 +2196,7 @@ void JSViewAbstract::ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::S
     }
     sheetStyle.detentSelection = sheetStruct;
 }
- 
+
 bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents)
 {
     if (!args->IsArray()) {
@@ -2418,17 +2493,15 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
         if (!builder->IsFunction()) {
             return;
         }
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
 
-        auto vm = info.GetVm();
-        auto jsFunc = JSRef<JSFunc>::Cast(builder);
-        auto func = jsFunc->GetLocalHandle();
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        auto buildFunc = [vm, func = panda::CopyableGlobal(vm, func), node = frameNode]() {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
+        CHECK_NULL_VOID(builderFunc);
+        auto buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc), node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("BuildMenu");
             auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            func->Call(vm, func.ToLocal(), nullptr, 0);
+            func->Execute();
         };
         ViewAbstractModel::GetInstance()->BindMenu({}, std::move(buildFunc), menuParam);
     }
@@ -2510,31 +2583,26 @@ void AppearDialogEvent(const JSCallbackInfo& info, DialogProperties& dialogPrope
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    auto vm = info.GetVm();
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidAppear = paramObject->GetProperty("onDidAppear");
     if (!onDidAppear->IsUndefined() && onDidAppear->IsFunction()) {
-        auto jsFunc = JSRef<JSFunc>::Cast(onDidAppear);
-        auto func = jsFunc->GetLocalHandle();
-        auto didAppearId = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode]() {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
+        auto jsFunc = AceType::MakeRefPtr<JsWeakFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidAppear));
+        auto didAppearId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Popups.onDidAppear");
             PipelineContext::SetCallBackNode(node);
-            func->Call(vm, func.ToLocal(), nullptr, 0);
+            func->Execute();
         };
         dialogProperties.onDidAppear = std::move(didAppearId);
     }
     auto onWillAppear = paramObject->GetProperty("onWillAppear");
     if (!onWillAppear->IsUndefined() && onWillAppear->IsFunction()) {
-        auto jsFunc = JSRef<JSFunc>::Cast(onWillAppear);
-        auto func = jsFunc->GetLocalHandle();
-        auto willAppearId = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode]() {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
+        auto jsFunc = AceType::MakeRefPtr<JsWeakFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillAppear));
+        auto willAppearId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Popups.onWillAppear");
             PipelineContext::SetCallBackNode(node);
-            func->Call(vm, func.ToLocal(), nullptr, 0);
+            func->Execute();
         };
         dialogProperties.onWillAppear = std::move(willAppearId);
     }
@@ -2545,32 +2613,27 @@ void DisappearDialogEvent(const JSCallbackInfo& info, DialogProperties& dialogPr
     if (!info[0]->IsObject()) {
         return;
     }
-    auto vm = info.GetVm();
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onDidDisappear = paramObject->GetProperty("onDidDisappear");
     if (!onDidDisappear->IsUndefined() && onDidDisappear->IsFunction()) {
-        auto jsFunc = JSRef<JSFunc>::Cast(onDidDisappear);
-        auto func = jsFunc->GetLocalHandle();
-        auto didDisappearId = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode]() {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
+        auto jsFunc = AceType::MakeRefPtr<JsWeakFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDidDisappear));
+        auto didDisappearId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Popups.onDidDisappear");
             PipelineContext::SetCallBackNode(node);
-            func->Call(vm, func.ToLocal(), nullptr, 0);
+            func->Execute();
         };
         dialogProperties.onDidDisappear = std::move(didDisappearId);
     }
     auto onWillDisappear = paramObject->GetProperty("onWillDisappear");
     if (!onWillDisappear->IsUndefined() && onWillDisappear->IsFunction()) {
-        auto jsFunc = JSRef<JSFunc>::Cast(onWillDisappear);
-        auto func = jsFunc->GetLocalHandle();
-        auto willDisappearId = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode]() {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
+        auto jsFunc = AceType::MakeRefPtr<JsWeakFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDisappear));
+        auto willDisappearId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Popups.onWillDisappear");
             PipelineContext::SetCallBackNode(node);
-            func->Call(vm, func.ToLocal(), nullptr, 0);
+            func->Execute();
         };
         dialogProperties.onWillDisappear = std::move(willDisappearId);
     }

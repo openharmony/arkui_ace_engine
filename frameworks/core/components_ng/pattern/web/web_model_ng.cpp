@@ -239,7 +239,7 @@ void WebModelNG::SetOnRequestFocus(std::function<void(const BaseEventInfo* info)
             instanceId = Container::CurrentIdSafely();
         }
         ContainerScope scope(instanceId);
-        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+        auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostAsyncEvent([info, func]() { func(info.get()); }, "ArkUIWebRequestFocusCallback");
     };
@@ -328,7 +328,7 @@ void WebModelNG::SetOnKeyEvent(std::function<void(KeyEventInfo& keyEventInfo)>&&
             instanceId = Container::CurrentIdSafely();
         }
         ContainerScope scope(instanceId);
-        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+        auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostSyncEvent([&keyEventInfo, func]() { func(keyEventInfo); }, "ArkUIWebKeyEventCallback");
     };
@@ -639,7 +639,7 @@ void WebModelNG::SetOnMouseEvent(std::function<void(MouseInfo& info)>&& jsCallba
             instanceId = Container::CurrentIdSafely();
         }
         ContainerScope scope(instanceId);
-        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+        auto context = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->PostSyncEvent([&info, func]() { func(info); }, "ArkUIWebMouseEventCallback");
     };
@@ -940,7 +940,7 @@ void WebModelNG::SetOnInterceptKeyEventCallback(std::function<bool(KeyEventInfo&
             instanceId = Container::CurrentIdSafely();
         }
         ContainerScope scope(instanceId);
-        auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+        auto context = PipelineBase::GetCurrentContext();
         bool result = false;
         CHECK_NULL_RETURN(context, result);
         context->PostSyncEvent(
@@ -1239,6 +1239,13 @@ void WebModelNG::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
     webPattern->JavaScriptOnDocumentEnd(scriptItems);
 }
 
+void WebModelNG::SetDefaultFileSelectorShow(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->SetDefaultFileSelectorShowCallback(std::move(jsCallback));
+}
+
 void WebModelNG::SetPermissionClipboard(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -1255,11 +1262,12 @@ void WebModelNG::SetOpenAppLinkFunction(std::function<void(const std::shared_ptr
     webPattern->SetOnOpenAppLinkCallback(std::move(jsCallback));
 }
 
-void WebModelNG::SetDefaultFileSelectorShow(std::function<void(const std::shared_ptr<BaseEventInfo>&)>&& jsCallback)
+void WebModelNG::SetWebDetachFunction(std::function<void(int32_t)>&& jsCallback)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
-    webPattern->SetDefaultFileSelectorShowCallback(std::move(jsCallback));
+
+    webPattern->SetSetWebDetachCallback(std::move(jsCallback));
 }
 
 void WebModelNG::SetTextAutosizing(bool isTextAutosizing)
@@ -1295,6 +1303,15 @@ void WebModelNG::SetRenderProcessRespondingId(std::function<void(const BaseEvent
     webEventHub->SetOnRenderProcessRespondingEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnViewportFitChangedEvent(std::move(uiCallback));
+}
+
 void WebModelNG::SetSelectionMenuOptions(const WebMenuOptionsParam& webMenuOption)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -1311,13 +1328,13 @@ void WebModelNG::SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMen
         std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 
-void WebModelNG::SetViewportFitChangedId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+void WebModelNG::SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     auto func = jsCallback;
     auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
-    webEventHub->SetOnViewportFitChangedEvent(std::move(uiCallback));
+    webEventHub->SetOnAdsBlockedEvent(std::move(uiCallback));
 }
 
 void WebModelNG::SetOnInterceptKeyboardAttach(std::function<WebKeyboardOption(const BaseEventInfo* info)>&& jsCallback)
@@ -1329,15 +1346,6 @@ void WebModelNG::SetOnInterceptKeyboardAttach(std::function<WebKeyboardOption(co
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnInterceptKeyboardAttachEvent(std::move(uiCallback));
-}
-
-void WebModelNG::SetAdsBlockedEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
-{
-    auto func = jsCallback;
-    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
-    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
-    CHECK_NULL_VOID(webEventHub);
-    webEventHub->SetOnAdsBlockedEvent(std::move(uiCallback));
 }
 
 void WebModelNG::SetUpdateInstanceIdCallback(std::function<void(int32_t)>&& callback)
@@ -1376,6 +1384,13 @@ void WebModelNG::SetOptimizeParserBudgetEnabled(bool enable)
     webPattern->UpdateOptimizeParserBudgetEnabled(enable);
 }
 
+void WebModelNG::SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateEnableFollowSystemFontWeight(enableFollowSystemFontWeight);
+}
+
 void WebModelNG::SetWebMediaAVSessionEnabled(bool isEnabled)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -1395,13 +1410,6 @@ void WebModelNG::SetDataDetectorConfig(const TextDetectConfig& config)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateDataDetectorConfig(config);
-}
-
-void WebModelNG::SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
-{
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateEnableFollowSystemFontWeight(enableFollowSystemFontWeight);
 }
 
 void WebModelNG::SetJsEnabled(FrameNode* frameNode, bool isJsEnabled)
@@ -1580,6 +1588,7 @@ void WebModelNG::InitialScale(FrameNode* frameNode, float scale)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateInitialScale(scale);
 }
+
 void WebModelNG::SetGeolocationAccessEnabled(FrameNode* frameNode, bool isGeolocationAccessEnabled)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1712,7 +1721,6 @@ void WebModelNG::SetWebSansSerifFont(FrameNode* frameNode, const std::string& sa
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateWebSansSerifFont(sansSerifFontFamily);
 }
-
 
 void WebModelNG::SetWebFixedFont(FrameNode* frameNode, const std::string& fixedFontFamily)
 {
@@ -1936,7 +1944,8 @@ void WebModelNG::SetCopyOptionMode(FrameNode* frameNode, CopyOptions mode)
     webPattern->UpdateCopyOptionMode(static_cast<int32_t>(mode));
 }
 
-void WebModelNG::SetRenderProcessNotRespondingId(FrameNode* frameNode,  std::function<void(const BaseEventInfo* info)>&& jsCallback)
+void WebModelNG::SetRenderProcessNotRespondingId(
+    FrameNode* frameNode,  std::function<void(const BaseEventInfo* info)>&& jsCallback)
 {
     CHECK_NULL_VOID(frameNode);
     auto func = jsCallback;
@@ -2001,6 +2010,14 @@ void WebModelNG::SetOnRefreshAccessedHistory(
     webEventHub->SetOnRefreshAccessedHistoryEvent(std::move(uiCallback));
 }
 
+void WebModelNG::SetBypassVsyncCondition(WebBypassVsyncCondition condition)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebModelNG::SetBypassVsyncCondition condition:%{public}d", condition);
+    webPattern->UpdateBypassVsyncCondition(condition);
+}
+
 void WebModelNG::SetOnNavigationEntryCommitted(
     FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& navigationEntryCommitted)
 {
@@ -2008,14 +2025,6 @@ void WebModelNG::SetOnNavigationEntryCommitted(
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnNavigationEntryCommittedEvent(std::move(navigationEntryCommitted));
-}
-
-void WebModelNG::SetBypassVsyncCondition(WebBypassVsyncCondition condition)
-{
-    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
-    CHECK_NULL_VOID(webPattern);
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebModelNG::SetBypassVsyncCondition condition:%{public}d", condition);
-    webPattern->UpdateBypassVsyncCondition(condition);
 }
 
 void WebModelNG::SetOnSearchResultReceive(
@@ -2119,7 +2128,8 @@ void WebModelNG::SetWindowExitEventId(FrameNode* frameNode, std::function<void(c
     webEventHub->SetOnWindowExitEvent(std::move(uiCallback));
 }
 
-void WebModelNG::SetOnAlert(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType)
+void WebModelNG::SetOnAlert(
+    FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType)
 {
     CHECK_NULL_VOID(frameNode);
     auto func = jsCallback;
@@ -2132,7 +2142,8 @@ void WebModelNG::SetOnAlert(FrameNode* frameNode, std::function<bool(const BaseE
     webEventHub->SetOnCommonDialogEvent(std::move(uiCallback), static_cast<DialogEventType>(dialogEventType));
 }
 
-void WebModelNG::SetOnConfirm(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType)
+void WebModelNG::SetOnConfirm(
+    FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType)
 {
     CHECK_NULL_VOID(frameNode);
     auto func = jsCallback;
@@ -2145,7 +2156,8 @@ void WebModelNG::SetOnConfirm(FrameNode* frameNode, std::function<bool(const Bas
     webEventHub->SetOnCommonDialogEvent(std::move(uiCallback), static_cast<DialogEventType>(dialogEventType));
 }
 
-void WebModelNG::SetOnPrompt(FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType)
+void WebModelNG::SetOnPrompt(
+    FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& jsCallback, int dialogEventType)
 {
     CHECK_NULL_VOID(frameNode);
     auto func = jsCallback;
@@ -2311,5 +2323,20 @@ void WebModelNG::SetOnDataResubmitted(
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnDataResubmittedEvent(std::move(dataResubmittedId));
+}
+
+void WebModelNG::SetGestureFocusMode(GestureFocusMode mode)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateGestureFocusMode(mode);
+}
+
+void WebModelNG::SetGestureFocusMode(FrameNode* frameNode, GestureFocusMode mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateGestureFocusMode(mode);
 }
 } // namespace OHOS::Ace::NG

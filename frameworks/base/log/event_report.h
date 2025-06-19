@@ -18,6 +18,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/macros.h"
@@ -250,11 +251,15 @@ public:
     static void FrameRateDurationsStatistics(int32_t expectedRate, const std::string& scene, NG::SceneStatus status);
     static void AddFrameRateDuration(int32_t frameRate, int64_t duration);
 
+    static void StartFormModifyTimeoutReportTimer(int64_t formId, const std::string &bundleName,
+        const std::string &formName);
+    static void StopFormModifyTimeoutReportTimer(int64_t formId);
 private:
     static void SendEventInner(const EventInfo& eventInfo);
     static FRCSceneFpsInfo curFRCSceneFpsInfo_;
     static int64_t calTime_;
     static int32_t calFrameRate_;
+    static std::unordered_map<int64_t, int32_t> formEventTimerMap_;
 };
 
 } // namespace OHOS::Ace
