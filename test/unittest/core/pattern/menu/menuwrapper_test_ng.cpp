@@ -1519,6 +1519,11 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg032, TestSize.Level1)
     wrapperPattern->isShowInSubWindow_ = false;
     wrapperPattern->isFirstShow_ = false;
     EXPECT_FALSE(wrapperPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, configDirtySwap));
+    layoutProperty->UpdateShowInSubWindow(true);
+    wrapperPattern->isOpenMenu_ = true;
+    wrapperPattern->menuStatus_ = MenuStatus::ON_SHOW_ANIMATION;
+    wrapperNode->onMainTree_ = true;
+    EXPECT_FALSE(wrapperPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, configDirtySwap));
 }
 
 /**

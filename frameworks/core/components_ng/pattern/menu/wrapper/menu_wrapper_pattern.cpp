@@ -754,7 +754,7 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     CHECK_NULL_RETURN(layoutProperty, false);
     isShowInSubWindow_ = layoutProperty->GetShowInSubWindowValue(true);
     if (host->IsOnMainTree() &&
-        ((IsContextMenu() && !IsHide()) || ((expandDisplay && isShowInSubWindow_) && !IsHide()) ||
+        ((IsContextMenu() && !IsHide()) || (((expandDisplay || isOpenMenu_) && isShowInSubWindow_) && !IsHide()) ||
             GetIsSelectOverlaySubWindowWrapper())) {
         SetHotAreas(dirty);
     }
@@ -774,7 +774,7 @@ bool MenuWrapperPattern::IsNeedSetHotAreas(const RefPtr<LayoutWrapper>& layoutWr
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, false);
     bool menuNotNeedsHotAreas = (layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) &&
-                                !(theme->GetExpandDisplay() && isShowInSubWindow_);
+                                !((theme->GetExpandDisplay() || isOpenMenu_) && isShowInSubWindow_);
     if (menuNotNeedsHotAreas && !GetIsSelectOverlaySubWindowWrapper()) {
         return false;
     }
