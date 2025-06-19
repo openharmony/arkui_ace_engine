@@ -53,8 +53,7 @@
     "keywords": [],
     "dependencies": {
         "@koalaui/common": "file:../common",
-        "@koalaui/compat": "file:../compat",
-        "@koalaui/harness": "file:../harness"
+        "@koalaui/compat": "file:../compat"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^5.20.0",

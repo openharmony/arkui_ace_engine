@@ -6,7 +6,6 @@
         "paths": {
             "@koalaui/common": ["../../../incremental/common/src"],
             "@koalaui/compat": ["../../../incremental/compat/src/arkts"],
-            "@koalaui/harness": ["../../../incremental/harness/src/arkts"],
             "@koalaui/runtime": ["../../../incremental/runtime/src"],
             "@koalaui/runtime/annotations": ["../../../incremental/runtime/annotations"]
         },

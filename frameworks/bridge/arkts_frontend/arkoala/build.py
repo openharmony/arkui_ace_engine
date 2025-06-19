@@ -359,9 +359,6 @@ def pre_processing(path: Paths):
     target_path = os.path.join(
         path.project_path, "arkoala-arkts", "arkui-ohos-preprocess")
 
-    if os.path.exists(target_path):
-        shutil.rmtree(target_path)
-
     def ignore_build_path(src, names):
         return ["build"] if "build" in names else []
 

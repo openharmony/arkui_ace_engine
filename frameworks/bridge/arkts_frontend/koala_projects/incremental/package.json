@@ -5,9 +5,7 @@
         "build-common",
         "compat",
         "common",
-        "harness",
         "runtime",
-        "demo-playground",
         "compiler-plugin"
     ],
     "devDependencies": {
