@@ -58,9 +58,9 @@ import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 import { hookStateStyleImpl } from "../handwritten/ArkStateStyle"
 import { rememberMutableState } from '@koalaui/runtime'
 import { hookDrawModifierInvalidateImpl, hookDrawModifierAttributeImpl } from "../handwritten/ArkDrawModifierImpl"
-import { hookDragPreview, hookAllowDropAttribute, hookRegisterOnDragStartImpl } from "../handwritten/ArkDragDrop"
+import { hookDragPreview, hookAllowDropAttribute, hookRegisterOnDragStartImpl, hookOnDrop, hookDragEventStartDataLoading } from "../handwritten/ArkDragDrop"
 import { ArkUIAniModule } from "arkui.ani"
-import { PointerStyle, UnifiedData, Summary, PixelMap, UniformDataType } from "#external"
+import { PointerStyle, UnifiedData, Summary, PixelMap, UniformDataType, DataSyncOptions } from "#external"
 import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookCommonMethodParallelGestureImpl, hookCommonMethodPriorityGestureImpl } from "../handwritten/CommonHandWritten"
 export interface ICurve {
     interpolate(fraction: number): number
@@ -844,8 +844,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         return
     }
     public startDataLoading(options: DataSyncOptions): string {
-        const options_casted = options as (DataSyncOptions)
-        return this.startDataLoading_serialize(options_casted)
+        return hookDragEventStartDataLoading(this.peer!.ptr, options)
     }
     private getDragBehavior(): DragBehavior {
         return this.getDragBehavior_serialize()
@@ -7625,9 +7624,7 @@ export enum DragBehavior {
     COPY = 0,
     MOVE = 1
 }
-export interface DataSyncOptions {
-    _DataSyncOptionsStub: string;
-}
+
 export enum DragResult {
     UNKNOWN = -1,
     DRAG_SUCCESSFUL = 0,
@@ -10575,20 +10572,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public onDrop(eventCallback: ((event: DragEvent,extraParams?: string) => void) | undefined | OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
         if (this.checkPriority("onDrop")) {
-            const eventCallback_type = runtimeType(eventCallback)
-            const dropOptions_type = runtimeType(dropOptions)
-            if ((RuntimeType.FUNCTION == eventCallback_type) || (RuntimeType.UNDEFINED == eventCallback_type)) {
-                const value_casted = eventCallback as (((event: DragEvent,extraParams?: string) => void) | undefined)
-                this.getPeer()?.onDrop0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.FUNCTION == eventCallback_type) || (RuntimeType.UNDEFINED == eventCallback_type)) {
-                const eventCallback_casted = eventCallback as (OnDragEventCallback | undefined)
-                const dropOptions_casted = dropOptions as (DropOptions)
-                this.getPeer()?.onDrop1Attribute(eventCallback_casted, dropOptions_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            hookOnDrop(this, eventCallback, dropOptions)
         }
         return this
     }

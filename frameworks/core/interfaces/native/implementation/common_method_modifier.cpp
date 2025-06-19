@@ -4032,9 +4032,27 @@ void OnDrop1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(eventCallback);
-    //auto convValue = Converter::OptConvert<type>(eventCallback); // for enums
-    //CommonMethodModelNG::SetOnDrop1(frameNode, convValue);
+    auto optValue = Converter::GetOptPtr(eventCallback);
+    if (!optValue) {
+        return;
+    }
+    auto onDrop = [callback = CallbackHelper(*optValue)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent,
+        const std::string& extraParams) {
+        CHECK_NULL_VOID(dragEvent);
+        Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
+        callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+    };
+    ViewAbstract::SetOnDrop(frameNode, std::move(onDrop));
+
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto optValueDropOption = Converter::GetOptPtr(dropOptions);
+    if (!optValueDropOption) {
+        eventHub->SetDisableDataPrefetch(false);
+        return;
+    }
+    auto disableDataPrefetch = Converter::OptConvert<bool>(optValueDropOption->disableDataPrefetch).value_or(false);
+    eventHub->SetDisableDataPrefetch(disableDataPrefetch);
 }
 void OnDragEndImpl(Ark_NativePointer node,
                    const Opt_Callback_DragEvent_String_Void* value)
