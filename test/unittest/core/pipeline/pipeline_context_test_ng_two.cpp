@@ -2448,5 +2448,23 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg402, TestSize.Level1)
     node->DetachContext(false);
     EXPECT_FALSE(context_->attachedNodeSet_.count(AceType::WeakClaim(AceType::RawPtr(node))));
 }
+
+/**
+ * @tc.name: PipelineContextTestNg300
+ * @tc.desc: Test the function NotifyColorModeChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg403, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Call Function NotifyColorModeChange.
+     * @tc.expected: context_->instanceId_ == Container::CurrentIdSafely().
+     */
+    ASSERT_NE(context_, nullptr);
+    uint32_t colorMode = static_cast<uint32_t>(ColorMode::LIGHT);
+    context_->rootNode_->isDarkMode_ = false;
+    context_->NotifyColorModeChange(colorMode);
+    EXPECT_EQ(context_->instanceId_, Container::CurrentIdSafely());
+}
 } // namespace NG
 } // namespace OHOS::Ace

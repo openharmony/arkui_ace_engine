@@ -5913,20 +5913,22 @@ void PipelineContext::NotifyColorModeChange(uint32_t colorMode)
     AnimationUtils::Animate(
         option,
         [weakPipelineContext = WeakClaim(this), weak = WeakPtr<FrameNode>(rootNode_),
-            colorMode, rootColorMode = GetColorMode()]() {
+            colorMode, rootColorMode = GetColorMode(), instanceId = instanceId_]() {
             auto pipeline = weakPipelineContext.Upgrade();
             CHECK_NULL_VOID(pipeline);
             auto rootNode = weak.Upgrade();
             CHECK_NULL_VOID(rootNode);
+            ContainerScope scope(instanceId);
             pipeline->SetIsReloading(true);
             rootNode->SetDarkMode(rootColorMode == ColorMode::DARK);
             rootNode->NotifyColorModeChange(colorMode);
             pipeline->SetIsReloading(false);
             pipeline->FlushUITasks();
         },
-        [weak = WeakClaim(this)]() {
+        [weak = WeakClaim(this), instanceId = instanceId_]() {
             auto pipeline = weak.Upgrade();
             CHECK_NULL_VOID(pipeline);
+            ContainerScope scope(instanceId);
             pipeline->OnFlushReloadFinish();
         });
     CHECK_NULL_VOID(stageManager_);
