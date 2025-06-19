@@ -43,6 +43,7 @@ ohos_shared_library("ace_form_render") {
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_proxy.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_stub.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_group.cpp",
+    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_event_report.cpp",
   ]
 
   configs = [
@@ -69,6 +70,8 @@ ohos_shared_library("ace_form_render") {
     "ipc:ipc_core",
     "napi:ace_napi",
     "window_manager:libwm",
+    "hisysevent:libhisysevent",
+    "hicollie:libhicollie",
   ]
 
   subsystem_name = ace_engine_subsystem

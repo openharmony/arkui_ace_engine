@@ -18,6 +18,8 @@
 #include <unistd.h>
 
 #include "hisysevent.h"
+#include "xcollie/xcollie.h"
+#include "xcollie/xcollie_define.h"
 
 #include "core/common/ace_engine.h"
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
@@ -29,7 +31,7 @@ namespace OHOS::Ace {
     FRCSceneFpsInfo EventReport::curFRCSceneFpsInfo_;
     int64_t EventReport::calTime_ = 0;
     int32_t EventReport::calFrameRate_ = 0;
-
+    std::unordered_map<int64_t, int32_t> EventReport::formEventTimerMap_ = {};
 namespace {
 
 constexpr char EVENT_KEY_ERROR_TYPE[] = "ERROR_TYPE";
@@ -124,6 +126,12 @@ constexpr char EVENT_KEY_DRAG_GAIN[] = "DRAG_GAIN";
 constexpr char EVENT_KEY_MAX_FLING_VELOCITY[] = "MAX_FLING_VELOCITY";
 constexpr char EVENT_KEY_SLIP_FACTOR[] = "SLIP_FACTOR";
 constexpr char EVENT_KEY_FRICTION[] = "FRICTION";
+constexpr char EVENT_KEY_FORM_ID[] = "FORM_ID";
+constexpr char EVENT_KEY_ERROR_NAME[] = "ERROR_NAME";
+constexpr char EVENT_KEY_ERROR_CODE[] = "ERROR_CODE";
+constexpr char FORM_NODE_ERROR[] = "FORM_NODE_ERROR";
+constexpr int32_t WAIT_MODIFY_TIMEOUT = 10;
+constexpr int32_t WAIT_MODIFY_FAILED = 1;
 
 void StrTrim(std::string& str)
 {
@@ -654,4 +662,41 @@ void EventReport::ReportPageSlidInfo(NG::SlidInfo &slidInfo)
         EVENT_KEY_SLIP_FACTOR, slidInfo.slipFactor, EVENT_KEY_FRICTION,
         slidInfo.friction);
 }
+
+void EventReport::StartFormModifyTimeoutReportTimer(int64_t formId, const std::string &bundleName,
+    const std::string &formName)
+{
+    auto timeoutCallback = [formId, bundleName, formName](void *) {
+        LOGE("ModifyTimeout, cardId: %{public}" PRId64, formId);
+        HiSysEventWrite(
+            OHOS::HiviewDFX::HiSysEvent::Domain::FORM_MANAGER,
+            "FORM_ERROR",
+            OHOS::HiviewDFX::HiSysEvent::EventType::FAULT,
+            EVENT_KEY_FORM_ID, formId,
+            EVENT_KEY_BUNDLE_NAME, bundleName,
+            EVENT_KEY_FORM_NAME, formName,
+            EVENT_KEY_ERROR_NAME, FORM_NODE_ERROR,
+            EVENT_KEY_ERROR_TYPE, WAIT_MODIFY_FAILED,
+            EVENT_KEY_ERROR_CODE, 0);
+    };
+    const std::string taskName = "FormPattern_WaitModifyDone_" + std::to_string(formId);
+    EventReport::StopFormModifyTimeoutReportTimer(formId);
+    int32_t timerId = OHOS::HiviewDFX::XCollie::GetInstance().SetTimer(
+        taskName, WAIT_MODIFY_TIMEOUT, timeoutCallback, nullptr, HiviewDFX::XCOLLIE_FLAG_NOOP);
+    EventReport::formEventTimerMap_[formId] = timerId;
+    LOGI("StartFormModifyTimeoutReportTimer, cardId: %{public}" PRId64 ", timerId: %{public}d", formId, timerId);
+}
+
+void EventReport::StopFormModifyTimeoutReportTimer(int64_t formId)
+{
+    auto iter = EventReport::formEventTimerMap_.find(formId);
+    if (iter == EventReport::formEventTimerMap_.end()) {
+        return;
+    }
+    int32_t timerId = iter->second;
+    LOGI("StopFormModifyTimeoutReportTimer, timerId:%{public}d", timerId);
+    OHOS::HiviewDFX::XCollie::GetInstance().CancelTimer(timerId);
+    EventReport::formEventTimerMap_.erase(iter);
+}
+
 } // namespace OHOS::Ace
