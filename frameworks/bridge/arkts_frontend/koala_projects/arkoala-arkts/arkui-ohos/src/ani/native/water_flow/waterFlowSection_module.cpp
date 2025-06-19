@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,19 @@
  * limitations under the License.
  */
 
-#pragma once
+#include <memory>
+#include "common_module.h"
+#include "waterFlowSection_module.h"
+#include "base/utils/utils.h"
+#include "load.h"
+#include "base/log/log.h"
 
-#include "styled_string_peer.h"
 
-struct MutableStyledStringPeer : public StyledStringPeer {
-    ~MutableStyledStringPeer() override = default;
-    static MutableStyledStringPeer *Create(const OHOS::Ace::RefPtr<OHOS::Ace::SpanStringBase>& src = nullptr)
-    {
-        auto ret = new MutableStyledStringPeer;
-        ret->spanString = OHOS::Ace::AceType::DynamicCast<OHOS::Ace::MutableSpanString>(src);
-        return ret;
-    }
-};
+namespace OHOS::Ace::Ani {
+void SetWaterFlowOptions(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_object waterFlowOptions)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->getArkUIAniWaterFlowModifier()->setWaterFlowOptions(env, ptr, waterFlowOptions);
+}
+} // namespace OHOS::Ace::Ani

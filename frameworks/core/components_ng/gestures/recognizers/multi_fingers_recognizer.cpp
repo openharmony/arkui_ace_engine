@@ -32,12 +32,42 @@ MultiFingersRecognizer::MultiFingersRecognizer(int32_t fingers, bool isLimitFing
     isLimitFingerCount_ = isLimitFingerCount;
 }
 
+namespace {
+bool CheckRefereeState(RefereeState refereeState)
+{
+    return refereeState != RefereeState::PENDING &&
+        refereeState != RefereeState::PENDING_BLOCKED &&
+        refereeState != RefereeState::SUCCEED_BLOCKED;
+}
+} // namespace
+
+bool MultiFingersRecognizer::CheckFingerListInDownFingers(int32_t pointId) const
+{
+    if (inputEventType_ == InputEventType::AXIS) {
+        return false;
+    }
+    if (!CheckRefereeState(lastRefereeState_) ||
+        !CheckRefereeState(refereeState_)) {
+        return false;
+    }
+    if (isPostEventResult_) {
+        return false;
+    }
+    if (CheckoutDownFingers(pointId)) {
+        return false;
+    }
+    return true;
+}
+
 void MultiFingersRecognizer::UpdateFingerListInfo()
 {
     fingerList_.clear();
     lastPointEvent_.reset();
     auto maxTimeStamp = TimeStamp::min().time_since_epoch().count();
     for (const auto& point : touchPoints_) {
+        if (CheckFingerListInDownFingers(point.second.id)) {
+            continue;
+        }
         PointF localPoint(point.second.x, point.second.y);
         NGGestureRecognizer::Transform(
             localPoint, GetAttachedNode(), false, isPostEventResult_, point.second.postEventNodeId);
@@ -95,6 +125,7 @@ void MultiFingersRecognizer::CleanRecognizerState()
         refereeState_ == RefereeState::FAIL ||
         refereeState_ == RefereeState::DETECTING) &&
         currentFingers_ == 0) {
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
     }

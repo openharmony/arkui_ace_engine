@@ -127,8 +127,8 @@ void AssignArkValue(Ark_NativeEmbedInfo& dst, const EmbedInfo& src)
     dst.type = Converter::ArkValue<Opt_String>(src.type);
     dst.url = Converter::ArkValue<Opt_String>(src.url);
     Ark_Position position;
-    position.x = Converter::ArkValue<Opt_Length>(src.x);
-    position.y = Converter::ArkValue<Opt_Length>(src.y);
+    position.x = Converter::ArkValue<Opt_Length>((float)src.x);
+    position.y = Converter::ArkValue<Opt_Length>((float)src.y);
     dst.position = Converter::ArkValue<Opt_Position>(position);
 }
 

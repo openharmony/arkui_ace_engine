@@ -21,6 +21,7 @@ import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
 import { DrawContext } from "arkui/Graphics"
 import { DrawModifier, AsyncCallback } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
+import { WaterFlowOptions,WaterFlowSections } from "arkui/component"
 
 export class ArkUIAniModule {
     static {
@@ -60,6 +61,9 @@ export class ArkUIAniModule {
     native static _SetDrawModifier(ptr: KPointer, drawModifier: DrawModifier): void
     
     native static _Invalidate(ptr: KPointer): void
+
+    native static _SetWaterFlowOptions(ptr: KPointer, options: WaterFlowOptions): void
+    
     native static _DragEvent_Set_Data(ptr: KLong, data : unifiedDataChannel.UnifiedData) : void
     native static _DragEvent_Get_Data(ptr: KLong) : unifiedDataChannel.UnifiedData
     native static _DragEvent_Get_Summary(ptr: KLong) : unifiedDataChannel.Summary

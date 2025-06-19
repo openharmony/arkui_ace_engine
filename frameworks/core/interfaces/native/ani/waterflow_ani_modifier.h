@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,13 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_WATERFLOW_ANI_MODIFIER
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_WATERFLOW_ANI_MODIFIER
 
-#include "styled_string_peer.h"
+#include "core/interfaces/ani/ani_api.h"
 
-struct MutableStyledStringPeer : public StyledStringPeer {
-    ~MutableStyledStringPeer() override = default;
-    static MutableStyledStringPeer *Create(const OHOS::Ace::RefPtr<OHOS::Ace::SpanStringBase>& src = nullptr)
-    {
-        auto ret = new MutableStyledStringPeer;
-        ret->spanString = OHOS::Ace::AceType::DynamicCast<OHOS::Ace::MutableSpanString>(src);
-        return ret;
-    }
-};
+namespace OHOS::Ace::NG {
+const ArkUIAniWaterFlowModifier* GetArkUIAniWaterFlowModifier();
+} // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_ANI_WATERFLOW_ANI_MODIFIER

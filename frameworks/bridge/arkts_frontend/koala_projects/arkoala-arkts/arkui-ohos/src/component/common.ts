@@ -11295,13 +11295,13 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             const sysOptions_type = runtimeType(sysOptions)
             if ((RuntimeType.NUMBER == blurRadius_type) || (RuntimeType.UNDEFINED == blurRadius_type)) {
                 const value_casted = blurRadius as (number | undefined)
-                const options_casted = options as (BlurOptions)
+                const options_casted = options as (BlurOptions | undefined)
                 this.getPeer()?.blur0Attribute(value_casted, options_casted)
                 return this
             }
             if ((RuntimeType.NUMBER == blurRadius_type) || (RuntimeType.UNDEFINED == blurRadius_type)) {
                 const blurRadius_casted = blurRadius as (number | undefined)
-                const options_casted = options as (BlurOptions)
+                const options_casted = options as (BlurOptions | undefined)
                 const sysOptions_casted = sysOptions as (SystemAdaptiveOptions)
                 this.getPeer()?.blur1Attribute(blurRadius_casted, options_casted, sysOptions_casted)
                 return this

@@ -69,6 +69,8 @@ constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int NUM_3 = 3;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
+constexpr float MIN_ANGEL = 0.0f;
+constexpr float MAX_ANGEL = 360.0f;
 const uint32_t FOCUS_PRIORITY_AUTO = 0;
 const uint32_t FOCUS_PRIORITY_PRIOR = 2000;
 const uint32_t FOCUS_PRIORITY_PREVIOUS = 3000;
@@ -394,6 +396,21 @@ auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_
         menuParam.isShowHoverImage = optParam->isShowHoverImage;
     }
 };
+
+Dimension ClampAngleDimension(const std::optional<Dimension>& angle, float minAngle, float maxAngle)
+{
+    if (!angle) {
+        return CalcDimension(0.0f, DimensionUnit::PX);
+    }
+
+    float value = angle.value().Value();
+    if (LessOrEqual(value, minAngle)) {
+        value = minAngle;
+    } else if (GreatOrEqual(value, maxAngle)) {
+        value = maxAngle;
+    }
+    return CalcDimension(value, DimensionUnit::PX);
+}
 
 namespace GeneratedModifier {
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
@@ -1164,14 +1181,19 @@ RotateOpt Convert(const Ark_RotateOptions& src)
     auto centerY =  OptConvert<Dimension>(src.centerY);
     Validator::ValidateNonPercent(centerX);
     Validator::ValidateNonPercent(centerY);
-    if (centerX.has_value() && centerY.has_value()) {
-        auto center = DimensionOffset(centerX.value(), centerY.value());
-        auto centerZ =  OptConvert<Dimension>(src.centerZ);
-        if (centerZ.has_value()) {
-            center.SetZ(centerZ.value());
-        }
-        options.center = center;
+    auto center = DimensionOffset(Dimension(0.5f, DimensionUnit::PERCENT), Dimension(0.5f, DimensionUnit::PERCENT));
+    center.SetZ(Dimension(0.5f, DimensionUnit::PERCENT));
+    if (centerX.has_value()) {
+        center.SetX(centerX.value());
     }
+    if (centerY.has_value()) {
+        center.SetY(centerY.value());
+    }
+    auto centerZ =  OptConvert<Dimension>(src.centerZ);
+    if (centerZ.has_value()) {
+        center.SetZ(centerZ.value());
+    }
+    options.center = center;
     return options;
 }
 
@@ -3272,8 +3294,42 @@ void Rotate0Impl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstractModelStatic::SetPivot(frameNode, convValue->center);
+    auto xValue = Converter::GetOptPtr(&(value->value.centerX));
+    if (xValue.has_value()) {
+        Converter::VisitUnion(
+            xValue.value(),
+            [&convValue](const Ark_String& val) {
+                std::string degreeStr = Converter::Convert<std::string>(val);
+                auto dim = StringUtils::StringToCalcDimension(degreeStr);
+                convValue->center->SetX(dim);
+            },
+            [](const Ark_Number& val) {}, []() {});
+    }
+    auto yValue = Converter::GetOptPtr(&(value->value.centerY));
+    if (yValue.has_value()) {
+        Converter::VisitUnion(
+            yValue.value(),
+            [&convValue](const Ark_String& val) {
+                std::string degreeStr = Converter::Convert<std::string>(val);
+                auto dim = StringUtils::StringToCalcDimension(degreeStr);
+                convValue->center->SetY(dim);
+            },
+            [](const Ark_Number& val) {}, []() {});
+    }
+    auto angleValue = value->value.angle;
+    Converter::VisitUnion(
+        angleValue,
+        [&convValue](const Ark_String& str) {
+            std::string degreeStr = Converter::Convert<std::string>(str);
+            float angle = static_cast<float>(StringUtils::StringToCalcDimension(degreeStr).Value());
+            int32_t indA = 3;
+            if (convValue->vec5f.size() > indA) {
+                convValue->vec5f[indA] = angle;
+            }
+        },
+        [](const Ark_Number& val) {}, []() {});
     ViewAbstractModelStatic::SetRotate(frameNode, convValue->vec5f);
+    ViewAbstractModelStatic::SetPivot(frameNode, convValue->center);
 }
 void Rotate1Impl(Ark_NativePointer node,
                  const Opt_RotateOptions* value)
@@ -3984,11 +4040,11 @@ void SweepGradient0Impl(Ark_NativePointer node,
     auto startAngle = Converter::OptConvert<Dimension>(optValue->start);
     auto endAngle = Converter::OptConvert<Dimension>(optValue->end);
     auto rotation = Converter::OptConvert<Dimension>(optValue->rotation);
+    sweep->startAngle = ClampAngleDimension(Converter::OptConvert<Dimension>(optValue->start), MIN_ANGEL, MAX_ANGEL);
+    sweep->endAngle = ClampAngleDimension(Converter::OptConvert<Dimension>(optValue->end), MIN_ANGEL, MAX_ANGEL);
+    sweep->rotation = ClampAngleDimension(Converter::OptConvert<Dimension>(optValue->rotation), MIN_ANGEL, MAX_ANGEL);
     if (centerX) sweep->centerX = centerX.value();
     if (centerY) sweep->centerY = centerY.value();
-    if (startAngle) sweep->startAngle = startAngle.value();
-    if (endAngle) sweep->endAngle = endAngle.value();
-    if (rotation) sweep->rotation = rotation.value();
     Converter::AssignGradientColors(&gradient, &optValue->colors);
     ViewAbstract::SetSweepGradient(frameNode, gradient);
 }

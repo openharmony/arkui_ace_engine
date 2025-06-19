@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,14 @@
  * limitations under the License.
  */
 
-#pragma once
+import { WaterFlowOptions } from "../component/waterFlow"
+import { PeerNode } from "../PeerNode"
+import { ArkUIAniModule } from "arkui.ani"
 
-#include "styled_string_peer.h"
-
-struct MutableStyledStringPeer : public StyledStringPeer {
-    ~MutableStyledStringPeer() override = default;
-    static MutableStyledStringPeer *Create(const OHOS::Ace::RefPtr<OHOS::Ace::SpanStringBase>& src = nullptr)
-    {
-        auto ret = new MutableStyledStringPeer;
-        ret->spanString = OHOS::Ace::AceType::DynamicCast<OHOS::Ace::MutableSpanString>(src);
-        return ret;
+export class WaterFlowHandWritten {
+    static hookWaterFlowOptionsImpl(peer: PeerNode, options: WaterFlowOptions | undefined): void {
+        if (options !== undefined && options.sections !== undefined) {
+            ArkUIAniModule._SetWaterFlowOptions(peer.peer.ptr, options)
+        }
     }
-};
+}

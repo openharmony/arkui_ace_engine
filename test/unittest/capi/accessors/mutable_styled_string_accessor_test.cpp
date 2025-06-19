@@ -29,7 +29,19 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
-class MutableStyledStringAccessorTest : public AccessorTestBase<GENERATED_ArkUIMutableStyledStringAccessor,
+template<typename AccessorType, auto GetAccessorFunc, typename PeerType>
+class AccessorTestMutable : public AccessorTestBaseParent<AccessorType, GetAccessorFunc, PeerType> {
+public:
+    virtual void SetUp(void)
+    {
+        ASSERT_NE(this->accessor_->ctor, nullptr);
+        this->peer_ = static_cast<PeerType *>(this->accessor_->ctor(nullptr, nullptr));
+        ASSERT_NE(this->peer_, nullptr);
+        AccessorTestBaseParent<AccessorType, GetAccessorFunc, PeerType>::SetUp();
+    }
+};
+
+class MutableStyledStringAccessorTest : public AccessorTestMutable<GENERATED_ArkUIMutableStyledStringAccessor,
     &GENERATED_ArkUIAccessors::getMutableStyledStringAccessor, MutableStyledStringPeer> {
 protected:
     Ark_VMContext vmContext_ = nullptr;
@@ -44,7 +56,6 @@ struct StyleTestPlan {
 };
 } // namespace
 
-
 /**
  * @tc.name: ctorTest
  * @tc.desc:
@@ -52,15 +63,15 @@ struct StyleTestPlan {
  */
 HWTEST_F(MutableStyledStringAccessorTest, ctorTest, TestSize.Level1)
 {
-    auto peer1 = reinterpret_cast<MutableStyledStringPeer*>(this->accessor_->ctor());
-    auto peer2 = reinterpret_cast<MutableStyledStringPeer*>(this->accessor_->ctor());
-    auto peer3 = reinterpret_cast<MutableStyledStringPeer*>(this->accessor_->ctor());
+    auto peer1 = reinterpret_cast<MutableStyledStringPeer*>(this->accessor_->ctor(nullptr, nullptr));
+    auto peer2 = reinterpret_cast<MutableStyledStringPeer*>(this->accessor_->ctor(nullptr, nullptr));
+    auto peer3 = reinterpret_cast<MutableStyledStringPeer*>(this->accessor_->ctor(nullptr, nullptr));
     ASSERT_NE(peer1, nullptr);
     ASSERT_NE(peer2, nullptr);
     ASSERT_NE(peer3, nullptr);
-    EXPECT_EQ(peer1->spanString, nullptr);
-    EXPECT_EQ(peer2->spanString, nullptr);
-    EXPECT_EQ(peer3->spanString, nullptr);
+    ASSERT_NE(peer1->spanString, nullptr);
+    ASSERT_NE(peer2->spanString, nullptr);
+    ASSERT_NE(peer3->spanString, nullptr);
     finalyzer_(peer1);
     finalyzer_(peer2);
     finalyzer_(peer3);

@@ -19,6 +19,7 @@
 #include "image_ani_modifier.h"
 #include "web_ani_modifier.h"
 #include "custom_node_ani_modifier.h"
+#include "waterflow_ani_modifier.h"
 #include "drag_ani_modifier.h"
 
 extern "C" {
@@ -33,6 +34,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getCustomNodeAniModifier = OHOS::Ace::NG::GetCustomNodeAniModifier,
         .getContentSlotAniModifier = OHOS::Ace::NG::GetContentSlotAniModifier,
         .getArkUIAniDrawModifier = OHOS::Ace::NG::GetArkUIAniDrawModifier,
+        .getArkUIAniWaterFlowModifier = OHOS::Ace::NG::GetArkUIAniWaterFlowModifier,
         .getComponentSnapshotAniModifier = OHOS::Ace::NG::GetComponentSnapshotAniModifier,
     };
     return &impl;
