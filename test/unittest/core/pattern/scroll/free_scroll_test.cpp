@@ -79,6 +79,23 @@ HWTEST_F(FreeScrollTest, FreeScroll001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Properties001
+ * @tc.desc: check property values with Axis::Free (main axis should be horizontal)
+ * @tc.type: FUNC
+ */
+HWTEST_F(FreeScrollTest, Properties001, TestSize.Level1)
+{
+    constexpr float contentWidth = 1000;
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ contentWidth, 2000 });
+    CreateScrollDone();
+
+    EXPECT_EQ(pattern_->scrollableDistance_, contentWidth - WIDTH);
+    EXPECT_EQ(pattern_->viewPortLength_, WIDTH);
+}
+
+/**
  * @tc.name: ModeChange001
  * @tc.desc: Test Scroll axis change
  * @tc.type: FUNC
