@@ -212,7 +212,7 @@ void CustomPaintPaintMethod::UpdateFontFamilies()
 }
 
 std::shared_ptr<RSShaderEffect> CustomPaintPaintMethod::MakeConicGradient(
-    const Ace::Gradient& gradient, std::shared_ptr<RSColorSpace> colorSpace)
+    const Ace::Gradient& gradient, const std::shared_ptr<RSColorSpace>& colorSpace)
 {
     std::shared_ptr<RSShaderEffect> shaderEffect = nullptr;
     if (gradient.GetType() == Ace::GradientType::CONIC) {
