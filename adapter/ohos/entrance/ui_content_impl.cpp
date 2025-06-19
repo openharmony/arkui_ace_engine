@@ -2043,6 +2043,14 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     if (vmType_ == VMType::ARK_NATIVE) {
         frontendType = FrontendType::ARK_TS;
     }
+
+    if (appInfo->codeLanguage == AbilityRuntime::APPLICAITON_CODE_LANGUAGE_ARKTS_HYBRID) {
+        if (vmType_ == VMType::ARK_NATIVE) {
+            frontendType = FrontendType::STATIC_HYBRID_DYNAMIC;
+        } else {
+            frontendType = FrontendType::DYNAMIC_HYBRID_STATIC;
+        }
+    }
     auto container =
         AceType::MakeRefPtr<Platform::AceContainer>(instanceId_, frontendType, context_, info,
             std::make_unique<ContentEventCallback>(
