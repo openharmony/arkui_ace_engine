@@ -279,4 +279,30 @@ void FontStyle::UpdateColorByResourceId()
         std::for_each(colors.begin(), colors.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
     }
 }
+
+PlaceholderAlignment GetPlaceHolderAlignmentFromVerticalAlign(VerticalAlign verticalAlign)
+{
+    PlaceholderAlignment alignment;
+    switch (verticalAlign) {
+        case VerticalAlign::TOP:
+            alignment = PlaceholderAlignment::TOP;
+            break;
+        case VerticalAlign::CENTER:
+            alignment = PlaceholderAlignment::MIDDLE;
+            break;
+        case VerticalAlign::BOTTOM:
+        case VerticalAlign::NONE:
+            alignment = PlaceholderAlignment::BOTTOM;
+            break;
+        case VerticalAlign::BASELINE:
+            alignment = PlaceholderAlignment::ABOVEBASELINE;
+            break;
+        case VerticalAlign::FOLLOW_PARAGRAPH:
+            alignment = PlaceholderAlignment::FOLLOW_PARAGRAPH;
+            break;
+        default:
+            alignment = PlaceholderAlignment::BOTTOM;
+    }
+    return alignment;
+}
 } // namespace OHOS::Ace::NG

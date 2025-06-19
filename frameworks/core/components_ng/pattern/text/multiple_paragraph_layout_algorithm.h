@@ -52,8 +52,6 @@ public:
     RefPtr<Paragraph> GetSingleParagraph() const;
 
 protected:
-    void GetSpanParagraphStyle(LayoutWrapper* layoutWrapper, const RefPtr<SpanItem>& spanItem, ParagraphStyle& pStyle);
-    virtual ParagraphStyle GetParagraphStyle(const TextStyle& textStyle) const;
     virtual bool CreateParagraph(
         const TextStyle& textStyle, std::u16string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) = 0;
     virtual void HandleEmptyParagraph(RefPtr<Paragraph> paragraph, const std::list<RefPtr<SpanItem>>& spanGroup) {}
@@ -112,7 +110,6 @@ protected:
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
     virtual void AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
-    static TextDirection GetTextDirection(const std::u16string& content, LayoutWrapper* layoutWrapper);
     void MeasureChildren(LayoutWrapper* layoutWrapper, const TextStyle& textStyle);
     bool ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle& paraStyle, const TextStyle& textStyle,
         std::vector<TextStyle>& textStyles);
@@ -147,7 +144,6 @@ private:
     {
         return 0.0f;
     }
-    static TextDirection GetTextDirectionByContent(const std::u16string& content);
 
     void UpdateSymbolSpanEffect(
         RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph, const std::list<RefPtr<SpanItem>>& spans);

@@ -271,6 +271,13 @@ class MeasureUtils {
         __JSScopeUtil__.restoreInstanceId();
         return sizeOption;
     }
+
+    getParagraphs(styledString, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let paraArr = TextLayout.getParagraphs(styledString, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return paraArr;
+    }
 }
 
 class FrameCallback {
