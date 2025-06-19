@@ -123,33 +123,59 @@ ace_unittest("accessibility_adapter_test_ng") {
     defines = [ "OHOS_STANDARD_SYSTEM" ]
     defines += [ "WINDOW_SCENE_SUPPORTED" ]
     external_deps = [
-      "ability_base:view_data",
       "ability_base:want",
       "ability_runtime:abilitykit_native",
-      "ability_runtime:app_context",
-      "ability_runtime:app_manager",
       "accessibility:accessibilityclient",
       "accessibility:accessibilityconfig",
       "ace_engine:ace_uicontent",
-      "app_file_service:fileuri_native",
       "c_utils:utils",
-      "egl:libEGL",
       "ffrt:libffrt",
-      "graphic_2d:EGL",
-      "graphic_2d:GLESv3",
       "graphic_2d:librender_service_base",
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
-      "init:libbegetutil",
       "input:libmmi-client",
-      "ipc:ipc_core",
       "ipc:ipc_single",
       "napi:ace_napi",
-      "opengles:libGLES",
       "window_manager:libdm",
-      "window_manager:libpip_ndk",
       "window_manager:libwm",
       "window_manager:scene_session",
+      "window_manager:scene_session_manager",
+    ]
+  }
+}
+
+ace_unittest("accessibility_adapter_test_web_ng") {
+  type = "new"
+  module_output = "basic"
+  sources = [
+    "$ace_root/adapter/ohos/osal/js_accessibility_manager.cpp",
+    "$ace_root/adapter/ohos/osal/js_third_accessibility_hover_ng.cpp",
+    "$ace_root/adapter/ohos/osal/js_third_provider_interaction_operation.cpp",
+    "$ace_root/frameworks/bridge/common/accessibility/accessibility_node_manager.cpp",
+    "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
+    "$ace_root/frameworks/core/accessibility/accessibility_manager_ng.cpp",
+    "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
+    "$ace_root/test/unittest/core/accessibility/mock_ace_container.cpp",
+    "js_accessibility_manager_web_test.cpp",
+    "mock_js_accessibility_manager.cpp",
+  ]
+  if (is_ohos_standard_system) {
+    defines = [ "OHOS_STANDARD_SYSTEM" ]
+    defines += [
+      "WINDOW_SCENE_SUPPORTED",
+      "NG_BUILD",
+    ]
+    external_deps = [
+      "ability_base:view_data",
+      "ability_runtime:abilitykit_native",
+      "ability_runtime:app_manager",
+      "accessibility:accessibilityclient",
+      "accessibility:accessibilityconfig",
+      "app_file_service:fileuri_native",
+      "ffrt:libffrt",
+      "graphic_2d:librender_service_base",
+      "init:libbegetutil",
+      "window_manager:libpip_ndk",
       "window_manager:scene_session_manager",
     ]
   }
