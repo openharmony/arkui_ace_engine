@@ -67,6 +67,8 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int NUM_3 = 3;
+constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
+constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 const uint32_t FOCUS_PRIORITY_AUTO = 0;
 const uint32_t FOCUS_PRIORITY_PRIOR = 2000;
 const uint32_t FOCUS_PRIORITY_PREVIOUS = 3000;
@@ -3684,11 +3686,16 @@ void ClickEffect0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Ark_ClickEffect>(value);
     if (!convValue.has_value()) {
-        ViewAbstractModelStatic::SetClickEffectLevel(frameNode, std::nullopt, std::nullopt);
+        ViewAbstractModelStatic::SetClickEffectLevel(frameNode, ClickEffectLevel::LIGHT, DEFAULT_SCALE_LIGHT);
         return;
     }
     const std::optional<ClickEffectLevel>& level = Converter::OptConvert<ClickEffectLevel>(convValue.value().level);
-    const std::optional<float> scaleValue = Converter::OptConvert<float>(convValue.value().scale);
+    auto scaleValue = Converter::OptConvert<float>(convValue.value().scale);
+    if (!scaleValue) {
+        scaleValue = (level == ClickEffectLevel::MIDDLE || level == ClickEffectLevel::HEAVY)
+                         ? DEFAULT_SCALE_MIDDLE_OR_HEAVY
+                         : DEFAULT_SCALE_LIGHT;
+    }
     ViewAbstractModelStatic::SetClickEffectLevel(frameNode, level, scaleValue);
 }
 void ClickEffect1Impl(Ark_NativePointer node,
