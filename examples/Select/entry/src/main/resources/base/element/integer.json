@@ -1,0 +1,16 @@
+{
+  "integer": [
+    {
+      "name": "integer_30",
+      "value": 30
+    },
+    {
+      "name": "integer_1",
+      "value": 1
+    },
+    {
+      "name": "integer_2",
+      "value": 2
+    }
+  ]
+}
