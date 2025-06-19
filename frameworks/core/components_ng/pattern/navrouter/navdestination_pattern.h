@@ -173,11 +173,7 @@ public:
         return navDestinationId_;
     }
 
-    void OnDetachFromMainTree() override
-    {
-        backupStyle_.reset();
-        currStyle_.reset();
-    }
+    void OnDetachFromMainTree() override;
 
     bool OverlayOnBackPressed();
 

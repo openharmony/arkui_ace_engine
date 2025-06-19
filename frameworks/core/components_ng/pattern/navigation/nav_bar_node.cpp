@@ -56,33 +56,14 @@ void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
     contentNode->AddChild(child);
 }
 
-void NavBarNode::InitSystemTransitionPop()
+void NavBarNode::SystemTransitionPushStart(bool transitionIn)
 {
-    // navabr do enter pop initialization
-    float isRTL = GetLanguageDirection();
-    SetTransitionType(PageTransitionType::ENTER_POP);
-    auto renderContext = GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto geometryNode = GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto frameSize = geometryNode->GetFrameSize();
-    renderContext->RemoveClipWithRRect();
-    auto translate = CalcTranslateForTransitionPopStart(frameSize, true);
-    renderContext->UpdateTranslateInXY(translate);
-    auto curTitleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
-    CHECK_NULL_VOID(curTitleBarNode);
-    curTitleBarNode->GetRenderContext()->UpdateTranslateInXY(
-        { frameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
-}
-
-void NavBarNode::SystemTransitionPushAction(bool isStart)
-{
-    // initialization or finish callBack
-    if (isStart) {
-        SetTransitionType(PageTransitionType::EXIT_PUSH);
-    } else {
-        GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
+    if (transitionIn) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't push navBar");
+        return;
     }
+
+    SetTransitionType(PageTransitionType::EXIT_PUSH);
     GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     auto titleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     CHECK_NULL_VOID(titleNode);
@@ -125,8 +106,13 @@ void NavBarNode::StartSoftTransitionPop()
     GetRenderContext()->UpdateTranslateInXY({0.0f, 0.0f});
 }
 
-void NavBarNode::StartSystemTransitionPush()
+void NavBarNode::SystemTransitionPushEnd(bool transitionIn)
 {
+    if (transitionIn) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't push navBar");
+        return;
+    }
+
     // start EXIT_PUSH transition animation
     float isRTL = GetLanguageDirection();
     auto geometryNode = GetGeometryNode();
@@ -143,8 +129,51 @@ void NavBarNode::StartSystemTransitionPush()
         { frameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
 }
 
-void NavBarNode::StartSystemTransitionPop()
+void NavBarNode::SystemTransitionPushFinish(bool transitionIn, int32_t animationId)
 {
+    if (transitionIn) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't push navBar");
+        return;
+    }
+
+    GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
+    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+    auto titleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    CHECK_NULL_VOID(titleNode);
+    titleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+}
+
+void NavBarNode::SystemTransitionPopStart(bool transitionIn)
+{
+    if (!transitionIn) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't pop navBar");
+        return;
+    }
+
+    // navabr do enter pop initialization
+    float isRTL = GetLanguageDirection();
+    SetTransitionType(PageTransitionType::ENTER_POP);
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    renderContext->RemoveClipWithRRect();
+    auto translate = CalcTranslateForTransitionPopStart(frameSize, true);
+    renderContext->UpdateTranslateInXY(translate);
+    auto curTitleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
+    CHECK_NULL_VOID(curTitleBarNode);
+    curTitleBarNode->GetRenderContext()->UpdateTranslateInXY(
+        { frameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
+}
+
+void NavBarNode::SystemTransitionPopEnd(bool transitionIn)
+{
+    if (!transitionIn) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "can't pop navBar");
+        return;
+    }
+
     // navabr start to do ENTER_POP animation
     GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());

@@ -2782,16 +2782,17 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
             if (isEntry) {
                 return nullptr;
             }
-            // if the destination does not responds, find navigation from navbar
-            auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+            // if the destination does not responds, find navigation from navbar or homeDestination
+            auto navBarOrHomeDestNode =
+                AceType::DynamicCast<NavDestinationNodeBase>(navigationGroupNode->GetNavBarOrHomeDestinationNode());
             auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
             CHECK_NULL_RETURN(navigationLayoutProperty, nullptr);
             if (navigationLayoutProperty->GetHideNavBarValue(false)) {
                 return nullptr;
             }
-            auto targetNodeFromNavbar = FindNavigationNodeToHandleBack(navBarNode, isEntry);
-            if (targetNodeFromNavbar) {
-                return targetNodeFromNavbar;
+            auto targetNodeFromNavbarOrHomeDest = FindNavigationNodeToHandleBack(navBarOrHomeDestNode, isEntry);
+            if (targetNodeFromNavbarOrHomeDest) {
+                return targetNodeFromNavbarOrHomeDest;
             }
             return nullptr;
         }

@@ -774,7 +774,8 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0022, TestSize.Level1)
     calcLayoutConstraint->selfIdealSize = CalcSize(std::nullopt, len);
     navigationLayoutProperty->calcLayoutConstraint_ = std::move(calcLayoutConstraint);
     algorithm->MeasureContentChild(AceType::RawPtr(layoutWrapper), navigation, navigationLayoutProperty, SizeF());
-    algorithm->MeasureNavBar(AceType::RawPtr(layoutWrapper), navigation, navigationLayoutProperty, SizeF());
+    algorithm->MeasureNavBarOrHomeDestination(
+        AceType::RawPtr(layoutWrapper), navigation, navigationLayoutProperty, SizeF());
     LayoutConstraintF constraint;
     constraint.selfIdealSize = OptionalSizeF(20, 20);
     navigationLayoutProperty->layoutConstraint_ = LayoutConstraintF();

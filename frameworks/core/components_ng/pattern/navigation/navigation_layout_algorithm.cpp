@@ -161,19 +161,21 @@ float LayoutPrimaryContentNode(LayoutWrapper* layoutWrapper, const RefPtr<Naviga
     return geometryNode->GetFrameSize().Width();
 }
 
-float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
-    const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const NavBarPosition& position,
+float LayoutNavBarOrHomeDestination(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+    const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, NavBarPosition position,
     OffsetF& returnNavBarOffset)
 {
-    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
+    CHECK_NULL_RETURN(hostNode, 0.0f);
+    auto navigationPattern = hostNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(navigationPattern, 0.0f);
+    auto targetNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarOrHomeDestinationNode());
+    CHECK_NULL_RETURN(targetNode, 0.0f);
     auto contentNode = hostNode->GetContentNode();
     CHECK_NULL_RETURN(contentNode, 0.0f);
-    auto navBarNode = hostNode->GetNavBarNode();
-    CHECK_NULL_RETURN(navBarNode, 0.0f);
-    auto index = hostNode->GetChildIndexById(navBarNode->GetId());
-    auto navBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    CHECK_NULL_RETURN(navBarWrapper, 0.0f);
-    auto geometryNode = navBarWrapper->GetGeometryNode();
+    auto index = hostNode->GetChildIndexById(targetNode->GetId());
+    auto targetNodeWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_RETURN(targetNodeWrapper, 0.0f);
+    auto geometryNode = targetNodeWrapper->GetGeometryNode();
     auto navigationGeometryNode = layoutWrapper->GetGeometryNode();
     auto navBarOffset = OffsetT<float>(0.0f, 0.0f);
     bool isNavBarInRight = (position == NavBarPosition::END && !AceApplicationInfo::GetInstance().IsRightToLeft()) ||
@@ -188,7 +190,7 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     navBarOffset.AddX(padding.left.value_or(0.0f));
     navBarOffset.AddY(padding.top.value_or(0.0f));
     geometryNode->SetMarginFrameOffset(navBarOffset);
-    navBarWrapper->Layout();
+    targetNodeWrapper->Layout();
     returnNavBarOffset = navBarOffset;
     return isHideNavBar && navigationMode == NavigationMode::SPLIT ? 0.0f : geometryNode->GetFrameSize().Width();
 }
@@ -355,11 +357,7 @@ void SwitchModeWithAnimation(const RefPtr<NavigationGroupNode>& hostNode)
             CHECK_NULL_VOID(navigationLayoutProperty);
             bool navbarIsHidden = (pattern->GetNavigationMode() == NavigationMode::STACK && lastStandardIndex >= 0) ||
                                   navigationLayoutProperty->GetHideNavBar().value_or(false);
-            if (navbarIsHidden) {
-                hostNode->SetNeedSetInvisible(true);
-            } else {
-                hostNode->SetNeedSetInvisible(false);
-            }
+            hostNode->SetNeedSetInvisible(navbarIsHidden);
             hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     });
@@ -490,9 +488,9 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     if (usrNavigationMode == NavigationMode::AUTO) {
         if (frameSize.Width() >= CalculateNavigationWidth(hostNode)) {
             usrNavigationMode = NavigationMode::SPLIT;
-            auto navBarNode = hostNode->GetNavBarNode();
-            if (navBarNode) {
-                navBarNode->SetJSViewActive(true);
+            auto targetNode = hostNode->GetNavBarOrHomeDestinationNode();
+            if (targetNode) {
+                targetNode->SetJSViewActive(true);
             }
         } else {
             usrNavigationMode = NavigationMode::STACK;
@@ -528,6 +526,13 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
             navigationPattern->OnNavBarStateChange(false);
             SwitchModeWithAnimation(AceType::DynamicCast<NavigationGroupNode>(navigationPattern->GetHost()));
         } else {
+            if (navigationPattern->IsHomeDestinationVisible()) {
+                navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_SHOW, true);
+                navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_ACTIVE, true);
+            } else {
+                navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_INACTIVE, true);
+                navigationPattern->FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle::ON_HIDE, true);
+            }
             navigationPattern->OnNavBarStateChange(modeChange);
             navigationPattern->OnNavigationModeChange(modeChange);
         }
@@ -600,9 +605,9 @@ void NavigationLayoutAlgorithm::SizeCalculationSplit(const RefPtr<NavigationGrou
         realContentWidth_ = halfWidth;
     } else if (isHideNavbar) {
         CHECK_NULL_VOID(hostNode);
-        auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
-        CHECK_NULL_VOID(navBarNode);
-        auto geometryNode = navBarNode->GetGeometryNode();
+        auto targetNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarOrHomeDestinationNode());
+        CHECK_NULL_VOID(targetNode);
+        auto geometryNode = targetNode->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         navBarSize_.SetWidth(geometryNode->GetFrameSize().Width());
         dividerSize_.SetWidth(0.0f);
@@ -698,25 +703,27 @@ void NavigationLayoutAlgorithm::MeasurePrimaryContentNode(
     realNavBarHeight_ = nodeWrapper->GetGeometryNode()->GetFrameSize().Height();
 }
 
-void NavigationLayoutAlgorithm::MeasureNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+void NavigationLayoutAlgorithm::MeasureNavBarOrHomeDestination(
+    LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
     const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& navBarSize)
 {
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
-    CHECK_NULL_VOID(navBarNode);
-    auto index = hostNode->GetChildIndexById(navBarNode->GetId());
-    auto navBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    CHECK_NULL_VOID(navBarWrapper);
+    CHECK_NULL_VOID(hostNode);
+    auto targetNode = AceType::DynamicCast<NavDestinationNodeBase>(hostNode->GetNavBarOrHomeDestinationNode());
+    CHECK_NULL_VOID(targetNode);
+    auto index = hostNode->GetChildIndexById(targetNode->GetId());
+    auto targetNodeWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(targetNodeWrapper);
     auto constraint = navigationLayoutProperty->CreateChildConstraint();
     if (IsAutoHeight(navigationLayoutProperty)) {
-        navBarWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        targetNodeWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
             navigationLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.value());
         constraint.selfIdealSize.SetWidth(navBarSize.Width());
     } else {
         constraint.selfIdealSize = OptionalSizeF(navBarSize.Width(), navBarSize.Height());
     }
-    auto adjustConstraint = navBarNode->AdjustLayoutConstarintIfNeeded(constraint);
-    navBarWrapper->Measure(adjustConstraint);
-    realNavBarHeight_ = navBarWrapper->GetGeometryNode()->GetFrameSize().Height();
+    auto adjustConstraint = targetNode->AdjustLayoutConstarintIfNeeded(constraint);
+    targetNodeWrapper->Measure(adjustConstraint);
+    realNavBarHeight_ = targetNodeWrapper->GetGeometryNode()->GetFrameSize().Height();
 }
 
 void NavigationLayoutAlgorithm::MeasureContentChild(LayoutWrapper* layoutWrapper,
@@ -780,7 +787,7 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasurePrimaryContentNode(layoutWrapper, hostNode, navigationLayoutProperty, primaryNodeSize_);
     } else {
         SizeCalculation(layoutWrapper, hostNode, navigationLayoutProperty, size);
-        MeasureNavBar(layoutWrapper, hostNode, navigationLayoutProperty, navBarSize_);
+        MeasureNavBarOrHomeDestination(layoutWrapper, hostNode, navigationLayoutProperty, navBarSize_);
     }
 
     MeasureContentChild(layoutWrapper, hostNode, navigationLayoutProperty, contentSize_);
@@ -817,7 +824,7 @@ void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         navBarPosition = pattern->IsForceSplitUseNavBar() ? NavBarPosition::START :
             navigationLayoutProperty->GetNavBarPositionValue(NavBarPosition::START);
         OffsetF navBarOffset(0.0, 0.0);
-        navBarOrPrimarNodeWidth = LayoutNavBar(
+        navBarOrPrimarNodeWidth = LayoutNavBarOrHomeDestination(
             layoutWrapper, hostNode, navigationLayoutProperty, navBarPosition, navBarOffset);
     }
 
