@@ -16,13 +16,13 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("scroll_test_ng") {
   type = "new"
   sources = [
+    "free_scroll_test.cpp",
     "scroll_accessibility_test_ng.cpp",
     "scroll_bar_overlay_test_ng.cpp",
     "scroll_controller_test_ng.cpp",
     "scroll_dump_test_ng.cpp",
     "scroll_effect_test_ng.cpp",
     "scroll_event_test_ng.cpp",
-    "scroll_gesture_test.cpp",
     "scroll_inner_bar_test_ng.cpp",
     "scroll_inner_event_test_ng.cpp",
     "scroll_inner_layout_test_ng.cpp",

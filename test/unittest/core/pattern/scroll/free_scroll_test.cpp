@@ -18,7 +18,7 @@
 #include "core/event/touch_event.h"
 namespace OHOS::Ace::NG {
 
-class ScrollGestureTest : public ScrollTestNg {
+class FreeScrollTest : public ScrollTestNg {
 public:
     void TriggerFreeScroll(const Offset& delta)
     {
@@ -40,7 +40,7 @@ public:
  * @tc.desc: Test gesture recognizer override when axis == FREE
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollGestureTest, RecognizerOverride001, TestSize.Level1)
+HWTEST_F(FreeScrollTest, RecognizerOverride001, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
@@ -63,7 +63,7 @@ HWTEST_F(ScrollGestureTest, RecognizerOverride001, TestSize.Level1)
  * @tc.desc: Test Scroll with Axis::FREE
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollGestureTest, FreeScroll001, TestSize.Level1)
+HWTEST_F(FreeScrollTest, FreeScroll001, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
@@ -83,7 +83,7 @@ HWTEST_F(ScrollGestureTest, FreeScroll001, TestSize.Level1)
  * @tc.desc: Test Scroll axis change
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollGestureTest, ModeChange001, TestSize.Level1)
+HWTEST_F(FreeScrollTest, ModeChange001, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
