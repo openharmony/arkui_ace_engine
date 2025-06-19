@@ -39,6 +39,11 @@ public:
     static NG::PaddingProperty GetPadding(const std::optional<CalcDimension>& top,
         const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
         const std::optional<CalcDimension>& right);
+private:
+    static void CreateWithResourceObj(const RefPtr<ResourceObject>& resObj, const int32_t colorType);
+    static void SetCheckedBackgroundColor(const JSCallbackInfo& info, const RefPtr<RadioTheme>& theme);
+    static void SetUncheckedBorderColor(const JSCallbackInfo& info, const RefPtr<RadioTheme>& theme);
+    static void SetIndicatorColor(const JSCallbackInfo& info, const RefPtr<RadioTheme>& theme);
 };
 
 } // namespace OHOS::Ace::Framework

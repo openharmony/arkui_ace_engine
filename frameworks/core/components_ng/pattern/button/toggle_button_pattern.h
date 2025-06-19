@@ -85,6 +85,7 @@ public:
     void SetButtonPress(bool value);
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void UpdateComponentColor(const Color& color, const ToggleColorType toggleColorType);
 
 private:
     void OnAttachToFrameNode() override;

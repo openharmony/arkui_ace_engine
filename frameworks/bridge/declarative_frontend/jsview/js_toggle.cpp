@@ -265,8 +265,12 @@ void JSToggle::SelectedColor(const JSCallbackInfo& info)
     }
     Color color;
     std::optional<Color> selectedColor;
-    if (ParseJsColor(info[0], color)) {
+    RefPtr<ResourceObject> resObj;
+    if (ParseJsColor(info[0], color, resObj)) {
         selectedColor = color;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        ToggleModel::GetInstance()->CreateWithColorResourceObj(resObj, ToggleColorType::SELECTED_COLOR);
     }
 
     ToggleModel::GetInstance()->SetSelectedColor(selectedColor);
@@ -278,9 +282,13 @@ void JSToggle::SwitchPointColor(const JSCallbackInfo& info)
         return;
     }
     Color color;
+    RefPtr<ResourceObject> resObj;
     std::optional<Color> switchPointColor;
-    if (ParseJsColor(info[0], color)) {
+    if (ParseJsColor(info[0], color, resObj)) {
         switchPointColor = color;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        ToggleModel::GetInstance()->CreateWithColorResourceObj(resObj, ToggleColorType::SWITCH_POINT_COLOR);
     }
 
     ToggleModel::GetInstance()->SetSwitchPointColor(switchPointColor);
@@ -418,18 +426,33 @@ void JSToggle::SwitchStyle(const JSCallbackInfo& info)
         return;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+    SetPointRadius(jsObj);
+    SetUnselectedColor(jsObj);
+    SetPointColor(jsObj);
+    SetTrackBorderRadius(jsObj);
+}
 
+void JSToggle::SetPointRadius(const JSRef<JSObject>& jsObj)
+{
     CalcDimension pointRadius;
+    RefPtr<ResourceObject> pointRadiusResObj;
     if (jsObj->HasProperty("pointRadius") &&
-        ParseJsDimensionVpNG(jsObj->GetProperty("pointRadius"), pointRadius, false) && !pointRadius.IsNegative()) {
+        ParseJsDimensionVpNG(jsObj->GetProperty("pointRadius"), pointRadius, pointRadiusResObj, false) &&
+        !pointRadius.IsNegative()) {
+        CreateWithDimensionResourceObj(pointRadiusResObj, static_cast<int32_t>(ToggleDimensionType::POINT_RADIUS));
         ToggleModel::GetInstance()->SetPointRadius(pointRadius);
     } else {
         ToggleModel::GetInstance()->ResetPointRadius();
     }
+}
 
+void JSToggle::SetUnselectedColor(const JSRef<JSObject>& jsObj)
+{
     Color unselectedColor;
+    RefPtr<ResourceObject> unselectedColorResObj;
     if (jsObj->HasProperty("unselectedColor") &&
-        ParseJsColor(jsObj->GetProperty("unselectedColor"), unselectedColor)) {
+        ParseJsColor(jsObj->GetProperty("unselectedColor"), unselectedColor, unselectedColorResObj)) {
+        CreateWithColorResourceObj(unselectedColorResObj, static_cast<int32_t>(ToggleColorType::UN_SELECTED_COLOR));
         ToggleModel::GetInstance()->SetUnselectedColor(unselectedColor);
     } else {
         auto theme = GetTheme<SwitchTheme>();
@@ -438,9 +461,15 @@ void JSToggle::SwitchStyle(const JSCallbackInfo& info)
         }
         ToggleModel::GetInstance()->SetUnselectedColor(unselectedColor);
     }
+}
 
+void JSToggle::SetPointColor(const JSRef<JSObject>& jsObj)
+{
     Color pointColor;
-    if (jsObj->HasProperty("pointColor") && ParseJsColor(jsObj->GetProperty("pointColor"), pointColor)) {
+    RefPtr<ResourceObject> pointColorResObj;
+    if (jsObj->HasProperty("pointColor") && ParseJsColor(jsObj->GetProperty("pointColor"),
+        pointColor, pointColorResObj)) {
+        CreateWithColorResourceObj(pointColorResObj, static_cast<int32_t>(ToggleColorType::SWITCH_POINT_COLOR));
         ToggleModel::GetInstance()->SetSwitchPointColor(pointColor);
     } else {
         auto theme = GetTheme<SwitchTheme>();
@@ -449,14 +478,34 @@ void JSToggle::SwitchStyle(const JSCallbackInfo& info)
         }
         ToggleModel::GetInstance()->SetSwitchPointColor(pointColor);
     }
+}
 
+void JSToggle::SetTrackBorderRadius(const JSRef<JSObject>& jsObj)
+{
     CalcDimension trackRadius;
+    RefPtr<ResourceObject> trackBorderRadiusResObj;
     if (jsObj->HasProperty("trackBorderRadius") &&
-        ParseJsDimensionVpNG(jsObj->GetProperty("trackBorderRadius"), trackRadius, false) &&
+        ParseJsDimensionVpNG(jsObj->GetProperty("trackBorderRadius"), trackRadius, trackBorderRadiusResObj, false) &&
         !trackRadius.IsNegative()) {
+        CreateWithDimensionResourceObj(trackBorderRadiusResObj,
+            static_cast<int32_t>(ToggleDimensionType::TRACK_BORDER_RADIUS));
         ToggleModel::GetInstance()->SetTrackBorderRadius(trackRadius);
     } else {
         ToggleModel::GetInstance()->ResetTrackBorderRadius();
+    }
+}
+
+void JSToggle::CreateWithDimensionResourceObj(RefPtr<ResourceObject>& resObj, const int32_t resType)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ToggleModel::GetInstance()->CreateWithDimensionVpResourceObj(resObj, static_cast<ToggleDimensionType>(resType));
+    }
+}
+
+void JSToggle::CreateWithColorResourceObj(RefPtr<ResourceObject>& resObj, const int32_t resType)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ToggleModel::GetInstance()->CreateWithColorResourceObj(resObj, static_cast<ToggleColorType>(resType));
     }
 }
 
