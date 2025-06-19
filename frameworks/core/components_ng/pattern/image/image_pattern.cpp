@@ -1674,6 +1674,10 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     Matrix4 defaultMatrixValue = Matrix4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
     Matrix4 matrixValue = renderProp->HasImageMatrix() ? renderProp->GetImageMatrixValue() : defaultMatrixValue;
     json->PutExtAttr("imageMatrix", matrixValue.ToString().c_str(), filter);
+    if (loadingCtx_) {
+        json->PutExtAttr("imageWidth", std::to_string(loadingCtx_->GetOriginImageSize().Width()).c_str(), filter);
+        json->PutExtAttr("imageHeight", std::to_string(loadingCtx_->GetOriginImageSize().Height()).c_str(), filter);
+    }
 }
 
 void ImagePattern::DumpLayoutInfo()
