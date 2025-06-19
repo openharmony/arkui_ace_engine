@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <list>
+#include <mutex>
 #include <shared_mutex>
 
 #include "base/memory/ace_type.h"
