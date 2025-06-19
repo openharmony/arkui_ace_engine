@@ -195,7 +195,8 @@ struct TranslateTextExtraData {
     std::string initScript = "";
 };
 TranslateTextExtraData g_translateTextData;
-uint32_t g_currentControllerId;
+uint32_t g_currentControllerId = 0;
+bool g_currentControllerIdStop = false;
 enum PictureInPictureState {
     PIP_STATE_ENTER = 0,
     PIP_STATE_EXIT,
@@ -220,127 +221,6 @@ struct PipData {
 
 std::unordered_map<uint32_t, PipData> pipCallbackMap_;
 std::mutex pipCallbackMapMutex_;
-
-void PipStartPipCallback(uint32_t controllerId, uint8_t requestId, uint64_t surfaceId)
-{
-    TAG_LOGI(AceLogTag::ACE_WEB, "PipStartPipCallback %{public}d", controllerId);
-    if (g_currentControllerId != controllerId) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "The controllerId is not current %{public}d",
-            g_currentControllerId);
-        return;
-    }
-    std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
-    auto it = pipCallbackMap_.find(controllerId);
-    if (it != pipCallbackMap_.end()) {
-        auto pip = it->second;
-
-        OHNativeWindow *window = nullptr;
-        int32_t ret = OH_NativeWindow_CreateNativeWindowFromSurfaceId(surfaceId, &window);
-        if (ret != GSERROR_OK) {
-            TAG_LOGI(AceLogTag::ACE_WEB, "CreateNativeWindowFromSurfaceId err:%{public}d ", ret);
-            return;
-        }
-        if (window == nullptr) {
-            TAG_LOGI(AceLogTag::ACE_WEB, "CreateNativeWindowFromSurfaceId window is null");
-            return;
-        }
-        pip.pipWebPattern->SetPipNativeWindow(pip.delegateId, pip.childId, pip.frameRoutingId, window);
-    }
-}
-
-void PipLifecycleCallback(uint32_t controllerId, PictureInPicture_PipState state, int32_t errorCode)
-{
-    TAG_LOGI(AceLogTag::ACE_WEB, "PipLifeCycleCallback, controllerId:%{public}u, "
-        "PipState:%{public}d, errorCode:%{public}d", controllerId, state, errorCode);
-    if (g_currentControllerId != controllerId) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "The controllerId is not current %{public}d",
-            g_currentControllerId);
-        return;
-    }
-    uint32_t event;
-    {
-        std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
-        auto it = pipCallbackMap_.find(controllerId);
-        if (it != pipCallbackMap_.end()) {
-            switch (state) {
-                case PictureInPicture_PipState::STOPPED:
-                    if (it->second.preStatus != PictureInPicture_PipState::ABOUT_TO_RESTORE) {
-                        event = PIP_STATE_EXIT;
-                    } else {
-                        event = PIP_STATE_NONE;
-                    }
-                    break;
-                case PictureInPicture_PipState::ABOUT_TO_RESTORE:
-                    event = PIP_STATE_RESTORE;
-                    break;
-                default:
-                    event = PIP_STATE_NONE;
-            }
-            if (event != PIP_STATE_NONE) {
-                auto pip = it->second;
-                pip.pipWebPattern->SendPipEvent(pip.delegateId, pip.childId, pip.frameRoutingId, event);
-            }
-            it->second.preStatus = state;
-        }
-    }
-}
-
-void PipControlEventCallback(
-    uint32_t controllerId, PictureInPicture_PipControlType actionType, PictureInPicture_PipControlStatus status)
-{
-    TAG_LOGI(AceLogTag::ACE_WEB, "PipControlEventCallback, controllerId:%{public}u,"
-        "actionType:%{public}d, status:%{public}d", controllerId, actionType, status);
-    if (g_currentControllerId != controllerId) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "The controllerId is not current %{public}d",
-            g_currentControllerId);
-        return;
-    }
-    uint32_t event;
-    switch (actionType) {
-        case PictureInPicture_PipControlType::VIDEO_PLAY_PAUSE:
-            if (status == 0) {
-                event = PIP_STATE_PAUSE;
-            } else {
-                event = PIP_STATE_PLAY;
-            }
-            break;
-        case PictureInPicture_PipControlType::FAST_FORWARD:
-            event = PIP_STATE_FAST_FORWARD;
-            break;
-        case PictureInPicture_PipControlType::FAST_BACKWARD:
-            event = PIP_STATE_FAST_BACKWARD;
-            break;
-        default:
-            event = PIP_STATE_NONE;
-    }
-    if (event != PIP_STATE_NONE) {
-        std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
-        auto it = pipCallbackMap_.find(controllerId);
-        if (it != pipCallbackMap_.end()) {
-            auto pip = it->second;
-            pip.pipWebPattern->SendPipEvent(
-                pip.delegateId, pip.childId, pip.frameRoutingId, event);
-        }
-    }
-}
-
-void PipResizeCallback(uint32_t controllerId, uint32_t width, uint32_t height, double scale)
-{
-    TAG_LOGI(AceLogTag::ACE_WEB, "PipResizeCallback, controllerId:%{public}u, "
-        "width:%{public}d, height:%{public}d", controllerId, width, height);
-    if (g_currentControllerId != controllerId) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "The controllerId is not current %{public}d",
-            g_currentControllerId);
-        return;
-    }
-
-    std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
-    auto it = pipCallbackMap_.find(controllerId);
-    if (it != pipCallbackMap_.end()) {
-        auto pip = it->second;
-        pip.pipWebPattern->SendPipEvent(pip.delegateId, pip.childId, pip.frameRoutingId, PIP_STATE_RESIZE);
-    }
-}
 
 bool ParseDateTimeJson(const std::string& timeJson, NWeb::DateTime& result)
 {
@@ -490,6 +370,130 @@ bool IsSnapshotPathValid(const std::string& snapshotPath)
     return true;
 }
 } // namespace
+
+void PipStartPipCallback(uint32_t controllerId, uint8_t requestId, uint64_t surfaceId)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "PipStartPipCallback %{public}u", controllerId);
+    if (g_currentControllerId != controllerId) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "The controllerId is not equal %{public}u", g_currentControllerId);
+        return;
+    }
+    std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
+    auto it = pipCallbackMap_.find(controllerId);
+    if (it != pipCallbackMap_.end()) {
+        auto pip = it->second;
+
+        OHNativeWindow *window = nullptr;
+        int32_t ret = OH_NativeWindow_CreateNativeWindowFromSurfaceId(surfaceId, &window);
+        if (ret != GSERROR_OK) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "CreateNativeWindowFromSurfaceId err:%{public}d ", ret);
+            return;
+        }
+        if (window == nullptr) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "CreateNativeWindowFromSurfaceId window is null");
+            return;
+        }
+        if (pip.pipWebPattern) {
+            pip.pipWebPattern->SetPipNativeWindow(pip.delegateId, pip.childId, pip.frameRoutingId, window);
+        }
+    }
+}
+
+void PipLifecycleCallback(uint32_t controllerId, PictureInPicture_PipState state, int32_t errorCode)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "PipLifeCycleCallback, controllerId:%{public}u, "
+        "PipState:%{public}d, errorCode:%{public}d", controllerId, state, errorCode);
+    if (g_currentControllerId != controllerId || g_currentControllerIdStop) {
+        g_currentControllerIdStop = false;
+        TAG_LOGE(AceLogTag::ACE_WEB, "The controllerId is not equal %{public}u", g_currentControllerId);
+        return;
+    }
+    uint32_t event;
+    {
+        std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
+        auto it = pipCallbackMap_.find(controllerId);
+        if (it != pipCallbackMap_.end()) {
+            switch (state) {
+                case PictureInPicture_PipState::STOPPED:
+                    if (it->second.preStatus != PictureInPicture_PipState::ABOUT_TO_RESTORE) {
+                        event = PIP_STATE_EXIT;
+                    } else {
+                        event = PIP_STATE_NONE;
+                    }
+                    break;
+                case PictureInPicture_PipState::ABOUT_TO_RESTORE:
+                    event = PIP_STATE_RESTORE;
+                    break;
+                default:
+                    event = PIP_STATE_NONE;
+            }
+            if (event != PIP_STATE_NONE) {
+                auto pip = it->second;
+                if (pip.pipWebPattern) {
+                    pip.pipWebPattern->SendPipEvent(pip.delegateId, pip.childId, pip.frameRoutingId, event);
+                }
+            }
+            if (state != PictureInPicture_PipState::ABOUT_TO_STOP) {
+                it->second.preStatus = state;
+            }
+        }
+    }
+}
+
+void PipControlEventCallback(
+    uint32_t controllerId, PictureInPicture_PipControlType actionType, PictureInPicture_PipControlStatus status)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "PipControlEventCallback, controllerId:%{public}u,"
+        "actionType:%{public}d, status:%{public}d", controllerId, actionType, status);
+    if (g_currentControllerId != controllerId) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "The controllerId is not equal %{public}u", g_currentControllerId);
+        return;
+    }
+    uint32_t event;
+    switch (actionType) {
+        case PictureInPicture_PipControlType::VIDEO_PLAY_PAUSE:
+            event = status == 0 ? PIP_STATE_PAUSE : PIP_STATE_PLAY;
+            break;
+        case PictureInPicture_PipControlType::FAST_FORWARD:
+            event = PIP_STATE_FAST_FORWARD;
+            break;
+        case PictureInPicture_PipControlType::FAST_BACKWARD:
+            event = PIP_STATE_FAST_BACKWARD;
+            break;
+        default:
+            event = PIP_STATE_NONE;
+    }
+    if (event != PIP_STATE_NONE) {
+        std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
+        auto it = pipCallbackMap_.find(controllerId);
+        if (it != pipCallbackMap_.end()) {
+            auto pip = it->second;
+            if (pip.pipWebPattern) {
+                pip.pipWebPattern->SendPipEvent(pip.delegateId, pip.childId, pip.frameRoutingId, event);
+            }
+        }
+    }
+}
+
+void PipResizeCallback(uint32_t controllerId, uint32_t width, uint32_t height, double scale)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "PipResizeCallback, controllerId:%{public}u, "
+        "width:%{public}d, height:%{public}d", controllerId, width, height);
+    if (g_currentControllerId != controllerId) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "The controllerId is not equal %{public}u", g_currentControllerId);
+        return;
+    }
+
+    std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
+    auto it = pipCallbackMap_.find(controllerId);
+    if (it != pipCallbackMap_.end()) {
+        auto pip = it->second;
+        if (pip.pipWebPattern) {
+            pip.pipWebPattern->SendPipEvent(
+                pip.delegateId, pip.childId, pip.frameRoutingId, PIP_STATE_RESIZE);
+        }
+    }
+}
 
 constexpr int32_t SINGLE_CLICK_NUM = 1;
 constexpr int32_t DOUBLE_CLICK_NUM = 2;
@@ -8155,8 +8159,9 @@ bool WebPattern::CreatePip(int status, napi_env env, bool& init, uint32_t &pipCo
     OH_PictureInPicture_SetPipRect(pipConfig, pipInfo.width, pipInfo.height);
     OH_PictureInPicture_SetPipControlGroup(pipConfig, controlGroup, controlGroupLength);
     OH_PictureInPicture_SetPipNapiEnv(pipConfig, env);
-    auto errCode = OH_PictureInPicture_CreatePip(pipConfig, &pipController);    if (errCode != 0) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "OH_PictureInPicture_CreatePip err:%{public}d", errCode);
+    auto errCode = OH_PictureInPicture_CreatePip(pipConfig, &pipController);
+    if (errCode != 0) {
+        OH_PictureInPicture_DestroyPipConfig(&pipConfig);
         return false;
     }
     OH_PictureInPicture_DestroyPipConfig(&pipConfig);
@@ -8251,16 +8256,18 @@ bool WebPattern::StopPip(int delegateId, int childId, int frameRoutingId)
         auto pip = it.second;
         if (pip.delegateId == delegateId && pip.childId == childId &&
             pip.frameRoutingId == frameRoutingId) {
+            bool result = true;
             auto errCode = OH_PictureInPicture_StopPip(it.first);
             if (errCode != 0) {
                 TAG_LOGE(AceLogTag::ACE_WEB, "OH_PictureInPicture_StopPip err: %{public}d", errCode);
-                return false;
+                result = false;
             }
             if (g_currentControllerId != it.first) {
+                g_currentControllerIdStop = true;
                 auto errCode = OH_PictureInPicture_StopPip(g_currentControllerId);
                 CHECK_NE_RETURN(errCode, 0, false);
             }
-            return true;
+            return result;
         }
     }
     return false;
@@ -8281,7 +8288,7 @@ bool WebPattern::PlayPip(int delegateId, int childId, int frameRoutingId)
         }
     }
     if (!flag) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "PausePip id no match "
+        TAG_LOGE(AceLogTag::ACE_WEB, "PlayPip id no match "
             "delegateId:%{public}d, childId:%{public}d frameRoutingId:%{public}d",
             delegateId, childId, frameRoutingId);
         return false;
