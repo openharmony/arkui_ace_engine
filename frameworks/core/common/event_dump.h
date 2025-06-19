@@ -100,6 +100,8 @@ struct EventTreeRecord {
         const std::string& state, const std::string& disposal, int64_t timestamp = 0);
 
     void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth, int32_t startNumber = 0) const;
+    void DumpBriefInfo(
+        std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth, int32_t startNumber = 0) const;
 
     void BuildAxis(std::list<AxisSnapshot> axis, std::unique_ptr<JsonValue>& json) const;
 
