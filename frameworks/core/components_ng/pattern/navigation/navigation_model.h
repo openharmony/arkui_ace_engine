@@ -45,7 +45,7 @@ public:
     static NavigationModel* GetInstance();
     virtual ~NavigationModel() = default;
 
-    virtual void Create() = 0;
+    virtual void Create(bool useHomeDestination = false) = 0;
     virtual void SetNavigationStack() = 0;
     virtual void SetNavigationStack(const RefPtr<NG::NavigationStack>& navigationStack) = 0;
     virtual void SetNavigationStackWithCreatorAndUpdater(std::function<RefPtr<NG::NavigationStack>()> creator,
@@ -137,6 +137,9 @@ public:
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj) {};
     virtual void UpdateSubTitle(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& subResObj) {};
+    virtual bool UseHomeDestination() const { return false; }
+    virtual void SetHomePathInfoWithCallback(
+        std::function<void(const RefPtr<NG::NavigationStack>&)>&& setHomePathInfoCallback) {}
 
 private:
     static std::unique_ptr<NavigationModel> instance_;

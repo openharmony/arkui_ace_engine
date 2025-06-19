@@ -86,6 +86,22 @@ public:
     {
         return navBarNode_;
     }
+    const RefPtr<UINode>& GetHomeDestinationNode() const
+    {
+        return customHomeDestination_;
+    }
+    const RefPtr<UINode>& GetNavBarOrHomeDestinationNode() const;
+
+    const std::optional<bool> GetUseHomeDestination() const
+    {
+        return useHomeDestination_;
+    }
+    void SetUseHomeDestinatoin(bool use)
+    {
+        useHomeDestination_ = use;
+    }
+
+    void CreateHomeDestinationIfNeeded();
 
     void SetSplitPlaceholder(const RefPtr<NG::UINode>& splitPlaceholder);
 
@@ -382,6 +398,9 @@ private:
         const RefPtr<FrameNode>& curNode, bool isNavBar, bool preUseCustomTransition, bool curUseCustomTransition,
         const NavigationGroupNode::AnimationFinishCallback& callback);
 
+    std::optional<bool> useHomeDestination_;
+    RefPtr<UINode> customHomeNode_;
+    RefPtr<UINode> customHomeDestination_;
     RefPtr<UINode> primaryContentNode_;
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
