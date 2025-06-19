@@ -20,6 +20,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
@@ -1652,5 +1653,86 @@ HWTEST_F(BadgeTestNg, BadgeDumpInfo001, TestSize.Level1)
     pattern_->UpdateBorderWidth(width2, false);
     pattern_->DumpInfo();
     EXPECT_EQ(layoutProperty->GetBadgeBorderWidth(), width); // should not update
+}
+
+/**
+ * @tc.name: BadgeModelNGTest001
+ * @tc.desc: Test CreateWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgeModelNGTest001, TestSize.Level1)
+{
+    BadgeModelNG badge1;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeMaxCount = 99;
+    badgeParameters.badgeFontSize = BADGE_FONT_SIZE;
+    g_isConfigChangePerform = false;
+    badge1.Create(badgeParameters);
+    GetInstance();
+
+    BadgeModelNG badge2;
+    g_isConfigChangePerform = true;
+    badgeParameters.resourceBadgeValueObject = nullptr;
+    badgeParameters.resourceBadgeColorObject = nullptr;
+    badgeParameters.resourceBadgeColorObject = nullptr;
+    badgeParameters.resourceBorderColorObject = nullptr;
+    badgeParameters.resourceFontWeightObject = nullptr;
+    badgeParameters.resourceFontSizeObject = nullptr;
+    badgeParameters.resourceBadgeSizeObject = nullptr;
+    badgeParameters.resourceBadgePositionXObject = nullptr;
+    badgeParameters.resourceBadgePositionYObject = nullptr;
+    badgeParameters.resourceBorderWidthObject = nullptr;
+    badge2.Create(badgeParameters);
+    EXPECT_EQ(layoutProperty_->GetBadgeTextColor(), Color::BLACK);
+
+    BadgeModelNG badge3;
+    badgeParameters.resourceBadgeValueObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badgeParameters.resourceBadgeColorObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badgeParameters.resourceBadgeColorObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badgeParameters.resourceBorderColorObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badgeParameters.resourceFontWeightObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badgeParameters.resourceFontSizeObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badgeParameters.resourceBadgeSizeObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badgeParameters.resourceBadgePositionXObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badgeParameters.resourceBadgePositionYObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badgeParameters.resourceBorderWidthObject = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    badge3.Create(badgeParameters);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    auto badgeTextColor = badgeTheme->GetBadgeTextColor();
+    EXPECT_EQ(layoutProperty_->GetBadgeTextColor(), badgeTextColor);
+}
+
+/**
+ * @tc.name: BadgePatternOnColorUpdate001
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgePatternOnColorUpdate001, TestSize.Level1)
+{
+    CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    g_isConfigChangePerform = false;
+    pattern_->OnColorConfigurationUpdate();
+    auto layoutProperty = pattern_->GetLayoutProperty<BadgeLayoutProperty>();
+    EXPECT_EQ(layoutProperty->GetBadgeTextColor(), Color::BLACK);
+    g_isConfigChangePerform = true;
+    pattern_->OnColorConfigurationUpdate();
+    auto pipeline = PipelineBase::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    auto badgeTheme = pipeline->GetTheme<BadgeTheme>();
+    auto badgeTextColor = badgeTheme->GetBadgeTextColor();
+    EXPECT_EQ(layoutProperty->GetBadgeTextColor(), badgeTextColor);
+
+    layoutProperty->UpdateBadgePositionXByuser(true);
+    layoutProperty->UpdateBadgePositionYByuser(true);
+    layoutProperty->UpdateBadgeFontSizeByuser(true);
+    layoutProperty->UpdateBadgeCircleSizeByuser(true);
+    layoutProperty->UpdateBadgeBorderColorByuser(true);
+    layoutProperty->UpdateBadgeBorderWidthByuser(true);
+    layoutProperty->UpdateBadgeTextColorByuser(true);
+    layoutProperty->UpdateBadgeColorByuser(true);
+    pattern_->OnColorConfigurationUpdate();
+    EXPECT_EQ(layoutProperty->GetBadgeTextColor(), Color::BLACK);
 }
 } // namespace OHOS::Ace::NG
