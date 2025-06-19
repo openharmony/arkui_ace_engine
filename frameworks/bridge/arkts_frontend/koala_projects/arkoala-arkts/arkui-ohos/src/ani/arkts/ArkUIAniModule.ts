@@ -19,10 +19,11 @@ import webview from "@ohos.web.webview"
 import common from "@ohos.app.ability.common"
 import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
 import { DrawContext } from "arkui/Graphics"
-import { AnimatableArithmetic, AsyncCallback, DrawModifier } from "arkui/component"
+import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
 import { WaterFlowOptions,WaterFlowSections } from "arkui/component"
 import { HookDragInfo } from "arkui/handwritten"
+import { dragController } from "@ohos/arkui/dragController"
 
 export class ArkUIAniModule {
     static {
@@ -70,7 +71,33 @@ export class ArkUIAniModule {
     native static _ComponentSnapshot_createFromBuilderWithCallback(ptr: KPointer, destroyCallback: () => void,
         callback: AsyncCallback<image.PixelMap>, delay?: number, checkImageStatus?: boolean): void
     native static _ComponentSnapshot_createFromBuilderWithPromise(ptr: KPointer, destroyCallback: () => void,
-            delay?: number, checkImageStatus?: boolean): Promise<image.PixelMap>
+        delay?: number, checkImageStatus?: boolean): Promise<image.PixelMap>
+
+    // for dragController
+    native static _DragController_executeDragWithCallback(custom: DragItemInfo, builder: KPointer,
+        destroyCallback: () => void, dragInfo: dragController.DragInfo,
+        callback: AsyncCallback<dragController.DragEventParam>): void
+
+    native static _DragController_executeDragWithPromise(custom: DragItemInfo, builder: KPointer,
+        destroyCallback: () => void, dragInfo: dragController.DragInfo): Promise<dragController.DragEventParam>
+    
+    native static _DragController_createDragAction(customArray: Array<DragItemInfo>, builderArray: Array<KPointer>,
+        destroyCallback: () => void, dragInfo: dragController.DragInfo): dragController.DragAction
+
+    native static _DragController_startDrag(dragActionPtr: KPointer): Promise<void>
+
+    native static _DragController_on(type: string, callback: Callback<dragController.DragAndDropInfo>,
+        dragActionPtr: KPointer): void
+
+    native static _DragController_off(type: string, callback: Callback<dragController.DragAndDropInfo> | undefined,
+        dragActionPtr: KPointer): void
+
+    native static _DragController_setDragEventStrictReportingEnabled(enable: boolean): void
+
+    native static _DragController_cancelDataLoading(key: string): void
+
+    native static _DragController_notifyDragStartReques(requestStatus: dragController.DragStartRequestStatus): void
+
     native static _Animation_SetOrCreateAnimatableProperty<T>(ptr: KPointer, propertyName: string, property: number | AnimatableArithmetic<T>,
         callback: (value: number | AnimatableArithmetic<T>) => void): void
 }

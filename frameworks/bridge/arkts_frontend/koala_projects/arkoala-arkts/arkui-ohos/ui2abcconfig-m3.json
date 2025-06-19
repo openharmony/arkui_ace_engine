@@ -43,6 +43,9 @@
             "@ohos/arkui/componentSnapshot": [
                 "./@ohos.arkui.componentSnapshot.ts"
             ],
+            "@ohos/arkui/dragController": [
+                "./@ohos.arkui.dragController.ts"
+            ],
             "@ohos/arkui/inspector": [
                 "./@ohos.arkui.inspector.ts"
             ],
