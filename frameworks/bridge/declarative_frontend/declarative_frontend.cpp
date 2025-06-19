@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "bridge/js_frontend/engine/common/js_engine.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "frameworks/bridge/card_frontend/form_frontend_delegate_declarative.h"
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.h"
@@ -182,7 +183,7 @@ bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecuto
 {
     type_ = type;
     taskExecutor_ = taskExecutor;
-    ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS);
+    ACE_DCHECK(type_ == FrontendType::DECLARATIVE_JS || type_ == FrontendType::STATIC_HYBRID_DYNAMIC);
     InitializeFrontendDelegate(taskExecutor);
 
     bool needPostJsTask = true;
@@ -190,6 +191,20 @@ bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecuto
     if (container) {
         const auto& setting = container->GetSettings();
         needPostJsTask = !(setting.usePlatformAsUIThread && setting.useUIAsJSThread);
+    }
+
+    auto hybridType = Framework::JsEngineHybridType::NONE;
+    if (type_ == FrontendType::STATIC_HYBRID_DYNAMIC) {
+        needPostJsTask = false;
+        hybridType = Framework::JsEngineHybridType::STATIC_HYBRID_DYNAMIC;
+    } else if (type_ == FrontendType::DYNAMIC_HYBRID_STATIC) {
+        needPostJsTask = false;
+        hybridType = Framework::JsEngineHybridType::DYNAMIC_HYBRID_STATIC;
+    } else {
+        hybridType = Framework::JsEngineHybridType::NONE;
+    }
+    if (jsEngine_) {
+        jsEngine_->UpdateHybridType(hybridType);
     }
 
 #if defined(PREVIEW)

@@ -78,7 +78,11 @@ struct WindowConfig {
     }
 };
 
-enum class FrontendType { JSON, JS, JS_CARD, DECLARATIVE_JS, JS_PLUGIN, ETS_CARD, DECLARATIVE_CJ, ARK_TS };
+enum class FrontendType {
+    JSON, JS, JS_CARD, DECLARATIVE_JS, JS_PLUGIN, ETS_CARD, DECLARATIVE_CJ, ARK_TS,
+    DYNAMIC_HYBRID_STATIC, STATIC_HYBRID_DYNAMIC
+};
+
 struct PageTarget;
 
 class ACE_FORCE_EXPORT Frontend : public AceType {
@@ -359,6 +363,7 @@ public:
     {
         return "";
     }
+    virtual void* GetEnv() { return nullptr; }
 
 protected:
     virtual bool MaybeRelease() override;
