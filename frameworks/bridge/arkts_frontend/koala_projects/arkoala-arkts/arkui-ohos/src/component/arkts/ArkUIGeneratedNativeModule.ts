@@ -3702,7 +3702,17 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _LinearIndicatorAttribute_indicatorLoop(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _AlphabetIndexerOps_registerIndexerSelectedCallback(node: KPointer, index: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
     native static _LinearIndicatorAttribute_onChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ListItemOps_registerSelectedCallback(node: KPointer, value: KInt, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _RefreshOps_registerRefreshingCallback(node: KPointer, value: KInt, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _SwiperOps_registerIndexCallback(node: KPointer, value: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TabsOps_registerIndexCallback(node: KPointer, value: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _AnimationExtender_SetClipRect(node: KPointer, x: KFloat, y: KFloat, width: KFloat, height: KFloat): void
     @ani.unsafe.Direct
@@ -6264,6 +6274,22 @@ export class ArkUIGeneratedNativeModule {
     native static _BounceSymbolEffect_getDirection(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _BounceSymbolEffect_setDirection(ptr: KPointer, direction: KInt): void
+    @ani.unsafe.Direct
+    native static _BuilderNodeOps_ctor(): KPointer
+    @ani.unsafe.Direct
+    native static _BuilderNodeOps_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _BuilderNodeOps_create(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _BuilderNodeOps_disposeNode(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _BuilderNodeOps_setUpdateConfigurationCallback(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _BuilderNodeOps_setOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _BuilderNodeOps_postTouchEvent(ptr: KPointer, event: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _BuilderNodeOps_setRootFrameNodeInBuilderNode(ptr: KPointer, node: KPointer): KPointer
     @ani.unsafe.Direct
     native static _PulseSymbolEffect_ctor(): KPointer
     @ani.unsafe.Direct

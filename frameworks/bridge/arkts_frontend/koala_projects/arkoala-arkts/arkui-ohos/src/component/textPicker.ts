@@ -63,18 +63,7 @@ export class ArkTextPickerPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setTextPickerOptionsAttribute(options?: TextPickerOptions): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        let options_type : int32 = RuntimeType.UNDEFINED
-        options_type = runtimeType(options)
-        thisSerializer.writeInt8(options_type as int32)
-        if ((RuntimeType.UNDEFINED) != (options_type)) {
-            const options_value  = options!
-            thisSerializer.writeTextPickerOptions(options_value)
-        }
-        ArkUIGeneratedNativeModule._TextPickerInterface_setTextPickerOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
+    setTextPickerOptionsAttribute(options?: TextPickerOptions): void {}
     defaultPickerItemHeight0Attribute(value: number | string | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -637,7 +626,7 @@ export class ArkTextPickerComponent extends ArkCommonMethodComponent implements 
     public setTextPickerOptions(options?: TextPickerOptions): this {
         if (this.checkPriority("setTextPickerOptions")) {
             const options_casted = options as (TextPickerOptions | undefined)
-            this.getPeer()?.setTextPickerOptionsAttribute(options_casted)
+            hookSetTextPickerOptions(this.getPeer(), options_casted)
             return this
         }
         return this

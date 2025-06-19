@@ -102,6 +102,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructCustomNode)
         },
         ani_native_function {
+            "_BuilderProxyNode_Construct",
+            "I:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::BuilderProxyNodeConstruct)
+        },
+        ani_native_function {
             "_ContentSlot_construct",
             "I:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ContentSlotConstruct)

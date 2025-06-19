@@ -14,7 +14,7 @@
  */
 
 import { KPointer, InteropNativeModule } from "@koalaui/interop"
-import { TabsOps, BarMode, ScrollableBarModeOptions, BlurStyle, BackgroundBlurStyleOptions } from "../component"
+import { TabsOps, BarMode, ScrollableBarModeOptions, BlurStyle, BackgroundBlurStyleOptions, Bindable } from "../component"
 
 export class TabsOpsHandWritten {
     static hookTabsAttributeBarModeImpl(node: KPointer, value: BarMode | undefined, options: ScrollableBarModeOptions | undefined) {
@@ -23,5 +23,11 @@ export class TabsOpsHandWritten {
 
     static hookTabsAttributeBarBackgroundBlurStyleImpl(node: KPointer, style: BlurStyle | undefined, options: BackgroundBlurStyleOptions | undefined) {
         TabsOps.registerBarBackgroundBlurStyle(node, style, options)
+    }
+
+    static hookTabsAttributeIndexImpl(node: KPointer, value: Bindable<number>) {
+        TabsOps.registerIndexCallback(node, value.value, (v) => {
+            value.onChange(v)
+        })
     }
 }

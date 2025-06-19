@@ -74,6 +74,7 @@ public:
     static void SetLaneMaxLength(FrameNode* frameNode, const Dimension& laneMaxLength);
     static void SetEditMode(FrameNode* frameNode, bool editMode);
     static void SetMultiSelectable(FrameNode* frameNode, bool selectable);
+    static void SetStackFromEnd(FrameNode* frameNode, const std::optional<bool>& enabled);
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };

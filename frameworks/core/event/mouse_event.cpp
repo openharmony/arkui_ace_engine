@@ -19,6 +19,7 @@
 #include "base/geometry/offset.h"
 #include "base/input_manager/input_manager.h"
 #include "core/common/ace_application_info.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -29,6 +30,14 @@ bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
         return false;
     }
     HoverInfo hoverInfo;
+    auto node = GetAttachedNode().Upgrade();
+    if (node) {
+        NG::PointF localPoint(event.x, event.y);
+        NG::NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
+        auto localX = static_cast<float>(localPoint.GetX());
+        auto localY = static_cast<float>(localPoint.GetY());
+        hoverInfo.SetLocalLocation(Offset(localX, localY));
+    }
     hoverInfo.SetTimeStamp(event.time);
     hoverInfo.SetDeviceId(event.deviceId);
     hoverInfo.SetSourceDevice(event.sourceType);
