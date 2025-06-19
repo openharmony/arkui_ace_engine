@@ -1364,7 +1364,7 @@ void WebPattern::OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode)
 
 
 void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-    const NG::OnMenuItemClickCallback&& onMenuItemClick)
+    const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
     // cross platform is not support now;
 }
