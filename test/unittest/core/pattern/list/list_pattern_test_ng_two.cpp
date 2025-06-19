@@ -393,4 +393,330 @@ HWTEST_F(ListPatternTwoTestNg, LayoutItemInGroupForFocus002, TestSize.Level1)
     listNode->context_ = nullptr;
     EXPECT_TRUE(result);
 }
+
+/**
+ * @tc.name: GetNextMoveStepForMultiLanes001
+ * @tc.desc: Test ListPattern GetNextMoveStepForMultiLanes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTwoTestNg, GetNextMoveStepForMultiLanes001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+
+    /**
+     * @tc.steps: step2. Set nextIndex to 3
+     */
+    int32_t nextIndex = 3;
+
+    /**
+     * @tc.steps: step3. Set the currIndex to 2, focusStep to NONE and isVertical to true
+     * @tc.expected: The result of calling the function return -1 and nextIndex is unchanged
+     */
+    auto result = listPattern->GetNextMoveStepForMultiLanes(2, FocusStep::NONE, true, nextIndex);
+    EXPECT_EQ(nextIndex, 3);
+    EXPECT_EQ(result, -1);
+}
+
+/**
+ * @tc.name: GetNextMoveStepForMultiLanes002
+ * @tc.desc: Test ListPattern GetNextMoveStepForMultiLanes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTwoTestNg, GetNextMoveStepForMultiLanes002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+
+    /**
+     * @tc.steps: step2. Set nextIndex to 3 and lanes_ of listPattern to 2
+     * Set the second element of the itemPosition and cachedItemPosition
+     */
+    int32_t nextIndex = 3;
+    listPattern->lanes_ = 2;
+    listPattern->itemPosition_[2] = { 2, 2.0f, 4.0f, false };
+    listPattern->cachedItemPosition_[2] = { 3, 4.0f, 6.0f, false };
+
+    /**
+     * @tc.steps: step3. Set the currIndex to 2, focusStep to DOWN and isVertical to true
+     * @tc.expected: The result of calling the function return 2 and nextIndex to be 4
+     */
+    auto result = listPattern->GetNextMoveStepForMultiLanes(2, FocusStep::DOWN, true, nextIndex);
+    EXPECT_EQ(nextIndex, 4);
+    EXPECT_EQ(result, 2);
+}
+
+/**
+ * @tc.name: GetNextMoveStepForMultiLanes003
+ * @tc.desc: Test ListPattern GetNextMoveStepForMultiLanes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTwoTestNg, GetNextMoveStepForMultiLanes003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+
+    /**
+     * @tc.steps: step2. Set nextIndex to 3 and lanes_ of listPattern to 2
+     * Set the second element of the itemPosition and the third element of the cachedItemPosition
+     */
+    int32_t nextIndex = 3;
+    listPattern->lanes_ = 2;
+    listPattern->itemPosition_[2] = { 2, 2.0f, 4.0f, false };
+    listPattern->cachedItemPosition_[3] = { 3, 4.0f, 6.0f, true };
+
+    /**
+     * @tc.steps: step3. Set the currIndex to 2, focusStep to RIGHT and isVertical to false
+     * @tc.expected: The result of calling the function return 1 and nextIndex to be curIndex + 1
+     */
+    auto result = listPattern->GetNextMoveStepForMultiLanes(2, FocusStep::RIGHT, false, nextIndex);
+    EXPECT_EQ(nextIndex, 3);
+    EXPECT_EQ(result, 1);
+}
+
+/**
+ * @tc.name: HandleIndexToBounds
+ * @tc.desc: Test static HandleIndexToBounds
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTwoTestNg, HandleIndexToBounds, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+
+    /**
+     * @tc.steps: step2. Set maxListItemIndex_ of listPattern to 2
+     */
+    listPattern->maxListItemIndex_ = 2;
+
+    /**
+     * @tc.steps: step3. Set nextIndex to 3 and loopFlag to true
+     * @tc.expected: The nextIndex to be maxListItemIndex_ and loopFlag to be false
+     */
+    int32_t nextIndex = 3;
+    bool loopFlag = true;
+    listPattern->HandleIndexToBounds(nextIndex, loopFlag);
+    EXPECT_EQ(nextIndex, 2);
+    EXPECT_FALSE(loopFlag);
+}
+
+/**
+ * @tc.name: GetCrossAxisNextIndex
+ * @tc.desc: Test static GetCrossAxisNextIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTwoTestNg, GetCrossAxisNextIndex, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+
+    /**
+     * @tc.steps: step2. Set focusWrapMode_ of listPattern to DEFAULT
+     */
+    listPattern->focusWrapMode_ = FocusWrapMode::DEFAULT;
+
+    /**
+     * @tc.steps: step3. Call the GetCrossAxisNextIndex function
+     * @tc.expected: The result return 3
+     */
+    auto result = listPattern->GetCrossAxisNextIndex(1, true, 2, FocusStep::NONE);
+    EXPECT_EQ(result, 3);
+}
+
+/**
+ * @tc.name: GetPosition001
+ * @tc.desc: Test static GetPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTwoTestNg, GetPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+
+    /**
+     * @tc.steps: step2. Set the second element of the itemPosition and cachedItemPosition
+     */
+    listPattern->itemPosition_[2] = { 2, 2.0f, 4.0f, false };
+    listPattern->cachedItemPosition_[2] = { 3, 4.0f, 6.0f, true };
+
+    /**
+     * @tc.steps: step3. Set index to 3
+     * @tc.expected: The result return nullptr
+     */
+    auto result = listPattern->GetPosition(3);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetPosition002
+ * @tc.desc: Test static GetPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTwoTestNg, GetPosition002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+
+    /**
+     * @tc.steps: step2. Set the second element of the itemPosition
+     * and set the third element of the cachedItemPosition
+     */
+    listPattern->itemPosition_[2] = { 2, 2.0f, 4.0f, false };
+    listPattern->cachedItemPosition_[3] = { 3, 4.0f, 6.0f, true };
+
+    /**
+     * @tc.steps: step3. Set index to 3
+     * @tc.expected: The result->id return 3
+     */
+    auto result = listPattern->GetPosition(3);
+    EXPECT_EQ(result->id, 3);
+}
+
+/**
+ * @tc.name: NextPositionBlocksMove001
+ * @tc.desc: Test static NextPositionBlocksMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTwoTestNg, NextPositionBlocksMove001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+
+    /**
+     * @tc.steps: step2. Set all element of curPos
+     * and set the nextPos to nullptr
+     */
+    ListItemInfo curPos = { 2, 2.0f, 4.0f, false };
+
+    /**
+     * @tc.steps: step3. Set isVertical to false
+     * @tc.expected: The result return false
+     */
+    auto result = listPattern->NextPositionBlocksMove(&curPos, nullptr, false);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: NextPositionBlocksMove002
+ * @tc.desc: Test static NextPositionBlocksMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTwoTestNg, NextPositionBlocksMove002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+
+    /**
+     * @tc.steps: step2. Set all element of curPos
+     * and set the isGroup of the nextPos to true
+     */
+    ListItemInfo curPos = { 2, 2.0f, 4.0f, false };
+    ListItemInfo nextPos = { 3, 4.0f, 6.0f, true };
+
+    /**
+     * @tc.steps: step3. Set isVertical to true
+     * @tc.expected: The result return true
+     */
+    auto result = listPattern->NextPositionBlocksMove(&curPos, &nextPos, true);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: AdjustNextIndexForEdgeRow001
+ * @tc.desc: Test static AdjustNextIndexForEdgeRow
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTwoTestNg, AdjustNextIndexForEdgeRow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+
+    /**
+     * @tc.steps: step2. Set the maxListItemIndex_ of listPattern to 2
+     * and set the lanes_ of listPattern to 2
+     */
+    listPattern->maxListItemIndex_ = 2;
+    listPattern->lanes_ = 2;
+
+    /**
+     * @tc.steps: step3. Set nextIndex to 4, moveStep to 2 and curIndex to 2
+     * @tc.expected: The result return 4
+     */
+    auto result = listPattern->AdjustNextIndexForEdgeRow(4, 2, 2);
+    EXPECT_EQ(result, 4);
+}
+
+/**
+ * @tc.name: AdjustNextIndexForEdgeRow002
+ * @tc.desc: Test static AdjustNextIndexForEdgeRow
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTwoTestNg, AdjustNextIndexForEdgeRow002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+
+    /**
+     * @tc.steps: step2. Set the maxListItemIndex_ of listPattern to 6
+     * and set the lanes_ of listPattern to 1
+     */
+    listPattern->maxListItemIndex_ = 6;
+    listPattern->lanes_ = 1;
+
+    /**
+     * @tc.steps: step3. Set nextIndex to 6, moveStep to 2 and curIndex to 4
+     * @tc.expected: The result return 6
+     */
+    auto result = listPattern->AdjustNextIndexForEdgeRow(6, 2, 4);
+    EXPECT_EQ(result, 6);
+}
+
+/**
+ * @tc.name: SetFocusWrapMode
+ * @tc.desc: Test static SetFocusWrapMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTwoTestNg, SetFocusWrapMode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    int32_t number = 6;
+    FocusWrapMode focusWrapMode = static_cast<FocusWrapMode>(number);
+
+    /**
+     * @tc.steps: Set focusWrapMode_ to WRAP_WITH_ARROW
+     */
+    listPattern->focusWrapMode_ = FocusWrapMode::WRAP_WITH_ARROW;
+
+    /**
+     * @tc.steps: step3. Set focusWrapMode is not equal to DEFAULT and WRAP_WITH_ARROW
+     * @tc.expected: The focusWrapMode_ of listPattern to be DEFAULT
+     */
+    listPattern->SetFocusWrapMode(focusWrapMode);
+    EXPECT_EQ(listPattern->focusWrapMode_, FocusWrapMode::DEFAULT);
+}
 } // namespace OHOS::Ace::NG
