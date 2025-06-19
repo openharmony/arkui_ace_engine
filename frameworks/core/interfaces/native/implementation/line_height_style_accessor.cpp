@@ -44,7 +44,7 @@ Ark_Number GetLineHeightImpl(Ark_LineHeightStyle peer)
     Ark_Number ret = Converter::ArkValue<Ark_Number>(0);
     CHECK_NULL_RETURN(peer, ret);
     CHECK_NULL_RETURN(peer->span, ret);
-    return Converter::ArkValue<Ark_Number>(peer->span->GetLineHeight().ConvertToPx());
+    return Converter::ArkValue<Ark_Number>(peer->span->GetLineHeight().ConvertToVp());
 }
 } // LineHeightStyleAccessor
 const GENERATED_ArkUILineHeightStyleAccessor* GetLineHeightStyleAccessor()

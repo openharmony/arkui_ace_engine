@@ -282,6 +282,12 @@ void AssignArkValue(Ark_LeadingMarginPlaceholder& dst, const LeadingMargin& src)
     }
 }
 
+void AssignArkValue(Ark_Number& dst, const LeadingMargin& src)
+{
+    auto leadingMargin = Dimension(src.size.Width()).ConvertToVp();
+    dst = ArkValue<Ark_Number>(leadingMargin);
+}
+
 void AssignArkValue(Ark_Length& dst, const double& src)
 {
     dst.type = INTEROP_RUNTIME_NUMBER;
