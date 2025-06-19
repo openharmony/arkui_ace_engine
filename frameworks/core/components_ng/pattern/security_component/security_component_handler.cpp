@@ -1335,11 +1335,34 @@ void SecurityComponentHandler::CheckSecurityComponentClickEvent(const RefPtr<Fra
 }
 
 int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scId,
+    RefPtr<FrameNode>& node, const SecCompEnhanceEvent& event,
+    Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback)
+{
+    CHECK_NULL_RETURN(node, -1);
+    SecCompClickEvent secEvent = {};
+    secEvent.type = ClickEventType::ACCESSIBILITY_EVENT_TYPE;
+#ifdef SECURITY_COMPONENT_ENABLE
+    std::vector<uint8_t> dataBuffer = event.dataBuffer;
+    if (dataBuffer.size() > 0) {
+        secEvent.extraInfo.data = dataBuffer.data();
+        secEvent.extraInfo.dataSize = dataBuffer.size();
+    }
+    secEvent.accessibility.timestamp =
+        static_cast<uint64_t>(event.time.time_since_epoch().count()) / SECOND_TO_MILLISECOND;
+    secEvent.accessibility.componentId = node->GetId();
+#endif
+    std::string message;
+    CheckSecurityComponentClickEvent(node, message);
+
+    return ReportSecurityComponentClickEventInner(scId, node, secEvent, std::move(callback), message);
+}
+
+int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scId,
     RefPtr<FrameNode>& node, GestureEvent& event,
     Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback,
     std::string& message)
 {
-    SecCompClickEvent secEvent;
+    SecCompClickEvent secEvent = {};
     secEvent.type = ClickEventType::POINT_EVENT_TYPE;
 #ifdef SECURITY_COMPONENT_ENABLE
     secEvent.point.touchX = event.GetDisplayX();
@@ -1373,7 +1396,7 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
     RefPtr<FrameNode>& node, const KeyEvent& event,
     Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback)
 {
-    SecCompClickEvent secEvent;
+    SecCompClickEvent secEvent = {};
     secEvent.type = ClickEventType::KEY_EVENT_TYPE;
 
     secEvent.key.timestamp =
