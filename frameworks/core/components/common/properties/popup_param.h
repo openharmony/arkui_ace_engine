@@ -586,7 +586,7 @@ public:
         avoidTarget_ = avoidTarget;
     }
     
-    AvoidanceMode GetAvoidTarget() const
+    std::optional<AvoidanceMode> GetAvoidTarget() const
     {
         return avoidTarget_;
     }
@@ -779,7 +779,7 @@ private:
     RefPtr<NG::ChainedTransitionEffect> transitionEffects_ = nullptr;
     StateChangeFunc doubleBindCallback_;
     PopupKeyboardAvoidMode keyboardAvoidMode_ = PopupKeyboardAvoidMode::NONE;
-    AvoidanceMode avoidTarget_ = AvoidanceMode::COVER_TARGET;
+    std::optional<AvoidanceMode> avoidTarget_ = AvoidanceMode::COVER_TARGET;
     std::optional<Dimension> outlineWidth_;
     std::optional<Dimension> innerBorderWidth_;
     PopupLinearGradientProperties outlineLinearGradient_;

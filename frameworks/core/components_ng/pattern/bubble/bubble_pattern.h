@@ -281,24 +281,14 @@ public:
         return hasWidth_;
     }
 
-    void SetAvoidTarget(AvoidanceMode avoidTarget)
+    void SetAvoidTarget(std::optional<AvoidanceMode> avoidTarget)
     {
         avoidTarget_ = avoidTarget;
     }
     
-    AvoidanceMode GetAvoidTarget() const
+    std::optional<AvoidanceMode> GetAvoidTarget() const
     {
         return avoidTarget_;
-    }
-
-    void SetTextPadding(PaddingProperty textPadding)
-    {
-        popupTextPadding_ = textPadding;
-    }
-    
-    PaddingProperty GetTextPadding() const
-    {
-        return popupTextPadding_;
     }
 
     bool GetHasTransition() const
@@ -466,8 +456,7 @@ private:
     bool avoidKeyboard_ = false;
     bool hasPlacement_ = false;
     bool hasWidth_ = false;
-    AvoidanceMode avoidTarget_ = AvoidanceMode::COVER_TARGET;
-    PaddingProperty popupTextPadding_;
+    std::optional<AvoidanceMode> avoidTarget_ = std::nullopt;
 
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 

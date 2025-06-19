@@ -223,8 +223,8 @@ private:
         const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);
     OffsetF GetChildPositionNew(
         const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& bubbleProp, const RefPtr<LayoutWrapper> child);
-    OffsetF FitToScreenNew(const OffsetF& position, size_t step, size_t& i, const SizeF& childSize,
-        const OffsetF& arrowPosition, bool didNeedArrow = false);
+    OffsetF FitToScreenNew(
+        const OffsetF& position, size_t step, size_t& i, const SizeF& childSize, bool didNeedArrow = false);
     bool GetIfNeedArrow(const RefPtr<BubbleLayoutProperty>& bubbleProp, const SizeF& childSize);
     void UpdateChildPosition(OffsetF& childOffset);
     void UpdateTouchRegion();
@@ -293,12 +293,14 @@ private:
         const SizeF& childSize, OffsetF& arrowPosition, OffsetF& resultPosition, SizeF& resultSize, bool canCompress);
     bool AvoidToTargetLeft(
         const SizeF& childSize, OffsetF& arrowPosition, OffsetF& resultPosition, SizeF& resultSize, bool canCompress);
+    void RecordMaxSpace(const float maxAreaSpace, const OffsetF& position, const float maxWidth, const float maxHeight,
+        const OffsetF& arrowPosition);
     Rect GetBottomRect();
     Rect GetTopRect();
     Rect GetRightRect();
     Rect GetLeftRect();
     OffsetF AvoidToTopOrBottomByWidth(const SizeF& childSize, OffsetF& arrowPosition, SizeF& resultSize);
-    OffsetF AdjustAvoidPosition(const OffsetF& position, float width, float height, OffsetF& ArrowPosition);
+    OffsetF AdjustAvoidPosition(const OffsetF& position, float width, float height, OffsetF& arrowPosition);
 
     ArrowOfTargetOffset arrowOfTargetOffset_ = ArrowOfTargetOffset::NONE;
     Dimension arrowOffset_;
@@ -365,10 +367,10 @@ private:
     bool hasPlacement_ = false;
     bool hasWidth_ = false;
     
-    AvoidanceMode avoidTarget_ = AvoidanceMode::COVER_TARGET;
-    PaddingProperty popupTextPadding_;
+    std::optional<AvoidanceMode> avoidTarget_ = std::nullopt;
     PopupCanPlacement canPlacement_;
     float maxAreaSpace_ = 0.0f;
+    OffsetF checkArrowPosition_; // transfer arrowPosition to CheckPosition
     PopupMaxAreaInfo maxAreaInfo_;
     float targetSecurity_ = 0.0f;
     using PlacementFunc = OffsetF (BubbleLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&, OffsetF&);
