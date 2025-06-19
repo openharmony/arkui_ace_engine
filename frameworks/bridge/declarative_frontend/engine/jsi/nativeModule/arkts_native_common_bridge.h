@@ -295,6 +295,7 @@ public:
     static Local<panda::ObjectRef> CreateGestureInfo(EcmaVM* vm, const RefPtr<NG::GestureInfo>& gestureInfo);
     static Local<panda::ObjectRef> CreateGestureEventInfo(
         EcmaVM* vm, GestureTypeName typeName, const std::shared_ptr<BaseGestureEvent>& info);
+    static Local<panda::ObjectRef> CreateGestureEventInfo(EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info);
     static Local<panda::ObjectRef> CreateFingerInfosInfo(
         EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info, Local<panda::ObjectRef>& obj);
     static Local<panda::ObjectRef> SetUniqueAttributes(
@@ -400,6 +401,8 @@ public:
     static ArkUINativeModuleValue ResetOnGestureJudgeBegin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnGestureRecognizerJudgeBegin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnGestureRecognizerJudgeBegin(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnTouchTestDone(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnTouchTestDone(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetShouldBuiltInRecognizerParallelWith(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetShouldBuiltInRecognizerParallelWith(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue AddTapGesture(ArkUIRuntimeCallInfo* runtimeCallInfo);
