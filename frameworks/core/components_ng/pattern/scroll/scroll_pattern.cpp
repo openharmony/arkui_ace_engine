@@ -51,6 +51,8 @@ void ScrollPattern::OnModifyDone()
         ResetPosition();
         if (axis == Axis::FREE) {
             InitFreeScroll();
+        } else {
+            freePanGesture_.Reset();
         }
     }
     if (!GetScrollableEvent()) {

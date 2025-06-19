@@ -48,11 +48,10 @@ HWTEST_F(ScrollGestureTest, RecognizerOverride001, TestSize.Level1)
     CreateScrollDone();
     ASSERT_TRUE(pattern_->freePanGesture_);
 
-    OffsetF of { 1, 1 };
     TouchTestResult res;
     ResponseLinkResult link;
     auto scrollHandler = pattern_->GetScrollableEvent();
-    scrollHandler->CollectScrollableTouchTarget(of, nullptr, res, frameNode_, nullptr, link);
+    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link);
     EXPECT_EQ(link.size(), 1);
     EXPECT_EQ(*link.begin(), pattern_->freePanGesture_);
     EXPECT_EQ(*res.begin(), pattern_->freePanGesture_);
@@ -77,5 +76,37 @@ HWTEST_F(ScrollGestureTest, FreeScroll001, TestSize.Level1)
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildX(frameNode_, 0), -100.0f);
     EXPECT_EQ(GetChildY(frameNode_, 0), -100.0f);
+}
+
+/**
+ * @tc.name: ModeChange001
+ * @tc.desc: Test Scroll axis change
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollGestureTest, ModeChange001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ 2000, 2000 });
+    CreateScrollDone();
+
+    TouchTestResult res;
+    ResponseLinkResult link;
+    auto scrollHandler = pattern_->GetScrollableEvent();
+    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link);
+    EXPECT_EQ(link.size(), 1);
+    EXPECT_EQ(*link.begin(), pattern_->freePanGesture_);
+    EXPECT_EQ(*res.begin(), pattern_->freePanGesture_);
+    ASSERT_TRUE(pattern_->freePanGesture_->onActionUpdate_);
+
+    res.clear();
+    link.clear();
+    layoutProperty_->UpdateAxis(Axis::VERTICAL);
+    pattern_->OnModifyDone();
+    ASSERT_FALSE(pattern_->freePanGesture_);
+    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link);
+    EXPECT_EQ(link.size(), 1);
+    ASSERT_EQ(*link.begin(), scrollHandler->GetScrollable()->panRecognizerNG_);
 }
 } // namespace OHOS::Ace::NG
