@@ -436,7 +436,7 @@ public:
     /**
      * @return Pan gesture recognizer configured for Axis::FREE mode
      */
-    RefPtr<NGGestureRecognizer> GetExtraRecognizer() const
+    RefPtr<NGGestureRecognizer> GetOverrideRecognizer() const
     {
         return freePanGesture_;
     }
@@ -444,7 +444,7 @@ public:
 private:
     void InitFreeScroll();
 
-    RefPtr<PanRecognizer> freePanGesture_; // extra recognizer governs the vertical axis in Free Scroll mode
+    RefPtr<PanRecognizer> freePanGesture_; // all-direction pan recognizer for free scroll mode
     float crossOffset_ = 0.0f; // offset on the vertical axis (currentOffset_ represents horizontal axis in Free Scroll mode)
     /* ============================================================================== */
 

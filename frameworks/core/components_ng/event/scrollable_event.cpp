@@ -173,7 +173,7 @@ RefPtr<NGGestureRecognizer> GetOverrideRecognizer(const RefPtr<FrameNode>& frame
 {
     auto scrollComponent = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_RETURN(scrollComponent, nullptr);
-    return scrollComponent->GetExtraRecognizer();
+    return scrollComponent->GetOverrideRecognizer();
 }
 } // namespace
 
