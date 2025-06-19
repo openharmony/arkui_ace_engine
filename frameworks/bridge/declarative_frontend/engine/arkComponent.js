@@ -23390,28 +23390,33 @@ class TextpickerSelectedBackgroundStyleModifier extends ModifierWithKey {
         }
         getUINativeModule().textpicker.setTextpickerSelectedBackgroundStyle(node, color, topLeft, topRight, bottomLeft,
           bottomRight);
+      } else {
+        getUINativeModule().textpicker.setTextpickerSelectedBackgroundStyle(node, color, undefined, undefined,
+          undefined, undefined);
       }
     }
   }
   checkObjectDiff() {
     if (!(this.stageValue.color === this.value.color)) {
       return true;
-    } else if (Object.keys(this.value.borderRadius).indexOf('value') >= 0) {
-      return !(
-        this.stageValue.borderRadius.value === this.value.borderRadius.value &&
-        this.stageValue.borderRadius.unit === this.value.borderRadius.unit);
-    } else if (Object.keys(this.value.borderRadius).indexOf('topLeft') >= 0) {
-      return !(
-        this.stageValue.borderRadius.topLeft === this.value.borderRadius.topLeft &&
-        this.stageValue.borderRadius.topRight === this.value.borderRadius.topRight &&
-        this.stageValue.borderRadius.bottomLeft === this.value.borderRadius.bottomLeft &&
-        this.stageValue.borderRadius.bottomRight === this.value.borderRadius.bottomRight);
-    } else if (Object.keys(this.value.borderRadius).indexOf('topStart') >= 0) {
-      return !(
-        this.stageValue.borderRadius.topStart === this.value.borderRadius.topStart &&
-        this.stageValue.borderRadius.topEnd === this.value.borderRadius.topEnd &&
-        this.stageValue.borderRadius.bottomStart === this.value.borderRadius.bottomStart &&
-        this.stageValue.borderRadius.bottomEnd === this.value.borderRadius.bottomEnd);
+    } else if (this.stageValue.borderRadius != null && this.value.borderRadius != null) {
+      if (Object.keys(this.value.borderRadius).indexOf('value') >= 0) {
+        return !(
+          this.stageValue.borderRadius.value === this.value.borderRadius.value &&
+          this.stageValue.borderRadius.unit === this.value.borderRadius.unit);
+      } else if (Object.keys(this.value.borderRadius).indexOf('topLeft') >= 0) {
+        return !(
+          this.stageValue.borderRadius.topLeft === this.value.borderRadius.topLeft &&
+          this.stageValue.borderRadius.topRight === this.value.borderRadius.topRight &&
+          this.stageValue.borderRadius.bottomLeft === this.value.borderRadius.bottomLeft &&
+          this.stageValue.borderRadius.bottomRight === this.value.borderRadius.bottomRight);
+      } else if (Object.keys(this.value.borderRadius).indexOf('topStart') >= 0) {
+        return !(
+          this.stageValue.borderRadius.topStart === this.value.borderRadius.topStart &&
+          this.stageValue.borderRadius.topEnd === this.value.borderRadius.topEnd &&
+          this.stageValue.borderRadius.bottomStart === this.value.borderRadius.bottomStart &&
+          this.stageValue.borderRadius.bottomEnd === this.value.borderRadius.bottomEnd);
+      }
     }
     return true;
   }
