@@ -1890,6 +1890,41 @@ HWTEST_F(ListLayoutTestNg, PostListItemPressStyleTask002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PostListItemPressStyleTask003
+ * @tc.desc: Test list layout with PostListItemPressStyleTask.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, PostListItemPressStyleTask003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init List.
+     */
+    ListModelNG model = CreateList();
+    model.SetDivider(ITEM_DIVIDER);
+    CreateListItemGroups(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
+    auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
+    int cur = 0;
+    for (auto& child : groupPattern->itemPosition_) {
+        child.second.id += cur;
+        cur++;
+    }
+
+    auto listItemNode = GetChildFrameNode(groupFrameNode, 0);
+    auto listItemNodeId = listItemNode->GetId();
+    auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(listItemNode);
+    stateStyleMgr->PostListItemPressStyleTask(UI_STATE_PRESSED | UI_STATE_SELECTED);
+    RefPtr<NodePaintMethod> paint = groupPattern->CreateNodePaintMethod();
+    RefPtr<ListItemGroupPaintMethod> groupPaint = AceType::DynamicCast<ListItemGroupPaintMethod>(paint);
+    for (auto& child : groupPaint->itemPosition_) {
+        if (child.second.id == listItemNodeId) {
+            EXPECT_TRUE(child.second.isPressed);
+        }
+    }
+}
+
+/**
  * @tc.name: ChildrenMainSize005
  * @tc.desc: Test childrenMainSize layout
  * @tc.type: FUNC

@@ -363,7 +363,7 @@ void StateStyleManager::PostPressCancelStyleTask(uint32_t delayTime)
 
 void StateStyleManager::PostListItemPressStyleTask(UIState state)
 {
-    bool isPressed = state == UI_STATE_PRESSED;
+    bool isPressed = (state & UI_STATE_PRESSED) > 0;
     auto node = GetFrameNode();
     CHECK_NULL_VOID(node);
     auto nodeId = node->GetId();
