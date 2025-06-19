@@ -1099,6 +1099,25 @@
             ]
         },
         {
+            "name": "FontWeightResStrings",
+            "type": "Ark_Resource",
+            "resType": "STRING",
+            "validValues": [
+                ["\"100\"", "100"],
+                ["\"200\"", "200"],
+                ["\"300\"", "300"],
+                ["\"400\"", "400"],
+                ["\"500\"", "500"],
+                ["\"600\"", "600"],
+                ["\"700\"", "700"],
+                ["\"800\"", "800"],
+                ["\"900\"", "900"],
+            ],
+            "invalidValues": [
+                "\"0\"", "\"1000\"", "\"-100\""
+            ]
+        },
+        {
             "name": "ScrollableFrictionNum",
             "type": "Ark_Number",
             "validValues": [
@@ -1226,6 +1245,46 @@
         {
             "name": "TimeFormat",
             "type": "Ark_String",
+            "validValues":[
+                ["\"aa hh:mm:ss\"", "aa hh:mm:ss"],
+                ["\"EEEE, M, d, yyyy\"", "EEEE, M, d, yyyy"],
+                ["\"MMM d, yyyy\"", "MMM d, yyyy"],
+                ["\"EEEE, M, d\"", "EEEE, M, d"],
+                ["\"MMM dd\"", "MMM dd"],
+                ["\"MM/dd/yyyy\"", "MM/dd/yyyy"],
+                ["\"EEEE MM dd\"", "EEEE MM dd"],
+                ["\"yyyy\"", "yyyy"],
+                ["\"yy\"", "yy"],
+                ["\"MM\"", "MM"],
+                ["\"M\"", "M"],
+                ["\"dd\"", "dd"],
+                ["\"d\"", "d"],
+                ["\"EEEE\"", "EEEE"],
+                ["\"E, EE, EEE\"", "E, EE, EEE"],
+                ["\"MMM d, yyyy\"", "MMM d, yyyy"],
+                ["\"yyyy/M/d\"", "yyyy/M/d"],
+                ["\"yyyy-M-d\"", "yyyy-M-d"],
+                ["\"yyyy.M.d\"", "yyyy.M.d"],
+                ["\"HH:mm:ss\"", "HH:mm:ss"],
+                ["\"aa hh:mm:ss\"", "aa hh:mm:ss"],
+                ["\"hh:mm:ss\"", "hh:mm:ss"],
+                ["\"HH:mm\"", "HH:mm"],
+                ["\"aa hh:mm\"", "aa hh:mm"],
+                ["\"hh:mm\"", "hh:mm"],
+                ["\"mm:ss\"", "mm:ss"],
+                ["\"mm:ss.SS\"", "mm:ss.SS"],
+                ["\"mm:ss.SSS\"", "mm:ss.SSS"],
+                ["\"hh:mm:ss aa\"", "hh:mm:ss aa"],
+                ["\"HH\"", "HH"],
+            ],
+            "invalidValues": [
+                "\"\""
+            ]
+        },
+        {
+            "name": "TimeFormatRes",
+            "type": "Ark_Resource",
+            "resType": "STRING",
             "validValues":[
                 ["\"aa hh:mm:ss\"", "aa hh:mm:ss"],
                 ["\"EEEE, M, d, yyyy\"", "EEEE, M, d, yyyy"],
@@ -1396,6 +1455,13 @@
                 "\"zz:rr:tt\""
             ]
         },
+        {
+            "name": "ImageContent",
+            "type": "Ark_ImageContent",
+            "validValues": [
+                ["ARK_IMAGE_CONTENT_EMPTY", ""],
+            ],
+        },
     ],
     "types": [
         {
@@ -1435,8 +1501,12 @@
             "fixtures": ["NumberFloatAnything", "StringFloatAnything"]
         },
         {
-            "name": "Union_Number_FontWeight_String",
-            "fixtures": ["FontWeightNumbers"]
+            "name": "FontWeightType",
+            "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+        },
+        {
+            "name": "FontWeightTypeWithRes",
+            "fixtures": ["FontWeightNumbers", "FontWeightStrings", "FontWeightResStrings"]
         },
         {
             "name": "FontFamily",
@@ -2012,7 +2082,7 @@
                 {
                     "name": "fontWeight",
                     "default": "FontWeight.Normal",
-                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                    "type": "FontWeightType",
                 },
                 {
                     "name": "fontFamily",
@@ -2168,7 +2238,7 @@
                         {
                             "name": "weight",
                             "default": "FontWeight.Normal",
-                            "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                            "type": "FontWeightType",
                         },
                         {
                             "name": "family",
@@ -2297,7 +2367,7 @@
                 {
                     "name": "fontWeight",
                     "default": "FontWeight.Normal",
-                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                    "type": "FontWeightType",
                 },
                 {
                     "name": "fontFamily",
@@ -2491,7 +2561,7 @@
                         {
                             "name": "weight",
                             "default": "FontWeight.Normal",
-                            "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                            "type": "FontWeightType",
                         },
                         {
                             "name": "family",
@@ -2786,7 +2856,7 @@
                 {
                     "name": "fontWeight",
                     "default": "FontWeight.Medium",
-                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                    "type": "FontWeightType",
                 },
                 {
                     "name": "fontStyle",
@@ -2838,7 +2908,7 @@
                                 {
                                     "name": "weight",
                                     "default": "FontWeight.Medium",
-                                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                                    "type": "FontWeightType",
                                 },
                                 {
                                     "name": "family",
@@ -3567,11 +3637,14 @@
                 "resizable", // Non-standard JSON formatting
                 "edgeAntialiasing", // No values in the JSON
                 "analyzerConfig", // No values in the JSON
+                "colorFilter", // No values in the JSON
+                "enhancedImageQuality", // New in API 130
             ],
             "attributes": [
                 {
                     "name": "src",
-                    "default": ""
+                    "default": "",
+                    "fixtures": ["ImageContent"],
                 },
                 {
                     "name": "alt",
@@ -3732,7 +3805,7 @@
                     "name": "orientation",
                     "default": "1",
                     "fixtures": ["ImageRotateOrientation"]
-                }
+                },
             ],
             "remove": [
             ],
@@ -3768,6 +3841,8 @@
                 "setFitOriginalSizeTestFitOriginalSizeInvalidValues", // Bug
 
                 "setDraggableTestDraggableValidValues", // Looks like Bug
+
+                "setImageOptions1TestValidValues", // Need opt support for valid values...
             ]
         },
         {
@@ -4373,7 +4448,7 @@
                         {
                             "name": "weight",
                             "default": "FontWeight.Normal",
-                            "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                            "type": "FontWeightType",
                         },
                         {
                             "name": "family",
@@ -4403,7 +4478,7 @@
                 {
                     "name": "fontWeight",
                     "default": "FontWeight.Normal",
-                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                    "type": "FontWeightType",
                 },
                 {
                     "name": "fontStyle",
@@ -4483,7 +4558,7 @@
                         {
                             "name": "weight",
                             "default": "FontWeight.Normal",
-                            "fixtures": ["FontWeightNumbers", "FontWeightStrings"],
+                            "type": "FontWeightType",
                         },
                         {
                             "name": "enableVariableFontWeight",
@@ -4531,7 +4606,7 @@
                     "name": "fontWeight",
                     "arguments": ["^fontWeight", "^font"],
                     "default": "FontWeight.Normal",
-                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                    "type": "FontWeightType",
                 },
                 {
                     "name": "halfLeading",
@@ -4788,7 +4863,7 @@
                 {
                     "name": "format",
                     "default": "aa hh:mm:ss",
-                    "fixtures": ["TimeFormat"]
+                    "fixtures": ["TimeFormat", "TimeFormatRes"],
                 },
                 {
                     "name": "fontColor",
@@ -4805,7 +4880,7 @@
                 {
                     "name": "fontWeight",
                     "default": "FontWeight.Normal",
-                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                    "type": "FontWeightType",
                 },
                 {
                     "name": "fontFamily",
@@ -4991,7 +5066,7 @@
                 {
                     "name": "space",
                     "default": "0.00px",
-                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg"],
+                    "type": "DimensionNonNeg",
                 },
             ]
         },
@@ -5003,31 +5078,31 @@
                 "setSymbolSpanOptionsTestValidValues",
             ],
             "attributes": [
-               {
-                   "name": "fontSize",
-                   "default": "16.00fp",
-                   "type": "DimensionNonNegNonPct",
-               },
-               {
-                   "name": "fontWeight",
-                   "default": "FontWeight.Normal",
-                   "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
-               },
-               {
-                   "name": "fontColor",
-                   "default": "#FF000000",
-               },
-               {
-                   "name": "effectStrategy",
-                   "default": "SymbolEffectStrategy.NONE",
-               },
-               {
-                   "name": "renderingStrategy",
-                   "default": "SymbolRenderingStrategy.SINGLE",
-               },
+                {
+                    "name": "fontSize",
+                    "default": "16.00fp",
+                    "type": "DimensionNonNegNonPct",
+                },
+                {
+                    "name": "fontWeight",
+                    "default": "FontWeight.Normal",
+                    "type": "FontWeightType",
+                },
+                {
+                    "name": "fontColor",
+                    "default": "#FF000000",
+                },
+                {
+                    "name": "effectStrategy",
+                    "default": "SymbolEffectStrategy.NONE",
+                },
+                {
+                    "name": "renderingStrategy",
+                    "default": "SymbolRenderingStrategy.SINGLE",
+                },
             ]
-       },
-       {
+        },
+        {
             "name": "TextTimer",
             "disable": [
                 "setTextTimerOptionsTestValidValues",
@@ -5067,7 +5142,7 @@
                 {
                     "name": "fontWeight",
                     "default": "FontWeight.Normal",
-                    "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
+                    "type": "FontWeightTypeWithRes",
                 },
                 {
                     "name": "fontFamily",

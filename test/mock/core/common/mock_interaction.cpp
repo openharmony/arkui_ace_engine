@@ -18,7 +18,7 @@
 namespace OHOS::Ace {
 InteractionInterface* InteractionInterface::GetInstance()
 {
-    static MockInteractionInterface instance;
+    static ::testing::NiceMock<MockInteractionInterface> instance;
     return &instance;
 };
 } // namespace OHOS::Ace

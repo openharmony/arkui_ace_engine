@@ -55,11 +55,12 @@ void GetGroupDir0Impl(Ark_VMContext vmContext,
                       const Context_getGroupDir_Callback* callback_)
 {
 }
-Ark_String GetGroupDir1Impl(Ark_VMContext vmContext,
-                            Ark_common_Context peer,
-                            const Ark_String* dataGroupID)
+void GetGroupDir1Impl(Ark_VMContext vmContext,
+                      Ark_AsyncWorkerPtr asyncWorker,
+                      Ark_common_Context peer,
+                      const Ark_String* dataGroupID,
+                      const Callback_Opt_String_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    return {};
 }
 Ark_String GetCacheDirImpl(Ark_common_Context peer)
 {

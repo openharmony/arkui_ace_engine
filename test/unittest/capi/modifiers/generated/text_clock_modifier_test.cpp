@@ -176,14 +176,14 @@ HWTEST_F(TextClockModifierTest, setFormatTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(TextClockModifierTest, setFormatTestFormatValidValues, TestSize.Level1)
 {
-    Opt_String initValueFormat;
+    Opt_ResourceStr initValueFormat;
 
     // Initial setup
-    initValueFormat = ArkValue<Opt_String>(std::get<1>(Fixtures::testFixtureTimeFormatValidValues[0]));
+    initValueFormat = ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureTimeFormatValidValues[0]));
 
     auto checkValue = [this, &initValueFormat](
-                          const std::string& input, const std::string& expectedStr, const Opt_String& value) {
-        Opt_String inputValueFormat = initValueFormat;
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceStr& value) {
+        Opt_ResourceStr inputValueFormat = initValueFormat;
 
         inputValueFormat = value;
         modifier_->setFormat(node_, &inputValueFormat);
@@ -193,7 +193,10 @@ HWTEST_F(TextClockModifierTest, setFormatTestFormatValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureTimeFormatValidValues) {
-        checkValue(input, expected, ArkValue<Opt_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_String>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureTimeFormatResValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_Resource>(value));
     }
 }
 
@@ -204,13 +207,13 @@ HWTEST_F(TextClockModifierTest, setFormatTestFormatValidValues, TestSize.Level1)
  */
 HWTEST_F(TextClockModifierTest, setFormatTestFormatInvalidValues, TestSize.Level1)
 {
-    Opt_String initValueFormat;
+    Opt_ResourceStr initValueFormat;
 
     // Initial setup
-    initValueFormat = ArkValue<Opt_String>(std::get<1>(Fixtures::testFixtureTimeFormatValidValues[0]));
+    initValueFormat = ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureTimeFormatValidValues[0]));
 
-    auto checkValue = [this, &initValueFormat](const std::string& input, const Opt_String& value) {
-        Opt_String inputValueFormat = initValueFormat;
+    auto checkValue = [this, &initValueFormat](const std::string& input, const Opt_ResourceStr& value) {
+        Opt_ResourceStr inputValueFormat = initValueFormat;
 
         modifier_->setFormat(node_, &inputValueFormat);
         inputValueFormat = value;
@@ -222,10 +225,15 @@ HWTEST_F(TextClockModifierTest, setFormatTestFormatInvalidValues, TestSize.Level
     };
 
     for (auto& [input, value] : Fixtures::testFixtureTimeFormatInvalidValues) {
-        checkValue(input, ArkValue<Opt_String>(value));
+        checkValue(input, ArkUnion<Opt_ResourceStr, Ark_String>(value));
     }
+    for (auto& [input, value] : Fixtures::testFixtureTimeFormatResInvalidValues) {
+        checkValue(input, ArkUnion<Opt_ResourceStr, Ark_Resource>(value));
+    }
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Opt_ResourceStr, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_String>());
+    checkValue("undefined", ArkValue<Opt_ResourceStr>());
 }
 
 /*

@@ -76,14 +76,14 @@ HWTEST_F(QRCodeModifierTest, setQRCodeOptionsTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(QRCodeModifierTest, setQRCodeOptionsTestValueValidValues, TestSize.Level1)
 {
-    Ark_String initValueValue;
+    Ark_ResourceStr initValueValue;
 
     // Initial setup
-    initValueValue = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+    initValueValue = ArkUnion<Ark_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueValue](
-                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
-        Ark_String inputValueValue = initValueValue;
+                          const std::string& input, const std::string& expectedStr, const Ark_ResourceStr& value) {
+        Ark_ResourceStr inputValueValue = initValueValue;
 
         // Re-create node for 'options' attribute
         auto node = CreateNode();
@@ -97,8 +97,41 @@ HWTEST_F(QRCodeModifierTest, setQRCodeOptionsTestValueValidValues, TestSize.Leve
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, expected, value);
+        checkValue(input, expected, ArkUnion<Ark_ResourceStr, Ark_String>(value));
     }
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringResValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_ResourceStr, Ark_Resource>(value));
+    }
+}
+
+/*
+ * @tc.name: setQRCodeOptionsTestValueInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeModifierTest, setQRCodeOptionsTestValueInvalidValues, TestSize.Level1)
+{
+    Ark_ResourceStr initValueValue;
+
+    // Initial setup
+    initValueValue = ArkUnion<Ark_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+
+    auto checkValue = [this, &initValueValue](const std::string& input, const Ark_ResourceStr& value) {
+        Ark_ResourceStr inputValueValue = initValueValue;
+
+        // Re-create node for 'options' attribute
+        auto node = CreateNode();
+        inputValueValue = value;
+        modifier_->setQRCodeOptions(node, &inputValueValue);
+        auto jsonValue = GetJsonValue(node);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUE_NAME);
+        DisposeNode(node);
+        EXPECT_EQ(resultStr, ATTRIBUTE_VALUE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setQRCodeOptions, attribute: value";
+    };
+
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Ark_ResourceStr, Ark_Empty>(nullptr));
 }
 
 /*

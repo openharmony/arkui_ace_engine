@@ -30,9 +30,11 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Scene LoadImpl(const Opt_ResourceStr* uri)
+void LoadImpl(Ark_VMContext vmContext,
+              Ark_AsyncWorkerPtr asyncWorker,
+              const Opt_ResourceStr* uri,
+              const Callback_Opt_Scene_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    return {};
 }
 void DestroyImpl(Ark_Scene peer)
 {

@@ -18,11 +18,11 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace LayoutPolicyAccessor {
-void DestroyPeerImpl(Ark_LayoutPolicy peer)
+namespace ExtendableComponentAccessor {
+void DestroyPeerImpl(Ark_ExtendableComponent peer)
 {
 }
-Ark_LayoutPolicy CtorImpl()
+Ark_ExtendableComponent CtorImpl()
 {
     return nullptr;
 }
@@ -30,20 +30,25 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_LayoutPolicy GetMatchParentImpl()
+Ark_UIContext GetUIContextImpl(Ark_ExtendableComponent peer)
 {
     return {};
 }
-} // LayoutPolicyAccessor
-const GENERATED_ArkUILayoutPolicyAccessor* GetLayoutPolicyAccessor()
+Ark_Int32 GetUniqueIdImpl(Ark_ExtendableComponent peer)
 {
-    static const GENERATED_ArkUILayoutPolicyAccessor LayoutPolicyAccessorImpl {
-        LayoutPolicyAccessor::DestroyPeerImpl,
-        LayoutPolicyAccessor::CtorImpl,
-        LayoutPolicyAccessor::GetFinalizerImpl,
-        LayoutPolicyAccessor::GetMatchParentImpl,
+    return {};
+}
+} // ExtendableComponentAccessor
+const GENERATED_ArkUIExtendableComponentAccessor* GetExtendableComponentAccessor()
+{
+    static const GENERATED_ArkUIExtendableComponentAccessor ExtendableComponentAccessorImpl {
+        ExtendableComponentAccessor::DestroyPeerImpl,
+        ExtendableComponentAccessor::CtorImpl,
+        ExtendableComponentAccessor::GetFinalizerImpl,
+        ExtendableComponentAccessor::GetUIContextImpl,
+        ExtendableComponentAccessor::GetUniqueIdImpl,
     };
-    return &LayoutPolicyAccessorImpl;
+    return &ExtendableComponentAccessorImpl;
 }
 
 }

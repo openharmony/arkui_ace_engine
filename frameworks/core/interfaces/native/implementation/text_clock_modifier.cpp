@@ -79,7 +79,7 @@ void SetTextClockOptionsImpl(Ark_NativePointer node,
 } // TextClockInterfaceModifier
 namespace TextClockAttributeModifier {
 void FormatImpl(Ark_NativePointer node,
-                const Opt_String* value)
+                const Opt_ResourceStr* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

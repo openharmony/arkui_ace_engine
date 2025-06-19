@@ -24,20 +24,22 @@ namespace ImageBitmapAccessor {
 const auto ARK_ERROR_VALUE = Converter::ArkValue<Ark_Number>(0);
 void DestroyPeerImpl(Ark_ImageBitmap peer)
 {
-    if (peer) {
-        peer->DecRefCount();
-    }
+    PeerUtils::DestroyPeer(peer);
 }
-Ark_ImageBitmap CtorImpl(const Ark_String* src)
+Ark_ImageBitmap CtorImpl(const Ark_Union_PixelMap_String* src,
+                         const Opt_LengthMetricsUnit* unit)
 {
-    auto peer = Referenced::MakeRefPtr<ImageBitmapPeer>();
-    peer->IncRefCount();
-    std::string stringSrc;
-    if (src) {
-        stringSrc = Converter::Convert<std::string>(*src);
-    }
-    peer->SetOptions(stringSrc);
-    return reinterpret_cast<ImageBitmapPeer*>(Referenced::RawPtr(peer));
+    auto peer = PeerUtils::CreatePeer<ImageBitmapPeer>();
+    Converter::VisitUnionPtr(src,
+        [peer](const Ark_String& src) {
+            auto stringSrc = Converter::Convert<std::string>(src);
+            peer->SetOptions(stringSrc);
+        },
+        [peer](const Ark_image_PixelMap& src) {
+            peer->SetOptions("", src->pixelMap);
+        },
+        []() {});
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

@@ -118,15 +118,15 @@ HWTEST_F(ImageModifierTest, setImageOptions0TestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest, setImageOptions0TestSrcValidValues, TestSize.Level1)
 {
-    Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor initValueSrc;
+    Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent initValueSrc;
 
     // Initial setup
-    initValueSrc = ArkUnion<Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(
-        ArkUnion<Ark_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0])));
+    initValueSrc = ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ImageContent>(
+        std::get<1>(Fixtures::testFixtureImageContentValidValues[0]));
 
     auto checkValue = [this, &initValueSrc](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor& value) {
-        Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor inputValueSrc = initValueSrc;
+                          const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent& value) {
+        Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent inputValueSrc = initValueSrc;
 
         // Re-create node for 'options' attribute
         auto node = CreateNode();
@@ -139,14 +139,18 @@ HWTEST_F(ImageModifierTest, setImageOptions0TestSrcValidValues, TestSize.Level1)
             "Input value is: " << input << ", method: setImageOptions0, attribute: src";
     };
 
+    for (auto& [input, value, expected] : Fixtures::testFixtureImageContentValidValues) {
+        checkValue(input, expected,
+            ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ImageContent>(value));
+    }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
         checkValue(input, expected,
-            ArkUnion<Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(
+            ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ResourceStr>(
                 ArkUnion<Ark_ResourceStr, Ark_String>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringResValidValues) {
         checkValue(input, expected,
-            ArkUnion<Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(
+            ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ResourceStr>(
                 ArkUnion<Ark_ResourceStr, Ark_Resource>(value)));
     }
 }
@@ -158,15 +162,15 @@ HWTEST_F(ImageModifierTest, setImageOptions0TestSrcValidValues, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest, setImageOptions0TestSrcInvalidValues, TestSize.Level1)
 {
-    Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor initValueSrc;
+    Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent initValueSrc;
 
     // Initial setup
-    initValueSrc = ArkUnion<Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor, Ark_ResourceStr>(
-        ArkUnion<Ark_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0])));
+    initValueSrc = ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ImageContent>(
+        std::get<1>(Fixtures::testFixtureImageContentValidValues[0]));
 
     auto checkValue = [this, &initValueSrc](const std::string& input,
-                          const Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor& value) {
-        Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor inputValueSrc = initValueSrc;
+                          const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent& value) {
+        Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent inputValueSrc = initValueSrc;
 
         // Re-create node for 'options' attribute
         auto node = CreateNode();
@@ -180,9 +184,11 @@ HWTEST_F(ImageModifierTest, setImageOptions0TestSrcInvalidValues, TestSize.Level
     };
 
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor, Ark_Empty>(nullptr));
+    checkValue(
+        "invalid union", ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_Empty>(nullptr));
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor, Ark_Empty>(nullptr));
+    checkValue(
+        "invalid union", ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_Empty>(nullptr));
 }
 
 /*
@@ -191,104 +197,6 @@ HWTEST_F(ImageModifierTest, setImageOptions0TestSrcInvalidValues, TestSize.Level
  * @tc.type: FUNC
  */
 HWTEST_F(ImageModifierTest, setImageOptions1TestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SRC_DEFAULT_VALUE) << "Default value for attribute 'src'";
-}
-
-/*
- * @tc.name: setImageOptions1TestSrcValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest, DISABLED_setImageOptions1TestSrcValidValues, TestSize.Level1)
-{
-    Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent initValueSrc;
-
-    // Initial setup
-    initValueSrc = ArkUnion<Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ImageContent>(
-        std::get<1>(Fixtures::testFixtureEnumImageContentValidValues[0]));
-
-    auto checkValue = [this, &initValueSrc](const std::string& input, const std::string& expectedStr,
-                          const Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent& value) {
-        Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent inputValueSrc = initValueSrc;
-
-        // Re-create node for 'options' attribute
-        auto node = CreateNode();
-        inputValueSrc = value;
-        modifier_->setImageOptions1(node, &inputValueSrc);
-        auto jsonValue = GetJsonValue(node);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
-        DisposeNode(node);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setImageOptions1, attribute: src";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureEnumImageContentValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ImageContent>(value));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ResourceStr>(
-                ArkUnion<Ark_ResourceStr, Ark_String>(value)));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringResValidValues) {
-        checkValue(input, expected,
-            ArkUnion<Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ResourceStr>(
-                ArkUnion<Ark_ResourceStr, Ark_Resource>(value)));
-    }
-}
-
-/*
- * @tc.name: setImageOptions1TestSrcInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest, DISABLED_setImageOptions1TestSrcInvalidValues, TestSize.Level1)
-{
-    Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent initValueSrc;
-
-    // Initial setup
-    initValueSrc = ArkUnion<Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ImageContent>(
-        std::get<1>(Fixtures::testFixtureEnumImageContentValidValues[0]));
-
-    auto checkValue = [this, &initValueSrc](const std::string& input,
-                          const Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent& value) {
-        Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent inputValueSrc = initValueSrc;
-
-        // Re-create node for 'options' attribute
-        auto node = CreateNode();
-        inputValueSrc = value;
-        modifier_->setImageOptions1(node, &inputValueSrc);
-        auto jsonValue = GetJsonValue(node);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
-        DisposeNode(node);
-        EXPECT_EQ(resultStr, ATTRIBUTE_SRC_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setImageOptions1, attribute: src";
-    };
-
-    // Check invalid union
-    checkValue("invalid union",
-        ArkUnion<Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_Empty>(nullptr));
-    for (auto& [input, value] : Fixtures::testFixtureEnumImageContentInvalidValues) {
-        checkValue(input,
-            ArkUnion<Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_ImageContent>(value));
-    }
-    // Check invalid union
-    checkValue("invalid union",
-        ArkUnion<Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, Ark_Empty>(nullptr));
-}
-
-/*
- * @tc.name: setImageOptions2TestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest, DISABLED_setImageOptions2TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultImageAIOptions =
@@ -304,11 +212,11 @@ HWTEST_F(ImageModifierTest, DISABLED_setImageOptions2TestDefaultValues, TestSize
 }
 
 /*
- * @tc.name: setImageOptions2TestValidValues
+ * @tc.name: setImageOptions1TestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageModifierTest, DISABLED_setImageOptions2TestValidValues, TestSize.Level1)
+HWTEST_F(ImageModifierTest, DISABLED_setImageOptions1TestValidValues, TestSize.Level1)
 {
     FAIL() << "Need to properly configure fixtures in configuration file for proper test generation!";
 }
@@ -334,15 +242,15 @@ HWTEST_F(ImageModifierTest, setAltTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest, setAltTestAltValidValues, TestSize.Level1)
 {
-    Opt_Union_String_Resource_Image_PixelMap initValueAlt;
+    Opt_Union_String_Resource_PixelMap initValueAlt;
 
     // Initial setup
-    initValueAlt = ArkUnion<Opt_Union_String_Resource_Image_PixelMap, Ark_String>(
+    initValueAlt = ArkUnion<Opt_Union_String_Resource_PixelMap, Ark_String>(
         std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
     auto checkValue = [this, &initValueAlt](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_String_Resource_Image_PixelMap& value) {
-        Opt_Union_String_Resource_Image_PixelMap inputValueAlt = initValueAlt;
+                          const Opt_Union_String_Resource_PixelMap& value) {
+        Opt_Union_String_Resource_PixelMap inputValueAlt = initValueAlt;
 
         inputValueAlt = value;
         modifier_->setAlt(node_, &inputValueAlt);
@@ -352,10 +260,10 @@ HWTEST_F(ImageModifierTest, setAltTestAltValidValues, TestSize.Level1)
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource_Image_PixelMap, Ark_String>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource_PixelMap, Ark_String>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureStringResValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource_Image_PixelMap, Ark_Resource>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource_PixelMap, Ark_Resource>(value));
     }
 }
 
@@ -366,15 +274,14 @@ HWTEST_F(ImageModifierTest, setAltTestAltValidValues, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest, setAltTestAltInvalidValues, TestSize.Level1)
 {
-    Opt_Union_String_Resource_Image_PixelMap initValueAlt;
+    Opt_Union_String_Resource_PixelMap initValueAlt;
 
     // Initial setup
-    initValueAlt = ArkUnion<Opt_Union_String_Resource_Image_PixelMap, Ark_String>(
+    initValueAlt = ArkUnion<Opt_Union_String_Resource_PixelMap, Ark_String>(
         std::get<1>(Fixtures::testFixtureStringValidValues[0]));
 
-    auto checkValue = [this, &initValueAlt](
-                          const std::string& input, const Opt_Union_String_Resource_Image_PixelMap& value) {
-        Opt_Union_String_Resource_Image_PixelMap inputValueAlt = initValueAlt;
+    auto checkValue = [this, &initValueAlt](const std::string& input, const Opt_Union_String_Resource_PixelMap& value) {
+        Opt_Union_String_Resource_PixelMap inputValueAlt = initValueAlt;
 
         modifier_->setAlt(node_, &inputValueAlt);
         inputValueAlt = value;
@@ -386,9 +293,9 @@ HWTEST_F(ImageModifierTest, setAltTestAltInvalidValues, TestSize.Level1)
     };
 
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_String_Resource_Image_PixelMap, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_String_Resource_PixelMap, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_String_Resource_Image_PixelMap>());
+    checkValue("undefined", ArkValue<Opt_Union_String_Resource_PixelMap>());
 }
 
 /*
@@ -555,15 +462,15 @@ HWTEST_F(ImageModifierTest, setFillColorTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ImageModifierTest, setFillColorTestFillColorValidValues, TestSize.Level1)
 {
-    Opt_Union_ResourceColor_ColorContent initValueFillColor;
+    Opt_Union_ResourceColor_ColorContent_ColorMetrics initValueFillColor;
 
     // Initial setup
-    initValueFillColor = ArkUnion<Opt_Union_ResourceColor_ColorContent, Ark_ResourceColor>(
+    initValueFillColor = ArkUnion<Opt_Union_ResourceColor_ColorContent_ColorMetrics, Ark_ResourceColor>(
         ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
 
     auto checkValue = [this, &initValueFillColor](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_ResourceColor_ColorContent& value) {
-        Opt_Union_ResourceColor_ColorContent inputValueFillColor = initValueFillColor;
+                          const Opt_Union_ResourceColor_ColorContent_ColorMetrics& value) {
+        Opt_Union_ResourceColor_ColorContent_ColorMetrics inputValueFillColor = initValueFillColor;
 
         inputValueFillColor = value;
         modifier_->setFillColor(node_, &inputValueFillColor);
@@ -575,22 +482,22 @@ HWTEST_F(ImageModifierTest, setFillColorTestFillColorValidValues, TestSize.Level
 
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsEnumValidValues) {
         checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_ColorContent, Ark_ResourceColor>(
+            ArkUnion<Opt_Union_ResourceColor_ColorContent_ColorMetrics, Ark_ResourceColor>(
                 ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsNumValidValues) {
         checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_ColorContent, Ark_ResourceColor>(
+            ArkUnion<Opt_Union_ResourceColor_ColorContent_ColorMetrics, Ark_ResourceColor>(
                 ArkUnion<Ark_ResourceColor, Ark_Number>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsResValidValues) {
         checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_ColorContent, Ark_ResourceColor>(
+            ArkUnion<Opt_Union_ResourceColor_ColorContent_ColorMetrics, Ark_ResourceColor>(
                 ArkUnion<Ark_ResourceColor, Ark_Resource>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureColorsStrValidValues) {
         checkValue(input, expected,
-            ArkUnion<Opt_Union_ResourceColor_ColorContent, Ark_ResourceColor>(
+            ArkUnion<Opt_Union_ResourceColor_ColorContent_ColorMetrics, Ark_ResourceColor>(
                 ArkUnion<Ark_ResourceColor, Ark_String>(value)));
     }
 }
@@ -602,15 +509,15 @@ HWTEST_F(ImageModifierTest, setFillColorTestFillColorValidValues, TestSize.Level
  */
 HWTEST_F(ImageModifierTest, setFillColorTestFillColorInvalidValues, TestSize.Level1)
 {
-    Opt_Union_ResourceColor_ColorContent initValueFillColor;
+    Opt_Union_ResourceColor_ColorContent_ColorMetrics initValueFillColor;
 
     // Initial setup
-    initValueFillColor = ArkUnion<Opt_Union_ResourceColor_ColorContent, Ark_ResourceColor>(
+    initValueFillColor = ArkUnion<Opt_Union_ResourceColor_ColorContent_ColorMetrics, Ark_ResourceColor>(
         ArkUnion<Ark_ResourceColor, Ark_Color>(std::get<1>(Fixtures::testFixtureColorsEnumValidValues[0])));
 
     auto checkValue = [this, &initValueFillColor](
-                          const std::string& input, const Opt_Union_ResourceColor_ColorContent& value) {
-        Opt_Union_ResourceColor_ColorContent inputValueFillColor = initValueFillColor;
+                          const std::string& input, const Opt_Union_ResourceColor_ColorContent_ColorMetrics& value) {
+        Opt_Union_ResourceColor_ColorContent_ColorMetrics inputValueFillColor = initValueFillColor;
 
         modifier_->setFillColor(node_, &inputValueFillColor);
         inputValueFillColor = value;
@@ -622,19 +529,19 @@ HWTEST_F(ImageModifierTest, setFillColorTestFillColorInvalidValues, TestSize.Lev
     };
 
     for (auto& [input, value] : Fixtures::testFixtureColorsStrInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_ResourceColor_ColorContent, Ark_ResourceColor>(
+        checkValue(input, ArkUnion<Opt_Union_ResourceColor_ColorContent_ColorMetrics, Ark_ResourceColor>(
                               ArkUnion<Ark_ResourceColor, Ark_String>(value)));
     }
     for (auto& [input, value] : Fixtures::testFixtureColorsEnumInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_ResourceColor_ColorContent, Ark_ResourceColor>(
+        checkValue(input, ArkUnion<Opt_Union_ResourceColor_ColorContent_ColorMetrics, Ark_ResourceColor>(
                               ArkUnion<Ark_ResourceColor, Ark_Color>(value)));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_ColorContent, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_ColorContent_ColorMetrics, Ark_Empty>(nullptr));
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_ColorContent, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_ResourceColor_ColorContent_ColorMetrics, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_ResourceColor_ColorContent>());
+    checkValue("undefined", ArkValue<Opt_Union_ResourceColor_ColorContent_ColorMetrics>());
 }
 
 /*

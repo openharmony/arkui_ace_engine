@@ -18,32 +18,20 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace LayoutPolicyAccessor {
-void DestroyPeerImpl(Ark_LayoutPolicy peer)
-{
-}
-Ark_LayoutPolicy CtorImpl()
-{
-    return nullptr;
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
-Ark_LayoutPolicy GetMatchParentImpl()
+namespace SearchOpsAccessor {
+Ark_NativePointer RegisterSearchValueCallbackImpl(Ark_NativePointer node,
+                                                  const Ark_String* value,
+                                                  const SearchValueCallback* callback)
 {
     return {};
 }
-} // LayoutPolicyAccessor
-const GENERATED_ArkUILayoutPolicyAccessor* GetLayoutPolicyAccessor()
+} // SearchOpsAccessor
+const GENERATED_ArkUISearchOpsAccessor* GetSearchOpsAccessor()
 {
-    static const GENERATED_ArkUILayoutPolicyAccessor LayoutPolicyAccessorImpl {
-        LayoutPolicyAccessor::DestroyPeerImpl,
-        LayoutPolicyAccessor::CtorImpl,
-        LayoutPolicyAccessor::GetFinalizerImpl,
-        LayoutPolicyAccessor::GetMatchParentImpl,
+    static const GENERATED_ArkUISearchOpsAccessor SearchOpsAccessorImpl {
+        SearchOpsAccessor::RegisterSearchValueCallbackImpl,
     };
-    return &LayoutPolicyAccessorImpl;
+    return &SearchOpsAccessorImpl;
 }
 
 }

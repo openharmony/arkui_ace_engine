@@ -520,12 +520,12 @@ void SetSizeImpl(Ark_RenderNode peer,
     frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
 #endif
 }
-Ark_Position GetPositionImpl(Ark_RenderNode peer)
+Ark_Vector2 GetPositionImpl(Ark_RenderNode peer)
 {
     return {};
 }
 void SetPositionImpl(Ark_RenderNode peer,
-                     const Ark_Position* position)
+                     const Ark_Vector2* position)
 {
 #ifdef WRONG_CODE
     if (!peer) {

@@ -78,10 +78,6 @@ Opt_ResourceColor GetFontColorImpl(Ark_TextStyle peer)
     auto color = peer->span->GetFont().fontColor;
     return Converter::ArkUnion<Opt_ResourceColor, Ark_String>(color, Converter::FC);
 }
-void SetFontColorImpl(Ark_TextStyle peer,
-                      const Opt_ResourceColor* fontColor)
-{
-}
 Opt_String GetFontFamilyImpl(Ark_TextStyle peer)
 {
     auto invalidValue = Converter::ArkValue<Opt_String>();
@@ -94,10 +90,6 @@ Opt_String GetFontFamilyImpl(Ark_TextStyle peer)
     auto retStr = std::accumulate(fontFamilies.begin(), fontFamilies.end(), std::string());
     return Converter::ArkValue<Opt_String>(retStr, Converter::FC);
 }
-void SetFontFamilyImpl(Ark_TextStyle peer,
-                       const Opt_String* fontFamily)
-{
-}
 Opt_Number GetFontSizeImpl(Ark_TextStyle peer)
 {
     auto invalidValue = Converter::ArkValue<Opt_Number>();
@@ -109,10 +101,6 @@ Opt_Number GetFontSizeImpl(Ark_TextStyle peer)
     auto ret = peer->span->GetFont().fontSize.value().ConvertToVp();
     return Converter::ArkValue<Opt_Number>(ret);
 }
-void SetFontSizeImpl(Ark_TextStyle peer,
-                     const Opt_Number* fontSize)
-{
-}
 Opt_Number GetFontWeightImpl(Ark_TextStyle peer)
 {
     auto invalidValue = Converter::ArkValue<Opt_Number>();
@@ -120,20 +108,12 @@ Opt_Number GetFontWeightImpl(Ark_TextStyle peer)
     CHECK_NULL_RETURN(peer->span, invalidValue);
     return Converter::ArkValue<Opt_Number>(EnumToInt(peer->span->GetFont().fontWeight));
 }
-void SetFontWeightImpl(Ark_TextStyle peer,
-                       const Opt_Number* fontWeight)
-{
-}
 Opt_FontStyle GetFontStyleImpl(Ark_TextStyle peer)
 {
     auto invalidValue = Converter::ArkValue<Opt_FontStyle>();
     CHECK_NULL_RETURN(peer, invalidValue);
     CHECK_NULL_RETURN(peer->span, invalidValue);
     return Converter::ArkValue<Opt_FontStyle>(peer->span->GetFont().fontStyle);
-}
-void SetFontStyleImpl(Ark_TextStyle peer,
-                      const Opt_FontStyle* fontStyle)
-{
 }
 } // TextStyleAccessor
 const GENERATED_ArkUITextStyleAccessor* GetTextStyleAccessor()
@@ -143,15 +123,10 @@ const GENERATED_ArkUITextStyleAccessor* GetTextStyleAccessor()
         TextStyleAccessor::CtorImpl,
         TextStyleAccessor::GetFinalizerImpl,
         TextStyleAccessor::GetFontColorImpl,
-        TextStyleAccessor::SetFontColorImpl,
         TextStyleAccessor::GetFontFamilyImpl,
-        TextStyleAccessor::SetFontFamilyImpl,
         TextStyleAccessor::GetFontSizeImpl,
-        TextStyleAccessor::SetFontSizeImpl,
         TextStyleAccessor::GetFontWeightImpl,
-        TextStyleAccessor::SetFontWeightImpl,
         TextStyleAccessor::GetFontStyleImpl,
-        TextStyleAccessor::SetFontStyleImpl,
     };
     return &TextStyleAccessorImpl;
 }

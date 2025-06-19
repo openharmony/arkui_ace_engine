@@ -18,11 +18,11 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace LayoutPolicyAccessor {
-void DestroyPeerImpl(Ark_LayoutPolicy peer)
+namespace LifeCycleAccessor {
+void DestroyPeerImpl(Ark_LifeCycle peer)
 {
 }
-Ark_LayoutPolicy CtorImpl()
+Ark_LifeCycle CtorImpl()
 {
     return nullptr;
 }
@@ -30,20 +30,31 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_LayoutPolicy GetMatchParentImpl()
+void AboutToAppearImpl(Ark_LifeCycle peer)
 {
-    return {};
 }
-} // LayoutPolicyAccessor
-const GENERATED_ArkUILayoutPolicyAccessor* GetLayoutPolicyAccessor()
+void AboutToDisappearImpl(Ark_LifeCycle peer)
 {
-    static const GENERATED_ArkUILayoutPolicyAccessor LayoutPolicyAccessorImpl {
-        LayoutPolicyAccessor::DestroyPeerImpl,
-        LayoutPolicyAccessor::CtorImpl,
-        LayoutPolicyAccessor::GetFinalizerImpl,
-        LayoutPolicyAccessor::GetMatchParentImpl,
+}
+void OnDidBuildImpl(Ark_LifeCycle peer)
+{
+}
+void BuildImpl(Ark_LifeCycle peer)
+{
+}
+} // LifeCycleAccessor
+const GENERATED_ArkUILifeCycleAccessor* GetLifeCycleAccessor()
+{
+    static const GENERATED_ArkUILifeCycleAccessor LifeCycleAccessorImpl {
+        LifeCycleAccessor::DestroyPeerImpl,
+        LifeCycleAccessor::CtorImpl,
+        LifeCycleAccessor::GetFinalizerImpl,
+        LifeCycleAccessor::AboutToAppearImpl,
+        LifeCycleAccessor::AboutToDisappearImpl,
+        LifeCycleAccessor::OnDidBuildImpl,
+        LifeCycleAccessor::BuildImpl,
     };
-    return &LayoutPolicyAccessorImpl;
+    return &LifeCycleAccessorImpl;
 }
 
 }

@@ -14,14 +14,16 @@
  */
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_component.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/image/image_model_static.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
-#include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/base/view_abstract_model_static.h"
+
+#include "image_common_methods.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -91,26 +93,11 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // ImageModifier
 namespace ImageInterfaceModifier {
 void SetImageOptions0Impl(Ark_NativePointer node,
-                          const Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor* src)
-{
-    CHECK_NULL_VOID(src);
-    auto info = Converter::OptConvert<ImageSourceInfo>(*src);
-    if (info) {
-        auto frameNode = reinterpret_cast<FrameNode*>(node);
-        CHECK_NULL_VOID(frameNode);
-        ImageModelNG::InitImage(frameNode, info->GetSrc());
-    }
-}
-void SetImageOptions1Impl(Ark_NativePointer node,
-                          const Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src)
+                          const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent* src)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(src);
-    if (src->selector == SELECTOR_INDEX) {
-        ImageModelNG::ResetImageSrc(frameNode);
-        return;
-    }
     auto info = Converter::OptConvert<ImageSourceInfo>(*src);
     // Note.
     // This function should skip InitImage invocation if info's optional is empty.
@@ -118,23 +105,26 @@ void SetImageOptions1Impl(Ark_NativePointer node,
         auto frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
         ImageModelNG::InitImage(frameNode, info->GetSrc());
+    } else {
+        ImageModelNG::ResetImageSrc(frameNode);
     }
 }
-void SetImageOptions2Impl(Ark_NativePointer node,
-                          const Ark_Union_Image_PixelMap_ResourceStr_DrawableDescriptor* src,
+void SetImageOptions1Impl(Ark_NativePointer node,
+                          const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor* src,
                           const Ark_ImageAIOptions* imageAIOptions)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(src);
-    //auto convValue = Converter::OptConvert<type>(src); // for enums
-    //ImageModelNG::SetSetImageOptions2(frameNode, convValue);
-    LOGE("Arkoala: Image.SetImageOptions2Impl - method not implemented");
+    CHECK_NULL_VOID(src);
+    auto info = Converter::OptConvert<ImageSourceInfo>(*src);
+    if (info) {
+        auto frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        ImageModelNG::InitImage(frameNode, info->GetSrc());
+    }
 }
 } // ImageInterfaceModifier
 namespace ImageAttributeModifier {
 void AltImpl(Ark_NativePointer node,
-             const Opt_Union_String_Resource_Image_PixelMap* value)
+             const Opt_Union_String_Resource_PixelMap* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -171,7 +161,7 @@ void FitOriginalSizeImpl(Ark_NativePointer node,
     ImageModelNG::SetFitOriginSize(frameNode, *convValue);
 }
 void FillColorImpl(Ark_NativePointer node,
-                   const Opt_Union_ResourceColor_ColorContent* value)
+                   const Opt_Union_ResourceColor_ColorContent_ColorMetrics* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -252,6 +242,11 @@ void SyncLoadImpl(Ark_NativePointer node,
         return;
     }
     ImageModelNG::SetSyncMode(frameNode, *convValue);
+}
+void ColorFilterImpl(Ark_NativePointer node,
+                     const Opt_Union_ColorFilter_DrawingColorFilter* value)
+{
+    ImageCommonMethods::ApplyColorFilterValues(node, value);
 }
 void CopyOptionImpl(Ark_NativePointer node,
                     const Opt_CopyOptions* value)
@@ -425,6 +420,14 @@ void PrivacySensitiveImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetPrivacySensitive(frameNode, Converter::OptConvert<bool>(*value));
 }
+void EnhancedImageQualityImpl(Ark_NativePointer node,
+                              const Opt_image_ResolutionQuality* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //ImageModelNG::SetEnhancedImageQuality(frameNode, convValue);
+}
 void OrientationImpl(Ark_NativePointer node,
                      const Opt_ImageRotateOrientation* value)
 {
@@ -440,7 +443,6 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
         ImageModifier::ConstructImpl,
         ImageInterfaceModifier::SetImageOptions0Impl,
         ImageInterfaceModifier::SetImageOptions1Impl,
-        ImageInterfaceModifier::SetImageOptions2Impl,
         ImageAttributeModifier::AltImpl,
         ImageAttributeModifier::MatchTextDirectionImpl,
         ImageAttributeModifier::FitOriginalSizeImpl,
@@ -454,6 +456,7 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
         ImageAttributeModifier::InterpolationImpl,
         ImageAttributeModifier::SourceSizeImpl,
         ImageAttributeModifier::SyncLoadImpl,
+        ImageAttributeModifier::ColorFilterImpl,
         ImageAttributeModifier::CopyOptionImpl,
         ImageAttributeModifier::DraggableImpl,
         ImageAttributeModifier::PointLightImpl,
@@ -465,6 +468,7 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
         ImageAttributeModifier::AnalyzerConfigImpl,
         ImageAttributeModifier::ResizableImpl,
         ImageAttributeModifier::PrivacySensitiveImpl,
+        ImageAttributeModifier::EnhancedImageQualityImpl,
         ImageAttributeModifier::OrientationImpl,
     };
     return &ArkUIImageModifierImpl;

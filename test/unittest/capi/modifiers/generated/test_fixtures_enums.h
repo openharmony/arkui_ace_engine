@@ -90,8 +90,6 @@ extern std::vector<std::tuple<std::string, Ark_HorizontalAlign, std::string>> te
 extern std::vector<std::tuple<std::string, Ark_HorizontalAlign>> testFixtureEnumHorizontalAlignInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_IlluminatedType, std::string>> testFixtureEnumIlluminatedTypeValidValues;
 extern std::vector<std::tuple<std::string, Ark_IlluminatedType>> testFixtureEnumIlluminatedTypeInvalidValues;
-extern std::vector<std::tuple<std::string, Ark_ImageContent, std::string>> testFixtureEnumImageContentValidValues;
-extern std::vector<std::tuple<std::string, Ark_ImageContent>> testFixtureEnumImageContentInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ImageFit, std::string>> testFixtureEnumImageFitValidValues;
 extern std::vector<std::tuple<std::string, Ark_ImageFit>> testFixtureEnumImageFitInvalidValues;
 extern std::vector<std::tuple<std::string, Ark_ImageInterpolation, std::string>>

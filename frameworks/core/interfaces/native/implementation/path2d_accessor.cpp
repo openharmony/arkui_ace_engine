@@ -28,12 +28,34 @@ void DestroyPeerImpl(Ark_Path2D peer)
         peerImpl->DecRefCount();
     }
 }
-Ark_Path2D CtorImpl()
+Ark_Path2D Ctor0Impl()
 {
     auto peerImpl = Referenced::MakeRefPtr<Path2DPeerImpl>();
     peerImpl->IncRefCount();
     peerImpl->SetOptions();
     return reinterpret_cast<Path2DPeer*>(Referenced::RawPtr(peerImpl));
+}
+Ark_Path2D Ctor1Impl(Ark_LengthMetricsUnit unit)
+{
+    return nullptr;
+}
+Ark_Path2D Ctor2Impl(Ark_Path2D path)
+{
+    return nullptr;
+}
+Ark_Path2D Ctor3Impl(Ark_Path2D path,
+                     Ark_LengthMetricsUnit unit)
+{
+    return nullptr;
+}
+Ark_Path2D Ctor4Impl(const Ark_String* d)
+{
+    return nullptr;
+}
+Ark_Path2D Ctor5Impl(const Ark_String* description,
+                     Ark_LengthMetricsUnit unit)
+{
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -54,7 +76,12 @@ const GENERATED_ArkUIPath2DAccessor* GetPath2DAccessor()
 {
     static const GENERATED_ArkUIPath2DAccessor Path2DAccessorImpl {
         Path2DAccessor::DestroyPeerImpl,
-        Path2DAccessor::CtorImpl,
+        Path2DAccessor::Ctor0Impl,
+        Path2DAccessor::Ctor1Impl,
+        Path2DAccessor::Ctor2Impl,
+        Path2DAccessor::Ctor3Impl,
+        Path2DAccessor::Ctor4Impl,
+        Path2DAccessor::Ctor5Impl,
         Path2DAccessor::GetFinalizerImpl,
         Path2DAccessor::AddPathImpl,
     };

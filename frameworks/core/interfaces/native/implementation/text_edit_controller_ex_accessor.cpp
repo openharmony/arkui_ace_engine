@@ -55,7 +55,7 @@ Ark_Number GetCaretOffsetImpl(Ark_TextEditControllerEx peer)
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Ark_Number>(0));
     return Converter::ArkValue<Ark_Number>(peer->GetCaretOffset());
 }
-Opt_Callback_PreviewText GetGetPreviewTextImpl(Ark_TextEditControllerEx peer)
+Ark_PreviewText GetPreviewTextImpl(Ark_TextEditControllerEx peer)
 {
 #ifdef WRONG_GEN
     CHECK_NULL_RETURN(peer, {});
@@ -63,10 +63,6 @@ Opt_Callback_PreviewText GetGetPreviewTextImpl(Ark_TextEditControllerEx peer)
     return Converter::ArkValue<Ark_PreviewText>(result, Converter::FC);
 #endif
     return {};
-}
-void SetGetPreviewTextImpl(Ark_TextEditControllerEx peer,
-                           const Callback_PreviewText* getPreviewText)
-{
 }
 } // TextEditControllerExAccessor
 const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccessor()
@@ -79,8 +75,7 @@ const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccess
         TextEditControllerExAccessor::StopEditingImpl,
         TextEditControllerExAccessor::SetCaretOffsetImpl,
         TextEditControllerExAccessor::GetCaretOffsetImpl,
-        TextEditControllerExAccessor::GetGetPreviewTextImpl,
-        TextEditControllerExAccessor::SetGetPreviewTextImpl,
+        TextEditControllerExAccessor::GetPreviewTextImpl,
     };
     return &TextEditControllerExAccessorImpl;
 }

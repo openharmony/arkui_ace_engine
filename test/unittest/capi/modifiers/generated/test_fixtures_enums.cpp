@@ -382,15 +382,6 @@ std::vector<std::tuple<std::string, Ark_IlluminatedType>> testFixtureEnumIllumin
     { "INT_MAX", static_cast<Ark_IlluminatedType>(INT_MAX) },
 };
 
-std::vector<std::tuple<std::string, Ark_ImageContent, std::string>> testFixtureEnumImageContentValidValues = {
-    { "ARK_IMAGE_CONTENT_EMPTY", ARK_IMAGE_CONTENT_EMPTY, "ImageContent.EMPTY" },
-};
-
-std::vector<std::tuple<std::string, Ark_ImageContent>> testFixtureEnumImageContentInvalidValues = {
-    { "-1", static_cast<Ark_ImageContent>(-1) },
-    { "INT_MAX", static_cast<Ark_ImageContent>(INT_MAX) },
-};
-
 std::vector<std::tuple<std::string, Ark_ImageFit, std::string>> testFixtureEnumImageFitValidValues = {
     { "ARK_IMAGE_FIT_CONTAIN", ARK_IMAGE_FIT_CONTAIN, "ImageFit.Contain" },
     { "ARK_IMAGE_FIT_COVER", ARK_IMAGE_FIT_COVER, "ImageFit.Cover" },

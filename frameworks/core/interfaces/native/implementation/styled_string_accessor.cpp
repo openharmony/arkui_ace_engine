@@ -362,10 +362,6 @@ Ark_Number GetLengthImpl(Ark_StyledString peer)
     CHECK_NULL_RETURN(peer->spanString, errValue);
     return Converter::ArkValue<Ark_Number>(peer->spanString->GetLength());
 }
-void SetLengthImpl(Ark_StyledString peer,
-                   const Ark_Number* length)
-{
-}
 } // StyledStringAccessor
 const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
 {
@@ -384,7 +380,6 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
         StyledStringAccessor::Marshalling1Impl,
         StyledStringAccessor::Unmarshalling1Impl,
         StyledStringAccessor::GetLengthImpl,
-        StyledStringAccessor::SetLengthImpl,
     };
     return &StyledStringAccessorImpl;
 }

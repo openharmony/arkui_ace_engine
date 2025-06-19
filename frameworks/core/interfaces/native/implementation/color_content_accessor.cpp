@@ -34,9 +34,6 @@ Ark_ColorContent GetORIGINImpl()
 {
     return {};
 }
-void SetORIGINImpl(Ark_ColorContent ORIGIN)
-{
-}
 } // ColorContentAccessor
 const GENERATED_ArkUIColorContentAccessor* GetColorContentAccessor()
 {
@@ -45,7 +42,6 @@ const GENERATED_ArkUIColorContentAccessor* GetColorContentAccessor()
         ColorContentAccessor::CtorImpl,
         ColorContentAccessor::GetFinalizerImpl,
         ColorContentAccessor::GetORIGINImpl,
-        ColorContentAccessor::SetORIGINImpl,
     };
     return &ColorContentAccessorImpl;
 }

@@ -478,7 +478,7 @@ auto g_bindSheetCallbacks2 = [](SheetCallbacks& callbacks, const Ark_SheetOption
 auto g_bindSheetParams = [](SheetStyle& sheetStyle, const Ark_SheetOptions& sheetOptions) {
     sheetStyle.showInPage = OptConvert<SheetLevel>(sheetOptions.mode).value_or(SheetLevel::EMBEDDED);
     std::vector<SheetHeight> detents;
-    auto detentsOpt = OptConvert<Ark_Type_SheetOptions_detents>(sheetOptions.detents);
+    auto detentsOpt = GetOpt(sheetOptions.detents);
     if (detentsOpt) {
         auto value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value0);
         if (value0) {
@@ -2279,7 +2279,7 @@ void BorderImageImpl(Ark_NativePointer node,
         return;
     }
     Converter::VisitUnion(optValue->source,
-        [frameNode](const Ark_LinearGradient_common& src) {
+        [frameNode](const Ark_LinearGradientOptions& src) {
             Gradient gradient = Converter::Convert<Gradient>(src);
             ViewAbstract::SetBorderImageGradient(frameNode, gradient);
         },

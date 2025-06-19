@@ -27,7 +27,11 @@ void DestroyPeerImpl(Ark_Matrix2D peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_Matrix2D CtorImpl()
+Ark_Matrix2D Ctor0Impl()
+{
+    return nullptr;
+}
+Ark_Matrix2D Ctor1Impl(Ark_LengthMetricsUnit unit)
 {
     return PeerUtils::CreatePeer<Matrix2DPeer>();
 }
@@ -175,7 +179,8 @@ const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor()
 {
     static const GENERATED_ArkUIMatrix2DAccessor Matrix2DAccessorImpl {
         Matrix2DAccessor::DestroyPeerImpl,
-        Matrix2DAccessor::CtorImpl,
+        Matrix2DAccessor::Ctor0Impl,
+        Matrix2DAccessor::Ctor1Impl,
         Matrix2DAccessor::GetFinalizerImpl,
         Matrix2DAccessor::IdentityImpl,
         Matrix2DAccessor::InvertImpl,

@@ -116,6 +116,18 @@ enum ResID {
     MIN_FONT_SCALE_RES_0_ID,
     MIN_FONT_SCALE_RES_1_ID,
     MIN_FONT_SCALE_RES_2_ID,
+    FONT_WEIGHT_RES_STRINGS_0_ID,
+    FONT_WEIGHT_RES_STRINGS_1_ID,
+    FONT_WEIGHT_RES_STRINGS_2_ID,
+    FONT_WEIGHT_RES_STRINGS_3_ID,
+    FONT_WEIGHT_RES_STRINGS_4_ID,
+    FONT_WEIGHT_RES_STRINGS_5_ID,
+    FONT_WEIGHT_RES_STRINGS_6_ID,
+    FONT_WEIGHT_RES_STRINGS_7_ID,
+    FONT_WEIGHT_RES_STRINGS_8_ID,
+    FONT_WEIGHT_RES_STRINGS_9_ID,
+    FONT_WEIGHT_RES_STRINGS_10_ID,
+    FONT_WEIGHT_RES_STRINGS_11_ID,
     SCROLLABLE_FRICTION_RES_0_ID,
     SCROLLABLE_FRICTION_RES_1_ID,
     SCROLLABLE_FRICTION_RES_2_ID,
@@ -137,6 +149,37 @@ enum ResID {
     FRICTION_RESOURCE_5_ID,
     FRICTION_RESOURCE_6_ID,
     FRICTION_RESOURCE_7_ID,
+    TIME_FORMAT_RES_0_ID,
+    TIME_FORMAT_RES_1_ID,
+    TIME_FORMAT_RES_2_ID,
+    TIME_FORMAT_RES_3_ID,
+    TIME_FORMAT_RES_4_ID,
+    TIME_FORMAT_RES_5_ID,
+    TIME_FORMAT_RES_6_ID,
+    TIME_FORMAT_RES_7_ID,
+    TIME_FORMAT_RES_8_ID,
+    TIME_FORMAT_RES_9_ID,
+    TIME_FORMAT_RES_10_ID,
+    TIME_FORMAT_RES_11_ID,
+    TIME_FORMAT_RES_12_ID,
+    TIME_FORMAT_RES_13_ID,
+    TIME_FORMAT_RES_14_ID,
+    TIME_FORMAT_RES_15_ID,
+    TIME_FORMAT_RES_16_ID,
+    TIME_FORMAT_RES_17_ID,
+    TIME_FORMAT_RES_18_ID,
+    TIME_FORMAT_RES_19_ID,
+    TIME_FORMAT_RES_20_ID,
+    TIME_FORMAT_RES_21_ID,
+    TIME_FORMAT_RES_22_ID,
+    TIME_FORMAT_RES_23_ID,
+    TIME_FORMAT_RES_24_ID,
+    TIME_FORMAT_RES_25_ID,
+    TIME_FORMAT_RES_26_ID,
+    TIME_FORMAT_RES_27_ID,
+    TIME_FORMAT_RES_28_ID,
+    TIME_FORMAT_RES_29_ID,
+    TIME_FORMAT_RES_30_ID,
     SHADOW_RADIUS_RES_0_ID,
     SHADOW_RADIUS_RES_1_ID,
     SHADOW_RADIUS_RES_2_ID,
@@ -242,6 +285,18 @@ inline constexpr auto MAX_FONT_SCALE_RES_2_STR = "MAX_FONT_SCALE_RES_2_STR";
 inline constexpr auto MIN_FONT_SCALE_RES_0_STR = "MIN_FONT_SCALE_RES_0_STR";
 inline constexpr auto MIN_FONT_SCALE_RES_1_STR = "MIN_FONT_SCALE_RES_1_STR";
 inline constexpr auto MIN_FONT_SCALE_RES_2_STR = "MIN_FONT_SCALE_RES_2_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_0_STR = "FONT_WEIGHT_RES_STRINGS_0_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_1_STR = "FONT_WEIGHT_RES_STRINGS_1_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_2_STR = "FONT_WEIGHT_RES_STRINGS_2_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_3_STR = "FONT_WEIGHT_RES_STRINGS_3_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_4_STR = "FONT_WEIGHT_RES_STRINGS_4_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_5_STR = "FONT_WEIGHT_RES_STRINGS_5_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_6_STR = "FONT_WEIGHT_RES_STRINGS_6_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_7_STR = "FONT_WEIGHT_RES_STRINGS_7_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_8_STR = "FONT_WEIGHT_RES_STRINGS_8_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_9_STR = "FONT_WEIGHT_RES_STRINGS_9_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_10_STR = "FONT_WEIGHT_RES_STRINGS_10_STR";
+inline constexpr auto FONT_WEIGHT_RES_STRINGS_11_STR = "FONT_WEIGHT_RES_STRINGS_11_STR";
 inline constexpr auto SCROLLABLE_FRICTION_RES_0_STR = "SCROLLABLE_FRICTION_RES_0_STR";
 inline constexpr auto SCROLLABLE_FRICTION_RES_1_STR = "SCROLLABLE_FRICTION_RES_1_STR";
 inline constexpr auto SCROLLABLE_FRICTION_RES_2_STR = "SCROLLABLE_FRICTION_RES_2_STR";
@@ -263,6 +318,37 @@ inline constexpr auto FRICTION_RESOURCE_4_STR = "FRICTION_RESOURCE_4_STR";
 inline constexpr auto FRICTION_RESOURCE_5_STR = "FRICTION_RESOURCE_5_STR";
 inline constexpr auto FRICTION_RESOURCE_6_STR = "FRICTION_RESOURCE_6_STR";
 inline constexpr auto FRICTION_RESOURCE_7_STR = "FRICTION_RESOURCE_7_STR";
+inline constexpr auto TIME_FORMAT_RES_0_STR = "TIME_FORMAT_RES_0_STR";
+inline constexpr auto TIME_FORMAT_RES_1_STR = "TIME_FORMAT_RES_1_STR";
+inline constexpr auto TIME_FORMAT_RES_2_STR = "TIME_FORMAT_RES_2_STR";
+inline constexpr auto TIME_FORMAT_RES_3_STR = "TIME_FORMAT_RES_3_STR";
+inline constexpr auto TIME_FORMAT_RES_4_STR = "TIME_FORMAT_RES_4_STR";
+inline constexpr auto TIME_FORMAT_RES_5_STR = "TIME_FORMAT_RES_5_STR";
+inline constexpr auto TIME_FORMAT_RES_6_STR = "TIME_FORMAT_RES_6_STR";
+inline constexpr auto TIME_FORMAT_RES_7_STR = "TIME_FORMAT_RES_7_STR";
+inline constexpr auto TIME_FORMAT_RES_8_STR = "TIME_FORMAT_RES_8_STR";
+inline constexpr auto TIME_FORMAT_RES_9_STR = "TIME_FORMAT_RES_9_STR";
+inline constexpr auto TIME_FORMAT_RES_10_STR = "TIME_FORMAT_RES_10_STR";
+inline constexpr auto TIME_FORMAT_RES_11_STR = "TIME_FORMAT_RES_11_STR";
+inline constexpr auto TIME_FORMAT_RES_12_STR = "TIME_FORMAT_RES_12_STR";
+inline constexpr auto TIME_FORMAT_RES_13_STR = "TIME_FORMAT_RES_13_STR";
+inline constexpr auto TIME_FORMAT_RES_14_STR = "TIME_FORMAT_RES_14_STR";
+inline constexpr auto TIME_FORMAT_RES_15_STR = "TIME_FORMAT_RES_15_STR";
+inline constexpr auto TIME_FORMAT_RES_16_STR = "TIME_FORMAT_RES_16_STR";
+inline constexpr auto TIME_FORMAT_RES_17_STR = "TIME_FORMAT_RES_17_STR";
+inline constexpr auto TIME_FORMAT_RES_18_STR = "TIME_FORMAT_RES_18_STR";
+inline constexpr auto TIME_FORMAT_RES_19_STR = "TIME_FORMAT_RES_19_STR";
+inline constexpr auto TIME_FORMAT_RES_20_STR = "TIME_FORMAT_RES_20_STR";
+inline constexpr auto TIME_FORMAT_RES_21_STR = "TIME_FORMAT_RES_21_STR";
+inline constexpr auto TIME_FORMAT_RES_22_STR = "TIME_FORMAT_RES_22_STR";
+inline constexpr auto TIME_FORMAT_RES_23_STR = "TIME_FORMAT_RES_23_STR";
+inline constexpr auto TIME_FORMAT_RES_24_STR = "TIME_FORMAT_RES_24_STR";
+inline constexpr auto TIME_FORMAT_RES_25_STR = "TIME_FORMAT_RES_25_STR";
+inline constexpr auto TIME_FORMAT_RES_26_STR = "TIME_FORMAT_RES_26_STR";
+inline constexpr auto TIME_FORMAT_RES_27_STR = "TIME_FORMAT_RES_27_STR";
+inline constexpr auto TIME_FORMAT_RES_28_STR = "TIME_FORMAT_RES_28_STR";
+inline constexpr auto TIME_FORMAT_RES_29_STR = "TIME_FORMAT_RES_29_STR";
+inline constexpr auto TIME_FORMAT_RES_30_STR = "TIME_FORMAT_RES_30_STR";
 inline constexpr auto SHADOW_RADIUS_RES_0_STR = "SHADOW_RADIUS_RES_0_STR";
 inline constexpr auto SHADOW_RADIUS_RES_1_STR = "SHADOW_RADIUS_RES_1_STR";
 inline constexpr auto SHADOW_RADIUS_RES_2_STR = "SHADOW_RADIUS_RES_2_STR";
@@ -555,6 +641,10 @@ extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureFontWeightNum
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFontWeightStringsValidValues;
 extern std::vector<std::tuple<std::string, Ark_String>> testFixtureFontWeightStringsInvalidValues;
 
+// Fixture 'FontWeightResStrings' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureFontWeightResStringsValidValues;
+extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureFontWeightResStringsInvalidValues;
+
 // Fixture 'ScrollableFrictionNum' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureScrollableFrictionNumValidValues;
 extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureScrollableFrictionNumInvalidValues;
@@ -595,6 +685,10 @@ extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtu
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTimeFormatValidValues;
 extern std::vector<std::tuple<std::string, Ark_String>> testFixtureTimeFormatInvalidValues;
 
+// Fixture 'TimeFormatRes' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureTimeFormatResValidValues;
+extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureTimeFormatResInvalidValues;
+
 // Fixture 'FontFeatureNum' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFontFeatureNumValidValues;
 extern std::vector<std::tuple<std::string, Ark_String>> testFixtureFontFeatureNumInvalidValues;
@@ -627,5 +721,8 @@ extern std::vector<std::tuple<std::string, Ark_Number>> testFixtureTimerInputCou
 // Fixture 'TextTimerDateFormat' for type 'Ark_String'
 extern std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureTextTimerDateFormatValidValues;
 extern std::vector<std::tuple<std::string, Ark_String>> testFixtureTextTimerDateFormatInvalidValues;
+
+// Fixture 'ImageContent' for type 'Ark_ImageContent'
+extern std::vector<std::tuple<std::string, Ark_ImageContent, std::string>> testFixtureImageContentValidValues;
 } // namespace OHOS::Ace::NG::Fixtures
 #endif // GENERATED_FOUNDATION_ACE_CAPI_TEST_FIXTURES_H

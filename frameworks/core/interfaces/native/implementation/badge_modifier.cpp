@@ -111,7 +111,7 @@ template<>
 BadgeParameters Convert(const Ark_BadgeParamWithString& src)
 {
     BadgeParameters dst = ConverterHelper(src);
-    dst.badgeValue = Converter::Convert<std::string>(src.value);
+    dst.badgeValue = Converter::OptConvert<std::string>(src.value);
     return dst;
 }
 

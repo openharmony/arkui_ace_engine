@@ -124,23 +124,37 @@ Opt_String GetWindowNameImpl(Ark_UIContext peer)
 {
     return {};
 }
+Ark_WidthBreakpoint GetWindowWidthBreakpointImpl(Ark_UIContext peer)
+{
+    return {};
+}
+Ark_HeightBreakpoint GetWindowHeightBreakpointImpl(Ark_UIContext peer)
+{
+    return {};
+}
 void OpenBindSheetImpl(Ark_VMContext vmContext,
+                       Ark_AsyncWorkerPtr asyncWorker,
                        Ark_UIContext peer,
                        Ark_ComponentContent bindSheetContent,
                        const Opt_SheetOptions* sheetOptions,
-                       const Opt_Number* targetId)
+                       const Opt_Number* targetId,
+                       const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
 }
 void UpdateBindSheetImpl(Ark_VMContext vmContext,
+                         Ark_AsyncWorkerPtr asyncWorker,
                          Ark_UIContext peer,
                          Ark_ComponentContent bindSheetContent,
                          const Ark_SheetOptions* sheetOptions,
-                         const Opt_Boolean* partialUpdate)
+                         const Opt_Boolean* partialUpdate,
+                         const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
 }
 void CloseBindSheetImpl(Ark_VMContext vmContext,
+                        Ark_AsyncWorkerPtr asyncWorker,
                         Ark_UIContext peer,
-                        Ark_ComponentContent bindSheetContent)
+                        Ark_ComponentContent bindSheetContent,
+                        const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
 }
 void ClearResourceCacheImpl(Ark_VMContext vmContext,
@@ -181,6 +195,8 @@ const GENERATED_ArkUIUIContextAccessor* GetUIContextAccessor()
         UIContextAccessor::GetHostContextImpl,
         UIContextAccessor::SetDynamicDimmingImpl,
         UIContextAccessor::GetWindowNameImpl,
+        UIContextAccessor::GetWindowWidthBreakpointImpl,
+        UIContextAccessor::GetWindowHeightBreakpointImpl,
         UIContextAccessor::OpenBindSheetImpl,
         UIContextAccessor::UpdateBindSheetImpl,
         UIContextAccessor::CloseBindSheetImpl,

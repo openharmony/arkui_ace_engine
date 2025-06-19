@@ -33,7 +33,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // StepperModifier
 namespace StepperInterfaceModifier {
 void SetStepperOptionsImpl(Ark_NativePointer node,
-                           const Opt_StepperOptionalIndex* value)
+                           const Opt_StepperOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

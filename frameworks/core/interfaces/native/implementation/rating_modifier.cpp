@@ -66,23 +66,11 @@ void SetRatingOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<float> rating {std::nullopt};
-    std::optional<double> dRating {std::nullopt};
-    std::optional<bool> indicator {std::nullopt};
-    if (!options) {
-        RatingModelStatic::SetRatingOptions(frameNode, dRating, indicator);
-        return;
-    }
-    auto optOptions = Converter::OptConvert<Ark_RatingOptions>(*options);
-    if (!optOptions.has_value()) {
-        RatingModelStatic::SetRatingOptions(frameNode, dRating, indicator);
-        return;
-    }
-    auto arkOptions = optOptions.value();
-    rating = Converter::Convert<float>(arkOptions.rating);
-    indicator = Converter::OptConvert<bool>(arkOptions.indicator);
+    auto optOptions = Converter::GetOptPtr(options);
+    auto rating = optOptions ? Converter::OptConvert<float>(optOptions->rating) : std::nullopt;
+    auto indicator = optOptions ? Converter::OptConvert<bool>(optOptions->indicator) : std::nullopt;
     Validator::ValidateNonNegative(rating);
-    dRating = FloatToDouble(rating);
+    auto dRating = FloatToDouble(rating);
     RatingModelStatic::SetRatingOptions(frameNode, dRating, indicator);
 }
 } // RatingInterfaceModifier
@@ -92,8 +80,7 @@ void StarsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto arkVal = value ? Converter::GetOpt(*value) : std::nullopt;
-    auto convVal = arkVal.has_value() ? Converter::OptConvert<float>(arkVal.value()) : std::nullopt;
+    auto convVal = Converter::OptConvertPtr<float>(value);
     Validator::ValidateNonNegative(convVal);
     auto optdVal = FloatToDouble(convVal);
     RatingModelStatic::SetStars(frameNode,  optdVal);
@@ -103,8 +90,7 @@ void StepSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto arkVal = value ? Converter::GetOpt(*value) : std::nullopt;
-    auto convVal = arkVal.has_value() ? Converter::OptConvert<float>(arkVal.value()) : std::nullopt;
+    auto convVal = Converter::OptConvertPtr<float>(value);
     static const float stepSizeMin = 0.1;
     Validator::ValidateGreatOrEqual(convVal, stepSizeMin);
     auto optdVal = FloatToDouble(convVal);
@@ -115,11 +101,7 @@ void StarStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto arkVal = value ? Converter::GetOpt(*value) : std::nullopt;
-    StarStyleOptions options = {};
-    if (arkVal.has_value()) {
-        options = Converter::Convert<StarStyleOptions>(arkVal.value());
-    }
+    auto options = Converter::OptConvertPtr<StarStyleOptions>(value).value_or(StarStyleOptions());
     RatingModelNG::SetBackgroundSrc(frameNode, options.backgroundUri,  options.backgroundUri.empty());
     RatingModelNG::SetForegroundSrc(frameNode, options.foregroundUri, options.foregroundUri.empty());
     RatingModelNG::SetSecondarySrc(frameNode, options.secondaryUri, options.secondaryUri.empty());

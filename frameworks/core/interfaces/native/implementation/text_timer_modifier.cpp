@@ -135,7 +135,7 @@ void FontStyleImpl(Ark_NativePointer node,
     TextTimerModelStatic::SetFontStyle(frameNode, style);
 }
 void FontWeightImpl(Ark_NativePointer node,
-                    const Opt_Union_Number_FontWeight_String* value)
+                    const Opt_Union_Number_FontWeight_ResourceStr* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

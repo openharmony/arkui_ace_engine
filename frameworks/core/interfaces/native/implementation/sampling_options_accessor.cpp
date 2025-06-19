@@ -22,7 +22,11 @@ namespace Drawing_SamplingOptionsAccessor {
 void DestroyPeerImpl(Ark_drawing_SamplingOptions peer)
 {
 }
-Ark_drawing_SamplingOptions CtorImpl()
+Ark_drawing_SamplingOptions Ctor0Impl()
+{
+    return nullptr;
+}
+Ark_drawing_SamplingOptions Ctor1Impl(Ark_drawing_FilterMode filterMode)
 {
     return nullptr;
 }
@@ -35,7 +39,8 @@ const GENERATED_ArkUIDrawing_SamplingOptionsAccessor* GetDrawing_SamplingOptions
 {
     static const GENERATED_ArkUIDrawing_SamplingOptionsAccessor Drawing_SamplingOptionsAccessorImpl {
         Drawing_SamplingOptionsAccessor::DestroyPeerImpl,
-        Drawing_SamplingOptionsAccessor::CtorImpl,
+        Drawing_SamplingOptionsAccessor::Ctor0Impl,
+        Drawing_SamplingOptionsAccessor::Ctor1Impl,
         Drawing_SamplingOptionsAccessor::GetFinalizerImpl,
     };
     return &Drawing_SamplingOptionsAccessorImpl;

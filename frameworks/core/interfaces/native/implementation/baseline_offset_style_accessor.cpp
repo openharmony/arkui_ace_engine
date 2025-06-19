@@ -47,10 +47,6 @@ Ark_Number GetBaselineOffsetImpl(Ark_BaselineOffsetStyle peer)
     auto value = Converter::ArkValue<Ark_Number>(peer->span->GetBaselineOffset().ConvertToVp());
     return value;
 }
-void SetBaselineOffsetImpl(Ark_BaselineOffsetStyle peer,
-                           const Ark_Number* baselineOffset)
-{
-}
 } // BaselineOffsetStyleAccessor
 const GENERATED_ArkUIBaselineOffsetStyleAccessor* GetBaselineOffsetStyleAccessor()
 {
@@ -59,7 +55,6 @@ const GENERATED_ArkUIBaselineOffsetStyleAccessor* GetBaselineOffsetStyleAccessor
         BaselineOffsetStyleAccessor::CtorImpl,
         BaselineOffsetStyleAccessor::GetFinalizerImpl,
         BaselineOffsetStyleAccessor::GetBaselineOffsetImpl,
-        BaselineOffsetStyleAccessor::SetBaselineOffsetImpl,
     };
     return &BaselineOffsetStyleAccessorImpl;
 }

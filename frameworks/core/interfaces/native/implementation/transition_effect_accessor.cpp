@@ -24,81 +24,93 @@ namespace TransitionEffectAccessor {
 
 const auto IDENTITY_TOKEN = "identity";
 const auto SLIDE_SWITCH_TOKEN = "slideswitch";
-const auto TRANSLATE_TOKEN = "translate";
-const auto ROTATE_TOKEN = "rotate";
-const auto SCALE_TOKEN = "scale";
-const auto OPACITY_TOKEN = "opacity";
-const auto MOVE_TOKEN = "move";
-const auto ASYMMETRIC_TOKEN = "asymmetric";
 
 void DestroyPeerImpl(Ark_TransitionEffect peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-RefPtr<OHOS::Ace::NG::ChainedRotateEffect> HandleRotate(const Ark_RotateOptions& rotate)
-{
-    auto emptyDimension = Dimension();
-    auto x = Converter::Convert<float>(rotate.x.value);
-    auto y = Converter::Convert<float>(rotate.y.value);
-    auto z = Converter::Convert<float>(rotate.z.value);
-    auto centerX = Converter::OptConvert<CalcDimension>(rotate.centerX.value);
-    auto centerY = Converter::OptConvert<CalcDimension>(rotate.centerY.value);
-    auto centerZ = Converter::OptConvert<CalcDimension>(rotate.centerZ.value);
-    auto perspective = Converter::Convert<float>(rotate.perspective.value);
-    auto angle = Converter::OptConvert<float>(rotate.angle);
-    RotateOptions rotateOpts(x, y, z, angle.value_or(0),
-        centerX.value_or(emptyDimension),
-        centerY.value_or(emptyDimension),
-        centerZ.value_or(emptyDimension), perspective);
-    return AceType::MakeRefPtr<ChainedRotateEffect>(rotateOpts);
-}
-RefPtr<OHOS::Ace::NG::ChainedScaleEffect> HandleScale(const Ark_ScaleOptions& scale)
-{
-    auto emptyDimension = Dimension();
-    auto x = Converter::Convert<float>(scale.x.value);
-    auto y = Converter::Convert<float>(scale.y.value);
-    auto z = Converter::Convert<float>(scale.z.value);
-    auto centerX = Converter::OptConvert<CalcDimension>(scale.centerX.value);
-    auto centerY = Converter::OptConvert<CalcDimension>(scale.centerY.value);
-    ScaleOptions scaleOpts(x, y, z, centerX.value_or(emptyDimension), centerY.value_or(emptyDimension));
-    return AceType::MakeRefPtr<ChainedScaleEffect>(scaleOpts);
-}
-Ark_TransitionEffect CtorImpl(const Ark_String* type)
+Ark_TransitionEffect Ctor0Impl(const Ark_String* type)
 {
     CHECK_NULL_RETURN(type, nullptr);
     auto valueText = Converter::Convert<std::string>(*type);
-    TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
-#ifdef WRONG_GEN
-    auto emptyDimension = Dimension();
-    if (valueText == TRANSLATE_TOKEN) {
-        auto x = Converter::OptConvert<CalcDimension>(effect->translate.x.value);
-        auto y = Converter::OptConvert<CalcDimension>(effect->translate.y.value);
-        auto z = Converter::OptConvert<CalcDimension>(effect->translate.z.value);
-        TranslateOptions translate(x.value_or(emptyDimension), y.value_or(emptyDimension), z.value_or(emptyDimension));
-        peer->handler = AceType::MakeRefPtr<ChainedTranslateEffect>(translate);
-    } else if (valueText == IDENTITY_TOKEN) {
+    TransitionEffectPeer* peer = nullptr;
+    if (valueText == IDENTITY_TOKEN) {
+        peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
         peer->handler = AceType::MakeRefPtr<ChainedIdentityEffect>();
     } else if (valueText == SLIDE_SWITCH_TOKEN) {
+        peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
         peer->handler = AceType::MakeRefPtr<ChainedSlideSwitchEffect>();
-    } else if (valueText == ROTATE_TOKEN) {
-        peer->handler = HandleRotate(*effect);
-    } else if (valueText == SCALE_TOKEN) {
-        peer->handler = HandleScale(*effect);
-    } else if (valueText == OPACITY_TOKEN) {
-        auto opacity = Converter::Convert<float>(effect->opacity);
-        peer->handler = AceType::MakeRefPtr<ChainedOpacityEffect>(opacity);
-    } else if (valueText == MOVE_TOKEN) {
-        auto move = Converter::OptConvert<TransitionEdge>(effect->move);
-        peer->handler = AceType::MakeRefPtr<ChainedMoveEffect>(move.value_or(TransitionEdge::TOP));
-    } else if (valueText == ASYMMETRIC_TOKEN) {
-        CHECK_NULL_RETURN(effect, nullptr);
-        auto app = effect->asymmetric.appear;
-        CHECK_NULL_RETURN(app, nullptr);
-        auto disapp = effect->asymmetric.disappear;
-        CHECK_NULL_RETURN(disapp, nullptr);
-        peer->handler = AceType::MakeRefPtr<ChainedAsymmetricEffect>(app->handler, disapp->handler);
     }
-#endif
+    return peer;
+}
+Ark_TransitionEffect Ctor1Impl(const Ark_Number* effect)
+{
+    CHECK_NULL_RETURN(effect, nullptr);
+    TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
+    auto opacity = Converter::Convert<float>(*effect);
+    peer->handler = AceType::MakeRefPtr<ChainedOpacityEffect>(opacity);
+    return peer;
+}
+Ark_TransitionEffect Ctor2Impl(Ark_TransitionEdge effect)
+{
+    CHECK_NULL_RETURN(effect, nullptr);
+    TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
+    auto move = Converter::OptConvert<TransitionEdge>(effect).value_or(TransitionEdge::TOP);
+    peer->handler = AceType::MakeRefPtr<ChainedMoveEffect>(move);
+    return peer;
+}
+Ark_TransitionEffect Ctor3Impl(const Ark_TranslateOptions* effect)
+{
+    CHECK_NULL_RETURN(effect, nullptr);
+    TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
+    auto emptyDimension = Dimension();
+    auto x = Converter::OptConvert<CalcDimension>(effect->x).value_or(emptyDimension);
+    auto y = Converter::OptConvert<CalcDimension>(effect->y).value_or(emptyDimension);
+    auto z = Converter::OptConvert<CalcDimension>(effect->z).value_or(emptyDimension);
+    TranslateOptions translate(x, y, z);
+    peer->handler = AceType::MakeRefPtr<ChainedTranslateEffect>(translate);
+    return peer;
+}
+Ark_TransitionEffect Ctor4Impl(const Ark_RotateOptions* effect)
+{
+    CHECK_NULL_RETURN(effect, nullptr);
+    TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
+    auto emptyDimension = Dimension();
+    auto x = Converter::OptConvert<float>(effect->x.value).value_or(0);
+    auto y = Converter::OptConvert<float>(effect->y.value).value_or(0);
+    auto z = Converter::OptConvert<float>(effect->z.value).value_or(0);
+    auto centerX = Converter::OptConvert<CalcDimension>(effect->centerX).value_or(emptyDimension);
+    auto centerY = Converter::OptConvert<CalcDimension>(effect->centerY).value_or(emptyDimension);
+    auto centerZ = Converter::OptConvert<CalcDimension>(effect->centerZ).value_or(emptyDimension);
+    auto perspective = Converter::OptConvert<float>(effect->perspective).value_or(0);
+    auto angle = Converter::OptConvert<float>(effect->angle).value_or(0);
+    RotateOptions rotateOpts(x, y, z, angle, centerX, centerY, centerZ, perspective);
+    peer->handler = AceType::MakeRefPtr<ChainedRotateEffect>(rotateOpts);
+    return peer;
+}
+Ark_TransitionEffect Ctor5Impl(const Ark_ScaleOptions* effect)
+{
+    CHECK_NULL_RETURN(effect, nullptr);
+    TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
+    auto emptyDimension = Dimension();
+    auto x = Converter::OptConvert<float>(effect->x).value_or(0);
+    auto y = Converter::OptConvert<float>(effect->y).value_or(0);
+    auto z = Converter::OptConvert<float>(effect->z).value_or(0);
+    auto centerX = Converter::OptConvert<CalcDimension>(effect->centerX).value_or(emptyDimension);
+    auto centerY = Converter::OptConvert<CalcDimension>(effect->centerY).value_or(emptyDimension);
+    ScaleOptions scaleOpts(x, y, z, centerX, centerY);
+    peer->handler = AceType::MakeRefPtr<ChainedScaleEffect>(scaleOpts);
+    return peer;
+}
+Ark_TransitionEffect Ctor6Impl(const Ark_AsymmetricTransitionOption* effect)
+{
+    CHECK_NULL_RETURN(effect, nullptr);
+    auto app = effect->appear;
+    CHECK_NULL_RETURN(app, nullptr);
+    auto disapp = effect->disappear;
+    CHECK_NULL_RETURN(disapp, nullptr);
+    TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
+    peer->handler = AceType::MakeRefPtr<ChainedAsymmetricEffect>(app->handler, disapp->handler);
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -107,41 +119,32 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_TransitionEffect TranslateImpl(const Ark_TranslateOptions* options)
 {
-    CHECK_NULL_RETURN(options, nullptr);
-    Ark_String type = Converter::ArkValue<Ark_String>(TRANSLATE_TOKEN, Converter::FC);
-    return CtorImpl(&type);
+    return Ctor3Impl(options);
 }
 Ark_TransitionEffect RotateImpl(const Ark_RotateOptions* options)
 {
-    CHECK_NULL_RETURN(options, nullptr);
-    Ark_String type = Converter::ArkValue<Ark_String>(ROTATE_TOKEN, Converter::FC);
-    return CtorImpl(&type);
+    return Ctor4Impl(options);
 }
 Ark_TransitionEffect ScaleImpl(const Ark_ScaleOptions* options)
 {
-    CHECK_NULL_RETURN(options, nullptr);
-    Ark_String type = Converter::ArkValue<Ark_String>(SCALE_TOKEN, Converter::FC);
-    return CtorImpl(&type);
+    return Ctor5Impl(options);
 }
 Ark_TransitionEffect OpacityImpl(const Ark_Number* alpha)
 {
-    CHECK_NULL_RETURN(alpha, nullptr);
-    Ark_String type = Converter::ArkValue<Ark_String>(OPACITY_TOKEN, Converter::FC);
-    return CtorImpl(&type);
+    return Ctor1Impl(alpha);
 }
 Ark_TransitionEffect MoveImpl(Ark_TransitionEdge edge)
 {
-    Ark_String type = Converter::ArkValue<Ark_String>(MOVE_TOKEN, Converter::FC);
-    return CtorImpl(&type);
+    return Ctor2Impl(edge);
 }
 Ark_TransitionEffect AsymmetricImpl(Ark_TransitionEffect appear,
                                     Ark_TransitionEffect disappear)
 {
     CHECK_NULL_RETURN(appear, nullptr);
     CHECK_NULL_RETURN(disappear, nullptr);
-
-    Ark_String type = Converter::ArkValue<Ark_String>(ASYMMETRIC_TOKEN, Converter::FC);
-    return CtorImpl(&type);
+    TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
+    peer->handler = AceType::MakeRefPtr<ChainedAsymmetricEffect>(appear->handler, disappear->handler);
+    return peer;
 }
 Ark_TransitionEffect AnimationImpl(Ark_TransitionEffect peer,
                                    const Ark_AnimateParam* value)
@@ -172,17 +175,11 @@ Ark_TransitionEffect GetIDENTITYImpl()
     peer->handler = AceType::MakeRefPtr<ChainedIdentityEffect>();
     return peer;
 }
-void SetIDENTITYImpl(Ark_TransitionEffect IDENTITY)
-{
-}
 Ark_TransitionEffect GetOPACITYImpl()
 {
     TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
     peer->handler = AceType::MakeRefPtr<ChainedOpacityEffect>(0);
     return peer;
-}
-void SetOPACITYImpl(Ark_TransitionEffect OPACITY)
-{
 }
 Ark_TransitionEffect GetSLIDEImpl()
 {
@@ -192,24 +189,24 @@ Ark_TransitionEffect GetSLIDEImpl()
     peer->handler = AceType::MakeRefPtr<ChainedAsymmetricEffect>(appear, disappear);
     return peer;
 }
-void SetSLIDEImpl(Ark_TransitionEffect SLIDE)
-{
-}
 Ark_TransitionEffect GetSLIDE_SWITCHImpl()
 {
     TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
     peer->handler = AceType::MakeRefPtr<ChainedSlideSwitchEffect>();
     return peer;
 }
-void SetSLIDE_SWITCHImpl(Ark_TransitionEffect SLIDE_SWITCH)
-{
-}
 } // TransitionEffectAccessor
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
 {
     static const GENERATED_ArkUITransitionEffectAccessor TransitionEffectAccessorImpl {
         TransitionEffectAccessor::DestroyPeerImpl,
-        TransitionEffectAccessor::CtorImpl,
+        TransitionEffectAccessor::Ctor0Impl,
+        TransitionEffectAccessor::Ctor1Impl,
+        TransitionEffectAccessor::Ctor2Impl,
+        TransitionEffectAccessor::Ctor3Impl,
+        TransitionEffectAccessor::Ctor4Impl,
+        TransitionEffectAccessor::Ctor5Impl,
+        TransitionEffectAccessor::Ctor6Impl,
         TransitionEffectAccessor::GetFinalizerImpl,
         TransitionEffectAccessor::TranslateImpl,
         TransitionEffectAccessor::RotateImpl,
@@ -220,13 +217,9 @@ const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
         TransitionEffectAccessor::AnimationImpl,
         TransitionEffectAccessor::CombineImpl,
         TransitionEffectAccessor::GetIDENTITYImpl,
-        TransitionEffectAccessor::SetIDENTITYImpl,
         TransitionEffectAccessor::GetOPACITYImpl,
-        TransitionEffectAccessor::SetOPACITYImpl,
         TransitionEffectAccessor::GetSLIDEImpl,
-        TransitionEffectAccessor::SetSLIDEImpl,
         TransitionEffectAccessor::GetSLIDE_SWITCHImpl,
-        TransitionEffectAccessor::SetSLIDE_SWITCHImpl,
     };
     return &TransitionEffectAccessorImpl;
 }

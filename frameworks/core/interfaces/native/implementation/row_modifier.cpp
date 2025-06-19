@@ -52,37 +52,15 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // RowModifier
 namespace RowInterfaceModifier {
-void SetRowOptions0Impl(Ark_NativePointer node,
-                        const Opt_RowOptions* options)
+void SetRowOptionsImpl(Ark_NativePointer node,
+                       const Opt_RowOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto opts = Converter::OptConvert<RowOptions>(*options);
-    auto space = opts ? opts->space : std::nullopt;
-    RowModelNG::SetSpace(frameNode, space.value_or(0.0_px));
-}
-void SetRowOptions1Impl(Ark_NativePointer node,
-                        const Opt_Union_RowOptions_RowOptionsV2* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto arkUnion = options ? Converter::GetOpt(*options) : std::nullopt;
-    if (!arkUnion.has_value()) {
-        RowModelNG::SetSpace(frameNode, Dimension());
-        return;
+    auto opts = Converter::OptConvertPtr<RowOptions>(options);
+    if (opts) {
+        RowModelNG::SetSpace(frameNode, opts->space);
     }
-    Converter::VisitUnion(arkUnion.value(),
-        [frameNode](const Ark_RowOptions& value) {
-            RowModelNG::SetSpace(frameNode, Converter::OptConvert<Dimension>(value.space));
-        },
-        [frameNode](const Ark_RowOptionsV2& value) {
-            LOGE("ARKOALA RowInterfaceModifier::SetRowOptions1Impl  Ark_RowOptionsV2 is not implemented.");
-        },
-        []() {}
-    );
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //RowModelNG::SetSetRowOptions1(frameNode, convValue);
 }
 } // RowInterfaceModifier
 namespace RowAttributeModifier {
@@ -150,8 +128,7 @@ const GENERATED_ArkUIRowModifier* GetRowModifier()
 {
     static const GENERATED_ArkUIRowModifier ArkUIRowModifierImpl {
         RowModifier::ConstructImpl,
-        RowInterfaceModifier::SetRowOptions0Impl,
-        RowInterfaceModifier::SetRowOptions1Impl,
+        RowInterfaceModifier::SetRowOptionsImpl,
         RowAttributeModifier::AlignItemsImpl,
         RowAttributeModifier::JustifyContentImpl,
         RowAttributeModifier::PointLightImpl,

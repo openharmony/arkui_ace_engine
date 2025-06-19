@@ -144,7 +144,7 @@ void SelectedImpl(Ark_NativePointer node,
     SelectModelStatic::SetSelected(frameNode, convVal);
 }
 void ValueImpl(Ark_NativePointer node,
-               const Opt_ResourceStr* value)
+               const Opt_Union_ResourceStr_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

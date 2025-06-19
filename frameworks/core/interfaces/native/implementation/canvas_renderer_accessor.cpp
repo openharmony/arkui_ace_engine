@@ -225,23 +225,18 @@ void Fill1Impl(Ark_CanvasRenderer peer,
     auto ruleStr = Converter::OptConvert<std::string>(*fillRule);
     peerImpl->Fill(ruleStr, pathImpl->GetCanvasPath2d());
 }
-void Stroke0Impl(Ark_CanvasRenderer peer)
+void StrokeImpl(Ark_CanvasRenderer peer,
+                const Opt_Path2D* path)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    peerImpl->Stroke();
-}
-void Stroke1Impl(Ark_CanvasRenderer peer,
-                 Ark_Path2D path)
-{
-    CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(path);
-    auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path);
-    CHECK_NULL_VOID(pathImpl);
-    peerImpl->Stroke(pathImpl->GetCanvasPath2d());
+    auto optPath = Converter::GetOptPtr(path);
+    RefPtr<CanvasPath2D> arg;
+    if (optPath && optPath.value()) {
+        auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(optPath.value());
+        arg = pathImpl->GetCanvasPath2d();
+    }
+    peerImpl->Stroke(arg);
 }
 Ark_CanvasGradient CreateLinearGradientImpl(Ark_CanvasRenderer peer,
                                             const Ark_Number* x0,
@@ -627,7 +622,7 @@ Ark_Matrix2D GetTransformImpl(Ark_CanvasRenderer peer)
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, {});
-    auto matrixPeer = reinterpret_cast<Matrix2DPeer*>(GetMatrix2DAccessor()->ctor());
+    auto matrixPeer = PeerUtils::CreatePeer<Matrix2DPeer>();
     peerImpl->GetTransform(matrixPeer);
     return matrixPeer;
 }
@@ -1177,8 +1172,7 @@ const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()
         CanvasRendererAccessor::Clip1Impl,
         CanvasRendererAccessor::Fill0Impl,
         CanvasRendererAccessor::Fill1Impl,
-        CanvasRendererAccessor::Stroke0Impl,
-        CanvasRendererAccessor::Stroke1Impl,
+        CanvasRendererAccessor::StrokeImpl,
         CanvasRendererAccessor::CreateLinearGradientImpl,
         CanvasRendererAccessor::CreatePatternImpl,
         CanvasRendererAccessor::CreateRadialGradientImpl,

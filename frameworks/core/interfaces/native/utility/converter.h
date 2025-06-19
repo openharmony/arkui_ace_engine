@@ -356,7 +356,7 @@ namespace Converter {
     }
 
     template<>
-    inline ImageSourceInfo Convert(const Ark_LinearGradient_common& value)
+    inline ImageSourceInfo Convert(const Ark_LinearGradientOptions& value)
     {
         LOGE("Convert [Ark_LinearGradient] to [ImageSourceInfo] is not supported");
         return ImageSourceInfo();
@@ -507,7 +507,7 @@ namespace Converter {
     template<> FontWeightInt Convert(const Ark_Number& src);
     template<> FontWeightInt Convert(const Ark_String& src);
     template<> Gradient Convert(const Ark_LinearGradient& value);
-    template<> Gradient Convert(const Ark_LinearGradient_common& value);
+    template<> Gradient Convert(const Ark_LinearGradientOptions& value);
     template<> GradientColor Convert(const Ark_Tuple_ResourceColor_Number& value);
     template<> ImageResizableSlice Convert(const Ark_EdgeWidths& src);
     template<> ImageSpanSize Convert(const Ark_SizeOptions& value);
@@ -545,8 +545,9 @@ namespace Converter {
     template<> PickerTextStyle Convert(const Ark_TextPickerTextStyle& src);
     template<> PickerTime Convert(const Ark_Date& src);
     template<> PickerTime Convert(const Ark_TimePickerResult& src);
+    template<> PickerValueType Convert(const Ark_Resource& src);
     template<> PickerValueType Convert(const Ark_String& src);
-    template<> PickerValueType Convert(const Array_String& src);
+    template<> PickerValueType Convert(const Array_ResourceStr& src);
     template<> PointLightStyle Convert(const Ark_PointLightStyle& src);
     template<> RadioStyle Convert(const Ark_RadioStyle& src);
     template<> Radius Convert(const Ark_Vector2& src);
@@ -639,8 +640,9 @@ namespace Converter {
     template<> void AssignCast(std::optional<ChainEdgeEffect>& dst, const Ark_ChainEdgeEffect& src);
     template<> void AssignCast(std::optional<ChainStyle>& dst, const Ark_ChainStyle& src);
     template<> void AssignCast(std::optional<CleanNodeStyle>& dst, const Ark_CancelButtonStyle& src);
+    template<> void AssignCast(std::optional<Color>& dst, const Ark_Color& src);
+    template<> void AssignCast(std::optional<Color>& dst, const Ark_ColorMetrics& src);
     template<> void AssignCast(std::optional<Color>& dst, const Ark_String& src);
-    template<> void AssignCast(std::optional<Color>& dst, const enum Ark_Color& src);
     template<> void AssignCast(std::optional<ContentClipMode>& dst, const Ark_ContentClipMode& src);
     template<> void AssignCast(std::optional<ControlSize>& dst, const Ark_ControlSize& src);
     template<> void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src);
@@ -669,6 +671,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_FontWeight& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_Int32& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_Number& src);
+    template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_Resource& src);
     template<> void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<ForegroundColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<GestureMask>& dst, const Ark_GestureMask& src);

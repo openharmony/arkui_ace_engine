@@ -47,10 +47,6 @@ Ark_Number GetLineHeightImpl(Ark_LineHeightStyle peer)
     CHECK_NULL_RETURN(peer->span, ret);
     return Converter::ArkValue<Ark_Number>(peer->span->GetLineHeight().ConvertToPx());
 }
-void SetLineHeightImpl(Ark_LineHeightStyle peer,
-                       const Ark_Number* lineHeight)
-{
-}
 } // LineHeightStyleAccessor
 const GENERATED_ArkUILineHeightStyleAccessor* GetLineHeightStyleAccessor()
 {
@@ -59,7 +55,6 @@ const GENERATED_ArkUILineHeightStyleAccessor* GetLineHeightStyleAccessor()
         LineHeightStyleAccessor::CtorImpl,
         LineHeightStyleAccessor::GetFinalizerImpl,
         LineHeightStyleAccessor::GetLineHeightImpl,
-        LineHeightStyleAccessor::SetLineHeightImpl,
     };
     return &LineHeightStyleAccessorImpl;
 }

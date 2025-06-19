@@ -22,7 +22,11 @@ namespace Drawing_PathAccessor {
 void DestroyPeerImpl(Ark_drawing_Path peer)
 {
 }
-Ark_drawing_Path CtorImpl()
+Ark_drawing_Path Ctor0Impl()
+{
+    return nullptr;
+}
+Ark_drawing_Path Ctor1Impl(Ark_drawing_Path path)
 {
     return nullptr;
 }
@@ -217,7 +221,8 @@ const GENERATED_ArkUIDrawing_PathAccessor* GetDrawing_PathAccessor()
 {
     static const GENERATED_ArkUIDrawing_PathAccessor Drawing_PathAccessorImpl {
         Drawing_PathAccessor::DestroyPeerImpl,
-        Drawing_PathAccessor::CtorImpl,
+        Drawing_PathAccessor::Ctor0Impl,
+        Drawing_PathAccessor::Ctor1Impl,
         Drawing_PathAccessor::GetFinalizerImpl,
         Drawing_PathAccessor::MoveToImpl,
         Drawing_PathAccessor::LineToImpl,

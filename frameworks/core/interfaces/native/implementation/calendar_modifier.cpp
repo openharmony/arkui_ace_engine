@@ -80,7 +80,7 @@ ObtainedMonth Convert(const Ark_MonthData& src)
 }
 
 template<>
-CalendarData Convert(const Ark_Type_CalendarInterface_callable0_value& src)
+CalendarData Convert(const Ark_CalendarRequestedMonths& src)
 {
     const auto peer = OptConvert<Ark_CalendarController>(src.controller);
     return {
@@ -190,7 +190,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // CalendarModifier
 namespace CalendarInterfaceModifier {
 void SetCalendarOptionsImpl(Ark_NativePointer node,
-                            const Ark_Type_CalendarInterface_callable0_value* value)
+                            const Ark_CalendarRequestedMonths* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

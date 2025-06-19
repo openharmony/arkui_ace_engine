@@ -30,6 +30,7 @@ namespace GeneratedViewModel {
     Ark_NodeHandle createBaseSpanNode(Ark_Int32 nodeId);
     Ark_NodeHandle createBlankNode(Ark_Int32 nodeId);
     Ark_NodeHandle createButtonNode(Ark_Int32 nodeId);
+    Ark_NodeHandle createCalendarNode(Ark_Int32 nodeId);
     Ark_NodeHandle createCalendarPickerNode(Ark_Int32 nodeId);
     Ark_NodeHandle createCanvasNode(Ark_Int32 nodeId);
     Ark_NodeHandle createCheckboxNode(Ark_Int32 nodeId);
@@ -152,6 +153,7 @@ namespace GeneratedBridge {
             case GENERATED_ARKUI_BASE_SPAN: return GeneratedViewModel::createBaseSpanNode(id);
             case GENERATED_ARKUI_BLANK: return GeneratedViewModel::createBlankNode(id);
             case GENERATED_ARKUI_BUTTON: return GeneratedViewModel::createButtonNode(id);
+            case GENERATED_ARKUI_CALENDAR: return GeneratedViewModel::createCalendarNode(id);
             case GENERATED_ARKUI_CALENDAR_PICKER: return GeneratedViewModel::createCalendarPickerNode(id);
             case GENERATED_ARKUI_CANVAS: return GeneratedViewModel::createCanvasNode(id);
             case GENERATED_ARKUI_CHECKBOX: return GeneratedViewModel::createCheckboxNode(id);

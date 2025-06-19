@@ -39,12 +39,12 @@ public:
 } // namespace
 
 class Path2DAccessorTest
-    : public AccessorTestBase<GENERATED_ArkUIPath2DAccessor,
+    : public AccessorTestBase0<GENERATED_ArkUIPath2DAccessor,
         &GENERATED_ArkUIAccessors::getPath2DAccessor, Path2DPeer> {
 public:
     void SetUp(void) override
     {
-        AccessorTestBase::SetUp();
+        ASSERT_NO_FATAL_FAILURE(AccessorTestBase0::SetUp());
         mockPath_ = new MockCanvasPath();
         mockPathKeeper_ = AceType::Claim(mockPath_);
         ASSERT_NE(mockPathKeeper_, nullptr);
@@ -55,7 +55,7 @@ public:
 
     void TearDown() override
     {
-        AccessorTestBaseParent::TearDown();
+        AccessorTestBase0::TearDown();
         mockPathKeeper_ = nullptr;
         mockPath_ = nullptr;
     }

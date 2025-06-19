@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace GlobalScopeAccessor {
 Ark_Resource $rImpl(const Ark_String* value,
-                    const Array_Object* params)
+                    const Array_Opt_Object* params)
 {
     return {};
 }
@@ -99,6 +99,10 @@ Ark_Boolean FocusControl_requestFocusImpl(const Ark_String* value)
         [pipelineContext, inspectorKey, &result]() { result = pipelineContext->RequestFocus(inspectorKey); },
         TaskExecutor::TaskType::UI, "ArkUIJsRequestFocus");
     return Converter::ArkValue<Ark_Boolean>(result);
+}
+Ark_font_UIFontConfig Font_getUIFontConfigImpl()
+{
+    return {};
 }
 Ark_ComponentInfo GetRectangleByIdImpl(const Ark_String* id)
 {
@@ -197,6 +201,7 @@ const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor()
         GlobalScopeAccessor::EdgeColorsImpl,
         GlobalScopeAccessor::EdgeWidthsImpl,
         GlobalScopeAccessor::FocusControl_requestFocusImpl,
+        GlobalScopeAccessor::Font_getUIFontConfigImpl,
         GlobalScopeAccessor::GetRectangleByIdImpl,
         GlobalScopeAccessor::PostCardActionImpl,
         GlobalScopeAccessor::Profiler_registerVsyncCallbackImpl,

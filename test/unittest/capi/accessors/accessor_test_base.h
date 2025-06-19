@@ -187,6 +187,18 @@ public:
 };
 
 template<typename AccessorType, auto GetAccessorFunc, typename PeerType>
+class AccessorTestBase0 : public AccessorTestBaseParent<AccessorType, GetAccessorFunc, PeerType> {
+public:
+    virtual void SetUp(void)
+    {
+        ASSERT_NE(this->accessor_->ctor0, nullptr);
+        this->peer_ = static_cast<PeerType *>(this->accessor_->ctor0());
+        ASSERT_NE(this->peer_, nullptr);
+        AccessorTestBaseParent<AccessorType, GetAccessorFunc, PeerType>::SetUp();
+    }
+};
+
+template<typename AccessorType, auto GetAccessorFunc, typename PeerType>
 class AccessorTestCtorBase : public AccessorTestBaseParent<AccessorType, GetAccessorFunc, PeerType> {
 public:
     virtual void SetUp(void)

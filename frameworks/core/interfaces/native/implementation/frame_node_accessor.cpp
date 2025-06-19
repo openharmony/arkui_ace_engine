@@ -227,6 +227,14 @@ void DisposeImpl(Ark_FrameNode peer)
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(currentUINodeRef);
 }
+Ark_String GetIdImpl(Ark_FrameNode peer)
+{
+    return {};
+}
+Ark_Number GetUniqueIdImpl(Ark_FrameNode peer)
+{
+    return {};
+}
 Ark_Number GetOpacityImpl(Ark_FrameNode peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(1);
@@ -234,6 +242,36 @@ Ark_Number GetOpacityImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(peerNode, errValue);
     auto opacity = ViewAbstract::GetOpacity(Referenced::RawPtr(peerNode));
     return Converter::ArkValue<Ark_Number>(opacity);
+}
+Ark_Boolean IsVisibleImpl(Ark_FrameNode peer)
+{
+    return {};
+}
+Ark_Boolean IsClipToFrameImpl(Ark_FrameNode peer)
+{
+    return {};
+}
+Ark_Boolean IsAttachedImpl(Ark_FrameNode peer)
+{
+    return {};
+}
+Ark_Object GetInspectorInfoImpl(Ark_FrameNode peer)
+{
+    return {};
+}
+void InvalidateImpl(Ark_FrameNode peer)
+{
+}
+void DisposeTreeImpl(Ark_FrameNode peer)
+{
+}
+void SetCrossLanguageOptionsImpl(Ark_FrameNode peer,
+                                 const Ark_CrossLanguageOptions* options)
+{
+}
+Ark_CrossLanguageOptions GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
+{
+    return {};
 }
 Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
 {
@@ -414,7 +452,17 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::GetParentImpl,
         FrameNodeAccessor::GetChildrenCountImpl,
         FrameNodeAccessor::DisposeImpl,
+        FrameNodeAccessor::GetIdImpl,
+        FrameNodeAccessor::GetUniqueIdImpl,
         FrameNodeAccessor::GetOpacityImpl,
+        FrameNodeAccessor::IsVisibleImpl,
+        FrameNodeAccessor::IsClipToFrameImpl,
+        FrameNodeAccessor::IsAttachedImpl,
+        FrameNodeAccessor::GetInspectorInfoImpl,
+        FrameNodeAccessor::InvalidateImpl,
+        FrameNodeAccessor::DisposeTreeImpl,
+        FrameNodeAccessor::SetCrossLanguageOptionsImpl,
+        FrameNodeAccessor::GetCrossLanguageOptionsImpl,
         FrameNodeAccessor::GetPositionToWindowWithTransformImpl,
         FrameNodeAccessor::GetFrameNodeByKeyImpl,
         FrameNodeAccessor::GetIdByFrameNodeImpl,

@@ -18,11 +18,11 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace LayoutPolicyAccessor {
-void DestroyPeerImpl(Ark_LayoutPolicy peer)
+namespace TextMenuControllerAccessor {
+void DestroyPeerImpl(Ark_TextMenuController peer)
 {
 }
-Ark_LayoutPolicy CtorImpl()
+Ark_TextMenuController CtorImpl()
 {
     return nullptr;
 }
@@ -30,20 +30,20 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_LayoutPolicy GetMatchParentImpl()
+void SetMenuOptionsImpl(Ark_TextMenuController peer,
+                        const Ark_TextMenuOptions* options)
 {
-    return {};
 }
-} // LayoutPolicyAccessor
-const GENERATED_ArkUILayoutPolicyAccessor* GetLayoutPolicyAccessor()
+} // TextMenuControllerAccessor
+const GENERATED_ArkUITextMenuControllerAccessor* GetTextMenuControllerAccessor()
 {
-    static const GENERATED_ArkUILayoutPolicyAccessor LayoutPolicyAccessorImpl {
-        LayoutPolicyAccessor::DestroyPeerImpl,
-        LayoutPolicyAccessor::CtorImpl,
-        LayoutPolicyAccessor::GetFinalizerImpl,
-        LayoutPolicyAccessor::GetMatchParentImpl,
+    static const GENERATED_ArkUITextMenuControllerAccessor TextMenuControllerAccessorImpl {
+        TextMenuControllerAccessor::DestroyPeerImpl,
+        TextMenuControllerAccessor::CtorImpl,
+        TextMenuControllerAccessor::GetFinalizerImpl,
+        TextMenuControllerAccessor::SetMenuOptionsImpl,
     };
-    return &LayoutPolicyAccessorImpl;
+    return &TextMenuControllerAccessorImpl;
 }
 
 }

@@ -63,24 +63,15 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // ColumnModifier
 namespace ColumnInterfaceModifier {
-void SetColumnOptions0Impl(Ark_NativePointer node,
-                           const Opt_ColumnOptions* options)
+void SetColumnOptionsImpl(Ark_NativePointer node,
+                          const Opt_ColumnOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto opts = Converter::OptConvert<ColumnOptions>(*options);
+    auto opts = Converter::OptConvertPtr<ColumnOptions>(options);
     if (opts) {
         ColumnModelNG::SetSpace(frameNode, opts->space);
     }
-}
-void SetColumnOptions1Impl(Ark_NativePointer node,
-                           const Opt_Union_ColumnOptions_ColumnOptionsV2* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //ColumnModelNG::SetSetColumnOptions1(frameNode, convValue);
 }
 } // ColumnInterfaceModifier
 namespace ColumnAttributeModifier {
@@ -152,8 +143,7 @@ const GENERATED_ArkUIColumnModifier* GetColumnModifier()
 {
     static const GENERATED_ArkUIColumnModifier ArkUIColumnModifierImpl {
         ColumnModifier::ConstructImpl,
-        ColumnInterfaceModifier::SetColumnOptions0Impl,
-        ColumnInterfaceModifier::SetColumnOptions1Impl,
+        ColumnInterfaceModifier::SetColumnOptionsImpl,
         ColumnAttributeModifier::AlignItemsImpl,
         ColumnAttributeModifier::JustifyContentImpl,
         ColumnAttributeModifier::PointLightImpl,

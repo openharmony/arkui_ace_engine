@@ -22,7 +22,11 @@ namespace Drawing_BrushAccessor {
 void DestroyPeerImpl(Ark_drawing_Brush peer)
 {
 }
-Ark_drawing_Brush CtorImpl()
+Ark_drawing_Brush Ctor0Impl()
+{
+    return nullptr;
+}
+Ark_drawing_Brush Ctor1Impl(Ark_drawing_Brush brush)
 {
     return nullptr;
 }
@@ -105,7 +109,8 @@ const GENERATED_ArkUIDrawing_BrushAccessor* GetDrawing_BrushAccessor()
 {
     static const GENERATED_ArkUIDrawing_BrushAccessor Drawing_BrushAccessorImpl {
         Drawing_BrushAccessor::DestroyPeerImpl,
-        Drawing_BrushAccessor::CtorImpl,
+        Drawing_BrushAccessor::Ctor0Impl,
+        Drawing_BrushAccessor::Ctor1Impl,
         Drawing_BrushAccessor::GetFinalizerImpl,
         Drawing_BrushAccessor::SetColor0Impl,
         Drawing_BrushAccessor::SetColor1Impl,

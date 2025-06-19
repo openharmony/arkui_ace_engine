@@ -33,13 +33,15 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 } // QRCodeModifier
 namespace QRCodeInterfaceModifier {
 void SetQRCodeOptionsImpl(Ark_NativePointer node,
-                          const Ark_String* value)
+                          const Ark_ResourceStr* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto convValue = Converter::Convert<std::string>(*value);
-    QRCodeModelNG::SetQRCodeValue(frameNode, convValue);
+    auto convValue = Converter::OptConvert<std::string>(*value);
+    if (convValue) {
+        QRCodeModelNG::SetQRCodeValue(frameNode, *convValue);
+    }
 }
 } // QRCodeInterfaceModifier
 namespace QRCodeAttributeModifier {

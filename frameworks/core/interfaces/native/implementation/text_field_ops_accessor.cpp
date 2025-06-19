@@ -18,31 +18,20 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace CustomBuildAccessor {
-void DestroyPeerImpl(Ark_CustomBuild peer)
+namespace TextFieldOpsAccessor {
+Ark_NativePointer RegisterTextFieldValueCallbackImpl(Ark_NativePointer node,
+                                                     const Ark_ResourceStr* value,
+                                                     const TextFieldValueCallback* callback)
 {
+    return {};
 }
-Ark_CustomBuild CtorImpl()
+} // TextFieldOpsAccessor
+const GENERATED_ArkUITextFieldOpsAccessor* GetTextFieldOpsAccessor()
 {
-    return nullptr;
-}
-Ark_NativePointer GetFinalizerImpl()
-{
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
-}
-void BuildImpl(Ark_CustomBuild peer)
-{
-}
-} // CustomBuildAccessor
-const GENERATED_ArkUICustomBuildAccessor* GetCustomBuildAccessor()
-{
-    static const GENERATED_ArkUICustomBuildAccessor CustomBuildAccessorImpl {
-        CustomBuildAccessor::DestroyPeerImpl,
-        CustomBuildAccessor::CtorImpl,
-        CustomBuildAccessor::GetFinalizerImpl,
-        CustomBuildAccessor::BuildImpl,
+    static const GENERATED_ArkUITextFieldOpsAccessor TextFieldOpsAccessorImpl {
+        TextFieldOpsAccessor::RegisterTextFieldValueCallbackImpl,
     };
-    return &CustomBuildAccessorImpl;
+    return &TextFieldOpsAccessorImpl;
 }
 
 }

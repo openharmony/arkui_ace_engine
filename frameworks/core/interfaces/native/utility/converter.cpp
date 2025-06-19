@@ -24,6 +24,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/interfaces/native/implementation/color_metrics_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
@@ -1025,7 +1026,7 @@ std::pair<std::optional<Color>, Dimension> Convert(const Ark_ColorStop& src)
 }
 
 template<>
-Gradient Convert(const Ark_LinearGradient_common& value)
+Gradient Convert(const Ark_LinearGradientOptions& value)
 {
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
@@ -1496,6 +1497,21 @@ void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src)
     auto value = Convert<std::string>(src);
     if (auto [parseOk, val] = StringUtils::ParseFontWeight(value); parseOk) {
         dst = val;
+    }
+}
+
+template<>
+void AssignCast(std::optional<FontWeight>& dst, const Ark_Resource& src)
+{
+    auto value = OptConvert<std::string>(src);
+    if (value) {
+        if (auto [parseOk, val] = StringUtils::ParseFontWeight(*value); parseOk) {
+            dst = val;
+        }
+    }
+    auto intVal = OptConvert<int32_t>(src);
+    if (intVal) {
+        AssignCast(dst, *intVal);
     }
 }
 
@@ -2033,6 +2049,13 @@ void AssignCast(std::optional<Color>& dst, const Ark_String& src)
 }
 
 template<>
+void AssignCast(std::optional<Color>& dst, const Ark_ColorMetrics& src)
+{
+    CHECK_NULL_VOID(src);
+    dst = Color(src->colorValue.value);
+}
+
+template<>
 void AssignCast(std::optional<FontFamilies>& dst, const Ark_Resource& value)
 {
     dst = std::nullopt;
@@ -2209,9 +2232,26 @@ PickerValueType Convert(const Ark_String& src)
 }
 
 template<>
+PickerValueType Convert(const Ark_Resource& src)
+{
+    auto value = Converter::OptConvert<std::string>(src);
+    if (value) {
+        return *value;
+    }
+    return std::vector<std::string>();
+}
+
+template<>
 PickerValueType Convert(const Array_String& src)
 {
     return Converter::Convert<std::vector<std::string>>(src);
+}
+
+template<>
+PickerValueType Convert(const Array_ResourceStr& src)
+{
+    auto value = Converter::Convert<std::vector<std::optional<std::string>>>(src);
+    return Squash(value);
 }
 
 template<>
@@ -2419,14 +2459,14 @@ template<>
 SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
 {
     SelectMenuParam selectMenuParam = {.onAppear = [](int32_t start, int32_t end) {}, .onDisappear = []() {}};
-    auto optOnAppear = Converter::OptConvert<MenuOnAppearCallback>(src.onAppear);
+    auto optOnAppear = Converter::GetOpt(src.onAppear);
     if (optOnAppear.has_value()) {
         selectMenuParam.onAppear =
             [arkCallback = CallbackHelper(optOnAppear.value())](int32_t start, int32_t end) {
                 arkCallback.Invoke(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
         };
     }
-    auto optOnDisappear = Converter::OptConvert<Callback_Void>(src.onDisappear);
+    auto optOnDisappear = Converter::GetOpt(src.onDisappear);
     if (optOnDisappear.has_value()) {
         selectMenuParam.onDisappear =
             [arkCallback = CallbackHelper(optOnDisappear.value())]() {

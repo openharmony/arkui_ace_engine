@@ -133,10 +133,6 @@ Ark_image_PixelMap GetValueImpl(Ark_ImageAttachment peer)
     return nullptr;
 #endif
 }
-void SetValueImpl(Ark_ImageAttachment peer,
-                  Ark_image_PixelMap value)
-{
-}
 Opt_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
 {
     auto invalid = Converter::ArkValue<Opt_SizeOptions>();
@@ -149,10 +145,6 @@ Opt_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
     size.height = ArkValue<Opt_Length>(peer->span->GetImageAttribute()->size->height, Converter::FC);
     return Converter::ArkValue<Opt_SizeOptions>(size);
 }
-void SetSizeImpl(Ark_ImageAttachment peer,
-                 const Opt_SizeOptions* size)
-{
-}
 Opt_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
 {
     auto invalid = Converter::ArkValue<Opt_ImageSpanAlignment>();
@@ -161,10 +153,6 @@ Opt_ImageSpanAlignment GetVerticalAlignImpl(Ark_ImageAttachment peer)
     auto alignment = peer->span->GetImageAttribute()->verticalAlign;
     return ArkValue<Opt_ImageSpanAlignment>(alignment);
 }
-void SetVerticalAlignImpl(Ark_ImageAttachment peer,
-                          const Opt_ImageSpanAlignment* verticalAlign)
-{
-}
 Opt_ImageFit GetObjectFitImpl(Ark_ImageAttachment peer)
 {
     auto invalid = Converter::ArkValue<Opt_ImageFit>();
@@ -172,20 +160,12 @@ Opt_ImageFit GetObjectFitImpl(Ark_ImageAttachment peer)
     auto objectFit = peer->span->GetImageAttribute()->objectFit;
     return ArkValue<Opt_ImageFit>(objectFit);
 }
-void SetObjectFitImpl(Ark_ImageAttachment peer,
-                      const Opt_ImageFit* objectFit)
-{
-}
 Opt_ImageAttachmentLayoutStyle GetLayoutStyleImpl(Ark_ImageAttachment peer)
 {
     auto invalid = Converter::ArkValue<Opt_ImageAttachmentLayoutStyle>();
     CHECK_NULL_RETURN(peer, invalid);
     CHECK_NULL_RETURN(peer->span, invalid);
     return ArkValue<Opt_ImageAttachmentLayoutStyle>(peer->span->GetImageAttribute(), Converter::FC);
-}
-void SetLayoutStyleImpl(Ark_ImageAttachment peer,
-                        const Opt_ImageAttachmentLayoutStyle* layoutStyle)
-{
 }
 Opt_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
 {
@@ -206,10 +186,6 @@ Opt_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
     }
     return empty;
 }
-void SetColorFilterImpl(Ark_ImageAttachment peer,
-                        const Opt_ColorFilterType* colorFilter)
-{
-}
 } // ImageAttachmentAccessor
 const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor()
 {
@@ -218,17 +194,11 @@ const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor()
         ImageAttachmentAccessor::CtorImpl,
         ImageAttachmentAccessor::GetFinalizerImpl,
         ImageAttachmentAccessor::GetValueImpl,
-        ImageAttachmentAccessor::SetValueImpl,
         ImageAttachmentAccessor::GetSizeImpl,
-        ImageAttachmentAccessor::SetSizeImpl,
         ImageAttachmentAccessor::GetVerticalAlignImpl,
-        ImageAttachmentAccessor::SetVerticalAlignImpl,
         ImageAttachmentAccessor::GetObjectFitImpl,
-        ImageAttachmentAccessor::SetObjectFitImpl,
         ImageAttachmentAccessor::GetLayoutStyleImpl,
-        ImageAttachmentAccessor::SetLayoutStyleImpl,
         ImageAttachmentAccessor::GetColorFilterImpl,
-        ImageAttachmentAccessor::SetColorFilterImpl,
     };
     return &ImageAttachmentAccessorImpl;
 }

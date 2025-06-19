@@ -22,7 +22,11 @@ namespace Drawing_PenAccessor {
 void DestroyPeerImpl(Ark_drawing_Pen peer)
 {
 }
-Ark_drawing_Pen CtorImpl()
+Ark_drawing_Pen Ctor0Impl()
+{
+    return nullptr;
+}
+Ark_drawing_Pen Ctor1Impl(Ark_drawing_Pen pen)
 {
     return nullptr;
 }
@@ -151,7 +155,8 @@ const GENERATED_ArkUIDrawing_PenAccessor* GetDrawing_PenAccessor()
 {
     static const GENERATED_ArkUIDrawing_PenAccessor Drawing_PenAccessorImpl {
         Drawing_PenAccessor::DestroyPeerImpl,
-        Drawing_PenAccessor::CtorImpl,
+        Drawing_PenAccessor::Ctor0Impl,
+        Drawing_PenAccessor::Ctor1Impl,
         Drawing_PenAccessor::GetFinalizerImpl,
         Drawing_PenAccessor::SetMiterLimitImpl,
         Drawing_PenAccessor::GetMiterLimitImpl,

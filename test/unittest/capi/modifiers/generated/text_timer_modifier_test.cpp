@@ -575,15 +575,15 @@ HWTEST_F(TextTimerModifierTest, setFontWeightTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(TextTimerModifierTest, setFontWeightTestFontWeightValidValues, TestSize.Level1)
 {
-    Opt_Union_Number_FontWeight_String initValueFontWeight;
+    Opt_Union_Number_FontWeight_ResourceStr initValueFontWeight;
 
     // Initial setup
-    initValueFontWeight = ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(
+    initValueFontWeight = ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
 
     auto checkValue = [this, &initValueFontWeight](const std::string& input, const std::string& expectedStr,
-                          const Opt_Union_Number_FontWeight_String& value) {
-        Opt_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
+                          const Opt_Union_Number_FontWeight_ResourceStr& value) {
+        Opt_Union_Number_FontWeight_ResourceStr inputValueFontWeight = initValueFontWeight;
 
         inputValueFontWeight = value;
         modifier_->setFontWeight(node_, &inputValueFontWeight);
@@ -594,13 +594,20 @@ HWTEST_F(TextTimerModifierTest, setFontWeightTestFontWeightValidValues, TestSize
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontWeightValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_FontWeight>(value));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightNumbersValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(value));
+        checkValue(input, expected, ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_Number>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightResStringsValidValues) {
+        checkValue(input, expected,
+            ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_ResourceStr>(
+                ArkUnion<Ark_ResourceStr, Ark_Resource>(value)));
     }
     for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightStringsValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(value));
+        checkValue(input, expected,
+            ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_ResourceStr>(
+                ArkUnion<Ark_ResourceStr, Ark_String>(value)));
     }
 }
 
@@ -611,15 +618,15 @@ HWTEST_F(TextTimerModifierTest, setFontWeightTestFontWeightValidValues, TestSize
  */
 HWTEST_F(TextTimerModifierTest, setFontWeightTestFontWeightInvalidValues, TestSize.Level1)
 {
-    Opt_Union_Number_FontWeight_String initValueFontWeight;
+    Opt_Union_Number_FontWeight_ResourceStr initValueFontWeight;
 
     // Initial setup
-    initValueFontWeight = ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(
+    initValueFontWeight = ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
 
     auto checkValue = [this, &initValueFontWeight](
-                          const std::string& input, const Opt_Union_Number_FontWeight_String& value) {
-        Opt_Union_Number_FontWeight_String inputValueFontWeight = initValueFontWeight;
+                          const std::string& input, const Opt_Union_Number_FontWeight_ResourceStr& value) {
+        Opt_Union_Number_FontWeight_ResourceStr inputValueFontWeight = initValueFontWeight;
 
         modifier_->setFontWeight(node_, &inputValueFontWeight);
         inputValueFontWeight = value;
@@ -631,18 +638,23 @@ HWTEST_F(TextTimerModifierTest, setFontWeightTestFontWeightInvalidValues, TestSi
     };
 
     for (auto& [input, value] : Fixtures::testFixtureFontWeightNumbersInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_Number>(value));
     }
     for (auto& [input, value] : Fixtures::testFixtureFontWeightStringsInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_String>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_ResourceStr>(
+                              ArkUnion<Ark_ResourceStr, Ark_String>(value)));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureFontWeightResStringsInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_ResourceStr>(
+                              ArkUnion<Ark_ResourceStr, Ark_Resource>(value)));
     }
     for (auto& [input, value] : Fixtures::testFixtureEnumFontWeightInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Union_Number_FontWeight_String, Ark_FontWeight>(value));
+        checkValue(input, ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_FontWeight>(value));
     }
     // Check invalid union
-    checkValue("invalid union", ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Empty>(nullptr));
+    checkValue("invalid union", ArkUnion<Opt_Union_Number_FontWeight_ResourceStr, Ark_Empty>(nullptr));
     // Check empty optional
-    checkValue("undefined", ArkValue<Opt_Union_Number_FontWeight_String>());
+    checkValue("undefined", ArkValue<Opt_Union_Number_FontWeight_ResourceStr>());
 }
 
 /*

@@ -30,6 +30,6 @@ const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
     1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0
 };
 
-void ApplyColorFilterValues(Ark_NativePointer node, const Opt_Union_ColorFilter_Drawing_ColorFilter* value);
+void ApplyColorFilterValues(Ark_NativePointer node, const Opt_Union_ColorFilter_DrawingColorFilter* value);
 } // namespace ImageCommonMethods
 } // namespace OHOS::Ace::NG::GeneratedModifier
