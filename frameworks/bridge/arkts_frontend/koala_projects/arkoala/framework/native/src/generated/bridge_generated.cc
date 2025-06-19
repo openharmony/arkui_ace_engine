@@ -32058,6 +32058,28 @@ void impl_SystemOps_setFrameCallback(KSerializerBuffer thisArray, int32_t thisLe
         GetAccessors()->getSystemOpsAccessor()->setFrameCallback((const Callback_Number_Void*)&onFrameCallback_value, (const Callback_Number_Void*)&onIdleCallback_value, (const Ark_Number*) (&delayTime));
 }
 KOALA_INTEROP_DIRECT_V3(SystemOps_setFrameCallback, KSerializerBuffer, int32_t, KInteropNumber)
+KInteropReturnBuffer impl_SystemOps_resourceToLengthMetrics(KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_Resource res_value = thisDeserializer.readResource();;
+        const auto &retValue = GetAccessors()->getSystemOpsAccessor()->resourceToLengthMetrics((const Ark_Resource*)&res_value);
+        Serializer _retSerializer {};
+        _retSerializer.writeLengthMetricsCustom(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_2(SystemOps_resourceToLengthMetrics, KInteropReturnBuffer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_SystemOps_colorMetricsResourceColor(KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_Resource color_value = thisDeserializer.readResource();;
+        const auto &retValue = GetAccessors()->getSystemOpsAccessor()->colorMetricsResourceColor((const Ark_Resource*)&color_value);
+        Serializer _retSerializer {};
+        _retSerializer.writeInt32(retValue.length);
+        for (int i = 0; i < retValue.length; i++) {
+            const Ark_Number retValue_element = retValue.array[i];
+            _retSerializer.writeNumber(retValue_element);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_2(SystemOps_colorMetricsResourceColor, KInteropReturnBuffer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_GestureOps_createTapGesture(KInteropNumber fingers, KInteropNumber count, KInteropNumber distanceThreshold, Ark_Boolean isFingerCountLimited) {
         return GetAccessors()->getGestureOpsAccessor()->createTapGesture((const Ark_Number*) (&fingers), (const Ark_Number*) (&count), (const Ark_Number*) (&distanceThreshold), isFingerCountLimited);
 }

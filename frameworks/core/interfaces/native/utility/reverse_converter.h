@@ -275,6 +275,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_PanelMode& dst, const PanelMode& src);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_Position& dst, const OffsetF& src);
+    void AssignArkValue(Ark_LengthMetricsCustom& dst, const CalcDimension& src);
     void AssignArkValue(Ark_PositionWithAffinity& dst, const PositionWithAffinity& src);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewTextInfo& src, ConvContext *ctx);

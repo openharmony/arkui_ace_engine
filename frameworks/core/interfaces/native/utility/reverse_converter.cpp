@@ -476,6 +476,12 @@ void AssignArkValue(Ark_Position& dst, const OffsetF& src)
     dst.y = Converter::ArkValue<Opt_Length>(src.GetY());
 }
 
+void AssignArkValue(Ark_LengthMetricsCustom& dst, const CalcDimension& src)
+{
+    dst.value = Converter::ArkValue<Ark_Number>(static_cast<float>(src.Value()));
+    dst.unit = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(src.Unit()));
+}
+
 void AssignArkValue(Ark_OffsetResult& dst, const Offset& src)
 {
     dst.xOffset = ArkValue<Ark_Number>(src.GetX());

@@ -2306,7 +2306,7 @@ export class Serializer extends SerializerBase {
         const value_deleteValue  = value.deleteValue
         valueSerializer.writeString(value_deleteValue)
     }
-    writeDirectionalEdgesT(value: DirectionalEdgesT): void {
+    writeDirectionalEdgesT(value: DirectionalEdgesT<number>): void {
         let valueSerializer : Serializer = this
         const value_start  = value.start
         valueSerializer.writeNumber(value_start)

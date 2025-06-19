@@ -37,6 +37,7 @@ import { Deserializer } from "./component/peers/Deserializer";
 import { ComponentContent } from './ComponentContent';
 import { DrawContext } from './Graphics';
 import { JSBuilderNode } from "./BuilderNode"
+import { BusinessError } from '#external';
 
 export interface CrossLanguageOptions {
     attributeSetting?: boolean;
@@ -166,7 +167,8 @@ export class FrameNode implements MaterializedBase {
     }
     public appendChild(node: FrameNode): void {
         if (node.getType() === 'ProxyFrameNode' || !this.checkValid(node)) {
-            throw Error("The FrameNode is not modifiable.");
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
         }
         const node_casted = node as (FrameNode)
         this.appendChild_serialize(node_casted)
@@ -198,6 +200,13 @@ export class FrameNode implements MaterializedBase {
         content.setAttachedParent(undefined);
     }
     public insertChildAfter(child: FrameNode, sibling: FrameNode | null): void {
+        if (child === undefined || child === null) {
+            return;
+        }
+        if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
         const child_casted = child as (FrameNode);
         if (sibling === null || sibling === undefined) {
             this.insertChildAfter_serialize(child_casted, null);
@@ -518,8 +527,9 @@ export class FrameNode implements MaterializedBase {
             index_casted = index;
         }
         const oldParent = this.getParent();
-        if (oldParent && !oldParent.isModifiable() || !targetParent.isModifiable()) {
-            throw Error("The FrameNode is not modifiable.");
+        if (oldParent && !oldParent.isModifiable() || !targetParent.isModifiable() || !targetParent.checkValid(this)) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
         }
         const targetParent_casted = targetParent as (FrameNode);
         this.moveTo_serialize(targetParent_casted, index_casted);
@@ -719,16 +729,20 @@ class ImmutableFrameNode extends FrameNode {
         return;
     }
     appendChild(node: FrameNode): void {
-        throw Error("The FrameNode is not modifiable.");
+        const error = Error('The FrameNode is not modifiable.');
+        throw new BusinessError(100021, error);
     }
     insertChildAfter(child: FrameNode, sibling: FrameNode | null): void {
-        throw Error("The FrameNode is not modifiable.");
+        const error = Error('The FrameNode is not modifiable.');
+        throw new BusinessError(100021, error);
     }
     removeChild(node: FrameNode): void {
-        throw Error("The FrameNode is not modifiable.");
+        const error = Error('The FrameNode is not modifiable.');
+        throw new BusinessError(100021, error);
     }
     clearChildren(): void {
-        throw Error("The FrameNode is not modifiable.");
+        const error = Error('The FrameNode is not modifiable.');
+        throw new BusinessError(100021, error);
     }
 }
 
@@ -740,7 +754,8 @@ export class ProxyFrameNode extends ImmutableFrameNode {
         return 'ProxyFrameNode';
     }
     moveTo(targetParent: FrameNode, index?: number): void {
-        throw Error("The FrameNode is not modifiable.");
+        const error = Error('The FrameNode is not modifiable.');
+        throw new BusinessError(100021, error);
     }
 }
 export class BuilderRootFrameNode<T> extends ImmutableFrameNode {
