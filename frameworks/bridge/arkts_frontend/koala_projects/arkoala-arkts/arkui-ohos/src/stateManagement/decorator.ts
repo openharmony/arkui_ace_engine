@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import { ObserveSingleton } from "./base/observeSingleton";
+import { ObserveSingleton } from './base/observeSingleton';
 import { int32 } from '@koalaui/common';
-import { __StateMgmtFactoryImpl } from "./base/stateMgmtFactory";
-import { ExtendableComponent } from "../component/extendableComponent";
+import { __StateMgmtFactoryImpl } from './base/stateMgmtFactory';
+import { ExtendableComponent } from '../component/extendableComponent';
 
 export interface IDecoratedVariable {
     readonly varName: string;
@@ -73,9 +73,7 @@ export interface IMutableStateMeta {
 
 export interface IMutableKeyedStateMeta {
     addRef(key: string): void;
-    // addRef(index: int32): void;
     fireChange(key: string): void;
-    // fireChange(index: int32): void;
 }
 
 export interface IObserve {
@@ -101,9 +99,9 @@ export interface IStateMgmtFactory {
     makeProp<T>(owningView: ExtendableComponent, varName: string, initValue: T, watchFunc?: WatchFuncType): IPropDecoratedVariable<T>;
     makeLink<T>(owningView: ExtendableComponent, varName: string, source: LinkSourceType<T>, watchFunc?: WatchFuncType): ILinkDecoratedVariable<T>;
     makeProvide<T>(owningView: ExtendableComponent, varName: string, provideAlias: string,
-        initValue: T, allowOverride: boolean, wathcFunc?: WatchFuncType): IProvideDecoratedVariable<T>;
+        initValue: T, allowOverride: boolean, watchFunc?: WatchFuncType): IProvideDecoratedVariable<T>;
     makeConsume<T>(owningView: ExtendableComponent, varName: string, provideAlias: string,  watchFunc?: WatchFuncType): IConsumeDecoratedVariable<T>;
-    makeObjectLink<T>(owningView: ExtendableComponent, varName: string, initValue: T, wathcFunc?: WatchFuncType): IObjectLinkDecoratedVariable<T>;
+    makeObjectLink<T>(owningView: ExtendableComponent, varName: string, initValue: T, watchFunc?: WatchFuncType): IObjectLinkDecoratedVariable<T>;
     makeStorageLink<T>(owningView: ExtendableComponent, propName: string,
         varName: string, initValue: T, watchFunc?: WatchFuncType): IStorageLinkDecoratedVariable<T>;
     makeStorageProp<T>(owningView: ExtendableComponent, propName: string,

@@ -16,18 +16,14 @@
 import { InteropNativeModule } from '@koalaui/interop';
 
 export class StateMgmtConsole {
-    static log(str: string) {
+    static log(str: string): void {
         InteropNativeModule._NativeLog('StateManagement: ['+str+']');
     }
-    static traceBegin(str: string) {
-        // AceTrace.begin(str);
+    static traceBegin(str: string): void {
     }
-    static traceEnd() {
-        // AceTrace.end();
+    static traceEnd(): void {
     }
-    static scopedTrace(str: string, cb: ()=>void) {
-        // AceTrace.begin(str);
+    static scopedTrace(str: string, cb: ()=>void): void {
         cb();
-        // AceTrace.end();
     }
 }

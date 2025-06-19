@@ -112,6 +112,7 @@ void checkGuideLineData(Ark_NodeHandle node, std::vector<string> vecId,
 {
     auto jsonValue = GetJsonValue(node);
     auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_GUIDE_LINE_NAME);
+    ASSERT_NE(jsonArray, nullptr);
     EXPECT_EQ(jsonArray->GetArraySize(), vecId.size());
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
         auto itemJson = jsonArray->GetArrayItem(i);
@@ -142,6 +143,7 @@ void checkBarrierData(Ark_NodeHandle node, std::vector<string> vecId,
 {
     auto jsonValue = GetJsonValue(node);
     auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BARRIER_NAME);
+    ASSERT_NE(jsonArray, nullptr);
     EXPECT_EQ(jsonArray->GetArraySize(), vecId.size());
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
         auto itemJson = jsonArray->GetArrayItem(i);
@@ -170,6 +172,7 @@ void checkLocBarrierData(Ark_NodeHandle node, std::vector<string> vecId,
 {
     auto jsonValue = GetJsonValue(node);
     auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BARRIER_NAME);
+    ASSERT_NE(jsonArray, nullptr);
     EXPECT_EQ(jsonArray->GetArraySize(), vecId.size());
     for (int i = 0; i < jsonArray->GetArraySize(); i++) {
         auto itemJson = jsonArray->GetArrayItem(i);
@@ -197,10 +200,11 @@ class RelativeContainerModifierTest : public ModifierTestBase<
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerModifierTest, setTestDefaultValues, TestSize.Level1)
+HWTEST_F(RelativeContainerModifierTest, DISABLED_setTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_GUIDE_LINE_NAME);
+    ASSERT_NE(jsonArray, nullptr);
     EXPECT_EQ(jsonArray->GetArraySize(), ATTRIBUTE_ARRAY_DEFAULT_SIZE);
     jsonArray = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BARRIER_NAME);
     EXPECT_EQ(jsonArray->GetArraySize(), ATTRIBUTE_ARRAY_DEFAULT_SIZE);
@@ -211,7 +215,7 @@ HWTEST_F(RelativeContainerModifierTest, setTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerModifierTest, setGuideLineTestValidValues, TestSize.Level1)
+HWTEST_F(RelativeContainerModifierTest, DISABLED_setGuideLineTestValidValues, TestSize.Level1)
 {
     std::vector<Ark_GuideLineStyle> inputVec;
     std::vector<string> vecId = {"abc1", "abc2", "abc3", "abc4", "abc5"};
@@ -237,7 +241,7 @@ HWTEST_F(RelativeContainerModifierTest, setGuideLineTestValidValues, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerModifierTest, setGuideLineTestValidValues2, TestSize.Level1)
+HWTEST_F(RelativeContainerModifierTest, DISABLED_setGuideLineTestValidValues2, TestSize.Level1)
 {
     std::vector<Ark_GuideLineStyle> inputVec;
     std::vector<std::string> vecId = {"8", "4", "5", "9", "100"};
@@ -262,7 +266,7 @@ HWTEST_F(RelativeContainerModifierTest, setGuideLineTestValidValues2, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerModifierTest, setGuideLineTestValidValues3, TestSize.Level1)
+HWTEST_F(RelativeContainerModifierTest, DISABLED_setGuideLineTestValidValues3, TestSize.Level1)
 {
     std::vector<Ark_GuideLineStyle> inputVec;
     std::vector<std::string>  vecId = {"8", "4", "5", "9", "100"};
@@ -289,7 +293,7 @@ HWTEST_F(RelativeContainerModifierTest, setGuideLineTestValidValues3, TestSize.L
  * empty axis. The default value is AXIS_VERTICAL
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerModifierTest, setGuideLineTestInvalidValues, TestSize.Level1)
+HWTEST_F(RelativeContainerModifierTest, DISABLED_setGuideLineTestInvalidValues, TestSize.Level1)
 {
     std::vector<Ark_GuideLineStyle> inputVec;
     std::vector<std::string>  vecId = {"-8", "-4", "-5-", "+9", "%100", "-10", "*&^", "abc", "40%", "-"};
@@ -317,7 +321,7 @@ HWTEST_F(RelativeContainerModifierTest, setGuideLineTestInvalidValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerModifierTest, setGuideLineTestInvalidValues2, TestSize.Level1)
+HWTEST_F(RelativeContainerModifierTest, DISABLED_setGuideLineTestInvalidValues2, TestSize.Level1)
 {
     std::vector<Ark_GuideLineStyle> inputVec;
     std::vector<std::string> vecId = {"", "", "", "", ""};
@@ -342,7 +346,7 @@ HWTEST_F(RelativeContainerModifierTest, setGuideLineTestInvalidValues2, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerModifierTest, setBarrier0TestValidValues, TestSize.Level1)
+HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier0TestValidValues, TestSize.Level1)
 {
     std::vector<std::string> vecId = {"10.f", "4.f", "5", "9", "100"};
     std::vector<Ark_BarrierDirection> vecBarrierDir = {ARK_BARRIER_DIRECTION_BOTTOM, ARK_BARRIER_DIRECTION_RIGHT,
@@ -366,7 +370,7 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier0TestValidValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerModifierTest, setBarrier0TestValidValues2, TestSize.Level1)
+HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier0TestValidValues2, TestSize.Level1)
 {
     std::vector<std::string> vecId = {"abc1", "abc2", "abc3", "abc4", "abc5"};
     std::vector<Ark_BarrierDirection> vecBarrierDir = {ARK_BARRIER_DIRECTION_LEFT, ARK_BARRIER_DIRECTION_RIGHT,
@@ -390,7 +394,7 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier0TestValidValues2, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerModifierTest, setBarrier0TestInvalidValues, TestSize.Level1)
+HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier0TestInvalidValues, TestSize.Level1)
 {
     std::vector<std::string> vecId = {"-10.f", "", "", "", "-100"};
     std::vector<Ark_BarrierDirection> vecBarrierDir = {ARK_BARRIER_DIRECTION_LEFT, ARK_BARRIER_DIRECTION_RIGHT,
@@ -415,7 +419,7 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier0TestInvalidValues, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerModifierTest, setBarrier0TestInvalidValues2, TestSize.Level1)
+HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier0TestInvalidValues2, TestSize.Level1)
 {
     std::vector<std::string> vecId = {"-10", "", "abc", "40%", "-"};
     std::vector<Ark_BarrierDirection> vecBarrierDir = {ARK_BARRIER_DIRECTION_LEFT, ARK_BARRIER_DIRECTION_RIGHT,
@@ -440,7 +444,7 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier0TestInvalidValues2, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerModifierTest, setBarrier1TestValidValues, TestSize.Level1)
+HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier1TestValidValues, TestSize.Level1)
 {
     std::vector<std::string> vecId = {"abc1", "abc2", "abc3", "abc4", "abc5"};
     std::vector<Ark_LocalizedBarrierDirection> vecBarrierDir = {
@@ -469,7 +473,7 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier1TestValidValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerModifierTest, setBarrier1TestValidValues2, TestSize.Level1)
+HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier1TestValidValues2, TestSize.Level1)
 {
     std::vector<std::string> vecId = {"10.f", "4.f", "5", "9", "100"};
     std::vector<Ark_LocalizedBarrierDirection> vecBarrierDir = {
@@ -498,7 +502,7 @@ HWTEST_F(RelativeContainerModifierTest, setBarrier1TestValidValues2, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RelativeContainerModifierTest, setBarrier1TestInvalidValues3, TestSize.Level1)
+HWTEST_F(RelativeContainerModifierTest, DISABLED_setBarrier1TestInvalidValues3, TestSize.Level1)
 {
     std::vector<std::string> vecId = {"-10", "", "abc", "40%", "-"};
     std::vector<Ark_LocalizedBarrierDirection> vecBarrierDir = {

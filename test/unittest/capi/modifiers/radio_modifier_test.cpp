@@ -84,7 +84,6 @@ public:
     CustomNodeBuilder getBuilderCb()
     {
         auto checkCallback = [](
-            Ark_VMContext context,
             const Ark_Int32 resourceId,
             const Ark_NativePointer parentNode,
             const Callback_Pointer_Void continuation) {
@@ -170,11 +169,11 @@ HWTEST_F(RadioModifierTest, RadioOptionsCustomBuilderTest, TestSize.Level1)
         uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
         auto builder = getBuilderCb();
         radioOptions.indicatorBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
+        checkEvent = std::nullopt;
         modifier_->setRadioOptions(node_, &radioOptions);
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
         auto pattern = frameNode->GetPattern<RadioPattern>();
         ASSERT_NE(pattern, nullptr);
-        checkEvent = std::nullopt;
         pattern->SetRadioChecked(true);
         ASSERT_EQ(checkEvent.has_value(), true);
         EXPECT_EQ(checkEvent->resourceId, TEST_RESOURCE_ID);

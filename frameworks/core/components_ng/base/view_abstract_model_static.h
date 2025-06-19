@@ -18,6 +18,7 @@
 
 #include <optional>
 #include <utility>
+#include "view_abstract.h"
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/vector.h"
@@ -225,12 +226,33 @@ public:
         const std::optional<bool>& isGroup, const std::optional<bool>& arrowKeyStepOut);
     static void SetFocusScopePriority(
         FrameNode* frameNode, const std::string& focusScopeId, const std::optional<uint32_t>& focusPriority);
+    static void SetGrayScale(FrameNode* frameNode, const std::optional<Dimension>& grayScale);
+    static void SetColorBlend(FrameNode* frameNode, const std::optional<Color>& colorBlend);
+    static void SetUseShadowBatching(FrameNode* frameNode, std::optional<bool> useShadowBatching);
+    static void SetUseEffect(FrameNode* frameNode, std::optional<bool> useEffect);
+    static void SetDrawModifier(FrameNode* frameNode, const RefPtr<NG::DrawModifier>& drawModifier);
+    static void SetFreeze(FrameNode* frameNode, std::optional<bool> freeze);
+    static void SetClickEffectLevel(FrameNode* frameNode,
+        const std::optional<ClickEffectLevel>& level, std::optional<float> scaleValue);
+    static void SetBrightness(FrameNode* frameNode, const std::optional<Dimension>& brightness);
+    static void SetContrast(FrameNode* frameNode, const std::optional<Dimension>& contrast);
+    static void SetSphericalEffect(FrameNode* frameNode, const std::optional<double> radio);
+    static void SetLightUpEffect(FrameNode* frameNode, const std::optional<double> radio);
+    static void SetPixelStretchEffect(FrameNode* frameNode,
+        const std::optional<PixStretchEffectOption>& option);
     static void SetBlendApplyType(FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
     static void SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest);
     static void SetOnGestureRecognizerJudgeBegin(
         FrameNode* frameNode, GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool innerGestureFlag = false);
-
+    static void SetOuterBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value);
+    static void SetOuterBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value);
+    static void SetOuterBorderColor(FrameNode* frameNode, const BorderColorProperty& value);
+    static void SetOuterBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value);
+    static void SetAllowDrop(FrameNode* frameNode, const std::optional<std::set<std::string>>& allowDrop);
+    static void SetDragPreview(FrameNode* frameNode, const std::optional<DragDropInfo>& DragDropInfo);
+    static void SetBackgroundImage(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
+    static void SetBackgroundImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat);
 private:
     static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
     static void RegisterContextMenuKeyEvent(

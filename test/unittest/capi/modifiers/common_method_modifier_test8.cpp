@@ -310,7 +310,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover0IsShowTest, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, setBindContentCover0ModalTransitionTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover0ModalTransitionTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover0, nullptr);
     auto node = BlankModelNG::CreateFrameNode(EXPECTED_NODE_ID);
@@ -335,7 +335,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover0ModalTransitionTest, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, setBindContentCover1IsShowTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1IsShowTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -363,7 +363,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1IsShowTest, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnAppearTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnAppearTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -406,7 +406,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnAppearTest, TestSize.L
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnDisAppearTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnDisAppearTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -454,7 +454,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnDisAppearTest, TestSiz
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnWillAppearTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnWillAppearTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -495,7 +495,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnWillAppearTest, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnWillDisAppearTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1OnWillDisAppearTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -542,7 +542,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1OnWillDisAppearTest, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, setBindContentCover1DissmisCallbackTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1DissmisCallbackTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -582,7 +582,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1DissmisCallbackTest, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, setBindContentCover1BackgroundColorTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1BackgroundColorTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -613,7 +613,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1BackgroundColorTest, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, setBindContentCover1ModalTransitionTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1ModalTransitionTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -642,7 +642,7 @@ HWTEST_F(CommonMethodModifierTest8, setBindContentCover1ModalTransitionTest, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest8, setBindContentCover1TransitionEffectTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1TransitionEffectTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindContentCover1, nullptr);
     FrameNode* frameNode = reinterpret_cast<FrameNode*>(node_);

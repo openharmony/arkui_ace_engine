@@ -258,6 +258,15 @@ void SideBarContainerModelStatic::SetOnChangeEvent(
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
 
+void SideBarContainerModelStatic::SetOnSideBarWidthChangeEvent(FrameNode* frameNode,
+    OnSideBarWidthChangeEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<SideBarContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSideBarWidthChangeEvent(std::move(event));
+}
+
 void SideBarContainerModelStatic::ResetControlButtonLeft(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(

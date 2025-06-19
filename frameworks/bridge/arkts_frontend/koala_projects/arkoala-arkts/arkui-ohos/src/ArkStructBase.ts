@@ -14,41 +14,56 @@
  */
 
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ArkCustomComponentImpl } from "./ArkCustomComponent"
-import { ArkCommonMethodComponent } from "./component"
-import { ArkPageTransitionEnter, ArkPageTransitionExit } from "./handwritten/ArkPageTransition";
-import { PageTransitionOptions } from "./component";
+import { ArkCustomComponent } from "./ArkCustomComponent"
 import { ArkComponentRoot } from "./ArkComponentRoot"
 import { ArkColumnPeer } from "./component";
 import { ObserveSingleton } from "./stateManagement/base/observeSingleton";
 import { OBSERVE } from "./stateManagement";
+import { PeerNode } from "./PeerNode"
 
 /** base class for user's structs */
-export abstract class ArkStructBase<T, T_Options> extends ArkCustomComponentImpl {
+export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent {
+    private peer?: PeerNode
+
+    setPeer(peer: PeerNode): void {
+        this.peer = peer
+    }
+    getPeer(): PeerNode | undefined {
+        return this. peer
+    }
+
+    onFormRecycle(): string {
+        throw new Error("Not supported yet");
+    }
+    onFormRecover(statusData: string): void {
+        throw new Error("Not supported yet");
+    }
+
+    aboutToReuse(initializers?: T_Options): void {}
+    aboutToRecycle(): void {}
+
     // Can be overridden as an effect of @Prop, @Watch etc
     /** @memo */
-    protected __updateStruct(arg1?: T_Options): void { }
+    protected __updateStruct(initializers?: T_Options): void { }
 
     /** @memo */
     static _instantiate<T extends ArkStructBase<T, T_Options>, T_Options>(
-        /** @memo */
-        attributes: undefined | ((instance: ArkCommonMethodComponent) => void),
         factory: () => T,
         /** @memo */
-        arg1?: () => void,
-        arg2?: T_Options,
+        content?: () => void,
+        initializers?: T_Options,
         reuseKey?: string
     ): void {
         if (reuseKey) {
-            ArkStructBase._instantiateReusable(reuseKey!, attributes, factory, arg1, arg2);
+            ArkStructBase._instantiateReusable(reuseKey!, factory, content, initializers);
             return
         }
         const receiver = remember(() => {
             const instance = factory();
-            instance.__initializeStruct(arg1, arg2);
+            instance.__initializeStruct(content, initializers);
             return instance;
         });
-        receiver._buildWrapper(attributes, arg1, arg2);
+        receiver._buildWrapper(content, initializers);
     }
 
     protected __initializeStruct(
@@ -62,15 +77,13 @@ export abstract class ArkStructBase<T, T_Options> extends ArkCustomComponentImpl
     /** @memo */
     _buildWrapper(
         /** @memo */
-        attributes: undefined | ((instance: ArkCommonMethodComponent) => void),
-        /** @memo */
         content?: () => void,
         initializers?: T_Options
     ): void {
         ArkComponentRoot(this, () => {
             this.__updateStruct(initializers);
             OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
-            this.__build(attributes, content, initializers);
+            this.build();
             OBSERVE.renderingComponent = ObserveSingleton.RenderingComponent;
             remember(() => {
                 this.onDidBuild();
@@ -78,30 +91,20 @@ export abstract class ArkStructBase<T, T_Options> extends ArkCustomComponentImpl
         })
     }
 
-    /** @memo */
-    abstract __build(
-        /** @memo */
-        attributes: undefined | ((instance: ArkCommonMethodComponent) => void),
-        /** @memo */
-        content?: () => void,
-        initializers?: T_Options
-    ): void
 
     /** @memo */
     static _instantiateReusable<T extends ArkStructBase<T, T_Options>, T_Options>(
         reuseId: string,
-        /** @memo */
-        attributes: undefined | ((instance: ArkCommonMethodComponent) => void),
         factory: () => T,
         /** @memo */
-        arg1?: () => void,
-        arg2?: T_Options,
+        content?: () => void,
+        initializers?: T_Options,
     ): void {
         /* need to wrap both states and build() of @Component */
         NodeAttach(() => ArkColumnPeer.create(undefined), (node: ArkColumnPeer) => { // replace with Frontend Node later
             const component = remember(() => {
                 const instance = factory()
-                instance.__initializeStruct(arg1, arg2);
+                instance.__initializeStruct(content, initializers);
                 node.setOnRecycle(() =>
                     instance.aboutToRecycle()
                 )
@@ -109,12 +112,10 @@ export abstract class ArkStructBase<T, T_Options> extends ArkCustomComponentImpl
             });
             node.setOnReuse(
                 () => {
-                    if (arg2) component.aboutToReuse(component.__toRecord(arg2!! as Object))
+                    component.aboutToReuse(initializers)
                 }
             )
-            component._buildWrapper(attributes, arg1, arg2);
+            component._buildWrapper(content, initializers);
         }, reuseId)
     }
-
-    abstract __toRecord(param: Object): Record<string, Object> // overridden by CustomDelegate
 }

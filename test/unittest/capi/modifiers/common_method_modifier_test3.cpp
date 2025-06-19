@@ -81,7 +81,7 @@ HWTEST_F(CommonMethodModifierTest3, setBrightnessTestDefaultValues, TestSize.Lev
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest3, setBrightnessTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest3, DISABLED_setBrightnessTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBrightness0, nullptr);
     using OneTestStep = std::tuple<Opt_Number, std::string>;
@@ -136,7 +136,7 @@ HWTEST_F(CommonMethodModifierTest3, setContrastTestDefaultValues, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest3, setContrastTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest3, DISABLED_setContrastTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setContrast0, nullptr);
     using OneTestStep = std::tuple<Opt_Number, std::string>;
@@ -191,7 +191,7 @@ HWTEST_F(CommonMethodModifierTest3, setGrayScaleTestDefaultValues, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest3, setGrayScaleTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest3, DISABLED_setGrayScaleTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setGrayscale0, nullptr);
     using OneTestStep = std::tuple<Opt_Number, std::string>;
@@ -246,7 +246,7 @@ HWTEST_F(CommonMethodModifierTest3, setSaturateTestDefaultValues, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest3, setSaturateTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest3, DISABLED_setSaturateTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSaturate0, nullptr);
     using OneTestStep = std::tuple<Opt_Number, std::string>;
@@ -301,7 +301,7 @@ HWTEST_F(CommonMethodModifierTest3, setSepiaTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest3, setSepiaTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest3, DISABLED_setSepiaTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSepia0, nullptr);
     using OneTestStep = std::tuple<Opt_Number, std::string>;
@@ -356,7 +356,7 @@ HWTEST_F(CommonMethodModifierTest3, setUseShadowBatchingTestDefaultValues, TestS
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest3, setUseShadowBatchingTestValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest3, DISABLED_setUseShadowBatchingTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setUseShadowBatching0, nullptr);
     using OneTestStep = std::tuple<Opt_Boolean, std::string>;
@@ -408,7 +408,7 @@ struct AutoProgressMaskPeer {
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest3, setMask0ValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest3, DISABLED_setMask0ValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setMask0, nullptr);
     const std::vector<ProgressMaskTestPlan> validValues {

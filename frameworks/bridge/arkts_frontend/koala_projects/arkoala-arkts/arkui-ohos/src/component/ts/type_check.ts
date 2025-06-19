@@ -23,7 +23,7 @@ import { AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, Common
 import { Affinity, TextBox, LineMetrics, RunMetrics, TextDirection } from "./../arkui-graphics-text"
 import { AlphabetIndexerAttribute, Callback_Number_Void, OnAlphabetIndexerSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerPopupSelectCallback, IndexerAlign, Callback_Opt_Number_Void, AlphabetIndexerOptions } from "./../alphabetIndexer"
 import { ResourceColor, Font, Position, Length, SizeOptions, Offset, ColorFilter, ResourceStr, Dimension, LengthConstrain, VoidCallback, DividerStyleOptions, ConstraintSizeOptions, AccessibilityOptions, Bias, BorderRadiuses, ChainWeightOptions, DirectionalEdgesT, EdgeOutlineStyles, EdgeOutlineWidths, EdgeWidths, OutlineRadiuses, Padding, VP, Area, EdgeColors, PX, LPX, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdges, LocalizedEdgeWidths, LocalizedPadding, LocalizedPosition, MarkStyle, BorderOptions, OutlineOptions, EdgeStyles } from "./../units"
-import { PixelMap } from "./../arkui-pixelmap"
+import { PixelMap } from "#external"
 import { AnimatedDrawableDescriptor, DrawableDescriptor, AnimationOptions, LayeredDrawableDescriptor, PixelMapDrawableDescriptor } from "./../arkui-drawabledescriptor"
 import { AnimationMode, BarMode, BarPosition, LayoutStyle, TabContentTransitionProxy, TabsAnimationEvent, TabsAttribute, OnTabsAnimationStartCallback, OnTabsAnimationEndCallback, OnTabsGestureSwipeCallback, DividerStyle, BarGridColumnOptions, TabsCustomContentTransitionCallback, OnTabsContentWillChangeCallback, ScrollableBarModeOptions, TabsCacheMode, TabsController, CommonModifier, TabContentAnimatedTransition, Callback_TabContentTransitionProxy_Void, TabsOptions } from "./../tabs"
 import { ArrowPosition, AvoidanceMode, MenuAlignType, SelectAttribute, Callback_Number_String_Void, OnSelectCallback, MenuOutlineOptions, Callback_Opt_Union_Number_Resource_Void, Callback_Opt_ResourceStr_Void, MenuItemConfiguration, SelectOption } from "./../select"
@@ -48,7 +48,7 @@ import { ChainEdgeEffect, ScrollState, ListAttribute, ListItemAlign, ListDivider
 import { ColorContent, DynamicRangeMode, ImageContent, ImageInterpolation, ImageRenderMode, ImageRotateOrientation, Type_ImageAttribute_onComplete_callback_event, ImageError, ImageSourceSize, ResizableOptions } from "./../image"
 import { ColorMode, LayoutDirection } from "./../stateManagement"
 import { Component3DAttribute, ModelType, SceneOptions } from "./../component3d"
-import { ComponentContent, UnifiedData, SystemBarStyle, Scene, Context, WorkerEventListener, Event, BaseContext, Context_getGroupDir_Callback, ErrorEvent, MessageEvents, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, CustomTheme } from "./../arkui-custom"
+import { BuilderNodeOps, BuilderNodeOptions, ComponentContent, UnifiedData, SystemBarStyle, Scene, Context, WorkerEventListener, Event, BaseContext, Context_getGroupDir_Callback, ErrorEvent, MessageEvents, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, CustomTheme } from "./../arkui-custom"
 import { ContentModifier, WrappedBuilder, CommonConfiguration, Callback_WrappedBuilder_Args_Void } from "./../arkui-wrapper-builder"
 import { ContentType, EnterKeyType, InputType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScrollCallback, OnPasteCallback, TextInputAttribute, OnSubmitCallback, TextInputStyle, PasswordIcon, UnderlineColor, TextInputController, TextInputOptions } from "./../textInput"
 import { CustomDialogController, CustomDialogControllerOptions } from "./../customDialogController"
@@ -138,7 +138,7 @@ import { GaugeOptions, GaugeIndicatorOptions, GaugeShadowOptions, Tuple_Union_Re
 import { GridColColumnOption, GridColOptions } from "./../gridCol"
 import { ImageLoadResult } from "./../imageSpan"
 import { LineOptions, ShapePoint } from "./../line"
-import { StepperOptionalIndex } from "./../stepper"
+import { StepperOptions } from "./../stepper"
 import { MarqueeOptions } from "./../marquee"
 import { PathOptions } from "./../path"
 import { PluginComponentTemplate, PluginErrorData, PluginComponentOptions } from "./../pluginComponent"
@@ -1981,6 +1981,23 @@ export class TypeChecker {
         }
         else {
             throw new Error("Can not discriminate value typeof BreakpointsReference")
+        }
+    }
+    static isBuilderNodeOps(value: Object | string | number | undefined | boolean): boolean {
+        throw new Error("Can not discriminate value typeof BuilderNodeOps")
+    }
+    static isBuilderNodeOptions(value: Object | string | number | undefined | boolean, duplicated_selfIdealSize: boolean, duplicated_type: boolean, duplicated_surfaceId: boolean): boolean {
+        if ((!duplicated_selfIdealSize) && (value?.hasOwnProperty("selfIdealSize"))) {
+            return true
+        }
+        else if ((!duplicated_type) && (value?.hasOwnProperty("type"))) {
+            return true
+        }
+        else if ((!duplicated_surfaceId) && (value?.hasOwnProperty("surfaceId"))) {
+            return true
+        }
+        else {
+            throw new Error("Can not discriminate value typeof BuilderNodeOptions")
         }
     }
     static isBrightnessBlender(value: Object | string | number | undefined | boolean, duplicated_cubicRate: boolean, duplicated_quadraticRate: boolean, duplicated_linearRate: boolean, duplicated_degree: boolean, duplicated_saturation: boolean, duplicated_positiveCoefficient: boolean, duplicated_negativeCoefficient: boolean, duplicated_fraction: boolean): boolean {
@@ -19247,8 +19264,17 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof WebNavigationType")
         }
     }
+    static isBindableBoolean(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<boolean>")
+    }
+    static isBindableNumber(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<number>")
+    }
     static isBindableString(value: Object | string | number | undefined): boolean {
         throw new Error("Can not discriminate value typeof Bindable<String>")
+    }
+    static isBindableResource(value: Object | string | number | undefined): boolean {
+        throw new Error("Can not discriminate value typeof Bindable<Resource>")
     }
     static isBindableResourceStr(value: Object | string | number | undefined): boolean {
         throw new Error("Can not discriminate value typeof Bindable<ResourceStr>")

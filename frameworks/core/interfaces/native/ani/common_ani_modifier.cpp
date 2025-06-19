@@ -20,6 +20,7 @@
 #include "base/log/log.h"
 #include "bridge/arkts_frontend/ani_graphics_module.h"
 #include "core/common/container_scope.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "frameworks/bridge/arkts_frontend/ani_context_module.h"
 
 namespace OHOS::Ace::NG {
@@ -56,12 +57,32 @@ void SetDrawCallback(ani_env* env, ani_long ptr, ani_fn_object fnObj)
     Framework::AniGraphicsModule::SetDrawCallback(env, ptr, fnObj);
 }
 
+ArkUI_Int32 GetCurrentInstanceId()
+{
+    return ContainerScope::CurrentId();
+}
+
+ani_long BuilderProxyNodeConstruct(ArkUI_Int32 id)
+{
+    auto proxyNode = NG::FrameNode::GetOrCreateFrameNode(
+        "BuilderProxyNode", id, []() { return AceType::MakeRefPtr<StackPattern>(); });
+    CHECK_NULL_RETURN(proxyNode, 0);
+    auto stackLayoutAlgorithm = proxyNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_RETURN(stackLayoutAlgorithm, 0);
+    stackLayoutAlgorithm->UpdateAlignment(Alignment::TOP_LEFT);
+    proxyNode->IncRefCount();
+    return reinterpret_cast<ani_long>(AceType::RawPtr(proxyNode));
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
-    static const ArkUIAniCommonModifier impl = { .getHostContext = OHOS::Ace::NG::GetHostContext,
+    static const ArkUIAniCommonModifier impl = {
+        .getHostContext = OHOS::Ace::NG::GetHostContext,
         .syncInstanceId = OHOS::Ace::NG::SyncInstanceId,
         .restoreInstanceId = OHOS::Ace::NG::RestoreInstanceId,
-        .setDrawCallback = OHOS::Ace::NG::SetDrawCallback };
+        .setDrawCallback = OHOS::Ace::NG::SetDrawCallback,
+        .getCurrentInstanceId = OHOS::Ace::NG::GetCurrentInstanceId,
+        .builderProxyNodeConstruct = OHOS::Ace::NG::BuilderProxyNodeConstruct };
     return &impl;
 }
 

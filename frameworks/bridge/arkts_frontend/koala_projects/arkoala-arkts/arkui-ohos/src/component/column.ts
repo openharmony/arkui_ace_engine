@@ -22,12 +22,14 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
 import { HorizontalAlign, FlexAlign } from "./enums"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource } from "global/resource"
+import { ArkColumnNode } from '../handwritten/modifiers/ArkColumnNode';
+import { ArkColumnAttributeSet, ColumnModifier } from '../ColumnModifier';
 
 export class ArkColumnPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -156,6 +158,30 @@ export class ArkColumnStyle extends ArkCommonMethodStyle implements ColumnAttrib
     }
 }
 export class ArkColumnComponent extends ArkCommonMethodComponent implements ColumnAttribute {
+    protected _modifierHost: ArkColumnNode | undefined;
+    setModifierHost(value: ArkColumnNode): void {
+        this._modifierHost = value;
+    }
+    getModifierHost(): ArkColumnNode {
+        if (this._modifierHost === undefined || this._modifierHost === null) {
+            this._modifierHost = new ArkColumnNode();
+            this._modifierHost!.setPeer(this.getPeer());
+        }
+        return this._modifierHost!;
+    }
+    getAttributeSet(): ArkColumnAttributeSet  {
+        return this.getPeer()._attributeSet as ArkColumnAttributeSet;
+    }
+ 
+    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
+        let isCommonModifier: boolean = modifier instanceof ColumnModifier;
+        if (isCommonModifier) {
+            let commonModifier = modifier as object as ColumnModifier;
+            this.getPeer()._attributeSet = commonModifier.attributeSet;
+        } else if (this.getPeer()._attributeSet == null) {
+            this.getPeer()._attributeSet = new ArkColumnAttributeSet();
+        }
+    }
     getPeer(): ArkColumnPeer {
         return (this.peer as ArkColumnPeer)
     }

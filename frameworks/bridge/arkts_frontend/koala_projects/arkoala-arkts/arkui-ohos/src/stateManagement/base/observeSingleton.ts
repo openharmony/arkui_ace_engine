@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-import { IObserve, OBSERVE } from "../decorator";
-import { IObservedObject, RenderIdType } from "../decorator";
-import { IBindingSource } from "./mutableStateMeta";
-import { TypeChecker } from "#components";
-import { StateMgmtTool } from "#stateMgmtTool";
-import { NullableObject } from "./types";
-import { GlobalStateManager } from "@koalaui/runtime";
-import { StateMgmtConsole } from "../tools/stateMgmtDFX";
+import { IObserve, OBSERVE } from '../decorator';
+import { IObservedObject, RenderIdType } from '../decorator';
+import { IBindingSource } from './mutableStateMeta';
+import { TypeChecker } from '#components';
+import { StateMgmtTool } from '#stateMgmtTool';
+import { NullableObject } from './types';
+import { GlobalStateManager } from '@koalaui/runtime';
+import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
 export class ObserveSingleton implements IObserve {
     public static readonly instance: ObserveSingleton = new ObserveSingleton;
@@ -60,16 +60,18 @@ export class ObserveSingleton implements IObserve {
     }
 
     public setV1RenderId(value: NullableObject): void {
-        if ((this.renderingComponent === ObserveSingleton.RenderingComponentV1)
-            && (this.renderingId !== ObserveSingleton.InvalidRenderId)
-            && value
-            && (typeof (value) === 'object')) {
-                if (StateMgmtTool.isIObservedObject(value as Object)) {
-                    (value as Object as IObservedObject).setV1RenderId(this.renderingId!);
-                } else {
-                    this.trySetRenderIdOnInterface(value as object);
-                }
+        if (
+            this.renderingComponent === ObserveSingleton.RenderingComponentV1 &&
+            this.renderingId !== ObserveSingleton.InvalidRenderId &&
+            value &&
+            typeof value === 'object'
+        ) {
+            if (StateMgmtTool.isIObservedObject(value as Object)) {
+                (value as Object as IObservedObject).setV1RenderId(this.renderingId!);
+            } else {
+                this.trySetRenderIdOnInterface(value as object);
             }
+        }
     }
 
     private trySetRenderIdOnInterface(obj: object): void {
@@ -80,7 +82,7 @@ export class ObserveSingleton implements IObserve {
     }
 
     public isObservedInterface(value: NullableObject): boolean {
-        if (value === undefined || value === null || typeof value !== "object") {
+        if (value === undefined || value === null || typeof value !== 'object') {
             return false;
         }
         const handler = StateMgmtTool.tryGetHandler(value as Object);
@@ -88,9 +90,11 @@ export class ObserveSingleton implements IObserve {
     }
 
     public shouldAddRef(iObjectsRenderId: RenderIdType): boolean {
-        return ((this.renderingComponent >= ObserveSingleton.RenderingComponentV2)
-            || ((this.renderingComponent === ObserveSingleton.RenderingComponentV1)
-            && (iObjectsRenderId === this.renderingId)));
+        return (
+            this.renderingComponent >= ObserveSingleton.RenderingComponentV2 ||
+            (this.renderingComponent === ObserveSingleton.RenderingComponentV1 &&
+            iObjectsRenderId === this.renderingId)
+        );
     }
 
     public clearBindingById(id: RenderIdType): void {

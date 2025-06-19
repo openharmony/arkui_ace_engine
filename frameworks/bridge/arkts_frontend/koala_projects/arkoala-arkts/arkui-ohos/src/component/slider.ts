@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { ResourceColor, Length, Dimension, SizeOptions, ResourceStr, PX, VP, FP, LPX, Percentage } from "./units"
 import { LinearGradient } from "./dataPanel"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
@@ -32,6 +32,7 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { SliderOpsHandWritten } from "./../handwritten"
 
 export class ArkSliderPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -544,7 +545,7 @@ export interface SlideRange {
     to?: number;
 }
 export interface SliderOptions {
-    value?: number;
+    value?: number | Bindable<number>;
     min?: number;
     max?: number;
     step?: number;
@@ -698,11 +699,24 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements Slid
     getPeer(): ArkSliderPeer {
         return (this.peer as ArkSliderPeer)
     }
+    SliderOptionsValueIsBindable(options?: SliderOptions): boolean {
+        if ((RuntimeType.UNDEFINED) != runtimeType(options)) {
+            const options_num  = options!.value;
+            if ((RuntimeType.UNDEFINED) != (runtimeType(options_num))) {
+                const options_num_value  = options_num!;
+                return TypeChecker.isBindableNumber(options_num_value);
+            }
+        }
+        return false;
+    }
     public setSliderOptions(options?: SliderOptions): this {
         if (this.checkPriority("setSliderOptions")) {
             const options_casted = options as (SliderOptions | undefined)
             this.getPeer()?.setSliderOptionsAttribute(options_casted)
-            return this
+        }
+        if (this.SliderOptionsValueIsBindable(options)) {
+            SliderOpsHandWritten.hookSliderAttributeValueImpl(this.getPeer().peer.ptr,
+                (options!.value as Bindable<number>));
         }
         return this
     }

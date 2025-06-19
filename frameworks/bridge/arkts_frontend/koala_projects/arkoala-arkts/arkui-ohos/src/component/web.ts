@@ -34,7 +34,7 @@ import { CopyOptions, NestedScrollMode } from "./enums"
 import { EditMenuOptions, MenuType } from "./textCommon"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Position, ResourceStr } from "./units"
-import { PixelMap } from "./arkui-pixelmap"
+import { PixelMap } from "#external"
 import { PreviewMenuOptions } from "./richEditor"
 import { ArkUIAniModule } from "arkui.ani"
 

@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
 import { ResourceColor } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global/resource"
@@ -110,7 +110,7 @@ export class ArkBlankStyle extends ArkCommonMethodStyle implements BlankAttribut
     }
 }
 export class ArkBlankComponent extends ArkCommonMethodComponent implements BlankAttribute {
-    protected _modifierHost: ArkBlankNode | undefined
+    protected _modifierHost: ArkBlankNode | undefined;
     setModifierHost(value: ArkBlankNode): void {
         this._modifierHost = value;
     }

@@ -502,12 +502,18 @@ HWTEST_F(GestureEventAccessorTest, GetFingerListTest, TestSize.Level1)
     Array_FingerInfo fingerInfoArr = accessor_->getFingerList(peer_);
     ASSERT_EQ(static_cast<int32_t>(fingerInfoArr.length), 1);
     ASSERT_NE(fingerInfoArr.array, nullptr);
-    EXPECT_EQ(Converter::Convert<float>(fingerInfoArr.array->displayX), expectedDisplayX);
-    EXPECT_EQ(Converter::Convert<float>(fingerInfoArr.array->displayY), expectedDisplayY);
-    EXPECT_EQ(Converter::Convert<float>(fingerInfoArr.array->globalX), expectedWindowX);
-    EXPECT_EQ(Converter::Convert<float>(fingerInfoArr.array->globalY), expectedWindowY);
-    EXPECT_EQ(Converter::Convert<float>(fingerInfoArr.array->localX), expectedX);
-    EXPECT_EQ(Converter::Convert<float>(fingerInfoArr.array->localY), expectedY);
+    EXPECT_NEAR(Converter::Convert<float>(fingerInfoArr.array->displayX),
+        PipelineBase::Px2VpWithCurrentDensity(expectedDisplayX), EPSILON);
+    EXPECT_NEAR(Converter::Convert<float>(fingerInfoArr.array->displayY),
+        PipelineBase::Px2VpWithCurrentDensity(expectedDisplayY), EPSILON);
+    EXPECT_NEAR(Converter::Convert<float>(fingerInfoArr.array->globalX),
+        PipelineBase::Px2VpWithCurrentDensity(expectedWindowX), EPSILON);
+    EXPECT_NEAR(Converter::Convert<float>(fingerInfoArr.array->globalY),
+        PipelineBase::Px2VpWithCurrentDensity(expectedWindowY), EPSILON);
+    EXPECT_NEAR(Converter::Convert<float>(fingerInfoArr.array->localX),
+        PipelineBase::Px2VpWithCurrentDensity(expectedX), EPSILON);
+    EXPECT_NEAR(Converter::Convert<float>(fingerInfoArr.array->localY),
+        PipelineBase::Px2VpWithCurrentDensity(expectedY), EPSILON);
     EXPECT_EQ(Converter::Convert<int32_t>(fingerInfoArr.array->id), fingerId);
 }
 }

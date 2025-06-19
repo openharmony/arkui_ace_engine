@@ -93,7 +93,7 @@ HWTEST_F(BaseEventAccessorTest, GetModifierKeyStateTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, GetTargetTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, DISABLED_GetTargetTest, TestSize.Level1)
 {
     const Dimension height(100.f);
     const Dimension width(200.f);

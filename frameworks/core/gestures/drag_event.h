@@ -22,9 +22,11 @@
 #include "base/memory/ace_type.h"
 #include "core/common/udmf/unified_data.h"
 #include "core/event/ace_events.h"
+#include "core/gestures/gesture_info.h"
 #include "core/gestures/velocity.h"
 
 namespace OHOS::Ace {
+
 constexpr Dimension DEFAULT_DRAG_START_PAN_DISTANCE_THRESHOLD = 10.0_vp;
 constexpr float DEFAULT_DRAG_START_SCALE = 0.2;
 class PasteData : public AceType {
@@ -349,6 +351,13 @@ public:
         return requestId_;
     }
 
+    RefPtr<PixelMap> GetDragDropInfoPixelMap() const;
+    void* GetDragDropInfoCustomNode() const;
+    std::string GetDragDropInfoExtraInfo() const;
+    void SetDragDropInfoPixelMap(RefPtr<PixelMap> pixelMap);
+    void SetDragDropInfoCustomNode(void* customNode);
+    void SetDragDropInfoExtraInfo(std::string& extraInfo);
+
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
@@ -376,6 +385,9 @@ private:
     std::function<void()> executeDropAnimation_;
     int32_t requestId_ = -1;
     bool isDragEndPending_ = false;
+    RefPtr<PixelMap> dragDropInfoPixelMap_;
+    void* dragDropInfoCustomNode_;
+    std::string dragDropInfoExtraInfo_;
 };
 
 class NotifyDragEvent : public DragEvent {

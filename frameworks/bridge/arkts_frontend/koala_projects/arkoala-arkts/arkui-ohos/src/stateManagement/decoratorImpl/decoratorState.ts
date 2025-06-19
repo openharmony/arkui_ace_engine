@@ -25,6 +25,7 @@ import { PropDecoratedVariable } from './decoratorProp';
 import { WatchFunc } from './decoratorWatch';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { NullableObject } from '../base/types';
+import { UIUtils } from '../utils';
 export interface __MkPropReturnType<T> {
     prop: PropDecoratedVariable<T>;
     watchId: WatchIdType;
@@ -43,10 +44,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     // @state can init from parent @Component
     // initValue is either value provided by parent or localInit value
     constructor(owningView: ExtendableComponent | null, varName: string, initValue: T, watchFunc?: WatchFuncType) {
-        super("@State", owningView, varName, watchFunc);
-        // if (this.validateValue(localInitValue) === false) {
-        //     throw new Error("@State Object-type Value must be ObservedObject")
-        // }
+        super('@State', owningView, varName, watchFunc);
         this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
         // @Watch
         // if initial value is object, register so that property changes trigger
@@ -69,10 +67,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T>
         if (value === newValue) {
             return;
         }
-        // if (this.validateValue(locanewValueInitValue) === false) {
-        //     throw new Error("@State Object-type Value must be ObservedObject")
-        // }
-        if (this.backing_.set(newValue)) {
+        if (this.backing_.set(UIUtils.makeObserved(newValue as Object) as T)) {
             // @Watch
             // if new value is object, register so that property changes trigger
             // Watch function exec

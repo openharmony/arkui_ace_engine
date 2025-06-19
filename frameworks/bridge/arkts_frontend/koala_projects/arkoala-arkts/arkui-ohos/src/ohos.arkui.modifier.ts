@@ -23,6 +23,20 @@ export { DividerModifier } from './DividerModifier';
 
 export { BlankModifier } from './BlankModifier';
 
+export { StackModifier } from './StackModifier';
+
+export { GridColModifier } from './GridColModifier';
+
+export { GridRowModifier } from './GridRowModifier';
+
+export { RowModifier } from './RowModifier';
+
+export { RowSplitModifier } from './RowSplitModifier';
+
+export { ColumnModifier } from './ColumnModifier';
+
+export { ColumnSplitModifier } from './ColumnSplitModifier';
+
 // export { TextModifier } from './handwritten/modifiers/ArkTextModifier'
 
 // export { SymbolGlyphModifier } from "./handwritten/modifiers/ArkSymbolGlyphModifier"

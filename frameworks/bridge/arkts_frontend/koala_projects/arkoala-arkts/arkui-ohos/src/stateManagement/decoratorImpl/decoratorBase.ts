@@ -20,7 +20,7 @@ import { IDecoratedMutableVariable, IDecoratedV1Variable } from '../decorator';
 import { WatchFuncType, ISubscribedWatches, WatchIdType } from '../decorator';
 import { ExtendableComponent } from '../../component/extendableComponent';
 import { IObserve, OBSERVE } from '../decorator';
-import { StateMgmtTool } from "#stateMgmtTool";
+import { StateMgmtTool } from '#stateMgmtTool';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { SubscribedAbstractProperty } from '../decorator';
 /**
@@ -101,13 +101,13 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase<T
     }
     public aboutToBeDeleted(): void {}
 
-    public addWatch(watchFunc?: WatchFuncType) {
+    public addWatch(watchFunc?: WatchFuncType): void {
         if (watchFunc) {
             const w = new WatchFunc(watchFunc);
             this._watchFuncs.set(w.id(), w);
         }
     }
-    
+
     /**
      * remove WatchFunc with given id
      * @param watchId 
@@ -119,20 +119,21 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase<T
 
     /* compiler BUG: change to protcted */
     public registerWatchForObservedObjectChanges(value: T): void {
-        if (value && typeof value === 'object') {
-            if (StateMgmtTool.isISubscribedWatches(value as Object)) {
-                const iSubscribedWatches = value as Object as ISubscribedWatches;
-                this._watchFuncs.forEach((watchFunc)=>{
+        if (!(value && typeof value === 'object')) {
+            return;
+        }
+        if (StateMgmtTool.isISubscribedWatches(value as Object)) {
+            const iSubscribedWatches = value as Object as ISubscribedWatches;
+            this._watchFuncs.forEach((watchFunc)=>{
+                watchFunc.registerMeTo(iSubscribedWatches);
+            });
+        } else {
+            const handler = StateMgmtTool.tryGetHandler(value as Object);
+            if (handler && StateMgmtTool.isISubscribedWatches(handler as Object)) {
+                const iSubscribedWatches = handler as Object as ISubscribedWatches;
+                this._watchFuncs.forEach((watchFunc) => {
                     watchFunc.registerMeTo(iSubscribedWatches);
-                })
-            } else {
-                const handler = StateMgmtTool.tryGetHandler(value as Object);
-                if (handler && StateMgmtTool.isISubscribedWatches(handler as Object)) {
-                    const iSubscribedWatches = handler as Object as ISubscribedWatches;
-                    this._watchFuncs.forEach((watchFunc)=>{
-                        watchFunc.registerMeTo(iSubscribedWatches)
-                    })
-                }
+                });
             }
         }
     }
@@ -140,21 +141,22 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase<T
 
     /* compiler BUG: change to protcted */
     public unregisterWatchFromObservedObjectChanges(value: T): void {
-        if (value && typeof value === 'object') {
-            if (StateMgmtTool.isISubscribedWatches(value as Object)) {
-                const iSubscribedWatches = value as Object as ISubscribedWatches;
+        if (!(value && typeof value === 'object')) {
+            return;
+        }
+        if (StateMgmtTool.isISubscribedWatches(value as Object)) {
+            const iSubscribedWatches = value as Object as ISubscribedWatches;
+            this._watchFuncs.forEach((watchFunc) => {
+                watchFunc.unregisterMeFrom(iSubscribedWatches);
+            });
+        } else {
+            // check if value is observed / proxied interface
+            const handler = StateMgmtTool.tryGetHandler(value as Object);
+            if (handler && (StateMgmtTool.isISubscribedWatches(handler as Object))) {
+                const iSubscribedWatches = handler as ISubscribedWatches;
                 this._watchFuncs.forEach((watchFunc) => {
                     watchFunc.unregisterMeFrom(iSubscribedWatches);
                 });
-            } else {
-                // check if value is observed / proxied interface
-                const handler = StateMgmtTool.tryGetHandler(value as Object);
-                if (handler && (StateMgmtTool.isISubscribedWatches(handler as Object))) {
-                    const iSubscribedWatches = handler as ISubscribedWatches;
-                    this._watchFuncs.forEach((watchFunc) => {
-                        watchFunc.unregisterMeFrom(iSubscribedWatches);
-                    });
-                }
             }
         }
     }
@@ -166,7 +168,7 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase<T
 
     public registerWatchToSource(me: IDecoratedV1Variable<T>): void {
         if (!StateMgmtTool.isDecoratedV1VariableBase(me)) {
-            throw new SyntaxError("syntax error")
+            throw new SyntaxError('syntax error');
         }
         const meBase = me as DecoratedV1VariableBase<T>;
         const weakMe = new WeakRef<DecoratedV1VariableBase<T>>(meBase);

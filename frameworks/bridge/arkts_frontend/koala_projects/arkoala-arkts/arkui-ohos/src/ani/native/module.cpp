@@ -25,6 +25,8 @@
 #include "web_module_methods.h"
 #include "custom_node_module.h"
 #include "waterFlowSection_module.h"
+#include "native_drag_drop_global.h"
+#include "componentSnapshot_module.h"
 
 namespace OHOS::Ace::Ani {
 
@@ -91,9 +93,19 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::RestoreInstanceId)
         },
         ani_native_function {
+            "_Common_Get_Current_InstanceId",
+            ":I",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetCurrentInstanceId)
+        },
+        ani_native_function {
             "_CustomNode_Construct",
             "ILarkui/ArkCustomComponent/ArkCustomComponent;:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructCustomNode)
+        },
+        ani_native_function {
+            "_BuilderProxyNode_Construct",
+            "I:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::BuilderProxyNodeConstruct)
         },
         ani_native_function {
             "_ContentSlot_construct",
@@ -124,6 +136,46 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_SetWaterFlowOptions",
             "JLarkui/component/waterFlow/WaterFlowOptions;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowOptions)
+        },
+        ani_native_function {
+            "_DragEvent_Set_Data",
+            "JL@ohos/data/unifiedDataChannel/unifiedDataChannel/UnifiedData;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventSetData)
+        },
+        ani_native_function {
+            "_DragEvent_Get_Data",
+            "J:L@ohos/data/unifiedDataChannel/unifiedDataChannel/UnifiedData;",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventGetData)
+        },
+        ani_native_function {
+            "_DragEvent_Get_Summary",
+            "J:L@ohos/data/unifiedDataChannel/unifiedDataChannel/Summary;",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventGetSummary)
+        },
+        ani_native_function {
+            "_DragEvent_Set_PixelMap",
+            "JL@ohos/multimedia/image/image/PixelMap;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventSetPixelMap)
+        },
+        ani_native_function {
+            "_DragEvent_Set_ExtraInfo",
+            "JLstd/core/String;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventSetExtraInfo)
+        },
+        ani_native_function {
+            "_DragEvent_Set_CustomNode",
+            "JJ:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventSetCustomNode)
+        },
+        ani_native_function {
+            "_ComponentSnapshot_createFromBuilderWithCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateFromBuilderWithCallback)
+        },
+        ani_native_function {
+            "_ComponentSnapshot_createFromBuilderWithPromise",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateFromBuilderWithPromise)
         },
     };
 

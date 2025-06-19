@@ -217,6 +217,11 @@ public:
     void AddSubwindow(int32_t instanceId, SubwindowType windowType, RefPtr<Subwindow> subwindow);
     const std::vector<RefPtr<Subwindow>> GetSortSubwindow(int32_t instanceId);
 
+    // ArkTS 1.2
+    ACE_FORCE_EXPORT void ShowToastStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
+    void ShowToastNGStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback);
+    ACE_FORCE_EXPORT void CloseToastStatic(
+        const int32_t toastId, const NG::ToastShowMode& showMode, std::function<void(int32_t)>&& callback);
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
     RefPtr<Subwindow> GetOrCreateSystemSubWindow(int32_t containerId);

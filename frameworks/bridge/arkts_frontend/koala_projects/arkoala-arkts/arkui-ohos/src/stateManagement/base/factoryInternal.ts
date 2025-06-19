@@ -13,25 +13,23 @@
  * limitations under the License.
  */
  
-import { IMutableKeyedStateMeta, IMutableStateMeta } from "../decorator";
-import { IFactoryInternal } from "./iFactoryInternal";
-import { IBackingValue } from "./iBackingValue";
-import { DecoratorBackingValue } from "./backingValue";
-import { MutableKeyedStateMeta, MutableStateMeta } from "./mutableStateMeta";
-import { StateMgmtTool, InterfaceProxyHandler } from "#stateMgmtTool";
+import { IMutableKeyedStateMeta, IMutableStateMeta } from '../decorator';
+import { IFactoryInternal } from './iFactoryInternal';
+import { IBackingValue } from './iBackingValue';
+import { DecoratorBackingValue } from './backingValue';
+import { MutableKeyedStateMeta, MutableStateMeta } from './mutableStateMeta';
+import { StateMgmtTool, InterfaceProxyHandler } from '#stateMgmtTool';
 
 export class FactoryInternalImpl implements IFactoryInternal {
     public mkDecoratorValue<T>(info: string, initValue: T): IBackingValue<T> {
         return new DecoratorBackingValue<T>(info, initValue);
     }
-
     public mkMutableStateMeta(info: string): IMutableStateMeta {
         return new MutableStateMeta(info);
     }
     public mkMutableKeyedStateMeta(info: string): IMutableKeyedStateMeta {
         return new MutableKeyedStateMeta(info);
     }
-    
     public mkObservedInterfaceProxy<T extends Object>(x: T): T {
         return StateMgmtTool.createProxy<T>(x);
     }

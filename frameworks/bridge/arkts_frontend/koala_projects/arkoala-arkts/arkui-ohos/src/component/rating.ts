@@ -22,12 +22,13 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { RatingOpsHandWritten } from "./../handwritten"
 
 export class ArkRatingPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -180,7 +181,7 @@ export class ArkRatingPeer extends ArkCommonMethodPeer {
     }
 }
 export interface RatingOptions {
-    rating: number;
+    rating: number | Bindable<number>;
     indicator?: boolean;
 }
 export interface StarStyleOptions {
@@ -234,11 +235,24 @@ export class ArkRatingComponent extends ArkCommonMethodComponent implements Rati
     getPeer(): ArkRatingPeer {
         return (this.peer as ArkRatingPeer)
     }
+    RatingOptionsRatingIsBindable(options?: RatingOptions): boolean {
+        if ((RuntimeType.UNDEFINED) != runtimeType(options)) {
+            const options_rating  = options!.rating;
+            if ((RuntimeType.UNDEFINED) != (runtimeType(options_rating))) {
+                const options_rating_value  = options_rating!;
+                return TypeChecker.isBindableNumber(options_rating_value);
+            }
+        }
+        return false;
+    }
     public setRatingOptions(options?: RatingOptions): this {
         if (this.checkPriority("setRatingOptions")) {
             const options_casted = options as (RatingOptions | undefined)
             this.getPeer()?.setRatingOptionsAttribute(options_casted)
-            return this
+        }
+        if (this.RatingOptionsRatingIsBindable(options)) {
+            RatingOpsHandWritten.hookRatingAttributeRatingImpl(this.getPeer().peer.ptr,
+                (options!.rating as Bindable<number>));
         }
         return this
     }

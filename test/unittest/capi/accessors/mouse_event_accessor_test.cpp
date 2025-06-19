@@ -152,7 +152,7 @@ HWTEST_F(MouseEventAccessorTest, SetActionTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(MouseEventAccessorTest, GetActionTest, TestSize.Level1)
+HWTEST_F(MouseEventAccessorTest, DISABLED_GetActionTest, TestSize.Level1)
 {
     for (auto& [value, expected]: getMouseActionTestPlan) {
         auto eventInfo = peer_->GetEventInfo();

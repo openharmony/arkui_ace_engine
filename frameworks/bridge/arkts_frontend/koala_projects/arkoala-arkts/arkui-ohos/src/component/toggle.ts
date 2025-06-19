@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { Callback_Boolean_Void } from "./navigation"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { ResourceColor } from "./units"
@@ -31,6 +31,7 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ToggleOpsHandWritten } from "./../handwritten"
 
 export class ArkTogglePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -179,7 +180,7 @@ export interface ToggleConfiguration extends CommonConfiguration {
 }
 export interface ToggleOptions {
     type: ToggleType;
-    isOn?: boolean;
+    isOn?: boolean | Bindable<boolean>;
 }
 export type ToggleInterface = (options: ToggleOptions) => ToggleAttribute;
 export interface ToggleAttribute extends CommonMethod {
@@ -219,11 +220,24 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements Togg
     getPeer(): ArkTogglePeer {
         return (this.peer as ArkTogglePeer)
     }
+    ToggleOptionsIsOnIsBindable(options?: ToggleOptions): boolean {
+        if ((RuntimeType.UNDEFINED) != runtimeType(options)) {
+            const options_isOn  = options!.isOn;
+            if ((RuntimeType.UNDEFINED) != (runtimeType(options_isOn))) {
+                const options_isOn_value  = options_isOn!;
+                return TypeChecker.isBindableBoolean(options_isOn_value);
+            }
+        }
+        return false;
+    }
     public setToggleOptions(options: ToggleOptions): this {
         if (this.checkPriority("setToggleOptions")) {
             const options_casted = options as (ToggleOptions)
             this.getPeer()?.setToggleOptionsAttribute(options_casted)
-            return this
+        }
+        if (this.ToggleOptionsIsOnIsBindable(options)) {
+            ToggleOpsHandWritten.hookToggleAttributeIsOnImpl(this.getPeer().peer.ptr,
+                (options!.isOn as Bindable<boolean>));
         }
         return this
     }

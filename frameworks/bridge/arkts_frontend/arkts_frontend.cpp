@@ -44,6 +44,8 @@ struct AppInfo {
     const char* enterMethodSig;
     const char* emitEventMethodName;
     const char* emitEventMethodSig;
+    const char* checkCallbackMethodName;
+    const char* checkCallbackEventMethodSig;
 };
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 const AppInfo KOALA_APP_INFO = {
@@ -57,6 +59,8 @@ const AppInfo KOALA_APP_INFO = {
     "IIJ:Z",
     "emitEvent",
     "IIII:V",
+    "checkCallbacks",
+    ":V",
 };
 
 // void TryEmitError(EtsEnv& env)
@@ -143,6 +147,21 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
     //     exit(0);
     // }
 }
+
+// fire all arkoala callbacks at the tail of vsync (PipelineContext::FlushVsync)
+void FireAllArkoalaAsyncEvents(ani_env* env, ani_ref app)
+{
+    ani_class appClass;
+    ANI_CALL(env, FindClass(KOALA_APP_INFO.className, &appClass), return);
+
+    ani_method checkCallbacks = nullptr;
+    ANI_CALL(env,
+        Class_FindMethod(appClass, KOALA_APP_INFO.checkCallbackMethodName, KOALA_APP_INFO.checkCallbackEventMethodSig,
+            &checkCallbacks),
+        return);
+
+    ANI_CALL(env, Object_CallMethod_Void(static_cast<ani_object>(app), checkCallbacks), return);
+}
 } // namespace
 
 ArktsFrontend::ArktsFrontend(void* runtime)
@@ -226,6 +245,8 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     ani_class appClass;
     EntryLoader entryLoader(url, env);
 
+    pageRouterManager_ = NG::PageRouterManagerFactory::CreateManager();
+
     if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
         LOGE("Cannot load main class %{public}s", KOALA_APP_INFO.className);
         return UIContentErrorCode::INVALID_URL;
@@ -238,12 +259,10 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
         return UIContentErrorCode::INVALID_URL;
     }
 
-    std::string appUrl = "ComExampleTrivialApplication"; // TODO: use passed in url and params
-    std::string appParams = "ArkTSLoaderParam";
     ani_string aniUrl;
-    env->String_NewUTF8(appUrl.c_str(), appUrl.size(), &aniUrl);
+    env->String_NewUTF8(url.c_str(), url.size(), &aniUrl);
     ani_string aniParams;
-    env->String_NewUTF8(appParams.c_str(), appParams.size(), &aniParams);
+    env->String_NewUTF8(params.c_str(), params.size(), &aniParams);
 
     ani_ref appLocal;
     ani_ref optionalEntry;
@@ -280,6 +299,12 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     pipeline_->SetVsyncListener([vm = vm_, app = app_]() {
         auto* env = ArktsAniUtils::GetAniEnv(vm);
         RunArkoalaEventLoop(env, app);
+    });
+
+    // register one hook method to pipeline, which will be called at the tail of vsync
+    pipeline_->SetAsyncEventsHookListener([vm = vm_, app = app_]() {
+        auto* env = ArktsAniUtils::GetAniEnv(vm);
+        FireAllArkoalaAsyncEvents(env, app);
     });
 
     return UIContentErrorCode::NO_ERRORS;
@@ -341,6 +366,54 @@ ani_object ArktsFrontend::CallGetUIContextFunc()
         return result;
     }
     return result;
+}
+
+void* ArktsFrontend::PushExtender(const std::string& url, const std::string& params)
+{
+    CHECK_NULL_RETURN(pageRouterManager_, nullptr);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = url;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = true;
+    auto pageNode = pageRouterManager_->PushExtender(routerPageInfo);
+    return pageNode.GetRawPtr();
+}
+
+void* ArktsFrontend::ReplaceExtender(
+    const std::string& url, const std::string& params, std::function<void()>&& finishCallback)
+{
+    CHECK_NULL_RETURN(pageRouterManager_, nullptr);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = url;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = true;
+    auto pageNode = pageRouterManager_->ReplaceExtender(routerPageInfo, std::move(finishCallback));
+    return pageNode.GetRawPtr();
+}
+
+void* ArktsFrontend::RunPageExtender(const std::string& url, const std::string& params)
+{
+    CHECK_NULL_RETURN(pageRouterManager_, nullptr);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = url;
+    routerPageInfo.params = params;
+    auto pageNode = pageRouterManager_->RunPageExtender(routerPageInfo);
+    return pageNode.GetRawPtr();
+}
+
+void ArktsFrontend::BackExtender(const std::string& url, const std::string& params)
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = url;
+    routerPageInfo.params = params;
+    pageRouterManager_->BackWithTarget(routerPageInfo);
+}
+
+void ArktsFrontend::ClearExtender()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    pageRouterManager_->Clear();
 }
 
 void ArktsFrontend::SetAniContext(int32_t instanceId, ani_ref* context)

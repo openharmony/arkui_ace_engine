@@ -57,6 +57,6 @@ export class StorageLinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
         }
         this.unregisterWatchFromObservedObjectChanges(oldValue);
         this.registerWatchForObservedObjectChanges(newValue);
-        this.asLink!.set(newValue as NullableObject);
+        this.asLink!.set(newValue as NullableObject); // makeObserved should be called in source
     }
 }

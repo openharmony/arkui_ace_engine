@@ -35,11 +35,7 @@ class ColorModifier extends ModifierWithKey<ResourceColor | undefined> {
     }
 
     static factory(value: ResourceColor | undefined): ColorModifier {
-        if (value) {
-            return new ColorModifier(value);
-        } else {
-            return new ColorModifier(undefined);
-        }
+        return new ColorModifier(value);
     }
 }
 

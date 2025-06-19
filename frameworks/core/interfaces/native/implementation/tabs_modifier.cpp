@@ -114,6 +114,12 @@ void AssignTo(std::optional<TabContentAnimatedTransition>& dst, const Opt_TabCon
 {
     TabContentAnimatedTransition ret;
     ret.timeout = Converter::OptConvert<int32_t>(from.value.timeout).value_or(0);
+    ret.transition = [arkCallback = CallbackHelper(from.value.transition)](
+        const RefPtr<TabContentTransitionProxy>& proxy) {
+        Ark_TabContentTransitionProxy arkValue = new TabContentTransitionProxyPeer();
+        arkValue->SetHandler(proxy);
+        arkCallback.InvokeSync(arkValue);
+    };
     dst = ret;
 }
 
@@ -523,8 +529,9 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
             auto peer = new TabContentTransitionProxyPeer();
             CHECK_NULL_VOID(peer);
             peer->SetHandler(proxy);
-            arkCallback.Invoke(peer);
+            arkCallback.InvokeSync(peer);
         };
+        transitionInfo.timeout = optTimeout.value_or(0);
         transitionInfo.transition = std::move(onTransition);
         return transitionInfo;
     };

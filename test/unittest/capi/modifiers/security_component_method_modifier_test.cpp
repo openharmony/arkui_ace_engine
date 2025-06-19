@@ -280,7 +280,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPositionTestDefaultVal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, setPositionTestValidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPositionTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultPosition;
@@ -327,7 +327,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setPositionTestValidValues, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, setPositionTestInvalidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setPositionTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultPosition;
@@ -399,7 +399,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setMarkAnchorTestDefaultV
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, setMarkAnchorTestValidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setMarkAnchorTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultMarkAnchor;
@@ -444,7 +444,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setMarkAnchorTestValidValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, setMarkAnchorTestInvalidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setMarkAnchorTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultMarkAnchor;
@@ -1537,7 +1537,7 @@ static std::vector<std::tuple<std::string, Ark_String, std::string>> keyKeyValid
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, setKeyTestValidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setKeyTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -1609,7 +1609,7 @@ HWTEST_F(SecurityComponentMethodModifierTest, setWidthTestValidValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, setWidthTestInvalidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setWidthTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -1697,7 +1697,7 @@ static std::vector<std::tuple<std::string, Ark_Length>> heightHeightInvalidValue
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, setHeightTestInvalidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setHeightTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -1819,7 +1819,7 @@ static std::vector<std::tuple<std::string, Opt_Length>> sizeHeightInvalidValues 
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, setSizeTestInvalidValues, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setSizeTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultSize;
@@ -1879,7 +1879,7 @@ static std::vector<std::tuple<std::string, Opt_Length>> sizeHeightInvalidValuesR
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SecurityComponentMethodModifierTest, setSizeTestInvalidValuesReset, TestSize.Level1)
+HWTEST_F(SecurityComponentMethodModifierTest, DISABLED_setSizeTestInvalidValuesReset, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultSize;

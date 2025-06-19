@@ -73,7 +73,7 @@ export class MutableKeyedStateMeta extends MutableStateMetaBase
 
     protected readonly __metaDependencies = new Map<string, MutableStateMeta>();
 
-    constructor(info: string = "") {
+    constructor(info: string = '') {
         super(info);
     }
 
@@ -86,20 +86,10 @@ export class MutableKeyedStateMeta extends MutableStateMetaBase
         metaDependency.addRef();
     }
 
-    // public addRef(index: int32): void {
-    //     // FIXME is there a faster way to convert int32 to string?
-    //     this.addRef(String(index));
-    // }
-
     public fireChange(key: string): void {
         let metaDependency: MutableStateMeta | undefined = this.__metaDependencies.get(key);
         if (metaDependency) {
             metaDependency.fireChange();
         }
     }
-
-    // public fireChange(index: int32): void {
-    //     // FIXME is there a faster way to convert int32 to string?
-    //     this.fireChange(String(index));
-    // }
 }

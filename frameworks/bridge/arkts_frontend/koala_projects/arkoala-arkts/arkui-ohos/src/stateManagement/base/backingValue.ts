@@ -18,25 +18,25 @@
   versioning of backing store values
 */
 
-import { IMutableStateMeta } from "../decorator";
-import { IBackingValue } from "./iBackingValue";
-import { TypeChecker } from "#components";
-import { StateMgmtTool } from "#stateMgmtTool";
-import { STATE_MGMT_FACTORY } from "../decorator";
-import { ObserveSingleton } from "./observeSingleton";
-import { StateMgmtConsole } from "../tools/stateMgmtDFX";
+import { IMutableStateMeta } from '../decorator';
+import { IBackingValue } from './iBackingValue';
+import { TypeChecker } from '#components';
+import { StateMgmtTool } from '#stateMgmtTool';
+import { STATE_MGMT_FACTORY } from '../decorator';
+import { ObserveSingleton } from './observeSingleton';
+import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 export class DecoratorBackingValue<T> implements IBackingValue<T> {
     protected readonly propertyName_: string;
     private value_: T;
     protected readonly metaDependency_: IMutableStateMeta;
 
     constructor(propertyName: string, initValue: T) {
-        // if (!this.isValueValid(initValue)) {
-        //     throw new TypeError(`${propertyName} init with non-Observed object. Type error.`);
-        // }
+        if (!this.isValueValid(initValue)) {
+            throw new TypeError(`${propertyName} init with non-Observed object. Type error.`);
+        }
         this.propertyName_ = propertyName;
         this.value_ = initValue;
-        this.metaDependency_ = STATE_MGMT_FACTORY.makeMutableStateMeta()
+        this.metaDependency_ = STATE_MGMT_FACTORY.makeMutableStateMeta();
     }
 
     public get(shouldAddRef: boolean): T {
@@ -76,11 +76,7 @@ export class DecoratorBackingValue<T> implements IBackingValue<T> {
     }
 
     protected isValueValid(newValue: T): boolean {
+        // need add check
         return true;
-        // return (newValue === undefined
-        //     || newValue === null
-        //     || (typeof newValue !== 'object')
-        //     || (StateMgmtTool.isIObservedObject(newValue))
-        //     || (ObserveSingleton.instance.isObservedInterface(newValue)));
     }
 }

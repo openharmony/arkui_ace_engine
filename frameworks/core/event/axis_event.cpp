@@ -148,26 +148,6 @@ int32_t AxisInfo::GetScrollStep() const
     return scrollStep_;
 }
 
-void AxisInfo::SetVerticalAxis(float axis)
-{
-    verticalAxis_ = axis;
-}
-
-float AxisInfo::GetVerticalAxis() const
-{
-    return verticalAxis_;
-}
-
-void AxisInfo::SetHorizontalAxis(float axis)
-{
-    horizontalAxis_ = axis;
-}
-
-float AxisInfo::GetHorizontalAxis() const
-{
-    return horizontalAxis_;
-}
-
 void AxisInfo::SetPinchAxisScale(float scale)
 {
     pinchAxisScale_ = scale;

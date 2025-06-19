@@ -6308,6 +6308,7 @@ struct ArkUIExtendedNodeAPI {
     void (*createNewScope)();
     void (*registerOEMVisualEffect)(ArkUIOEMVisualEffectFuncHandle func);
     void (*setOnNodeDestroyCallback)(ArkUINodeHandle node, void (*onDestroy)(ArkUINodeHandle node));
+    ArkUINodeHandle (*createCustomNodeByNodeId)(ArkUI_CharPtr tag, ArkUI_Int32 nodeId);
 };
 
 struct ArkUIStyledStringAPI {

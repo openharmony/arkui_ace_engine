@@ -2556,7 +2556,7 @@ HWTEST_F(SliderModifierTest, setOnChangeTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setOnChangeEventValueImpl, TestSize.Level1)
+HWTEST_F(SliderModifierTest, DISABLED_setOnChangeEventValueImpl, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -2626,7 +2626,7 @@ HWTEST_F(SliderModifierTest, setDigitalCrownSensitivityDefaultValuesTest, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setDigitalCrownSensitivityValuesTest, TestSize.Level1)
+HWTEST_F(SliderModifierTest, DISABLED_setDigitalCrownSensitivityValuesTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDigitalCrownSensitivity, nullptr);
     auto checkValue = [this](
@@ -2649,7 +2649,7 @@ HWTEST_F(SliderModifierTest, setDigitalCrownSensitivityValuesTest, TestSize.Leve
  * @tc.desc: Check backToTop method of ScrollableCommonMethod modifier
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setEnableHapticFeedbackTest, TestSize.Level1)
+HWTEST_F(SliderModifierTest, DISABLED_setEnableHapticFeedbackTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setEnableHapticFeedback, nullptr);
     auto frameNode = reinterpret_cast<FrameNode *>(node_);

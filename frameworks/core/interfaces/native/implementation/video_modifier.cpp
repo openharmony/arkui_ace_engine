@@ -32,7 +32,26 @@ struct VideoOptions {
     double currentProgressRate;
     ImageSourceInfo previewSourceInfo;
     RefPtr<VideoControllerV2> videoController;
+    bool showFirstFrame;
 };
+namespace {
+const float SPEED_0_75_X = 0.75f;
+const float SPEED_1_00_X = 1.0f;
+const float SPEED_1_25_X = 1.25f;
+const float SPEED_1_75_X = 1.75f;
+const float SPEED_2_00_X = 2.0f;
+float ConvertVideoPorgressRateNumber(float rate)
+{
+    switch (static_cast<int32_t>(rate)) {
+        case ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_75_X: return SPEED_0_75_X;
+        case ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_00_X: return SPEED_1_00_X;
+        case ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_25_X: return SPEED_1_25_X;
+        case ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_75_X: return SPEED_1_75_X;
+        case ARK_PLAYBACK_SPEED_SPEED_FORWARD_2_00_X: return SPEED_2_00_X;
+        default: return SPEED_1_00_X;
+    }
+}
+}
 } // OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::Converter {
@@ -64,7 +83,7 @@ VideoOptions Convert(const Ark_VideoOptions& src)
 
     // currentProgressRate
     options.currentProgressRate = static_cast<double>(
-        Converter::OptConvert<float>(src.currentProgressRate).value_or(1.0f));
+        ConvertVideoPorgressRateNumber(Converter::OptConvert<float>(src.currentProgressRate).value_or(1.0f)));
 
     // previewUri
     options.previewSourceInfo = Converter::OptConvert<ImageSourceInfo>(src.previewUri)
@@ -76,6 +95,14 @@ VideoOptions Convert(const Ark_VideoOptions& src)
     auto peerImplPtr = abstPeerPtrOpt.value();
     CHECK_NULL_RETURN(peerImplPtr, options);
     options.videoController = peerImplPtr->GetController();
+
+    // posterOptions
+    options.showFirstFrame = false;
+    auto optPosterOptions = src.posterOptions;
+    if (optPosterOptions.tag != InteropTag::INTEROP_TAG_UNDEFINED &&
+        optPosterOptions.value.showFirstFrame.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        options.showFirstFrame = Converter::Convert<bool>(optPosterOptions.value.showFirstFrame.value);
+    }
     return options;
 }
 } // OHOS::Ace::NG::Converter
@@ -102,6 +129,7 @@ void SetVideoOptionsImpl(Ark_NativePointer node,
     VideoModelStatic::SetSrc(frameNode, options.src, options.bundleNameSrc, options.moduleNameSrc);
     VideoModelStatic::SetProgressRate(frameNode, options.currentProgressRate);
     VideoModelStatic::SetPosterSourceInfo(frameNode, options.previewSourceInfo);
+    VideoModelStatic::SetShowFirstFrame(frameNode, options.showFirstFrame);
     if (options.videoController) {
         VideoModelStatic::SetVideoController(frameNode, options.videoController);
     }
@@ -116,7 +144,7 @@ void MutedImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        VideoModelNG::SetMuted(frameNode, false);
         return;
     }
     VideoModelNG::SetMuted(frameNode, *convValue);
@@ -128,7 +156,7 @@ void AutoPlayImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        VideoModelNG::SetAutoPlay(frameNode, false);
         return;
     }
     VideoModelNG::SetAutoPlay(frameNode, *convValue);
@@ -140,7 +168,7 @@ void ControlsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        VideoModelNG::SetControls(frameNode, true);
         return;
     }
     VideoModelNG::SetControls(frameNode, *convValue);
@@ -152,7 +180,7 @@ void LoopImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        VideoModelNG::SetLoop(frameNode, false);
         return;
     }
     VideoModelNG::SetLoop(frameNode, *convValue);
@@ -347,7 +375,7 @@ void EnableAnalyzerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        VideoModelStatic::EnableAnalyzer(frameNode, false);
         return;
     }
     VideoModelStatic::EnableAnalyzer(frameNode, *convValue);
@@ -368,12 +396,15 @@ void SurfaceBackgroundColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        VideoModelStatic::SetSurfaceBackgroundColor(frameNode, Color::BLACK);
         return;
     }
     auto peer = *optValue;
     Color backgroundColor = Color::BLACK;
     backgroundColor.SetValue(peer->colorValue.value);
+    if (backgroundColor != Color::TRANSPARENT) {
+        backgroundColor = Color::BLACK;
+    }
     VideoModelStatic::SetSurfaceBackgroundColor(frameNode, backgroundColor);
 }
 void EnableShortcutKeyImpl(Ark_NativePointer node,
@@ -383,7 +414,7 @@ void EnableShortcutKeyImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     if (!convValue) {
-        // TODO: Reset value
+        VideoModelNG::SetShortcutKeyEnabled(frameNode, false);
         return;
     }
     VideoModelNG::SetShortcutKeyEnabled(frameNode, *convValue);

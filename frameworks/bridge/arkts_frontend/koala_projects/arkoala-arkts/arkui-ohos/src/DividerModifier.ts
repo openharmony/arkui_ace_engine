@@ -35,11 +35,7 @@ class ColorModifier extends ModifierWithKey<ResourceColor | undefined> {
     }
 
     static factory(value: ResourceColor | undefined): ColorModifier {
-        if (value) {
-            return new ColorModifier(value);
-        } else {
-            return new ColorModifier(undefined);
-        }
+        return new ColorModifier(value);
     }
 }
 
@@ -62,11 +58,7 @@ class StrokeWidthModifier extends ModifierWithKey<string | number | undefined> {
     }
 
     static factory(value: string | number | undefined): StrokeWidthModifier {
-        if (value) {
-            return new StrokeWidthModifier(value);
-        } else {
-            return new StrokeWidthModifier(undefined);
-        }
+        return new StrokeWidthModifier(value);
     }
 }
 
@@ -112,11 +104,7 @@ class LineCapModifier extends ModifierWithKey<LineCapStyle | undefined> {
     }
 
     static factory(value: LineCapStyle | undefined): LineCapModifier {
-        if (value) {
-            return new LineCapModifier(value);
-        } else {
-            return new LineCapModifier(undefined);
-        }
+        return new LineCapModifier(value);
     }
 }
 

@@ -22,10 +22,12 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ArkRowSplitNode } from '../handwritten/modifiers/ArkRowSplitNode';
+import { ArkRowSplitAttributeSet, RowSplitModifier } from '../RowSplitModifier';
 
 export class ArkRowSplitPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -65,6 +67,30 @@ export class ArkRowSplitStyle extends ArkCommonMethodStyle implements RowSplitAt
         }
 }
 export class ArkRowSplitComponent extends ArkCommonMethodComponent implements RowSplitAttribute {
+    protected _modifierHost: ArkRowSplitNode | undefined;
+    setModifierHost(value: ArkRowSplitNode): void {
+        this._modifierHost = value;
+    }
+    getModifierHost(): ArkRowSplitNode {
+        if (this._modifierHost === undefined || this._modifierHost === null) {
+            this._modifierHost = new ArkRowSplitNode()
+            this._modifierHost!.setPeer(this.getPeer());
+        }
+        return this._modifierHost!;
+    }
+    getAttributeSet(): ArkRowSplitAttributeSet  {
+        return this.getPeer()._attributeSet as ArkRowSplitAttributeSet;
+    }
+ 
+    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
+        let isCommonModifier: boolean = modifier instanceof RowSplitModifier;
+        if (isCommonModifier) {
+            let commonModifier = modifier as object as RowSplitModifier;
+            this.getPeer()._attributeSet = commonModifier.attributeSet;
+        } else if (this.getPeer()._attributeSet == null) {
+            this.getPeer()._attributeSet = new ArkRowSplitAttributeSet();
+        }
+    }
     getPeer(): ArkRowSplitPeer {
         return (this.peer as ArkRowSplitPeer)
     }

@@ -59,6 +59,9 @@
             "@ohos/font": [
                 "@ohos.font.ets"
             ],
+            "@ohos/mediaquery": [
+                "@ohos.mediaquery.ets"
+            ],
             "global/resource": [
                 "global/resource/resource.ets"
             ],
@@ -88,6 +91,9 @@
             ],
             "@ohos/arkui/focusController": [
                 "@ohos.arkui.focusController.ets"
+            ],
+            "@ohos/arkui/componentSnapshot": [
+                "@ohos.arkui.componentSnapshot.ets"
             ],
             "#stateMgmtTool": [
                 "./arkui/stateManagement/tools/arkts"

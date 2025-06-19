@@ -199,6 +199,16 @@ void ReplaceDestinationImpl(Ark_VMContext vmContext,
                             const Opt_NavigationOptions* options,
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(info);
+    auto navStack = peer->GetNavPathStack();
+    if (!navStack) {
+        LOGE("NavPathStackAccessor::ReplaceDestinationImpl. Navigation Stack isn't bound to a component.");
+        return;
+    }
+    auto navInfo = info->data;
+    auto navOptions = Converter::Convert<NavigationOptions>(options->value);
+    navStack->NavigationContext::PathStack::ReplaceDestination(navInfo, navOptions);
 }
 void ReplacePathByNameImpl(Ark_NavPathStack peer,
                            const Ark_String* name,

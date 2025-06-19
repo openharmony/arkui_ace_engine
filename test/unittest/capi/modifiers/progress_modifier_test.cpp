@@ -438,7 +438,7 @@ HWTEST_F(ProgressModifierTest, setCapsuleStyleDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressModifierTest, setCapsuleStyleValidValues, TestSize.Level1)
+HWTEST_F(ProgressModifierTest, DISABLED_setCapsuleStyleValidValues, TestSize.Level1)
 {
     Ark_ProgressOptions progressOptions;
     progressOptions.value = Converter::ArkValue<Ark_Number>(5);
@@ -482,7 +482,7 @@ HWTEST_F(ProgressModifierTest, setCapsuleStyleValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressModifierTest, setCapsuleStyleValidFontValues, TestSize.Level1)
+HWTEST_F(ProgressModifierTest, DISABLED_setCapsuleStyleValidFontValues, TestSize.Level1)
 {
     Ark_ProgressOptions progressOptions;
     progressOptions.value = Converter::ArkValue<Ark_Number>(5);

@@ -64,11 +64,12 @@ void SetRadioOptionsImpl(Ark_NativePointer node,
     }
     auto arkBuilder = Converter::OptConvert<CustomNodeBuilder>(options->indicatorBuilder);
     if (arkBuilder.has_value()) {
-        auto builder = [callback = CallbackHelper(arkBuilder.value()), node]() {
-            auto builderNode = callback.BuildSync(node);
-            NG::ViewStackProcessor::GetInstance()->Push(builderNode);
-        };
-        RadioModelStatic::SetBuilder(frameNode, std::move(builder));
+        CallbackHelper(arkBuilder.value()).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
+            auto builder = [uiNode]() {
+                NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+            };
+            RadioModelStatic::SetBuilder(frameNode, std::move(builder));
+            }, node);
     }
 }
 } // RadioInterfaceModifier
