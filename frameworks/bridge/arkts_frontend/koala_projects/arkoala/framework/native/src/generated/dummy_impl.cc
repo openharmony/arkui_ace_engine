@@ -23525,6 +23525,82 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         };
         return &modifiersImpl;
     }
+    namespace AlphabetIndexerOpsAccessor {
+    Ark_NativePointer RegisterIndexerSelectedCallbackImpl(Ark_NativePointer node,
+                                                          const Ark_Number* index,
+                                                          const IndexerSelectedCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerIndexerSelectedCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, index);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // AlphabetIndexerOpsAccessor
+    namespace ListItemOpsAccessor {
+    Ark_NativePointer RegisterSelectedCallbackImpl(Ark_NativePointer node,
+                                                   Ark_Boolean value,
+                                                   const SelectedCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerSelectedCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // ListItemOpsAccessor
+    namespace RefreshOpsAccessor {
+    Ark_NativePointer RegisterRefreshingCallbackImpl(Ark_NativePointer node,
+                                                     Ark_Boolean value,
+                                                     const RefreshingCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerRefreshingCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // RefreshOpsAccessor
+    namespace SwiperOpsAccessor {
+    Ark_NativePointer RegisterIndexCallbackImpl(Ark_NativePointer node,
+                                                const Ark_Number* value,
+                                                const IndexCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerIndexCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // SwiperOpsAccessor
     namespace AnimationExtenderAccessor {
     void SetClipRectImpl(Ark_NativePointer node,
                          Ark_Float32 x,
@@ -28213,6 +28289,23 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return nullptr;
     }
+    Ark_NativePointer RegisterIndexCallbackImpl(Ark_NativePointer node,
+                                                const Ark_Number* value,
+                                                const IndexCallback* callback)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("registerIndexCallback(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
     } // TabsOpsAccessor
     namespace UIContextImpAccessor {
     void FreezeUINode0Impl(const Ark_String* id,
@@ -29033,12 +29126,27 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     } // AlertDialogAccessor
 
     namespace PromptActionAccessor {
-    void ShowToastImpl(const Ark_ShowToastOptions* value)
+    void ShowToastImpl(const Ark_ShowToastOptions* value,
+                       const Callback_Number_Void* callback_value)
     {
         if (!needGroupedLog(1))
             return;
         string out("showToast(");
         WriteToString(&out, value);
+        out.append(", ");
+        WriteToString(&out, callback_value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void CloseToastImpl(const Ark_Number* id,
+                        const Callback_Number_Void* callback_value)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("closeToast(");
+        WriteToString(&out, id);
+        out.append(", ");
+        WriteToString(&out, callback_value);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -38782,6 +38890,98 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // BounceSymbolEffectAccessor
+    namespace BuilderNodeOpsAccessor {
+    void DestroyPeerImpl(Ark_BuilderNodeOps peer)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_BuilderNodeOps CtorImpl()
+    {
+        if (!needGroupedLog(1))
+            return (Ark_BuilderNodeOps) 100;
+        string out("new BuilderNodeOps(");
+        out.append(") \n");
+        out.append("[return (Ark_BuilderNodeOps) 100] \n");
+        appendGroupedLog(1, out);
+        return (Ark_BuilderNodeOps) 100;
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void CreateImpl(Ark_BuilderNodeOps peer,
+                    const Callback_Void* buildFunc)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("create(");
+        WriteToString(&out, buildFunc);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void DisposeNodeImpl(Ark_BuilderNodeOps peer)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("disposeNode(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetUpdateConfigurationCallbackImpl(Ark_BuilderNodeOps peer,
+                                            const Callback_Void* configurationUpdateFunc)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("setUpdateConfigurationCallback(");
+        WriteToString(&out, configurationUpdateFunc);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOptionsImpl(Ark_BuilderNodeOps peer,
+                        const Ark_BuilderNodeOptions* options)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("setOptions(");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_Boolean PostTouchEventImpl(Ark_BuilderNodeOps peer,
+                                   Ark_TouchEvent event)
+    {
+        if (!needGroupedLog(1))
+            return 0;
+        string out("postTouchEvent(");
+        WriteToString(&out, event);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Ark_NativePointer SetRootFrameNodeInBuilderNodeImpl(Ark_BuilderNodeOps peer,
+                                                        Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("setRootFrameNodeInBuilderNode(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // BuilderNodeOpsAccessor
     namespace PulseSymbolEffectAccessor {
     void DestroyPeerImpl(Ark_PulseSymbolEffect peer)
     {
@@ -43343,6 +43543,34 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // RouterExtenderAccessor
+    const GENERATED_ArkUIAlphabetIndexerOpsAccessor* GetAlphabetIndexerOpsAccessor()
+    {
+        static const GENERATED_ArkUIAlphabetIndexerOpsAccessor AlphabetIndexerOpsAccessorImpl {
+            AlphabetIndexerOpsAccessor::RegisterIndexerSelectedCallbackImpl,
+        };
+        return &AlphabetIndexerOpsAccessorImpl;
+    }
+    const GENERATED_ArkUIListItemOpsAccessor* GetListItemOpsAccessor()
+    {
+        static const GENERATED_ArkUIListItemOpsAccessor ListItemOpsAccessorImpl {
+            ListItemOpsAccessor::RegisterSelectedCallbackImpl,
+        };
+        return &ListItemOpsAccessorImpl;
+    }
+    const GENERATED_ArkUIRefreshOpsAccessor* GetRefreshOpsAccessor()
+    {
+        static const GENERATED_ArkUIRefreshOpsAccessor RefreshOpsAccessorImpl {
+            RefreshOpsAccessor::RegisterRefreshingCallbackImpl,
+        };
+        return &RefreshOpsAccessorImpl;
+    }
+    const GENERATED_ArkUISwiperOpsAccessor* GetSwiperOpsAccessor()
+    {
+        static const GENERATED_ArkUISwiperOpsAccessor SwiperOpsAccessorImpl {
+            SwiperOpsAccessor::RegisterIndexCallbackImpl,
+        };
+        return &SwiperOpsAccessorImpl;
+    }
     const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()
     {
         static const GENERATED_ArkUIAnimationExtenderAccessor AnimationExtenderAccessorImpl {
@@ -44221,6 +44449,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         static const GENERATED_ArkUITabsOpsAccessor TabsOpsAccessorImpl {
             TabsOpsAccessor::RegisterBarModeImpl,
             TabsOpsAccessor::RegisterBarBackgroundBlurStyleImpl,
+            TabsOpsAccessor::RegisterIndexCallbackImpl,
         };
         return &TabsOpsAccessorImpl;
     }
@@ -44341,6 +44570,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIPromptActionAccessor PromptActionAccessorImpl {
             PromptActionAccessor::ShowToastImpl,
+            PromptActionAccessor::CloseToastImpl,
         };
         return &PromptActionAccessorImpl;
     }
@@ -46135,6 +46365,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct BounceSymbolEffectPeer {
         virtual ~BounceSymbolEffectPeer() = default;
     };
+    const GENERATED_ArkUIBuilderNodeOpsAccessor* GetBuilderNodeOpsAccessor()
+    {
+        static const GENERATED_ArkUIBuilderNodeOpsAccessor BuilderNodeOpsAccessorImpl {
+            BuilderNodeOpsAccessor::DestroyPeerImpl,
+            BuilderNodeOpsAccessor::CtorImpl,
+            BuilderNodeOpsAccessor::GetFinalizerImpl,
+            BuilderNodeOpsAccessor::CreateImpl,
+            BuilderNodeOpsAccessor::DisposeNodeImpl,
+            BuilderNodeOpsAccessor::SetUpdateConfigurationCallbackImpl,
+            BuilderNodeOpsAccessor::SetOptionsImpl,
+            BuilderNodeOpsAccessor::PostTouchEventImpl,
+            BuilderNodeOpsAccessor::SetRootFrameNodeInBuilderNodeImpl,
+        };
+        return &BuilderNodeOpsAccessorImpl;
+    }
+
+    struct BuilderNodeOpsPeer {
+        virtual ~BuilderNodeOpsPeer() = default;
+    };
     const GENERATED_ArkUIPulseSymbolEffectAccessor* GetPulseSymbolEffectAccessor()
     {
         static const GENERATED_ArkUIPulseSymbolEffectAccessor PulseSymbolEffectAccessorImpl {
@@ -47172,6 +47421,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
     {
         static const GENERATED_ArkUIAccessors accessorsImpl = {
+            GetAlphabetIndexerOpsAccessor,
+            GetListItemOpsAccessor,
+            GetRefreshOpsAccessor,
+            GetSwiperOpsAccessor
             GetAnimationExtenderAccessor,
             GetBaseContextAccessor,
             GetContextAccessor,
@@ -47321,6 +47574,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetAppearSymbolEffectAccessor,
             GetDisappearSymbolEffectAccessor,
             GetBounceSymbolEffectAccessor,
+            GetBuilderNodeOpsAccessor,
             GetPulseSymbolEffectAccessor,
             GetTabsControllerAccessor,
             GetTabContentTransitionProxyAccessor,

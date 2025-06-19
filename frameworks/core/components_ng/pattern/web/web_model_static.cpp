@@ -265,8 +265,10 @@ void WebModelStatic::SetEnableFollowSystemFontWeight(FrameNode *frameNode,
 
 void WebModelStatic::SetWebMediaAVSessionEnabled(FrameNode *frameNode, const std::optional<bool>& enable)
 {
-    (void)frameNode;
-    (void)enable;
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebMediaAVSessionEnabled(enable.value());
 }
 
 void WebModelStatic::JavaScriptOnDocumentStart(FrameNode* frameNode, const ScriptItems& scriptItems)

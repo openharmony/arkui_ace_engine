@@ -330,7 +330,7 @@ void OnChangeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // TODO: Reset value
+        SearchModelNG::SetOnChange(frameNode, nullptr);
         return;
     }
     auto onChange = [arkCallback = CallbackHelper(*optValue)](const ChangeValueInfo& info) {
@@ -338,7 +338,12 @@ void OnChangeImpl(Ark_NativePointer node,
         auto textArkString = Converter::ArkValue<Ark_String>(info.value, &ctx);
         auto textArkPrevText = Converter::ArkValue<Opt_PreviewText>(info.previewText, &ctx);
         auto options = Converter::ArkValue<Opt_TextChangeOptions>();
-        arkCallback.Invoke(textArkString, textArkPrevText, options);
+        options.tag = INTEROP_TAG_OBJECT;
+        options.value.rangeBefore = Converter::ArkValue<Ark_TextRange>(info.rangeBefore);
+        options.value.rangeAfter = Converter::ArkValue<Ark_TextRange>(info.rangeAfter);
+        options.value.oldContent = Converter::ArkValue<Ark_String>(info.oldContent, &ctx);
+        options.value.oldPreviewText = Converter::ArkValue<Ark_PreviewText>(info.oldPreviewText, &ctx);
+        arkCallback.InvokeSync(textArkString, textArkPrevText, options);
     };
     SearchModelNG::SetOnChange(frameNode, std::move(onChange));
 }

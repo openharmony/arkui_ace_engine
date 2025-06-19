@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 
-#include <memory>
 #include "common_module.h"
 
+#include <memory>
+
 #include "load.h"
+
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace::Ani {
 
@@ -86,5 +89,15 @@ void Invalidate(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr
         return;
     }
     modifier->getArkUIAniDrawModifier()->invalidate(env, ptr);
+}
+ani_long BuilderProxyNodeConstruct(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id)
+{
+    auto nodeId = reinterpret_cast<ArkUI_Int32>(id);
+    ani_long nativeObj {};
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, nativeObj);
+    auto builderProxyNode = modifier->getCommonAniModifier()->builderProxyNodeConstruct(nodeId);
+    CHECK_NULL_RETURN(builderProxyNode, nativeObj);
+    return reinterpret_cast<ani_long>(builderProxyNode);
 }
 } // namespace OHOS::Ace::Ani

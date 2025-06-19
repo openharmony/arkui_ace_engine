@@ -15,12 +15,13 @@
 
 import { ExtendableComponent } from '../../component/extendableComponent';
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { UIUtils, WatchFuncType } from '../decorator';
+import { WatchFuncType } from '../decorator';
 import { IProvideDecoratedVariable } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
+import { UIUtils } from '../utils';
 
 export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     implements IProvideDecoratedVariable<T> {

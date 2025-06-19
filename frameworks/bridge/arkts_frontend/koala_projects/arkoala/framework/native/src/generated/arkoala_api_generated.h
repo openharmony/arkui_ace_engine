@@ -274,6 +274,9 @@ typedef struct BaseShapePeer* Ark_BaseShape;
 typedef struct Opt_BaseShape Opt_BaseShape;
 typedef struct Opt_Boolean Opt_Boolean;
 typedef struct Opt_Buffer Opt_Buffer;
+typedef struct BuilderNodeOpsPeer BuilderNodeOpsPeer;
+typedef struct BuilderNodeOpsPeer* Ark_BuilderNodeOps;
+typedef struct Opt_BuilderNodeOps Opt_BuilderNodeOps;
 typedef struct CalendarControllerPeer CalendarControllerPeer;
 typedef struct CalendarControllerPeer* Ark_CalendarController;
 typedef struct Opt_CalendarController Opt_CalendarController;
@@ -1445,6 +1448,10 @@ typedef struct ImageCompleteCallback ImageCompleteCallback;
 typedef struct Opt_ImageCompleteCallback Opt_ImageCompleteCallback;
 typedef struct ImageErrorCallback ImageErrorCallback;
 typedef struct Opt_ImageErrorCallback Opt_ImageErrorCallback;
+typedef struct IndexerSelectedCallback IndexerSelectedCallback;
+typedef struct Opt_IndexerSelectedCallback Opt_IndexerSelectedCallback;
+typedef struct IndexCallback IndexCallback;
+typedef struct Opt_IndexCallback Opt_IndexCallback;
 typedef struct InterceptionModeCallback InterceptionModeCallback;
 typedef struct Opt_InterceptionModeCallback Opt_InterceptionModeCallback;
 typedef struct InterceptionShowCallback InterceptionShowCallback;
@@ -1589,6 +1596,8 @@ typedef struct Profiler_Callback_String_Void Profiler_Callback_String_Void;
 typedef struct Opt_Profiler_Callback_String_Void Opt_Profiler_Callback_String_Void;
 typedef struct ReceiveCallback ReceiveCallback;
 typedef struct Opt_ReceiveCallback Opt_ReceiveCallback;
+typedef struct RefreshingCallback RefreshingCallback;
+typedef struct Opt_RefreshingCallback Opt_RefreshingCallback;
 typedef struct RestrictedWorker_onerror_Callback RestrictedWorker_onerror_Callback;
 typedef struct Opt_RestrictedWorker_onerror_Callback Opt_RestrictedWorker_onerror_Callback;
 typedef struct RestrictedWorker_onexit_Callback RestrictedWorker_onexit_Callback;
@@ -1723,6 +1732,8 @@ typedef struct BounceSymbolEffectPeer* Ark_BounceSymbolEffect;
 typedef struct Opt_BounceSymbolEffect Opt_BounceSymbolEffect;
 typedef struct Ark_BreakPoints Ark_BreakPoints;
 typedef struct Opt_BreakPoints Opt_BreakPoints;
+typedef struct Ark_BuilderNodeOptions Ark_BuilderNodeOptions;
+typedef struct Opt_BuilderNodeOptions Opt_BuilderNodeOptions;
 typedef struct Ark_BrightnessBlender Ark_BrightnessBlender;
 typedef struct Opt_BrightnessBlender Opt_BrightnessBlender;
 typedef struct Ark_BusinessError Ark_BusinessError;
@@ -5212,13 +5223,13 @@ typedef struct Opt_PageFlipMode {
 } Opt_PageFlipMode;
 typedef enum Ark_PanDirection {
     ARK_PAN_DIRECTION_NONE = 0,
-    ARK_PAN_DIRECTION_HORIZONTAL = 1,
-    ARK_PAN_DIRECTION_LEFT = 2,
-    ARK_PAN_DIRECTION_RIGHT = 3,
-    ARK_PAN_DIRECTION_VERTICAL = 4,
-    ARK_PAN_DIRECTION_UP = 5,
-    ARK_PAN_DIRECTION_DOWN = 6,
-    ARK_PAN_DIRECTION_ALL = 7,
+    ARK_PAN_DIRECTION_HORIZONTAL = 3,
+    ARK_PAN_DIRECTION_LEFT = 1,
+    ARK_PAN_DIRECTION_RIGHT = 2,
+    ARK_PAN_DIRECTION_VERTICAL = 12,
+    ARK_PAN_DIRECTION_UP = 4,
+    ARK_PAN_DIRECTION_DOWN = 8,
+    ARK_PAN_DIRECTION_ALL = 15,
 } Ark_PanDirection;
 typedef struct Opt_PanDirection {
     Ark_Tag tag;
@@ -6778,6 +6789,10 @@ typedef struct Opt_Buffer {
     Ark_Tag tag;
     Ark_Buffer value;
 } Opt_Buffer;
+typedef struct Opt_BuilderNodeOps {
+    Ark_Tag tag;
+    Ark_BuilderNodeOps value;
+} Opt_BuilderNodeOps;
 typedef struct Opt_CalendarController {
     Ark_Tag tag;
     Ark_CalendarController value;
@@ -10808,6 +10823,24 @@ typedef struct Opt_ImageErrorCallback {
     Ark_Tag tag;
     ImageErrorCallback value;
 } Opt_ImageErrorCallback;
+typedef struct IndexerSelectedCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Number index);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number index);
+} IndexerSelectedCallback;
+typedef struct Opt_IndexerSelectedCallback {
+    Ark_Tag tag;
+    IndexerSelectedCallback value;
+} Opt_IndexerSelectedCallback;
+typedef struct IndexCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Number value);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number value);
+} IndexCallback;
+typedef struct Opt_IndexCallback {
+    Ark_Tag tag;
+    IndexCallback value;
+} Opt_IndexCallback;
 typedef struct InterceptionModeCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, Ark_NavigationMode mode);
@@ -11454,6 +11487,15 @@ typedef struct Opt_ReceiveCallback {
     Ark_Tag tag;
     ReceiveCallback value;
 } Opt_ReceiveCallback;
+typedef struct RefreshingCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Boolean refreshing);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Boolean refreshing);
+} RefreshingCallback;
+typedef struct Opt_RefreshingCallback {
+    Ark_Tag tag;
+    RefreshingCallback value;
+} Opt_RefreshingCallback;
 typedef struct RestrictedWorker_onerror_Callback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_ErrorEvent ev);
@@ -12015,6 +12057,16 @@ typedef struct Opt_BreakPoints {
     Ark_Tag tag;
     Ark_BreakPoints value;
 } Opt_BreakPoints;
+typedef struct Ark_BuilderNodeOptions {
+    /* kind: Interface */
+    Opt_Size selfIdealSize;
+    Opt_Number type;
+    Opt_String surfaceId;
+} Ark_BuilderNodeOptions;
+typedef struct Opt_BuilderNodeOptions {
+    Ark_Tag tag;
+    Ark_BuilderNodeOptions value;
+} Opt_BuilderNodeOptions;
 typedef struct Ark_BrightnessBlender {
     Ark_Number cubicRate;
     Ark_Number quadraticRate;
@@ -23542,6 +23594,26 @@ typedef struct GENERATED_ArkUILinearIndicatorModifier {
 
 // Accessors
 
+typedef struct GENERATED_ArkUIAlphabetIndexerOpsAccessor {
+    Ark_NativePointer (*registerIndexerSelectedCallback)(Ark_NativePointer node,
+                                                         const Ark_Number* index,
+                                                         const IndexerSelectedCallback* callback);
+} GENERATED_ArkUIAlphabetIndexerOpsAccessor;
+typedef struct GENERATED_ArkUIListItemOpsAccessor {
+    Ark_NativePointer (*registerSelectedCallback)(Ark_NativePointer node,
+                                                  Ark_Boolean value,
+                                                  const SelectedCallback* callback);
+} GENERATED_ArkUIListItemOpsAccessor;
+typedef struct GENERATED_ArkUIRefreshOpsAccessor {
+    Ark_NativePointer (*registerRefreshingCallback)(Ark_NativePointer node,
+                                                    Ark_Boolean value,
+                                                    const RefreshingCallback* callback);
+} GENERATED_ArkUIRefreshOpsAccessor;
+typedef struct GENERATED_ArkUISwiperOpsAccessor {
+    Ark_NativePointer (*registerIndexCallback)(Ark_NativePointer node,
+                                               const Ark_Number* value,
+                                               const IndexCallback* callback);
+} GENERATED_ArkUISwiperOpsAccessor;
 typedef struct GENERATED_ArkUIAnimationExtenderAccessor {
     void (*SetClipRect)(Ark_NativePointer node,
                         Ark_Float32 x,
@@ -24489,6 +24561,9 @@ typedef struct GENERATED_ArkUITabsOpsAccessor {
     Ark_NativePointer (*registerBarBackgroundBlurStyle)(Ark_NativePointer node,
                                                         const Opt_BlurStyle* style,
                                                         const Opt_BackgroundBlurStyleOptions* options);
+    Ark_NativePointer (*registerIndexCallback)(Ark_NativePointer node,
+                                               const Ark_Number* value,
+                                               const IndexCallback* callback);
 } GENERATED_ArkUITabsOpsAccessor;
 
 typedef struct GENERATED_ArkUIUIContextImpAccessor {
@@ -24496,7 +24571,7 @@ typedef struct GENERATED_ArkUIUIContextImpAccessor {
                           Ark_Boolean isFrozen);
     void (*freezeUINode1)(const Ark_Number* id,
                           Ark_Boolean isFrozen);
-} GetRenderNodeAccessorGENERATED_ArkUIUIContextImpAccessor;
+} GENERATED_ArkUIUIContextImpAccessor;
 
 typedef struct GENERATED_ArkUIGridItemOpsAccessor {
     Ark_NativePointer (*registerSelectedCallback)(Ark_NativePointer node,
@@ -26442,6 +26517,23 @@ typedef struct GENERATED_ArkUIBounceSymbolEffectAccessor {
                          Ark_EffectDirection direction);
 } GENERATED_ArkUIBounceSymbolEffectAccessor;
 
+typedef struct GENERATED_ArkUIBuilderNodeOpsAccessor {
+    void (*destroyPeer)(Ark_BuilderNodeOps peer);
+    Ark_BuilderNodeOps (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*create)(Ark_BuilderNodeOps peer,
+                   const Callback_Void* buildFunc);
+    void (*disposeNode)(Ark_BuilderNodeOps peer);
+    void (*setUpdateConfigurationCallback)(Ark_BuilderNodeOps peer,
+                                           const Callback_Void* configurationUpdateFunc);
+    void (*setOptions)(Ark_BuilderNodeOps peer,
+                       const Ark_BuilderNodeOptions* options);
+    Ark_Boolean (*postTouchEvent)(Ark_BuilderNodeOps peer,
+                                  Ark_TouchEvent event);
+    Ark_NativePointer (*setRootFrameNodeInBuilderNode)(Ark_BuilderNodeOps peer,
+                                                       Ark_NativePointer node);
+} GENERATED_ArkUIBuilderNodeOpsAccessor;
+
 typedef struct GENERATED_ArkUIPulseSymbolEffectAccessor {
     void (*destroyPeer)(Ark_PulseSymbolEffect peer);
     Ark_PulseSymbolEffect (*ctor)();
@@ -27221,7 +27313,10 @@ typedef struct GENERATED_ArkUIGlobalScopeAccessor {
 } GENERATED_ArkUIGlobalScopeAccessor;
 
 typedef struct GENERATED_ArkUIPromptActionAccessor {
-    void (*showToast)(const Ark_ShowToastOptions* value);
+    void (*showToast)(const Ark_ShowToastOptions* value,
+                      const Callback_Number_Void* callback_value);
+    void (*closeToast)(const Ark_Number* toastId,
+                      const Callback_Number_Void* callback_value);
 } GENERATED_ArkUIPromptActionAccessor;
 
 typedef struct GENERATED_ArkUIRouterExtenderAccessor {
@@ -27361,6 +27456,10 @@ typedef struct GENERATED_ArkUINodeModifiers {
 } GENERATED_ArkUINodeModifiers;
 
 typedef struct GENERATED_ArkUIAccessors {
+    const GENERATED_ArkUIAlphabetIndexerOpsAccessor* (*getAlphabetIndexerOpsAccessor)();
+    const GENERATED_ArkUIListItemOpsAccessor* (*getListItemOpsAccessor)();
+    const GENERATED_ArkUIRefreshOpsAccessor* (*getRefreshOpsAccessor)();
+    const GENERATED_ArkUISwiperOpsAccessor* (*getSwiperOpsAccessor)();
     const GENERATED_ArkUIAnimationExtenderAccessor* (*getAnimationExtenderAccessor)();
     const GENERATED_ArkUIBindSheetOpsAccessor* (*getBindSheetOpsAccessor)();
     const GENERATED_ArkUIBaseContextAccessor* (*getBaseContextAccessor)();
@@ -27523,6 +27622,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIAppearSymbolEffectAccessor* (*getAppearSymbolEffectAccessor)();
     const GENERATED_ArkUIDisappearSymbolEffectAccessor* (*getDisappearSymbolEffectAccessor)();
     const GENERATED_ArkUIBounceSymbolEffectAccessor* (*getBounceSymbolEffectAccessor)();
+    const GENERATED_ArkUIBuilderNodeOpsAccessor* (*getBuilderNodeOpsAccessor)();
     const GENERATED_ArkUIPulseSymbolEffectAccessor* (*getPulseSymbolEffectAccessor)();
     const GENERATED_ArkUITabsControllerAccessor* (*getTabsControllerAccessor)();
     const GENERATED_ArkUITabContentTransitionProxyAccessor* (*getTabContentTransitionProxyAccessor)();

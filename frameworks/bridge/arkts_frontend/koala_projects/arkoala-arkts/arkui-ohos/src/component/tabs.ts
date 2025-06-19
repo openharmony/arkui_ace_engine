@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { TranslateOptions, ArkCommonMethodPeer, CommonMethod, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { TranslateOptions, ArkCommonMethodPeer, CommonMethod, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -647,7 +647,7 @@ export enum TabsCacheMode {
 }
 export interface TabsOptions {
     barPosition?: BarPosition;
-    index?: number;
+    index?: number | Bindable<number>;
     controller?: TabsController;
     barModifier?: CommonModifier;
 }
@@ -834,11 +834,24 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
     getPeer(): ArkTabsPeer {
         return (this.peer as ArkTabsPeer)
     }
+    TabsOptionsValueIsBindable(options: TabsOptions): boolean {
+        if ((RuntimeType.UNDEFINED) != runtimeType(options)) {
+            const options_num  = options!.index;
+            if ((RuntimeType.UNDEFINED) != (runtimeType(options_num))) {
+                const options_num_value  = options_num!;
+                return TypeChecker.isBindableNumber(options_num_value);
+            }
+        }
+        return false;
+    }
     public setTabsOptions(options?: TabsOptions): this {
         if (this.checkPriority("setTabsOptions")) {
             const options_casted = options as (TabsOptions | undefined)
             this.getPeer()?.setTabsOptionsAttribute(options_casted)
-            return this
+        }
+        if (this.TabsOptionsValueIsBindable(options!)) {
+            TabsOpsHandWritten.hookTabsAttributeIndexImpl(this.getPeer().peer.ptr,
+                (options!.index as Bindable<number>));
         }
         return this
     }

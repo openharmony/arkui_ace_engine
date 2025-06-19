@@ -17,6 +17,9 @@
 #include "core/components/toast/toast_theme.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/components_ng/pattern/overlay/dialog_manager_static.h"
 #include "frameworks/base/utils/utils.h"
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -47,32 +50,6 @@ bool ContainerIsScenceBoard()
     return container && container->IsScenceBoardWindow();
 }
 #endif
-
-void RunTaskInOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, const std::string& name)
-{
-    auto currentId = Container::CurrentId();
-    ContainerScope scope(currentId);
-    auto context = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    context->GetTaskExecutor()->PostTask(
-        [task = std::move(task), weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
-            task(weak.Upgrade());
-        },
-        TaskExecutor::TaskType::UI, name);
-}
-
-void ShowToastCommon(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)
-{
-    auto task = [toastInfo, callbackParam = std::move(callback), containerId = Container::CurrentId()](
-        const RefPtr<NG::OverlayManager>& overlayManager) {
-        CHECK_NULL_VOID(overlayManager);
-        ContainerScope scope(containerId);
-        overlayManager->ShowToast(
-            toastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
-    };
-    RunTaskInOverlay(std::move(task), "ArkUIOverlayShowToast");
-}
 } // OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::Converter {
@@ -145,22 +122,62 @@ ToastInfo Convert(const Ark_ShowToastOptions& options)
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PromptActionAccessor {
-void ShowToastImpl(const Ark_ShowToastOptions* options)
+void ShowToastImpl(const Ark_ShowToastOptions* options,
+    const Callback_Number_Void* callback_value)
 {
     auto toastInfo = Converter::Convert<ToastInfo>(*options);
     std::function<void(int32_t)> toastCallback = nullptr;
+    if (callback_value) {
+        toastCallback = [arkCallback = CallbackHelper(*callback_value)](int32_t toastId) {
+            arkCallback.Invoke(Converter::ArkValue<Ark_Number>(toastId));
+        };
+    }
 #ifdef OHOS_STANDARD_SYSTEM
     if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
         toastInfo.showMode == OHOS::Ace::NG::ToastShowMode::DEFAULT) {
-        ShowToastCommon(toastInfo, std::move(toastCallback));
+        DialogManagerStatic::ShowToastStatic(toastInfo, std::move(toastCallback), INSTANCE_ID_UNDEFINED);
     } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
-        OHOS::Ace::SubwindowManager::GetInstance()->ShowToast(toastInfo, std::move(toastCallback));
+        OHOS::Ace::SubwindowManager::GetInstance()->ShowToastStatic(toastInfo, std::move(toastCallback));
     }
 #else
     if (toastInfo.showMode == OHOS::Ace::NG::ToastShowMode::DEFAULT) {
-        ShowToastCommon(toastInfo, std::move(toastCallback));
+        DialogManagerStatic::ShowToastStatic(toastInfo, std::move(toastCallback), INSTANCE_ID_UNDEFINED);
     } else if (OHOS::Ace::SubwindowManager::GetInstance() != nullptr) {
-        OHOS::Ace::SubwindowManager::GetInstance()->ShowToast(toastInfo, std::move(toastCallback));
+        OHOS::Ace::SubwindowManager::GetInstance()->ShowToastStatic(toastInfo, std::move(toastCallback));
+    }
+#endif
+}
+
+void CloseToastImpl(const Ark_Number* id,
+    const Callback_Number_Void* callback_value)
+{
+    auto toastCloseCallback = [arkCallback = CallbackHelper(*callback_value)](int32_t errorCode) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(errorCode));
+    };
+    
+    if (!id) {
+        toastCloseCallback(ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    int32_t showModeVal = static_cast<int32_t>(Converter::Convert<uint32_t>(*id) & 0b111);
+    int32_t toastId = static_cast<int32_t>(Converter::Convert<uint32_t>(*id) >> 3);
+    if (toastId < 0 || showModeVal < 0 || showModeVal > static_cast<int32_t>(NG::ToastShowMode::SYSTEM_TOP_MOST)) {
+        toastCloseCallback(ERROR_CODE_TOAST_NOT_FOUND);
+        return;
+    }
+    auto showMode = static_cast<NG::ToastShowMode>(showModeVal);
+#ifdef OHOS_STANDARD_SYSTEM
+    if ((OHOS::Ace::SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
+        showMode == NG::ToastShowMode::DEFAULT) {
+        DialogManagerStatic::CloseToastStatic(toastId, std::move(toastCloseCallback), INSTANCE_ID_UNDEFINED);
+    } else if (SubwindowManager::GetInstance() != nullptr) {
+        SubwindowManager::GetInstance()->CloseToastStatic(toastId, showMode, std::move(toastCloseCallback));
+    }
+#else
+    if (showMode == NG::ToastShowMode::DEFAULT) {
+        DialogManagerStatic::CloseToastStatic(toastId, std::move(toastCloseCallback), INSTANCE_ID_UNDEFINED);
+    } else if (SubwindowManager::GetInstance() != nullptr) {
+        SubwindowManager::GetInstance()->CloseToastStatic(toastId, showMode, std::move(toastCloseCallback));
     }
 #endif
 }
@@ -170,6 +187,7 @@ const GENERATED_ArkUIPromptActionAccessor* GetPromptActionAccessor()
 {
     static const GENERATED_ArkUIPromptActionAccessor PromptActionAccessorImpl {
         PromptActionAccessor::ShowToastImpl,
+        PromptActionAccessor::CloseToastImpl,
     };
     return &PromptActionAccessorImpl;
 }

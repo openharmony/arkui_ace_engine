@@ -318,6 +318,8 @@ function fixNamespace(code: string) {
     code = code.replaceAll(/public static (getRectangleById\(rectId)/g, "export function $1")
     code = code.replaceAll(/public static (getUIFontConfig\()/g, "export function $1")
     code = code.replaceAll(/public static (showToast\(value: ShowToastOptions)/g, "export function $1")
+    code = code.replaceAll(/public static (openToast\(value: ShowToastOptions)/g, "export function $1")
+    code = code.replaceAll(/public static (closeToast\(id: number)/g, "export function $1")
     code = code.replaceAll(/public static (getLength\(\))/g, "export function $1")
     code = code.replaceAll(/public static (getState\(\))/g, "export function $1")
     code = code.replaceAll(/public static (getStateByIndex\(index)/g, "export function $1")

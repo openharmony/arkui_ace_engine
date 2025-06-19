@@ -18,13 +18,13 @@
 import { DecoratedV1VariableBase } from './decoratorBase';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
 import { ExtendableComponent } from '../../component/extendableComponent';
-import { IObjectLinkDecoratedVariable, UIUtils } from '../decorator';
+import { IObjectLinkDecoratedVariable } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { ObserveSingleton } from '../base/observeSingleton';
 import { WatchFuncType } from '../decorator';
 import { NullableObject } from '../base/types';
-
+import { UIUtils } from '../utils';
 /** 
 * implementation of V1 @ObjectLink
 *

@@ -104,18 +104,28 @@ void SetButtonOptions1Impl(Ark_NativePointer node,
     if (buttonOptions.type) {
         auto typeInt = EnumToInt(buttonOptions.type);
         ButtonModelStatic::SetType(frameNode, typeInt);
+    } else {
+        ButtonModelStatic::SetType(frameNode, std::nullopt);
     }
     if (buttonOptions.stateEffect) {
         ButtonModelStatic::SetStateEffect(frameNode, buttonOptions.stateEffect.value());
+    } else {
+        ButtonModelStatic::SetStateEffect(frameNode, std::nullopt);
     }
     if (buttonOptions.role) {
         ButtonModelStatic::SetRole(frameNode, buttonOptions.role);
+    } else {
+        ButtonModelStatic::SetRole(frameNode, std::nullopt);
     }
     if (buttonOptions.controlSize) {
         ButtonModelStatic::SetControlSize(frameNode, buttonOptions.controlSize);
+    } else {
+        ButtonModelStatic::SetControlSize(frameNode, std::nullopt);
     }
     if (buttonOptions.buttonStyle) {
         ButtonModelStatic::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
+    } else {
+        ButtonModelStatic::SetButtonStyle(frameNode, std::nullopt);
     }
 }
 void SetButtonOptions2Impl(Ark_NativePointer node,
