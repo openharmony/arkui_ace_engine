@@ -1458,9 +1458,11 @@ void TabsModelNG::HandleBarGridGutter(FrameNode* frameNode, const RefPtr<Resourc
         CalcDimension result;
         BarGridColumnOptions columnOption;
         ACE_GET_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
-        ResourceParseUtils::ParseResDimensionVp(resObj, result);
-        columnOption.gutter = result;
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, result) && NonNegative(result.Value()) &&
+            result.Unit() != DimensionUnit::PERCENT) {
+            columnOption.gutter = result;
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
+        }
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
@@ -1482,9 +1484,11 @@ void TabsModelNG::HandleBarGridMargin(FrameNode* frameNode, const RefPtr<Resourc
         CalcDimension result;
         BarGridColumnOptions columnOption;
         ACE_GET_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
-        ResourceParseUtils::ParseResDimensionVp(resObj, result);
-        columnOption.margin = result;
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, result) && NonNegative(result.Value()) &&
+            result.Unit() != DimensionUnit::PERCENT) {
+            columnOption.margin = result;
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, BarGridAlign, columnOption, tabBarNode);
+        }
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
@@ -1623,8 +1627,12 @@ void TabsModelNG::HandleScrollableBarMargin(FrameNode* frameNode, const RefPtr<R
         CalcDimension result;
         ScrollableBarModeOptions option;
         ACE_GET_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, ScrollableBarModeOptions, option, tabBarNode);
-        ResourceParseUtils::ParseResDimensionVp(resObj, result);
-        option.margin = result;
+        if (!ResourceParseUtils::ParseResDimensionVp(resObj, result) || Negative(result.Value()) ||
+            result.Unit() == DimensionUnit::PERCENT) {
+            option.margin = 0.0_vp;
+        } else {
+            option.margin = result;
+        }
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabBarLayoutProperty, ScrollableBarModeOptions, option, tabBarNode);
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));

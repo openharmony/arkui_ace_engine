@@ -337,6 +337,12 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
     // Resource and string type.
     std::string title;
     RefPtr<ResourceObject> mainResObj;
+    NavDestinationModel::GetInstance()->ResetResObj(
+        NavDestinationPatternType::TITLE_BAR, "navDestination.title.commonMainTitle");
+    NavDestinationModel::GetInstance()->ResetResObj(
+        NavDestinationPatternType::TITLE_BAR, "navDestination.title.commonSubTitle");
+    NavDestinationModel::GetInstance()->ResetResObj(
+        NavDestinationPatternType::TITLE_BAR, "navDestination.title.customtitle");
     if (JSViewAbstract::ParseJsString(info[0], title, mainResObj)) {
         if (SystemProperties::ConfigChangePerform() && mainResObj) {
             NavDestinationModel::GetInstance()->ParseCommonTitle(false, true, nullptr, mainResObj);
@@ -360,6 +366,8 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
     }
 
     NG::NavigationTitlebarOptions options;
+    NavDestinationModel::GetInstance()->ResetResObj(
+        NavDestinationPatternType::TITLE_BAR, "navDestination.navigationTitlebarOptions");
     JSNavigationUtils::ParseTitleBarOptions(info, false, options);
     NavDestinationModel::GetInstance()->SetTitlebarOptions(std::move(options));
 }
@@ -370,6 +378,10 @@ void JSNavDestination::SetBackButtonIcon(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    NavDestinationModel::GetInstance()->ResetResObj(
+        NavDestinationPatternType::TITLE_BAR, "navDestination.backButtonIcon.icon");
+    NavDestinationModel::GetInstance()->ResetResObj(
+        NavDestinationPatternType::TITLE_BAR, "navDestination.backButtonIcon.accessibilityText");
     std::string src;
     RefPtr<ResourceObject> backButtonIconResObj;
     auto noPixMap = ParseJsMedia(info[0], src, backButtonIconResObj);
@@ -402,14 +414,13 @@ void JSNavDestination::SetBackButtonIcon(const JSCallbackInfo& info)
     bool configChange = SystemProperties::ConfigChangePerform();
     if (info.Length() > 1) {
         if (!info[1]->IsNull() && !info[1]->IsUndefined()) {
-            ParseBackButtonText(info, pixMap, imageOption, iconSymbol, src, nameList,
-                backButtonIconResObj);
+            ParseBackButtonText(info, pixMap, imageOption, iconSymbol, src, nameList, backButtonIconResObj);
             return;
         }
     }
     if (configChange && backButtonIconResObj) {
-        NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, backButtonIconResObj, imageOption,
-            pixMap, nameList);
+        NavDestinationModel::GetInstance()->SetBackButtonIcon(
+            iconSymbol, backButtonIconResObj, imageOption, pixMap, nameList);
     } else {
         NavDestinationModel::GetInstance()->SetBackButtonIcon(iconSymbol, src, imageOption, pixMap, nameList);
     }
@@ -506,6 +517,10 @@ void JSNavDestination::SetMenus(const JSCallbackInfo& info)
         return;
     }
 
+    NavDestinationModel::GetInstance()->ResetResObj(
+        NavDestinationPatternType::NAV_DESTINATION, "navDestination.menuItems");
+    NavDestinationModel::GetInstance()->ResetResObj(
+        NavDestinationPatternType::NAV_DESTINATION, "navDestination.navigationMenuOptions");
     NG::NavigationMenuOptions options;
     if (info.Length() > 1 && info[1]->IsObject()) {
         auto optObj = JSRef<JSObject>::Cast(info[1]);
@@ -663,6 +678,8 @@ void JSNavDestination::SetToolBarConfiguration(const JSCallbackInfo& info)
     bool hideText = false;
     JSNavigationUtils::ParseHideToolBarText(info, hideText);
     NavDestinationModel::GetInstance()->SetHideItemText(hideText);
+    NavDestinationModel::GetInstance()->ResetResObj(
+        NavDestinationPatternType::NAV_DESTINATION, "navDestination.toolbarConfiguration");
     if (info[0]->IsUndefined() || info[0]->IsArray()) {
         std::vector<NG::BarItem> toolBarItems;
         if (info[0]->IsArray()) {
@@ -694,6 +711,8 @@ void JSNavDestination::SetToolBarConfiguration(const JSCallbackInfo& info)
         }
     }
     NG::NavigationToolbarOptions options;
+    NavDestinationModel::GetInstance()->ResetResObj(
+        NavDestinationPatternType::NAV_DESTINATION, "navigation.navigationToolbarOptions");
     JSNavigationUtils::ParseToolbarOptions(info, options);
     NavDestinationModel::GetInstance()->SetToolBarOptions(std::move(options));
 }

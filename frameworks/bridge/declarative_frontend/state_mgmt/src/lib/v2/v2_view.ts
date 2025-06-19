@@ -395,7 +395,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      }
 
     public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: { prototype: Object, pop?: () => void }): void {
-        if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+        if (PUV2ViewBase.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
             const prebuildFunc: PrebuildFunc = () => {
               this.observeComponentCreation2(compilerAssignedUpdateFunc, classObject);
             };

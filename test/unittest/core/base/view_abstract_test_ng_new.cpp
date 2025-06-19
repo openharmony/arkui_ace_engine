@@ -18,6 +18,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/event/key_event.h"
+#include "test/mock/base/mock_system_properties.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1881,6 +1882,24 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest045, TestSize.Level1)
     frameNode->DetachContext(true);
     ViewAbstract::SetNeedFocus(AceType::RawPtr(frameNode), false);
     EXPECT_EQ(ContainerScope::CurrentId(), -1);
+}
+
+/**
+ * @tc.name: RemoveResObj
+ * @tc.desc: Test RemoveResObj of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest046, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    std::string key = "clipShape";
+    ViewAbstractModelNG::RemoveResObj(frameNode, key);
+    g_isConfigChangePerform = false;
+    ViewAbstractModelNG::RemoveResObj(frameNode, key);
 }
 
 /**

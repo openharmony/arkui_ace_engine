@@ -42,6 +42,8 @@ struct TouchPoint final {
     float y = 0.0f;
     float screenX = 0.0f;
     float screenY = 0.0f;
+    double globalDisplayX = 0.0;
+    double globalDisplayY = 0.0;
     TimeStamp downTime;
     double size = 0.0;
     float force = 0.0f;
@@ -121,6 +123,8 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent& SetY(float y);
     TouchEvent& SetScreenX(float screenX);
     TouchEvent& SetScreenY(float screenY);
+    TouchEvent& SetGlobalDisplayX(double globalDisplayX);
+    TouchEvent& SetGlobalDisplayY(double globalDisplayY);
     TouchEvent& SetTime(TimeStamp time);
     TimeStamp GetTimeStamp() const;
     TouchEvent& SetType(TouchType type);
@@ -154,6 +158,7 @@ struct TouchEvent final : public PointerEvent {
     void FromJson(const std::unique_ptr<JsonValue>& json);
     Offset GetOffset() const;
     Offset GetScreenOffset() const;
+    Offset GetGlobalDisplayOffset() const;
     int32_t GetTargetDisplayId() const;
     void CovertId();
     int32_t GetOriginalReCovertId() const;
@@ -209,6 +214,10 @@ public:
     float GetScreenX() const;
     void SetScreenY(float screenY);
     float GetScreenY() const;
+    void SetGlobalDisplayX(double globalDisplayX);
+    double GetGlobalDisplayX() const;
+    void SetGlobalDisplayY(double globalDisplayY);
+    double GetGlobalDisplayY() const;
     void SetLocalX(float localX);
     float GetLocalX() const;
     void SetLocalY(float localY);
@@ -219,6 +228,8 @@ public:
     TimeStamp GetTimeStamp() const;
 
 private:
+    double globalDisplayX_ = 0.0;
+    double globalDisplayY_ = 0.0;
     float screenX_ = 0.0f;
     float screenY_ = 0.0f;
     float localX_ = 0.0f;
@@ -243,6 +254,11 @@ public:
     TouchLocationInfo& SetGlobalLocation(const Offset& globalLocation);
     TouchLocationInfo& SetLocalLocation(const Offset& localLocation);
     TouchLocationInfo& SetScreenLocation(const Offset& screenLocation);
+    TouchLocationInfo& SetGlobalDisplayLocation(const Offset& globalDisplayLocation);
+    const Offset& GetGlobalDisplayLocation() const
+    {
+        return globalDisplayLocation_;
+    }
     const Offset& GetScreenLocation() const
     {
         return screenLocation_;
@@ -286,6 +302,8 @@ private:
     // current node which has the recognizer.
     Offset localLocation_;
     Offset screenLocation_;
+    // The location where the touch point touches the screen when there are multiple screens.
+    Offset globalDisplayLocation_;
     // finger touch size
     double size_ = 0.0;
     // input device id

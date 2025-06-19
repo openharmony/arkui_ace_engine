@@ -447,7 +447,7 @@ HWTEST_F(TextFieldPatternTestSix, BeforeAutoFillAnimation005, TestSize.Level0)
 HWTEST_F(TextFieldPatternTestSix, IsTriggerAutoFillPassword001, TestSize.Level0)
 {
     CreateTextField();
-    layoutProperty_->UpdateTextContentType(TextContentType::DISTRICT_ADDRESS);
+    layoutProperty_->UpdateTextContentType(TextContentType::CITY_ADDRESS);
     EXPECT_EQ(pattern_->IsTriggerAutoFillPassword(), false);
 }
 

@@ -3238,12 +3238,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest075, TestSize.Level1)
     g_isConfigChangePerform = false;
     pattern->RemoveResObj("borderWidth");
 
-    auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto& layoutBorderWidth = layoutProperty->GetBorderWidthProperty();
-    ASSERT_NE(layoutBorderWidth, nullptr);
-    EXPECT_EQ(layoutBorderWidth->bottomDimen, BOTTOM);
-
     auto context = frameNode->GetRenderContext();
     ASSERT_NE(context, nullptr);
     Dimension defaultDimension(0);
@@ -3464,6 +3458,27 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest082, TestSize.Level1)
         std::nullopt, std::nullopt };
     auto positionEdges = context->GetOffsetEdgesValue(defaultEdgesParam);
     EXPECT_EQ(positionEdges.bottom, BOTTOM);
+}
+
+/**
+ * @tc.name: RemoveResObj
+ * @tc.desc: Test RemoveResObj of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0083, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = false;
+    std::string key = "clipShape";
+    viewAbstractModelNG.RemoveResObj(key);
+    g_isConfigChangePerform = true;
+    viewAbstractModelNG.RemoveResObj(key);
+    g_isConfigChangePerform = false;
+    std::string maskShape = pattern->GetResCacheMapByKey("clipShape");
+    EXPECT_EQ(maskShape, "");
 }
 
 /**

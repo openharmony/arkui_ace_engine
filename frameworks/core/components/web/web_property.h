@@ -99,6 +99,11 @@ enum class WebBypassVsyncCondition : int32_t {
     SCROLLBY_FROM_ZERO_OFFSET = 1
 };
 
+enum class GestureFocusMode : int32_t {
+    DEFAULT = 0,
+    GESTURE_TAP_AND_LONG_PRESS = 1
+};
+
 struct WebPreviewSelectionMenuParam {
     WebElementType type;
     ResponseType responseType;

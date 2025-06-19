@@ -18,6 +18,7 @@
 #include "test/mock/core/common/mock_font_manager.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/base/mock_system_properties.h"
 
 namespace OHOS::Ace::NG {
 void IndexerTestNg::SetUpTestSuite()
@@ -191,13 +192,13 @@ HWTEST_F(IndexerTestNg, IndexerEnableHapticFeedback002, TestSize.Level1)
 }
 
 /**
- * @tc.name: CreateWithResourceObjTest001
- * @tc.desc: Verify IndexerModelNG::CreateWithResourceObj processes all resource types correctly
+ * @tc.name: RemoveResourceObjTest001
+ * @tc.desc: Verify IndexerModelNG::RemoveColor
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerTestNg, CreateWithResourceObjTest001, TestSize.Level1)
+HWTEST_F(IndexerTestNg, RemoveResourceObjTest001, TestSize.Level1)
 {
-    CreateIndexer(std::vector<std::string>());
+    IndexerModelNG model = CreateIndexer(std::vector<std::string>());
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
@@ -207,28 +208,58 @@ HWTEST_F(IndexerTestNg, CreateWithResourceObjTest001, TestSize.Level1)
     IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::POPUP_COLOR, resObj);
     IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::SELECTED_BACKGROUND_COLOR, resObj);
     IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::POPUP_BACKGROUND, resObj);
-    IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::SELECTED_COLOR, resObj);
-    IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::ALIGN_OFFSET, resObj);
-    IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::POPUP_POSITION_X, resObj);
-    IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::POPUP_POSITION_Y, resObj);
-    EXPECT_TRUE(true);
+    IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::POPUP_UNSELECTED_COLOR, resObj);
+    IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::POPUP_SELECTED_COLOR, resObj);
+    IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::POPUP_ITEM_BACKGROUND_COLOR, resObj);
+    IndexerModelNG::CreateWithResourceObj(frameNode, IndexerJsResourceType::POPUP_TITLE_BACKGROUND, resObj);
+    model.RemoveColor(frameNode);
+    model.RemovePopupColor(frameNode);
+    model.RemoveSelectedColor(frameNode);
+    model.RemoveSelectedBackgroundColor(frameNode);
+    model.RemovePopupUnselectedColor(frameNode);
+    model.RemovePopupBackground(frameNode);
+    model.RemovePopupSelectedColor(frameNode);
+    model.RemovePopupItemBackground(frameNode);
+    model.RemovePopupTitleBackground(frameNode);
+    pattern_->OnModifyDone();
+    EXPECT_EQ(pattern_->GetResCacheMapByKey("indexer.Color"), "");
+    EXPECT_EQ(pattern_->GetResCacheMapByKey("indexer.PopupColor"), "");
+    EXPECT_EQ(pattern_->GetResCacheMapByKey("indexer.SelectedColor"), "");
+    EXPECT_EQ(pattern_->GetResCacheMapByKey("indexer.SelectedBackgroundColor"), "");
+    EXPECT_EQ(pattern_->GetResCacheMapByKey("indexer.PopupUnselectedColor"), "");
+    EXPECT_EQ(pattern_->GetResCacheMapByKey("indexer.PopupBackground"), "");
+    EXPECT_EQ(pattern_->GetResCacheMapByKey("indexer.PopupSelectedColor"), "");
+    EXPECT_EQ(pattern_->GetResCacheMapByKey("indexer.PopupItemBackground"), "");
+    EXPECT_EQ(pattern_->GetResCacheMapByKey("indexer.PopupTitleBackground"), "");
 }
 
 /**
  * @tc.name: IndexerSetColorByUser001
- * @tc.desc: Test property SetColorByUser
+ * @tc.desc: Test property SetColorByUser UpdateThemeColor
  * @tc.type: FUNC
  */
 HWTEST_F(IndexerTestNg, IndexerSetColorByUser001, TestSize.Level1)
 {
+    g_isConfigChangePerform = true;
     IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 2);
-    CreateDone();
+    model.SetColor(std::optional<Color>(Color::RED));
+    model.SetSelectedColor(std::optional<Color>(Color::RED));
+    model.SetPopupColor(std::optional<Color>(Color::RED));
+    model.SetSelectedBackgroundColor(std::optional<Color>(Color::RED));
+    model.SetPopupUnselectedColor(std::optional<Color>(Color::RED));
+    model.SetPopupSelectedColor(std::optional<Color>(Color::RED));
+    model.SetPopupItemBackground(std::optional<Color>(Color::RED));
+    model.SetPopupBackground(std::optional<Color>(Color::RED));
+    model.SetPopupTitleBackground(std::optional<Color>(Color::RED));
     model.SetColorByUser(true);
     model.SetSelectedColorByUser(true);
     model.SetPopupColorByUser(true);
     model.SetSelectedBGColorByUser(true);
     model.SetPopupUnselectedColorByUser(true);
     model.SetPopupTitleBackgroundByUser(true);
+    model.SetPopupSelectedColorByUser(true);
+    model.SetPopupItemBackgroundColorByUser(true);
+    model.SetPopupBackgroundColorByUser(true);
     pattern_->OnModifyDone();
     auto indexerLayoutProperty = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
     ASSERT_NE(indexerLayoutProperty, nullptr);
@@ -238,5 +269,47 @@ HWTEST_F(IndexerTestNg, IndexerSetColorByUser001, TestSize.Level1)
     EXPECT_TRUE(indexerLayoutProperty->GetSetSelectedBGColorByUser().value_or(false));
     EXPECT_TRUE(indexerLayoutProperty->GetSetPopupUnselectedColorByUser().value_or(false));
     EXPECT_TRUE(indexerLayoutProperty->GetSetPopupTitleBackgroundByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetPopupSelectedColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetPopupItemBackgroundColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetPopupBackgroundColorByUser().value_or(false));
+    indexerLayoutProperty->UpdateSelected(1);
+    pattern_->selected_ = 0;
+    pattern_->UpdateThemeColor();
+    auto paintProperty = pattern_->GetPaintProperty<IndexerPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    EXPECT_EQ(indexerLayoutProperty->GetColor(), Color::RED);
+    EXPECT_EQ(indexerLayoutProperty->GetSelectedColor(), Color::RED);
+    EXPECT_EQ(indexerLayoutProperty->GetPopupColor(), Color::RED);
+    EXPECT_EQ(paintProperty->GetSelectedBackgroundColor(), Color::RED);
+    EXPECT_EQ(paintProperty->GetPopupUnselectedColor(), Color::RED);
+    EXPECT_EQ(paintProperty->GetPopupSelectedColor(), Color::RED);
+    EXPECT_EQ(paintProperty->GetPopupItemBackground(), Color::RED);
+    EXPECT_EQ(paintProperty->GetPopupBackground(), Color::RED);
+    EXPECT_EQ(paintProperty->GetPopupTitleBackground(), Color::RED);
+
+    model.SetColorByUser(false);
+    model.SetSelectedColorByUser(false);
+    model.SetPopupColorByUser(false);
+    model.SetSelectedBGColorByUser(false);
+    model.SetPopupUnselectedColorByUser(false);
+    model.SetPopupTitleBackgroundByUser(false);
+    model.SetPopupSelectedColorByUser(false);
+    model.SetPopupItemBackgroundColorByUser(false);
+    model.SetPopupBackgroundColorByUser(false);
+    pattern_->OnModifyDone();
+    indexerLayoutProperty->UpdateSelected(1);
+    pattern_->selected_ = 1;
+    pattern_->UpdateThemeColor();
+    EXPECT_FALSE(indexerLayoutProperty->GetColor().has_value());
+    EXPECT_FALSE(indexerLayoutProperty->GetSelectedColor().has_value());
+    EXPECT_FALSE(indexerLayoutProperty->GetPopupColor().has_value());
+    EXPECT_FALSE(paintProperty->GetSelectedBackgroundColor().has_value());
+    EXPECT_FALSE(paintProperty->GetPopupUnselectedColor().has_value());
+    EXPECT_FALSE(paintProperty->GetPopupSelectedColor().has_value());
+    EXPECT_FALSE(paintProperty->GetPopupItemBackground().has_value());
+    EXPECT_FALSE(paintProperty->GetPopupBackground().has_value());
+    EXPECT_FALSE(paintProperty->GetPopupTitleBackground().has_value());
+    g_isConfigChangePerform = false;
+    CreateDone();
 }
 } // namespace OHOS::Ace::NG

@@ -414,6 +414,12 @@ public:
         focusGroupIndex_ = index;
     }
 
+    void UpdateGroupFocusIndexForDataChange(int32_t groupIndexInList, int32_t indexInGroup, int32_t count);
+    bool CheckFocusOnHeaderOrFooter(const RefPtr<FocusHub>& childFocusHub);
+    void AdjustFocusGroupIndex(int32_t index, int32_t& indexInGroup);
+
+    void FireFocusInListItemGroup(int32_t groupIndexInList);
+
     void ResetGroupIndexChanged()
     {
         groupIndexChanged_ = false;
@@ -426,11 +432,6 @@ public:
     void ResetGroupIndexInView()
     {
         groupIndexInView_ = true;
-    }
-    
-    void SetFocusIndexChangedByListItemGroup(bool focusIndexChangedByListItemGroup)
-    {
-        focusIndexChangedByListItemGroup_ = focusIndexChangedByListItemGroup;
     }
 
     void SetGroupIndexInView(bool groupIndexInView)
@@ -616,9 +617,11 @@ private:
     bool UpdateStartIndex(int32_t index, int32_t indexInGroup = -1);
     bool IsInViewport(int32_t index) const;
     void FireFocus();
-    void FireFocusInListItemGroup();
+    bool CheckValidInList(int32_t index);
     void ProcessFocusEvent(bool indexChanged);
-    void RequestFocusForItem();
+    void RequestFocusForItem(int32_t index, int32_t indexInGroup);
+    RefPtr<FocusHub> GetChildFocusHubInGroup(int32_t indexInList, int32_t indexInListItemGroup) const;
+
     std::optional<int32_t> focusIndex_;
     std::optional<int32_t> focusGroupIndex_;
     float prevStartOffset_ = 0.f;
@@ -632,7 +635,6 @@ private:
     bool snapTrigByScrollBar_ = false;
     bool groupIndexChanged_ = false;
     bool groupIndexInView_ = true;
-    bool focusIndexChangedByListItemGroup_ = false;
 
     std::optional<int32_t> jumpIndexInGroup_;
     std::optional<int32_t> targetIndexInGroup_;

@@ -142,6 +142,8 @@ public:
     ACE_FORCE_EXPORT void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback);
     ACE_FORCE_EXPORT void UpdateCustomDialogNG(
         const WeakPtr<NG::UINode>& node, const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback);
+    ACE_FORCE_EXPORT void UpdateCustomDialogNGWithNode(
+        const WeakPtr<NG::UINode>& node, const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback);
     ACE_FORCE_EXPORT std::optional<double> GetTopOrder();
     ACE_FORCE_EXPORT std::optional<double> GetBottomOrder();
     void HideSubWindowNG();
@@ -225,8 +227,9 @@ public:
 
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow(bool isDialog = false);
-    const RefPtr<Subwindow> GetSubwindowByNodeId(int32_t instanceId, SubwindowType windowType, int32_t nodeId);
-    const RefPtr<Subwindow> GetOrCreateSubWindowByType(SubwindowType windowType, bool isModal = true);
+    RefPtr<Subwindow> GetSubwindowByNodeId(int32_t instanceId, SubwindowType windowType, int32_t nodeId);
+    RefPtr<Subwindow> GetOrCreateSubWindowByType(SubwindowType windowType, bool isModal = true);
+    RefPtr<Subwindow> GetSubwindowBySearchkey(int32_t instanceId, const SubwindowKey& searchKey);
     RefPtr<Subwindow> GetOrCreateSystemSubWindow(int32_t containerId);
     RefPtr<Subwindow> GetOrCreateToastWindow(int32_t containerId, const NG::ToastShowMode& showMode);
     RefPtr<Subwindow> GetOrCreateToastWindowNG(int32_t containerId, const ToastWindowType& windowType,
@@ -239,7 +242,7 @@ private:
     RefPtr<Subwindow> CheckSubwindowDisplayId(const SubwindowKey& searchKey, const RefPtr<Subwindow>& subwindow);
     void RemoveSubwindowBySearchKey(const SubwindowKey& searchKey);
     void AddSubwindowBySearchKey(const SubwindowKey& searchKey, const RefPtr<Subwindow>& subwindow);
-    const RefPtr<Subwindow> RemoveSubwindowMapByNodeId(const int32_t nodeId);
+    RefPtr<Subwindow> RemoveSubwindowMapByNodeId(const int32_t nodeId);
     const std::vector<RefPtr<Subwindow>> RemoveSubwindowMapByInstanceId(const int32_t instanceId);
     const std::vector<RefPtr<Subwindow>> GetAllSubwindow();
     static std::mutex instanceMutex_;

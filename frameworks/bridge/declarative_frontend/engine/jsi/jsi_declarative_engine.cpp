@@ -24,6 +24,11 @@
 
 #include "dfx_jsnapi.h"
 
+#ifndef PREVIEW
+#include "console.h"
+#include "sys_timer.h"
+#endif
+
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
 #include "base/utils/system_properties.h"
@@ -108,6 +113,8 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 const std::string OHMURL_START_TAG = "@bundle:";
+constexpr char ETS_TAG[] = "/ets/";
+constexpr int32_t ETS_TAG_LENGTH = 5;
 
 #if defined(ANDROID_PLATFORM)
 const std::string ARK_DEBUGGER_LIB_PATH = "libark_inspector.so";
@@ -412,6 +419,20 @@ bool ParseNamedRouterParams(const EcmaVM* vm, const panda::Local<panda::ObjectRe
 
     return true;
 }
+
+std::string GetRealPagePath(const std::string& pagePath)
+{
+    if (pagePath.empty()) {
+        return "";
+    }
+    auto etsTagIndex = pagePath.rfind(ETS_TAG);
+    if (etsTagIndex == std::string::npos) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "current pagePath %{public}s don't contain '/ets/'", pagePath.c_str());
+        return pagePath;
+    }
+    auto pageUrlIndex = etsTagIndex + ETS_TAG_LENGTH;
+    return pagePath.substr(pageUrlIndex, pagePath.size() - pageUrlIndex);
+}
 } // namespace
 
 // -----------------------
@@ -438,6 +459,8 @@ thread_local bool isUnique_ = false;
 thread_local bool isWorker_ = false;
 
 thread_local bool isDynamicModulePreloaded_ = false;
+
+thread_local std::unordered_set<void*> validEnvs_;
 
 JsiDeclarativeEngineInstance::~JsiDeclarativeEngineInstance()
 {
@@ -755,6 +778,94 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     }
     localRuntime_ = arkRuntime;
     cardRuntime_ = runtime;
+}
+
+void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtime)
+{
+#ifndef PREVIEW
+    if (!runtime) {
+        return;
+    }
+
+    std::shared_ptr<ArkJSRuntime> arkRuntime = std::make_shared<ArkJSRuntime>();
+    auto nativeArkEngine = static_cast<ArkNativeEngine*>(runtime);
+    EcmaVM* vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
+    if (vm == nullptr) {
+        return;
+    }
+    validEnvs_.insert(runtime);
+
+    if (!arkRuntime->InitializeFromExistVM(vm)) {
+        return;
+    }
+
+    LocalScope scope(vm);
+    {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = arkRuntime;
+    }
+
+    RegisterStringCacheTable(vm, MAX_STRING_CACHE_SIZE);
+    // preload js views
+    JsRegisterViews(JSNApi::GetGlobalObject(vm, nativeArkEngine->GetContext()), runtime);
+
+    // preload console
+    shared_ptr<JsValue> global = arkRuntime->GetGlobal(nativeArkEngine);
+    OHOS::JsSysModule::Console::InitConsoleModule(static_cast<napi_env>(runtime));
+    OHOS::JsSysModule::Timer::RegisterTime(static_cast<napi_env>(runtime));
+    JsiSyscapModule::GetInstance()->InitSyscapModule(arkRuntime, global);
+    PreloadAceConsole(arkRuntime, global);
+
+    // preload aceTrace
+    PreloadAceTrace(arkRuntime, global);
+
+    // preload getContext
+    JsiContextModule::GetInstance()->InitContextModule(arkRuntime, global);
+
+    // preload perfutil
+    PreloadPerfutil(arkRuntime, global);
+
+    // preload js enums
+    LOGI("preload js enums in PreloadAceModuleForCustomRuntime");
+    bool jsEnumStyleResult = PreloadJsEnums(arkRuntime);
+    if (!jsEnumStyleResult) {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+        return;
+    }
+
+    bool evalResult = PreloadStateManagement(arkRuntime);
+
+    PreloadUIContent(arkRuntime);
+
+    // preload ark component
+    bool arkComponentResult = PreloadArkComponent(arkRuntime);
+    if (!arkComponentResult) {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+        return;
+    }
+
+    // preload ark styles
+    bool arkThemeResult = PreloadArkTheme(arkRuntime);
+    if (!arkThemeResult) {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+        return;
+    }
+
+    isModulePreloaded_ = evalResult;
+    {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+    }
+    localRuntime_ = arkRuntime;
+#endif
+}
+
+void JsiDeclarativeEngineInstance::RemoveInvalidEnv(void* env)
+{
+    validEnvs_.erase(env);
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule()
@@ -1997,7 +2108,7 @@ bool JsiDeclarativeEngine::GeneratePageByIntent(
         [&bundleName, &moduleName, &pagePath](const auto& item) {
             return item.second.bundleName == bundleName
                 && item.second.moduleName == moduleName
-                && item.second.pagePath == pagePath;
+                && (item.second.pagePath == pagePath || GetRealPagePath(item.second.pagePath) == pagePath);
         });
     if (iter == namedRouterRegisterMap_.end()) {
         TAG_LOGE(AceLogTag::ACE_ROUTER, "intent page not found in router page map!");
@@ -2796,6 +2907,30 @@ std::shared_ptr<void> JsiDeclarativeEngine::SerializeValue(
     return { serializationData, &panda::JSNApi::DeleteSerializationData };
 #else
     return nullptr;
+#endif
+}
+
+void JsiDeclarativeEngine::TriggerModuleSerializer()
+{
+#ifdef USE_ARK_ENGINE
+    ContainerScope scope(instanceId_);
+    if (!engineInstance_) {
+        LOGW("TriggerModuleSerializer engineInstance is null.");
+        return;
+    }
+    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(engineInstance_->GetJsRuntime());
+    if (!arkRuntime) {
+        LOGW("TriggerModuleSerializer arkRuntime is null.");
+        return;
+    }
+    auto vm = arkRuntime->GetEcmaVm();
+    if (!vm) {
+        LOGW("TriggerModuleSerializer vm is null.");
+        return;
+    }
+    panda::LocalScope jsScope(vm);
+    panda::JSNApi::PandaFileSerialize(vm);
+    panda::JSNApi::ModuleSerialize(vm);
 #endif
 }
 

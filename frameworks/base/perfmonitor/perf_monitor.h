@@ -77,6 +77,7 @@ public:
                            const std::string& bundleName);
     void NotifyAppJankStatsBegin();
     void NotifyAppJankStatsEnd();
+    void SetApplicationInfo();
 private:
     std::shared_ptr<ApsMonitor> apsMonitor_ = nullptr;
 };

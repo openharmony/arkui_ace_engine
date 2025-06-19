@@ -16,6 +16,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/image/image_source_info.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
+#include "core/components_ng/pattern/text/image_span_view_static.h"
 #include "core/interfaces/native/implementation/image_common_methods.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "pixel_map_peer.h"
@@ -40,7 +41,7 @@ void SetImageSpanOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto imageSource = Converter::OptConvert<ImageSourceInfo>(*value);
     if (imageSource) {
-        ImageSpanView::SetImageSpanSrc(frameNode, *imageSource);
+        ImageSpanViewStatic::SetImageSpanSrc(frameNode, *imageSource);
     }
 }
 } // ImageSpanInterfaceModifier
@@ -51,7 +52,7 @@ void VerticalAlignImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<VerticalAlign>(value);
-    ImageSpanView::SetVerticalAlign(frameNode, convValue);
+    ImageSpanViewStatic::SetVerticalAlign(frameNode, convValue);
 }
 void ColorFilterImpl(Ark_NativePointer node,
                      const Ark_Union_ColorFilter_DrawingColorFilter* value)
@@ -64,7 +65,7 @@ void ObjectFitImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<ImageFit>(value);
-    ImageSpanView::SetObjectFit(frameNode, convValue);
+    ImageSpanViewStatic::SetObjectFit(frameNode, convValue);
 }
 void OnCompleteImpl(Ark_NativePointer node,
                     const ImageCompleteCallback* value)

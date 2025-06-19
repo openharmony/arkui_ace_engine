@@ -195,6 +195,8 @@ public:
 
     void DumpSubInfo(RefPtr<ButtonLayoutProperty> layoutProperty);
 
+    void HandleBackgroundColor();
+
 protected:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -204,7 +206,6 @@ protected:
     void HandlePressedStyle();
     void HandleNormalStyle();
     void HandleHoverEvent(bool isHover);
-    void HandleBackgroundColor();
     void UpdateTexOverflow(bool isMarqueeStart);
     void HandleEnabled();
     void InitButtonLabel();

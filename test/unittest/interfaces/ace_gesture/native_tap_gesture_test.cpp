@@ -132,7 +132,7 @@ HWTEST_F(NativeTapGestureTest, NativeTapGestureTest003, TestSize.Level1)
         Ace::NG::TapGesture* tapGesture = reinterpret_cast<Ace::NG::TapGesture*>(tapGestureRecognizer->gesture);
         EXPECT_EQ(tapGesture->GetTapCount(), expectValue);
         EXPECT_EQ(tapGesture->GetFingers(), fingerNum);
-        EXPECT_DOUBLE_EQ(tapGesture->distanceThreshold_, 0.0); // not support
+        EXPECT_DOUBLE_EQ(tapGesture->distanceThreshold_.ConvertToPx(), 0.0); // not support
 
         NATIVE_GESTURE_API->dispose(tapGestureRecognizer);
     }
@@ -163,7 +163,7 @@ HWTEST_F(NativeTapGestureTest, NativeTapGestureTest004, TestSize.Level1)
         Ace::NG::TapGesture* tapGesture = reinterpret_cast<Ace::NG::TapGesture*>(tapGestureRecognizer->gesture);
         EXPECT_EQ(tapGesture->GetTapCount(), numCount);
         EXPECT_EQ(tapGesture->GetFingers(), expectValue);
-        EXPECT_DOUBLE_EQ(tapGesture->distanceThreshold_, 0.0); // not support
+        EXPECT_DOUBLE_EQ(tapGesture->distanceThreshold_.ConvertToPx(), 0.0); // not support
 
         NATIVE_GESTURE_API->dispose(tapGestureRecognizer);
     }
@@ -195,7 +195,7 @@ HWTEST_F(NativeTapGestureTest, NativeTapGestureTest005, TestSize.Level1)
         Ace::NG::TapGesture* tapGesture = reinterpret_cast<Ace::NG::TapGesture*>(tapGestureRecognizer->gesture);
         EXPECT_EQ(tapGesture->GetTapCount(), numCount);
         EXPECT_EQ(tapGesture->GetFingers(), fingerNum);
-        EXPECT_DOUBLE_EQ(tapGesture->distanceThreshold_, expectValue); // not support
+        EXPECT_DOUBLE_EQ(tapGesture->distanceThreshold_.ConvertToPx(), expectValue); // not support
 
         NATIVE_GESTURE_API->dispose(tapGestureRecognizer);
     }

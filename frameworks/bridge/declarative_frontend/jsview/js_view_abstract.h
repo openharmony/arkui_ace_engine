@@ -130,7 +130,8 @@ public:
     static void GetFractionStops(
         std::vector<std::pair<float, float>>& fractionStops, const JSRef<JSVal>& array);
     static void NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
-    static void NewGetJsGradientColorStops(NG::Gradient& gradient, const JSRef<JSVal>& colorStops);
+    static void NewGetJsGradientColorStops(NG::Gradient& gradient, const JSRef<JSVal>& colorStops,
+        const int32_t mapIdx = 0);
     static void NewGetJsGradientColorStopsCheck(NG::Gradient& gradient, const JSRef<JSVal>& colorStops);
 
     static void JsScale(const JSCallbackInfo& info);
@@ -526,6 +527,8 @@ public:
     static void JsClip(const JSCallbackInfo& info);
     static void JsClipShape(const JSCallbackInfo& info);
 
+    static void ParseProgressMaskResObj(const JSRef<JSVal>& jColor, Color& colorVal,
+        RefPtr<NG::ProgressMaskProperty>& progressMask);
     static void ParseJsMaskProperty(const JSRef<JSObject>& paramObject);
     static void JsMask(const JSCallbackInfo& info);
     static void JsMaskShape(const JSCallbackInfo& info);
@@ -890,8 +893,12 @@ private:
     static void GetBorderRadiusBottomRight(const JSRef<JSVal>& jsValue, NG::BorderRadiusProperty& borderRadius);
     static void ParseSweepGradientCenter(NG::Gradient& newGradient, const JSRef<JSArray> centerArray);
     static void ParseRadialGradientCenter(NG::Gradient& newGradient, const JSRef<JSArray> centerArray);
-    static void NewParseGradientColor(NG::Gradient& gradient, JSRef<JSArray>& subArray,
-        NG::GradientColor& gradientColor, size_t& i, size_t& length);
+    static void NewParseGradientColor(NG::Gradient& gradient, RefPtr<ResourceObject>& resObj,
+        NG::GradientColor& gradientColor, int32_t& indx);
+    static void NewParseSweepGradientColor(NG::Gradient& gradient, RefPtr<ResourceObject>& resObj,
+        NG::GradientColor& gradientColor, int32_t& indx);
+    static void NewParseRadialGradientColor(NG::Gradient& gradient, RefPtr<ResourceObject>& resObj,
+        NG::GradientColor& gradientColor, int32_t& indx);
     static bool ParseBackgroundBuilder(
         const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, std::function<void()>& builderFunc);
     static void SetBorderColorProps(const Color& color, NG::BorderColorProperty& props, const char* corner);

@@ -19,6 +19,7 @@
 #include "image_analyzer_loader.h"
 
 #include "base/utils/macros.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
 
@@ -42,6 +43,7 @@ public:
     void UpdateOverlayStatus(void** overlayData, ImageAnalyzerInnerConfig* config) override;
     void UpdateOverlayActiveStatus(void** overlayData, bool status) override;
     void UpdateAIButtonConfig(void** overlayData, AIButtonConfig* config) override;
+    void UpdateKeyEvent(void** overlayData, void* keyEvent) override;
 
 private:
     ImageAnalyzerMgr();

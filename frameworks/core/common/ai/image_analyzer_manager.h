@@ -19,6 +19,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/event/key_event.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 namespace OHOS::Ace {
@@ -60,6 +61,7 @@ public:
     void UpdateOverlayTouchInfo(int touchPointX, int touchPointY, TouchType touchType);
     void UpdateOverlayStatus(bool status, int offsetX, int offsetY, int rectWidth, int rectHeight);
     void UpdateAIButtonConfig(AIButtonConfig config);
+    virtual void UpdateKeyEvent(KeyEvent keyEvent);
     void UpdateOverlayActiveStatus(bool status);
     void SetNotifySelectedCallback(OnNotifySelectedStatusCallback&& callback);
     void SetOnCanPlayCallback(OnCanPlayCallback&& callback);
