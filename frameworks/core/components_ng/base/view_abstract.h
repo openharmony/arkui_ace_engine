@@ -974,6 +974,7 @@ public:
         const uint32_t focusPriority);
     static void ResetBias(FrameNode* frameNode);
     static void ResetAlignRules(FrameNode* frameNode);
+    static void ResetResObj(const std::string& key);
     static void SetOnVisibleChange(FrameNode* frameNode, std::function<void(bool, double)> &&onVisibleChange,
         const std::vector<double> &ratioList);
     static void SetOnVisibleAreaApproximateChange(FrameNode* frameNode,

@@ -1864,6 +1864,11 @@ public:
         ViewAbstract::SetFocusScopePriority(focusScopeId, focusPriority);
     }
 
+    void ResetResObj(const std::string& key) override
+    {
+        ViewAbstract::ResetResObj(key);
+    }
+
     static void SetAccessibilityGroup(FrameNode* frameNode, bool accessible);
     static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)
     {
