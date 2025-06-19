@@ -354,7 +354,7 @@ void JsUpdateDirty2ForAnimateTo(BindingTarget globalObj)
     }
 }
 
-void JsBindViews(BindingTarget globalObj, void* nativeEngine)
+void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSupported)
 {
     JSViewAbstract::JSBind(globalObj);
     JSViewStackProcessor::JSBind(globalObj);

@@ -191,6 +191,12 @@ template("ace_core_interfaces_native_node") {
       sources += [ "node/embeddedComponent_modifier.cpp" ]
     }
 
+    if (is_arkui_x) {
+      deps += [
+        "//foundation/arkui/napi:ace_napi",
+      ]
+    }
+
     external_deps = [
       "graphic_2d:drawing_napi_impl",
       "graphic_2d:librender_service_client",
