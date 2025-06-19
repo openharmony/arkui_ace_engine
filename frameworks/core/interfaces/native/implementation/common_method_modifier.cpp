@@ -1181,14 +1181,19 @@ RotateOpt Convert(const Ark_RotateOptions& src)
     auto centerY =  OptConvert<Dimension>(src.centerY);
     Validator::ValidateNonPercent(centerX);
     Validator::ValidateNonPercent(centerY);
-    if (centerX.has_value() && centerY.has_value()) {
-        auto center = DimensionOffset(centerX.value(), centerY.value());
-        auto centerZ =  OptConvert<Dimension>(src.centerZ);
-        if (centerZ.has_value()) {
-            center.SetZ(centerZ.value());
-        }
-        options.center = center;
+    auto center = DimensionOffset(Dimension(0.5f, DimensionUnit::PERCENT), Dimension(0.5f, DimensionUnit::PERCENT));
+    center.SetZ(Dimension(0.5f, DimensionUnit::PERCENT));
+    if (centerX.has_value()) {
+        center.SetX(centerX.value());
     }
+    if (centerY.has_value()) {
+        center.SetY(centerY.value());
+    }
+    auto centerZ =  OptConvert<Dimension>(src.centerZ);
+    if (centerZ.has_value()) {
+        center.SetZ(centerZ.value());
+    }
+    options.center = center;
     return options;
 }
 
@@ -3289,8 +3294,42 @@ void Rotate0Impl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ViewAbstractModelStatic::SetPivot(frameNode, convValue->center);
+    auto xValue = Converter::GetOptPtr(&(value->value.centerX));
+    if (xValue.has_value()) {
+        Converter::VisitUnion(
+            xValue.value(),
+            [&convValue](const Ark_String& val) {
+                std::string degreeStr = Converter::Convert<std::string>(val);
+                auto dim = StringUtils::StringToCalcDimension(degreeStr);
+                convValue->center->SetX(dim);
+            },
+            [](const Ark_Number& val) {}, []() {});
+    }
+    auto yValue = Converter::GetOptPtr(&(value->value.centerY));
+    if (yValue.has_value()) {
+        Converter::VisitUnion(
+            yValue.value(),
+            [&convValue](const Ark_String& val) {
+                std::string degreeStr = Converter::Convert<std::string>(val);
+                auto dim = StringUtils::StringToCalcDimension(degreeStr);
+                convValue->center->SetY(dim);
+            },
+            [](const Ark_Number& val) {}, []() {});
+    }
+    auto angleValue = value->value.angle;
+    Converter::VisitUnion(
+        angleValue,
+        [&convValue](const Ark_String& str) {
+            std::string degreeStr = Converter::Convert<std::string>(str);
+            float angle = static_cast<float>(StringUtils::StringToCalcDimension(degreeStr).Value());
+            int32_t indA = 3;
+            if (convValue->vec5f.size() > indA) {
+                convValue->vec5f[indA] = angle;
+            }
+        },
+        [](const Ark_Number& val) {}, []() {});
     ViewAbstractModelStatic::SetRotate(frameNode, convValue->vec5f);
+    ViewAbstractModelStatic::SetPivot(frameNode, convValue->center);
 }
 void Rotate1Impl(Ark_NativePointer node,
                  const Opt_RotateOptions* value)
