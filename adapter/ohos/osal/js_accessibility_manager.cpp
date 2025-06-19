@@ -6638,10 +6638,16 @@ std::shared_ptr<NG::TransitionalNodeInfo> GetChildrenFromWebNode(
     std::shared_ptr<NG::TransitionalNodeInfo> node = nullptr;
     std::list<int64_t> webNodeChildren;
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        node = webPattern->GetTransitionalNodeById(nodeId);
+        int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+        int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+        AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(nodeId, splitElementId, splitTreeId);
+        node = webPattern->GetTransitionalNodeById(splitElementId);
         CHECK_NULL_RETURN(node, nullptr);
-        for (auto& childId : node->GetChildIds()) {
-            webNodeChildren.emplace_back(childId);
+        auto treeId = webPattern->GetTreeId();
+        for (auto& childIdConst : node->GetChildIds()) {
+            int64_t mutableChildId = childIdConst;
+            AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(treeId, mutableChildId);
+            webNodeChildren.emplace_back(mutableChildId);
         }
     }
     while (!webNodeChildren.empty()) {
@@ -6912,28 +6918,50 @@ void JsAccessibilityManager::UpdateWebCacheInfo(std::list<AccessibilityElementIn
     const SearchParameter& searchParam, const RefPtr<NG::WebPattern>& webPattern)
 {
     uint32_t umode = searchParam.mode;
+    std::unordered_map<int64_t, AccessibilityElementInfo> allEmbedNodeTreeInfosMap;
     std::list<int64_t> children;
     // get all children
     if (!(umode & static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN))) {
         return;
     }
     GetChildrenFromWebNode(nodeId, children, ngPipeline, webPattern);
+    // The application needs to insert node information in the order of BFS
     while (!children.empty()) {
         int64_t parent = children.front();
         children.pop_front();
         AccessibilityElementInfo nodeInfo;
+        if (GetChildrenFromEmbedNode(nodeInfo, parent, children, allEmbedNodeTreeInfosMap)) {
+            PushElementsIntoInfos(nodeInfo, infos, webPattern, children, allEmbedNodeTreeInfosMap);
+            continue;
+        }
 
         auto node = GetChildrenFromWebNode(parent, children, ngPipeline, webPattern);
         if (node) {
             UpdateWebAccessibilityElementInfo(node, commonProperty, nodeInfo, webPattern);
-            PushElementsIntoInfos(nodeInfo, node, infos, webPattern);
+            PushElementsIntoInfos(nodeInfo, infos, webPattern, children, allEmbedNodeTreeInfosMap);
         }
     }
 }
 
+bool JsAccessibilityManager::GetChildrenFromEmbedNode(AccessibilityElementInfo& nodeInfo, int64_t nodeId,
+    std::list<int64_t>& children, std::unordered_map<int64_t, AccessibilityElementInfo>& allEmbedNodeTreeInfosMap)
+{
+    auto it = allEmbedNodeTreeInfosMap.find(nodeId);
+    if (it == allEmbedNodeTreeInfosMap.end()) {
+        return false;
+    }
+    nodeInfo = it->second;
+    allEmbedNodeTreeInfosMap.erase(it);
+
+    for (auto& childId : nodeInfo.GetChildIds()) {
+        children.emplace_back(childId);
+    }
+    return true;
+}
+
 void JsAccessibilityManager::PushElementsIntoInfos(AccessibilityElementInfo& nodeInfo,
-    std::shared_ptr<NG::TransitionalNodeInfo>& node, std::list<AccessibilityElementInfo>& infos,
-    const RefPtr<NG::WebPattern>& webPattern)
+    std::list<AccessibilityElementInfo>& infos, const RefPtr<NG::WebPattern>& webPattern, std::list<int64_t>& children,
+    std::unordered_map<int64_t, AccessibilityElementInfo>& allEmbedNodeTreeInfosMap)
 {
     if (!IsTagInEmbedComponent(nodeInfo.GetComponentType())) {
         infos.push_back(nodeInfo);
@@ -6941,6 +6969,7 @@ void JsAccessibilityManager::PushElementsIntoInfos(AccessibilityElementInfo& nod
     }
     int64_t accessibilityId = nodeInfo.GetAccessibilityId();
     CHECK_NULL_VOID(webPattern);
+    std::shared_ptr<NG::TransitionalNodeInfo> node = webPattern->GetTransitionalNodeById(accessibilityId);
     CHECK_NULL_VOID(node);
     std::string surfaceId = webPattern->GetSurfaceIdByHtmlElementId(node->GetHtmlElementId());
     if (surfaceId == "") {
@@ -6960,7 +6989,10 @@ void JsAccessibilityManager::PushElementsIntoInfos(AccessibilityElementInfo& nod
     root.SetParent(accessibilityId);
     nodeInfo.AddChild(root.GetAccessibilityId());
     infos.push_back(nodeInfo);
-    infos.splice(infos.end(), embedNodeTreeInfo);
+    children.emplace_back(root.GetAccessibilityId());
+    for (const auto& info : embedNodeTreeInfo) {
+        allEmbedNodeTreeInfosMap[info.GetAccessibilityId()] = info;
+    }
 }
 
 int64_t JsAccessibilityManager::GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId)
