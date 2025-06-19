@@ -438,6 +438,7 @@ void AssignArkValue(Ark_AxisAction& dst, const AxisAction& src)
         case AxisAction::BEGIN: dst = ARK_AXIS_ACTION_BEGIN; break;
         case AxisAction::UPDATE: dst = ARK_AXIS_ACTION_UPDATE; break;
         case AxisAction::END: dst = ARK_AXIS_ACTION_END; break;
+        case AxisAction::CANCEL: dst = ARK_AXIS_ACTION_CANCEL; break;
         default: {
             dst = static_cast<Ark_AxisAction>(-1);
             LOGE("Unexpected enum value in AxisAction: %{public}d", src);

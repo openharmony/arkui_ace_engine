@@ -2052,6 +2052,26 @@ export class ArkCommonMethodPeer extends PeerNode {
             else if (TypeChecker.isRectangle(value_value, false, false, false, false)) {
                 thisSerializer.writeInt8(1 as int32)
                 const value_value_1  = value_value as Rectangle
+                let value_x_type : int32 = RuntimeType.UNDEFINED
+                value_x_type = runtimeType(value_value_1.x)
+                if ((RuntimeType.UNDEFINED) == (value_x_type)) {
+                    value_value_1.x  = 0
+                }
+                let value_y_type : int32 = RuntimeType.UNDEFINED
+                value_y_type = runtimeType(value_value_1.y)
+                if ((RuntimeType.UNDEFINED) == (value_y_type)) {
+                    value_value_1.y  = 0
+                }
+                let value_width_type : int32 = RuntimeType.UNDEFINED
+                value_width_type = runtimeType(value_value_1.width)
+                if ((RuntimeType.UNDEFINED) == (value_width_type)) {
+                    value_value_1.width  = '100%'
+                }
+                let value_height_type : int32 = RuntimeType.UNDEFINED
+                value_height_type = runtimeType(value_value_1.height)
+                if ((RuntimeType.UNDEFINED) == (value_height_type)) {
+                    value_value_1.height  = '100%'
+                }
                 thisSerializer.writeRectangle(value_value_1)
             }
         }
