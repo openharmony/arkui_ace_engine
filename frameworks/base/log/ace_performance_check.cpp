@@ -193,8 +193,8 @@ void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(
     auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9901");
     auto pageJson = JsonUtil::Create(true);
     pageJson->Put("eventTime", eventTime.c_str());
-    pageJson->Put("nodeCount", pageNodeCount);
     pageJson->Put("pagePath", codeInfo.sources.c_str());
+    pageJson->Put("nodeCount", pageNodeCount);
     pageJson->Put("depth", pageDepth);
     // add children size > 100 of component to pageJson
     for (const auto& iter : pageNodeList) {
