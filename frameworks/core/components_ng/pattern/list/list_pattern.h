@@ -155,6 +155,8 @@ public:
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     float GetOffsetWithLimit(float offset) const override;
     bool GetIsInViewInGroup(int32_t groupIndex, int32_t index);
+    static bool IsForwardStep(FocusStep step, bool isVertical, bool isDefault);
+    static bool IsBackwardStep(FocusStep step, bool isVertical, bool isDefault);
     virtual void HandleScrollBarOutBoundary();
 
     FocusPattern GetFocusPattern() const override

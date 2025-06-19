@@ -3507,7 +3507,15 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNodeInList(FocusStep step, const Weak
         }
         LayoutListForFocus(nextIndex, curIndex);
         auto nextFocusNode = FindChildFocusNodeByIndex(nextIndex, step, curIndex);
+        auto isDefault = GetFocusWrapMode() == FocusWrapMode::DEFAULT;
         if (nextFocusNode.Upgrade()) {
+            const ListItemInfo* curPos = GetPosition(curIndex);
+            const ListItemInfo* nextPos = GetPosition(nextIndex);
+            const bool isForward = (isVertical && step == FocusStep::RIGHT) || (!isVertical && step == FocusStep::DOWN);
+            const bool isBackward = (isVertical && step == FocusStep::LEFT) || (!isVertical && step == FocusStep::UP);
+            if ((isForward || isBackward) && NextPositionBlocksMove(curPos, nextPos, isVertical) && isDefault) {
+                return nullptr;
+            }
             // Scroll and display the ListItem.
             if (IsListItem(nextFocusNode)) {
                 AdjustScrollPosition(nextIndex, curIndex);
@@ -3592,8 +3600,6 @@ WeakPtr<FocusHub> ListPattern::FindChildFocusNodeByIndex(
         }
         auto curIndex = childItemPattern->GetIndexInList();
         if (curIndex == tarMainIndex) {
-            auto childItemPattern = AceType::DynamicCast<ListItemPattern>(childPattern);
-            CHECK_NULL_RETURN(childItemPattern, false);
             auto isFindTailOrHead = childItemPattern->FindHeadOrTailChild(childFocus, step, target);
             target = !isFindTailOrHead ? childFocus : target;
             return true;
@@ -3603,10 +3609,45 @@ WeakPtr<FocusHub> ListPattern::FindChildFocusNodeByIndex(
     return target;
 }
 
+bool ListPattern::IsForwardStep(FocusStep step, bool isVertical, bool isDefault)
+{
+    if (step == FocusStep::TAB) {
+        return true;
+    }
+    if (isVertical) {
+        if ((step == FocusStep::DOWN) || (step == FocusStep::RIGHT && !isDefault)) {
+            return true;
+        }
+    } else {
+        if ((step == FocusStep::RIGHT) || (step == FocusStep::DOWN && !isDefault)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ListPattern::IsBackwardStep(FocusStep step, bool isVertical, bool isDefault)
+{
+    if (step == FocusStep::SHIFT_TAB) {
+        return true;
+    }
+    if (isVertical) {
+        if ((step == FocusStep::UP) || (step == FocusStep::LEFT && !isDefault)) {
+            return true;
+        }
+    } else {
+        if ((step == FocusStep::LEFT) || (step == FocusStep::UP && !isDefault)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void ListPattern::DetermineSingleLaneStep(
     FocusStep step, bool isVertical, int32_t curIndex, int32_t& moveStep, int32_t& nextIndex)
 {
     // Only for GetNextFocusNodeInList
+    auto isDefault = GetFocusWrapMode() == FocusWrapMode::DEFAULT;
     if (step == FocusStep::UP_END || step == FocusStep::LEFT_END) {
         moveStep = 1;
         nextIndex = 0;
@@ -3615,12 +3656,10 @@ void ListPattern::DetermineSingleLaneStep(
     } else if (step == FocusStep::DOWN_END || step == FocusStep::RIGHT_END) {
         moveStep = -1;
         nextIndex = maxListItemIndex_;
-    } else if ((isVertical && (step == FocusStep::DOWN)) || (!isVertical && step == FocusStep::RIGHT) ||
-               (step == FocusStep::TAB)) {
+    } else if (IsForwardStep(step, isVertical, isDefault)) {
         moveStep = 1;
         nextIndex = curIndex + moveStep;
-    } else if ((isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::LEFT) ||
-               (step == FocusStep::SHIFT_TAB)) {
+    } else if (IsBackwardStep(step, isVertical, isDefault)) {
         moveStep = -1;
         nextIndex = curIndex + moveStep;
     }

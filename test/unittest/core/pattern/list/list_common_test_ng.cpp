@@ -96,8 +96,7 @@ public:
     RefPtr<ListItemDragManager> GetLazyForEachItemDragManager(int32_t itemIndex);
     RefPtr<ListItemDragManager> GetRepeatItemDragManager(int32_t itemIndex);
     ListItemGroupModelNG CreateListItemGroupWithHeaderAndFooter(int32_t count = 0, int32_t index = 0);
-    void CreateFocusableListItemGroupsWithHeaderAndFooter(
-        int32_t groupNumber, int32_t groupItemNum, int32_t count = 0, int32_t index = 0);
+    void CreateFocusableListItemGroupsWithHeaderAndFooter(int32_t groupNumber, int32_t groupItemNum, int32_t count = 0);
     std::function<void()> GetHeaderOrFooterButtonBuilder(int32_t count = 0, std::string prefix = "", int32_t index = 0);
     static void CreateFocusableListItemsWithMultiComponent(int32_t index, std::string prefix = "");
 };
@@ -210,7 +209,7 @@ ListItemGroupModelNG ListCommonTestNg::CreateListItemGroupWithHeaderAndFooter(in
 }
 
 void ListCommonTestNg::CreateFocusableListItemGroupsWithHeaderAndFooter(
-    int32_t groupNumber, int32_t groupItemNum, int32_t count, int32_t index)
+    int32_t groupNumber, int32_t groupItemNum, int32_t count)
 {
     for (int32_t index = 0; index < groupNumber; index++) {
         auto groupMode = CreateListItemGroupWithHeaderAndFooter(count, index);
@@ -1069,6 +1068,186 @@ HWTEST_F(ListCommonTestNg, FocusWrapMode004, TestSize.Level1)
      * @tc.expected: Move focus to the previous line of last item
      */
     EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::LEFT, 2, 2, 1, 4));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode005, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(1);
+    list.SetFocusWrapMode(FocusWrapMode::WRAP_WITH_ARROW);
+    CreateFocusableListItems(6);
+    CreateDone();
+    /**
+     * @tc.steps: step1. In single-column list, call GetNextFocusNode from third item.
+     * @tc.expected: With wrap mode, focus should move to next item.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, 3, 4));
+    /**
+     * @tc.steps: step2. In single-column list, call GetNextFocusNode from forth item.
+     * @tc.expected: With wrap mode, focus should move to front item.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, 4, 3));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode006, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(1);
+    list.SetFocusWrapMode(FocusWrapMode::WRAP_WITH_ARROW);
+    list.SetListDirection(Axis::HORIZONTAL);
+    CreateFocusableListItems(6);
+    CreateDone();
+    /**
+     * @tc.steps: step1. In single-column horizontal list, call GetNextFocusNode from first item.
+     * @tc.expected: With wrap mode, focus should move to next item.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 1, 2));
+    /**
+     * @tc.steps: step2. In single-column horizontal list, call GetNextFocusNode from second item.
+     * @tc.expected: With wrap mode, focus should move to front item.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 2, 1));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode007, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(1);
+    list.SetFocusWrapMode(FocusWrapMode::DEFAULT);
+    CreateFocusableListItems(6);
+    CreateDone();
+    /**
+     * @tc.steps: step1. Call GetNextFocusNode from third item.
+     * @tc.expected: Focus should not move (returns -1).
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, 3, -1));
+    /**
+     * @tc.steps: step2. Call GetNextFocusNode from forth item.
+     * @tc.expected: Focus should not move (returns -1).
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, 4, -1));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode008, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(1);
+    list.SetListDirection(Axis::HORIZONTAL);
+    list.SetFocusWrapMode(FocusWrapMode::DEFAULT);
+    CreateFocusableListItems(6);
+    CreateDone();
+    /**
+     * @tc.steps: step1. Call GetNextFocusNode from third item.
+     * @tc.expected: Focus should not move (returns -1).
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, 3, -1));
+    /**
+     * @tc.steps: step2. Call GetNextFocusNode from forth item.
+     * @tc.expected: Focus should not move (returns -1).
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, 4, -1));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode009, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(2);
+    list.SetFocusWrapMode(FocusWrapMode::DEFAULT);
+    CreateFocusableListItems(2);
+    CreateListItems(1);
+    CreateFocusableListItems(2);
+    CreateListItems(1);
+    CreateFocusableListItems(2);
+    CreateDone();
+    /**
+     * @tc.steps: step1. Call GetNextFocusNode from third item.
+     * @tc.expected: focus should not move (returns -1) because the third item is non-focusable.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, 3, -1));
+    /**
+     * @tc.steps: step2. Call GetNextFocusNode from forth item.
+     * @tc.expected: focus should not move (returns -1) because the third item is non-focusable.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, 4, -1));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode010, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(1);
+    CreateFocusableListItemGroups(2, 4);
+    list.SetFocusWrapMode(FocusWrapMode::DEFAULT);
+    CreateDone();
+    /**
+     * @tc.steps: step1. Call GetNextFocusNode from third item.
+     * @tc.expected: focus should not move (returns NULL_VALUE) because the focusWrapMode is default.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::RIGHT, 1, NULL_VALUE, 1, 4));
+    /**
+     * @tc.steps: step2. Call GetNextFocusNode from forth item.
+     * @tc.expected: focus should not move (returns NULL_VALUE) because the focusWrapMode is default.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::LEFT, 1, NULL_VALUE, 1, 4));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode011, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(1);
+    CreateFocusableListItemGroups(2, 4);
+    list.SetListDirection(Axis::VERTICAL);
+    list.SetFocusWrapMode(FocusWrapMode::WRAP_WITH_ARROW);
+    CreateDone();
+    /**
+     * @tc.steps: step1. Call GetNextFocusNode from third item.
+     * @tc.expected: focus should move to the next item.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::RIGHT, 0, 1, 0, 4));
+    /**
+     * @tc.steps: step2. Call GetNextFocusNode from forth item.
+     * @tc.expected: focus should move to the front item.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::LEFT, 1, 0, 0, 4));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode012, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(1);
+    CreateFocusableListItemGroups(2, 4);
+    list.SetListDirection(Axis::HORIZONTAL);
+    list.SetFocusWrapMode(FocusWrapMode::WRAP_WITH_ARROW);
+    CreateDone();
+    /**
+     * @tc.steps: step1. Call GetNextFocusNode from third item.
+     * @tc.expected: focus should move to the next item.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::DOWN, 0, 1, 0, 4));
+    /**
+     * @tc.steps: step2. Call GetNextFocusNode from forth item.
+     * @tc.expected: focus should move to the next item.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::UP, 1, 0, 0, 4));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode013, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(1);
+    CreateFocusableListItemGroups(2, 4);
+    list.SetListDirection(Axis::HORIZONTAL);
+    list.SetFocusWrapMode(FocusWrapMode::DEFAULT);
+    CreateDone();
+    /**
+     * @tc.steps: step1. Call GetNextFocusNode from third item.
+     * @tc.expected: focus should not move (returns NULL_VALUE) because the focusWrapMode is default.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::DOWN, 0, NULL_VALUE, 0, 4));
+    /**
+     * @tc.steps: step2. Call GetNextFocusNode from forth item.
+     * @tc.expected: focus should not move (returns NULL_VALUE) because the focusWrapMode is default.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::UP, 1, NULL_VALUE, 0, 4));
 }
 
 /**
