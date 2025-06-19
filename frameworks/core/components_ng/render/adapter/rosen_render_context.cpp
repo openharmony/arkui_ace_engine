@@ -460,34 +460,26 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
 {
     // skip if node already created
     CHECK_NULL_VOID(!rsNode_);
-
     std::shared_ptr<Rosen::RSUIContext> rsContext;
     if (SystemProperties::GetMultiInstanceEnabled()) {
         auto pipeline = GetPipelineContext();
         rsContext = GetRSUIContext(pipeline);
     }
-
     auto isTextureExportNode = ViewStackProcessor::GetInstance()->IsExportTexture();
-
     if (isRoot) {
         rsNode_ = Rosen::RSRootNode::Create(false, isTextureExportNode, rsContext);
-    } else if (!param.has_value()) {
-        rsNode_ = Rosen::RSCanvasNode::Create(false, isTextureExportNode, rsContext);
-    } else {
-        patternType_ = param->patternType;
-        CreateNodeByType(*param, isTextureExportNode, rsContext);
-    }
-
-    if (rsNode_) {
         SetSkipCheckInMultiInstance();
         AddFrameNodeInfoToRsNode();
+        return;
+    } else if (!param.has_value()) {
+        rsNode_ = Rosen::RSCanvasNode::Create(false, isTextureExportNode, rsContext);
+        SetSkipCheckInMultiInstance();
+        AddFrameNodeInfoToRsNode();
+        return;
     }
-}
-
-void RosenRenderContext::CreateNodeByType(
-    const ContextParam& param, bool isTextureExportNode, std::shared_ptr<Rosen::RSUIContext>& rsContext)
-{
-    switch (param.type) {
+    patternType_ = param->patternType;
+    // create proper RSNode base on input
+    switch (param->type) {
         case ContextType::CANVAS:
             rsNode_ = Rosen::RSCanvasNode::Create(false, isTextureExportNode, rsContext);
             break;
@@ -495,7 +487,7 @@ void RosenRenderContext::CreateNodeByType(
             rsNode_ = Rosen::RSRootNode::Create(false, isTextureExportNode, rsContext);
             break;
         case ContextType::SURFACE: {
-            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param.surfaceName.value_or(""),
+            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
                 .isTextureExportNode = isTextureExportNode };
             rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false, rsContext);
             break;
@@ -513,12 +505,6 @@ void RosenRenderContext::CreateNodeByType(
         case ContextType::EFFECT:
             rsNode_ = Rosen::RSEffectNode::Create(false, isTextureExportNode, rsContext);
             break;
-        case ContextType::COMPOSITE_COMPONENT: {
-            Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param.surfaceName.value_or(""),
-                .isTextureExportNode = isTextureExportNode };
-            rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false, rsContext);
-            break;
-        }
         case ContextType::INCREMENTAL_CANVAS: {
 #ifdef ACE_ENABLE_HYBRID_RENDER
             if (RSSystemProperties::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
@@ -537,6 +523,8 @@ void RosenRenderContext::CreateNodeByType(
         default:
             break;
     }
+    SetSkipCheckInMultiInstance();
+    AddFrameNodeInfoToRsNode();
 }
 
 void RosenRenderContext::SetSkipCheckInMultiInstance()

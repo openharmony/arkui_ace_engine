@@ -21,7 +21,6 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/property.h"
-#include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace::NG {
 enum class EffectLayer : int32_t { NONE = 0, CHARGE, TEXT };
@@ -48,14 +47,19 @@ public:
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        if (effectLayer_ == EffectLayer::NONE) {
-            return RenderContext::ContextParam { RenderContext::ContextType::COMPOSITE_COMPONENT };
+        if (effectLayer_ != EffectLayer::NONE) {
+            return RenderContext::ContextParam { RenderContext::ContextType::SURFACE };
         }
         return RenderContext::ContextParam { RenderContext::ContextType::EFFECT };
     }
 
     bool OnDirtyLayoutWrapperSwap(
         const RefPtr<LayoutWrapper>& /*dirty*/, bool /*skipMeasure*/, bool /*skipLayout*/) override;
+
+    EffectLayer GetEffectLayer() const
+    {
+        return effectLayer_;
+    }
 
 private:
     WeakPtr<UINode> parent_ = nullptr;

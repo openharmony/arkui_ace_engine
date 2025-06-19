@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-static std::unordered_map<NG::EffectLayer, Rosen::TopLayerZOrder> effectLayerMap = {
+std::unordered_map<NG::EffectLayer, Rosen::TopLayerZOrder> effectLayerMap = {
     { NG::EffectLayer::CHARGE, Rosen::TopLayerZOrder::CHARGE_3D_MOTION },
     { NG::EffectLayer::TEXT, Rosen::TopLayerZOrder::CHARGE_ACTION_TEXT }
 };
@@ -45,7 +45,7 @@ bool EffectComponentPattern::OnDirtyLayoutWrapperSwap(
     CHECK_NULL_RETURN(pipiline, false);
     auto parent = host->GetParent();
     CHECK_NULL_RETURN(parent, false);
-    if (parent_ == parent || effectLayer_ == EffectLayer::NONE) {
+    if (parent_.Upgrade() == parent || effectLayer_ == EffectLayer::NONE) {
         return false;
     }
     parent_ = parent;
@@ -54,22 +54,17 @@ bool EffectComponentPattern::OnDirtyLayoutWrapperSwap(
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
-        auto geometryNode = host->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        const auto& size = geometryNode->GetFrameSize();
-        if (size.IsPositive()) {
-            auto renderContext = host->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
-            auto rsNode = AceType::DynamicCast<NG::RosenRenderContext>(renderContext)->GetRSNode();
-            CHECK_NULL_VOID(rsNode);
-            auto surfaceNode = rsNode->ReinterpretCastTo<RSSurfaceNode>();
-            CHECK_NULL_VOID(surfaceNode);
-            if (effectLayerMap.find(effectLayer_) == effectLayerMap.end()) {
-                return false;
-            }
-            Rosen::TopLayerZOrder zOrder = effectLayerMap[effectLayer_];
-            surfaceNode->SetCompositeLayer(zOrder);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto rsNode = AceType::DynamicCast<NG::RosenRenderContext>(renderContext)->GetRSNode();
+        CHECK_NULL_VOID(rsNode);
+        auto surfaceNode = rsNode->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+        CHECK_NULL_VOID(surfaceNode);
+        if (effectLayerMap.find(pattern->GetEffectLayer()) == effectLayerMap.end()) {
+            return;
         }
+        Rosen::TopLayerZOrder zOrder = effectLayerMap[pattern->GetEffectLayer()];
+        surfaceNode->SetCompositeLayer(zOrder);
     });
 
     return false;

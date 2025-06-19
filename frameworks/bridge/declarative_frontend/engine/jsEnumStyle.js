@@ -1794,6 +1794,13 @@ let TouchTestStrategy;
   TouchTestStrategy.FORWARD = 2;
 })(TouchTestStrategy || (TouchTestStrategy = {}));
 
+let EffectLayer;
+(function (EffectLayer) {
+  EffectLayer.NONE = 0;
+  EffectLayer.CHARGE_MOTION = 1;
+  EffectLayer.CHARGE_TEXT = 2;
+})(EffectLayer || (EffectLayer = {}));
+
 let ModalTransition;
 (function (ModalTransition) {
   ModalTransition[ModalTransition.Default = 0] = 'Default';

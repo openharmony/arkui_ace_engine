@@ -17,6 +17,7 @@
 
 #include "bridge/declarative_frontend/jsview/models/effect_component_model_impl.h"
 #include "core/components_ng/pattern/effect_component/effect_component_model_ng.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 
 namespace OHOS::Ace {
@@ -47,27 +48,23 @@ EffectComponentModel* EffectComponentModel::GetInstance()
 namespace OHOS::Ace::Framework {
 void JSEffectComponent::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() <= 0) {
+    if (info.Length() <= 0 || !info[0]->IsObject()) {
         EffectComponentModel::GetInstance()->Create();
         return;
     }
-    auto independentLayer = -1;
-    auto tmpInfo = info[0];
-    if (!tmpInfo->IsObject()) {
-        EffectComponentModel::GetInstance()->Create();
-        return;
-    }
-    auto obj = JSRef<JSObject>::Cast(tmpInfo);
-    auto independentLayerVal = obj->GetProperty("independentLayer");
+    auto obj = JSRef<JSObject>::Cast(info[0]);
+    auto independentLayerVal = obj->GetProperty("effectLayer");
+    NG::EffectLayer independentLayer = NG::EffectLayer::NONE;
     if (independentLayerVal->IsNumber()) {
-        independentLayer = independentLayerVal->ToNumber<int32_t>();
-        if (independentLayer < static_cast<int32_t>(NG::EffectLayer::NONE) ||
-            independentLayer > static_cast<int32_t>(NG::EffectLayer::TEXT)) {
-            EffectComponentModel::GetInstance()->Create();
+        int32_t tmpLayer = independentLayerVal->ToNumber<int32_t>();
+        if (tmpLayer >= static_cast<int32_t>(NG::EffectLayer::NONE) &&
+            tmpLayer <= static_cast<int32_t>(NG::EffectLayer::TEXT)) {
+            independentLayer = static_cast<NG::EffectLayer>(tmpLayer);
+            EffectComponentModel::GetInstance()->Create(independentLayer);
             return;
         }
-        EffectComponentModel::GetInstance()->Create(static_cast<NG::EffectLayer>(independentLayer));
     }
+    EffectComponentModel::GetInstance()->Create();
 }
 
 void JSEffectComponent::AlwaysSnapshot(const JSCallbackInfo& info)
@@ -85,6 +82,7 @@ void JSEffectComponent::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSEffectComponent>::StaticMethod("create", &JSEffectComponent::Create, opt);
     JSClass<JSEffectComponent>::StaticMethod("alwaysSnapshot", &JSEffectComponent::AlwaysSnapshot, opt);
+    JSClass<JSEffectComponent>::StaticMethod("pop", &JSContainerBase::Pop, opt);
 
     JSClass<JSEffectComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
