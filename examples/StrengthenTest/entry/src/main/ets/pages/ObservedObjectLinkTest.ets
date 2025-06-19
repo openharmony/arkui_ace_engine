@@ -32,7 +32,7 @@ import hilog from '@ohos.hilog'
 
 @Observed
 class Info {
-  private id: number = 0;
+  public id: number = 0;
   private name: string = '';
 
   constructor(id?: number) {

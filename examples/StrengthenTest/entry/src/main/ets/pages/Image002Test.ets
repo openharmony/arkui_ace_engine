@@ -85,16 +85,12 @@ export struct Image002Test {
   @State pixelmap: PixelMap | string = ''
 
   aboutToAppear() {
-    从配置文件或数据库中读取图片地址
+    // 从配置文件或数据库中读取图片地址
     this.pixelmap = this.getConfiguredImageUrl();
   }
 
   getConfiguredImageUrl(): string {
-    return $r('app.string.image_url')
-  }
-
-  aboutToAppear() {
-   
+    return 'http://p0.meituan.net/content/9543e34f59c343282a8f83926f72f585173498.jpg.webp@289w_289h_1e_1l'
   }
 
   build() {

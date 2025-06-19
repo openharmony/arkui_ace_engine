@@ -35,13 +35,6 @@ import {
   PanDirection,
   Row,
   GestureInfo,
-  Text,
-  TextAttribute,
-  Column, Component,
-  Button,
-  ButtonAttribute,
-  ClickEvent,
-  UserView,
   NavDestination,
   NavPathStack,
   NavDestinationContext,
@@ -57,8 +50,8 @@ export struct GestureTest {
   panOptionNormal: PanGestureOptions = new PanGestureOptions({
     fingers: 2,
     distance: 5,
-    direction: Pan.Horizontal,
-    isFingerCount: true
+    direction: PanDirection.Horizontal,
+    isFingerCountLimited: true
   })
 
   panOptionAbnormal: PanGestureOptions = new PanGestureOptions({ 
