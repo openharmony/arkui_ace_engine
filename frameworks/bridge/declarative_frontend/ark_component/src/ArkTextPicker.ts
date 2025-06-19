@@ -373,7 +373,10 @@ class TextpickerSelectedBackgroundStyleModifier extends ModifierWithKey<PickerBa
       const { color, borderRadius } = this.value;
       if (borderRadius != null) {
         const borderRadiusKeys = Object.keys(borderRadius);
-        let topLeft, topRight, bottomLeft, bottomRight;
+        let topLeft;
+        let topRight;
+        let bottomLeft;
+        let bottomRight;
         if (borderRadiusKeys.indexOf('value') >= 0) {
           topLeft = topRight = bottomLeft = bottomRight = borderRadius;
         } else if (borderRadiusKeys.indexOf('topLeft') >= 0) {
