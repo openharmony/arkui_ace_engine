@@ -137,7 +137,7 @@ void TextLayoutAlgorithm::ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>
 void TextLayoutAlgorithm::OnReset() {}
 
 std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
-    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+    const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, std::nullopt);
@@ -145,6 +145,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     CHECK_NULL_RETURN(pattern, std::nullopt);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, std::nullopt);
+    auto contentConstraint = CalcContentConstraint(constraint, layoutWrapper);
     ConstructTextStyles(contentConstraint, layoutWrapper, textStyle_);
     if (isSpanStringMode_ && spanStringHasMaxLines_) {
         textStyle_.SetMaxLines(UINT32_MAX);
@@ -193,7 +194,12 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     auto longestLine = paragraphManager_->GetLongestLine();
     auto heightFinal = static_cast<float>(height + std::fabs(baselineOffset_));
     if (contentConstraint.selfIdealSize.Height().has_value()) {
-        heightFinal = std::min(heightFinal, contentConstraint.selfIdealSize.Height().value());
+        auto heightPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
+        if (heightPolicy == LayoutCalPolicy::MATCH_PARENT) {
+            heightFinal = contentConstraint.selfIdealSize.Height().value();
+        } else {
+            heightFinal = std::min(heightFinal, contentConstraint.selfIdealSize.Height().value());
+        }
     } else {
         heightFinal = std::min(heightFinal, contentConstraint.maxSize.Height());
     }
@@ -853,12 +859,7 @@ bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<Text
             return false;
         }
     }
-    auto reLayoutConstraint = contentConstraint;
-    auto widthPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
-    if (widthPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        reLayoutConstraint.selfIdealSize.SetWidth(contentConstraint.parentIdealSize.Width().value_or(0.0f));
-    }
-    return ParagraphReLayout(reLayoutConstraint);
+    return ParagraphReLayout(contentConstraint);
 }
 
 bool TextLayoutAlgorithm::BuildParagraphAdaptUseMinFontSize(TextStyle& textStyle,
@@ -1048,5 +1049,59 @@ bool TextLayoutAlgorithm::IsParentSizeNearZero(const LayoutConstraintF& contentC
         return true;
     }
     return false;
+}
+
+bool TextLayoutAlgorithm::IsFixIdealSizeAndNoMaxSize(LayoutWrapper* layoutWrapper, bool isWidth)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto layoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, isWidth);
+    if (layoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProperty, false);
+        const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+        CHECK_NULL_RETURN(calcLayoutConstraint, false);
+        return isWidth ? !calcLayoutConstraint->maxSize->Width().has_value()
+                       : !calcLayoutConstraint->maxSize->Height().has_value();
+    }
+    return false;
+}
+
+LayoutConstraintF TextLayoutAlgorithm::CalcContentConstraint(
+    const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper)
+{
+    LayoutConstraintF contentConstraint = constraint;
+    CHECK_NULL_RETURN(layoutWrapper, contentConstraint);
+    auto widthPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+    isFixIdealSizeAndNoMaxWidth_ = IsFixIdealSizeAndNoMaxSize(layoutWrapper, true);
+    if (isFixIdealSizeAndNoMaxWidth_) {
+        contentConstraint.maxSize.SetWidth(std::numeric_limits<double>::infinity());
+    } else if (widthPolicy == LayoutCalPolicy::MATCH_PARENT) {
+        auto idealSize = constraint.parentIdealSize;
+        idealSize.Constrain(constraint.minSize, constraint.maxSize, true);
+        contentConstraint.selfIdealSize.SetWidth(idealSize.Width().value_or(0.0f));
+    }
+    auto heightPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
+    if (IsFixIdealSizeAndNoMaxSize(layoutWrapper, false)) {
+        contentConstraint.maxSize.SetHeight(std::numeric_limits<double>::infinity());
+    } else if (heightPolicy == LayoutCalPolicy::MATCH_PARENT) {
+        auto idealSize = constraint.parentIdealSize;
+        idealSize.Constrain(constraint.minSize, constraint.maxSize, true);
+        contentConstraint.selfIdealSize.SetHeight(idealSize.Height().value_or(0.0f));
+    }
+    cachedCalcContentConstraint_ = contentConstraint;
+    return contentConstraint;
+}
+
+bool TextLayoutAlgorithm::IsNeedParagraphReLayout() const
+{
+    return isFixIdealSizeAndNoMaxWidth_;
+}
+
+double TextLayoutAlgorithm::GetIndentMaxWidth(double width) const
+{
+    if (isFixIdealSizeAndNoMaxWidth_ && cachedCalcContentConstraint_.has_value()) {
+        return cachedCalcContentConstraint_.value().maxSize.Width();
+    }
+    return width;
 }
 } // namespace OHOS::Ace::NG

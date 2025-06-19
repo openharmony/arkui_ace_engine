@@ -118,6 +118,14 @@ protected:
         std::vector<TextStyle>& textStyles);
     virtual ChildrenListWithGuard GetAllChildrenWithBuild(LayoutWrapper* layoutWrapper);
     void UpdateShaderStyle(const RefPtr<TextLayoutProperty>& layoutProperty, TextStyle& textStyle);
+    virtual bool IsNeedParagraphReLayout() const
+    {
+        return false;
+    }
+    virtual double GetIndentMaxWidth(double width) const
+    {
+        return width;
+    }
 
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     RefPtr<ParagraphManager> paragraphManager_;
@@ -164,6 +172,7 @@ private:
     void UpdateSymbolStyle(TextStyle& textStyle, bool isSymbol);
     std::optional<OHOS::Ace::Gradient> ToGradient(const NG::Gradient& gradient);
     AnimatableDimension ToAnimatableDimension(const Dimension& dimension);
+    void MeasureWithFixAtIdealSize(LayoutWrapper* layoutWrapper);
 
     ACE_DISALLOW_COPY_AND_MOVE(MultipleParagraphLayoutAlgorithm);
 };
