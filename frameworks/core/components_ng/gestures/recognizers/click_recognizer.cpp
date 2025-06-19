@@ -166,6 +166,7 @@ void ClickRecognizer::OnAccepted()
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s",
         node ? node->GetTag().c_str() : "null");
     auto lastRefereeState = refereeState_;
+    lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     ResSchedReport::GetInstance().ResSchedDataReport("click");
     if (backupTouchPointsForSucceedBlock_.has_value()) {
@@ -213,6 +214,7 @@ void ClickRecognizer::OnAccepted()
 void ClickRecognizer::OnRejected()
 {
     SendRejectMsg();
+    lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
     backupTouchPointsForSucceedBlock_.reset();
@@ -636,6 +638,7 @@ void ClickRecognizer::CleanRecognizerState()
         refereeState_ == RefereeState::DETECTING) &&
         currentFingers_ == 0) {
         tappedCount_ = 0;
+        lastRefereeState_ = RefereeState::READY;
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
     }
