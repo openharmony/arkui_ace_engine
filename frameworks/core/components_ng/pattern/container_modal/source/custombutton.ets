@@ -377,14 +377,17 @@ struct custombutton {
 
   setMaximizeVisibility(isHide: boolean) {
     this.maximizeVisibility = isHide ? Visibility.None : Visibility.Visible
+    this.setRowVisibility();
   }
 
   setMinimizeVisibility(isHide: boolean) {
     this.minimizeVisibility = isHide ? Visibility.None : Visibility.Visible
+    this.setRowVisibility();
   }
 
   setCloseVisibility(isHide: boolean) {
     this.closeVisibility = isHide ? Visibility.None : Visibility.Visible
+    this.setRowVisibility();
   }
 
   setCloseStatus(isEnabled: boolean) {
@@ -407,7 +410,7 @@ struct custombutton {
   setRowVisibility() {
     if (this.maximizeVisibility === Visibility.None && this.minimizeVisibility === Visibility.None &&
       this.closeVisibility === Visibility.None) {
-      this.rowVisibility = Visibility.None
+      this.rowVisibility = Visibility.Hidden
     } else {
       this.rowVisibility = Visibility.Visible
     }
