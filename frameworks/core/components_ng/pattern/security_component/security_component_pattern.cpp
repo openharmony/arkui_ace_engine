@@ -39,7 +39,9 @@ static std::vector<uint64_t> g_omittedNodeIndex;
 static uint64_t g_scIndex = 0;
 static std::mutex g_scMutex;
 const std::string SYSTEM_INTERNAL_ERROR_MESSAGE = "system internal error";
+constexpr int REPORT_CLICK_ERROR = -1;
 #endif
+constexpr int HANDLE_RES_ERROR = 1;
 }
 SecurityComponentPattern::SecurityComponentPattern()
 {
@@ -101,6 +103,51 @@ void SecurityComponentPattern::OnLanguageConfigurationUpdate()
             textLayoutProperty->UpdateContent(text);
         }
     }
+}
+
+bool SecurityComponentPattern::OnAccessibilityEvent(const SecCompEnhanceEvent& event)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    int res = HANDLE_RES_ERROR;
+#ifdef SECURITY_COMPONENT_ENABLE
+    res = ReportSecurityComponentClickEvent(event);
+    if (res == Security::SecurityComponent::SC_SERVICE_ERROR_WAIT_FOR_DIALOG_CLOSE) {
+        return true;
+    }
+    if (res != 0) {
+        SC_LOG_ERROR("ReportSecurityComponentClickEvent failed, errno %{public}d", res);
+        res = HANDLE_RES_ERROR;
+    }
+#endif
+    auto jsonNode = JsonUtil::Create(true);
+    CHECK_NULL_RETURN(jsonNode, false);
+    jsonNode->Put("handleRes", res);
+    std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureEventHub, false);
+    gestureEventHub->ActClick(jsonShrd);
+    return false;
+}
+
+void SecurityComponentPattern::InitOnAccessibilityEvent(RefPtr<FrameNode>& secCompNode)
+{
+    if (isSetOnAccessibilityEvent_) {
+        SC_LOG_WARN("OnAccessibilityEvent is already set");
+        return;
+    }
+
+    auto accessibilityProperty = secCompNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+
+    auto securityClickCallback = [weak = WeakClaim(this)](const SecCompEnhanceEvent& event) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnAccessibilityEvent(event);
+    };
+
+    accessibilityProperty->SetSecurityClickAction(securityClickCallback);
+    isSetOnAccessibilityEvent_ = true;
 }
 
 bool SecurityComponentPattern::OnKeyEvent(const KeyEvent& event)
@@ -665,6 +712,7 @@ void SecurityComponentPattern::OnModifyDone()
     InitOnKeyEvent(frameNode);
     InitAppearCallback(frameNode);
     InitOnTouch(frameNode);
+    InitOnAccessibilityEvent(frameNode);
 }
 
 bool SecurityComponentPattern::IsFontColorSet()
@@ -973,6 +1021,38 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEve
 
     OnClickAfterFirstUseDialog = CreateFirstUseDialogCloseFunc(
         frameNode, pipeline, "ArkUISecurityComponentKeyTriggerOnClick");
+
+    return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
+        frameNode, event, std::move(OnClickAfterFirstUseDialog));
+}
+
+int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const SecCompEnhanceEvent& event)
+{
+    if (regStatus_ == SecurityComponentRegisterStatus::UNREGISTERED) {
+        SC_LOG_WARN("AccessibilityEventHandler: security component has not registered.");
+        return REPORT_CLICK_ERROR;
+    }
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, REPORT_CLICK_ERROR);
+    if (regStatus_ == SecurityComponentRegisterStatus::REGISTERING) {
+        RegisterSecurityComponentRetry();
+    }
+    if (regStatus_ != SecurityComponentRegisterStatus::REGISTERED) {
+        SC_LOG_WARN("AccessibilityEventHandler: security component try to register failed.");
+        return REPORT_CLICK_ERROR;
+    }
+
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, REPORT_CLICK_ERROR);
+    std::function<void (int32_t)> OnClickAfterFirstUseDialog;
+    if (frameNode->GetTag() == V2::PASTE_BUTTON_ETS_TAG) {
+        OnClickAfterFirstUseDialog = [] (int32_t) {};
+        return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
+            frameNode, event, std::move(OnClickAfterFirstUseDialog));
+    }
+
+    OnClickAfterFirstUseDialog = CreateFirstUseDialogCloseFunc(
+        frameNode, pipeline, "ArkUISecurityComponentAccessibilityTriggerOnClick");
 
     return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
         frameNode, event, std::move(OnClickAfterFirstUseDialog));

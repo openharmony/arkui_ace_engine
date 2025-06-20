@@ -134,6 +134,7 @@ template("ace_core_interfaces_native_node") {
       "node/video_modifier.cpp",
       "node/view_model.cpp",
       "node/water_flow_modifier.cpp",
+      "runtime/runtime_init.cpp"
     ]
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
@@ -151,6 +152,7 @@ template("ace_core_interfaces_native_node") {
       "${ace_root}/interfaces/inner_api/ace",
       "${ace_root}/interfaces/native",
       "${ace_root}/interfaces/native/node",
+      "${ace_root}/interfaces/native/runtime",
     ]
 
     if (qrcodegen_support) {
@@ -189,9 +191,16 @@ template("ace_core_interfaces_native_node") {
       sources += [ "node/embeddedComponent_modifier.cpp" ]
     }
 
+    if (is_arkui_x) {
+      deps += [
+        "//foundation/arkui/napi:ace_napi",
+      ]
+    }
+
     external_deps = [
       "graphic_2d:drawing_napi_impl",
       "graphic_2d:librender_service_client",
+      "napi:ace_napi",
     ]
     if (defined(config.model_component_support) &&
         config.model_component_support) {

@@ -685,9 +685,6 @@ void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
     if (ParseJsString(contentParam, content, resTextObj)) {
         contentOpt = content;
     }
-    if (SystemProperties::ConfigChangePerform()) {
-        TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TEXT_CONTENT, resTextObj);
-    }
 
     JSRef<JSVal> indicatorParam = paramObject->GetProperty("indicator");
     SetIndicator(indicatorParam);
@@ -707,6 +704,7 @@ void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
     JSRef<JSVal> idParam = paramObject->GetProperty("id");
     SetId(idParam);
 
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TEXT_CONTENT, resTextObj);
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     TabContentModel::GetInstance()->SetTabBar(contentOpt, std::nullopt, std::nullopt, nullptr, false);
     TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);

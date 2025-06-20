@@ -59,7 +59,8 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
     bool matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(frameSize_, axis));
-    syncLoad_ = gridLayoutProperty->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren;
+    syncLoad_ = gridLayoutProperty->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren ||
+                info_.targetIndex_.has_value();
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize_);
     MinusPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), frameSize_);
     info_.contentEndPadding_ = ScrollableUtils::CheckHeightExpansion(gridLayoutProperty, axis);
@@ -444,6 +445,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     }
     if (enableSkipping_) {
         SkipLargeOffset(mainSize, layoutWrapper);
+        syncLoad_ = syncLoad_ || (reason_ == GridReloadReason::SKIP_LARGE_OFFSET);
     }
 
     if (!info_.lastCrossCount_) {
@@ -524,6 +526,9 @@ void GridScrollLayoutAlgorithm::ReloadToStartIndex(float mainSize, float crossSi
             info_.reachEnd_ = true;
             break;
         }
+        if (measureInNextFrame_) {
+            break;
+        }
     }
     info_.startMainLineIndex_ = currentMainLineIndex_;
     info_.UpdateStartIndexByStartLine();
@@ -581,6 +586,9 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
             info_.lineHeightMap_[info_.startMainLineIndex_] = lineHeight;
             blankAtStart -= (lineHeight + mainGap_);
             fillNewLine = true;
+            if (measureInNextFrame_) {
+                break;
+            }
             continue;
         }
         info_.reachStart_ = true;
@@ -1443,6 +1451,11 @@ void GridScrollLayoutAlgorithm::AddForwardLines(
             break;
         }
         addLine = true;
+        if (!syncLoad_ && NearEqual(info_.prevOffset_, info_.currentOffset_) &&
+            layoutWrapper->ReachResponseDeadline()) {
+            measureInNextFrame_ = true;
+            break;
+        }
     }
     if (!addLine) {
         return;
@@ -1544,7 +1557,7 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
         info_.endIndex_ = currentIndex;
         currentIndex++;
         doneFillLine = true;
-        if (!syncLoad_ && NearEqual(info_.prevOffset_, info_.currentOffset_) &&
+        if (!reverse && !syncLoad_ && NearEqual(info_.prevOffset_, info_.currentOffset_) &&
             layoutWrapper->ReachResponseDeadline()) {
             measureInNextFrame_ = true;
             break;

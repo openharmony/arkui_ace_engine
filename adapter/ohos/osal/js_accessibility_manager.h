@@ -699,6 +699,9 @@ private:
         const SearchParameter& searchParam);
 #ifdef WEB_SUPPORTED
 
+    void WebSetScreenRect(const std::shared_ptr<NG::TransitionalNodeInfo>& node, const CommonProperty& commonProperty,
+        AccessibilityElementInfo& nodeInfo);
+
     void UpdateWebAccessibilityElementInfo(const std::shared_ptr<NG::TransitionalNodeInfo>& node,
         Accessibility::AccessibilityElementInfo& nodeInfo, int32_t treeId);
 
@@ -709,8 +712,11 @@ private:
     void UpdateWebCacheInfo(std::list<Accessibility::AccessibilityElementInfo>& infos, int64_t nodeId,
         const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
         const SearchParameter& searchParam, const RefPtr<NG::WebPattern>& webPattern);
-    void PushElementsIntoInfos(AccessibilityElementInfo& nodeInfo, std::shared_ptr<NG::TransitionalNodeInfo>& node,
-        std::list<AccessibilityElementInfo>& infos, const RefPtr<NG::WebPattern>& webPattern);
+    bool GetChildrenFromEmbedNode(AccessibilityElementInfo& nodeInfo, int64_t nodeId, std::list<int64_t>& children,
+        std::unordered_map<int64_t, AccessibilityElementInfo>& allEmbedNodeTreeInfosMap);
+    void PushElementsIntoInfos(AccessibilityElementInfo& nodeInfo, std::list<AccessibilityElementInfo>& infos,
+        const RefPtr<NG::WebPattern>& webPattern, std::list<int64_t>& children,
+        std::unordered_map<int64_t, AccessibilityElementInfo>& allEmbedNodeTreeInfosMap);
 
     int64_t GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId);
 #endif //WEB_SUPPORTED

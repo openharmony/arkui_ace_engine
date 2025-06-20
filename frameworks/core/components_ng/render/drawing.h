@@ -47,10 +47,11 @@
 
 #include "pipeline/rs_recording_canvas.h"
 #include "rosen_text/font_collection.h"
+#include "rosen_text/text_effect.h"
+#include "rosen_text/text_style.h"
 #include "rosen_text/typography.h"
 #include "rosen_text/typography_create.h"
 #include "rosen_text/typography_types.h"
-#include "rosen_text/text_style.h"
 #include "utils/camera3d.h"
 #include "utils/canvas_utils.h"
 #include "utils/point3.h"
@@ -136,6 +137,8 @@ using RSTextDirection = Rosen::TextDirection;
 using RSTextAlign = Rosen::TextAlign;
 using RSWordBreakType = Rosen::WordBreakType;
 using RSTextBaseline = Rosen::TextBaseline;
+using RSTextEffect = Rosen::TextEffect;
+using RSTextEffectFactoryCreator = Rosen::TextEffectFactoryCreator;
 using RSTextStyle = Rosen::TextStyle;
 using RSTextDecoration = Rosen::TextDecoration;
 using RSTextDecorationStyle = Rosen::TextDecorationStyle;

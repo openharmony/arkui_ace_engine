@@ -14,7 +14,6 @@
  */
 
 #include "mock_pipeline_context.h"
-#include "test/mock/core/common/mock_font_manager.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -171,11 +170,6 @@ void MockPipelineContext::TearDown()
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
 {
     return pipeline_;
-}
-
-void MockPipelineContext::ResetFontManager()
-{
-    pipeline_->fontManager_ = MockFontManager::Create();
 }
 
 void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
@@ -648,6 +642,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 
 bool PipelineContext::OnBackPressed()
 {
+    auto deviceType = SystemProperties::GetDeviceType();
+    if ((deviceType == DeviceType::WEARABLE || deviceType == DeviceType::WATCH) && !enableSwipeBack_) {
+        return true;
+    }
     return false;
 }
 
@@ -1263,6 +1261,11 @@ Rect PipelineBase::GetCurrentWindowRect() const
     return NG::windowRect_;
 }
 
+Rect PipelineBase::GetGlobalDisplayWindowRect() const
+{
+    return NG::windowRect_;
+}
+
 void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
 {
     textFieldManager_ = manager;
@@ -1290,14 +1293,6 @@ Dimension NG::PipelineContext::GetCustomTitleHeight()
 void PipelineBase::SetFontScale(float fontScale)
 {
     fontScale_ = fontScale;
-}
-
-bool PipelineBase::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
-{
-    if (fontManager_) {
-        return fontManager_->GetSystemFont(fontName, fontInfo);
-    }
-    return false;
 }
 
 bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>& animationCallback)
@@ -1363,8 +1358,6 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
 {
     return false;
 }
-
-void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
 
 void NG::PipelineContext::SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
 

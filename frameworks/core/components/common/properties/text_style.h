@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_TEXT_STYLE_H
 
 #include <bitset>
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -220,6 +221,22 @@ enum class EllipsisMode {
     MIDDLE,
     TAIL,
 };
+
+enum class TextFlipDirection {
+    DOWN = 0,
+    UP,
+};
+namespace StringUtils {
+inline std::string ToString(const TextFlipDirection& textFlipDirection)
+{
+    static const LinearEnumMapNode<TextFlipDirection, std::string> table[] = {
+        { TextFlipDirection::DOWN, "down" },
+        { TextFlipDirection::UP, "up" },
+    };
+    auto iter = BinarySearchFindIndex(table, ArraySize(table), textFlipDirection);
+    return iter != -1 ? table[iter].value : "";
+}
+} // namespace StringUtils
 
 namespace StringUtils {
 inline std::string ToString(const EllipsisMode& ellipsisMode)
@@ -470,30 +487,30 @@ enum class SymbolStyleAttribute {
 };
 
 // For textStyle
-#define ACE_DEFINE_TEXT_STYLE_FUNC(name, type, changeflag) \
-public:                                                    \
-    const type& Get##name() const                          \
-    {                                                      \
-        return prop##name##_;                              \
-    }                                                      \
-    void Set##name(const type& newValue)                   \
-    {                                                      \
-        if (NearEqual(prop##name##_, newValue)) {          \
-            return;                                        \
-        }                                                  \
-        auto flag = static_cast<int32_t>(changeflag);      \
-        if (GreatOrEqual(flag, 0)) {                       \
-            reLayoutTextStyleBitmap_.set(flag);            \
-        } else {                                           \
-            needReCreateParagraph_ = true;                 \
-        }                                                  \
-        prop##name##_ = newValue;                          \
-    }                                                      \
-    void Set##name(const std::optional<type>& value)       \
-    {                                                      \
-        if (value.has_value()) {                           \
-            Set##name(value.value());                      \
-        }                                                  \
+#define ACE_DEFINE_TEXT_STYLE_FUNC(name, type, changeflag)           \
+public:                                                              \
+    const type& Get##name() const                                    \
+    {                                                                \
+        return prop##name##_;                                        \
+    }                                                                \
+    void Set##name(const type& newValue)                             \
+    {                                                                \
+        if (NearEqual(prop##name##_, newValue)) {                    \
+            return;                                                  \
+        }                                                            \
+        auto flag = static_cast<int32_t>(changeflag);                \
+        if (GreatOrEqual(flag, 0)) {                                 \
+            reLayoutTextStyleBitmap_.set(static_cast<size_t>(flag)); \
+        } else {                                                     \
+            needReCreateParagraph_ = true;                           \
+        }                                                            \
+        prop##name##_ = newValue;                                    \
+    }                                                                \
+    void Set##name(const std::optional<type>& value)                 \
+    {                                                                \
+        if (value.has_value()) {                                     \
+            Set##name(value.value());                                \
+        }                                                            \
     }
 
 #define ACE_DEFINE_TEXT_STYLE(name, type, changeflag)  \
@@ -586,27 +603,27 @@ private:                                                              \
     std::optional<type> prop##name##_;
 
 // For paragraphStyle
-#define ACE_DEFINE_PARAGRAPH_STYLE(name, type, changeflag) \
-public:                                                    \
-    const type& Get##name() const                          \
-    {                                                      \
-        return prop##name##_;                              \
-    }                                                      \
-    void Set##name(const type& newValue)                   \
-    {                                                      \
-        if (NearEqual(prop##name##_, newValue)) {          \
-            return;                                        \
-        }                                                  \
-        auto flag = static_cast<int32_t>(changeflag);      \
-        if (GreatOrEqual(flag, 0)) {                       \
-            reLayoutParagraphStyleBitmap_.set(flag);       \
-        } else {                                           \
-            needReCreateParagraph_ = true;                 \
-        }                                                  \
-        prop##name##_ = newValue;                          \
-    }                                                      \
-                                                           \
-private:                                                   \
+#define ACE_DEFINE_PARAGRAPH_STYLE(name, type, changeflag)                \
+public:                                                                   \
+    const type& Get##name() const                                         \
+    {                                                                     \
+        return prop##name##_;                                             \
+    }                                                                     \
+    void Set##name(const type& newValue)                                  \
+    {                                                                     \
+        if (NearEqual(prop##name##_, newValue)) {                         \
+            return;                                                       \
+        }                                                                 \
+        auto flag = static_cast<int32_t>(changeflag);                     \
+        if (GreatOrEqual(flag, 0)) {                                      \
+            reLayoutParagraphStyleBitmap_.set(static_cast<size_t>(flag)); \
+        } else {                                                          \
+            needReCreateParagraph_ = true;                                \
+        }                                                                 \
+        prop##name##_ = newValue;                                         \
+    }                                                                     \
+                                                                          \
+private:                                                                  \
     type prop##name##_;
 
 #define ACE_DEFINE_PARAGRAPH_STYLE_WITH_DEFAULT_VALUE(name, type, initValue, changeflag) \
@@ -622,7 +639,7 @@ public:                                                                         
         }                                                                                \
         auto flag = static_cast<int32_t>(changeflag);                                    \
         if (GreatOrEqual(flag, 0)) {                                                     \
-            reLayoutParagraphStyleBitmap_.set(flag);                                     \
+            reLayoutParagraphStyleBitmap_.set(static_cast<size_t>(flag));                \
         } else {                                                                         \
             needReCreateParagraph_ = true;                                               \
         }                                                                                \
@@ -777,6 +794,8 @@ public:
 
     // for Symbol
     ACE_DEFINE_SYMBOL_STYLE(RenderColors, std::vector<Color>, SymbolStyleAttribute::COLOR_LIST);
+    ACE_DEFINE_SYMBOL_STYLE(SymbolShadowProp, SymbolShadow, SymbolStyleAttribute::SYMBOL_SHADOW);
+    ACE_DEFINE_SYMBOL_STYLE(GradientColorProp, std::vector<SymbolGradient>, SymbolStyleAttribute::GRADIENT_COLOR);
     ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(RenderStrategy, int32_t, 0, SymbolStyleAttribute::RENDER_MODE);
     ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(EffectStrategy, int32_t, 0, SymbolStyleAttribute::EFFECT_STRATEGY);
     ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(
@@ -1109,10 +1128,36 @@ public:
         symbolUid_ = symbolUid;
     }
 
+    void SetSymbolShadow(const SymbolShadow& symbolShadow)
+    {
+        if (propSymbolShadowProp_ == symbolShadow) {
+            return;
+        }
+        propSymbolShadowProp_ = symbolShadow;
+        reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::SYMBOL_SHADOW));
+    }
+
+    SymbolShadow GetSymbolShadow() const
+    {
+        return propSymbolShadowProp_;
+    }
+
+    void SetShaderStyle(const std::vector<SymbolGradient>& shaderStyle)
+    {
+        if (propGradientColorProp_ != shaderStyle) {
+            propGradientColorProp_ = shaderStyle;
+            reLayoutSymbolStyleBitmap_.set(static_cast<int32_t>(SymbolStyleAttribute::GRADIENT_COLOR));
+        }
+    }
+
+    std::vector<SymbolGradient> GetShaderStyle() const
+    {
+        return propGradientColorProp_;
+    }
+
     void SetGradient(const std::optional<Gradient>& gradient)
     {
         gradient_ = gradient;
-        reLayoutTextStyleBitmap_.set(static_cast<int32_t>(TextStyleAttribute::FOREGROUND_BRUSH));
     }
 
     void SetForeGroundBrushBitMap()

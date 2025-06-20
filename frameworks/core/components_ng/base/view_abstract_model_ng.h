@@ -989,11 +989,6 @@ public:
         ViewAbstract::SetProgressMask(progress);
     }
 
-    void CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress) override
-    {
-        ViewAbstract::CreateWithMaskResourceObj(progress);
-    }
-
     void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
     {
         ViewAbstract::SetBackdropBlur(radius, blurOption, sysOptions);
@@ -1128,6 +1123,12 @@ public:
     }
 
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc, double distanceThreshold) override
+    {
+        ViewAbstract::SetOnClick(std::move(tapEventFunc), distanceThreshold);
+    }
+
+    void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+        Dimension distanceThreshold) override
     {
         ViewAbstract::SetOnClick(std::move(tapEventFunc), distanceThreshold);
     }
@@ -1652,16 +1653,27 @@ public:
     void SetAccessibilityUseSamePage(const std::string& pageMode) override;
     void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) override;
     void SetAccessibilityFocusDrawLevel(int32_t drawLevel) override;
-    std::string PopupTypeStr(PopupType& type);
-    void UpdateColor(PopupType& type, const Color& color);
-    void CreateWithColorResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, PopupType& type) override;
-    void CreateWithBoolResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj) override;
-    virtual void CreateWithResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, PopupType type) override;
+    static std::string PopupTypeStr(const PopupType& type);
+    static void UpdateColor(const RefPtr<NG::FrameNode>& frameNode, const PopupType& type, const Color& color);
+    static void CreateWithColorResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, const PopupType& type);
+    static void CreateWithBoolResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj);
+    static std::string PopupOptionTypeStr(const PopupOptionsType& type);
+    static void ParseOptionsDimension(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& dimensionResObj, const PopupOptionsType& type, CalcDimension& dimession);
+    static void CreateWithDimensionResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& dimensionResObj, const PopupOptionsType& type);
+    virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& resourceObj, const PopupType& type) override;
     virtual void CreateWithResourceObj(
         const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) override;
+    void RemoveResObj(const std::string& key) override
+    {
+        ViewAbstract::RemoveResObj(key);
+    }
+    virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& resourceObj, const PopupOptionsType& type) override;
     void SetForegroundColor(const Color& color) override
     {
         ViewAbstract::SetForegroundColor(color);
@@ -1859,6 +1871,11 @@ public:
         ViewAbstract::SetFocusScopePriority(focusScopeId, focusPriority);
     }
 
+    void ResetResObj(const std::string& key) override
+    {
+        ViewAbstract::ResetResObj(key);
+    }
+
     static void SetAccessibilityGroup(FrameNode* frameNode, bool accessible);
     static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)
     {
@@ -1934,6 +1951,7 @@ public:
     {
         ViewAbstract::SetCompositingFilter(frameNode, compositingFilter);
     }
+    static void RemoveResObj(FrameNode* frameNode, const std::string& key);
 
     static void SetAccessibilityVirtualNode(FrameNode* frameNode, std::function<RefPtr<NG::UINode>()>&& buildFunc);
     static void BindPopup(FrameNode* targetNode, const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode)

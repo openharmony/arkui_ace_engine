@@ -574,11 +574,13 @@ bool NGGestureRecognizer::IsInAttachedNode(const TouchEvent& event, bool isRealT
     }
 
     PointF localPoint(event.x, event.y);
+    bool isPostEventResult = isPostEventResult_ || event.passThrough;
     if (isRealTime) {
-        NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult_,
-            isPostEventResult_, event.postEventNodeId);
+        NGGestureRecognizer::Transform(localPoint, frameNode, !isPostEventResult,
+            isPostEventResult, event.postEventNodeId);
     } else {
-        TransformForRecognizer(localPoint, frameNode, false, isPostEventResult_, event.postEventNodeId);
+        TransformForRecognizer(
+            localPoint, frameNode, false, isPostEventResult, event.postEventNodeId);
     }
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
@@ -698,66 +700,44 @@ std::string NGGestureRecognizer::GetCallbackName(const std::unique_ptr<GestureEv
     return "";
 }
 
-void NGGestureRecognizer::HandleGestureAccept(const GestureEvent& info, GestureCallbackType type)
+void NGGestureRecognizer::HandleGestureAccept(
+    const GestureEvent& info, GestureCallbackType type, GestureListenerType listenerType)
 {
     auto gestureInfo = GetGestureInfo();
     CHECK_NULL_VOID(gestureInfo);
     auto node = GetAttachedNode().Upgrade();
     CHECK_NULL_VOID(node);
-    GestureListenerType listenerType = GetListenerType(gestureInfo->GetRecognizerType());
     if (listenerType == GestureListenerType::UNKNOWN) {
         return;
     }
-    GestureActionPhase phase = GetActionPhase(type, gestureInfo->GetRecognizerType());
+    GestureActionPhase phase = GetActionPhase(type, listenerType);
     if (phase == GestureActionPhase::UNKNOWN) {
         return;
     }
     UIObserverHandler::GetInstance().NotifyGestureStateChange(listenerType, info, Claim(this), node, phase);
 }
 
-GestureListenerType NGGestureRecognizer::GetListenerType(GestureTypeName typeName) const
+GestureActionPhase NGGestureRecognizer::GetActionPhase(
+    GestureCallbackType callbackType, GestureListenerType listenerType) const
 {
-    switch (typeName) {
-        case GestureTypeName::PAN_GESTURE:
-            return GestureListenerType::PAN;
-        case GestureTypeName::PINCH_GESTURE:
-            return GestureListenerType::PINCH;
-        case GestureTypeName::ROTATION_GESTURE:
-            return GestureListenerType::ROTATION;
-        case GestureTypeName::TAP_GESTURE:
-            return GestureListenerType::TAP;
-        case GestureTypeName::SWIPE_GESTURE:
-            return GestureListenerType::SWIPE;
-        case GestureTypeName::LONG_PRESS_GESTURE:
-            return GestureListenerType::LONG_PRESS;
-        default:
-            return GestureListenerType::UNKNOWN;
-    }
-}
-
-GestureActionPhase NGGestureRecognizer::GetActionPhase(GestureCallbackType callbackType, GestureTypeName typeName) const
-{
-    static const std::unordered_set<GestureTypeName> startSupportedGestures = {
-        GestureTypeName::PAN_GESTURE,
-        GestureTypeName::PINCH_GESTURE,
-        GestureTypeName::ROTATION_GESTURE,
+    static const std::unordered_set<GestureListenerType> startSupportedGestures = { GestureListenerType::PAN,
+        GestureListenerType::PINCH, GestureListenerType::ROTATION,
         // LONG_PRESS_GESTURE when onAction, callbackType is START
-        GestureTypeName::LONG_PRESS_GESTURE
-    };
+        GestureListenerType::LONG_PRESS };
 
     switch (callbackType) {
         case GestureCallbackType::START:
-            return (startSupportedGestures.count(typeName)) ? GestureActionPhase::WILL_START
-                                                            : GestureActionPhase::UNKNOWN;
+            return (startSupportedGestures.count(listenerType)) ? GestureActionPhase::WILL_START
+                                                                : GestureActionPhase::UNKNOWN;
 
         case GestureCallbackType::END:
-            return (startSupportedGestures.count(typeName)) ? GestureActionPhase::WILL_END
-                                                            : GestureActionPhase::UNKNOWN;
+            return (startSupportedGestures.count(listenerType)) ? GestureActionPhase::WILL_END
+                                                                : GestureActionPhase::UNKNOWN;
 
         case GestureCallbackType::ACTION:
             // ACTION will only be mapped to WILL_START if the START gesture is not supported
-            return (!startSupportedGestures.count(typeName)) ? GestureActionPhase::WILL_START
-                                                             : GestureActionPhase::UNKNOWN;
+            return (!startSupportedGestures.count(listenerType)) ? GestureActionPhase::WILL_START
+                                                                 : GestureActionPhase::UNKNOWN;
 
         default:
             return GestureActionPhase::UNKNOWN;

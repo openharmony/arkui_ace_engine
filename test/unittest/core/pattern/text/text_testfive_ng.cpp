@@ -24,6 +24,7 @@
 #include "text_base.h"
 
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 
@@ -803,20 +804,20 @@ HWTEST_F(TextTestFiveNg, GetTextDirection001, TestSize.Level1)
     auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(textLayoutProperty, nullptr);
 
-    EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
+    EXPECT_EQ(ParagraphUtil::GetTextDirection(
         content, Referenced::RawPtr(layoutWrapper)), TextDirection::LTR);
 
     textLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
-    EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
+    EXPECT_EQ(ParagraphUtil::GetTextDirection(
         content, Referenced::RawPtr(layoutWrapper)), TextDirection::LTR);
 
     textLayoutProperty->UpdateLayoutDirection(TextDirection::RTL);
-    EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
+    EXPECT_EQ(ParagraphUtil::GetTextDirection(
         content, Referenced::RawPtr(layoutWrapper)), TextDirection::RTL);
 
     textLayoutProperty->UpdateLayoutDirection(TextDirection::AUTO);
     AceApplicationInfo::GetInstance().isRightToLeft_ = !AceApplicationInfo::GetInstance().IsRightToLeft();
-    EXPECT_EQ(MultipleParagraphLayoutAlgorithm::GetTextDirection(
+    EXPECT_EQ(ParagraphUtil::GetTextDirection(
         content, Referenced::RawPtr(layoutWrapper)), TextDirection::LTR);
     AceApplicationInfo::GetInstance().isRightToLeft_ = !AceApplicationInfo::GetInstance().IsRightToLeft();
 }
@@ -1744,7 +1745,7 @@ HWTEST_F(TextTestFiveNg, GetSpanParagraphStyle001, TestSize.Level1)
     spanItem->textLineStyle->UpdateEllipsisMode(EllipsisMode::HEAD);
     spanItem->textLineStyle->UpdateLineBreakStrategy(LineBreakStrategy::GREEDY);
     spanItem->textLineStyle->UpdateLeadingMargin(LeadingMargin());
-    textLayoutAlgorithm->GetSpanParagraphStyle(nullptr, spanItem, pStyle);
+    ParagraphUtil::GetSpanParagraphStyle(nullptr, spanItem, pStyle);
     EXPECT_EQ(pStyle.maxLines, 1024);
     EXPECT_EQ(pStyle.ellipsisMode, EllipsisMode::HEAD);
     EXPECT_EQ(pStyle.lineBreakStrategy, LineBreakStrategy::GREEDY);

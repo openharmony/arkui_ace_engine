@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_menu_item_theme.h"
 #include "core/components_ng/pattern/symbol/symbol_source_info.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<MenuItemModel> MenuItemModel::instance_ = nullptr;
@@ -56,6 +57,10 @@ void JSMenuItem::ParseMenuItemOptionsResource(
     std::string contentStr;
     std::string endIconPath;
     std::string labelStr;
+    RefPtr<ResourceObject> contentStrObj;
+    RefPtr<ResourceObject> labelStrObj;
+    RefPtr<ResourceObject> startIconObj;
+    RefPtr<ResourceObject> endIconObj;
     std::function<void(WeakPtr<NG::FrameNode>)> symbolApply;
 
     auto startIcon = menuItemObj->GetProperty("startIcon");
@@ -68,30 +73,70 @@ void JSMenuItem::ParseMenuItemOptionsResource(
     if (symbolStart->IsObject()) {
         JSViewAbstract::SetSymbolOptionApply(info, symbolApply, symbolStart);
         menuItemProps.startApply = symbolApply;
-    } else if (ParseJsMedia(startIcon, startIconPath)) {
+    } else if (ParseJsMedia(startIcon, startIconPath, startIconObj)) {
         std::string bundleName;
         std::string moduleName;
         GetJsMediaBundleInfo(startIcon, bundleName, moduleName);
         ImageSourceInfo imageSourceInfo(startIconPath, bundleName, moduleName);
         menuItemProps.startIcon = imageSourceInfo;
     }
-
-    ParseJsString(content, contentStr);
+    ParseJsString(content, contentStr, contentStrObj);
     menuItemProps.content = contentStr;
-
     if (symbolEnd->IsObject()) {
         JSViewAbstract::SetSymbolOptionApply(info, symbolApply, symbolEnd);
         menuItemProps.endApply = symbolApply;
-    } else if (ParseJsMedia(endIcon, endIconPath)) {
+    } else if (ParseJsMedia(endIcon, endIconPath, endIconObj)) {
         std::string bundleName;
         std::string moduleName;
         GetJsMediaBundleInfo(endIcon, bundleName, moduleName);
         ImageSourceInfo imageSourceInfo(endIconPath, bundleName, moduleName);
         menuItemProps.endIcon = imageSourceInfo;
     }
-
-    if (ParseJsString(label, labelStr)) {
+    if (ParseJsString(label, labelStr, labelStrObj)) {
         menuItemProps.labelInfo = labelStr;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        AddMenuItemOptionsResource(contentStrObj, labelStrObj, startIconObj, endIconObj, menuItemProps);
+    }
+}
+
+void JSMenuItem::AddMenuItemOptionsResource(const RefPtr<ResourceObject>& contentStrObj,
+    const RefPtr<ResourceObject>& labelStrObj, const RefPtr<ResourceObject>& startIconObj,
+    const RefPtr<ResourceObject>& endIconObj, MenuItemProperties& menuItemProps)
+{
+    if (contentStrObj) {
+        menuItemProps.AddResource("MenuItem.Content", contentStrObj, [](const RefPtr<ResourceObject>& resObj,
+            MenuItemProperties& props) {
+            std::string contentStr;
+            CHECK_NE_VOID(ResourceParseUtils::ParseResString(resObj, contentStr), true);
+            props.content = contentStr;
+        });
+    }
+    if (labelStrObj) {
+        menuItemProps.AddResource("MenuItem.Label", labelStrObj, [](const RefPtr<ResourceObject>& resObj,
+            MenuItemProperties& props) {
+            std::string labelInfoStr;
+            CHECK_NE_VOID(ResourceParseUtils::ParseResString(resObj, labelInfoStr), true);
+            props.labelInfo = labelInfoStr;
+        });
+    }
+    if (startIconObj) {
+        menuItemProps.AddResource("MenuItem.StartIcon", startIconObj, [](const RefPtr<ResourceObject>& resObj,
+            MenuItemProperties& props) {
+            std::string iconStr;
+            CHECK_NE_VOID(ResourceParseUtils::ParseResMedia(resObj, iconStr), true);
+            ImageSourceInfo imageSourceInfo(iconStr);
+            props.startIcon = imageSourceInfo;
+        });
+    }
+    if (endIconObj) {
+        menuItemProps.AddResource("MenuItem.EndIcon", endIconObj, [](const RefPtr<ResourceObject>& resObj,
+            MenuItemProperties& props) {
+            std::string iconStr;
+            CHECK_NE_VOID(ResourceParseUtils::ParseResMedia(resObj, iconStr), true);
+            ImageSourceInfo imageSourceInfo(iconStr);
+            props.endIcon = imageSourceInfo;
+        });
     }
 }
 
@@ -101,16 +146,14 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
         MenuItemModel::GetInstance()->Create(nullptr);
         return;
     }
-    auto vm = info.GetVm();
     // custom menu item
     if (info[0]->IsFunction()) {
-        auto jsFunc = JSRef<JSFunc>::Cast(info[0]);
-        auto func = jsFunc->GetLocalHandle();
-        auto builderFunc = panda::CopyableGlobal(vm, func);
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(info[0]));
+        CHECK_NULL_VOID(builderFunc);
         RefPtr<NG::UINode> customNode;
         {
             ViewStackModel::GetInstance()->NewScope();
-            builderFunc->Call(vm, builderFunc.ToLocal(), nullptr, 0);
+            builderFunc->Execute();
             customNode = AceType::DynamicCast<NG::UINode>(ViewStackModel::GetInstance()->Finish());
         }
         CHECK_NULL_VOID(customNode);
@@ -121,15 +164,15 @@ void JSMenuItem::Create(const JSCallbackInfo& info)
         ParseMenuItemOptionsResource(info, menuItemObj, menuItemProps);
         auto builder = menuItemObj->GetProperty("builder");
         if (!builder.IsEmpty() && builder->IsFunction()) {
-            auto jsFunc = JSRef<JSFunc>::Cast(builder);
-            auto func = jsFunc->GetLocalHandle();
+            auto subBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+            CHECK_NULL_VOID(subBuilderFunc);
             auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            auto subBuildFunc = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode]() {
-                panda::LocalScope pandaScope(vm);
-                panda::TryCatch trycatch(vm);
+            auto subBuildFunc = [execCtx = info.GetExecutionContext(), func = std::move(subBuilderFunc),
+                                    node = targetNode]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("MenuItem SubBuilder");
                 PipelineContext::SetCallBackNode(node);
-                func->Call(vm, func.ToLocal(), nullptr, 0);
+                func->ExecuteJS();
             };
             menuItemProps.buildFunc = std::move(subBuildFunc);
         }
@@ -146,6 +189,7 @@ void JSMenuItem::JSBind(BindingTarget globalObj)
 
     JSClass<JSMenuItem>::StaticMethod("selected", &JSMenuItem::IsSelected, opt);
     JSClass<JSMenuItem>::StaticMethod("selectIcon", &JSMenuItem::SelectIcon, opt);
+    JSClass<JSMenuItem>::StaticMethod("onChange", &JSMenuItem::OnChange, opt);
     JSClass<JSMenuItem>::StaticMethod("contentFont", &JSMenuItem::ContentFont, opt);
     JSClass<JSMenuItem>::StaticMethod("contentFontColor", &JSMenuItem::ContentFontColor, opt);
     JSClass<JSMenuItem>::StaticMethod("labelFont", &JSMenuItem::LabelFont, opt);
@@ -161,17 +205,16 @@ void JSMenuItem::JSBind(BindingTarget globalObj)
 void ParseIsSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
-    auto vm = info.GetVm();
-    auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
-    auto func = jsFunc->GetLocalHandle();
+
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onSelected = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](bool selected) {
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch trycatch(vm);
+    auto onSelected = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                          bool selected) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("MenuItem.SelectedChangeEvent");
         PipelineContext::SetCallBackNode(node);
-        panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, selected) };
-        func->Call(vm, func.ToLocal(), params, 1);
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(selected));
+        func->ExecuteJS(1, &newJSVal);
     };
     MenuItemModel::GetInstance()->SetSelectedChangeEvent(std::move(onSelected));
 }
@@ -206,11 +249,12 @@ void JSMenuItem::SelectIcon(const JSCallbackInfo& info)
 {
     bool isShow = false;
     std::string icon;
+    RefPtr<ResourceObject> resObj;
     std::function<void(WeakPtr<NG::FrameNode>)> symbolApply;
     if (info[0]->IsBoolean()) {
         isShow = info[0]->ToBoolean();
     } else if (info[0]->IsString()) {
-        icon = info[0]->ToString();
+        ParseJsString(info[0], icon, resObj);
         isShow = true;
     } else if (ParseJsMedia(info[0], icon)) {
         isShow = true;
@@ -221,129 +265,173 @@ void JSMenuItem::SelectIcon(const JSCallbackInfo& info)
     MenuItemModel::GetInstance()->SetSelectIcon(isShow);
     MenuItemModel::GetInstance()->SetSelectIconSrc(icon);
     MenuItemModel::GetInstance()->SetSelectIconSymbol(std::move(symbolApply));
+    if (SystemProperties::ConfigChangePerform()) {
+        MenuItemModel::GetInstance()->CreateWithStringResourceObj(resObj, MenuItemStringType::SELECT_ICON);
+    }
+}
+
+void JSMenuItem::OnChange(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool selected) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("MenuItem.onChange");
+        PipelineContext::SetCallBackNode(node);
+        JSRef<JSVal> params[1];
+        params[0] = JSRef<JSVal>::Make(ToJSValue(selected));
+        func->ExecuteJS(1, params);
+    };
+    MenuItemModel::GetInstance()->SetOnChange(std::move(onChange));
+    info.ReturnSelf();
 }
 
 void JSMenuItem::ContentFont(const JSCallbackInfo& info)
 {
     CalcDimension fontSize;
     std::string weight;
-    if (!info[0]->IsObject()) {
-        return;
-    } else {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        JSRef<JSVal> size = obj->GetProperty("size");
-        if (!size->IsNull()) {
-            ParseJsDimensionFp(size, fontSize);
-            if (fontSize.Unit() == DimensionUnit::PERCENT) {
-                // set zero for abnormal value
-                fontSize = CalcDimension();
-            }
+    RefPtr<ResourceObject> fontSizeResObj;
+    CHECK_NE_VOID(info[0]->IsObject(), true);
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> size = obj->GetProperty("size");
+    if (!size->IsNull()) {
+        ParseJsDimensionFp(size, fontSize, fontSizeResObj);
+        if (fontSize.Unit() == DimensionUnit::PERCENT) {
+            // set zero for abnormal value
+            fontSize = CalcDimension();
         }
+    }
 
-        auto jsWeight = obj->GetProperty("weight");
-        if (!jsWeight->IsNull()) {
-            if (jsWeight->IsNumber()) {
-                weight = std::to_string(jsWeight->ToNumber<int32_t>());
-            } else {
-                ParseJsString(jsWeight, weight);
-            }
+    auto jsWeight = obj->GetProperty("weight");
+    if (!jsWeight->IsNull()) {
+        if (jsWeight->IsNumber()) {
+            weight = std::to_string(jsWeight->ToNumber<int32_t>());
+        } else {
+            ParseJsString(jsWeight, weight);
         }
+    }
 
-        auto jsStyle = obj->GetProperty("style");
-        if (!jsStyle->IsNull()) {
-            if (jsStyle->IsNumber()) {
-                MenuItemModel::GetInstance()->SetFontStyle(static_cast<FontStyle>(jsStyle->ToNumber<int32_t>()));
-            } else {
-                std::string style;
-                ParseJsString(jsStyle, style);
-                MenuItemModel::GetInstance()->SetFontStyle(ConvertStrToFontStyle(style));
-            }
+    auto jsStyle = obj->GetProperty("style");
+    if (!jsStyle->IsNull()) {
+        if (jsStyle->IsNumber()) {
+            MenuItemModel::GetInstance()->SetFontStyle(static_cast<FontStyle>(jsStyle->ToNumber<int32_t>()));
+        } else {
+            std::string style;
+            ParseJsString(jsStyle, style);
+            MenuItemModel::GetInstance()->SetFontStyle(ConvertStrToFontStyle(style));
         }
+    }
 
-        auto jsFamily = obj->GetProperty("family");
-        if (!jsFamily->IsNull() && jsFamily->IsString()) {
-            auto familyVal = jsFamily->ToString();
-            auto fontFamilies = ConvertStrToFontFamilies(familyVal);
+    auto jsFamily = obj->GetProperty("family");
+    if (!jsFamily->IsNull() && jsFamily->IsString()) {
+        RefPtr<ResourceObject> familyResObj;
+        std::vector<std::string> fontFamilies;
+        if (ParseJsFontFamilies(jsFamily, fontFamilies, familyResObj)) {
             MenuItemModel::GetInstance()->SetFontFamily(fontFamilies);
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            MenuItemModel::GetInstance()->CreateWithFontFamilyResourceObj(
+                familyResObj, MenuItemFontFamilyType::FONT_FAMILY);
         }
     }
     MenuItemModel::GetInstance()->SetFontSize(fontSize);
+    if (SystemProperties::ConfigChangePerform()) {
+        MenuItemModel::GetInstance()->CreateWithDimensionFpResourceObj(
+            fontSizeResObj, MenuItemFontSizeType::FONT_SIZE);
+    }
     MenuItemModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
 }
 
 void JSMenuItem::ContentFontColor(const JSCallbackInfo& info)
 {
-    std::optional<Color> color = std::nullopt;
     if (info.Length() < 1) {
         return;
-    } else {
-        Color textColor;
-        if (ParseJsColor(info[0], textColor)) {
-            color = textColor;
-        }
+    }
+    std::optional<Color> color = std::nullopt;
+    Color textColor;
+    RefPtr<ResourceObject> resObj;
+    if (ParseJsColor(info[0], textColor, resObj)) {
+        color = textColor;
     }
     MenuItemModel::GetInstance()->SetFontColor(color);
+    if (SystemProperties::ConfigChangePerform()) {
+        MenuItemModel::GetInstance()->CreateWithColorResourceObj(resObj, MenuItemFontColorType::FONT_COLOR);
+    }
 }
 
 void JSMenuItem::LabelFont(const JSCallbackInfo& info)
 {
     CalcDimension fontSize;
     std::string weight;
-    if (!info[0]->IsObject()) {
-        return;
-    } else {
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-        JSRef<JSVal> size = obj->GetProperty("size");
-        if (!size->IsNull()) {
-            ParseJsDimensionFp(size, fontSize);
-            if (fontSize.Unit() == DimensionUnit::PERCENT) {
-                // set zero for abnormal value
-                fontSize = CalcDimension();
-            }
+    RefPtr<ResourceObject> fontSizeResObj;
+    CHECK_NE_VOID(info[0]->IsObject(), true);
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> size = obj->GetProperty("size");
+    if (!size->IsNull()) {
+        ParseJsDimensionFp(size, fontSize, fontSizeResObj);
+        if (fontSize.Unit() == DimensionUnit::PERCENT) {
+            // set zero for abnormal value
+            fontSize = CalcDimension();
         }
+    }
 
-        auto jsWeight = obj->GetProperty("weight");
-        if (!jsWeight->IsNull()) {
-            if (jsWeight->IsNumber()) {
-                weight = std::to_string(jsWeight->ToNumber<int32_t>());
-            } else {
-                ParseJsString(jsWeight, weight);
-            }
+    auto jsWeight = obj->GetProperty("weight");
+    if (!jsWeight->IsNull()) {
+        if (jsWeight->IsNumber()) {
+            weight = std::to_string(jsWeight->ToNumber<int32_t>());
+        } else {
+            ParseJsString(jsWeight, weight);
         }
+    }
 
-        auto jsStyle = obj->GetProperty("style");
-        if (!jsStyle->IsNull()) {
-            if (jsStyle->IsNumber()) {
-                MenuItemModel::GetInstance()->SetLabelFontStyle(static_cast<FontStyle>(jsStyle->ToNumber<int32_t>()));
-            } else {
-                std::string style;
-                ParseJsString(jsStyle, style);
-                MenuItemModel::GetInstance()->SetLabelFontStyle(ConvertStrToFontStyle(style));
-            }
+    auto jsStyle = obj->GetProperty("style");
+    if (!jsStyle->IsNull()) {
+        if (jsStyle->IsNumber()) {
+            MenuItemModel::GetInstance()->SetLabelFontStyle(static_cast<FontStyle>(jsStyle->ToNumber<int32_t>()));
+        } else {
+            std::string style;
+            ParseJsString(jsStyle, style);
+            MenuItemModel::GetInstance()->SetLabelFontStyle(ConvertStrToFontStyle(style));
         }
+    }
 
-        auto jsFamily = obj->GetProperty("family");
-        if (!jsFamily->IsNull() && jsFamily->IsString()) {
-            auto familyVal = jsFamily->ToString();
-            auto fontFamilies = ConvertStrToFontFamilies(familyVal);
+    auto jsFamily = obj->GetProperty("family");
+    if (!jsFamily->IsNull() && jsFamily->IsString()) {
+        RefPtr<ResourceObject> familyResObj;
+        std::vector<std::string> fontFamilies;
+        if (ParseJsFontFamilies(jsFamily, fontFamilies, familyResObj)) {
             MenuItemModel::GetInstance()->SetLabelFontFamily(fontFamilies);
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            MenuItemModel::GetInstance()->CreateWithFontFamilyResourceObj(
+                familyResObj, MenuItemFontFamilyType::LABEL_FONT_FAMILY);
         }
     }
     MenuItemModel::GetInstance()->SetLabelFontSize(fontSize);
+    if (SystemProperties::ConfigChangePerform()) {
+        MenuItemModel::GetInstance()->CreateWithDimensionFpResourceObj(
+            fontSizeResObj, MenuItemFontSizeType::LABEL_FONT_SIZE);
+    }
     MenuItemModel::GetInstance()->SetLabelFontWeight(ConvertStrToFontWeight(weight));
 }
 
 void JSMenuItem::LabelFontColor(const JSCallbackInfo& info)
 {
-    std::optional<Color> color = std::nullopt;
     if (info.Length() < 1) {
         return;
-    } else {
-        Color textColor;
-        if (ParseJsColor(info[0], textColor)) {
-            color = textColor;
-        }
+    }
+    std::optional<Color> color = std::nullopt;
+    Color textColor;
+    RefPtr<ResourceObject> resObj;
+    if (ParseJsColor(info[0], textColor, resObj)) {
+        color = textColor;
     }
     MenuItemModel::GetInstance()->SetLabelFontColor(color);
+    if (SystemProperties::ConfigChangePerform()) {
+        MenuItemModel::GetInstance()->CreateWithColorResourceObj(resObj, MenuItemFontColorType::LABEL_FONT_COLOR);
+    }
 }
 } // namespace OHOS::Ace::Framework

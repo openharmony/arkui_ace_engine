@@ -2244,6 +2244,21 @@ class OnGestureRecognizerJudgeBeginModifier extends ModifierWithKey<GestureRecog
   }
 }
 
+declare type TouchTestDoneCallback = (event: BaseGestureEvent, recognizers: Array<GestureRecognizer>) => void;
+class OnTouchTestDoneModifier extends ModifierWithKey<TouchTestDoneCallback> {
+  constructor(value: TouchTestDoneCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onTouchTestDone');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnOnTouchTestDone(node);
+    } else {
+      getUINativeModule().common.setOnTouchTestDone(node, this.value);
+    }
+  }
+}
+
 declare type ShouldBuiltInRecognizerParallelWithCallback = (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer;
 class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey<ShouldBuiltInRecognizerParallelWithCallback> {
   constructor(value: ShouldBuiltInRecognizerParallelWithCallback) {
@@ -4009,6 +4024,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   private _onAreaChange: AreaChangeEventCallback = null;
   private _onGestureJudgeBegin: GestureJudgeBeginCallback = null;
   private _onGestureRecognizerJudgeBegin: GestureRecognizerJudgeBeginCallback = null;
+  private _onTouchTestDone: TouchTestDoneCallback = null;
   private _shouldBuiltInRecognizerParallelWith: ShouldBuiltInRecognizerParallelWithCallback = null;
   private _onFocusAxisEvent: FocusAxisEventCallback = null;
 
@@ -4109,6 +4125,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     touchRecognizers?: Array<TouchRecognizer>) => GestureJudgeResult): this {
     this._onGestureRecognizerJudgeBegin = callback;
     modifierWithKey(this._modifiersWithKeys, OnGestureRecognizerJudgeBeginModifier.identity, OnGestureRecognizerJudgeBeginModifier, callback);
+    return this;
+  }
+  onTouchTestDone(callback: (event: BaseGestureEvent, recognizers: Array<GestureRecognizer>) => void): this {
+    this._onTouchTestDone = callback;
+    modifierWithKey(this._modifiersWithKeys, OnTouchTestDoneModifier.identity, OnTouchTestDoneModifier, callback);
     return this;
   }
   shouldBuiltInRecognizerParallelWith(callback: (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer): this {

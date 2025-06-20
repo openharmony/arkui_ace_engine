@@ -15,7 +15,7 @@
 
 #include "native_node_napi.h"
 
-
+#include "napi/native_node_api.h"
 #include "node/node_extened.h"
 #include "node/node_model.h"
 
@@ -167,6 +167,39 @@ int32_t OH_ArkUI_GetNodeContentFromNapiValue(napi_env env, napi_value value, Ark
     }
     *content = reinterpret_cast<ArkUI_NodeContentHandle>(nativePtr);
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
+{
+    CHECK_NULL_RETURN(env, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    auto callback = [](const char* moduleName) -> bool {
+        const char* allowedModules[] = { "arkui.uicontext", "arkui.node", "arkui.modifier", "measure",
+            "arkui.UIContext" };
+        for (const char* allowedModule : allowedModules) {
+            if (std::strcmp(moduleName, allowedModule) == 0) {
+                return true;
+            }
+        }
+        return false;
+    };
+    auto ret = napi_set_module_validate_callback(callback);
+    if (ret != napi_ok) {
+        LOGE("fail to set module validate callback");
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getRuntimeInit()->registerViews(reinterpret_cast<void*>(env));
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+void OH_ArkUI_NotifyArkTSEnvDestroy(napi_env env)
+{
+    CHECK_NULL_VOID(env);
+    CHECK_NULL_VOID(OHOS::Ace::NodeModel::InitialFullImpl());
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_VOID(impl);
+    impl->getRuntimeInit()->notifyArkTSEnvDestroy(reinterpret_cast<void*>(env));
 }
 
 int32_t OH_ArkUI_GetDrawableDescriptorFromNapiValue(

@@ -49,6 +49,16 @@ PanEventActuator::PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventH
     panRecognizer_ = MakeRefPtr<PanRecognizer>(fingers_, direction_, distanceMap);
 }
 
+PanEventActuator::PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction,
+    int32_t fingers, const PanDistanceMapDimension& distanceMap)
+    : gestureEventHub_(gestureEventHub), direction_(direction), fingers_(fingers)
+{
+    if (fingers_ < DEFAULT_PAN_FINGER) {
+        fingers_ = DEFAULT_PAN_FINGER;
+    }
+    panRecognizer_ = MakeRefPtr<PanRecognizer>(fingers_, direction_, distanceMap);
+}
+
 void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, ResponseLinkResult& responseLinkResult)
 {

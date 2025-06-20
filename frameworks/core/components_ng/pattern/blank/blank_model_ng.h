@@ -27,10 +27,13 @@ public:
     void SetHeight(const Dimension& height) override;
     void SetColor(const Color& color) override;
     void SetColor(const RefPtr<ResourceObject>& resobj) override;
+    void ResetResObj(const std::string& key) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetColor(FrameNode* frameNode, const Color& color);
+    static void SetColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resobj);
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
     static void SetBlankMin(FrameNode* frameNode, const Dimension& blankMin);
+    static void ResetResObj(FrameNode* frameNode, const std::string& key);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BLANK_BLANK_MODEL_NG_H

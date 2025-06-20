@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include <cmath>
+#include <limits>
+#include "gtest/gtest.h"
 #include "text_input_base.h"
 
 #include "test/mock/core/render/mock_paragraph.h"
@@ -30,6 +33,8 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 
+#include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
+#include "core/components_ng/property/layout_constraint.h"
 #include "core/text/text_emoji_processor.h"
 #include "base/i18n/localization.h"
 #include "base/log/dump_log.h"
@@ -289,7 +294,7 @@ HWTEST_F(TextFieldPatternTestNine, HandleAIWriteResult001, TestSize.Level0)
     });
     GetFocus();
 
-    int32_t start =0;
+    int32_t start = 0;
     int32_t end = 0;
     std::vector<uint8_t> buffer;
     pattern_->HandleAIWriteResult(start, end, buffer);
@@ -1026,5 +1031,30 @@ HWTEST_F(TextFieldPatternTestNine, RegisterFontCallback, TestSize.Level0)
     fontManager->externalLoadCallbacks_.emplace(WeakPtr(frameNode_), std::make_pair("myFont", fontChangeCallback));
     fontChangeCallback();
     EXPECT_TRUE(hasChanged);
+}
+
+/**
+ * @tc.name: GetMaxIndent
+ * @tc.desc: test GetMaxIndent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestNine, GetMaxIndent, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT);
+    ASSERT_NE(pattern_, nullptr);
+    auto layoutAlgorithm = pattern_->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    auto textFieldLayoutAlgorithm = AceType::DynamicCast<TextFieldLayoutAlgorithm>(layoutAlgorithm);
+
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    auto width = textFieldLayoutAlgorithm->GetMaxIndent(&layoutWrapper, 100.0f);
+    EXPECT_EQ(width, 100.0f);
+    layoutProperty_->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize.SetWidth(200.0f);
+    layoutProperty_->contentConstraint_ = contentConstraint;
+    width = textFieldLayoutAlgorithm->GetMaxIndent(&layoutWrapper, std::numeric_limits<double>::infinity());
+    EXPECT_EQ(width, 200.0f);
 }
 } // namespace OHOS::Ace::NG

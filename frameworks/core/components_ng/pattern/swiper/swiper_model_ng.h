@@ -177,6 +177,22 @@ public:
     static std::shared_ptr<SwiperDigitalParameters> GetDigitIndicator(FrameNode* frameNode);
     static void SetMaintainVisibleContentPosition(FrameNode* frameNode, bool value);
     static bool GetMaintainVisibleContentPosition(FrameNode* frameNode);
+    static void ProcessDotPositionWithResourceObj(FrameNode* frameNode, const std::string& name,
+        const RefPtr<ResourceObject>& resObj);
+    static void ProcessDotSizeWithResourceObj(FrameNode* frameNode, const std::string& name,
+        const RefPtr<ResourceObject>& resObj);
+    static void ProcessDotColorWithResourceObj(FrameNode* frameNode, const std::string& name,
+        const RefPtr<ResourceObject>& resObj);
+    static void ProcessDigitalPositionWithResourceObj(FrameNode* frameNode, const std::string& name,
+        const RefPtr<ResourceObject>& resObj);
+    static void ProcessDigitalFontSizeWithResourceObj(FrameNode* frameNode, const std::string& name,
+        const RefPtr<ResourceObject>& resObj);
+    static void ProcessDigitalColorWithResourceObj(FrameNode* frameNode, const std::string& name,
+        const RefPtr<ResourceObject>& resObj);
+    static void ProcessArrowColorWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ProcessArrowBackgroundColorWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ProcessArrowSizeWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void ProcessBackgroundSizeWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void CreateDotWithResourceObj(FrameNode*  frameNode, const SwiperParameters& swiperParameters);
     static void CreateDigitWithResourceObj(FrameNode*  frameNode,
         const SwiperDigitalParameters& swiperDigitalParameters);

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/common/reporter/reporter.h"
@@ -123,7 +124,8 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     extraInfo_ = "";
-    lastAction_ = static_cast<int32_t>(TouchType::DOWN);
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::DOWN)
+                                                                  : static_cast<int32_t>(MouseAction::PRESS);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -189,7 +191,8 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    lastAction_ = static_cast<int32_t>(TouchType::UP);
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::UP)
+                                                                  : static_cast<int32_t>(MouseAction::RELEASE);
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
@@ -230,7 +233,8 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     lastTouchEvent_.pressedKeyCodes_ = event.pressedKeyCodes_;
-    lastAction_ = static_cast<int32_t>(TouchType::MOVE);
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::MOVE)
+                                                                  : static_cast<int32_t>(MouseAction::MOVE);
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         return;
     }
@@ -255,7 +259,8 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::FAIL) {
         return;
     }
-    lastAction_ = static_cast<int32_t>(TouchType::CANCEL);
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::CANCEL)
+                                                                  : static_cast<int32_t>(MouseAction::CANCEL);
     lastTouchEvent_ = event;
     if (touchPoints_.find(event.id) != touchPoints_.end()) {
         touchPoints_.erase(event.id);
@@ -420,6 +425,7 @@ void LongPressRecognizer::TriggerCallbackMsg(
         info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
         info.SetGlobalLocation(lastTouchEvent_.GetOffset())
             .SetLocalLocation(lastTouchEvent_.GetOffset() - coordinateOffset_);
+        info.SetGlobalDisplayLocation(lastTouchEvent_.GetGlobalDisplayOffset());
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         info.SetForce(lastTouchEvent_.force);
         if (lastTouchEvent_.tiltX.has_value()) {
@@ -439,7 +445,7 @@ void LongPressRecognizer::TriggerCallbackMsg(
         info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
-        HandleGestureAccept(info, type);
+        HandleGestureAccept(info, type, GestureListenerType::LONG_PRESS);
         callbackFunction(info);
         HandleReports(info, type);
         if (type == GestureCallbackType::START && longPressRecorder_ && *longPressRecorder_) {

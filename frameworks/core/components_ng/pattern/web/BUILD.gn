@@ -25,7 +25,6 @@ build_component_ng("web_pattern_ng") {
       "web_accessibility_property.cpp",
       "web_layout_algorithm.cpp",
       "web_model_ng.cpp",
-      #"web_model_static_ng.cpp",
     ]
   } else {
     sources = [
@@ -40,7 +39,6 @@ build_component_ng("web_pattern_ng") {
       "web_data_detector_adapter.cpp",
       "web_layout_algorithm.cpp",
       "web_model_ng.cpp",
-      #"web_model_static_ng.cpp",
       "web_paint_method.cpp",
       "web_pattern.cpp",
       "web_select_overlay.cpp",

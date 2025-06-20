@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -394,6 +394,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("friction", &JSGrid::SetFriction);
     JSClass<JSGrid>::StaticMethod("focusWrapMode", &JSGrid::SetFocusWrapMode);
     JSClass<JSGrid>::StaticMethod("alignItems", &JSGrid::SetAlignItems);
+    JSClass<JSGrid>::StaticMethod("syncLoad", &JSGrid::SetSyncLoad);
 
     JSClass<JSGrid>::StaticMethod("onScroll", &JSGrid::JsOnScroll);
     JSClass<JSGrid>::StaticMethod("onReachStart", &JSGrid::JsOnReachStart);
@@ -700,6 +701,18 @@ void JSGrid::SetAlignItems(const JSCallbackInfo& info)
     } else {
         GridModel::GetInstance()->SetAlignItems(GridItemAlignment::DEFAULT);
     }
+}
+
+void JSGrid::SetSyncLoad(const JSCallbackInfo& info)
+{
+    bool syncLoad = false;
+    if (info.Length() >= 1) {
+        auto value = info[0];
+        if (value->IsBoolean()) {
+            syncLoad = value->ToBoolean();
+        }
+    }
+    GridModel::GetInstance()->SetSyncLoad(syncLoad);
 }
 
 void JSGrid::JsOnScroll(const JSCallbackInfo& args)

@@ -48,6 +48,11 @@ public:
     SelectPattern() = default;
     ~SelectPattern() override = default;
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -205,7 +210,7 @@ public:
     void OnLanguageConfigurationUpdate() override;
     void ShowSelectMenu();
     void ShowSelectMenuInSubWindow();
-    
+
     Dimension GetFontSize();
     void SetOptionWidth(const Dimension& value);
     void SetOptionHeight(const Dimension& value);
@@ -244,6 +249,19 @@ public:
     void UpdateSelectedOptionFontFromPattern(const RefPtr<MenuItemPattern>& optionPattern);
     void DumpInfo() override;
 
+    void UpdateComponentColor(const Color& color, const SelectColorType selectColorType);
+    void SetColorByUser(const RefPtr<FrameNode>& host);
+    void UpdateMenuOption(int32_t index, const std::string& value, const SelectOptionType optionType);
+    void SetNormalOptionBgColorResource(bool flag)
+    {
+        isNormalOptionBgColorFlag_ = flag;
+    }
+
+    bool IsNormalOptionBgColorResource()
+    {
+        return isNormalOptionBgColorFlag_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
@@ -252,6 +270,8 @@ private:
     void HandleFocusStyleTask();
     void HandleBlurStyleTask();
     void SetFocusStyle();
+    void SetMenuBackgroundColorByUser(Color themeColor);
+    void SetOptionBgColorByUser(Color themeColor);
     void ClearFocusStyle();
     void ModFocusIconStyle(RefPtr<SelectTheme> selectTheme, bool focusedFlag);
     void InitFocusEvent();
@@ -382,6 +402,8 @@ private:
     std::function<void(WeakPtr<NG::FrameNode>)> textApply_ = nullptr;
     std::function<void(WeakPtr<NG::FrameNode>)> textOptionApply_ = nullptr;
     std::function<void(WeakPtr<NG::FrameNode>)> textSelectOptionApply_ = nullptr;
+    bool isNormalOptionBgColorFlag_ = false;
+    std::optional<Color> menuBackgroundColor_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -21,14 +21,14 @@
 namespace OHOS::Ace::Framework {
 class NavigationModelImpl : public NavigationModel {
 public:
-    void Create() override;
+    void Create(bool useHomeDestination = false) override;
     void SetNavigationStack() override;
     void SetNavigationStack(const RefPtr<NG::NavigationStack>& navigationStack) override;
     void SetNavigationStackProvided(bool provided) override;
     void SetTitle(const std::string& title, bool hasSubTitle = false) override;
     void SetCustomTitle(const RefPtr<AceType>& customTitle) override;
     void SetTitleHeight(const Dimension& height, bool isValid = true) override;
-    void SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid = true) override;
+    void SetTitleHeight(const RefPtr<ResourceObject>& resObj) override;
     void SetTitleMode(NG::NavigationTitleMode mode) override;
     void SetSubtitle(const std::string& subtitle) override;
     void SetEnableModeChangeAnimation(bool isEnable) override;

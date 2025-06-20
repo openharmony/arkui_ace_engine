@@ -575,6 +575,20 @@ public:
             nodeInfo_->codeCol = col;
         }
     }
+    void SetFilePath(const std::string& sources)
+    {
+        if (nodeInfo_) {
+            nodeInfo_->pagePath = sources;
+        }
+    }
+
+    std::string GetFilePath() const
+    {
+        if (nodeInfo_) {
+            return nodeInfo_->pagePath;
+        }
+        return "";
+    }
     void SetForeachItem()
     {
         if (nodeInfo_) {

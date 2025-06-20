@@ -289,7 +289,12 @@ HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator006, TestSize.Level1)
     bool isCalled = false;
     auto dialogEventHub = AceType::MakeRefPtr<DialogEventHub>();
     dialogEventHub->SetOnSuccess([&isCalled](int32_t, int32_t) { isCalled = true; });
-    dialogEventHub->FireSuccessEvent(0);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
+        V2::ACTION_SHEET_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialog, nullptr);
+    dialogEventHub->FireSuccessEvent(0, dialog);
     EXPECT_TRUE(isCalled);
 }
 
@@ -306,7 +311,12 @@ HWTEST_F(DialogPatternTestNg, DialogFrameNodeCreator0007, TestSize.Level1)
      * tc.expected:the dialogEventHub created successfully.
      */
     auto dialogEventHub = AceType::MakeRefPtr<DialogEventHub>();
-    dialogEventHub->FireSuccessEvent(buttonIdx);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    ASSERT_NE(dialogTheme, nullptr);
+    RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(
+        V2::ACTION_SHEET_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+    ASSERT_NE(dialog, nullptr);
+    dialogEventHub->FireSuccessEvent(buttonIdx, dialog);
     EXPECT_EQ(dialogEventHub->onSuccess_ == nullptr, true);
 }
 

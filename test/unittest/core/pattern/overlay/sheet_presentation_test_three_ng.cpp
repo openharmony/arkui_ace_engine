@@ -1585,4 +1585,61 @@ HWTEST_F(SheetPresentationTestThreeNg, StartSheetTransitionAnimation001, TestSiz
     CHECK_NULL_VOID(overlayManager);
     EXPECT_TRUE(overlayManager->modalStack_.empty());
 }
+
+/**
+ * @tc.name: SetWindowUseImplicitAnimation001
+ * @tc.desc: Branch: if (sheetStyle.showInSubWindow.value_or(false))
+ *           Condition: sheetStyle.showInSubWindow = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, SetWindowUseImplicitAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 301, AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set sheetStyle.showInSubWindow true.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.showInSubWindow = true;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto windowManager = pipelineContext->windowManager_;
+    pipelineContext->windowManager_ = nullptr;
+
+    /**
+     * @tc.steps: step2. set useImplicitAnimationCallback_.
+     * @tc.expected: isUseImplicit will be changed.
+     */
+    pipelineContext->windowManager_ = windowManager;
+    bool isUseImplicit = false;
+    pipelineContext->windowManager_->useImplicitAnimationCallback_ = [&isUseImplicit](bool m) { isUseImplicit = m; };
+
+    /**
+     * @tc.expected: isUseImplicit is false.
+     */
+    sheetPattern->SetWindowUseImplicitAnimation(AceType::RawPtr(sheetNode), true);
+    EXPECT_EQ(isUseImplicit, false);
+
+    /**
+     * @tc.steps: step3. set sheetStyle.showInSubWindow false.
+     * @tc.expected: isUseImplicit is true.
+     */
+    sheetStyle.showInSubWindow = false;
+    layoutProperty->propSheetStyle_ = sheetStyle;
+    sheetPattern->SetWindowUseImplicitAnimation(AceType::RawPtr(sheetNode), true);
+    EXPECT_EQ(isUseImplicit, true);
+    pipelineContext->windowManager_->useImplicitAnimationCallback_ = nullptr;
+    pipelineContext->windowManager_ = nullptr;
+    SheetPresentationTestThreeNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG

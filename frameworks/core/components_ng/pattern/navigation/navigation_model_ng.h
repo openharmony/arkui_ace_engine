@@ -25,7 +25,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT NavigationModelNG : public OHOS::Ace::NavigationModel {
 public:
-    void Create() override;
+    void Create(bool useHomeDestination = false) override;
     void SetNavigationStack() override;
     void SetNavigationStack(const RefPtr<NG::NavigationStack>& navigationStack) override;
     void SetNavigationStackWithCreatorAndUpdater(std::function<RefPtr<NG::NavigationStack>()> creator,
@@ -35,7 +35,7 @@ public:
     bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
         const std::string& title, bool ignoreMainTitle = false) override;
     bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
-        const RefPtr<ResourceObject>& mainResObj, bool ignoreMainTitle = false) override;
+        const RefPtr<ResourceObject>& mainResObj) override;
     void UpdateMainTitle(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj) override;
     void UpdateSubTitle(
@@ -45,7 +45,7 @@ public:
     void SetTitlebarOptions(NavigationTitlebarOptions&& opt) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
     void SetTitleHeight(const Dimension& height, bool isValid = true) override;
-    void SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid = true) override;
+    void SetTitleHeight(const RefPtr<ResourceObject>& resObj) override;
     void SetTitleMode(NG::NavigationTitleMode mode) override;
     void SetSubtitle(const std::string& subtitle) override;
     void SetEnableModeChangeAnimation(bool isEnable) override;
@@ -109,6 +109,7 @@ public:
     void SetIsCustomAnimation(bool isCustom) override;
     void SetRecoverable(bool recoverable) override;
     void SetEnableDragBar(bool enableDragBar) override;
+    void ResetResObj(NavigationPatternType type, const std::string& key) override;
     void ResetSplitPlaceholder() override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -145,9 +146,8 @@ public:
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) override;
     static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo,
         bool ignoreMainTitle = false);
-    static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo,
-        const RefPtr<ResourceObject>& titleResObj, const RefPtr<ResourceObject>& subtitleResObj,
-        bool ignoreMainTitle = false);
+    static void ParseCommonTitle(
+        FrameNode* frameNode, const RefPtr<ResourceObject>& titleResObj, const RefPtr<ResourceObject>& subtitleResObj);
     static void UpdateMainTitleInfo(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj);
     static void UpdateSubTitleInfo(
@@ -174,6 +174,12 @@ public:
     static RefPtr<NG::NavigationStack> GetNavigationStack(FrameNode* frameNode);
     static void SetOnNavBarStateChange(FrameNode* frameNode, std::function<void(bool)>&& onNavBarStateChange);
     static CalcDimension ParseTitleHeight(const RefPtr<ResourceObject>& resObj);
+    static void ResetResObj(FrameNode* frameNode, NavigationPatternType type, const std::string& key);
+    static void SetBeforeCreateLayoutWrapperCallBack(
+        FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper);
+    virtual bool UseHomeDestination() const override;
+    virtual void SetHomePathInfoWithCallback(
+        std::function<void(const RefPtr<NavigationStack>&)>&& setHomePathInfoCallback) override;
 
 private:
     bool CreatePrimaryContentIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);

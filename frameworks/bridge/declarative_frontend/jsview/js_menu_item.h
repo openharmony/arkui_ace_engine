@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@ public:
 
     static void IsSelected(const JSCallbackInfo& info);
     static void SelectIcon(const JSCallbackInfo& info);
+    static void OnChange(const JSCallbackInfo& info);
 
     static void ContentFont(const JSCallbackInfo& info);
     static void ContentFontColor(const JSCallbackInfo& info);
@@ -36,6 +37,9 @@ public:
 private:
     static void ParseMenuItemOptionsResource(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuItemObj, MenuItemProperties& menuItemProps);
+    static void AddMenuItemOptionsResource(const RefPtr<ResourceObject>& contentStrObj,
+        const RefPtr<ResourceObject>& labelStrObj, const RefPtr<ResourceObject>& startIconObj,
+        const RefPtr<ResourceObject>& endIconObj, MenuItemProperties& menuItemProps);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_MENU_ITEM_H

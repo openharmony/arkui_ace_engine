@@ -59,6 +59,9 @@ public:
     void SetUp() override;
     void TearDown() override;
     static void TearDownTestSuite();
+
+protected:
+    std::vector<MenuOptionsParam> GetMenuOptionItems();
 };
 
 void RichEditorMenuTestNg::SetUp()
@@ -88,6 +91,20 @@ void RichEditorMenuTestNg::TearDown()
 void RichEditorMenuTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+}
+
+std::vector<MenuOptionsParam> RichEditorMenuTestNg::GetMenuOptionItems()
+{
+    std::vector<MenuOptionsParam> menuOptionItems;
+    MenuOptionsParam menuOptionItem1;
+    menuOptionItem1.content = "test1";
+    menuOptionItem1.action = [](const std::string&) {};
+    MenuOptionsParam menuOptionItem2;
+    menuOptionItem2.content = "test2";
+    menuOptionItem2.action = [](const std::string&) {};
+    menuOptionItems.emplace_back(menuOptionItem1);
+    menuOptionItems.emplace_back(menuOptionItem2);
+    return menuOptionItems;
 }
 
 /**
@@ -506,7 +523,9 @@ HWTEST_F(RichEditorMenuTestNg, SelectionMenuOptionsTest001, TestSize.Level1)
     menuOptionsItems.push_back(menuOptionsParam3);
     OnCreateMenuCallback onCreateMenuCallback;
     OnMenuItemClickCallback onMenuItemClick;
-    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    OnPrepareMenuCallback onPrepareMenuCallback;
+    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick),
+        std::move(onPrepareMenuCallback));
 }
 
 /**
@@ -534,7 +553,51 @@ HWTEST_F(RichEditorMenuTestNg, SelectionMenuOptionsTest002, TestSize.Level1)
     menuOptionsItems.push_back(menuOptionsParam3);
     OnCreateMenuCallback onCreateMenuCallback;
     OnMenuItemClickCallback onMenuItemClick;
-    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    OnPrepareMenuCallback onPrepareMenuCallback;
+    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick),
+        std::move(onPrepareMenuCallback));
+}
+
+/**
+ * @tc.name: EditMenuOptionsTest001
+ * @tc.desc: Test editMenuOptions callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorMenuTestNg, EditMenuOptionsTest001, TestSize.Level1)
+{
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. Set editMenuOptions callback.
+     */
+    auto menuOptionItems = GetMenuOptionItems();
+    auto onCreateMenuCallback = [menuOptionItems](
+            const std::vector<NG::MenuItemParam>& menuItems) -> std::vector<MenuOptionsParam> {
+        return menuOptionItems;
+    };
+    auto onMenuItemClick = [](NG::MenuItemParam menuOptionsParam) -> bool { return false; };
+    auto onPrepareMenuCallback = [menuOptionItems](
+            const std::vector<NG::MenuItemParam>& menuItems) -> std::vector<MenuOptionsParam> {
+        return menuOptionItems;
+    };
+    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick),
+        std::move(onPrepareMenuCallback));
+
+    /**
+     * @tc.steps: step2. UpdateSelectOverlayInfo.
+     */
+    SelectOverlayInfo selectInfo;
+    int32_t requestCode = -1;
+    richEditorPattern->selectOverlay_->OnUpdateSelectOverlayInfo(selectInfo, requestCode);
+    EXPECT_TRUE(selectInfo.menuInfo.hasOnPrepareMenuCallback);
+
+    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick),
+        nullptr);
+    richEditorPattern->selectOverlay_->OnUpdateSelectOverlayInfo(selectInfo, requestCode);
+    EXPECT_FALSE(selectInfo.menuInfo.hasOnPrepareMenuCallback);
 }
 
 /**
@@ -964,7 +1027,9 @@ HWTEST_F(RichEditorMenuTestNg, OnSelectionMenuOptionsUpdate001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     OnCreateMenuCallback onCreateMenuCallback;
     OnMenuItemClickCallback onMenuItemClick;
-    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    OnPrepareMenuCallback onPrepareMenuCallback;
+    richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick),
+        std::move(onPrepareMenuCallback));
 }
 
 /**

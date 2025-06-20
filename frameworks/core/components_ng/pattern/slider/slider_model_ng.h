@@ -66,6 +66,11 @@ public:
     void SetValidSlideRange(float fromValue, float toValue) override;
     void SetPrefix(const RefPtr<UINode>& content, const NG::SliderPrefixOptions& options) override;
     void SetSuffix(const RefPtr<UINode>& content, const NG::SliderSuffixOptions& options) override;
+    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+        const SliderColorType sliderColorType) override;
+    void CreateWithMediaResourceObj(const RefPtr<ResourceObject>& resObj,
+        const std::string& bundleName, const std::string& moduleName) override;
+    void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj, const bool isShowTips) override;
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) override;
 #endif
@@ -92,7 +97,13 @@ public:
 #ifdef SUPPORT_DIGITAL_CROWN
     void ResetDigitalCrownSensitivity() override;
 #endif
-
+    static void UpdateComponentColor(FrameNode* frameNode, const SliderColorType sliderColorType);
+    static void CreateWithColorResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        const SliderColorType sliderColorType);
+    static void CreateWithStringResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        const bool isShowTips);
+    static void CreateWithMediaResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        const std::string& bundleName, const std::string& moduleName);
     static void SetShowTips(FrameNode* frameNode, bool value, const std::optional<std::string>& content);
     static void SetThickness(FrameNode* frameNode, const Dimension& value);
     static void SetStepSize(FrameNode* frameNode, const Dimension& value);
@@ -178,6 +189,7 @@ public:
 
 private:
     void SetSliderValue(float value);
+    static std::string ColorTypeToString(const SliderColorType sliderColorType);
 };
 
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,16 +72,15 @@ void JSCheckbox::Create(const JSCallbackInfo& info)
         }
         auto builderObject = paramObject->GetProperty("indicatorBuilder");
         if (builderObject->IsFunction()) {
-            auto vm = info.GetVm();
-            auto jsFunc = JSRef<JSFunc>::Cast(builderObject);
-            auto func = jsFunc->GetLocalHandle();
+            auto builderFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builderObject));
+            CHECK_NULL_VOID(builderFunc);
             auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            auto callbackFunc = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode]() {
-                panda::LocalScope pandaScope(vm);
-                panda::TryCatch trycatch(vm);
+            auto callbackFunc = [execCtx = info.GetExecutionContext(),
+                func = std::move(builderFunc), node = targetNode]() {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("CheckBox.builder");
                 PipelineContext::SetCallBackNode(node);
-                func->Call(vm, func.ToLocal(), nullptr, 0);
+                func->Execute();
             };
             customBuilderFunc = std::move(callbackFunc);
         }
@@ -97,11 +96,13 @@ void JSCheckbox::JSBind(BindingTarget globalObj)
     JSClass<JSCheckbox>::StaticMethod("create", &JSCheckbox::Create);
     JSClass<JSCheckbox>::StaticMethod("select", &JSCheckbox::SetSelect);
     JSClass<JSCheckbox>::StaticMethod("shape", &JSCheckbox::SetCheckboxStyle);
+    JSClass<JSCheckbox>::StaticMethod("onChange", &JSCheckbox::SetOnChange);
     JSClass<JSCheckbox>::StaticMethod("selectedColor", &JSCheckbox::SelectedColor);
     JSClass<JSCheckbox>::StaticMethod("unselectedColor", &JSCheckbox::UnSelectedColor);
     JSClass<JSCheckbox>::StaticMethod("mark", &JSCheckbox::Mark);
     JSClass<JSCheckbox>::StaticMethod("responseRegion", &JSCheckbox::JsResponseRegion);
     JSClass<JSCheckbox>::StaticMethod("padding", &JSCheckbox::JsPadding);
+    JSClass<JSCheckbox>::StaticMethod("margin", &JSCheckbox::JsMargin);
     JSClass<JSCheckbox>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSCheckbox>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSCheckbox>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -117,17 +118,14 @@ void ParseSelectObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEve
 {
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
-    auto vm = info.GetVm();
-    auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
-    auto func = jsFunc->GetLocalHandle();
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto changeEvent = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](bool param) {
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch trycatch(vm);
+    auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool param) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("CheckBox.ChangeEvent");
         PipelineContext::SetCallBackNode(node);
-        panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, param) };
-        func->Call(vm, func.ToLocal(), params, 1);
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
+        func->ExecuteJS(1, &newJSVal);
     };
     CheckBoxModel::GetInstance()->SetChangeEvent(std::move(changeEvent));
 }
@@ -157,6 +155,24 @@ void JSCheckbox::SetSelect(const JSCallbackInfo& info)
     if (changeEventVal->IsFunction()) {
         ParseSelectObject(info, changeEventVal);
     }
+}
+
+void JSCheckbox::SetOnChange(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onChange = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](bool select) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("CheckBox.onChange");
+        PipelineContext::SetCallBackNode(node);
+        auto newJSVal = JSRef<JSVal>::Make(ToJSValue(select));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    CheckBoxModel::GetInstance()->SetOnChange(onChange);
+    args.ReturnSelf();
 }
 
 void JSCheckbox::JsResponseRegion(const JSCallbackInfo& info)
@@ -236,11 +252,15 @@ void JSCheckbox::SelectedColor(const JSCallbackInfo& info)
         return;
     }
     Color selectedColor;
-    if (!ParseJsColor(info[0], selectedColor)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], selectedColor, resObj)) {
         CheckBoxModel::GetInstance()->ResetSelectedColor();
-        return;
+    } else {
+        CheckBoxModel::GetInstance()->SetSelectedColor(selectedColor);
     }
-    CheckBoxModel::GetInstance()->SetSelectedColor(selectedColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckBoxModel::GetInstance()->CreateWithColorResourceObj(resObj, CheckBoxColorType::SELECTED_COLOR);
+    }
 }
 
 void JSCheckbox::UnSelectedColor(const JSCallbackInfo& info)
@@ -249,12 +269,15 @@ void JSCheckbox::UnSelectedColor(const JSCallbackInfo& info)
         return;
     }
     Color unSelectedColor;
-    if (!ParseJsColor(info[0], unSelectedColor)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsColor(info[0], unSelectedColor, resObj)) {
         CheckBoxModel::GetInstance()->ResetUnSelectedColor();
-        return;
+    } else {
+        CheckBoxModel::GetInstance()->SetUnSelectedColor(unSelectedColor);
     }
-
-    CheckBoxModel::GetInstance()->SetUnSelectedColor(unSelectedColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        CheckBoxModel::GetInstance()->CreateWithColorResourceObj(resObj, CheckBoxColorType::UN_SELECTED_COLOR);
+    }
 }
 
 void JSCheckbox::SetCheckboxStyle(int32_t checkBoxStyle)
@@ -308,6 +331,12 @@ void JSCheckbox::JsPadding(const JSCallbackInfo& info)
     bool flag = GetOldPadding(info, oldPadding);
     NG::PaddingProperty newPadding = GetNewPadding(info);
     CheckBoxModel::GetInstance()->SetPadding(oldPadding, newPadding, flag);
+}
+
+void JSCheckbox::JsMargin(const JSCallbackInfo& info)
+{
+    CheckBoxModel::GetInstance()->SetIsUserSetMargin(true);
+    JSViewAbstract::JsMargin(info);
 }
 
 bool JSCheckbox::GetOldPadding(const JSCallbackInfo& info, NG::PaddingPropertyF& padding)

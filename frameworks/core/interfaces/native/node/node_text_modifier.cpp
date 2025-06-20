@@ -1776,6 +1776,21 @@ ArkUI_Uint32 GetTextVerticalAlign(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, static_cast<uint32_t>(TextVerticalAlign::BASELINE));
     return static_cast<ArkUI_Uint32>(TextModelNG::GetTextVerticalAlign(frameNode));
 }
+
+void SetTextContentTransition(ArkUINodeHandle node, ArkUI_Int32 flipDirection, ArkUI_Bool enableBlur)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetContentTransition(frameNode, TextEffectStrategy::FLIP,
+        static_cast<TextFlipDirection>(flipDirection), static_cast<bool>(enableBlur));
+}
+
+void ResetTextContentTransition(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetContentTransition(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1927,6 +1942,8 @@ const ArkUITextModifier* GetTextModifier()
         .setTextVerticalAlign = SetTextVerticalAlign,
         .resetTextVerticalAlign = ResetTextVerticalAlign,
         .getTextVerticalAlign = GetTextVerticalAlign,
+        .setTextContentTransition = SetTextContentTransition,
+        .resetTextContentTransition = ResetTextContentTransition
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

@@ -175,6 +175,7 @@ bool CheckIsCNode(ArkUI_NodeHandle node);
 bool CheckIsCNodeOrCrossLanguage(ArkUI_NodeHandle node);
 ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node);
 int32_t GetNodeTypeByTag(ArkUI_NodeHandle node);
+std::string ConvertNodeTypeToTag(ArkUI_NodeType nodeType);
 void RegisterBindNativeNode(ArkUI_NodeHandle node);
 }; // namespace OHOS::Ace::NodeModel
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_MODEL_H

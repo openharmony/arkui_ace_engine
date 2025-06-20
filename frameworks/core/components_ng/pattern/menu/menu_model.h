@@ -20,6 +20,23 @@
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace {
+enum class MenuColorType {
+    FONT_COLOR,
+    GROUP_DIVIDER_COLOR,
+    DIVIDER_COLOR
+};
+enum class MenuDimensionType {
+    WIDTH,
+    FONT_SIZE,
+    BORDER_RADIUS,
+    RADIUS_TOP_LEFT,
+    RADIUS_TOP_RIGHT,
+    RADIUS_BOTTOM_LEFT,
+    RADIUS_BOTTOM_RIGHT
+};
+enum class MenuFamilyType {
+    FONT_FAMILY
+};
 class ACE_FORCE_EXPORT MenuModel {
 public:
     static MenuModel* GetInstance();
@@ -38,10 +55,16 @@ public:
     virtual void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight);
+    virtual void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) {};
     virtual void SetExpandingMode(const NG::SubMenuExpandingMode& expandingMode) {};
     virtual void SetExpandSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& subMenuExpandSymbol) {};
     virtual void SetItemDivider(const V2::ItemDivider& divider, const DividerMode& mode) = 0;
     virtual void SetItemGroupDivider(const V2::ItemDivider& divider, const DividerMode& mode) = 0;
+    virtual void CreateWithColorResourceObj(
+        const RefPtr<ResourceObject>& resObj, const MenuColorType menuColorType) = 0;
+    virtual void CreateWithDimensionResourceObj(
+        const RefPtr<ResourceObject>& resObj, const MenuDimensionType menuDimensionType) = 0;
+    virtual void CreateWithFontFamilyResourceObj(const RefPtr<ResourceObject>& resObj, MenuFamilyType type) = 0;
 private:
     static std::unique_ptr<MenuModel> instance_;
     static std::mutex mutex_;

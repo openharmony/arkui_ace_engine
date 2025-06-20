@@ -1591,12 +1591,14 @@ void SheetPresentationPattern::FireCommonCallback()
 
 void SheetPresentationPattern::PopupSheetChanged()
 {
-    if (SheetHeightNeedChanged() || SheetWidthNeedChanged() || typeChanged_) {
+    // when sheet height and width not change, but sheetOffsetY changed because of avoiding keyboard, update offsetY.
+    if (SheetHeightNeedChanged() || SheetWidthNeedChanged() || typeChanged_ || sheetOffsetYChanged_) {
         FireCommonCallback();
         auto renderContext = GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateTransformTranslate({ 0.0f, Dimension(sheetOffsetY_), 0.0f });
         typeChanged_ = false;
+        sheetOffsetYChanged_ = false;
     }
 }
 
@@ -2042,7 +2044,10 @@ void SheetPresentationPattern::SetUIFirstSwitch(bool isFirstTransition, bool isN
 void SheetPresentationPattern::SetWindowUseImplicitAnimation(FrameNode* sheetNode, bool useImplicit)
 {
     CHECK_NULL_VOID(sheetNode);
-    if (IsShowInSubWindow()) {
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (sheetStyle.showInSubWindow.value_or(false)) {
         TAG_LOGD(AceLogTag::ACE_SHEET, "UseImplicitAnimation ShowInSubWindow");
         return;
     }

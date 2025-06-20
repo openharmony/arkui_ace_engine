@@ -17,6 +17,8 @@ group("frameworks_unittest") {
   testonly = true
   deps = [
     "base/perfmonitor:perf_monitor_test",
-    "core/common:container_scope_test"
+    "base/ressched:ressched_report_test",
+    "core/common:color_inverter_test",
+    "core/common:container_scope_test",
   ]
 }

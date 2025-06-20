@@ -195,6 +195,11 @@ void PerfMonitor::NotifyAppJankStatsEnd()
     PerfInterfaces::NotifyAppJankStatsEnd();
 }
 
+void PerfMonitor::SetApplicationInfo()
+{
+    PerfInterfaces::SetApplicationInfo();
+}
+
 void PerfMonitor::SetApsMonitor(const std::shared_ptr<ApsMonitor>& apsMonitor)
 {
     apsMonitor_ = apsMonitor;

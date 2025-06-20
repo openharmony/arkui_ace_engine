@@ -38,7 +38,6 @@ declare class ForEach {
 declare class RepeatNative {
   static startRender(): void;
   static finishRender(removedChildElmtIds: Array<number>): void;
-  static isInAnimation(): boolean;
   static moveChild(fromIndex: number): void;
   static createNewChildStart(id: string): void;
   static createNewChildFinish(id: string): void;
@@ -80,9 +79,6 @@ declare class RepeatVirtualScroll2Native {
       onPurge: () => void;
     }
   ): void;
-
-  // PipelineContext is inside an animation closure
-  static isInAnimation(): boolean;
 
   // purge node with given Repeat Item Id (Rid)
   static removeNode(rid: number): void;

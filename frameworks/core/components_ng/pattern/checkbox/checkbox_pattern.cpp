@@ -173,13 +173,34 @@ void CheckBoxPattern::OnModifyDone()
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(checkBoxTheme);
+    hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
+    hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
+    InitDefaultMargin();
+    InitClickEvent();
+    InitTouchEvent();
+    InitMouseEvent();
+    InitFocusEvent();
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
+    SetAccessibilityAction();
+}
+
+void CheckBoxPattern::InitDefaultMargin()
+{
+    if (makeFunc_.has_value() || toggleMakeFunc_.has_value()) {
+        ResetDefaultMargin();
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     MarginProperty margin;
-    margin.left = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
-    margin.right = CalcLength(checkBoxTheme->GetHotZoneHorizontalPadding().Value());
-    margin.top = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
-    margin.bottom = CalcLength(checkBoxTheme->GetHotZoneVerticalPadding().Value());
+    margin.left = CalcLength(hotZoneHorizontalPadding_.Value());
+    margin.right = CalcLength(hotZoneHorizontalPadding_.Value());
+    margin.top = CalcLength(hotZoneVerticalPadding_.Value());
+    margin.bottom = CalcLength(hotZoneVerticalPadding_.Value());
     auto& setMargin = layoutProperty->GetMarginProperty();
     if (setMargin) {
         if (setMargin->left.has_value()) {
@@ -196,16 +217,19 @@ void CheckBoxPattern::OnModifyDone()
         }
     }
     layoutProperty->UpdateMargin(margin);
-    hotZoneHorizontalPadding_ = checkBoxTheme->GetHotZoneHorizontalPadding();
-    hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
-    InitClickEvent();
-    InitTouchEvent();
-    InitMouseEvent();
-    InitFocusEvent();
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    InitOnKeyEvent(focusHub);
-    SetAccessibilityAction();
+}
+
+void CheckBoxPattern::ResetDefaultMargin()
+{
+    if (isUserSetMargin_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    MarginProperty margin;
+    layoutProperty->UpdateMargin(margin);
 }
 
 void CheckBoxPattern::SetAccessibilityAction()
@@ -502,6 +526,56 @@ void CheckBoxPattern::UpdateUIStatus(bool check)
         FireBuilder();
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CheckBoxPattern::UpdateCheckboxComponentColor(const Color& color, const CheckBoxColorType checkBoxColorType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (checkBoxColorType) {
+            case CheckBoxColorType::SELECTED_COLOR:
+                paintProperty->UpdateCheckBoxSelectedColor(color);
+                paintProperty->UpdateCheckBoxSelectedColorFlagByUser(true);
+                break;
+            case CheckBoxColorType::UN_SELECTED_COLOR:
+                paintProperty->UpdateCheckBoxUnSelectedColor(color);
+                paintProperty->UpdateCheckBoxUnSelectedColorFlagByUser(true);
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+}
+
+void CheckBoxPattern::UpdateComponentColor(const Color& color, const ToggleColorType toggleColorType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+
+    if (pipelineContext->IsSystmColorChange()) {
+        switch (toggleColorType) {
+            case ToggleColorType::SELECTED_COLOR:
+                paintProperty->UpdateCheckBoxSelectedColor(color);
+                paintProperty->UpdateCheckBoxSelectedColorFlagByUser(true);
+                break;
+            default:
+                break;
+        }
+    }
+    if (host->GetRerenderable()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
 }
 
 void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)

@@ -30,6 +30,7 @@ enum class InspectorInfoType: int32_t {
     CONTENT = 0,
     WINDOW_ID,
     WEB_LANG,
+    PAGE_PARAM,
 };
 
 enum class InspectorPageType: int32_t {

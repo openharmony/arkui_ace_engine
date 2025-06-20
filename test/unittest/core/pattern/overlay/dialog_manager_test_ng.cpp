@@ -22,6 +22,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/event/frame_node_on_tree.h"
 
+#include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -145,18 +146,41 @@ HWTEST_F(DialogManagerTestNg, DialogManagerTest003, TestSize.Level1)
  */
 HWTEST_F(DialogManagerTestNg, DialogManagerTest004, TestSize.Level1)
 {
-    auto context = DialogManager::GetMainPipelineContext(nullptr);
+    RefPtr<FrameNode> framenode = nullptr;
+    auto context = DialogManager::GetMainPipelineContext(framenode);
     EXPECT_EQ(context, nullptr);
-    auto node = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+
+    auto node = FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    context = DialogManager::GetMainPipelineContext(node);
+    EXPECT_EQ(context, nullptr);
+
+    MockPipelineContext::SetUp();
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    node->context_ = AceType::RawPtr(pipelineContext);
     context = DialogManager::GetMainPipelineContext(node);
     EXPECT_EQ(context, nullptr);
     node->instanceId_ = 999;
     context = DialogManager::GetMainPipelineContext(node);
     EXPECT_EQ(context, nullptr);
-    auto container = Container::Current();
+    
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->pipelineContext_ = pipelineContext;
     node->instanceId_ = container->GetInstanceId();
     AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     context = DialogManager::GetMainPipelineContext(node);
-    ASSERT_NE(context, nullptr);
+    EXPECT_NE(context, nullptr);
+
+    container->isSubContainer_ = true;
+    EXPECT_EQ(container->IsSubContainer(), true);
+    context = DialogManager::GetMainPipelineContext(node);
+    EXPECT_EQ(context, nullptr);
+
+    SubwindowManager::GetInstance()->AddParentContainerId(container->GetInstanceId(), container->GetInstanceId());
+    context = DialogManager::GetMainPipelineContext(node);
+    EXPECT_NE(context, nullptr);
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
+    container->isSubContainer_ = false;
 }
 } // namespace OHOS::Ace::NG

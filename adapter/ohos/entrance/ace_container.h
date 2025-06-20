@@ -818,10 +818,24 @@ public:
         return uiWindow_->GetFreeMultiWindowModeEnabledState();
     }
 
+    Rect GetGlobalScaledRect() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, Rect());
+        Rosen::Rect rect{};
+        uiWindow_->GetGlobalScaledRect(rect);
+        return Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    }
+
     bool IsWaterfallWindow() const override
     {
         CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->IsWaterfallModeEnabled();
+    }
+
+    bool IsPcOrFreeMultiWindowCapability() const override
+    {
+        CHECK_NULL_RETURN(uiWindow_, false);
+        return uiWindow_->IsPcOrFreeMultiWindowCapabilityEnabled();
     }
 
     Rect GetUIExtensionHostWindowRect() override

@@ -59,10 +59,12 @@ ArkUINativeModuleValue MenuItemBridge::SetLabelFontColor(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj)) {
         GetArkUINodeModifiers()->getMenuItemModifier()->resetLabelFontColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getMenuItemModifier()->setLabelFontColor(nativeNode, color.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getMenuItemModifier()->setLabelFontColor(nativeNode, color.GetValue(), colorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -85,10 +87,12 @@ ArkUINativeModuleValue MenuItemBridge::SetContentFontColor(ArkUIRuntimeCallInfo*
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj)) {
         GetArkUINodeModifiers()->getMenuItemModifier()->resetContentFontColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getMenuItemModifier()->setContentFontColor(nativeNode, color.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getMenuItemModifier()->setContentFontColor(nativeNode, color.GetValue(), colorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -119,7 +123,8 @@ ArkUINativeModuleValue MenuItemBridge::SetLabelFont(ArkUIRuntimeCallInfo* runtim
     }
 
     CalcDimension fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, false)) {
+    RefPtr<ResourceObject> fontSizeResObj;
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, fontSizeResObj, false)) {
         fontSize = Dimension(0.0);
     }
 
@@ -138,14 +143,18 @@ ArkUINativeModuleValue MenuItemBridge::SetLabelFont(ArkUIRuntimeCallInfo* runtim
     }
 
     std::string family;
-    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, familyArg, family) || family.empty()) {
+    RefPtr<ResourceObject> fontFamiliesResObj;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, familyArg, family, fontFamiliesResObj) || family.empty()) {
         family = DEFAULT_ERR_CODE;
     }
 
     std::string fontSizeStr = fontSize.ToString();
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), family.c_str());
-    GetArkUINodeModifiers()->getMenuItemModifier()->setLabelFont(nativeNode, fontInfo.c_str(), style);
+    auto fontFamiliesRawPtr = AceType::RawPtr(fontFamiliesResObj);
+    auto fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
+    GetArkUINodeModifiers()->getMenuItemModifier()->setLabelFont(
+        nativeNode, fontInfo.c_str(), style, fontFamiliesRawPtr, fontSizeRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -175,7 +184,8 @@ ArkUINativeModuleValue MenuItemBridge::SetContentFont(ArkUIRuntimeCallInfo* runt
     }
 
     CalcDimension fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, false)) {
+    RefPtr<ResourceObject> fontSizeResObj;
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, fontSizeResObj, false)) {
         fontSize = Dimension(0.0);
     }
 
@@ -194,14 +204,18 @@ ArkUINativeModuleValue MenuItemBridge::SetContentFont(ArkUIRuntimeCallInfo* runt
     }
 
     std::string family;
-    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, familyArg, family) || family.empty()) {
+    RefPtr<ResourceObject> fontFamiliesResObj;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, familyArg, family, fontFamiliesResObj) || family.empty()) {
         family = DEFAULT_ERR_CODE;
     }
 
     std::string fontSizeStr = fontSize.ToString();
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), family.c_str());
-    GetArkUINodeModifiers()->getMenuItemModifier()->setContentFont(nativeNode, fontInfo.c_str(), style);
+    auto fontFamiliesRawPtr = AceType::RawPtr(fontFamiliesResObj);
+    auto fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
+    GetArkUINodeModifiers()->getMenuItemModifier()->setContentFont(
+        nativeNode, fontInfo.c_str(), style, fontSizeRawPtr, fontFamiliesRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -225,20 +239,22 @@ ArkUINativeModuleValue MenuItemBridge::SetSelectIcon(ArkUIRuntimeCallInfo* runti
     std::function<void(WeakPtr<NG::FrameNode>)> symbolApply;
     bool isShow = false;
     std::string icon;
+    RefPtr<ResourceObject> selectIconResObj;
     if (inputArg->IsBoolean()) {
         isShow = inputArg->ToBoolean(vm)->Value();
     } else if (inputArg->IsString(vm)) {
         icon = inputArg->ToString(vm)->ToString(vm);
         isShow = true;
-    } else if (ArkTSUtils::ParseJsMedia(vm, inputArg, icon)) {
+    } else if (ArkTSUtils::ParseJsMedia(vm, inputArg, icon, selectIconResObj)) {
         isShow = true;
     } else if (inputArg->IsObject(vm)) {
         isShow = true;
         Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
         Framework::JSViewAbstract::SetSymbolOptionApply(runtimeCallInfo, symbolApply, info[1]);
     }
+    auto selectIconRawPtr = AceType::RawPtr(selectIconResObj);
     GetArkUINodeModifiers()->getMenuItemModifier()->setSelectIcon(nativeNode, isShow);
-    GetArkUINodeModifiers()->getMenuItemModifier()->setSelectIconSrc(nativeNode, icon.c_str());
+    GetArkUINodeModifiers()->getMenuItemModifier()->setSelectIconSrc(nativeNode, icon.c_str(), selectIconRawPtr);
     GetArkUINodeModifiers()->getMenuItemModifier()->setSelectIconSymbol(
         nativeNode, reinterpret_cast<void*>(&symbolApply));
     return panda::JSValueRef::Undefined(vm);

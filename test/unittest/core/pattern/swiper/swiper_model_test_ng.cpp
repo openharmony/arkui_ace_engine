@@ -19,6 +19,9 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_event_hub.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model_ng.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_pattern.h"
+#include "core/common/resource/resource_parse_utils.h"
+#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1125,7 +1128,8 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg022, TestSize.Level1)
      * @tc.expected: change page to 0.
      */
     layoutProperty_->ResetIndex();
-    ShowNextPage();
+    pattern_->OnModifyDone();
+    FlushUITasks(frameNode_);
     EXPECT_EQ(currentIndex, 0);
     EXPECT_EQ(indicatorPattern->GetCurrentIndex(), 0);
 }
@@ -1317,7 +1321,8 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg026, TestSize.Level1)
      */
     auto swiperLayoutProperty = pattern_->GetLayoutProperty<SwiperLayoutProperty>();
     swiperLayoutProperty->UpdateIndex(1);
-    ShowNextPage();
+    pattern_->OnModifyDone();
+    FlushUITasks(frameNode_);
     EXPECT_EQ(currentIndex, 1);
     EXPECT_EQ(indicatorPattern->GetCurrentIndex(), 1);
 }
@@ -1430,7 +1435,8 @@ HWTEST_F(SwiperModelTestNg, SwiperModelTestNg028, TestSize.Level1)
     auto swiperLayoutProperty = pattern_->GetLayoutProperty<SwiperLayoutProperty>();
     ASSERT_NE(swiperLayoutProperty, nullptr);
     swiperLayoutProperty->UpdateIndex(2);
-    ShowNextPage();
+    pattern_->OnModifyDone();
+    FlushUITasks(frameNode_);
     EXPECT_EQ(currentIndex, 2);
     EXPECT_EQ(indicatorPattern->GetCurrentIndex(), 2);
     /**
@@ -1955,5 +1961,614 @@ HWTEST_F(SwiperModelTestNg, OnIndexChangeInSingleMode002, TestSize.Level1)
     indicatorPattern->isHover_ = true;
     indicatorPattern->OnIndexChangeInSingleMode(-5);
     EXPECT_EQ(indicatorPattern->currentIndexInSingleMode_, 0);
+}
+
+/**
+ * @tc.name: ProcessDotPositionWithResourceObjTest001
+ * @tc.desc: Verify SwiperModelTestNg::ProcessDotPositionWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, ProcessDotPositionWithResourceObjTest001, TestSize.Level1)
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = true;
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+
+    SwiperParameters swiperParameters;
+    pattern_->SetSwiperParameters(swiperParameters);
+
+    model.ProcessDotPositionWithResourceObj(Referenced::RawPtr(frameNode_), "", nullptr);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ProcessDotPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimLeft", resObj);
+    model.ProcessDotPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimRight", resObj);
+    model.ProcessDotPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimTop", resObj);
+    model.ProcessDotPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimBottom", resObj);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperParameters()->dimLeft, 0.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->dimRight, 0.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->dimTop, 0.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->dimBottom, 0.0_vp);
+
+    std::vector<ResourceObjectParams> params;
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    ResetMockResourceData();
+    AddMockResourceData(0, "100");
+    model.ProcessDotPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimLeft", resObjWithString);
+    model.ProcessDotPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimRight", resObjWithString);
+    model.ProcessDotPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimTop", resObjWithString);
+    model.ProcessDotPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimBottom", resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperParameters()->dimLeft, 100.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->dimRight, 100.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->dimTop, 100.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->dimBottom, 100.0_vp);
+
+    ResetMockResourceData();
+    AddMockResourceData(0, "-100");
+    model.ProcessDotPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimLeft", resObjWithString);
+    model.ProcessDotPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimRight", resObjWithString);
+    model.ProcessDotPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimTop", resObjWithString);
+    model.ProcessDotPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimBottom", resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperParameters()->dimLeft, 0.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->dimRight, 0.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->dimTop, 0.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->dimBottom, 0.0_vp);
+
+    CreateSwiperDone();
+    g_isConfigChangePerform = false;
+    ResetMockResourceData();
+}
+
+/**
+ * @tc.name: ProcessDotSizeWithResourceObjTest001
+ * @tc.desc: Verify SwiperModelTestNg::ProcessDotSizeWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, ProcessDotSizeWithResourceObjTest001, TestSize.Level1)
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = true;
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+
+    SwiperParameters swiperParameters;
+    pattern_->SetSwiperParameters(swiperParameters);
+
+    model.ProcessDotSizeWithResourceObj(Referenced::RawPtr(frameNode_), "", nullptr);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ProcessDotSizeWithResourceObj(Referenced::RawPtr(frameNode_), "itemWidth", resObj);
+    model.ProcessDotSizeWithResourceObj(Referenced::RawPtr(frameNode_), "itemHeight", resObj);
+    model.ProcessDotSizeWithResourceObj(Referenced::RawPtr(frameNode_), "selectedItemWidth", resObj);
+    model.ProcessDotSizeWithResourceObj(Referenced::RawPtr(frameNode_), "selectedItemHeight", resObj);
+    pattern_->resourceMgr_->ReloadResources();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto result = theme->GetSize();
+    EXPECT_EQ(pattern_->GetSwiperParameters()->itemWidth, result);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->itemHeight, result);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->selectedItemWidth, result);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->selectedItemHeight, result);
+
+    std::vector<ResourceObjectParams> params;
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    ResetMockResourceData();
+    AddMockResourceData(0, "100");
+    model.ProcessDotSizeWithResourceObj(Referenced::RawPtr(frameNode_), "itemWidth", resObjWithString);
+    model.ProcessDotSizeWithResourceObj(Referenced::RawPtr(frameNode_), "itemHeight", resObjWithString);
+    model.ProcessDotSizeWithResourceObj(Referenced::RawPtr(frameNode_), "selectedItemWidth", resObjWithString);
+    model.ProcessDotSizeWithResourceObj(Referenced::RawPtr(frameNode_), "selectedItemHeight", resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperParameters()->itemWidth, 100.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->itemHeight, 100.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->selectedItemWidth, 100.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->selectedItemHeight, 100.0_vp);
+
+    ResetMockResourceData();
+    AddMockResourceData(0, "-100");
+    model.ProcessDotSizeWithResourceObj(Referenced::RawPtr(frameNode_), "itemWidth", resObjWithString);
+    model.ProcessDotSizeWithResourceObj(Referenced::RawPtr(frameNode_), "itemHeight", resObjWithString);
+    model.ProcessDotSizeWithResourceObj(Referenced::RawPtr(frameNode_), "selectedItemWidth", resObjWithString);
+    model.ProcessDotSizeWithResourceObj(Referenced::RawPtr(frameNode_), "selectedItemHeight", resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperParameters()->itemWidth, result);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->itemHeight, result);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->selectedItemWidth, result);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->selectedItemHeight, result);
+
+    CreateSwiperDone();
+    g_isConfigChangePerform = false;
+    ResetMockResourceData();
+}
+
+/**
+ * @tc.name: ProcessDotColorWithResourceObjTest001
+ * @tc.desc: Verify SwiperModelTestNg::ProcessDotColorWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, ProcessDotColorWithResourceObjTest001, TestSize.Level1)
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = true;
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+
+    SwiperParameters swiperParameters;
+    pattern_->SetSwiperParameters(swiperParameters);
+
+    model.ProcessDotColorWithResourceObj(Referenced::RawPtr(frameNode_), "", nullptr);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ProcessDotColorWithResourceObj(Referenced::RawPtr(frameNode_), "colorVal", resObj);
+    model.ProcessDotColorWithResourceObj(Referenced::RawPtr(frameNode_), "selectedColorVal", resObj);
+    pattern_->resourceMgr_->ReloadResources();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto colorVal = theme->GetColor();
+    auto selectedColorVal = theme->GetSelectedColor();
+    EXPECT_EQ(pattern_->GetSwiperParameters()->colorVal, colorVal);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->selectedColorVal, selectedColorVal);
+
+    std::vector<ResourceObjectParams> params;
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    ResetMockResourceData();
+    AddMockResourceData(0, "#FF0000");
+    model.ProcessDotColorWithResourceObj(Referenced::RawPtr(frameNode_), "colorVal", resObjWithString);
+    model.ProcessDotColorWithResourceObj(Referenced::RawPtr(frameNode_), "selectedColorVal", resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperParameters()->colorVal, Color::RED);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->selectedColorVal, Color::RED);
+
+    ResetMockResourceData();
+    AddMockResourceData(0, "-100");
+    model.ProcessDotColorWithResourceObj(Referenced::RawPtr(frameNode_), "colorVal", resObjWithString);
+    model.ProcessDotColorWithResourceObj(Referenced::RawPtr(frameNode_), "selectedColorVal", resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperParameters()->colorVal, colorVal);
+    EXPECT_EQ(pattern_->GetSwiperParameters()->selectedColorVal, selectedColorVal);
+
+    CreateSwiperDone();
+    g_isConfigChangePerform = false;
+    ResetMockResourceData();
+}
+
+/**
+ * @tc.name: ProcessDigitalPositionWithResourceObjTest001
+ * @tc.desc: Verify SwiperModelTestNg::ProcessDigitalPositionWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, ProcessDigitalPositionWithResourceObjTest001, TestSize.Level1)
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = true;
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+
+    SwiperDigitalParameters swiperParameters;
+    pattern_->SetSwiperDigitalParameters(swiperParameters);
+
+    model.ProcessDigitalPositionWithResourceObj(Referenced::RawPtr(frameNode_), "", nullptr);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ProcessDigitalPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimLeft", resObj);
+    model.ProcessDigitalPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimRight", resObj);
+    model.ProcessDigitalPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimTop", resObj);
+    model.ProcessDigitalPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimBottom", resObj);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->dimLeft, 0.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->dimRight, 0.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->dimTop, 0.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->dimBottom, 0.0_vp);
+
+    std::vector<ResourceObjectParams> params;
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    ResetMockResourceData();
+    AddMockResourceData(0, "100");
+    model.ProcessDigitalPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimLeft", resObjWithString);
+    model.ProcessDigitalPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimRight", resObjWithString);
+    model.ProcessDigitalPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimTop", resObjWithString);
+    model.ProcessDigitalPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimBottom", resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->dimLeft, 100.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->dimRight, 100.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->dimTop, 100.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->dimBottom, 100.0_vp);
+
+    ResetMockResourceData();
+    AddMockResourceData(0, "-100");
+    model.ProcessDigitalPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimLeft", resObjWithString);
+    model.ProcessDigitalPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimRight", resObjWithString);
+    model.ProcessDigitalPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimTop", resObjWithString);
+    model.ProcessDigitalPositionWithResourceObj(Referenced::RawPtr(frameNode_), "dimBottom", resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->dimLeft, 0.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->dimRight, 0.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->dimTop, 0.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->dimBottom, 0.0_vp);
+
+    CreateSwiperDone();
+    g_isConfigChangePerform = false;
+    ResetMockResourceData();
+}
+
+/**
+ * @tc.name: ProcessDigitalFontSizeWithResourceObjTest001
+ * @tc.desc: Verify SwiperModelTestNg::ProcessDigitalFontSizeWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, ProcessDigitalFontSizeWithResourceObjTest001, TestSize.Level1)
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = true;
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+
+    SwiperDigitalParameters swiperParameters;
+    pattern_->SetSwiperDigitalParameters(swiperParameters);
+
+    model.ProcessDigitalFontSizeWithResourceObj(Referenced::RawPtr(frameNode_), "", nullptr);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ProcessDigitalFontSizeWithResourceObj(Referenced::RawPtr(frameNode_), "fontSize", resObj);
+    model.ProcessDigitalFontSizeWithResourceObj(Referenced::RawPtr(frameNode_), "selectedFontSize", resObj);
+    pattern_->resourceMgr_->ReloadResources();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto fontSize = theme->GetDigitalIndicatorTextStyle().GetFontSize();
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->fontSize.value(), fontSize);
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->selectedFontSize.value(), fontSize);
+
+    std::vector<ResourceObjectParams> params;
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    ResetMockResourceData();
+    AddMockResourceData(0, "100");
+    model.ProcessDigitalFontSizeWithResourceObj(Referenced::RawPtr(frameNode_), "fontSize", resObjWithString);
+    model.ProcessDigitalFontSizeWithResourceObj(Referenced::RawPtr(frameNode_), "selectedFontSize", resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->fontSize.value(), 100.0_fp);
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->selectedFontSize.value(), 100.0_fp);
+
+    ResetMockResourceData();
+    AddMockResourceData(0, "-100");
+    model.ProcessDigitalFontSizeWithResourceObj(Referenced::RawPtr(frameNode_), "fontSize", resObjWithString);
+    model.ProcessDigitalFontSizeWithResourceObj(Referenced::RawPtr(frameNode_), "selectedFontSize", resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->fontSize.value(), fontSize);
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->selectedFontSize.value(), fontSize);
+
+    CreateSwiperDone();
+    g_isConfigChangePerform = false;
+    ResetMockResourceData();
+}
+
+/**
+ * @tc.name: ProcessDigitalColorWithResourceObjTest001
+ * @tc.desc: Verify SwiperModelTestNg::ProcessDigitalColorWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, ProcessDigitalColorWithResourceObjTest001, TestSize.Level1)
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = true;
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+
+    SwiperDigitalParameters swiperParameters;
+    pattern_->SetSwiperDigitalParameters(swiperParameters);
+
+    model.ProcessDigitalColorWithResourceObj(Referenced::RawPtr(frameNode_), "", nullptr);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ProcessDigitalColorWithResourceObj(Referenced::RawPtr(frameNode_), "fontColor", resObj);
+    model.ProcessDigitalColorWithResourceObj(Referenced::RawPtr(frameNode_), "selectedFontColor", resObj);
+    pattern_->resourceMgr_->ReloadResources();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto fontColor = theme->GetDigitalIndicatorTextStyle().GetTextColor();
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->fontColor, fontColor);
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->selectedFontColor, fontColor);
+
+    std::vector<ResourceObjectParams> params;
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    ResetMockResourceData();
+    AddMockResourceData(0, "#FF0000");
+    model.ProcessDigitalColorWithResourceObj(Referenced::RawPtr(frameNode_), "fontColor", resObjWithString);
+    model.ProcessDigitalColorWithResourceObj(Referenced::RawPtr(frameNode_), "selectedFontColor", resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->fontColor, Color::RED);
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->selectedFontColor, Color::RED);
+
+    ResetMockResourceData();
+    AddMockResourceData(0, "-100");
+    model.ProcessDigitalColorWithResourceObj(Referenced::RawPtr(frameNode_), "fontColor", resObjWithString);
+    model.ProcessDigitalColorWithResourceObj(Referenced::RawPtr(frameNode_), "selectedFontColor", resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->fontColor, fontColor);
+    EXPECT_EQ(pattern_->GetSwiperDigitalParameters()->selectedFontColor, fontColor);
+
+    CreateSwiperDone();
+    g_isConfigChangePerform = false;
+    ResetMockResourceData();
+}
+
+/**
+ * @tc.name: ProcessArrowColorWithResourceObjTest001
+ * @tc.desc: Verify SwiperModelTestNg::ProcessArrowColorWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, ProcessArrowColorWithResourceObjTest001, TestSize.Level1)
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = true;
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+
+    auto swiperLayoutProperty = pattern_->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    swiperLayoutProperty->UpdateArrowColor(Color::RED);
+
+    model.ProcessArrowColorWithResourceObj(Referenced::RawPtr(frameNode_), nullptr);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ProcessArrowColorWithResourceObj(Referenced::RawPtr(frameNode_), resObj);
+    pattern_->resourceMgr_->ReloadResources();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto param = pattern_->GetSwiperArrowParameters();
+    auto arrowColor = param->isSidebarMiddle.value() ? theme->GetBigArrowColor() : theme->GetSmallArrowColor();
+    EXPECT_EQ(swiperLayoutProperty->GetArrowColorValue(), arrowColor);
+
+    std::vector<ResourceObjectParams> params;
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    ResetMockResourceData();
+    AddMockResourceData(0, "#FF0000");
+    model.ProcessArrowColorWithResourceObj(Referenced::RawPtr(frameNode_), resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(swiperLayoutProperty->GetArrowColorValue(), Color::RED);
+
+    ResetMockResourceData();
+    AddMockResourceData(0, "-100");
+    model.ProcessArrowColorWithResourceObj(Referenced::RawPtr(frameNode_), resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(swiperLayoutProperty->GetArrowColorValue(), arrowColor);
+
+    CreateSwiperDone();
+    g_isConfigChangePerform = false;
+    ResetMockResourceData();
+}
+
+/**
+ * @tc.name: ProcessArrowBackgroundColorWithResourceObjTest001
+ * @tc.desc: Verify SwiperModelTestNg::ProcessArrowBackgroundColorWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, ProcessArrowBackgroundColorWithResourceObjTest001, TestSize.Level1)
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = true;
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+
+    auto swiperLayoutProperty = pattern_->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    swiperLayoutProperty->UpdateBackgroundColor(Color::RED);
+
+    model.ProcessArrowBackgroundColorWithResourceObj(Referenced::RawPtr(frameNode_), nullptr);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ProcessArrowBackgroundColorWithResourceObj(Referenced::RawPtr(frameNode_), resObj);
+    pattern_->resourceMgr_->ReloadResources();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto param = pattern_->GetSwiperArrowParameters();
+    auto backgroundColor =
+        param->isSidebarMiddle.value() ? theme->GetBigArrowBackgroundColor() : theme->GetSmallArrowBackgroundColor();
+    EXPECT_EQ(swiperLayoutProperty->GetBackgroundColorValue(), backgroundColor);
+
+    std::vector<ResourceObjectParams> params;
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    ResetMockResourceData();
+    AddMockResourceData(0, "#FF0000");
+    model.ProcessArrowBackgroundColorWithResourceObj(Referenced::RawPtr(frameNode_), resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(swiperLayoutProperty->GetBackgroundColorValue(), Color::RED);
+
+    ResetMockResourceData();
+    AddMockResourceData(0, "-100");
+    model.ProcessArrowBackgroundColorWithResourceObj(Referenced::RawPtr(frameNode_), resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(swiperLayoutProperty->GetBackgroundColorValue(), backgroundColor);
+
+    CreateSwiperDone();
+    g_isConfigChangePerform = false;
+    ResetMockResourceData();
+}
+
+/**
+ * @tc.name: ProcessArrowSizeWithResourceObjTest001
+ * @tc.desc: Verify SwiperModelTestNg::ProcessArrowSizeWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, ProcessArrowSizeWithResourceObjTest001, TestSize.Level1)
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = true;
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+
+    SwiperArrowParameters swiperParameters;
+    swiperParameters.isSidebarMiddle = true;
+    swiperParameters.isShowBackground = false;
+    pattern_->SetSwiperArrowParameters(swiperParameters);
+    auto swiperLayoutProperty = pattern_->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    swiperLayoutProperty->UpdateBackgroundSize(Dimension(0.0, DimensionUnit::PX));
+    swiperLayoutProperty->UpdateArrowSize(Dimension(0.0, DimensionUnit::PX));
+
+    model.ProcessArrowSizeWithResourceObj(Referenced::RawPtr(frameNode_), nullptr);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ProcessArrowSizeWithResourceObj(Referenced::RawPtr(frameNode_), resObj);
+    pattern_->resourceMgr_->ReloadResources();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(theme);
+    auto fontSize = pattern_->GetSwiperArrowParameters()->isSidebarMiddle.value() ? theme->GetBigArrowSize()
+                                                                                  : theme->GetSmallArrowSize();
+    EXPECT_EQ(pattern_->GetSwiperArrowParameters()->arrowSize.value(), fontSize);
+    EXPECT_EQ(pattern_->GetSwiperArrowParameters()->backgroundSize.value(), fontSize);
+    EXPECT_EQ(swiperLayoutProperty->GetArrowSize().value(), fontSize);
+    EXPECT_EQ(swiperLayoutProperty->GetBackgroundSize().value(), fontSize);
+
+    std::vector<ResourceObjectParams> params;
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    ResetMockResourceData();
+    AddMockResourceData(0, "100");
+    model.ProcessArrowSizeWithResourceObj(Referenced::RawPtr(frameNode_), resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperArrowParameters()->arrowSize.value(), 100.0_vp);
+    EXPECT_EQ(pattern_->GetSwiperArrowParameters()->backgroundSize.value(), 100.0_vp);
+    EXPECT_EQ(swiperLayoutProperty->GetArrowSize().value(), 100.0_vp);
+    EXPECT_EQ(swiperLayoutProperty->GetBackgroundSize().value(), 100.0_vp);
+
+    ResetMockResourceData();
+    AddMockResourceData(0, "-100");
+    model.ProcessArrowSizeWithResourceObj(Referenced::RawPtr(frameNode_), resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperArrowParameters()->arrowSize.value(), fontSize);
+    EXPECT_EQ(pattern_->GetSwiperArrowParameters()->backgroundSize.value(), fontSize);
+    EXPECT_EQ(swiperLayoutProperty->GetArrowSize().value(), fontSize);
+    EXPECT_EQ(swiperLayoutProperty->GetBackgroundSize().value(), fontSize);
+
+    CreateSwiperDone();
+    g_isConfigChangePerform = false;
+    ResetMockResourceData();
+}
+
+/**
+ * @tc.name: ProcessArrowSizeWithResourceObjTest002
+ * @tc.desc: Verify SwiperModelTestNg::ProcessArrowSizeWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, ProcessArrowSizeWithResourceObjTest002, TestSize.Level1)
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = true;
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+
+    SwiperArrowParameters swiperParameters;
+    swiperParameters.isSidebarMiddle = true;
+    swiperParameters.isShowBackground = true;
+    swiperParameters.backgroundSize = Dimension(0.0, DimensionUnit::PX);
+    pattern_->SetSwiperArrowParameters(swiperParameters);
+    auto swiperLayoutProperty = pattern_->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    swiperLayoutProperty->UpdateBackgroundSize(Dimension(0.0, DimensionUnit::PX));
+    swiperLayoutProperty->UpdateArrowSize(Dimension(0.0, DimensionUnit::PX));
+
+    model.ProcessArrowSizeWithResourceObj(Referenced::RawPtr(frameNode_), nullptr);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ProcessArrowSizeWithResourceObj(Referenced::RawPtr(frameNode_), resObj);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperArrowParameters()->arrowSize.value(), 0.0_px);
+    EXPECT_EQ(swiperLayoutProperty->GetArrowSize().value(), 0.0_px);
+    EXPECT_EQ(swiperLayoutProperty->GetBackgroundSize().value(), 0.0_px);
+
+    std::vector<ResourceObjectParams> params;
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    ResetMockResourceData();
+    AddMockResourceData(0, "100");
+    model.ProcessArrowSizeWithResourceObj(Referenced::RawPtr(frameNode_), resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperArrowParameters()->arrowSize.value(), 0.0_px);
+    EXPECT_EQ(swiperLayoutProperty->GetArrowSize().value(), 0.0_px);
+    EXPECT_EQ(swiperLayoutProperty->GetBackgroundSize().value(), 0.0_px);
+
+    ResetMockResourceData();
+    AddMockResourceData(0, "-100");
+    model.ProcessArrowSizeWithResourceObj(Referenced::RawPtr(frameNode_), resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperArrowParameters()->arrowSize.value(), 0.0_px);
+    EXPECT_EQ(swiperLayoutProperty->GetArrowSize().value(), 0.0_px);
+    EXPECT_EQ(swiperLayoutProperty->GetBackgroundSize().value(), 0.0_px);
+
+    CreateSwiperDone();
+    g_isConfigChangePerform = false;
+    ResetMockResourceData();
+}
+
+/**
+ * @tc.name: ProcessBackgroundSizeWithResourceObjTest001
+ * @tc.desc: Verify SwiperModelTestNg::ProcessBackgroundSizeWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperModelTestNg, ProcessBackgroundSizeWithResourceObjTest001, TestSize.Level1)
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = true;
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+
+    SwiperArrowParameters swiperParameters;
+    swiperParameters.isSidebarMiddle = true;
+    swiperParameters.isShowBackground = false;
+    pattern_->SetSwiperArrowParameters(swiperParameters);
+    auto swiperLayoutProperty = pattern_->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    swiperLayoutProperty->UpdateBackgroundSize(Dimension(0.0, DimensionUnit::PX));
+    swiperLayoutProperty->UpdateArrowSize(Dimension(0.0, DimensionUnit::PX));
+
+    model.ProcessBackgroundSizeWithResourceObj(Referenced::RawPtr(frameNode_), nullptr);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ProcessBackgroundSizeWithResourceObj(Referenced::RawPtr(frameNode_), resObj);
+    pattern_->resourceMgr_->ReloadResources();
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(theme);
+    auto fontSize = pattern_->GetSwiperArrowParameters()->isSidebarMiddle.value()
+                        ? theme->GetBigArrowBackgroundSize()
+                        : theme->GetSmallArrowBackgroundSize();
+    EXPECT_EQ(pattern_->GetSwiperArrowParameters()->backgroundSize.value(), fontSize);
+    EXPECT_EQ(swiperLayoutProperty->GetBackgroundSize().value(), fontSize);
+
+    std::vector<ResourceObjectParams> params;
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        0, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    ResetMockResourceData();
+    AddMockResourceData(0, "100");
+    model.ProcessBackgroundSizeWithResourceObj(Referenced::RawPtr(frameNode_), resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperArrowParameters()->backgroundSize.value(), 100.0_vp);
+    EXPECT_EQ(swiperLayoutProperty->GetBackgroundSize().value(), 100.0_vp);
+
+    ResetMockResourceData();
+    AddMockResourceData(0, "-100");
+    model.ProcessBackgroundSizeWithResourceObj(Referenced::RawPtr(frameNode_), resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(pattern_->GetSwiperArrowParameters()->backgroundSize.value(), fontSize);
+    EXPECT_EQ(swiperLayoutProperty->GetBackgroundSize().value(), fontSize);
+
+    CreateSwiperDone();
+    g_isConfigChangePerform = false;
+    ResetMockResourceData();
 }
 } // namespace OHOS::Ace::NG

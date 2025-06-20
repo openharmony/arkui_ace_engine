@@ -5919,11 +5919,11 @@ void TextFieldPattern::RecordSubmitEvent() const
 
 void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
 {
+    auto result = UtfUtils::Str8DebugToStr16(value->text);
 #if !defined(ENABLE_STANDARD_INPUT)
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     if (layoutProperty && layoutProperty->HasMaxLength()) {
         bool textChange = false;
-        auto result = UtfUtils::Str8DebugToStr16(value->text);
         contentController_->FilterTextInputStyle(textChange, result);
         auto resultLen = static_cast<int32_t>(result.length());
         auto maxLen = static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
@@ -5931,11 +5931,15 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
             showCountBorderStyle_ = resultLen > maxLen;
             HandleCountStyle();
         }
+        auto deleteSize = resultLen - maxLen;
+        if (resultLen > maxLen && value->selection.baseOffset >= deleteSize) {
+            result.erase(value->selection.baseOffset - deleteSize, deleteSize);
+            value->selection.baseOffset -= deleteSize;
+        }
     }
 #endif
-
     UpdateEditingValueToRecord();
-    contentController_->SetTextValue(UtfUtils::Str8DebugToStr16(value->text));
+    contentController_->SetTextValue(result);
     selectController_->UpdateCaretIndex(value->selection.baseOffset);
     ContainerScope scope(GetInstanceId());
     CloseSelectOverlay();
@@ -7772,6 +7776,7 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("minFontScale", GetMinFontScale().c_str(), filter);
     json->PutExtAttr("maxFontScale", GetMaxFontScale().c_str(), filter);
     json->PutExtAttr("ellipsisMode",GetEllipsisMode().c_str(), filter);
+    json->PutExtAttr("autoCapitalizationMode", AutoCapTypeToString().c_str(), filter);
     ToJsonValueForOption(json, filter);
     ToJsonValueForFontFeature(json, filter);
     ToJsonValueSelectOverlay(json, filter);
@@ -9758,9 +9763,9 @@ bool TextFieldPattern::IsContentRectNonPositive()
 void TextFieldPattern::ReportEvent()
 {
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (UiSessionManager::GetInstance()->GetSearchEventRegistered()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         auto data = JsonUtil::Create();
         data->Put("event", "onTextSearch");
         data->Put("id", host->GetId());
@@ -9770,6 +9775,15 @@ void TextFieldPattern::ReportEvent()
         data->Put("position", host->GetGeometryNode()->GetFrameRect().ToString().data());
         // report all use textfield component unfocus event,more than just the search box
         UiSessionManager::GetInstance()->ReportSearchEvent(data->ToString());
+    }
+    if (!IsInPasswordMode()) {
+        auto value = InspectorJsonUtil::Create();
+        CHECK_NULL_VOID(value);
+        auto textString = GetTextValue();
+        value->Put("text", textString.c_str());
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(), "event", value);
+        SEC_TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] TextField reportComponentChangeEvent %{public}d",
+            host->GetId(), textString.length());
     }
 #endif
 }

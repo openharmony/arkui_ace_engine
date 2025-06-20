@@ -89,6 +89,51 @@ void RowModelNG::SetSpace(FrameNode* frameNode, const std::optional<Dimension>& 
     }
 }
 
+void RowModelNG::SetSpace(FrameNode* frameNode, const RefPtr<ResourceObject>& spaceResObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LinearLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<LinearLayoutPattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string rawString = pattern->GetResCacheMapByKey("row.space");
+        CalcDimension value;
+        if (rawString.empty()) {
+            ResourceParseUtils::ParseResDimensionVp(resObj, value);
+            pattern->AddResCache("row.space", value.ToString());
+        } else {
+            value = StringUtils::StringToCalcDimension(rawString);
+        }
+        if (GreatOrEqual(value.Value(), 0.0)) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, value, frameNode);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    };
+    updateFunc(spaceResObj);
+    pattern->AddResObj("row.space", spaceResObj, std::move(updateFunc));
+    CalcDimension value;
+    ResourceParseUtils::ParseResDimensionVp(spaceResObj, value);
+    if (GreatOrEqual(value.Value(), 0.0)) {
+        ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, value);
+    } else {
+        LOGE("Column: the space value is illegal due to space is less than zero");
+    }
+}
+
+void RowModelNG::ResetResObj(FrameNode* frameNode, const std::string& key)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LinearLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
+}
+
 RefPtr<FrameNode> RowModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(

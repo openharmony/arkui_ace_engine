@@ -113,13 +113,35 @@ void RadioPattern::OnModifyDone()
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);
+    hotZoneHorizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding();
+    hotZoneVerticalPadding_ = radioTheme->GetHotZoneVerticalPadding();
+    InitDefaultMargin();
+    HandleEnabled();
+    InitClickEvent();
+    InitTouchEvent();
+    InitMouseEvent();
+    InitFocusEvent();
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    InitOnKeyEvent(focusHub);
+    SetAccessibilityAction();
+}
+
+void RadioPattern::InitDefaultMargin()
+{
+    if (makeFunc_.has_value()) {
+        ResetDefaultMargin();
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     MarginProperty margin;
-    margin.left = CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value());
-    margin.right = CalcLength(radioTheme->GetHotZoneHorizontalPadding().Value());
-    margin.top = CalcLength(radioTheme->GetHotZoneVerticalPadding().Value());
-    margin.bottom = CalcLength(radioTheme->GetHotZoneVerticalPadding().Value());
+    margin.left = CalcLength(hotZoneHorizontalPadding_.Value());
+    margin.right = CalcLength(hotZoneHorizontalPadding_.Value());
+    margin.top = CalcLength(hotZoneVerticalPadding_.Value());
+    margin.bottom = CalcLength(hotZoneVerticalPadding_.Value());
     auto& setMargin = layoutProperty->GetMarginProperty();
     if (setMargin) {
         if (setMargin->left.has_value()) {
@@ -136,17 +158,19 @@ void RadioPattern::OnModifyDone()
         }
     }
     layoutProperty->UpdateMargin(margin);
-    hotZoneHorizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding();
-    hotZoneVerticalPadding_ = radioTheme->GetHotZoneVerticalPadding();
-    HandleEnabled();
-    InitClickEvent();
-    InitTouchEvent();
-    InitMouseEvent();
-    InitFocusEvent();
-    auto focusHub = host->GetFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    InitOnKeyEvent(focusHub);
-    SetAccessibilityAction();
+}
+
+void RadioPattern::ResetDefaultMargin()
+{
+    if (isUserSetMargin_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    MarginProperty margin;
+    layoutProperty->UpdateMargin(margin);
 }
 
 void RadioPattern::InitFocusEvent()
@@ -1010,16 +1034,47 @@ void RadioPattern::DumpInfo ()
     }
 }
 
+void RadioPattern::UpdateRadioComponentColor(const Color& color, const RadioColorType radioColorType)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    switch (radioColorType) {
+        case RadioColorType::CHECKED_BACKGROUND_COLOR:
+            paintProperty->UpdateRadioCheckedBackgroundColor(color);
+            break;
+        case RadioColorType::UNCHECKED_BORDER_COLOR:
+            paintProperty->UpdateRadioUncheckedBorderColor(color);
+            break;
+        case RadioColorType::INDICATOR_COLOR:
+            paintProperty->UpdateRadioIndicatorColor(color);
+            ImageNodeCreate();
+            break;
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void RadioPattern::FireBuilder()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->RemoveChildAndReturnIndex(customNode_);
-    if (makeFunc_.has_value()) {
-        customNode_ = BuildContentModifierNode();
-        CHECK_NULL_VOID(customNode_);
-        host->AddChild(customNode_, 0);
+    if (!makeFunc_.has_value()) {
+        host->RemoveChildAndReturnIndex(customNode_);
+        customNode_ = nullptr;
+        host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+        return;
     }
+    auto node = BuildContentModifierNode();
+    if (customNode_ == node) {
+        return;
+    }
+    host->RemoveChildAndReturnIndex(customNode_);
+    customNode_ = node;
+    CHECK_NULL_VOID(customNode_);
+    host->AddChild(customNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1065,5 +1120,35 @@ void RadioPattern::SetPrePageIdToLastPageId()
         CHECK_NULL_VOID(pageNode);
         SetPrePageId(pageNode->GetId());
     }
+}
+
+void RadioPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<RadioPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    CHECK_NULL_VOID(radioTheme);
+    if (!paintProperty->GetRadioCheckedBackgroundColorSetByUser().value_or(false)) {
+        auto activeColor = radioTheme->GetActiveColor();
+        paintProperty->UpdateRadioCheckedBackgroundColor(activeColor);
+    }
+    if (!paintProperty->GetRadioUncheckedBorderColorSetByUser().value_or(false)) {
+        auto inActiveColor = radioTheme->GetInactiveColor();
+        paintProperty->UpdateRadioUncheckedBorderColor(inActiveColor);
+    }
+    if (!paintProperty->GetRadioIndicatorColorSetByUser().value_or(false)) {
+        auto pointColor = radioTheme->GetPointColor();
+        paintProperty->UpdateRadioIndicatorColor(pointColor);
+        ImageNodeCreate();
+    }
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG

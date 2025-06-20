@@ -102,4 +102,8 @@ void PerfInterfaces::ReportPageShowMsg(const std::string& pageUrl, const std::st
 {
 }
 
+void PerfInterfaces::SetApplicationInfo()
+{
+}
+
 } // namespace OHOS::Ace

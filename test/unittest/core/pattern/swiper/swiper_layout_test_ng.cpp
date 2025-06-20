@@ -1447,4 +1447,237 @@ HWTEST_F(SwiperLayoutTestNg, CaptureMeasure002, TestSize.Level1)
     swiperLayoutAlgorithm->CaptureMeasure(&layoutWrapper, layoutConstraint);
     EXPECT_EQ(pattern_->contentMainSize_, sizeTmp);
 }
+
+/**
+ * @tc.name: LayoutPolicyTest001
+ * @tc.desc: test the measure result when setting matchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, LayoutPolicyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default swiper
+     */
+    RefPtr<FrameNode> swiperInner;
+    auto swiper = CreateSwiper([this, &swiperInner](SwiperModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        swiperInner = CreateSwiper([this](SwiperModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+        });
+    });
+    ASSERT_NE(swiper, nullptr);
+    CreateLayoutTask(swiper);
+
+    // Expect swiper's width is 500, height is 300 land offset is [0.0, 0.0].
+    auto geometryNode = swiper->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect swiperInner's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode1 = swiperInner->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest002
+ * @tc.desc: test the measure result when setting matchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, LayoutPolicyTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default swiper
+     */
+    RefPtr<FrameNode> swiperInner;
+    auto swiper = CreateSwiper([this, &swiperInner](SwiperModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        ViewAbstract::SetPadding(CalcLength(20));
+        swiperInner = CreateSwiper([this](SwiperModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+        });
+    });
+    ASSERT_NE(swiper, nullptr);
+    CreateLayoutTask(swiper);
+
+    // Expect swiper's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode = swiper->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect swiperInner's width is 460, height is 260 and offset is [20.0, 20.0].
+    auto geometryNode1 = swiperInner->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(460.0f, 260.0f));
+    EXPECT_EQ(offset1, OffsetF(20.0f, 20.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest003
+ * @tc.desc: test the measure result when setting matchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, LayoutPolicyTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default swiper
+     */
+    RefPtr<FrameNode> swiperInner;
+    RefPtr<FrameNode> swiperOutter;
+    RefPtr<FrameNode> swiper;
+    swiperOutter = CreateSwiper([this, &swiper, &swiperInner](SwiperModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500.0f));
+        ViewAbstract::SetHeight(CalcLength(500.0f));
+        swiper = CreateSwiper([this, &swiperInner](SwiperModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+            swiperInner = CreateSwiper([this](SwiperModelNG model) {
+                ViewAbstract::SetWidth(CalcLength(100.0f));
+                ViewAbstract::SetHeight(CalcLength(100.0f));
+                ViewAbstract::SetFlexShrink(0.0f);
+            });
+        });
+    });
+    ASSERT_NE(swiperOutter, nullptr);
+    CreateLayoutTask(swiperOutter);
+
+    // Expect swiperOutter's width is 200, height is 200 and offset is [0.0, 0.0].
+    auto geometryNodeOutter = swiperOutter->GetGeometryNode();
+    ASSERT_NE(geometryNodeOutter, nullptr);
+    auto sizeOutter = geometryNodeOutter->GetFrameSize();
+    auto offsetOutter = geometryNodeOutter->GetFrameOffset();
+    EXPECT_EQ(sizeOutter, SizeF(500.0f, 500.0f));
+    EXPECT_EQ(offsetOutter, OffsetF(0.0f, 0.0f));
+
+    // Expect swiper's width is 150, height is 200 and offset is [25.0, 0.0].
+    auto geometryNode = swiper->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 500.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect swiperInner's width is 300, height is 400 and offset is [-75.0, -100.0].
+    auto geometryNodeInner = swiperInner->GetGeometryNode();
+    ASSERT_NE(geometryNodeInner, nullptr);
+    auto sizeInner = geometryNodeInner->GetFrameSize();
+    auto offsetInner = geometryNodeInner->GetFrameOffset();
+    EXPECT_EQ(sizeInner, SizeF(500.0f, 100.0f));
+    EXPECT_EQ(offsetInner, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest004
+ * @tc.desc: test the measure result when setting wrapContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, LayoutPolicyTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default swiper
+     */
+    RefPtr<FrameNode> swiperInner;
+    auto swiper = CreateSwiper([this, &swiperInner](SwiperModelNG model) {
+        ViewAbstractModelNG model1;
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+        swiperInner = CreateSwiper([this](SwiperModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(500));
+            ViewAbstract::SetHeight(CalcLength(300));
+        });
+    });
+    ASSERT_NE(swiper, nullptr);
+    CreateLayoutTask(swiper);
+
+    // Expect swiper's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode = swiper->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect swiperInner's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode1 = swiperInner->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest005
+ * @tc.desc: test the measure result when setting wrapContent and parent has constraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, LayoutPolicyTest005, TestSize.Level1)
+{
+/**
+     * @tc.steps: step1. Create default swiper
+     */
+    RefPtr<FrameNode> swiperInner;
+    RefPtr<FrameNode> swiperOutter;
+    RefPtr<FrameNode> swiper;
+    swiperOutter = CreateSwiper([this, &swiper, &swiperInner](SwiperModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(200.0f));
+        ViewAbstract::SetHeight(CalcLength(200.0f));
+        swiper = CreateSwiper([this, &swiperInner](SwiperModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+            ViewAbstract::SetMaxWidth(CalcLength(150.0f));
+            ViewAbstract::SetMaxHeight(CalcLength(300.0f));
+            swiperInner = CreateSwiper([this](SwiperModelNG model) {
+                ViewAbstract::SetWidth(CalcLength(300.0f));
+                ViewAbstract::SetHeight(CalcLength(400.0f));
+                ViewAbstract::SetFlexShrink(0.0f);
+            });
+        });
+    });
+    ASSERT_NE(swiperOutter, nullptr);
+    CreateLayoutTask(swiperOutter);
+
+    // Expect swiperOutter's width is 200, height is 200 and offset is [0.0, 0.0].
+    auto geometryNodeOutter = swiperOutter->GetGeometryNode();
+    ASSERT_NE(geometryNodeOutter, nullptr);
+    auto sizeOutter = geometryNodeOutter->GetFrameSize();
+    auto offsetOutter = geometryNodeOutter->GetFrameOffset();
+    EXPECT_EQ(sizeOutter, SizeF(200.0f, 200.0f));
+    EXPECT_EQ(offsetOutter, OffsetF(0.0f, 0.0f));
+
+    // Expect swiper's width is 150, height is 200 and offset is [25.0, 0.0].
+    auto geometryNode = swiper->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(150.0f, 200.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect swiperInner's width is 300, height is 400 and offset is [-75.0, -100.0].
+    auto geometryNodeInner = swiperInner->GetGeometryNode();
+    ASSERT_NE(geometryNodeInner, nullptr);
+    auto sizeInner = geometryNodeInner->GetFrameSize();
+    auto offsetInner = geometryNodeInner->GetFrameOffset();
+    EXPECT_EQ(sizeInner, SizeF(150.0f, 200.0f));
+    EXPECT_EQ(offsetInner, OffsetF(0.0f, 0.0f));
+}
 } // namespace OHOS::Ace::NG

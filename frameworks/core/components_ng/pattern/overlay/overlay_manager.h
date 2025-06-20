@@ -128,7 +128,7 @@ class ACE_FORCE_EXPORT OverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(OverlayManager, AceType);
 
 public:
-    explicit OverlayManager(const RefPtr<FrameNode>& rootNode) : rootNodeWeak_(rootNode) {}
+    explicit OverlayManager(const RefPtr<FrameNode>& rootNode);
     ~OverlayManager() override;
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
     void RemoveIndexerPopupById(int32_t targetId);
@@ -262,6 +262,8 @@ public:
     void CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)> &&callback);
     void UpdateCustomDialog(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
         std::function<void(int32_t)> &&callback);
+    void UpdateCustomDialogWithNode(
+        const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback);
     std::optional<double> GetTopOrder();
     std::optional<double> GetBottomOrder();
 
@@ -763,6 +765,7 @@ public:
     std::optional<double> GetLevelOrder(const RefPtr<FrameNode>& node, std::optional<double> levelOrder = std::nullopt);
 
 private:
+    RefPtr<PipelineContext> GetPipelineContext() const;
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
         const RefPtr<UINode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
         NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
@@ -942,6 +945,8 @@ private:
     RefPtr<UINode> RebuildCustomBuilder(RefPtr<UINode>& contentNode);
     void OpenCustomDialogInner(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback,
         const RefPtr<FrameNode> dialog, bool showComponentContent);
+    RefPtr<FrameNode> UpdateCustomDialogInner(
+        const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback);
 
     void DumpPopupMapInfo() const;
     void DumpMapInfo(
@@ -962,7 +967,7 @@ private:
     CustomKeyboardOffsetInfo CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard);
     void SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow);
     void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode, const RefPtr<PipelineContext>& pipeline);
-    void RemoveMenuWrapperFromRoot(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& menuWrapperNode);
+    void CallMenuDisappearWithStatus(const RefPtr<FrameNode>& menuWrapperNode);
     void SetDragNodeNeedClean();
     void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
     void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
@@ -992,6 +997,7 @@ private:
     WeakPtr<FrameNode> lastModalNode_; // Previous Modal Node
     float sheetHeight_ { 0.0 };
     WeakPtr<UINode> rootNodeWeak_;
+    WeakPtr<PipelineContext> context_;
     int32_t dialogCount_ = 0;
     DismissTarget dismissTarget_;
     int32_t dismissSheetId_ = 0;

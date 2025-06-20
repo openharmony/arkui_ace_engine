@@ -52,6 +52,37 @@ public:
         return property->GetItemSpace().value_or(0.0_px).ConvertToPx();
     }
 
+    static LayoutConstraintF CheckLayoutPolicyConstraint(const RefPtr<SwiperLayoutProperty>& property,
+        OptionalSizeF childSelfIdealSize, LayoutConstraintF layoutConstraint)
+    {
+        auto layoutPolicy = property->GetLayoutPolicyProperty();
+        auto axis = property->GetDirection().value_or(Axis::HORIZONTAL);
+        if (layoutPolicy.has_value()) {
+            auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+            auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+            // crosss axis set maxSize and reset IdealSize'cross width/heigth, when layoutPolicy is matchParent
+            if (axis == Axis::HORIZONTAL && heightLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
+                auto heightOpt = childSelfIdealSize.Height();
+                if (heightOpt) {
+                    layoutConstraint.maxSize.SetHeight(heightOpt.value());
+                }
+                auto width = childSelfIdealSize.Width();
+                childSelfIdealSize.Reset();
+                childSelfIdealSize.SetWidth(width);
+            } else if (axis == Axis::VERTICAL && widthLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
+                auto widthOpt = childSelfIdealSize.Width();
+                if (widthOpt) {
+                    layoutConstraint.maxSize.SetWidth(widthOpt.value());
+                }
+                auto height = childSelfIdealSize.Height();
+                childSelfIdealSize.Reset();
+                childSelfIdealSize.SetHeight(height);
+            }
+        }
+        layoutConstraint.selfIdealSize = childSelfIdealSize;
+        return layoutConstraint;
+    }
+
     static LayoutConstraintF CreateChildConstraint(
         const RefPtr<SwiperLayoutProperty>& property, const OptionalSizeF& idealSize, bool getAutoFill)
     {
@@ -101,9 +132,8 @@ public:
             axis == Axis::HORIZONTAL ? childSelfIdealSize.SetWidth(childCalcIdealLength)
                                      : childSelfIdealSize.SetHeight(childCalcIdealLength);
         }
-
-        layoutConstraint.selfIdealSize = childSelfIdealSize;
-        return layoutConstraint;
+        
+        return CheckLayoutPolicyConstraint(property, childSelfIdealSize, layoutConstraint);
     }
 
     static int32_t CaculateDisplayItemSpaceCount(

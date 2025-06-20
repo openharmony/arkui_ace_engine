@@ -91,6 +91,8 @@ protected:
     bool DidExceedMaxLines(const SizeF& maxSize) override;
 
     std::u16string StringOutBoundProtection(int32_t position, int32_t length, std::u16string wTextForAI);
+    bool IsNeedParagraphReLayout() const override;
+    double GetIndentMaxWidth(double width) const override;
 
 private:
     OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) override;
@@ -101,7 +103,6 @@ private:
         LayoutWrapper* layoutWrapper, RefPtr<FrameNode>& frameNode);
     void CreateParagraphDrag(
         const TextStyle& textStyle, const std::vector<std::u16string>& contents, const RefPtr<Paragraph>& paragraph);
-    void ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>>& spans);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool AddPropertiesAndAnimations(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& textLayoutProperty,
@@ -131,8 +132,13 @@ private:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double stepSize);
     bool IsAdaptExceedLimit(const SizeF& maxSize) override;
     bool IsParentSizeNearZero(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-
+    void CreateOrUpdateTextEffect(const RefPtr<Paragraph>& oldParagraph, const RefPtr<Paragraph>& newParagraph,
+        const RefPtr<TextPattern>& textPattern, const std::u16string& content);
+    bool IsFixIdealSizeAndNoMaxSize(LayoutWrapper* layoutWrapper, bool isWidth);
+    LayoutConstraintF CalcContentConstraint(const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
     RefPtr<PropertyBool> showSelect_;
+    std::optional<LayoutConstraintF> cachedCalcContentConstraint_;
+    bool isFixIdealSizeAndNoMaxWidth_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

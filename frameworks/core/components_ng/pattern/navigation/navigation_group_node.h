@@ -86,6 +86,23 @@ public:
     {
         return navBarNode_;
     }
+    const RefPtr<UINode>& GetHomeDestinationNode() const
+    {
+        return customHomeDestination_;
+    }
+    const RefPtr<UINode>& GetNavBarOrHomeDestinationNode() const;
+    bool IsNavBarOrHomeDestination(const RefPtr<UINode>& node) const;
+
+    const std::optional<bool> GetUseHomeDestination() const
+    {
+        return useHomeDestination_;
+    }
+    void SetUseHomeDestinatoin(bool use)
+    {
+        useHomeDestination_ = use;
+    }
+
+    void CreateHomeDestinationIfNeeded();
 
     void SetSplitPlaceholder(const RefPtr<NG::UINode>& splitPlaceholder);
 
@@ -198,12 +215,14 @@ public:
     void ConfigureNavigationWithAnimation(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
     void ResetTransitionAnimationNodeState(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
     RefPtr<NavigationManager> FetchNavigationManager();
-    void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
-    void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
+    void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+        bool isNavBarOrHomeDestination = false);
+    void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
+        bool isNavBarOrHomeDestination = false);
     virtual void CreateAnimationWithPop(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
-        const AnimationFinishCallback finishCallback, bool isNavBar = false);
+        const AnimationFinishCallback finishCallback, bool isNavBarOrHomeDestination = false);
     virtual void CreateAnimationWithPush(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
-        const AnimationFinishCallback finishCallback, bool isNavBar = false);
+        const AnimationFinishCallback finishCallback, bool isNavBarOrHomeDestination = false);
     void CreateSoftAnimationWithPush(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
         const AnimationFinishCallback finishCallback, bool isNavBar = false);
     void CreateSoftAnimationWithPop(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
@@ -215,8 +234,9 @@ public:
     std::shared_ptr<AnimationUtils::Animation> MaskAnimation(const RefPtr<FrameNode>& curNode, bool isTransitionIn);
     std::shared_ptr<AnimationUtils::Animation> TitleOpacityAnimation(
         const RefPtr<FrameNode>& node, bool isTransitionOut);
-    void TransitionWithReplace(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar);
-    void DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBar, bool isAnimated = true);
+    void TransitionWithReplace(
+        const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBarOrHomeDestination);
+    void DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBarOrHomeDestination, bool isAnimated = true);
     void NotifyPageHide();
     void UpdateLastStandardIndex();
 
@@ -368,7 +388,7 @@ private:
     bool FindNavigationParent(const std::string& parentName);
     void DealRemoveDestination(const RefPtr<NavDestinationGroupNode>& destination);
     RefPtr<FrameNode> TransitionAnimationIsValid(
-        const RefPtr<FrameNode>& node, bool isNavBar, bool isUseNavDestCustomTransition);
+        const RefPtr<FrameNode>& node, bool isNavBarOrHomeDestination, bool isUseNavDestCustomTransition);
     bool CheckNeedUpdateParentNode(const RefPtr<UINode>& node);
     void RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
         int32_t preAnimationId);
@@ -381,7 +401,11 @@ private:
     void SoftTransitionAnimationPop(const RefPtr<FrameNode>& preNode,
         const RefPtr<FrameNode>& curNode, bool isNavBar, bool preUseCustomTransition, bool curUseCustomTransition,
         const NavigationGroupNode::AnimationFinishCallback& callback);
+    bool HandleBackForHomeDestination();
 
+    std::optional<bool> useHomeDestination_;
+    RefPtr<UINode> customHomeNode_;
+    RefPtr<UINode> customHomeDestination_;
     RefPtr<UINode> primaryContentNode_;
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;

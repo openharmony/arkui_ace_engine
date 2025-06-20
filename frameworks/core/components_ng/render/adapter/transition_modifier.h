@@ -120,8 +120,8 @@ private:
         float heightScale = backgroundRegionHeight / initialBackgroundRegion_.Height();
         RSRect desRSRect = RSRect(backgroundRegion.GetLeft() + offset2.GetX() * widthScale,
                                   backgroundRegion.GetTop() + offset2.GetY() * heightScale,
-                                  (srcSize.Width() + backgroundRegion.GetLeft()) * widthScale + offset2.GetX(),
-                                  (srcSize.Height() + backgroundRegion.GetTop()) * heightScale + offset2.GetY());
+                                  backgroundRegion.GetLeft() + (srcSize.Width() + offset2.GetX()) * widthScale,
+                                  backgroundRegion.GetTop() + (srcSize.Height() + offset2.GetY()) * heightScale);
         if (srcSize.Width() > desSize.Width()) {
             srcRSRect.SetRight(offset1.GetX() + desSize.Width());
             desRSRect.SetRight(backgroundRegion.GetLeft() + backgroundRegionWidth);

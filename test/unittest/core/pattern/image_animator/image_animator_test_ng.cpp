@@ -2695,7 +2695,7 @@ HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_012, TestSize.Level1)
     animator.AddStopListener([&finished]() { finished = true; });
     animator.Forward();
     EXPECT_TRUE(finished);
-    EXPECT_EQ(flagNumber, 1);
+    EXPECT_EQ(flagNumber, 2);
 }
 
 /**

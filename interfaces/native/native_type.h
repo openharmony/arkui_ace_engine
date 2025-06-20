@@ -2286,6 +2286,11 @@ typedef enum {
      */
     ARKUI_ERROR_CODE_NODE_ON_INVALID_THREAD = 106204,
     /**
+     * @error Force dark config is invalid.
+     * @since 20
+     */
+    ARKUI_ERROR_CODE_FORCE_DARK_CONFIG_INVALID = 106205,
+    /**
      * @error The node requesting focus is not focusable.
      * @since 15
      */

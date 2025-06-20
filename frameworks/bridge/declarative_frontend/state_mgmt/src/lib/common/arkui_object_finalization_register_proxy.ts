@@ -15,18 +15,18 @@
  */
 
 class ArkUIObjectFinalizationRegisterProxy {
-    static callbackFunc_: ((obj: {hash: number, name: string, msg: string}) => void) | undefined;
+    static callbackFunc_: ((weakRef: WeakRef<object>, msg: string) => void) | undefined;
     constructor() {}
     // need to check callbackFunc_ before invoke call function
-    static call(obj: { hash: number, name: string, msg: string }) {
+    static call(weakRef: WeakRef<object>, msg: string): void {
         if (ArkUIObjectFinalizationRegisterProxy.callbackFunc_) {
-            ArkUIObjectFinalizationRegisterProxy.callbackFunc_(obj);
+            ArkUIObjectFinalizationRegisterProxy.callbackFunc_(weakRef, msg);
         } 
     }
 }
 
 // provide for jsMemoryWatch to register callback function for ArkUI
-function registerArkUIObjectLifeCycleCallback(callback: (obj: {hash: number, name: string, msg: string}) => void): void {
+function registerArkUIObjectLifeCycleCallback(callback: (weakRef: WeakRef<object>, msg: string) => void): void {
     ArkUIObjectFinalizationRegisterProxy.callbackFunc_ = callback;
 }
 

@@ -814,11 +814,11 @@ HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg017, TestSize.Level1)
 }
 
 /**
- * @tc.name: CreateDotWithResourceObj001
- * @tc.desc: Text CreateDotWithResourceObj.
+ * @tc.name: IndicatorModelTestNg018
+ * @tc.desc: Text CreateDigitWithResourceObj.
  * @tc.type: FUNC
  */
-HWTEST_F(IndicatorModelTestNg, CreateDigitWithResourceObj, TestSize.Level1)
+HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg018, TestSize.Level1)
 {
     SwiperDigitalParameters swiperDigitalParameters;
     swiperDigitalParameters.fontColor = Color::RED;
@@ -828,20 +828,17 @@ HWTEST_F(IndicatorModelTestNg, CreateDigitWithResourceObj, TestSize.Level1)
     indicatorPattern_ = frameNode_->GetPattern<IndicatorPattern>();
     EXPECT_NE(indicatorPattern_, nullptr);
     FrameNode* frameNode = static_cast<FrameNode*>(AceType::RawPtr(frameNode_));
-    model.CreateDigitWithResourceObj(frameNode, swiperDigitalParameters);
-    model.SetIndicatorType(frameNode, SwiperIndicatorType::DIGIT);
-    model.SetDigitIndicatorStyle(frameNode, swiperDigitalParameters);
 
-    EXPECT_EQ(indicatorPattern_->GetIndicatorType(), SwiperIndicatorType::DIGIT);
-    EXPECT_EQ(indicatorPattern_->swiperDigitalParameters_->fontColor, Color::RED);
+    model.CreateDigitWithResourceObj(frameNode, swiperDigitalParameters);
+    EXPECT_EQ(indicatorPattern_->resourceMgr_, nullptr);
 }
 
 /**
- * @tc.name: CreateDotWithResourceObj001
+ * @tc.name: IndicatorModelTestNg019
  * @tc.desc: Text CreateDotWithResourceObj.
  * @tc.type: FUNC
  */
-HWTEST_F(IndicatorModelTestNg, CreateDotWithResourceObj, TestSize.Level1)
+HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg019, TestSize.Level1)
 {
     SwiperParameters swiperParameters;
     swiperParameters.colorVal = Color::RED;
@@ -851,11 +848,190 @@ HWTEST_F(IndicatorModelTestNg, CreateDotWithResourceObj, TestSize.Level1)
     indicatorPattern_ = frameNode_->GetPattern<IndicatorPattern>();
     EXPECT_NE(indicatorPattern_, nullptr);
     FrameNode* frameNode = static_cast<FrameNode*>(AceType::RawPtr(frameNode_));
-    model.CreateDotWithResourceObj(frameNode, swiperParameters);
-    model.SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
-    model.SetDotIndicatorStyle(frameNode, swiperParameters);
 
+    model.CreateDotWithResourceObj(frameNode, swiperParameters);
+    EXPECT_EQ(indicatorPattern_->resourceMgr_, nullptr);
+}
+
+/**
+ * @tc.name: IndicatorModelTestNg020
+ * @tc.desc: Text ProcessDotSizeWithResourceObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg020, TestSize.Level1)
+{
+    SwiperParameters swiperParameters;
+    IndicatorModelNG model;
+    frameNode_ = model.CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    EXPECT_NE(frameNode_, nullptr);
+    indicatorPattern_ = frameNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern_, nullptr);
+    FrameNode* frameNode = static_cast<FrameNode*>(AceType::RawPtr(frameNode_));
+
+    model.ProcessDotSizeWithResourceObj(frameNode, "itemWidth", nullptr);
+    EXPECT_EQ(indicatorPattern_->resourceMgr_, nullptr);
+ 
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ProcessDotSizeWithResourceObj(frameNode, "itemWidth", resObj);
+    indicatorPattern_->resourceMgr_->ReloadResources();
+    ASSERT_NE(indicatorPattern_->resourceMgr_, nullptr);
+    EXPECT_NE(indicatorPattern_->resourceMgr_->resMap_.size(), 0);
+
+    model.ProcessDotSizeWithResourceObj(frameNode, "itemHeight", resObj);
+    indicatorPattern_->resourceMgr_->ReloadResources();
+    ASSERT_NE(indicatorPattern_->resourceMgr_, nullptr);
+    EXPECT_NE(indicatorPattern_->resourceMgr_->resMap_.size(), 0);
+
+    model.ProcessDotSizeWithResourceObj(frameNode, "SelectedItemWidth", resObj);
+    indicatorPattern_->resourceMgr_->ReloadResources();
+    ASSERT_NE(indicatorPattern_->resourceMgr_, nullptr);
+    EXPECT_NE(indicatorPattern_->resourceMgr_->resMap_.size(), 0);
+
+    model.ProcessDotSizeWithResourceObj(frameNode, "selectedItemHeight", resObj);
+    indicatorPattern_->resourceMgr_->ReloadResources();
+    ASSERT_NE(indicatorPattern_->resourceMgr_, nullptr);
+    EXPECT_NE(indicatorPattern_->resourceMgr_->resMap_.size(), 0);
+}
+
+/**
+ * @tc.name: IndicatorModelTestNg021
+ * @tc.desc: Text ProcessDigitalFontSizeWithResourceObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg021, TestSize.Level1)
+{
+    SwiperDigitalParameters swiperDigitalParameters;
+    IndicatorModelNG model;
+    frameNode_ = model.CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    EXPECT_NE(frameNode_, nullptr);
+    indicatorPattern_ = frameNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern_, nullptr);
+    FrameNode* frameNode = static_cast<FrameNode*>(AceType::RawPtr(frameNode_));
+
+    model.ProcessDigitalFontSizeWithResourceObj(frameNode, "fontSize", nullptr);
+    EXPECT_EQ(indicatorPattern_->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ProcessDigitalFontSizeWithResourceObj(frameNode, "fontSize", resObj);
+    indicatorPattern_->resourceMgr_->ReloadResources();
+    ASSERT_NE(indicatorPattern_->resourceMgr_, nullptr);
+    EXPECT_NE(indicatorPattern_->resourceMgr_->resMap_.size(), 0);
+
+    model.ProcessDigitalFontSizeWithResourceObj(frameNode, "fontSize", resObj);
+    indicatorPattern_->resourceMgr_->ReloadResources();
+    ASSERT_NE(indicatorPattern_->resourceMgr_, nullptr);
+    EXPECT_NE(indicatorPattern_->resourceMgr_->resMap_.size(), 0);
+
+    model.ProcessDigitalFontSizeWithResourceObj(frameNode, "selectedFontSize", resObj);
+    indicatorPattern_->resourceMgr_->ReloadResources();
+    ASSERT_NE(indicatorPattern_->resourceMgr_, nullptr);
+    EXPECT_NE(indicatorPattern_->resourceMgr_->resMap_.size(), 0);
+}
+
+/**
+ * @tc.name: IndicatorModelTestNg022
+ * @tc.desc: Text ProcessDotColorWithResourceObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg022, TestSize.Level1)
+{
+    SwiperParameters swiperParameters;
+    IndicatorModelNG model;
+    frameNode_ = model.CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    EXPECT_NE(frameNode_, nullptr);
+    indicatorPattern_ = frameNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern_, nullptr);
+    FrameNode* frameNode = static_cast<FrameNode*>(AceType::RawPtr(frameNode_));
+
+    model.ProcessDotColorWithResourceObj(frameNode, "colorVal", nullptr);
+    EXPECT_EQ(indicatorPattern_->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ProcessDotColorWithResourceObj(frameNode, "colorVal", resObj);
+    indicatorPattern_->resourceMgr_->ReloadResources();
+    ASSERT_NE(indicatorPattern_->resourceMgr_, nullptr);
+    EXPECT_NE(indicatorPattern_->resourceMgr_->resMap_.size(), 0);
+
+    model.ProcessDotColorWithResourceObj(frameNode, "selectedColorVal", resObj);
+    indicatorPattern_->resourceMgr_->ReloadResources();
+    ASSERT_NE(indicatorPattern_->resourceMgr_, nullptr);
+    EXPECT_NE(indicatorPattern_->resourceMgr_->resMap_.size(), 0);
+}
+
+/**
+ * @tc.name: IndicatorModelTestNg023
+ * @tc.desc: Text ProcessDigitalFontColorWithResourceObj.
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg023, TestSize.Level1)
+{
+    SwiperDigitalParameters swiperDigitalParameters;
+    IndicatorModelNG model;
+    frameNode_ = model.CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    EXPECT_NE(frameNode_, nullptr);
+    indicatorPattern_ = frameNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern_, nullptr);
+    FrameNode* frameNode = static_cast<FrameNode*>(AceType::RawPtr(frameNode_));
+
+    model.ProcessDigitalColorWithResourceObj(frameNode, "fontColor", nullptr);
+    EXPECT_EQ(indicatorPattern_->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    model.ProcessDigitalColorWithResourceObj(frameNode, "fontColor", resObj);
+    indicatorPattern_->resourceMgr_->ReloadResources();
+    ASSERT_NE(indicatorPattern_->resourceMgr_, nullptr);
+    EXPECT_NE(indicatorPattern_->resourceMgr_->resMap_.size(), 0);
+
+    model.ProcessDigitalColorWithResourceObj(frameNode, "selectedFontColor", resObj);
+    indicatorPattern_->resourceMgr_->ReloadResources();
+    ASSERT_NE(indicatorPattern_->resourceMgr_, nullptr);
+    EXPECT_NE(indicatorPattern_->resourceMgr_->resMap_.size(), 0);
+}
+
+/**
+ * @tc.name: IndicatorModelTestNg024
+ * @tc.desc: Text UpdateDefaultColor
+ */
+HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg024, TestSize.Level1)
+{
+    SwiperDigitalParameters swiperDigitalParameters;
+    IndicatorModelNG model;
+    frameNode_ = model.CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    EXPECT_NE(frameNode_, nullptr);
+    indicatorPattern_ = frameNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern_, nullptr);
+    FrameNode* frameNode = static_cast<FrameNode*>(AceType::RawPtr(frameNode_));
+
+    swiperDigitalParameters.fontColor = Color::RED;
+    swiperDigitalParameters.selectedFontColor = Color::BLUE;
+    model.SetDigitIndicatorStyle(swiperDigitalParameters);
+    model.SetIndicatorType(frameNode, SwiperIndicatorType::DIGIT);
+    indicatorPattern_->OnColorModeChange(static_cast<uint32_t>(ColorMode::DARK));
+    EXPECT_NE(indicatorPattern_->GetSwiperDigitalParameters()->fontColor, Color::RED);
+    EXPECT_NE(indicatorPattern_->GetSwiperDigitalParameters()->selectedFontColor, Color::BLUE);
+    EXPECT_EQ(indicatorPattern_->GetIndicatorType(), SwiperIndicatorType::DIGIT);
+}
+
+/**
+ * @tc.name: IndicatorModelTestNg025
+ * @tc.desc: Text OnColorModeChange
+ */
+HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg025, TestSize.Level1)
+{
+    SwiperParameters swiperParameters;
+    IndicatorModelNG model;
+    frameNode_ = model.CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    EXPECT_NE(frameNode_, nullptr);
+    indicatorPattern_ = frameNode_->GetPattern<IndicatorPattern>();
+    EXPECT_NE(indicatorPattern_, nullptr);
+    indicatorPaintProperty_ = frameNode_->GetPaintProperty<DotIndicatorPaintProperty>();
+    FrameNode* frameNode = static_cast<FrameNode*>(AceType::RawPtr(frameNode_));
+
+    swiperParameters.colorVal = Color::RED;
+    model.SetDotIndicatorStyle(frameNode, swiperParameters);
+    model.SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
+    indicatorPattern_->OnColorModeChange(static_cast<uint32_t>(ColorMode::DARK));
+    EXPECT_EQ(indicatorPaintProperty_->GetColorValue(Color::BLACK), Color::RED);
     EXPECT_EQ(indicatorPattern_->GetIndicatorType(), SwiperIndicatorType::DOT);
-    EXPECT_EQ(indicatorPattern_->swiperParameters_->colorVal, Color::RED);
 }
 } // namespace OHOS::Ace::NG

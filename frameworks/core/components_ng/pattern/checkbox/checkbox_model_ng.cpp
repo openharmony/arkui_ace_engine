@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
@@ -91,7 +92,6 @@ void CheckBoxModelNG::SetCheckboxStyle(CheckBoxStyle checkboxStyle)
 {
     ACE_UPDATE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedStyle, checkboxStyle);
 }
-
 
 void CheckBoxModelNG::SetCheckMarkColor(const Color& color)
 {
@@ -366,6 +366,73 @@ std::string CheckBoxModelNG::GetCheckboxGroup(FrameNode* frameNode)
     return eventHub->GetGroupName();
 }
 
+void CheckBoxModelNG::CreateWithColorResourceObj(
+    const RefPtr<ResourceObject>& resObj, const CheckBoxColorType checkBoxColorType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObj(frameNode, checkBoxColorType, resObj);
+}
+
+void CheckBoxModelNG::UpdateComponentColor(FrameNode* frameNode, const CheckBoxColorType checkBoxColorType)
+{
+    CHECK_NULL_VOID(frameNode);
+    switch (checkBoxColorType) {
+        case CheckBoxColorType::SELECTED_COLOR:
+            ResetSelectedColor(frameNode);
+            break;
+        case CheckBoxColorType::UN_SELECTED_COLOR:
+            ResetUnSelectedColor(frameNode);
+            break;
+        default:
+            break;
+    }
+}
+
+void CheckBoxModelNG::CreateWithResourceObj(
+    FrameNode* frameNode, const CheckBoxColorType jsResourceType, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    std::string key = "checkbox" + ColorTypeToString(jsResourceType);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [jsResourceType, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+        CHECK_NULL_VOID(pattern);
+        Color result;
+        if (ResourceParseUtils::ParseResColor(resObj, result)) {
+            UpdateComponentColor(AceType::RawPtr(frameNode), jsResourceType);
+            return;
+        }
+
+        pattern->UpdateCheckboxComponentColor(result, jsResourceType);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+std::string CheckBoxModelNG::ColorTypeToString(const CheckBoxColorType checkBoxColorType)
+{
+    std::string rst;
+    switch (checkBoxColorType) {
+        case CheckBoxColorType::SELECTED_COLOR:
+            rst = "SelectedColor";
+            break;
+        case CheckBoxColorType::UN_SELECTED_COLOR:
+            rst = "UnSelectedColor";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
+}
+
 void CheckBoxModelNG::ResetSelectedColor()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxSelectedColor, PROPERTY_UPDATE_RENDER);
@@ -374,25 +441,25 @@ void CheckBoxModelNG::ResetSelectedColor()
 
 void CheckBoxModelNG::ResetSelectedColor(FrameNode* frameNode)
 {
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxSelectedColor,
-        PROPERTY_UPDATE_RENDER, frameNode);
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxSelectedColorFlagByUser,
-        PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxPaintProperty, CheckBoxSelectedColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxPaintProperty, CheckBoxSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
 void CheckBoxModelNG::ResetUnSelectedColor()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxUnSelectedColor, PROPERTY_UPDATE_RENDER);
-    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxUnSelectedColorFlagByUser,
-        PROPERTY_UPDATE_RENDER);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxPaintProperty, CheckBoxUnSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER);
 }
 
 void CheckBoxModelNG::ResetUnSelectedColor(FrameNode* frameNode)
 {
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxUnSelectedColor,
-        PROPERTY_UPDATE_RENDER, frameNode);
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxUnSelectedColorFlagByUser,
-        PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxPaintProperty, CheckBoxUnSelectedColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxPaintProperty, CheckBoxUnSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
 void CheckBoxModelNG::ResetCheckMarkColor()
@@ -403,9 +470,24 @@ void CheckBoxModelNG::ResetCheckMarkColor()
 
 void CheckBoxModelNG::ResetCheckMarkColor(FrameNode* frameNode)
 {
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxCheckMarkColor,
-        PROPERTY_UPDATE_RENDER, frameNode);
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(CheckBoxPaintProperty, CheckBoxCheckMarkColorFlagByUser,
-        PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxPaintProperty, CheckBoxCheckMarkColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxPaintProperty, CheckBoxCheckMarkColorFlagByUser, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void CheckBoxModelNG::SetIsUserSetMargin(bool isUserSet)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetIsUserSetMargin(frameNode, isUserSet);
+}
+
+void CheckBoxModelNG::SetIsUserSetMargin(FrameNode* frameNode, bool isUserSet)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsUserSetMargin(isUserSet);
 }
 } // namespace OHOS::Ace::NG

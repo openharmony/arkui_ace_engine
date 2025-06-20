@@ -34,6 +34,11 @@ public:
     void SetFontFamily(const std::vector<std::string> &families) override;
     void SetItemDivider(const V2::ItemDivider& divider, const DividerMode& mode) override;
     void SetItemGroupDivider(const V2::ItemDivider& divider, const DividerMode& mode) override;
+    void CreateWithColorResourceObj(
+        const RefPtr<ResourceObject>& resObj, const MenuColorType menuColorType) override {};
+    void CreateWithDimensionResourceObj(
+        const RefPtr<ResourceObject>& resObj, const MenuDimensionType menuDimensionType) override {};
+    void CreateWithFontFamilyResourceObj(const RefPtr<ResourceObject>& resObj, MenuFamilyType type) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_MENU_MODEL_IMPL_H

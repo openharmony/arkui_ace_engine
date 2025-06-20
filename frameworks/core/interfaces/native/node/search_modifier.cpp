@@ -1263,6 +1263,20 @@ void ResetEnableAutoSpacing(ArkUINodeHandle node)
     SearchModelNG::SetEnableAutoSpacing(frameNode, false);
 }
 
+void SetSearchMargin(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetUserMargin(frameNode);
+}
+
+void ResetSearchMargin(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetUserMargin(frameNode);
+}
+
 } // namespace
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
@@ -1380,6 +1394,8 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetSearchStrokeColor = ResetSearchStrokeColor,
         .setEnableAutoSpacing = SetEnableAutoSpacing,
         .resetEnableAutoSpacing = ResetEnableAutoSpacing,
+        .setSearchMargin = SetSearchMargin,
+        .resetSearchMargin = ResetSearchMargin,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

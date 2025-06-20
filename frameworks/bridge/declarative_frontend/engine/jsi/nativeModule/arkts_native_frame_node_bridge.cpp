@@ -47,6 +47,7 @@ constexpr double VISIBLE_RATIO_MAX = 1.0;
 constexpr int32_t INDEX_OF_INTERVAL = 4;
 constexpr int32_t INDEX_OF_OPTION_OF_VISIBLE = 3;
 constexpr int DEFAULT_EXPECTED_UPDATE_INTERVAL = 1000;
+constexpr int32_t SIZE_OF_ARRAY = 2;
 
 bool ParseFloatArray(const EcmaVM* vm, const panda::Local<panda::ArrayRef>& array, std::vector<float>& outArray)
 {
@@ -222,8 +223,9 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(
     const Offset& globalOffset = touchInfo.GetGlobalLocation();
     const Offset& localOffset = touchInfo.GetLocalLocation();
     const Offset& screenOffset = touchInfo.GetScreenLocation();
+    const Offset& globalDisplayOffset = touchInfo.GetGlobalDisplayLocation();
     const char* keys[] = { "type", "id", "displayX", "displayY", "windowX", "windowY", "screenX", "screenY", "x", "y",
-        "pressedTime", "pressure", "width", "height", "hand" };
+        "pressedTime", "pressure", "width", "height", "hand", "globalDisplayX", "globalDisplayY" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(touchInfo.GetTouchType())),
         panda::NumberRef::New(vm, touchInfo.GetFingerId()), panda::NumberRef::New(vm, screenOffset.GetX() / density),
         panda::NumberRef::New(vm, screenOffset.GetY() / density),
@@ -237,7 +239,9 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(
         panda::NumberRef::New(vm, touchInfo.GetForce()),
         panda::NumberRef::New(vm, touchInfo.GetWidth() / density),
         panda::NumberRef::New(vm, touchInfo.GetHeight() / density),
-        panda::NumberRef::New(vm, touchInfo.GetOperatingHand()) };
+        panda::NumberRef::New(vm, touchInfo.GetOperatingHand()),
+        panda::NumberRef::New(vm, globalDisplayOffset.GetX() / density),
+        panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density) };
     auto touchInfoObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     touchInfoObj->SetNativePointerFieldCount(vm, 1);
     touchInfoObj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
@@ -691,9 +695,9 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, Gest
     const Offset& localOffset = info.GetLocalLocation();
     const Offset& screenOffset = info.GetScreenLocation();
     double density = PipelineBase::GetCurrentDensity();
-
+    const Offset& globalDisplayOffset = info.GetGlobalDisplayLocation();
     const char* keys[] = { "displayX", "displayY", "windowX", "windowY", "screenX", "screenY", "x", "y", "timestamp",
-        "source", "pressure", "deviceId", "hand" };
+        "source", "pressure", "deviceId", "hand", "globalDisplayX", "globalDisplayY" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, screenOffset.GetX() / density),
         panda::NumberRef::New(vm, screenOffset.GetY() / density),
         panda::NumberRef::New(vm, globalOffset.GetX() / density),
@@ -706,7 +710,9 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, Gest
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
         panda::NumberRef::New(vm, info.GetForce()),
         panda::NumberRef::New(vm, info.GetDeviceId()),
-        panda::NumberRef::New(vm, GetOperatingHand(info)) };
+        panda::NumberRef::New(vm, GetOperatingHand(info)),
+        panda::NumberRef::New(vm, globalDisplayOffset.GetX() / density),
+        panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"), panda::NumberRef::New(vm, info.GetTargetDisplayId()));
@@ -751,6 +757,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnClick(ArkUIRuntimeCallInfo* runtime
     auto flag = IsCustomFrameNode(frameNode);
     auto onClick = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
                        node = AceType::WeakClaim(frameNode), containerId](GestureEvent& info) {
+        panda::JsiFastNativeScope fastNativeScope(vm);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
@@ -778,6 +785,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfoObj(EcmaVM* vm, Tou
 
 Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchEventInfo& info)
 {
+    panda::JsiFastNativeScope fastNativeScope(vm);
     auto eventObj = CreateTouchEventInfoObj(vm, info);
     eventObj->SetNativePointerFieldCount(vm, 1);
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
@@ -844,6 +852,7 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnTouch(ArkUIRuntimeCallInfo* runtime
     auto flag = IsCustomFrameNode(frameNode);
     auto onTouch = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag),
                        node = AceType::WeakClaim(frameNode), containerId](TouchEventInfo& info) {
+        panda::JsiFastNativeScope fastNativeScope(vm);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
@@ -1058,11 +1067,12 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnBlur(ArkUIRuntimeCallInfo* runtimeC
 Local<panda::ObjectRef> FrameNodeBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo& hoverInfo)
 {
     const char* keys[] = { "stopPropagation", "getModifierKeyState", "timestamp", "source", "target", "deviceId",
-        "displayX", "displayY", "windowX", "windowY", "x", "y", };
+        "displayX", "displayY", "windowX", "windowY", "x", "y", "globalDisplayX", "globalDisplayY", };
     double density = PipelineBase::GetCurrentDensity();
     const Offset& globalOffset = hoverInfo.GetGlobalLocation();
     const Offset& localOffset = hoverInfo.GetLocalLocation();
     const Offset& screenOffset = hoverInfo.GetScreenLocation();
+    const Offset& globalDisplayOffset = hoverInfo.GetGlobalDisplayLocation();
     Local<JSValueRef> values[] = { panda::FunctionRef::New(vm, Framework::JsStopPropagation),
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
         panda::NumberRef::New(vm, static_cast<double>(hoverInfo.GetTimeStamp().time_since_epoch().count())),
@@ -1074,7 +1084,9 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo& 
         panda::NumberRef::New(vm, density != 0 ? globalOffset.GetX() / density : 0),
         panda::NumberRef::New(vm, density != 0 ? globalOffset.GetY() / density : 0),
         panda::NumberRef::New(vm, density != 0 ? localOffset.GetX() / density : 0),
-        panda::NumberRef::New(vm, density != 0 ? localOffset.GetY() / density : 0) };
+        panda::NumberRef::New(vm, density != 0 ? localOffset.GetY() / density : 0),
+        panda::NumberRef::New(vm, density != 0 ? globalDisplayOffset.GetX() / density : 0),
+        panda::NumberRef::New(vm, density != 0 ? globalDisplayOffset.GetY() / density : 0) };
     auto eventObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
         panda::NumberRef::New(vm, static_cast<int32_t>(hoverInfo.GetRollAngle().value_or(0.0f))));
@@ -1163,10 +1175,11 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfoObj(EcmaVM* vm, MouseInf
     const Offset& globalOffset = info.GetGlobalLocation();
     const Offset& localOffset = info.GetLocalLocation();
     const Offset& screenOffset = info.GetScreenLocation();
+    const Offset& globalDisplayOffset = info.GetGlobalDisplayLocation();
     double density = PipelineBase::GetCurrentDensity();
     const char* keys[] = { "button", "action", "displayX", "displayY", "windowX", "windowY", "screenX", "screenY", "x",
         "y", "timestamp", "stopPropagation", "getModifierKeyState", "source", "pressure", "deviceId", "rawDeltaX",
-        "rawDeltaY", "targetDisplayId" };
+        "rawDeltaY", "targetDisplayId", "globalDisplayX", "globalDisplayY" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetButton())),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetAction())),
         panda::NumberRef::New(vm, screenOffset.GetX() / density),
@@ -1184,7 +1197,9 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfoObj(EcmaVM* vm, MouseInf
         panda::NumberRef::New(vm, info.GetForce()), panda::NumberRef::New(vm, info.GetDeviceId()),
         panda::NumberRef::New(vm, info.GetRawDeltaX() / density),
         panda::NumberRef::New(vm, info.GetRawDeltaY() / density),
-        panda::NumberRef::New(vm, info.GetTargetDisplayId()) };
+        panda::NumberRef::New(vm, info.GetTargetDisplayId()),
+        panda::NumberRef::New(vm, globalDisplayOffset.GetX() / density),
+        panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density) };
     return panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
 }
 
@@ -1297,6 +1312,23 @@ ArkUINativeModuleValue FrameNodeBridge::GetPositionToScreen(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(screenPosition, panda::JSValueRef::Undefined(vm));
     Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, screenPosition[0]));
     Framework::ArrayRef::SetValueAt(vm, valueArray, 1, panda::NumberRef::New(vm, screenPosition[1]));
+    return valueArray;
+}
+
+ArkUINativeModuleValue FrameNodeBridge::GetGlobalPositionOnDisplay(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<Framework::ArrayRef> valueArray = Framework::ArrayRef::New(vm, SIZE_OF_ARRAY);
+    ArkUI_Float32 globalDisplayPosition[SIZE_OF_ARRAY];
+    GetArkUINodeModifiers()->getFrameNodeModifier()->getGlobalPositionOnDisplay(
+        nativeNode, &globalDisplayPosition, true);
+    CHECK_NULL_RETURN(globalDisplayPosition, panda::JSValueRef::Undefined(vm));
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, globalDisplayPosition[0]));
+    Framework::ArrayRef::SetValueAt(vm, valueArray, 1, panda::NumberRef::New(vm, globalDisplayPosition[1]));
     return valueArray;
 }
 

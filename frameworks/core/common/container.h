@@ -697,6 +697,15 @@ public:
     {
         return false;
     }
+    virtual Rect GetGlobalScaledRect() const
+    {
+        return Rect();
+    }
+
+    virtual bool IsPcOrFreeMultiWindowCapability() const
+    {
+        return false;
+    }
 
     virtual Rect GetUIExtensionHostWindowRect()
     {
