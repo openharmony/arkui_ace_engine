@@ -534,7 +534,7 @@ void ViewFunctions::ExecuteDisappear()
     JSRef<JSVal> jsObject = jsObject_.Lock();
     std::string functionName("aboutToDisappear");
     auto codeInfo = EngineHelper::GetPositionOnJsCode();
-    AceScopedPerformanceCheck scoped(functionName, std::get<0>(codeInfo).c_str());
+    AceScopedPerformanceCheck scoped(functionName, std::get<0>(codeInfo));
     if (!jsObject->IsUndefined()) {
         jsDisappearFunc_.Lock()->Call(jsObject);
     } else {
@@ -563,7 +563,7 @@ void ViewFunctions::ExecuteAboutToReuse(void* params)
     if (!jsObject->IsUndefined()) {
         std::string functionName("ExecuteAboutToReuse");
         auto codeInfo = EngineHelper::GetPositionOnJsCode();
-        AceScopedPerformanceCheck scoped(functionName, std::get<0>(codeInfo).c_str());
+        AceScopedPerformanceCheck scoped(functionName, std::get<0>(codeInfo));
         auto reuseParams = JsiCallbackInfo(reinterpret_cast<panda::JsiRuntimeCallInfo*>(params));
         JsiRef<JsiValue> params[1] = { reuseParams[0] };
         if (reuseParams.Length() > 0) {
@@ -606,7 +606,7 @@ void ViewFunctions::ExecuteAboutToBeDeleted()
     JSRef<JSVal> jsObject = jsObject_.Lock();
     std::string functionName("aboutToBeDeleted");
     auto codeInfo = EngineHelper::GetPositionOnJsCode();
-    AceScopedPerformanceCheck scoped(functionName, std::get<0>(codeInfo).c_str());
+    AceScopedPerformanceCheck scoped(functionName, std::get<0>(codeInfo));
     if (!jsObject->IsUndefined()) {
         jsAboutToBeDeletedFunc_.Lock()->Call(jsObject);
     } else {
@@ -681,7 +681,7 @@ void ViewFunctions::ExecuteFunction(JSWeak<JSFunc>& func, const char* debugInfo)
     if (!jsObject->IsUndefined()) {
         std::string functionName(debugInfo);
         auto codeInfo = EngineHelper::GetPositionOnJsCode();
-        AceScopedPerformanceCheck scoped(functionName, std::get<0>(codeInfo).c_str());
+        AceScopedPerformanceCheck scoped(functionName, std::get<0>(codeInfo));
         func.Lock()->Call(jsObject);
     } else {
         LOGE("jsObject is undefined. Internal error while trying to exec %{public}s", debugInfo);
@@ -698,7 +698,7 @@ JSRef<JSVal> ViewFunctions::ExecuteFunctionWithReturn(JSWeak<JSFunc>& func, cons
     JSRef<JSVal> jsObject = jsObject_.Lock();
     std::string functionName(debugInfo);
     auto codeInfo = EngineHelper::GetPositionOnJsCode();
-    AceScopedPerformanceCheck scoped(functionName, std::get<0>(codeInfo).c_str());
+    AceScopedPerformanceCheck scoped(functionName, std::get<0>(codeInfo));
     JSRef<JSVal> result = func.Lock()->Call(jsObject);
     if (result.IsEmpty()) {
         LOGE("Error calling %{public}s", debugInfo);
