@@ -653,7 +653,7 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     nullptr,
     nullptr,
     NodeModifier::ResetOnAxisEvent,
-    nullptr,
+    NodeModifier::ResetOnClick,
     nullptr,
     NodeModifier::ResetOnHoverMove,
 };
