@@ -5667,7 +5667,7 @@ void KeyboardShortcutImpl(Ark_NativePointer node,
         auto weakNode = AceType::WeakClaim(frameNode);
         auto onKeyboardShortcutAction = [arkCallback = CallbackHelper(actionOpt.value()), node = weakNode]() {
             PipelineContext::SetCallBackNode(node);
-            arkCallback.Invoke();
+            arkCallback.InvokeSync();
         };
         ViewAbstractModelStatic::SetKeyboardShortcut(
             frameNode, strValue.value(), keysVect, std::move(onKeyboardShortcutAction));

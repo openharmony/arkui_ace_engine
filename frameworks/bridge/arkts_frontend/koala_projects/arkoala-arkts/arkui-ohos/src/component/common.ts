@@ -7404,7 +7404,9 @@ export enum SourceType {
     MOUSE = 1,
     Mouse = 1,
     TOUCH_SCREEN = 2,
-    TouchScreen = 2
+    TouchScreen = 2,
+    KEYBOARD = 4,
+    JOYSTICK = 5
 }
 export enum SourceTool {
     UNKNOWN = 0,
@@ -11527,7 +11529,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("keyboardShortcut")) {
             const value_casted = value as (string | FunctionKey | undefined)
             const keys_casted = keys as (Array<ModifierKey> | undefined)
-            const action_casted = action as ((() => void))
+            const action_casted = action as ((() => void) | undefined)
             this.getPeer()?.keyboardShortcutAttribute(value_casted, keys_casted, action_casted)
             return this
         }

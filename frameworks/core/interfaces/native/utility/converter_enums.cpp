@@ -20,6 +20,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
 
+#include "arkoala_api_generated.h"
 #include "converter.h"
 #include "converter2.h"
 #include "reverse_converter.h"
@@ -2205,6 +2206,8 @@ void AssignCast(std::optional<SourceType>& dst, const Ark_SourceType& src)
         case ARK_SOURCE_TYPE_UNKNOWN: dst = SourceType::NONE; break;
         case ARK_SOURCE_TYPE_MOUSE: dst = SourceType::MOUSE; break;
         case ARK_SOURCE_TYPE_TOUCH_SCREEN: dst = SourceType::TOUCH; break;
+        case ARK_SOURCE_TYPE_KEYBOARD: dst = SourceType::KEYBOARD; break;
+        case ARK_SOURCE_TYPE_JOYSTICK: dst = SourceType::JOYSTICK; break;
         default: LOGE("Unexpected enum value in Ark_SourceType: %{public}d", src);
     }
 }
