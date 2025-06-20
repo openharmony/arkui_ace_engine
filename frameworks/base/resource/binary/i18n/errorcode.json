@@ -316,7 +316,7 @@
         "error_video_000001":"​ບໍ່​ສາມາດ​ລິ​ເລີ່​ມ​ໂປຣ​ແກຣມຫຼິ້ນວິ​ດີ​ໂອ​ໄດ້."
     },
     "zz-ZX":{
-        "error_video_000002":"[HM_637203]_Unable to open video file.",
-        "error_video_000001":"[HM_637201]_Unable to initialize video player."
+        "error_video_000002":"[TS_954611]_Unable to open video file.",
+        "error_video_000001":"[TS_954618]_Unable to initialize video player."
     }
 }
