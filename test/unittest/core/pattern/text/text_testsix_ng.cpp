@@ -381,10 +381,10 @@ HWTEST_F(TextTestSixNg, ParagraphManagerTestNG001, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckWhetherNeedResetTextEffectTest001
- * @tc.desc: Test CheckWhetherNeedResetTextEffect when textEffectStrategy is NONE
+ * @tc.name: ResetTextEffectBeforeLayoutTest001
+ * @tc.desc: Test ResetTextEffectBeforeLayout when textEffectStrategy is NONE
  */
-HWTEST_F(TextTestSixNg, CheckWhetherNeedResetTextEffectTest001, TestSize.Level1)
+HWTEST_F(TextTestSixNg, ResetTextEffectBeforeLayoutTest001, TestSize.Level1)
 {
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
@@ -392,12 +392,12 @@ HWTEST_F(TextTestSixNg, CheckWhetherNeedResetTextEffectTest001, TestSize.Level1)
     auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
     layoutProperty->UpdateTextEffectStrategy(TextEffectStrategy::NONE);
 
-    bool result = pattern->CheckWhetherNeedResetTextEffect(true);
+    bool result = pattern->ResetTextEffectBeforeLayout();
     EXPECT_TRUE(result);
 
     layoutProperty->UpdateTextEffectStrategy(TextEffectStrategy::FLIP);
 
-    result = pattern->CheckWhetherNeedResetTextEffect(true);
+    result = pattern->ResetTextEffectBeforeLayout();
     EXPECT_FALSE(result);
 }
 

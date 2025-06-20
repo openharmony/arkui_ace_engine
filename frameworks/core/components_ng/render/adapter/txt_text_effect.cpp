@@ -25,24 +25,6 @@
 #include "core/components_ng/render/adapter/txt_paragraph.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-Rosen::TextEffectAttribute ConvertTxtTextEffectAttribute(TextEffectAttribute textEffectAtttribute)
-{
-    Rosen::TextEffectAttribute convertValue = Rosen::TextEffectAttribute::FLIP_DIRECTION;
-    switch (textEffectAtttribute) {
-        case NG::TextEffectAttribute::FLIP_DIRECTION:
-            convertValue = Rosen::TextEffectAttribute::FLIP_DIRECTION;
-            break;
-        case NG::TextEffectAttribute::BLUR_ENABLE:
-            convertValue = Rosen::TextEffectAttribute::BLUR_ENABLE;
-            break;
-        default:
-            TAG_LOGW(AceLogTag::ACE_FONT, "TextEffectAttribute setting error! Now using default TextEffectAttribute");
-            break;
-    };
-    return convertValue;
-}
-} // namespace
 RefPtr<TextEffect> TextEffect::CreateTextEffect()
 {
     return AceType::MakeRefPtr<TxtTextEffect>();
@@ -56,17 +38,17 @@ TxtTextEffect::TxtTextEffect()
 #endif
 }
 
-int TxtTextEffect::UpdateEffectConfig(const std::unordered_map<TextEffectAttribute, std::string>& config)
+int TxtTextEffect::UpdateEffectConfig(TextFlipDirection direction, bool enableBlur)
 {
     CHECK_NULL_RETURN(textEffect_, -1);
-    std::unordered_map<Rosen::TextEffectAttribute, std::string> txtConfig;
-    for (const auto& [key, value] : config) {
-        if (SystemProperties::GetTextTraceEnabled()) {
-            ACE_TEXT_SCOPED_TRACE("TxtTextEffect::UpdateEffectConfig value:%s", value.c_str());
-        }
-        auto txtTextEffectAttribute = ConvertTxtTextEffectAttribute(key);
-        txtConfig[txtTextEffectAttribute] = value;
+    if (direction_ && direction_.value() == direction && enableBlur == enableBlur_) {
+        return 0;
     }
+    direction_ = direction;
+    enableBlur_ = enableBlur;
+    std::unordered_map<Rosen::TextEffectAttribute, std::string> txtConfig;
+    txtConfig[Rosen::TextEffectAttribute::FLIP_DIRECTION] = StringUtils::ToString(direction);
+    txtConfig[Rosen::TextEffectAttribute::BLUR_ENABLE] = enableBlur ? "true" : "false";
     return textEffect_->UpdateEffectConfig(txtConfig);
 }
 

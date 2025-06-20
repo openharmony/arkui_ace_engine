@@ -440,7 +440,7 @@ void TextModelNG::SetContentTransition(TextEffectStrategy value, TextFlipDirecti
 
 void TextModelNG::ResetContentTransition()
 {
-    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, TextEffectStrategy);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, TextEffectStrategy, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipDirection);
     ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipEnableBlur);
 }
@@ -1490,7 +1490,8 @@ void TextModelNG::SetContentTransition(
 
 void TextModelNG::ResetContentTransition(FrameNode* frameNode)
 {
-    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextEffectStrategy, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        TextLayoutProperty, TextEffectStrategy, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipDirection, frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipEnableBlur, frameNode);
 }

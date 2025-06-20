@@ -16,8 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_TEXT_EFFECT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_TXT_TEXT_EFFECT_H
 
-#include "core/components_ng/render/text_effect.h"
+#include <optional>
+
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/text_effect.h"
 
 namespace OHOS::Ace::NG {
 
@@ -28,7 +31,7 @@ class TxtTextEffect : public TextEffect {
 public:
     TxtTextEffect();
     ~TxtTextEffect() = default;
-    int UpdateEffectConfig(const std::unordered_map<TextEffectAttribute, std::string>& config) override;
+    int UpdateEffectConfig(TextFlipDirection direction, bool enableBlur) override;
     int AppendTypography(const std::vector<RefPtr<Paragraph>>& paragraphs) override;
     void RemoveTypography(const std::vector<RefPtr<Paragraph>>& paragraphs) override;
     int UpdateTypography(std::vector<std::pair<RefPtr<Paragraph>, RefPtr<Paragraph>>>& paragraphs) override;
@@ -37,6 +40,8 @@ public:
 
 private:
     std::shared_ptr<RSTextEffect> textEffect_;
+    std::optional<TextFlipDirection> direction_;
+    bool enableBlur_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TxtTextEffect);
 };

@@ -560,7 +560,7 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(TextStyle& textStyle, const s
         CHECK_NULL_RETURN(frameNode, false);
         auto pattern = frameNode->GetPattern<TextPattern>();
         CHECK_NULL_RETURN(pattern, false);
-        pattern->CheckWhetherNeedResetTextEffect();
+        pattern->RelayoutResetOrUpdateTextEffect();
         if (!ReLayoutParagraphs(textStyle, layoutWrapper, maxSize)) {
             CHECK_NULL_RETURN(CreateParagraph(textStyle, content, layoutWrapper, maxSize.Width()), false);
             CHECK_NULL_RETURN(LayoutParagraphs(maxSize.Width()), false);
@@ -778,11 +778,11 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
     textStyleTmp.ResetTextBaselineOffset();
     paragraph->PushStyle(textStyleTmp);
     if (pattern->NeedShowAIDetect()) {
-        UpdateParagraphForAISpan(textStyle, layoutWrapper, paragraph);
+        UpdateParagraphForAISpan(textStyleTmp, layoutWrapper, paragraph);
     } else {
         if (pattern->IsDragging()) {
             auto dragContents = pattern->GetDragContents();
-            CreateParagraphDrag(textStyle, dragContents, paragraph);
+            CreateParagraphDrag(textStyleTmp, dragContents, paragraph);
         } else {
             auto value = content;
             StringUtils::TransformStrCase(value, static_cast<int32_t>(textStyle.GetTextCase()));
@@ -822,14 +822,6 @@ void TextLayoutAlgorithm::CreateOrUpdateTextEffect(const RefPtr<Paragraph>& oldP
         paragraphs.emplace_back(pair);
         textEffect->UpdateTypography(paragraphs);
     } else if (!needUpdateTypography) {
-        auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        std::unordered_map<TextEffectAttribute, std::string> configs;
-        auto flipDirection = textLayoutProperty->GetTextFlipDirectionValue(TextFlipDirection::DOWN);
-        auto enableBlur = textLayoutProperty->GetTextFlipEnableBlurValue(false);
-        configs[TextEffectAttribute::FLIP_DIRECTION] = StringUtils::ToString(flipDirection);
-        configs[TextEffectAttribute::BLUR_ENABLE] = enableBlur ? "true" : "false";
-        textEffect->UpdateEffectConfig(configs);
         std::vector<RefPtr<Paragraph>> paragraphs;
         paragraphs.emplace_back(newParagraph);
         textEffect->AppendTypography(paragraphs);

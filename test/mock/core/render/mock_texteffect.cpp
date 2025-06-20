@@ -23,7 +23,7 @@ RefPtr<TextEffect> TextEffect::CreateTextEffect()
 
 MockTextEffect::MockTextEffect() {}
 
-int MockTextEffect::UpdateEffectConfig(const std::unordered_map<TextEffectAttribute, std::string>& config)
+int MockTextEffect::UpdateEffectConfig(TextFlipDirection direction, bool enableBlur)
 {
     return -1;
 }

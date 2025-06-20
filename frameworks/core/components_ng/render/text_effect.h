@@ -22,6 +22,7 @@
 #include "ui/base/referenced.h"
 
 #include "base/memory/ace_type.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/render/drawing_forward.h"
 
 namespace OHOS::Ace::NG {
@@ -38,7 +39,7 @@ class TextEffect : public virtual AceType {
 public:
     static RefPtr<TextEffect> CreateTextEffect();
 
-    virtual int UpdateEffectConfig(const std::unordered_map<TextEffectAttribute, std::string>& config) = 0;
+    virtual int UpdateEffectConfig(TextFlipDirection direction, bool enableBlur) = 0;
     virtual int AppendTypography(const std::vector<RefPtr<Paragraph>>& paragraphs) = 0;
     virtual void RemoveTypography(const std::vector<RefPtr<Paragraph>>& paragraphs) = 0;
     virtual int UpdateTypography(std::vector<std::pair<RefPtr<Paragraph>, RefPtr<Paragraph>>>& paragraphs) = 0;

@@ -4264,27 +4264,35 @@ void TextPattern::BeforeCreateLayoutWrapper()
     if (HasSpanOnHoverEvent()) {
         InitSpanMouseEvent();
     }
+    ResetTextEffectBeforeLayout();
 }
 
-bool TextPattern::CheckWhetherNeedResetTextEffect(bool isNumber)
+bool TextPattern::ResetTextEffectBeforeLayout()
 {
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, true);
     if (textLayoutProperty->GetTextEffectStrategyValue(TextEffectStrategy::NONE) == TextEffectStrategy::NONE ||
-        !isNumber || !spans_.empty() || isSpanStringMode_ || externalParagraph_ || IsSetObscured() ||
-        IsSensitiveEnable()) {
-        CHECK_NULL_RETURN(textEffect_, true);
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, true);
-        TAG_LOGI(AceLogTag::ACE_TEXT, "TextPattern::CheckWhetherNeedResetTextEffect reset textEffeect [id:%{public}d]",
-            host->GetId());
+        textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE || !spans_.empty() ||
+        isSpanStringMode_ || externalParagraph_ || IsSetObscured() || IsSensitiveEnable()) {
         ReseTextEffect();
         return true;
     }
     return false;
 }
 
-void TextPattern::ReseTextEffect()
+void TextPattern::RelayoutResetOrUpdateTextEffect()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    ResetTextEffectBeforeLayout();
+    // 重排版动效config切换
+    if (textEffect_) {
+        textEffect_->UpdateEffectConfig(textLayoutProperty->GetTextFlipDirectionValue(TextFlipDirection::DOWN),
+            textLayoutProperty->GetTextFlipEnableBlurValue(false));
+    }
+}
+
+void TextPattern::ReseTextEffect(bool clear)
 {
     CHECK_NULL_VOID(textEffect_);
     textEffect_->StopEffect();
@@ -4301,9 +4309,13 @@ RefPtr<TextEffect> TextPattern::GetOrCreateTextEffect(const std::u16string& cont
         ReseTextEffect();
         return nullptr;
     }
+    if (ResetTextEffectBeforeLayout()) {
+        return nullptr;
+    }
     auto isNumber = RegularMatchNumbers(content);
-    if (CheckWhetherNeedResetTextEffect(isNumber)) {
-        return textEffect_;
+    if (!isNumber) {
+        ReseTextEffect();
+        return nullptr;
     }
     if (!textEffect_) {
         auto host = GetHost();
@@ -4314,6 +4326,10 @@ RefPtr<TextEffect> TextPattern::GetOrCreateTextEffect(const std::u16string& cont
     } else {
         // 上一次与此次的paragraph都满足翻牌要求需要重新更新textEffect中的paragraph
         needUpdateTypography = true;
+    }
+    if (textEffect_) {
+        textEffect_->UpdateEffectConfig(textLayoutProperty->GetTextFlipDirectionValue(TextFlipDirection::DOWN),
+            textLayoutProperty->GetTextFlipEnableBlurValue(false));
     }
     return textEffect_;
 }
