@@ -531,6 +531,28 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "DrawingRenderingContext", JSDrawingRenderingContext::JSBind },
 };
 
+static const std::unordered_set<std::string> unsupportedTargetsInCustomEnv = {
+    "UIExtensionComponent",
+    "PluginComponent",
+    "AbilityComponent",
+    "FormComponent",
+    "FormMenuItem",
+    "DynamicComponent",
+    "SecurityUIExtensionComponent",
+    "PreviewUIExtensionComponent",
+    "Component3D",
+    "EmbeddedComponent",
+    "IsolatedComponent",
+    "RemoteWindow",
+    "RootScene",
+    "Screen",
+    "SecurityUIExtensionProxy",
+    "WindowScene",
+    "UIExtensionProxy",
+    "FormLink",
+    "AbilityController",
+};
+
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {
     { "Flex", JSFlexImpl::JSBind },
     { "TextController", JSTextController::JSBind },
@@ -824,7 +846,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TouchRecognizer", JSTouchRecognizer::JSBind }
 };
 
-void RegisterBindFuncs(BindingTarget globalObj)
+void RegisterBindFuncs(BindingTarget globalObj, bool isCustomEnvSupported)
 {
     auto container = Container::Current();
     if (container && container->IsDynamicRender() && !container->GetRegisterComponents().empty()) {
@@ -842,11 +864,15 @@ void RegisterBindFuncs(BindingTarget globalObj)
     }
 
     for (auto& iter : bindFuncs) {
+        if (isCustomEnvSupported &&
+            unsupportedTargetsInCustomEnv.find(iter.first) != unsupportedTargetsInCustomEnv.end()) {
+            continue;
+        }
         iter.second(globalObj);
     }
 }
 
-void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
+void RegisterAllModule(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSupported)
 {
     JSColumn::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
@@ -894,7 +920,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
     JSEllipseShape::JSBind(globalObj);
     JSPathShape::JSBind(globalObj);
 
-    RegisterBindFuncs(globalObj);
+    RegisterBindFuncs(globalObj, isCustomEnvSupported);
     RegisterExtraViews(globalObj);
 }
 
@@ -1108,7 +1134,7 @@ void JsBindFormViews(
     }
 }
 
-void JsBindViews(BindingTarget globalObj, void* nativeEngine)
+void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSupported)
 {
     JSViewAbstract::JSBind(globalObj);
     JSContainerBase::JSBind(globalObj);
@@ -1143,7 +1169,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     if (delegate && delegate->GetAssetContent("component_collection.txt", jsModules)) {
         JsRegisterModules(globalObj, jsModules, nativeEngine);
     } else {
-        RegisterAllModule(globalObj, nativeEngine);
+        RegisterAllModule(globalObj, nativeEngine, isCustomEnvSupported);
     }
 }
 

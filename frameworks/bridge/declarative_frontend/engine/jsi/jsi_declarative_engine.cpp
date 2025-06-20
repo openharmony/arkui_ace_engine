@@ -24,7 +24,7 @@
 
 #include "dfx_jsnapi.h"
 
-#ifndef PREVIEW
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
 #include "console.h"
 #include "sys_timer.h"
 #endif
@@ -782,7 +782,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
 
 void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtime)
 {
-#ifndef PREVIEW
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     if (!runtime) {
         return;
     }
@@ -807,7 +807,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtim
 
     RegisterStringCacheTable(vm, MAX_STRING_CACHE_SIZE);
     // preload js views
-    JsRegisterViews(JSNApi::GetGlobalObject(vm, nativeArkEngine->GetContext()), runtime);
+    JsRegisterViews(JSNApi::GetGlobalObject(vm, nativeArkEngine->GetContext()), runtime, true);
 
     // preload console
     shared_ptr<JsValue> global = arkRuntime->GetGlobal(nativeArkEngine);
