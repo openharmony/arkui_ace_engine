@@ -2083,6 +2083,11 @@ HWTEST_F(FormPatternTest, FormPatternTest_056, TestSize.Level1)
     auto pattern = formNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
 
+    pattern->cardInfo_.dimension = static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1);
+    int32_t dimension = pattern->cardInfo_.dimension;
+    int32_t dimensionHeight = pattern->GetFormDimensionHeight(dimension);
+    EXPECT_GT(dimensionHeight, 0);
+
     pattern->frameNode_ = nullptr;
     pattern->DelayRemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
     pattern->frameNode_ = formNode;
