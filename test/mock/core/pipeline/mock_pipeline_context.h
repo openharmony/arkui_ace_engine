@@ -76,7 +76,6 @@ public:
         }
         return false;
     }
-    void SetEnableSwipeBack(bool isEnable) {}
 
     void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
 
