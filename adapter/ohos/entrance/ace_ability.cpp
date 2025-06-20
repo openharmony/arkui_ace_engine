@@ -18,6 +18,7 @@
 #include <ui/rs_surface_node.h>
 
 #include "ability_process.h"
+#include "ability_loader.h"
 #include "dm/display_manager.h"
 #include "form_utils_impl.h"
 #include "ohos/init_data.h"
