@@ -260,6 +260,11 @@ public:
     void SetHeightInLanes(int32_t idx, float mainHeight);
     bool HaveRecordIdx(int32_t idx) const;
 
+    void InvalidatedOffset() override
+    {
+        isPrevOffsetValid_ = false;
+    };
+
     /**
      * @brief lanes in multiple sections.
      * REQUIRES: In stable state (outside update phase), only items inside viewport are in lanes_.
@@ -339,6 +344,8 @@ private:
     bool synced_ = false;
     bool prevItemStart_ = false;
     bool knowTotalHeight_ = false; // set to true when content end is reached. no longer need to estimate totalHeight
+
+    bool isPrevOffsetValid_ = true;
 
     struct ItemInfo;
 };

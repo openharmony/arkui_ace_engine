@@ -57,6 +57,7 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     maxHeight_ = std::max(-totalOffset_ + contentEnd, maxHeight_);
 
     newStartIndex_ = EMPTY_NEW_START_INDEX;
+    isPrevOffsetValid_ = true;
 
     synced_ = true;
 }
@@ -882,6 +883,10 @@ void WaterFlowLayoutInfoSW::EstimateTotalOffset(int32_t prevStart, int32_t start
     }
 
     // filter unreasonable estimates
+    if (!isPrevOffsetValid_) {
+        return;
+    }
+
     if (prevStart <= startIdx) {
         totalOffset_ = std::min(totalOffset_, prevOffset - average);
     } else {

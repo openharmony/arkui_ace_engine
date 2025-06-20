@@ -192,6 +192,8 @@ public:
         const std::vector<WaterFlowSections::Section>& prevSections, int32_t start) override
     {}
 
+    void InvalidatedOffset() override {};
+
     float currentOffset_ = 0.0f;
     // 0.0f until itemEnd_ is true
     float maxHeight_ = 0.0f;
