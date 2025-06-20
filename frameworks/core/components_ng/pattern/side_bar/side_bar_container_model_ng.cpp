@@ -713,7 +713,8 @@ void SideBarContainerModelNG::SetSideBarWidth(FrameNode* frameNode, const RefPtr
     SetSideBarWidth(frameNode, sideBarWidth.IsNonNegative() ? sideBarWidth : defaultSiderBarWidth);
     CHECK_NULL_VOID(frameNode);
     std::string key = "sideBarContainer.sideBarWidth";
-    auto updateSideBarWidthFunc = [key, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+    auto updateSideBarWidthFunc = [key, defaultSiderBarWidth, weak = AceType::WeakClaim(frameNode)](
+                                      const RefPtr<ResourceObject>& resObj) {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
@@ -727,8 +728,8 @@ void SideBarContainerModelNG::SetSideBarWidth(FrameNode* frameNode, const RefPtr
         } else {
             sideBarWidth = StringUtils::StringToCalcDimension(sideBarWidthValue);
         }
+        sideBarWidth = sideBarWidth.IsNonNegative() ? sideBarWidth : defaultSiderBarWidth;
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, SideBarWidth, sideBarWidth, frameNode);
-        sideBarWidth = sideBarWidth.IsNonNegative() ? sideBarWidth : DEFAULT_SIDE_BAR_WIDTH;
         frameNode->MarkModifyDone();
         frameNode->MarkDirtyNode();
     };
@@ -747,7 +748,8 @@ void SideBarContainerModelNG::SetMinSideBarWidth(FrameNode* frameNode, const Ref
     SetMinSideBarWidth(frameNode, minSideBarWidth.IsNonNegative() ? minSideBarWidth : defaultMinSideBarWidth);
     CHECK_NULL_VOID(frameNode);
     std::string key = "sideBarContainer.minSideBarWidth";
-    auto updateSideBarWidthFunc = [key, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+    auto updateSideBarWidthFunc = [key, defaultMinSideBarWidth, weak = AceType::WeakClaim(frameNode)](
+                                      const RefPtr<ResourceObject>& resObj) {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
@@ -761,7 +763,7 @@ void SideBarContainerModelNG::SetMinSideBarWidth(FrameNode* frameNode, const Ref
         } else {
             minSideBarWidth = StringUtils::StringToCalcDimension(minSideBarWidthValue);
         }
-        minSideBarWidth = minSideBarWidth.IsNonNegative() ? minSideBarWidth : DEFAULT_SIDE_BAR_WIDTH;
+        minSideBarWidth = minSideBarWidth.IsNonNegative() ? minSideBarWidth : defaultMinSideBarWidth;
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(SideBarContainerLayoutProperty, MinSideBarWidth, minSideBarWidth, frameNode);
         frameNode->MarkModifyDone();
         frameNode->MarkDirtyNode();
