@@ -2050,7 +2050,7 @@ void JSViewAbstract::ParseSheetStyle(
     } else if (keyboardAvoidMode->IsNumber()) {
         auto sheetKeyboardAvoidMode = keyboardAvoidMode->ToNumber<int32_t>();
         if (sheetKeyboardAvoidMode >= static_cast<int>(NG::SheetKeyboardAvoidMode::NONE) &&
-            sheetKeyboardAvoidMode <= static_cast<int>(NG::SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL)) {
+            sheetKeyboardAvoidMode <= static_cast<int>(NG::SheetKeyboardAvoidMode::POPUP_SHEET)) {
             sheetStyle.sheetKeyboardAvoidMode = static_cast<NG::SheetKeyboardAvoidMode>(sheetKeyboardAvoidMode);
         }
     }
