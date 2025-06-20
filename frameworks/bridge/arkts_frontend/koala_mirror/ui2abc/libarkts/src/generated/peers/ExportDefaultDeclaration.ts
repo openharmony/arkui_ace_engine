@@ -47,6 +47,7 @@ export class ExportDefaultDeclaration extends Statement {
     get isExportEquals(): boolean {
         return global.generatedEs2panda._ExportDefaultDeclarationIsExportEqualsConst(global.context, this.peer)
     }
+    protected readonly brandExportDefaultDeclaration: undefined
 }
 export function isExportDefaultDeclaration(node: object | undefined): node is ExportDefaultDeclaration {
     return node instanceof ExportDefaultDeclaration

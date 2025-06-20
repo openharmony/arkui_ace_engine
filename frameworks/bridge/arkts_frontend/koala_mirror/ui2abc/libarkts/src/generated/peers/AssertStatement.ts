@@ -48,6 +48,7 @@ export class AssertStatement extends Statement {
     get second(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._AssertStatementSecondConst(global.context, this.peer))
     }
+    protected readonly brandAssertStatement: undefined
 }
 export function isAssertStatement(node: object | undefined): node is AssertStatement {
     return node instanceof AssertStatement

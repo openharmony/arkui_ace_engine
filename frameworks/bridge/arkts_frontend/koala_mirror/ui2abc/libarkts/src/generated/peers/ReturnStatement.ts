@@ -56,6 +56,7 @@ export class ReturnStatement extends Statement {
     get isAsyncImplReturn(): boolean {
         return global.generatedEs2panda._ReturnStatementIsAsyncImplReturnConst(global.context, this.peer)
     }
+    protected readonly brandReturnStatement: undefined
 }
 export function isReturnStatement(node: object | undefined): node is ReturnStatement {
     return node instanceof ReturnStatement

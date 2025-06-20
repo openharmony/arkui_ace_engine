@@ -59,6 +59,7 @@ export class ContinueStatement extends Statement {
         global.generatedEs2panda._ContinueStatementSetTarget(global.context, this.peer, passNode(target))
         return this
     }
+    protected readonly brandContinueStatement: undefined
 }
 export function isContinueStatement(node: object | undefined): node is ContinueStatement {
     return node instanceof ContinueStatement

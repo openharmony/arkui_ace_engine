@@ -50,6 +50,7 @@ export class TemplateElement extends Expression {
     get cooked(): string {
         return unpackString(global.generatedEs2panda._TemplateElementCookedConst(global.context, this.peer))
     }
+    protected readonly brandTemplateElement: undefined
 }
 export function isTemplateElement(node: object | undefined): node is TemplateElement {
     return node instanceof TemplateElement

@@ -33,6 +33,15 @@ export class Literal extends Expression {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    get isFolded(): boolean {
+        return global.generatedEs2panda._LiteralIsFoldedConst(global.context, this.peer)
+    }
+    /** @deprecated */
+    setFolded(folded: boolean): this {
+        global.generatedEs2panda._LiteralSetFolded(global.context, this.peer, folded)
+        return this
+    }
+    protected readonly brandLiteral: undefined
 }
 export function isLiteral(node: object | undefined): node is Literal {
     return node instanceof Literal

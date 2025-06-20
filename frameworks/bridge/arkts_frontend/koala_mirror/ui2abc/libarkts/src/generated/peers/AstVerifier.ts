@@ -32,4 +32,5 @@ export class AstVerifier extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandAstVerifier: undefined
 }

@@ -41,6 +41,7 @@ export class TSBigintKeyword extends TypeNode {
     static updateTSBigintKeyword(original?: TSBigintKeyword): TSBigintKeyword {
         return new TSBigintKeyword(global.generatedEs2panda._UpdateTSBigintKeyword(global.context, passNode(original)))
     }
+    protected readonly brandTSBigintKeyword: undefined
 }
 export function isTSBigintKeyword(node: object | undefined): node is TSBigintKeyword {
     return node instanceof TSBigintKeyword

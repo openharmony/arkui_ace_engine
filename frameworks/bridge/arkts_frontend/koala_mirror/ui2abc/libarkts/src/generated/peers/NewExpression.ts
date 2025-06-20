@@ -47,6 +47,7 @@ export class NewExpression extends Expression {
     get arguments(): readonly Expression[] {
         return unpackNodeArray(global.generatedEs2panda._NewExpressionArgumentsConst(global.context, this.peer))
     }
+    protected readonly brandNewExpression: undefined
 }
 export function isNewExpression(node: object | undefined): node is NewExpression {
     return node instanceof NewExpression

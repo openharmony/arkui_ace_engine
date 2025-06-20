@@ -44,6 +44,7 @@ export class BooleanLiteral extends Literal {
     get value(): boolean {
         return global.generatedEs2panda._BooleanLiteralValueConst(global.context, this.peer)
     }
+    protected readonly brandBooleanLiteral: undefined
 }
 export function isBooleanLiteral(node: object | undefined): node is BooleanLiteral {
     return node instanceof BooleanLiteral

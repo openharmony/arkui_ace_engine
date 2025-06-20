@@ -32,4 +32,5 @@ export class ObjectDescriptor extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandObjectDescriptor: undefined
 }

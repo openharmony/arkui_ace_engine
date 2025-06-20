@@ -94,6 +94,7 @@ export class ArrayExpression extends AnnotatedExpression {
         global.generatedEs2panda._ArrayExpressionSetTsTypeAnnotation(global.context, this.peer, passNode(typeAnnotation))
         return this
     }
+    protected readonly brandArrayExpression: undefined
 }
 export function isArrayExpression(node: object | undefined): node is ArrayExpression {
     return node instanceof ArrayExpression

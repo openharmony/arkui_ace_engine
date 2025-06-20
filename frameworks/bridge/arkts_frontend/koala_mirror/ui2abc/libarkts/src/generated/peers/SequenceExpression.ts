@@ -44,6 +44,7 @@ export class SequenceExpression extends Expression {
     get sequence(): readonly Expression[] {
         return unpackNodeArray(global.generatedEs2panda._SequenceExpressionSequence(global.context, this.peer))
     }
+    protected readonly brandSequenceExpression: undefined
 }
 export function isSequenceExpression(node: object | undefined): node is SequenceExpression {
     return node instanceof SequenceExpression

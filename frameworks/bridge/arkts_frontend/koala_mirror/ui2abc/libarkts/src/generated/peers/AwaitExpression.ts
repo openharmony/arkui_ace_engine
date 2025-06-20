@@ -44,6 +44,7 @@ export class AwaitExpression extends Expression {
     get argument(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._AwaitExpressionArgumentConst(global.context, this.peer))
     }
+    protected readonly brandAwaitExpression: undefined
 }
 export function isAwaitExpression(node: object | undefined): node is AwaitExpression {
     return node instanceof AwaitExpression

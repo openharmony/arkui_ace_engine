@@ -56,6 +56,7 @@ export class ETSNewMultiDimArrayInstanceExpression extends Expression {
         global.generatedEs2panda._ETSNewMultiDimArrayInstanceExpressionClearPreferredType(global.context, this.peer)
         return this
     }
+    protected readonly brandETSNewMultiDimArrayInstanceExpression: undefined
 }
 export function isETSNewMultiDimArrayInstanceExpression(node: object | undefined): node is ETSNewMultiDimArrayInstanceExpression {
     return node instanceof ETSNewMultiDimArrayInstanceExpression

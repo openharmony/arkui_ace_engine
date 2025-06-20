@@ -1,8 +1,8 @@
 
-function main() {}
+function main(): void {}
 
 
-function someFunc(value: SomeClass | undefined) {
+function someFunc(value: SomeClass | undefined): void {
   let x: SomeClass | undefined = value;
   let zzz = ({let chaintmp%%_0 = x;
   (((chaintmp%%_0) === (undefined)) ? undefined : chaintmp%%_0.y)});

@@ -49,6 +49,7 @@ export class ETSTypeReference extends TypeNode {
     get baseName(): Identifier | undefined {
         return unpackNode(global.generatedEs2panda._ETSTypeReferenceBaseNameConst(global.context, this.peer))
     }
+    protected readonly brandETSTypeReference: undefined
 }
 export function isETSTypeReference(node: object | undefined): node is ETSTypeReference {
     return node instanceof ETSTypeReference

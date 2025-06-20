@@ -52,6 +52,7 @@ export class ForInStatement extends LoopStatement {
     get body(): Statement | undefined {
         return unpackNode(global.generatedEs2panda._ForInStatementBody(global.context, this.peer))
     }
+    protected readonly brandForInStatement: undefined
 }
 export function isForInStatement(node: object | undefined): node is ForInStatement {
     return node instanceof ForInStatement

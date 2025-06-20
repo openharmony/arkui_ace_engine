@@ -32,6 +32,7 @@ export class TypedAstNode extends AstNode {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandTypedAstNode: undefined
 }
 export function isTypedAstNode(node: object | undefined): node is TypedAstNode {
     return node instanceof TypedAstNode

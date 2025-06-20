@@ -24,10 +24,14 @@ function makeFilesEqual(filePath: string) {
     fs.writeFileSync(`./golden/${filePath}.ets`, out)
 }
 
+function filterGensym(value: string): string {
+    return value.replaceAll(/gensym%%_[0-9]*/g, "gensym_XXX")
+}
+
 function assertFilesEqual(filePath: string) {
     const golden = fs.readFileSync(`./golden/${filePath}.ets`, 'utf-8')
     const out = fs.readFileSync(`./out/${filePath}.ets`, 'utf-8')
-    Assert.equal(out, golden)
+    Assert.equal(filterGensym(out), filterGensym(golden))
 }
 
 function testBody(path: string) {

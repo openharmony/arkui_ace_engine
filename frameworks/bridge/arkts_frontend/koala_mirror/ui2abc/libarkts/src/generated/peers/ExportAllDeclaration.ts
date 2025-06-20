@@ -49,6 +49,7 @@ export class ExportAllDeclaration extends Statement {
     get exported(): Identifier | undefined {
         return unpackNode(global.generatedEs2panda._ExportAllDeclarationExportedConst(global.context, this.peer))
     }
+    protected readonly brandExportAllDeclaration: undefined
 }
 export function isExportAllDeclaration(node: object | undefined): node is ExportAllDeclaration {
     return node instanceof ExportAllDeclaration

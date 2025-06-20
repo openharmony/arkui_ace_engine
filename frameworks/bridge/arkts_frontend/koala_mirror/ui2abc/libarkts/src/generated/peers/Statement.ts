@@ -32,6 +32,7 @@ export class Statement extends AstNode {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandStatement: undefined
 }
 export function isStatement(node: object | undefined): node is Statement {
     return node instanceof Statement

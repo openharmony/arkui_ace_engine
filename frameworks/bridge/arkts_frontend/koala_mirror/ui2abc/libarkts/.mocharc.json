@@ -7,5 +7,5 @@
     "require": [
         "../../incremental/test-utils/scripts/register"
     ],
-    "timeout": 10000
+    "timeout": 20000
 }

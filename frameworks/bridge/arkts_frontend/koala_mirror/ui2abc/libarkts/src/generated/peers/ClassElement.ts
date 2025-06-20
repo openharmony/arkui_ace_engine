@@ -62,9 +62,6 @@ export class ClassElement extends TypedStatement {
     get isPrivateElement(): boolean {
         return global.generatedEs2panda._ClassElementIsPrivateElementConst(global.context, this.peer)
     }
-    get decorators(): readonly Decorator[] {
-        return unpackNodeArray(global.generatedEs2panda._ClassElementDecoratorsConst(global.context, this.peer))
-    }
     get isComputed(): boolean {
         return global.generatedEs2panda._ClassElementIsComputedConst(global.context, this.peer)
     }
@@ -73,6 +70,28 @@ export class ClassElement extends TypedStatement {
         global.generatedEs2panda._ClassElementAddDecorator(global.context, this.peer, passNode(decorator))
         return this
     }
+    /** @deprecated */
+    emplaceDecorators(decorators?: Decorator): this {
+        global.generatedEs2panda._ClassElementEmplaceDecorators(global.context, this.peer, passNode(decorators))
+        return this
+    }
+    /** @deprecated */
+    clearDecorators(): this {
+        global.generatedEs2panda._ClassElementClearDecorators(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setValueDecorators(decorators: Decorator | undefined, index: number): this {
+        global.generatedEs2panda._ClassElementSetValueDecorators(global.context, this.peer, passNode(decorators), index)
+        return this
+    }
+    get decorators(): readonly Decorator[] {
+        return unpackNodeArray(global.generatedEs2panda._ClassElementDecorators(global.context, this.peer))
+    }
+    get decoratorsForUpdate(): readonly Decorator[] {
+        return unpackNodeArray(global.generatedEs2panda._ClassElementDecoratorsForUpdate(global.context, this.peer))
+    }
+    protected readonly brandClassElement: undefined
 }
 export function isClassElement(node: object | undefined): node is ClassElement {
     return node instanceof ClassElement

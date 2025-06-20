@@ -41,6 +41,7 @@ export class TSThisType extends TypeNode {
     static updateTSThisType(original?: TSThisType): TSThisType {
         return new TSThisType(global.generatedEs2panda._UpdateTSThisType(global.context, passNode(original)))
     }
+    protected readonly brandTSThisType: undefined
 }
 export function isTSThisType(node: object | undefined): node is TSThisType {
     return node instanceof TSThisType
