@@ -18,6 +18,7 @@
 
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
+#include "core/accessibility/static/accessibility_static_utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/layout/grid_layout_info.h"
@@ -2565,22 +2566,22 @@ void OnHoverMoveImpl(Ark_NativePointer node,
 void OnAccessibilityHoverImpl(Ark_NativePointer node,
                               const Opt_AccessibilityCallback* value)
 {
-    // auto frameNode = reinterpret_cast<FrameNode *>(node);
-    // CHECK_NULL_VOID(frameNode);
-    // auto optValue = Converter::GetOptPtr(value);
-    // if (!optValue) {
-    //     ViewAbstract::DisableOnAccessibilityHover(frameNode);
-    //     return;
-    // }
-    // auto weakNode = AceType::WeakClaim(frameNode);
-    // auto onAccessibilityHover = [arkCallback = CallbackHelper(*optValue), node = weakNode](
-    //     bool isHover, AccessibilityHoverInfo& hoverInfo) {
-    //     PipelineContext::SetCallBackNode(node);
-    //     Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
-    //     auto event = Converter::ArkAccessibilityHoverEventSync(hoverInfo);
-    //     arkCallback.InvokeSync(arkIsHover, event.ArkValue());
-    // };
-    // ViewAbstract::SetOnAccessibilityHover(frameNode, std::move(onAccessibilityHover));
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ViewAbstractModelStatic::DisableOnAccessibilityHover(frameNode);
+        return;
+    }
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onAccessibilityHover = [arkCallback = CallbackHelper(*optValue), node = weakNode](
+        bool isHover, AccessibilityHoverInfo& hoverInfo) {
+        PipelineContext::SetCallBackNode(node);
+        Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
+        auto event = Converter::ArkAccessibilityHoverEventSync(hoverInfo);
+        arkCallback.InvokeSync(arkIsHover, event.ArkValue());
+    };
+    ViewAbstractModelStatic::SetOnAccessibilityHover(frameNode, std::move(onAccessibilityHover));
 }
 void HoverEffectImpl(Ark_NativePointer node,
                      const Opt_HoverEffect* value)
@@ -4312,7 +4313,7 @@ void AccessibilityGroup0Impl(Ark_NativePointer node,
     if (convValue) {
         isGroupFlag = *convValue;
     }
-    // ViewAbstractModelNG::SetAccessibilityGroup(frameNode, isGroupFlag);
+    ViewAbstractModelNG::SetAccessibilityGroup(frameNode, isGroupFlag);
 }
 void AccessibilityGroup1Impl(Ark_NativePointer node,
                              const Opt_Boolean* isGroup,
@@ -4328,8 +4329,8 @@ void AccessibilityGroup1Impl(Ark_NativePointer node,
     auto optValue = Converter::GetOptPtr(accessibilityOptions);
     auto accessibilityPreferred = optValue ?
         Converter::OptConvert<bool>(optValue->accessibilityPreferred) : std::nullopt;
-    // ViewAbstractModelNG::SetAccessibilityGroup(frameNode, isGroupFlag);
-    // ViewAbstractModelNG::SetAccessibilityTextPreferred(frameNode, accessibilityPreferred.value_or(false));
+    ViewAbstractModelNG::SetAccessibilityGroup(frameNode, isGroupFlag);
+    ViewAbstractModelNG::SetAccessibilityTextPreferred(frameNode, accessibilityPreferred.value_or(false));
 }
 void AccessibilityText0Impl(Ark_NativePointer node,
                             const Opt_String* value)
@@ -4341,7 +4342,7 @@ void AccessibilityText0Impl(Ark_NativePointer node,
         // keep the same processing
         return;
     }
-    // ViewAbstractModelNG::SetAccessibilityText(frameNode, *convValue);
+    ViewAbstractModelNG::SetAccessibilityText(frameNode, *convValue);
 }
 void AccessibilityText1Impl(Ark_NativePointer node,
                             const Opt_Resource* value)
@@ -4353,7 +4354,7 @@ void AccessibilityText1Impl(Ark_NativePointer node,
         // keep the same processing
         return;
     }
-    // ViewAbstractModelNG::SetAccessibilityText(frameNode, optValue.value());
+    ViewAbstractModelNG::SetAccessibilityText(frameNode, optValue.value());
 }
 void AccessibilityNextFocusIdImpl(Ark_NativePointer node,
                                   const Opt_String* value)
@@ -4365,7 +4366,7 @@ void AccessibilityNextFocusIdImpl(Ark_NativePointer node,
         // keep the same processing
         return;
     }
-    // ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, *convValue);
+    ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, *convValue);
 }
 void AccessibilityDefaultFocusImpl(Ark_NativePointer node,
                                    const Opt_Boolean* value)
@@ -4378,7 +4379,7 @@ void AccessibilityDefaultFocusImpl(Ark_NativePointer node,
     if (convValue) {
         isFocus = *convValue;
     }
-    // ViewAbstractModelNG::SetAccessibilityDefaultFocus(frameNode, isFocus);
+    ViewAbstractModelNG::SetAccessibilityDefaultFocus(frameNode, isFocus);
 }
 void AccessibilityUseSamePageImpl(Ark_NativePointer node,
                                   const Opt_AccessibilitySamePageMode* value)
@@ -4387,11 +4388,11 @@ void AccessibilityUseSamePageImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Ark_AccessibilitySamePageMode>(value);
     if (!convValue) {
-        // ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, "");
+        ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, "");
         return;
     }
-    auto pageMode = AccessibilityUtils::GetPageModeType(convValue.value());
-    // ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, pageMode);
+    auto pageMode = AccessibilityStaticUtils::GetPageModeType(convValue.value());
+    ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, pageMode);
 }
 void AccessibilityScrollTriggerableImpl(Ark_NativePointer node,
                                         const Opt_Boolean* value)
@@ -4406,7 +4407,7 @@ void AccessibilityScrollTriggerableImpl(Ark_NativePointer node,
     } else  {
         scrollTriggerable = *convValue;
     }
-    // ViewAbstractModelNG::SetAccessibilityScrollTriggerable(frameNode, scrollTriggerable, resetValue);
+    ViewAbstractModelNG::SetAccessibilityScrollTriggerable(frameNode, scrollTriggerable, resetValue);
 }
 void AccessibilityRoleImpl(Ark_NativePointer node,
                            const Opt_AccessibilityRoleType* value)
@@ -4417,15 +4418,15 @@ void AccessibilityRoleImpl(Ark_NativePointer node,
     std::string role;
     auto convValue = Converter::OptConvertPtr<Ark_AccessibilityRoleType>(value);
     if (!convValue) {
-        // ViewAbstractModelNG::SetAccessibilityRole(frameNode, role, true);
+        ViewAbstractModelNG::SetAccessibilityRole(frameNode, role, true);
         return;
     }
     auto roleType = static_cast<AccessibilityRoleType>(convValue.value());
-    role = AccessibilityUtils::GetRoleByType(roleType);
+    role = AccessibilityStaticUtils::GetRoleByType(roleType);
     if (role.empty()) {
         resetValue = true;
     }
-    // ViewAbstractModelNG::SetAccessibilityRole(frameNode, role, resetValue);
+    ViewAbstractModelNG::SetAccessibilityRole(frameNode, role, resetValue);
 }
 void OnAccessibilityFocusImpl(Ark_NativePointer node,
                               const Opt_AccessibilityFocusCallback* value)
@@ -4434,13 +4435,13 @@ void OnAccessibilityFocusImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        // ViewAbstractModelNG::ResetOnAccessibilityFocus(frameNode);
+        ViewAbstractModelNG::ResetOnAccessibilityFocus(frameNode);
         return;
     }
     auto onFocus = [callback = CallbackHelper(*optValue)](bool isFocus) -> void {
         callback.Invoke(ArkValue<Ark_Boolean>(isFocus));
     };
-    // ViewAbstractModelNG::SetOnAccessibilityFocus(frameNode, std::move(onFocus));
+    ViewAbstractModelNG::SetOnAccessibilityFocus(frameNode, std::move(onFocus));
 }
 void AccessibilityTextHintImpl(Ark_NativePointer node,
                                const Opt_String* value)
@@ -4452,7 +4453,7 @@ void AccessibilityTextHintImpl(Ark_NativePointer node,
         // keep the same processing
         return;
     }
-    // ViewAbstractModelNG::SetAccessibilityTextHint(frameNode, *convValue);
+    ViewAbstractModelStatic::SetAccessibilityTextHint(frameNode, *convValue);
 }
 void AccessibilityDescription0Impl(Ark_NativePointer node,
                                    const Opt_String* value)
@@ -4464,7 +4465,7 @@ void AccessibilityDescription0Impl(Ark_NativePointer node,
         // keep the same processing
         return;
     }
-    // ViewAbstractModelNG::SetAccessibilityDescription(frameNode, *convValue);
+    ViewAbstractModelNG::SetAccessibilityDescription(frameNode, *convValue);
 }
 void AccessibilityDescription1Impl(Ark_NativePointer node,
                                    const Opt_Resource* value)
@@ -4473,7 +4474,7 @@ void AccessibilityDescription1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::OptConvertPtr<std::string>(value);
     CHECK_EQUAL_VOID(optValue.has_value(), false);
-    // ViewAbstractModelNG::SetAccessibilityDescription(frameNode, optValue.value());
+    ViewAbstractModelNG::SetAccessibilityDescription(frameNode, optValue.value());
 }
 void AccessibilityLevelImpl(Ark_NativePointer node,
                             const Opt_String* value)
@@ -4485,7 +4486,7 @@ void AccessibilityLevelImpl(Ark_NativePointer node,
         // keep the same processing
         return;
     }
-    // ViewAbstractModelNG::SetAccessibilityImportance(frameNode, *convValue);
+    ViewAbstractModelNG::SetAccessibilityImportance(frameNode, *convValue);
 }
 void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
                                   const Opt_CustomNodeBuilder* value)
@@ -4501,7 +4502,7 @@ void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
         auto builder = [uiNode]() -> RefPtr<UINode> {
             return uiNode;
         };
-        // ViewAbstractModelNG::SetAccessibilityVirtualNode(frameNode, std::move(builder));
+        ViewAbstractModelStatic::SetAccessibilityVirtualNode(frameNode, std::move(builder));
     }, node);
 }
 void AccessibilityCheckedImpl(Ark_NativePointer node,
@@ -4517,7 +4518,7 @@ void AccessibilityCheckedImpl(Ark_NativePointer node,
     } else {
         checked = *convValue;
     }
-    // ViewAbstractModelNG::SetAccessibilityChecked(frameNode, checked, resetValue);
+    ViewAbstractModelNG::SetAccessibilityChecked(frameNode, checked, resetValue);
 }
 void AccessibilitySelectedImpl(Ark_NativePointer node,
                                const Opt_Boolean* value)
@@ -4532,7 +4533,7 @@ void AccessibilitySelectedImpl(Ark_NativePointer node,
     } else {
         selected = *convValue;
     }
-    // ViewAbstractModelNG::SetAccessibilitySelected(frameNode, selected, resetValue);
+    ViewAbstractModelNG::SetAccessibilitySelected(frameNode, selected, resetValue);
 }
 void ObscuredImpl(Ark_NativePointer node,
                   const Opt_Array_ObscuredReasons* value)
@@ -4784,12 +4785,12 @@ void AccessibilityFocusDrawLevelImpl(Ark_NativePointer node,
     int32_t drawLevel = 0;
     auto convValue = Converter::OptConvertPtr<Ark_FocusDrawLevel>(value);
     if (convValue.has_value()) {
-        drawLevel = AccessibilityUtils::GetFocusDrawLevel(static_cast<int32_t>(convValue.value()));
+        drawLevel = AccessibilityStaticUtils::GetFocusDrawLevel(static_cast<int32_t>(convValue.value()));
         if (drawLevel == -1) {
             drawLevel = 0;
         }
     }
-    // ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, drawLevel);
+    ViewAbstractModelNG::SetAccessibilityFocusDrawLevel(frameNode, drawLevel);
 }
 void CustomPropertyImpl(Ark_NativePointer node,
                         const Opt_String* name,
