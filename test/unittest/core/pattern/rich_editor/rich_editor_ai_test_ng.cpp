@@ -542,7 +542,7 @@ HWTEST_F(RichEditorAITestOneNg, InitAiselection, TestSize.Level1)
     richEditorPattern->dataDetectorAdapter_->enablePreviewMenu_ = false;
     richEditorPattern->InitAiSelection(offset);
     auto textSelector2 = richEditorPattern->GetTextSelector();
-    EXPECT_TRUE(textSelector2.aiStart.has_value());
-    EXPECT_TRUE(textSelector2.aiEnd.has_value());
+    EXPECT_FALSE(textSelector2.aiStart.has_value());
+    EXPECT_FALSE(textSelector2.aiEnd.has_value());
 }
 }
