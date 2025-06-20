@@ -481,7 +481,7 @@ void ImagePattern::OnImageLoadSuccess()
         SetPixelMapMemoryName(pixelMap);
     }
     if (context && pixelMap) {
-        context->SetIsWideColorGamut(pixelMap->GetIsWideColorGamut());
+        context->SetColorGamut(pixelMap->GetInnerColorGamut());
     }
     ReportPerfData(host, IMAGE_LOAD_SUCCESS);
     host->MarkNeedRenderOnly();
