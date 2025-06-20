@@ -58,6 +58,11 @@ class AppBarTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+
+    void SetUp() override
+    {
+        ViewStackProcessor::GetInstance()->SetCustomAppBarNode(nullptr);
+    }
 };
 
 void AppBarTestNg::SetUpTestSuite()
