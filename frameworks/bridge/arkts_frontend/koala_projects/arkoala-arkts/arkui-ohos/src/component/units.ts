@@ -225,11 +225,11 @@ export interface TouchPoint {
     x: Dimension;
     y: Dimension;
 }
-export interface DirectionalEdgesT {
-    start: number;
-    end: number;
-    top: number;
-    bottom: number;
+export interface DirectionalEdgesT<T> {
+    start: T;
+    end: T;
+    top: T;
+    bottom: T;
 }
 export interface DividerStyleOptions {
     strokeWidth?: LengthMetrics;

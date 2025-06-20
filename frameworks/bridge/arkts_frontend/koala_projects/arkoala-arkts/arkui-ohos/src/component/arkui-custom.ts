@@ -1096,6 +1096,10 @@ export type Context_getGroupDir_Callback = (result: string) => void;
 
 export type Callback_RangeUpdate = (start: int32, end: int32) => void;
 export type Callback_CreateItem = (index: int32) => KPointer;
+export interface LengthMetricsCustom {
+    unit: number;
+    value: number;
+}
 export interface CustomColors {
     brand?: ResourceColor;
     warning?: ResourceColor;

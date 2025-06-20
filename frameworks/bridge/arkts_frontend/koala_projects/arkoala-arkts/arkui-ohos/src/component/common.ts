@@ -1342,9 +1342,9 @@ export class ProgressMask implements MaterializedBase {
 export interface Measurable {
     uniqueId?: number | undefined
     measure(constraint: ConstraintSizeOptions): MeasureResult
-    getMargin(): DirectionalEdgesT
-    getPadding(): DirectionalEdgesT
-    getBorderWidth(): DirectionalEdgesT
+    getMargin(): DirectionalEdgesT<number>
+    getPadding(): DirectionalEdgesT<number>
+    getBorderWidth(): DirectionalEdgesT<number>
 }
 export class MeasurableInternal implements MaterializedBase,Measurable {
     peer?: Finalizable | undefined = undefined
@@ -1373,13 +1373,13 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
         const constraint_casted = constraint as (ConstraintSizeOptions)
         return this.measure_serialize(constraint_casted)
     }
-    public getMargin(): DirectionalEdgesT {
+    public getMargin(): DirectionalEdgesT<number> {
         return this.getMargin_serialize()
     }
-    public getPadding(): DirectionalEdgesT {
+    public getPadding(): DirectionalEdgesT<number> {
         return this.getPadding_serialize()
     }
-    public getBorderWidth(): DirectionalEdgesT {
+    public getBorderWidth(): DirectionalEdgesT<number> {
         return this.getBorderWidth_serialize()
     }
     private getUniqueId(): number | undefined {
@@ -1399,22 +1399,22 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
         const returnResult : MeasureResult = retvalDeserializer.readMeasureResult()
         return returnResult
     }
-    private getMargin_serialize(): DirectionalEdgesT {
+    private getMargin_serialize(): DirectionalEdgesT<number> {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getMargin(this.peer!.ptr)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
+        const returnResult : DirectionalEdgesT<number> = retvalDeserializer.readDirectionalEdgesT()
         return returnResult
     }
-    private getPadding_serialize(): DirectionalEdgesT {
+    private getPadding_serialize(): DirectionalEdgesT<number> {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getPadding(this.peer!.ptr)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
+        const returnResult : DirectionalEdgesT<number> = retvalDeserializer.readDirectionalEdgesT()
         return returnResult
     }
-    private getBorderWidth_serialize(): DirectionalEdgesT {
+    private getBorderWidth_serialize(): DirectionalEdgesT<number> {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getBorderWidth(this.peer!.ptr)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
+        const returnResult : DirectionalEdgesT<number> = retvalDeserializer.readDirectionalEdgesT()
         return returnResult
     }
     private getUniqueId_serialize(): number | undefined {
