@@ -334,7 +334,7 @@ void GestureObserver::HandleGestureAccept(NG::GestureListenerType gestureListene
         return;
     }
     for (const auto& listener : phaseIter->second) {
-        listener->OnGestureStateChange(gestureEventInfo, current, frameNode, phase);
+        listener->OnGestureStateChange(gestureListenerType, gestureEventInfo, current, frameNode, phase);
     }
     napi_close_handle_scope(env, scope);
 }
