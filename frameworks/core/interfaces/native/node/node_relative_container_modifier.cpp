@@ -15,15 +15,17 @@
 
 #include "core/interfaces/native/node/node_relative_container_modifier.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-
-void SetGuideLine(ArkUINodeHandle node, ArkUIGuidelineStyle* values, ArkUI_Int32 size)
+constexpr int NUM_2 = 2;
+void SetGuideLine(ArkUINodeHandle node, ArkUIGuidelineStyle* values, ArkUI_Int32 size, void* rawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    RelativeContainerModelNG::ResetResObj(frameNode, "relativeContainer.guideLine");
     std::vector<GuidelineInfo> guidelineInfos;
     for (int32_t i = 0; i < size; ++i) {
         GuidelineInfo info;
@@ -42,6 +44,23 @@ void SetGuideLine(ArkUINodeHandle node, ArkUIGuidelineStyle* values, ArkUI_Int32
         } else {
             CalcDimension start(0.0, DimensionUnit::VP);
             info.start = start;
+        }
+        auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
+        if (SystemProperties::ConfigChangePerform() && objs[NUM_2 * i]) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, GuidelineInfo& guidelineInfo) {
+                CalcDimension result;
+                ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+                guidelineInfo.start = result;
+            };
+            info.AddResource("relativeContainer.guideLine.position.start", objs[NUM_2 * i], std::move(updateFunc));
+        }
+        if (SystemProperties::ConfigChangePerform() && objs[NUM_2 * i + 1]) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, GuidelineInfo& guidelineInfo) {
+                CalcDimension result;
+                ResourceParseUtils::ParseResDimensionVpNG(resObj, result);
+                guidelineInfo.end = result;
+            };
+            info.AddResource("relativeContainer.guideLine.position.end", objs[NUM_2 * i + 1], std::move(updateFunc));
         }
         guidelineInfos.push_back(info);
     }
@@ -114,6 +133,7 @@ void ResetGuideline(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    RelativeContainerModelNG::ResetResObj(frameNode, "relativeContainer.guideLine");
     RelativeContainerModelNG::ResetGuideline(frameNode);
 }
 

@@ -47,7 +47,7 @@ void LinearSplitModelNG::SetDivider(NG::SplitType splitType, const ColumnSplitDi
         auto&& updateFunc = [divider, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
             auto frameNode = weak.Upgrade();
             CHECK_NULL_VOID(frameNode);
-            ColumnSplitDivider &value = const_cast<ColumnSplitDivider &>(divider);
+            ColumnSplitDivider& value = const_cast<ColumnSplitDivider&>(divider);
             value.ReloadResources();
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, value, frameNode);
             frameNode->MarkModifyDone();
@@ -78,7 +78,33 @@ void LinearSplitModelNG::SetResizable(FrameNode* frameNode, NG::SplitType splitT
 void LinearSplitModelNG::SetDivider(FrameNode* frameNode, NG::SplitType splitType, const ColumnSplitDivider& divider)
 {
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern<LinearSplitPattern>();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [divider, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            ColumnSplitDivider& value = const_cast<ColumnSplitDivider&>(divider);
+            value.ReloadResources();
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, value, frameNode);
+            frameNode->MarkModifyDone();
+            frameNode->MarkDirtyNode();
+        };
+        pattern->AddResObj("columnSplit.divider", resObj, std::move(updateFunc));
+    }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, divider, frameNode);
 }
+
+void LinearSplitModelNG::ResetResObj(FrameNode* frameNode, const std::string& key)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LinearSplitPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
 }
+} // namespace OHOS::Ace::NG
 // namespace OHOS::Ace::NG

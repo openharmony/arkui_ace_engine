@@ -18,17 +18,25 @@
 #include "core/components_ng/base/view_abstract.h"
 
 namespace OHOS::Ace::NG {
-void SetColor(ArkUINodeHandle node, ArkUI_Uint32 value)
+void SetColor(ArkUINodeHandle node, ArkUI_Uint32 value, void* colorRawPtr)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    BlankModelNG::SetColor(frameNode, Color(value));
+    BlankModelNG::ResetResObj(frameNode, "blank.color");
+    if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
+        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+        auto colorResObj = AceType::Claim(color);
+        BlankModelNG::SetColor(frameNode, colorResObj);
+    } else {
+        BlankModelNG::SetColor(frameNode, Color(value));
+    }
 }
 
 void ResetColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    BlankModelNG::ResetResObj(frameNode, "blank.color");
     BlankModelNG::SetColor(frameNode, Color::TRANSPARENT);
 }
 

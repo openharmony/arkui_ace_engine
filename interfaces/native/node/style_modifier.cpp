@@ -14865,7 +14865,7 @@ int32_t SetRelativeContainerGuideLine(ArkUI_NodeHandle node, const ArkUI_Attribu
         guidelineStyle.push_back(style);
     }
     GetFullImpl()->getNodeModifiers()->getRelativeContainerModifier()->setGuideLine(
-        node->uiNodeHandle, guidelineStyle.data(), size);
+        node->uiNodeHandle, guidelineStyle.data(), size, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 

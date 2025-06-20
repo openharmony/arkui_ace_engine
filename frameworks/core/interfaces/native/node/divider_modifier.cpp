@@ -59,21 +59,29 @@ void ResetDividerLineCap(ArkUINodeHandle node)
     DividerModelNG::LineCap(frameNode, DEFAULT_DIVIDER_LINE_CAP);
 }
 
-void SetDividerColor(ArkUINodeHandle node, uint32_t color)
+void SetDividerColor(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    DividerModelNG::SetDividerColor(frameNode, Color(color));
+    DividerModelNG::ResetResObj(frameNode, "divider.color");
+    if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
+        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+        auto colorResObj = AceType::Claim(color);
+        DividerModelNG::SetDividerColor(frameNode, colorResObj, true);
+    } else {
+        DividerModelNG::SetDividerColor(frameNode, Color(color), true);
+    }
 }
 
 void ResetDividerColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    DividerModelNG::ResetResObj(frameNode, "divider.color");
     auto theme = GetTheme<DividerTheme>();
     CHECK_NULL_VOID(theme);
     Color dividerColor = theme->GetColor();
-    DividerModelNG::SetDividerColor(frameNode, dividerColor);
+    DividerModelNG::SetDividerColor(frameNode, dividerColor, false);
 }
 
 void SetDividerVertical(ArkUINodeHandle node, ArkUI_Bool value)
