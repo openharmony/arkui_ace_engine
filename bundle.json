@@ -118,9 +118,12 @@
                 "egl",
                 "request",
                 "qrcodegen",
-                "sdk"
+                "sdk",
+                "glfw"
             ],
-            "third_party": []
+            "third_party": [
+                "ffmpeg"
+            ]
         },
         "build": {
             "group_type": {
@@ -227,6 +230,15 @@
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/build:libace_compatible"
+                },
+                {
+                    "header": {
+                        "header_base": "//foundation/arkui/ace_engine/",
+                        "header_files": [
+                            "adapter/preview/entrance/sample/event_adapter.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/build:libevent_adapter"
                 },
                 {
                     "header": {

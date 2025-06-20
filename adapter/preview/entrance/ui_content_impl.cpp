@@ -41,6 +41,11 @@
 #ifdef INIT_ICU_DATA_PATH
 #include "unicode/putil.h"
 #endif
+#ifdef NG_BUILD
+#include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
+#else
+#include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
+#endif
 
 #include "frameworks/simulator/common/include/context.h"
 
@@ -459,6 +464,7 @@ void UIContentImpl::Destroy()
 {
     LOGI("UIContentImpl: window destroy");
     AceContainer::DestroyContainer(instanceId_);
+    rsWindow_ = nullptr;
 }
 
 uint32_t UIContentImpl::GetBackgroundColor()
@@ -627,5 +633,25 @@ void UIContentImpl::SetStatusBarItemColor(uint32_t color)
     auto appBar = container->GetAppBar();
     CHECK_NULL_VOID(appBar);
     appBar->SetStatusBarItemColor(IsDarkColor(color));
+}
+
+napi_value UIContentImpl::GetUINapiContext()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    ContainerScope scope(instanceId_);
+    napi_value result = nullptr;
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, result);
+    if (frontend->GetType() == FrontendType::DECLARATIVE_JS) {
+#ifdef NG_BUILD
+        auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend);
+#else
+        auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend);
+#endif
+        CHECK_NULL_RETURN(declarativeFrontend, result);
+        return declarativeFrontend->GetContextValue();
+    }
+
+    return result;
 }
 } // namespace OHOS::Ace
