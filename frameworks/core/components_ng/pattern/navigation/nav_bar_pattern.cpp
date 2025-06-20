@@ -537,4 +537,11 @@ bool NavBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     hostNode->AdjustRenderContextIfNeeded();
     return false;
 }
+
+void NavBarPattern::BeforeCreateLayoutWrapper()
+{
+    auto eventHub = GetOrCreateEventHub<NavBarEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireBeforeCreateLayoutWrapperCallBack();
+}
 } // namespace OHOS::Ace::NG

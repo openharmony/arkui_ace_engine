@@ -974,4 +974,13 @@ void NavDestinationPattern::CheckIfNavigationIndicatorConfigChagned()
     }
     mgr->SetWindowSystemBarEnabled(SystemBarType::NAVIGATION_INDICATOR, enable, std::nullopt);
 }
+
+void NavDestinationPattern::BeforeCreateLayoutWrapper()
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->FireBeforeCreateLayoutWrapperCallBack();
+}
 } // namespace OHOS::Ace::NG

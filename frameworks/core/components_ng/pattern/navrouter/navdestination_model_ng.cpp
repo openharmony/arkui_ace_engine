@@ -1921,4 +1921,15 @@ void NavDestinationModelNG::SetEnableNavigationIndicator(
     CHECK_NULL_VOID(node);
     node->SetNavigationIndicatorConfig(navigationIndicator);
 }
+
+void NavDestinationModelNG::SetBeforeCreateLayoutWrapperCallBack(
+    FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper)
+{
+    CHECK_NULL_VOID(beforeCreateLayoutWrapper);
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationEventHub = navDestinationGroupNode->GetOrCreateEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetBeforeCreateLayoutWrapperCallBack(std::move(beforeCreateLayoutWrapper));
+}
 } // namespace OHOS::Ace::NG

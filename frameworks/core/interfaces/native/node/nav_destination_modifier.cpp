@@ -698,6 +698,20 @@ void ResetNavDestinationOnReady(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NavDestinationModelNG::SetOnReady(frameNode, nullptr);
 }
+
+void SetNavDestinationBeforeCreateLayoutWrapperCallBack(
+    ArkUINodeHandle node, void (*beforeCreateLayoutWrapper)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto beforeCreateLayoutWrapperCallBack = [node = AceType::WeakClaim(frameNode), beforeCreateLayoutWrapper]() {
+        auto frameNode = node.Upgrade();
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        beforeCreateLayoutWrapper(nodeHandle);
+    };
+    NavDestinationModelNG::SetBeforeCreateLayoutWrapperCallBack(
+        frameNode, std::move(beforeCreateLayoutWrapperCallBack));
+}
 namespace NodeModifier {
 const ArkUINavDestinationModifier* GetNavDestinationModifier()
 {
@@ -755,6 +769,7 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         .resetNavDestinationOnBackPressed = ResetNavDestinationOnBackPressed,
         .setNavDestinationOnReady = SetNavDestinationOnReady,
         .resetNavDestinationOnReady = ResetNavDestinationOnReady,
+        .setNavDestinationBeforeCreateLayoutWrapperCallBack = SetNavDestinationBeforeCreateLayoutWrapperCallBack,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

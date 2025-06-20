@@ -301,6 +301,8 @@ public:
         serializedParam_ = param;
     }
 
+    void BeforeCreateLayoutWrapper() override;
+
 private:
     struct HideBarOnSwipeContext {
         CancelableCallback<void()> showBarTask;

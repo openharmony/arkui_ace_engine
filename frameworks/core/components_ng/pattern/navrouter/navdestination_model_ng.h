@@ -149,6 +149,8 @@ public:
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& subResObj) override;
     static CalcDimension ParseTitleHeight(const RefPtr<ResourceObject>& resObj);
     static void ResetResObj(FrameNode* frameNode, NavDestinationPatternType type, const std::string& key);
+    static void SetBeforeCreateLayoutWrapperCallBack(
+        FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper);
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);
