@@ -794,17 +794,20 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             .filter((varName) => !varName.startsWith(ProviderConsumerUtilV2.ALIAS_PREFIX)) // remove provider & consumer prefix
             .forEach((varName) => {
                 const prop: any = Reflect.get(meta, varName);
-                if ('deco' in prop) {
-                    retVal += ` ${prop.deco}`; // main decorator
-                }
-                if ('deco2' in prop) {
-                    retVal += ` ${prop.deco2}`; // sub decorator like @Once
-                }
-                if ('aliasName' in prop) {
-                    retVal += `(${prop.aliasName})`; // aliasName for provider & consumer
+                if (prop && typeof prop === 'object') {
+                    if ('deco' in prop) {
+                        retVal += ` ${prop.deco}`; // main decorator
+                    }
+                    if ('deco2' in prop) {
+                        retVal += ` ${prop.deco2}`; // sub decorator like @Once
+                    }
+                    if ('aliasName' in prop) {
+                        retVal += `(${prop.aliasName})`; // aliasName for provider & consumer
+                    }
                 }
                 retVal += ` varName: ${varName}`;
-                let dependentElmtIds = this[ObserveV2.SYMBOL_REFS][varName];
+
+                let dependentElmtIds = this[ObserveV2.SYMBOL_REFS]?.[varName];
                 if (dependentElmtIds) {
                     retVal += `\n  |--DependentElements:`;
                     dependentElmtIds.forEach((elmtId) => {
