@@ -57,7 +57,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "BufferAvailableCallback id:%{public}d", session->GetPersistentId());
         if (!session->GetBufferAvailable()) {
-            session->SetBufferAvailable(true);
+            session->SetBufferAvailable(true, false);
             Rosen::SceneSessionManager::GetInstance().NotifyCompleteFirstFrameDrawing(session->GetPersistentId());
         }
         // In a locked screen scenario, the lifetime of the session is larger than the lifetime of the object self
@@ -357,6 +357,12 @@ void WindowScene::BufferAvailableCallback()
             CHECK_NULL_VOID(self->appWindow_);
         } else {
             CHECK_NULL_VOID(self->startingWindow_);
+        }
+
+        CHECK_NULL_VOID(self->session_);
+        if (self->session->GetHidingStartingWindow()) {
+            self->session->SetHidingStartingWindow(false);
+            self->session->SetBufferAvailable(true, true);
         }
         auto surfaceNode = self->session_->GetSurfaceNode();
         bool isWindowSizeEqual = self->IsWindowSizeEqual();

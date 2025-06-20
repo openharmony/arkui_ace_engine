@@ -457,6 +457,43 @@ HWTEST_F(WindowSceneTest, IsMainSessionRecent, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HideStartingWindow
+ * @tc.desc: HideStartingWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, HideStartingWindow, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create windowScene.                
+     */
+    auto windowScene = CreateWindowSceneForStartingWindowTest();
+    ASSERT_NE(windowScene, nullptr);
+    /**
+     * @tc.steps: step2. Set sub session.
+     */
+    Rosen::SessionInfo subSessionInfo = {
+        .abilityName_ = "SUB_ABILITY_NAME",
+        .bundleName_ = "SUB_BUNDLE_NAME",
+        .moduleName_ = "SUB_MODULE_NAME",
+        .startWindowType_ = Rosen::StartWindowType::RETAIN_AND_INVISIBLE,
+    };
+    auto subSession = ssm_->RequestSceneSession(subSessionInfo);
+    ASSERT_NE(subSession, nullptr);
+    Rosen::RSSurfaceNodeConfig config = {
+        .SurfaceNodeName = "SurfaceNode"
+    };
+    subSession->surfaceNode_ = Rosen::RSSurfaceNode::Create(config);
+    ASSERT_NE(subSession->surfaceNode_, nullptr);
+    subSession->surfaceNode_->SetVisible(false);
+    windowScene->weakSubSessions_.push_back(subSession);
+    /**
+     * @tc.steps: step3. Test and check
+     */
+    windowScene->SetSubSessionVisible();
+    ASSERT_EQ(subSession->surfaceNode_->GetStagingProperties().GetVisible(), true);
+}
+
+/**
  * @tc.name: SetSubSessionVisible
  * @tc.desc: set sub session visible
  * @tc.type: FUNC
