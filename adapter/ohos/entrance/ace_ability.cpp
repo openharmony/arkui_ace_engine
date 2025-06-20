@@ -487,7 +487,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
             rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
             return rect;
         });
-        context->SetGlobalDisplayWindowRectCallback([window]() -> Rect {
+        context->InitGetGlobalWindowRectCallback([window]() -> Rect {
             Rect rect;
             CHECK_NULL_RETURN(window, rect);
             auto globalDisplayWindowRect = window->GetGlobalDisplayRect();

@@ -138,7 +138,7 @@ public:
         windowRectImpl_ = std::move(callback);
     }
 
-    void SetGlobalDisplayWindowRectCallback(std::function<Rect()>&& callback)
+    void InitGetGlobalWindowRectCallback(std::function<Rect()>&& callback)
     {
         globalDisplayWindowRectImpl_ = std::move(callback);
     }

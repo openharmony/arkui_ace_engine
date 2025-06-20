@@ -7416,4 +7416,21 @@ HWTEST_F(NativeNodeTest, NativeNodeTest146, TestSize.Level1)
     EXPECT_EQ(NodeModel::GetNativeNodeEventType(&event2), -1);
     nodeAPI2->disposeNode(freeNode);
 }
+
+/**
+ * @tc.name: NativeNodeTest147
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetLayoutPositionInGlobalDisplay function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest147, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ArkUI_IntOffset offset = {0, 0};
+    auto ret = OH_ArkUI_NodeUtils_GetLayoutPositionInGlobalDisplay(node, &offset);
+    EXPECT_EQ(ret, ERROR_CODE_NO_ERROR);
+    ret = OH_ArkUI_NodeUtils_GetLayoutPositionInGlobalDisplay(nullptr, &offset);
+    EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
+}
 } // namespace OHOS::Ace
