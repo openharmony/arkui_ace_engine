@@ -3809,14 +3809,15 @@ ArkUI_ErrorCode CheckIsSupportedScenario(int32_t scenarioExpr, const ArkUI_UIInp
                                                        : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
         }
         case C_CLICK_EVENT_ID: {
-            if ((event->inputType == ARKUI_UIINPUTEVENT_TYPE_KEY) && (scenarioExpr & S_GESTURE_CLICK_EVENT)) {
+            if (event->inputType == ARKUI_UIINPUTEVENT_TYPE_KEY) {
                 // click event from click or tap gesture triggered by keyboard
-                return ARKUI_ERROR_CODE_NO_ERROR;
-            } else if (scenarioExpr & S_NODE_ON_CLICK_EVENT) {
+                return scenarioExpr & S_GESTURE_CLICK_EVENT ? ARKUI_ERROR_CODE_NO_ERROR
+                                                            : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+            } else {
                 // click event registed by NODE_ON_CLICK
-                return ARKUI_ERROR_CODE_NO_ERROR;
+                return scenarioExpr & S_NODE_ON_CLICK_EVENT ? ARKUI_ERROR_CODE_NO_ERROR
+                                                            : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
             }
-            return ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
         }
         case C_HOVER_EVENT_ID: {
             // hover event registed by NODE_ON_HOVER_EVENT

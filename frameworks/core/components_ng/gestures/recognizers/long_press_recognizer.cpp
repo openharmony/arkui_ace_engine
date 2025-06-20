@@ -124,7 +124,8 @@ void LongPressRecognizer::ThumbnailTimer(int32_t time)
 void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     extraInfo_ = "";
-    lastAction_ = static_cast<int32_t>(TouchType::DOWN);
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::DOWN)
+                                                                  : static_cast<int32_t>(MouseAction::PRESS);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -190,7 +191,8 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    lastAction_ = static_cast<int32_t>(TouchType::UP);
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::UP)
+                                                                  : static_cast<int32_t>(MouseAction::RELEASE);
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveGestureTask(task_);
@@ -231,7 +233,8 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
     lastTouchEvent_.pressedKeyCodes_ = event.pressedKeyCodes_;
-    lastAction_ = static_cast<int32_t>(TouchType::MOVE);
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::MOVE)
+                                                                  : static_cast<int32_t>(MouseAction::MOVE);
     if (static_cast<int32_t>(touchPoints_.size()) < fingers_) {
         return;
     }
@@ -256,7 +259,8 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::FAIL) {
         return;
     }
-    lastAction_ = static_cast<int32_t>(TouchType::CANCEL);
+    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::CANCEL)
+                                                                  : static_cast<int32_t>(MouseAction::CANCEL);
     lastTouchEvent_ = event;
     if (touchPoints_.find(event.id) != touchPoints_.end()) {
         touchPoints_.erase(event.id);

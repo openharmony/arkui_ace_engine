@@ -1904,4 +1904,159 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayY, TestS
     result = OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayY(uiInputEvent.get(), 1, 1);
     EXPECT_EQ(result, 0);
 }
+
+/**
+ * @tc.name: CheckIsSupportedScenario001
+ * @tc.desc: Test CheckIsSupportedScenario
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, CheckIsSupportedScenario001, TestSize.Level1)
+{
+    auto errorCode = CheckIsSupportedScenario(S_UNKNOWN, nullptr);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    ArkUI_UIInputEvent event;
+    event.inputType = ARKUI_UIINPUTEVENT_TYPE_AXIS;
+    event.eventTypeId = AXIS_EVENT_ID;
+    errorCode = CheckIsSupportedScenario(S_NXC_DISPATCH_AXIS_EVENT, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_NO_ERROR);
+    errorCode = CheckIsSupportedScenario(S_UNKNOWN, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+
+    event.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
+    event.eventTypeId = TOUCH_EVENT_ID;
+    errorCode = CheckIsSupportedScenario(S_NXC_ON_TOUCH_INTERCEPT, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_NO_ERROR);
+    errorCode = CheckIsSupportedScenario(S_UNKNOWN, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+}
+
+/**
+ * @tc.name: CheckIsSupportedScenario002
+ * @tc.desc: Test CheckIsSupportedScenario
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, CheckIsSupportedScenario002, TestSize.Level1)
+{
+    ArkUI_UIInputEvent event;
+    ArkUITouchEvent touchEvent;
+    event.inputType = ARKUI_UIINPUTEVENT_TYPE_TOUCH;
+    event.eventTypeId = C_TOUCH_EVENT_ID;
+    event.inputEvent = nullptr;
+    auto errorCode = CheckIsSupportedScenario(S_UNKNOWN, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_PARAM_INVALID);
+    event.inputEvent = &touchEvent;
+    touchEvent.subKind = ON_TOUCH;
+    errorCode = CheckIsSupportedScenario(S_NODE_TOUCH_EVENT, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_NO_ERROR);
+    touchEvent.subKind = ON_TOUCH_INTERCEPT;
+    errorCode = CheckIsSupportedScenario(S_NODE_ON_TOUCH_INTERCEPT, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_NO_ERROR);
+    touchEvent.subKind = ON_HOVER_MOVE;
+    errorCode = CheckIsSupportedScenario(S_NODE_ON_HOVER_MOVE, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_NO_ERROR);
+    touchEvent.subKind = 0;
+    errorCode = CheckIsSupportedScenario(S_GESTURE_TOUCH_EVENT, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_NO_ERROR);
+    errorCode = CheckIsSupportedScenario(S_UNKNOWN, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+
+    ArkUIMouseEvent mouseEvent;
+    event.inputType = ARKUI_UIINPUTEVENT_TYPE_MOUSE;
+    event.eventTypeId = C_MOUSE_EVENT_ID;
+    event.inputEvent = nullptr;
+    errorCode = CheckIsSupportedScenario(S_UNKNOWN, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_PARAM_INVALID);
+    event.inputEvent = &mouseEvent;
+    mouseEvent.subKind = ON_MOUSE;
+    errorCode = CheckIsSupportedScenario(S_NODE_ON_MOUSE, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_NO_ERROR);
+    mouseEvent.subKind = 0;
+    errorCode = CheckIsSupportedScenario(S_GESTURE_MOUSE_EVENT, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_NO_ERROR);
+    errorCode = CheckIsSupportedScenario(S_UNKNOWN, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+}
+
+/**
+ * @tc.name: CheckIsSupportedScenario003
+ * @tc.desc: Test CheckIsSupportedScenario
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, CheckIsSupportedScenario003, TestSize.Level1)
+{
+    ArkUI_UIInputEvent event;
+    ArkUIAxisEvent axisEvent;
+    event.inputType = ARKUI_UIINPUTEVENT_TYPE_AXIS;
+    event.eventTypeId = C_AXIS_EVENT_ID;
+    event.inputEvent = nullptr;
+    auto errorCode = CheckIsSupportedScenario(S_UNKNOWN, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_PARAM_INVALID);
+    event.inputEvent = &axisEvent;
+    axisEvent.subKind = ON_AXIS;
+    errorCode = CheckIsSupportedScenario(S_NODE_ON_AXIS, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_NO_ERROR);
+    axisEvent.subKind = 0;
+    errorCode = CheckIsSupportedScenario(S_GESTURE_AXIS_EVENT, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_NO_ERROR);
+    errorCode = CheckIsSupportedScenario(S_UNKNOWN, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+
+    ArkUIKeyEvent keyEvent;
+    event.inputType = ARKUI_UIINPUTEVENT_TYPE_KEY;
+    event.eventTypeId = C_KEY_EVENT_ID;
+    event.inputEvent = nullptr;
+    errorCode = CheckIsSupportedScenario(S_UNKNOWN, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_PARAM_INVALID);
+    event.inputEvent = &keyEvent;
+    keyEvent.subKind = ON_KEY_EVENT;
+    errorCode = CheckIsSupportedScenario(S_NODE_ON_KEY_EVENT, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_NO_ERROR);
+    event.inputEvent = &keyEvent;
+    keyEvent.subKind = ON_KEY_PREIME;
+    errorCode = CheckIsSupportedScenario(S_NODE_ON_KEY_PRE_IME, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_NO_ERROR);
+    event.inputEvent = &keyEvent;
+    keyEvent.subKind = ON_KEY_DISPATCH;
+    errorCode = CheckIsSupportedScenario(S_NODE_DISPATCH_KEY_EVENT, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_NO_ERROR);
+    errorCode = CheckIsSupportedScenario(S_UNKNOWN, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+}
+
+/**
+ * @tc.name: CheckIsSupportedScenario004
+ * @tc.desc: Test CheckIsSupportedScenario
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, CheckIsSupportedScenario004, TestSize.Level1)
+{
+    ArkUI_UIInputEvent event;
+    event.inputType = ARKUI_UIINPUTEVENT_TYPE_UNKNOWN;
+    event.eventTypeId = C_FOCUS_AXIS_EVENT_ID;
+    auto errorCode = CheckIsSupportedScenario(S_NODE_ON_FOCUS_AXIS, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_NO_ERROR);
+    errorCode = CheckIsSupportedScenario(S_UNKNOWN, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+
+    event.inputType = ARKUI_UIINPUTEVENT_TYPE_UNKNOWN;
+    event.eventTypeId = C_CLICK_EVENT_ID;
+    errorCode = CheckIsSupportedScenario(S_NODE_ON_CLICK_EVENT, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_NO_ERROR);
+    errorCode = CheckIsSupportedScenario(S_UNKNOWN, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+
+    event.inputType = ARKUI_UIINPUTEVENT_TYPE_KEY;
+    errorCode = CheckIsSupportedScenario(S_GESTURE_CLICK_EVENT, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_NO_ERROR);
+    errorCode = CheckIsSupportedScenario(S_UNKNOWN, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+
+    event.inputType = ARKUI_UIINPUTEVENT_TYPE_UNKNOWN;
+    event.eventTypeId = C_HOVER_EVENT_ID;
+    errorCode = CheckIsSupportedScenario(S_NODE_ON_HOVER_EVENT, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_CODE_NO_ERROR);
+    errorCode = CheckIsSupportedScenario(S_UNKNOWN, &event);
+    EXPECT_EQ(errorCode, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+}
 } // namespace OHOS::Ace
