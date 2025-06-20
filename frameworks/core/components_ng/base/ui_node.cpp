@@ -37,8 +37,9 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     if (AceChecker::IsPerformanceCheckEnabled()) {
         auto pos = EngineHelper::GetPositionOnJsCode();
         nodeInfo_ = std::make_unique<PerformanceCheckNode>();
-        nodeInfo_->codeRow = pos.first;
-        nodeInfo_->codeCol = pos.second;
+        nodeInfo_->codeRow = std::get<1>(pos);
+        nodeInfo_->codeCol = std::get<2>(pos);
+        nodeInfo_->pagePath = std::get<0>(pos);
     }
     apiVersion_ = Container::GetCurrentApiTargetVersion();
 #ifdef UICAST_COMPONENT_SUPPORTED
