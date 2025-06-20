@@ -890,10 +890,10 @@ void PipelineBase::SetGetWindowRectImpl(std::function<Rect()>&& callback)
     }
 }
 
-void PipelineBase::SetGetGlobalDisplayWindowRectImpl(std::function<Rect()>&& callback)
+void PipelineBase::SetGlobalDisplayWindowRectCallback(std::function<Rect()>&& callback)
 {
     CHECK_NULL_VOID(window_);
-    window_->SetGetGlobalDisplayWindowRectImpl(std::move(callback));
+    window_->SetGlobalDisplayWindowRectCallback(std::move(callback));
 }
 
 void PipelineBase::ContainerModalUnFocus() {}

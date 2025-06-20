@@ -3063,7 +3063,7 @@ void AceContainer::InitWindowCallback()
         return rect;
     });
 
-    pipelineContext_->SetGetGlobalDisplayWindowRectImpl([window = uiWindow_]() -> Rect {
+    pipelineContext_->SetGlobalDisplayWindowRectCallback([window = uiWindow_]() -> Rect {
         Rect rect;
         CHECK_NULL_RETURN(window, rect);
         auto globalDisplayWindowRect = window->GetGlobalDisplayRect();
