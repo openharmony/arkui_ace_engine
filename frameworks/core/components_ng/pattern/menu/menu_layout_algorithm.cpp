@@ -784,7 +784,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     InitCanExpandCurrentWindow(isShowInSubWindow);
     Initialize(layoutWrapper);
     if (!targetTag_.empty()) {
-        InitTargetSizeAndPosition(layoutWrapper, isContextMenu, menuPattern);
+        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern);
     }
     CalcWrapperRectForHoverMode(menuPattern);
 
@@ -1918,6 +1918,7 @@ void MenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(menuWrapper);
         auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_VOID(wrapperPattern);
+        dumpInfo_.anchorPosition = menuProp->GetAnchorPosition().value_or(OffsetF());
         wrapperPattern->SetDumpInfo(dumpInfo_);
         UpdateMenuFrameSizeWithArrow(geometryNode, didNeedArrow_);
     }

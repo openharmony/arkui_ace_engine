@@ -2244,15 +2244,18 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         float keyboardOffset = manager ? manager->GetClickPositionOffset() : safeAreaManager_->GetKeyboardOffset();
         if (manager) {
             positionY = static_cast<float>(manager->GetClickPosition().GetY()) - keyboardOffset;
+            auto onFocusField = manager->GetOnFocusTextField().Upgrade();
+            if (onFocusField && onFocusField->GetHost() && onFocusField->GetHost()->GetGeometryNode()) {
+                auto adjustRect = onFocusField->GetHost()->GetGeometryNode()->GetParentAdjust();
+                positionY += adjustRect.Top();
+            }
         }
         auto bottomLen = safeAreaManager_->GetNavSafeArea().bottom_.IsValid() ?
             safeAreaManager_->GetNavSafeArea().bottom_.Length() : 0;
         if (manager->IsScrollableChild() && rootHeight_ - positionY - safeHeight - bottomLen < 0) {
             safeHeight = rootHeight_ - positionY - bottomLen;
         }
-        if (NearZero(keyboardHeight)) {
-            safeAreaManager_->UpdateKeyboardOffset(0.0f);
-        } else if (LessOrEqual(positionY + safeHeight, rootHeight_ - keyboardHeight)) {
+        if (NearZero(keyboardHeight) || LessOrEqual(positionY + safeHeight, rootHeight_ - keyboardHeight)) {
             safeAreaManager_->UpdateKeyboardOffset(0.0f);
         } else if (positionY + safeHeight > rootHeight_ - keyboardHeight) {
             safeAreaManager_->UpdateKeyboardOffset(-(positionY - rootHeight_ + keyboardHeight)- safeHeight);
@@ -2272,9 +2275,8 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         MarkDirtyOverlay();
         SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
 
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-            "AvoidanceLogic keyboardHeight: %{public}f, positionY: %{public}f, safeHeight: %{public}f, "
-            "rootHeight_ %{public}f final calculate keyboard offset is %{public}f",
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "AvoidanceLogic keyboardHeight: %{public}f, positionY: %{public}f, "
+            "safeHeight: %{public}f, rootHeight_ %{public}f final calculate keyboard offset is %{public}f",
             keyboardHeight, positionY, safeHeight, rootHeight_, safeAreaManager_->GetKeyboardOffset());
     };
     FlushUITasks();
@@ -2643,6 +2645,12 @@ bool PipelineContext::OnBackPressed()
         return false;
     }
 
+    auto deviceType = SystemProperties::GetDeviceType();
+    if ((deviceType == DeviceType::WEARABLE || deviceType == DeviceType::WATCH) && !enableSwipeBack_) {
+        LOGW("disableSwipeBack set in wearable device, will NOT consume this back-press event");
+        return true;
+    }
+
     // If the tag of the last child of the rootnode is video, exit full screen.
     if (fullScreenManager_->OnBackPressed()) {
         LOGI("fullscreen component: video or web consumed backpressed event");
@@ -2743,6 +2751,26 @@ bool PipelineContext::OnBackPressed()
         LOGI("router consumed backpressed event");
         return true;
     }
+
+    taskExecutor_->PostSyncTask(
+        [weakPipelineContext = WeakClaim(this), &result]() {
+            auto context = weakPipelineContext.Upgrade();
+            CHECK_NULL_VOID(context);
+            auto container = Container::Current();
+            CHECK_NULL_VOID(container);
+            auto appBar = container->GetAppBar();
+            CHECK_NULL_VOID(appBar);
+            auto atomicServicePattern = appBar->GetAtomicServicePattern();
+            CHECK_NULL_VOID(atomicServicePattern);
+            atomicServicePattern->OnBackPressedCallback();
+            result = true;
+        },
+        TaskExecutor::TaskType::UI, "ArkUIBackPressedAppBar");
+
+    if (result) {
+        LOGI("appbar consumed backpressed event");
+        return true;
+    }
     return false;
 }
 
@@ -2780,16 +2808,17 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
             if (isEntry) {
                 return nullptr;
             }
-            // if the destination does not responds, find navigation from navbar
-            auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+            // if the destination does not responds, find navigation from navbar or homeDestination
+            auto navBarOrHomeDestNode =
+                AceType::DynamicCast<NavDestinationNodeBase>(navigationGroupNode->GetNavBarOrHomeDestinationNode());
             auto navigationLayoutProperty = navigationGroupNode->GetLayoutProperty<NavigationLayoutProperty>();
             CHECK_NULL_RETURN(navigationLayoutProperty, nullptr);
             if (navigationLayoutProperty->GetHideNavBarValue(false)) {
                 return nullptr;
             }
-            auto targetNodeFromNavbar = FindNavigationNodeToHandleBack(navBarNode, isEntry);
-            if (targetNodeFromNavbar) {
-                return targetNodeFromNavbar;
+            auto targetNodeFromNavbarOrHomeDest = FindNavigationNodeToHandleBack(navBarOrHomeDestNode, isEntry);
+            if (targetNodeFromNavbarOrHomeDest) {
+                return targetNodeFromNavbarOrHomeDest;
             }
             return nullptr;
         }
@@ -4838,6 +4867,9 @@ void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEven
 
     if (action == DragEventAction::DRAG_EVENT_OUT || action == DragEventAction::DRAG_EVENT_END ||
         action == DragEventAction::DRAG_EVENT_PULL_THROW || action == DragEventAction::DRAG_EVENT_PULL_CANCEL) {
+        if (!eventManager_->touchDelegatesMap_.empty()) {
+            eventManager_->UnregisterTouchDelegate(pointerEvent.pointerId);
+        }
         lastDragTime_ = GetTimeFromExternalTimer();
         CompensatePointerMoveEvent(pointerEvent, node);
         manager->HandleDragEvent(pointerEvent, action, node);
@@ -6148,14 +6180,6 @@ std::string PipelineContext::GetModuleName()
     return container->GetModuleName();
 }
 
-void PipelineContext::SetEnableSwipeBack(bool isEnable)
-{
-    CHECK_NULL_VOID(rootNode_);
-    auto rootPattern = rootNode_->GetPattern<RootPattern>();
-    CHECK_NULL_VOID(rootPattern);
-    rootPattern->SetEnableSwipeBack(isEnable);
-}
-
 void PipelineContext::SetHostParentOffsetToWindow(const Offset& offset)
 {
     lastHostParentOffsetToWindow_ = offset;
@@ -6198,7 +6222,9 @@ void PipelineContext::SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo
 
 void PipelineContext::SetIsTransFlag(bool result)
 {
-    isTransFlag_ = result;
+    if (isTransFlag_ != result) {
+        isTransFlag_ = result;
+    }
 }
 
 void PipelineContext::FlushMouseEventForHover()
@@ -6224,7 +6250,11 @@ void PipelineContext::FlushMouseEventForHover()
     event.deviceId = lastMouseEvent_->deviceId;
     event.sourceTool = lastMouseEvent_->sourceTool;
     event.sourceType = lastMouseEvent_->sourceType;
-    event.action = lastMouseEvent_->action;
+    if (lastMouseEvent_->action == MouseAction::WINDOW_ENTER || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
+        event.action = MouseAction::MOVE;
+    } else {
+        event.action = lastMouseEvent_->action;
+    }
     event.time = lastMouseEvent_->time;
     event.touchEventId = lastMouseEvent_->touchEventId;
     event.mockFlushEvent = true;
@@ -6315,15 +6345,5 @@ const RefPtr<NodeRenderStatusMonitor>& PipelineContext::GetNodeRenderStatusMonit
         nodeRenderStatusMonitor_ = AceType::MakeRefPtr<NodeRenderStatusMonitor>();
     }
     return nodeRenderStatusMonitor_;
-}
-
-void PipelineContext::RemoveNodeFromDirtyRenderNode(int32_t nodeId, int32_t pageId)
-{
-    taskScheduler_->RemoveNodeFromDirtyRender(nodeId, pageId);
-}
- 
-void PipelineContext::GetRemovedDirtyRenderAndErase(uint32_t id)
-{
-    taskScheduler_->RemoveDirtyRenderNodes(id);
 }
 } // namespace OHOS::Ace::NG

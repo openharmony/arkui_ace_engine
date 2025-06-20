@@ -97,6 +97,41 @@ struct MenuParam {
     bool disappearScaleToTarget = false;
     std::optional<NG::BorderWidthProperty> outlineWidth;
     std::optional<NG::BorderColorProperty> outlineColor;
+    struct resourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, MenuParam&)> updateFunc;
+    };
+    std::unordered_map<std::string, resourceUpdater> resMap_;
+
+    void AddResource(const std::string& key, const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, MenuParam&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = { resObj, std::move(updateFunc) };
+    }
+
+    const RefPtr<ResourceObject> GetResource(const std::string& key) const
+    {
+        auto iter = resMap_.find(key);
+        if (iter != resMap_.end()) {
+            return iter->second.resObj;
+        }
+        return nullptr;
+    }
+
+    bool HasResources() const
+    {
+        return !resMap_.empty();
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+    }
     std::optional<bool> maskEnable;
     std::optional<MenuMaskType> maskType;
     std::optional<ModalMode> modalMode;

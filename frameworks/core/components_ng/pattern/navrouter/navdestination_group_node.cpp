@@ -106,13 +106,29 @@ RefPtr<NavDestinationGroupNode> NavDestinationGroupNode::GetOrCreateGroupNode(
 bool NavDestinationGroupNode::IsNeedContentTransition()
 {
     if (systemTransitionType_ == NavigationSystemTransitionType::DEFAULT) {
-        return true;
+        // for HomeNavDestination, DEFAULT equals to NONE when split mode.
+        if (!isHomeDestination_) {
+            return true;
+        }
+        auto navNode = AceType::DynamicCast<NavigationGroupNode>(GetNavigationNode());
+        CHECK_NULL_RETURN(navNode, true);
+        auto pattern = navNode->GetPattern<NavigationPattern>();
+        CHECK_NULL_RETURN(pattern, true);
+        return pattern->GetNavigationMode() == NavigationMode::STACK;
     }
     return (systemTransitionType_ & NavigationSystemTransitionType::CONTENT) != NavigationSystemTransitionType::NONE;
 }
 
 bool NavDestinationGroupNode::TransitionContentInValid()
 {
+    if (isHomeDestination_) {
+        auto navNode = AceType::DynamicCast<NavigationGroupNode>(GetNavigationNode());
+        CHECK_NULL_RETURN(navNode, false);
+        auto navPattern = navNode->GetPattern<NavigationPattern>();
+        CHECK_NULL_RETURN(navPattern, false);
+        auto mode = navPattern->GetNavigationMode();
+        return mode == NavigationMode::SPLIT;
+    }
     return (systemTransitionType_ & NavigationSystemTransitionType::CONTENT) == NavigationSystemTransitionType::NONE
         && mode_ == NavDestinationMode::STANDARD;
 }
@@ -120,7 +136,15 @@ bool NavDestinationGroupNode::TransitionContentInValid()
 bool NavDestinationGroupNode::IsNeedTitleTransition()
 {
     if (systemTransitionType_ == NavigationSystemTransitionType::DEFAULT) {
-        return true;
+        // for HomeNavDestination, DEFAULT equals to NONE when split mode.
+        if (!isHomeDestination_) {
+            return true;
+        }
+        auto navNode = AceType::DynamicCast<NavigationGroupNode>(GetNavigationNode());
+        CHECK_NULL_RETURN(navNode, true);
+        auto pattern = navNode->GetPattern<NavigationPattern>();
+        CHECK_NULL_RETURN(pattern, true);
+        return pattern->GetNavigationMode() == NavigationMode::STACK;
     }
     if (mode_ == NavDestinationMode::STANDARD) {
         return (systemTransitionType_ & NavigationSystemTransitionType::TITLE) != NavigationSystemTransitionType::NONE;
@@ -241,7 +265,7 @@ void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
     json->PutExtAttr("systemTransition", TransitionTypeToString(systemTransitionType_), filter);
 }
 
-void NavDestinationGroupNode::InitSystemTransitionPush(bool transitionIn)
+void NavDestinationGroupNode::SystemTransitionPushStart(bool transitionIn)
 {
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     float isRTL = GetLanguageDirection();
@@ -378,7 +402,7 @@ void NavDestinationGroupNode::StartSoftTransitionPop(bool transitionIn)
     }
 }
 
-void NavDestinationGroupNode::StartSystemTransitionPush(bool transitionIn)
+void NavDestinationGroupNode::SystemTransitionPushEnd(bool transitionIn)
 {
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     auto geometryNode = GetGeometryNode();
@@ -412,7 +436,7 @@ void NavDestinationGroupNode::StartSystemTransitionPush(bool transitionIn)
     }
 }
 
-void NavDestinationGroupNode::SystemTransitionPushCallback(bool transitionIn, const int32_t animationId)
+void NavDestinationGroupNode::SystemTransitionPushFinish(bool transitionIn, int32_t animationId)
 {
     if (animationId != animationId_) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "push animation invalid,curId: %{public}d, targetId: %{public}d",
@@ -447,7 +471,7 @@ void NavDestinationGroupNode::SystemTransitionPushCallback(bool transitionIn, co
     }
 }
 
-void NavDestinationGroupNode::InitSystemTransitionPop(bool isTransitionIn)
+void NavDestinationGroupNode::SystemTransitionPopStart(bool transitionIn)
 {
     auto geometryNode = GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -459,7 +483,7 @@ void NavDestinationGroupNode::InitSystemTransitionPop(bool isTransitionIn)
     bool needTitleAnimation = IsNeedTitleTransition();
     auto renderContext = GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (isTransitionIn) {
+    if (transitionIn) {
         SetTransitionType(PageTransitionType::ENTER_POP);
         renderContext->RemoveClipWithRRect();
         if (needContentAnimation) {
@@ -486,7 +510,7 @@ void NavDestinationGroupNode::InitSystemTransitionPop(bool isTransitionIn)
     }
 }
 
-void NavDestinationGroupNode::StartSystemTransitionPop(bool transitionIn)
+void NavDestinationGroupNode::SystemTransitionPopEnd(bool transitionIn)
 {
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     bool needContentAnimation = IsNeedContentTransition();
@@ -535,7 +559,7 @@ bool NavDestinationGroupNode::CheckTransitionPop(const int32_t animationId)
     return true;
 }
 
-bool NavDestinationGroupNode::SystemTransitionPopCallback(const int32_t animationId, bool isNeedCleanContent)
+bool NavDestinationGroupNode::SystemTransitionPopFinish(int32_t animationId, bool isNeedCleanContent)
 {
     if (animationId_ != animationId) {
         TAG_LOGW(AceLogTag::ACE_NAVIGATION,
@@ -777,11 +801,20 @@ void NavDestinationGroupNode::CleanContent(bool cleanDirectly, bool allowTransit
 
 bool NavDestinationGroupNode::IsNodeInvisible(const RefPtr<FrameNode>& node)
 {
-    auto navigaiton = DynamicCast<NavigationGroupNode>(node);
-    CHECK_NULL_RETURN(navigaiton, false);
-    int32_t lastStandardIndex = navigaiton->GetLastStandardIndex();
+    auto navigation = DynamicCast<NavigationGroupNode>(node);
+    CHECK_NULL_RETURN(navigation, false);
+    int32_t lastStandardIndex = navigation->GetLastStandardIndex();
     bool isInvisible = index_ < lastStandardIndex;
-    return isInvisible;
+    if (!isHomeDestination_) {
+        return isInvisible;
+    }
+    auto navPattern = navigation->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(navPattern, isInvisible);
+    auto mode = navPattern->GetNavigationMode();
+    if (mode == NavigationMode::STACK) {
+        return isInvisible;
+    }
+    return false;
 }
 
 std::string NavDestinationGroupNode::ToDumpString()
@@ -1115,6 +1148,19 @@ std::function<void()> NavDestinationGroupNode::BuildTransitionFinishCallback(
             }
             if (isSystemTransition) {
                 navDestination->ResetCustomTransitionAnimationProperties();
+            }
+            if (navDestination->IsHomeDestination()) {
+                auto navNode = AceType::DynamicCast<NavigationGroupNode>(navDestination->GetNavigationNode());
+                CHECK_NULL_VOID(navNode);
+                auto navPattern = navNode->GetPattern<NavigationPattern>();
+                CHECK_NULL_VOID(navPattern);
+                auto mode = navPattern->GetNavigationMode();
+                if (mode == NavigationMode::STACK && navDestination->HasStandardBefore()) {
+                    navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+                    navDestination->SetJSViewActive(false);
+                }
+                navDestination->SetIsOnAnimation(false);
+                return;
             }
             // only handle current node in latest finish callback.
             if (!navDestination->GetInCurrentStack()) {

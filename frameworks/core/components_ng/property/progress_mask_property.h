@@ -30,6 +30,12 @@ public:
     ProgressMaskProperty() = default;
     ~ProgressMaskProperty() override = default;
 
+    struct ResourceUpdater {
+        RefPtr<ResourceObject> resObj;
+        std::function<void(const RefPtr<ResourceObject>&, ProgressMaskProperty&)> updateFunc;
+    };
+    std::unordered_map<std::string, ResourceUpdater> resMap_;
+
     float GetValue() const
     {
         return value_;
@@ -43,11 +49,6 @@ public:
     Color GetColor() const
     {
         return color_;
-    }
-
-    RefPtr<ResourceObject> GetResObj()
-    {
-        return resObj_;
     }
 
     bool GetEnableBreathe() const
@@ -75,10 +76,6 @@ public:
         enableBreathe_ = enableBreathe;
     }
 
-    void SetResObj(const RefPtr<ResourceObject> resObj)
-    {
-        resObj_ = resObj;
-    }
     bool operator==(const ProgressMaskProperty& other) const
     {
         return  (value_ == other.GetValue() &&
@@ -96,12 +93,29 @@ public:
         return *this;
     }
 
+    void AddResource(
+        const std::string& key,
+        const RefPtr<ResourceObject>& resObj,
+        std::function<void(const RefPtr<ResourceObject>&, ProgressMaskProperty&)>&& updateFunc)
+    {
+        if (resObj == nullptr || !updateFunc) {
+            return;
+        }
+        resMap_[key] = {resObj, std::move(updateFunc)};
+    }
+
+    void ReloadResources()
+    {
+        for (const auto& [key, resourceUpdater] : resMap_) {
+            resourceUpdater.updateFunc(resourceUpdater.resObj, *this);
+        }
+    }
+
 private:
     float value_ = 0.0f;
     float maxValue_ = 100.0f;
     Color color_ = Color(0x99182431);
     bool enableBreathe_ = false;
-    RefPtr<ResourceObject> resObj_;
 };
 } // namespace OHOS::Ace::NG {
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_PROGRESS_MASK_PROPERTY_H

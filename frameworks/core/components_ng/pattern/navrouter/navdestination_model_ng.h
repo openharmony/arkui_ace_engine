@@ -97,8 +97,8 @@ public:
     void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath) override;
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) override;
     static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo);
-    static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo,
-        const RefPtr<ResourceObject>& titleResObj, const RefPtr<ResourceObject>& subtitleResObj);
+    static void ParseCommonTitle(
+        FrameNode* frameNode, const RefPtr<ResourceObject>& titleResObj, const RefPtr<ResourceObject>& subtitleResObj);
     static void UpdateMainTitleInfo(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj);
     static void UpdateSubTitleInfo(
@@ -140,13 +140,17 @@ public:
     void SetEnableNavigationIndicator(const std::optional<bool>& navigationIndicator) override;
     static void SetEnableNavigationIndicator(
         FrameNode* frameNode, const std::optional<bool>& navigationIndicator);
+    void ResetResObj(NavDestinationPatternType type, const std::string& key) override;
     bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
-        const RefPtr<ResourceObject>& mainResObj, bool ignoreMainTitle = false) override;
+        const RefPtr<ResourceObject>& mainResObj) override;
     void UpdateMainTitle(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj) override;
     void UpdateSubTitle(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& subResObj) override;
     static CalcDimension ParseTitleHeight(const RefPtr<ResourceObject>& resObj);
+    static void ResetResObj(FrameNode* frameNode, NavDestinationPatternType type, const std::string& key);
+    static void SetBeforeCreateLayoutWrapperCallBack(
+        FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper);
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

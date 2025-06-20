@@ -25,17 +25,23 @@ void ToggleButtonModelNG::Create(const std::string& tagName)
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tagName.c_str(), nodeId);
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(tagName, nodeId, []() { return AceType::MakeRefPtr<ToggleButtonPattern>(); });
+    CHECK_NULL_VOID(frameNode);
     stack->Push(frameNode);
+    auto pros = frameNode->GetPaintProperty<ToggleButtonPaintProperty>();
+    CHECK_NULL_VOID(pros);
+    pros->ResetSelectedColorSetByUser();
 }
 
 void ToggleButtonModelNG::SetSelectedColor(const Color& selectedColor)
 {
     ACE_UPDATE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColor, selectedColor);
+    ACE_UPDATE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColorSetByUser, true);
 }
 
 void ToggleButtonModelNG::ResetSelectedColor()
 {
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ToggleButtonPaintProperty, SelectedColor, PROPERTY_UPDATE_RENDER);
+    ACE_UPDATE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColorSetByUser, false);
 }
 
 void ToggleButtonModelNG::SetIsOn(bool isOn)
@@ -70,12 +76,14 @@ void ToggleButtonModelNG::SetBackgroundColor(const Color& backgroundColor, bool 
 void ToggleButtonModelNG::SetSelectedColor(FrameNode* frameNode, const Color& selectedColor)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColor, selectedColor, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColorSetByUser, true, frameNode);
 }
 
 void ToggleButtonModelNG::ResetSelectedColor(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
         ToggleButtonPaintProperty, SelectedColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ToggleButtonPaintProperty, SelectedColorSetByUser, false, frameNode);
 }
 
 void ToggleButtonModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& backgroundColor)

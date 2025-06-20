@@ -20,8 +20,12 @@
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkRRect.h"
 #endif
-#include "render_service_client/core/modifier/rs_extended_modifier.h"
 #include "render_service_client/core/modifier/rs_property.h"
+#if defined(MODIFIER_NG)
+#include "render_service_client/core/modifier_ng/custom/rs_foreground_style_modifier.h"
+#else
+#include "render_service_client/core/modifier/rs_extended_modifier.h"
+#endif
 
 #include "core/components/common/properties/color.h"
 #ifdef USE_ROSEN_DRAWING
@@ -29,10 +33,16 @@
 #endif
 
 namespace OHOS::Ace::NG {
+#if defined(MODIFIER_NG)
+using RSDrawingContext = Rosen::ModifierNG::RSDrawingContext;
+using RSForegroundStyleModifier = Rosen::ModifierNG::RSForegroundStyleModifier;
+#else
 using RSDrawingContext = Rosen::RSDrawingContext;
+using RSForegroundStyleModifier = Rosen::RSForegroundStyleModifier;
+#endif
 
 // common parent class of graphic effect modifiers
-class GraphicModifier : public Rosen::RSForegroundStyleModifier {
+class GraphicModifier : public RSForegroundStyleModifier {
 public:
     void SetCustomData(float data);
 

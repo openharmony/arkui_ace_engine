@@ -536,10 +536,16 @@ HWTEST_F(RichEditorLayoutTestNg, HandleAISpanTest001, TestSize.Level1)
     spans.push_back(spanItem3);
 
     std::map<int32_t, AISpan> aiSpanMap = { { 8, { 8, 12 } } };
-    layoutAlgorithm->HandleAISpan(spans, aiSpanMap);
-    EXPECT_EQ(spanItem1->hasAISpanResult, false);
-    EXPECT_EQ(spanItem2->hasAISpanResult, true);
-    EXPECT_EQ(spanItem3->hasAISpanResult, true);
+    AISpanLayoutInfo aiSpanLayoutInfo{ aiSpanMap, true };
+    // span:[0-5][5-10][10-15]
+    layoutAlgorithm->HandleAISpan(spans, aiSpanLayoutInfo);
+    EXPECT_EQ(spanItem1->aiSpanResultCount, 0);
+    EXPECT_EQ(spanItem2->aiSpanResultCount, 1);
+    EXPECT_EQ(spanItem3->aiSpanResultCount, 1);
+
+    EXPECT_EQ(spanItem1->needReLayout, false);
+    EXPECT_EQ(spanItem2->needReLayout, true);
+    EXPECT_EQ(spanItem3->needReLayout, true);
 }
 
 } // namespace OHOS::Ace::NG

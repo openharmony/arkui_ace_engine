@@ -137,6 +137,11 @@ struct MouseEvent final : public PointerEvent {
         return Offset(screenX, screenY);
     }
 
+    Offset GetGlobalDisplayOffset() const
+    {
+        return Offset(globalDisplayX, globalDisplayY);
+    }
+
     int32_t GetId() const
     {
         if (pressedButtons > 0) {
@@ -177,6 +182,8 @@ struct MouseEvent final : public PointerEvent {
         mouseEvent.scrollZ = scrollZ / scale;
         mouseEvent.screenX = screenX / scale;
         mouseEvent.screenY = screenY / scale;
+        mouseEvent.globalDisplayX = globalDisplayX / scale;
+        mouseEvent.globalDisplayY = globalDisplayY / scale;
         mouseEvent.action = action;
         mouseEvent.pullAction = pullAction;
         mouseEvent.button = button;
@@ -196,6 +203,10 @@ struct MouseEvent final : public PointerEvent {
         mouseEvent.rawDeltaY = rawDeltaY;
         mouseEvent.pressedButtonsArray = pressedButtonsArray;
         mouseEvent.passThrough = passThrough;
+        // Only set postEventNodeId when the event supports passThrough
+        if (passThrough) {
+            mouseEvent.postEventNodeId = postEventNodeId;
+        }
         return mouseEvent;
     }
 
@@ -231,16 +242,16 @@ struct MouseEvent final : public PointerEvent {
             .y = y,
             .screenX = screenX,
             .screenY = screenY,
+            .globalDisplayX = globalDisplayX,
+            .globalDisplayY = globalDisplayY,
             .downTime = time,
             .size = 0.0,
             .isPressed = (type == TouchType::DOWN),
             .originalId = pointOriginalId };
         TouchEvent event;
         event.SetId(pointId)
-            .SetX(x)
-            .SetY(y)
-            .SetScreenX(screenX)
-            .SetScreenY(screenY)
+            .SetX(x).SetY(y).SetScreenX(screenX).SetScreenY(screenY)
+            .SetGlobalDisplayX(globalDisplayX).SetGlobalDisplayY(globalDisplayY)
             .SetType(type)
             .SetTime(time)
             .SetSize(0.0)
@@ -256,6 +267,10 @@ struct MouseEvent final : public PointerEvent {
         event.pointers.emplace_back(std::move(point));
         event.pressedKeyCodes_ = pressedKeyCodes_;
         event.passThrough = passThrough;
+        // Only set postEventNodeId when the event supports passThrough
+        if (passThrough) {
+            event.postEventNodeId = postEventNodeId;
+        }
         return event;
     }
 
@@ -315,6 +330,17 @@ public:
     {
         screenLocation_ = screenLocation;
         return *this;
+    }
+
+    MouseInfo& SetGlobalDisplayLocation(const Offset& globalDisplayLocation)
+    {
+        globalDisplayLocation_ = globalDisplayLocation;
+        return *this;
+    }
+
+    const Offset& GetGlobalDisplayLocation() const
+    {
+        return globalDisplayLocation_;
     }
 
     const Offset& GetScreenLocation() const
@@ -378,6 +404,8 @@ private:
     // current node which has the recognizer.
     Offset localLocation_;
     Offset screenLocation_;
+    // The location where the touch point touches the screen when there are multiple screens.
+    Offset globalDisplayLocation_;
     float rawDeltaX_ = 0.0f;
     float rawDeltaY_ = 0.0f;
     std::vector<MouseButton> pressedButtonsArray_;
@@ -416,6 +444,17 @@ public:
         return *this;
     }
 
+    HoverInfo& SetGlobalDisplayLocation(const Offset& globalDisplayLocation)
+    {
+        globalDisplayLocation_ = globalDisplayLocation;
+        return *this;
+    }
+
+    const Offset& GetGlobalDisplayLocation() const
+    {
+        return globalDisplayLocation_;
+    }
+
     const Offset& GetScreenLocation() const
     {
         return screenLocation_;
@@ -444,6 +483,8 @@ private:
     Offset localLocation_;
 
     Offset screenLocation_;
+    // The location where the touch point touches the screen when there are multiple screens.
+    Offset globalDisplayLocation_;
     MouseAction mouseAction_ = MouseAction::NONE;
 };
 
@@ -469,6 +510,17 @@ public:
     {
         screenLocation_ = screenLocation;
         return *this;
+    }
+
+    AccessibilityHoverInfo& SetGlobalDisplayLocation(const Offset& globalDisplayLocation)
+    {
+        globalDisplayLocation_ = globalDisplayLocation;
+        return *this;
+    }
+    
+    const Offset& GetGlobalDisplayLocation() const
+    {
+        return globalDisplayLocation_;
     }
 
     const Offset& GetScreenLocation() const
@@ -505,6 +557,8 @@ private:
 
     Offset screenLocation_;
 
+    // The location where the touch point touches the screen when there are multiple screens.
+    Offset globalDisplayLocation_;
     // touch type
     AccessibilityHoverAction actionType_ = AccessibilityHoverAction::UNKNOWN;
 };

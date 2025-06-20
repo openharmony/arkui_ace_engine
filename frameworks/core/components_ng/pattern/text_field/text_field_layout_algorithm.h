@@ -151,7 +151,6 @@ protected:
     LayoutConstraintF CalculateFrameSizeConstraint(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     void UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* layoutWrapper, OptionalSizeF& frameSize);
-    void UpdateAutoWidth(const RefPtr<TextFieldLayoutProperty>& property, LayoutWrapper* layoutWrapper);
 
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> inlineParagraph_;
@@ -170,6 +169,7 @@ protected:
     bool isFontSizeNonPositive_ = false;
     Dimension textIndent_ = 0.0_px;
     float indent_ = 0.0f;
+    bool isInlineFocus_ = false;
 
 private:
     void InlineFocusMeasure(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
@@ -202,6 +202,10 @@ private:
     void ApplyIndent(LayoutWrapper* layoutWrapper, double width);
     LayoutConstraintF BuildInlineFocusLayoutConstraint(const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper);
+    void CalculateContentMaxSizeWithPolicy(
+        LayoutWrapper* layoutWrapper, LayoutConstraintF& contentConstraint, SizeF& maxIdealSize);
+    double GetMaxIndent(LayoutWrapper* layoutWrapper, double width);
+    bool HasCalcMinWidthVersion11OrLarger(LayoutWrapper* layoutWrapper, const LayoutConstraintF& contentConstraint);
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

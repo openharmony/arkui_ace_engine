@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG {
 const std::string ARKUI_APP_BAR_COLOR_CONFIGURATION = "arkui_app_bar_color_configuration";
 const std::string ARKUI_APP_BAR_MENU_SAFE_AREA = "arkui_app_bar_menu_safe_area";
 const std::string ARKUI_APP_BAR_CONTENT_SAFE_AREA = "arkui_app_bar_content_safe_area";
+const std::string ARKUI_APP_BAR_ON_BACK_PRESSED = "arkui_app_bar_on_back_pressed";
 const std::string ARKUI_APP_BAR_BAR_INFO = "arkui_app_bar_info";
 const std::string ARKUI_APP_BAR_SCREEN = "arkui_app_bar_screen";
 const std::string ARKUI_APP_BG_COLOR = "arkui_app_bg_color";

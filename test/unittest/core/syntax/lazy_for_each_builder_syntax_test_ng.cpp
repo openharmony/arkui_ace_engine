@@ -277,6 +277,40 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDatasetChangeTest001, TestSize.Le
 }
 
 /**
+ * @tc.name: LazyForEachOnDatasetChangeTest002
+ * @tc.desc: Test OnDatasetChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDatasetChangeTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LazyForEachNode
+     * @tc.expected: Create LazyForEachNode success.
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    auto lazyForEachBuilder = lazyForEachNode->builder_;
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+    for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
+        lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
+    }
+    /**
+     * @tc.steps: step2. Invoke OnDatasetChange function.
+     * @tc.expected: Create delete operation and Invoke OnDatasetChange function.
+     */
+    lazyForEachBuilder->UpdateHistoricalTotalCount(lazyForEachBuilder->GetTotalCount());
+    std::list<V2::Operation> DataOperations;
+    V2::Operation operation1 = { .type = "delete", .index = INDEX_0, .count = 1 };
+    DataOperations.push_back(operation1);
+    lazyForEachNode->OnDatasetChange(DataOperations);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuild();
+    EXPECT_EQ(lazyForEachNode->builder_->cachedItems_.size(), 6);
+    EXPECT_EQ(lazyForEachNode->builder_->operationList_.size(), 0);
+}
+
+/**
  * @tc.name: LazyForEachGetFrameChildByIndexTest001
  * @tc.desc: Create LazyForEach, update its Items and invoke :GetFrameChildByIndex function.
  * @tc.type: FUNC

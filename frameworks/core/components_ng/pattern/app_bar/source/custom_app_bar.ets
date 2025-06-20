@@ -22,6 +22,7 @@ const ARKUI_APP_BAR_SCREEN: string = 'arkui_app_bar_screen';
 const ARKUI_APP_BG_COLOR: string = 'arkui_app_bg_color';
 const ARKUI_APP_BAR_SERVICE_PANEL: string = 'arkui_app_bar_service_panel'
 const ARKUI_APP_BAR_CLOSE: string = 'arkui_app_bar_close'
+const ARKUI_APP_BAR_ON_BACK_PRESSED = 'arkui_app_bar_on_back_pressed';
 
 const EVENT_NAME_CUSTOM_APP_BAR_MENU_CLICK = 'arkui_custom_app_bar_menu_click';
 const EVENT_NAME_CUSTOM_APP_BAR_CLOSE_CLICK = 'arkui_custom_app_bar_close_click';
@@ -117,7 +118,12 @@ struct Index {
 
     } else if (eventName === ARKUI_APP_BG_COLOR) {
       this.contentBgColor = param;
+    } else if (eventName === ARKUI_APP_BAR_ON_BACK_PRESSED) {
+        this.onBackPressed();
     }
+  }
+
+  onBackPressed() {
   }
 
   onColorConfigurationUpdate(isDark: boolean) {

@@ -138,6 +138,13 @@ void AtomicServicePattern::AppScreenCallBack()
     customAppBar->FireCustomCallback(ARKUI_APP_BAR_SCREEN, container->UIExtensionIsHalfScreen());
 }
 
+void AtomicServicePattern::OnBackPressedCallback()
+{
+    auto customAppBar = GetJSAppBarContainer();
+    CHECK_NULL_VOID(customAppBar);
+    customAppBar->FireCustomCallback(ARKUI_APP_BAR_ON_BACK_PRESSED, true);
+}
+
 void AtomicServicePattern::AppBgColorCallBack()
 {
     auto host = GetHost();

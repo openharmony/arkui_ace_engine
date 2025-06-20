@@ -172,15 +172,6 @@ private:
 #ifdef SUPPORT_DIGITAL_CROWN
     void HandleCrownMoveEvent(const CrownEvent& event);
 #endif
-    void UpdateDisappearTextProperties(const RefPtr<PickerTheme>& pickerTheme,
-        const RefPtr<TextLayoutProperty>& textLayoutProperty,
-        const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty);
-    void UpdateCandidateTextProperties(const RefPtr<PickerTheme>& pickerTheme,
-        const RefPtr<TextLayoutProperty>& textLayoutProperty,
-        const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty);
-    void UpdateSelectedTextProperties(const RefPtr<PickerTheme>& pickerTheme,
-        const RefPtr<TextLayoutProperty>& textLayoutProperty,
-        const RefPtr<TimePickerLayoutProperty>& timePickerLayoutProperty);
     void TextPropertiesLinearAnimation(const RefPtr<TextLayoutProperty>& textLayoutProperty, uint32_t index,
         uint32_t showCount, bool isDown, double scale) override;
     void InitTextFontFamily() override;
@@ -189,8 +180,6 @@ private:
     Color pressColor_;
     Color hoverColor_;
     Color buttonBgColor_ = Color::TRANSPARENT;
-    FontWeight SelectedWeight_ = FontWeight::MEDIUM;
-    FontWeight DisappearWeight_ = FontWeight::REGULAR;
     bool hour24_ = SystemProperties::Is24HourClock();
     // column options number
     std::map<WeakPtr<FrameNode>, uint32_t> optionsTotalCount_;

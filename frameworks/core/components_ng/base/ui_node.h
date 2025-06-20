@@ -221,12 +221,15 @@ public:
         return parent_.Upgrade();
     }
 
+    RefPtr<UINode> GetAncestor() const;
+
     void SetNeedCallChildrenUpdate(bool needCallChildrenUpdate)
     {
         needCallChildrenUpdate_ = needCallChildrenUpdate;
     }
 
     virtual void SetParent(const WeakPtr<UINode>& parent, bool needDetect = true);
+    void SetAncestor(const WeakPtr<UINode>& parent);
     // Tree operation end.
 
     // performance.
@@ -571,6 +574,20 @@ public:
         if (nodeInfo_) {
             nodeInfo_->codeCol = col;
         }
+    }
+    void SetFilePath(const std::string& sources)
+    {
+        if (nodeInfo_) {
+            nodeInfo_->pagePath = sources;
+        }
+    }
+
+    std::string GetFilePath() const
+    {
+        if (nodeInfo_) {
+            return nodeInfo_->pagePath;
+        }
+        return "";
     }
     void SetForeachItem()
     {
@@ -1181,7 +1198,8 @@ private:
     // disappearingChild、index、branchId
     std::list<std::tuple<RefPtr<UINode>, uint32_t, int32_t>> disappearingChildren_;
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
-    WeakPtr<UINode> parent_;
+    WeakPtr<UINode> parent_; // maybe wrong when not on the tree
+    WeakPtr<UINode> ancestor_; // always correct parent ptr, used to remove duplicates when inserting child nodes
     std::string tag_ = "UINode";
     int32_t depth_ = Infinity<int32_t>();
     int32_t hostRootId_ = 0;

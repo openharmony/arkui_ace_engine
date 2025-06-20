@@ -35,7 +35,6 @@ public:
     void StartRender() override;
     void FinishRender(std::list<int32_t>& removedElmtId) override;
 
-    bool IsInAnimation() override;
     void MoveChild(uint32_t fromIndex) override;
     void CreateNewChildStart(const std::string& key) override;
     void CreateNewChildFinish(const std::string& key) override;

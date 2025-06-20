@@ -374,6 +374,19 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg106, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetGlobalPositionOnDisplay001
+ * @tc.desc: Test frame node method GetGlobalPositionOnDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetGlobalPositionOnDisplay001, TestSize.Level1)
+{
+    OffsetF Offset = { 0, 0 };
+    FRAME_NODE2->SetParent(FRAME_NODE3);
+    auto globalDisplayOffset = FRAME_NODE2->GetGlobalPositionOnDisplay();
+    EXPECT_EQ(globalDisplayOffset, Offset);
+}
+
+/**
  * @tc.name: GetCacheVisibleRectTest
  * @tc.desc: Test GetCacheVisibleRectTest.
  * @tc.type: FUNC

@@ -2025,16 +2025,19 @@ void DragEventActuator::HandleTouchEvent(const TouchEventInfo& info, bool isRest
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto touchPoint = Point(
-        info.GetTouches().front().GetGlobalLocation().GetX(), info.GetTouches().front().GetGlobalLocation().GetY(),
-        info.GetTouches().front().GetScreenLocation().GetX(), info.GetTouches().front().GetScreenLocation().GetY());
+    auto touchPoint = Point(info.GetTouches().front().GetGlobalLocation().GetX(),
+        info.GetTouches().front().GetGlobalLocation().GetY(), info.GetTouches().front().GetScreenLocation().GetX(),
+        info.GetTouches().front().GetScreenLocation().GetY(),
+        info.GetTouches().front().GetGlobalDisplayLocation().GetX(),
+        info.GetTouches().front().GetGlobalDisplayLocation().GetY());
     auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     for (const auto& touchInfo : info.GetTouches()) {
         auto point = Point(touchInfo.GetGlobalLocation().GetX(), touchInfo.GetGlobalLocation().GetY(),
-            touchInfo.GetScreenLocation().GetX(), touchInfo.GetScreenLocation().GetY());
+            touchInfo.GetScreenLocation().GetX(), touchInfo.GetScreenLocation().GetY(),
+            touchInfo.GetGlobalDisplayLocation().GetX(), touchInfo.GetGlobalDisplayLocation().GetY());
         dragDropManager->UpdatePointInfoForFinger(touchInfo.GetFingerId(), point);
     }
     if (isRestartDrag) {

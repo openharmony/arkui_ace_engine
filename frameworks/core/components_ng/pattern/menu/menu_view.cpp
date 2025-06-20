@@ -1375,11 +1375,8 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
-    } else {
-        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
-            menuWrapperPattern->SetMenuParam(menuParam);
-        }
     }
+    menuWrapperPattern->SetMenuParam(menuParam);
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
@@ -1388,6 +1385,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
             menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
+        menuProperty->UpdateAnchorPosition(menuParam.anchorPosition);
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
     auto scroll = CreateMenuScroll(column);
@@ -1500,6 +1498,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     menuWrapperPattern->SetMenuParam(menuParam);
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
 
+    ReloadMenuParam(menuParam);
     CustomPreviewNodeProc(previewNode, menuParam, previewCustomNode);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
@@ -1528,6 +1527,26 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         SetFilter(targetNode, wrapperNode);
     }
     return wrapperNode;
+}
+
+void MenuView::ReloadMenuParam(const MenuParam& menuParam)
+{
+    MenuParam& menuParamValue = const_cast<MenuParam&>(menuParam);
+    if (SystemProperties::ConfigChangePerform()) {
+        menuParamValue.ReloadResources();
+        if (menuParamValue.borderRadius) {
+            menuParamValue.borderRadius->ReloadResources();
+        }
+        if (menuParamValue.previewBorderRadius) {
+            menuParamValue.previewBorderRadius->ReloadResources();
+        }
+        if (menuParamValue.outlineColor) {
+            menuParamValue.outlineColor->ReloadResources();
+        }
+        if (menuParamValue.outlineWidth) {
+            menuParamValue.outlineWidth->ReloadResources();
+        }
+    }
 }
 
 void MenuView::UpdateMenuParam(
@@ -1564,6 +1583,7 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
             menuProperty->UpdateMenuPlacement(menuParam.placement.value());
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
+        menuProperty->UpdateAnchorPosition(menuParam.anchorPosition);
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
 }

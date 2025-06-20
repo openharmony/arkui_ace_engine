@@ -140,4 +140,10 @@ void PerfInterfaces::ReportPageShowMsg(const std::string& pageUrl, const std::st
     PerfMonitorAdapter::GetInstance().ReportPageShowMsg(pageUrl, bundleName, pageName);
 }
 
+void PerfInterfaces::SetApplicationInfo()
+{
+    auto appInfo = GetAceAppInfo();
+    PerfMonitorAdapter::GetInstance().SetAppInfo(appInfo);
+}
+
 } // namespace OHOS::Ace

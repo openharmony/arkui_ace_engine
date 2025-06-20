@@ -201,6 +201,7 @@ public:
     static void EnableDataDetector(const JSCallbackInfo& args);
     static void DataDetectorConfig(const JSCallbackInfo& args);
     static void EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight);
+    static void GestureFocusMode(int32_t gestureFocusMode);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

@@ -37,6 +37,9 @@
 #include "core/event/pointer_event.h"
 #include "core/common/container_consts.h"
 
+struct _ArkUINodeAdapter;
+typedef _ArkUINodeAdapter* ArkUINodeAdapterHandle;
+
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
 class AccessibilityEventInfo;
@@ -64,7 +67,7 @@ public:
 private:
     std::function<void()> callback_;
 };
-
+ 
 // Pattern is the base class for different measure, layout and paint behavior.
 class ACE_FORCE_EXPORT Pattern : public virtual AceType {
     DECLARE_ACE_TYPE(Pattern, AceType);
@@ -131,6 +134,21 @@ public:
     }
 
     virtual bool IsEnableFix()
+    {
+        return false;
+    }
+
+    virtual bool isEqualWidthAndHeight()
+    {
+        return false;
+    }
+
+    virtual bool IsChildComponentContent()
+    {
+        return false;
+    }
+
+    virtual bool IsChildColumnLayout()
     {
         return false;
     }
@@ -520,6 +538,8 @@ public:
         return -1;
     }
 
+    virtual void OnBackPressedCallback() {};
+    
     virtual void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
 
@@ -640,6 +660,7 @@ public:
         host->ResetSafeAreaPadding();
         layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
         layoutProperty->CheckIgnoreLayoutSafeArea(layoutDirection);
+        layoutProperty->CheckBackgroundLayoutSafeAreaEdges(layoutDirection);
     }
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}
@@ -685,7 +706,7 @@ public:
         const std::string& key,
         const RefPtr<ResourceObject>& resObj,
         std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc);
-    
+
     void RemoveResObj(const std::string& key);
 
     void AddResCache(const std::string& key, const std::string& value);
@@ -726,7 +747,7 @@ public:
         return false;
     }
 
-    void UnRegisterResource(const std::string& key);
+    virtual void UnRegisterResource(const std::string& key);
 
     template<typename T>
     void RegisterResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value)
@@ -749,6 +770,18 @@ public:
     {
         return false;
     }
+
+    virtual void UpdateBorderResource() {};
+    virtual void UpdateMarginResource() {};
+    virtual bool DetachHostNodeAdapter(const RefPtr<FrameNode>& node)
+    {
+        return false;
+    }
+    virtual bool GetNodeAdapterComponent(ArkUINodeAdapterHandle handle, const RefPtr<FrameNode>& node)
+    {
+        return false;
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

@@ -104,8 +104,8 @@ constexpr float IMAGE_SENSITIVE_RADIUS = 80.0f;
 constexpr double IMAGE_SENSITIVE_SATURATION = 1.0;
 constexpr double IMAGE_SENSITIVE_BRIGHTNESS = 1.08;
 constexpr uint32_t MAX_SRC_LENGTH = 120; // prevent the Base64 image format from too long.
-constexpr int IMAGE_LOAD_FAIL = 0;
-constexpr int IMAGE_LOAD_SUCCESS = 1;
+constexpr int32_t IMAGE_LOAD_FAIL = 0;
+constexpr int32_t IMAGE_LOAD_SUCCESS = 1;
 
 ImagePattern::ImagePattern()
 {
@@ -419,14 +419,14 @@ void ImagePattern::ApplyAIModificationsToImage()
     }
 }
 
-void ImagePattern::ReportPerfData(const RefPtr<NG::FrameNode>& host, int state)
+void ImagePattern::ReportPerfData(const RefPtr<NG::FrameNode>& host, int32_t state)
 {
     auto accessibilityId = host->GetAccessibilityId();
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto type = loadingCtx_->GetSourceInfo().GetSrcType();
     std::string srcType = GetSrcTypeToString(type);
-    std::pair<int, int> size(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
+    std::pair<int32_t, int32_t> size(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
     ImagePerf::GetPerfMonitor()->EndRecordImageLoadStat(accessibilityId, srcType, size, state);
 }
 
@@ -937,14 +937,22 @@ void ImagePattern::InitOnKeyEvent()
     keyEventCallback_ = [weak = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        pattern->OnKeyEvent();
+        pattern->OnKeyEvent(event);
         return false;
     };
     focusHub->SetOnKeyEventInternal(std::move(keyEventCallback_));
 }
 
-void ImagePattern::OnKeyEvent()
+void ImagePattern::OnKeyEvent(const KeyEvent& event)
 {
+    if (imageAnalyzerManager_) {
+        auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto imageInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+        if (!imageInfo.IsSvg()) {
+            imageAnalyzerManager_->UpdateKeyEvent(event);
+        }
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
@@ -1666,6 +1674,10 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     Matrix4 defaultMatrixValue = Matrix4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
     Matrix4 matrixValue = renderProp->HasImageMatrix() ? renderProp->GetImageMatrixValue() : defaultMatrixValue;
     json->PutExtAttr("imageMatrix", matrixValue.ToString().c_str(), filter);
+    if (loadingCtx_) {
+        json->PutExtAttr("imageWidth", std::to_string(loadingCtx_->GetOriginImageSize().Width()).c_str(), filter);
+        json->PutExtAttr("imageHeight", std::to_string(loadingCtx_->GetOriginImageSize().Height()).c_str(), filter);
+    }
 }
 
 void ImagePattern::DumpLayoutInfo()
@@ -1783,9 +1795,7 @@ inline void ImagePattern::DumpFillColor(const RefPtr<OHOS::Ace::NG::ImageRenderP
     auto fillColor = renderProp->GetSvgFillColor();
     if (fillColor.has_value()) {
         auto color = fillColor.value();
-        DumpLog::GetInstance().AddDesc(std::string("fillColor: ").append(color.ColorToString()));
-    } else {
-        DumpLog::GetInstance().AddDesc("fillColor: Null");
+        DumpLog::GetInstance().AddDesc(std::string("fillColor_value: ").append(color.ToSvgFillColorKey()));
     }
 }
 
@@ -1959,6 +1969,25 @@ void ImagePattern::OnLanguageConfigurationUpdate()
 void ImagePattern::OnColorConfigurationUpdate()
 {
     OnConfigurationUpdate();
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID(theme);
+    auto layoutProperty = host->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetImageFillSetByUserValue(false)) {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
+            return;
+        }
+        CHECK_NULL_VOID(theme);
+        auto color = theme->GetFillColor();
+        UpdateImageFill(color);
+    }
 }
 
 void ImagePattern::OnDirectionConfigurationUpdate()

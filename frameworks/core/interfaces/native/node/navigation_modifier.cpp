@@ -71,6 +71,7 @@ void SetMinContentWidth(ArkUINodeHandle node, ArkUI_Float32 value, int unit, voi
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::ResetResObj(frameNode, NavigationPatternType::NAVIGATION, "navigation.minContentWidth");
     CalcDimension width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
     if (!SystemProperties::ConfigChangePerform() || !minContentWidthRawPtr) {
         NavigationModelNG::SetMinContentWidth(frameNode, width);
@@ -85,6 +86,7 @@ void ResetMinContentWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::ResetResObj(frameNode, NavigationPatternType::NAVIGATION, "navigation.minContentWidth");
     NavigationModelNG::SetMinContentWidth(frameNode, DEFAULT_MIN_CONTENT_WIDTH);
 }
 
@@ -92,6 +94,8 @@ void SetMinNavBarWidth(ArkUINodeHandle node, ArkUI_Float32 minValue, int minUnit
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::ResetResObj(
+        frameNode, NavigationPatternType::NAVIGATION, "navigation.navBarWidthRange.minNavBarWidth");
     CalcDimension minNavBarWidth = Dimension(minValue, static_cast<OHOS::Ace::DimensionUnit>(minUnit));
     if (LessNotEqual(minNavBarWidth.Value(), 0.0)) {
         minNavBarWidth = DEFAULT_MIN_NAV_BAR_WIDTH;
@@ -110,6 +114,8 @@ void ResetMinNavBarWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::ResetResObj(
+        frameNode, NavigationPatternType::NAVIGATION, "navigation.navBarWidthRange.minNavBarWidth");
     CalcDimension minNavBarWidth = DEFAULT_MIN_NAV_BAR_WIDTH;
     NavigationModelNG::SetMinNavBarWidth(frameNode, minNavBarWidth);
 }
@@ -118,6 +124,8 @@ void SetMaxNavBarWidth(ArkUINodeHandle node, ArkUI_Float32 maxValue, int maxUnit
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::ResetResObj(
+        frameNode, NavigationPatternType::NAVIGATION, "navigation.navBarWidthRange.maxNavBarWidth");
     CalcDimension maxNavBarWidth = Dimension(maxValue, static_cast<OHOS::Ace::DimensionUnit>(maxUnit));
     if (LessNotEqual(maxNavBarWidth.Value(), 0.0)) {
         maxNavBarWidth = DEFAULT_MAX_NAV_BAR_WIDTH;
@@ -136,6 +144,8 @@ void ResetMaxNavBarWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::ResetResObj(
+        frameNode, NavigationPatternType::NAVIGATION, "navigation.navBarWidthRange.maxNavBarWidth");
     CalcDimension maxNavBarWidth = DEFAULT_MAX_NAV_BAR_WIDTH;
     NavigationModelNG::SetMaxNavBarWidth(frameNode, maxNavBarWidth);
 }
@@ -144,6 +154,7 @@ void SetNavBarWidth(ArkUINodeHandle node, ArkUI_Float32 value, int unit, void* w
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::ResetResObj(frameNode, NavigationPatternType::NAVIGATION, "navigation.navBarWidth");
     CalcDimension width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
     if (!SystemProperties::ConfigChangePerform() || !widthRawPtr) {
         NavigationModelNG::SetNavBarWidth(frameNode, width);
@@ -158,6 +169,7 @@ void ResetNavBarWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::ResetResObj(frameNode, NavigationPatternType::NAVIGATION, "navigation.navBarWidth");
     CalcDimension navBarWidth;
     navBarWidth.SetValue(DEFAULT_NAV_BAR_WIDTH_FOR_MODIFIER);
     NavigationModelNG::SetNavBarWidth(frameNode, navBarWidth);
@@ -364,6 +376,9 @@ void SetNavTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUI
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::ResetResObj(frameNode, NavigationPatternType::TITLE_BAR, "navigation.title.commonMainTitle");
+    NavigationModelNG::ResetResObj(frameNode, NavigationPatternType::TITLE_BAR, "navigation.title.commonSubTitle");
+    NavigationModelNG::ResetResObj(frameNode, NavigationPatternType::NAVIGATION, "navigationModifier.titlebarOptions");
     std::string mainTitleString = std::string(titleInfo.mainTitle);
     std::string subTitleString = std::string(titleInfo.subTitle);
     NG::NavigationTitleInfo ngTitleInfo = { titleInfo.hasSubTitle, titleInfo.hasMainTitle,
@@ -373,7 +388,7 @@ void SetNavTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUI
         auto titleResObj = AceType::Claim(title);
         auto* subtitle = reinterpret_cast<ResourceObject*>(subtitleRawPtr);
         auto subtitleResObj = AceType::Claim(subtitle);
-        NavigationModelNG::ParseCommonTitle(frameNode, ngTitleInfo, titleResObj, subtitleResObj);
+        NavigationModelNG::ParseCommonTitle(frameNode, titleResObj, subtitleResObj);
     } else {
         NavigationModelNG::ParseCommonTitle(frameNode, ngTitleInfo);
     }
@@ -401,16 +416,18 @@ void SetNavTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUI
         finalOptions.enableHoverMode = options.enableHoverMode.value;
     }
     NavigationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
-    if (!SystemProperties::ConfigChangePerform()) {
-        return;
+    if (SystemProperties::ConfigChangePerform()) {
+        UpdateNavigationTitlebarOptions(frameNode, options);
     }
-    UpdateNavigationTitlebarOptions(frameNode, options);
 }
 
 void ResetNavTitle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::ResetResObj(frameNode, NavigationPatternType::TITLE_BAR, "navigation.title.commonMainTitle");
+    NavigationModelNG::ResetResObj(frameNode, NavigationPatternType::TITLE_BAR, "navigation.title.commonSubTitle");
+    NavigationModelNG::ResetResObj(frameNode, NavigationPatternType::NAVIGATION, "navigationModifier.titlebarOptions");
     NG::NavigationTitleInfo ngTitleInfo = { false, false, "", "" };
     NavigationModelNG::ParseCommonTitle(frameNode, ngTitleInfo);
     NavigationTitlebarOptions options;
@@ -465,6 +482,7 @@ void SetNavMenus(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::ResetResObj(frameNode, NavigationPatternType::NAVIGATION, "navigationModifier.menuItems");
     CHECK_NULL_VOID(items);
     std::vector<NG::BarItem> menuItems;
     for (uint32_t i = 0; i < length; i++) {
@@ -510,6 +528,7 @@ void ResetNavMenus(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::ResetResObj(frameNode, NavigationPatternType::NAVIGATION, "navigationModifier.menuItems");
     std::vector<NG::BarItem> menuItems;
     NavigationModelNG::SetMenuItems(frameNode, std::move(menuItems));
 }
@@ -776,6 +795,18 @@ void ResetOnNavBarStateChange(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     NavigationModelNG::SetOnNavBarStateChange(frameNode, nullptr);
 }
+
+void SetBeforeCreateLayoutWrapperCallBack(ArkUINodeHandle node, void (*beforeCreateLayoutWrapper)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto beforeCreateLayoutWrapperCallBack = [node = AceType::WeakClaim(frameNode), beforeCreateLayoutWrapper]() {
+        auto frameNode = node.Upgrade();
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+        beforeCreateLayoutWrapper(nodeHandle);
+    };
+    NavigationModelNG::SetBeforeCreateLayoutWrapperCallBack(frameNode, std::move(beforeCreateLayoutWrapperCallBack));
+}
 namespace NodeModifier {
 const ArkUINavigationModifier* GetNavigationModifier()
 {
@@ -842,6 +873,7 @@ const ArkUINavigationModifier* GetNavigationModifier()
         .resetToolBar = ResetToolBar,
         .setOnNavBarStateChange = SetOnNavBarStateChange,
         .resetOnNavBarStateChange = ResetOnNavBarStateChange,
+        .setBeforeCreateLayoutWrapperCallBack = SetBeforeCreateLayoutWrapperCallBack,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

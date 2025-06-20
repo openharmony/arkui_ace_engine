@@ -46,15 +46,12 @@ public:
     void SetOnTimer(std::function<void(int64_t, int64_t)> && onChange) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
+    void SetTextColorByUser(bool isSetByUser) override;
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void CreateWithResourceObj(JsTextTimerResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override;
-    void HandleTextColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
-    void HandleFontWeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
-    void HandleFontSize(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
-    void HandleFontFamily(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<TextTimerController> InitTextController(FrameNode* frameNode);
     static void SetIsCountDown(FrameNode* frameNode, bool isCountDown);
@@ -70,6 +67,12 @@ public:
     static void SetJSTextTimerController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
     static void SetOnTimer(FrameNode* frameNode, std::function<void(int64_t, int64_t)>&& onChange);
     static RefPtr<Referenced> GetJSTextTimerController(FrameNode* frameNode);
+    static void HandleTextColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleFontWeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleFontSize(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void HandleFontFamily(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void CreateWithResourceObj(
+        FrameNode* frameNode, JsTextTimerResourceType jsResourceType, const RefPtr<ResourceObject>& resObj);
 };
 } // namespace OHOS::Ace::NG
 

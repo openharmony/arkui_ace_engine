@@ -2695,7 +2695,7 @@ HWTEST_F(ImageAnimatorTestNg, ControlledAnimatorTest_012, TestSize.Level1)
     animator.AddStopListener([&finished]() { finished = true; });
     animator.Forward();
     EXPECT_TRUE(finished);
-    EXPECT_EQ(flagNumber, 1);
+    EXPECT_EQ(flagNumber, 2);
 }
 
 /**
@@ -2783,5 +2783,63 @@ HWTEST_F(ImageAnimatorTestNg, ImageAnimatorSetImagesTest001, TestSize.Level1)
     imageAnimatorPattern->AttachToFrameNode(frameNode);
     imageAnimatorPattern->OnModifyDone();
     EXPECT_TRUE(pauseFlag);
+}
+
+
+/**
+ * @tc.name: ImageAnimatorSetImagesTest002
+ * @tc.desc: SetImages into ImageAnimatorPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageAnimatorTestNg, ImageAnimatorSetImagesTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ImageAnimatorModelNG.
+     */
+
+    ImageAnimatorModelNG imageAnimatorModelNG;
+    imageAnimatorModelNG.Create();
+
+    /**
+     * @tc.steps: step2. set image's attributes and imageAnimatorView's attributes.
+     * @tc.expected: step2. related function is called.
+     */
+
+    ImageProperties imageProperties1;
+    imageProperties1.src = IMAGE_SRC_URL;
+    imageProperties1.width = IMAGE_WIDTH;
+    imageProperties1.height = IMAGE_HEIGHT;
+    imageProperties1.top = IMAGE_TOP;
+    imageProperties1.left = IMAGE_LEFT;
+    imageProperties1.duration = -IMAGE_DURATION;
+    ImageProperties imageProperties2;
+    imageProperties2.src = IMAGE_SRC_URL;
+    imageProperties2.pixelMap = CreatePixelMap(IMAGE_SRC_URL);
+    imageProperties2.width = IMAGE_WIDTH;
+    imageProperties2.height = IMAGE_HEIGHT;
+    imageProperties2.top = IMAGE_TOP;
+    imageProperties2.left = IMAGE_LEFT;
+    imageProperties2.duration = IMAGE_DURATION;
+    ImageProperties imageProperties3;
+    imageProperties3.src = IMAGE_SRC_URL;
+    imageProperties3.pixelMap = CreatePixelMap(IMAGE_SRC_URL);
+    imageProperties3.width = IMAGE_WIDTH;
+    imageProperties3.height = IMAGE_HEIGHT;
+    imageProperties3.top = IMAGE_TOP;
+    imageProperties3.left = IMAGE_LEFT;
+    imageProperties3.duration = -IMAGE_DURATION;
+    ImageProperties imageProperties4;
+    imageProperties4.src = IMAGE_SRC_URL;
+    imageProperties4.width = IMAGE_WIDTH;
+    imageProperties4.height = IMAGE_HEIGHT;
+    imageProperties4.top = IMAGE_TOP;
+    imageProperties4.left = IMAGE_LEFT;
+    imageProperties4.duration = IMAGE_DURATION;
+    std::vector<ImageProperties> images = { imageProperties1, imageProperties2, imageProperties3, imageProperties4 };
+    imageAnimatorModelNG.SetImages(std::move(images));
+    imageAnimatorModelNG.SetState(STATE_PAUSED);
+    imageAnimatorModelNG.SetIteration(ITERATION_DEFAULT);
+    auto pattern = imageAnimatorModelNG.GetImageAnimatorPattern();
+    EXPECT_EQ(pattern->durationTotal_, 1000);
 }
 } // namespace OHOS::Ace::NG

@@ -1859,4 +1859,29 @@ HWTEST_F(XComponentTestTwoNg, IsEnableMatchParentTest, TestSize.Level1)
      */
     EXPECT_TRUE(pattern->IsEnableMatchParent());
 }
+
+/**
+ * @tc.name: SetHasGotNativeXComponentTest
+ * @tc.desc: Test SetHasGotNativeXComponent Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, SetHasGotNativeXComponentTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    /**
+     * @tc.steps2: Check Param hasGotNativeXComponent_'s value.
+     * @tc.expected: Param hasGotNativeXComponent_ equals true.
+     */
+    pattern->SetHasGotNativeXComponent(true);
+    EXPECT_TRUE(pattern->hasGotNativeXComponent_);
+}
 } // namespace OHOS::Ace::NG

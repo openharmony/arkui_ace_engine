@@ -24,9 +24,11 @@ ArkUINativeModuleValue BlankBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCallIn
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> blankResObj;
+    if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, blankResObj)) {
         uint32_t value = color.GetValue();
-        GetArkUINodeModifiers()->getBlankModifier()->setColor(nativeNode, value);
+        auto blankRawPtr = AceType::RawPtr(blankResObj);
+        GetArkUINodeModifiers()->getBlankModifier()->setColor(nativeNode, value, blankRawPtr);
     } else {
         GetArkUINodeModifiers()->getBlankModifier()->resetColor(nativeNode);
     }

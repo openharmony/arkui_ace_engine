@@ -36,6 +36,7 @@ enum class SubMenuExpandingMode { SIDE, EMBEDDED, STACK };
 struct MenuItemFontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontColor, Color);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(FontColorSetByUser, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontWeight, FontWeight);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontFamily, std::vector<std::string>);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ItalicFontStyle, Ace::FontStyle);
@@ -128,12 +129,14 @@ public:
 
     // placement to menu
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MenuPlacement, Placement, PROPERTY_UPDATE_LAYOUT);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AnchorPosition, NG::OffsetF, PROPERTY_UPDATE_LAYOUT);
     
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectMenuModifiedWidth, float, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectModifiedHeight, float, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_GROUP(MenuItemFontStyle, MenuItemFontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MenuItemFontStyle, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MenuItemFontStyle, FontColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MenuItemFontStyle, FontColorSetByUser, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MenuItemFontStyle, FontWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(MenuItemFontStyle, FontFamily,
         std::vector<std::string>, PROPERTY_UPDATE_MEASURE);

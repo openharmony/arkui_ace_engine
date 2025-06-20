@@ -340,6 +340,12 @@ template("declarative_js_engine_ark") {
       deps += [ "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl" ]
     }
     external_deps = [ "graphic_2d:drawing_napi_impl" ]
+    if (!build_ohos_sdk && !is_arkui_x) {
+      external_deps += [
+        "ets_utils:console",
+        "ets_utils:timer"
+      ]
+    }
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }

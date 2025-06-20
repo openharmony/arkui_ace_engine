@@ -1430,7 +1430,7 @@ void MenuItemPattern::OnHover(bool isHover)
         props->UpdateHover(isHover);
         UpdateDividerHoverStatus(isHover);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        if (isHover || !IsSelected()) {
+        if ((isHover || !IsSelected()) && !showDefaultSelectedIcon_) {
             UpdateNextNodeDivider(!isHover);
         }
         PlayBgColorAnimation();
@@ -2990,6 +2990,9 @@ void MenuItemPattern::OnPress(const UIState& state)
         props->UpdatePress(true);
         UpdateDividerPressStatus(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        if (isOptionPattern_ && showDefaultSelectedIcon_) {
+            return;
+        }
         // disable next option node's divider
         UpdateNextNodeDivider(false);
     } else if (state == UI_STATE_NORMAL) {
@@ -3402,8 +3405,43 @@ void MenuItemPattern::ApplyOptionThemeStyles()
     SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
     SetBorderColor(GetBorderColor());
     SetBorderWidth(GetBorderWidth());
-    if (!(IsSelectOption() && showDefaultSelectedIcon_ && !selectTheme->GetMenuBlendBgColor())) {
-        SetBgColor(selectTheme->GetBackgroundColor());
+    if (IsSelectOption() && showDefaultSelectedIcon_ && !selectTheme->GetMenuBlendBgColor()) {
+        SetBgColor(Color::TRANSPARENT);
+        return;
+    }
+    SetBgColor(selectTheme->GetBackgroundColor());
+}
+
+void MenuItemPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto menuNode = GetMenu();
+    CHECK_NULL_VOID(menuNode);
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    auto pipeline = menuNode->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(itemProperty);
+
+    if (SystemProperties::ConfigChangePerform() && label_) {
+        auto isSetByUser = itemProperty->GetLabelFontColorSetByUser().value_or(false);
+        if (!isSetByUser) {
+            itemProperty->UpdateLabelFontColor(menuTheme->GetSecondaryFontColor());
+            host->MarkModifyDone();
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+    if (SystemProperties::ConfigChangePerform() && content_) {
+        auto fontColor = itemProperty->GetFontColor();
+        auto isSetbyUser = menuProperty->GetFontColorSetByUser().value_or(false);
+        auto property = isSetbyUser ? menuProperty : AceType::MakeRefPtr<MenuLayoutProperty>();
+        auto defaultFontColor = menuTheme->GetMenuFontColor();
+        UpdateFontColor(content_, property, fontColor, defaultFontColor);
+        content_->MarkModifyDone();
+        content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,7 @@
 #define protected public
 #include "accessibility_element_info.h"
 #include "adapter/ohos/entrance/dynamic_component/dynamic_component_renderer_impl.h"
+#include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "core/common/window.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -925,13 +926,65 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest025, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetAccessibilityParentRect001
+ * @tc.desc: Test PlatformContainerHandler GetAccessibilityParentRect pattern nullptr return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, GetAccessibilityParentRect001, TestSize.Level1)
+{
+    HandlerReply reply;
+    PlatformContainerHandler handler;
+
+    handler.hostPattern_ = nullptr;
+
+    bool result = handler.GetAccessibilityParentRect(reply);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetAccessibilityParentRect002
+ * @tc.desc: Test PlatformContainerHandler GetAccessibilityParentRect host nullptr return false
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, GetAccessibilityParentRect002, TestSize.Level1)
+{
+    HandlerReply reply;
+    PlatformContainerHandler handler;
+
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+
+    handler.SetContainerHostPattern(pattern);
+
+    bool result = handler.GetAccessibilityParentRect(reply);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: GetAccessibilityParentRect003
+ * @tc.desc: Test GetAccessibilityParentRect host and pattern are not nullptr return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, GetAccessibilityParentRect003, TestSize.Level1)
+{
+    HandlerReply reply;
+    PlatformContainerHandler handler;
+
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    auto frameNode = FrameNode::CreateFrameNode(TAG, 1, pattern);
+
+    handler.SetContainerHostPattern(pattern);
+
+    bool result = handler.GetAccessibilityParentRect(reply);
+    EXPECT_TRUE(result);
+}
+
+/**
  * @tc.name: DynamicPatternTest026
  * @tc.desc: Test PlatformContainerHandler GetDCAccessibilityParentRect
  * @tc.type: FUNC
  */
 HWTEST_F(DynamicPatternTestNg, DynamicPatternTest026, TestSize.Level1)
 {
-#ifdef OHOS_STANDARD_SYSTEM
     auto dynamicPattern = CreateDynamicComponent();
     EXPECT_NE(dynamicPattern, nullptr);
 
@@ -953,7 +1006,6 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest026, TestSize.Level1)
 
     auto rotateDegree = reply.GetParam<int32_t>("rotateDegree", -1);
     EXPECT_EQ(rotateDegree, 90);
-#endif
 }
 
 /**
@@ -963,7 +1015,6 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest026, TestSize.Level1)
  */
 HWTEST_F(DynamicPatternTestNg, DynamicPatternTest027, TestSize.Level1)
 {
-#ifdef OHOS_STANDARD_SYSTEM
     PlatformContainerHandler handler;
     HandlerReply reply;
 
@@ -990,7 +1041,79 @@ HWTEST_F(DynamicPatternTestNg, DynamicPatternTest027, TestSize.Level1)
     EXPECT_EQ(reply.GetParam<int32_t>("innerCenterX", -1), 50);
     EXPECT_EQ(reply.GetParam<int32_t>("innerCenterY", -1), 60);
     EXPECT_EQ(reply.GetParam<int32_t>("rotateDegree", -1), 90);
-#endif
+}
+
+/**
+ * @tc.name: DynamicPatternTest028
+ * @tc.desc: Test DynamicPattern HandleTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get DynamicPattern
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    EXPECT_NE(dynamicPattern, nullptr);
+ 
+    /**
+     * @tc.steps: step2. call HandleTouchEvent.
+     * @tc.expected: test HandleTouchEvent with different pointerEvent.
+     */
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = std::make_shared<MMI::PointerEvent>(1);
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE);
+    auto ret = dynamicPattern->HandleTouchEvent(pointerEvent);
+    EXPECT_FALSE(ret);
+ 
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP);
+    ret = dynamicPattern->HandleTouchEvent(pointerEvent);
+    EXPECT_FALSE(ret);
+ 
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_UP);
+    ret = dynamicPattern->HandleTouchEvent(pointerEvent);
+    EXPECT_FALSE(ret);
+}
+ 
+/**
+ * @tc.name: DynamicPatternTest029
+ * @tc.desc: Test DynamicPattern HandleMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DynamicPatternTestNg, DynamicPatternTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get DynamicPattern
+     */
+    auto dynamicPattern = CreateDynamicComponent();
+    EXPECT_NE(dynamicPattern, nullptr);
+ 
+    /**
+     * @tc.steps: step2. call HandleMouseEvent.
+     * @tc.expected: test HandleTouchEvent with different action.
+     */
+    MouseInfo mouseInfo;
+    mouseInfo.SetSourceDevice(SourceType::NONE);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = std::make_shared<MMI::PointerEvent>(1);
+    mouseInfo.SetPointerEvent(pointerEvent);
+    dynamicPattern->HandleMouseEvent(mouseInfo);
+    EXPECT_FALSE(dynamicPattern->lastPointerEvent_);
+ 
+    mouseInfo.SetSourceDevice(SourceType::MOUSE);
+    mouseInfo.SetPullAction(MouseAction::PULL_MOVE);
+    dynamicPattern->HandleMouseEvent(mouseInfo);
+    EXPECT_FALSE(dynamicPattern->lastPointerEvent_);
+ 
+    mouseInfo.SetPullAction(MouseAction::PULL_UP);
+    dynamicPattern->HandleMouseEvent(mouseInfo);
+    EXPECT_FALSE(dynamicPattern->lastPointerEvent_);
+ 
+    mouseInfo.SetPullAction(MouseAction::PRESS);
+    dynamicPattern->HandleMouseEvent(mouseInfo);
+    EXPECT_TRUE(dynamicPattern->lastPointerEvent_);
+ 
+    mouseInfo.SetPullAction(MouseAction::RELEASE);
+    dynamicPattern->HandleMouseEvent(mouseInfo);
+    EXPECT_TRUE(dynamicPattern->lastPointerEvent_);
 }
 
 } // namespace OHOS::Ace::NG

@@ -69,13 +69,17 @@ HWTEST_F(GridSyncLoadTestNg, SyncLoad001, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr");
     model.SetSyncLoad(false);
+    bool isTrigger = false;
+    auto event = [&isTrigger]() { isTrigger = true; };
+    model.SetOnReachStart(event);
     CreateGridItems(10);
     MockPipelineContext::GetCurrent()->SetResponseTime(2);
     CreateDone();
     EXPECT_EQ(pattern_->info_.endIndex_, 1);
     EXPECT_EQ(pattern_->info_.endMainLineIndex_, 0);
     EXPECT_TRUE(frameNode_->isLayoutDirtyMarked_);
-
+    EXPECT_FALSE(isTrigger);
+    
     /**
      * @tc.steps: step1. Flush next frame
      * @tc.expected: Grid load 1 item(less than one line) in the second frame
@@ -84,6 +88,16 @@ HWTEST_F(GridSyncLoadTestNg, SyncLoad001, TestSize.Level1)
     MockPipelineContext::GetCurrent()->FlushUITaskWithSingleDirtyNode(frameNode_);
     EXPECT_EQ(pattern_->info_.endIndex_, 2);
     EXPECT_EQ(pattern_->info_.endMainLineIndex_, 1);
+
+    /**
+     * @tc.steps: step2. fill grid
+     * @tc.expected: trigger grid onReachStart
+     */
+    MockPipelineContext::GetCurrent()->SetResponseTime(INT32_MAX);
+    MockPipelineContext::GetCurrent()->FlushUITaskWithSingleDirtyNode(frameNode_);
+    EXPECT_FALSE(frameNode_->isLayoutDirtyMarked_);
+    EXPECT_EQ(pattern_->info_.endIndex_, 7);
+    EXPECT_TRUE(isTrigger);
 }
 
 /**

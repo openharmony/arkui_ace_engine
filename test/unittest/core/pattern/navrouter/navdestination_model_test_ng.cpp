@@ -1397,4 +1397,35 @@ HWTEST_F(NavDestinationModelTestNg, CanRecoveryTest002, TestSize.Level1)
     navdestinationNode->fromNavrouterAndNoRouteInfo_ = true;
     ASSERT_EQ(navdestinationNode->CanRecovery(), false);
 }
+
+/**
+ * @tc.name: SetBeforeCreateLayoutWrapperCallBack001
+ * @tc.desc: Branch: if frameNode valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, SetBeforeCreateLayoutWrapperCallBack001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and call SetBeforeCreateLayoutWrapperCallBack.
+     */
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto navdestinationNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navdestinationNode, nullptr);
+    bool isCallbackCalled = false;
+    NavDestinationModelNG::SetBeforeCreateLayoutWrapperCallBack(
+        Referenced::RawPtr(navdestinationNode), [&isCallbackCalled]() {
+        isCallbackCalled = true;
+    });
+    /**
+     * @tc.steps: step2. verify the BeforeCreateLayoutWrapper callback valid.
+     */
+    auto eventHub = navdestinationNode->GetEventHub<NavDestinationEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    ASSERT_NE(eventHub->beforeCreateLayoutWrapper_, nullptr);
+    ASSERT_EQ(isCallbackCalled, false);
+    eventHub->beforeCreateLayoutWrapper_();
+    ASSERT_EQ(isCallbackCalled, true);
+}
 } // namespace OHOS::Ace::NG

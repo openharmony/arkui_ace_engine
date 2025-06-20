@@ -162,6 +162,8 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, 
         touchPoint.screenX = pointerItem.GetDisplayX();
         touchPoint.screenY = pointerItem.GetDisplayY();
     }
+    touchPoint.globalDisplayX = pointerItem.GetGlobalX();
+    touchPoint.globalDisplayY = pointerItem.GetGlobalY();
     touchPoint.isPressed = pointerItem.IsPressed();
     touchPoint.force = static_cast<float>(pointerItem.GetPressure());
     touchPoint.tiltX = pointerItem.GetTiltX();
@@ -257,6 +259,8 @@ void UpdateMouseEventForPen(const MMI::PointerEvent::PointerItem& pointerItem, M
     mouseEvent.screenX = pointerItem.GetDisplayXPos();
     mouseEvent.screenY = pointerItem.GetDisplayYPos();
     mouseEvent.originalId = mouseEvent.id;
+    mouseEvent.globalDisplayX = pointerItem.GetGlobalX();
+    mouseEvent.globalDisplayY = pointerItem.GetGlobalY();
 }
 
 TouchEvent ConvertTouchEventFromTouchPoint(TouchPoint touchPoint)
@@ -267,6 +271,8 @@ TouchEvent ConvertTouchEventFromTouchPoint(TouchPoint touchPoint)
         .SetY(touchPoint.y)
         .SetScreenX(touchPoint.screenX)
         .SetScreenY(touchPoint.screenY)
+        .SetGlobalDisplayX(touchPoint.globalDisplayX)
+        .SetGlobalDisplayY(touchPoint.globalDisplayY)
         .SetType(TouchType::UNKNOWN)
         .SetPullType(TouchType::UNKNOWN)
         .SetSize(touchPoint.size)
@@ -331,6 +337,8 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         event.y = item.GetWindowYPos();
         event.screenX = item.GetDisplayXPos();
         event.screenY = item.GetDisplayYPos();
+        event.globalDisplayX = item.GetGlobalX();
+        event.globalDisplayY = item.GetGlobalY();
     }
     event.pressedKeyCodes_.clear();
     for (const auto& curCode : pointerEvent->GetPressedKeys()) {
@@ -421,6 +429,8 @@ void ConvertMouseEvent(
         events.screenX = item.GetDisplayX();
         events.screenY = item.GetDisplayY();
     }
+    events.globalDisplayX = item.GetGlobalX();
+    events.globalDisplayY = item.GetGlobalY();
     events.rawDeltaX = item.GetRawDx();
     events.rawDeltaY = item.GetRawDy();
     GetMouseEventAction(pointerEvent->GetPointerAction(), events, isSceneBoardWindow);
@@ -532,6 +542,8 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
         event.screenX = static_cast<float>(item.GetDisplayX());
         event.screenY = static_cast<float>(item.GetDisplayY());
     }
+    event.globalDisplayX = item.GetGlobalX();
+    event.globalDisplayY = item.GetGlobalY();
     event.horizontalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
     event.verticalAxis = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL);
     event.pinchAxisScale = pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH);
@@ -578,6 +590,17 @@ static TouchType ConvertRawAxisActionToTouch(int32_t rawAxisAction)
     }
 }
 
+void SetAxisEvent(PointerEvent& axisFakePntEvt, TouchPoint& touchPoint)
+{
+    axisFakePntEvt.x = touchPoint.x;
+    axisFakePntEvt.y = touchPoint.y;
+    axisFakePntEvt.screenX = touchPoint.screenX;
+    axisFakePntEvt.screenY = touchPoint.screenY;
+    axisFakePntEvt.globalDisplayX = touchPoint.globalDisplayX;
+    axisFakePntEvt.globalDisplayY = touchPoint.globalDisplayY;
+    touchPoint.downTime = axisFakePntEvt.time;
+}
+
 static void ConvertAxisEventToTouchPoint(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     MMI::PointerEvent::PointerItem& pointerItem, TouchPoint& touchPoint, PointerEvent& axisFakePntEvt)
 {
@@ -611,6 +634,8 @@ static void ConvertAxisEventToTouchPoint(const std::shared_ptr<MMI::PointerEvent
             touchPoint.screenX = pointerItem.GetDisplayX();
             touchPoint.screenY = pointerItem.GetDisplayY();
         }
+        touchPoint.globalDisplayX = pointerItem.GetGlobalX();
+        touchPoint.globalDisplayY = pointerItem.GetGlobalY();
     } else {
         const float xOffset =
             cvtStep * pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL);
@@ -620,12 +645,10 @@ static void ConvertAxisEventToTouchPoint(const std::shared_ptr<MMI::PointerEvent
         touchPoint.y = axisFakePntEvt.y - yOffset;
         touchPoint.screenX = axisFakePntEvt.screenX - xOffset;
         touchPoint.screenY = axisFakePntEvt.screenY - yOffset;
+        touchPoint.globalDisplayX = axisFakePntEvt.globalDisplayX - xOffset;
+        touchPoint.globalDisplayY = axisFakePntEvt.globalDisplayY - yOffset;
     }
-    axisFakePntEvt.x = touchPoint.x;
-    axisFakePntEvt.y = touchPoint.y;
-    axisFakePntEvt.screenX = touchPoint.screenX;
-    axisFakePntEvt.screenY = touchPoint.screenY;
-    touchPoint.downTime = axisFakePntEvt.time;
+    SetAxisEvent(axisFakePntEvt, touchPoint);
 }
 
 void ConvertAxisEventToTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, TouchEvent& touchEvt,
@@ -832,6 +855,8 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         event.displayX = pointerItem.GetDisplayX();
         event.displayY = pointerItem.GetDisplayY();
     }
+    event.globalDisplayX = pointerItem.GetGlobalX();
+    event.globalDisplayY = pointerItem.GetGlobalY();
     event.displayId = pointerEvent->GetTargetDisplayId();
     event.size = std::max(pointerItem.GetWidth(), pointerItem.GetHeight()) / SIZE_DIVIDE;
     event.force = static_cast<float>(pointerItem.GetPressure());

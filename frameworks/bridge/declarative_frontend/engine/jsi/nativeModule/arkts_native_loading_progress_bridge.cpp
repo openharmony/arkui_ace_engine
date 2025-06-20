@@ -34,10 +34,12 @@ ArkUINativeModuleValue LoadingProgressBridge::SetColor(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj)) {
         GetArkUINodeModifiers()->getLoadingProgressModifier()->resetColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getLoadingProgressModifier()->setColor(nativeNode, color.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getLoadingProgressModifier()->setColorPtr(nativeNode, color.GetValue(), colorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -89,15 +91,17 @@ ArkUINativeModuleValue LoadingProgressBridge::SetForegroundColor(ArkUIRuntimeCal
     ForegroundColorStrategy strategy;
     if (ArkTSUtils::ParseJsColorStrategy(vm, colorArg, strategy)) {
         auto strategyInt = static_cast<uint32_t>(ForegroundColorStrategy::INVERT);
-        GetArkUINodeModifiers()->getCommonModifier()->setForegroundColor(nativeNode, false, strategyInt);
+        GetArkUINodeModifiers()->getCommonModifier()->setForegroundColor(nativeNode, false, strategyInt, nullptr);
         return panda::JSValueRef::Undefined(vm);
     }
     Color foregroundColor;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, foregroundColor)) {
+    RefPtr<ResourceObject> foregroundColorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, foregroundColor, foregroundColorResObj)) {
         GetArkUINodeModifiers()->getLoadingProgressModifier()->resetForegroundColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getLoadingProgressModifier()->setForegroundColor(
-            nativeNode, foregroundColor.GetValue());
+        auto foregroundColorRawPtr = AceType::RawPtr(foregroundColorResObj);
+        GetArkUINodeModifiers()->getLoadingProgressModifier()->setForegroundColorPtr(
+            nativeNode, foregroundColor.GetValue(), foregroundColorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }

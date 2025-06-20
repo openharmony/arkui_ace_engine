@@ -137,31 +137,11 @@ HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveEnd001, TestSize.Level2)
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
     EXPECT_FALSE(richEditorPattern->CursorMoveToParagraphBegin());
-}
 
-/**
- * @tc.name: CursorMoveEnd002
- * @tc.desc: test CursorMoveEnd
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveEnd002, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->textSelector_.baseOffset = 1;
     richEditorPattern->textSelector_.destinationOffset = 2;
     EXPECT_TRUE(richEditorPattern->CursorMoveEnd());
-}
 
-/**
- * @tc.name: CursorMoveEnd003
- * @tc.desc: test CursorMoveEnd
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, CursorMoveEnd003, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->textSelector_.baseOffset = -1;
     richEditorPattern->textSelector_.destinationOffset = 2;
     EXPECT_FALSE(richEditorPattern->CursorMoveEnd());
@@ -334,74 +314,27 @@ HWTEST_F(RichEditorPatternTestThreeNg, GetRectsForRange001, TestSize.Level1)
     ASSERT_FALSE(richEditorPattern->spans_.empty());
     auto firstSpanItem = richEditorPattern->spans_.front();
     ASSERT_NE(firstSpanItem, nullptr);
+    RectHeightStyle heightStyle = RectHeightStyle::TIGHT;
+    RectWidthStyle widthStyle = RectWidthStyle::TIGHT;
+
     int32_t start = 0;
     int32_t end = 10;
-    RectHeightStyle heightStyle = RectHeightStyle::TIGHT;
-    RectWidthStyle widthStyle = RectWidthStyle::TIGHT;
     auto result = richEditorPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
     EXPECT_TRUE(result.empty());
-}
 
-/**
- * @tc.name: GetRectsForRange002
- * @tc.desc: test GetRectsForRange
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, GetRectsForRange002, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(EXCEPT_VALUE);
-    ASSERT_FALSE(richEditorPattern->spans_.empty());
-    auto firstSpanItem = richEditorPattern->spans_.front();
-    ASSERT_NE(firstSpanItem, nullptr);
-    int32_t start = -5;
-    int32_t end = 10;
-    RectHeightStyle heightStyle = RectHeightStyle::TIGHT;
-    RectWidthStyle widthStyle = RectWidthStyle::TIGHT;
-    auto result = richEditorPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
+    start = -5;
+    end = 10;
+    result = richEditorPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
     EXPECT_TRUE(result.empty());
-}
 
-/**
- * @tc.name: GetRectsForRange003
- * @tc.desc: test GetRectsForRange
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, GetRectsForRange003, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(EXCEPT_VALUE);
-    ASSERT_FALSE(richEditorPattern->spans_.empty());
-    auto firstSpanItem = richEditorPattern->spans_.front();
-    ASSERT_NE(firstSpanItem, nullptr);
-    int32_t start = 0;
-    int32_t end = -5;
-    RectHeightStyle heightStyle = RectHeightStyle::TIGHT;
-    RectWidthStyle widthStyle = RectWidthStyle::TIGHT;
-    auto result = richEditorPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
+    start = 0;
+    end = -5;
+    result = richEditorPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
     EXPECT_TRUE(result.empty());
-}
 
-/**
- * @tc.name: GetRectsForRange004
- * @tc.desc: test GetRectsForRange
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, GetRectsForRange004, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(EXCEPT_VALUE);
-    ASSERT_FALSE(richEditorPattern->spans_.empty());
-    auto firstSpanItem = richEditorPattern->spans_.front();
-    ASSERT_NE(firstSpanItem, nullptr);
-    int32_t start = 10;
-    int32_t end = 0;
-    RectHeightStyle heightStyle = RectHeightStyle::TIGHT;
-    RectWidthStyle widthStyle = RectWidthStyle::TIGHT;
-    auto result = richEditorPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
+    start = 10;
+    end = 0;
+    result = richEditorPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
     EXPECT_TRUE(result.empty());
 }
 

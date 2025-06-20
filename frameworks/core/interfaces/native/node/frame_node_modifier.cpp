@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "base/error/error_code.h"
+#include "core/common/color_inverter.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
@@ -297,6 +298,20 @@ void GetPositionToWindow(ArkUINodeHandle node, ArkUI_Float32 (*windowOffset)[2],
     } else {
         (*windowOffset)[0] = offset.GetX();
         (*windowOffset)[1] = offset.GetY();
+    }
+}
+
+void GetGlobalPositionOnDisplay(ArkUINodeHandle node, ArkUI_Float32 (*globalDisplayPosition)[2], ArkUI_Bool useVp)
+{
+    auto* currentNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto offset = currentNode->GetGlobalPositionOnDisplay();
+    if (useVp) {
+        (*globalDisplayPosition)[0] = PipelineBase::Px2VpWithCurrentDensity(offset.GetX());
+        (*globalDisplayPosition)[1] = PipelineBase::Px2VpWithCurrentDensity(offset.GetY());
+    } else {
+        (*globalDisplayPosition)[0] = offset.GetX();
+        (*globalDisplayPosition)[1] = offset.GetY();
     }
 }
 
@@ -974,6 +989,27 @@ void RemoveSupportedUIStates(ArkUINodeHandle node, int32_t state)
     eventHub->RemoveSupportedUIState(static_cast<uint64_t>(state), false);
 }
 
+ArkUI_Int32 SetForceDarkConfig(
+    ArkUI_Int32 instanceId, bool forceDark, ArkUI_CharPtr nodeTag, uint32_t (*colorInvertFunc)(uint32_t color))
+{
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    if (!pipeline || !pipeline->CheckThreadSafe()) {
+        LOGF_ABORT("SetForceDarkConfig doesn't run on UI");
+    }
+    if (!forceDark && colorInvertFunc) {
+        return ERROR_CODE_NATIVE_IMPL_FORCE_DARK_CONFIG_INVALID;
+    }
+    if (forceDark) {
+        auto invertFunc = [colorInvertFunc](uint32_t color) {
+            return colorInvertFunc ? colorInvertFunc(color) : ColorInverter::DefaultInverter(color);
+        };
+        ColorInverter::GetInstance().EnableColorInvert(instanceId, nodeTag, std::move(invertFunc));
+    } else {
+        ColorInverter::GetInstance().DisableColorInvert(instanceId);
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -998,6 +1034,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .getPositionToParent = GetPositionToParent,
         .getPositionToScreen = GetPositionToScreen,
         .getPositionToWindow = GetPositionToWindow,
+        .getGlobalPositionOnDisplay = GetGlobalPositionOnDisplay,
         .getPositionToParentWithTransform = GetPositionToParentWithTransform,
         .getPositionToScreenWithTransform = GetPositionToScreenWithTransform,
         .getPositionToWindowWithTransform = GetPositionToWindowWithTransform,
@@ -1055,6 +1092,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .updateConfiguration = UpdateConfiguration,
         .addSupportedUIStates = AddSupportedUIStates,
         .removeSupportedUIStates = RemoveSupportedUIStates,
+        .setForceDarkConfig = SetForceDarkConfig,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1083,6 +1121,7 @@ const CJUIFrameNodeModifier* GetCJUIFrameNodeModifier()
         .getPositionToParent = GetPositionToParent,
         .getPositionToScreen = GetPositionToScreen,
         .getPositionToWindow = GetPositionToWindow,
+        .getGlobalPositionOnDisplay = GetGlobalPositionOnDisplay,
         .getPositionToParentWithTransform = GetPositionToParentWithTransform,
         .getPositionToScreenWithTransform = GetPositionToScreenWithTransform,
         .getPositionToWindowWithTransform = GetPositionToWindowWithTransform,

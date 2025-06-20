@@ -25,7 +25,7 @@ class ImagePaintMethodTestNg : public ImageBases {};
  * @tc.desc: Create UpdateBorderRadius.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdateBorderRadius, TestSize.Level1)
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdateBorderRadius, TestSize.Level0)
 {
     /* *
      * @tc.steps: step1. create image object
@@ -86,7 +86,7 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdateBorderRadius, Test
  * @tc.desc: Create UpdatePaintConfig.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdatePaintConfig, TestSize.Level1)
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdatePaintConfig, TestSize.Level0)
 {
     /* *
      * @tc.steps: step1. create image object
@@ -150,7 +150,7 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdatePaintConfig, TestS
  * @tc.desc: Create UpdatePaintConfig.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdatePaintConfig_ImageMatrix001, TestSize.Level1)
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdatePaintConfig_ImageMatrix001, TestSize.Level0)
 {
     /* *
      * @tc.steps: step1. create image object
@@ -208,7 +208,7 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdatePaintConfig_ImageM
  * @tc.desc: Create UpdatePaintConfig.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdatePaintConfig_ImageMatrix002, TestSize.Level1)
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdatePaintConfig_ImageMatrix002, TestSize.Level0)
 {
     /* *
      * @tc.steps: step1. create image object
@@ -266,7 +266,7 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdatePaintConfig_ImageM
  * @tc.desc: Create NormalizeRadius.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_NormalizeRadius, TestSize.Level1)
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_NormalizeRadius, TestSize.Level0)
 {
     /* *
      * @tc.steps: step1. create image object
@@ -317,7 +317,7 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_NormalizeRadius, TestSiz
  * @tc.desc: Test hdrBrightness.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_HdrBrightness, TestSize.Level1)
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_HdrBrightness, TestSize.Level0)
 {
     /* *
      * @tc.steps: step1. create image object

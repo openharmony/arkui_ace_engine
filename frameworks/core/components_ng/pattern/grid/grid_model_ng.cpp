@@ -15,10 +15,12 @@
 
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 
+#include "base/utils/system_properties.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -137,7 +139,11 @@ void GridModelNG::SetScrollBarWidth(const std::string& value)
 
 void GridModelNG::SetCachedCount(int32_t value, bool show)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, value);
+    int32_t count = value;
+    if (SystemProperties::IsWhiteBlockEnabled()) {
+        count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, count);
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, ShowCachedItems, show);
 }
 
@@ -462,7 +468,11 @@ void GridModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optional<Co
 void GridModelNG::SetCachedCount(FrameNode* frameNode, int32_t cachedCount)
 {
     if (cachedCount >= 0) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, cachedCount, frameNode);
+        int32_t count = cachedCount;
+        if (SystemProperties::IsWhiteBlockEnabled()) {
+            count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, count, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, CachedCount, frameNode);
     }
@@ -775,9 +785,8 @@ void GridModelNG::CreateWithResourceObjFriction(const RefPtr<ResourceObject>& re
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         double friction = -1.0;
-        if (ResourceParseUtils::ParseResDouble(resObj, friction)) {
-            pattern->SetFriction(friction);
-        }
+        ResourceParseUtils::ParseResDouble(resObj, friction);
+        pattern->SetFriction(friction);
     };
     pattern->AddResObj("GridFriction", resObj, std::move(updateFunc));
 }
@@ -841,12 +850,12 @@ void GridModelNG::CreateWithResourceObjFriction(FrameNode* frameNode, const RefP
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         double friction = -1.0;
-        if (ResourceParseUtils::ParseResDouble(resObj, friction)) {
-            pattern->SetFriction(friction);
-        }
+        ResourceParseUtils::ParseResDouble(resObj, friction);
+        pattern->SetFriction(friction);
     };
     pattern->AddResObj("GridFriction", resObj, std::move(updateFunc));
 }
+
 void GridModelNG::SetSyncLoad(bool syncLoad)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, SyncLoad, syncLoad);

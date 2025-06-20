@@ -39,6 +39,7 @@
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/models/image_model_impl.h"
 #include "core/common/container.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_event.h"
 #include "core/components/image/image_theme.h"
@@ -580,6 +581,37 @@ void JSImage::JsImageResizable(const JSCallbackInfo& info)
     ParseResizableLattice(resizableObject);
 }
 
+void ApplySliceResource(ImageResizableSlice& sliceResult, const std::string& resKey,
+    const RefPtr<ResourceObject>& resObj, BorderImageDirection direction)
+{
+    if (resObj && SystemProperties::ConfigChangePerform()) {
+        sliceResult.AddResource(
+            resKey, resObj, [direction](const RefPtr<ResourceObject>& currentResObj, ImageResizableSlice& slice) {
+                CalcDimension dim;
+                ResizableOption resizableOption;
+                switch (direction) {
+                    case BorderImageDirection::LEFT:
+                        resizableOption = ResizableOption::LEFT;
+                        break;
+                    case BorderImageDirection::RIGHT:
+                        resizableOption = ResizableOption::RIGHT;
+                        break;
+                    case BorderImageDirection::TOP:
+                        resizableOption = ResizableOption::TOP;
+                        break;
+                    case BorderImageDirection::BOTTOM:
+                        resizableOption = ResizableOption::BOTTOM;
+                        break;
+                    default:
+                        return;
+                }
+                if (ResourceParseUtils::ParseResDimensionVpNG(currentResObj, dim) && dim.IsValid()) {
+                    slice.SetEdgeSlice(resizableOption, dim);
+                }
+            });
+    }
+}
+
 void JSImage::UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableSlice& sliceResult)
 {
     // creatge a array has 4 elements for paresing sliceSize
@@ -589,28 +621,36 @@ void JSImage::UpdateSliceResult(const JSRef<JSObject>& sliceObj, ImageResizableS
     for (uint32_t i = 0; i < keys.size(); i++) {
         auto sliceSize = sliceObj->GetProperty(keys.at(i));
         CalcDimension sliceDimension;
-        if (!ParseJsDimensionVp(sliceSize, sliceDimension)) {
+        RefPtr<ResourceObject> resObj;
+        std::string resKey = "image.";
+        if (!ParseJsDimensionVp(sliceSize, sliceDimension, resObj)) {
             continue;
         }
         if (!sliceDimension.IsValid()) {
             continue;
         }
-        switch (static_cast<BorderImageDirection>(i)) {
+        BorderImageDirection direction = static_cast<BorderImageDirection>(i);
+        switch (direction) {
             case BorderImageDirection::LEFT:
                 sliceResult.left = sliceDimension;
+                resKey += "left";
                 break;
             case BorderImageDirection::RIGHT:
                 sliceResult.right = sliceDimension;
+                resKey += "right";
                 break;
             case BorderImageDirection::TOP:
                 sliceResult.top = sliceDimension;
+                resKey += "top";
                 break;
             case BorderImageDirection::BOTTOM:
                 sliceResult.bottom = sliceDimension;
+                resKey += "bottom";
                 break;
             default:
                 break;
         }
+        ApplySliceResource(sliceResult, resKey, resObj, direction);
     }
     ImageModel::GetInstance()->SetResizableSlice(sliceResult);
 }
@@ -679,8 +719,9 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
     }
     ImageModel::GetInstance()->SetImageFill(color);
 
-    if (SystemProperties::ConfigChangePerform()&&resObj) {
+    if (SystemProperties::ConfigChangePerform()) {
         ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::FILL_COLOR, resObj);
+        ImageModel::GetInstance()->SetImageFillSetByUser(!status);
     }
 }
 

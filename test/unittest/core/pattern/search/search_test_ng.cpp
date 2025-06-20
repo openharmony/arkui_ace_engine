@@ -18,9 +18,11 @@
 #include "ui/base/geometry/dimension.h"
 #include "ui/properties/color.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/search/search_layout_property.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 
 namespace OHOS::Ace::NG {
@@ -2549,4 +2551,44 @@ HWTEST_F(SearchTestNg, SearchEnableAutoSpacing, TestSize.Level1)
     EXPECT_EQ(SearchModelNG::GetEnableAutoSpacing(frameNode), false);
 }
 
+/**
+ * @tc.name: InitMargin
+ * @tc.desc: Test the margin setup method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, InitMargin, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto searchPattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(searchPattern, nullptr);
+
+    auto searchLayoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    ASSERT_NE(searchLayoutProperty, nullptr);
+    searchPattern->InitMargin(searchLayoutProperty);
+    const auto& marginProperty = searchLayoutProperty->GetMarginProperty();
+    ASSERT_NE(marginProperty, nullptr);
+    EXPECT_TRUE(marginProperty->top);
+    EXPECT_TRUE(marginProperty->bottom);
+
+    searchLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    searchPattern->InitMargin(searchLayoutProperty);
+    EXPECT_FALSE(marginProperty->top);
+    EXPECT_FALSE(marginProperty->bottom);
+
+    MarginProperty margin;
+    margin.top = CalcLength(10.0f);
+    margin.bottom = CalcLength(10.0f);
+    searchLayoutProperty->UpdateUserMargin(margin);
+    searchLayoutProperty->UpdateMargin(margin);
+    searchPattern->InitMargin(searchLayoutProperty);
+
+    EXPECT_TRUE(marginProperty->top);
+    EXPECT_TRUE(marginProperty->bottom);
+}
 } // namespace OHOS::Ace::NG

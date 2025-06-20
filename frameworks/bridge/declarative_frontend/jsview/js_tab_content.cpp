@@ -81,7 +81,8 @@ void JSTabContent::CreateForPartialUpdate(const JSCallbackInfo& info)
     }
 
     JSRef<JSVal> builderFunctionJS = info[0];
-    auto builderFunc = [builder = std::move(builderFunctionJS)]() {
+    auto builderFunc = [context = info.GetExecutionContext(), builder = std::move(builderFunctionJS)]() {
+        JAVASCRIPT_EXECUTION_SCOPE(context)
         JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
     };
     TabContentModel::GetInstance()->Create(std::move(builderFunc));
@@ -136,14 +137,14 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     }
     JSRef<JSVal> builderFuncParam = paramObject->GetProperty("builder");
     if (builderFuncParam->IsFunction()) {
-        auto vm = info.GetVm();
-        auto jsFunc = JSRef<JSFunc>::Cast(builderFuncParam);
-        auto func = jsFunc->GetLocalHandle();
-        auto tabBarBuilderFunc = [vm, func = panda::CopyableGlobal(vm, func)]() {
-            ACE_SCOPED_TRACE("JSTabContent::Execute TabBar builder");
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
-            func->Call(vm, func.ToLocal(), nullptr, 0);
+        auto tabBarBuilder = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builderFuncParam));
+        auto tabBarBuilderFunc = [execCtx = info.GetExecutionContext(),
+                                     tabBarBuilderFunc = std::move(tabBarBuilder)]() {
+            if (tabBarBuilderFunc) {
+                ACE_SCOPED_TRACE("JSTabContent::Execute TabBar builder");
+                JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+                tabBarBuilderFunc->ExecuteJS();
+            }
         };
         TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
         TabContentModel::GetInstance()->SetTabBar(
@@ -684,9 +685,6 @@ void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
     if (ParseJsString(contentParam, content, resTextObj)) {
         contentOpt = content;
     }
-    if (SystemProperties::ConfigChangePerform()) {
-        TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TEXT_CONTENT, resTextObj);
-    }
 
     JSRef<JSVal> indicatorParam = paramObject->GetProperty("indicator");
     SetIndicator(indicatorParam);
@@ -706,6 +704,7 @@ void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
     JSRef<JSVal> idParam = paramObject->GetProperty("id");
     SetId(idParam);
 
+    TabContentModel::GetInstance()->CreateWithResourceObj(TabContentJsType::TEXT_CONTENT, resTextObj);
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     TabContentModel::GetInstance()->SetTabBar(contentOpt, std::nullopt, std::nullopt, nullptr, false);
     TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
@@ -801,6 +800,36 @@ void JSTabContent::SetBottomTabBarStyle(const JSCallbackInfo& info)
     TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
 }
 
+void JSTabContent::SetOnWillShow(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+    auto willShowHandler = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onWillShow = [executionContext = info.GetExecutionContext(), func = std::move(willShowHandler)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        ACE_SCORING_EVENT("TabContent.onWillShow");
+        func->Execute();
+    };
+    TabContentModel::GetInstance()->SetOnWillShow(std::move(onWillShow));
+}
+
+void JSTabContent::SetOnWillHide(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+    auto willHideHandler = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onWillHide = [executionContext = info.GetExecutionContext(), func = std::move(willHideHandler)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        ACE_SCORING_EVENT("TabContent.onWillHide");
+        func->Execute();
+    };
+    TabContentModel::GetInstance()->SetOnWillHide(std::move(onWillHide));
+}
+
 void JSTabContent::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTabContent>::Declare("TabContent");
@@ -819,6 +848,8 @@ void JSTabContent::JSBind(BindingTarget globalObj)
     JSClass<JSTabContent>::StaticMethod("width", &JSTabContent::SetTabContentWidth);
     JSClass<JSTabContent>::StaticMethod("height", &JSTabContent::SetTabContentHeight);
     JSClass<JSTabContent>::StaticMethod("size", &JSTabContent::SetTabContentSize);
+    JSClass<JSTabContent>::StaticMethod("onWillShow", &JSTabContent::SetOnWillShow);
+    JSClass<JSTabContent>::StaticMethod("onWillHide", &JSTabContent::SetOnWillHide);
     JSClass<JSTabContent>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSTabContent>::InheritAndBind<JSContainerBase>(globalObj);
 }

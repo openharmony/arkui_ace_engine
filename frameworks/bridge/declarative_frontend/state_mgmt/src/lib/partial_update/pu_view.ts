@@ -258,13 +258,12 @@ abstract class ViewPU extends PUV2ViewBase
     ViewBuildNodeBase.arkThemeScopeManager?.onViewPUDelete(this);
     this.localStoragebackStore_ = undefined;
     PUV2ViewBase.prebuildFuncQueues.delete(this.id__());
+    PUV2ViewBase.propertyChangedFuncQueues.delete(this.id__());
     // if memory watch register the callback func, then report such information to memory watch
     // when custom node destroyed
     if (ArkUIObjectFinalizationRegisterProxy.callbackFunc_) {
-      ArkUIObjectFinalizationRegisterProxy.call({
-        hash: Utils.getArkTsUtil().getHash(this),
-        name: this.constructor.name,
-        msg: `${this.debugInfo__()} is in the process of destruction` });
+      ArkUIObjectFinalizationRegisterProxy.call(new WeakRef(this),
+        `${this.debugInfo__()} is in the process of destruction` );
     }
   }
 
@@ -290,7 +289,7 @@ abstract class ViewPU extends PUV2ViewBase
       .filter((varName: string) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
       .forEach((varName) => {
         const prop: any = Reflect.get(this, varName);
-        if ('debugInfoDecorator' in prop) {
+        if (prop && typeof prop === 'object' && 'debugInfoDecorator' in prop) {
           const observedProp = prop as ObservedPropertyAbstractPU<any>;
           result += `\n  ${observedProp.debugInfoDecorator()} '${observedProp.info()}'[${observedProp.id__()}]`;
           result += `\n  ${observedProp.debugInfoSubscribers()}`;
@@ -385,7 +384,7 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtProfiler.end();
   }
 
-  public UpdateElement(elmtId: number): void {
+  public UpdateElement(elmtId: number, dirtElmtIdsFromRootNode: Array<number> = new Array<number>()): void {
     stateMgmtProfiler.begin('ViewPU.UpdateElement');
     if (elmtId === this.id__()) {
       // do not attempt to update itself.
@@ -415,7 +414,15 @@ abstract class ViewPU extends PUV2ViewBase
       stateMgmtConsole.debug(`${this.debugInfo__()}: UpdateElement: re-render of ${entry.getComponentName()} elmtId ${elmtId} start ...`);
       this.isRenderInProgress = true;
       stateMgmtProfiler.begin('ViewPU.updateFunc');
-      updateFunc(elmtId, /* isFirstRender */ false);
+      try {
+        updateFunc(elmtId, /* isFirstRender */ false);
+      } catch (error) {
+        for (const dirtEId of dirtElmtIdsFromRootNode) {
+          stateMgmtConsole.applicationError(`${this.debugInfo__()}: dirty element ${this.updateFuncByElmtId.get(dirtEId)?.getComponentName()} with id ${dirtEId}, isPending: ${this.updateFuncByElmtId.get(dirtEId)?.isPending()}`);
+        }
+        stateMgmtConsole.applicationError(`${this.debugInfo__()}: UpdateElement: re-render of ${entry.getComponentName()} elmtId ${elmtId} has error in update func: ${error.message}`);
+        throw error;
+      }
       stateMgmtProfiler.end();
       stateMgmtProfiler.begin('ViewPU.finishUpdateFunc (native)');
       this.finishUpdateFunc(elmtId);
@@ -644,7 +651,7 @@ abstract class ViewPU extends PUV2ViewBase
         providedVarStore = new ObservedPropertySimplePU(defaultValue, this, consumeVarName);
         providedVarStore.__setIsFake_ObservedPropertyAbstract_Internal(true);
       } else {
-        throw new ReferenceError(`${this.debugInfo__()} missing @Provide property with name ${providedPropName}.
+        throw new ReferenceError(`${this.debugInfo__()} missing @Provide property with name ${providedPropName} or default value.
           Fail to resolve @Consume(${providedPropName}).`);
       }
     }
@@ -693,9 +700,9 @@ abstract class ViewPU extends PUV2ViewBase
       // to newly created this.dirtDescendantElementIds_ Set
       dirtElmtIdsFromRootNode.forEach(elmtId => {
         if (this.hasRecycleManager()) {
-          this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId));
+          this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId), dirtElmtIdsFromRootNode);
         } else {
-          this.UpdateElement(elmtId);
+          this.UpdateElement(elmtId, dirtElmtIdsFromRootNode);
         }
         this.dirtDescendantElementIds_.delete(elmtId);
       });
@@ -717,7 +724,7 @@ abstract class ViewPU extends PUV2ViewBase
   // executed on first render only
   // kept for backward compatibility with old ace-ets2bundle
   public observeComponentCreation(compilerAssignedUpdateFunc: UpdateFunc): void {
-    if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+    if (PUV2ViewBase.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
       const prebuildFunc: PrebuildFunc = () => {
         this.observeComponentCreation(compilerAssignedUpdateFunc);
       };
@@ -755,7 +762,7 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: UIClassObject): void {
-    if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+    if (PUV2ViewBase.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
       const prebuildFunc: PrebuildFunc = () => {
         this.observeComponentCreation2(compilerAssignedUpdateFunc, classObject);
       };
@@ -881,7 +888,7 @@ abstract class ViewPU extends PUV2ViewBase
    * @return void
    */
   public observeRecycleComponentCreation(name: string, recycleUpdateFunc: RecycleUpdateFunc): void {
-    if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+    if (PUV2ViewBase.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
       const prebuildFunc: PrebuildFunc = () => {
         this.observeRecycleComponentCreation(name, recycleUpdateFunc);
       };

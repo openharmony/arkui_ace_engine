@@ -1296,6 +1296,27 @@ HWTEST_F(UINodeTestNg, GetCurrentCustomNodeInfo002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetFilePath001
+ * @tc.desc: Test ui node method GetCurrentCustomNodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetFilePath001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = FrameNode::CreateFrameNode("filePathNode", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    node->tag_ = V2::COMMON_VIEW_ETS_TAG;
+
+    node->SetFilePath("abc");
+    EXPECT_EQ(node->GetFilePath(), "");
+    node->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    node->SetFilePath("abc");
+    EXPECT_EQ(node->GetFilePath(), "abc");
+}
+
+/**
  * @tc.name: GetPerformanceCheckData001
  * @tc.desc: Test ui node method GetCurrentCustomNodeInfo
  * @tc.type: FUNC
@@ -3648,5 +3669,29 @@ HWTEST_F(UINodeTestNg, FreeUINodeTestNg009, TestSize.Level1)
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     EXPECT_EQ(frameNode->isFreeNode_, true);
     EXPECT_EQ(frameNode->isFreeState_, true);
+}
+
+/**
+ * @tc.name: AddChildOPTTest001
+ * @tc.desc: Test AddChild optimize
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddChildOPTTest001, TestSize.Level1)
+{
+    ONE->Clean();
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto testNode2 = TestNode::CreateTestNode(TEST_ID_TWO);
+    ONE->AddChild(TWO, 1, false);
+    ONE->AddChild(testNode, 1, false);
+    ONE->AddChild(testNode2, 1, false);
+    ONE->AddChildBefore(testNode, testNode2);
+    EXPECT_EQ(ONE->children_.size(), 3);
+    ONE->Clean();
+    ONE->AddChild(TWO, 1, false);
+    ONE->AddChild(testNode, 1, false);
+    ONE->AddChild(testNode2, 1, false);
+    ONE->AddChildAfter(testNode2, testNode);
+    EXPECT_EQ(ONE->children_.size(), 3);
+    ONE->Clean();
 }
 } // namespace OHOS::Ace::NG

@@ -22,13 +22,13 @@ namespace OHOS::Ace {
 AxisEvent AxisEvent::CreateScaleEvent(float scale) const
 {
     if (NearZero(scale)) {
-        return { id, x, y, screenX, screenY, verticalAxis, horizontalAxis, pinchAxisScale, rotateAxisAngle,
-            isRotationEvent, action, time, deviceId, sourceType, sourceTool, pointerEvent, pressedCodes,
-            targetDisplayId, originalId, isInjected, scrollStep };
+        return { id, x, y, screenX, screenY, globalDisplayX, globalDisplayY, verticalAxis, horizontalAxis,
+            pinchAxisScale, rotateAxisAngle, isRotationEvent, action, time, deviceId, sourceType, sourceTool,
+            pointerEvent, pressedCodes, targetDisplayId, originalId, isInjected, scrollStep };
     }
-    return { id, x / scale, y / scale, screenX / scale, screenY / scale, verticalAxis, horizontalAxis, pinchAxisScale,
-        rotateAxisAngle, isRotationEvent, action, time, deviceId, sourceType, sourceTool, pointerEvent, pressedCodes,
-        targetDisplayId, originalId, isInjected, scrollStep };
+    return { id, x / scale, y / scale, screenX / scale, screenY / scale, globalDisplayX / scale, globalDisplayY / scale,
+        verticalAxis, horizontalAxis, pinchAxisScale, rotateAxisAngle, isRotationEvent, action, time, deviceId,
+        sourceType, sourceTool, pointerEvent, pressedCodes, targetDisplayId, originalId, isInjected, scrollStep };
 }
 
 Offset AxisEvent::GetOffset() const
@@ -39,6 +39,11 @@ Offset AxisEvent::GetOffset() const
 Offset AxisEvent::GetScreenOffset() const
 {
     return Offset(screenX, screenY);
+}
+
+Offset AxisEvent::GetGlobalDisplayOffset() const
+{
+    return Offset(globalDisplayX, globalDisplayY);
 }
 
 AxisDirection AxisEvent::GetDirection() const
@@ -154,26 +159,6 @@ int32_t AxisInfo::GetScrollStep() const
     return scrollStep_;
 }
 
-void AxisInfo::SetVerticalAxis(float axis)
-{
-    verticalAxis_ = axis;
-}
-
-float AxisInfo::GetVerticalAxis() const
-{
-    return verticalAxis_;
-}
-
-void AxisInfo::SetHorizontalAxis(float axis)
-{
-    horizontalAxis_ = axis;
-}
-
-float AxisInfo::GetHorizontalAxis() const
-{
-    return horizontalAxis_;
-}
-
 void AxisInfo::SetPinchAxisScale(float scale)
 {
     pinchAxisScale_ = scale;
@@ -235,6 +220,16 @@ const Offset& AxisInfo::GetGlobalLocation() const
     return globalLocation_;
 }
 
+AxisInfo& AxisInfo::SetGlobalDisplayLocation(const Offset& globalDisplayLocation)
+{
+    globalDisplayLocation_ = globalDisplayLocation;
+    return *this;
+}
+const Offset& AxisInfo::GetGlobalDisplayLocation() const
+{
+    return globalDisplayLocation_;
+}
+
 AxisEvent AxisInfo::ConvertToAxisEvent() const
 {
     AxisEvent axisEvent;
@@ -242,6 +237,8 @@ AxisEvent AxisInfo::ConvertToAxisEvent() const
     axisEvent.y = static_cast<float>(globalLocation_.GetY());
     axisEvent.screenX = static_cast<float>(screenLocation_.GetX());
     axisEvent.screenY = static_cast<float>(screenLocation_.GetY());
+    axisEvent.globalDisplayX = static_cast<float>(globalDisplayLocation_.GetX());
+    axisEvent.globalDisplayY = static_cast<float>(globalDisplayLocation_.GetY());
     axisEvent.scrollStep = scrollStep_;
     axisEvent.horizontalAxis = horizontalAxis_;
     axisEvent.verticalAxis = verticalAxis_;
@@ -312,6 +309,7 @@ bool AxisEventTarget::HandleAxisEvent(const AxisEvent& event)
         event.GetOffset().GetX() - coordinateOffset_.GetX(), event.GetOffset().GetY() - coordinateOffset_.GetY());
     AxisInfo info = AxisInfo(event, localLocation, GetEventTarget().value_or(EventTarget()));
     info.SetScreenLocation(Offset(event.screenX, event.screenY));
+    info.SetGlobalDisplayLocation(Offset(event.globalDisplayX, event.globalDisplayY));
     info.SetSourceTool(event.sourceTool);
     info.SetStopPropagation(true);
     onAxisCallback_(info);

@@ -29,4 +29,9 @@ ACE_WEAK_SYM std::optional<RectF> AppBarView::GetAppBarRect()
 {
     return RectF();
 }
+
+ACE_WEAK_SYM RefPtr<Pattern> AppBarView::GetAtomicServicePattern()
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::NG

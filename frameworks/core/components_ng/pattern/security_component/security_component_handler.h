@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_HANDLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_HANDLER_H
 #include "base/geometry/ng/rect_t.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_probe.h"
@@ -42,6 +43,9 @@ public:
         std::string& message);
     static int32_t ReportSecurityComponentClickEvent(int32_t& scId,
         RefPtr<FrameNode>& node, const KeyEvent& event,
+        Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback);
+    static int32_t ReportSecurityComponentClickEvent(int32_t& scId,
+        RefPtr<FrameNode>& node, const SecCompEnhanceEvent& event,
         Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback);
     static bool InitButtonInfoValue(RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
         const Security::SecurityComponent::SecCompType& scType, std::string& message);

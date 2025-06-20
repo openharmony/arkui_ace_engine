@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -285,6 +286,23 @@ CheckBoxStyle CheckBoxGroupModelNG::GetCheckboxGroupStyle(FrameNode* frameNode)
     return value;
 }
 
+std::string CheckBoxGroupModelNG::ColorTypeToString(const CheckBoxGroupColorType checkBoxGroupColorType)
+{
+    std::string rst;
+    switch (checkBoxGroupColorType) {
+        case CheckBoxGroupColorType::SELECTED_COLOR:
+            rst = "SelectedColor";
+            break;
+        case CheckBoxGroupColorType::UN_SELECTED_COLOR:
+            rst = "UnSelectedColor";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
+}
+
 void CheckBoxGroupModelNG::SetOnChange(FrameNode* frameNode, GroupChangeEvent&& onChange)
 {
     auto eventHub = frameNode->GetOrCreateEventHub<CheckBoxGroupEventHub>();
@@ -314,5 +332,71 @@ void CheckBoxGroupModelNG::ResetCheckMarkColor()
         PROPERTY_UPDATE_RENDER);
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColorFlagByUser,
         PROPERTY_UPDATE_RENDER);
+}
+
+void CheckBoxGroupModelNG::CreateWithColorResourceObj(
+    const RefPtr<ResourceObject>& resObj, const CheckBoxGroupColorType checkBoxGroupColorType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObj(frameNode, checkBoxGroupColorType, resObj);
+}
+
+void CheckBoxGroupModelNG::ResetUnSelectedColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void CheckBoxGroupModelNG::ResetSelectedColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
+void CheckBoxGroupModelNG::UpdateComponentColor(FrameNode* frameNode, const CheckBoxGroupColorType checkBoxColorType)
+{
+    CHECK_NULL_VOID(frameNode);
+    switch (checkBoxColorType) {
+        case CheckBoxGroupColorType::SELECTED_COLOR:
+            ResetSelectedColor(frameNode);
+            break;
+        case CheckBoxGroupColorType::UN_SELECTED_COLOR:
+            ResetUnSelectedColor(frameNode);
+            break;
+        default:
+            break;
+    }
+}
+
+void CheckBoxGroupModelNG::CreateWithResourceObj(
+    FrameNode* frameNode, const CheckBoxGroupColorType jsResourceType, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "checkboxgroup" + ColorTypeToString(jsResourceType);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+
+    auto&& updateFunc = [jsResourceType, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+        CHECK_NULL_VOID(pattern);
+        Color result;
+        if (!ResourceParseUtils::ParseResColor(resObj, result)) {
+            UpdateComponentColor(AceType::RawPtr(frameNode), jsResourceType);
+            return;
+        }
+
+        pattern->UpdateCheckBoxGroupComponentColor(result, jsResourceType);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 } // namespace OHOS::Ace::NG

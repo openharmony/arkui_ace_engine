@@ -83,6 +83,7 @@ private:
     double CalcSymbolIconHeight(LayoutWrapper* layoutWrapper, int32_t index, double defaultImageHeight);
     float CalculateTextFieldWidth(
         LayoutWrapper* layoutWrapper, float searchWidthMax, const RefPtr<SearchTheme>& searchTheme);
+    float GetSearchFieldMinWidth(LayoutWrapper* layoutWrapper);
 
     // cached data
     float maxFontScale_;

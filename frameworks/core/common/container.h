@@ -697,6 +697,15 @@ public:
     {
         return false;
     }
+    virtual Rect GetGlobalScaledRect() const
+    {
+        return Rect();
+    }
+
+    virtual bool IsPcOrFreeMultiWindowCapability() const
+    {
+        return false;
+    }
 
     virtual Rect GetUIExtensionHostWindowRect()
     {
@@ -764,6 +773,8 @@ public:
     static bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes);
 
     virtual void UpdateColorMode(uint32_t colorMode) {};
+
+    virtual void TriggerModuleSerializer() {};
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::vector<std::string> GetFontFamilyName(const std::string& path);

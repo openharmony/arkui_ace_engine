@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
@@ -1545,7 +1546,10 @@ HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmGetCurrentPipelineContext, Tes
      * @tc.expected: These properties are matched.
      */
     EXPECT_TRUE(Container::CurrentId() >= MIN_SUBCONTAINER_ID);
-    dialogLayoutAlgorithm.GetCurrentPipelineContext();
+    auto dialog = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(dialog, nullptr);
+    auto pipelineContext = DialogManager::GetMainPipelineContext(dialog);
+    ASSERT_EQ(pipelineContext, nullptr);
 }
 
 /**
@@ -1562,7 +1566,12 @@ HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmIsGetExpandDisplayValidHeight,
     dialogLayoutAlgorithm.expandDisplay_ = true;
     dialogLayoutAlgorithm.isShowInSubWindow_ = true;
     Container::UpdateCurrent(0);
-    auto pipelineContext = dialogLayoutAlgorithm.GetCurrentPipelineContext();
+    auto node = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(node, nullptr);
+    auto container = Container::Current();
+    node->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+    auto pipelineContext = DialogManager::GetMainPipelineContext(node);
     ASSERT_NE(pipelineContext, nullptr);
     pipelineContext->UpdateDisplayAvailableRect(Rect(1.0f, 1.0f, 1.0f, 1.0f));
     /**
@@ -1574,7 +1583,7 @@ HWTEST_F(DialogLayoutTestNg, DialogLayoutAlgorithmIsGetExpandDisplayValidHeight,
     ASSERT_NE(dialog, nullptr);
     auto dialogProp = dialog->GetLayoutProperty<DialogLayoutProperty>();
     ASSERT_NE(dialogProp, nullptr);
-    EXPECT_FALSE(dialogLayoutAlgorithm.IsGetExpandDisplayValidHeight(dialogProp));
+    EXPECT_TRUE(dialogLayoutAlgorithm.IsGetExpandDisplayValidHeight(dialogProp));
 }
 
 /**

@@ -478,7 +478,11 @@ protected:
     void HandleTouchDown(const TouchEvent& point);
     void HandleTouchUp(const TouchEvent& point);
     void HandleTouchCancel(const TouchEvent& point);
-    void HandleGestureAccept(const GestureEvent& info, GestureCallbackType type);
+    void HandleGestureAccept(const GestureEvent& info, GestureCallbackType type, GestureListenerType listenerType);
+    virtual bool CheckReconcileFromProperties(const RefPtr<NGGestureRecognizer>& recognizer)
+    {
+        return false;
+    }
 
     RefereeState refereeState_ = RefereeState::READY;
 
@@ -527,8 +531,7 @@ protected:
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
     WeakPtr<NGGestureRecognizer> eventImportGestureGroup_;
-    GestureListenerType GetListenerType(GestureTypeName typeName) const;
-    GestureActionPhase GetActionPhase(GestureCallbackType callbackType, GestureTypeName typeName) const;
+    GestureActionPhase GetActionPhase(GestureCallbackType callbackType, GestureListenerType listenerType) const;
 };
 
 } // namespace OHOS::Ace::NG

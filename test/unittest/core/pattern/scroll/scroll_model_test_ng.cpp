@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "scroll_test_ng.h"
+
 #include "base/memory/ace_type.h"
 
 namespace OHOS::Ace::NG {

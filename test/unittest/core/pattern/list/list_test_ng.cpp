@@ -33,6 +33,8 @@ namespace OHOS::Ace::NG {
 void ListTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
     MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockAnimationManager::Enable(true);
@@ -65,15 +67,24 @@ void ListTestNg::SetUpTestSuite()
 void ListTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
 }
 
-void ListTestNg::SetUp() {}
+void ListTestNg::SetUp()
+{
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
+}
 
 void ListTestNg::TearDown()
 {
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
     RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
+    itemGroupPatters_.clear();
     eventHub_ = nullptr;
     layoutProperty_ = nullptr;
     paintProperty_ = nullptr;
@@ -168,6 +179,11 @@ ListItemGroupModelNG ListTestNg::CreateListItemGroup(V2::ListItemGroupStyle list
     groupModel.Create(listItemGroupStyle);
     auto listItemGroup = ViewStackProcessor::GetInstance()->GetMainElementNode();
     listItemGroup->SetParent(weakList);
+    auto listItemGroupFrameNode = AceType::DynamicCast<FrameNode>(listItemGroup);
+    auto groupPattern_ = listItemGroupFrameNode->GetPattern<ListItemGroupPattern>();
+    if (groupPattern_) {
+        itemGroupPatters_.emplace_back(groupPattern_);
+    }
     return groupModel;
 }
 

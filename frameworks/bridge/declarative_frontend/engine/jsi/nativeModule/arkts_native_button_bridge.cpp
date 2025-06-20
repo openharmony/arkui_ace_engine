@@ -221,10 +221,12 @@ ArkUINativeModuleValue ButtonBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
         GetArkUINodeModifiers()->getButtonModifier()->resetButtonFontColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getButtonModifier()->setButtonFontColor(nativeNode, color.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getButtonModifier()->setButtonFontColorPtr(nativeNode, color.GetValue(), colorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -332,12 +334,14 @@ ArkUINativeModuleValue ButtonBridge::SetFontFamily(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     std::string fontFamily;
-    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, secondArg, fontFamily)) {
+    RefPtr<ResourceObject> familiesResObj;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, secondArg, fontFamily, familiesResObj)) {
         GetArkUINodeModifiers()->getButtonModifier()->resetButtonFontFamily(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-
-    GetArkUINodeModifiers()->getButtonModifier()->setButtonFontFamily(nativeNode, fontFamily.c_str());
+    auto familiesRawPtr = AceType::RawPtr(familiesResObj);
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonFontFamilyPtr(
+        nativeNode, fontFamily.c_str(), familiesRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -359,11 +363,13 @@ ArkUINativeModuleValue ButtonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *ru
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
         GetArkUINodeModifiers()->getButtonModifier()->resetButtonBackgroundColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getButtonModifier()->setButtonBackgroundColorWithColorSpace(
-            nativeNode, color.GetValue(), color.GetColorSpace());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getButtonModifier()->setButtonBackgroundColorWithColorSpacePtr(
+            nativeNode, color.GetValue(), color.GetColorSpace(), colorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -498,9 +504,27 @@ ArkUINativeModuleValue ButtonBridge::SetLabelStyle(ArkUIRuntimeCallInfo* runtime
     dataCountVector.push_back(stringParameters.size());
     dataCountVector.push_back(valuesVector.size());
     dataCountVector.push_back(fontSizesVector.size());
-    GetArkUINodeModifiers()->getButtonModifier()->setButtonLabelStyle(
-        nativeNode, stringParameters.data(), valuesVector.data(), fontSizesVector.data(), dataCountVector.data());
+
+    ArkUIButtonSizeStruct sizeResObj;
+    auto maxFontSizeResObj = ParseFontSizeResObj(runtimeCallInfo, vm, MAX_FONT_SIZE_ARG_4);
+    sizeResObj.maxFontSize = AceType::RawPtr(maxFontSizeResObj);
+    auto minFontSizeResObj = ParseFontSizeResObj(runtimeCallInfo, vm, MIN_FONT_SIZE_ARG_3);
+    sizeResObj.minFontSize = AceType::RawPtr(minFontSizeResObj);
+
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonLabelStylePtr(
+        nativeNode, stringParameters.data(), valuesVector.data(), fontSizesVector.data(),
+        dataCountVector.data(), sizeResObj);
     return panda::JSValueRef::Undefined(vm);
+}
+
+RefPtr<ResourceObject> ButtonBridge::ParseFontSizeResObj(ArkUIRuntimeCallInfo* runtimeCallInfo,
+    EcmaVM* vm, int32_t argIndex)
+{
+    Local<JSValueRef> arg = runtimeCallInfo->GetCallArgRef(argIndex);
+    CalcDimension parsedDimension;
+    RefPtr<ResourceObject> resObj;
+    ArkTSUtils::ParseJsDimensionFp(vm, arg, parsedDimension, resObj, false);
+    return resObj;
 }
 
 ArkUINativeModuleValue ButtonBridge::ResetLabelStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -798,17 +822,20 @@ ArkUINativeModuleValue ButtonBridge::SetMinFontScale(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     double minFontScale;
-    if (!ArkTSUtils::ParseJsDouble(vm, secondArg, minFontScale)) {
+    RefPtr<ResourceObject> doubleResObj;
+    if (!ArkTSUtils::ParseJsDouble(vm, secondArg, minFontScale, doubleResObj)) {
         return panda::JSValueRef::Undefined(vm);
     }
+    auto doubleRawPtr = AceType::RawPtr(doubleResObj);
     if (LessOrEqual(minFontScale, 0.0f)) {
-        GetArkUINodeModifiers()->getButtonModifier()->setButtonMinFontScale(
-            nativeNode, static_cast<float>(minFontScale));
+        GetArkUINodeModifiers()->getButtonModifier()->setButtonMinFontScalePtr(
+            nativeNode, static_cast<float>(minFontScale), doubleRawPtr);
         minFontScale = 0.0f;
     } else if (GreatOrEqual(minFontScale, 1.0f)) {
         minFontScale = 1.0f;
     }
-    GetArkUINodeModifiers()->getButtonModifier()->setButtonMinFontScale(nativeNode, static_cast<float>(minFontScale));
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonMinFontScalePtr(
+        nativeNode, static_cast<float>(minFontScale), doubleRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -832,13 +859,16 @@ ArkUINativeModuleValue ButtonBridge::SetMaxFontScale(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     double maxFontScale;
-    if (!ArkTSUtils::ParseJsDouble(vm, secondArg, maxFontScale)) {
+    RefPtr<ResourceObject> doubleResObj;
+    if (!ArkTSUtils::ParseJsDouble(vm, secondArg, maxFontScale, doubleResObj)) {
         return panda::JSValueRef::Undefined(vm);
     }
     if (LessOrEqual(maxFontScale, 1.0f)) {
         maxFontScale = 1.0f;
     }
-    GetArkUINodeModifiers()->getButtonModifier()->setButtonMaxFontScale(nativeNode, static_cast<float>(maxFontScale));
+    auto doubleRawPtr = AceType::RawPtr(doubleResObj);
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonMaxFontScalePtr(
+        nativeNode, static_cast<float>(maxFontScale), doubleRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 

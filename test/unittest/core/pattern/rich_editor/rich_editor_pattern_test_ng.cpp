@@ -418,4 +418,47 @@ HWTEST_F(RichEditorPatternTestNg, UpdateSelectorOnHandleMove001, TestSize.Level1
     richEditorPattern->textSelector_.Update(0, testNumber5);
     richEditorPattern->selectOverlay_->UpdateSelectorOnHandleMove(offsetF, true);
 }
+
+/**
+ * @tc.name: DeleteToMaxLength001
+ * @tc.desc: test DeleteToMaxLength001
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, DeleteToMaxLength001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call function
+     */
+    richEditorPattern->DeleteToMaxLength(std::nullopt);
+    ASSERT_EQ(richEditorPattern->previewLongPress_, false);
+}
+
+/**
+ * @tc.name: DeleteToMaxLength002
+ * @tc.desc: test DeleteToMaxLength002
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, DeleteToMaxLength002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call function
+     */
+    int len = richEditorPattern->GetTextContentLength() - 1;
+    richEditorPattern->DeleteToMaxLength(len);
+    ASSERT_EQ(richEditorPattern->previewLongPress_, false);
+}
 } // namespace

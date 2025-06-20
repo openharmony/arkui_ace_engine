@@ -20,6 +20,8 @@
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "frameworks/core/common/resource/resource_parse_utils.h"
+#include "test/mock/base/mock_system_properties.h"
 
 namespace OHOS::Ace::NG {
 
@@ -225,5 +227,104 @@ HWTEST_F(TabsModelTestNg, SetBarBackgroundEffect002, TestSize.Level1)
     effectOption.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
     model.SetBarBackgroundEffect(frameNode, effectOption);
     EXPECT_FALSE(pipe->onWindowFocusChangedCallbacks_.empty());
+}
+
+/**
+ * @tc.name: HandleBarGridGutterTest001
+ * @tc.desc: Verify TabsModelNG::HandleBarGridGutter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModelTestNg, HandleBarGridGutterTest001, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+    TabsModelNG model = CreateTabs();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    BarGridColumnOptions columnOption;
+    tabBarLayoutProperty_->UpdateBarGridAlign(columnOption);
+    model.HandleBarGridGutter(frameNode, resObj);
+    pattern_->resourceMgr_->ReloadResources();
+    ASSERT_NE(tabBarLayoutProperty_, nullptr);
+    EXPECT_TRUE(tabBarLayoutProperty_->GetBarGridAlign().has_value());
+
+    ResourceObjectParams param;
+    param.type = ResourceObjectParamType::STRING;
+    param.value = "0";
+    std::vector<ResourceObjectParams> params;
+    params.push_back(param);
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        -1, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    model.HandleBarGridGutter(frameNode, resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(tabBarLayoutProperty_->GetBarGridAlign()->gutter, Dimension(0.0_vp));
+    CreateDone();
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: HandleBarGridMarginTest001
+ * @tc.desc: Verify TabsModelNG::HandleBarGridMargin
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModelTestNg, HandleBarGridMarginTest001, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+    TabsModelNG model = CreateTabs();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    BarGridColumnOptions columnOption;
+    tabBarLayoutProperty_->UpdateBarGridAlign(columnOption);
+    model.HandleBarGridMargin(frameNode, resObj);
+    pattern_->resourceMgr_->ReloadResources();
+    ASSERT_NE(tabBarLayoutProperty_, nullptr);
+    EXPECT_TRUE(tabBarLayoutProperty_->GetBarGridAlign().has_value());
+
+    ResourceObjectParams param;
+    param.type = ResourceObjectParamType::STRING;
+    param.value = "0";
+    std::vector<ResourceObjectParams> params;
+    params.push_back(param);
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        -1, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    model.HandleBarGridMargin(frameNode, resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(tabBarLayoutProperty_->GetBarGridAlign()->margin, Dimension(0.0_vp));
+    CreateDone();
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: HandleScrollableBarMarginTest001
+ * @tc.desc: Verify TabsModelNG::HandleScrollableBarMargin
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModelTestNg, HandleScrollableBarMarginTest001, TestSize.Level1)
+{
+    g_isConfigChangePerform = true;
+    TabsModelNG model = CreateTabs();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    ScrollableBarModeOptions option;
+    tabBarLayoutProperty_->UpdateScrollableBarModeOptions(option);
+    model.HandleScrollableBarMargin(frameNode, resObj);
+    pattern_->resourceMgr_->ReloadResources();
+    ASSERT_NE(tabBarLayoutProperty_, nullptr);
+    EXPECT_TRUE(tabBarLayoutProperty_->GetScrollableBarModeOptions().has_value());
+
+    ResourceObjectParams param;
+    param.type = ResourceObjectParamType::STRING;
+    param.value = "0";
+    std::vector<ResourceObjectParams> params;
+    params.push_back(param);
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        -1, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    model.HandleScrollableBarMargin(frameNode, resObjWithString);
+    pattern_->resourceMgr_->ReloadResources();
+    EXPECT_EQ(tabBarLayoutProperty_->GetScrollableBarModeOptions()->margin, Dimension(0.0_vp));
+    CreateDone();
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

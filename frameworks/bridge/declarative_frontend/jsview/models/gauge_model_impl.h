@@ -47,6 +47,7 @@ public:
     void ResetIndicatorIconPath() override {}
     void ResetIndicatorSpace() override {}
     void CreateWithResourceObj(GaugeResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override {};
+    void SetUseGradient(bool useGradient) override {};
 };
 
 } // namespace OHOS::Ace::Framework

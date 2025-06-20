@@ -320,6 +320,7 @@ HWTEST_F(RichEditorControllerTest, RichEditorModel017, TestSize.Level1)
     // test paragraph style linebreakstrategy default value
     richEditorController->AddTextSpan(options);
     auto info = richEditorController->GetParagraphsInfo(1, sizeof(INIT_VALUE_1));
+    CHECK_NULL_VOID(!info.empty());
     auto hasTextVerticalAlign = info[0].textVerticalAlign.has_value();
     EXPECT_FALSE(hasTextVerticalAlign);
 

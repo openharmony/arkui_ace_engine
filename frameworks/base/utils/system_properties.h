@@ -746,6 +746,11 @@ public:
 
     static int32_t getFormSharedImageCacheThreshold();
 
+    static bool IsWhiteBlockEnabled();
+    static bool IsWhiteBlockIdleChange();
+    static int32_t GetWhiteBlockIndexValue();
+    static int32_t GetWhiteBlockCacheCountValue();
+
     static WidthLayoutBreakPoint GetWidthLayoutBreakpoints()
     {
         return widthLayoutBreakpoints_;
@@ -856,6 +861,7 @@ private:
     static WidthLayoutBreakPoint widthLayoutBreakpoints_;
     static HeightLayoutBreakPoint heightLayoutBreakpoints_;
     static bool syncLoadEnabled_;
+    static bool whiteBlockEnabled_;
 };
 
 } // namespace OHOS::Ace

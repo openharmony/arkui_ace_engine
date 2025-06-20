@@ -427,6 +427,7 @@ template("declarative_js_engine") {
       "sharedata/js_share_data.cpp",
       "style_string/js_span_object.cpp",
       "style_string/js_span_string.cpp",
+      "style_string/js_text_layout.cpp",
       "view_stack_processor.cpp",
 
       # ark_theme
@@ -540,6 +541,9 @@ template("declarative_js_engine") {
     }
 
     external_deps = [ "graphic_2d:drawing_napi_impl" ]
+    if (!build_ohos_sdk) {
+      external_deps += [ "graphic_2d:text_napi_impl" ]
+    }
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }
@@ -992,6 +996,7 @@ template("declarative_js_engine_ng") {
       "jsview/text_menu/js_text_menu.cpp",
       "style_string/js_span_object.cpp",
       "style_string/js_span_string.cpp",
+      "style_string/js_text_layout.cpp",
 
       # ark_theme
       "ark_theme/theme_apply/js_with_theme.cpp",
@@ -1010,7 +1015,7 @@ template("declarative_js_engine_ng") {
       "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
     ]
 
-    external_deps = [ "graphic_2d:drawing_napi_impl" ]
+    external_deps = ["graphic_2d:drawing_napi_impl", "graphic_2d:text_napi_impl"]
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }

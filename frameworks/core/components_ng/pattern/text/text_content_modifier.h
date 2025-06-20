@@ -183,6 +183,8 @@ private:
     void DrawTextRacing(DrawingContext& drawingContext, const FadeoutInfo& info, RefPtr<ParagraphManager> pManager);
     void DrawText(RSCanvas& canvas, RefPtr<ParagraphManager> pManager);
     void DrawContent(DrawingContext& drawingContext, const FadeoutInfo& info);
+    void DrawActualText(DrawingContext& drawingContext, const RefPtr<TextPattern>& textPattern,
+        const RefPtr<ParagraphManager>& pManager, const FadeoutInfo& fadeoutInfo);
     void DrawFadeout(DrawingContext& drawingContext, const FadeoutInfo& info);
     FadeoutInfo GetFadeoutInfo(DrawingContext& drawingContext);
     float GetFadeoutPercent();

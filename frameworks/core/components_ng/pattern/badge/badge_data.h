@@ -53,6 +53,15 @@ struct BadgeParameters {
     RefPtr<ResourceObject> resourceBadgePositionXObject;
     RefPtr<ResourceObject> resourceBadgePositionYObject;
     RefPtr<ResourceObject> resourceBorderWidthObject;
+    
+    bool badgePositionXByUser = false;
+    bool badgePositionYByUser = false;
+    bool badgeTextColorByUser = false;
+    bool badgeFontSizeByUser = false;
+    bool badgeCircleSizeByUser = false;
+    bool badgeColorByUser = false;
+    bool badgeBorderWidthByUser = false;
+    bool badgeBorderColorByUser = false;
 };
 } // namespace OHOS::Ace
 

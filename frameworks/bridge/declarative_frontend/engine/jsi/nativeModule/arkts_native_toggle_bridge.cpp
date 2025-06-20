@@ -199,10 +199,14 @@ ArkUINativeModuleValue ToggleBridge::SetSelectedColor(ArkUIRuntimeCallInfo* runt
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     Color color;
-    if (colorArg->IsNull() || colorArg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (colorArg->IsNull() || colorArg->IsUndefined() ||
+        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj)) {
         GetArkUINodeModifiers()->getToggleModifier()->resetToggleSelectedColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getToggleModifier()->setToggleSelectedColor(nativeNode, color.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getToggleModifier()->setToggleSelectedColorPtr(
+            nativeNode, color.GetValue(), colorRawPtr);
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -227,10 +231,14 @@ ArkUINativeModuleValue ToggleBridge::SetSwitchPointColor(ArkUIRuntimeCallInfo* r
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     Color color;
-    if (colorArg->IsNull() || colorArg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (colorArg->IsNull() || colorArg->IsUndefined() ||
+        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj)) {
         GetArkUINodeModifiers()->getToggleModifier()->resetToggleSwitchPointColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getToggleModifier()->setToggleSwitchPointColor(nativeNode, color.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getToggleModifier()->setToggleSwitchPointColorPtr(
+            nativeNode, color.GetValue(), colorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -255,39 +263,69 @@ ArkUINativeModuleValue ToggleBridge::SetSwitchStyle(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> unselectedColorArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_2);
     Local<JSValueRef> pointColorArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_3);
     Local<JSValueRef> trackRadiusArg = runtimeCallInfo->GetCallArgRef(INDEX_ARGUMENT_4);
-    CalcDimension pointRadius;
-    if (!pointRadiusArg->IsUndefined() &&
-        ArkTSUtils::ParseJsDimensionNG(vm, pointRadiusArg, pointRadius, DimensionUnit::VP) &&
-        !pointRadius.IsNegative()) {
-        GetArkUINodeModifiers()->getToggleModifier()->setTogglePointRadius(
-            nativeNode, pointRadius.Value(), static_cast<int>(pointRadius.Unit()));
-    } else {
-        GetArkUINodeModifiers()->getToggleModifier()->resetTogglePointRadius(nativeNode);
-    }
-    Color unselectedColor;
-    if (unselectedColorArg->IsNull() || unselectedColorArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, unselectedColorArg, unselectedColor)) {
-        GetArkUINodeModifiers()->getToggleModifier()->resetToggleUnselectedColor(nativeNode);
-    } else {
-        GetArkUINodeModifiers()->getToggleModifier()->setToggleUnselectedColor(nativeNode, unselectedColor.GetValue());
-    }
-    Color pointColor;
-    if (pointColorArg->IsNull() || pointColorArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, pointColorArg, pointColor)) {
-        GetArkUINodeModifiers()->getToggleModifier()->resetToggleSwitchPointColor(nativeNode);
-    } else {
-        GetArkUINodeModifiers()->getToggleModifier()->setToggleSwitchPointColor(nativeNode, pointColor.GetValue());
-    }
-    CalcDimension trackRadius;
-    if (!trackRadiusArg->IsUndefined() &&
-        ArkTSUtils::ParseJsDimensionNG(vm, trackRadiusArg, trackRadius, DimensionUnit::VP) &&
-        !trackRadius.IsNegative()) {
-        GetArkUINodeModifiers()->getToggleModifier()->setToggleTrackBorderRadius(
-            nativeNode, trackRadius.Value(), static_cast<int>(trackRadius.Unit()));
-    } else {
-        GetArkUINodeModifiers()->getToggleModifier()->resetToggleTrackBorderRadius(nativeNode);
-    }
+    SetPointRadius(vm, nativeNode, pointRadiusArg);
+    SetUnselectedColor(vm, nativeNode, unselectedColorArg);
+    SetPointColor(vm, nativeNode, pointColorArg);
+    SetTrackRadius(vm, nativeNode, trackRadiusArg);
     return panda::JSValueRef::Undefined(vm);
+}
+
+void ToggleBridge::SetPointRadius(const EcmaVM* vm, ArkUINodeHandle nativeNode, const Local<JSValueRef>& arg)
+{
+    CHECK_NULL_VOID(vm);
+    CalcDimension pointRadius;
+    RefPtr<ResourceObject> resObj;
+    if (!arg->IsUndefined() && ArkTSUtils::ParseJsDimensionVpNG(vm, arg, pointRadius, resObj) &&
+        !pointRadius.IsNegative()) {
+        auto pointRadiusRawPtr = AceType::RawPtr(resObj);
+        GetArkUINodeModifiers()->getToggleModifier()->setTogglePointRadiusPtr(
+            nativeNode, pointRadius.Value(), static_cast<int>(pointRadius.Unit()), pointRadiusRawPtr);
+        return;
+    }
+    GetArkUINodeModifiers()->getToggleModifier()->resetTogglePointRadius(nativeNode);
+}
+
+void ToggleBridge::SetUnselectedColor(const EcmaVM* vm, ArkUINodeHandle nativeNode, const Local<JSValueRef>& arg)
+{
+    CHECK_NULL_VOID(vm);
+    Color unselectedColor;
+    RefPtr<ResourceObject> resObj;
+    if (arg->IsNull() || arg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, arg, unselectedColor, resObj)) {
+        GetArkUINodeModifiers()->getToggleModifier()->resetToggleUnselectedColor(nativeNode);
+        return;
+    }
+    auto colorRawPtr = AceType::RawPtr(resObj);
+    GetArkUINodeModifiers()->getToggleModifier()->setToggleUnselectedColorPtr(
+        nativeNode, unselectedColor.GetValue(), colorRawPtr);
+}
+
+void ToggleBridge::SetPointColor(const EcmaVM* vm, ArkUINodeHandle nativeNode, const Local<JSValueRef>& arg)
+{
+    CHECK_NULL_VOID(vm);
+    Color pointColor;
+    RefPtr<ResourceObject> resObj;
+    if (arg->IsNull() || arg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, arg, pointColor, resObj)) {
+        GetArkUINodeModifiers()->getToggleModifier()->resetToggleSwitchPointColor(nativeNode);
+        return;
+    }
+    auto colorRawPtr = AceType::RawPtr(resObj);
+    GetArkUINodeModifiers()->getToggleModifier()->setToggleSwitchPointColorPtr(
+        nativeNode, pointColor.GetValue(), colorRawPtr);
+}
+
+void ToggleBridge::SetTrackRadius(const EcmaVM* vm, ArkUINodeHandle nativeNode, const Local<JSValueRef>& arg)
+{
+    CHECK_NULL_VOID(vm);
+    CalcDimension trackRadius;
+    RefPtr<ResourceObject> resObj;
+    if (!arg->IsUndefined() && ArkTSUtils::ParseJsDimensionVpNG(vm, arg, trackRadius, resObj) &&
+        !trackRadius.IsNegative()) {
+        auto radiusRawPtr = AceType::RawPtr(resObj);
+        GetArkUINodeModifiers()->getToggleModifier()->setToggleTrackBorderRadiusPtr(
+            nativeNode, trackRadius.Value(), static_cast<int>(trackRadius.Unit()), radiusRawPtr);
+        return;
+    }
+    GetArkUINodeModifiers()->getToggleModifier()->resetToggleTrackBorderRadius(nativeNode);
 }
 
 ArkUINativeModuleValue ToggleBridge::ResetSwitchStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -475,6 +513,37 @@ ArkUINativeModuleValue ToggleBridge::ParseParams(ArkUIRuntimeCallInfo* runtimeCa
             toggleParams->isOn = isOnArg->ToBoolean(vm)->Value();
         }
     }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ToggleBridge::SetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(INDEX_FRAME_NODE_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    bool isLengthMetrics = ArkTSUtils::ParseMargin(runtimeCallInfo, top, right, bottom, left);
+    if (isLengthMetrics) {
+        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+        GetArkUINodeModifiers()->getToggleModifier()->setToggleMargin(
+            nativeNode, &top, isRightToLeft ? &left : &right, &bottom, isRightToLeft ? &right : &left);
+    } else {
+        GetArkUINodeModifiers()->getToggleModifier()->setToggleMargin(nativeNode, &top, &right, &bottom, &left);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ToggleBridge::ResetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getToggleModifier()->resetToggleMargin(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

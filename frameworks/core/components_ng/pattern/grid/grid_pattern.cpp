@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
+#include "base/utils/system_properties.h"
 #include "base/log/dump_log.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
@@ -29,6 +30,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -390,7 +392,11 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
 void GridPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex)
 {
     CHECK_NULL_VOID(indexChanged && onScrollIndex);
-    onScrollIndex(info_.startIndex_, info_.endIndex_);
+    int32_t endIndex = info_.endIndex_;
+    if (SystemProperties::IsWhiteBlockEnabled()) {
+        endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(info_.endIndex_);
+    }
+    onScrollIndex(info_.startIndex_, endIndex);
 }
 
 SizeF GridPattern::GetContentSize() const
@@ -508,19 +514,19 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto gridLayoutAlgorithm = DynamicCast<GridLayoutBaseAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(gridLayoutAlgorithm, false);
     const auto& gridLayoutInfo = gridLayoutAlgorithm->GetGridLayoutInfo();
-    auto eventhub = GetOrCreateEventHub<GridEventHub>();
-    CHECK_NULL_RETURN(eventhub, false);
-    Dimension offset(0, DimensionUnit::VP);
-    Dimension offsetPx(gridLayoutInfo.currentOffset_, DimensionUnit::PX);
-    auto offsetVpValue = offsetPx.ConvertToVp();
-    offset.SetValue(offsetVpValue);
-    scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, offset);
-    if (!isInitialized_ || info_.startIndex_ != gridLayoutInfo.startIndex_) {
-        eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
+    if (!gridLayoutAlgorithm->MeasureInNextFrame()) {
+        auto eventhub = GetOrCreateEventHub<GridEventHub>();
+        CHECK_NULL_RETURN(eventhub, false);
+        Dimension offset(0, DimensionUnit::VP);
+        Dimension offsetPx(gridLayoutInfo.currentOffset_, DimensionUnit::PX);
+        auto offsetVpValue = offsetPx.ConvertToVp();
+        offset.SetValue(offsetVpValue);
+        scrollbarInfo_ = eventhub->FireOnScrollBarUpdate(gridLayoutInfo.startIndex_, offset);
+        if (!isInitialized_ || startIndex_ != gridLayoutInfo.startIndex_) {
+            eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
+        }
     }
 
-    bool indexChanged =
-        (gridLayoutInfo.startIndex_ != info_.startIndex_) || (gridLayoutInfo.endIndex_ != info_.endIndex_);
     bool offsetEnd = info_.offsetEnd_;
     mainSizeChanged_ = info_.lastMainSize_ - gridLayoutInfo.lastMainSize_;
     info_ = gridLayoutInfo;
@@ -537,8 +543,20 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (info_.offsetEnd_ && (!offsetEnd || !NearZero(mainSizeChanged_))) {
         endHeight_ = GetTotalHeight() - GetMainContentSize();
     }
-    ProcessEvent(indexChanged, info_.currentHeight_ - info_.prevHeight_);
-    info_.prevHeight_ = info_.currentHeight_;
+    if (!gridLayoutAlgorithm->MeasureInNextFrame()) {
+        bool indexChanged = (startIndex_ != info_.startIndex_) || (endIndex_ != info_.endIndex_);
+        ProcessEvent(indexChanged, info_.currentHeight_ - info_.prevHeight_);
+        info_.prevHeight_ = info_.currentHeight_;
+        startIndex_ = info_.startIndex_;
+        endIndex_ = info_.endIndex_;
+        if (isConfigScrollable_) {
+            focusHandler_.ProcessFocusEvent(keyEvent_, indexChanged);
+        }
+    }
+    if (isSmoothScrolling_ && scrollStop_) {
+        isSmoothScrolling_ = false;
+    }
+
     info_.extraOffset_.reset();
     UpdateScrollBarOffset();
     SetScrollSource(SCROLL_FROM_NONE);
@@ -552,10 +570,12 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     CheckScrollable();
     MarkSelectedItems();
-    isInitialized_ = true;
+
     if (gridLayoutAlgorithm->MeasureInNextFrame()) {
         ACE_SCOPED_TRACE("Grid MeasureInNextFrame");
         MarkDirtyNodeSelf();
+    } else {
+        isInitialized_ = true;
     }
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
@@ -624,11 +644,6 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     auto onScrollStop = gridEventHub->GetOnScrollStop();
     auto onJSFrameNodeScrollStop = gridEventHub->GetJSFrameNodeOnScrollStop();
     OnScrollStop(onScrollStop, onJSFrameNodeScrollStop);
-    if (isSmoothScrolling_ && scrollStop_) {
-        isSmoothScrolling_ = false;
-    }
-    CHECK_NULL_VOID(isConfigScrollable_);
-    focusHandler_.ProcessFocusEvent(keyEvent_, indexChanged);
 }
 
 void GridPattern::MarkDirtyNodeSelf()

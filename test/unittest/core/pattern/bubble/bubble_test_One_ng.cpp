@@ -840,13 +840,12 @@ HWTEST_F(BubbleTestOneNg, FitToScreenNew001, TestSize.Level1)
     ASSERT_NE(layoutAlgorithm, nullptr);
     size_t index = 0;
     SizeF childSize;
-    OffsetF arrowPosition;
-    OffsetF testF = layoutAlgorithm->FitToScreenNew(OffsetF(10.0f, 10.0f), 0, index, childSize, arrowPosition);
+    OffsetF testF = layoutAlgorithm->FitToScreenNew(OffsetF(10.0f, 10.0f), 0, index, childSize);
     EXPECT_EQ(testF, OffsetF(0.0f, 0.0f));
-    testF = layoutAlgorithm->FitToScreenNew(OffsetF(0.0f, 0.0f), 0, index, childSize, arrowPosition, true);
+    testF = layoutAlgorithm->FitToScreenNew(OffsetF(0.0f, 0.0f), 0, index, childSize, true);
     EXPECT_EQ(testF, OffsetF(0.0f, 0.0f));
     layoutAlgorithm->arrowPlacement_ = Placement::BOTTOM;
-    testF = layoutAlgorithm->FitToScreenNew(OffsetF(0.0f, 0.0f), 0, index, childSize, arrowPosition, true);
+    testF = layoutAlgorithm->FitToScreenNew(OffsetF(0.0f, 0.0f), 0, index, childSize, true);
     EXPECT_EQ(testF, OffsetF(0.0f, 0.0f));
 }
 

@@ -187,6 +187,7 @@ ace_wearable_defines = [ "WEARABLE_PRODUCT" ]
 ace_ivi_defines = [ "IVI_PRODUCT" ]
 
 ace_common_defines = [ "ACE_LOG_TAG=\"Ace\"" ]
+ace_common_defines += [ "MODIFIER_NG" ]
 
 if (use_hilog) {
   ace_common_defines += [ "USE_HILOG" ]

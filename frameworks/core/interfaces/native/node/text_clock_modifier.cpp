@@ -19,13 +19,14 @@
 #include "core/components_ng/pattern/text_clock/text_clock_event_hub.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/components_ng/pattern/text_clock/text_clock_pattern.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
 constexpr Dimension DEFAULT_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
-const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
+const std::string DEFAULT_FONT_FAMILY_CLOCK = "HarmonyOS Sans";
 
 namespace TextClockModifier {
 void SetFormat(ArkUINodeHandle node, ArkUI_CharPtr format)
@@ -35,11 +36,26 @@ void SetFormat(ArkUINodeHandle node, ArkUI_CharPtr format)
     TextClockModelNG::SetFormat(frameNode, format);
 }
 
+void SetFormatRes(ArkUINodeHandle node, ArkUI_CharPtr format, void* formatRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextClockModelNG::SetFormat(frameNode, format);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* format = reinterpret_cast<ResourceObject*>(formatRawPtr);
+        auto formatResObj = AceType::Claim(format);
+        TextClockModelNG::CreateWithFormatResourceObj(frameNode, formatResObj);
+    }
+}
+
 void ResetFormat(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextClockModelNG::SetFormat(frameNode, "");
+    if (SystemProperties::ConfigChangePerform()) {
+        TextClockModelNG::CreateWithFormatResourceObj(frameNode, nullptr);
+    }
 }
 
 void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color)
@@ -47,6 +63,18 @@ void SetFontColor(ArkUINodeHandle node, ArkUI_Uint32 color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextClockModelNG::SetFontColor(frameNode, Color(color));
+}
+
+void SetFontColorRes(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontColorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextClockModelNG::SetFontColor(frameNode, Color(color));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* fontColor = reinterpret_cast<ResourceObject*>(fontColorRawPtr);
+        auto pathColorResObj = AceType::Claim(fontColor);
+        TextClockModelNG::CreateWithTextColorResourceObj(frameNode, pathColorResObj);
+    }
 }
 
 void ResetFontColor(ArkUINodeHandle node)
@@ -58,6 +86,10 @@ void ResetFontColor(ArkUINodeHandle node)
     auto theme = pipelineContext->GetTheme<TextClockTheme>();
     CHECK_NULL_VOID(theme);
     TextClockModelNG::SetFontColor(frameNode, theme->GetTextParseFailedColor());
+    if (SystemProperties::ConfigChangePerform()) {
+        TextClockModelNG::SetFontColorByUser(frameNode, false);
+        TextClockModelNG::CreateWithTextColorResourceObj(frameNode, nullptr);
+    }
 }
 
 void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSizeValue, ArkUI_Int32 fontSizeUnit)
@@ -67,11 +99,26 @@ void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 fontSizeValue, ArkUI_Int32 
     TextClockModelNG::SetFontSize(frameNode, CalcDimension(fontSizeValue, (DimensionUnit)fontSizeUnit));
 }
 
+void SetFontSizeRes(ArkUINodeHandle node, ArkUI_Float32 fontSizeValue, ArkUI_Int32 fontSizeUnit, void* fontSizeRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextClockModelNG::SetFontSize(frameNode, CalcDimension(fontSizeValue, (DimensionUnit)fontSizeUnit));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* fontSize = reinterpret_cast<ResourceObject*>(fontSizeRawPtr);
+        auto pathFontSizeResObj = AceType::Claim(fontSize);
+        TextClockModelNG::CreateWithFontSizeResourceObj(frameNode, pathFontSizeResObj);
+    }
+}
+
 void ResetFontSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextClockModelNG::SetFontSize(frameNode, DEFAULT_FONT_SIZE);
+    if (SystemProperties::ConfigChangePerform()) {
+        TextClockModelNG::CreateWithFontSizeResourceObj(frameNode, nullptr);
+    }
 }
 
 void SetFontStyle(ArkUINodeHandle node, ArkUI_Uint32 fontStyle)
@@ -96,11 +143,27 @@ void SetFontWeight(ArkUINodeHandle node, ArkUI_CharPtr fontWeight)
     TextClockModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeightStr));
 }
 
+void SetFontWeightRes(ArkUINodeHandle node, ArkUI_CharPtr fontWeight, void* fontWeightRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string fontWeightStr = fontWeight;
+    TextClockModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeightStr));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* fontWeight = reinterpret_cast<ResourceObject*>(fontWeightRawPtr);
+        auto pathFontWeightResObj = AceType::Claim(fontWeight);
+        TextClockModelNG::CreateWithFontWeightResourceObj(frameNode, pathFontWeightResObj);
+    }
+}
+
 void ResetFontWeight(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextClockModelNG::SetFontWeight(frameNode, DEFAULT_FONT_WEIGHT);
+    if (SystemProperties::ConfigChangePerform()) {
+        TextClockModelNG::CreateWithFontWeightResourceObj(frameNode, nullptr);
+    }
 }
 
 void SetFontFamily(ArkUINodeHandle node, ArkUI_CharPtr fontFamily)
@@ -112,13 +175,30 @@ void SetFontFamily(ArkUINodeHandle node, ArkUI_CharPtr fontFamily)
     TextClockModelNG::SetFontFamily(frameNode, fontFamilyResult);
 }
 
+void SetFontFamilyRes(ArkUINodeHandle node, ArkUI_CharPtr fontFamily, void* fontFamilyRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string familiesStr = fontFamily;
+    std::vector<std::string> fontFamilyResult = Framework::ConvertStrToFontFamilies(familiesStr);
+    TextClockModelNG::SetFontFamily(frameNode, fontFamilyResult);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* fontFamily = reinterpret_cast<ResourceObject*>(fontFamilyRawPtr);
+        auto pathFontFamilyResObj = AceType::Claim(fontFamily);
+        TextClockModelNG::CreateWithFontFamilyResourceObj(frameNode, pathFontFamilyResObj);
+    }
+}
+
 void ResetFontFamily(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::string familiesStr = DEFAULT_FONT_FAMILY;
+    std::string familiesStr = DEFAULT_FONT_FAMILY_CLOCK;
     std::vector<std::string> fontFamilyResult = Framework::ConvertStrToFontFamilies(familiesStr);
     TextClockModelNG::SetFontFamily(frameNode, fontFamilyResult);
+    if (SystemProperties::ConfigChangePerform()) {
+        TextClockModelNG::CreateWithFontFamilyResourceObj(frameNode, nullptr);
+    }
 }
 
 void SetTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length)
@@ -136,6 +216,103 @@ void SetTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, 
         shadow.SetOffsetX(shadowStruct->offsetX);
         shadow.SetOffsetY(shadowStruct->offsetY);
         shadow.SetIsFilled(static_cast<bool>(shadowStruct->fill));
+        shadowList.at(i) = shadow;
+    }
+    TextClockModelNG::SetTextShadow(frameNode, shadowList);
+}
+
+void ParseShadowRadiusUpdate(const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow)
+{
+    if (!radiusResObj) {
+        return;
+    }
+    auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, Shadow& shadow) {
+        double radius = 0.0;
+        ResourceParseUtils::ParseResDouble(resObj, radius);
+        shadow.SetBlurRadius(std::max(radius, 0.0));
+    };
+    shadow.AddResource("shadow.radius", radiusResObj, std::move(updateFunc));
+}
+
+void ParseShadowColorUpdate(const RefPtr<ResourceObject>& colorResObj, Shadow& shadow)
+{
+    if (!colorResObj) {
+        return;
+    }
+    auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, Shadow& shadow) {
+        Color color;
+        ResourceParseUtils::ParseResColor(resObj, color);
+        shadow.SetColor(color);
+    };
+    shadow.AddResource("shadow.colorValue", colorResObj, std::move(updateFunc));
+}
+
+void ParseShadowOffsetXUpdate(const RefPtr<ResourceObject>& offsetXResObj, Shadow& shadow)
+{
+    if (!offsetXResObj) {
+        return;
+    }
+    auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, Shadow& shadow) {
+        CalcDimension xValue;
+        ResourceParseUtils::ParseResResource(resObj, xValue);
+        shadow.SetOffsetX(xValue.Value());
+    };
+    shadow.AddResource("shadow.offsetX", offsetXResObj, std::move(updateFunc));
+}
+
+void ParseShadowOffsetYUpdate(const RefPtr<ResourceObject>& offsetYResObj, Shadow& shadow)
+{
+    if (!offsetYResObj) {
+        return;
+    }
+    auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, Shadow& shadow) {
+        CalcDimension yValue;
+        ResourceParseUtils::ParseResResource(resObj, yValue);
+        shadow.SetOffsetY(yValue.Value());
+    };
+    shadow.AddResource("shadow.offsetY", offsetYResObj, std::move(updateFunc));
+}
+
+void SetTextShadowRes(
+    ArkUINodeHandle node, ArkUITextShadowStruct* shadows, ArkUITextShadowResStruct* shadowsRes, ArkUI_Uint32 length)
+{
+    CHECK_NULL_VOID(shadows);
+    CHECK_NULL_VOID(shadowsRes);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<Shadow> shadowList(length);
+    for (uint32_t i = 0; i < length; i++) {
+        Shadow shadow;
+        ArkUITextShadowStruct* shadowStruct = &shadows[i];
+        ArkUITextShadowResStruct* shadowResStruct = &shadowsRes[i];
+        shadow.SetBlurRadius(shadowStruct->radius);
+        shadow.SetShadowType(static_cast<ShadowType>(shadowStruct->type));
+        shadow.SetColor(Color(shadowStruct->color));
+        shadow.SetOffsetX(shadowStruct->offsetX);
+        shadow.SetOffsetY(shadowStruct->offsetY);
+        shadow.SetIsFilled(static_cast<bool>(shadowStruct->fill));
+        if (SystemProperties::ConfigChangePerform()) {
+            auto* radius = shadowResStruct->radiusResObj ?
+                reinterpret_cast<ResourceObject*>(shadowResStruct->radiusResObj) : nullptr;
+            if (radius) {
+                ParseShadowRadiusUpdate(AceType::Claim(radius), shadow);
+            }
+            auto* color = shadowResStruct->colorResObj ?
+                reinterpret_cast<ResourceObject*>(shadowResStruct->colorResObj) : nullptr;
+                if (color) {
+                ParseShadowColorUpdate(AceType::Claim(color), shadow);
+            }
+            auto* offsetX = shadowResStruct->offsetXResObj ?
+                reinterpret_cast<ResourceObject*>(shadowResStruct->offsetXResObj) : nullptr;
+            if (offsetX) {
+                ParseShadowOffsetXUpdate(AceType::Claim(offsetX), shadow);
+            }
+            auto* offsetY = shadowResStruct->offsetYResObj ?
+                reinterpret_cast<ResourceObject*>(shadowResStruct->offsetYResObj) : nullptr;
+            if (offsetY) {
+                ParseShadowOffsetYUpdate(AceType::Claim(offsetY), shadow);
+            }
+        }
         shadowList.at(i) = shadow;
     }
     TextClockModelNG::SetTextShadow(frameNode, shadowList);
@@ -216,18 +393,24 @@ const ArkUITextClockModifier* GetTextClockModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUITextClockModifier modifier = {
         .setFormat = TextClockModifier::SetFormat,
+        .setFormatRes = TextClockModifier::SetFormatRes,
         .resetFormat = TextClockModifier::ResetFormat,
         .setFontColor = TextClockModifier::SetFontColor,
+        .setFontColorRes = TextClockModifier::SetFontColorRes,
         .resetFontColor = TextClockModifier::ResetFontColor,
         .setFontSize = TextClockModifier::SetFontSize,
+        .setFontSizeRes = TextClockModifier::SetFontSizeRes,
         .resetFontSize = TextClockModifier::ResetFontSize,
         .setFontStyle = TextClockModifier::SetFontStyle,
         .resetFontStyle = TextClockModifier::ResetFontStyle,
         .setFontWeight = TextClockModifier::SetFontWeight,
+        .setFontWeightRes = TextClockModifier::SetFontWeightRes,
         .resetFontWeight = TextClockModifier::ResetFontWeight,
         .setFontFamily = TextClockModifier::SetFontFamily,
+        .setFontFamilyRes = TextClockModifier::SetFontFamilyRes,
         .resetFontFamily = TextClockModifier::ResetFontFamily,
         .setTextShadow = TextClockModifier::SetTextShadow,
+        .setTextShadowRes = TextClockModifier::SetTextShadowRes,
         .resetTextShadow = TextClockModifier::ResetTextShadow,
         .setFontFeature = TextClockModifier::SetFontFeature,
         .resetFontFeature = TextClockModifier::ResetFontFeature,
@@ -247,18 +430,24 @@ const CJUITextClockModifier* GetCJUITextClockModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUITextClockModifier modifier = {
         .setFormat = TextClockModifier::SetFormat,
+        .setFormatRes = TextClockModifier::SetFormatRes,
         .resetFormat = TextClockModifier::ResetFormat,
         .setFontColor = TextClockModifier::SetFontColor,
+        .setFontColorRes = TextClockModifier::SetFontColorRes,
         .resetFontColor = TextClockModifier::ResetFontColor,
         .setFontSize = TextClockModifier::SetFontSize,
+        .setFontSizeRes = TextClockModifier::SetFontSizeRes,
         .resetFontSize = TextClockModifier::ResetFontSize,
         .setFontStyle = TextClockModifier::SetFontStyle,
         .resetFontStyle = TextClockModifier::ResetFontStyle,
         .setFontWeight = TextClockModifier::SetFontWeight,
+        .setFontWeightRes = TextClockModifier::SetFontWeightRes,
         .resetFontWeight = TextClockModifier::ResetFontWeight,
         .setFontFamily = TextClockModifier::SetFontFamily,
+        .setFontFamilyRes = TextClockModifier::SetFontFamilyRes,
         .resetFontFamily = TextClockModifier::ResetFontFamily,
         .setTextShadow = TextClockModifier::SetTextShadow,
+        .setTextShadowRes = TextClockModifier::SetTextShadowRes,
         .resetTextShadow = TextClockModifier::ResetTextShadow,
         .setFontFeature = TextClockModifier::SetFontFeature,
         .resetFontFeature = TextClockModifier::ResetFontFeature,

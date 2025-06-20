@@ -32,6 +32,8 @@ int32_t testAboutToIMEInput = 0;
 int32_t testOnIMEInputComplete = 0;
 int32_t testAboutToDelete = 0;
 int32_t testOnDeleteComplete = 0;
+const std::string ADDRESS = "天安门";
+const std::u16string ADDRESS_U16 = u"天安门";
 } // namespace
 
 class RichEditorAITestOneNg : public RichEditorCommonTestNg {
@@ -495,4 +497,52 @@ HWTEST_F(RichEditorAITestOneNg, NeedShowAIDetect003, TestSize.Level1)
     EXPECT_FALSE(ret);
 }
 
+/**
+ * @tc.name: InitAiselection001
+ * @tc.desc: test NeedShowAIDetect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAITestOneNg, InitAiselection, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    std::map<int32_t, AISpan> aiSpanMap;
+    AISpan aiSpan0;
+    aiSpan0.content = ADDRESS;
+    aiSpan0.start = 0;
+    aiSpan0.end = 3;
+    aiSpanMap[0] = aiSpan0;
+    TextSpanOptions options;
+    options.value = ADDRESS_U16;
+    richEditorController->AddTextSpan(options);
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    auto mockParagraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(mockParagraph, nullptr);
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
+            selectedRects.emplace_back(RectF(0, 0, 100, 20));
+        }));
+    PositionWithAffinity positionWithAffinity(1, TextAffinity::UPSTREAM);
+    EXPECT_CALL(*mockParagraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
+    Offset offset = { 10, 10 };
+    richEditorPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
+    richEditorPattern->dataDetectorAdapter_->enablePreviewMenu_ = true;
+    richEditorPattern->textDetectEnable_ = true;
+    richEditorPattern->InitAiSelection(offset);
+    auto textSelector1 = richEditorPattern->GetTextSelector();
+    EXPECT_TRUE(textSelector1.aiStart.has_value());
+    EXPECT_TRUE(textSelector1.aiEnd.has_value());
+    richEditorPattern->dataDetectorAdapter_->enablePreviewMenu_ = false;
+    richEditorPattern->InitAiSelection(offset);
+    auto textSelector2 = richEditorPattern->GetTextSelector();
+    EXPECT_FALSE(textSelector2.aiStart.has_value());
+    EXPECT_FALSE(textSelector2.aiEnd.has_value());
+}
 }

@@ -43,6 +43,12 @@ public:
     static ArkUINativeModuleValue SetToggleOptions(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static void SetPointRadius(const EcmaVM* vm,  ArkUINodeHandle nativeNode, const Local<JSValueRef>& arg);
+    static void SetPointColor(const EcmaVM* vm,  ArkUINodeHandle nativeNode, const Local<JSValueRef>& arg);
+    static void SetUnselectedColor(const EcmaVM* vm,  ArkUINodeHandle nativeNode, const Local<JSValueRef>& arg);
+    static void SetTrackRadius(const EcmaVM* vm,  ArkUINodeHandle nativeNode, const Local<JSValueRef>& arg);
 };
 } // namespace OHOS::Ace::NG
 

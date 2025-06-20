@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
 #include "core/components_ng/pattern/progress/progress_theme_wrapper.h"
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -1240,5 +1241,143 @@ HWTEST_F(LoadingProgressTestNg, LoadingProgressFrameRateRangeTest001, TestSize.L
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     EXPECT_FALSE(loadingProgressPattern->loadingProgressModifier_->isVisible_);
+}
+
+/**
+ * @tc.name: LoadingProgressUpdateColorTest002
+ * @tc.desc: Test LoadingProgress color update property.
+ * @tc.type: FUNCC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressUpdateColorTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create loading progress and get pattern
+     */
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto loadingProgressPattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(loadingProgressPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. get related properties and objects
+     */
+    auto paintProperty = loadingProgressPattern->GetPaintProperty<LoadingProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    pipelineContext->SetIsSystemColorChange(true);
+    Color systemColor = Color::RED;
+    loadingProgressPattern->UpdateColor(systemColor, false);
+    EXPECT_EQ(paintProperty->GetColor().value(), systemColor);
+    EXPECT_EQ(renderContext->GetForegroundColor().value(), systemColor);
+}
+
+/**
+ * @tc.name: LoadingProgressOnColorConfigurationUpdateTest001
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressOnColorConfigurationUpdateTest001, TestSize.Level1)
+{
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<LoadingProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    g_isConfigChangePerform = false;
+    pattern->OnColorConfigurationUpdate();
+
+    g_isConfigChangePerform = true;
+    pattern->OnColorConfigurationUpdate();
+
+    paintProperty->ResetColorSetByUser();
+    pattern->OnColorConfigurationUpdate();
+
+    paintProperty->UpdateColorSetByUser(true);
+    pattern->OnColorConfigurationUpdate();
+
+    paintProperty->UpdateColorSetByUser(false);
+    pipeline->SetIsSystemColorChange(true);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    ASSERT_NE(theme, nullptr);
+    int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHT));
+    Color testColor = theme->GetLoadingColor();
+    pattern->OnColorConfigurationUpdate();
+
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    pattern->OnColorConfigurationUpdate();
+
+    EXPECT_EQ(paintProperty->GetColor(), testColor);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion);
+}
+
+/**
+ * @tc.name: LoadingProgressCreateWithResourceObjTest001
+ * @tc.desc: Test CreateWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(LoadingProgressTestNg, LoadingProgressCreateWithResourceObjTest001, TestSize.Level1)
+{
+    LoadingProgressModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<LoadingProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto paintProperty = pattern->GetPaintProperty<LoadingProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    ResourceObjectParams params { .value = "test", .type = ResourceObjectParamType::STRING };
+    std::vector<ResourceObjectParams> resObjParamsList;
+    resObjParamsList.push_back(params);
+    RefPtr<ResourceObject> resObjWithId =
+        AceType::MakeRefPtr<ResourceObject>(100000, 10007, resObjParamsList, "com.example.test", "entry", 100000);
+    RefPtr<ResourceObject> resObjId = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto progressTheme = AceType::MakeRefPtr<ProgressTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
+    modelNg.SetColorByUser(true);
+    modelNg.SetColorByUser(frameNode, true);
+
+    modelNg.CreateWithResourceObj(LoadingProgressResourceType::COLOR, resObjWithId);
+    modelNg.CreateWithResourceObj(LoadingProgressResourceType::FOREGROUNDCOLOR, resObjWithId);
+    modelNg.CreateWithResourceObj(static_cast<LoadingProgressResourceType>(100), resObjWithId);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    ASSERT_NE(theme, nullptr);
+    Color testColor = theme->GetLoadingColor();
+    int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHT));
+    modelNg.CreateWithResourceObj(LoadingProgressResourceType::COLOR, resObjId);
+    modelNg.CreateWithResourceObj(LoadingProgressResourceType::FOREGROUNDCOLOR, resObjId);
+    pattern->OnColorModeChange(colorMode);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    pattern->OnColorModeChange(colorMode);
+
+    EXPECT_EQ(paintProperty->GetColor(), testColor);
+    EXPECT_TRUE(paintProperty->GetColorSetByUser());
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion);
 }
 } // namespace OHOS::Ace::NG

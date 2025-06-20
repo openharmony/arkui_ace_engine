@@ -2154,30 +2154,32 @@ void IndexerPattern::UpdateThemeColor()
     CHECK_NULL_VOID(layoutProperty);
     auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-
-    if (layoutProperty->GetSetColorByUserValue(false)) {
-        auto defaultColor = indexerTheme->GetDefaultTextColor();
-        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Color, defaultColor);
+    if (!layoutProperty->GetSetColorByUserValue(false)) {
+        layoutProperty->ResetColor();
     }
-    if (layoutProperty->GetSetSelectedColorByUserValue(false)) {
-        auto selectedColor = indexerTheme->GetSelectedTextColor();
-        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, Color, selectedColor);
+    if (!layoutProperty->GetSetSelectedColorByUserValue(false)) {
+        layoutProperty->ResetSelectedColor();
     }
-    if (layoutProperty->GetSetPopupColorByUserValue(false)) {
-        auto popupSelectedColor = indexerTheme->GetPopupSelectedTextColor();
-        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupColor, popupSelectedColor);
+    if (!layoutProperty->GetSetPopupColorByUserValue(false)) {
+        layoutProperty->ResetPopupColor();
     }
-    if (layoutProperty->GetSetSelectedBGColorByUserValue(false)) {
-        auto selectedBackgroundColor = indexerTheme->GetSelectedBackgroundColor();
-        ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, SelectedBackgroundColor, selectedBackgroundColor);
+    if (!layoutProperty->GetSetSelectedBGColorByUserValue(false)) {
+        paintProperty->ResetSelectedBackgroundColor();
     }
-    if (layoutProperty->GetSetPopupUnselectedColorByUserValue(false)) {
-        auto popupUnselectedColor = indexerTheme->GetPopupUnselectedTextColor();
-        ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupUnselectedColor, popupUnselectedColor);
+    if (!layoutProperty->GetSetPopupUnselectedColorByUserValue(false)) {
+        paintProperty->ResetPopupUnselectedColor();
     }
-    if (layoutProperty->GetSetPopupTitleBackgroundByUserValue(false)) {
-        auto popupTitleBackgroundColor = indexerTheme->GetPopupBackgroundColor();
-        ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupBackground, popupTitleBackgroundColor);
+    if (!layoutProperty->GetSetPopupTitleBackgroundByUserValue(false)) {
+        paintProperty->ResetPopupTitleBackground();
+    }
+    if (!layoutProperty->GetSetPopupSelectedColorByUserValue(false)) {
+        paintProperty->ResetPopupSelectedColor();
+    }
+    if (!layoutProperty->GetSetPopupBackgroundColorByUserValue(false)) {
+        paintProperty->ResetPopupBackground();
+    }
+    if (!layoutProperty->GetSetPopupItemBackgroundColorByUserValue(false)) {
+        paintProperty->ResetPopupItemBackground();
     }
 }
 
@@ -2187,6 +2189,9 @@ void IndexerPattern::OnColorModeChange(uint32_t colorMode)
     UpdateThemeColor();
     ApplyIndexChanged(true, false);
     UpdateBubbleView();
+    if (popupNode_) {
+        popupNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void IndexerPattern::DumpInfo()

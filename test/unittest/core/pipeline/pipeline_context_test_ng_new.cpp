@@ -3711,56 +3711,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg254, TestSize.Level1)
 }
 
 /**
- * @tc.name: UITaskSchedulerTestNg015
- * @tc.desc: Test FlushRenderTask.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg015, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: Create taskScheduler.
-     */
-    UITaskScheduler taskScheduler;
-
-    /**
-     * @tc.steps2: Create dirtyRenderNodes_.
-     */
-    taskScheduler.dirtyRenderNodes_[1].emplace(nullptr);
-
-    /**
-     * @tc.steps3: RemoveNodeFromDirtyRender.
-     */
-    auto result = taskScheduler.RemoveNodeFromDirtyRender(-1, -1);
-    EXPECT_EQ(result, 0);
-}
-
-/**
- * @tc.name: UITaskSchedulerTestNg016
- * @tc.desc: Test FlushRenderTask.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg016, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: Create taskScheduler.
-     */
-    UITaskScheduler taskScheduler;
-
-    /**
-     * @tc.steps2: Create removedDirtyRenderNodes_.
-     */
-    taskScheduler.removedDirtyRenderNodes_.emplace(0);
-
-    /**
-     * @tc.steps3: RemoveDirtyRenderNodes and test.
-     */
-    auto result = taskScheduler.RemoveDirtyRenderNodes(0);
-    EXPECT_EQ(result, 1);
-    result = taskScheduler.RemoveDirtyRenderNodes(1);
-    EXPECT_EQ(result, 0);
-}
-
-/**
  * @tc.name: PipelineContextTestNg302
  * @tc.desc: Test FlushRenderTask.
  * @tc.type: FUNC
@@ -3813,6 +3763,42 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg302, TestSize.Level1)
     context_->SetIsFormRender(true);
     result = context_->CheckIfGetTheme();
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg255
+ * @tc.desc: Test FlushMouseEventForHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg255, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    context_->SetupRootElement();
+    auto manager = context_->GetDragDropManager();
+    ASSERT_NE(manager, nullptr);
+    auto frameNodeId_017 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_017, nullptr);
+    ASSERT_NE(frameNode, nullptr);
+ 
+    /**
+     * @tc.steps1: Call the function OnDragEvent with isDragged_=true, currentId_=DEFAULT_INT1 and DRAG_EVENT_OUT.
+     * @tc.expected: The currentId_ is equal to DEFAULT_INT1.
+     */
+    manager->isDragged_ = true;
+    manager->currentId_ = DEFAULT_INT1;
+    context_->OnDragEvent({ DEFAULT_INT1, DEFAULT_INT1 }, DragEventAction::DRAG_EVENT_OUT);
+    EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
+ 
+    auto delegate = AceType::MakeRefPtr<TouchDelegate>();
+    std::unordered_map<int32_t, TouchDelegates> touchDelegatesMap;
+    touchDelegatesMap[0].emplace_back(delegate);
+    context_->eventManager_->touchDelegatesMap_ = touchDelegatesMap;
+    context_->OnDragEvent({ DEFAULT_INT1, DEFAULT_INT1 }, DragEventAction::DRAG_EVENT_OUT);
+    EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
 }
 } // namespace NG
 } // namespace OHOS::Ace

@@ -1944,6 +1944,62 @@ HWTEST_F(NavigationModelTestNg, SetMinContentWidth001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetMinContentWidth002
+ * @tc.desc: Test SetMinContentWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, SetMinContentWidth002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    navigationModel.SetMinContentWidth(resObj);
+    std::string key = "navigation.minContentWidth";
+    EXPECT_EQ(navigationPattern->GetResCacheMapByKey(key), "");
+    navigationPattern->OnColorModeChange(1);
+    CalcDimension minContentWidth;
+    ResourceParseUtils::ParseResDimensionVpNG(resObj, minContentWidth);
+    EXPECT_EQ(navigationPattern->GetResCacheMapByKey(key), minContentWidth.ToString());
+}
+
+/**
+ * @tc.name: SetMinContentWidth003
+ * @tc.desc: Test SetMinContentWidth with Specific frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, SetMinContentWidth003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    navigationModel.SetMinContentWidth(resObj);
+    std::string key = "navigation.minContentWidth";
+    EXPECT_EQ(navigationPattern->GetResCacheMapByKey(key), "");
+    navigationPattern->OnColorModeChange(1);
+    CalcDimension minContentWidth;
+    ResourceParseUtils::ParseResDimensionVpNG(resObj, minContentWidth);
+    EXPECT_EQ(navigationPattern->GetResCacheMapByKey(key), minContentWidth.ToString());
+}
+
+/**
  * @tc.name: SetNavigationPathInfo001
  * @tc.desc: Test SetNavigationPathInfo and cover all conditions.
  * @tc.type: FUNC

@@ -64,14 +64,8 @@ ScopedDelegate EngineHelper::GetCurrentDelegateSafely()
     return { nullptr, 0 };
 }
 
-std::pair<int32_t, int32_t> EngineHelper::StringToPair(const std::string& match)
+std::tuple<std::string, int32_t, int32_t> EngineHelper::GetPositionOnJsCode()
 {
-    std::pair<int32_t, int32_t> res;
-    return res;
-}
-
-std::pair<int32_t, int32_t> EngineHelper::GetPositionOnJsCode()
-{
-    return { 0, 0 };
+    return {"", 0, 0 };
 }
 } // namespace OHOS::Ace

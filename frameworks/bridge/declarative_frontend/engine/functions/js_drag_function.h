@@ -54,6 +54,8 @@ public:
     void GetJsPasteData(const JSCallbackInfo& args);
     void GetScreenX(const JSCallbackInfo& args);
     void GetScreenY(const JSCallbackInfo& args);
+    void GetGlobalDisplayX(const JSCallbackInfo& args);
+    void GetGlobalDisplayY(const JSCallbackInfo& args);
     void GetDisplayId(const JSCallbackInfo& args);
     void GetX(const JSCallbackInfo& args);
     void GetY(const JSCallbackInfo& args);

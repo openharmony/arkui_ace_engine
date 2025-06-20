@@ -111,6 +111,8 @@ ArkUINativeModuleValue NavDestinationBridge::SetToolBarConfiguration(ArkUIRuntim
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    NavDestinationModelNG::ResetResObj(
+        frameNode, NavDestinationPatternType::NAV_DESTINATION, "navDestination.toolbarConfiguration");
     using namespace OHOS::Ace::Framework;
     JsiCallbackInfo info = JsiCallbackInfo(runtimeCallInfo);
     bool hideText = false;
@@ -154,6 +156,8 @@ ArkUINativeModuleValue NavDestinationBridge::SetToolBarConfiguration(ArkUIRuntim
         }
     }
     NG::NavigationToolbarOptions options;
+    NavDestinationModelNG::ResetResObj(
+        frameNode, NavDestinationPatternType::NAV_DESTINATION, "navigation.navigationToolbarOptions");
     JSNavigationUtils::ParseToolbarOptions(info, options);
     NavDestinationModel::GetInstance()->SetToolBarOptions(std::move(options));
     return panda::JSValueRef::Undefined(vm);
@@ -235,6 +239,9 @@ ArkUINativeModuleValue NavDestinationBridge::SetBackButtonIcon(ArkUIRuntimeCallI
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    NavDestinationModelNG::ResetResObj(
+        frameNode, NavDestinationPatternType::TITLE_BAR, "navDestination.backButtonIcon.icon");
 
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
     std::string src;
@@ -292,6 +299,8 @@ ArkUINativeModuleValue NavDestinationBridge::ResetBackButtonIcon(ArkUIRuntimeCal
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    NavDestinationModelNG::ResetResObj(
+        frameNode, NavDestinationPatternType::TITLE_BAR, "navDestination.backButtonIcon.icon");
     bool noPixMap = false;
     RefPtr<PixelMap> pixMap = nullptr;
     std::string src;

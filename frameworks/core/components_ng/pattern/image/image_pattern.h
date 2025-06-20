@@ -482,7 +482,7 @@ private:
     void OnDirectionConfigurationUpdate() override;
     void OnIconConfigurationUpdate() override;
     ImageDfxConfig CreateImageDfxConfig(const ImageSourceInfo& src);
-    void ReportPerfData(const RefPtr<NG::FrameNode>& host, int state);
+    void ReportPerfData(const RefPtr<NG::FrameNode>& host, int32_t state);
     void LoadImage(const ImageSourceInfo& src, bool needLayout);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 
@@ -518,7 +518,7 @@ private:
     void SetImageFit(const RefPtr<FrameNode>& imageFrameNode);
     void ControlAnimation(int32_t index);
     void SetObscured();
-    void OnKeyEvent();
+    void OnKeyEvent(const KeyEvent& event);
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::LOW;
     bool needLoadAlt_ = true;
