@@ -1,6 +1,0 @@
-{
-    "name": "@types/arkoala-runtime",
-    "version": "1.4.1+devel",
-    "description": "Runtime VM declarations",
-    "types": "./runtime-types.d.ts"
-}

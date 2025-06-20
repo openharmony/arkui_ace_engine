@@ -25,12 +25,6 @@
             "@koalaui/compat": [
                 "../../incremental/compat/src"
             ],
-            "@koalaui/arkui-common": [
-                "../../arkoala/arkui-common/src/arkts"
-            ],
-            "#arkcompat/*": [
-                "../../arkoala/arkui-common/src/arkts/*"
-            ],
             "@ohos/arkui": [
                 "./src/generated"
             ],
@@ -73,8 +67,6 @@
         "../../incremental/tools/panda/arkts/std-lib/global.d.ts"
     ],
     "references": [
-        { "path": "../../arkoala/arkui-common" },
-        { "path": "../../arkoala/arkui-common/tsconfig-unmemoize.json" },
         { "path": "../../interop" }
     ]
 }
