@@ -933,36 +933,6 @@ void MultipleParagraphLayoutAlgorithm::UpdateParagraphByCustomSpan(RefPtr<Custom
     customSpanPlaceholder.customSpanIndex = customSpanItem->placeholderIndex;
 }
 
-void MultipleParagraphLayoutAlgorithm::ApplyIndent(
-    ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width, const TextStyle& textStyle)
-{
-    auto indentValue = paragraphStyle.indent;
-    CHECK_NULL_VOID(paragraph);
-    double value = 0.0;
-    if (GreatNotEqual(indentValue.Value(), 0.0)) {
-        // first line indent
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        if (indentValue.Unit() != DimensionUnit::PERCENT) {
-            value = indentValue.ConvertToPxDistribute(
-                textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-        } else {
-            value = static_cast<float>(GetIndentMaxWidth(width) * indentValue.Value());
-            paragraphStyle.indent = Dimension(value);
-        }
-    }
-    auto indent = static_cast<float>(value);
-    auto leadingMarginValue = 0.0f;
-    std::vector<float> indents;
-    if (paragraphStyle.leadingMargin.has_value()) {
-        leadingMarginValue = paragraphStyle.leadingMargin->size.Width().ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
-    }
-    indents.emplace_back(indent + leadingMarginValue);
-    indents.emplace_back(leadingMarginValue);
-    paragraph->SetIndents(indents);
-}
-
 void MultipleParagraphLayoutAlgorithm::UpdateSymbolSpanEffect(
     RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph, const std::list<RefPtr<SpanItem>>& spans)
 {
