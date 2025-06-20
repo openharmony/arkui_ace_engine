@@ -1363,4 +1363,287 @@ HWTEST_F(ScrollPatternTwoTestNg, ScrollToEdge_None, TestSize.Level1)
     scrollPattern->ScrollToEdge(ScrollEdgeType::SCROLL_NONE, false);
     EXPECT_EQ(scrollPattern->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
 }
+
+/**
+ * @tc.name: JumpToPosition_Running
+ * @tc.desc: Test ScrollPattern JumpToPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, JumpToPosition_Running, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->accessibilityId_ = 1;
+    scrollPattern->frameNode_ = frameNode;
+    RefPtr<PipelineBase> context = AceType::MakeRefPtr<PipelineContext>();
+    auto animator = Animator::CreateAnimator(nullptr, context, nullptr);
+    scrollPattern->animator_ = animator;
+
+    /**
+     * @tc.steps: step2. Set animator_ of scrollPattern
+     * set isAnimationStop_ to false and scrollAbort_ to true
+     */
+    scrollPattern->animator_->isBothBackwards = true;
+    scrollPattern->animator_->status_ = Animator::Status::RUNNING;
+    scrollPattern->isAnimationStop_ = false;
+    scrollPattern->scrollAbort_ = true;
+
+    /**
+     * @tc.steps: step3. Calling the JumpToPosition function
+     * @tc.expected: The scrollAbort_ of scrollPattern to be false
+     */
+    scrollPattern->JumpToPosition(4.0f, SCROLL_FROM_START);
+    EXPECT_FALSE(scrollPattern->scrollAbort_);
+}
+
+/**
+ * @tc.name: StartSnapAnimation_001
+ * @tc.desc: Test scrollPattern StartSnapAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, StartSnapAnimation_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ScrollLayoutProperty> layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::NONE);
+    scrollPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
+    scrollPattern->scrollBarProxy_ = AceType::MakeRefPtr<ScrollBarProxy>();
+    frameNode->layoutProperty_ = layoutProperty;
+    RefPtr<PipelineBase> context = AceType::MakeRefPtr<PipelineContext>();
+    auto animator = Animator::CreateAnimator(nullptr, context, nullptr);
+    animator->status_ = Animator::Status::STOPPED;
+    scrollPattern->animator_ = animator;
+    scrollPattern->isAnimationStop_ = true;
+    SnapAnimationOptions snapAnimationOptions;
+    scrollPattern->scrollableEvent_ = nullptr;
+    scrollPattern->currentOffset_ = 8.0f;
+    scrollPattern->lastPageLength_ = 18.0f;
+    scrollPattern->scrollableDistance_ = 8.0f;
+    scrollPattern->viewPortLength_ = 3.0f;
+    scrollPattern->enablePagingStatus_ = ScrollPagingStatus::VALID;
+
+    /**
+     * @tc.steps: step2. Set fromScrollBar of snapAnimationOptions to false
+     * set isDriving_ of scrollBar to true
+     */
+    snapAnimationOptions.fromScrollBar = false;
+    scrollPattern->scrollBar_->isDriving_ = true;
+
+    /**
+     * @tc.steps: step3. Calling the StartSnapAnimation function
+     * @tc.expected: The result of calling the function return false
+     */
+    auto result = scrollPattern->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: StartSnapAnimation_002
+ * @tc.desc: Test scrollPattern StartSnapAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, StartSnapAnimation_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ScrollLayoutProperty> layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::NONE);
+    scrollPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
+    scrollPattern->scrollBarProxy_ = AceType::MakeRefPtr<ScrollBarProxy>();
+    frameNode->layoutProperty_ = layoutProperty;
+    RefPtr<PipelineBase> context = AceType::MakeRefPtr<PipelineContext>();
+    auto animator = Animator::CreateAnimator(nullptr, context, nullptr);
+    animator->status_ = Animator::Status::STOPPED;
+    scrollPattern->animator_ = animator;
+    scrollPattern->isAnimationStop_ = true;
+    SnapAnimationOptions snapAnimationOptions;
+    scrollPattern->scrollableEvent_ = nullptr;
+    scrollPattern->currentOffset_ = 8.0f;
+    scrollPattern->lastPageLength_ = 18.0f;
+    scrollPattern->scrollableDistance_ = 8.0f;
+    scrollPattern->viewPortLength_ = 3.0f;
+    scrollPattern->enablePagingStatus_ = ScrollPagingStatus::VALID;
+
+    /**
+     * @tc.steps: step2. Set fromScrollBar of snapAnimationOptions to false
+     * set isDriving_ of scrollBar to false and scrollSnapTrigger_ of scrollBarProxy to true
+     */
+    snapAnimationOptions.fromScrollBar = false;
+    scrollPattern->scrollBar_->isDriving_ = false;
+    scrollPattern->scrollBarProxy_->scrollSnapTrigger_ = true;
+
+    /**
+     * @tc.steps: step3. Calling the StartSnapAnimation function
+     * @tc.expected: The result of calling the function return false
+     */
+    auto result = scrollPattern->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: StartSnapAnimation_003
+ * @tc.desc: Test scrollPattern StartSnapAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, StartSnapAnimation_003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    scrollPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
+    scrollPattern->scrollBarProxy_ = AceType::MakeRefPtr<ScrollBarProxy>();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ScrollLayoutProperty> layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::NONE);
+    frameNode->layoutProperty_ = layoutProperty;
+    RefPtr<PipelineBase> context = AceType::MakeRefPtr<PipelineContext>();
+    auto animator = Animator::CreateAnimator(nullptr, context, nullptr);
+    animator->status_ = Animator::Status::STOPPED;
+    scrollPattern->animator_ = animator;
+    SnapAnimationOptions snapAnimationOptions;
+    scrollPattern->scrollableEvent_ = nullptr;
+    scrollPattern->currentOffset_ = 8.0f;
+    scrollPattern->lastPageLength_ = 18.0f;
+    scrollPattern->scrollableDistance_ = 8.0f;
+    scrollPattern->viewPortLength_ = 3.0f;
+    scrollPattern->enablePagingStatus_ = ScrollPagingStatus::VALID;
+
+    /**
+     * @tc.steps: step2. Set fromScrollBar of snapAnimationOptions to false
+     * set isDriving_ of scrollBar to false and scrollSnapTrigger_ of scrollBarProxy to false
+     * and set isAnimationStop_ of scrollPattern and snapOffsets_
+     */
+    snapAnimationOptions.fromScrollBar = false;
+    scrollPattern->scrollBar_->isDriving_ = false;
+    scrollPattern->scrollBarProxy_->scrollSnapTrigger_ = false;
+    scrollPattern->isAnimationStop_ = true;
+    scrollPattern->snapOffsets_ = { -6.0f, 0.0f };
+
+    /**
+     * @tc.steps: step3. Calling the StartSnapAnimation function
+     * @tc.expected: The result of calling the function return true
+     */
+    auto result = scrollPattern->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: StartSnapAnimation_004
+ * @tc.desc: Test scrollPattern StartSnapAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, StartSnapAnimation_004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ScrollLayoutProperty> layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    RefPtr<PipelineBase> context = AceType::MakeRefPtr<PipelineContext>();
+    auto animator = Animator::CreateAnimator(nullptr, context, nullptr);
+    animator->status_ = Animator::Status::STOPPED;
+    scrollPattern->enablePagingStatus_ = ScrollPagingStatus::VALID;
+    scrollPattern->animator_ = animator;
+    scrollPattern->isAnimationStop_ = true;
+    SnapAnimationOptions snapAnimationOptions;
+    scrollPattern->scrollableEvent_ = nullptr;
+    scrollPattern->currentOffset_ = 8.0f;
+    scrollPattern->lastPageLength_ = 18.0f;
+    scrollPattern->scrollableDistance_ = 8.0f;
+    scrollPattern->viewPortLength_ = 3.0f;
+    scrollPattern->snapOffsets_ = { -6.0f, 0.0f };
+    scrollPattern->isAnimationStop_ = true;
+
+    /**
+     * @tc.steps: step2. Set fromScrollBar of snapAnimationOptions to false
+     * set scrollBar and scrollBarProxy_ of scrollPattern to nullptr
+     * and set ScrollSnapAlign to START
+     */
+    snapAnimationOptions.fromScrollBar = false;
+    scrollPattern->scrollBar_ = nullptr;
+    scrollPattern->scrollBarProxy_ = nullptr;
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
+    frameNode->layoutProperty_ = layoutProperty;
+
+    /**
+     * @tc.steps: step3. Calling the StartSnapAnimation function
+     * @tc.expected: The result of calling the function return false
+     */
+    auto result = scrollPattern->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: StartSnapAnimation_005
+ * @tc.desc: Test scrollPattern StartSnapAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, StartSnapAnimation_005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    scrollPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
+    scrollPattern->scrollBarProxy_ = AceType::MakeRefPtr<ScrollBarProxy>();
+    scrollPattern->scrollBar_->isDriving_ = false;
+    scrollPattern->scrollBarProxy_->scrollSnapTrigger_ = false;
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ScrollLayoutProperty> layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::NONE);
+    frameNode->layoutProperty_ = layoutProperty;
+    RefPtr<PipelineBase> context = AceType::MakeRefPtr<PipelineContext>();
+    auto animator = Animator::CreateAnimator(nullptr, context, nullptr);
+    animator->status_ = Animator::Status::STOPPED;
+    scrollPattern->animator_ = animator;
+    scrollPattern->isAnimationStop_ = true;
+    SnapAnimationOptions snapAnimationOptions;
+    scrollPattern->scrollableEvent_ = nullptr;
+    scrollPattern->currentOffset_ = 8.0f;
+    scrollPattern->lastPageLength_ = 18.0f;
+    scrollPattern->scrollableDistance_ = 8.0f;
+    scrollPattern->viewPortLength_ = 3.0f;
+    scrollPattern->enablePagingStatus_ = ScrollPagingStatus::VALID;
+
+    /**
+     * @tc.steps: step2. Set fromScrollBar of snapAnimationOptions to true
+     * set snapDirection of snapAnimationOptions to FORWARD and snapDelta to 2.0f
+     * and set the snapOffsets
+     */
+    snapAnimationOptions.fromScrollBar = true;
+    scrollPattern->snapOffsets_ = { 2.0f, 4.0f };
+    snapAnimationOptions.snapDirection = SnapDirection::FORWARD;
+    snapAnimationOptions.snapDelta = 2.0f;
+
+    /**
+     * @tc.steps: step3. Calling the StartSnapAnimation function
+     * @tc.expected: The result of calling the function return true
+     */
+    auto result = scrollPattern->StartSnapAnimation(snapAnimationOptions);
+    EXPECT_TRUE(result);
+}
 } // namespace OHOS::Ace::NG
