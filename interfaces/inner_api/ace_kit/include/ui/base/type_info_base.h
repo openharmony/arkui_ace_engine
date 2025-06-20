@@ -22,17 +22,21 @@
 
 // Generate 'TypeInfo' for each classes.
 // And using hash code of its name for 'TypeId'.
-#define DECLARE_CLASS_TYPE_INFO(classname)                                              \
-public:                                                                                 \
-    static const char* TypeName()                                                       \
-    {                                                                                   \
-        return #classname;                                                              \
-    }                                                                                   \
-    static TypeInfoBase::IdType TypeId()                                                \
-    {                                                                                   \
-        static TypeInfoBase::IdType myTypeId = std::hash<std::string> {}(TypeName());   \
-        return myTypeId;                                                                \
-    }                                                                                   \
+#define DECLARE_CLASS_TYPE_INFO(classname)                                                  \
+public:                                                                                     \
+    static const char* TypeName()                                                           \
+    {                                                                                       \
+        return #classname;                                                                  \
+    }                                                                                       \
+    static constexpr const char* TypeFullName()                                             \
+    {                                                                                       \
+        return __PRETTY_FUNCTION__;                                                         \
+    }                                                                                       \
+    static TypeInfoBase::IdType TypeId()                                                    \
+    {                                                                                       \
+        static TypeInfoBase::IdType myTypeId = std::hash<std::string> {}(TypeFullName());   \
+        return myTypeId;                                                                    \
+    }                                                                                       \
     DECLARE_CLASS_TYPE_SIZE(classname)
 
 // Integrate it into class declaration to support 'DynamicCast'.
