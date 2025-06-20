@@ -2502,6 +2502,8 @@ void HandleDidClickAccept(RefPtr<NG::FrameNode>& frameNode)
 bool ActClick(RefPtr<NG::FrameNode>& frameNode, const NG::SecCompEnhanceEvent& secEvent)
 {
     if (NG::AccessibilityFunctionUtils::HandleClickBySecComponent(frameNode, secEvent)) {
+        // notify child action happened to parent
+        NG::AccessibilityFunctionUtils::HandleNotifyChildAction(frameNode, NotifyChildActionType::ACTION_CLICK);
         return true;
     }
 
