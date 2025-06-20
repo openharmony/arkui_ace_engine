@@ -37,7 +37,8 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     GetExpandArea(props_, info_);
 
     auto [size, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
-    syncLoad_ = props_->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren;
+    syncLoad_ = props_->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren ||
+                info_->targetIndex_.has_value();
     Init(size);
     if (!IsSectionValid(info_, itemCnt_) || !CheckData()) {
         info_->isDataValid_ = false;
