@@ -14096,7 +14096,7 @@ class TextShaderStyleModifier extends ModifierWithKey {
       getUINativeModule().text.resetShaderStyle(node, this.value);
     } else {
       getUINativeModule().text.setShaderStyle(node, this.value.center, this.value.radius, this.value.angle,
-        this.value.direction, this.value.repeating, this.value.colors);
+        this.value.direction, this.value.repeating, this.value.colors, this.value.color);
     }
   }
   checkObjectDiff() {

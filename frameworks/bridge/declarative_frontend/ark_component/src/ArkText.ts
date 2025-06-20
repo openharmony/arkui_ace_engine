@@ -896,6 +896,7 @@ class TextShaderStyleModifier extends ModifierWithKey<{
   direction?: GradientDirection;
   colors: Array<any>;
   repeating?: boolean;
+  color: ResourceColor;
 }> {
   constructor(value: {
     center: Array<any>;
@@ -904,6 +905,7 @@ class TextShaderStyleModifier extends ModifierWithKey<{
     direction?: GradientDirection;
     colors: Array<any>;
     repeating?: boolean;
+    color: ResourceColor;
   }) {
     super(value);
   }
@@ -914,7 +916,7 @@ class TextShaderStyleModifier extends ModifierWithKey<{
     }
     else {
       getUINativeModule().text.setShaderStyle(node, this.value.center, this.value.radius, this.value.angle,
-        this.value.direction, this.value.repeating, this.value.colors);
+        this.value.direction, this.value.repeating, this.value.colors, this.value.color);
     }
   }
   checkObjectDiff(): boolean {

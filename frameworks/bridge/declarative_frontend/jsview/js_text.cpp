@@ -1160,6 +1160,11 @@ void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient
     } else if (shaderStyleObj->HasProperty("colors")) {
         NewJsLinearGradient(info, gradient);
         TextModel::GetInstance()->SetGradientShaderStyle(gradient);
+    } else if (shaderStyleObj->HasProperty("color")) {
+        Color textColor;
+        auto infoColor = shaderStyleObj->GetProperty("color");
+        ParseJsColor(infoColor, textColor);
+        TextModel::GetInstance()->SetColorShaderStyle(textColor);
     } else {
         TextModel::GetInstance()->ResetGradientShaderStyle();
     }

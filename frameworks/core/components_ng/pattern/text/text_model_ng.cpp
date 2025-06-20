@@ -1428,18 +1428,34 @@ bool TextModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
 
 void TextModelNG::SetGradientShaderStyle(NG::Gradient& gradient)
 {
+    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, ColorShaderStyle);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle, gradient);
+}
+
+void TextModelNG::SetColorShaderStyle(const Color& value)
+{
+    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ColorShaderStyle, value);
 }
 
 void TextModelNG::ResetGradientShaderStyle()
 {
     ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle);
+    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, ColorShaderStyle);
 }
 
 void TextModelNG::SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ColorShaderStyle, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle, gradient, frameNode);
+}
+
+void TextModelNG::SetColorShaderStyle(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ColorShaderStyle, value, frameNode);
 }
 
 NG::Gradient TextModelNG::GetGradientStyle(FrameNode* frameNode)
@@ -1458,6 +1474,7 @@ void TextModelNG::ResetTextGradient(FrameNode* frameNode)
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     if (textLayoutProperty) {
         textLayoutProperty->ResetGradientShaderStyle();
+        textLayoutProperty->ResetColorShaderStyle();
     }
 }
 

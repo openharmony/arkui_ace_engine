@@ -129,9 +129,15 @@ void MultipleParagraphLayoutAlgorithm::UpdateShaderStyle(
     if (layoutProperty->HasGradientShaderStyle()) {
         auto gradients = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
         auto gradient = ToGradient(gradients);
+        textStyle.SetColorShaderStyle(std::optional<Color>(std::nullopt));
         textStyle.SetGradient(gradient);
+    } else if (layoutProperty->HasColorShaderStyle()) {
+        std::optional<Color> colors = layoutProperty->GetColorShaderStyle().value_or(Color::TRANSPARENT);
+        textStyle.SetGradient(std::nullopt);
+        textStyle.SetColorShaderStyle(colors);
     } else {
         textStyle.SetGradient(std::nullopt);
+        textStyle.SetColorShaderStyle(std::optional<Color>(std::nullopt));
     }
 }
 

@@ -560,7 +560,13 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         brush.SetColor(textStyle.GetTextColor().GetValue());
         txtStyle.foregroundBrush = brush;
     }
-    
+    if (textStyle.GetColorShaderStyle().has_value() && textStyle.GetStrokeWidth().Value() >= DEFAULT_STROKE_WIDTH) {
+        RSBrush brush;
+        auto shaderEffect =
+            RSRecordingShaderEffect::CreateColorShader(textStyle.GetColorShaderStyle().value().GetValue());
+        brush.SetShaderEffect(shaderEffect);
+        txtStyle.foregroundBrush = brush;
+    }
     for (auto& spanShadow : textStyle.GetTextShadows()) {
         Rosen::TextShadow txtShadow;
         txtShadow.color = spanShadow.GetColor().GetValue();
@@ -671,6 +677,7 @@ void ConvertForegroundPaint(const TextStyle& textStyle, double width, double hei
     if (!textStyle.GetGradient().has_value()) {
         return;
     }
+    LOGI("liufeng ConvertForegroundPaint");
     txtStyle.textStyleUid = static_cast<unsigned long>(textStyle.GetTextStyleUid());
     txtStyle.relayoutChangeBitmap = textStyle.GetReLayoutTextStyleBitmap();
     auto gradient = textStyle.GetGradient().value();

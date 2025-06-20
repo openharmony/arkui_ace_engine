@@ -814,6 +814,28 @@ HWTEST_F(TextTestNineNg, UpdateShaderStyle003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateShaderStyle004
+ * @tc.desc: test UpdateShaderStyle of multiple paragraph.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, UpdateShaderStyle004, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    pattern->AttachToFrameNode(frameNode);
+    auto multipleAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    TextStyle textStyle;
+    multipleAlgorithm->UpdateShaderStyle(layoutProperty, textStyle);
+    EXPECT_EQ(textStyle.GetGradient(), std::nullopt);
+    Color color = Color::GREEN;
+    layoutProperty->UpdateColorShaderStyle(color);
+    multipleAlgorithm->UpdateShaderStyle(layoutProperty, textStyle);
+    EXPECT_EQ(textStyle.GetColorShaderStyle().value(), Color::GREEN);
+}
+
+/**
  * @tc.name: UpdateRelayoutShaderStyle
  * @tc.desc: Test UpdateRelayoutShaderStyle.
  * @tc.type: FUNC
