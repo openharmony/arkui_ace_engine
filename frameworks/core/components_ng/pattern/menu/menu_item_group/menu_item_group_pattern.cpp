@@ -226,4 +226,63 @@ void MenuItemGroupPattern::OnIntItemPressed(int32_t index, bool press)
         }
     }
 }
+
+void MenuItemGroupPattern::SetHeaderContent(const std::string& str)
+{
+    CHECK_NULL_VOID(headerContent_);
+    auto content = headerContent_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(content);
+    content->UpdateContent(str);
+    headerContent_->MarkModifyDone();
+    headerContent_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemGroupPattern::SetFooterContent(const std::string& str)
+{
+    CHECK_NULL_VOID(footerContent_);
+    auto content = footerContent_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(content);
+    content->UpdateContent(str);
+    footerContent_->MarkModifyDone();
+    footerContent_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemGroupPattern::UpdateHeaderColor()
+{
+    CHECK_NULL_VOID(headerContent_);
+    auto content = headerContent_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(content);
+    auto pipeline = headerContent_->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto themeFontColor = menuTheme->GetMenuFontColor();
+    content->UpdateTextColor(themeFontColor);
+    headerContent_->MarkModifyDone();
+    headerContent_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemGroupPattern::UpdateFooterColor()
+{
+    CHECK_NULL_VOID(footerContent_);
+    auto content = footerContent_->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(content);
+    auto pipeline = footerContent_->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto themeFontColor = menuTheme->GetSecondaryFontColor();
+    content->UpdateTextColor(themeFontColor);
+    footerContent_->MarkModifyDone();
+    footerContent_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuItemGroupPattern::OnColorConfigurationUpdate()
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        UpdateFooterColor();
+        UpdateHeaderColor();
+        ModifyFontSize();
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -690,6 +690,7 @@ public:
         CalcDimension& bottomLeft, CalcDimension& bottomRight);
     static bool ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
         CalcDimension& bottomLeft, CalcDimension& bottomRight, TextBackgroundStyle& textBackgroundStyle);
+    static void ParseAllBorderRadiuses(JSRef<JSObject>& object, NG::BorderRadiusProperty& borderRadius);
     static void JsPointLight(const JSCallbackInfo& info);
 
     template<typename T>

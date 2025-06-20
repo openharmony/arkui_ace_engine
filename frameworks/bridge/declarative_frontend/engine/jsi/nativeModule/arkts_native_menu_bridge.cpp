@@ -25,9 +25,16 @@ constexpr int ARG_INDEX_2 = 2;
 constexpr int ARG_INDEX_3 = 3;
 constexpr int ARG_INDEX_4 = 4;
 constexpr int ARG_INDEX_5 = 5;
+constexpr int COUNT_PROP = 4;
+
+struct RadiusParseParams {
+    std::vector<ArkUI_Float32> radiusValues;
+    std::vector<int32_t> radiusUnits;
+    std::vector<void*> resObjs;
+};
 
 ArkUIMenuDividerOptions BuildMenuDividerOptions(EcmaVM* vm, Local<JSValueRef> strokeWidthArg,
-    Local<JSValueRef> colorArg, Local<JSValueRef> startMarginArg, Local<JSValueRef> endMarginArg)
+    Local<JSValueRef> startMarginArg, Local<JSValueRef> endMarginArg)
 {
     ArkUIDimensionType strokeWidthOption;
     ArkUIDimensionType startMarginOption;
@@ -39,11 +46,6 @@ ArkUIMenuDividerOptions BuildMenuDividerOptions(EcmaVM* vm, Local<JSValueRef> st
     }
     strokeWidthOption.value = strokeWidth.Value();
     strokeWidthOption.units = static_cast<int32_t>(strokeWidth.Unit());
-
-    Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
-        color = Color::TRANSPARENT;
-    }
 
     CalcDimension startMargin;
     if (!ArkTSUtils::ParseJsLengthMetrics(vm, startMarginArg, startMargin)) {
@@ -61,7 +63,6 @@ ArkUIMenuDividerOptions BuildMenuDividerOptions(EcmaVM* vm, Local<JSValueRef> st
 
     ArkUIMenuDividerOptions dividerOptions;
     dividerOptions.strokeWidth = strokeWidthOption;
-    dividerOptions.color = color.GetValue();
     dividerOptions.startMargin = startMarginOption;
     dividerOptions.endMargin = endMarginOption;
     return dividerOptions;
@@ -87,16 +88,25 @@ ArkUINativeModuleValue SetMenuDivider(ArkUIRuntimeCallInfo* runtimeCallInfo, boo
         }
         return panda::JSValueRef::Undefined(vm);
     }
-    auto dividerOptions = BuildMenuDividerOptions(vm, strokeWidthArg, colorArg, startMarginArg, endMarginArg);
+    RefPtr<ResourceObject> colorResObj;
+    auto dividerOptions = BuildMenuDividerOptions(vm, strokeWidthArg, startMarginArg, endMarginArg);
+    Color color;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj)) {
+        color = Color::TRANSPARENT;
+    }
+    dividerOptions.color = color.GetValue();
     int32_t mode = 0;
     if (modeArg->IsNumber()) {
         mode = modeArg->Int32Value(vm);
     }
     dividerOptions.mode = mode;
+    auto colorRawPtr = AceType::RawPtr(colorResObj);
     if (isGroupDivider) {
-        GetArkUINodeModifiers()->getMenuModifier()->setMenuItemGroupDivider(nativeNode, &dividerOptions);
+        GetArkUINodeModifiers()->getMenuModifier()->setMenuItemGroupDividerWithResource(
+            nativeNode, &dividerOptions, colorRawPtr);
     } else {
-        GetArkUINodeModifiers()->getMenuModifier()->setMenuItemDivider(nativeNode, &dividerOptions);
+        GetArkUINodeModifiers()->getMenuModifier()->setMenuItemDividerWithResource(
+            nativeNode, &dividerOptions, colorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -123,10 +133,12 @@ ArkUINativeModuleValue MenuBridge::SetMenuFontColor(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
         GetArkUINodeModifiers()->getMenuModifier()->resetMenuFontColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getMenuModifier()->setMenuFontColor(nativeNode, color.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getMenuModifier()->setMenuFontColor(nativeNode, color.GetValue(), colorRawPtr);
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -158,7 +170,8 @@ ArkUINativeModuleValue MenuBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
     }
 
     CalcDimension fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, false)) {
+    RefPtr<ResourceObject> fontSizeResObj;
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, fontSizeResObj, false)) {
         fontSize = Dimension(0.0);
     }
     std::string weight = DEFAULT_ERR_CODE;
@@ -176,14 +189,17 @@ ArkUINativeModuleValue MenuBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
     }
 
     std::string family;
-    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, familyArg, family) || family.empty()) {
+    RefPtr<ResourceObject> fontFamiliesResObj;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, familyArg, family, fontFamiliesResObj) || family.empty()) {
         family = DEFAULT_ERR_CODE;
     }
     std::string fontSizeStr = fontSize.ToString();
     std::string fontInfo =
         StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), family.c_str());
-
-    GetArkUINodeModifiers()->getMenuModifier()->setFont(nativeNode, fontInfo.c_str(), style);
+    auto fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
+    auto fontFamiliesRawPtr = AceType::RawPtr(fontFamiliesResObj);
+    GetArkUINodeModifiers()->getMenuModifier()->setFont(
+        nativeNode, fontInfo.c_str(), style, fontSizeRawPtr, fontFamiliesRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -197,8 +213,48 @@ ArkUINativeModuleValue MenuBridge::ResetFont(ArkUIRuntimeCallInfo* runtimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
-bool MenuBridge::ParseRadius(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUINodeHandle nativeNode,
-    std::vector<ArkUI_Float32>& radiusValues, std::vector<int32_t>& radiusUnits)
+void SetRadiusResObjs(std::vector<void*>& resObjs, RefPtr<ResourceObject>& topLeftResObj,
+    RefPtr<ResourceObject>& topRightResObj, RefPtr<ResourceObject>& bottomLeftResObj,
+    RefPtr<ResourceObject>& bottomRightResObj)
+{
+    if (topLeftResObj) {
+        topLeftResObj->IncRefCount();
+    }
+    if (topRightResObj) {
+        topRightResObj->IncRefCount();
+    }
+    if (bottomLeftResObj) {
+        bottomLeftResObj->IncRefCount();
+    }
+    if (bottomRightResObj) {
+        bottomRightResObj->IncRefCount();
+    }
+    resObjs.push_back(AceType::RawPtr(topLeftResObj));
+    resObjs.push_back(AceType::RawPtr(topRightResObj));
+    resObjs.push_back(AceType::RawPtr(bottomLeftResObj));
+    resObjs.push_back(AceType::RawPtr(bottomRightResObj));
+}
+
+void SetRadiusValues(std::vector<ArkUI_Float32>& radiusValues, CalcDimension topLeft, CalcDimension topRight,
+    CalcDimension bottomLeft, CalcDimension bottomRight)
+{
+    radiusValues.push_back(topLeft.Value());
+    radiusValues.push_back(topRight.Value());
+    radiusValues.push_back(bottomLeft.Value());
+    radiusValues.push_back(bottomRight.Value());
+}
+
+void SetRadiusUnits(std::vector<int32_t>& radiusUnits, CalcDimension topLeft, CalcDimension topRight,
+    CalcDimension bottomLeft, CalcDimension bottomRight)
+{
+    radiusUnits.push_back(static_cast<int32_t>(topLeft.Unit()));
+    radiusUnits.push_back(static_cast<int32_t>(topRight.Unit()));
+    radiusUnits.push_back(static_cast<int32_t>(bottomLeft.Unit()));
+    radiusUnits.push_back(static_cast<int32_t>(bottomRight.Unit()));
+}
+
+bool ParseRadius(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUINodeHandle nativeNode,
+    RadiusParseParams& radiusParseParams)
 {
     Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(1);     // 1: index of top left value
     Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(2);    // 2: index of top right value
@@ -210,11 +266,14 @@ bool MenuBridge::ParseRadius(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, 
         GetArkUINodeModifiers()->getMenuModifier()->resetRadius(nativeNode);
         return false;
     }
-
     CalcDimension topLeft;
     CalcDimension topRight;
     CalcDimension bottomLeft;
     CalcDimension bottomRight;
+    RefPtr<ResourceObject> topLeftResObj;
+    RefPtr<ResourceObject> topRightResObj;
+    RefPtr<ResourceObject> bottomLeftResObj;
+    RefPtr<ResourceObject> bottomRightResObj;
     if (isObjectArgs->IsBoolean() && !isObjectArgs->ToBoolean(vm)->Value()) {
         if (!ArkTSUtils::ParseJsDimensionVpNG(vm, topLeftArgs, topLeft, true)) {
             GetArkUINodeModifiers()->getMenuModifier()->resetRadius(nativeNode);
@@ -228,30 +287,22 @@ bool MenuBridge::ParseRadius(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, 
         bottomLeft = topLeft;
         bottomRight = topLeft;
     } else {
-        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, topLeftArgs, topLeft, true)) {
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, topLeftArgs, topLeft, topLeftResObj, true)) {
             topLeft = CalcDimension(0.0, DimensionUnit::VP);
         }
-
-        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, topRightArgs, topRight, true)) {
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, topRightArgs, topRight, topRightResObj, true)) {
             topRight = CalcDimension(0.0, DimensionUnit::VP);
         }
-
-        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, bottomLeftArgs, bottomLeft, true)) {
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, bottomLeftArgs, bottomLeft, bottomLeftResObj, true)) {
             bottomLeft = CalcDimension(0.0, DimensionUnit::VP);
         }
-
-        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, bottomRightArgs, bottomRight, true)) {
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, bottomRightArgs, bottomRight, bottomRightResObj, true)) {
             bottomRight = CalcDimension(0.0, DimensionUnit::VP);
         }
     }
-    radiusUnits.push_back(static_cast<int32_t>(topLeft.Unit()));
-    radiusUnits.push_back(static_cast<int32_t>(topRight.Unit()));
-    radiusUnits.push_back(static_cast<int32_t>(bottomLeft.Unit()));
-    radiusUnits.push_back(static_cast<int32_t>(bottomRight.Unit()));
-    radiusValues.push_back(topLeft.Value());
-    radiusValues.push_back(topRight.Value());
-    radiusValues.push_back(bottomLeft.Value());
-    radiusValues.push_back(bottomRight.Value());
+    SetRadiusValues(radiusParseParams.radiusValues, topLeft, topRight, bottomLeft, bottomRight);
+    SetRadiusUnits(radiusParseParams.radiusUnits, topLeft, topRight, bottomLeft, bottomRight);
+    SetRadiusResObjs(radiusParseParams.resObjs, topLeftResObj, topRightResObj, bottomLeftResObj, bottomRightResObj);
     return true;
 }
 
@@ -261,12 +312,12 @@ ArkUINativeModuleValue MenuBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallIn
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    std::vector<ArkUI_Float32> radiusValues;
-    std::vector<int32_t> radiusUnits;
-    if (!ParseRadius(vm, runtimeCallInfo, nativeNode, radiusValues, radiusUnits)) {
+    RadiusParseParams radiusParseParams;
+    if (!ParseRadius(vm, runtimeCallInfo, nativeNode, radiusParseParams)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUINodeModifiers()->getMenuModifier()->setRadius(nativeNode, radiusValues.data(), radiusUnits.data());
+    GetArkUINodeModifiers()->getMenuModifier()->setRadius(nativeNode, radiusParseParams.radiusValues.data(),
+        radiusParseParams.radiusUnits.data(), radiusParseParams.resObjs.data(), COUNT_PROP);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -398,11 +449,13 @@ ArkUINativeModuleValue MenuBridge::SetFontSize(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> fontSizeArg = runtimeCallInfo->GetCallArgRef(ARG_INDEX_1);
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     CalcDimension fontSize;
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSize) || fontSize.IsNegative()) {
+    RefPtr<ResourceObject> fontSizeResObj;
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSize, fontSizeResObj) || fontSize.IsNegative()) {
         GetArkUINodeModifiers()->getMenuModifier()->resetMenuFontSize(nativeNode);
     } else {
+        auto fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
         GetArkUINodeModifiers()->getMenuModifier()->setMenuFontSize(
-            nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()));
+            nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()), fontSizeRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }

@@ -3411,4 +3411,37 @@ void MenuItemPattern::ApplyOptionThemeStyles()
     }
     SetBgColor(selectTheme->GetBackgroundColor());
 }
+
+void MenuItemPattern::OnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto menuNode = GetMenu();
+    CHECK_NULL_VOID(menuNode);
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    auto pipeline = menuNode->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
+    CHECK_NULL_VOID(itemProperty);
+
+    if (SystemProperties::ConfigChangePerform() && label_) {
+        auto isSetByUser = itemProperty->GetLabelFontColorSetByUser().value_or(false);
+        if (!isSetByUser) {
+            itemProperty->UpdateLabelFontColor(menuTheme->GetSecondaryFontColor());
+            host->MarkModifyDone();
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        }
+    }
+    if (SystemProperties::ConfigChangePerform() && content_) {
+        auto fontColor = itemProperty->GetFontColor();
+        auto isSetbyUser = menuProperty->GetFontColorSetByUser().value_or(false);
+        auto property = isSetbyUser ? menuProperty : AceType::MakeRefPtr<MenuLayoutProperty>();
+        auto defaultFontColor = menuTheme->GetMenuFontColor();
+        UpdateFontColor(content_, property, fontColor, defaultFontColor);
+        content_->MarkModifyDone();
+        content_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
 } // namespace OHOS::Ace::NG

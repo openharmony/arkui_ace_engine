@@ -1303,4 +1303,51 @@ HWTEST_F(MenuItemGroupTestNg, SetBackgroundEffect003, TestSize.Level1)
     EXPECT_EQ(renderContext->GetBackgroundEffect()->saturation, EFFECT_SATURATION);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
+
+/**
+ * @tc.name: MenuItemGroupSetHeaderContentTest001
+ * @tc.desc: Test MenuItemGroupPattern::SetHeaderContent with valid header content
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, MenuItemGroupSetHeaderContentTest001, TestSize.Level1)
+{
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    ASSERT_NE(menuItemGroupPattern, nullptr);
+
+    menuItemGroupPattern->headerContent_ = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(menuItemGroupPattern->headerContent_, nullptr);
+
+    std::string testText = "Test Header Content";
+    menuItemGroupPattern->SetHeaderContent(testText);
+
+    auto textLayoutProperty = menuItemGroupPattern->headerContent_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), UtfUtils::Str8DebugToStr16(testText));
+}
+
+/**
+ * @tc.name: MenuItemGroupSetFooterContentTest001
+ * @tc.desc: Test MenuItemGroupPattern::SetFooterContent with valid footer content
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, MenuItemGroupSetFooterContentTest001, TestSize.Level1)
+{
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    ASSERT_NE(menuItemGroupPattern, nullptr);
+
+    menuItemGroupPattern->footerContent_ = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(menuItemGroupPattern->footerContent_, nullptr);
+
+    std::string testText = "Test Footer Content";
+
+    menuItemGroupPattern->SetFooterContent(testText);
+
+    auto textLayoutProperty = menuItemGroupPattern->footerContent_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), UtfUtils::Str8DebugToStr16(testText));
+}
 } // namespace OHOS::Ace::NG

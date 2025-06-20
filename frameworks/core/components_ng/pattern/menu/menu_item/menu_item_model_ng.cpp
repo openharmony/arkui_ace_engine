@@ -15,10 +15,297 @@
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 
 namespace OHOS::Ace::NG {
+void MenuItemModelNG::CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj, MenuItemFontColorType type)
+{
+    CHECK_NULL_VOID(resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithColorResourceObj(frameNode, resObj, type);
+}
+
+void MenuItemModelNG::CreateWithColorResourceObj(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, MenuItemFontColorType type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "MenuItem" + ColorTypeToString(type);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [pattern, key, type, weak = AceType::WeakClaim(frameNode)](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        std::string colorStr = pattern->GetResCacheMapByKey(key);
+        Color color;
+        if (colorStr.empty()) {
+            CHECK_NE_VOID(ResourceParseUtils::ParseResColor(resObj, color), true);
+            pattern->AddResCache(key, color.ToString());
+        } else {
+            color = Color::ColorFromString(colorStr);
+        }
+        if (type == MenuItemFontColorType::FONT_COLOR) {
+            MenuItemModelNG::SetFontColor(&(*node), color);
+        } else if (type == MenuItemFontColorType::LABEL_FONT_COLOR) {
+            MenuItemModelNG::SetLabelFontColor(&(*node), color);
+        }
+        node->MarkModifyDone();
+        node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void MenuItemModelNG::CreateWithDimensionFpResourceObj(const RefPtr<ResourceObject>& resObj, MenuItemFontSizeType type)
+{
+    CHECK_NULL_VOID(resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithDimensionFpResourceObj(frameNode, resObj, type);
+}
+
+void MenuItemModelNG::CreateWithDimensionFpResourceObj(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, MenuItemFontSizeType type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "MenuItem" + DimensionTypeToString(type);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [pattern, key, type, weak = AceType::WeakClaim(frameNode)](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        std::string cacheValue = pattern->GetResCacheMapByKey(key);
+        CalcDimension result;
+        if (cacheValue.empty()) {
+            CHECK_NE_VOID(ResourceParseUtils::ParseResDimensionFpNG(resObj, result, false), true);
+            pattern->AddResCache(key, result.ToString());
+        } else {
+            result = CalcDimension::FromString(cacheValue);
+        }
+        if (type == MenuItemFontSizeType::FONT_SIZE) {
+            if (result.Unit() == DimensionUnit::PERCENT) {
+                result = CalcDimension();
+            }
+            MenuItemModelNG::SetFontSize(&(*node), result);
+        } else if (type == MenuItemFontSizeType::LABEL_FONT_SIZE) {
+            if (result.Unit() == DimensionUnit::PERCENT) {
+                result = CalcDimension();
+            }
+            MenuItemModelNG::SetLabelFontSize(&(*node), result);
+        }
+        node->MarkModifyDone();
+        node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void MenuItemModelNG::CreateWithFontFamilyResourceObj(const RefPtr<ResourceObject>& resObj, MenuItemFontFamilyType type)
+{
+    CHECK_NULL_VOID(resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithFontFamilyResourceObj(frameNode, resObj, type);
+}
+
+void MenuItemModelNG::CreateWithFontFamilyResourceObj(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, MenuItemFontFamilyType type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "MenuItem" + FamilyTypeToString(type);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [type, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        std::vector<std::string> fontFamilies;
+        CHECK_NE_VOID(ResourceParseUtils::ParseResFontFamilies(resObj, fontFamilies), true);
+        if (type == MenuItemFontFamilyType::FONT_FAMILY) {
+            MenuItemModelNG::SetFontFamily(&(*node), fontFamilies);
+        } else if (type == MenuItemFontFamilyType::LABEL_FONT_FAMILY) {
+            MenuItemModelNG::SetLabelFontFamily(&(*node), fontFamilies);
+        }
+        node->MarkModifyDone();
+        node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void MenuItemModelNG::CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj, MenuItemStringType type)
+{
+    CHECK_NULL_VOID(resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithStringResourceObj(frameNode, resObj, type);
+}
+
+void MenuItemModelNG::CreateWithStringResourceObj(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, MenuItemStringType type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "MenuItem" + StringTypeToString(type);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [key, type, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto nodePattern = node->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(nodePattern);
+        std::string str = nodePattern->GetResCacheMapByKey(key);
+        if (str.empty()) {
+            CHECK_NE_VOID(ResourceParseUtils::ParseResString(resObj, str), true);
+            nodePattern->AddResCache(key, str);
+        }
+        if (type == MenuItemStringType::SELECT_ICON) {
+            MenuItemModelNG::SetSelectIconSrc(&(*node), str);
+        } else if (type == MenuItemStringType::CONTENT) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, Content, str, &(*node));
+        } else if (type == MenuItemStringType::LABEL_INFO) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, Label, str, &(*node));
+        }
+        node->MarkModifyDone();
+        node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void MenuItemModelNG::CreateWithMediaResourceObj(const RefPtr<ResourceObject>& resObj, const MenuItemIconType type)
+{
+    CHECK_NULL_VOID(resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithMediaResourceObj(frameNode, resObj, type);
+}
+
+void MenuItemModelNG::CreateWithMediaResourceObj(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, const MenuItemIconType type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "MenuItem" + MediaTypeToString(type);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [key, type, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto node = weak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto nodePattern = node->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(nodePattern);
+        std::string str = nodePattern->GetResCacheMapByKey(key);
+        if (str.empty()) {
+            nodePattern->AddResCache(key, str);
+        }
+        CHECK_NE_VOID(ResourceParseUtils::ParseResMedia(resObj, str), true);
+        ImageSourceInfo imageSourceInfo(str);
+        if (type == MenuItemIconType::START_ICON) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, StartIcon, imageSourceInfo, &(*node));
+        } else if (type == MenuItemIconType::END_ICON) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, EndIcon, imageSourceInfo, &(*node));
+        }
+        node->MarkModifyDone();
+        node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+const std::string MenuItemModelNG::ColorTypeToString(const MenuItemFontColorType type)
+{
+    std::string rst;
+    switch (type) {
+        case MenuItemFontColorType::FONT_COLOR:
+            rst = "FontColor";
+            break;
+        case MenuItemFontColorType::LABEL_FONT_COLOR:
+            rst = "LabelFontColor";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
+}
+
+const std::string MenuItemModelNG::DimensionTypeToString(const MenuItemFontSizeType type)
+{
+    std::string rst;
+    switch (type) {
+        case MenuItemFontSizeType::FONT_SIZE:
+            rst = "FontSize";
+            break;
+        case MenuItemFontSizeType::LABEL_FONT_SIZE:
+            rst = "LabelFontSize";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
+}
+
+const std::string MenuItemModelNG::StringTypeToString(const MenuItemStringType type)
+{
+    std::string rst;
+    switch (type) {
+        case MenuItemStringType::SELECT_ICON:
+            rst = "SelectIcon";
+            break;
+        case MenuItemStringType::CONTENT:
+            rst = "Content";
+            break;
+        case MenuItemStringType::LABEL_INFO:
+            rst = "LabelInfo";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
+}
+
+const std::string MenuItemModelNG::FamilyTypeToString(const MenuItemFontFamilyType type)
+{
+    std::string rst;
+    switch (type) {
+        case MenuItemFontFamilyType::FONT_FAMILY:
+            rst = "FontFamily";
+            break;
+        case MenuItemFontFamilyType::LABEL_FONT_FAMILY:
+            rst = "LabelFontFamily";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
+}
+
+const std::string MenuItemModelNG::MediaTypeToString(const MenuItemIconType type)
+{
+    std::string rst;
+    switch (type) {
+        case MenuItemIconType::START_ICON:
+            rst = "StartIcon";
+            break;
+        case MenuItemIconType::END_ICON:
+            rst = "EndIcon";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
+}
+
 void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -171,6 +458,33 @@ void MenuItemModelNG::UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, 
     auto menuProperty = menuItem->GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(menuProperty);
 
+    if (SystemProperties::ConfigChangePerform() && menuItemProps.HasResources()) {
+        auto pattern = menuItem->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->RemoveResObj("menuItem");
+        auto&& updateFunc = [menuItemProps, weak = AceType::WeakClaim(AceType::RawPtr(menuItem))](
+                                const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            if (!frameNode) {
+                return;
+            }
+            auto menuProperty = frameNode->GetLayoutProperty<MenuItemLayoutProperty>();
+            CHECK_NULL_VOID(menuProperty);
+            MenuItemProperties& menuItemPropsValue = const_cast<MenuItemProperties&>(menuItemProps);
+            menuItemPropsValue.ReloadResources(menuItemPropsValue);
+            menuProperty->UpdateStartIcon(menuItemPropsValue.startIcon.value_or(ImageSourceInfo("")));
+            menuProperty->UpdateContent(menuItemPropsValue.content);
+            menuProperty->UpdateEndIcon(menuItemPropsValue.endIcon.value_or(ImageSourceInfo("")));
+            menuProperty->UpdateLabel(menuItemPropsValue.labelInfo.value_or(""));
+            frameNode->MarkModifyDone();
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        };
+        if (menuItemProps.HasResources()) {
+            RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+            pattern->AddResObj("menuItem", resObj, std::move(updateFunc));
+        }
+    }
+
     menuProperty->UpdateStartIcon(menuItemProps.startIcon.value_or(ImageSourceInfo("")));
     menuProperty->UpdateContent(menuItemProps.content);
     menuProperty->UpdateEndIcon(menuItemProps.endIcon.value_or(ImageSourceInfo("")));
@@ -282,8 +596,10 @@ void MenuItemModelNG::SetLabelFontColor(const std::optional<Color>& color)
 {
     if (color.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor, color.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColorSetByUser, true);
     } else {
         ACE_RESET_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor);
+        ACE_RESET_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColorSetByUser);
     }
 }
 
@@ -314,8 +630,10 @@ void MenuItemModelNG::SetLabelFontColor(FrameNode* frameNode, const std::optiona
 {
     if (color.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor, color.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColorSetByUser, true, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColor, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, LabelFontColorSetByUser, frameNode);
     }
 }
 

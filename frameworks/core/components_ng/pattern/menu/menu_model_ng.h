@@ -34,9 +34,14 @@ public:
     void SetBorderRadius(const std::optional<Dimension>& radiusTopLeft, const std::optional<Dimension>& radiusTopRight,
         const std::optional<Dimension>& radiusBottomLeft, const std::optional<Dimension>& radiusBottomRight) override;
     void SetExpandingMode(const SubMenuExpandingMode& expandingMode) override;
+    void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) override;
     void SetExpandSymbol(const std::function<void(WeakPtr<NG::FrameNode>)>& expandSymbol) override;
     void SetItemDivider(const V2::ItemDivider& divider, const DividerMode& mode) override;
     void SetItemGroupDivider(const V2::ItemDivider& divider, const DividerMode& mode) override;
+    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj, const MenuColorType menuColorType) override;
+    void CreateWithDimensionResourceObj(const RefPtr<ResourceObject>& resObj,
+        const MenuDimensionType menuDimensionType) override;
+    void CreateWithFontFamilyResourceObj(const RefPtr<ResourceObject>& resObj, MenuFamilyType type) override;
     static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, FontWeight weight);
@@ -53,6 +58,19 @@ public:
     static void SetExpandingMode(FrameNode* frameNode, const SubMenuExpandingMode& expandingMode);
     static void SetExpandSymbol(FrameNode* frameNode, const std::function<void(WeakPtr<NG::FrameNode>)>& expandSymbol);
     static RefPtr<FrameNode> CreateMenu();
+    static void SetBorderRadius(FrameNode* frameNode, const NG::BorderRadiusProperty& borderRadius);
+    static void CreateWithColorResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        const MenuColorType menuColorType);
+    static void CreateWithDimensionResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        const MenuDimensionType menuDimensionType);
+    static void CreateWithFontFamilyResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        MenuFamilyType type);
+private:
+    static void SetMenuDimensionValue(MenuDimensionType type, RefPtr<NG::FrameNode>& node, CalcDimension& result);
+    static void SetMenuColorValue(MenuColorType type, RefPtr<NG::FrameNode>& node, Color& color);
+    static const std::string ColorTypeToString(const MenuColorType menuColorType);
+    static const std::string DimensionTypeToString(const MenuDimensionType menuDimensionType);
+    static const std::string FamilyTypeToString(const MenuFamilyType type);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_MODEL_NG_H
