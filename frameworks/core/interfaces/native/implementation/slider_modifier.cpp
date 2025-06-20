@@ -274,6 +274,7 @@ void TrackBorderRadiusImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
     Validator::ValidateNonNegative(convValue);
+    Validator::ValidateNonPercent(convValue);
     SliderModelStatic::SetTrackBorderRadius(frameNode, convValue);
 }
 void SelectedBorderRadiusImpl(Ark_NativePointer node,
@@ -283,6 +284,7 @@ void SelectedBorderRadiusImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
     Validator::ValidateNonNegative(convValue);
+    Validator::ValidateNonPercent(convValue);
     SliderModelStatic::SetSelectedBorderRadius(frameNode, convValue);
 }
 void BlockSizeImpl(Ark_NativePointer node,
@@ -400,7 +402,7 @@ void _onChangeEvent_valueImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
     };
-    // SliderModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
+    SliderModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 } // SliderAttributeModifier
 const GENERATED_ArkUISliderModifier* GetSliderModifier()

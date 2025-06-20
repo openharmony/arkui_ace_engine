@@ -61,7 +61,7 @@ void SelectModelStatic::SetSelected(FrameNode* frameNode, const std::optional<in
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
-    pattern->SetSelected(idx.value_or(-1));
+    pattern->SetSelected(idx.value_or(0));
 }
 
 void SelectModelStatic::SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
