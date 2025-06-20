@@ -3229,6 +3229,9 @@ void JsAccessibilityManager::InitializeCallback()
         pipelineContext->AddUIExtensionCallbackEvent(OHOS::Ace::NG::UIExtCallbackEventId::ON_UEA_ACCESSIBILITY_READY);
         RegisterUIExtBusinessConsumeCallback();
         RegisterGetParentRectHandler();
+        if (container->GetUIContentType() == UIContentType::PREVIEW_UI_EXTENSION) {
+            SetIsIgnoreAllAction(true);
+        }
         return;
     }
 
@@ -6814,6 +6817,10 @@ bool JsAccessibilityManager::ExecuteActionNG(int64_t elementId,
     const std::map<std::string, std::string>& actionArguments, ActionType action, const RefPtr<PipelineBase>& context,
     int64_t uiExtensionOffset)
 {
+    if (GetIsIgnoreAllAction() && !(action == ActionType::ACCESSIBILITY_ACTION_FOCUS ||
+                                    action == ActionType::ACCESSIBILITY_ACTION_CLEAR_FOCUS)) {
+        return false;
+    }
     bool result = false;
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_RETURN(ngPipeline, result);

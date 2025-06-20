@@ -509,6 +509,7 @@ void PreviewSessionWrapperImpl::NotifyForeground()
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto hostWindowId = pipeline->GetFocusWindowId();
+    PLATFORM_LOGI("PreviewSessionWrapperImpl NotifyForeground hostWindowId is %{public}u.", hostWindowId);
     auto wantPtr = session_->EditSessionInfo().want;
     UpdateWantPtr(wantPtr);
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionActivation(
@@ -521,11 +522,19 @@ void PreviewSessionWrapperImpl::NotifyBackground(bool isHandleError)
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
         session_, std::move(backgroundCallback_));
 }
+
 void PreviewSessionWrapperImpl::NotifyDestroy(bool isHandleError)
 {
     CHECK_NULL_VOID(session_);
-    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(
-        session_, std::move(destructionCallback_));
+    PLATFORM_LOGI("PreviewSessionWrapperImpl NotifyDestroy, isHandleError = %{public}d, persistentid = %{public}d.",
+        isHandleError, session_->GetPersistentId());
+    if (isHandleError) {
+        Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(
+            session_, std::move(destructionCallback_));
+    } else {
+        Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(
+            session_, nullptr);
+    }
 }
 
 void PreviewSessionWrapperImpl::NotifyConfigurationUpdate() {}
