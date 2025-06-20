@@ -538,6 +538,8 @@ public:
         return -1;
     }
 
+    virtual void OnBackPressedCallback() {};
+    
     virtual void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
 
