@@ -136,6 +136,11 @@ public:
     {
         return navDestinationPathInfo_;
     }
+
+    const std::string& GetNavDestinationModuleName() const
+    {
+        return navDestinationModuleName_;
+    }
     
     int32_t GetNavigationNodeId() const;
 

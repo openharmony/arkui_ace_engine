@@ -67,30 +67,33 @@ private:
 
 class ACE_EXPORT AceScopedPerformanceCheck final {
 public:
-    explicit AceScopedPerformanceCheck(const std::string& name);
+    explicit AceScopedPerformanceCheck(const std::string& name, const std::string& pagePath);
     ~AceScopedPerformanceCheck();
 
     static CodeInfo GetCodeInfo(int32_t row, int32_t col);
-    static void RecordPerformanceCheckData(
-        const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout, std::string path);
+    static void RecordPerformanceCheckData(const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout,
+        std::string path, std::string fromPath = "", std::string moduleName = "", bool isNavgation = false);
 
 private:
     static std::string GetCurrentTime();
     static bool CheckIsRuleContainsPage(const std::string& ruleType, const std::string& pagePath);
     static void RecordPageNodeCountAndDepth(int32_t pageNodeCount, int32_t pageDepth,
-        std::vector<PerformanceCheckNode>& pageNodeList, const CodeInfo& info);
-    static void RecordForEachItemsCount(
-        int32_t count, std::unordered_map<int32_t, PerformanceCheckNode>& foreachNodeMap, const CodeInfo& info);
-    static void RecordFlexLayoutsCount(const std::vector<PerformanceCheckNode>& nodeList, const CodeInfo& info);
-    static void RecordVsyncTimeout(const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout, const CodeInfo& info);
+        std::vector<PerformanceCheckNode>& pageNodeList, const CodeInfo& info, std::string pageRoute);
+    static void RecordForEachItemsCount(int32_t count,
+        std::unordered_map<int32_t, PerformanceCheckNode>& foreachNodeMap, const CodeInfo& info, std::string pageRoute);
+    static void RecordFlexLayoutsCount(
+        const std::vector<PerformanceCheckNode>& nodeList, const CodeInfo& info, std::string pageRoute);
+    static void RecordVsyncTimeout(
+        const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout, const CodeInfo& info, std::string pageRoute);
     static bool CheckPage(const CodeInfo& codeInfo, const std::string& rule);
     static void RecordFunctionTimeout();
     static RefPtr<Framework::RevSourceMap> GetCurrentSourceMap();
     static bool CheckIsRuleWebsocket(const std::string& ruleType);
     int64_t markTime_ = 0;
     std::string name_;
+    std::string pagePath_;
     static std::string currentPath_;
-    static std::vector<std::pair<int64_t, std::string>> records_;
+    static std::vector<std::tuple<int64_t, std::string, std::string>> records_;
     ACE_DISALLOW_COPY_AND_MOVE(AceScopedPerformanceCheck);
 };
 } // namespace OHOS::Ace
