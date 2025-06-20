@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { DrawContext } from "./../Graphics"
 import { LengthMetrics } from "../Graphics"
-import { ComponentContent, Context, ContextInternal, GestureOps, StateStylesOps } from "./arkui-custom"
+import { ComponentContent, Context, ContextInternal, StateStylesOps } from "./arkui-custom"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { IntentionCode, CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, GradientDirection, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, TouchType, InteractionHand, CrownAction, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, IlluminatedType, MouseButton, MouseAction, AccessibilityHoverType, AxisAction, AxisModel, ScrollSource } from "./enums"
@@ -39,7 +39,7 @@ import { VisualEffect, Filter, BrightnessBlender } from "./arkui-uieffect"
 import { FocusBoxStyle, FocusPriority } from "./focus"
 import { TransformationMatrix } from "./arkui-common"
 import { UniformDataType } from "./arkui-uniformtypedescriptor"
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup, GestureGroupHandler } from "./gesture"
+import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup } from "./gesture"
 import { BlendMode } from "./arkui-drawing"
 import { StyledString } from "./styledString"
 import { Callback_Number_Number_Void } from "./grid"
@@ -62,6 +62,7 @@ import { hookDrawModifierInvalidateImpl, hookDrawModifierAttributeImpl } from ".
 import { hookRegisterOnDragStartImpl } from "../handwritten/ArkDragDrop"
 import { ArkUIAniModule } from "arkui.ani"
 import { PointerStyle, UnifiedData, Summary, PixelMap } from "#external"
+import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookCommonMethodParallelGestureImpl, hookCommonMethodPriorityGestureImpl } from "../handwritten/CommonHandWritten"
 export interface ICurve {
     interpolate(fraction: number): number
 }
@@ -9253,40 +9254,6 @@ export type SelectedCallback = (selected: boolean) => void;
 export type IndexCallback = (value: number) => void;
 export type IndexerSelectedCallback = (index: number) => void;
 export type RefreshingCallback = (refreshing: boolean) => void;
-export class UIGestureEvent {
-    private peer?: PeerNode
-    setPeer(peer?: PeerNode) {
-        this.peer = peer
-    }
-    addGesture(gesture: GestureHandler, priority?: GesturePriority, mask?: GestureMask): void {
-        if (gesture instanceof GestureGroupHandler) {
-            let gestureGroup = gesture as GestureGroupHandler;
-            gestureGroup.addGestureGroupToNode(priority ?? GesturePriority.NORMAL, this.peer, mask)
-        } else if (gesture instanceof GestureHandler) {
-            gesture.setGesture(priority ?? GesturePriority.NORMAL, this.peer, mask);
-        }
-    }
-    addParallelGesture(gesture: GestureHandler, mask?: GestureMask): void {
-        if (gesture instanceof GestureGroupHandler) {
-            let gestureGroup = gesture as GestureGroupHandler;
-            gestureGroup.addGestureGroupToNode(2, this.peer, mask)
-        } else if (gesture instanceof GestureHandler) {
-            gesture.setGesture(2, this.peer, mask);
-        }
-    }
-    removeGestureByTag(tag: string): void {
-        if (this.peer) {
-            let peerNode = this.peer as PeerNode;
-            GestureOps.removeGestureByTag(peerNode.peer.ptr, tag);
-        }
-    }
-    clearGestures(): void {
-        if (this.peer) {
-            let peerNode = this.peer as PeerNode;
-            GestureOps.clearGestures(peerNode.peer.ptr);
-        }
-    }
-}
 export interface SelectionOptions {
     menuPolicy?: MenuPolicy;
 }
@@ -11044,14 +11011,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public gestureModifier(value: GestureModifier | undefined): this {
         if (this.checkPriority("gestureModifier")) {
-            if (value === undefined) {
-                return this;
-            }
-            const value_casted = value as GestureModifier
-            let gestureEvent = this.getOrCreateGestureEvent();
-            gestureEvent.clearGestures();
-            value_casted.applyGesture(gestureEvent);
-            return this
+            hookCommonMethodGestureModifierImpl(this, value);
         }
         return this
     }
@@ -11250,43 +11210,19 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         if (this.checkPriority("gesture")) {
-            if (gesture instanceof Gesture) {
-                let singleGesture = gesture as Gesture;
-                singleGesture.setGesture(0, this.getPeer(), mask);
-                return this;
-            } else {
-                let gestureGroup = gesture as GestureGroup;
-                gestureGroup.addGestureGroupToNode(0, this.getPeer(), mask)
-            }
-            return this
+            hookCommonMethodGestureImpl(this, gesture, mask)
         }
         return this
     }
     public priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         if (this.checkPriority("priorityGesture")) {
-            if (gesture instanceof Gesture) {
-                let singleGesture = gesture as Gesture;
-                singleGesture.setGesture(1, this.getPeer(), mask);
-                return this;
-            } else {
-                let gestureGroup = gesture as GestureGroup;
-                gestureGroup.addGestureGroupToNode(1, this.getPeer(), mask)
-            }
-            return this
+            hookCommonMethodPriorityGestureImpl(this, gesture, mask)
         }
         return this
     }
     public parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         if (this.checkPriority("parallelGesture")) {
-            if (gesture instanceof Gesture) {
-                let singleGesture = gesture as Gesture;
-                singleGesture.setGesture(2, this.getPeer(), mask);
-                return this;
-            } else {
-                let gestureGroup = gesture as GestureGroup;
-                gestureGroup.addGestureGroupToNode(2, this.getPeer(), mask)
-            }
-            return this
+            hookCommonMethodParallelGestureImpl(this, gesture, mask)
         }
         return this
     }
