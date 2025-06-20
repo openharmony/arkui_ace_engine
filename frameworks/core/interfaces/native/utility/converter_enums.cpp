@@ -1489,6 +1489,16 @@ void AssignCast(std::optional<OverScrollMode>& dst, const Ark_OverScrollMode& sr
 }
 
 template<>
+void AssignCast(std::optional<BlurOnKeyboardHideMode>& dst, const Ark_BlurOnKeyboardHideMode& src)
+{
+    switch (src) {
+        case ARK_BLUR_ON_KEYBOARD_HIDE_MODE_SILENT: dst = BlurOnKeyboardHideMode::SILENT; break;
+        case ARK_BLUR_ON_KEYBOARD_HIDE_MODE_BLUR: dst = BlurOnKeyboardHideMode::BLUR; break;
+        default: LOGE("Unexpected enum value in Ark_BlurOnKeyboardHideMode: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<PanelMode>& dst, const Ark_PanelMode& src)
 {
     switch (src) {
