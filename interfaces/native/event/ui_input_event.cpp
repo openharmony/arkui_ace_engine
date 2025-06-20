@@ -748,8 +748,7 @@ int32_t OH_ArkUI_PointerEvent_GetPointerId(const ArkUI_UIInputEvent* event, uint
             if (!isCurrentCTouchEventParamValid(touchEvent, pointerIndex)) {
                 RETURN_RET_WITH_STATUS_CHECK(0, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
-
-            RETURN_RET_WITH_STATUS_CHECK(touchEvent->touchPointes[pointerIndex].id, ARKUI_ERROR_CODE_PARAM_INVALID);
+            RETURN_RET_WITH_STATUS_CHECK(touchEvent->touchPointes[pointerIndex].id, ARKUI_ERROR_CODE_NO_ERROR);
         }
         case C_MOUSE_EVENT_ID: {
             const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
@@ -1931,7 +1930,7 @@ int32_t OH_ArkUI_PointerEvent_GetInteractionHandByIndex(const ArkUI_UIInputEvent
             RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_NO_ERROR, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
             break;
     }
-    RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_NO_ERROR, ARKUI_ERROR_CODE_PARAM_INVALID);
+    RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_NO_ERROR, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 float OH_ArkUI_PointerEvent_GetTouchAreaWidth(const ArkUI_UIInputEvent* event, uint32_t pointerIndex)
