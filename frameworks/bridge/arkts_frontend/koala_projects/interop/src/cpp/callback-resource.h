@@ -46,9 +46,11 @@ enum CallbackEventKind {
     Event_CallCallback = 0,
     Event_HoldManagedResource = 1,
     Event_ReleaseManagedResource = 2,
+    Event_CallCallback_Customize = 3,
 };
 
 void enqueueCallback(const CallbackBuffer* event);
+void enqueueCustomCallback(const CallbackBuffer* event);
 void holdManagedCallbackResource(InteropInt32 resourceId);
 void releaseManagedCallbackResource(InteropInt32 resourceId);
 
