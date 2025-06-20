@@ -1219,6 +1219,48 @@ HWTEST_F(LayoutPropertyTestNgTwo, UpdateLayoutConstraint002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckBackgroundLayoutSafeAreaEdges001
+ * @tc.desc: Test CheckBackgroundLayoutSafeAreaEdges
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, CheckBackgroundLayoutSafeAreaEdges001, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
+    layoutProperty->SetHost(frameNodeHost);
+    auto renderContext = frameNodeHost->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_ = LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP;
+    layoutProperty->CheckBackgroundLayoutSafeAreaEdges(TextDirection::LTR);
+    EXPECT_EQ(
+        layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_, LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP);
+    EXPECT_EQ(layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP);
+    layoutProperty->CheckBackgroundLayoutSafeAreaEdges(TextDirection::RTL);
+    EXPECT_EQ(
+        layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_, LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_TOP);
+    EXPECT_EQ(layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_TOP);
+    EXPECT_EQ(renderContext->GetBackgroundIgnoresLayoutSafeAreaEdgesValue(LAYOUT_SAFE_AREA_EDGE_NONE),
+        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_TOP);
+
+    layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_ = LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM;
+    layoutProperty->CheckBackgroundLayoutSafeAreaEdges(TextDirection::LTR);
+    EXPECT_EQ(layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+    EXPECT_EQ(layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+    layoutProperty->CheckBackgroundLayoutSafeAreaEdges(TextDirection::RTL);
+    EXPECT_EQ(layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_END | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+    EXPECT_EQ(layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_,
+        LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+    EXPECT_EQ(renderContext->GetBackgroundIgnoresLayoutSafeAreaEdgesValue(LAYOUT_SAFE_AREA_EDGE_NONE),
+        LAYOUT_SAFE_AREA_EDGE_START | LAYOUT_SAFE_AREA_EDGE_BOTTOM);
+}
+
+/**
  * @tc.name: CheckIgnoreLayoutSafeArea
  * @tc.desc: Test CheckIgnoreLayoutSafeArea
  * @tc.type: FUNC
@@ -1285,5 +1327,40 @@ HWTEST_F(LayoutPropertyTestNgTwo, TestIsExpandConstraintNeeded, TestSize.Level1)
     EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), false);
     layoutProperty->ignoreLayoutSafeAreaOpts_->edges = LAYOUT_SAFE_AREA_EDGE_VERTICAL;
     EXPECT_EQ(layoutProperty->IsExpandConstraintNeeded(), true);
+}
+
+/**
+ * @tc.name: UpdateLocalizedAlignment001
+ * @tc.desc: Test cast to UpdateLocalizedAlignment
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, UpdateLocalizedAlignment001, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    EXPECT_FALSE(layoutProperty->positionProperty_);
+    layoutProperty->UpdateLocalizedAlignment("top_start");
+    auto align = layoutProperty->GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+    EXPECT_EQ(align, "top_start");
+
+    layoutProperty->UpdateLocalizedAlignment("bottom_end");
+    auto align1 = layoutProperty->GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+    EXPECT_EQ(align1, "bottom_end");
+}
+
+/**
+ * @tc.name: UpdateIsMirrorable001
+ * @tc.desc: Test cast to UpdateIsMirrorable
+ * @tc.type: FUNC
+ */
+HWTEST_F(LayoutPropertyTestNgTwo, UpdateIsMirrorable001, TestSize.Level1)
+{
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->UpdateIsMirrorable(true);
+    auto isMirrorable = layoutProperty->GetPositionProperty()->GetIsMirrorable().value_or(false);
+    EXPECT_EQ(isMirrorable, true);
+
+    layoutProperty->UpdateIsMirrorable(false);
+    auto isMirrorable1 = layoutProperty->GetPositionProperty()->GetIsMirrorable().value_or(false);
+    EXPECT_EQ(isMirrorable1, false);
 }
 }

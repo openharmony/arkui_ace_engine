@@ -37,6 +37,8 @@ const char INSPECTOR_WIDTH[] = "width";
 const char INSPECTOR_HEIGHT[] = "height";
 const char INSPECTOR_RESOLUTION[] = "$resolution";
 const char INSPECTOR_CHILDREN[] = "$children";
+const char INSPECTOR_BUNDLE[] = "bundleName";
+const char INSPECTOR_ABILITY[] = "ability";
 const char INSPECTOR_PAGE_URL[] = "pageUrl";
 const char INSPECTOR_NAV_DST_NAME[] = "navDstName";
 const char INSPECTOR_ATTR_ID[] = "id";
@@ -50,7 +52,8 @@ const char INSPECTOR_CHILDREN_COUNT[] = "$childrenCount";
 }
 
 SimplifiedInspector::SimplifiedInspector(int32_t containerId, const TreeParams& params)
-    : containerId_(containerId), params_(params), inspectorCfg_({ params.isContentOnly })
+    : containerId_(containerId), params_(params), inspectorCfg_({ params.isContentOnly, !params.enableBackground }),
+      isBackground_(params.enableBackground)
 {}
 
 RefPtr<NG::UINode> GetOverlayNode(const RefPtr<NG::UINode>& pageNode)
@@ -104,6 +107,8 @@ bool SimplifiedInspector::GetInspectorStep2(
     CHECK_NULL_RETURN(pagePattern, false);
     auto pageInfo = pagePattern->GetPageInfo();
     CHECK_NULL_RETURN(pageInfo, false);
+    jsonRoot->Put(INSPECTOR_BUNDLE, AceApplicationInfo::GetInstance().GetPackageName().c_str());
+    jsonRoot->Put(INSPECTOR_ABILITY, AceApplicationInfo::GetInstance().GetAbilityName().c_str());
     jsonRoot->Put(INSPECTOR_PAGE_URL, pageInfo->GetPageUrl().c_str());
     jsonRoot->Put(INSPECTOR_NAV_DST_NAME, Recorder::EventRecorder::Get().GetNavDstName().c_str());
 
@@ -131,6 +136,7 @@ bool SimplifiedInspector::GetInspectorStep2(
 void SimplifiedInspector::GetFrameNodeChildren(
     const RefPtr<NG::UINode>& uiNode, std::list<RefPtr<NG::UINode>>& children)
 {
+    CHECK_NULL_VOID(uiNode);
     if (isBackground_) {
         collector_->RetainNode(uiNode);
     }
@@ -165,6 +171,7 @@ void SimplifiedInspector::GetInspectorChildren(
     }
     auto jsonNode = JsonUtil::Create(true);
     auto node = AceType::DynamicCast<FrameNode>(parent);
+    CHECK_NULL_VOID(node);
     auto active = isActive && node->IsActive();
     if (!isActive && !params_.enableAllNodes) {
         return;
@@ -318,7 +325,6 @@ void SimplifiedInspector::GetInspectorBackgroundAsync(
     collector->CreateJson();
     collector_ = collector;
     isAsync_ = true;
-    isBackground_ = true;
     TAG_LOGD(AceLogTag::ACE_UIEVENT, "Inspector3:container %{public}d", containerId_);
     auto context = NG::PipelineContext::GetContextByContainerId(containerId_);
     CHECK_NULL_VOID(context);
@@ -348,6 +354,8 @@ void SimplifiedInspector::GetInspectorBackgroundAsync(
             jsonRoot->Put(INSPECTOR_WIDTH, std::to_string(rootWidth * scale).c_str());
             jsonRoot->Put(INSPECTOR_HEIGHT, std::to_string(rootHeight * scale).c_str());
             jsonRoot->Put(INSPECTOR_RESOLUTION, std::to_string(SystemProperties::GetResolution()).c_str());
+            jsonRoot->Put(INSPECTOR_ABILITY, AceApplicationInfo::GetInstance().GetAbilityName().c_str());
+            jsonRoot->Put(INSPECTOR_BUNDLE, AceApplicationInfo::GetInstance().GetPackageName().c_str());
             jsonRoot->Put(INSPECTOR_PAGE_URL, pageUrl.c_str());
             jsonRoot->Put(INSPECTOR_NAV_DST_NAME, Recorder::EventRecorder::Get().GetNavDstName().c_str());
             auto jsonNodeArray = JsonUtil::CreateArray(true);

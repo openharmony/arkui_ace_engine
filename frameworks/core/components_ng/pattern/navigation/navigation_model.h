@@ -31,6 +31,12 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 
 namespace OHOS::Ace {
+
+enum class NavigationPatternType {
+    TITLE_BAR = 0,
+    NAV_BAR,
+    NAVIGATION,
+};
 using NavigationTransitionEvent = std::function<NG::NavigationTransition(
      RefPtr<NG::NavDestinationContext> from, RefPtr<NG::NavDestinationContext> to, NG::NavigationOperation operation)>;
 using OnNavBarWidthChangeEvent = std::function<void(const Dimension)>;
@@ -39,7 +45,7 @@ public:
     static NavigationModel* GetInstance();
     virtual ~NavigationModel() = default;
 
-    virtual void Create() = 0;
+    virtual void Create(bool useHomeDestination = false) = 0;
     virtual void SetNavigationStack() = 0;
     virtual void SetNavigationStack(const RefPtr<NG::NavigationStack>& navigationStack) = 0;
     virtual void SetNavigationStackWithCreatorAndUpdater(std::function<RefPtr<NG::NavigationStack>()> creator,
@@ -55,7 +61,7 @@ public:
     virtual void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) {}
     virtual void SetCustomTitle(const RefPtr<AceType>& customNode) = 0;
     virtual void SetTitleHeight(const Dimension& height, bool isValid = true) = 0;
-    virtual void SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid = true) = 0;
+    virtual void SetTitleHeight(const RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetTitleMode(NG::NavigationTitleMode mode) = 0;
     virtual void SetSubtitle(const std::string& subtitle) = 0;
     virtual void SetEnableModeChangeAnimation(bool isEnable) = 0;
@@ -124,12 +130,16 @@ public:
     virtual void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) {};
     virtual void SetRecoverable(bool recoverable) {}
     virtual void SetEnableDragBar(bool recoverable) {}
+    virtual void ResetResObj(NavigationPatternType type, const std::string& key) {}
     virtual bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const RefPtr<ResourceObject>& subResObj,
-        const RefPtr<ResourceObject>& mainResObj, bool ignoreMainTitle = false) {return false;};
+        const RefPtr<ResourceObject>& mainResObj) {return false;};
     virtual void UpdateMainTitle(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& mainResObj) {};
     virtual void UpdateSubTitle(
         const RefPtr<NG::TitleBarNode>& titleBarNode, const RefPtr<ResourceObject>& subResObj) {};
+    virtual bool UseHomeDestination() const { return false; }
+    virtual void SetHomePathInfoWithCallback(
+        std::function<void(const RefPtr<NG::NavigationStack>&)>&& setHomePathInfoCallback) {}
 
 private:
     static std::unique_ptr<NavigationModel> instance_;

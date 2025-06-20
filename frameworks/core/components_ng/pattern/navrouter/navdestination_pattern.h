@@ -295,6 +295,16 @@ public:
         return isActive_;
     }
 
+    std::string GetSerializedParam() const
+    {
+        return serializedParam_;
+    }
+
+    void UpdateSerializedParam(const std::string& param)
+    {
+        serializedParam_ = param;
+    }
+
 private:
     struct HideBarOnSwipeContext {
         CancelableCallback<void()> showBarTask;
@@ -354,6 +364,7 @@ private:
     bool isFirstTimeCheckStatusBarConfig_ = true;
     bool isFirstTimeCheckNavigationIndicatorConfig_ = true;
     RefPtr<TouchEventImpl> touchListener_ = nullptr;
+    std::string serializedParam_ = "";
 };
 } // namespace OHOS::Ace::NG
 

@@ -48,12 +48,14 @@ ArkUINativeModuleValue TextTimerBridge::SetFontColor(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Color color;
+    RefPtr<ResourceObject> colorResObj;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, paramArg, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, paramArg, color, colorResObj)) {
         nodeModifiers->getTextTimerModifier()->resetFontColor(nativeNode);
     } else {
-        nodeModifiers->getTextTimerModifier()->setFontColor(nativeNode, color.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        nodeModifiers->getTextTimerModifier()->setFontColorRes(nativeNode, color.GetValue(), colorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -80,14 +82,16 @@ ArkUINativeModuleValue TextTimerBridge::SetFontSize(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension fontSize;
+    RefPtr<ResourceObject> fontSizeResObj;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSize) || fontSize.Value() < 0 ||
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, fontSizeArg, fontSize, fontSizeResObj) || fontSize.Value() < 0 ||
         fontSize.Unit() == DimensionUnit::PERCENT) {
         nodeModifiers->getTextTimerModifier()->resetFontSize(nativeNode);
     } else {
-        nodeModifiers->getTextTimerModifier()->setFontSize(
-            nativeNode, fontSize.Value(), static_cast<int32_t>(fontSize.Unit()));
+        auto fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);
+        nodeModifiers->getTextTimerModifier()->setFontSizeRes(
+            nativeNode, fontSize.Value(), static_cast<int32_t>(fontSize.Unit()), fontSizeRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -150,18 +154,20 @@ ArkUINativeModuleValue TextTimerBridge::SetFontWeight(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     std::string fontWeight;
+    RefPtr<ResourceObject> fontWeightResObj;
     if (!fontWeightArg->IsNull()) {
         if (fontWeightArg->IsNumber()) {
             fontWeight = std::to_string(fontWeightArg->Int32Value(vm));
         } else if (fontWeightArg->IsString(vm)) {
             fontWeight = fontWeightArg->ToString(vm)->ToString(vm);
         } else if (fontWeightArg->IsObject(vm)) {
-            ArkTSUtils::ParseJsString(vm, fontWeightArg, fontWeight);
+            ArkTSUtils::ParseJsString(vm, fontWeightArg, fontWeight, fontWeightResObj);
         }
     }
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getTextTimerModifier()->setFontWeight(nativeNode, fontWeight.c_str());
+    auto fontWeightRawPtr = AceType::RawPtr(fontWeightResObj);
+    nodeModifiers->getTextTimerModifier()->setFontWeightRes(nativeNode, fontWeight.c_str(), fontWeightRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -188,13 +194,15 @@ ArkUINativeModuleValue TextTimerBridge::SetFontFamily(ArkUIRuntimeCallInfo* runt
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     std::string fontFamilyStr;
+    RefPtr<ResourceObject> fontFamilyResObj;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamilyStr)) {
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamilyStr, fontFamilyResObj)) {
         nodeModifiers->getTextTimerModifier()->resetFontFamily(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    nodeModifiers->getTextTimerModifier()->setFontFamily(nativeNode, fontFamilyStr.c_str());
+    auto fontFamilyRawPtr = AceType::RawPtr(fontFamilyResObj);
+    nodeModifiers->getTextTimerModifier()->setFontFamilyRes(nativeNode, fontFamilyStr.c_str(), fontFamilyRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -261,16 +269,20 @@ ArkUINativeModuleValue TextTimerBridge::SetTextShadow(ArkUIRuntimeCallInfo* runt
     auto offsetXArray = std::make_unique<double[]>(length);
     auto offsetYArray = std::make_unique<double[]>(length);
     auto fillArray = std::make_unique<uint32_t[]>(length);
-    bool radiusParseResult = ArkTSUtils::ParseArray<double>(
-        vm, runtimeCallInfo->GetCallArgRef(NUM_1), radiusArray.get(), length, ArkTSUtils::parseShadowRadius);
+    std::vector<RefPtr<ResourceObject>> radiusResObjArray;
+    std::vector<RefPtr<ResourceObject>> colorResObjArray;
+    std::vector<RefPtr<ResourceObject>> offsetXResObjArray;
+    std::vector<RefPtr<ResourceObject>> offsetYResObjArray;
+    bool radiusParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, runtimeCallInfo->GetCallArgRef(NUM_1),
+        radiusArray.get(), length, ArkTSUtils::parseShadowRadiusWithResObj, radiusResObjArray);
     bool typeParseResult = ArkTSUtils::ParseArray<uint32_t>(
         vm, runtimeCallInfo->GetCallArgRef(NUM_2), typeArray.get(), length, ArkTSUtils::parseShadowType);
-    bool colorParseResult = ArkTSUtils::ParseArray<uint32_t>(
-        vm, runtimeCallInfo->GetCallArgRef(NUM_3), colorArray.get(), length, ArkTSUtils::parseShadowColor);
-    bool offsetXParseResult = ArkTSUtils::ParseArray<double>(
-        vm, runtimeCallInfo->GetCallArgRef(NUM_4), offsetXArray.get(), length, ArkTSUtils::parseShadowOffset);
-    bool offsetYParseResult = ArkTSUtils::ParseArray<double>(
-        vm, runtimeCallInfo->GetCallArgRef(NUM_5), offsetYArray.get(), length, ArkTSUtils::parseShadowOffset);
+    bool colorParseResult = ArkTSUtils::ParseArrayWithResObj<uint32_t>(vm, runtimeCallInfo->GetCallArgRef(NUM_3),
+        colorArray.get(), length, ArkTSUtils::parseShadowColorWithResObj, colorResObjArray);
+    bool offsetXParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, runtimeCallInfo->GetCallArgRef(NUM_4),
+        offsetXArray.get(), length, ArkTSUtils::parseShadowOffsetWithResObj, offsetXResObjArray);
+    bool offsetYParseResult = ArkTSUtils::ParseArrayWithResObj<double>(vm, runtimeCallInfo->GetCallArgRef(NUM_5),
+        offsetYArray.get(), length, ArkTSUtils::parseShadowOffsetWithResObj, offsetYResObjArray);
     bool fillParseResult = ArkTSUtils::ParseArray<uint32_t>(
         vm, runtimeCallInfo->GetCallArgRef(NUM_6), fillArray.get(), length, ArkTSUtils::parseShadowFill);
     if (!radiusParseResult || !colorParseResult || !offsetXParseResult ||
@@ -278,18 +290,16 @@ ArkUINativeModuleValue TextTimerBridge::SetTextShadow(ArkUIRuntimeCallInfo* runt
         return panda::JSValueRef::Undefined(vm);
     }
     auto textShadowArray = std::make_unique<ArkUITextShadowStruct[]>(length);
-    CHECK_NULL_RETURN(textShadowArray.get(), panda::JSValueRef::Undefined(vm));
+    auto textShadowResArray = std::make_unique<ArkUITextShadowResStruct[]>(length);
+    CHECK_NULL_RETURN(textShadowArray && textShadowResArray, panda::JSValueRef::Undefined(vm));
     for (uint32_t i = 0; i < length; i++) {
-        textShadowArray[i].radius = radiusArray[i];
-        textShadowArray[i].type = typeArray[i];
-        textShadowArray[i].color = colorArray[i];
-        textShadowArray[i].offsetX = offsetXArray[i];
-        textShadowArray[i].offsetY = offsetYArray[i];
-        textShadowArray[i].fill = fillArray[i];
+        textShadowArray[i] = { radiusArray[i], typeArray[i], colorArray[i], offsetXArray[i], offsetYArray[i],
+            fillArray[i] };
+        textShadowResArray[i] = { AceType::RawPtr(radiusResObjArray[i]), AceType::RawPtr(colorResObjArray[i]),
+            AceType::RawPtr(offsetXResObjArray[i]), AceType::RawPtr(offsetYResObjArray[i]) };
     }
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getTextTimerModifier()->setTextShadow(nativeNode, textShadowArray.get(), length);
+    GetArkUINodeModifiers()->getTextTimerModifier()->setTextShadowRes(
+        nativeNode, textShadowArray.get(), textShadowResArray.get(), length);
     return panda::JSValueRef::Undefined(vm);
 }
 

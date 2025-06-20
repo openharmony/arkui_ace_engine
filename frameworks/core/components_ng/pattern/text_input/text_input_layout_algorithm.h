@@ -65,7 +65,8 @@ private:
     bool IsFontSizeNonPositive(const TextStyle& textStyle) const;
     void MeasureAutoFillIcon(LayoutWrapper* layoutWrapper);
     void LayoutAutoFillIcon(LayoutWrapper* layoutWrapper);
-    
+    void MeasureCounterWithPolicy(LayoutWrapper* layoutWrapper, float nonContentWidth);
+
     SizeF autoFillIconSizeMeasure_;
 };
 } // namespace OHOS::Ace::NG

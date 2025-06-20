@@ -453,4 +453,89 @@ HWTEST_F(RefreshLayoutTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     EXPECT_EQ(textLayoutProperty->GetFontSizeValue(0.0_vp), 14.0_fp);
     EXPECT_EQ(textLayoutProperty->GetTextColorValue(Color::WHITE), Color::BLACK);
 }
+
+/**
+ * @tc.name: CustomBuilderNodeVisibility001
+ * @tc.desc: Test CustomBuilderNode's visibility
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, CustomBuilderNodeVisibility001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. SetCustomBuilder
+     * @tc.expected: custom node exists, and default visibility is visible.
+     */
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto builder = CreateCustomNode();
+    RefreshModelNG model = CreateRefresh();
+    model.SetCustomBuilder(builder);
+    model.SetIsCustomBuilderExist(true);
+    CreateDone();
+    EXPECT_EQ(pattern_->progressChild_, nullptr);
+    EXPECT_EQ(pattern_->customBuilder_, builder);
+    auto customBuilderLayoutProperty = pattern_->customBuilder_->GetLayoutProperty();
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+    EXPECT_TRUE(pattern_->isHigherVersion_);
+
+    /**
+     * @tc.steps: step2.  start Refreshing
+     * @tc.expected: Update Visibility to VISIBLE
+     */
+    layoutProperty_->UpdateIsRefreshing(true);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+
+    /**
+     * @tc.steps: step3.  end Refreshing
+     * @tc.expected: Update Visibility to VISIBLE
+     */
+    layoutProperty_->UpdateIsRefreshing(false);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::VISIBLE);
+
+    /**
+     * @tc.steps: step4.  user has setted visibility and  start Refreshing
+     * @tc.expected: don't change visibility
+     */
+    customBuilderLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE, false, true);
+    layoutProperty_->UpdateIsRefreshing(true);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(customBuilderLayoutProperty->IsUserSetVisibility());
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibility(), VisibleType::INVISIBLE);
+
+    /**
+     * @tc.steps: step5.  user has setted visibility and  end Refreshing
+     * @tc.expected: don't change visibility
+     */
+    customBuilderLayoutProperty->UpdateVisibility(VisibleType::VISIBLE, false, true);
+    layoutProperty_->UpdateIsRefreshing(false);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(customBuilderLayoutProperty->IsUserSetVisibility());
+    EXPECT_EQ(customBuilderLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: BeginAndEndTrailingTrace001
+ * @tc.desc: Test BeginTrailingTrace and EndTrailingTrace function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshLayoutTestNg, BeginAndEndTrailingTrace001, TestSize.Level1)
+{
+    RefreshModelNG model = CreateRefresh();
+    CreateDone();
+    EXPECT_FALSE(pattern_->hasBeginTrailingTrace_);
+
+    pattern_->BeginTrailingTrace();
+    EXPECT_TRUE(pattern_->hasBeginTrailingTrace_);
+    pattern_->EndTrailingTrace();
+    EXPECT_FALSE(pattern_->hasBeginTrailingTrace_);
+}
 } // namespace OHOS::Ace::NG

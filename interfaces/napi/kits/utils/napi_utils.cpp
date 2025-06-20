@@ -734,6 +734,7 @@ std::string DimensionToString(Dimension dimension)
 bool ParseString(const ResourceInfo& info, std::string& result)
 {
     auto resourceWrapper = CreateResourceWrapper(info);
+    CHECK_NULL_RETURN(resourceWrapper, false);
     if (info.type == static_cast<int>(ResourceType::PLURAL)) {
         std::string pluralResults;
         if (info.resId == UNKNOWN_RESOURCE_ID) {
@@ -828,6 +829,7 @@ std::optional<Color> GetOptionalColor(napi_env env, napi_value argv, napi_valuet
 bool ParseIntegerToString(const ResourceInfo& info, std::string& result)
 {
     auto resourceWrapper = CreateResourceWrapper(info);
+    CHECK_NULL_RETURN(resourceWrapper, false);
     if (info.type == static_cast<int>(ResourceType::INTEGER)) {
         if (info.resId == UNKNOWN_RESOURCE_ID) {
             result = std::to_string(resourceWrapper->GetIntByName(info.params[0]));

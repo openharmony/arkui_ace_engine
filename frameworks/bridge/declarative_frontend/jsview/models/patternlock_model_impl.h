@@ -26,19 +26,25 @@ public:
     void SetPatternComplete(std::function<void(const BaseEventInfo* info)>&& onComplete) override;
     void SetDotConnect(std::function<void(int32_t)>&& onDotConnect) override {};
     void SetSelectedColor(const Color& selectedColor) override;
+    void SetSelectedColorByUser(bool isByuserSet) override {};
     void SetAutoReset(bool isAutoReset) override;
     void SetPathColor(const Color& pathColor) override;
+    void SetPathColorByUser(bool isByuserSet) override {};
     void SetActiveColor(const Color& activeColor) override;
+    void SetActiveColorByUser(bool isByuserSet) override {};
     void SetRegularColor(const Color& regularColor) override;
+    void SetRegularColorByUser(bool isByuserSet) override {};
     void SetCircleRadius(const Dimension& radius) override;
     void SetSideLength(const Dimension& sideLength) override;
     void SetStrokeWidth(const Dimension& lineWidth) override;
     void SetActiveCircleColor(const Color& activeCircleColor) override;
+    void SetActiveCircleColorByUser(bool isByuserSet) override {};
     void SetActiveCircleRadius(const Dimension& activeCircleRadius) override;
     void SetEnableWaveEffect(bool enableWaveEffect) override;
     void SetEnableForeground(bool enableForeground) override;
     void SetSkipUnselectedPoint(bool isSkipUnselectedPoint) override;
-    void CreateWithResourceObj(JsResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override {};
+    void CreateWithResourceObj(
+        PatternLockResourceType PatternLockResourceType, const RefPtr<ResourceObject>& resObj) override {};
 };
 
 } // namespace OHOS::Ace::Framework

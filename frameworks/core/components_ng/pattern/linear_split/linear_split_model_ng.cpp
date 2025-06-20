@@ -51,11 +51,23 @@ void LinearSplitModelNG::SetDivider(NG::SplitType splitType, const ColumnSplitDi
             value.ReloadResources();
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, value, frameNode);
             frameNode->MarkModifyDone();
-            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            frameNode->MarkDirtyNode();
         };
-        pattern->AddResObj("ColumnSplit.divider", resObj, std::move(updateFunc));
+        pattern->AddResObj("columnSplit.divider", resObj, std::move(updateFunc));
     }
     ACE_UPDATE_LAYOUT_PROPERTY(LinearSplitLayoutProperty, Divider, divider);
+}
+
+void LinearSplitModelNG::ResetResObj(const std::string& key)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LinearSplitPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
 }
 
 void LinearSplitModelNG::SetResizable(FrameNode* frameNode, NG::SplitType splitType, bool resizable)

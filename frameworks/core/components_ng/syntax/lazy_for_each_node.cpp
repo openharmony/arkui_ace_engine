@@ -306,6 +306,15 @@ void LazyForEachNode::OnDatasetChange(const std::list<V2::Operation>& DataOperat
             builder_->NotifyItemDeleted(RawPtr(node.second), node.first);
         }
         builder_->clearDeletedNodes();
+        auto pipeline = GetContext();
+        bool isShow = pipeline ? pipeline->GetOnShow() : true;
+        if (pipeline && !isShow) {
+            pipeline->AddAfterLayoutTask(
+                [nodes = std::move(nodeList)]() mutable {
+                    nodes.clear();
+                }
+            );
+        }
     }
     tempChildren_.clear();
     tempChildren_.swap(children_);
@@ -340,11 +349,15 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
         child.second->SetJSViewActive(false, true);
         return child.second->GetFrameChildByIndex(0, needBuild);
     }
-    if (isActive_) {
-        child.second->SetJSViewActive(true, true);
-    }
     if (addToRenderTree) {
         child.second->SetActive(true);
+        auto frameNode = AceType::DynamicCast<FrameNode>(child.second->GetFrameChildByIndex(0, true));
+        if (frameNode && !frameNode->IsActive()) {
+            frameNode->SetActive(true);
+        }
+    }
+    if (isActive_) {
+        child.second->SetJSViewActive(true, true);
     }
     if (child.second->GetDepth() != GetDepth() + 1) {
         child.second->SetDepth(GetDepth() + 1);

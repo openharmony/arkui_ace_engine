@@ -41,6 +41,8 @@ public:
 
     void Execute(const JSRef<JSObject>& jsParamsObject);
     void Execute(const std::vector<std::string>& keys, const std::string& param);
+    void ExecuteWithContext(
+        const std::vector<std::string>& keys, const std::string& param, const JSExecutionContext& context);
     void ExecuteNew(const std::vector<std::string>& keys, const std::string& param);
 
     virtual JSRef<JSVal> ExecuteJS(int argc)

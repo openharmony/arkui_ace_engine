@@ -87,4 +87,22 @@ HWTEST_F(SubwindowManagerTest, CloseDialog001, TestSize.Level1)
     ASSERT_NE(manager, nullptr);
     manager->CloseDialog(100000);
 }
+
+/**
+ * @tc.name: SubwindowManagerTest_ShowDialogNG001
+ * @tc.desc: Test frame node method ShowDialogNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubwindowManagerTest, ShowDialogNG001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get subwindowManager, and ShowDialogNG.
+     */
+    auto manager = SubwindowManager::GetInstance();
+    ASSERT_NE(manager, nullptr);
+    DialogProperties dialogProps;
+    std::function<void()> buildFunc = nullptr;
+    auto dialogNode = manager->ShowDialogNG(dialogProps, std::move(buildFunc));
+    ASSERT_EQ(dialogNode, nullptr);
+}
 }

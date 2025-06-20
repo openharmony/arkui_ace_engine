@@ -937,4 +937,204 @@ HWTEST_F(SheetPopupTestNg, AvoidanceRuleBottom001, TestSize.Level1)
     MockContainer::Current()->SetApiTargetVersion(lastPlatformVersion);
     // SheetPopupTestNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: SheetPopupAvoidKeyboard001
+ * @tc.desc: Branch: if (keyboardAvoidMode == SheetKeyboardAvoidMode::POPUP_SHEET) &&
+ *                      (placementOnTarget == true) && (sheetHeight < rootSize - keyboardHeight)
+ *           Condition: keyboardAvoidMode == SheetKeyboardAvoidMode::POPUP_SHEET
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPopupTestNg, SheetPopupAvoidKeyboard001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1: create root and target node, init builder func
+     * @tc.expected: targetNode != nullptr
+     */
+    SheetPopupTestNg::SetUpTestCase();
+    SizeF rootSize = SizeF(3000.f, 3000.f);
+    OffsetF rootOffset = OffsetF(0.f, 0.f);
+    SizeF targetSize = SizeF(200.f, 80.f);
+    // targetOffset determines every space is not enough to layout sheetPage, but top height is biggest
+    OffsetF targetOffset = OffsetF(1450.f, 1800.f);
+
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetDisplayWindowRectInfo(Rect(0.f, 0.f, 3000.f, 3000.f));
+    MockPipelineContext::GetCurrent()->SetCurrentWindowRect(Rect(0.f, 0.f, 3000.f, 3000.f));
+    MockPipelineContext::GetCurrent()->SetRootSize(rootSize.Width(), rootSize.Height());
+
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(context, nullptr);
+    context->safeAreaManager_ = AceType::MakeRefPtr<SafeAreaManager>();
+    context->safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
+    context->safeAreaManager_->keyboardInset_ = { .start = 0, .end = 1000 };
+
+    RefPtr<FrameNode> rootNode;
+    auto targetNode = InitTargetNodeEnv(rootNode, rootSize, rootOffset, targetSize, targetOffset);
+    ASSERT_NE(targetNode, nullptr);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(targetNode->GetRenderContext());
+    mockRenderContext->SetPaintRectWithTransform(
+        RectF(targetOffset.GetX(), targetOffset.GetY(), targetSize.Width(), targetSize.Height()));
+
+    CreateSheetBuilder();
+
+    /**
+     * @tc.steps: step2: init sheet size and bind sheet
+     * @tc.expected: bindSheet create success
+     */
+    SheetStyle sheetStyle;
+    Dimension sheetPageWidth = Dimension(1600.f, DimensionUnit::PX);
+    Dimension sheetPageHeight = Dimension(1600.f, DimensionUnit::PX);
+    CreateSheetStyle(sheetStyle, sheetPageWidth, sheetPageHeight);
+    sheetStyle.placement = Placement::BOTTOM;
+    sheetStyle.placementOnTarget = true;
+    sheetStyle.sheetKeyboardAvoidMode = SheetKeyboardAvoidMode::POPUP_SHEET;
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+
+    /**
+     * @tc.steps: step3: measure and layout sheet page
+     * @tc.expected: finalPlacement == Top and showArrow == true
+     */
+    auto sheetPageNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetPageNode, nullptr);
+    sheetPageNode->GetFocusHub()->currentFocus_ = true;
+    auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetThemeType_ = "popup";
+    auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetPageNode->GetParent());
+    ASSERT_NE(sheetWrapperNode, nullptr);
+    RefPtr<SheetPresentationLayoutAlgorithm> sheetPageLayoutAlgorithm;
+    RefPtr<SheetWrapperLayoutAlgorithm> sheetWrapperLayoutAlgorithm;
+    InitSheetAndWrapperLayoutInfo(
+        sheetPageNode, sheetWrapperNode, sheetPageLayoutAlgorithm, sheetWrapperLayoutAlgorithm);
+    auto layoutProperty = sheetPageNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+
+    sheetWrapperNode->Measure(sheetWrapperNode->GetLayoutConstraint());
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetWidth_, sheetPageWidth.ConvertToPx()));
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetHeight_, sheetPageHeight.ConvertToPx()));
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->placement_, Placement::BOTTOM);
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.placementOnTarget, true);
+
+    sheetWrapperNode->Layout();
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.finalPlacement, Placement::TOP);
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.showArrow, true);
+    EXPECT_TRUE(NearEqual(sheetPageLayoutAlgorithm->sheetWidth_, sheetPageWidth.ConvertToPx()));
+    auto resizeHeight = sheetPageHeight.ConvertToPx() + SHEET_ARROW_HEIGHT.ConvertToPx();
+    EXPECT_TRUE(NearEqual(sheetPageLayoutAlgorithm->sheetHeight_, resizeHeight));
+    auto expectedOffsetX = targetOffset.GetX() + targetSize.Width() / 2.0 - sheetPageWidth.ConvertToPx() / 2.0;
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.sheetOffsetX, expectedOffsetX));
+    auto expectedOffsetY =
+        targetOffset.GetY() - SHEET_TARGET_SPACE.ConvertToPx() - sheetPageLayoutAlgorithm->sheetHeight_;
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.sheetOffsetY, expectedOffsetY));
+
+    /**
+     * @tc.steps: step4. recover container and pipeline info.
+     */
+    SheetPopupTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SheetPopupAvoidKeyboard002
+ * @tc.desc: Branch: if (keyboardAvoidMode == SheetKeyboardAvoidMode::POPUP_SHEET) &&
+ *                      (placementOnTarget == true) && (sheetHeight >= rootSize - keyboardHeight)
+ *           Condition: keyboardAvoidMode == SheetKeyboardAvoidMode::POPUP_SHEET
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPopupTestNg, SheetPopupAvoidKeyboard002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1: create root and target node, init builder func
+     * @tc.expected: targetNode != nullptr
+     */
+    SheetPopupTestNg::SetUpTestCase();
+    SizeF rootSize = SizeF(3000.f, 3000.f);
+    OffsetF rootOffset = OffsetF(0.f, 0.f);
+    SizeF targetSize = SizeF(200.f, 80.f);
+    // targetOffset determines every space is not enough to layout sheetPage, but top height is biggest
+    OffsetF targetOffset = OffsetF(1450.f, 1800.f);
+
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetDisplayWindowRectInfo(Rect(0.f, 0.f, 3000.f, 3000.f));
+    MockPipelineContext::GetCurrent()->SetCurrentWindowRect(Rect(0.f, 0.f, 3000.f, 3000.f));
+    MockPipelineContext::GetCurrent()->SetRootSize(rootSize.Width(), rootSize.Height());
+
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(context, nullptr);
+    context->safeAreaManager_ = AceType::MakeRefPtr<SafeAreaManager>();
+    context->safeAreaManager_->keyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
+    context->safeAreaManager_->keyboardInset_ = { .start = 0, .end = 1800 };
+
+    RefPtr<FrameNode> rootNode;
+    auto targetNode = InitTargetNodeEnv(rootNode, rootSize, rootOffset, targetSize, targetOffset);
+    ASSERT_NE(targetNode, nullptr);
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(targetNode->GetRenderContext());
+    mockRenderContext->SetPaintRectWithTransform(
+        RectF(targetOffset.GetX(), targetOffset.GetY(), targetSize.Width(), targetSize.Height()));
+
+    CreateSheetBuilder();
+
+    /**
+     * @tc.steps: step2: init sheet size and bind sheet
+     * @tc.expected: bindSheet create success
+     */
+    SheetStyle sheetStyle;
+    Dimension sheetPageWidth = Dimension(1600.f, DimensionUnit::PX);
+    Dimension sheetPageHeight = Dimension(1600.f, DimensionUnit::PX);
+    CreateSheetStyle(sheetStyle, sheetPageWidth, sheetPageHeight);
+    sheetStyle.placement = Placement::BOTTOM;
+    sheetStyle.placementOnTarget = true;
+    sheetStyle.sheetKeyboardAvoidMode = SheetKeyboardAvoidMode::POPUP_SHEET;
+    bool isShow = true;
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+
+    /**
+     * @tc.steps: step3: measure and layout sheet page
+     * @tc.expected: finalPlacement == Top and showArrow == false
+     */
+    auto sheetPageNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(sheetPageNode, nullptr);
+    sheetPageNode->GetFocusHub()->currentFocus_ = true;
+    auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->sheetThemeType_ = "popup";
+    auto sheetWrapperNode = AceType::DynamicCast<FrameNode>(sheetPageNode->GetParent());
+    ASSERT_NE(sheetWrapperNode, nullptr);
+    RefPtr<SheetPresentationLayoutAlgorithm> sheetPageLayoutAlgorithm;
+    RefPtr<SheetWrapperLayoutAlgorithm> sheetWrapperLayoutAlgorithm;
+    InitSheetAndWrapperLayoutInfo(
+        sheetPageNode, sheetWrapperNode, sheetPageLayoutAlgorithm, sheetWrapperLayoutAlgorithm);
+    auto layoutProperty = sheetPageNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+
+    sheetWrapperNode->Measure(sheetWrapperNode->GetLayoutConstraint());
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetWidth_, sheetPageWidth.ConvertToPx()));
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetHeight_, sheetPageHeight.ConvertToPx()));
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->placement_, Placement::BOTTOM);
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.placementOnTarget, true);
+
+    sheetWrapperNode->Layout();
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.finalPlacement, Placement::TOP);
+    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.showArrow, true);
+    EXPECT_TRUE(NearEqual(sheetPageLayoutAlgorithm->sheetWidth_, sheetPageWidth.ConvertToPx()));
+    auto resizeHeight = sheetPageHeight.ConvertToPx() + SHEET_ARROW_HEIGHT.ConvertToPx();
+    EXPECT_TRUE(NearEqual(sheetPageLayoutAlgorithm->sheetHeight_, resizeHeight));
+    auto expectedOffsetX = targetOffset.GetX() + targetSize.Width() / 2.0 - sheetPageWidth.ConvertToPx() / 2.0;
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.sheetOffsetX, expectedOffsetX));
+    auto expectedOffsetY = sheetWrapperLayoutAlgorithm->windowGlobalRect_.Top() + WINDOW_EDGE_SPACE.ConvertToPx();
+    EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.sheetOffsetY, expectedOffsetY));
+}
 } // namespace OHOS::Ace::NG

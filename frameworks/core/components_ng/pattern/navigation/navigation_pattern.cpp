@@ -438,6 +438,56 @@ void NavigationPattern::BuildDragBar()
     }
 }
 
+bool NavigationPattern::CreateHomeDestination(RefPtr<UINode>& customNode, RefPtr<NavDestinationGroupNode>& homeDest)
+{
+    CHECK_NULL_RETURN(navigationStack_, false);
+    auto host = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    do {
+        if (parentNode_.Upgrade() || !host) {
+            break;
+        }
+        auto context = host->GetContext();
+        // Avoid the loading problem of atomicservice on the home page
+        if ((context && !context->GetInstallationFree()) || !context) {
+            break;
+        }
+        RefPtr<UINode> parentCustomNode;
+        auto curNode = host->GetParent();
+        while (curNode) {
+            auto curTag = curNode->GetTag();
+            if (curTag == V2::JS_VIEW_ETS_TAG) {
+                parentCustomNode = curNode;
+                break;
+            }
+            curNode = curNode->GetParent();
+        }
+        auto pattern = host->GetPattern<NavigationPattern>();
+        if (pattern && parentCustomNode) {
+            pattern->SetParentCustomNode(parentCustomNode);
+        }
+    } while (false);
+    RefPtr<UINode> node;
+    if (!navigationStack_->CreateHomeDestination(parentNode_, node)) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "failed to create home NavDestination");
+        return false;
+    }
+    CHECK_NULL_RETURN(node, false);
+    node->SetFreeze(true, true);
+    auto destNode = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(node));
+    CHECK_NULL_RETURN(destNode, false);
+    destNode->SetIsHomeDestination(true);
+    // set navigation id
+    auto destPattern = AceType::DynamicCast<NavDestinationPattern>(destNode->GetPattern());
+    if (host && destPattern) {
+        destPattern->SetNavigationNode(host);
+        destPattern->SetNavigationId(host->GetInspectorId().value_or(""));
+    }
+    customNode = node;
+    homeDest = destNode;
+    return true;
+}
+
 void NavigationPattern::OnModifyDone()
 {
     // !!! Do not add operations about NavPathStack here, see @SyncWithJsStackIfNeeded
@@ -1207,6 +1257,7 @@ void NavigationPattern::UpdateColorModeForNodes(
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
         CHECK_NULL_VOID(hostNode);
         auto lastIndex = hostNode->GetLastStandardIndex();
+        lastIndex = lastIndex < 0 ? 0 : lastIndex;
         auto pipelineContext = hostNode->GetContext();
         CHECK_NULL_VOID(pipelineContext);
         auto colorMode = pipelineContext->GetColorMode() == ColorMode::DARK ? true : false;
@@ -3560,7 +3611,7 @@ std::unique_ptr<JsonValue> NavigationPattern::GetTopNavdestinationJson(bool need
     topNavdestinationJson->Put("navigationId", hostNode->GetCurId().c_str());
     std::string param = "";
     if (needParam) {
-        param = navigationStack_->GetSerializedParamSafely(topNavDestinationNode->GetIndex());
+        param = navdestinationPattern->GetSerializedParam();
         topNavdestinationJson->Put("param", param.c_str());
     }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get top navDestinationInfo success, name: %{public}s, mode: %{public}d, "
@@ -4852,6 +4903,8 @@ void NavigationPattern::SetToolbarManagerNavigationMode(NavigationMode mode)
     auto navigationMode = toolbarManager_->GetNavigationMode();
     if (navigationMode != mode) {
         toolbarManager_->SetNavigationMode(mode);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "update navigationMode successful, new mode: %{public}d",
+            static_cast<int>(mode));
     }
 }
 

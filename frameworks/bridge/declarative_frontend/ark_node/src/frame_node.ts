@@ -1196,7 +1196,147 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
         }
         node._componentAttribute = new ArkTextAreaComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
         return node._componentAttribute;
-      }]
+    }],
+    ['Button', (node: FrameNode): ArkButtonComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkButtonComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Checkbox', (node: FrameNode): ArkCheckboxComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkCheckboxComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Radio', (node: FrameNode): ArkRadioComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkRadioComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Slider', (node: FrameNode): ArkSliderComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkSliderComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Toggle', (node: FrameNode): ArkToggleComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkToggleComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Column', (node: FrameNode): ArkColumnComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkColumnComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Row', (node: FrameNode): ArkRowComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkRowComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Stack', (node: FrameNode): ArkStackComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkStackComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Flex', (node: FrameNode): ArkFlexComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkFlexComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['RelativeContainer', (node: FrameNode): ArkRelativeContainerComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkRelativeContainerComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['XComponent', (node: FrameNode): ArkXComponentComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkXComponentComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Progress', (node: FrameNode): ArkProgressComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkProgressComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['LoadingProgress', (node: FrameNode): ArkLoadingProgressComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkLoadingProgressComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Image', (node: FrameNode): ArkImageComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkImageComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }]
   ]
 )
 

@@ -90,6 +90,7 @@ bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
 bool SystemProperties::multiInstanceEnabled_ = false;
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
+bool SystemProperties::softPagetransition_ = false;
 bool SystemProperties::formSkeletonBlurEnabled_ = true;
 bool SystemProperties::syncLoadEnabled_ = true;
 int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
@@ -98,6 +99,7 @@ bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;
 bool g_isNeedSymbol = true;
 bool g_isResourceDecoupling = true;
+bool g_isConfigChangePerform = false;
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
 HeightLayoutBreakPoint SystemProperties::heightLayoutBreakpoints_ = HeightLayoutBreakPoint();
 
@@ -290,7 +292,7 @@ bool SystemProperties::GetResourceDecoupling()
 
 bool SystemProperties::ConfigChangePerform()
 {
-    return false;
+    return g_isConfigChangePerform;
 }
 
 int32_t SystemProperties::GetDragDropFrameworkStatus()
@@ -313,6 +315,11 @@ bool SystemProperties::IsPageTransitionFreeze()
     return pageTransitionFrzEnabled_;
 }
 
+bool SystemProperties::IsSoftPageTransition()
+{
+    return softPagetransition_;
+}
+
 bool SystemProperties::IsFormSkeletonBlurEnabled()
 {
     return formSkeletonBlurEnabled_;
@@ -322,4 +329,25 @@ int32_t SystemProperties::getFormSharedImageCacheThreshold()
 {
     return formSharedImageCacheThreshold_;
 }
+
+bool SystemProperties::IsWhiteBlockEnabled()
+{
+    return false;
+}
+
+bool SystemProperties::IsWhiteBlockIdleChange()
+{
+    return false;
+}
+
+int32_t SystemProperties::GetWhiteBlockIndexValue()
+{
+    return 0;
+}
+
+int32_t SystemProperties::GetWhiteBlockCacheCountValue()
+{
+    return 0;
+}
+
 } // namespace OHOS::Ace

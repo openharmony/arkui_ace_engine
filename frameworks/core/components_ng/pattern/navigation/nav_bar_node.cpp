@@ -89,6 +89,42 @@ void NavBarNode::SystemTransitionPushAction(bool isStart)
     titleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
 }
 
+void NavBarNode::InitSoftTransitionPop()
+{
+    SetTransitionType(PageTransitionType::ENTER_POP);
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto translate = CalcTranslateForTransitionPopStart(frameSize, true);
+    renderContext->UpdateTranslateInXY(translate);
+}
+
+void NavBarNode::SoftTransitionPushAction(bool isStart)
+{
+    if (isStart) {
+        SetTransitionType(PageTransitionType::EXIT_PUSH);
+    }
+    GetRenderContext()->UpdateTranslateInXY({0.0f, 0.0f});
+}
+
+void NavBarNode::StartSoftTransitionPush()
+{
+    auto geometryNode = GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto renderContext = GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto translate = CalcTranslateForTransitionPushEnd(frameSize, false);
+    renderContext->UpdateTranslateInXY(translate);
+}
+
+void NavBarNode::StartSoftTransitionPop()
+{
+    GetRenderContext()->UpdateTranslateInXY({0.0f, 0.0f});
+}
+
 void NavBarNode::StartSystemTransitionPush()
 {
     // start EXIT_PUSH transition animation

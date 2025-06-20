@@ -722,6 +722,9 @@ void RefreshPattern::InitOffsetProperty()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             auto scrollOffsetLimit = std::clamp(scrollOffset, 0.0f, pattern->GetMaxPullDownDistance());
+            if (NearEqual(scrollOffsetLimit, pattern->scrollOffset_, 1.f)) {
+                pattern->BeginTrailingTrace();
+            }
             pattern->scrollOffset_ = scrollOffsetLimit;
             pattern->UpdateFirstChildPlacement();
             pattern->FireOnOffsetChange(scrollOffsetLimit);
@@ -875,6 +878,7 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
             if (recycle) {
                 pattern->UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, pattern->GetFollowRatio());
             }
+            pattern->EndTrailingTrace();
         });
     auto context = GetContext();
     CHECK_NULL_VOID(context);
@@ -917,7 +921,12 @@ void RefreshPattern::QuickFirstChildAppear()
     option.SetCurve(DEFAULT_CURVE);
     option.SetDuration(LOADING_ANIMATION_DURATION);
     animation_ = AnimationUtils::StartAnimation(
-        option, [&]() { offsetProperty_->Set(static_cast<float>(refreshOffset_.ConvertToPx())); });
+        option, [&]() { offsetProperty_->Set(static_cast<float>(refreshOffset_.ConvertToPx())); },
+        [weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->EndTrailingTrace();
+        });
 }
 
 void RefreshPattern::QuickFirstChildDisappear()
@@ -932,6 +941,7 @@ void RefreshPattern::QuickFirstChildDisappear()
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->SpeedAnimationFinish();
+            pattern->EndTrailingTrace();
         });
 }
 
@@ -958,6 +968,10 @@ void RefreshPattern::ResetAnimation()
                 auto offsetProperty = pattern->offsetProperty_;
                 CHECK_NULL_VOID(offsetProperty);
                 offsetProperty->Set(offset);
+            }, [weak = AceType::WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->EndTrailingTrace();
             });
     } else {
         AnimationUtils::StopAnimation(animation_);
@@ -1295,6 +1309,30 @@ void RefreshPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
         parent->OnScrollEndRecursive(velocity);
     }
     SetIsNestedInterrupt(false);
+}
+
+void RefreshPattern::BeginTrailingTrace()
+{
+    if (!hasBeginTrailingTrace_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto id = host->GetAccessibilityId();
+        AceAsyncTraceBeginCommercial(
+            id, (TRAILING_ANIMATION + std::to_string(id) + std::string(" ") + host->GetTag()).c_str());
+        hasBeginTrailingTrace_ = true;
+    }
+}
+
+void RefreshPattern::EndTrailingTrace()
+{
+    if (hasBeginTrailingTrace_) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto id = host->GetAccessibilityId();
+        AceAsyncTraceEndCommercial(
+            id, (TRAILING_ANIMATION + std::to_string(id) + std::string(" ") + host->GetTag()).c_str());
+        hasBeginTrailingTrace_ = false;
+    }
 }
 
 float RefreshPattern::GetLoadingProgressOpacity()

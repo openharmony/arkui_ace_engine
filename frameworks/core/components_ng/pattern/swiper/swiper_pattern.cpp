@@ -615,6 +615,10 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
         SetIndicatorJumpIndex(jumpIndex_);
     }
     isVoluntarilyClear_ = false;
+    if (jumpIndexByUser_.has_value()) {
+        jumpIndex_ = jumpIndexByUser_;
+    }
+    jumpIndexByUser_.reset();
     if (jumpIndex_) {
         if ((jumpIndex_.value() < 0 || jumpIndex_.value() >= TotalCount()) && !IsLoop()) {
             jumpIndex_ = 0;
@@ -1310,8 +1314,6 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         indexsInAnimation_.clear();
     }
 
-    UpdateLayoutRange(GetAxis(), isInit);
-
     const auto& paddingProperty = props->GetPaddingProperty();
     jumpOnChange_ = false;
     return GetEdgeEffect() == EdgeEffect::FADE || paddingProperty != nullptr;
@@ -1779,7 +1781,8 @@ void SwiperPattern::FireSwiperCustomAnimationEvent()
     CHECK_NULL_VOID(transition);
 
     auto selectedIndex = GetCurrentIndex();
-    for (auto& item : itemPositionInAnimation_) {
+    auto itemPosition = itemPositionInAnimation_;
+    for (auto& item : itemPosition) {
         if (indexsInAnimation_.find(item.first) == indexsInAnimation_.end()) {
             continue;
         }
@@ -1898,7 +1901,7 @@ void SwiperPattern::SwipeToWithoutAnimation(int32_t index)
     StopSpringAnimationImmediately();
     StopIndicatorAnimation(true);
     jumpIndex_ = index;
-    RequestJump(index);
+    jumpIndexByUser_ = index;
     AceAsyncTraceBeginCommercial(0, hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
     uiCastJumpIndex_ = index;
     MarkDirtyNodeSelf();
@@ -1975,9 +1978,7 @@ void SwiperPattern::SwipeTo(int32_t index)
     if (hasTabsAncestor_ && NeedFastAnimation()) {
         FastAnimation(targetIndex);
     }
-    if (RequestFillToTarget(targetIndex)) {
-        targetIndex_ = targetIndex;
-    } else {} // postpone targetIndex_ to next frame
+    targetIndex_ = targetIndex;
     UpdateTabBarAnimationDuration(index);
     if (GetDuration() == 0 || !isVisible_) {
         SwipeToWithoutAnimation(index);
@@ -2202,7 +2203,7 @@ void SwiperPattern::ChangeIndex(int32_t index, SwiperAnimationMode mode)
             SetIndicatorChangeIndexStatus(false);
         }
 
-        SwipeToWithoutAnimation(GetLoopIndex(targetIndex));
+        SwipeToWithoutAnimation(CheckIndexRange(CheckTargetIndex(index)));
     } else if (mode == SwiperAnimationMode::DEFAULT_ANIMATION) {
         if (GetMaxDisplayCount() > 0) {
             SetIndicatorChangeIndexStatus(true);
@@ -2255,7 +2256,7 @@ void SwiperPattern::ChangeIndex(int32_t index, bool useAnimation)
             SetIndicatorChangeIndexStatus(false);
         }
 
-        SwipeToWithoutAnimation(GetLoopIndex(targetIndex));
+        SwipeToWithoutAnimation(CheckIndexRange(CheckTargetIndex(index)));
     }
 }
 
@@ -2943,7 +2944,6 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
             FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
         }
     }
-    UpdateOffset(-currentDelta_);
     HandleSwiperCustomAnimation(-currentDelta_);
     MarkDirtyNodeSelf();
 }
@@ -4860,6 +4860,24 @@ std::shared_ptr<SwiperParameters> SwiperPattern::GetSwiperParameters() const
     return swiperParameters_;
 }
 
+std::shared_ptr<SwiperArrowParameters> SwiperPattern::GetSwiperArrowParameters() const
+{
+    if (swiperArrowParameters_ == nullptr) {
+        swiperArrowParameters_ = std::make_shared<SwiperArrowParameters>();
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, swiperArrowParameters_);
+        auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+        CHECK_NULL_RETURN(swiperIndicatorTheme, swiperArrowParameters_);
+        swiperArrowParameters_->isShowBackground = false;
+        swiperArrowParameters_->isSidebarMiddle = false;
+        swiperArrowParameters_->backgroundSize = swiperIndicatorTheme->GetSmallArrowSize();
+        swiperArrowParameters_->backgroundColor = swiperIndicatorTheme->GetSmallArrowBackgroundColor();
+        swiperArrowParameters_->arrowSize = swiperIndicatorTheme->GetSmallArrowSize();
+        swiperArrowParameters_->arrowColor = swiperIndicatorTheme->GetSmallArrowColor();
+    }
+    return swiperArrowParameters_;
+}
+
 std::shared_ptr<SwiperDigitalParameters> SwiperPattern::GetSwiperDigitalParameters() const
 {
     if (swiperDigitalParameters_ == nullptr) {
@@ -4886,7 +4904,7 @@ int32_t SwiperPattern::TotalCount() const
     const auto props = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(props, 1);
     auto displayCount = props->GetDisplayCount().value_or(1);
-    auto totalCount = ArkoalaLazyEnabled() ? GetTotalChildCount() : RealTotalCount();
+    auto totalCount = RealTotalCount();
     if (IsSwipeByGroup() && displayCount != 0) {
         totalCount =
             static_cast<int32_t>(std::ceil(static_cast<float>(totalCount) / static_cast<float>(displayCount))) *
@@ -7631,6 +7649,14 @@ void SwiperPattern::UpdateDefaultColor()
     if (swiperDigitalParameters_ && !swiperDigitalParameters_->parametersByUser.count("selectedFontColor")) {
         swiperDigitalParameters_->selectedFontColor =
             swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
+    }
+    if (swiperParameters_ && swiperParameters_->parametersByUser.count("dotIndicator") &&
+       !swiperParameters_->parametersByUser.count("colorVal")) {
+        swiperParameters_->colorVal = swiperIndicatorTheme->GetColor();
+    }
+    if (swiperParameters_ && swiperParameters_->parametersByUser.count("dotIndicator") &&
+        !swiperParameters_->parametersByUser.count("selectedColorVal")) {
+        swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
     }
     if (swiperArrowParameters_ && !swiperArrowParameters_->parametersByUser.count("backgroundColor")) {
         if (props->GetIsSidebarMiddleValue()) {

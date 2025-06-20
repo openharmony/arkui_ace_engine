@@ -932,6 +932,9 @@ public:
     void ResetScrollUserDefinedIdealSize(const RefPtr<SheetObject>& oldObject, const RefPtr<SheetObject>& newObject);
     void UpdateSheetPopupInfo(const SheetPopupInfo& sheetPopupInfo)
     {
+        if (!NearEqual(sheetPopupInfo_.sheetOffsetY, sheetPopupInfo.sheetOffsetY)) {
+            sheetOffsetYChanged_ = true;
+        }
         sheetPopupInfo_ = sheetPopupInfo;
     }
 
@@ -1209,6 +1212,7 @@ private:
     bool isPlayTransition_ = false;
     Placement finalPlacement_ = Placement::BOTTOM;
     bool showArrow_ = true;
+    bool sheetOffsetYChanged_ = false;
     SheetArrowPosition arrowPosition_ = SheetArrowPosition::NONE;
     SheetPopupInfo sheetPopupInfo_;
     WeakPtr<FrameNode> closeButtonNode_;

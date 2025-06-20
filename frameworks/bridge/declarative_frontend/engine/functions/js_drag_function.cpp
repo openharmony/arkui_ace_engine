@@ -16,6 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 
 #include "base/log/log.h"
+#include "core/common/udmf/data_load_params.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 
@@ -109,6 +110,8 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("getPasteData", &JsDragEvent::GetJsPasteData);
     JSClass<JsDragEvent>::CustomMethod("getDisplayX", &JsDragEvent::GetScreenX);
     JSClass<JsDragEvent>::CustomMethod("getDisplayY", &JsDragEvent::GetScreenY);
+    JSClass<JsDragEvent>::CustomMethod("getGlobalDisplayX", &JsDragEvent::GetGlobalDisplayX);
+    JSClass<JsDragEvent>::CustomMethod("getGlobalDisplayY", &JsDragEvent::GetGlobalDisplayY);
     JSClass<JsDragEvent>::CustomMethod("getDragSource", &JsDragEvent::GetDragSource);
     JSClass<JsDragEvent>::CustomMethod("isRemote", &JsDragEvent::IsRemote);
     JSClass<JsDragEvent>::CustomMethod("getWindowX", &JsDragEvent::GetX);
@@ -136,6 +139,7 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("startDataLoading", &JsDragEvent::StartDataLoading);
     JSClass<JsDragEvent>::CustomMethod("getDisplayId", &JsDragEvent::GetDisplayId);
     JSClass<JsDragEvent>::CustomMethod("enableInternalDropAnimation", &JsDragEvent::EnableInternalDropAnimation);
+    JSClass<JsDragEvent>::CustomMethod("setDataLoadParams", &JsDragEvent::SetDataLoadParams);
     JSClass<JsDragEvent>::Bind(globalObj, &JsDragEvent::Constructor, &JsDragEvent::Destructor);
 }
 
@@ -167,6 +171,20 @@ void JsDragEvent::GetScreenX(const JSCallbackInfo& args)
 void JsDragEvent::GetScreenY(const JSCallbackInfo& args)
 {
     auto yValue = JSVal(ToJSValue(PipelineBase::Px2VpWithCurrentDensity(dragEvent_->GetScreenY())));
+    auto yValueRef = JSRef<JSVal>::Make(yValue);
+    args.SetReturnValue(yValueRef);
+}
+
+void JsDragEvent::GetGlobalDisplayX(const JSCallbackInfo& args)
+{
+    auto xValue = JSVal(ToJSValue(PipelineBase::Px2VpWithCurrentDensity(dragEvent_->GetGlobalDisplayX())));
+    auto xValueRef = JSRef<JSVal>::Make(xValue);
+    args.SetReturnValue(xValueRef);
+}
+
+void JsDragEvent::GetGlobalDisplayY(const JSCallbackInfo& args)
+{
+    auto yValue = JSVal(ToJSValue(PipelineBase::Px2VpWithCurrentDensity(dragEvent_->GetGlobalDisplayY())));
     auto yValueRef = JSRef<JSVal>::Make(yValue);
     args.SetReturnValue(yValueRef);
 }
@@ -228,6 +246,26 @@ void JsDragEvent::SetData(const JSCallbackInfo& args)
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedData(nativeValue);
     CHECK_NULL_VOID(udData);
     dragEvent_->SetData(udData);
+}
+
+void JsDragEvent::SetDataLoadParams(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsObject()) {
+        return;
+    }
+    CHECK_NULL_VOID(dragEvent_);
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(engine);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_VOID(nativeEngine);
+    panda::Local<JsiValue> value = args[0].Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    ScopeRAII scope(env);
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    RefPtr<DataLoadParams> udDataLoadParams = UdmfClient::GetInstance()->TransformDataLoadParams(env, nativeValue);
+    CHECK_NULL_VOID(udDataLoadParams);
+    dragEvent_->SetDataLoadParams(udDataLoadParams);
 }
 
 void JsDragEvent::StartDataLoading(const JSCallbackInfo& args)

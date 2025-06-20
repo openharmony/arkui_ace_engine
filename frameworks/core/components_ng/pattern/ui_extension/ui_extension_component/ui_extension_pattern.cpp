@@ -29,6 +29,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/ui_extension/platform_utils.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/modal_ui_extension_proxy_impl.h"
@@ -1168,24 +1169,30 @@ void UIExtensionPattern::HandleBlurEvent()
     uiExtensionManager->RegisterUIExtensionInFocus(nullptr, nullptr);
 }
 
+bool UIExtensionPattern::HandleTouchEvent(
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_RETURN(pointerEvent, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto newPointerEvent =
+        PlatformUtils::CopyPointerEventWithExtraProperty(pointerEvent, AceLogTag::ACE_UIEXTENSIONCOMPONENT);
+    CHECK_NULL_RETURN(newPointerEvent, false);
+    Platform::CalculatePointerEvent(newPointerEvent, host);
+    DispatchPointerEvent(newPointerEvent);
+    return true;
+}
+
 void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
     if (info.GetSourceDevice() != SourceType::TOUCH) {
         UIEXT_LOGE("The source type is not TOUCH, type %{public}d.", info.GetSourceDevice());
         return;
     }
-    const auto pointerEvent = info.GetPointerEvent();
-    if (!pointerEvent) {
-        UIEXT_LOGE("The pointerEvent is empty.");
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    std::shared_ptr<MMI::PointerEvent> newPointerEvent = std::make_shared<MMI::PointerEvent>(*pointerEvent);
-    Platform::CalculatePointerEvent(newPointerEvent, host);
-    AceExtraInputData::InsertInterpolatePoints(info);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     bool ret = true;
@@ -1198,8 +1205,12 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
             UIEXT_LOGW("RequestFocusImmediately failed when HandleTouchEvent.");
         }
     }
-    DispatchPointerEvent(newPointerEvent);
-    if (focusState_ && newPointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
+    const auto pointerEvent = info.GetPointerEvent();
+    if (!pointerEvent) {
+        UIEXT_LOGE("The pointerEvent is empty.");
+        return;
+    }
+    if (focusState_ && pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
         if (needReSendFocusToUIExtension_) {
             HandleFocusEvent();
             needReSendFocusToUIExtension_ = false;

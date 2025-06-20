@@ -47,6 +47,7 @@ public:
     static void ReportJankFrameApp(double jank, int32_t jankThreshold);
     static void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
         const std::string& pageName);
+    static void SetApplicationInfo();
 };
 
 } // namespace OHOS::Ace

@@ -24,15 +24,12 @@ std::optional<SizeF> ShapeLayoutAlgorithm::MeasureContent(
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, std::nullopt);
-    if (!host->IsAtomicNode()) {
-        return std::nullopt;
-    }
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     auto measureType = layoutProperty->GetMeasureType(MeasureType::MATCH_CONTENT);
     OptionalSizeF contentSize;
     do {
-        // Use idea size first if it is valid.
+        // Use idealSize first if it is valid.
         contentSize.UpdateSizeWithCheck(contentConstraint.selfIdealSize);
         if (contentSize.IsValid()) {
             break;

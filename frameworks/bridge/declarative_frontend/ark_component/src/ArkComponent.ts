@@ -712,8 +712,8 @@ class OpacityModifier extends ModifierWithKey<number | Resource> {
   }
 }
 
-class AlignModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class AlignModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
     super(value);
   }
   static identity: Symbol = Symbol('align');
@@ -725,6 +725,20 @@ class AlignModifier extends ModifierWithKey<number> {
     }
   }
 }
+
+class LayoutGravityModifier extends ModifierWithKey<string> {
+    constructor(value: string) {
+      super(value);
+    }
+    static identity: Symbol = Symbol('layoutGravity');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        getUINativeModule().common.resetLayoutGravity(node);
+      } else {
+        getUINativeModule().common.setLayoutGravity(node, this.value);
+      }
+    }
+  }
 
 class BackdropBlurModifier extends ModifierWithKey<ArkBlurOptions> {
   constructor(value: ArkBlurOptions) {
@@ -2226,6 +2240,21 @@ class OnGestureRecognizerJudgeBeginModifier extends ModifierWithKey<GestureRecog
       getUINativeModule().common.resetOnGestureRecognizerJudgeBegin(node);
     } else {
       getUINativeModule().common.setOnGestureRecognizerJudgeBegin(node, this.value);
+    }
+  }
+}
+
+declare type TouchTestDoneCallback = (event: BaseGestureEvent, recognizers: Array<GestureRecognizer>) => void;
+class OnTouchTestDoneModifier extends ModifierWithKey<TouchTestDoneCallback> {
+  constructor(value: TouchTestDoneCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onTouchTestDone');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnOnTouchTestDone(node);
+    } else {
+      getUINativeModule().common.setOnTouchTestDone(node, this.value);
     }
   }
 }
@@ -3995,6 +4024,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   private _onAreaChange: AreaChangeEventCallback = null;
   private _onGestureJudgeBegin: GestureJudgeBeginCallback = null;
   private _onGestureRecognizerJudgeBegin: GestureRecognizerJudgeBeginCallback = null;
+  private _onTouchTestDone: TouchTestDoneCallback = null;
   private _shouldBuiltInRecognizerParallelWith: ShouldBuiltInRecognizerParallelWithCallback = null;
   private _onFocusAxisEvent: FocusAxisEventCallback = null;
 
@@ -4095,6 +4125,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     touchRecognizers?: Array<TouchRecognizer>) => GestureJudgeResult): this {
     this._onGestureRecognizerJudgeBegin = callback;
     modifierWithKey(this._modifiersWithKeys, OnGestureRecognizerJudgeBeginModifier.identity, OnGestureRecognizerJudgeBeginModifier, callback);
+    return this;
+  }
+  onTouchTestDone(callback: (event: BaseGestureEvent, recognizers: Array<GestureRecognizer>) => void): this {
+    this._onTouchTestDone = callback;
+    modifierWithKey(this._modifiersWithKeys, OnTouchTestDoneModifier.identity, OnTouchTestDoneModifier, callback);
     return this;
   }
   shouldBuiltInRecognizerParallelWith(callback: (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer): this {
@@ -5033,11 +5068,20 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  align(value: Alignment): this {
-    if (isNumber(value)) {
-      modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, value);
-    } else {
+  align(value: Alignment | LocalizedAlignment): this {
+    if (!isNumber(value) && !isString(value)) {
       modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, value);
+    }
+    return this;
+  }
+
+  layoutGravity(value:string): this {
+    if (!isString(value)) {
+      modifierWithKey(this._modifiersWithKeys, LayoutGravityModifier.identity, LayoutGravityModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, LayoutGravityModifier.identity, LayoutGravityModifier, value);
     }
     return this;
   }

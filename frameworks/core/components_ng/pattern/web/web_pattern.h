@@ -128,6 +128,7 @@ class WebPattern : public NestableScrollContainer,
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
+    using SetWebDetachCallback = std::function<void(int32_t)>;
     using SetHapPathCallback = std::function<void(const std::string&)>;
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
@@ -236,17 +237,6 @@ public:
         }
     }
 
-    void SetWebSrcStatic(const std::string& webSrc)
-    {
-        if (webSrc_ != webSrc) {
-            webSrc_ = webSrc;
-            OnWebSrcUpdate();
-        }
-        if (webPaintProperty_) {
-            webPaintProperty_->SetWebPaintData(webSrc);
-        }
-    }
-
     const std::optional<std::string>& GetWebSrc() const
     {
         return webSrc_;
@@ -306,6 +296,16 @@ public:
     SetWebIdCallback GetSetWebIdCallback() const
     {
         return setWebIdCallback_;
+    }
+
+    void SetSetWebDetachCallback(SetWebDetachCallback&& callback)
+    {
+        setWebDetachCallback_ = std::move(callback);
+    }
+
+    SetWebDetachCallback GetSetWebDetachCallback() const
+    {
+        return setWebDetachCallback_;
     }
 
     void SetPermissionClipboardCallback(PermissionClipboardCallback&& Callback)
@@ -527,6 +527,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebMediaAVSessionEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDataDetector, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, GestureFocusMode, GestureFocusMode);
 
     bool IsFocus() const
     {
@@ -780,6 +781,10 @@ public:
     {
         return isDragging_;
     }
+    bool IsDefaultGestureFocusMode() const
+    {
+        return gestureFocusMode_ == GestureFocusMode::DEFAULT;
+    }
 
     void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param);
 
@@ -822,6 +827,11 @@ public:
     void InitDataDetector();
     void CloseDataDetectorMenu();
 
+    void SetAILinkMenuShow(bool isAILinkMenuShow)
+    {
+        isAILinkMenuShow_ = isAILinkMenuShow;
+    }
+
     void CreateSnapshotImageFrameNode(const std::string& snapshotPath);
     void RemoveSnapshotFrameNode();
 
@@ -829,6 +839,12 @@ public:
     void SetPipNativeWindow(int delegateId, int childId, int frameRoutingId, void* window);
     void SendPipEvent(int delegateId, int childId, int frameRoutingId, int event);
     void SetDefaultBackgroundColor();
+    bool CheckVisible();
+
+    void UpdateSingleHandleVisible(bool isVisible);
+    void OnShowMagnifier();
+    void OnHideMagnifier();
+    void SetTouchHandleExistState(bool touchHandleExist);
 private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;
@@ -853,7 +869,9 @@ private:
     void RegistVirtualKeyBoardListener(const RefPtr<PipelineContext> &context);
     bool IsNeedResizeVisibleViewport();
     bool ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool safeAreaEnabled);
+    bool ProcessVirtualKeyBoardHideAvoidMenu(int32_t width, int32_t height, bool safeAreaEnabled);
     bool ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled);
+    bool ProcessVirtualKeyBoardShowAvoidMenu(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled);
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard, bool isCustomKeyboard = false);
     void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard, bool isUpdate = true);
     bool UpdateLayoutAfterKeyboard(int32_t width, int32_t height, double keyboard);
@@ -940,6 +958,7 @@ private:
     void OnOptimizeParserBudgetEnabledUpdate(bool value);
     void OnEnableFollowSystemFontWeightUpdate(bool value);
     void OnEnableDataDetectorUpdate(bool enable);
+    void OnGestureFocusModeUpdate(GestureFocusMode mode);
 
     int GetWebId();
 
@@ -1125,7 +1144,7 @@ private:
     void UpdateTouchpadSlidingStatus(const GestureEvent& event);
     CursorStyleInfo GetAndUpdateCursorStyleInfo(
         const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
-    bool UpdateKeyboardSafeArea(bool hideOrClose, double height = 0.0f);
+    bool MenuAvoidKeyboard(bool hideOrClose, double height = 0.0f);
     int32_t GetVisibleViewportAvoidHeight();
 
     std::optional<std::string> webSrc_;
@@ -1135,6 +1154,7 @@ private:
     std::optional<int32_t> transformHintChangedCallbackId_;
     uint32_t rotation_ = 0;
     SetWebIdCallback setWebIdCallback_ = nullptr;
+    SetWebDetachCallback setWebDetachCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
     DefaultFileSelectorShowCallback defaultFileSelectorShowCallback_ = nullptr;
@@ -1286,7 +1306,7 @@ private:
     bool isRenderModeInit_ = false;
     bool isAutoFillClosing_ = true;
     std::shared_ptr<ViewDataCommon> viewDataCommon_;
-    RectF lastPageNodeRectRelativeToWeb_;
+    OffsetF requestedWebOffset_;
     bool isPasswordFill_ = false;
     bool isEnabledHapticFeedback_ = true;
     bool isTouchpadSliding_ = false;
@@ -1318,6 +1338,7 @@ private:
     bool isRegisterJsObject_ = false;
 
     // properties for AI data detector
+    bool isAILinkMenuShow_ = false;
     RefPtr<WebDataDetectorAdapter> webDataDetectorAdapter_ = nullptr;
     int lastDragOperation_;
 
@@ -1326,6 +1347,8 @@ private:
 
     WebBypassVsyncCondition webBypassVsyncCondition_ = WebBypassVsyncCondition::NONE;
     bool needSetDefaultBackgroundColor_ = false;
+    GestureFocusMode gestureFocusMode_ = GestureFocusMode::DEFAULT;
+
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;

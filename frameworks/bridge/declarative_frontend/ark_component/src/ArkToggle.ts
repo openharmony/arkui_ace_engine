@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,6 +75,36 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
   }
   switchStyle(value: SwitchStyle): this {
     modifierWithKey(this._modifiersWithKeys, ToggleSwitchStyleModifier.identity, ToggleSwitchStyleModifier, value);
+    return this;
+  }
+  margin(value: Margin | Length): this {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isLengthType(value) || isResource(value)) {
+        arkValue.top = <Length>value;
+        arkValue.right = <Length>value;
+        arkValue.bottom = <Length>value;
+        arkValue.left = <Length>value;
+      } else {
+        arkValue.top = value.top;
+        arkValue.bottom = value.bottom;
+        if (Object.keys(value).indexOf('right') >= 0) {
+          arkValue.right = value.right;
+        }
+        if (Object.keys(value).indexOf('end') >= 0) {
+          arkValue.right = value.end;
+        }
+        if (Object.keys(value).indexOf('left') >= 0) {
+          arkValue.left = value.left;
+        }
+        if (Object.keys(value).indexOf('start') >= 0) {
+          arkValue.left = value.start;
+        }
+      }
+      modifierWithKey(this._modifiersWithKeys, ToggleMarginModifier.identity, ToggleMarginModifier, arkValue);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ToggleMarginModifier.identity, ToggleMarginModifier, undefined);
+    }
     return this;
   }
   contentModifier(value: ContentModifier<ToggleConfiguration>): this {
@@ -321,6 +351,28 @@ class ToggleSwitchStyleModifier extends ModifierWithKey<SwitchStyle> {
   }
 }
 
+class ToggleMarginModifier extends ModifierWithKey<ArkPadding> {
+  constructor(value: ArkPadding) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('toggleMargin');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().toggle.resetMargin(node);
+    } else {
+      getUINativeModule().toggle.setMargin(node, this.value.top,
+        this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
+  }
+}
+
 class ToggleContentModifier extends ModifierWithKey<ContentModifier<ToggleConfiguration>> {
   constructor(value: ContentModifier<ToggleConfiguration>) {
     super(value);
@@ -366,9 +418,4 @@ globalThis.Toggle.contentModifier = function (modifier): void {
   });
   component.setNodePtr(nativeNode);
   component.setContentModifier(modifier);
-};
-
-globalThis.Toggle.onChange = function (value: (selected: boolean) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().toggle.setOnChange(nodePtr, value);
 };

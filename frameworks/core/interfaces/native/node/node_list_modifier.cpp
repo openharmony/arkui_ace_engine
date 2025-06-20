@@ -321,6 +321,9 @@ void ResetListFriction(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        ListModelNG::CreateWithResourceObjFriction(frameNode, nullptr);
+    }
     double friction = -1.0;
     ListModelNG::SetListFriction(frameNode, friction);
 }
@@ -533,6 +536,13 @@ void ListResetDivider(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     const V2::ItemDivider divider;
 
+    if (SystemProperties::ConfigChangePerform()) {
+        ListModelNG::ParseResObjDividerStrokeWidth(frameNode, nullptr);
+        ListModelNG::ParseResObjDividerColor(frameNode, nullptr);
+        ListModelNG::ParseResObjDividerStartMargin(frameNode, nullptr);
+        ListModelNG::ParseResObjDividerEndMargin(frameNode, nullptr);
+        ListModel::GetInstance()->SetDividerColorByUser(false);
+    }
     ListModelNG::SetDivider(frameNode, divider);
 }
 
@@ -773,6 +783,27 @@ ArkUI_Bool GetListStackFromEnd(ArkUINodeHandle node)
     return ListModelNG::GetListStackFromEnd(frameNode);
 }
 
+void SetListSyncLoad(ArkUINodeHandle node, ArkUI_Bool enabled)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListSyncLoad(frameNode, enabled);
+}
+
+void ResetListSyncLoad(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListSyncLoad(frameNode, true);
+}
+
+ArkUI_Bool GetListSyncLoad(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return ListModelNG::GetListSyncLoad(frameNode);
+}
+
 void SetListFadingEdge(
     ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue, ArkUI_Int32 fadingEdgeLengthUnit)
 {
@@ -933,6 +964,9 @@ const ArkUIListModifier* GetListModifier()
         .setListStackFromEnd = SetListStackFromEnd,
         .resetListStackFromEnd = ResetListStackFromEnd,
         .getListStackFromEnd = GetListStackFromEnd,
+        .setListSyncLoad = SetListSyncLoad,
+        .resetListSyncLoad = ResetListSyncLoad,
+        .getListSyncLoad = GetListSyncLoad,
         .setListFadingEdge = SetListFadingEdge,
         .resetListFadingEdge = ResetListFadingEdge,
         .setShowCached = SetShowCached,
@@ -1532,7 +1566,6 @@ void CreateWithResourceObjFriction(ArkUINodeHandle node, void* resObj)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(resObj);
     auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
     ListModelNG::CreateWithResourceObjFriction(frameNode, AceType::Claim(resourceObj));
 }
@@ -1541,7 +1574,6 @@ void ParseResObjDividerStrokeWidth(ArkUINodeHandle node, void* resObj)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(resObj);
     auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
     ListModelNG::ParseResObjDividerStrokeWidth(frameNode, AceType::Claim(resourceObj));
 }
@@ -1550,7 +1582,6 @@ void ParseResObjDividerColor(ArkUINodeHandle node, void* resObj)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(resObj);
     auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
     ListModelNG::ParseResObjDividerColor(frameNode, AceType::Claim(resourceObj));
     ListModelNG::SetDividerColorByUser(frameNode, false);
@@ -1560,7 +1591,6 @@ void ParseResObjDividerStartMargin(ArkUINodeHandle node, void* resObj)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(resObj);
     auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
     ListModelNG::ParseResObjDividerStartMargin(frameNode, AceType::Claim(resourceObj));
 }
@@ -1569,7 +1599,6 @@ void ParseResObjDividerEndMargin(ArkUINodeHandle node, void* resObj)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(resObj);
     auto* resourceObj = reinterpret_cast<ResourceObject*>(resObj);
     ListModelNG::ParseResObjDividerEndMargin(frameNode, AceType::Claim(resourceObj));
 }

@@ -113,7 +113,7 @@ void LayoutWrapper::OffsetNodeToSafeArea()
 
 RectF LayoutWrapper::GetBackGroundAccumulatedSafeAreaExpand()
 {
-    auto ignoreLayoutSafeAreaEdges = GetLayoutProperty()->GetBackgroundIgnoresLayoutSafeAreaEdges();
+    auto ignoreLayoutSafeAreaEdges = GetLayoutProperty()->GetLocalizedBackgroundIgnoresLayoutSafeAreaEdges();
     IgnoreLayoutSafeAreaOpts opts = { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = ignoreLayoutSafeAreaEdges };
     auto expandEdges = GetAccumulatedSafeAreaExpand(false, opts);
     auto geometryNode = GetGeometryNode();

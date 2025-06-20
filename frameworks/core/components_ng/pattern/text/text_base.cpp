@@ -272,6 +272,7 @@ size_t TextBase::CountUtf16Chars(const std::u16string& s)
 
 LayoutCalPolicy TextBase::GetLayoutCalPolicy(LayoutWrapper* layoutWrapper, bool isHorizontal)
 {
+    CHECK_NULL_RETURN(layoutWrapper, LayoutCalPolicy::NO_MATCH);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, LayoutCalPolicy::NO_MATCH);
     auto layoutPolicyProperty = layoutProperty->GetLayoutPolicyProperty();

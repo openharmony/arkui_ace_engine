@@ -466,6 +466,83 @@ HWTEST_F(VideoPropertyTestNg, VideoMeasureTest005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: VideoMeasureTest006
+ * @tc.desc: Create Video, and invoke its Measure and layout function, and test its child/children layout algorithm.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoPropertyTestNg, VideoMeasureTest006, TestSize.Level1)
+{
+    VideoModelNG video;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    video.Create(videoController);
+
+    auto frameNodeTemp = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNodeTemp, nullptr);
+    auto videoPatternTemp = AceType::DynamicCast<VideoPattern>(frameNodeTemp->GetPattern());
+    ASSERT_NE(videoPatternTemp, nullptr);
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPatternTemp->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(false));
+
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::VIDEO_ETS_TAG);
+    auto layoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+
+    // Create LayoutWrapper and set videoLayoutAlgorithm.
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
+    auto videoPattern = frameNode->GetPattern<VideoPattern>();
+    ASSERT_NE(videoPattern, nullptr);
+    auto videoLayoutAlgorithm = videoPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(videoLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(videoLayoutAlgorithm));
+
+    /**
+     * @tc.steps1: Width is matchParent
+     * @tc.expected: the return value of MeasureContent is (300, 1000)
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutConstraint.parentIdealSize = OptionalSizeF(300.0f, 400.0f);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+    auto videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
+    ASSERT_TRUE(videoSize.has_value());
+    EXPECT_EQ(videoSize.value(), SizeF(300, 1000));
+
+    /**
+     * @tc.steps2: Height is matchParent
+     * @tc.expected: the return value of MeasureContent is (1000, 400)
+     */
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
+    ASSERT_TRUE(videoSize.has_value());
+    EXPECT_EQ(videoSize.value(), SizeF(1000, 400));
+
+    /**
+     * @tc.steps3: Width and Height is not matchParent
+     * @tc.expected: the return value of MeasureContent is (1000, 1000)
+     */
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+    videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
+    ASSERT_TRUE(videoSize.has_value());
+    EXPECT_EQ(videoSize.value(), SizeF(1000, 1000));
+
+    /**
+     * @tc.steps4: layoutPolicy has no value
+     * @tc.expected: the return value of MeasureContent is (1000, 1000)
+     */
+    layoutProperty->layoutPolicy_ = std::nullopt;
+    videoSize = videoLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
+    ASSERT_TRUE(videoSize.has_value());
+    EXPECT_EQ(videoSize.value(), SizeF(1000, 1000));
+}
+
+/**
  * @tc.name: VideoFullScreenTest015
  * @tc.desc: Create Video, and invoke its MeasureContent function to calculate the content size when it is fullscreen.
  * @tc.type: FUNC

@@ -78,7 +78,9 @@ public:
         bubbleMethod->SetArrowHeight(arrowHeight_);
         bubbleMethod->SetBorder(border_);
         bubbleMethod->SetArrowBuildPlacement(arrowBuildPlacement_);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, bubbleMethod);
+        auto pipeline = host->GetContext();
         CHECK_NULL_RETURN(pipeline, bubbleMethod);
         auto theme = pipeline->GetTheme<PopupTheme>();
         CHECK_NULL_RETURN(theme, bubbleMethod);
@@ -174,6 +176,11 @@ public:
     void UpdateBubbleBackGroundColor(const Color& value);
     void UpdateMaskColor(const Color& value);
     void UpdateMask(bool maskValue);
+    void UpdateArrowWidth(const CalcDimension& dimension);
+    void UpdateArrowHeight(const CalcDimension& dimension);
+    void UpdateWidth(const CalcDimension& dimension);
+    void UpdateRadius(const CalcDimension& dimension);
+
     void SetMessageColor(bool isSetMessageColor)
     {
         isSetMessageColor_ = isSetMessageColor;
@@ -279,24 +286,14 @@ public:
         return hasWidth_;
     }
 
-    void SetAvoidTarget(AvoidanceMode avoidTarget)
+    void SetAvoidTarget(std::optional<AvoidanceMode> avoidTarget)
     {
         avoidTarget_ = avoidTarget;
     }
     
-    AvoidanceMode GetAvoidTarget() const
+    std::optional<AvoidanceMode> GetAvoidTarget() const
     {
         return avoidTarget_;
-    }
-
-    void SetTextPadding(PaddingProperty textPadding)
-    {
-        popupTextPadding_ = textPadding;
-    }
-    
-    PaddingProperty GetTextPadding() const
-    {
-        return popupTextPadding_;
     }
 
     bool GetHasTransition() const
@@ -464,8 +461,7 @@ private:
     bool avoidKeyboard_ = false;
     bool hasPlacement_ = false;
     bool hasWidth_ = false;
-    AvoidanceMode avoidTarget_ = AvoidanceMode::COVER_TARGET;
-    PaddingProperty popupTextPadding_;
+    std::optional<AvoidanceMode> avoidTarget_ = std::nullopt;
 
     TransitionStatus transitionStatus_ = TransitionStatus::INVISIABLE;
 

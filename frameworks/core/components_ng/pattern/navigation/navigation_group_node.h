@@ -86,6 +86,22 @@ public:
     {
         return navBarNode_;
     }
+    const RefPtr<UINode>& GetHomeDestinationNode() const
+    {
+        return customHomeDestination_;
+    }
+    const RefPtr<UINode>& GetNavBarOrHomeDestinationNode() const;
+
+    const std::optional<bool> GetUseHomeDestination() const
+    {
+        return useHomeDestination_;
+    }
+    void SetUseHomeDestinatoin(bool use)
+    {
+        useHomeDestination_ = use;
+    }
+
+    void CreateHomeDestinationIfNeeded();
 
     void SetSplitPlaceholder(const RefPtr<NG::UINode>& splitPlaceholder);
 
@@ -203,6 +219,10 @@ public:
     virtual void CreateAnimationWithPop(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
         const AnimationFinishCallback finishCallback, bool isNavBar = false);
     virtual void CreateAnimationWithPush(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
+        const AnimationFinishCallback finishCallback, bool isNavBar = false);
+    void CreateSoftAnimationWithPush(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
+        const AnimationFinishCallback finishCallback, bool isNavBar = false);
+    void CreateSoftAnimationWithPop(const TransitionUnitInfo& preInfo, const TransitionUnitInfo& curInfo,
         const AnimationFinishCallback finishCallback, bool isNavBar = false);
     virtual void ResetSystemAnimationProperties(const RefPtr<FrameNode>& navDestinationNode);
 
@@ -369,6 +389,18 @@ private:
     void RemoveJsChildImmediately(const RefPtr<FrameNode>& preNode, bool preUseCustomTransition,
         int32_t preAnimationId);
 
+    void StartSoftOpacityAnimationPush(const RefPtr<FrameNode>& curNode);
+    void StartSoftOpacityAnimationPop(const RefPtr<FrameNode>& preNode);
+    void SoftTransitionAnimationPush(const RefPtr<FrameNode>& preNode,
+        const RefPtr<FrameNode>& curNode, bool isNavBar, bool preUseCustomTransition, bool curUseCustomTransition,
+        const NavigationGroupNode::AnimationFinishCallback& callback);
+    void SoftTransitionAnimationPop(const RefPtr<FrameNode>& preNode,
+        const RefPtr<FrameNode>& curNode, bool isNavBar, bool preUseCustomTransition, bool curUseCustomTransition,
+        const NavigationGroupNode::AnimationFinishCallback& callback);
+
+    std::optional<bool> useHomeDestination_;
+    RefPtr<UINode> customHomeNode_;
+    RefPtr<UINode> customHomeDestination_;
     RefPtr<UINode> primaryContentNode_;
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;

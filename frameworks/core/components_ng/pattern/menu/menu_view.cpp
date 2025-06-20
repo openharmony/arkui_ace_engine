@@ -1375,11 +1375,8 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
-    } else {
-        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
-            menuWrapperPattern->SetMenuParam(menuParam);
-        }
     }
+    menuWrapperPattern->SetMenuParam(menuParam);
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
@@ -1388,6 +1385,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
             menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
+        menuProperty->UpdateAnchorPosition(menuParam.anchorPosition);
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
     auto scroll = CreateMenuScroll(column);
@@ -1564,6 +1562,7 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
             menuProperty->UpdateMenuPlacement(menuParam.placement.value());
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
+        menuProperty->UpdateAnchorPosition(menuParam.anchorPosition);
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
 }

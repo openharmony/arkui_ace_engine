@@ -116,12 +116,6 @@ ArkUINativeModuleValue ListItemGroupBridge::ResetDivider(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListItemGroupModifier()->listItemGroupResetDivider(nativeNode);
-    if (SystemProperties::ConfigChangePerform()) {
-        GetArkUINodeModifiers()->getListItemGroupModifier()->parseResObjDividerStrokeWidth(nativeNode, nullptr);
-        GetArkUINodeModifiers()->getListItemGroupModifier()->parseResObjDividerColor(nativeNode, nullptr);
-        GetArkUINodeModifiers()->getListItemGroupModifier()->parseResObjDividerStartMargin(nativeNode, nullptr);
-        GetArkUINodeModifiers()->getListItemGroupModifier()->parseResObjDividerEndMargin(nativeNode, nullptr);
-    }
     return panda::JSValueRef::Undefined(vm);
 }
 

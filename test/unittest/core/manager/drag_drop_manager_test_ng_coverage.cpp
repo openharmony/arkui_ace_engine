@@ -18,13 +18,19 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_udmf.h"
 #include "test/mock/core/render/mock_render_context.h"
+#include "core/common/ace_engine.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_controller_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float WIDTH = 400.0f;
+constexpr float HEIGHT = 400.0f;
+} // namespace
 void DragDropManagerTestNgCoverage::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
@@ -1248,13 +1254,11 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage050, TestSi
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNodeNull, nullptr);
-    dragDropManager->AddDragFrameNode(frameNodeNull->GetId(), frameNodeNull);
     frameNodeNull.Reset();
     auto frameNodeGeoNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeGeoNull =
         AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeGeoNullId, AceType::MakeRefPtr<Pattern>());
     frameNodeGeoNull->SetGeometryNode(nullptr);
-    dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
     auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     std::string onDropInfo;
@@ -1292,14 +1296,12 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage051, TestSi
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNodeNull, nullptr);
-    dragDropManager->AddDragFrameNode(frameNodeNull->GetId(), frameNodeNull);
     frameNodeNull.Reset();
     auto frameNodeGeoNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeGeoNull =
         AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeGeoNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNodeGeoNull, nullptr);
     frameNodeGeoNull->SetGeometryNode(nullptr);
-    dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
     auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     std::string onDropInfo;
@@ -1336,14 +1338,12 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage052, TestSi
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNodeNull, nullptr);
-    dragDropManager->AddDragFrameNode(frameNodeNull->GetId(), frameNodeNull);
     frameNodeNull.Reset();
     auto frameNodeGeoNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeGeoNull =
         AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeGeoNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNodeGeoNull, nullptr);
     frameNodeGeoNull->SetGeometryNode(nullptr);
-    dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
     auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     std::string onDropInfo;
@@ -2184,5 +2184,43 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage077, TestSi
     dragDropManager->dragCursorStyleCore_ = DragCursorStyleCore::MOVE;
     dragDropManager->HandleStopDrag(frameNode, pointerEvent, dragEvent, "");
     EXPECT_EQ(dragDropManager->dragCursorStyleCore_, DragCursorStyleCore::DEFAULT);
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage078
+ * @tc.desc: Test GetDragPreviewInfo
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage078, TestSize.Level1)
+{
+    auto containerId = Container::CurrentId();
+    AceEngine& aceEngine = AceEngine::Get();
+    aceEngine.AddContainer(containerId, MockContainer::container_);
+    auto pipelineContext = PipelineContext::GetContextByContainerId(containerId);
+    ASSERT_NE(pipelineContext, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(imageNode, nullptr);
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    imageNode->GetGeometryNode()->SetFrameWidth(WIDTH);
+    imageNode->GetGeometryNode()->SetFrameHeight(HEIGHT);
+
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("custom_node", -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->children_.push_back(imageNode);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(AceType::DynamicCast<FrameNode>(frameNode));
+    overlayManager->hasDragPixelMap_ = true;
+    frameNode->isActive_ = true;
+    overlayManager->dragPixmapColumnNodeWeak_ = WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(frameNode));
+    NG::DragControllerFuncWrapper::GetDragPreviewInfo(overlayManager, containerId);
+    
+    EXPECT_EQ(dragDropManager->GetDragPreviewInfo().width, WIDTH);
+    EXPECT_EQ(dragDropManager->GetDragPreviewInfo().height, HEIGHT);
+    EXPECT_NE(dragDropManager->GetDragPreviewInfo().imageNode, nullptr);
+    EXPECT_NE(dragDropManager->GetDragPreviewInfo().scale, 1);
 }
 } // namespace OHOS::Ace::NG

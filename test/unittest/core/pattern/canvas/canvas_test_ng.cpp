@@ -234,11 +234,11 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: CanvasPatternTest005
+ * @tc.name: MeasureContentTest001
  * @tc.desc: CanvasLayoutAlgorithm::MeasureContent
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasTestNg, CanvasPatternTest005, TestSize.Level1)
+HWTEST_F(CanvasTestNg, MeasureContentTest001, TestSize.Level1)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -267,6 +267,75 @@ HWTEST_F(CanvasTestNg, CanvasPatternTest005, TestSize.Level1)
     canvasLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
     EXPECT_EQ(pattern->canvasSize_->width_, 960.0f);
     EXPECT_EQ(pattern->canvasSize_->height_, 960.0f);
+}
+
+/**
+ * @tc.name: MeasureContentTest002
+ * @tc.desc: CanvasLayoutAlgorithm::MeasureContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasTestNg, MeasureContentTest002, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CANVAS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CanvasPattern>(); });
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    RefPtr<CanvasLayoutAlgorithm> canvasLayoutAlgorithm = AceType::MakeRefPtr<CanvasLayoutAlgorithm>();
+    LayoutConstraintF layoutConstraint;
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, nullptr, frameNode->GetLayoutProperty());
+    auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
+    ASSERT_TRUE(layoutProperty);
+
+    /**
+     * @tc.steps1: Width is matchParent
+     * @tc.expected: the return value of MeasureContent is (300, 1000)
+     */
+    layoutConstraint.maxSize = SizeF(1000.0f, 1000.0f);
+    layoutConstraint.parentIdealSize = OptionalSizeF(300.0f, 400.0f);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+    canvasLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
+    EXPECT_EQ(pattern->canvasSize_->width_, 300);
+    EXPECT_EQ(pattern->canvasSize_->height_, 1000);
+
+    /**
+     * @tc.steps2: Height is matchParent
+     * @tc.expected: the return value of MeasureContent is (1000, 400)
+     */
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    canvasLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
+    EXPECT_EQ(pattern->canvasSize_->width_, 1000);
+    EXPECT_EQ(pattern->canvasSize_->height_, 400);
+
+    /**
+     * @tc.steps3: Width and Height is not matchParent
+     * @tc.expected: the return value of MeasureContent is (1000, 1000)
+     */
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
+    canvasLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
+    EXPECT_EQ(pattern->canvasSize_->width_, 1000);
+    EXPECT_EQ(pattern->canvasSize_->height_, 1000);
+
+    /**
+     * @tc.steps4: layoutPolicy has no value
+     * @tc.expected: the return value of MeasureContent is (1000, 1000)
+     */
+    layoutProperty->layoutPolicy_ = std::nullopt;
+    canvasLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
+    EXPECT_EQ(pattern->canvasSize_->width_, 1000);
+    EXPECT_EQ(pattern->canvasSize_->height_, 1000);
+
+    /**
+     * @tc.steps5: layoutProperty is nullptr
+     * @tc.expected: the return value of MeasureContent is (1000, 1000)
+     */
+    layoutProperty.Reset();
+    canvasLayoutAlgorithm->MeasureContent(layoutConstraint, &layoutWrapper);
+    EXPECT_EQ(pattern->canvasSize_->width_, 1000);
+    EXPECT_EQ(pattern->canvasSize_->height_, 1000);
 }
 
 /**

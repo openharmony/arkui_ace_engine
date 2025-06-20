@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
@@ -50,6 +51,12 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
         stack->Push(childFrameNode);
     } else {
         ReCreateFrameNode(childFrameNode, nodeId, toggleType, isOn);
+    }
+    auto pros = childFrameNode->GetPaintProperty<SwitchPaintProperty>();
+    if (pros) {
+        pros->ResetUnselectedColorSetByUser();
+        pros->ResetSelectedColorSetByUser();
+        pros->ResetSwitchPointColorSetByUser();
     }
 }
 
@@ -119,8 +126,10 @@ void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
 
     if (!selectedColor.has_value()) {
         ACE_RESET_PAINT_PROPERTY_WITH_FLAG(SwitchPaintProperty, SelectedColor, PROPERTY_UPDATE_RENDER);
+        ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColorSetByUser, false);
     } else {
         ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color);
+        ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColorSetByUser, true);
     }
 }
 
@@ -132,8 +141,10 @@ void ToggleModelNG::SetSwitchPointColor(const std::optional<Color>& switchPointC
     if (paintProperty) {
         if (switchPointColor.has_value()) {
             paintProperty->UpdateSwitchPointColor(switchPointColor.value());
+            ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SwitchPointColorSetByUser, true);
         } else {
             paintProperty->ResetSwitchPointColor();
+            ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, SwitchPointColorSetByUser, false);
         }
     }
 }
@@ -182,28 +193,6 @@ void ToggleModelNG::OnChange(FrameNode* frameNode, ChangeEvent&& onChange)
     auto eventHub = frameNode->GetOrCreateEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
-}
-
-void ToggleModelNG::OnChangeEvent(FrameNode* frameNode, ChangeEvent&& onChangeEvent)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
-    if (checkboxPattern) {
-        auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->SetChangeEvent(std::move(onChangeEvent));
-        return;
-    }
-    auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
-    if (buttonPattern) {
-        auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->SetOnChangeEvent(std::move(onChangeEvent));
-        return;
-    }
-    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
 
 void ToggleModelNG::SetBuilderFunc(FrameNode* frameNode, NG::SwitchMakeCallback&& makeFunc)
@@ -424,16 +413,12 @@ void ToggleModelNG::ResetPointRadius()
     }
 }
 
-void ToggleModelNG::SetPointRadius(FrameNode* frameNode, const std::optional<Dimension>& switchPointRadius)
+void ToggleModelNG::SetPointRadius(FrameNode* frameNode, const Dimension& switchPointRadius)
 {
     CHECK_NULL_VOID(frameNode);
     auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
     if (paintProperty) {
-        if (switchPointRadius.has_value()) {
-            paintProperty->UpdatePointRadius(switchPointRadius.value());
-        } else {
-            ToggleModelNG::ResetPointRadius(frameNode);
-        }
+        paintProperty->UpdatePointRadius(switchPointRadius);
     }
 }
 
@@ -454,19 +439,16 @@ void ToggleModelNG::SetUnselectedColor(const Color& unselectedColor)
     auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
     if (paintProperty) {
         paintProperty->UpdateUnselectedColor(unselectedColor);
+        ACE_UPDATE_PAINT_PROPERTY(SwitchPaintProperty, UnselectedColorSetByUser, true);
     }
 }
 
-void ToggleModelNG::SetUnselectedColor(FrameNode* frameNode, const std::optional<Color>& unselectedColor)
+void ToggleModelNG::SetUnselectedColor(FrameNode* frameNode, const Color& unselectedColor)
 {
     CHECK_NULL_VOID(frameNode);
     auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
     if (paintProperty) {
-        if (unselectedColor.has_value()) {
-            paintProperty->UpdateUnselectedColor(unselectedColor.value());
-        } else {
-            paintProperty->ResetUnselectedColor();
-        }
+        paintProperty->UpdateUnselectedColor(unselectedColor);
     }
 }
 
@@ -491,16 +473,12 @@ void ToggleModelNG::ResetTrackBorderRadius()
     }
 }
 
-void ToggleModelNG::SetTrackBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& borderRadius)
+void ToggleModelNG::SetTrackBorderRadius(FrameNode* frameNode, const Dimension& borderRadius)
 {
     CHECK_NULL_VOID(frameNode);
     auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
     if (paintProperty) {
-        if (borderRadius.has_value()) {
-            paintProperty->UpdateTrackBorderRadius(borderRadius.value());
-        } else {
-            ToggleModelNG::ResetTrackBorderRadius(frameNode);
-        }
+        paintProperty->UpdateTrackBorderRadius(borderRadius);
     }
 }
 
@@ -555,6 +533,7 @@ void ToggleModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<C
     }
 
     ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColor, color, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SelectedColorSetByUser, true, frameNode);
 }
 
 void ToggleModelNG::SetSwitchPointColor(FrameNode* frameNode, const std::optional<Color>& switchPointColor)
@@ -573,6 +552,7 @@ void ToggleModelNG::SetSwitchPointColor(FrameNode* frameNode, const std::optiona
         color = theme->GetPointColor();
     }
     ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SwitchPointColor, color, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, SwitchPointColorSetByUser, true, frameNode);
 }
 
 void ToggleModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
@@ -654,6 +634,232 @@ void ToggleModelNG::SetSwitchIsOn(FrameNode* frameNode, bool isOn)
     ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn, frameNode);
 }
 
+void ToggleModelNG::CreateWithColorResourceObj(
+    const RefPtr<ResourceObject>& resObj, const ToggleColorType toggleColorType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObj(frameNode, toggleColorType, resObj);
+}
+
+void ToggleModelNG::UpdateSwitchToggleComponentColor(FrameNode* frameNode, const ToggleColorType toggleColorType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SwitchTheme>(frameNode->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    auto color = theme->GetPointColor();
+    switch (toggleColorType) {
+        case ToggleColorType::SELECTED_COLOR:
+            SetUnselectedColor(frameNode, color);
+            break;
+        case ToggleColorType::SWITCH_POINT_COLOR:
+            SetSwitchPointColor(frameNode, color);
+            break;
+        case ToggleColorType::UN_SELECTED_COLOR:
+            SetUnselectedColor(frameNode, color);
+            break;
+        default:
+            break;
+    }
+}
+
+void ToggleModelNG::CreateWithSwitchResourceObj(FrameNode* node, const ToggleColorType toggleColorType,
+    const RefPtr<ResourceObject>& resObj, const std::string& key)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<SwitchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [toggleColorType, weak = AceType::WeakClaim(node)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<SwitchPattern>();
+        CHECK_NULL_VOID(pattern);
+        Color result;
+        if (!ResourceParseUtils::ParseResColor(resObj, result)) {
+            UpdateSwitchToggleComponentColor(AceType::RawPtr(frameNode), toggleColorType);
+        }
+
+        pattern->UpdateComponentColor(result, toggleColorType);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ToggleModelNG::UpdateCBToggleComponentColor(FrameNode* frameNode, const ToggleColorType toggleColorType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SwitchTheme>(frameNode->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    auto color = theme->GetPointColor();
+    switch (toggleColorType) {
+        case ToggleColorType::SELECTED_COLOR:
+            SetUnselectedColor(frameNode, color);
+            break;
+        case ToggleColorType::SWITCH_POINT_COLOR:
+            SetSwitchPointColor(frameNode, color);
+            break;
+        case ToggleColorType::UN_SELECTED_COLOR:
+            SetUnselectedColor(frameNode, color);
+            break;
+        default:
+            break;
+    }
+}
+
+void ToggleModelNG::CreateWithCheckBoxResourceObj(FrameNode* node, const ToggleColorType toggleColorType,
+    const RefPtr<ResourceObject>& resObj, const std::string& key)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<ToggleCheckBoxPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [toggleColorType, weak = AceType::WeakClaim(node)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<ToggleCheckBoxPattern>();
+        CHECK_NULL_VOID(pattern);
+        Color result;
+        if (!ResourceParseUtils::ParseResColor(resObj, result)) {
+            UpdateCBToggleComponentColor(AceType::RawPtr(frameNode), toggleColorType);
+        }
+        pattern->UpdateComponentColor(result, toggleColorType);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ToggleModelNG::UpdateToggleButtonComponentColor(FrameNode* frameNode, const ToggleColorType toggleColorType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SwitchTheme>(frameNode->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    auto color = theme->GetPointColor();
+    switch (toggleColorType) {
+        case ToggleColorType::SELECTED_COLOR:
+            SetUnselectedColor(frameNode, color);
+            break;
+        case ToggleColorType::SWITCH_POINT_COLOR:
+            SetSwitchPointColor(frameNode, color);
+            break;
+        case ToggleColorType::UN_SELECTED_COLOR:
+            SetUnselectedColor(frameNode, color);
+            break;
+        default:
+            break;
+    }
+}
+
+void ToggleModelNG::CreateWithButtonResourceObj(FrameNode* node, const ToggleColorType toggleColorType,
+    const RefPtr<ResourceObject>& resObj, const std::string& key)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<ToggleButtonPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [toggleColorType, weak = AceType::WeakClaim(node)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+        CHECK_NULL_VOID(pattern);
+        Color result;
+        if (!ResourceParseUtils::ParseResColor(resObj, result)) {
+            UpdateToggleButtonComponentColor(AceType::RawPtr(frameNode), toggleColorType);
+        }
+
+        pattern->UpdateComponentColor(result, toggleColorType);
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void ToggleModelNG::CreateWithResourceObj(
+    const FrameNode* node, const ToggleColorType toggleColorType, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(node);
+    std::string key = "toggle" + ColorTypeToString(toggleColorType);
+    CreateWithSwitchResourceObj(const_cast<FrameNode*>(node), toggleColorType, resObj, key);
+    CreateWithCheckBoxResourceObj(const_cast<FrameNode*>(node), toggleColorType, resObj, key);
+    CreateWithButtonResourceObj(const_cast<FrameNode*>(node), toggleColorType, resObj, key);
+}
+
+void ToggleModelNG::CreateWithDimensionVpResourceObj(
+    const RefPtr<ResourceObject>& resObj, const ToggleDimensionType toggleDimensionType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithResourceObj(frameNode, toggleDimensionType, resObj);
+}
+
+void ToggleModelNG::CreateWithResourceObj(
+    const FrameNode* node, const ToggleDimensionType toggleDimensionType, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<SwitchPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    std::string key = "toggle" + DimensionTypeToString(toggleDimensionType);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
+    auto&& updateFunc = [toggleDimensionType, weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+        const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CalcDimension result;
+        if (ResourceParseUtils::ParseResDimensionVpNG(resObj, result, false)) {
+            pattern->UpdateComponentDimension(result, toggleDimensionType);
+        }
+    };
+    updateFunc(resObj);
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+std::string ToggleModelNG::ColorTypeToString(const ToggleColorType toggleColorType)
+{
+    std::string rst;
+    switch (toggleColorType) {
+        case ToggleColorType::SELECTED_COLOR:
+            rst = "SelectedColor";
+            break;
+        case ToggleColorType::SWITCH_POINT_COLOR:
+            rst = "SwitchPointColor";
+            break;
+        case ToggleColorType::UN_SELECTED_COLOR:
+            rst = "UnselectedColor";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
+}
+
+std::string ToggleModelNG::DimensionTypeToString(const ToggleDimensionType toggleDimensionType)
+{
+    std::string rst;
+    switch (toggleDimensionType) {
+        case ToggleDimensionType::POINT_RADIUS:
+            rst = "PointRadius";
+            break;
+        case ToggleDimensionType::TRACK_BORDER_RADIUS:
+            rst = "TrackBorderRadius";
+            break;
+        default:
+            rst = "Unknown";
+            break;
+    }
+    return rst;
+}
+
 void ToggleModelNG::UpdateSwitchIsOn(const RefPtr<FrameNode>& frameNode, bool isOn)
 {
     CHECK_NULL_VOID(frameNode);
@@ -700,5 +906,26 @@ Color ToggleModelNG::GetUnselectedColor(FrameNode* frameNode)
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
         SwitchPaintProperty, UnselectedColor, value, frameNode, Color(DEFAULT_COLOR));
     return value;
+}
+
+void ToggleModelNG::SetIsUserSetMargin(bool isUserSet)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetIsUserSetMargin(frameNode, isUserSet);
+}
+
+void ToggleModelNG::SetIsUserSetMargin(FrameNode* frameNode, bool isUserSet)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    if (AceType::InstanceOf<SwitchPattern>(pattern)) {
+        auto switchPattern = AceType::DynamicCast<SwitchPattern>(pattern);
+        switchPattern->SetIsUserSetMargin(isUserSet);
+    } else if (AceType::InstanceOf<CheckBoxPattern>(pattern)) {
+        auto checkboxPattern = AceType::DynamicCast<CheckBoxPattern>(pattern);
+        checkboxPattern->SetIsUserSetMargin(isUserSet);
+    }
 }
 } // namespace OHOS::Ace::NG

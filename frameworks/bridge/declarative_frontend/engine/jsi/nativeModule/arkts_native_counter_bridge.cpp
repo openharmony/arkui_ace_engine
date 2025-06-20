@@ -84,13 +84,15 @@ ArkUINativeModuleValue CounterBridge::SetCounterHeight(ArkUIRuntimeCallInfo* run
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     CalcDimension height;
-    ArkTSUtils::ParseJsDimensionVp(vm, heightValue, height, false);
+    RefPtr<ResourceObject> heightResObj;
+    ArkTSUtils::ParseJsDimensionVp(vm, heightValue, height, heightResObj, false);
     if (LessNotEqual(height.Value(), 0.0)) {
         GetArkUINodeModifiers()->getCounterModifier()->resetCounterHeight(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUINodeModifiers()->getCounterModifier()->setCounterHeight(
-        nativeNode, height.Value(), static_cast<int>(height.Unit()));
+    auto heightRawPtr = AceType::RawPtr(heightResObj);
+    GetArkUINodeModifiers()->getCounterModifier()->setCounterHeightRes(
+        nativeNode, height.Value(), static_cast<int>(height.Unit()), heightRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -115,14 +117,15 @@ ArkUINativeModuleValue CounterBridge::SetCounterWidth(ArkUIRuntimeCallInfo* runt
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     CalcDimension width;
-    ArkTSUtils::ParseJsDimensionVp(vm, widthValue, width, false);
+    RefPtr<ResourceObject> widthResObj;
+    ArkTSUtils::ParseJsDimensionVp(vm, widthValue, width, widthResObj, false);
     if (LessNotEqual(width.Value(), 0.0)) {
         GetArkUINodeModifiers()->getCounterModifier()->resetCounterWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-
-    GetArkUINodeModifiers()->getCounterModifier()->setCounterWidth(
-        nativeNode, width.Value(), static_cast<int>(width.Unit()));
+    auto widthRawPtr = AceType::RawPtr(widthResObj);
+    GetArkUINodeModifiers()->getCounterModifier()->setCounterWidthRes(
+        nativeNode, width.Value(), static_cast<int>(width.Unit()), widthRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -146,11 +149,13 @@ ArkUINativeModuleValue CounterBridge::SetCounterBackgroundColor(ArkUIRuntimeCall
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
         GetArkUINodeModifiers()->getCounterModifier()->resetCounterBackgroundColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getCounterModifier()->setCounterBackgroundColorWithColorSpace(
-            nativeNode, color.GetValue(), color.GetColorSpace());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getCounterModifier()->setCounterBackgroundColorRes(
+            nativeNode, color.GetValue(), color.GetColorSpace(), colorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }

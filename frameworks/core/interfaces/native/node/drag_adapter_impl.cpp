@@ -44,7 +44,10 @@ static void DragActionConvert(
         internalDragAction->previewOption.isShowBadge = dragAction->dragPreviewOption.isShowBadge;
     }
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedDataForNative(dragAction->unifiedData);
+    RefPtr<DataLoadParams> udDataLoadParams =
+        UdmfClient::GetInstance()->TransformDataLoadParamsForNative(dragAction->dataLoadParams);
     internalDragAction->unifiedData = udData;
+    internalDragAction->dataLoadParams = udDataLoadParams;
     internalDragAction->instanceId = dragAction->instanceId;
     internalDragAction->touchPointX = dragAction->touchPointX;
     internalDragAction->touchPointY = dragAction->touchPointY;

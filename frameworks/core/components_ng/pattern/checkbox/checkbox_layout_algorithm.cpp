@@ -37,6 +37,11 @@ std::optional<SizeF> CheckBoxLayoutAlgorithm::MeasureContent(
         return std::nullopt;
     }
     InitializeParam(host);
+
+    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
+        return LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, layoutWrapper);
+    }
     // Case 1: Width and height are set in the front end.
     if (contentConstraint.selfIdealSize.Width().has_value() && contentConstraint.selfIdealSize.Height().has_value() &&
         contentConstraint.selfIdealSize.IsNonNegative()) {
@@ -165,4 +170,19 @@ void CheckBoxLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 }
 
+std::optional<SizeF> CheckBoxLayoutAlgorithm::LayoutPolicyIsMatchParent(const LayoutConstraintF& contentConstraint,
+    std::optional<NG::LayoutPolicyProperty> layoutPolicy, LayoutWrapper* layoutWrapper)
+{
+    auto height = contentConstraint.parentIdealSize.Height().value();
+    auto width = contentConstraint.parentIdealSize.Width().value();
+    if (layoutPolicy->IsAllMatch()) {
+        auto length = std::min(width, height);
+        return SizeF(length, length);
+    } else if (layoutPolicy->IsWidthMatch()) {
+        return SizeF(width, width);
+    } else if (layoutPolicy->IsHeightMatch()) {
+        return SizeF(height, height);
+    }
+    return SizeF();
+}
 } // namespace OHOS::Ace::NG

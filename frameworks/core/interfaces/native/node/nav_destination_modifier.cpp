@@ -184,6 +184,12 @@ void SetTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINav
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::ResetResObj(
+        frameNode, NavDestinationPatternType::TITLE_BAR, "navDestination.title.commonMainTitle");
+    NavDestinationModelNG::ResetResObj(
+        frameNode, NavDestinationPatternType::TITLE_BAR, "navDestination.title.commonSubTitle");
+    NavDestinationModelNG::ResetResObj(
+        frameNode, NavDestinationPatternType::NAV_DESTINATION, "navDestination.titlebarOptions");
     std::string mainTitleString = std::string(titleInfo.mainTitle);
     std::string subTitleString = std::string(titleInfo.subTitle);
     NG::NavigationTitleInfo ngTitleInfo = { titleInfo.hasSubTitle, titleInfo.hasMainTitle,
@@ -193,7 +199,7 @@ void SetTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINav
         auto titleResObj = AceType::Claim(title);
         auto* subtitle = reinterpret_cast<ResourceObject*>(subtitleRawPtr);
         auto subtitleResObj = AceType::Claim(subtitle);
-        NavDestinationModelNG::ParseCommonTitle(frameNode, ngTitleInfo, titleResObj, subtitleResObj);
+        NavDestinationModelNG::ParseCommonTitle(frameNode, titleResObj, subtitleResObj);
     } else {
         NavDestinationModelNG::ParseCommonTitle(frameNode, ngTitleInfo);
     }
@@ -221,16 +227,21 @@ void SetTitle(ArkUINodeHandle node, ArkUINavigationTitleInfo titleInfo, ArkUINav
         finalOptions.enableHoverMode = options.enableHoverMode.value;
     }
     NavDestinationModelNG::SetTitlebarOptions(frameNode, std::move(finalOptions));
-    if (!SystemProperties::ConfigChangePerform()) {
-        return;
+    if (SystemProperties::ConfigChangePerform()) {
+        UpdateNavDestinationTitlebarOptions(frameNode, options);
     }
-    UpdateNavDestinationTitlebarOptions(frameNode, options);
 }
 
 void ResetTitle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::ResetResObj(
+        frameNode, NavDestinationPatternType::TITLE_BAR, "navDestination.title.commonMainTitle");
+    NavDestinationModelNG::ResetResObj(
+        frameNode, NavDestinationPatternType::TITLE_BAR, "navDestination.title.commonSubTitle");
+    NavDestinationModelNG::ResetResObj(
+        frameNode, NavDestinationPatternType::NAV_DESTINATION, "navDestination.titlebarOptions");
     NG::NavigationTitleInfo ngTitleInfo = { false, false, "", "" };
     NavDestinationModelNG::ParseCommonTitle(frameNode, ngTitleInfo);
     NavigationTitlebarOptions options;
@@ -286,6 +297,8 @@ void SetMenus(ArkUINodeHandle node, ArkUIBarItem* items, ArkUI_Uint32 length)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(items);
+    NavDestinationModelNG::ResetResObj(
+        frameNode, NavDestinationPatternType::NAV_DESTINATION, "navDestination.menuItems");
     std::vector<NG::BarItem> menuItems;
     for (uint32_t i = 0; i < length; i++) {
         NG::BarItem menuItem;
@@ -330,6 +343,8 @@ void ResetMenus(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    NavDestinationModelNG::ResetResObj(
+        frameNode, NavDestinationPatternType::NAV_DESTINATION, "navDestination.menuItems");
     std::vector<NG::BarItem> menuItems;
     NavDestinationModelNG::SetMenuItems(frameNode, std::move(menuItems));
 }

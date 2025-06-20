@@ -72,32 +72,32 @@ HWTEST_F(RichEditorPatternTestFiveNg, BuilderSpanBindSelectionMenu001, TestSize.
     ASSERT_NE(richEditorNode, nullptr);
     auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    ResultObject objText;
-    objText.type = SelectSpanType::TYPESPAN;
-    ResultObject objImage;
-    objImage.type = SelectSpanType::TYPEIMAGE;
-    objImage.valueString = u" ";
-    objImage.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
-    ResultObject objBuilder;
-    objBuilder.type = SelectSpanType::TYPEIMAGE;
-    objBuilder.valueString = u" ";
-    objBuilder.valuePixelMap = nullptr;
     SelectionInfo originalSelection;
     SelectionInfo adjustedSelection;
 
     // 0: Select BuilderSpan
+    ResultObject objBuilder;
+    objBuilder.type = SelectSpanType::TYPEIMAGE;
+    objBuilder.valueString = u" ";
+    objBuilder.valuePixelMap = nullptr;
     originalSelection.selection_.resultObjects.push_front(objBuilder);
     adjustedSelection = richEditorPattern->GetAdjustedSelectionInfo(originalSelection);
     richEditorPattern->UpdateSelectionType(adjustedSelection);
     EXPECT_EQ(richEditorPattern->selectedType_.value(), TextSpanType::BUILDER);
 
     // 1: Select BuilderSpan and TextSpan
+    ResultObject objText;
+    objText.type = SelectSpanType::TYPESPAN;
     originalSelection.selection_.resultObjects.push_front(objText);
     adjustedSelection = richEditorPattern->GetAdjustedSelectionInfo(originalSelection);
     richEditorPattern->UpdateSelectionType(adjustedSelection);
     EXPECT_EQ(richEditorPattern->selectedType_.value(), TextSpanType::MIXED);
 
     // 2: Select BuilderSpan、TextSpan and ImageSpan
+    ResultObject objImage;
+    objImage.type = SelectSpanType::TYPEIMAGE;
+    objImage.valueString = u" ";
+    objImage.valuePixelMap = PixelMap::CreatePixelMap(nullptr);
     originalSelection.selection_.resultObjects.push_front(objImage);
     adjustedSelection = richEditorPattern->GetAdjustedSelectionInfo(originalSelection);
     richEditorPattern->UpdateSelectionType(adjustedSelection);
@@ -250,46 +250,13 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->HandleExtendAction(ACTION_SELECT_ALL);
     EXPECT_TRUE(richEditorPattern->showSelect_);
-}
 
-/**
- * @tc.name: HandleExtendAction002
- * @tc.desc: test HandleExtendAction
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->HandleExtendAction(ACTION_CUT);
     EXPECT_EQ(richEditorPattern->copyOption_, CopyOptions::None);
-}
 
-/**
- * @tc.name: HandleExtendAction003
- * @tc.desc: test HandleExtendAction
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->HandleExtendAction(ACTION_COPY);
     EXPECT_EQ(richEditorPattern->copyOption_, CopyOptions::None);
-}
 
-/**
- * @tc.name: HandleExtendAction004
- * @tc.desc: test HandleExtendAction
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction004, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
     auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
     ASSERT_NE(richEditorPattern, nullptr);
     TextCommonEvent event;
@@ -299,11 +266,11 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction004, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleExtendAction005
+ * @tc.name: HandleExtendAction002
  * @tc.desc: test HandleExtendAction
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction005, TestSize.Level1)
+HWTEST_F(RichEditorPatternTestFiveNg, HandleExtendAction002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -381,7 +348,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, SetSubSpans001, TestSize.Level1)
     richEditorPattern->spans_.push_back(spanItem);
     richEditorPattern->spans_.push_back(spanItem1);
     RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
-    richEditorPattern->SetSubSpans(spanString, 1, 1);
+    richEditorPattern->SetSubSpans(spanString, 1, 1, spanString->spans_);
     EXPECT_EQ(spanString->spans_.size(), 0);
 }
 
@@ -447,6 +414,8 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleKbVerticalSelection001, TestSize.Lev
     richEditorPattern->textSelector_.baseOffset = 1;
     richEditorPattern->textSelector_.destinationOffset = 0;
     richEditorPattern->caretPosition_ = 1;
+    EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(true), 0);
+    richEditorPattern->caretPosition_ = 0;
     EXPECT_EQ(richEditorPattern->HandleKbVerticalSelection(true), 0);
 }
 
@@ -519,27 +488,10 @@ HWTEST_F(RichEditorPatternTestFiveNg, DumpInfo001, TestSize.Level1)
     std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
     richEditorPattern->DumpInfo(json);
     EXPECT_FALSE(richEditorPattern->selectOverlay_->HasRenderTransform());
-}
 
-/**
- * @tc.name: DumpInfo002
- * @tc.desc: test DumpInfo
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFiveNg, DumpInfo002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto context = richEditorNode_->GetContextRefPtr();
-    auto pipe = richEditorNode_->GetContext();
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
-    pipe->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
-    std::function<void()> test = []() {};
+    test = []() {};
     richEditorPattern->customKeyboardBuilder_ = test;
-    std::unique_ptr<JsonValue> json = std::make_unique<JsonValue>();
+    json = std::make_unique<JsonValue>();
     richEditorPattern->DumpInfo(json);
     EXPECT_FALSE(richEditorPattern->selectOverlay_->HasRenderTransform());
 }

@@ -2069,6 +2069,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("dataDetectorConfig", &JSWeb::DataDetectorConfig);
     JSClass<JSWeb>::StaticMethod("bypassVsyncCondition", &JSWeb::BypassVsyncCondition);
     JSClass<JSWeb>::StaticMethod("enableFollowSystemFontWeight", &JSWeb::EnableFollowSystemFontWeight);
+    JSClass<JSWeb>::StaticMethod("gestureFocusMode", &JSWeb::GestureFocusMode);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -2205,6 +2206,7 @@ JSRef<JSVal> LoadWebTitleReceiveEventToJSValue(const LoadWebTitleReceiveEvent& e
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("title", eventInfo.GetTitle());
+    obj->SetProperty("isRealTitle", eventInfo.GetIsRealTitle());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -2370,6 +2372,40 @@ JSRef<JSVal> WebAllSslErrorEventToJSValue(const WebAllSslErrorEvent& eventInfo)
     obj->SetProperty("referrer", eventInfo.GetReferrer());
     obj->SetProperty("isFatalError", eventInfo.GetIsFatalError());
     obj->SetProperty("isMainFrame", eventInfo.GetIsMainFrame());
+
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine || !engine->GetNativeEngine()) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+    napi_env env = reinterpret_cast<napi_env>(engine->GetNativeEngine());
+    std::vector<std::string> certChainDerData = eventInfo.GetCertChainData();
+    JSRef<JSArray> certsArr = JSRef<JSArray>::New();
+    for (uint8_t i = 0; i < certChainDerData.size(); i++) {
+        if (i == UINT8_MAX) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Cert chain data array reach max.");
+            break;
+        }
+        void *data = nullptr;
+        napi_value buffer = nullptr;
+        napi_value item = nullptr;
+        napi_status status = napi_create_arraybuffer(env, certChainDerData[i].size(), &data, &buffer);
+        if (status != napi_ok) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Create array buffer failed, status = %{public}d.", status);
+            continue;
+        }
+        if (memcpy_s(data, certChainDerData[i].size(), certChainDerData[i].data(), certChainDerData[i].size()) != 0) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Cert chain data failed, index = %{public}u.", i);
+            continue;
+        }
+        status = napi_create_typedarray(env, napi_uint8_array, certChainDerData[i].size(), buffer, 0, &item);
+        if (status != napi_ok) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Create typed array failed, status = %{public}d.", status);
+            continue;
+        }
+        JSRef<JSVal> cert = JsConverter::ConvertNapiValueToJsVal(item);
+        certsArr->SetValueAt(i, cert);
+    }
+    obj->SetPropertyObject("certChainData", certsArr);
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -2541,6 +2577,16 @@ void JSWeb::Create(const JSCallbackInfo& info)
             func->Call(webviewController, 1, argv);
         };
 
+        auto setWebDetachFunction = controller->GetProperty("setWebDetach");
+        std::function<void(int32_t)> setWebDetachCallback = nullptr;
+        if (setWebDetachFunction->IsFunction()) {
+            setWebDetachCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(setWebDetachFunction)](
+                                     int32_t webId) {
+                JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
+                func->Call(webviewController, 1, argv);
+            };
+        }
+
         auto setHapPathFunction = controller->GetProperty("innerSetHapPath");
         std::function<void(const std::string&)> setHapPathCallback = nullptr;
         if (setHapPathFunction->IsFunction()) {
@@ -2618,6 +2664,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
         WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));
         WebModel::GetInstance()->SetDefaultFileSelectorShow(std::move(fileSelectorShowFromUserCallback));
+        WebModel::GetInstance()->SetWebDetachFunction(std::move(setWebDetachCallback));
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         if (!getCmdLineFunction->IsFunction()) {
             return;
@@ -5280,6 +5327,7 @@ JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventIn
     const OHOS::Ace::Offset& globalLocation = touchInfo.GetGlobalLocation();
     const OHOS::Ace::Offset& localLocation = touchInfo.GetLocalLocation();
     const OHOS::Ace::Offset& screenLocation = touchInfo.GetScreenLocation();
+    const OHOS::Ace::Offset& globalDisplayLocation = touchInfo.GetGlobalDisplayLocation();
     touchInfoObj->SetProperty<int32_t>("type", static_cast<int32_t>(touchInfo.GetTouchType()));
     touchInfoObj->SetProperty<int32_t>("id", touchInfo.GetFingerId());
     touchInfoObj->SetProperty<double>("displayX", screenLocation.GetX());
@@ -5290,6 +5338,8 @@ JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventIn
     touchInfoObj->SetProperty<double>("screenY", globalLocation.GetY());
     touchInfoObj->SetProperty<double>("x", localLocation.GetX());
     touchInfoObj->SetProperty<double>("y", localLocation.GetY());
+    touchInfoObj->SetProperty<double>("globalDisplayX", globalDisplayLocation.GetX());
+    touchInfoObj->SetProperty<double>("globalDisplayY", globalDisplayLocation.GetY());
     touchInfoObj->Wrap<TouchEventInfo>(&info);
     return touchInfoObj;
 }
@@ -6026,5 +6076,16 @@ void JSWeb::BypassVsyncCondition(int32_t webBypassVsyncCondition)
 void JSWeb::EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
 {
     WebModel::GetInstance()->SetEnableFollowSystemFontWeight(enableFollowSystemFontWeight);
+}
+
+void JSWeb::GestureFocusMode(int32_t gestureFocusMode)
+{
+    if (gestureFocusMode < static_cast<int32_t>(GestureFocusMode::DEFAULT) ||
+        gestureFocusMode > static_cast<int32_t>(GestureFocusMode::GESTURE_TAP_AND_LONG_PRESS)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "GestureFocusMode param err");
+        return;
+    }
+    auto mode = static_cast<enum GestureFocusMode>(gestureFocusMode);
+    WebModel::GetInstance()->SetGestureFocusMode(mode);
 }
 } // namespace OHOS::Ace::Framework

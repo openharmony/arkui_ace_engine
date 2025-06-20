@@ -277,7 +277,8 @@ bool PipelineBase::NeedTouchInterpolation()
     auto uIContentType = container->GetUIContentType();
     return SystemProperties::IsNeedResampleTouchPoints() &&
         (uIContentType == UIContentType::SECURITY_UI_EXTENSION ||
-        uIContentType == UIContentType::MODAL_UI_EXTENSION);
+        uIContentType == UIContentType::MODAL_UI_EXTENSION ||
+        uIContentType == UIContentType::UI_EXTENSION);
 }
 
 void PipelineBase::SetFontWeightScale(float fontWeightScale)
@@ -1109,5 +1110,16 @@ void PipelineBase::SetUiDvsyncSwitch(bool on)
         window_->SetUiDvsyncSwitch(on);
     }
     lastUiDvsyncStatus_ = on;
+}
+
+bool PipelineBase::CheckIfGetTheme()
+{
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto uIContentType = container->GetUIContentType();
+    if (isJsCard_ || (isFormRender_ && uIContentType != UIContentType::DYNAMIC_COMPONENT)) {
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace

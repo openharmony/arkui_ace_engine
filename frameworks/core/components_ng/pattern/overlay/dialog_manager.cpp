@@ -20,6 +20,9 @@
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/common/ace_engine.h"
+#include "base/memory/ace_type.h"
+#include "base/subwindow/subwindow_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -132,5 +135,42 @@ bool DialogManager::IfNeedAvoidDock(const RefPtr<FrameNode>& currentNode) const
     CHECK_NULL_RETURN(container, false);
     auto isFreeMultiWindow = container->IsFreeMultiWindow();
     return expandDisplay || isFreeMultiWindow;
+}
+
+RefPtr<PipelineContext> DialogManager::GetMainPipelineContext(const RefPtr<FrameNode>& frameNode)
+{
+    // Get pipelineContext of main window or host window for UIExtension
+    if (!frameNode) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "get frameNode failed");
+        return nullptr;
+    }
+    auto pipeline = frameNode->GetContext();
+    if (!pipeline) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "get pipeline failed, nodeId: %{public}d", frameNode->GetId());
+        return nullptr;
+    }
+    auto containerId = pipeline->GetInstanceId();
+    auto container = AceEngine::Get().GetContainer(containerId);
+    if (!container) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY, "get container failed, nodeId: %{public}d", frameNode->GetId());
+        return nullptr;
+    }
+    RefPtr<PipelineContext> context;
+    if (container->IsSubContainer()) {
+        auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+        if (!parentContainer) {
+            TAG_LOGE(AceLogTag::ACE_OVERLAY, "get parentContainer failed, nodeId: %{public}d", frameNode->GetId());
+            return nullptr;
+        }
+        context = AceType::DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
+        if (!context) {
+            TAG_LOGE(AceLogTag::ACE_OVERLAY, "get context failed, nodeId: %{public}d", frameNode->GetId());
+            return nullptr;
+        }
+    } else {
+        context = AceType::Claim(pipeline);
+    }
+    return context;
 }
 } // namespace OHOS::Ace::NG

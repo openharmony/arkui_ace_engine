@@ -99,10 +99,12 @@ ArkUINativeModuleValue SliderBridge::SetShowTips(ArkUIRuntimeCallInfo* runtimeCa
     }
     
     std::string content;
-    if (ArkTSUtils::ParseJsString(vm, contentArg, content)) {
-        GetArkUINodeModifiers()->getSliderModifier()->setShowTips(nativeNode, showTips, content.c_str());
+    RefPtr<ResourceObject> strResObj;
+    if (ArkTSUtils::ParseJsString(vm, contentArg, content, strResObj)) {
+        auto strRawPtr = AceType::RawPtr(strResObj);
+        GetArkUINodeModifiers()->getSliderModifier()->setShowTipsPtr(nativeNode, showTips, content.c_str(), strRawPtr);
     } else {
-        GetArkUINodeModifiers()->getSliderModifier()->setShowTips(nativeNode, showTips, nullptr);
+        GetArkUINodeModifiers()->getSliderModifier()->setShowTipsPtr(nativeNode, showTips, nullptr, nullptr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -227,10 +229,12 @@ ArkUINativeModuleValue SliderBridge::SetStepColor(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
         GetArkUINodeModifiers()->getSliderModifier()->resetStepColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getSliderModifier()->setStepColor(nativeNode, color.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getSliderModifier()->setStepColorPtr(nativeNode, color.GetValue(), colorRawPtr);
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -254,10 +258,12 @@ ArkUINativeModuleValue SliderBridge::SetBlockBorderColor(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
         GetArkUINodeModifiers()->getSliderModifier()->resetBlockBorderColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getSliderModifier()->setBlockBorderColor(nativeNode, color.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getSliderModifier()->setBlockBorderColorPtr(nativeNode, color.GetValue(), colorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -314,10 +320,12 @@ ArkUINativeModuleValue SliderBridge::SetBlockColor(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
         GetArkUINodeModifiers()->getSliderModifier()->resetBlockColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getSliderModifier()->setBlockColor(nativeNode, color.GetValue());
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getSliderModifier()->setBlockColorPtr(nativeNode, color.GetValue(), colorRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -341,6 +349,7 @@ ArkUINativeModuleValue SliderBridge::SetTrackBackgroundColor(ArkUIRuntimeCallInf
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Gradient gradient;
     Color color;
+    RefPtr<ResourceObject> colorResObj;
     if (ConvertSliderGradientColor(vm, secondArg, gradient)) {
         ArkUIGradientType gradientObj;
         auto colorLength = gradient.GetColors().size();
@@ -362,8 +371,10 @@ ArkUINativeModuleValue SliderBridge::SetTrackBackgroundColor(ArkUIRuntimeCallInf
         gradientObj.offset = &(*offsetValues.begin());
         GetArkUINodeModifiers()->getSliderModifier()->setLinearTrackBackgroundColor(
             nativeNode, &gradientObj, colorLength);
-    } else if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUINodeModifiers()->getSliderModifier()->setTrackBackgroundColor(nativeNode, color.GetValue());
+    } else if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getSliderModifier()->setTrackBackgroundColorPtr(
+            nativeNode, color.GetValue(), colorRawPtr);
     } else {
         GetArkUINodeModifiers()->getSliderModifier()->resetTrackBackgroundColor(nativeNode);
     }
@@ -389,6 +400,7 @@ ArkUINativeModuleValue SliderBridge::SetSelectColor(ArkUIRuntimeCallInfo* runtim
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Gradient gradient;
     Color color;
+    RefPtr<ResourceObject> colorResObj;
     if (ConvertSliderGradientColor(vm, secondArg, gradient)) {
         ArkUIGradientType gradientObj;
         auto colorLength = gradient.GetColors().size();
@@ -409,8 +421,9 @@ ArkUINativeModuleValue SliderBridge::SetSelectColor(ArkUIRuntimeCallInfo* runtim
         gradientObj.color = &(*colorValues.begin());
         gradientObj.offset = &(*offsetValues.begin());
         GetArkUINodeModifiers()->getSliderModifier()->setLinearSelectColor(nativeNode, &gradientObj, colorLength);
-    } else if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        GetArkUINodeModifiers()->getSliderModifier()->setSelectColor(nativeNode, color.GetValue());
+    } else if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        GetArkUINodeModifiers()->getSliderModifier()->setSelectColorPtr(nativeNode, color.GetValue(), colorRawPtr);
     } else {
         GetArkUINodeModifiers()->getSliderModifier()->resetSelectColor(nativeNode);
     }
@@ -499,8 +512,9 @@ ArkUINativeModuleValue SliderBridge::SetBlockStyle(ArkUIRuntimeCallInfo* runtime
     auto type = static_cast<SliderModel::BlockStyleType>(getType->ToNumber<int32_t>());
     if (type == SliderModel::BlockStyleType::IMAGE) {
         std::string src;
+        RefPtr<ResourceObject> mediaResObj;
         auto image = jsObj->GetProperty("image");
-        if (!Framework::JSShapeAbstract::ParseJsMedia(image, src)) {
+        if (!Framework::JSShapeAbstract::ParseJsMedia(image, src, mediaResObj)) {
             SliderBridge::ResetBlockStyle(runtimeCallInfo);
             return panda::JSValueRef::Undefined(vm);
         }
@@ -508,6 +522,9 @@ ArkUINativeModuleValue SliderBridge::SetBlockStyle(ArkUIRuntimeCallInfo* runtime
         std::string moduleName;
         Framework::JSViewAbstract::GetJsMediaBundleInfo(image, bundleName, moduleName);
         SliderModelNG::SetBlockImage(frameNode, src, bundleName, moduleName);
+        if (SystemProperties::ConfigChangePerform() && mediaResObj) {
+            SliderModelNG::CreateWithMediaResourceObj(frameNode, mediaResObj, bundleName, moduleName);
+        }
     } else if (type == SliderModel::BlockStyleType::SHAPE) {
         auto shape = jsObj->GetProperty("shape");
         if (!shape->IsObject()) {

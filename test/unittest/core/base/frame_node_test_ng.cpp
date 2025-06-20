@@ -775,6 +775,37 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCreateRenderTask0016, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FrameNodeTestNg_CreateRenderTask0017
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeCreateRenderTask0017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build a object to CreateRenderTask
+     * @tc.expected: expect The isRenderDirtyMarked_ is false.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isRenderDirtyMarked_ = true;
+    frameNode->isObservedByDrawChildren_ = true;
+    frameNode->renderContext_->UpdateAccessibilityFocus(true);
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    NG::RectF testRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->SetLayoutRect(testRect);
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+
+    /**
+     * @tc.steps: step3. call the function CreateRenderTask.
+     */
+    frameNode->SetLayoutProperty(layoutProperty);
+    frameNode->CreateRenderTask(true).value()();
+    EXPECT_NE(frameNode, nullptr);
+}
+
+/**
  * @tc.name: FrameNodeTestNg_UpdateLayoutPropertyFlag0018
  * @tc.desc: Test frame node method
  * @tc.type: FUNC

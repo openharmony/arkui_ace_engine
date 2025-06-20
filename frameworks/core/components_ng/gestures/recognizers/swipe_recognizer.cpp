@@ -16,6 +16,7 @@
 #include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 
 #include "core/common/reporter/reporter.h"
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/components_ng/manager/event/json_report.h"
@@ -67,7 +68,7 @@ void SwipeRecognizer::OnAccepted()
     firstInputTime_.reset();
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Swipe accepted, tag = %{public}s",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "SWIPE RACC, T: %{public}s",
         node ? node->GetTag().c_str() : "null");
     auto lastRefereeState = refereeState_;
     lastRefereeState_ = refereeState_;
@@ -434,7 +435,7 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         info.SetInputEventType(inputEventType_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
-        HandleGestureAccept(info, type);
+        HandleGestureAccept(info, type, GestureListenerType::SWIPE);
         callbackFunction(info);
         HandleReports(info, type);
     }

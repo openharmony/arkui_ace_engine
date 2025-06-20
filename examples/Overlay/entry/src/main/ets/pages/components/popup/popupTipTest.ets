@@ -47,6 +47,28 @@ struct TipsExample {
             enableArrow:true,
           })
           .position({ x: 100, y: 350 })
+
+        Button('Hover Tips跟随鼠标')
+          .bindTips('test Tips', {
+            appearingTime: 700,
+            disappearingTime: 300,
+            appearingTimeWithContinuousOperation: 300,
+            disappearingTimeWithContinuousOperation: 0,
+            enableArrow: true,
+            showAtAnchor: TipsAnchorType.CURSOR,
+          })
+          .position({ x: 300, y: 250 })
+
+        Button('Hover Tips跟随鼠标')
+          .bindTips('1234567890'.repeat(20), {
+            appearingTime: 700,
+            disappearingTime: 300,
+            appearingTimeWithContinuousOperation: 300,
+            disappearingTimeWithContinuousOperation: 0,
+            enableArrow: true,
+            showAtAnchor: TipsAnchorType.CURSOR,
+          })
+          .position({ x: 300, y: 350 })
       }
       .width('100%')
       .padding({ top: 5 })

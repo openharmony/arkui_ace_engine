@@ -68,6 +68,7 @@ private:
 
 struct InspectorConfig {
     bool contentOnly = false;
+    bool callingOnMain = false;
 };
 } // namespace OHOS::Ace::NG
 

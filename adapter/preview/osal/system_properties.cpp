@@ -118,6 +118,7 @@ bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
 int32_t SystemProperties::touchAccelarate_ = 0;
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
+bool SystemProperties::softPagetransition_ = false;
 bool SystemProperties::formSkeletonBlurEnabled_ = true;
 int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
 WidthLayoutBreakPoint SystemProperties::widthLayoutBreakpoints_ = WidthLayoutBreakPoint();
@@ -420,6 +421,11 @@ bool SystemProperties::IsPageTransitionFreeze()
     return pageTransitionFrzEnabled_;
 }
 
+bool SystemProperties::IsSoftPageTransition()
+{
+    return softPagetransition_;
+}
+
 bool SystemProperties::IsFormSkeletonBlurEnabled()
 {
     return formSkeletonBlurEnabled_;
@@ -437,6 +443,26 @@ int32_t SystemProperties::getFormSharedImageCacheThreshold()
 
 void SystemProperties::SetMultiInstanceEnabled(bool enabled)
 {
+}
+
+bool SystemProperties::IsWhiteBlockEnabled()
+{
+    return false;
+}
+
+bool SystemProperties::IsWhiteBlockIdleChange()
+{
+    return false;
+}
+
+int32_t SystemProperties::GetWhiteBlockIndexValue()
+{
+    return 0;
+}
+
+int32_t SystemProperties::GetWhiteBlockCacheCountValue()
+{
+    return 0;
 }
 
 } // namespace OHOS::Ace

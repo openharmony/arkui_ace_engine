@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/common/reporter/reporter.h"
@@ -58,7 +59,7 @@ void LongPressRecognizer::OnAccepted()
     }
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "LongPress accepted, tag = %{public}s",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "LONG RACC, T: %{public}s",
         node ? node->GetTag().c_str() : "null");
     if (onAccessibilityEventFunc_) {
         auto onAccessibilityEventFunc = onAccessibilityEventFunc_;
@@ -420,6 +421,7 @@ void LongPressRecognizer::TriggerCallbackMsg(
         info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
         info.SetGlobalLocation(lastTouchEvent_.GetOffset())
             .SetLocalLocation(lastTouchEvent_.GetOffset() - coordinateOffset_);
+        info.SetGlobalDisplayLocation(lastTouchEvent_.GetGlobalDisplayOffset());
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         info.SetForce(lastTouchEvent_.force);
         if (lastTouchEvent_.tiltX.has_value()) {
@@ -439,7 +441,7 @@ void LongPressRecognizer::TriggerCallbackMsg(
         info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
-        HandleGestureAccept(info, type);
+        HandleGestureAccept(info, type, GestureListenerType::LONG_PRESS);
         callbackFunction(info);
         HandleReports(info, type);
         if (type == GestureCallbackType::START && longPressRecorder_ && *longPressRecorder_) {

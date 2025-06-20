@@ -107,6 +107,16 @@ public:
         return onReachEndEvent_;
     }
 
+    void SetOnWillStopDragging(OnWillStopDraggingEvent&& onWillStopdragging)
+    {
+        onWillStopDraggingEvent_ = std::move(onWillStopdragging);
+    }
+
+    const OnWillStopDraggingEvent& GetOnWillStopDragging() const
+    {
+        return onWillStopDraggingEvent_;
+    }
+
     void SetJSFrameNodeOnReachStart(OnReachEvent&& onScroll)
     {
         onJSFrameNodeReachStartEvent_ = std::move(onScroll);
@@ -235,6 +245,7 @@ private:
     OnScrollFrameBeginEvent onScrollFrameBeginEvent_;
     OnReachEvent onReachStartEvent_;
     OnReachEvent onReachEndEvent_;
+    OnWillStopDraggingEvent onWillStopDraggingEvent_;
 
     OnReachEvent onJSFrameNodeReachStartEvent_;
     OnReachEvent onJSFrameNodeReachEndEvent_;

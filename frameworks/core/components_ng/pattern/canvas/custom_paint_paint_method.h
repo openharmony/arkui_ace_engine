@@ -312,7 +312,7 @@ protected:
     void InitPaintBlend(RSBrush& brush);
     void InitPaintBlend(RSPen& pen);
     std::shared_ptr<RSShaderEffect> MakeConicGradient(
-        const Ace::Gradient& gradient, std::shared_ptr<RSColorSpace> colorSpace);
+        const Ace::Gradient& gradient, const std::shared_ptr<RSColorSpace>& colorSpace);
 
     void Path2DFill();
     void Path2DStroke();

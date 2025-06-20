@@ -62,6 +62,16 @@ enum class ResponseType : int32_t {
 };
 class SpanString;
 enum PopupType { POPUPTYPE_TEXTCOLOR, POPUPTYPE_POPUPCOLOR, POPUPTYPE_MASKCOLOR };
+enum PopupOptionsType {
+    POPUP_OPTIONTYPE_WIDTH,
+    POPUP_OPTIONTYPE_ARROWWIDTH,
+    POPUP_OPTIONTYPE_ARROWHEIGHT,
+    POPUP_OPTIONTYPE_RADIUS,
+    POPUP_OPTIONTYPE_OUTLINEWIDTH,
+    POPUP_OPTIONTYPE_BORDERWIDTH,
+    POPUP_OPTIONTYPE_OFFSETDX,
+    POPUP_OPTIONTYPE_OFFSETDY,
+};
 class ACE_FORCE_EXPORT ViewAbstractModel {
 public:
     static ViewAbstractModel* GetInstance();
@@ -72,6 +82,7 @@ public:
     virtual void CreateWithOuterBorderRadiusResourceObj(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithLightColorResourceObj(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithOuterBorderWidthResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ResetResObj(const std::string& key) {};
     
     // basic size
     virtual void SetWidth(const CalcDimension& width) = 0;
@@ -199,6 +210,9 @@ public:
     virtual void SetAspectRatio(float ratio) = 0;
     virtual void ResetAspectRatio() = 0;
     virtual void SetAlign(const Alignment& alignment) = 0;
+    virtual void SetAlign(const std::string& localizedAlignment) = 0;
+    virtual void SetLayoutGravity(const Alignment& alignment) = 0;
+    virtual void SetIsMirrorable(const bool& isMirrorable) = 0;
     virtual void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) = 0;
     virtual void SetChainStyle(const ChainInfo& chainInfo) = 0;
     virtual void SetBias(const BiasPair& biasPair) = 0;
@@ -303,6 +317,8 @@ public:
     // event
     virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
         double distanceThreshold = std::numeric_limits<double>::infinity()) = 0;
+    virtual void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+        Dimension distanceThreshold) = 0;
     virtual void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) = 0;
     virtual void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) = 0;
     virtual void SetShouldBuiltInRecognizerParallelWith(
@@ -493,7 +509,6 @@ public:
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;
-    virtual void CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress) {};
     // foregroundColor
     virtual void SetForegroundColor(const Color& color) = 0;
     virtual void SetForegroundColorStrategy(const ForegroundColorStrategy& strategy) = 0;
@@ -524,14 +539,13 @@ public:
     virtual void SetMarkAnchorStart(Dimension& markAnchorStart) = 0;
     virtual void ResetMarkAnchorStart() = 0;
     virtual void SetOffsetLocalizedEdges(bool needLocalized) = 0;
-    virtual void CreateWithColorResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, PopupType& type) = 0;
-    virtual void CreateWithBoolResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj) = 0;
-    virtual void CreateWithResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, PopupType type) = 0;
+    virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& resourceObj, const PopupType& type) = 0;
     virtual void CreateWithResourceObj(
         const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) = 0;
+    virtual void RemoveResObj(const std::string& key) {};
+    virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& resourceObj, const PopupOptionsType& type) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_H

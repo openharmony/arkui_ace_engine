@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "interfaces/inner_api/ace_kit/include/ui/resource/resource_object.h"
+#include "frameworks/core/common/resource/resource_parse_utils.h"
 #include "refresh_test_ng.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -1080,5 +1082,37 @@ HWTEST_F(RefreshEventTestNg, HandleScrollVelocityTest002, TestSize.Level1)
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DONE);
     EXPECT_EQ(pattern_->scrollOffset_, 0.f);
     EXPECT_FALSE(pattern_->isRefreshing_);
+}
+
+/**
+ * @tc.name: CreateWithResourceObjTest001
+ * @tc.desc: Verify RefreshModelNG::CreateWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshEventTestNg, CreateWithResourceObjTest001, TestSize.Level1)
+{
+    RefreshModelNG model = CreateRefresh();
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", Container::CurrentIdSafely());
+    model.CreateWithResourceObj(resObj);
+    auto pipeline = pattern_->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto colorMode = pipeline->GetColorMode() == ColorMode::DARK ? 1 : 0;
+    pattern_->OnColorModeChange(colorMode);
+    auto layoutProperty = pattern_->GetLayoutProperty<RefreshLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->GetLoadingText().has_value());
+
+    ResourceObjectParams param;
+    param.type = ResourceObjectParamType::STRING;
+    param.value = "testString";
+    std::vector<ResourceObjectParams> params;
+    params.push_back(param);
+    auto resObjWithString = AceType::MakeRefPtr<ResourceObject>(
+        -1, static_cast<int32_t>(ResourceType::STRING), params, "", "", Container::CurrentIdSafely());
+    model.CreateWithResourceObj(resObjWithString);
+    colorMode = pipeline->GetColorMode() == ColorMode::DARK ? 1 : 0;
+    pattern_->OnColorModeChange(colorMode);
+    EXPECT_TRUE(layoutProperty->GetLoadingText().has_value());
+    CreateDone();
 }
 } // namespace OHOS::Ace::NG

@@ -178,6 +178,7 @@ void FormPattern::OnAttachToFrameNode()
     InitClickEvent();
 
     scopeId_ = Container::CurrentId();
+    EventReport::StartFormModifyTimeoutReportTimer(cardInfo_.id, cardInfo_.bundleName, cardInfo_.cardName);
 }
 
 void FormPattern::InitClickEvent()
@@ -634,6 +635,7 @@ void FormPattern::OnVisibleChange(bool isVisible)
 
 void FormPattern::OnModifyDone()
 {
+    EventReport::StopFormModifyTimeoutReportTimer(cardInfo_.id);
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1854,7 +1856,7 @@ void FormPattern::OnLoadEvent()
 
 void FormPattern::OnActionEvent(const std::string& action)
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "formPattern receive actionEvent");  
+    TAG_LOGI(AceLogTag::ACE_FORM, "formPattern receive actionEvent");
     if (!formManagerBridge_) {
         TAG_LOGE(AceLogTag::ACE_FORM, "OnActionEvent failed, form manager deleget is null!");
         return;
@@ -2553,7 +2555,7 @@ void FormPattern::enhancesSubContainer(bool hasContainer)
     CHECK_NULL_VOID(pipeline);
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    
+
     subContainer_->SetFormPattern(WeakClaim(this));
     subContainer_->Initialize();
     subContainer_->SetNodeId(host->GetId());

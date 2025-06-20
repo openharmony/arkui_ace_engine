@@ -48,7 +48,6 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     CHECK_NULL_VOID(IsMainWindow());
     CHECK_NULL_VOID(session_);
     initWindowMode_ = session_->GetWindowMode();
-    syncStartingWindow_ = Rosen::SceneSessionManager::GetInstance().IsSyncLoadStartingWindow();
     session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
@@ -100,6 +99,7 @@ std::shared_ptr<Rosen::RSSurfaceNode> WindowScene::CreateLeashWindowNode()
     TAG_LOGD(AceLogTag::ACE_WINDOW, "Create RSSurfaceNode: %{public}s",
              WindowSceneHelper::RSNodeToStr(surfaceNode).c_str());
     CHECK_NULL_RETURN(surfaceNode, nullptr);
+    surfaceNode->SetSkipCheckInMultiInstance(true);
     surfaceNode->SetLeashPersistentId(static_cast<int64_t>(session_->GetPersistentId()));
     return surfaceNode;
 }
@@ -580,31 +580,6 @@ void WindowScene::OnActivation()
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneActivation", TaskExecutor::TaskType::UI);
 }
 
-void WindowScene::OnBackground()
-{
-    int32_t imageFit = 0;
-    auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
-        session_->GetPersistentId(), imageFit);
-    CHECK_EQUAL_VOID(isPersistentImageFit, false);
-    auto uiTask = [weakThis = WeakClaim(this)]() {
-        ACE_SCOPED_TRACE("WindowScene::OnBackground");
-        auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
-        auto host = self->GetHost();
-        CHECK_NULL_VOID(host);
-
-        auto snapshot = self->session_->GetSnapshot();
-        self->CreateSnapshotWindow(snapshot);
-        self->AddChild(host, self->snapshotWindow_, self->snapshotWindowName_);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    };
-
-    ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneBackground", TaskExecutor::TaskType::UI);
-}
-
 void WindowScene::DisposeSnapshotAndBlankWindow()
 {
     CHECK_NULL_VOID(session_);
@@ -724,7 +699,7 @@ void WindowScene::OnLayoutFinished()
         CHECK_NULL_VOID(host);
         ACE_SCOPED_TRACE("WindowScene::OnLayoutFinished[id:%d][self:%d][enabled:%d]",
             self->session_->GetPersistentId(), host->GetId(), self->session_->GetBufferAvailableCallbackEnable());
-        if (self->startingWindow_) {
+        if (self->startingWindow_ && (!self->session_->GetShowRecent())) {
             self->BufferAvailableCallback();
             return;
         }

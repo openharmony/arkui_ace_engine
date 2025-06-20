@@ -26,6 +26,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
@@ -532,7 +533,60 @@ HWTEST_F(SelectControlSizeNg, SetShowInSubWindow001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetShowDefaultSelectedIcon
+ * @tc.name: ResetShowInSubWindow001
+ * @tc.desc: Test SelectPattern ResetShowInSubWindow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectControlSizeNg, ResetShowInSubWindow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, select frame node and select pattern.
+     * @tc.expected: Objects are created successfully.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(pipeline->GetThemeManager());
+    ASSERT_NE(themeManager, nullptr);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(selectTheme));
+
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto viewStackProcessor = ViewStackProcessor::GetInstance();
+    ASSERT_NE(viewStackProcessor, nullptr);
+    auto selectFrameNode = viewStackProcessor->GetMainFrameNode();
+    ASSERT_NE(selectFrameNode, nullptr);
+    auto selectPattern = selectFrameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto selectLayoutProps = selectFrameNode->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(selectLayoutProps, nullptr);
+
+    MockContainer::SetUp();
+    auto container = AceType::DynamicCast<MockContainer>(Container::Current());
+    ASSERT_NE(container, nullptr);
+    AceEngine::Get().AddContainer(Container::CurrentId(), container);
+
+    /**
+     * @tc.steps: step2. Call ResetShowInSubWindow.
+     * @tc.expected: SelectLayoutProperty's isShowInSubWindow_ and the set value are equal.
+     */
+    ASSERT_NE(selectTheme, nullptr);
+    selectTheme->expandDisplay_ = true;
+    selectPattern->ResetShowInSubWindow();
+    EXPECT_EQ(selectLayoutProps->GetShowInSubWindowValue(false), true);
+    selectTheme->expandDisplay_ = false;
+    selectPattern->ResetShowInSubWindow();
+    EXPECT_EQ(selectLayoutProps->GetShowInSubWindowValue(false), false);
+
+    AceEngine::Get().RemoveContainer(Container::CurrentId());
+}
+
+/**
+ * @tc.name: SetShowDefaultSelectedIcon001
  * @tc.desc: Test SelectPattern SetShowDefaultSelectedIcon.
  * @tc.type: FUNC
  */
@@ -562,6 +616,39 @@ HWTEST_F(SelectControlSizeNg, SetShowDefaultSelectedIcon001, TestSize.Level1)
     SelectModelNG::SetShowDefaultSelectedIcon(selectFrameNode, true);
     EXPECT_EQ(selectLayoutProps->GetShowDefaultSelectedIconValue(false), true);
     SelectModelNG::SetShowDefaultSelectedIcon(selectFrameNode, false);
+    EXPECT_EQ(selectLayoutProps->GetShowDefaultSelectedIconValue(false), false);
+}
+
+/**
+ * @tc.name: ResetShowDefaultSelectedIcon001
+ * @tc.desc: Test SelectPattern ResetShowDefaultSelectedIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectControlSizeNg, ResetShowDefaultSelectedIcon001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create select model, select frame node and select pattern.
+     * @tc.expected: Objects are created successfully.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto viewStackProcessor = ViewStackProcessor::GetInstance();
+    ASSERT_NE(viewStackProcessor, nullptr);
+    auto selectFrameNode = viewStackProcessor->GetMainFrameNode();
+    ASSERT_NE(selectFrameNode, nullptr);
+    auto selectPattern = selectFrameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    auto selectLayoutProps = selectFrameNode->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(selectLayoutProps, nullptr);
+
+    /**
+     * @tc.steps: step2. Call ResetShowDefaultSelectedIcon
+     * @tc.expected: SelectLayoutProperty's isShowInSubWindow_ and the set value are equal.
+     */
+    selectPattern->ResetShowDefaultSelectedIcon();
     EXPECT_EQ(selectLayoutProps->GetShowDefaultSelectedIconValue(false), false);
 }
 
@@ -602,6 +689,18 @@ HWTEST_F(SelectControlSizeNg, UpdateSelectedProps001, TestSize.Level1)
     auto newSelectedNode = newSelected->GetHost();
     ASSERT_NE(newSelectedNode, nullptr);
     auto newSelectedPros = newSelectedNode->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(newSelectedPros, nullptr);
+    EXPECT_EQ(newSelectedPros->GetNeedDividerValue(false), false);
+
+    SelectModelNG::SetShowDefaultSelectedIcon(selectFrameNode, false);
+    index = 1;
+    selectPattern->UpdateSelectedProps(index);
+    newSelected = selectPattern->options_[index]->GetPattern<MenuItemPattern>();
+    ASSERT_NE(newSelected, nullptr);
+    EXPECT_EQ(newSelected->IsSelected(), true);
+    newSelectedNode = newSelected->GetHost();
+    ASSERT_NE(newSelectedNode, nullptr);
+    newSelectedPros = newSelectedNode->GetPaintProperty<MenuItemPaintProperty>();
     ASSERT_NE(newSelectedPros, nullptr);
     EXPECT_EQ(newSelectedPros->GetNeedDividerValue(false), false);
 }

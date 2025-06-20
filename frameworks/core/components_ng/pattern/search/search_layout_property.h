@@ -21,6 +21,7 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/search/search_model.h"
+#include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -105,6 +106,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CancelIconColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StrokeWidth, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StrokeColor, Color, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(UserMargin, MarginProperty, PROPERTY_UPDATE_MEASURE);
 
 private:
     std::function<void(WeakPtr<NG::FrameNode>)> searchIconSymbol_;

@@ -33,6 +33,7 @@ void InputScene::OnAttachToFrameNode()
     TAG_LOGD(AceLogTag::ACE_WINDOW, "Create RSCanvasNode: %{public}s",
              WindowSceneHelper::RSNodeToStr(rsNode).c_str());
     CHECK_NULL_VOID(rsNode);
+    rsNode->SetSkipCheckInMultiInstance(true);
     context->SetRSNode(rsNode);
     rsNode->SetBoundsChangedCallback(boundsChangedCallback_);
 }

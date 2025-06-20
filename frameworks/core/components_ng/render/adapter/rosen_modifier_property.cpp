@@ -15,9 +15,12 @@
 
 #include "core/components_ng/render/adapter/rosen_modifier_property.h"
 
+#ifndef MODIFIER_NG
 #include "base/utils/utils.h"
+#endif
 
 namespace OHOS::Ace::NG {
+#ifndef MODIFIER_NG
 template<typename T>
 bool CreateOrSetModifierValue(std::shared_ptr<Rosen::RSAnimatableProperty<T>>& property, const T& value)
 {
@@ -169,4 +172,5 @@ void WindowBlurModifier::AddOrChangeMaskColorModifier(std::shared_ptr<Rosen::RSN
         rsNode->AddModifier(modifier);
     }
 }
+#endif
 } // namespace OHOS::Ace::NG

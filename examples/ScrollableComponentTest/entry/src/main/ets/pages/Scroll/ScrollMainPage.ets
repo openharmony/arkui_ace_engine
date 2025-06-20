@@ -37,6 +37,7 @@ struct IndexPage {
     new TextList(3, 'InfiniteScrolling', 'pages/Scroll/InfiniteScrolling'),
     new TextList(4, 'NestedScrollBar', 'pages/Scroll/NestedScrollBar'),
     new TextList(5, 'RecycleView', 'pages/Scroll/RecycleView/Index'),
+    new TextList(6, 'ScrollNode', 'pages/Scroll/ScrollNode')
   ]
   @State fontSize: Resource | undefined = undefined
   build() {

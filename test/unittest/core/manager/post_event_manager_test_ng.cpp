@@ -1047,4 +1047,36 @@ HWTEST_F(PostEventManagerTestNg, CheckTouchEventTest006, TestSize.Level1)
     auto result = postEventManager_->CheckTouchEvent(UInode, touchUpEvent);
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: ClearPostInputActionsTest001
+ * @tc.desc: test ClearPostInputActions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, ClearPostInputActionsTest001, TestSize.Level1)
+{
+    Init();
+    auto gestureEventHub = root_->GetOrCreateGestureEventHub();
+    gestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    auto gesture = AceType::MakeRefPtr<TapGesture>();
+    gestureEventHub->AddGesture(gesture);
+
+    TouchEvent touchUpEvent;
+    touchUpEvent.type = TouchType::MOVE;
+    touchUpEvent.x = 15;
+    touchUpEvent.y = 15;
+    touchUpEvent.id = 2;
+    auto currentTime = GetSysTimestamp();
+    std::chrono::nanoseconds nanosecondsUp(currentTime);
+    TimeStamp timeUp(nanosecondsUp);
+    touchUpEvent.time = timeUp;
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+    PostEventAction eventAction;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = touchUpEvent;
+    postEventManager_->postInputEventAction_.push_back(eventAction);
+    postEventManager_->ClearPostInputActions(UInode, touchUpEvent.id);
+    EXPECT_TRUE(postEventManager_->postInputEventAction_.empty());
+}
 } // namespace OHOS::Ace::NG

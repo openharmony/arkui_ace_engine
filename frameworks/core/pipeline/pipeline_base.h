@@ -719,10 +719,12 @@ public:
         return {};
     }
 
+    bool CheckIfGetTheme();
+
     template<typename T>
     bool GetDraggable()
     {
-        if (isJsCard_ || isFormRender_) {
+        if (!CheckIfGetTheme()) {
             return false;
         }
         auto theme = GetTheme<T>();

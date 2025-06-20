@@ -737,6 +737,12 @@ bool ListItemGroupPattern::CheckDataChangeOutOfStart(int32_t index, int32_t coun
 
 void ListItemGroupPattern::NotifyDataChange(int32_t index, int32_t count)
 {
+    if (auto parentList = GetListFrameNode()) {
+        if (auto listPattern = parentList->GetPattern<ListPattern>()) {
+            listPattern->UpdateGroupFocusIndexForDataChange(GetIndexInList(), index, count);
+        }
+    }
+
     if (itemPosition_.empty()) {
         return;
     }
@@ -1227,6 +1233,17 @@ bool ListItemGroupPattern::FindHeadOrTailChild(
 }
 bool ListItemGroupPattern::IsInViewport(int32_t index) const
 {
+    if (itemDisplayStartIndex_ == itemDisplayEndIndex_ && itemDisplayStartIndex_ == 0) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        auto rect = geometryNode->GetPaddingRect();
+        auto footerOffset = rect.Height() + rect.GetY() - footerMainSize_;
+        if (LessNotEqual(footerOffset, 0.0f)) {
+            return false;
+        }
+    }
     return index >= itemDisplayStartIndex_ && index <= itemDisplayEndIndex_;
 }
 
@@ -1245,6 +1262,9 @@ void ListItemGroupPattern::MappingPropertiesFromLayoutAlgorithm(
     layoutDirection_ = layoutAlgorithm->GetLayoutDirection();
     mainSize_ = layoutAlgorithm->GetMainSize();
     laneGutter_ = layoutAlgorithm->GetLaneGutter();
+    bool indexChanged = false;
+    indexChanged = itemDisplayEndIndex_ != layoutAlgorithm->GetEndIndex() ||
+                   itemDisplayStartIndex_ != layoutAlgorithm->GetStartIndex();
     itemDisplayEndIndex_ = layoutAlgorithm->GetEndIndex();
     itemDisplayStartIndex_ = layoutAlgorithm->GetStartIndex();
     headerMainSize_ = layoutAlgorithm->GetHeaderMainSize();
@@ -1257,6 +1277,15 @@ void ListItemGroupPattern::MappingPropertiesFromLayoutAlgorithm(
     listContentSize_ = layoutAlgorithm->GetListContentSize();
     prevMeasureBreak_ = layoutAlgorithm->MeasureInNextFrame();
     layouted_ = true;
+    if (indexChanged) {
+        auto parentList = GetListFrameNode();
+        CHECK_NULL_VOID(parentList);
+        auto listPattern = parentList->GetPattern<ListPattern>();
+        CHECK_NULL_VOID(listPattern);
+        if (!(itemDisplayStartIndex_ == itemDisplayEndIndex_ && itemDisplayStartIndex_ == 0)) {
+            listPattern->FireFocusInListItemGroup(GetIndexInList());
+        }
+    }
 }
 
 } // namespace OHOS::Ace::NG

@@ -683,6 +683,7 @@ void WebDelegate::UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled) {}
 void WebDelegate::UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled) {}
 void WebDelegate::UpdateCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled) {}
 void WebDelegate::UpdateBypassVsyncCondition(const WebBypassVsyncCondition& condition) {}
+void WebDelegate::UpdateGestureFocusMode(const GestureFocusMode& mode) {}
 void WebDelegate::UpdateNativeEmbedRuleTag(const std::string& tag) {}
 void WebDelegate::UpdateNativeEmbedRuleType(const std::string& type) {}
 void WebDelegate::UpdateScrollBarColor(const std::string& colorValue) {}
@@ -734,7 +735,7 @@ void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::strin
 void WebDelegate::OnPageStarted(const std::string& param) {}
 void WebDelegate::OnPageFinished(const std::string& param) {}
 void WebDelegate::OnProgressChanged(int param) {}
-void WebDelegate::OnReceivedTitle(const std::string& param) {}
+void WebDelegate::OnReceivedTitle(const std::string& title, bool isRealTitle) {}
 void WebDelegate::ExitFullScreen() {}
 void WebDelegate::OnFullScreenExit()
 {
@@ -1300,7 +1301,7 @@ bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
     return false;
 }
 
-void WebDelegate::RemoveSnapshotFrameNode() {}
+void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime) {}
 
 void WebDelegate::OnPip(int status, int delegate_id,
     int child_id, int frame_routing_id,  int width, int height) {}
@@ -1309,4 +1310,8 @@ void WebDelegate::SetPipNativeWindow(int delegate_id,
 void WebDelegate::SendPipEvent(int delegate_id,
     int child_id, int frame_routing_id, int event) {}
 
+void WebDelegate::UpdateSingleHandleVisible(bool isVisible) {}
+bool WebDelegate::ShowMagnifier() { return false; }
+bool WebDelegate::HideMagnifier() { return false; }
+void WebDelegate::SetTouchHandleExistState(bool touchHandleExist) {}
 } // namespace OHOS::Ace

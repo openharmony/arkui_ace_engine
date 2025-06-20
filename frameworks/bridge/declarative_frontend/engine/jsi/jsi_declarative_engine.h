@@ -81,6 +81,8 @@ public:
     static void TriggerPageUpdate(const shared_ptr<JsRuntime>&);
     static RefPtr<PipelineBase> GetPipelineContext(const shared_ptr<JsRuntime>& runtime);
     static void PreloadAceModule(void* runtime);
+    static void PreloadAceModuleForCustomRuntime(void* runtime);
+    static void RemoveInvalidEnv(void* env);
     static void PreloadAceModuleWorker(void* runtime);
     // crossPlatform Resets the module pre-load flag
     static void ResetModulePreLoadFlag();
@@ -390,6 +392,8 @@ public:
     void SetJsContext(const std::shared_ptr<Framework::JsValue>& jsContext) override;
 
     std::shared_ptr<void> SerializeValue(const std::shared_ptr<Framework::JsValue>& jsValue) override;
+
+    void TriggerModuleSerializer() override;
 
     void SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder) override;
 

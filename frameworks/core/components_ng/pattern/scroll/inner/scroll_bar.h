@@ -666,6 +666,7 @@ private:
     Dimension hoverWidth_;
     double barWidth_ = 0.0; // actual width of the scrollbar
     Dimension position_;
+    int32_t fingerId_ = -1;
     double trickStartAngle_ = 0.0;
     double trickSweepAngle_ = 0.0;
     double topAngle_ = DEFAULT_TOPANGLE;

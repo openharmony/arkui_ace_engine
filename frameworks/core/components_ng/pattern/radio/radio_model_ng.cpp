@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
@@ -41,6 +42,12 @@ void RadioModelNG::Create(const std::optional<std::string>& value, const std::op
     }
     if (indicator.has_value()) {
         SetRadioIndicator(indicator.value());
+    }
+    auto props = frameNode->GetPaintPropertyPtr<RadioPaintProperty>();
+    if (props) {
+        props->ResetRadioCheckedBackgroundColorSetByUser();
+        props->ResetRadioUncheckedBorderColorSetByUser();
+        props->ResetRadioIndicatorColorSetByUser();
     }
 }
 
@@ -115,14 +122,29 @@ void RadioModelNG::SetCheckedBackgroundColor(const Color& color)
     ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioCheckedBackgroundColor, color);
 }
 
+void RadioModelNG::SetCheckedBackgroundColorSetByUser(bool flag)
+{
+    ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioCheckedBackgroundColorSetByUser, flag);
+}
+
 void RadioModelNG::SetUncheckedBorderColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioUncheckedBorderColor, color);
 }
 
+void RadioModelNG::SetUncheckedBorderColorSetByUser(bool flag)
+{
+    ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioUncheckedBorderColorSetByUser, flag);
+}
+
 void RadioModelNG::SetIndicatorColor(const Color& color)
 {
     ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicatorColor, color);
+}
+
+void RadioModelNG::SetIndicatorColorSetByUser(bool flag)
+{
+    ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicatorColorSetByUser, flag);
 }
 
 void RadioModelNG::SetOnChangeEvent(ChangeEvent&& onChangeEvent)
@@ -170,14 +192,29 @@ void RadioModelNG::SetCheckedBackgroundColor(FrameNode* frameNode, const Color& 
     ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheckedBackgroundColor, color, frameNode);
 }
 
+void RadioModelNG::SetCheckedBackgroundColorSetByUser(FrameNode* frameNode, bool flag)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioCheckedBackgroundColorSetByUser, flag, frameNode);
+}
+
 void RadioModelNG::SetUncheckedBorderColor(FrameNode* frameNode, const Color& color)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioUncheckedBorderColor, color, frameNode);
 }
 
+void RadioModelNG::SetUncheckedBorderColorSetByUser(FrameNode* frameNode, bool flag)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioUncheckedBorderColorSetByUser, flag, frameNode);
+}
+
 void RadioModelNG::SetIndicatorColor(FrameNode* frameNode, const Color& color)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicatorColor, color, frameNode);
+}
+
+void RadioModelNG::SetIndicatorColorSetByUser(FrameNode* frameNode, bool flag)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicatorColorSetByUser, flag, frameNode);
 }
 
 void RadioModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
@@ -303,5 +340,66 @@ void RadioModelNG::SetRadioOptions(FrameNode* frameNode, const std::string& valu
     eventHub->SetValue(value);
     eventHub->SetGroup(group);
     ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator, frameNode);
+}
+
+void RadioModelNG::CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+    const RadioColorType radioColorType)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    CreateWithColorResourceObj(frameNode, resObj, radioColorType);
+}
+
+void RadioModelNG::CreateWithColorResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+    const RadioColorType radioColorType)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "radio" + ColorTypeToString(radioColorType);
+    if (resObj) {
+        auto&& updateFunc = [radioColorType, weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+            const RefPtr<ResourceObject>& resObj) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            Color result;
+            if (ResourceParseUtils::ParseResColor(resObj, result)) {
+                pattern->UpdateRadioComponentColor(result, radioColorType);
+            }
+        };
+        updateFunc(resObj);
+        pattern->AddResObj(key, resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj(key);
+    }
+}
+
+std::string RadioModelNG::ColorTypeToString(const RadioColorType radioColorType)
+{
+    switch (radioColorType) {
+        case RadioColorType::CHECKED_BACKGROUND_COLOR:
+            return "CheckedBackgroundColor";
+        case RadioColorType::UNCHECKED_BORDER_COLOR:
+            return "UncheckedBorderColor";
+        case RadioColorType::INDICATOR_COLOR:
+            return "IndicatorColor";
+        default:
+            return "";
+    }
+    return "Unknown";
+}
+
+void RadioModelNG::SetIsUserSetMargin(bool isUserSet)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetIsUserSetMargin(frameNode, isUserSet);
+}
+
+void RadioModelNG::SetIsUserSetMargin(FrameNode* frameNode, bool isUserSet)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    pattern->SetIsUserSetMargin(isUserSet);
 }
 } // namespace OHOS::Ace::NG

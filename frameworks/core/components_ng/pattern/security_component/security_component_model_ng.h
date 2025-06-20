@@ -49,13 +49,14 @@ public:
     static void SetIconSize(const NG::CalcSize& value);
     static void SetSymbolIconSize(const Dimension& value);
     static void SetIconColor(const Color& value);
-    static void SetIconColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetIconBorderRadius(const Dimension& value);
     static void SetIconBorderRadius(const std::optional<Dimension>& topLeft,
         const std::optional<Dimension>& topRight, const std::optional<Dimension>& bottomLeft,
         const std::optional<Dimension>& bottomRight);
     static void SetIcon(const ImageSourceInfo& value);
     static void SetText(const std::string& value);
+    static void SetIconSize(FrameNode* frameNode, const std::optional<Dimension>& value);
+    static void SetIconColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetSymbolIconColor(const std::vector<Color>& value);
     static void SetFontSize(const Dimension& value);
     static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& value);
@@ -65,9 +66,9 @@ public:
     static void SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& value);
     static void SetFontFamily(const std::vector<std::string>& fontFamilies);
     static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamilies);
-    static void SetFontColor(const Color& value);
     static void SetStateEffect(const bool& value);
     static void SetTipPosition(const TipPosition& value);
+    static void SetFontColor(const Color& value);
     static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& value);
     static void SetBackgroundColor(const Color& value);
     static void SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& valueOpt);

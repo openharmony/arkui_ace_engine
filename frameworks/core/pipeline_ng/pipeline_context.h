@@ -308,6 +308,24 @@ public:
 
     void HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp);
 
+    void SetAreaChangeNodeMinDepth(int32_t depth)
+    {
+        if (areaChangeNodeMinDepth_ > 0) {
+            areaChangeNodeMinDepth_ = std::min(areaChangeNodeMinDepth_, depth);
+        } else {
+            areaChangeNodeMinDepth_ = depth;
+        }
+    }
+
+    void SetIsDisappearChangeNodeMinDepth(int32_t depth)
+    {
+        if (isDisappearChangeNodeMinDepth_ > 0) {
+            isDisappearChangeNodeMinDepth_ = std::min(isDisappearChangeNodeMinDepth_, depth);
+        } else {
+            isDisappearChangeNodeMinDepth_ = depth;
+        }
+    }
+
     void HandleSubwindow(bool isShow);
 
     void Destroy() override;
@@ -1130,7 +1148,10 @@ public:
         uiTranslateManager_->RemoveTranslateListener(nodeId);
     }
 
-    void SetEnableSwipeBack(bool isEnable) override;
+    void SetEnableSwipeBack(bool isEnable) override
+    {
+        enableSwipeBack_ = isEnable;
+    }
 
     Offset GetHostParentOffsetToWindow() const
     {
@@ -1212,8 +1233,6 @@ public:
         keyOcclusionNodes_[frameNodeId] = enable;
     }
     const RefPtr<NodeRenderStatusMonitor>& GetNodeRenderStatusMonitor();
-    void RemoveNodeFromDirtyRenderNode(int32_t nodeId, int32_t pageId);
-    void GetRemovedDirtyRenderAndErase(uint32_t id);
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1305,6 +1324,7 @@ private:
     void CompensateTouchMoveEvent(const TouchEvent& event);
 
     bool CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event);
+    void CompensateTouchMoveEventBeforeDown();
 
     void DispatchMouseToTouchEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
 
@@ -1417,6 +1437,13 @@ private:
     std::vector<FrameNode*> onAreaChangeNodesCache_;
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
+
+    // MinDepth < 0, do not work;
+    // MinDepth = 0, no Change Node from last frame;
+    // MinDepth > 0, represent Change MinDepth from last frame;
+    int32_t areaChangeNodeMinDepth_ = -1;
+    int32_t isDisappearChangeNodeMinDepth_ = -1;
+
     std::unordered_map<int32_t, std::vector<MouseEvent>> historyMousePointsById_;
     std::unordered_map<int32_t, std::vector<DragPointerEvent>> historyPointsEventById_;
     RefPtr<AccessibilityManagerNG> accessibilityManagerNG_;
@@ -1442,7 +1469,7 @@ private:
     WeakPtr<FrameNode> windowSceneNode_;
     uint32_t nextScheduleTaskId_ = 0;
     uint64_t resampleTimeStamp_ = 0;
-    bool touchAccelarate_ = false;
+    bool touchAccelarate_ = true;
     bool isEventsPassThrough_ = false;
     bool backgroundColorModeUpdated_ = false;  // Dark/light color switch flag
     uint64_t animationTimeStamp_ = 0;
@@ -1503,6 +1530,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 
     int32_t preNodeId_ = -1;
+    bool enableSwipeBack_ = true;
 
     RefPtr<AvoidInfoManager> avoidInfoMgr_ = MakeRefPtr<AvoidInfoManager>();
     RefPtr<MemoryManager> memoryMgr_ = MakeRefPtr<MemoryManager>();

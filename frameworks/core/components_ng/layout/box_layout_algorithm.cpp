@@ -89,9 +89,15 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
     auto widthLayoutPolicy = LayoutCalPolicy::NO_MATCH;
     auto heightLayoutPolicy = LayoutCalPolicy::NO_MATCH;
     auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+    bool isChildComponentContent = false;
+    bool isChildColumnLayout = false;
     if (layoutPolicy.has_value()) {
         widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
         heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        isChildComponentContent = layoutWrapper->GetHostNode() && layoutWrapper->GetHostNode()->GetPattern() &&
+                                  layoutWrapper->GetHostNode()->GetPattern()->IsChildComponentContent();
+        isChildColumnLayout = layoutWrapper->GetHostNode() && layoutWrapper->GetHostNode()->GetPattern() &&
+                              layoutWrapper->GetHostNode()->GetPattern()->IsChildColumnLayout();
     }
     do {
         // Use idea size first if it is valid.
@@ -110,7 +116,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
 
         const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
         auto fixIdealSize = OptionalSizeF();
-        if (content) {
+        if (content && !isChildComponentContent) {
             // use content size.
             auto contentSize = content->GetRect().GetSize();
             AddPaddingToSize(padding, contentSize);
@@ -132,8 +138,11 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
                 if (maxWidth < childSize.Width()) {
                     maxWidth = childSize.Width();
                 }
-                if (maxHeight < childSize.Height()) {
+                // If the child components are arranged in a Column layout ，isChildColumnLayout is true
+                if (!isChildColumnLayout && maxHeight < childSize.Height()) {
                     maxHeight = childSize.Height();
+                } else if (isChildColumnLayout && 0 < childSize.Height()) {
+                    maxHeight += childSize.Height();
                 }
                 childFrame.SetSizeT(SizeF { maxWidth, maxHeight });
             }
@@ -165,6 +174,15 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
         auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
             layoutConstraint.value(), widthLayoutPolicy, heightLayoutPolicy, Axis::HORIZONTAL)
                                     .ConvertToSizeT();
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(host);
+        auto pattern = host->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        bool isEqualWidthAndHeight = pattern->isEqualWidthAndHeight();
+        if (isEqualWidthAndHeight && (layoutPolicySize.Width() != layoutPolicySize.Height())) {
+            layoutPolicySize.SetHeight(std::max(layoutPolicySize.Width(), layoutPolicySize.Height()));
+            layoutPolicySize.SetWidth(layoutPolicySize.Height());
+        }
         frameSize.UpdateSizeWithCheck(layoutPolicySize);
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
@@ -215,7 +233,15 @@ void BoxLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
     auto paddingOffset = OffsetF(left, top);
     auto align = Alignment::CENTER;
     if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
-        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
+        auto isMirrorable = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetIsMirrorable()
+            .value_or(false);
+        if (isMirrorable) {
+            auto alignment = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetLocalizedAlignment()
+                .value_or("center");
+            align= MapLocalizedToAlignment(alignment);
+        } else {
+            align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
+        }
     }
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -272,5 +298,26 @@ std::optional<SizeF> BoxLayoutAlgorithm::PerformMeasureContent(
         contentSize.UpdateIllegalSizeWithCheck(contentConstraint.minSize);
     } while (false);
     return contentSize.ConvertToSizeT();
+}
+
+Alignment BoxLayoutAlgorithm::MapLocalizedToAlignment(std::string localizedAlignment)
+{
+    static const std::unordered_map<std::string, Alignment> alignmentMap = {
+        {"top_start", Alignment::TOP_LEFT},
+        {"top", Alignment::TOP_CENTER},
+        {"top_end", Alignment::TOP_RIGHT},
+        {"start", Alignment::CENTER_LEFT},
+        {"center", Alignment::CENTER},
+        {"end", Alignment::CENTER_RIGHT},
+        {"bottom_start", Alignment::BOTTOM_LEFT},
+        {"bottom", Alignment::BOTTOM_CENTER},
+        {"bottom_end", Alignment::BOTTOM_RIGHT}
+    };
+
+    auto it = alignmentMap.find(localizedAlignment);
+    if (it != alignmentMap.end()) {
+        return it->second;
+    }
+    return Alignment::CENTER;
 }
 } // namespace OHOS::Ace::NG
