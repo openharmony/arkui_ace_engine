@@ -146,6 +146,61 @@
       "buildFunction": "ButtonModifierBuilder"
     },
     {
+      "name": "ButtonLevel1",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel1.ets",
+      "buildFunction": "ButtonLevel1Builder"
+    },
+    {
+      "name": "ButtonLevel2",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel2.ets",
+      "buildFunction": "ButtonLevel2Builder"
+    },
+    {
+      "name": "ButtonLevel3",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel3.ets",
+      "buildFunction": "ButtonLevel3Builder"
+    },
+    {
+      "name": "ButtonLevel4",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel4.ets",
+      "buildFunction": "ButtonLevel4Builder"
+    },
+    {
+      "name": "ButtonLevel5",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel5.ets",
+      "buildFunction": "ButtonLevel5Builder"
+    },
+    {
+      "name": "ButtonLevel6",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel6.ets",
+      "buildFunction": "ButtonLevel6Builder"
+    },
+    {
+      "name": "ButtonLevel7",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel7.ets",
+      "buildFunction": "ButtonLevel7Builder"
+    },
+    {
+      "name": "ButtonLevel8",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel8.ets",
+      "buildFunction": "ButtonLevel8Builder"
+    },
+    {
+      "name": "ButtonLevel9",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel9.ets",
+      "buildFunction": "ButtonLevel9Builder"
+    },
+    {
+      "name": "ButtonLevel10",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel10.ets",
+      "buildFunction": "ButtonLevel10Builder"
+    },
+    {
+      "name": "ButtonLevel11",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel11.ets",
+      "buildFunction": "ButtonLevel11Builder"
+    },
+    {
       "name": "ToggleIndex",
       "pageSourceFile": "src/main/ets/pages/components/toggle/index.ets",
       "buildFunction": "ToggleIndexBuilder"
@@ -429,6 +484,11 @@
       "name": "RadioBuild",
       "pageSourceFile": "src/main/ets/pages/components/radio/radioBuild.ets",
       "buildFunction": "RadioBuildBuilder"
+    },
+    {
+      "name": "RadioLevel1",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioLevel1.ets",
+      "buildFunction": "RadioLevel1Builder"
     },
     {
       "name": "FormIndex",
