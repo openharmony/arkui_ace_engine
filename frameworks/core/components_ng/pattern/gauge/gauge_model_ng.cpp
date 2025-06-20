@@ -35,6 +35,7 @@ void GaugeModelNG::Create(float value, float min, float max)
     ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, Min, min);
     if (SystemProperties::ConfigChangePerform()) {
         SetUseGradient(false);
+        SetUseSpecialDefaultIndicator(false);
     }
 }
 
@@ -318,7 +319,7 @@ void HandleIndicatorSpaceResource(const RefPtr<ResourceObject>& resObj, const Re
     CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [pattern](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         CalcDimension result;
-        if (!ResourceParseUtils::ParseResDimensionVpNG(resObj, result)) {
+        if (!ResourceParseUtils::ParseResDimensionVpNG(resObj, result, false)) {
             result = NG::INDICATOR_DISTANCE_TO_TOP;
         }
         if (result.IsNegative()) {
@@ -368,5 +369,12 @@ void GaugeModelNG::SetUseGradient(bool useGradient)
 void GaugeModelNG::SetUseGradient(FrameNode* frameNode, bool useGradient)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(GaugePaintProperty, UseJsLinearGradient, useGradient, frameNode);
+}
+
+void GaugeModelNG::SetUseSpecialDefaultIndicator(bool useSpecialDefaultIndicator)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_PAINT_PROPERTY(GaugePaintProperty, UseSpecialDefaultIndicator, useSpecialDefaultIndicator);
+    }
 }
 } // namespace OHOS::Ace::NG

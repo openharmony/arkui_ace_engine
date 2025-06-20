@@ -297,7 +297,7 @@ void JSPatternLock::SetSideLength(const JSCallbackInfo& info)
     if (SystemProperties::ConfigChangePerform()) {
         bool state = ParseJsDimensionVp(info[0], sideLength, resObj);
         PatternLockModel::GetInstance()->CreateWithResourceObj(PatternLockResourceType::SIDELENGTH, resObj);
-        if (state && sideLength.IsNonNegative()) {
+        if (state) {
             PatternLockModel::GetInstance()->SetSideLength(sideLength);
         } else {
             RefPtr<V2::PatternLockTheme> patternLockTheme = GetTheme<V2::PatternLockTheme>();

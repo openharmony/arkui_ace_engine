@@ -627,11 +627,13 @@ ArkUINativeModuleValue ProgressBridge::SetProgressBackgroundColor(ArkUIRuntimeCa
     Color color;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resObj)) {
         nodeModifiers->getProgressModifier()->resetProgressBackgroundColor(nativeNode);
     } else {
+        auto colorRawPtr = AceType::RawPtr(resObj);
         nodeModifiers->getProgressModifier()->setProgressBackgroundColorWithColorSpace(
-            nativeNode, color.GetValue(), color.GetColorSpace());
+            nativeNode, color.GetValue(), color.GetColorSpace(), colorRawPtr);
     }
 
     return panda::JSValueRef::Undefined(vm);

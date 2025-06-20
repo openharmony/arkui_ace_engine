@@ -47,14 +47,19 @@ public:
         PatternLockResourceType PatternLockResourceType, const RefPtr<ResourceObject>& resObj) override;
 
     static void SetActiveColor(FrameNode* frameNode, const Color& activeColor);
+    static void SetActiveColorByUser(FrameNode* frameNode, bool isByuserSet);
     static void SetCircleRadius(FrameNode* frameNode, const Dimension& radius);
     static void SetSelectedColor(FrameNode* frameNode, const Color& selectedColor);
+    static void SetSelectedColorByUser(FrameNode* frameNode, bool isByuserSet);
     static void SetSideLength(FrameNode* frameNode, const Dimension& sideLength);
     static void SetAutoReset(FrameNode* frameNode, bool isAutoReset);
     static void SetStrokeWidth(FrameNode* frameNode, const Dimension& lineWidth);
     static void SetRegularColor(FrameNode* frameNode, const Color& color);
+    static void SetPathColorByUser(FrameNode* frameNode, bool isByuserSet);
     static void SetPathColor(FrameNode* frameNode, const Color& color);
+    static void SetRegularColorByUser(FrameNode* frameNode, bool isByuserSet);
     static void SetActiveCircleColor(FrameNode* frameNode, const Color& activeCircleColor);
+    static void SetActiveCircleColorByUser(FrameNode* frameNode, bool isByuserSet);
     static void SetActiveCircleRadius(FrameNode* frameNode, const Dimension& activeCircleRadius);
     static void SetEnableWaveEffect(FrameNode* frameNode, bool enableWaveEffect);
     static void SetEnableForeground(FrameNode* frameNode, bool enableForeground);

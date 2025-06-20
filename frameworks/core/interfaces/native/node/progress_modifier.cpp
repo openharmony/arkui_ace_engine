@@ -412,6 +412,13 @@ void SetCapsuleStyleOptions(FrameNode* node)
     ProgressModelNG::SetFontFamily(node, textTheme->GetTextStyle().GetFontFamilies());
     ProgressModelNG::SetItalicFontStyle(node, textTheme->GetTextStyle().GetFontStyle());
     ProgressModelNG::ResetBorderRadius(node); // Set default value.
+    if (SystemProperties::ConfigChangePerform()) {
+        CreateWithResourceObjIfNeeded(node, JsProgressResourceType::CapsuleBorderWidth, nullptr);
+        CreateWithResourceObjIfNeeded(node, JsProgressResourceType::CapsuleBorderColor, nullptr);
+        CreateWithResourceObjIfNeeded(node, JsProgressResourceType::Text, nullptr);
+        CreateWithResourceObjIfNeeded(node, JsProgressResourceType::FontColor, nullptr);
+        CreateWithResourceObjIfNeeded(node, JsProgressResourceType::FontSize, nullptr);
+    }
 }
 
 void ResetProgressStyle(ArkUINodeHandle node)
@@ -443,7 +450,7 @@ void SetProgressBackgroundColor(ArkUINodeHandle node, uint32_t color)
 }
 
 void SetProgressBackgroundColorWithColorSpace(
-    ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace)
+    ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* colorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -453,6 +460,11 @@ void SetProgressBackgroundColorWithColorSpace(
     } else {
         backgroundColor.SetColorSpace(ColorSpace::SRGB);
     }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        CreateWithResourceObjIfNeeded(frameNode, JsProgressResourceType::BackgroundColor, colorRawPtr, false);
+    }
+
     ProgressModelNG::SetBackgroundColor(frameNode, backgroundColor);
 }
 
@@ -475,6 +487,10 @@ void ResetProgressBackgroundColor(ArkUINodeHandle node)
         backgroundColor = theme->GetRingProgressParseFailedBgColor();
     } else {
         backgroundColor = theme->GetTrackParseFailedBgColor();
+    }
+    
+    if (SystemProperties::ConfigChangePerform()) {
+        CreateWithResourceObjIfNeeded(frameNode, JsProgressResourceType::BackgroundColor, nullptr);
     }
 
     ProgressModelNG::SetModifierInitiatedBgColor(frameNode, false);

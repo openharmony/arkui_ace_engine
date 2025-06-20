@@ -3071,6 +3071,7 @@ struct ArkUIImageModifier {
     void (*setEdgeAntialiasing)(ArkUINodeHandle node, ArkUI_Float32 edgeAntialiasing);
     void (*resetEdgeAntialiasing)(ArkUINodeHandle node);
     void (*setResizable)(ArkUINodeHandle node, const ArkUIStringAndFloat* options);
+    void (*setResizablePtr)(ArkUINodeHandle node, const ArkUIStringAndFloat* options, void* imageResizablePtr);
     void (*resetResizable)(ArkUINodeHandle node);
     void (*setDynamicRangeMode)(ArkUINodeHandle node, ArkUI_Int32 dynamicRangeMode);
     void (*resetDynamicRangeMode)(ArkUINodeHandle node);
@@ -4231,7 +4232,7 @@ struct ArkUIProgressModifier {
     void (*resetProgressStyle)(ArkUINodeHandle node);
     void (*setProgressBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setProgressBackgroundColorWithColorSpace)(
-        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace);
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* colorRawPtr);
     void (*resetProgressBackgroundColor)(ArkUINodeHandle node);
     void (*setProgressTotal)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*setProgressType)(ArkUINodeHandle node, ArkUI_Int32 type);

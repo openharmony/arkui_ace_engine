@@ -1916,4 +1916,66 @@ HWTEST_F(ImageTestTwoNg, TestUpdateImageFill002, TestSize.Level0)
     ASSERT_NE(renderProperty, nullptr);
     EXPECT_EQ(renderProperty->GetSvgFillColor(), testColor);
 }
+
+/**
+ * @tc.name: TesSetBorderRadius001
+ * @tc.desc: Test SetBorderRadius function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, TesSetBorderRadius001, TestSize.Level1)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(WEB_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    g_isConfigChangePerform = false;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(RADIUS_DEFAULT);
+    image.SetBorderRadius(borderRadius);
+    g_isConfigChangePerform = true;
+    image.SetBorderRadius(borderRadius);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+    EXPECT_TRUE(pattern->needBorderRadius_);
+}
+
+/**
+ * @tc.name: HandleBorderRadiusResource001
+ * @tc.desc: Test HandleBorderRadiusResource function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, HandleBorderRadiusResource001, TestSize.Level1)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(WEB_IMAGE);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    ResourceObjectParams params { .value = "test", .type = ResourceObjectParamType::STRING };
+    std::vector<ResourceObjectParams> resObjParamsList;
+    resObjParamsList.push_back(params);
+    RefPtr<ResourceObject> resObjWithDimensionId =
+        AceType::MakeRefPtr<ResourceObject>(100000, 10007, resObjParamsList, "com.example.test", "entry", 100000);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    image.CreateWithResourceObj(ImageResourceType::BORDER_RADIUS, resObjWithDimensionId);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+    image.CreateWithResourceObj(ImageResourceType::BORDER_RADIUS, resObj);
+    pattern->OnColorModeChange(colorMode);
+    EXPECT_TRUE(pattern->needBorderRadius_);
+}
 } // namespace OHOS::Ace::NG

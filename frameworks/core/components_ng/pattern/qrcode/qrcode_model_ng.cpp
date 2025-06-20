@@ -149,7 +149,6 @@ void HandleColorResource(const RefPtr<QRCodePattern>& pattern, const RefPtr<Reso
         }
         pattern->UpdateColor(result, isFristLoad);
     };
-    updateColorFunc(resObj, true);
     pattern->AddResObj(colorKey, resObj, std::move(updateColorFunc));
 }
 
@@ -169,7 +168,6 @@ void HandleBackgroundColorResource(const RefPtr<QRCodePattern>& pattern, const R
         }
         pattern->UpdateBackgroundColor(result, isFristLoad);
     };
-    updateBackgroundColorFunc(resObj, true);
     pattern->AddResObj(backgroundColorKey, resObj, std::move(updateBackgroundColorFunc));
 }
 
@@ -188,7 +186,6 @@ void HandleContentOpacityResource(const RefPtr<QRCodePattern>& pattern, const Re
         }
         pattern->UpdateContentOpacity(result, isFristLoad);
     };
-    updateOpacityFunc(resObj, true);
     pattern->AddResObj(opacityKey, resObj, std::move(updateOpacityFunc));
 }
 

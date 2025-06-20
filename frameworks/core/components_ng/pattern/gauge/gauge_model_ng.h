@@ -57,6 +57,7 @@ public:
     void ResetIndicatorSpace() override;
     void CreateWithResourceObj(GaugeResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override;
     void SetUseGradient(bool useGradient) override;
+    void SetUseSpecialDefaultIndicator(bool useSpecialDefaultIndicator) override;
 
     static void SetValue(FrameNode* frameNode, float value);
     static void SetStartAngle(FrameNode* frameNode, float value);

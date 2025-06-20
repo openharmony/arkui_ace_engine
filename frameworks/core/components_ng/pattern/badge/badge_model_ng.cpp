@@ -214,9 +214,7 @@ void BadgeModelNG::ProcessBadgeValue(
     auto updateFunc = [badgePattern](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         std::string badgeValue;
         ResourceParseUtils::ParseResString(resObj, badgeValue);
-        if (!badgeValue.empty()) {
-            badgePattern->UpdateBadgeValue(badgeValue, isFirstLoad);
-        }
+        badgePattern->UpdateBadgeValue(badgeValue, isFirstLoad);
     };
     updateFunc(resourceObject, true);
     badgePattern->AddResObj(key, resourceObject, std::move(updateFunc));

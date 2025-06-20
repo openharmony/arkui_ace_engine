@@ -42,6 +42,7 @@ public:
     void CreateWithFontFamilyResourceObj(const RefPtr<ResourceObject>& resObj) override {};
     void CreateWithFontWeightResourceObj(const RefPtr<ResourceObject>& resObj) override {};
     void CreateWithFormatResourceObj(const RefPtr<ResourceObject>& resObj) override {};
+    void RemoveResObjByKey(const std::string& key) override {};
 
 private:
     static RefPtr<TextClockComponent> GetComponent();

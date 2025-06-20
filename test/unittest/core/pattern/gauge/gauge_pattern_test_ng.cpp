@@ -19,6 +19,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
@@ -1957,5 +1958,40 @@ HWTEST_F(GaugePatternTestNg, GaugePatternTest003, TestSize.Level1)
     CalcDimension newSpace(spaceValue2);
     gaugePattern->UpdateIndicatorSpace(newSpace, false);
     EXPECT_EQ(paintProperty->GetIndicatorSpace(), space);
+}
+
+/**
+ * @tc.name: GaugeTestSetUseSpecialDefaultIndicator001
+ * @tc.desc: Test SetUseSpecialDefaultIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(GaugePatternTestNg, GaugeTestSetUseSpecialDefaultIndicator001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GaugeModelNG.
+     */
+    GaugeModelNG gauge;
+    gauge.Create(50.0f, 100.0f, 0.0f);
+    /**
+     * @tc.steps: step2. Test with SystemProperties::ConfigChangePerform() = false
+     */
+    g_isConfigChangePerform = false;
+    gauge.SetUseSpecialDefaultIndicator(true);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GaugePattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    ASSERT_NE(gaugePaintProperty, nullptr);
+    EXPECT_FALSE(gaugePaintProperty->GetUseSpecialDefaultIndicator().has_value());
+
+    /**
+     * @tc.steps: step3. Test with SystemProperties::ConfigChangePerform() = true
+     */
+    g_isConfigChangePerform = true;
+    gauge.SetUseSpecialDefaultIndicator(true);
+    ASSERT_NE(gaugePaintProperty->GetUseSpecialDefaultIndicator().has_value(), false);
+    EXPECT_TRUE(gaugePaintProperty->GetUseSpecialDefaultIndicatorValue());
 }
 } // namespace OHOS::Ace::NG

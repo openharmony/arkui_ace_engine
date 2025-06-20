@@ -44,6 +44,9 @@ RefPtr<TextTimerController> TextTimerModelNG::Create()
     auto textTimerLayoutProperty = textTimerNode->GetLayoutProperty<TextTimerLayoutProperty>();
     if (textTimerLayoutProperty) {
         textTimerLayoutProperty->ResetTextColorSetByUser();
+        textTimerLayoutProperty->ResetTextFontSizeSetByUser();
+        textTimerLayoutProperty->ResetTextFontWeightSetByUser();
+        textTimerLayoutProperty->ResetTextFontFamilySetByUser();
     }
 
     return textTimerPattern ? textTimerPattern->GetTextTimerController() : nullptr;
@@ -81,6 +84,11 @@ void TextTimerModelNG::SetTextColor(const Color& value)
 void TextTimerModelNG::SetTextColorByUser(bool isSetByUser)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColorSetByUser, isSetByUser);
+}
+
+void TextTimerModelNG::SetTextColorByUser(FrameNode* frameNode, bool isSetByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColorSetByUser, isSetByUser, frameNode);
 }
 
 void TextTimerModelNG::SetTextShadow(const std::vector<Shadow>& value)
@@ -345,23 +353,63 @@ void TextTimerModelNG::CreateWithResourceObj(
 void TextTimerModelNG::CreateWithResourceObj(
     FrameNode* frameNode, JsTextTimerResourceType jsResourceType, const RefPtr<ResourceObject>& resObj)
 {
-    if (resObj) {
-        switch (jsResourceType) {
-            case JsTextTimerResourceType::TEXTCOLOR:
-                HandleTextColor(frameNode, resObj);
-                break;
-            case JsTextTimerResourceType::FONTWEIGHT:
-                HandleFontWeight(frameNode, resObj);
-                break;
-            case JsTextTimerResourceType::FONTSIZE:
-                HandleFontSize(frameNode, resObj);
-                break;
-            case JsTextTimerResourceType::FONTFAMILY:
-                HandleFontFamily(frameNode, resObj);
-                break;
-            default:
-                return;
-        }
+    switch (jsResourceType) {
+        case JsTextTimerResourceType::TEXTCOLOR:
+            HandleTextColor(frameNode, resObj);
+            break;
+        case JsTextTimerResourceType::FONTWEIGHT:
+            HandleFontWeight(frameNode, resObj);
+            break;
+        case JsTextTimerResourceType::FONTSIZE:
+            HandleFontSize(frameNode, resObj);
+            break;
+        case JsTextTimerResourceType::FONTFAMILY:
+            HandleFontFamily(frameNode, resObj);
+            break;
+        default:
+            return;
+    }
+}
+
+void TextTimerModelNG::SetFontSizeByUser(bool isSetByUser)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextFontSizeSetByUser, isSetByUser);
+    }
+}
+
+void TextTimerModelNG::SetFontWeightByUser(bool isSetByUser)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextFontWeightSetByUser, isSetByUser);
+    }
+}
+
+void TextTimerModelNG::SetFontFamilyByUser(bool isSetByUser)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextFontFamilySetByUser, isSetByUser);
+    }
+}
+
+void TextTimerModelNG::SetFontSizeByUser(FrameNode* frameNode, bool isSetByUser)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextFontSizeSetByUser, isSetByUser, frameNode);
+    }
+}
+
+void TextTimerModelNG::SetFontWeightByUser(FrameNode* frameNode, bool isSetByUser)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextFontWeightSetByUser, isSetByUser, frameNode);
+    }
+}
+
+void TextTimerModelNG::SetFontFamilyByUser(FrameNode* frameNode, bool isSetByUser)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextFontFamilySetByUser, isSetByUser, frameNode);
     }
 }
 } // namespace OHOS::Ace::NG

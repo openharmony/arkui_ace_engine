@@ -254,6 +254,9 @@ void JSTextClock::SetFormat(const JSCallbackInfo& info)
         } else {
             TextClockModel::GetInstance()->SetFormat(DEFAULT_FORMAT_API_TEN);
         }
+        if (SystemProperties::ConfigChangePerform()) {
+            TextClockModel::GetInstance()->RemoveResObjByKey("textClockFormat");
+        }
         return;
     }
     std::string format;
@@ -295,6 +298,10 @@ void JSTextClock::SetTextShadow(const JSCallbackInfo& info)
     ParseTextShadowFromShadowObject(info[0], shadows);
     if (!shadows.empty()) {
         TextClockModel::GetInstance()->SetTextShadow(shadows);
+    } else {
+        if (SystemProperties::ConfigChangePerform()) {
+            TextClockModel::GetInstance()->RemoveResObjByKey("textClock.shadow");
+        }
     }
 }
 
