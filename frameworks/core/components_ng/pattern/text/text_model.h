@@ -171,6 +171,8 @@ public:
     virtual void SetAdaptMinFontSize(const Dimension& value) = 0;
     virtual void SetAdaptMaxFontSize(const Dimension& value) = 0;
     virtual void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value) = 0;
+    virtual void SetContentTransition(TextEffectStrategy value, TextFlipDirection direction, bool enableBlur) {};
+    virtual void ResetContentTransition() {};
     virtual void SetTextDetectEnable(bool value) = 0;
     virtual void SetTextDetectConfig(const TextDetectConfig& textDetectConfig) = 0;
     virtual void OnSetWidth() {};

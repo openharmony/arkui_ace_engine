@@ -290,7 +290,6 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
         textPadding.right = CalcLength(padding.Right());
         textPadding.top = CalcLength(padding.Top());
         textPadding.bottom = CalcLength(padding.Bottom());
-        bubblePattern->SetTextPadding(textPadding);
         layoutProps->UpdatePadding(textPadding);
         layoutProps->UpdateAlignment(Alignment::CENTER);
         UpdateTextProperties(param, layoutProps, columnNode);
@@ -906,7 +905,6 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
         textPadding.left = CalcLength(popupTheme->GetAgingTextLeftPadding());
         textPadding.right = CalcLength(popupTheme->GetAgingTextRightPadding());
     }
-    bubblePattern->SetTextPadding(textPadding);
     textLayoutProps->UpdatePadding(textPadding);
     textLayoutProps->UpdateAlignSelf(FlexAlign::FLEX_START);
     UpdateTextProperties(param, textLayoutProps, columnNode);

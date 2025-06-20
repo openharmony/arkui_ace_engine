@@ -18,7 +18,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
-void NavigationModelImpl::Create()
+void NavigationModelImpl::Create(bool useHomeDestination)
 {
     auto navigationContainer = AceType::MakeRefPtr<NavigationContainerComponent>();
     ViewStackProcessor::GetInstance()->Push(navigationContainer);

@@ -2244,15 +2244,18 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         float keyboardOffset = manager ? manager->GetClickPositionOffset() : safeAreaManager_->GetKeyboardOffset();
         if (manager) {
             positionY = static_cast<float>(manager->GetClickPosition().GetY()) - keyboardOffset;
+            auto onFocusField = manager->GetOnFocusTextField().Upgrade();
+            if (onFocusField && onFocusField->GetHost() && onFocusField->GetHost()->GetGeometryNode()) {
+                auto adjustRect = onFocusField->GetHost()->GetGeometryNode()->GetParentAdjust();
+                positionY += adjustRect.Top();
+            }
         }
         auto bottomLen = safeAreaManager_->GetNavSafeArea().bottom_.IsValid() ?
             safeAreaManager_->GetNavSafeArea().bottom_.Length() : 0;
         if (manager->IsScrollableChild() && rootHeight_ - positionY - safeHeight - bottomLen < 0) {
             safeHeight = rootHeight_ - positionY - bottomLen;
         }
-        if (NearZero(keyboardHeight)) {
-            safeAreaManager_->UpdateKeyboardOffset(0.0f);
-        } else if (LessOrEqual(positionY + safeHeight, rootHeight_ - keyboardHeight)) {
+        if (NearZero(keyboardHeight) || LessOrEqual(positionY + safeHeight, rootHeight_ - keyboardHeight)) {
             safeAreaManager_->UpdateKeyboardOffset(0.0f);
         } else if (positionY + safeHeight > rootHeight_ - keyboardHeight) {
             safeAreaManager_->UpdateKeyboardOffset(-(positionY - rootHeight_ + keyboardHeight)- safeHeight);
@@ -2272,9 +2275,8 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         MarkDirtyOverlay();
         SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
 
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD,
-            "AvoidanceLogic keyboardHeight: %{public}f, positionY: %{public}f, safeHeight: %{public}f, "
-            "rootHeight_ %{public}f final calculate keyboard offset is %{public}f",
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "AvoidanceLogic keyboardHeight: %{public}f, positionY: %{public}f, "
+            "safeHeight: %{public}f, rootHeight_ %{public}f final calculate keyboard offset is %{public}f",
             keyboardHeight, positionY, safeHeight, rootHeight_, safeAreaManager_->GetKeyboardOffset());
     };
     FlushUITasks();
@@ -4838,6 +4840,9 @@ void PipelineContext::OnDragEvent(const DragPointerEvent& pointerEvent, DragEven
 
     if (action == DragEventAction::DRAG_EVENT_OUT || action == DragEventAction::DRAG_EVENT_END ||
         action == DragEventAction::DRAG_EVENT_PULL_THROW || action == DragEventAction::DRAG_EVENT_PULL_CANCEL) {
+        if (!eventManager_->touchDelegatesMap_.empty()) {
+            eventManager_->UnregisterTouchDelegate(pointerEvent.pointerId);
+        }
         lastDragTime_ = GetTimeFromExternalTimer();
         CompensatePointerMoveEvent(pointerEvent, node);
         manager->HandleDragEvent(pointerEvent, action, node);

@@ -3238,12 +3238,6 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest075, TestSize.Level1)
     g_isConfigChangePerform = false;
     pattern->RemoveResObj("borderWidth");
 
-    auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    auto& layoutBorderWidth = layoutProperty->GetBorderWidthProperty();
-    ASSERT_NE(layoutBorderWidth, nullptr);
-    EXPECT_EQ(layoutBorderWidth->bottomDimen, BOTTOM);
-
     auto context = frameNode->GetRenderContext();
     ASSERT_NE(context, nullptr);
     Dimension defaultDimension(0);

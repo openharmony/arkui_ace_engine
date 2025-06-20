@@ -32,6 +32,7 @@
 #include "render_service_client/core/modifier_ng/geometry/rs_bounds_clip_modifier.h"
 #include "render_service_client/core/modifier_ng/geometry/rs_frame_clip_modifier.h"
 #include "render_service_client/core/modifier_ng/geometry/rs_transform_modifier.h"
+#include "render_service_client/core/ui/rs_canvas_node.h"
 #else
 #include "core/components_ng/render/adapter/rosen_modifier_property.h"
 #endif
@@ -200,10 +201,11 @@ public:
 
 #if defined(MODIFIER_NG)
     template<typename ModifierName, auto Setter, typename T>
+    void AddOrUpdateModifier(std::shared_ptr<ModifierName>& modifier, const T& value);
 #else
     template<typename ModifierName, typename T>
-#endif
     void SetAnimatableProperty(std::shared_ptr<ModifierName>& modifier, const T& value);
+#endif
 
     void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) override;
 

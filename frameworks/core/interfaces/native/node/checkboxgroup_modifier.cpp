@@ -23,11 +23,25 @@ static const float ERROR_FLOAT_CODE = -1.0f;
 static const int32_t ERROR_INT_CODE = -1;
 static std::string groupNameValue;
 const DimensionUnit DEFAULT_UNIT = DimensionUnit::VP;
+
 void SetCheckboxGroupSelectedColor(ArkUINodeHandle node, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxGroupModelNG::SetSelectedColor(frameNode, Color(color));
+}
+
+void SetCheckboxGroupSelectedColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
+{
+    CHECK_NULL_VOID(node);
+    SetCheckboxGroupSelectedColor(node, color);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+        auto colorResObj = AceType::Claim(color);
+        CheckBoxGroupModelNG::CreateWithResourceObj(frameNode, CheckBoxGroupColorType::SELECTED_COLOR, colorResObj);
+    }
 }
 
 void ResetCheckboxGroupSelectedColor(ArkUINodeHandle node)
@@ -40,6 +54,10 @@ void ResetCheckboxGroupSelectedColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(themeManager);
     auto checkBoxTheme = themeManager->GetTheme<CheckboxTheme>();
     CheckBoxGroupModelNG::SetSelectedColor(frameNode, checkBoxTheme->GetActiveColor());
+    if (SystemProperties::ConfigChangePerform()) {
+        auto resObj = AceType::MakeRefPtr<ResourceObject>();
+        CheckBoxGroupModelNG::CreateWithResourceObj(frameNode, CheckBoxGroupColorType::SELECTED_COLOR, resObj);
+    }
 }
 
 void SetCheckboxGroupUnSelectedColor(ArkUINodeHandle node, uint32_t color)
@@ -47,6 +65,19 @@ void SetCheckboxGroupUnSelectedColor(ArkUINodeHandle node, uint32_t color)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxGroupModelNG::SetUnSelectedColor(frameNode, Color(color));
+}
+
+void SetCheckboxGroupUnSelectedColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
+{
+    CHECK_NULL_VOID(node);
+    SetCheckboxGroupUnSelectedColor(node, color);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+        auto colorResObj = AceType::Claim(color);
+        CheckBoxGroupModelNG::CreateWithResourceObj(frameNode, CheckBoxGroupColorType::UN_SELECTED_COLOR, colorResObj);
+    }
 }
 
 void ResetCheckboxGroupUnSelectedColor(ArkUINodeHandle node)
@@ -59,6 +90,10 @@ void ResetCheckboxGroupUnSelectedColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(themeManager);
     auto checkBoxTheme = themeManager->GetTheme<CheckboxTheme>();
     CheckBoxGroupModelNG::SetUnSelectedColor(frameNode, checkBoxTheme->GetInactiveColor());
+    if (SystemProperties::ConfigChangePerform()) {
+        auto resObj = AceType::MakeRefPtr<ResourceObject>();
+        CheckBoxGroupModelNG::CreateWithResourceObj(frameNode, CheckBoxGroupColorType::UN_SELECTED_COLOR, resObj);
+    }
 }
 
 void SetCheckboxGroupSelectAll(ArkUINodeHandle node, ArkUI_Bool isSelected)
@@ -250,8 +285,10 @@ const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUICheckboxGroupModifier modifier = {
         .setCheckboxGroupSelectedColor = SetCheckboxGroupSelectedColor,
+        .setCheckboxGroupSelectedColorPtr = SetCheckboxGroupSelectedColorPtr,
         .resetCheckboxGroupSelectedColor = ResetCheckboxGroupSelectedColor,
         .setCheckboxGroupUnSelectedColor = SetCheckboxGroupUnSelectedColor,
+        .setCheckboxGroupUnSelectedColorPtr = SetCheckboxGroupUnSelectedColorPtr,
         .resetCheckboxGroupUnSelectedColor = ResetCheckboxGroupUnSelectedColor,
         .setCheckboxGroupSelectAll = SetCheckboxGroupSelectAll,
         .resetCheckboxGroupSelectAll = ResetCheckboxGroupSelectAll,

@@ -25,7 +25,7 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT NavigationModelNG : public OHOS::Ace::NavigationModel {
 public:
-    void Create() override;
+    void Create(bool useHomeDestination = false) override;
     void SetNavigationStack() override;
     void SetNavigationStack(const RefPtr<NG::NavigationStack>& navigationStack) override;
     void SetNavigationStackWithCreatorAndUpdater(std::function<RefPtr<NG::NavigationStack>()> creator,
@@ -177,6 +177,9 @@ public:
     static void ResetResObj(FrameNode* frameNode, NavigationPatternType type, const std::string& key);
     static void SetBeforeCreateLayoutWrapperCallBack(
         FrameNode* frameNode, std::function<void()>&& beforeCreateLayoutWrapper);
+    virtual bool UseHomeDestination() const override;
+    virtual void SetHomePathInfoWithCallback(
+        std::function<void(const RefPtr<NavigationStack>&)>&& setHomePathInfoCallback) override;
 
 private:
     bool CreatePrimaryContentIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);

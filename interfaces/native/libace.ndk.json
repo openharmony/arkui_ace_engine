@@ -3377,6 +3377,14 @@
     },
     {
         "first_introduced": "20",
+        "name": "OH_ArkUI_InitModuleForArkTSEnv"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_NotifyArkTSEnvDestroy"
+    },
+    {
+        "first_introduced": "20",
         "name": "OH_ArkUI_AddSupportedUIStates"
     },
     {
@@ -3450,6 +3458,38 @@
     {
         "first_introduced": "20",
         "name": "OH_ArkUI_SurfaceCallback_SetSurfaceHideEvent"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_DragEvent_GetTouchPointXToGlobalDisplay"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_DragEvent_GetTouchPointYToGlobalDisplay"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_PointerEvent_GetGlobalDisplayX"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_PointerEvent_GetGlobalDisplayY"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_PointerEvent_GetGlobalDisplayXByIndex"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_PointerEvent_GetGlobalDisplayYByIndex"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayX"
+    },
+    {
+        "first_introduced": "20",
+        "name": "OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayY"
     },
     {
         "first_introduced": "20",

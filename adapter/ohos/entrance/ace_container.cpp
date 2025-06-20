@@ -3898,6 +3898,8 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
         dragPointerEvent.windowX = pointerItem.GetWindowX();
         dragPointerEvent.windowY = pointerItem.GetWindowY();
     }
+    dragPointerEvent.globalDisplayX = pointerItem.GetGlobalX();
+    dragPointerEvent.globalDisplayY = pointerItem.GetGlobalY();
     dragPointerEvent.deviceId = pointerItem.GetDeviceId();
     dragPointerEvent.sourceTool = static_cast<SourceTool>(pointerItem.GetToolType());
     dragPointerEvent.displayId = currentPointerEvent->GetTargetDisplayId();
@@ -3953,6 +3955,8 @@ bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEve
         dragPointerEvent.windowX = pointerItem.GetWindowX();
         dragPointerEvent.windowY = pointerItem.GetWindowY();
     }
+    dragPointerEvent.globalDisplayX = pointerItem.GetGlobalX();
+    dragPointerEvent.globalDisplayY = pointerItem.GetGlobalY();
     return true;
 }
 

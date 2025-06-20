@@ -301,21 +301,40 @@ void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
         RadioModel::GetInstance()->SetIndicatorColor(theme->GetPointColor());
         return;
     }
+    SetCheckedBackgroundColor(info, theme);
+    SetUncheckedBorderColor(info, theme);
+    SetIndicatorColor(info, theme);
+}
+
+void JSRadio::SetCheckedBackgroundColor(const JSCallbackInfo& info, const RefPtr<RadioTheme>& theme)
+{
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> checkedBackgroundColor = obj->GetProperty("checkedBackgroundColor");
-    JSRef<JSVal> uncheckedBorderColor = obj->GetProperty("uncheckedBorderColor");
-    JSRef<JSVal> indicatorColor = obj->GetProperty("indicatorColor");
     Color checkedBackgroundColorVal;
-    if (!ParseJsColor(checkedBackgroundColor, checkedBackgroundColorVal)) {
+    RefPtr<ResourceObject> backgroundResObj;
+    bool isUserSetBgColor = true;
+    if (!ParseJsColor(checkedBackgroundColor, checkedBackgroundColorVal, backgroundResObj)) {
         if (!JSRadioTheme::ObtainCheckedBackgroundColor(checkedBackgroundColorVal)) {
             checkedBackgroundColorVal = theme->GetActiveColor();
+            isUserSetBgColor = false;
         }
     }
+    CreateWithResourceObj(backgroundResObj, static_cast<int32_t>(RadioColorType::CHECKED_BACKGROUND_COLOR));
     RadioModel::GetInstance()->SetCheckedBackgroundColor(checkedBackgroundColorVal);
+    RadioModel::GetInstance()->SetCheckedBackgroundColorSetByUser(isUserSetBgColor);
+}
+
+void JSRadio::SetUncheckedBorderColor(const JSCallbackInfo& info, const RefPtr<RadioTheme>& theme)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> uncheckedBorderColor = obj->GetProperty("uncheckedBorderColor");
     Color uncheckedBorderColorVal;
-    if (!ParseJsColor(uncheckedBorderColor, uncheckedBorderColorVal)) {
+    RefPtr<ResourceObject> borderResObj;
+    bool isUserSetUnBorderColor = true;
+    if (!ParseJsColor(uncheckedBorderColor, uncheckedBorderColorVal, borderResObj)) {
         if (!JSRadioTheme::ObtainUncheckedBorderColor(uncheckedBorderColorVal)) {
             uncheckedBorderColorVal = theme->GetInactiveColor();
+            isUserSetUnBorderColor = false;
         }
     } else {
         auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -324,14 +343,34 @@ void JSRadio::JsRadioStyle(const JSCallbackInfo& info)
         CHECK_NULL_VOID(pattern);
         pattern->SetIsUserSetUncheckBorderColor(true);
     }
+    CreateWithResourceObj(borderResObj, static_cast<int32_t>(RadioColorType::UNCHECKED_BORDER_COLOR));
     RadioModel::GetInstance()->SetUncheckedBorderColor(uncheckedBorderColorVal);
+    RadioModel::GetInstance()->SetUncheckedBorderColorSetByUser(isUserSetUnBorderColor);
+}
+
+void JSRadio::SetIndicatorColor(const JSCallbackInfo& info, const RefPtr<RadioTheme>& theme)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> indicatorColor = obj->GetProperty("indicatorColor");
     Color indicatorColorVal;
-    if (!ParseJsColor(indicatorColor, indicatorColorVal)) {
+    RefPtr<ResourceObject> indicatorResObj;
+    bool isUserSetIndicatorColor = true;
+    if (!ParseJsColor(indicatorColor, indicatorColorVal, indicatorResObj)) {
         if (!JSRadioTheme::ObtainIndicatorColor(indicatorColorVal)) {
             indicatorColorVal = theme->GetPointColor();
+            isUserSetIndicatorColor = false;
         }
     }
+    CreateWithResourceObj(indicatorResObj, static_cast<int32_t>(RadioColorType::INDICATOR_COLOR));
     RadioModel::GetInstance()->SetIndicatorColor(indicatorColorVal);
+    RadioModel::GetInstance()->SetIndicatorColorSetByUser(isUserSetIndicatorColor);
+}
+
+void JSRadio::CreateWithResourceObj(const RefPtr<ResourceObject>& resObj, const int32_t colorType)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        RadioModel::GetInstance()->CreateWithColorResourceObj(resObj, static_cast<RadioColorType>(colorType));
+    }
 }
 
 void JSRadio::JsResponseRegion(const JSCallbackInfo& info)

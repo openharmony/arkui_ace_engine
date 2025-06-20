@@ -145,6 +145,7 @@
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_app_bar_view.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_string.h"
+#include "frameworks/bridge/declarative_frontend/style_string/js_text_layout.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_modal_view.h"
 
 #ifdef USE_COMPONENTS_LIB
@@ -392,6 +393,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSParagraphStyleSpan::JSBind(globalObj);
     JSLineHeightSpan::JSBind(globalObj);
     JSUrlSpan::JSBind(globalObj);
+    JSTextLayout::JSBind(globalObj);
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);

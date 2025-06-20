@@ -75,7 +75,6 @@ void SetParseStyle(ButtonInfo& buttonInfo, const int32_t styleValue)
 
 void ParseTextPropsUpdate(const JSRef<JSVal>& jsVal, ButtonInfo& button)
 {
-    RefPtr<ResourceObject> resObj;
     std::string buttonValue;
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj = nullptr;
@@ -109,16 +108,13 @@ void ParseFontColorPropsUpdate(const JSRef<JSVal>& jsVal, ButtonInfo& button)
 void ParseBackgroundColorPropsUpdate(const JSRef<JSVal>& jsVal, ButtonInfo& button)
 {
     Color color;
-    if (SystemProperties::ConfigChangePerform()) {
-        RefPtr<ResourceObject> resObj = nullptr;
-        if (JSViewAbstract::ParseJsColor(jsVal, color, resObj)) {
-            button.backgroundColor = color;
-        }
-        button.resourceBgColorObj = resObj;
-        return;
+    RefPtr<ResourceObject> resObj = nullptr;
+    if (JSViewAbstract::ParseJsColor(jsVal, color, resObj)) {
+        button.isBgColorSetted = true;
+        button.bgColor = color;
     }
-    if (JSViewAbstract::ParseJsColor(jsVal, color)) {
-        button.backgroundColor = color;
+    if (SystemProperties::ConfigChangePerform()) {
+        button.resourceBgColorObj = resObj;
     }
 }
 
@@ -519,17 +515,17 @@ void ParseAlertLevelOrder(DialogProperties& properties, JSRef<JSObject> obj)
 
 void ParseBackgroundColor(const JSRef<JSVal>& jsValue, DialogProperties& properties)
 {
-    Color textColor;
+    Color color;
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
-        if (JSViewAbstract::ParseJsColor(jsValue, textColor, resObj)) {
-            properties.backgroundColor = textColor;
+        if (JSViewAbstract::ParseJsColor(jsValue, color, resObj)) {
+            properties.backgroundColor = color;
         }
         properties.resourceBgColorObj = resObj;
         return;
     }
-    if (JSViewAbstract::ParseJsColor(jsValue, textColor)) {
-        properties.backgroundColor = textColor;
+    if (JSViewAbstract::ParseJsColor(jsValue, color)) {
+        properties.backgroundColor = color;
     }
 }
 

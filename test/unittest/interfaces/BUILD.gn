@@ -69,6 +69,7 @@ ohos_unittest("form_render_test") {
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_proxy.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_stub.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_group.cpp",
+    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_event_report.cpp",
     "$ace_root/test/mock/interfaces/mock_uicontent_creator.cpp",
     "form_render/form_render_test.cpp",
     "form_render/form_renderer_dispatcher_proxy_test.cpp",
@@ -114,6 +115,8 @@ ohos_unittest("form_render_test") {
     "ipc:ipc_core",
     "napi:ace_napi",
     "window_manager:libwm",
+    "hisysevent:libhisysevent",
+    "hicollie:libhicollie",
   ]
 }
 
@@ -129,6 +132,7 @@ ohos_unittest("form_render_group_test") {
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_proxy.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_stub.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_group.cpp",
+    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_event_report.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
     "$ace_root/test/mock/base/mock_engine_helper.cpp",
@@ -192,6 +196,8 @@ ohos_unittest("form_render_group_test") {
     "ipc:ipc_core",
     "napi:ace_napi",
     "window_manager:libwm",
+    "hisysevent:libhisysevent",
+    "hicollie:libhicollie",
   ]
 }
 
@@ -280,6 +286,7 @@ ohos_unittest("form_render_dispatcher_stub_test") {
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_proxy.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_stub.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_group.cpp",
+    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_event_report.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
     "$ace_root/test/mock/base/mock_engine_helper.cpp",
@@ -325,6 +332,8 @@ ohos_unittest("form_render_dispatcher_stub_test") {
     "ipc:ipc_core",
     "napi:ace_napi",
     "window_manager:libwm",
+    "hisysevent:libhisysevent",
+    "hicollie:libhicollie",
   ]
 }
 
@@ -368,6 +377,7 @@ ohos_unittest("form_render_dispatcher_impl_test") {
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_impl.cpp",
     "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_stub.cpp",
+    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_event_report.cpp",
     "form_render/form_render_dispatcher_impl_test.cpp",
   ]
 
@@ -395,6 +405,8 @@ ohos_unittest("form_render_dispatcher_impl_test") {
     "ipc:ipc_core",
     "napi:ace_napi",
     "window_manager:libwm",
+    "hisysevent:libhisysevent",
+    "hicollie:libhicollie",
   ]
 }
 
@@ -629,6 +641,7 @@ ohos_unittest("native_node_napi_test") {
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
+    "ets_runtime:libark_jsruntime",
     "googletest:gmock_main",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",

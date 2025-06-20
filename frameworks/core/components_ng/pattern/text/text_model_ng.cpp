@@ -431,6 +431,20 @@ void TextModelNG::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, HeightAdaptivePolicy, value);
 }
 
+void TextModelNG::SetContentTransition(TextEffectStrategy value, TextFlipDirection direction, bool enableBlur)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextEffectStrategy, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipDirection, direction);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipEnableBlur, enableBlur);
+}
+
+void TextModelNG::ResetContentTransition()
+{
+    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, TextEffectStrategy);
+    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipDirection);
+    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipEnableBlur);
+}
+
 void TextModelNG::SetTextDetectEnable(bool value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1464,5 +1478,20 @@ TextVerticalAlign TextModelNG::GetTextVerticalAlign(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, value);
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, TextVerticalAlign, value, frameNode, value);
     return value;
+}
+
+void TextModelNG::SetContentTransition(
+    FrameNode* frameNode, TextEffectStrategy value, TextFlipDirection direction, bool enableBlur)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextEffectStrategy, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipDirection, direction, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipEnableBlur, enableBlur, frameNode);
+}
+
+void TextModelNG::ResetContentTransition(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextEffectStrategy, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipDirection, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextFlipEnableBlur, frameNode);
 }
 } // namespace OHOS::Ace::NG

@@ -1313,4 +1313,5 @@ void WebDelegate::SendPipEvent(int delegate_id,
 void WebDelegate::UpdateSingleHandleVisible(bool isVisible) {}
 bool WebDelegate::ShowMagnifier() { return false; }
 bool WebDelegate::HideMagnifier() { return false; }
+void WebDelegate::SetTouchHandleExistState(bool touchHandleExist) {}
 } // namespace OHOS::Ace

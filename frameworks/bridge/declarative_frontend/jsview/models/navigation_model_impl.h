@@ -21,7 +21,7 @@
 namespace OHOS::Ace::Framework {
 class NavigationModelImpl : public NavigationModel {
 public:
-    void Create() override;
+    void Create(bool useHomeDestination = false) override;
     void SetNavigationStack() override;
     void SetNavigationStack(const RefPtr<NG::NavigationStack>& navigationStack) override;
     void SetNavigationStackProvided(bool provided) override;

@@ -163,6 +163,7 @@ public:
     void UpdateAISelectMenu(TextDataDetectType type, const std::string& content);
     void UpdateSingleHandleVisible(bool isVisible);
     bool IsSingleHandle();
+    void SetTouchHandleExistState(bool touchHandleExist);
 private:
     void UpdateSelectMenuOptions();
     void UpdateIsSelectAll();

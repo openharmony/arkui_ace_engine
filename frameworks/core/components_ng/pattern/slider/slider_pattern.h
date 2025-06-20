@@ -258,10 +258,15 @@ public:
     void CalculateOffset();
     void MountToNavigation(RefPtr<FrameNode>& tipNode);
 
+    void UpdateSliderComponentColor(const Color& color, const SliderColorType sliderColorType, const Gradient& value);
+    void UpdateSliderComponentMedia();
+    void UpdateSliderComponentString(const bool isShowTips, const std::string& value);
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnModifyDone() override;
+    void OnColorConfigurationUpdate() override;
     void CalcSliderValue();
     void CancelExceptionValue(float& min, float& max, float& step);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout) override;

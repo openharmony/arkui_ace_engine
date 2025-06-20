@@ -785,9 +785,8 @@ void GridModelNG::CreateWithResourceObjFriction(const RefPtr<ResourceObject>& re
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         double friction = -1.0;
-        if (ResourceParseUtils::ParseResDouble(resObj, friction)) {
-            pattern->SetFriction(friction);
-        }
+        ResourceParseUtils::ParseResDouble(resObj, friction);
+        pattern->SetFriction(friction);
     };
     pattern->AddResObj("GridFriction", resObj, std::move(updateFunc));
 }
@@ -851,12 +850,12 @@ void GridModelNG::CreateWithResourceObjFriction(FrameNode* frameNode, const RefP
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         double friction = -1.0;
-        if (ResourceParseUtils::ParseResDouble(resObj, friction)) {
-            pattern->SetFriction(friction);
-        }
+        ResourceParseUtils::ParseResDouble(resObj, friction);
+        pattern->SetFriction(friction);
     };
     pattern->AddResObj("GridFriction", resObj, std::move(updateFunc));
 }
+
 void GridModelNG::SetSyncLoad(bool syncLoad)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, SyncLoad, syncLoad);

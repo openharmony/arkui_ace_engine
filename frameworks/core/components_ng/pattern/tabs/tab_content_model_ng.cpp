@@ -560,10 +560,27 @@ bool ParseType(const RefPtr<ResourceObject>& resObj, const std::string& name, T&
 {
     if constexpr (std::is_same_v<T, Color>) {
         return ResourceParseUtils::ParseResColor(resObj, result);
+    } else if constexpr (std::is_same_v<T, std::optional<Color>>) {
+        if (name == "selectedColor" || name == "unselectedColor") {
+            Color color;
+            if (ResourceParseUtils::ParseResColor(resObj, color)) {
+                result = color;
+            }
+            return true;
+        }
+    } else if constexpr (std::is_same_v<T, std::optional<Dimension>>) {
+        if (name == "fontSize") {
+            CalcDimension fontSize;
+            if (ResourceParseUtils::ParseResDimensionFp(resObj, fontSize) && NonNegative(fontSize.Value()) &&
+                fontSize.Unit() != DimensionUnit::PERCENT) {
+                result = fontSize;
+            }
+            return true;
+        }
     } else if constexpr (std::is_same_v<T, CalcDimension>) {
         if (name == "height" || name == "borderRadius" || name == "width" || name == "marginTop") {
             return ResourceParseUtils::ParseResDimensionVp(resObj, result);
-        } else if (name == "fontSize" || name == "minFontSize" || name == "maxFontSize") {
+        } else if (name == "minFontSize" || name == "maxFontSize") {
             return ResourceParseUtils::ParseResDimensionFp(resObj, result);
         } else {
             return ResourceParseUtils::ParseResDimensionNG(resObj, result, DimensionUnit::PX);
@@ -615,8 +632,7 @@ bool ParseType(const RefPtr<ResourceObject>& resObj, const std::string& name, T&
                 auto pattern = frameNode->GetPattern<TabContentPattern>();                                        \
                 CHECK_NULL_VOID(pattern);                                                                         \
                 resultType result;                                                                                \
-                if (ParseType(theResObj, #name, result) && NonNegative(result.Value()) &&                         \
-                    result.Unit() != DimensionUnit::PERCENT) {                                                    \
+                if (ParseType(theResObj, #name, result)) {                                                        \
                     auto attrs = pattern->Get##attrType();                                                        \
                     attrs.name = result;                                                                          \
                     pattern->Set##attrType(attrs);                                                                \
@@ -633,7 +649,7 @@ void TabContentModelNG::CreateWithResourceObj(TabContentJsType jsType, const Ref
     CHECK_NULL_VOID(frameNode);
     switch (jsType) {
         REGISTER_RESOURCE_UPDATE_ATTR_FONT_SIZE_FUNC(
-            TabContentJsType::FONT_SIZE, LabelStyle, fontSize, resObj, CalcDimension);
+            TabContentJsType::FONT_SIZE, LabelStyle, fontSize, resObj, std::optional<Dimension>);
         REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
             TabContentJsType::FONT_FAMILY, LabelStyle, fontFamily, resObj, std::vector<std::string>);
         REGISTER_RESOURCE_UPDATE_ATTR_FONT_SIZE_FUNC(
@@ -641,9 +657,9 @@ void TabContentModelNG::CreateWithResourceObj(TabContentJsType jsType, const Ref
         REGISTER_RESOURCE_UPDATE_ATTR_FONT_SIZE_FUNC(
             TabContentJsType::MAX_FONT_SIZE, LabelStyle, maxFontSize, resObj, CalcDimension);
         REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
-            TabContentJsType::LABEL_SELECT_COLOR, LabelStyle, selectedColor, resObj, Color);
+            TabContentJsType::LABEL_SELECT_COLOR, LabelStyle, selectedColor, resObj, std::optional<Color>);
         REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
-            TabContentJsType::LABEL_UNSELECT_COLOR, LabelStyle, unselectedColor, resObj, Color);
+            TabContentJsType::LABEL_UNSELECT_COLOR, LabelStyle, unselectedColor, resObj, std::optional<Color>);
         REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
             TabContentJsType::ICON_SELECT_COLOR, IconStyle, selectedColor, resObj, Color);
         REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
@@ -812,7 +828,8 @@ bool TabContentModelNG::CreatePaddingLeftWithResourceObj(FrameNode* frameNode,
         CHECK_NULL_VOID(pattern);
         CalcDimension left;
         auto padding = pattern->GetPadding();
-        if (ResourceParseUtils::ParseResDimensionVp(resObj, left)) {
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, left) && NonNegative(left.Value()) &&
+            left.Unit() != DimensionUnit::PERCENT) {
             padding.left = NG::CalcLength(left);
         } else {
             auto pipelineContext = frameNode->GetContext();
@@ -846,7 +863,8 @@ bool TabContentModelNG::CreatePaddingRightWithResourceObj(FrameNode* frameNode,
         CHECK_NULL_VOID(pattern);
         CalcDimension right;
         auto padding = pattern->GetPadding();
-        if (ResourceParseUtils::ParseResDimensionVp(resObj, right)) {
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, right) && NonNegative(right.Value()) &&
+            right.Unit() != DimensionUnit::PERCENT) {
             padding.right = NG::CalcLength(right);
         } else {
             auto pipelineContext = frameNode->GetContext();
@@ -880,7 +898,8 @@ bool TabContentModelNG::CreatePaddingTopWithResourceObj(FrameNode* frameNode,
         CHECK_NULL_VOID(pattern);
         CalcDimension top;
         auto padding = pattern->GetPadding();
-        if (ResourceParseUtils::ParseResDimensionVp(resObj, top)) {
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, top) && NonNegative(top.Value()) &&
+            top.Unit() != DimensionUnit::PERCENT) {
             padding.top = NG::CalcLength(top);
         } else {
             auto pipelineContext = frameNode->GetContext();
@@ -913,14 +932,14 @@ bool TabContentModelNG::CreatePaddingBottomWithResourceObj(FrameNode* frameNode,
         CHECK_NULL_VOID(pattern);
         CalcDimension bottom;
         auto padding = pattern->GetPadding();
-        if (ResourceParseUtils::ParseResDimensionVp(resObj, bottom)) {
+        if (ResourceParseUtils::ParseResDimensionVp(resObj, bottom) && NonNegative(bottom.Value()) &&
+            bottom.Unit() != DimensionUnit::PERCENT) {
             padding.bottom = NG::CalcLength(bottom);
         } else {
             auto pipelineContext = frameNode->GetContext();
             CHECK_NULL_VOID(pipelineContext);
             auto tabTheme = pipelineContext->GetTheme<TabTheme>();
             CHECK_NULL_VOID(tabTheme);
-            auto padding = pattern->GetPadding();
             padding.bottom = (isSubTabStyle) ? NG::CalcLength(tabTheme->GetSubTabBottomPadding()) :
                 NG::CalcLength(0.0_vp);
         }

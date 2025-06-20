@@ -586,7 +586,7 @@ public:
         avoidTarget_ = avoidTarget;
     }
     
-    AvoidanceMode GetAvoidTarget() const
+    std::optional<AvoidanceMode> GetAvoidTarget() const
     {
         return avoidTarget_;
     }
@@ -700,12 +700,12 @@ public:
         return resourceMaskColorObj_;
     }
 
-    void SetMasResourceObject(RefPtr<ResourceObject>& obj)
+    void SetMaskResourceObject(RefPtr<ResourceObject>& obj)
     {
         resourceMaskObj_ = obj;
     }
 
-    const RefPtr<ResourceObject>& GetMasResourceObject()
+    const RefPtr<ResourceObject>& GetMaskResourceObject()
     {
         return resourceMaskObj_;
     }
@@ -719,6 +719,67 @@ public:
     {
         return anchorType_;
     }
+
+    void SetWidthResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceWidthObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetWidthResourceObject()
+    {
+        return resourceWidthObj_;
+    }
+
+    void SetArrowWidthResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceArrowWidthObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GetArrowWidthResourceObject()
+    {
+        return resourceArrowWidthObj_;
+    }
+
+    void SetArrowHeightResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceArrowHeightObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GeArrowHeightResourceObject()
+    {
+        return resourceArrowHeightObj_;
+    }
+
+    void SetRadiusResourceObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceRadiusObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GeRadiusResourceObject()
+    {
+        return resourceRadiusObj_;
+    }
+
+    void SetOutlineWidthObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceOutlineWidthObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GeOutlineWidthResourceObject()
+    {
+        return resourceOutlineWidthObj_;
+    }
+
+    void SetBorderWidthObject(RefPtr<ResourceObject>& obj)
+    {
+        resourceBorderWidthObj_ = obj;
+    }
+
+    const RefPtr<ResourceObject>& GeBorderWidthResourceObject()
+    {
+        return resourceBorderWidthObj_;
+    }
+
 
 private:
     bool isShow_ = true;
@@ -779,7 +840,7 @@ private:
     RefPtr<NG::ChainedTransitionEffect> transitionEffects_ = nullptr;
     StateChangeFunc doubleBindCallback_;
     PopupKeyboardAvoidMode keyboardAvoidMode_ = PopupKeyboardAvoidMode::NONE;
-    AvoidanceMode avoidTarget_ = AvoidanceMode::COVER_TARGET;
+    std::optional<AvoidanceMode> avoidTarget_ = AvoidanceMode::COVER_TARGET;
     std::optional<Dimension> outlineWidth_;
     std::optional<Dimension> innerBorderWidth_;
     PopupLinearGradientProperties outlineLinearGradient_;
@@ -788,6 +849,12 @@ private:
     RefPtr<ResourceObject> resourcePopupColorObj_;
     RefPtr<ResourceObject> resourceMaskColorObj_;
     RefPtr<ResourceObject> resourceMaskObj_;
+    RefPtr<ResourceObject> resourceWidthObj_;
+    RefPtr<ResourceObject> resourceArrowWidthObj_;
+    RefPtr<ResourceObject> resourceArrowHeightObj_;
+    RefPtr<ResourceObject> resourceRadiusObj_;
+    RefPtr<ResourceObject> resourceOutlineWidthObj_;
+    RefPtr<ResourceObject> resourceBorderWidthObj_;
 };
 
 } // namespace OHOS::Ace

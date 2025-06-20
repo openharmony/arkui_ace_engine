@@ -1194,6 +1194,8 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
             }
             event->SetScreenX(info.GetScreenLocation().GetX());
             event->SetScreenY(info.GetScreenLocation().GetY());
+            event->SetGlobalDisplayX(info.GetGlobalDisplayLocation().GetX());
+            event->SetGlobalDisplayY(info.GetGlobalDisplayLocation().GetY());
             event->SetPressedKeyCodes(info.GetPressedKeyCodes());
             eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event);
             eventHub->HandleInternalOnDrop(event, "");
@@ -1818,6 +1820,8 @@ RefPtr<OHOS::Ace::DragEvent> GestureEventHub::CreateDragEvent(const GestureEvent
     event->SetScreenY(info.GetScreenLocation().GetY());
     event->SetDisplayX(info.GetScreenLocation().GetX());
     event->SetDisplayY(info.GetScreenLocation().GetY());
+    event->SetGlobalDisplayX(info.GetGlobalDisplayLocation().GetX());
+    event->SetGlobalDisplayY(info.GetGlobalDisplayLocation().GetY());
     event->SetSourceTool(info.GetSourceTool());
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, event);

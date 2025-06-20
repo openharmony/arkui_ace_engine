@@ -430,6 +430,7 @@ private:
         const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation);
     void CheckMousePendingRecognizersState(const TouchEvent& event);
     void ExecuteTouchTestDoneCallback(const TouchEvent& touchEvent, const ResponseLinkResult& responseLinkRecognizers);
+    void ExecuteTouchTestDoneCallback(const AxisEvent& axisEvent, const ResponseLinkResult& responseLinkRecognizers);
     bool innerEventWin_ = false;
     std::unordered_map<size_t, TouchTestResult> mouseTestResults_;
     std::unordered_map<int32_t, MouseTestResult> currMouseTestResultsMap_;

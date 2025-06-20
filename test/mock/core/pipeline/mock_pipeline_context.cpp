@@ -14,7 +14,6 @@
  */
 
 #include "mock_pipeline_context.h"
-#include "test/mock/core/common/mock_font_manager.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -171,11 +170,6 @@ void MockPipelineContext::TearDown()
 RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
 {
     return pipeline_;
-}
-
-void MockPipelineContext::ResetFontManager()
-{
-    pipeline_->fontManager_ = MockFontManager::Create();
 }
 
 void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)

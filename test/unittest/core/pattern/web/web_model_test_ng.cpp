@@ -4275,6 +4275,7 @@ HWTEST_F(WebModelTestNg, SetGestureFocusMode001, TestSize.Level1)
         FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
     ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
+
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
 
     WebModelNG webModelNG;
@@ -4284,5 +4285,29 @@ HWTEST_F(WebModelTestNg, SetGestureFocusMode001, TestSize.Level1)
     webModelNG.SetGestureFocusMode(AccessibilityManager::RawPtr(frameNode), GestureFocusMode::DEFAULT);
     EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckGestureFocusMode(GestureFocusMode::DEFAULT), true);
 #endif
+}
+
+/**
+ * @tc.name: SetWebDetachFunction001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetWebDetachFunction001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    WebModelNG webModelNG;
+    auto callback = [](int32_t id) {};
+    webModelNG.SetWebDetachFunction(callback);
+
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    EXPECT_NE(webPattern->GetSetWebDetachCallback(), nullptr);
+    #endif
 }
 } // namespace OHOS::Ace::NG

@@ -129,7 +129,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     viewPortExtent_ = childSize;
     viewPortLength_ = GetMainAxisSize(viewPort_, axis);
-    auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
+    auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, crossOffset_);
     if (layoutDirection == TextDirection::RTL && axis == Axis::HORIZONTAL) {
         currentOffset = OffsetF(std::min(size.Width() - childSize.Width(), 0.f) - currentOffset_, 0.0f);
     }

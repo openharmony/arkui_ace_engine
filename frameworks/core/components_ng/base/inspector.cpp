@@ -58,6 +58,13 @@ TouchEvent GetUpPoint(const TouchEvent& downPoint)
         .SetTime(std::chrono::high_resolution_clock::now())
         .SetSourceType(SourceType::TOUCH);
 }
+
+bool CanBeProcessedNodeType(const RefPtr<UINode>& uiNode)
+{
+    return AceType::InstanceOf<FrameNode>(uiNode) ||
+        AceType::InstanceOf<CustomNode>(uiNode) ||
+        AceType::InstanceOf<SpanNode>(uiNode);
+}
 #ifdef PREVIEW
 void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<NG::UINode>>& children, int32_t pageId,
     bool isLayoutInspector = false)
@@ -839,6 +846,9 @@ void Inspector::GetRecordAllPagesNodes(InspectorTreeMap& treesInfo)
 RefPtr<RecNode> Inspector::AddInspectorTreeNode(const RefPtr<NG::UINode>& uiNode, InspectorTreeMap& recNodes)
 {
     CHECK_NULL_RETURN(uiNode, nullptr);
+    if (!CanBeProcessedNodeType(uiNode)) {
+        return nullptr;
+    }
     RefPtr<RecNode> recNode = AceType::MakeRefPtr<RecNode>();
     CHECK_NULL_RETURN(recNode, nullptr);
     recNode->SetNodeId(uiNode->GetId());
@@ -849,13 +859,19 @@ RefPtr<RecNode> Inspector::AddInspectorTreeNode(const RefPtr<NG::UINode>& uiNode
     ConvertIllegalStr(strDebugLine);
     recNode->SetDebugLine(strDebugLine);
     auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, nullptr);
-    recNode->SetSelfId(renderContext->GetNodeId());
-    auto parentNode = frameNode->GetParent();
-    if (parentNode != nullptr) {
-        recNode->SetParentId(parentNode->GetId());
+    if (frameNode) {
+        auto renderContext = frameNode->GetRenderContext();
+        if (renderContext) {
+            recNode->SetSelfId(renderContext->GetNodeId());
+        }
+    }
+    auto parentNode = uiNode->GetParent();
+    while (parentNode != nullptr) {
+        if (CanBeProcessedNodeType(parentNode)) {
+            recNode->SetParentId(parentNode->GetId());
+            break;
+        }
+        parentNode = parentNode->GetParent();
     }
     recNodes.emplace(uiNode->GetId(), recNode);
     return recNode;
@@ -873,10 +889,6 @@ void Inspector::GetInspectorTreeInfo(
 void Inspector::GetInspectorChildrenInfo(
     const RefPtr<NG::UINode>& parent, InspectorTreeMap& recNodes, int32_t pageId, uint32_t depth)
 {
-    // Span is a special case in Inspector since span inherits from UINode
-    if (AceType::InstanceOf<SpanNode>(parent)) {
-        return;
-    }
     std::vector<RefPtr<NG::UINode>> children;
     for (const auto& item : parent->GetChildren()) {
         GetFrameNodeChildren(item, children, pageId, true);

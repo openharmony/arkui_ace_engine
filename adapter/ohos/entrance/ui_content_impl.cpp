@@ -44,6 +44,7 @@
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
@@ -2042,6 +2043,7 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
     CapabilityRegistry::Register();
     ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
     XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
+    PerfMonitor::GetPerfMonitor()->SetApplicationInfo();
 
     auto task = [] {
         std::unordered_map<std::string, std::string> payload;

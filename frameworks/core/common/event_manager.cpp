@@ -403,7 +403,7 @@ void EventManager::TouchTest(
     onTouchTestDoneFrameNodeList_.clear();
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, event.id, responseLinkResult);
     SetResponseLinkRecognizers(hitTestResult, responseLinkResult);
-    ExecuteTouchTestDoneCallback(touchRestrict.touchEvent, responseLinkResult);
+    ExecuteTouchTestDoneCallback(event, responseLinkResult);
     axisTouchTestResults_[event.id] = std::move(hitTestResult);
     LogTouchTestResultRecognizers(axisTouchTestResults_[event.id], event.touchEventId);
 }
@@ -442,8 +442,8 @@ void EventManager::ExecuteTouchTestDoneCallback(
             NG::PointF localPoint(point.x, point.y);
             NG::NGGestureRecognizer::Transform(localPoint, weakNode, false);
             FingerInfo fingerInfo = { point.originalId, point.operatingHand, Offset(point.x, point.y),
-                Offset(localPoint.GetX(), localPoint.GetY()),
-                Offset(point.screenX, point.screenY), touchEvent.sourceType, touchEvent.sourceTool };
+                Offset(localPoint.GetX(), localPoint.GetY()), Offset(point.screenX, point.screenY),
+                Offset(point.globalDisplayX, point.globalDisplayY), touchEvent.sourceType, touchEvent.sourceTool };
             fingerList.emplace_back(fingerInfo);
         }
         info->SetFingerList(fingerList);
@@ -457,6 +457,53 @@ void EventManager::ExecuteTouchTestDoneCallback(
             info->SetRollAngle(touchEvent.rollAngle.value());
         }
         info->SetSourceTool(touchEvent.sourceTool);
+        info->SetTargetDisplayId(touchEvent.targetDisplayId);
+        info->SetPressedKeyCodes(touchEvent.pressedKeyCodes_);
+        if (touchTestDoneCallbackForInner) {
+            touchTestDoneCallbackForInner(info, responseLinkRecognizers);
+        }
+        if (touchTestDoneCallback) {
+            touchTestDoneCallback(info, responseLinkRecognizers);
+        }
+    }
+}
+
+void EventManager::ExecuteTouchTestDoneCallback(
+    const AxisEvent& axisEvent, const ResponseLinkResult& responseLinkRecognizers)
+{
+    for (const auto& weakNode : onTouchTestDoneFrameNodeList_) {
+        auto frameNode = weakNode.Upgrade();
+        if (!frameNode) {
+            continue;
+        }
+        auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+        if (!gestureEventHub) {
+            continue;
+        }
+        auto touchTestDoneCallbackForInner = gestureEventHub->GetOnTouchTestDoneCallbackForInner();
+        auto touchTestDoneCallback = gestureEventHub->GetOnTouchTestDoneCallback();
+        if (!touchTestDoneCallbackForInner && !touchTestDoneCallback) {
+            continue;
+        }
+        auto info = std::make_shared<BaseGestureEvent>();
+        info->SetTimeStamp(axisEvent.time);
+        info->SetSourceDevice(axisEvent.sourceType);
+        auto getEventTargetImpl = gestureEventHub->CreateGetEventTargetImpl();
+        info->SetTarget(getEventTargetImpl ? getEventTargetImpl().value_or(EventTarget()) : EventTarget());
+        info->SetSourceTool(axisEvent.sourceTool);
+        info->SetHorizontalAxis(axisEvent.horizontalAxis);
+        info->SetVerticalAxis(axisEvent.verticalAxis);
+        info->SetDeviceId(axisEvent.deviceId);
+        info->SetTargetDisplayId(axisEvent.targetDisplayId);
+        info->SetPressedKeyCodes(axisEvent.pressedCodes);
+        std::list<FingerInfo> fingerList;
+        NG::PointF localPoint(axisEvent.x, axisEvent.y);
+        NG::NGGestureRecognizer::Transform(localPoint, weakNode, false);
+        FingerInfo fingerInfo = { axisEvent.originalId, 0, Offset(axisEvent.x, axisEvent.y),
+            Offset(localPoint.GetX(), localPoint.GetY()), Offset(axisEvent.screenX, axisEvent.screenY),
+            Offset(axisEvent.globalDisplayX, axisEvent.globalDisplayY), axisEvent.sourceType, axisEvent.sourceTool };
+        fingerList.emplace_back(fingerInfo);
+        info->SetFingerList(fingerList);
         if (touchTestDoneCallbackForInner) {
             touchTestDoneCallbackForInner(info, responseLinkRecognizers);
         }
@@ -485,6 +532,8 @@ TouchEvent EventManager::ConvertAxisEventToTouchEvent(const AxisEvent& axisEvent
         .y = axisEvent.y,
         .screenX = axisEvent.screenX,
         .screenY = axisEvent.screenY,
+        .globalDisplayX = axisEvent.globalDisplayX,
+        .globalDisplayY = axisEvent.globalDisplayY,
         .downTime = axisEvent.time,
         .size = 0.0,
         .isPressed = (type == TouchType::DOWN),
@@ -495,6 +544,8 @@ TouchEvent EventManager::ConvertAxisEventToTouchEvent(const AxisEvent& axisEvent
         .SetY(axisEvent.y)
         .SetScreenX(axisEvent.screenX)
         .SetScreenY(axisEvent.screenY)
+        .SetGlobalDisplayX(axisEvent.globalDisplayX)
+        .SetGlobalDisplayY(axisEvent.globalDisplayY)
         .SetType(type)
         .SetTime(axisEvent.time)
         .SetSize(0.0)

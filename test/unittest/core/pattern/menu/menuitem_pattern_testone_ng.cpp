@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_row_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
@@ -1398,6 +1399,109 @@ HWTEST_F(MenuItemPatternTestOneNg, InitFocusEvent003, TestSize.Level1)
     ASSERT_NE(itemPattern->selectTheme_, nullptr);
     EXPECT_EQ(itemPattern->selectTheme_->GetoptionApplyFocusedStyle(), true);
     EXPECT_EQ(itemPattern->isFocusShadowSet_, true);
+
+    itemPattern->showDefaultSelectedIcon_ = true;
+    itemPattern->SetFocusStyle();
+    EXPECT_EQ(itemPattern->fontColor_.has_value(), false);
+}
+
+/**
+ * @tc.name: CreateCheckMarkNode001
+ * @tc.desc: Verify CreateCheckMarkNode().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, CreateCheckMarkNode001, TestSize.Level1)
+{
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    auto endRow = FrameNode::CreateFrameNode(
+        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuItemRowPattern>());
+    ASSERT_NE(endRow, nullptr);
+    endRow->MountToParent(itemNode);
+
+    auto checkMarkNode = itemPattern->CreateCheckMarkNode(endRow, endRow->GetChildren().size());
+    ASSERT_NE(checkMarkNode, nullptr);
+
+    itemPattern->checkMarkNode_ = checkMarkNode;
+
+    itemPattern->UpdateCheckMarkColor(Color::BLACK);
+    auto checkLayoutProperty = itemPattern->checkMarkNode_->GetLayoutProperty<TextLayoutProperty>();
+    auto symbolColorList = checkLayoutProperty->GetSymbolColorList();
+    EXPECT_EQ(symbolColorList.has_value(), true);
+    EXPECT_EQ(symbolColorList.value().front(), Color::BLACK);
+
+    itemPattern->SetCheckMarkVisibleType(VisibleType::INVISIBLE);
+    auto checkMarkLayoutProps = itemPattern->checkMarkNode_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(checkMarkLayoutProps, nullptr);
+    auto type = checkMarkLayoutProps->GetVisibility().value_or(VisibleType::VISIBLE);
+    EXPECT_EQ(type, VisibleType::INVISIBLE);
+}
+
+/**
+ * @tc.name: SetShowDefaultSelectedIcon001
+ * @tc.desc: Verify SetShowDefaultSelectedIcon().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, SetShowDefaultSelectedIcon001, TestSize.Level1)
+{
+    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    itemPattern->SetShowDefaultSelectedIcon(false);
+    EXPECT_EQ(itemPattern->endRowNode_, nullptr);
+    EXPECT_EQ(itemPattern->showDefaultSelectedIcon_, false);
+    itemPattern->SetShowDefaultSelectedIcon(true);
+    EXPECT_EQ(itemPattern->endRowNode_, nullptr);
+    EXPECT_EQ(itemPattern->showDefaultSelectedIcon_, true);
+    itemPattern->isOptionPattern_ = true;
+    itemPattern->SetShowDefaultSelectedIcon(true);
+    EXPECT_NE(itemPattern->endRowNode_, nullptr);
+    itemPattern->isOptionPattern_ = false;
+    itemPattern->showDefaultSelectedIcon_ = true;
+    itemPattern->SetShowDefaultSelectedIcon(true);
+    EXPECT_NE(itemPattern->endRowNode_, nullptr);
+    itemPattern->isOptionPattern_ = true;
+    itemPattern->SetShowDefaultSelectedIcon(true);
+    EXPECT_NE(itemPattern->endRowNode_, nullptr);
+    itemPattern->SetShowDefaultSelectedIcon(true);
+    EXPECT_NE(itemPattern->endRowNode_, nullptr);
+}
+
+/**
+ * @tc.name: ApplySelectedThemeStyles001
+ * @tc.desc: Verify ApplySelectedThemeStyles().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, ApplySelectedThemeStyles001, TestSize.Level1)
+{
+    auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    itemPattern->ApplySelectedThemeStyles();
+    EXPECT_EQ(itemPattern->bgColor_.has_value(), false);
 }
 
 /**

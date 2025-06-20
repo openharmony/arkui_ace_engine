@@ -3675,6 +3675,7 @@ void RichEditorPattern::HandleBlurEvent()
         lastSelectionRange_.reset();
     }
     HandleOnEditChanged(false);
+    ReportComponentChangeEvent();
 }
 
 void RichEditorPattern::HandleFocusEvent(FocusReason focusReason)
@@ -6529,14 +6530,15 @@ void RichEditorPattern::DeleteContent(int32_t length)
 
 void RichEditorPattern::DeleteToMaxLength(std::optional<int32_t> length)
 {
-    if (length.value_or(INT_MAX) >= GetTextContentLength() || length.value_or(INT_MAX) <= 0) {
+    int maxLength = length.value_or(INT_MAX);
+    if (maxLength >= GetTextContentLength() || maxLength < 0) {
         return;
     }
     int32_t textContentLength = GetTextContentLength();
     if (isSpanStringMode_) {
-        DeleteValueInStyledString(length.value_or(INT_MAX), GetTextContentLength() - length.value_or(INT_MAX));
+        DeleteValueInStyledString(maxLength, GetTextContentLength() - maxLength);
     } else {
-        while (textContentLength > length.value_or(INT_MAX)) {
+        while (textContentLength > maxLength) {
             textContentLength -= CalculateDeleteLength(CUSTOM_CONTENT_LENGTH, true);
             DeleteContent(CUSTOM_CONTENT_LENGTH);
         }
@@ -13001,4 +13003,23 @@ void RichEditorPattern::OnAccessibilityEventTextChange(const std::string& change
     pipeline->SendEventToAccessibilityWithNode(event, GetHost());
 }
 
+void RichEditorPattern::ReportComponentChangeEvent() {
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    std::string str;
+    if (isSpanStringMode_) {
+        CHECK_NULL_VOID(styledString_);
+        str = styledString_->GetString();
+    } else {
+        std::u16string u16Str;
+        GetContentBySpans(u16Str);
+        str = UtfUtils::Str16DebugToStr8(u16Str);
+    }
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_VOID(value);
+    value->Put("text", str.c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameId_, "event", value);
+    SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "nodeId:[%{public}d] RichEditor reportComponentChangeEvent %{public}d",
+        frameId_, str.length());
+#endif
+}
 } // namespace OHOS::Ace::NG

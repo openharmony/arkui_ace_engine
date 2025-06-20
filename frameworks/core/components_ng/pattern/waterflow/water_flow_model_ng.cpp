@@ -789,12 +789,12 @@ void WaterFlowModelNG::ParseResObjFriction(FrameNode* frameNode, const RefPtr<Re
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj("waterflow.Friction");
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern](const RefPtr<ResourceObject>& resObj) {
-        double result;
-        if (!ResourceParseUtils::ParseResourceToDouble(resObj, result)) {
-            return;
-        }
-        pattern->SetFriction(result);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        double friction = -1.0;
+        ResourceParseUtils::ParseResDouble(resObj, friction);
+        pattern->SetFriction(friction);
     };
     pattern->AddResObj("waterflow.Friction", resObj, std::move(updateFunc));
 }

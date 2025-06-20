@@ -32,6 +32,9 @@ struct SwitchPaintParagraph {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(PointRadius, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(UnselectedColor, Color);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TrackBorderRadius, Dimension);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SwitchPointColorSetByUser, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectedColorSetByUser, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(UnselectedColorSetByUser, bool);
 
     void ToJsonValue(
         std::unique_ptr<JsonValue>& json, const InspectorFilter& filter, const RefPtr<FrameNode> host) const;
@@ -64,7 +67,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwitchPaintParagraph, PointRadius, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwitchPaintParagraph, UnselectedColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwitchPaintParagraph, TrackBorderRadius, Dimension, PROPERTY_UPDATE_RENDER);
-
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwitchPaintParagraph, SwitchPointColorSetByUser, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwitchPaintParagraph, SelectedColorSetByUser, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwitchPaintParagraph, UnselectedColorSetByUser, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsOn, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPaintProperty);

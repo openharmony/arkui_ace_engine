@@ -686,6 +686,12 @@ let FlexWrap;
   FlexWrap[FlexWrap.WrapReverse = 2] = 'WrapReverse';
 })(FlexWrap || (FlexWrap = {}));
 
+let FlipDirection;
+(function (FlipDirection) {
+  FlipDirection[FlipDirection.DOWN = 0] = 'DOWN';
+  FlipDirection[FlipDirection.UP = 1] = 'UP';
+})(FlipDirection || (FlipDirection = {}));
+
 class LayoutPolicy {
   id_ = '';
 
@@ -1624,6 +1630,45 @@ class QuickReplaceSymbolEffect extends SymbolEffect {
   }
   scope(value) {
     this.scope = value;
+    return this;
+  }
+}
+
+class ShaderStyle {
+}
+
+class RadialGradientStyle extends ShaderStyle {
+  constructor(options) {
+    super();
+    this.type = 'RadialGradientStyle';
+    this.options = options;
+  }
+  options(value) {
+    this.options = value;
+    return this;
+  }
+}
+
+class LinearGradientStyle extends ShaderStyle {
+  constructor(options) {
+    super();
+    this.type = 'LinearGradientStyle';
+    this.options = options;
+  }
+  options(value) {
+    this.options = value;
+    return this;
+  }
+}
+
+class ColorShaderStyle extends ShaderStyle {
+  constructor(color) {
+    super();
+    this.type = 'ColorShaderStyle';
+    this.color = color;
+  }
+  color(value) {
+    this.color = value;
     return this;
   }
 }

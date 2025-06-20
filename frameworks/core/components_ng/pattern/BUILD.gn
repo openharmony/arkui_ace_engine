@@ -532,6 +532,7 @@ build_component_ng("pattern_ng") {
     "text/image_span_view_static.cpp",
     "text/multiple_click_recognizer.cpp",
     "text/multiple_paragraph_layout_algorithm.cpp",
+    "text/paragraph_util.cpp",
     "text/span/mutable_span_string.cpp",
     "text/span/span_object.cpp",
     "text/span/span_string.cpp",

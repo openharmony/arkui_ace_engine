@@ -80,6 +80,8 @@ void AddTouchEventAllFingersInfo(const RefPtr<NG::FrameNode>& node, TouchEventIn
         float globalY = item.y;
         float screenX = item.screenX;
         float screenY = item.screenY;
+        double globalDisplayX = item.globalDisplayX;
+        double globalDisplayY = item.globalDisplayY;
         PointF localPoint(globalX, globalY);
         NGGestureRecognizer::Transform(localPoint, node, false, false);
         auto localX = static_cast<float>(localPoint.GetX());
@@ -88,6 +90,7 @@ void AddTouchEventAllFingersInfo(const RefPtr<NG::FrameNode>& node, TouchEventIn
         info.SetGlobalLocation(Offset(globalX, globalY));
         info.SetLocalLocation(Offset(localX, localY));
         info.SetScreenLocation(Offset(screenX, screenY));
+        info.SetGlobalDisplayLocation(Offset(globalDisplayX, globalDisplayY));
         info.SetTouchType(event.type);
         info.SetForce(item.force);
         info.SetPressedTime(item.downTime);
@@ -118,6 +121,7 @@ void ConvertTouchEvent2TouchEventInfo(const RefPtr<NG::FrameNode>& node, const T
     changedInfo.SetLocalLocation(Offset(localX, localY));
     changedInfo.SetGlobalLocation(Offset(event.x, event.y));
     changedInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
+    changedInfo.SetGlobalDisplayLocation(Offset(event.globalDisplayX, event.globalDisplayY));
     changedInfo.SetTouchType(event.type);
     changedInfo.SetForce(event.force);
     changedInfo.SetPressedTime(event.pressedTime);

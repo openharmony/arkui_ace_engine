@@ -87,23 +87,34 @@ ArkUINativeModuleValue RadioBridge::SetRadioStyle(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(radioTheme, panda::NativePointerRef::New(vm, nullptr));
 
     Color checkedBackgroundColorVal;
+    RefPtr<ResourceObject> backgroundColorResObj;
+    RefPtr<ResourceObject> unBorderColorResObj;
+    RefPtr<ResourceObject> indicatorColorResObj;
+    ArkUIRadioColorStruct resObjStru;
     if (checkedBackgroundColor->IsNull() || checkedBackgroundColor->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, checkedBackgroundColor, checkedBackgroundColorVal)) {
+        !ArkTSUtils::ParseJsColorAlpha(vm, checkedBackgroundColor, checkedBackgroundColorVal, backgroundColorResObj)) {
         checkedBackgroundColorVal = radioTheme->GetActiveColor();
+    } else {
+        resObjStru.checkedBackgroundColor = AceType::RawPtr(backgroundColorResObj);
     }
     Color uncheckedBorderColorVal;
     if (uncheckedBorderColor->IsNull() || uncheckedBorderColor->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, uncheckedBorderColor, uncheckedBorderColorVal)) {
+        !ArkTSUtils::ParseJsColorAlpha(vm, uncheckedBorderColor, uncheckedBorderColorVal, unBorderColorResObj)) {
         uncheckedBorderColorVal = radioTheme->GetInactiveColor();
+    } else {
+        resObjStru.uncheckedBorderColor = AceType::RawPtr(unBorderColorResObj);
     }
     Color indicatorColorVal;
     if (indicatorColor->IsNull() || indicatorColor->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, indicatorColor, indicatorColorVal)) {
+        !ArkTSUtils::ParseJsColorAlpha(vm, indicatorColor, indicatorColorVal, indicatorColorResObj)) {
         indicatorColorVal = radioTheme->GetPointColor();
+    } else {
+        resObjStru.indicatorColor = AceType::RawPtr(indicatorColorResObj);
     }
 
-    GetArkUINodeModifiers()->getRadioModifier()->setRadioStyle(nativeNode,
-        checkedBackgroundColorVal.GetValue(), uncheckedBorderColorVal.GetValue(), indicatorColorVal.GetValue());
+    GetArkUINodeModifiers()->getRadioModifier()->setRadioStylePtr(nativeNode,
+        checkedBackgroundColorVal.GetValue(), uncheckedBorderColorVal.GetValue(),
+        indicatorColorVal.GetValue(), resObjStru);
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -2566,5 +2566,41 @@ HWTEST_F(SpanStringTestNg, SpanLineThicknessScaleTest002, TestSize.Level1)
     EXPECT_EQ(buffer.find("DecorationSpan"), 0);
 }
 
+/**
+ * @tc.name: TextLayoutTest001
+ * @tc.desc: Test new attribute of TextLayoutInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, TextLayoutTest001, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
+    SpanParagraphStyle spanParagraphStyle;
+    spanParagraphStyle.align = TextAlign::START;
+    spanParagraphStyle.maxLines = 2;
+    spanParagraphStyle.wordBreak = WordBreak::BREAK_ALL;
+    spanParagraphStyle.textOverflow = TextOverflow::ELLIPSIS;
+    spanParagraphStyle.textIndent = Dimension(30);
+    spanParagraphStyle.leadingMargin = LeadingMargin();
+    spanParagraphStyle.leadingMargin->size = LeadingMarginSize(Dimension(25.0), Dimension(26.0));
+    spanString->AddSpan(AceType::MakeRefPtr<ParagraphStyleSpan>(spanParagraphStyle, 0, 1));
+    spanString->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3));
+    spanString->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(10), 0, 2));
+    auto firstSpans = spanString->GetSpans(2, 1);
+    EXPECT_EQ(firstSpans.size(), 1);
+    auto paraSpans = spanString->GetSpans(0, 2, SpanType::ParagraphStyle);
+    EXPECT_EQ(paraSpans.size(), 1);
+    auto paraSpan = AceType::DynamicCast<ParagraphStyleSpan>(paraSpans[0]);
+    EXPECT_NE(paraSpan, nullptr);
+    EXPECT_EQ(paraSpan->GetStartIndex(), 0);
+    EXPECT_EQ(paraSpan->GetEndIndex(), 1);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().align, TextAlign::START);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().maxLines, 2);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().wordBreak, WordBreak::BREAK_ALL);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().textOverflow, TextOverflow::ELLIPSIS);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().textIndent, Dimension(30));
+    EXPECT_EQ(paraSpan->GetParagraphStyle().leadingMargin.value().size.Width().ConvertToVp(), 25);
+    EXPECT_EQ(paraSpan->GetParagraphStyle().leadingMargin.value().size.Height().ConvertToVp(), 26);
+}
+
 
 } // namespace OHOS::Ace::NG

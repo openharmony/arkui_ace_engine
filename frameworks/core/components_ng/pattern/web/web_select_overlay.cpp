@@ -85,6 +85,7 @@ bool WebSelectOverlay::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuPar
     CHECK_NULL_RETURN(host, false);
     StartListenSelectOverlayParentScroll(host);
     ProcessOverlay({ .animation = true });
+    SetTouchHandleExistState(true);
     return true;
 }
 
@@ -987,6 +988,7 @@ void WebSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reaso
     aiMenuType_ = TextDataDetectType::INVALID;
     webSelectInfo_.menuInfo.aiMenuOptionType = aiMenuType_;
     StopListenSelectOverlayParentScroll(host);
+    SetTouchHandleExistState(false);
 }
 
 void WebSelectOverlay::AfterCloseOverlay()
@@ -1194,5 +1196,13 @@ void WebSelectOverlay::OnHandleIsHidden()
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateSingleHandleVisible(false);
+    SetTouchHandleExistState(false);
+}
+
+void WebSelectOverlay::SetTouchHandleExistState(bool touchHandleExist)
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTouchHandleExistState(touchHandleExist);
 }
 } // namespace OHOS::Ace::NG

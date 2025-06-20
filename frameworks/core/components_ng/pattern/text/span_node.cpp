@@ -19,6 +19,8 @@
 #include <optional>
 #include <string>
 
+#include "text_layout_adapter.h"
+
 #include "base/geometry/dimension.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utf_helper.h"
@@ -1417,26 +1419,7 @@ bool ImageSpanItem::UpdatePlaceholderRun(PlaceholderStyle placeholderStyle)
         run.baseline_offset = placeholderStyle.baselineOffset;
         run.alignment = PlaceholderAlignment::BASELINE;
     } else {
-        switch (placeholderStyle.verticalAlign) {
-            case VerticalAlign::TOP:
-                run.alignment = PlaceholderAlignment::TOP;
-                break;
-            case VerticalAlign::CENTER:
-                run.alignment = PlaceholderAlignment::MIDDLE;
-                break;
-            case VerticalAlign::BOTTOM:
-            case VerticalAlign::NONE:
-                run.alignment = PlaceholderAlignment::BOTTOM;
-                break;
-            case VerticalAlign::BASELINE:
-                run.alignment = PlaceholderAlignment::ABOVEBASELINE;
-                break;
-            case VerticalAlign::FOLLOW_PARAGRAPH:
-                run.alignment = PlaceholderAlignment::FOLLOW_PARAGRAPH;
-                break;
-            default:
-                run.alignment = PlaceholderAlignment::BOTTOM;
-        }
+        run.alignment = GetPlaceHolderAlignmentFromVerticalAlign(placeholderStyle.verticalAlign);
     }
     auto needReCreate = run_ != run;
     run_ = run;

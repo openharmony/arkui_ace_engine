@@ -653,7 +653,7 @@ abstract class ViewPU extends PUV2ViewBase
         providedVarStore = new ObservedPropertySimplePU(defaultValue, this, consumeVarName);
         providedVarStore.__setIsFake_ObservedPropertyAbstract_Internal(true);
       } else {
-        throw new ReferenceError(`${this.debugInfo__()} missing @Provide property with name ${providedPropName}.
+        throw new ReferenceError(`${this.debugInfo__()} missing @Provide property with name ${providedPropName} or default value.
           Fail to resolve @Consume(${providedPropName}).`);
       }
     }

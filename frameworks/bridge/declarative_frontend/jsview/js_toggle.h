@@ -54,6 +54,12 @@ public:
 
 private:
     static int32_t toggleType_;
+    static void CreateWithDimensionResourceObj(RefPtr<ResourceObject>& resObj, const int32_t resType);
+    static void CreateWithColorResourceObj(RefPtr<ResourceObject>& resObj, const int32_t resType);
+    static void SetPointRadius(const JSRef<JSObject>& jsObj);
+    static void SetUnselectedColor(const JSRef<JSObject>& jsObj);
+    static void SetPointColor(const JSRef<JSObject>& jsObj);
+    static void SetTrackBorderRadius(const JSRef<JSObject>& jsObj);
 };
 
 } // namespace OHOS::Ace::Framework

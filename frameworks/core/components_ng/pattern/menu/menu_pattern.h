@@ -618,6 +618,9 @@ public:
         return customNode_.Upgrade();
     }
 
+    void UpdateSelectOptionTextByIndex(int32_t index, const std::string& text);
+    void UpdateSelectOptionIconByIndex(int32_t index, const std::string& icon);
+
     void InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuTheme);
 
     float GetSelectMenuWidthFromTheme() const;
@@ -660,6 +663,11 @@ public:
     void SetOriginPreviewYForStack(float tmp)
     {
         originPreviewYForStack_ = tmp;
+    }
+
+    void SetDisableMenuBgColor(bool ret = false)
+    {
+        isDisableMenuBgColor_ = ret;
     }
 
 protected:
@@ -791,7 +799,7 @@ private:
     float translateYForStack_ = 0.0f;
     float originMenuYForStack_ = 0.0f;
     float originPreviewYForStack_ = 0.0f;
-
+    bool isDisableMenuBgColor_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };
 

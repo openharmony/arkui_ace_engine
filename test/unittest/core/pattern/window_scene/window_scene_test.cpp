@@ -491,4 +491,28 @@ HWTEST_F(WindowSceneTest, SetSubSessionVisible, TestSize.Level1)
     windowScene->SetSubSessionVisible();
     ASSERT_EQ(subSession->surfaceNode_->GetStagingProperties().GetVisible(), true);
 }
+
+
+/**
+ * @tc.name: OnLayoutFinished
+ * @tc.desc: OnLayoutFinished Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, OnLayoutFinished, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create windowScene.
+     */
+    auto windowScene = CreateWindowSceneForStartingWindowTest();
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+
+    windowScene->session_->SetShowRecent(true);
+    windowScene->OnLayoutFinished();
+    EXPECT_EQ(windowScene->session_->GetShowRecent(), true);
+}
+
 } // namespace OHOS::Ace::NG

@@ -2131,6 +2131,19 @@ class OnGestureRecognizerJudgeBeginModifier extends ModifierWithKey {
   }
 }
 OnGestureRecognizerJudgeBeginModifier.identity = Symbol('onGestureRecognizerJudgeBegin');
+class OnTouchTestDoneModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOnTouchTestDone(node);
+    } else {
+      getUINativeModule().common.setOnTouchTestDone(node, this.value);
+    }
+  }
+}
+OnGestureRecognizerJudgeBeginModifier.identity = Symbol('onOnTouchTestDone');
 class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -3793,6 +3806,11 @@ class ArkComponent {
   onGestureRecognizerJudgeBegin(callback) {
     this._onGestureRecognizerJudgeBegin = callback;
     modifierWithKey(this._modifiersWithKeys, OnGestureRecognizerJudgeBeginModifier.identity, OnGestureRecognizerJudgeBeginModifier, callback);
+    return this;
+  }
+  onTouchTestDone(callback) {
+    this._onTouchTestDone = callback;
+    modifierWithKey(this._modifiersWithKeys, OnTouchTestDoneModifier.identity, OnTouchTestDoneModifier, callback);
     return this;
   }
   shouldBuiltInRecognizerParallelWith(callback) {
@@ -14105,6 +14123,25 @@ class TextVerticalAlignModifier extends ModifierWithKey {
 }
 TextVerticalAlignModifier.identity = Symbol('textVerticalAlignIdentity');
 
+class TextContentTransitionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetTextContentTransition(node);
+    }
+    else {
+      getUINativeModule().text.setTextContentTransition(node, this.value.flipDirection, this.value.enableBlur);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.flipDirection, this.value.flipDirection) ||
+      !isBaseOrResourceEqual(this.stageValue.enableBlur, this.value.enableBlur);
+  }
+}
+TextContentTransitionModifier.identity = Symbol('textContentTransition');
+
 class ArkTextComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -14352,6 +14389,10 @@ class ArkTextComponent extends ArkComponent {
   }
   textVerticalAlign(value) {
     modifierWithKey(this._modifiersWithKeys, TextVerticalAlignModifier.identity, TextVerticalAlignModifier, value);
+    return this;
+  }
+  contentTransition(value) {
+    modifierWithKey(this._modifiersWithKeys, TextContentTransitionModifier.identity, TextContentTransitionModifier, value);
     return this;
   }
 }
@@ -38337,6 +38378,34 @@ class SymbolEffectModifier extends ModifierWithKey {
 }
 SymbolEffectModifier.identity = Symbol('symbolEffect');
 
+class SymbolShadowModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().symbolGlyph.resetSymbolShadow(node);
+      } else {
+        getUINativeModule().symbolGlyph.setSymbolShadow(node, this.value);
+      }
+    }
+  }
+  SymbolShadowModifier.identity = Symbol('symbolShadow');
+
+  class ShaderStyleModifier extends ModifierWithKey {
+    constructor(value) {
+      super(value);
+    }
+    applyPeer(node, reset) {
+      if (reset) {
+        getUINativeModule().symbolGlyph.resetShaderStyle(node);
+      } else {
+        getUINativeModule().symbolGlyph.setShaderStyle(node, this.value);
+      }
+    }
+  }
+  ShaderStyleModifier.identity = Symbol('shaderStyle');
+
 class SymbolMinFontScaleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -38410,6 +38479,14 @@ class ArkSymbolGlyphComponent extends ArkComponent {
     symbolEffect.symbolEffect = effect;
     symbolEffect.action = action;
     modifierWithKey(this._modifiersWithKeys, SymbolEffectModifier.identity, SymbolEffectModifier, symbolEffect);
+    return this;
+  }
+  shaderStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, ShaderStyleModifier.identity, ShaderStyleModifier, value);
+    return this;
+  }
+  symbolShadow(value) {
+    modifierWithKey(this._modifiersWithKeys, SymbolShadowModifier.identity, SymbolShadowModifier, value);
     return this;
   }
   minFontScale(value) {

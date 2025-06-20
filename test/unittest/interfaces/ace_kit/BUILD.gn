@@ -102,6 +102,7 @@ ohos_source_set("ace_kit_mock") {
     "$ace_root/test/mock/core/render/mock_media_player_creator.cpp",
     "$ace_root/test/mock/core/render/mock_modifier_adapter.cpp",
     "$ace_root/test/mock/core/render/mock_paragraph.cpp",
+    "$ace_root/test/mock/core/render/mock_texteffect.cpp",
     "$ace_root/test/mock/core/render/mock_path_painter.cpp",
     "$ace_root/test/mock/core/render/mock_pixmap_image.cpp",
     "$ace_root/test/mock/core/render/mock_render_context.cpp",
@@ -165,6 +166,7 @@ ohos_unittest("ace_kit_test") {
 
   sources += [
     "abstract_view_factory_test.cpp",
+    "aging_adapation_dialog_test.cpp",
     "aging_adapation_dialog_util_test.cpp",
     "animation_kit_test.cpp",
     "box_layout_algorithm_test.cpp",

@@ -235,16 +235,26 @@ void SetNeedResetTitleProperty(const RefPtr<FrameNode>& titleBarNode)
 } // namespace
 bool NavigationModelNG::navBarWidthDoubleBind_ = false;
 
-void NavigationModelNG::Create()
+void NavigationModelNG::Create(bool useHomeDestination)
 {
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "create navigation and %{public}s HomeNavDestination",
+        (useHomeDestination ? "use" : "don't use"));
     auto* stack = ViewStackProcessor::GetInstance();
     // navigation node
     int32_t nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVIGATION_VIEW_ETS_TAG, nodeId);
     auto navigationGroupNode = NavigationRegister::GetInstance()->GetOrCreateGroupNode(
         V2::NAVIGATION_VIEW_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto useHomeDest = navigationGroupNode->GetUseHomeDestination();
+    if (!useHomeDest.has_value()) {
+        useHomeDest = useHomeDestination;
+        navigationGroupNode->SetUseHomeDestinatoin(useHomeDestination);
+    }
+    if (!useHomeDest.value() && !CreateNavBarNodeIfNeeded(navigationGroupNode)) { // navBar node
+        return;
+    }
     if (!CreatePrimaryContentIfNeeded(navigationGroupNode) || // primaryContent node
-        !CreateNavBarNodeIfNeeded(navigationGroupNode) ||  // navBar node
         !CreateContentNodeIfNeeded(navigationGroupNode) || // content node
         !CreateDividerNodeIfNeeded(navigationGroupNode)) { // divider node
         return;
@@ -1715,6 +1725,29 @@ void NavigationModelNG::SetNavigationStackWithCreatorAndUpdater(
     updater(stack);
 }
 
+bool NavigationModelNG::UseHomeDestination() const
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_RETURN(navigationGroupNode, false);
+    auto useHomeDest = navigationGroupNode->GetUseHomeDestination();
+    return useHomeDest.has_value() && useHomeDest.value();
+}
+
+void NavigationModelNG::SetHomePathInfoWithCallback(
+    std::function<void(const RefPtr<NavigationStack>&)>&& setHomePathInfoCallback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto stack = pattern->GetNavigationStack();
+    if (setHomePathInfoCallback) {
+        setHomePathInfoCallback(stack);
+    }
+}
+
 void NavigationModelNG::SetNavigationStack()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -2194,10 +2227,13 @@ void NavigationModelNG::SetHideNavBarInner(
     } else {
         pattern->SetNavBarVisibilityChange(true);
     }
-    auto navBarNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetNavBarNode());
-    navBarNode->SetJSViewActive(!hideNavBar);
-    if (pattern->GetNavBarVisibilityChange()) {
-        navBarNode->MarkDirtyNode();
+    auto navBarOrHomeDestNode =
+        AceType::DynamicCast<NavDestinationNodeBase>(navigationGroupNode->GetNavBarOrHomeDestinationNode());
+    if (navBarOrHomeDestNode) {
+        navBarOrHomeDestNode->SetJSViewActive(!hideNavBar);
+        if (pattern->GetNavBarVisibilityChange()) {
+            navBarOrHomeDestNode->MarkDirtyNode();
+        }
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, HideNavBar, hideNavBar, navigationGroupNode);
 }

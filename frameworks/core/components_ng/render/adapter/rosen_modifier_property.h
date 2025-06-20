@@ -18,8 +18,8 @@
 
 #ifndef MODIFIER_NG
 #include "render_service_client/core/modifier/rs_property_modifier.h"
-#include "render_service_client/core/ui/rs_node.h"
 #endif
+#include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace::NG {
 #ifndef MODIFIER_NG

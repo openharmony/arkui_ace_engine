@@ -52,7 +52,9 @@ public:
     void ResetSelectedColor() override;
     void ResetUnSelectedColor() override;
     void ResetCheckMarkColor() override;
-    
+    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+        const CheckBoxColorType checkBoxColorType) override;
+
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetSelect(FrameNode* frameNode, bool isSelected);
     static void SetSelectedColor(FrameNode* frameNode, const Color& color);
@@ -84,6 +86,12 @@ public:
     static std::string GetCheckboxGroup(FrameNode* frameNode);
 
     static void SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange);
+    static void UpdateComponentColor(FrameNode* frameNode, const CheckBoxColorType checkBoxColorType);
+    static void CreateWithResourceObj(
+        FrameNode* frameNode, const CheckBoxColorType jsResourceType, const RefPtr<ResourceObject>& resObj);
+
+private:
+    static std::string ColorTypeToString(const CheckBoxColorType checkBoxColorType);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_MODEL_NG_H

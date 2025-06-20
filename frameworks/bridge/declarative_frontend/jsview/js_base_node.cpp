@@ -339,9 +339,7 @@ bool JSBaseNode::GetTouches(const JSCallbackInfo& info, TouchEvent& touchEvent)
         JSRef<JSArray> touchesArray = JSRef<JSArray>::Cast(touchesJsVal);
         for (auto index = 0; index < static_cast<int32_t>(touchesArray->Length()); index++) {
             JSRef<JSVal> item = touchesArray->GetValueAt(index);
-            if (!item->IsObject()) {
-                continue;
-            }
+            if (!item->IsObject()) { continue; }
             JSRef<JSObject> itemObj = JSRef<JSObject>::Cast(item);
             TouchPoint point;
             point.id = itemObj->GetPropertyValue<int32_t>("id", 0);
@@ -349,6 +347,8 @@ bool JSBaseNode::GetTouches(const JSCallbackInfo& info, TouchEvent& touchEvent)
             point.y = itemObj->GetPropertyValue<float>("y", 0.0f);
             point.screenX = itemObj->GetPropertyValue<float>("screenX", 0.0f);
             point.screenY = itemObj->GetPropertyValue<float>("screenY", 0.0f);
+            point.globalDisplayX = itemObj->GetPropertyValue<double>("globalDisplayX", 0.0);
+            point.globalDisplayY = itemObj->GetPropertyValue<double>("globalDisplayY", 0.0);
             point.originalId = itemObj->GetPropertyValue<int32_t>("id", 0);
             touchEvent.pointers.emplace_back(point);
         }

@@ -35,16 +35,42 @@ void SetSelect(ArkUINodeHandle node, ArkUI_Bool isSelected)
 
 void SetSelectedColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxModelNG::SetSelectedColor(frameNode, Color(color));
 }
 
+void SetSelectedColorPtr(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr)
+{
+    CHECK_NULL_VOID(node);
+    SetSelectedColor(node, color);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+        auto colorResObj = AceType::Claim(color);
+        CheckBoxModelNG::CreateWithResourceObj(frameNode, CheckBoxColorType::SELECTED_COLOR, colorResObj);
+    }
+}
+
 void SetUnSelectedColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxModelNG::SetUnSelectedColor(frameNode, Color(color));
+}
+
+void SetUnSelectedColorPtr(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr)
+{
+    CHECK_NULL_VOID(node);
+    SetUnSelectedColor(node, color);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+        auto colorResObj = AceType::Claim(color);
+        CheckBoxModelNG::CreateWithResourceObj(frameNode, CheckBoxColorType::UN_SELECTED_COLOR, colorResObj);
+    }
 }
 
 void SetCheckboxWidth(ArkUINodeHandle node, float value, int unit)
@@ -170,6 +196,10 @@ void ResetSelectedColor(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxModelNG::ResetSelectedColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto resObj = AceType::MakeRefPtr<ResourceObject>();
+        CheckBoxModelNG::CreateWithResourceObj(frameNode, CheckBoxColorType::SELECTED_COLOR, resObj);
+    }
 }
 
 void ResetUnSelectedColor(ArkUINodeHandle node)
@@ -177,6 +207,10 @@ void ResetUnSelectedColor(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxModelNG::ResetUnSelectedColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto resObj = AceType::MakeRefPtr<ResourceObject>();
+        CheckBoxModelNG::CreateWithResourceObj(frameNode, CheckBoxColorType::UN_SELECTED_COLOR, resObj);
+    }
 }
 
 void ResetCheckboxWidth(ArkUINodeHandle node)
@@ -324,7 +358,9 @@ const ArkUICheckboxModifier *GetCheckboxModifier()
     static const ArkUICheckboxModifier modifier = {
         .setSelect = SetSelect,
         .setSelectedColor = SetSelectedColor,
+        .setSelectedColorPtr = SetSelectedColorPtr,
         .setUnSelectedColor = SetUnSelectedColor,
+        .setUnSelectedColorPtr = SetUnSelectedColorPtr,
         .setCheckboxWidth = SetCheckboxWidth,
         .setCheckboxHeight = SetCheckboxHeight,
         .setMark = SetMark,

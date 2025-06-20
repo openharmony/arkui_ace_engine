@@ -259,6 +259,14 @@ shared_ptr<JsValue> ArkJSRuntime::GetGlobal()
     return std::make_shared<ArkJSValue>(shared_from_this(), JSNApi::GetGlobalObject(vm_));
 }
 
+shared_ptr<JsValue> ArkJSRuntime::GetGlobal(ArkNativeEngine* nativeArkEngine)
+{
+    LocalScope scope(vm_);
+    CHECK_NULL_RETURN(nativeArkEngine, nullptr);
+    return std::make_shared<ArkJSValue>(
+        shared_from_this(), JSNApi::GetGlobalObject(vm_, nativeArkEngine->GetContext()));
+}
+
 void ArkJSRuntime::RunGC()
 {
     JSExecutionScope executionScope(vm_);
