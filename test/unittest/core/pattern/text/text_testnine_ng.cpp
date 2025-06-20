@@ -885,4 +885,41 @@ HWTEST_F(TextTestNineNg, IsFixIdealSizeAndNoMaxSize, TestSize.Level1)
     ret = textLayoutAlgorithm->IsFixIdealSizeAndNoMaxSize(AccessibilityManager::RawPtr(layoutWrapper), true);
     EXPECT_TRUE(ret);
 }
+
+/**
+ * @tc.name: MeasureWithMatchParent
+ * @tc.desc: Test MeasureWithMatchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, MeasureWithMatchParent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and Create function
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(textLayoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(0.0f, 0.0f));
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    /**
+     * @tc.steps: step2. call MeasureWithMatchParent.
+     */
+    textLayoutAlgorithm->MeasureWithMatchParent(AceType::RawPtr(layoutWrapper));
+    auto frameSize = geometryNode->GetFrameSize();
+    EXPECT_EQ(frameSize, SizeF(0.0f, 0.0f));
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    layoutProperty->layoutConstraint_ = LayoutConstraintF();
+    layoutProperty->layoutConstraint_->parentIdealSize = OptionalSizeF(SizeF(100.0f, 100.0f));
+    textLayoutAlgorithm->MeasureWithMatchParent(AceType::RawPtr(layoutWrapper));
+    frameSize = geometryNode->GetFrameSize();
+    EXPECT_EQ(frameSize, SizeF(100.0f, 100.0f));
+}
 } // namespace OHOS::Ace::NG

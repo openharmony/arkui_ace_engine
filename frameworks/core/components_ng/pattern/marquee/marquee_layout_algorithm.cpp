@@ -37,8 +37,7 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (layoutConstraint->selfIdealSize.Height().has_value()) {
         textLayoutConstraint.selfIdealSize.SetHeight(layoutConstraint->selfIdealSize.Height().value());
     } else if (heightLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        auto maxHeight = TextBase::GetConstraintMaxLength(layoutWrapper, layoutConstraint.value(), false);
-        textLayoutConstraint.selfIdealSize.SetHeight(maxHeight);
+        textLayoutConstraint.selfIdealSize.SetHeight(maxSize.Height());
     }
     // measure text, and add marquee padding to text child
     PaddingProperty textPadding;
@@ -48,6 +47,11 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     textPadding.bottom = CalcLength(padding.bottom.value());
     child->GetLayoutProperty()->UpdatePadding(textPadding);
     child->Measure(textLayoutConstraint);
+    auto adaptiveSize = GetMeasureAdaptiveHeight(layoutWrapper, child);
+    if (adaptiveSize.Height().has_value()) {
+        textLayoutConstraint.selfIdealSize.SetHeight(adaptiveSize.Height().value());
+        child->Measure(textLayoutConstraint);
+    }
     // measure marquee self, and update marquee padding to zero
     layoutWrapper->GetGeometryNode()->UpdatePaddingWithBorder({ 0.0, 0.0, 0.0, 0.0 });
     OptionalSizeF frameSize;
@@ -61,12 +65,8 @@ void MarqueeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         frameSize.UpdateIllegalSizeWithCheck(layoutConstraint->parentIdealSize);
         frameSize.UpdateIllegalSizeWithCheck(layoutConstraint->percentReference);
         auto childFrame = child->GetGeometryNode()->GetMarginFrameSize();
-        auto constrainWidth = maxSize.Width();
-        auto widthLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
-        if (widthLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
-            constrainWidth = layoutConstraint->parentIdealSize.Width().value_or(0.0f);
-        }
-        frameSize.Constrain(SizeF { 0.0f, 0.0f }, SizeF { constrainWidth, childFrame.Height() });
+        frameSize.Constrain(SizeF { 0.0f, 0.0f }, SizeF { maxSize.Width(), childFrame.Height() });
+        MeasureWithLayoutPolicy(layoutWrapper, child, frameSize);
         break;
     } while (false);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
@@ -103,5 +103,122 @@ void MarqueeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     translate.SetY(0.0f);
     textGeoNode->SetMarginFrameOffset(translate);
     child->Layout();
+}
+
+void MarqueeLayoutAlgorithm::MeasureWithLayoutPolicy(
+    LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& textLayoutWrapper, OptionalSizeF& frameSize)
+{
+    auto widthPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
+    auto heightPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
+    if (widthPolicy == LayoutCalPolicy::NO_MATCH && heightPolicy == LayoutCalPolicy::NO_MATCH) {
+        return;
+    }
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
+    auto childGeometryNode = textLayoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(childGeometryNode);
+    auto childFrame = childGeometryNode->GetMarginFrameSize();
+    MeasureCalculationContext context {
+        .layoutConstraint = layoutConstraint.value(), .layoutProperty = layoutProperty, .optionalSize = OptionalSizeF()
+    };
+    HandleWidthConstraint(widthPolicy, childFrame.Width(), context);
+    HandleHeightConstraint(heightPolicy, childFrame.Height(), context);
+    auto optionalFrameSize = context.optionalSize;
+    optionalFrameSize.Constrain(context.layoutConstraint.minSize, context.layoutConstraint.maxSize, true);
+    if (optionalFrameSize.Width().has_value()) {
+        frameSize.SetWidth(optionalFrameSize.Width().value());
+    }
+    if (optionalFrameSize.Height().has_value()) {
+        frameSize.SetHeight(optionalFrameSize.Height().value());
+    }
+}
+
+void MarqueeLayoutAlgorithm::HandleWidthConstraint(
+    LayoutCalPolicy policy, float childDimensionSize, MeasureCalculationContext& context)
+{
+    CHECK_NULL_VOID(context.layoutProperty);
+    if (context.layoutConstraint.selfIdealSize.Width().has_value()) {
+        return;
+    }
+    switch (policy) {
+        case LayoutCalPolicy::WRAP_CONTENT:
+            context.optionalSize.SetWidth(childDimensionSize);
+            break;
+        case LayoutCalPolicy::FIX_AT_IDEAL_SIZE: {
+            context.optionalSize.SetWidth(childDimensionSize);
+            const auto& calcLayoutConstraint = context.layoutProperty->GetCalcLayoutConstraint();
+            if (calcLayoutConstraint && !calcLayoutConstraint->maxSize->Width().has_value()) {
+                context.layoutConstraint.maxSize.SetWidth(Infinity<float>());
+            }
+            break;
+        }
+        case LayoutCalPolicy::MATCH_PARENT:
+            context.optionalSize.SetWidth(context.layoutConstraint.parentIdealSize.Width());
+            break;
+        default:
+            break;
+    }
+}
+
+void MarqueeLayoutAlgorithm::HandleHeightConstraint(
+    LayoutCalPolicy policy, float childDimensionSize, MeasureCalculationContext& context)
+{
+    CHECK_NULL_VOID(context.layoutProperty);
+    if (context.layoutConstraint.selfIdealSize.Height().has_value()) {
+        return;
+    }
+    switch (policy) {
+        case LayoutCalPolicy::WRAP_CONTENT:
+            context.optionalSize.SetHeight(childDimensionSize);
+            break;
+        case LayoutCalPolicy::FIX_AT_IDEAL_SIZE: {
+            context.optionalSize.SetHeight(childDimensionSize);
+            const auto& calcLayoutConstraint = context.layoutProperty->GetCalcLayoutConstraint();
+            if (calcLayoutConstraint && !calcLayoutConstraint->maxSize->Height().has_value()) {
+                context.layoutConstraint.maxSize.SetHeight(Infinity<float>());
+            }
+            break;
+        }
+        case LayoutCalPolicy::MATCH_PARENT:
+            context.optionalSize.SetHeight(context.layoutConstraint.parentIdealSize.Height());
+            break;
+        default:
+            break;
+    }
+}
+
+OptionalSizeF MarqueeLayoutAlgorithm::GetMeasureAdaptiveHeight(
+    LayoutWrapper* marqueeLayoutWrapper, const RefPtr<LayoutWrapper>& textLayoutWrapper)
+{
+    OptionalSizeF frameSize;
+    auto heightPolicy = TextBase::GetLayoutCalPolicy(marqueeLayoutWrapper, false);
+    if (heightPolicy != LayoutCalPolicy::WRAP_CONTENT && heightPolicy != LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+        return frameSize;
+    }
+    auto layoutProperty = marqueeLayoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, frameSize);
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_RETURN(layoutConstraint, frameSize);
+    if (layoutConstraint->selfIdealSize.Height().has_value()) {
+        return frameSize;
+    }
+    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(calcLayoutConstraint, frameSize);
+    auto childGeometryNode = textLayoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(childGeometryNode, frameSize);
+    auto childFrame = childGeometryNode->GetMarginFrameSize();
+    frameSize.SetHeight(childFrame.Height());
+    auto maxSize = layoutConstraint->maxSize;
+    if (heightPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE && !calcLayoutConstraint->maxSize->Height().has_value()) {
+        maxSize.SetHeight(Infinity<float>());
+    }
+    frameSize.Constrain(layoutConstraint->minSize, maxSize, true);
+    if (frameSize.Height().has_value() && frameSize.Height().value() != childFrame.Height()) {
+        return frameSize;
+    }
+    frameSize.Reset();
+    return frameSize;
 }
 } // namespace OHOS::Ace::NG

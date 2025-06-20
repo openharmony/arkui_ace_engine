@@ -149,12 +149,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     auto longestLine = paragraphManager_->GetLongestLine();
     auto heightFinal = static_cast<float>(height + std::fabs(baselineOffset_));
     if (contentConstraint.selfIdealSize.Height().has_value()) {
-        auto heightPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
-        if (heightPolicy == LayoutCalPolicy::MATCH_PARENT) {
-            heightFinal = contentConstraint.selfIdealSize.Height().value();
-        } else {
-            heightFinal = std::min(heightFinal, contentConstraint.selfIdealSize.Height().value());
-        }
+        heightFinal = std::min(heightFinal, contentConstraint.selfIdealSize.Height().value());
     } else {
         heightFinal = std::min(heightFinal, contentConstraint.maxSize.Height());
     }

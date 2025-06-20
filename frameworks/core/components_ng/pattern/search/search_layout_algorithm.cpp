@@ -499,10 +499,6 @@ double SearchLayoutAlgorithm::CalcSearchWidth(
     auto searchConstraint = contentConstraint;
     auto maxWidth = TextBase::GetConstraintMaxLength(layoutWrapper, contentConstraint, true);
     auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(maxWidth);
-    auto widthLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
-    if (widthLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        return idealWidth;
-    }
     auto maxHeight = TextBase::GetConstraintMaxLength(layoutWrapper, contentConstraint, false);
     auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(maxHeight);
     auto maxIdealSize = SizeF { idealWidth, idealHeight };
@@ -578,7 +574,7 @@ double SearchLayoutAlgorithm::CalcSearchHeight(
     auto hasHeight = calcLayoutConstraint->selfIdealSize.has_value() &&
         calcLayoutConstraint->selfIdealSize->Height().has_value();
     if (hasMinSize && ((hasMaxSize && constraint.minSize.Height() >= constraint.maxSize.Height())
-        || (!hasMaxSize && !hasHeight))) {
+        || (!hasMaxSize && !hasHeight && layoutPolicy != LayoutCalPolicy::MATCH_PARENT))) {
         return constraint.minSize.Height();
     }
     if (hasMinSize) {
