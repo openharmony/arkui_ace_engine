@@ -60,8 +60,6 @@ protected:
         CHECK_NULL_RETURN(!spanGroup.empty(), nullptr);
         return spanGroup.front();
     }
-    void ApplyIndent(ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width,
-        const TextStyle& textStyle);
     void ConstructTextStyles(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle);
     bool ParagraphReLayout(const LayoutConstraintF& contentConstraint);

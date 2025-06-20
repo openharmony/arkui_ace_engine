@@ -17,7 +17,7 @@
 
 #include <unordered_set>
 
-#if !defined(PREVIEW)
+#if !defined(PREVIEW) && defined (OHOS_STANDARD_SYSTEM)
 #include "paragraph_napi/js_paragraph.h"
 #include "core/components_ng/render/adapter/txt_paragraph.h"
 #endif

@@ -755,7 +755,7 @@ bool TextLayoutAlgorithm::UpdateSingleParagraph(LayoutWrapper* layoutWrapper, Pa
     if (paragraph) {
         CreateOrUpdateTextEffect(oldParagraph, paragraph, pattern, content);
     }
-    ApplyIndent(paraStyle, paragraph, maxWidth, textStyle);
+    ParagraphUtil::ApplyIndent(paraStyle, paragraph, maxWidth, textStyle);
     paragraphManager_->AddParagraph({ .paragraph = paragraph,
         .paragraphStyle = paraStyle,
         .start = 0,
