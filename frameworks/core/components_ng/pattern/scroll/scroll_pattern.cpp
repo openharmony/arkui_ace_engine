@@ -259,6 +259,7 @@ void ScrollPattern::ResetPosition()
 {
     currentOffset_ = 0.0f;
     lastOffset_ = 0.0f;
+    crossOffset_ = 0.0f;
 }
 
 bool ScrollPattern::IsAtTop() const

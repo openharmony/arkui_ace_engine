@@ -126,4 +126,26 @@ HWTEST_F(FreeScrollTest, ModeChange001, TestSize.Level1)
     EXPECT_EQ(link.size(), 1);
     ASSERT_EQ(*link.begin(), scrollHandler->GetScrollable()->panRecognizerNG_);
 }
+
+/**
+ * @tc.name: ModeChange002
+ * @tc.desc: Test offset reset
+ * @tc.type: FUNC
+ */
+HWTEST_F(FreeScrollTest, ModeChange002, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ 2000, 2000 });
+    CreateScrollDone();
+
+    pattern_->crossOffset_ = 50.0;
+    pattern_->currentOffset_ = 20.0;
+
+    layoutProperty_->UpdateAxis(Axis::VERTICAL);
+    pattern_->OnModifyDone();
+    EXPECT_EQ(pattern_->crossOffset_, 0);
+    EXPECT_EQ(pattern_->currentOffset_, 0);
+}
 } // namespace OHOS::Ace::NG
