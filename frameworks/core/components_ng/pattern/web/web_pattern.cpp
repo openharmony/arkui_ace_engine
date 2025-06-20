@@ -2889,6 +2889,15 @@ void WebPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
     }
 }
 
+int32_t WebPattern::GetVisibleViewportAvoidHeight()
+{
+    int32_t avoidHeight = 0;
+    if (delegate_ != nullptr && delegate_->GetNweb() != nullptr) {
+        avoidHeight = delegate_->GetNweb()->GetVisibleViewportAvoidHeight();
+    }
+    return avoidHeight;
+}
+
 void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight)
 {
     lastKeyboardHeight_ = keyboard;
@@ -2909,6 +2918,10 @@ void WebPattern::UpdateLayoutAfterKeyboardShow(int32_t width, int32_t height, do
             return;
         }
         bool isUpdate = true;
+        if (GetVisibleViewportAvoidHeight() != 0) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "visible viewport avoid, behavior consistent with OVERLAYS_CONTENT");
+            return;
+        }
         if (keyBoardAvoidMode_ == WebKeyboardAvoidMode::RESIZE_VISUAL) {
             visibleViewportSize_.SetWidth(drawSize_.Width());
             visibleViewportSize_.SetHeight(newHeight);
