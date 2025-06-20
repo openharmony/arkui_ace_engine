@@ -174,6 +174,15 @@ public:
         isUserSetMargin_ = isUserSetMargin;
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool isEqualWidthAndHeight() override
+    {
+        return true;
+    }
     void UpdateCheckboxComponentColor(const Color& color, const CheckBoxColorType checkBoxColorType);
     void UpdateComponentColor(const Color& color, const ToggleColorType toggleColorType);
 

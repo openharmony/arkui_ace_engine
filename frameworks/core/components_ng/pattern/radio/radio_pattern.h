@@ -185,6 +185,15 @@ public:
 
     void DumpInfo() override;
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool isEqualWidthAndHeight() override
+    {
+        return true;
+    }
     void UpdateRadioComponentColor(const Color& color, const RadioColorType radioColorType);
     void OnColorConfigurationUpdate() override;
 

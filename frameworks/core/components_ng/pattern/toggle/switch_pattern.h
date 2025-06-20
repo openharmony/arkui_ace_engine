@@ -150,6 +150,10 @@ public:
         isUserSetMargin_ = isUserSetMargin;
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
     void UpdateComponentColor(const Color& color, const ToggleColorType toggleColorType);
     void UpdateComponentDimension(const CalcDimension& dimension, const ToggleDimensionType toggleDimensionType);
 

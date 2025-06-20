@@ -115,6 +115,16 @@ public:
         return isInHover_;
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     RefPtr<InputEvent>& GetHoverListener()
     {
         return hoverListener_;

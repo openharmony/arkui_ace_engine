@@ -174,6 +174,15 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
         auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
             layoutConstraint.value(), widthLayoutPolicy, heightLayoutPolicy, Axis::HORIZONTAL)
                                     .ConvertToSizeT();
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(host);
+        auto pattern = host->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        bool isEqualWidthAndHeight = pattern->isEqualWidthAndHeight();
+        if (isEqualWidthAndHeight && (layoutPolicySize.Width() != layoutPolicySize.Height())) {
+            layoutPolicySize.SetHeight(std::max(layoutPolicySize.Width(), layoutPolicySize.Height()));
+            layoutPolicySize.SetWidth(layoutPolicySize.Height());
+        }
         frameSize.UpdateSizeWithCheck(layoutPolicySize);
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
