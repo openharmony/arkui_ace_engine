@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,29 +44,47 @@ typedef enum {
 typedef struct AniEnv {
     ani_status FindNamespace(const char *namespace_descriptor, ani_namespace *result)
     {
+        if (strlen(namespace_descriptor) == 0) {
+            return ANI_ERROR;
+        }
         return ANI_OK;
     }
     ani_status Namespace_BindNativeFunctions(ani_namespace ns, const ani_native_function *functions,
                                              ani_size nr_functions)
     {
+        if (nr_functions == 0) {
+            return ANI_ERROR;
+        }
         return ANI_OK;
     }
     ani_status EnumItem_GetValue_Int(ani_enum_item enum_item, ani_int *result)
     {
+        if (enum_item < 0) {
+            return ANI_ERROR;
+        }
         return ANI_OK;
     }
     ani_status String_GetUTF8Size(ani_string string, ani_size *result)
     {
+        if (string.length() == 0) {
+            return ANI_ERROR;
+        }
         return ANI_OK;
     }
     ani_status String_GetUTF8(ani_string string, char *utf8_buffer, ani_size utf8_buffer_size, ani_size *result)
     {
+        if (string.length() == 0) {
+            return ANI_ERROR;
+        }
         return ANI_OK;
     }
 } ani_env;
 typedef struct AniVm {
     ani_status GetEnv(uint32_t version, ani_env **result)
     {
+        if (version == 0) {
+            return ANI_ERROR;
+        }
         return ANI_OK;
     }
 } ani_vm;
