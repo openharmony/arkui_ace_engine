@@ -256,8 +256,8 @@ void AceScopedPerformanceCheck::RecordFunctionTimeout()
         pageJson->Put("functionName", std::get<1>(record).c_str());
         pageJson->Put("costTime", std::get<0>(record));
         ruleJson->Put(pageJson);
+        LOGI("JX666 9902 pageJson: %{public}s", pageJson->ToString().c_str());
     }
-    LOGI("JX666 9902 pageJson: %{public}s", pageJson->ToString().c_str());
     records_.clear();
 }
 
