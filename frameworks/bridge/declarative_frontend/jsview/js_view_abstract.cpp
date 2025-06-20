@@ -8374,7 +8374,7 @@ void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
         return;
     }
     Shadow shadow;
-    if (!ParseShadowProps(jsVal, shadow)) {
+    if (!ParseShadowProps(jsVal, shadow, SystemProperties::ConfigChangePerform())) {
         info.ReturnSelf();
         return;
     }
@@ -10142,12 +10142,12 @@ void JSViewAbstract::ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double
     }
 }
 
-bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow)
+bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow, const bool configChangePerform)
 {
     int32_t shadowStyle = 0;
     if (ParseJsInteger<int32_t>(jsValue, shadowStyle)) {
         auto style = static_cast<ShadowStyle>(shadowStyle);
-        return GetShadowFromTheme(style, shadow);
+        return GetShadowFromTheme(style, shadow, configChangePerform);
     }
     if (!jsValue->IsObject()) {
         return false;
@@ -10190,7 +10190,7 @@ bool JSViewAbstract::ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shado
     return true;
 }
 
-bool JSViewAbstract::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
+bool JSViewAbstract::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow, const bool configChangePerform)
 {
     ViewAbstractModel::GetInstance()->RemoveResObj("shadowStyle");
     auto colorMode = Container::CurrentColorMode();
@@ -10208,7 +10208,7 @@ bool JSViewAbstract::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
         return false;
     }
     shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
-    if (SystemProperties::ConfigChangePerform()) {
+    if (configChangePerform) {
         auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_RETURN(frameNode, false);
         auto pattern = frameNode->GetPattern();
