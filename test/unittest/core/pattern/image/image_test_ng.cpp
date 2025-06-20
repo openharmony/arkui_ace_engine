@@ -2382,7 +2382,7 @@ HWTEST_F(ImageTestNg, SetPixelMapMemoryName002, TestSize.Level0)
 
 /**
  * @tc.name: TestKeyEvent001
- * @tc.desc: Test KeyEvent
+ * @tc.desc: Test KeyEvent001
  * @tc.type: FUNC
  */
 HWTEST_F(ImageTestNg, TestKeyEvent001, TestSize.Level1)
@@ -2401,7 +2401,7 @@ HWTEST_F(ImageTestNg, TestKeyEvent001, TestSize.Level1)
 
 /**
  * @tc.name: TestKeyEvent002
- * @tc.desc: Test KeyEvent
+ * @tc.desc: Test KeyEvent002
  * @tc.type: FUNC
  */
 HWTEST_F(ImageTestNg, TestKeyEvent002, TestSize.Level1)
