@@ -62,7 +62,7 @@ void JSCanvasGradient::AddColorStop(const JSCallbackInfo& info)
     if (!isColorStopValid_ && gradient_->GetColors().empty()) {
         isColorStopValid_ = true;
     }
-    if (isColorStopValid_ || !info[0]->IsNumber() || (!info[1]->IsString() && !info[1]->IsObject())) {
+    if (!isColorStopValid_ || !info[0]->IsNumber() || (!info[1]->IsString() && !info[1]->IsObject())) {
         return;
     }
     double offset = 0.0;
