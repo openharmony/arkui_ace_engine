@@ -843,12 +843,6 @@ public:
     }
     virtual void UpdateAIMenuOptions();
     bool PrepareAIMenuOptions(std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions);
-
-    bool IsEnableMatchParent() override
-    {
-        return true;
-    }
-
     bool IsAiSelected();
     RefPtr<FrameNode> CreateAIEntityMenu(const std::function<void()>& onMenuDisappear);
     void InitAiSelection(const Offset& globalOffset);
@@ -1090,7 +1084,6 @@ private:
     void ProcessOverlayAfterLayout();
     // SpanString
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
-    ImageSourceInfo CreateImageSourceInfo(const ImageSpanOptions& options);
     void ProcessSpanString();
     // to check if drag is in progress
     void SetCurrentDragTool(SourceTool tool)

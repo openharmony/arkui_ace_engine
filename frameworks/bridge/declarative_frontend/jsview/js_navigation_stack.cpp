@@ -336,6 +336,36 @@ void JSNavigationStack::SetDestinationIdToJsStack(int32_t index, const std::stri
     pathInfo->SetProperty<std::string>("navDestinationId", navDestinationId);
 }
 
+bool JSNavigationStack::CreateHomeDestination(const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node)
+{
+    if (!homePathInfo_.has_value()) {
+        return false;
+    }
+    RefPtr<NG::UINode> targetNode = nullptr;
+    RefPtr<NG::NavDestinationGroupNode> desNode = nullptr;
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    NG::ScopedViewStackProcessor scopedViewStackProcessor;
+    if (ERROR_CODE_NO_ERROR != LoadDestination(
+        homePathInfo_.value().name, homePathInfo_.value().param, customNode, targetNode, desNode)) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "failed to create , create empty node");
+        targetNode = AceType::DynamicCast<NG::UINode>(NavDestinationModel::GetInstance()->CreateEmpty());
+        GetNavDestinationNodeInUINode(targetNode, desNode);
+    }
+    CHECK_NULL_RETURN(targetNode, false);
+    CHECK_NULL_RETURN(desNode, false);
+    node = targetNode;
+    auto pattern = desNode->GetPattern<NG::NavDestinationPattern>();
+    if (pattern) {
+        pattern->SetName(homePathInfo_.value().name);
+        pattern->SetIndex(-1);
+        auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(homePathInfo_.value().name, homePathInfo_.value().param);
+        pattern->SetNavPathInfo(pathInfo);
+        pattern->SetNavigationStack(WeakClaim(this));
+    }
+    homeDestinationNode_ = WeakPtr(desNode);
+    return true;
+}
+
 bool JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINode>& customNode,
     RefPtr<NG::UINode>& node)
 {
@@ -714,26 +744,54 @@ void JSNavigationStack::UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::f
         auto navigationStack = weakStack.Upgrade();
         CHECK_NULL_VOID(navigationStack);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(navigationStack->executionContext_);
-        auto size = navigationStack->GetSize();
-        if (size == 0) {
+        // Firstly, check if there is a NavDestination in the stack that can respond to pop/popToIndex/popToName
+        if (navigationStack->ExecutePopCallbackInStack(param)) {
             return;
         }
-        auto pathInfo = navigationStack->GetJsPathInfo(size - 1);
-        if (pathInfo->IsEmpty()) {
-            return;
-        }
-        auto navDestinationId = pathInfo->GetProperty("navDestinationId");
-        if (!navDestinationId->IsString()) {
-            return;
-        }
-        auto id = navDestinationId->ToString();
-        auto navPathList = navigationStack->GetAllNavDestinationNodes();
-        for (auto iter : navPathList) {
-            if (navigationStack->ExecutePopCallback(iter.second, std::atoi(id.c_str()), param)) {
-                return;
-            }
-        }
+        // Otherwise, check if there is a home NavDestination that can respond to pop/popToIndex/popToName
+        navigationStack->ExecutePopCallbackForHomeNavDestination(param);
     });
+    stack->SetIsHomeNameCallback([weakStack = AceType::WeakClaim(this)](const std::string& name) -> bool {
+        auto navigationStack = weakStack.Upgrade();
+        CHECK_NULL_RETURN(navigationStack, false);
+        if (!navigationStack->homePathInfo_.has_value()) {
+            return false;
+        }
+        return navigationStack->homePathInfo_.value().name == name;
+    });
+}
+
+bool JSNavigationStack::ExecutePopCallbackInStack(const JSRef<JSVal>& param)
+{
+    auto size = GetSize();
+    if (size == 0) {
+        return false;
+    }
+    auto pathInfo = GetJsPathInfo(size - 1);
+    if (pathInfo->IsEmpty()) {
+        return false;
+    }
+    auto navDestinationId = pathInfo->GetProperty("navDestinationId");
+    if (!navDestinationId->IsString()) {
+        return false;
+    }
+    auto id = navDestinationId->ToString();
+    auto navPathList = GetAllNavDestinationNodes();
+    for (auto iter : navPathList) {
+        if (ExecutePopCallback(iter.second, std::atoi(id.c_str()), param)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void JSNavigationStack::ExecutePopCallbackForHomeNavDestination(const JSRef<JSVal>& param)
+{
+    auto homeDest = homeDestinationNode_.Upgrade();
+    CHECK_NULL_VOID(homeDest);
+    auto destPattern = homeDest->GetPattern<NG::NavDestinationPattern>();
+    CHECK_NULL_VOID(destPattern);
+    ExecutePopCallback(homeDest, destPattern->GetNavDestinationId(), param);
 }
 
 void JSNavigationStack::OnAttachToParent(RefPtr<NG::NavigationStack> parent)

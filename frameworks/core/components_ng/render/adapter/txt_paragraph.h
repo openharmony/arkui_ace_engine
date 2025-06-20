@@ -85,6 +85,8 @@ public:
     float GetAlphabeticBaseline() override;
     float GetCharacterWidth(int32_t index) override;
 
+    std::unique_ptr<RSParagraph> GetParagraphUniquePtr();
+
     // interfaces for painting
     void Paint(RSCanvas& canvas, float x, float y) override;
 

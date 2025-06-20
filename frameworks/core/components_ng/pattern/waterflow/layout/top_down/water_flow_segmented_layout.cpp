@@ -63,7 +63,8 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 
     info_->axis_ = axis_ = props_->GetAxis();
     auto [idealSize, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
-    syncLoad_ = props_->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren;
+    syncLoad_ = props_->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren ||
+                info_->targetIndex_.has_value();
     GetExpandArea(props_, info_);
 
     Init(idealSize);

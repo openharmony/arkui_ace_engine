@@ -479,8 +479,9 @@ void UIObserverListener::OnPanGestureStateChange(const GestureEvent& gestureEven
     AddGestureEventInfoThree(objValueGestureEvent, gestureEventInfo);
     AddGestureEventInfoFour(objValueGestureEvent, gestureEventInfo);
     AddTargetObject(objValueGestureEvent, gestureEventInfo);
-    GestureObserverListener::AddGestureRecognizerInfo(env_, objValueGestureRecognizer, current);
-    
+    GestureObserverListener::AddGestureRecognizerInfo(
+        env_, objValueGestureRecognizer, current, NG::GestureListenerType::PAN);
+
     napi_value objValueFrameNode = nullptr;
     napi_create_object(env_, &objValueFrameNode);
     objValueFrameNode = GetFrameNodeObject(frameNode);
@@ -490,8 +491,9 @@ void UIObserverListener::OnPanGestureStateChange(const GestureEvent& gestureEven
     napi_close_handle_scope(env_, scope);
 }
 
-void UIObserverListener::OnGestureStateChange(const GestureEvent& gestureEventInfo,
-    const RefPtr<NG::NGGestureRecognizer>& current, const RefPtr<NG::FrameNode> frameNode, NG::GestureActionPhase phase)
+void UIObserverListener::OnGestureStateChange(NG::GestureListenerType gestureListenerType,
+    const GestureEvent& gestureEventInfo, const RefPtr<NG::NGGestureRecognizer>& current,
+    const RefPtr<NG::FrameNode> frameNode, NG::GestureActionPhase phase)
 {
     if (!env_ || !callback_ || !current) {
         TAG_LOGW(
@@ -520,7 +522,7 @@ void UIObserverListener::OnGestureStateChange(const GestureEvent& gestureEventIn
     AddGestureEventInfoThree(objValueGestureEvent, gestureEventInfo);
     AddGestureEventInfoFour(objValueGestureEvent, gestureEventInfo);
     AddTargetObject(objValueGestureEvent, gestureEventInfo);
-    GestureObserverListener::AddGestureRecognizerInfo(env_, objValueGestureRecognizer, current);
+    GestureObserverListener::AddGestureRecognizerInfo(env_, objValueGestureRecognizer, current, gestureListenerType);
     napi_value currentPhase = nullptr;
     napi_create_double(env_, static_cast<int32_t>(phase), &currentPhase);
     napi_set_named_property(env_, objValueGestureTriggerInfo, "currentPhase", currentPhase);

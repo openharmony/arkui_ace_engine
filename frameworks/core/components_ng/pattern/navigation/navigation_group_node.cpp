@@ -2491,4 +2491,36 @@ void NavigationGroupNode::CreateSoftAnimationWithPop(const TransitionUnitInfo& p
         preUseCustomTransition, curUseCustomTransition, finishCallback);
     ConfigureNavigationWithAnimation(preNode, curNode);
 }
+
+const RefPtr<UINode>& NavigationGroupNode::GetNavBarOrHomeDestinationNode() const
+{
+    if (useHomeDestination_.has_value() && useHomeDestination_.value()) {
+        return customHomeDestination_;
+    } else {
+        return navBarNode_;
+    }
+}
+
+void NavigationGroupNode::CreateHomeDestinationIfNeeded()
+{
+    if (!useHomeDestination_.has_value() || !useHomeDestination_.value() || customHomeDestination_) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "will create home NavDestination");
+    auto pattern = GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<NavDestinationGroupNode> destNode = nullptr;
+    if (!pattern->CreateHomeDestination(customHomeNode_, destNode)) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "failed to create home NavDestination");
+        return;
+    }
+    CHECK_NULL_VOID(customHomeNode_);
+    CHECK_NULL_VOID(destNode);
+    SetBackButtonEvent(destNode);
+    auto eventHub = destNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnWillAppear();
+    AddChild(destNode, 0);
+    customHomeDestination_ = destNode;
+}
 } // namespace OHOS::Ace::NG

@@ -79,15 +79,133 @@ constexpr uint32_t SAFE_AREA_EDGE_TOP = 0;
 constexpr uint32_t SAFE_AREA_EDGE_BOTTOM = 1;
 constexpr int32_t PARAMETER_LENGTH_ONE  = 1;
 constexpr int32_t PARAMETER_LENGTH_TWO  = 2;
+constexpr int32_t PARAMETER_LENGTH_THREE  = 3;
 constexpr int32_t FIRST_INDEX  = 0;
 constexpr int32_t SECOND_INDEX  = 1;
 constexpr bool ENABLE_TOOLBAR_ADAPTATION_DEFULT = true;
 constexpr char MORE_BUTTON_OPTIONS_PROPERTY[] = "moreButtonOptions";
+constexpr char HOME_DESTINATION_INFO_NAME[] = "name";
+constexpr char HOME_DESTINATION_INFO_PARAM[] = "param";
 
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.IsMiniBar() ? static_cast<int32_t>(NavigationTitleMode::MINI)
                                                               : static_cast<int32_t>(NavigationTitleMode::FULL)));
+}
+
+bool ParseCreateParamsWithOneArg(
+    const JSCallbackInfo& info, JSRef<JSObject>& stackObj, std::string& moduleName, std::string& pagePath)
+{
+    // input format: navPathStack/pathInfo
+    if (!info[0]->IsObject()) {
+        return false;
+    }
+    // instance of NavPathStack
+    JSValueWrapper valueWrapper = info[0].Get().GetLocalHandle();
+    if (!JSNavPathStack::CheckIsValid(valueWrapper)) {
+        // first parameter = pathInfo{'moduleName': stringA, 'pagePath': stringB, 'isUserCreateStack': bool}
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current stack is not navPathStack");
+        auto infoObj = JSRef<JSObject>::Cast(info[0]);
+        if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
+            !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current pageInfo is invalid");
+            return false;
+        }
+        moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
+        pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
+    } else {
+        // first parameter = navPathStack
+        stackObj = JSRef<JSObject>::Cast(info[0]);
+    }
+    return true;
+}
+
+bool ParseCreateParamsWithTwoArgs(
+    const JSCallbackInfo& info, JSRef<JSObject>& stackObj, std::string& moduleName, std::string& pagePath)
+{
+    // parameter = navPathStack(maybe empty) + pathInfo
+    if (!info[0]->IsObject() || !info[1]->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "stack or pageInfo is invalid");
+        return false;
+    }
+    // instance of NavPathStack
+    JSValueWrapper valueWrapper = info[0].Get().GetLocalHandle();
+    if (!JSNavPathStack::CheckIsValid(valueWrapper)) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current stack is not navPathStack");
+        return false;
+    }
+    // pathInfo{'moduleName': stringA, 'pagePath': stringB, 'isUserCreateStack': bool}
+    auto infoObj = JSRef<JSObject>::Cast(info[1]);
+    auto isUserCreateStack = infoObj->GetProperty(NG::IS_USER_CREATE_STACK);
+    bool isUserDefined = true;
+    if (isUserCreateStack->IsBoolean()) {
+        isUserDefined = isUserCreateStack->ToBoolean();
+    }
+    if (isUserDefined) {
+        stackObj = JSRef<JSObject>::Cast(info[0]);
+    }
+    if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
+        !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current pageInfo is invalid");
+        return false;
+    }
+    moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
+    pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
+
+    return true;
+}
+
+bool ParseCreateParamsWithThreeArgs(
+    const JSCallbackInfo& info, JSRef<JSObject>& stackObj, std::string& moduleName, std::string& pagePath,
+    std::function<void(const RefPtr<NG::NavigationStack>&)>& setHomePathInfoCallback)
+{
+    // 1st param: NavPathStack, 2st param: homeDestination, 3rd param: { 'moduleName': xxx, ... }
+    if (!info[0]->IsObject() || !info[1]->IsObject() || !info[2]->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "stack, homeDestination or pageInfo is invalid");
+        return false;
+    }
+    // instance of NavPathStack
+    JSValueWrapper valueWrapper = info[0].Get().GetLocalHandle();
+    if (!JSNavPathStack::CheckIsValid(valueWrapper)) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current stack is not navPathStack");
+        return false;
+    }
+    // homeDestination
+    auto homeDestObj = JSRef<JSObject>::Cast(info[1]);
+    auto nameObj = homeDestObj->GetProperty(HOME_DESTINATION_INFO_NAME);
+    auto paramObj = homeDestObj->GetProperty(HOME_DESTINATION_INFO_PARAM);
+    HomePathInfo pathInfo;
+    if (!nameObj->IsEmpty() && nameObj->IsString()) {
+        pathInfo.name = nameObj->ToString();
+        pathInfo.param = paramObj;
+    } else {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Invalid HomeDestination found");
+        return false;
+    }
+    setHomePathInfoCallback = [pathInfo](const RefPtr<NG::NavigationStack>& stack) mutable {
+        auto jsStack = AceType::DynamicCast<JSNavigationStack>(stack);
+        CHECK_NULL_VOID(jsStack);
+        jsStack->SetHomePathInfo(std::move(pathInfo));
+    };
+    // pathInfo{'moduleName': stringA, 'pagePath': stringB, 'isUserCreateStack': bool}
+    auto infoObj = JSRef<JSObject>::Cast(info[2]);
+    auto isUserCreateStack = infoObj->GetProperty(NG::IS_USER_CREATE_STACK);
+    bool isUserDefined = true;
+    if (isUserCreateStack->IsBoolean()) {
+        isUserDefined = isUserCreateStack->ToBoolean();
+    }
+    if (isUserDefined) {
+        stackObj = JSRef<JSObject>::Cast(info[0]);
+    }
+    if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
+        !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current pageInfo is invalid");
+        return false;
+    }
+    moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
+    pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
+
+    return true;
 }
 } // namespace
 
@@ -234,60 +352,23 @@ void JSNavigation::Create(const JSCallbackInfo& info)
     JSRef<JSObject> newObj;
     std::string moduleName;
     std::string pagePath;
-    if (info.Length() == 1) {
-        // input format: navPathStack/pathInfo
-        if (!info[0]->IsObject()) {
-            return;
-        }
-        // instance of NavPathStack
-        JSValueWrapper valueWrapper = info[0].Get().GetLocalHandle();
-        if (!JSNavPathStack::CheckIsValid(valueWrapper)) {
-            // first parameter = pathInfo{'moduleName': stringA, 'pagePath': stringB, 'isUserCreateStack': bool}
-            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current stack is not navPathStack");
-            auto infoObj = JSRef<JSObject>::Cast(info[0]);
-            if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
-                !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
-                TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current pageInfo is invalid");
-                return;
-            }
-            moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
-            pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
-        } else {
-            // first parameter = navPathStack
-            newObj = JSRef<JSObject>::Cast(info[0]);
-        }
-    } else if (info.Length() == 2) {
-        // parameter = navPathStack(maybe empty) + pathInfo
-        if (!info[0]->IsObject() || !info[1]->IsObject()) {
-            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "stack or pageInfo is invalid");
-            return;
-        }
-        // instance of NavPathStack
-        JSValueWrapper valueWrapper = info[0].Get().GetLocalHandle();
-        if (!JSNavPathStack::CheckIsValid(valueWrapper)) {
-            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current stack is not navPathStack");
-            return;
-        }
-        // pathInfo{'moduleName': stringA, 'pagePath': stringB, 'isUserCreateStack': bool}
-        auto infoObj = JSRef<JSObject>::Cast(info[1]);
-        auto isUserCreateStack = infoObj->GetProperty(NG::IS_USER_CREATE_STACK);
-        bool isUserDefined = true;
-        if (isUserCreateStack->IsBoolean()) {
-            isUserDefined = isUserCreateStack->ToBoolean();
-        }
-        if (isUserDefined) {
-            newObj = JSRef<JSObject>::Cast(info[0]);
-        }
-        if (!infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->IsString() ||
-            !infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->IsString()) {
-            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "current pageInfo is invalid");
-            return;
-        }
-        moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
-        pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
+    std::function<void(const RefPtr<NG::NavigationStack>&)> setHomePathInfoCallback;
+    bool parseSuccess = true;
+    bool useHomeDestination = false;
+    if (info.Length() == PARAMETER_LENGTH_ONE) {
+        parseSuccess = ParseCreateParamsWithOneArg(info, newObj, moduleName, pagePath);
+    } else if (info.Length() == PARAMETER_LENGTH_TWO) {
+        parseSuccess = ParseCreateParamsWithTwoArgs(info, newObj, moduleName, pagePath);
+    } else if (info.Length() == PARAMETER_LENGTH_THREE) {
+        useHomeDestination = true;
+        parseSuccess = ParseCreateParamsWithThreeArgs(
+            info, newObj, moduleName, pagePath, setHomePathInfoCallback);
+    }
+    if (!parseSuccess) {
+        return;
     }
 
-    NavigationModel::GetInstance()->Create();
+    NavigationModel::GetInstance()->Create(useHomeDestination);
     auto stackCreator = []() -> RefPtr<JSNavigationStack> { return AceType::MakeRefPtr<JSNavigationStack>(); };
     auto stackUpdater = [&newObj, &info](RefPtr<NG::NavigationStack> stack) {
         NavigationModel::GetInstance()->SetNavigationStackProvided(!newObj->IsEmpty());
@@ -316,6 +397,9 @@ void JSNavigation::Create(const JSCallbackInfo& info)
     };
     NavigationModel::GetInstance()->SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
     NavigationModel::GetInstance()->SetNavigationPathInfo(moduleName, pagePath);
+    if (useHomeDestination) {
+        NavigationModel::GetInstance()->SetHomePathInfoWithCallback(std::move(setHomePathInfoCallback));
+    }
 }
 
 void JSNavigation::JSBind(BindingTarget globalObj)
@@ -363,6 +447,9 @@ void JSNavigation::JSBind(BindingTarget globalObj)
 
 void JSNavigation::SetTitle(const JSCallbackInfo& info)
 {
+    if (NavigationModel::GetInstance()->UseHomeDestination()) {
+        return;
+    }
     if (info.Length() < 1) {
         return;
     }
@@ -403,6 +490,9 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
 
 void JSNavigation::SetTitleMode(int32_t value)
 {
+    if (NavigationModel::GetInstance()->UseHomeDestination()) {
+        return;
+    }
     if (value >= 0 && value <= TITLE_MODE_RANGE) {
         NavigationModel::GetInstance()->SetTitleMode(static_cast<NG::NavigationTitleMode>(value));
     }
@@ -410,11 +500,17 @@ void JSNavigation::SetTitleMode(int32_t value)
 
 void JSNavigation::SetSubTitle(const std::string& subTitle)
 {
+    if (NavigationModel::GetInstance()->UseHomeDestination()) {
+        return;
+    }
     NavigationModel::GetInstance()->SetSubtitle(subTitle);
 }
 
 void JSNavigation::SetHideTitleBar(const JSCallbackInfo& info)
 {
+    if (NavigationModel::GetInstance()->UseHomeDestination()) {
+        return;
+    }
     bool isHide = false;
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         isHide = info[0]->ToBoolean();
@@ -489,6 +585,9 @@ void JSNavigation::SetHideNavBar(bool hide)
 
 void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
 {
+    if (NavigationModel::GetInstance()->UseHomeDestination()) {
+        return;
+    }
     if (info.Length() < 1) {
         return;
     }
@@ -537,11 +636,17 @@ void JSNavigation::SetBackButtonIcon(const JSCallbackInfo& info)
 
 void JSNavigation::SetHideBackButton(bool hide)
 {
+    if (NavigationModel::GetInstance()->UseHomeDestination()) {
+        return;
+    }
     NavigationModel::GetInstance()->SetHideBackButton(hide);
 }
 
 void JSNavigation::SetHideToolBar(const JSCallbackInfo& info)
 {
+    if (NavigationModel::GetInstance()->UseHomeDestination()) {
+        return;
+    }
     bool isHide = false;
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         isHide = info[0]->ToBoolean();
@@ -555,6 +660,9 @@ void JSNavigation::SetHideToolBar(const JSCallbackInfo& info)
 
 void JSNavigation::SetToolBar(const JSCallbackInfo& info)
 {
+    if (NavigationModel::GetInstance()->UseHomeDestination()) {
+        return;
+    }
     if (info.Length() < 1) {
         return;
     }
@@ -592,6 +700,9 @@ void JSNavigation::SetToolBar(const JSCallbackInfo& info)
 
 void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
 {
+    if (NavigationModel::GetInstance()->UseHomeDestination()) {
+        return;
+    }
     bool hideText = false;
     JSNavigationUtils::ParseHideToolBarText(info, hideText);
     NavigationModel::GetInstance()->SetHideItemText(hideText);
@@ -643,6 +754,9 @@ void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
 
 void JSNavigation::SetMenus(const JSCallbackInfo& info)
 {
+    if (NavigationModel::GetInstance()->UseHomeDestination()) {
+        return;
+    }
     if (info.Length() < 1) {
         return;
     }
@@ -687,11 +801,17 @@ void JSNavigation::SetMenus(const JSCallbackInfo& info)
 
 void JSNavigation::SetMenuCount(int32_t menuCount)
 {
+    if (NavigationModel::GetInstance()->UseHomeDestination()) {
+        return;
+    }
     NavigationModel::GetInstance()->SetMenuCount(menuCount);
 }
 
 void JSNavigation::SetOnTitleModeChanged(const JSCallbackInfo& info)
 {
+    if (NavigationModel::GetInstance()->UseHomeDestination()) {
+        return;
+    }
     if (info.Length() < 1) {
         return;
     }
@@ -1016,6 +1136,9 @@ void JSNavigation::SetCustomNavContentTransition(const JSCallbackInfo& info)
 
 void JSNavigation::SetIgnoreLayoutSafeArea(const JSCallbackInfo& info)
 {
+    if (NavigationModel::GetInstance()->UseHomeDestination()) {
+        return;
+    }
     NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL};
     if (info.Length() >= PARAMETER_LENGTH_ONE && info[FIRST_INDEX]->IsArray()) {
         auto paramArray = JSRef<JSArray>::Cast(info[0]);
@@ -1054,6 +1177,9 @@ void JSNavigation::SetIgnoreLayoutSafeArea(const JSCallbackInfo& info)
 
 void JSNavigation::SetSystemBarStyle(const JSCallbackInfo& info)
 {
+    if (NavigationModel::GetInstance()->UseHomeDestination()) {
+        return;
+    }
     RefPtr<SystemBarStyle> style = nullptr;
     if (info.Length() == 1 && info[0]->IsObject()) {
         auto styleObj = JsConverter::ConvertJsValToNapiValue(info[0]);

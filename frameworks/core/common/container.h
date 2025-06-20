@@ -702,6 +702,11 @@ public:
         return Rect();
     }
 
+    virtual bool IsPcOrFreeMultiWindowCapability() const
+    {
+        return false;
+    }
+
     virtual Rect GetUIExtensionHostWindowRect()
     {
         return Rect();
