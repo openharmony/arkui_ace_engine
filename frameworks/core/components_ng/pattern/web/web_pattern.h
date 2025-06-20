@@ -1145,6 +1145,7 @@ private:
     CursorStyleInfo GetAndUpdateCursorStyleInfo(
         const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
     bool MenuAvoidKeyboard(bool hideOrClose, double height = 0.0f);
+    int32_t GetVisibleViewportAvoidHeight();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;

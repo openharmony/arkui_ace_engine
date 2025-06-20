@@ -4751,4 +4751,29 @@ HWTEST_F(WebPatternTestNg, CheckVisible_004, TestSize.Level1)
 #endif
 }
 
+/**
+ * @tc.name: GetVisibleViewportAvoidHeight001
+ * @tc.desc: GetVisibleViewportAvoidHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, GetVisibleViewportAvoidHeight001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(
+            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    int32_t avoidHeight = webPattern->GetVisibleViewportAvoidHeight();
+    EXPECT_EQ(avoidHeight, 0);
+
+    webPattern->OnModifyDone();
+    avoidHeight = webPattern->GetVisibleViewportAvoidHeight();
+    EXPECT_EQ(avoidHeight, 0);
+#endif
+}
 } // namespace OHOS::Ace::NG
