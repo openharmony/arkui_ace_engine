@@ -15,7 +15,7 @@
 
 import { KPointer } from "@koalaui/interop"
 import { SelectOps, Bindable } from "../component"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { ResourceStr } from "../component/units"
 
 export class SelectOpsHandWritten {

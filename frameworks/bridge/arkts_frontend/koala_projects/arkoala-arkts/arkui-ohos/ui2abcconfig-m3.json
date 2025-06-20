@@ -61,9 +61,6 @@
             "@ohos/font/font": [
                 "./@ohos.font.ts"
             ],
-            "global/resource": [
-                "./global/resource/resource.ts"
-            ],
             "@ohos.router": [
                 "./@ohos.router.ts"
             ],

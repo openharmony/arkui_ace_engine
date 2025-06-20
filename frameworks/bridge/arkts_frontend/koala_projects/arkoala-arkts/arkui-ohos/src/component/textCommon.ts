@@ -28,7 +28,7 @@ import { StyledString, StyledStringInternal, MutableStyledString, MutableStyledS
 import { LineMetrics, TextBox, Affinity } from "./arkui-graphics-text"
 import { RectWidthStyle, RectHeightStyle } from "./arkui-external"
 import { ResourceStr, ResourceColor, Length } from "./units"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Callback_String_Void } from "./gridRow"
 import { TextDecorationType, TextDecorationStyle } from "./enums"

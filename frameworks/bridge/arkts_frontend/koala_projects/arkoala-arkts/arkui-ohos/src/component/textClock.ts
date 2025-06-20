@@ -31,7 +31,7 @@ import { ResourceColor, Length, ResourceStr } from "./units"
 import { FontStyle, FontWeight, Color } from "./enums"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { DateTimeOptions } from "./arkui-intl"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
 export class TextClockControllerInternal {

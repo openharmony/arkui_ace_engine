@@ -31,7 +31,7 @@ import { EnterKeyType, SubmitEvent, OnTextSelectionChangeCallback, OnContentScro
 import { Callback_String_Void } from "./gridRow"
 import { PasteEvent, KeyboardOptions } from "./richEditor"
 import { CopyOptions, TextAlign, Color } from "./enums"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"

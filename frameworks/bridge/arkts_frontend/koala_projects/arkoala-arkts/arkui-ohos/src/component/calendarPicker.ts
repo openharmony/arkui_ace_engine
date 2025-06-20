@@ -28,7 +28,7 @@ import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, PickerTextStyle, DateRange, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, PickerDialogButtonStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Offset, VoidCallback, ResourceColor } from "./units"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 export class CalendarPickerDialog {
     public static show(options?: CalendarDialogOptions): void {
         const options_casted = options as (CalendarDialogOptions | undefined)
