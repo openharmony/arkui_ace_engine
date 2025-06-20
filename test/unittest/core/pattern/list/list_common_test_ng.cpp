@@ -4212,6 +4212,47 @@ HWTEST_F(ListCommonTestNg, NotifyDataChange001, TestSize.Level1)
     EXPECT_EQ(pattern_->focusGroupIndex_, 0);
 }
 
+/**
+ * @tc.name: LostChildFocusToSelf001
+ * @tc.desc: Test LostChildFocusToSelf
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, LostChildFocusToSelf001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateFocusableListItems(10);
+    CreateDone();
+
+    RefPtr<FocusHub> focusHub = frameNode_->GetFocusHub();
+    focusHub->currentFocus_ = true;
+
+    /**
+     * @tc.steps: step1. Focus node scroll outside.
+     * @tc.expected: Node keep focus.
+     */
+    pattern_->focusIndex_ = 3;
+    pattern_->startIndex_ = 1;
+    pattern_->endIndex_ = 4;
+    pattern_->maxListItemIndex_ = 10;
+    pattern_->FireFocus();
+    FlushUITasks();
+    RefPtr<FocusHub> focusNode = GetChildFocusHub(frameNode_, 3);
+    focusNode = GetChildFocusHub(frameNode_, 3);
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 1, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_TRUE(focusNode->IsCurrentFocus());
+
+    /**
+     * @tc.steps: step2. Focus node scroll inside.
+     * @tc.expected: Node lost focus
+     */
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 5, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_FALSE(focusNode->IsCurrentFocus());
+}
+
 void ListCommonTestNg::MapEventInLazyForEachForItemDragEvent(int32_t* actualDragStartIndex, int32_t* actualOnDropIndex,
     int32_t* actualOnLongPressIndex, int32_t* actualonMoveThroughFrom, int32_t* actualonMoveThroughTo)
 {

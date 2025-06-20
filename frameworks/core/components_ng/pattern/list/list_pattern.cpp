@@ -3962,6 +3962,7 @@ bool ListPattern::ScrollToLastFocusIndex(const KeyEvent& event)
 {
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
+    CHECK_NULL_RETURN(pipeline->GetIsFocusActive(), false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto focusHub = host->GetFocusHub();
@@ -4033,7 +4034,6 @@ bool ListPattern::UpdateStartIndex(int32_t index, int32_t indexInGroup)
 
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
-    MarkDirtyNodeSelf();
     pipeline->FlushUITasks();
     RequestFocusForItem(index, focusGroupIndex_.has_value() && indexInGroup >= 0 ? indexInGroup : -1);
     auto child = host->GetChildByIndex(focusIndex_.value_or(-1));

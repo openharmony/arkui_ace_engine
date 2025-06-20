@@ -227,7 +227,41 @@ void ListLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrapper,
         start = std::min(start, draggingIndex_);
         end = std::max(end, draggingIndex_);
     }
+    LostChildFocusToSelf(layoutWrapper, start - cacheStart, end + cacheEnd);
     layoutWrapper->SetActiveChildRange(start, end, cacheStart, cacheEnd, show);
+}
+
+void ListLayoutAlgorithm::LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int32_t start, int32_t end)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_VOID(focusHub->IsCurrentFocus());
+    auto listPattern = host->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(listPattern);
+    auto focusIndex = listPattern->GetFocusIndex();
+    CHECK_NULL_VOID(focusIndex.has_value());
+    if (focusIndex.value() >= start && focusIndex.value() <= end) {
+        return;
+    }
+    int32_t indexInList = -1;
+    auto childFocusHub = focusHub->GetLastWeakFocusNode().Upgrade();
+    CHECK_NULL_VOID(childFocusHub);
+    auto focusNode = childFocusHub->GetFrameNode();
+    CHECK_NULL_VOID(focusNode);
+    auto childItemPattern = focusNode->GetPattern<ListItemPattern>();
+    if (!childItemPattern) {
+        auto listItemGroupPattern = focusNode->GetPattern<ListItemGroupPattern>();
+        CHECK_NULL_VOID(listItemGroupPattern);
+        indexInList = listItemGroupPattern->GetIndexInList();
+    } else {
+        indexInList = childItemPattern->GetIndexInList();
+    }
+    if (indexInList == focusIndex && childFocusHub->IsCurrentFocus()) {
+        focusHub->LostChildFocusToSelf();
+    }
 }
 
 bool ListLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const
