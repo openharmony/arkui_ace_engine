@@ -17,11 +17,16 @@
 
 #include "ani.h"
 #include "load.h"
+#include "log.h"
 
 #include "common_module.h"
 #include "content_slot_module.h"
 #include "utils/convert_utils.h"
 #include "web_module_methods.h"
+#include "custom_node_module.h"
+#include "waterFlowSection_module.h"
+#include "native_drag_drop_global.h"
+#include "componentSnapshot_module.h"
 
 namespace OHOS::Ace::Ani {
 
@@ -46,7 +51,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     }
 
     ani_class cls;
-    auto ani_status = env->FindClass("Larkui/ani/ArkUIAniModule/ArkUIAniModule;", &cls);
+    auto ani_status = env->FindClass("Larkui/ani/arkts/ArkUIAniModule/ArkUIAniModule;", &cls);
     if (ani_status != ANI_OK) {
         return ANI_ERROR;
     }
@@ -88,6 +93,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::RestoreInstanceId)
         },
         ani_native_function {
+            "_Common_Get_Current_InstanceId",
+            ":I",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetCurrentInstanceId)
+        },
+        ani_native_function {
+            "_CustomNode_Construct",
+            "ILarkui/ArkCustomComponent/ArkCustomComponent;:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructCustomNode)
+        },
+        ani_native_function {
+            "_BuilderProxyNode_Construct",
+            "I:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::BuilderProxyNodeConstruct)
+        },
+        ani_native_function {
             "_ContentSlot_construct",
             "I:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ContentSlotConstruct)
@@ -97,9 +117,73 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "JJ:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetContentSlotOptions)
         },
+        ani_native_function {
+            "_SetDrawCallback",
+            "JLstd/core/Function1;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetDrawCallback)
+        },
+        ani_native_function {
+            "_SetDrawModifier",
+            "JLarkui/component/common/DrawModifier;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetDrawModifier)
+        },
+        ani_native_function {
+            "_Invalidate",
+            "J:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::Invalidate)
+        },
+        ani_native_function {
+            "_SetWaterFlowOptions",
+            "JLarkui/component/waterFlow/WaterFlowOptions;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWaterFlowOptions)
+        },
+        ani_native_function {
+            "_DragEvent_Set_Data",
+            "JL@ohos/data/unifiedDataChannel/unifiedDataChannel/UnifiedData;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventSetData)
+        },
+        ani_native_function {
+            "_DragEvent_Get_Data",
+            "J:L@ohos/data/unifiedDataChannel/unifiedDataChannel/UnifiedData;",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventGetData)
+        },
+        ani_native_function {
+            "_DragEvent_Get_Summary",
+            "J:L@ohos/data/unifiedDataChannel/unifiedDataChannel/Summary;",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventGetSummary)
+        },
+        ani_native_function {
+            "_DragEvent_Set_PixelMap",
+            "JL@ohos/multimedia/image/image/PixelMap;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventSetPixelMap)
+        },
+        ani_native_function {
+            "_DragEvent_Set_ExtraInfo",
+            "JLstd/core/String;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventSetExtraInfo)
+        },
+        ani_native_function {
+            "_DragEvent_Set_CustomNode",
+            "JJ:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventSetCustomNode)
+        },
+        ani_native_function {
+            "_ComponentSnapshot_createFromBuilderWithCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateFromBuilderWithCallback)
+        },
+        ani_native_function {
+            "_ComponentSnapshot_createFromBuilderWithPromise",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateFromBuilderWithPromise)
+        },
     };
 
-    env->Class_BindNativeMethods(cls, methods.data(), methods.size());
+    auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
+    if (bindRst != ANI_OK) {
+        HILOGE("Bund native methonds failed, bindRst:%{public}d", bindRst);
+        return bindRst;
+    }
     *result = ANI_VERSION_1;
     return ANI_OK;
 }

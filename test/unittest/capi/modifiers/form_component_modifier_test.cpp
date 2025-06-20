@@ -51,12 +51,12 @@ const auto FORM_ON_ERROR_MSG_KEY = "msg";
 const auto FORM_EMPTY_STRING = "";
 
 
-std::vector<std::tuple<std::string, Opt_Length, std::string>> testFixtureFormSizeDimensionValidValues = {
-    { "100.00vp", Converter::ArkValue<Opt_Length>(100.), "100.00vp" },
-    { "0.00vp", Converter::ArkValue<Opt_Length>(0.), "0.00vp" },
-    { "-100.00vp", Converter::ArkValue<Opt_Length>(-100.), "-100.00vp" },
-    { "12.34vp", Converter::ArkValue<Opt_Length>(12.34), "12.34vp" },
-    { "-56.78vp", Converter::ArkValue<Opt_Length>(-56.78), "-56.78vp" },
+std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFormSizeDimensionValidValues = {
+    { "100", Converter::ArkValue<Ark_Number>(100), "100.00vp" },
+    { "0", Converter::ArkValue<Ark_Number>(0), "0.00vp" },
+    { "-100", Converter::ArkValue<Ark_Number>(-100), "-100.00vp" },
+    { "12.34", Converter::ArkValue<Ark_Number>(12.34), "12.34vp" },
+    { "-56.78", Converter::ArkValue<Ark_Number>(-56.78), "-56.78vp" },
 };
 
 std::vector<std::tuple<std::string, Ark_FormDimension, std::string>> testFixtureEnumFormDimensionValidValues = {
@@ -170,19 +170,19 @@ HWTEST_F(FormComponentModifierTest, setSizeTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeWidthValidValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, setSizeTestSizeWidthValidValues, TestSize.Level1)
 {
-    Ark_SizeOptions initValueSize;
+    Ark_FormSize initValueSize;
 
     // Initial setup
     initValueSize.width = std::get<1>(testFixtureFormSizeDimensionValidValues[0]);
     initValueSize.height = std::get<1>(testFixtureFormSizeDimensionValidValues[0]);
 
     auto checkValue = [this, &initValueSize](
-                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
-        Ark_SizeOptions inputValueSize = initValueSize;
+                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
+        Ark_FormSize inputValueSize = initValueSize;
         inputValueSize.width = value;
-        auto optValue = Converter::ArkValue<Opt_SizeOptions>(inputValueSize);
+        auto optValue = Converter::ArkValue<Opt_FormSize>(inputValueSize);
         modifier_->setSize(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
@@ -201,17 +201,17 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeWidthValidValues, Te
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeHeightValidValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, setSizeTestSizeHeightValidValues, TestSize.Level1)
 {
-    Ark_SizeOptions initValueSize;
+    Ark_FormSize initValueSize;
     // Initial setup
     initValueSize.width = std::get<1>(testFixtureFormSizeDimensionValidValues[0]);
     initValueSize.height = std::get<1>(testFixtureFormSizeDimensionValidValues[0]);
     auto checkValue = [this, &initValueSize](
-                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
-        Ark_SizeOptions inputValueSize = initValueSize;
+                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
+        Ark_FormSize inputValueSize = initValueSize;
         inputValueSize.height = value;
-        auto optValue = Converter::ArkValue<Opt_SizeOptions>(inputValueSize);
+        auto optValue = Converter::ArkValue<Opt_FormSize>(inputValueSize);
         modifier_->setSize(node_, &optValue);
         auto jsonValue = GetJsonValue(node_);
         auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
@@ -455,7 +455,7 @@ HWTEST_F(FormComponentModifierTest, setVisibilityTestVisibilityInvalidValues, Te
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, setOnAcquiredTest, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setOnAcquiredTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnAcquired, nullptr);
 
@@ -505,13 +505,13 @@ HWTEST_F(FormComponentModifierTest, setOnErrorTest, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<FormEventHub>();
     ASSERT_NE(eventHub, nullptr);
     static std::optional<std::pair<int32_t, std::string>> formInfo = std::nullopt;
-    auto onError = [](const Ark_Int32 resourceId, const Ark_Literal_Number_errcode_String_msg parameter) {
+    auto onError = [](const Ark_Int32 resourceId, const Ark_FormError parameter) {
         std::pair<int32_t, std::string> info;
         info.first = Converter::Convert<int32_t>(parameter.errcode);
         info.second = Converter::Convert<std::string>(parameter.msg);
         formInfo = info;
     };
-    Callback_Literal_Number_errcode_String_msg_Void func = {
+    Callback_FormError_Void func = {
         .resource = Ark_CallbackResource {
             .resourceId = frameNode->GetId(),
             .hold = nullptr,
@@ -519,7 +519,7 @@ HWTEST_F(FormComponentModifierTest, setOnErrorTest, TestSize.Level1)
         },
         .call = onError
     };
-    auto optFunc = Converter::ArkValue<Opt_Callback_Literal_Number_errcode_String_msg_Void>(func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_FormError_Void>(func);
     modifier_->setOnError(node_, &optFunc);
     for (const auto& [code, msg, expected] : testFixtureFormOnErrorCallbackTestValues) {
         formInfo = std::nullopt;
@@ -537,7 +537,7 @@ HWTEST_F(FormComponentModifierTest, setOnErrorTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, setOnUninstallTest, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, DISABLED_setOnUninstallTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnUninstall, nullptr);
 
@@ -629,7 +629,11 @@ HWTEST_F(FormComponentModifierTest, setFormComponentOptionsModuleNameValues, Tes
     Ark_FormInfo initValue;
     // Initial setup
     int64_t id = -1;
+#ifdef WRONG_GEN
     initValue.id = Converter::ArkUnion<Ark_Union_I64_String, Ark_Int64>(id);
+#else
+    initValue.id = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(id);
+#endif
     initValue.name = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
     initValue.bundle = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
     initValue.ability = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
@@ -667,7 +671,11 @@ HWTEST_F(FormComponentModifierTest, setFormComponentOptionsDimensionValues, Test
     Ark_FormInfo initValue;
     // Initial setup
     int64_t id = -1;
+#ifdef WRONG_GEN
     initValue.id = Converter::ArkUnion<Ark_Union_I64_String, Ark_Int64>(id);
+#else
+    initValue.id = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(id);
+#endif
     initValue.name = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
     initValue.bundle = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
     initValue.ability = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);

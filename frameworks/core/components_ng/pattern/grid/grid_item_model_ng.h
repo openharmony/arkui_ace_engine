@@ -19,7 +19,6 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/pattern/grid/grid_item_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_item_model.h"
-#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -48,7 +47,6 @@ public:
     static void SetColumnEnd(FrameNode* frameNode, int32_t columnEnd);
     static void SetGridItemStyle(FrameNode* frameNode, GridItemStyle gridItemStyle);
     static void SetOnSelect(FrameNode* frameNode, SelectFunc&& onSelect);
-    static void SetSelectChangeEvent(FrameNode* frameNode, SelectFunc&& changeEvent);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_ITEM_MODEL_NG_H

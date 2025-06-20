@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -128,13 +128,6 @@ export interface RelativeContainerAttribute extends CommonMethod {
     guideLine(value: Array<GuideLineStyle> | undefined): this
     barrier(value: Array<BarrierStyle> | undefined | Array<LocalizedBarrierStyle> | undefined): this
 }
-export interface UIRelativeContainerAttribute extends UICommonMethod {
-    /** @memo */
-    guideLine(value: Array<GuideLineStyle> | undefined): this
-    /** @memo */
-    barrier(value: Array<BarrierStyle> | undefined | Array<LocalizedBarrierStyle> | undefined): this
-    /** @memo */
-}
 export class ArkRelativeContainerStyle extends ArkCommonMethodStyle implements RelativeContainerAttribute {
     guideLine_value?: Array<GuideLineStyle> | undefined
     barrier_value?: Array<BarrierStyle> | undefined
@@ -145,12 +138,10 @@ export class ArkRelativeContainerStyle extends ArkCommonMethodStyle implements R
         return this
         }
 }
-/** @memo:stable */
-export class ArkRelativeContainerComponent extends ArkCommonMethodComponent implements UIRelativeContainerAttribute {
+export class ArkRelativeContainerComponent extends ArkCommonMethodComponent implements RelativeContainerAttribute {
     getPeer(): ArkRelativeContainerPeer {
         return (this.peer as ArkRelativeContainerPeer)
     }
-    /** @memo */
     public setRelativeContainerOptions(): this {
         if (this.checkPriority("setRelativeContainerOptions")) {
             this.getPeer()?.setRelativeContainerOptionsAttribute()
@@ -158,7 +149,6 @@ export class ArkRelativeContainerComponent extends ArkCommonMethodComponent impl
         }
         return this
     }
-    /** @memo */
     public guideLine(value: Array<GuideLineStyle> | undefined): this {
         if (this.checkPriority("guideLine")) {
             const value_casted = value as (Array<GuideLineStyle> | undefined)
@@ -167,7 +157,6 @@ export class ArkRelativeContainerComponent extends ArkCommonMethodComponent impl
         }
         return this
     }
-    /** @memo */
     public barrier(value: Array<BarrierStyle> | undefined | Array<LocalizedBarrierStyle> | undefined): this {
         if (this.checkPriority("barrier")) {
             const value_type = runtimeType(value)
@@ -194,7 +183,7 @@ export class ArkRelativeContainerComponent extends ArkCommonMethodComponent impl
 /** @memo */
 export function RelativeContainer(
     /** @memo */
-    style: ((attributes: UIRelativeContainerAttribute) => void) | undefined,
+    style: ((attributes: RelativeContainerAttribute) => void) | undefined,
     
     /** @memo */
     content_?: (() => void) | undefined,

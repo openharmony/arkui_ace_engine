@@ -947,15 +947,6 @@ std::vector<std::tuple<std::string, Ark_Number>> testFixtureDimensionsNumNonNegI
     { "-1", Converter::ArkValue<Ark_Number>(-1, &fixCtx) },
 };
 
-// Fixture 'FlexBasisValid' for type 'Ark_Number'
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFlexBasisValidValidValues = {
-    { "123", Converter::ArkValue<Ark_Number>(123, &fixCtx), "123.00vp" },
-    { "0", Converter::ArkValue<Ark_Number>(0, &fixCtx), "0.00vp" },
-    { "1.23", Converter::ArkValue<Ark_Number>(1.23, &fixCtx), "1.23vp" },
-    { "-2", Converter::ArkValue<Ark_Number>(-2, &fixCtx), "auto" },
-    { "-3.45", Converter::ArkValue<Ark_Number>(-3.45, &fixCtx), "auto" },
-};
-
 // Fixture 'DimensionsStrNonPerc' for type 'Ark_String'
 std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonPercValidValues = {
     { "\"123vp\"", Converter::ArkValue<Ark_String>("123vp", &fixCtx), "123.00vp" },

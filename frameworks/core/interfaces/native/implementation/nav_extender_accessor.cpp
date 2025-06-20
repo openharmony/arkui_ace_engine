@@ -113,7 +113,14 @@ Ark_Number PopToNameImpl(Ark_NavPathStack pathStack,
                          const Ark_String* name,
                          Ark_Boolean animated)
 {
-    return {};
+    static Ark_Number invalidVal = Converter::ArkValue<Ark_Number>(-1);
+    CHECK_NULL_RETURN(pathStack, invalidVal);
+    auto navStack = pathStack->GetNavPathStack();
+    CHECK_NULL_RETURN(navStack, invalidVal);
+    auto nameVal = Converter::Convert<std::string>(*name);
+    auto animatedVal = Converter::Convert<bool>(animated);
+    auto index = navStack->NavigationContext::PathStack::PopToName(nameVal, animatedVal);
+    return Converter::ArkValue<Ark_Number>(index);
 }
 } // NavExtenderAccessor
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()

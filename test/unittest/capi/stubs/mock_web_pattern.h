@@ -54,6 +54,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MediaPlayGestureAccess, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MultiWindowAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebMediaAVSessionEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BlockNetwork, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, HorizontalScrollBarAccessEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, VerticalScrollBarAccessEnabled, bool);
@@ -62,6 +63,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedModeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, TextAutosizing, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, IntrinsicSizeEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, MixedMode, MixedModeContent);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CacheMode, WebCacheMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, DarkMode, WebDarkMode);
@@ -91,6 +93,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, SelectionMenuOptions, WebMenuOptionsParam);
 
     void SetWebSrc(const std::string &webSrc);
+    void SetWebSrcStatic(const std::string &webSrc);
     void SetWebData(const std::string& webData);
     const std::optional<std::string>& GetWebData() const
     {
@@ -206,6 +209,8 @@ private:
     void OnNativeEmbedRuleTypeUpdate(const std::string&) {}
     void OnNativeVideoPlayerConfigUpdate(std::tuple<bool, bool> const&) {}
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption) {}
+    void OnIntrinsicSizeEnabledUpdate(bool) {}
+    void OnWebMediaAVSessionEnabledUpdate(bool) {}
 
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     NestedScrollOptionsExt nestedScroll_ = {

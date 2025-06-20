@@ -69,7 +69,7 @@ void WebModelStatic::SetWebSrc(FrameNode* frameNode, const std::optional<std::st
     CHECK_NULL_VOID(frameNode);
     auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPattern);
-    webPattern->SetWebSrc(webSrc.value_or(""));
+    webPattern->SetWebSrcStatic(webSrc.value_or(""));
 }
 
 void WebModelStatic::SetRenderMode(FrameNode* frameNode, const std::optional<RenderMode>& renderMode)
@@ -265,8 +265,10 @@ void WebModelStatic::SetEnableFollowSystemFontWeight(FrameNode *frameNode,
 
 void WebModelStatic::SetWebMediaAVSessionEnabled(FrameNode *frameNode, const std::optional<bool>& enable)
 {
-    (void)frameNode;
-    (void)enable;
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebMediaAVSessionEnabled(enable.value());
 }
 
 void WebModelStatic::JavaScriptOnDocumentStart(FrameNode* frameNode, const ScriptItems& scriptItems)
@@ -293,8 +295,10 @@ void WebModelStatic::JavaScriptOnHeadEnd(FrameNode *frameNode, const ScriptItems
 
 void WebModelStatic::SetNativeEmbedOptions(FrameNode *frameNode, bool supportDefaultIntrinsicSize)
 {
-    (void)frameNode;
-    (void)supportDefaultIntrinsicSize;
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateIntrinsicSizeEnabled(supportDefaultIntrinsicSize);
 }
 
 void WebModelStatic::SetMixedMode(FrameNode* frameNode, const std::optional<MixedModeContent>& mixedContentMode)

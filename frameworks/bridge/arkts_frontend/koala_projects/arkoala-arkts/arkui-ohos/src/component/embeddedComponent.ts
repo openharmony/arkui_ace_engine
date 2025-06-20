@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { ErrorCallback } from "./ohos.base"
 import { BusinessError } from "#external"
 import { Want } from "./ohos.app.ability"
@@ -82,13 +82,6 @@ export interface EmbeddedComponentAttribute extends CommonMethod {
     onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this
     onError(value: ErrorCallback | undefined): this
 }
-export interface UIEmbeddedComponentAttribute extends UICommonMethod {
-    /** @memo */
-    onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this
-    /** @memo */
-    onError(value: ErrorCallback | undefined): this
-    /** @memo */
-}
 export class ArkEmbeddedComponentStyle extends ArkCommonMethodStyle implements EmbeddedComponentAttribute {
     onTerminated_value?: ((parameter: TerminationInfo) => void) | undefined
     onError_value?: ErrorCallback | undefined
@@ -100,12 +93,10 @@ export class ArkEmbeddedComponentStyle extends ArkCommonMethodStyle implements E
         }
 }
 export type Callback_TerminationInfo_Void = (parameter: TerminationInfo) => void;
-/** @memo:stable */
-export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent implements UIEmbeddedComponentAttribute {
+export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent implements EmbeddedComponentAttribute {
     getPeer(): ArkEmbeddedComponentPeer {
         return (this.peer as ArkEmbeddedComponentPeer)
     }
-    /** @memo */
     public setEmbeddedComponentOptions(loader: Want, type: EmbeddedType): this {
         if (this.checkPriority("setEmbeddedComponentOptions")) {
             const loader_casted = loader as (Want)
@@ -115,7 +106,6 @@ export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent impl
         }
         return this
     }
-    /** @memo */
     public onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this {
         if (this.checkPriority("onTerminated")) {
             const value_casted = value as (((parameter: TerminationInfo) => void) | undefined)
@@ -124,7 +114,6 @@ export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent impl
         }
         return this
     }
-    /** @memo */
     public onError(value: ErrorCallback | undefined): this {
         if (this.checkPriority("onError")) {
             const value_casted = value as (ErrorCallback | undefined)
@@ -142,7 +131,7 @@ export class ArkEmbeddedComponentComponent extends ArkCommonMethodComponent impl
 /** @memo */
 export function EmbeddedComponent(
     /** @memo */
-    style: ((attributes: UIEmbeddedComponentAttribute) => void) | undefined,
+    style: ((attributes: EmbeddedComponentAttribute) => void) | undefined,
     loader: Want, type: EmbeddedType,
     /** @memo */
     content_?: (() => void) | undefined,

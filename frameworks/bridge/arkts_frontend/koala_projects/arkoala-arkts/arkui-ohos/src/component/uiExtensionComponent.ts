@@ -25,13 +25,12 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Want } from "./ohos.app.ability"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { ErrorCallback } from "./ohos.base"
 import { BusinessError } from "#external"
 import { Callback_TerminationInfo_Void, TerminationInfo } from "./embeddedComponent"
-import { Callback_Void } from "./abilityComponent"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentContent } from "./arkui-custom"
 
@@ -306,23 +305,6 @@ export interface UIExtensionComponentAttribute extends CommonMethod {
     onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this
     onDrawReady(value: (() => void) | undefined): this
 }
-export interface UIUIExtensionComponentAttribute extends UICommonMethod {
-    /** @memo */
-    onRemoteReady(value: ((parameter: UIExtensionProxy) => void) | undefined): this
-    /** @memo */
-    onReceive(value: ((parameter: Map<string, Object>) => void) | undefined): this
-    /** @memo */
-    onResult(value: ((parameter: Literal_Number_code__want) => void) | undefined): this
-    /** @memo */
-    onRelease(value: ((index: number) => void) | undefined): this
-    /** @memo */
-    onError(value: ErrorCallback | undefined): this
-    /** @memo */
-    onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this
-    /** @memo */
-    onDrawReady(value: (() => void) | undefined): this
-    /** @memo */
-}
 export class ArkUIExtensionComponentStyle extends ArkCommonMethodStyle implements UIExtensionComponentAttribute {
     onRemoteReady_value?: ((parameter: UIExtensionProxy) => void) | undefined
     onReceive_value?: ((parameter: Map<string, Object>) => void) | undefined
@@ -359,12 +341,10 @@ export interface Literal_Number_code__want {
     want?: Want;
 }
 export type Callback_Literal_Number_code__want_Void = (parameter: Literal_Number_code__want) => void;
-/** @memo:stable */
-export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent implements UIUIExtensionComponentAttribute {
+export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent implements UIExtensionComponentAttribute {
     getPeer(): ArkUIExtensionComponentPeer {
         return (this.peer as ArkUIExtensionComponentPeer)
     }
-    /** @memo */
     public setUIExtensionComponentOptions(want: Want, options?: UIExtensionOptions): this {
         if (this.checkPriority("setUIExtensionComponentOptions")) {
             const want_casted = want as (Want)
@@ -374,7 +354,6 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
         }
         return this
     }
-    /** @memo */
     public onRemoteReady(value: ((parameter: UIExtensionProxy) => void) | undefined): this {
         if (this.checkPriority("onRemoteReady")) {
             const value_casted = value as (((parameter: UIExtensionProxy) => void) | undefined)
@@ -383,7 +362,6 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
         }
         return this
     }
-    /** @memo */
     public onReceive(value: ((parameter: Map<string, Object>) => void) | undefined): this {
         if (this.checkPriority("onReceive")) {
             const value_casted = value as (((parameter: Map<string, Object>) => void) | undefined)
@@ -392,7 +370,6 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
         }
         return this
     }
-    /** @memo */
     public onResult(value: ((parameter: Literal_Number_code__want) => void) | undefined): this {
         if (this.checkPriority("onResult")) {
             const value_casted = value as (((parameter: Literal_Number_code__want) => void) | undefined)
@@ -401,7 +378,6 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
         }
         return this
     }
-    /** @memo */
     public onRelease(value: ((index: number) => void) | undefined): this {
         if (this.checkPriority("onRelease")) {
             const value_casted = value as (((index: number) => void) | undefined)
@@ -410,7 +386,6 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
         }
         return this
     }
-    /** @memo */
     public onError(value: ErrorCallback | undefined): this {
         if (this.checkPriority("onError")) {
             const value_casted = value as (ErrorCallback | undefined)
@@ -419,7 +394,6 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
         }
         return this
     }
-    /** @memo */
     public onTerminated(value: ((parameter: TerminationInfo) => void) | undefined): this {
         if (this.checkPriority("onTerminated")) {
             const value_casted = value as (((parameter: TerminationInfo) => void) | undefined)
@@ -428,7 +402,6 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
         }
         return this
     }
-    /** @memo */
     public onDrawReady(value: (() => void) | undefined): this {
         if (this.checkPriority("onDrawReady")) {
             const value_casted = value as ((() => void) | undefined)
@@ -446,7 +419,7 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
 /** @memo */
 export function UIExtensionComponent(
     /** @memo */
-    style: ((attributes: UIUIExtensionComponentAttribute) => void) | undefined,
+    style: ((attributes: UIExtensionComponentAttribute) => void) | undefined,
     want: Want, options?: UIExtensionOptions,
     /** @memo */
     content_?: (() => void) | undefined,

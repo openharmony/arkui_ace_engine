@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
+#include "core/components_ng/pattern/list/list_item_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -53,7 +54,7 @@ void SetDeleteArea(const Opt_Union_CustomBuilder_SwipeActionItem& arg, bool isSt
         [isStartArea, frameNode, node](const CustomNodeBuilder& value) {
             CallbackHelper(value).BuildAsync([isStartArea, frameNode](const RefPtr<UINode>& uiNode) {
                 CHECK_NULL_VOID(uiNode);
-                ListItemModelNG::SetDeleteArea(
+                ListItemModelStatic::SetDeleteArea(
                     frameNode, Referenced::RawPtr(uiNode), nullptr, nullptr, nullptr, nullptr,
                     Dimension(0, DimensionUnit::VP), isStartArea);
                 }, node);
@@ -80,12 +81,12 @@ void SetDeleteArea(const Opt_Union_CustomBuilder_SwipeActionItem& arg, bool isSt
                     onExitActionArea = std::move(onExitActionAreaCallback),
                     onStateChange = std::move(onStateChangeCallback)
                 ](const RefPtr<UINode>& uiNode) mutable {
-                    ListItemModelNG::SetDeleteArea(frameNode, Referenced::RawPtr(uiNode), std::move(onAction),
+                    ListItemModelStatic::SetDeleteArea(frameNode, Referenced::RawPtr(uiNode), std::move(onAction),
                         std::move(onEnterActionArea), std::move(onExitActionArea), std::move(onStateChange),
                         length, isStartArea);
                     }, node);
             } else {
-                ListItemModelNG::SetDeleteArea(frameNode, nullptr, std::move(onActionCallback),
+                ListItemModelStatic::SetDeleteArea(frameNode, nullptr, std::move(onActionCallback),
                     std::move(onEnterActionAreaCallback), std::move(onExitActionAreaCallback),
                     std::move(onStateChangeCallback), length, isStartArea);
             }
@@ -114,7 +115,7 @@ namespace ListItemModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = ListItemModelNG::CreateFrameNode(id);
+    auto frameNode = ListItemModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -129,7 +130,7 @@ void SetListItemOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto options = Converter::OptConvert<Converter::ListItemOptions>(*value);
     if (options.has_value()) {
-        ListItemModelNG::SetStyle(frameNode, options.value().style);
+        ListItemModelStatic::SetStyle(frameNode, options.value().style);
     }
 }
 } // ListItemInterfaceModifier
@@ -144,7 +145,7 @@ void SelectableImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ListItemModelNG::SetSelectable(frameNode, *convValue);
+    ListItemModelStatic::SetSelectable(frameNode, *convValue);
 }
 void SelectedImpl(Ark_NativePointer node,
                   const Opt_Boolean* value)
@@ -156,7 +157,7 @@ void SelectedImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ListItemModelNG::SetSelected(frameNode, *convValue);
+    ListItemModelStatic::SetSelected(frameNode, *convValue);
 }
 void SwipeActionImpl(Ark_NativePointer node,
                      const Opt_SwipeActionOptions* value)
@@ -183,7 +184,7 @@ void SwipeActionImpl(Ark_NativePointer node,
     }
 
     auto edgeEffect = Converter::OptConvert<V2::SwipeEdgeEffect>(optValue->edgeEffect);
-    ListItemModelNG::SetSwiperAction(frameNode, nullptr, nullptr,
+    ListItemModelStatic::SetSwiperAction(frameNode, nullptr, nullptr,
         std::move(onOffsetChangeCallback), edgeEffect);
 }
 void OnSelectImpl(Ark_NativePointer node,
@@ -199,7 +200,7 @@ void OnSelectImpl(Ark_NativePointer node,
     auto onSelect = [arkCallback = CallbackHelper(*optValue)](bool param) {
         arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(param));
     };
-    ListItemModelNG::SetSelectCallback(frameNode, onSelect);
+    ListItemModelStatic::SetSelectCallback(frameNode, onSelect);
 }
 #ifdef WRONG_GEN
 void _onChangeEvent_selectedImpl(Ark_NativePointer node,
@@ -213,7 +214,7 @@ void _onChangeEvent_selectedImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(Converter::ArkValue<Opt_Boolean>(value));
     };
-    ListItemModelNG::SetSelectChangeEvent(frameNode, std::move(onEvent));
+    ListItemModelStatic::SetSelectChangeEvent(frameNode, std::move(onEvent));
 }
 #endif
 } // ListItemAttributeModifier

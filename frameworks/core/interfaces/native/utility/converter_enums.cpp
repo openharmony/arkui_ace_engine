@@ -20,6 +20,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
 
+#include "arkoala_api_generated.h"
 #include "converter.h"
 #include "converter2.h"
 #include "reverse_converter.h"
@@ -701,6 +702,16 @@ void AssignCast(std::optional<CancelButtonStyle>& dst, const Ark_CancelButtonSty
         case ARK_CANCEL_BUTTON_STYLE_INVISIBLE: dst = CancelButtonStyle::INVISIBLE; break;
         case ARK_CANCEL_BUTTON_STYLE_INPUT: dst = CancelButtonStyle::INPUT; break;
         default: LOGE("Unexpected enum value in Ark_CancelButtonStyle: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<Ace::CanvasUnit>& dst, const Ark_LengthMetricsUnit& src)
+{
+    switch (src) {
+        case ARK_LENGTH_METRICS_UNIT_DEFAULT: dst = Ace::CanvasUnit::DEFAULT ; break;
+        case ARK_LENGTH_METRICS_UNIT_PX: dst = Ace::CanvasUnit::PX; break;
+        default: LOGE("Unexpected enum value in Ark_LengthMetricsUnit: %{public}d", src);
     }
 }
 
@@ -1736,7 +1747,7 @@ void AssignCast(std::optional<SwipeDirection>& dst, const Ark_SwipeDirection& sr
         case ARK_SWIPE_DIRECTION_VERTICAL: dst->type = SwipeDirection::VERTICAL; break;
         case ARK_SWIPE_DIRECTION_ALL: dst->type = SwipeDirection::ALL; break;
         default: {
-            LOGE("Unexpected enum value in Ark_PanDirection: %{public}d", src);
+            LOGE("Unexpected enum value in Ark_SwipeDirection: %{public}d", src);
             dst = std::nullopt;
         }
     }
@@ -2081,4 +2092,35 @@ void AssignCast(std::optional<SourceTool>& dst, const Ark_SourceTool& src)
         }
     }
 }
+
+template<>
+void AssignCast(std::optional<HapticFeedbackMode>& dst, const Ark_HapticFeedbackMode& src)
+{
+    switch (src) {
+        case ARK_HAPTIC_FEEDBACK_MODE_DISABLED: dst = HapticFeedbackMode::DISABLED; break;
+        case ARK_HAPTIC_FEEDBACK_MODE_ENABLED: dst = HapticFeedbackMode::ENABLED; break;
+        case ARK_HAPTIC_FEEDBACK_MODE_AUTO: dst = HapticFeedbackMode::AUTO; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_HapticFeedbackMode: %{public}d", src);
+            dst = std::nullopt;
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextAlign>& dst, const Ark_text_TextAlign& src)
+{
+    switch (src) {
+        default: LOGE("Unexpected enum value in Ark_text_TextAlign: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<WordBreak>& dst, const Ark_text_WordBreak& src)
+{
+    switch (src) {
+        default: LOGE("Unexpected enum value in Ark_text_WordBreak: %{public}d", src);
+    }
+}
+
 } // namespace OHOS::Ace::NG::Converter

@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, PickerTextStyle, DateRange, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, PickerDialogButtonStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, PickerTextStyle, DateRange, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, PickerDialogButtonStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Offset, VoidCallback, ResourceColor } from "./units"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource } from "global/resource"
@@ -190,16 +190,6 @@ export interface CalendarPickerAttribute extends CommonMethod {
     markToday(value: boolean | undefined): this
     edgeAlign(alignType: CalendarAlign | undefined, offset?: Offset): this
 }
-export interface UICalendarPickerAttribute extends UICommonMethod {
-    /** @memo */
-    textStyle(value: PickerTextStyle | undefined): this
-    /** @memo */
-    onChange(value: ((parameter: Date) => void) | undefined): this
-    /** @memo */
-    markToday(value: boolean | undefined): this
-    /** @memo */
-    edgeAlign(alignType: CalendarAlign | undefined, offset?: Offset): this
-}
 export class ArkCalendarPickerStyle extends ArkCommonMethodStyle implements CalendarPickerAttribute {
     textStyle_value?: PickerTextStyle | undefined
     onChange_value?: ((parameter: Date) => void) | undefined
@@ -236,12 +226,10 @@ export interface CalendarDialogOptions extends CalendarOptions {
     hoverModeArea?: HoverModeAreaType;
     markToday?: boolean;
 }
-/** @memo:stable */
-export class ArkCalendarPickerComponent extends ArkCommonMethodComponent implements UICalendarPickerAttribute {
+export class ArkCalendarPickerComponent extends ArkCommonMethodComponent implements CalendarPickerAttribute {
     getPeer(): ArkCalendarPickerPeer {
         return (this.peer as ArkCalendarPickerPeer)
     }
-    /** @memo */
     public setCalendarPickerOptions(options?: CalendarOptions): this {
         if (this.checkPriority("setCalendarPickerOptions")) {
             const options_casted = options as (CalendarOptions | undefined)
@@ -250,7 +238,6 @@ export class ArkCalendarPickerComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public textStyle(value: PickerTextStyle | undefined): this {
         if (this.checkPriority("textStyle")) {
             const value_type = runtimeType(value)
@@ -268,7 +255,6 @@ export class ArkCalendarPickerComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public onChange(value: ((parameter: Date) => void) | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_type = runtimeType(value)
@@ -286,7 +272,6 @@ export class ArkCalendarPickerComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public markToday(value: boolean | undefined): this {
         if (this.checkPriority("markToday")) {
             const value_casted = value as (boolean | undefined)
@@ -295,24 +280,12 @@ export class ArkCalendarPickerComponent extends ArkCommonMethodComponent impleme
         }
         return this
     }
-    /** @memo */
     public edgeAlign(alignType: CalendarAlign | undefined, offset?: Offset): this {
         if (this.checkPriority("edgeAlign")) {
-            const alignType_type = runtimeType(alignType)
-            const offset_type = runtimeType(offset)
-            if ((RuntimeType.OBJECT == alignType_type) || (RuntimeType.OBJECT == alignType_type)) {
-                const alignType_casted = alignType as (CalendarAlign | undefined)
-                const offset_casted = offset as (Offset)
-                this.getPeer()?.edgeAlign0Attribute(alignType_casted, offset_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == alignType_type) || (RuntimeType.OBJECT == alignType_type)) {
-                const alignType_casted = alignType as (CalendarAlign | undefined)
-                const offset_casted = offset as (Offset)
-                this.getPeer()?.edgeAlign1Attribute(alignType_casted, offset_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const alignType_casted = alignType as (CalendarAlign | undefined)
+            const offset_casted = offset as (Offset)
+            this.getPeer()?.edgeAlign0Attribute(alignType_casted, offset_casted)
+            return this
         }
         return this
     }
@@ -324,7 +297,7 @@ export class ArkCalendarPickerComponent extends ArkCommonMethodComponent impleme
 /** @memo */
 export function CalendarPicker(
     /** @memo */
-    style: ((attributes: UICalendarPickerAttribute) => void) | undefined,
+    style: ((attributes: CalendarPickerAttribute) => void) | undefined,
     options?: CalendarOptions,
     /** @memo */
     content_?: (() => void) | undefined,

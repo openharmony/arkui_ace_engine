@@ -39,6 +39,7 @@ OHOS::Ace::SpanParagraphStyle Convert(const Ark_ParagraphStyleInterface& src)
     ret.wordBreak = Converter::OptConvert<OHOS::Ace::WordBreak>(src.wordBreak);
     ret.textOverflow = Converter::OptConvert<OHOS::Ace::TextOverflow>(src.overflow);
     ret.textIndent = Converter::OptConvert<OHOS::Ace::Dimension>(src.textIndent);
+    ret.paragraphSpacing = Converter::OptConvert<OHOS::Ace::Dimension>(src.paragraphSpacing);
 
     Converter::VisitUnion(src.leadingMargin,
         [&ret](const Ark_LengthMetrics& metrics) {
@@ -61,12 +62,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ParagraphStyleAccessor {
 void DestroyPeerImpl(Ark_ParagraphStyle peer)
 {
-    CHECK_NULL_VOID(peer);
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_ParagraphStyle CtorImpl(const Opt_ParagraphStyleInterface* value)
 {
-    auto peer = new ParagraphStylePeer();
+    auto peer = PeerUtils::CreatePeer<ParagraphStylePeer>();
     CHECK_NULL_RETURN(value, peer);
 
     SpanParagraphStyle paragraph = Converter::OptConvert<SpanParagraphStyle>(*value).value_or(SpanParagraphStyle());
@@ -131,7 +131,11 @@ Opt_Union_Number_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyl
 }
 Opt_Number GetParagraphSpacingImpl(Ark_ParagraphStyle peer)
 {
-    return {};
+    auto invalid = Converter::ArkValue<Opt_Number>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
+    auto style = peer->span->GetParagraphStyle();
+    return Converter::ArkValue<Opt_Number>(style.paragraphSpacing);
 }
 } // ParagraphStyleAccessor
 const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor()

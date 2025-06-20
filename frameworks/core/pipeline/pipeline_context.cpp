@@ -1969,6 +1969,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         FlushAnimationTasks();
         window_->FlushLayoutSize(width_, height_);
         hasIdleTasks_ = false;
+        if (asyncEventsHookListener_ != nullptr) {
+            ACE_SCOPED_TRACE("arkoala callbacks");
+            asyncEventsHookListener_(); // fire all arkoala callbacks
+        }
     } else {
         LOGW("the surface is not ready, waiting");
     }

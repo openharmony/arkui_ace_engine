@@ -29,7 +29,7 @@ using namespace testing::ext;
 using namespace Converter;
 
 namespace Converter {
-inline void AssignArkValue(Ark_Literal_Number_offsetRemain& dst, const ScrollFrameResult& src,
+inline void AssignArkValue(Ark_OnScrollFrameBeginHandlerResult& dst, const ScrollFrameResult& src,
     ConvContext *ctx)
 {
     dst.offsetRemain = Converter::ArkValue<Ark_Number>(src.offset);
@@ -48,70 +48,6 @@ public:
         ModifierTestBase::SetUpTestCase();
     }
 };
-
-/*
- * @tc.name: setOnReachStartTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowModifierTest, setOnReachStartTest, TestSize.Level1)
-{
-    ASSERT_NE(modifier_->setOnReachStart, nullptr);
-    const int32_t contextId = 123;
-
-    static std::optional<int32_t> checkData;
-    auto checkCallback = [](const Ark_Int32 resourceId) { checkData = resourceId; };
-    ASSERT_FALSE(checkData.has_value());
-
-    // setup the callback object via C-API
-    auto arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
-    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
-    modifier_->setOnReachStart(node_, &optCallback);
-
-    auto frameNode = reinterpret_cast<FrameNode *>(node_);
-    ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-
-    auto onReachStart = eventHub->GetOnReachStart();
-    ASSERT_NE(onReachStart, nullptr);
-    onReachStart();
-
-    ASSERT_TRUE(checkData.has_value());
-    EXPECT_EQ(checkData.value(), contextId);
-}
-
-/*
- * @tc.name: setOnReachEndTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowModifierTest, setOnReachEndTest, TestSize.Level1)
-{
-    ASSERT_NE(modifier_->setOnReachEnd, nullptr);
-    const int32_t contextId = 123;
-
-    static std::optional<int32_t> checkData;
-    auto checkCallback = [](const Ark_Int32 resourceId) { checkData = resourceId; };
-    ASSERT_FALSE(checkData.has_value());
-
-    // setup the callback object via C-API
-    auto arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
-    auto optCallback = Converter::ArkValue<Opt_Callback_Void>(arkCallback);
-    modifier_->setOnReachEnd(node_, &optCallback);
-
-    auto frameNode = reinterpret_cast<FrameNode *>(node_);
-    ASSERT_NE(frameNode, nullptr);
-    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-
-    auto onReachEnd = eventHub->GetOnReachEnd();
-    onReachEnd();
-
-    ASSERT_TRUE(checkData.has_value());
-    EXPECT_EQ(checkData.value(), contextId);
-}
-
 
 HWTEST_F(WaterFlowModifierTest, setOnScrollIndexTestCachedCountValidValues, TestSize.Level1)
 {
@@ -195,17 +131,16 @@ HWTEST_F(WaterFlowModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     ASSERT_NE(modifier_->setOnScrollFrameBegin, nullptr);
     static const Ark_Int32 expectedResId = 123;
-    auto onScrollFrameBegin = [](Ark_VMContext context, const Ark_Int32 resourceId,
-        const Ark_Number offset, Ark_ScrollState state, const Callback_Literal_Number_offsetRemain_Void cbReturn) {
+    auto onScrollFrameBegin = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number offset,
+                                  Ark_ScrollState state, const Callback_OnScrollFrameBeginHandlerResult_Void cbReturn) {
         EXPECT_EQ(resourceId, expectedResId);
         EXPECT_EQ(Converter::Convert<float>(offset), TEST_OFFSET);
         ScrollFrameResult result;
         result.offset = Converter::Convert<Dimension>(offset);
-        CallbackHelper(cbReturn).InvokeSync(Converter::ArkValue<Ark_Literal_Number_offsetRemain>(result));
+        CallbackHelper(cbReturn).InvokeSync(Converter::ArkValue<Ark_OnScrollFrameBeginHandlerResult>(result));
     };
-    auto arkFunc = Converter::ArkValue<Callback_Number_ScrollState_Literal_Number_offsetRemain>(
-        nullptr, onScrollFrameBegin, expectedResId);
-    auto optCallback = Converter::ArkValue<Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain>(arkFunc);
+    auto arkFunc = Converter::ArkValue<OnScrollFrameBeginCallback>(nullptr, onScrollFrameBegin, expectedResId);
+    auto optCallback = Converter::ArkValue<Opt_OnScrollFrameBeginCallback>(arkFunc);
     modifier_->setOnScrollFrameBegin(node_, &optCallback);
 
     Dimension dimension(TEST_OFFSET);

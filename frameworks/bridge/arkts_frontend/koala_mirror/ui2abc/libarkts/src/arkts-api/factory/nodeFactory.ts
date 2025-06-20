@@ -25,6 +25,7 @@ import {
     VariableDeclarator,
     ObjectExpression,
     ETSTuple,
+    ETSImportDeclaration,
 } from "../../generated"
 import { factory as generatedFactory } from "../../generated/factory"
 import { createScriptFunction, updateScriptFunction } from "../node-utilities/ScriptFunction"
@@ -34,7 +35,7 @@ import { updateMemberExpression } from "../node-utilities/MemberExpression"
 import { createETSParameterExpression, updateETSParameterExpression } from "../node-utilities/ETSParameterExpression"
 import { updateTSTypeParameter } from "../node-utilities/TSTypeParameter"
 import { updateETSTypeReferencePart } from "../node-utilities/TSTypeReferencePart"
-import { createETSImportDeclaration, updateETSImportDeclaration } from "../node-utilities/ETSImportDeclaration"
+import { updateETSImportDeclaration } from "../node-utilities/ETSImportDeclaration"
 import { updateVariableDeclarator } from "../node-utilities/VariableDeclarator"
 import { updateClassDefinition } from "../node-utilities/ClassDefinition"
 import { updateETSStructDeclaration } from "../node-utilities/ETSStructDeclaration"
@@ -50,6 +51,7 @@ import { updateObjectExpression } from "../node-utilities/ObjectExpression"
 import { updateETSTuple } from "../node-utilities/ETSTuple"
 import { createArrayExpression, updateArrayExpression } from "../node-utilities/ArrayExpression"
 import { createTSTypeAliasDeclaration, updateTSTypeAliasDeclaration } from "../node-utilities/TSTypeAliasDeclaration"
+import { createClassDeclaration, updateClassDeclaration } from "../node-utilities/ClassDeclaration"
 
 export const factory = {
     ...generatedFactory,
@@ -75,7 +77,7 @@ export const factory = {
     createETSTypeReferencePart: ETSTypeReferencePart.createETSTypeReferencePart,
     updateETSTypeReferencePart,
 
-    createETSImportDeclaration,
+    createETSImportDeclaration: ETSImportDeclaration.createETSImportDeclaration,
     updateETSImportDeclaration,
 
     createVariableDeclarator: VariableDeclarator.create1VariableDeclarator,
@@ -89,6 +91,9 @@ export const factory = {
 
     createClassDefinition: ClassDefinition.createClassDefinition,
     updateClassDefinition,
+
+    createClassDeclaration,
+    updateClassDeclaration,
 
     createClassProperty,
     updateClassProperty,

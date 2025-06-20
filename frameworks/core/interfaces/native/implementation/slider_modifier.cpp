@@ -252,6 +252,7 @@ void TrackBorderRadiusImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
     Validator::ValidateNonNegative(convValue);
+    Validator::ValidateNonPercent(convValue);
     SliderModelStatic::SetTrackBorderRadius(frameNode, convValue);
 }
 void SelectedBorderRadiusImpl(Ark_NativePointer node,
@@ -261,6 +262,7 @@ void SelectedBorderRadiusImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
     Validator::ValidateNonNegative(convValue);
+    Validator::ValidateNonPercent(convValue);
     SliderModelStatic::SetSelectedBorderRadius(frameNode, convValue);
 }
 void BlockSizeImpl(Ark_NativePointer node,
@@ -334,20 +336,20 @@ void SlideRangeImpl(Ark_NativePointer node,
 void DigitalCrownSensitivityImpl(Ark_NativePointer node,
                                  const Opt_CrownSensitivity* value)
 {
-#ifdef SUPPORT_DIGITAL_CROWN
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<CrownSensitivity>(*value) : std::nullopt;
-    SliderModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
-#endif
+// #ifdef SUPPORT_DIGITAL_CROWN
+//     auto frameNode = reinterpret_cast<FrameNode *>(node);
+//     CHECK_NULL_VOID(frameNode);
+//     auto convValue = value ? Converter::OptConvert<CrownSensitivity>(*value) : std::nullopt;
+//     SliderModelNG::SetDigitalCrownSensitivity(frameNode, convValue);
+// #endif
 }
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
                               const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
-    if (!convValue) {
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    if (!convValue.has_value()) {
         // TODO: Reset value
         return;
     }
@@ -379,7 +381,7 @@ void _onChangeEvent_valueImpl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(weakNode);
         arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
     };
-    SliderModelNG::SetOnChangeEvent(frameNode, std::move(onEvent));
+    SliderModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
 }
 #endif
 } // SliderAttributeModifier

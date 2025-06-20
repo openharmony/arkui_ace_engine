@@ -214,12 +214,12 @@ const std::vector<OneWidthStep> WIDTH_TEST_PLAN = {
     { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-4.5px")), "-4.50px" },
     { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-56vp")), "-56.00vp" },
     { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("undefVal")),
-        "0.00fp" },
+        "0.00vp" },
     { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("-10%")),
         DEFAULT_STROKE_WIDTH },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("")), "0.00fp" },
+    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("")), "0.00vp" },
     { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("qw111vp")), "0.00vp" },
-    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("qw111")), "0.00fp" },
+    { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>(Converter::ArkValue<Ark_String>("qw111")), "0.00vp" },
 };
 
 /**

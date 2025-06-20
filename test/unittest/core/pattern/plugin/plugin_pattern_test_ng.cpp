@@ -235,7 +235,6 @@ HWTEST_F(PluginPatternTestNg, OnDirtyLayoutWrapperSwap2, TestSize.Level1)
     config.skipLayout = true;
     pattern->pluginInfo_.pluginName = "plugin";
     pattern->pluginManagerBridge_ = nullptr;
-    EXPECT_EQ(pattern->pluginManagerBridge_, nullptr);
     isSwap = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_EQ(isSwap, false);
 

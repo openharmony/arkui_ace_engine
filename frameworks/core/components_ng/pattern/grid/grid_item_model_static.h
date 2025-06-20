@@ -25,6 +25,15 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT GridItemModelStatic {
 public:
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetForceRebuild(FrameNode* frameNode, bool value);
+    static void SetSelectable(FrameNode* frameNode, bool selectable);
+    static void SetSelected(FrameNode* frameNode, bool selected);
+    static void SetRowStart(FrameNode* frameNode, int32_t rowStart);
+    static void SetRowEnd(FrameNode* frameNode, int32_t rowEnd);
+    static void SetColumnStart(FrameNode* frameNode, int32_t columnStart);
+    static void SetColumnEnd(FrameNode* frameNode, int32_t columnEnd);
+    static void SetGridItemStyle(FrameNode* frameNode, GridItemStyle gridItemStyle);
     static void SetOnSelect(FrameNode* frameNode, SelectFunc&& onSelect);
     static void SetSelectChangeEvent(FrameNode* frameNode, SelectFunc&& changeEvent);
 };

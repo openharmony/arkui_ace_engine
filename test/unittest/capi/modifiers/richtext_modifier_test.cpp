@@ -68,7 +68,8 @@ HWTEST_F(RichTextModifierTest, setOnStartTest, TestSize.Level1)
     };
 
     auto func = Converter::ArkValue<Callback_Void>(onCallback, TEST_RESOURCE_ID);
-    modifier_->setOnStart(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_Void>(func);
+    modifier_->setOnStart(node_, &optFunc);
 
     auto eventHub = frameNode->GetEventHub<NG::WebEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -95,7 +96,8 @@ HWTEST_F(RichTextModifierTest, setOnCompleteTest, TestSize.Level1)
     };
 
     auto func = Converter::ArkValue<Callback_Void>(onCallback, TEST_RESOURCE_ID);
-    modifier_->setOnComplete(node_, &func);
+    auto optFunc = Converter::ArkValue<Opt_Callback_Void>(func);
+    modifier_->setOnComplete(node_, &optFunc);
 
     auto eventHub = frameNode->GetEventHub<NG::WebEventHub>();
     ASSERT_NE(eventHub, nullptr);

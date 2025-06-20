@@ -16,6 +16,7 @@
 #include "base/geometry/axis.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
+#include "core/components_ng/pattern/list/list_model_static.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -135,7 +136,7 @@ namespace ListModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = ListModelNG::CreateFrameNode(id);
+    auto frameNode = ListModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -155,12 +156,12 @@ void SetListOptionsImpl(Ark_NativePointer node,
     }
 
     auto initialIndex = optionsOpt.value().initialIndex;
-    ListModelNG::SetInitialIndex(frameNode, initialIndex);
+    ListModelStatic::SetInitialIndex(frameNode, initialIndex);
     auto space = optionsOpt.value().space;
-    ListModelNG::SetListSpace(frameNode, space);
+    ListModelStatic::SetListSpace(frameNode, space);
 
-    RefPtr<ScrollControllerBase> positionController = ListModelNG::GetOrCreateController(frameNode);
-    RefPtr<ScrollProxy> scrollBarProxy = ListModelNG::GetOrCreateScrollBarProxy(frameNode);
+    RefPtr<ScrollControllerBase> positionController = ListModelStatic::GetOrCreateController(frameNode);
+    RefPtr<ScrollProxy> scrollBarProxy = ListModelStatic::GetOrCreateScrollBarProxy(frameNode);
     auto abstPeerPtrOpt = optionsOpt.value().scroller;
     CHECK_NULL_VOID(abstPeerPtrOpt);
     auto peerImplPtr = *abstPeerPtrOpt;
@@ -175,7 +176,7 @@ void AlignListItemImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetListItemAlign(frameNode, Converter::OptConvert<V2::ListItemAlign>(*value));
+    ListModelStatic::SetListItemAlign(frameNode, Converter::OptConvert<V2::ListItemAlign>(*value));
 }
 void ListDirectionImpl(Ark_NativePointer node,
                        const Opt_Axis* value)
@@ -183,7 +184,7 @@ void ListDirectionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<Axis> direction = Converter::OptConvert<Axis>(*value);
-    ListModelNG::SetListDirection(frameNode, EnumToInt(direction));
+    ListModelStatic::SetListDirection(frameNode, EnumToInt(direction));
 }
 void ContentStartOffsetImpl(Ark_NativePointer node,
                             const Opt_Number* value)
@@ -195,7 +196,7 @@ void ContentStartOffsetImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ListModelNG::SetContentStartOffset(frameNode, *convValue);
+    ListModelStatic::SetContentStartOffset(frameNode, *convValue);
 }
 void ContentEndOffsetImpl(Ark_NativePointer node,
                           const Opt_Number* value)
@@ -207,7 +208,7 @@ void ContentEndOffsetImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ListModelNG::SetContentEndOffset(frameNode, *convValue);
+    ListModelStatic::SetContentEndOffset(frameNode, *convValue);
 }
 void DividerImpl(Ark_NativePointer node,
                  const Opt_ListDividerOptions* value)
@@ -216,7 +217,7 @@ void DividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
-    ListModelNG::SetDivider(frameNode, divider);
+    ListModelStatic::SetDivider(frameNode, divider);
 }
 void MultiSelectableImpl(Ark_NativePointer node,
                          const Opt_Boolean* value)
@@ -228,7 +229,7 @@ void MultiSelectableImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ListModelNG::SetMultiSelectable(frameNode, *convValue);
+    ListModelStatic::SetMultiSelectable(frameNode, *convValue);
 }
 void CachedCount0Impl(Ark_NativePointer node,
                       const Opt_Number* value)
@@ -240,7 +241,7 @@ void CachedCount0Impl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ListModelNG::SetCachedCount(frameNode, *convValue);
+    ListModelStatic::SetCachedCount(frameNode, *convValue);
 }
 void CachedCount1Impl(Ark_NativePointer node,
                       const Opt_Number* count,
@@ -248,9 +249,6 @@ void CachedCount1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(count);
-    //auto convValue = Converter::OptConvert<type>(count); // for enums
-    //ListModelNG::SetCachedCount1(frameNode, convValue);
 }
 void ChainAnimationImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)
@@ -262,7 +260,7 @@ void ChainAnimationImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ListModelNG::SetChainAnimation(frameNode, *convValue);
+    ListModelStatic::SetChainAnimation(frameNode, *convValue);
 }
 void ChainAnimationOptionsImpl(Ark_NativePointer node,
                                const Opt_ChainAnimationOptions* value)
@@ -274,7 +272,7 @@ void ChainAnimationOptionsImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ListModelNG::SetChainAnimationOptions(frameNode, *convValue);
+    ListModelStatic::SetChainAnimationOptions(frameNode, *convValue);
 }
 void StickyImpl(Ark_NativePointer node,
                 const Opt_StickyStyle* value)
@@ -282,14 +280,14 @@ void StickyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<V2::StickyStyle> style = Converter::OptConvert<V2::StickyStyle>(*value);
-    ListModelNG::SetSticky(frameNode, EnumToInt(style));
+    ListModelStatic::SetSticky(frameNode, EnumToInt(style));
 }
 void ScrollSnapAlignImpl(Ark_NativePointer node,
                          const Opt_ScrollSnapAlign* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetScrollSnapAlign(frameNode, Converter::OptConvert<ScrollSnapAlign>(*value));
+    ListModelStatic::SetScrollSnapAlign(frameNode, Converter::OptConvert<ScrollSnapAlign>(*value));
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,
                           const Opt_ChildrenMainSize* value)
@@ -303,7 +301,7 @@ void ChildrenMainSizeImpl(Ark_NativePointer node,
     }
     auto peer = *optValue;
     CHECK_NULL_VOID(peer);
-    RefPtr<ListChildrenMainSize> handler = ListModelNG::GetOrCreateListChildrenMainSize(frameNode);
+    RefPtr<ListChildrenMainSize> handler = ListModelStatic::GetOrCreateListChildrenMainSize(frameNode);
     peer->SetHandler(handler);
 }
 void MaintainVisibleContentPositionImpl(Ark_NativePointer node,
@@ -316,15 +314,15 @@ void MaintainVisibleContentPositionImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    ListModelNG::SetListMaintainVisibleContentPosition(frameNode, *convValue);
+    ListModelStatic::SetListMaintainVisibleContentPosition(frameNode, *convValue);
 }
 void StackFromEndImpl(Ark_NativePointer node,
                       const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ListModelNG::SetStackFromEnd(frameNode, convValue);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ListModelStatic::SetStackFromEnd(frameNode, convValue);
 }
 void OnScrollIndexImpl(Ark_NativePointer node,
                        const Opt_Callback_Number_Number_Number_Void* value)
@@ -343,7 +341,7 @@ void OnScrollIndexImpl(Ark_NativePointer node,
         auto arkCenter = Converter::ArkValue<Ark_Number>(center);
         arkCallback.Invoke(arkStart, arkEnd, arkCenter);
     };
-    ListModelNG::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
+    ListModelStatic::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
 }
 void OnScrollVisibleContentChangeImpl(Ark_NativePointer node,
                                       const Opt_OnScrollVisibleContentChangeCallback* value)
@@ -361,7 +359,7 @@ void OnScrollVisibleContentChangeImpl(Ark_NativePointer node,
         auto endItemInfo = Converter::ArkValue<Ark_VisibleListContentInfo>(end);
         arkCallback.Invoke(startItemInfo, endItemInfo);
     };
-    ListModelNG::SetOnScrollVisibleContentChange(frameNode, std::move(onScrollVisibleContentChange));
+    ListModelStatic::SetOnScrollVisibleContentChange(frameNode, std::move(onScrollVisibleContentChange));
 }
 void OnItemMoveImpl(Ark_NativePointer node,
                     const Opt_Callback_Number_Number_Boolean* value)
@@ -379,7 +377,7 @@ void OnItemMoveImpl(Ark_NativePointer node,
         auto arkResult = callback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(arkFrom, arkTo);
         return Converter::Convert<bool>(arkResult);
     };
-    ListModelNG::SetOnItemMove(frameNode, std::move(onItemMove));
+    ListModelStatic::SetOnItemMove(frameNode, std::move(onItemMove));
 }
 void OnItemDragStartImpl(Ark_NativePointer node,
                          const Opt_OnItemDragStartCallback* value)
@@ -401,7 +399,7 @@ void OnItemDragStartImpl(Ark_NativePointer node,
                 arkDragInfo, arkItemIndex);
         return builder->BuildSync(node);
     };
-    ListModelNG::SetOnItemDragStart(frameNode, std::move(onItemDragStart));
+    ListModelStatic::SetOnItemDragStart(frameNode, std::move(onItemDragStart));
 }
 void OnItemDragEnterImpl(Ark_NativePointer node,
                          const Opt_Callback_ItemDragInfo_Void* value)
@@ -417,7 +415,7 @@ void OnItemDragEnterImpl(Ark_NativePointer node,
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         arkCallback.Invoke(arkDragInfo);
     };
-    ListModelNG::SetOnItemDragEnter(frameNode, std::move(onItemDragEnter));
+    ListModelStatic::SetOnItemDragEnter(frameNode, std::move(onItemDragEnter));
 }
 void OnItemDragMoveImpl(Ark_NativePointer node,
                         const Opt_Callback_ItemDragInfo_Number_Number_Void* value)
@@ -436,7 +434,7 @@ void OnItemDragMoveImpl(Ark_NativePointer node,
         auto arkInsertIndex = Converter::ArkValue<Ark_Number>(insertIndex);
         arkCallback.Invoke(arkDragInfo, arkItemIndex, arkInsertIndex);
     };
-    ListModelNG::SetOnItemDragMove(frameNode, std::move(onItemDragMove));
+    ListModelStatic::SetOnItemDragMove(frameNode, std::move(onItemDragMove));
 }
 void OnItemDragLeaveImpl(Ark_NativePointer node,
                          const Opt_Callback_ItemDragInfo_Number_Void* value)
@@ -453,7 +451,7 @@ void OnItemDragLeaveImpl(Ark_NativePointer node,
         auto arkItemIndex = Converter::ArkValue<Ark_Number>(itemIndex);
         arkCallback.Invoke(arkDragInfo, arkItemIndex);
     };
-    ListModelNG::SetOnItemDragLeave(frameNode, std::move(onItemDragLeave));
+    ListModelStatic::SetOnItemDragLeave(frameNode, std::move(onItemDragLeave));
 }
 void OnItemDropImpl(Ark_NativePointer node,
                     const Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void* value)
@@ -473,7 +471,7 @@ void OnItemDropImpl(Ark_NativePointer node,
         auto arkIsSuccess = Converter::ArkValue<Ark_Boolean>(isSuccess);
         arkCallback.Invoke(arkDragInfo, arkItemIndex, arkInsertIndex, arkIsSuccess);
     };
-    ListModelNG::SetOnItemDrop(frameNode, std::move(onItemDrop));
+    ListModelStatic::SetOnItemDrop(frameNode, std::move(onItemDrop));
 }
 void OnScrollFrameBeginImpl(Ark_NativePointer node,
                             const Opt_OnScrollFrameBeginCallback* value)
@@ -496,7 +494,7 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
             .offset = Converter::Convert<Dimension>(arkResult.offsetRemain)
         };
     };
-    ListModelNG::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameBegin));
+    ListModelStatic::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameBegin));
 }
 void OnWillScrollImpl(Ark_NativePointer node,
                       const Opt_OnWillScrollCallback* value)
@@ -526,12 +524,12 @@ void LanesImpl(Ark_NativePointer node,
         if (lanes) {
             if (lanes.value().index() == 0) {
                 int lane = std::get<0>(lanes.value());
-                ListModelNG::SetLanes(frameNode, lane);
-                ListModelNG::SetLaneConstrain(frameNode, Dimension(), Dimension());
+                ListModelStatic::SetLanes(frameNode, lane);
+                ListModelStatic::SetLaneConstrain(frameNode, Dimension(), Dimension());
             } else {
                 auto dimensions = std::get<1>(lanes.value());
-                ListModelNG::SetLanes(frameNode, 1);
-                ListModelNG::SetLaneConstrain(frameNode, std::get<0>(dimensions), std::get<1>(dimensions));
+                ListModelStatic::SetLanes(frameNode, 1);
+                ListModelStatic::SetLaneConstrain(frameNode, std::get<0>(dimensions), std::get<1>(dimensions));
             }
         }
     }
@@ -540,7 +538,7 @@ void LanesImpl(Ark_NativePointer node,
         std::optional<Dimension> gutterOpt;
         Converter::AssignOptionalTo(gutterOpt, *gutter);
         if (gutterOpt.has_value()) {
-            ListModelNG::SetLaneGutter(frameNode, gutterOpt);
+            ListModelStatic::SetLaneGutter(frameNode, gutterOpt);
         }
     }
 }

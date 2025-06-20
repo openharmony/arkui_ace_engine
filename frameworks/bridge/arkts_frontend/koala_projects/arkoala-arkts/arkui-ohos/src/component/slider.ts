@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { ResourceColor, Length, Dimension, SizeOptions, ResourceStr, PX, VP, FP, LPX, Percentage } from "./units"
 import { LinearGradient } from "./dataPanel"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
@@ -32,6 +32,7 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { SliderOpsHandWritten } from "./../handwritten"
 
 export class ArkSliderPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -544,7 +545,7 @@ export interface SlideRange {
     to?: number;
 }
 export interface SliderOptions {
-    value?: number;
+    value?: number | Bindable<number>;
     min?: number;
     max?: number;
     step?: number;
@@ -597,57 +598,6 @@ export interface SliderAttribute extends CommonMethod {
     enableHapticFeedback(value: boolean | undefined): this
     showTips(value: boolean | undefined, content?: ResourceStr): this
     _onChangeEvent_value(callback: ((index: number) => void)): void
-}
-export interface UISliderAttribute extends UICommonMethod {
-    /** @memo */
-    blockColor(value: ResourceColor | undefined): this
-    /** @memo */
-    trackColor(value: ResourceColor | LinearGradient | undefined): this
-    /** @memo */
-    selectedColor(value: ResourceColor | undefined | ResourceColor | LinearGradient | undefined): this
-    /** @memo */
-    minLabel(value: string | undefined): this
-    /** @memo */
-    maxLabel(value: string | undefined): this
-    /** @memo */
-    showSteps(value: boolean | undefined): this
-    /** @memo */
-    trackThickness(value: Length | undefined): this
-    /** @memo */
-    onChange(value: ((value: number,mode: SliderChangeMode) => void) | undefined): this
-    /** @memo */
-    blockBorderColor(value: ResourceColor | undefined): this
-    /** @memo */
-    blockBorderWidth(value: Length | undefined): this
-    /** @memo */
-    stepColor(value: ResourceColor | undefined): this
-    /** @memo */
-    trackBorderRadius(value: Length | undefined): this
-    /** @memo */
-    selectedBorderRadius(value: Dimension | undefined): this
-    /** @memo */
-    blockSize(value: SizeOptions | undefined): this
-    /** @memo */
-    blockStyle(value: SliderBlockStyle | undefined): this
-    /** @memo */
-    stepSize(value: Length | undefined): this
-    /** @memo */
-    sliderInteractionMode(value: SliderInteraction | undefined): this
-    /** @memo */
-    minResponsiveDistance(value: number | undefined): this
-    /** @memo */
-    contentModifier(value: ContentModifier | undefined): this
-    /** @memo */
-    slideRange(value: SlideRange | undefined): this
-    /** @memo */
-    digitalCrownSensitivity(value: CrownSensitivity | undefined): this
-    /** @memo */
-    enableHapticFeedback(value: boolean | undefined): this
-    /** @memo */
-    showTips(value: boolean | undefined, content?: ResourceStr): this
-    /** @memo */
-    _onChangeEvent_value(callback: ((index: number) => void)): void
-    /** @memo */
 }
 export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttribute {
     blockColor_value?: ResourceColor | undefined
@@ -745,21 +695,31 @@ export class ArkSliderStyle extends ArkCommonMethodStyle implements SliderAttrib
         throw new Error("Unimplmented")
         }
 }
-/** @memo:stable */
-export class ArkSliderComponent extends ArkCommonMethodComponent implements UISliderAttribute {
+export class ArkSliderComponent extends ArkCommonMethodComponent implements SliderAttribute {
     getPeer(): ArkSliderPeer {
         return (this.peer as ArkSliderPeer)
     }
-    /** @memo */
+    SliderOptionsValueIsBindable(options?: SliderOptions): boolean {
+        if ((RuntimeType.UNDEFINED) != runtimeType(options)) {
+            const options_num  = options!.value;
+            if ((RuntimeType.UNDEFINED) != (runtimeType(options_num))) {
+                const options_num_value  = options_num!;
+                return TypeChecker.isBindableNumber(options_num_value);
+            }
+        }
+        return false;
+    }
     public setSliderOptions(options?: SliderOptions): this {
         if (this.checkPriority("setSliderOptions")) {
             const options_casted = options as (SliderOptions | undefined)
             this.getPeer()?.setSliderOptionsAttribute(options_casted)
-            return this
+        }
+        if (this.SliderOptionsValueIsBindable(options)) {
+            SliderOpsHandWritten.hookSliderAttributeValueImpl(this.getPeer().peer.ptr,
+                (options!.value as Bindable<number>));
         }
         return this
     }
-    /** @memo */
     public blockColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("blockColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -768,7 +728,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public trackColor(value: ResourceColor | LinearGradient | undefined): this {
         if (this.checkPriority("trackColor")) {
             const value_casted = value as (ResourceColor | LinearGradient | undefined)
@@ -777,7 +736,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public selectedColor(value: ResourceColor | undefined | ResourceColor | LinearGradient | undefined): this {
         if (this.checkPriority("selectedColor")) {
             const value_type = runtimeType(value)
@@ -795,7 +753,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public minLabel(value: string | undefined): this {
         if (this.checkPriority("minLabel")) {
             const value_casted = value as (string | undefined)
@@ -804,7 +761,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public maxLabel(value: string | undefined): this {
         if (this.checkPriority("maxLabel")) {
             const value_casted = value as (string | undefined)
@@ -813,7 +769,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public showSteps(value: boolean | undefined): this {
         if (this.checkPriority("showSteps")) {
             const value_casted = value as (boolean | undefined)
@@ -822,7 +777,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public trackThickness(value: Length | undefined): this {
         if (this.checkPriority("trackThickness")) {
             const value_casted = value as (Length | undefined)
@@ -831,7 +785,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public onChange(value: ((value: number,mode: SliderChangeMode) => void) | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_casted = value as (((value: number,mode: SliderChangeMode) => void) | undefined)
@@ -840,7 +793,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public blockBorderColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("blockBorderColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -849,7 +801,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public blockBorderWidth(value: Length | undefined): this {
         if (this.checkPriority("blockBorderWidth")) {
             const value_casted = value as (Length | undefined)
@@ -858,7 +809,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public stepColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("stepColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -867,7 +817,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public trackBorderRadius(value: Length | undefined): this {
         if (this.checkPriority("trackBorderRadius")) {
             const value_casted = value as (Length | undefined)
@@ -876,7 +825,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public selectedBorderRadius(value: Dimension | undefined): this {
         if (this.checkPriority("selectedBorderRadius")) {
             const value_casted = value as (Dimension | undefined)
@@ -885,7 +833,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public blockSize(value: SizeOptions | undefined): this {
         if (this.checkPriority("blockSize")) {
             const value_casted = value as (SizeOptions | undefined)
@@ -894,7 +841,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public blockStyle(value: SliderBlockStyle | undefined): this {
         if (this.checkPriority("blockStyle")) {
             const value_casted = value as (SliderBlockStyle | undefined)
@@ -903,7 +849,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public stepSize(value: Length | undefined): this {
         if (this.checkPriority("stepSize")) {
             const value_casted = value as (Length | undefined)
@@ -912,7 +857,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public sliderInteractionMode(value: SliderInteraction | undefined): this {
         if (this.checkPriority("sliderInteractionMode")) {
             const value_casted = value as (SliderInteraction | undefined)
@@ -921,7 +865,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public minResponsiveDistance(value: number | undefined): this {
         if (this.checkPriority("minResponsiveDistance")) {
             const value_casted = value as (number | undefined)
@@ -930,7 +873,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public contentModifier(value: ContentModifier | undefined): this {
         if (this.checkPriority("contentModifier")) {
             const value_casted = value as (ContentModifier | undefined)
@@ -939,7 +881,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public slideRange(value: SlideRange | undefined): this {
         if (this.checkPriority("slideRange")) {
             const value_casted = value as (SlideRange | undefined)
@@ -948,7 +889,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
         if (this.checkPriority("digitalCrownSensitivity")) {
             const value_casted = value as (CrownSensitivity | undefined)
@@ -957,7 +897,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public enableHapticFeedback(value: boolean | undefined): this {
         if (this.checkPriority("enableHapticFeedback")) {
             const value_casted = value as (boolean | undefined)
@@ -966,7 +905,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public showTips(value: boolean | undefined, content?: ResourceStr): this {
         if (this.checkPriority("showTips")) {
             const value_casted = value as (boolean | undefined)
@@ -976,7 +914,6 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_value(callback: ((index: number) => void)): void {
         if (this.checkPriority("_onChangeEvent_value")) {
             const callback_casted = callback as (((index: number) => void))
@@ -994,7 +931,7 @@ export class ArkSliderComponent extends ArkCommonMethodComponent implements UISl
 /** @memo */
 export function Slider(
     /** @memo */
-    style: ((attributes: UISliderAttribute) => void) | undefined,
+    style: ((attributes: SliderAttribute) => void) | undefined,
     options?: SliderOptions,
     /** @memo */
     content_?: (() => void) | undefined,

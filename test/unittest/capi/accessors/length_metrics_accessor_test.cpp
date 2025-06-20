@@ -45,12 +45,12 @@ const std::vector<std::pair<DimensionUnit, Ark_LengthUnit>> unitTestPlan = {
 }
 
 class LengthMetricsAccessorTest
-    : public AccessorTestBase<GENERATED_ArkUILengthMetricsAccessor,
+    : public AccessorTestCtorBase<GENERATED_ArkUILengthMetricsAccessor,
         &GENERATED_ArkUIAccessors::getLengthMetricsAccessor, LengthMetricsPeer> {
 public:
     void SetUp(void) override
     {
-        AccessorTestBase::SetUp();
+        AccessorTestCtorBase::SetUp();
         dragEvent_ = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
         ASSERT_NE(dragEvent_, nullptr);
 
@@ -58,6 +58,11 @@ public:
             AddResource(id, res);
             AddResource(strid, res);
         }
+    }
+    void *CreatePeerInstance() override
+    {
+        auto val = Converter::ArkValue<Ark_Number>(0);
+        return accessor_->ctor(&val, ARK_LENGTH_UNIT_VP);
     }
     RefPtr<OHOS::Ace::DragEvent> dragEvent_ = nullptr;
 };

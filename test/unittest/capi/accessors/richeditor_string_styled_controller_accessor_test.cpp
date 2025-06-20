@@ -89,7 +89,11 @@ HWTEST_F(RichEditorStyledStringControllerAccessorTest, setAndGetStyledStringTest
     ASSERT_NE(stringAccessor, nullptr);
     ASSERT_NE(stringAccessor->ctor, nullptr);
     ASSERT_NE(stringAccessor->destroyPeer, nullptr);
+#ifdef WRONG_GEN
+    const auto stringPeer = reinterpret_cast<MutableStyledStringPeer*>(stringAccessor->ctor(nullptr, nullptr));
+#else
     const auto stringPeer = reinterpret_cast<MutableStyledStringPeer*>(stringAccessor->ctor());
+#endif
     const auto refString = AceType::MakeRefPtr<MutableSpanString>(TEST_TEXT);
     stringPeer->spanString = refString;
 

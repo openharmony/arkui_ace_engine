@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { ResourceColor, MarkStyle } from "./units"
 import { CheckBoxShape, Color } from "./enums"
 import { Callback_Opt_Boolean_Void } from "./checkbox"
@@ -30,6 +30,7 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { CheckboxGroupOpsHandWritten } from "./../handwritten"
 
 export class ArkCheckboxGroupPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -307,28 +308,12 @@ export interface CheckboxGroupResult {
 export type CheckboxGroupInterface = (options?: CheckboxGroupOptions) => CheckboxGroupAttribute;
 export type OnCheckboxGroupChangeCallback = (value: CheckboxGroupResult) => void;
 export interface CheckboxGroupAttribute extends CommonMethod {
-    selectAll(value: boolean | undefined): this
+    selectAll(value: boolean | Bindable<boolean> | undefined): this
     selectedColor(value: ResourceColor | undefined): this
     unselectedColor(value: ResourceColor | undefined): this
     mark(value: MarkStyle | undefined): this
     onChange(value: OnCheckboxGroupChangeCallback | undefined): this
     checkboxShape(value: CheckBoxShape | undefined): this
-    _onChangeEvent_selectAll(callback: ((select: boolean | undefined) => void)): void
-}
-export interface UICheckboxGroupAttribute extends UICommonMethod {
-    /** @memo */
-    selectAll(value: boolean | undefined): this
-    /** @memo */
-    selectedColor(value: ResourceColor | undefined): this
-    /** @memo */
-    unselectedColor(value: ResourceColor | undefined): this
-    /** @memo */
-    mark(value: MarkStyle | undefined): this
-    /** @memo */
-    onChange(value: OnCheckboxGroupChangeCallback | undefined): this
-    /** @memo */
-    checkboxShape(value: CheckBoxShape | undefined): this
-    /** @memo */
     _onChangeEvent_selectAll(callback: ((select: boolean | undefined) => void)): void
 }
 export class ArkCheckboxGroupStyle extends ArkCommonMethodStyle implements CheckboxGroupAttribute {
@@ -338,7 +323,7 @@ export class ArkCheckboxGroupStyle extends ArkCommonMethodStyle implements Check
     mark_value?: MarkStyle | undefined
     onChange_value?: OnCheckboxGroupChangeCallback | undefined
     checkboxShape_value?: CheckBoxShape | undefined
-    public selectAll(value: boolean | undefined): this {
+    public selectAll(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
     public selectedColor(value: ResourceColor | undefined): this {
@@ -360,12 +345,10 @@ export class ArkCheckboxGroupStyle extends ArkCommonMethodStyle implements Check
         throw new Error("Unimplmented")
     }
 }
-/** @memo:stable */
-export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implements UICheckboxGroupAttribute {
+export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implements CheckboxGroupAttribute {
     getPeer(): ArkCheckboxGroupPeer {
         return (this.peer as ArkCheckboxGroupPeer)
     }
-    /** @memo */
     public setCheckboxGroupOptions(options?: CheckboxGroupOptions): this {
         if (this.checkPriority("setCheckboxGroupOptions")) {
             const options_casted = options as (CheckboxGroupOptions | undefined)
@@ -374,9 +357,8 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
-    public selectAll(value: boolean | undefined): this {
-        if (this.checkPriority("selectAll")) {
+    public selectAll(value: boolean | Bindable<boolean> | undefined): this {
+        if (this.checkPriority("selectAll") && (typeof value === "boolean" || typeof value === "undefined")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.BOOLEAN == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (boolean | undefined)
@@ -390,9 +372,9 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
             }
             throw new Error("Can not select appropriate overload")
         }
+        CheckboxGroupOpsHandWritten.hookCheckboxGroupAttributeSelectAllImpl(this.getPeer().peer.ptr, (value as Bindable<boolean>));
         return this
     }
-    /** @memo */
     public selectedColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("selectedColor")) {
             const value_type = runtimeType(value)
@@ -410,7 +392,6 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public unselectedColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("unselectedColor")) {
             const value_type = runtimeType(value)
@@ -428,7 +409,6 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public mark(value: MarkStyle | undefined): this {
         if (this.checkPriority("mark")) {
             const value_type = runtimeType(value)
@@ -446,7 +426,6 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public onChange(value: OnCheckboxGroupChangeCallback | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_type = runtimeType(value)
@@ -464,7 +443,6 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public checkboxShape(value: CheckBoxShape | undefined): this {
         if (this.checkPriority("checkboxShape")) {
             const value_type = runtimeType(value)
@@ -477,7 +455,6 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_selectAll(callback: ((select: boolean | undefined) => void)): void {
         if (this.checkPriority("_onChangeEvent_selectAll")) {
             const callback_casted = callback as (((select: boolean | undefined) => void))
@@ -494,7 +471,7 @@ export class ArkCheckboxGroupComponent extends ArkCommonMethodComponent implemen
 /** @memo */
 export function CheckboxGroup(
     /** @memo */
-    style: ((attributes: UICheckboxGroupAttribute) => void) | undefined,
+    style: ((attributes: CheckboxGroupAttribute) => void) | undefined,
     options?: CheckboxGroupOptions,
     /** @memo */
     content_?: (() => void) | undefined,

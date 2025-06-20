@@ -11201,14 +11201,14 @@ void impl_GridAttribute_onScrollFrameBegin(Ark_NativePointer thisPtr, KSerialize
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain value_value_buf = {};
+        Opt_OnScrollFrameBeginCallback value_value_buf = {};
         value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
         {
-            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number offset, Ark_ScrollState state, const Callback_Literal_Number_offsetRemain_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_ScrollState_Literal_Number_offsetRemain)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number offset, Ark_ScrollState state, const Callback_Literal_Number_offsetRemain_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_ScrollState_Literal_Number_offsetRemain))))};
+            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number offset, Ark_ScrollState state, const Callback_OnScrollFrameBeginHandlerResult_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnScrollFrameBeginCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number offset, Ark_ScrollState state, const Callback_OnScrollFrameBeginHandlerResult_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnScrollFrameBeginCallback))))};
         }
-        Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain value_value = value_value_buf;;
-        GetNodeModifiers()->getGridModifier()->setOnScrollFrameBegin(self, (const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain*)&value_value);
+        Opt_OnScrollFrameBeginCallback value_value = value_value_buf;;
+        GetNodeModifiers()->getGridModifier()->setOnScrollFrameBegin(self, (const Opt_OnScrollFrameBeginCallback*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(GridAttribute_onScrollFrameBegin, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_GridAttribute_onWillScroll(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -31525,14 +31525,14 @@ void impl_WaterFlowAttribute_onScrollFrameBegin(Ark_NativePointer thisPtr, KSeri
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain value_value_buf = {};
+        Opt_OnScrollFrameBeginCallback value_value_buf = {};
         value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
         if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
         {
-            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number offset, Ark_ScrollState state, const Callback_Literal_Number_offsetRemain_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_ScrollState_Literal_Number_offsetRemain)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number offset, Ark_ScrollState state, const Callback_Literal_Number_offsetRemain_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_ScrollState_Literal_Number_offsetRemain))))};
+            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number offset, Ark_ScrollState state, const Callback_OnScrollFrameBeginHandlerResult_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_OnScrollFrameBeginCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number offset, Ark_ScrollState state, const Callback_OnScrollFrameBeginHandlerResult_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_OnScrollFrameBeginCallback))))};
         }
-        Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain value_value = value_value_buf;;
-        GetNodeModifiers()->getWaterFlowModifier()->setOnScrollFrameBegin(self, (const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain*)&value_value);
+        Opt_OnScrollFrameBeginCallback value_value = value_value_buf;;
+        GetNodeModifiers()->getWaterFlowModifier()->setOnScrollFrameBegin(self, (const Opt_OnScrollFrameBeginCallback*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(WaterFlowAttribute_onScrollFrameBegin, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_WaterFlowAttribute_onScrollIndex(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
@@ -31765,6 +31765,36 @@ KOALA_INTEROP_DIRECT_V3(LinearIndicatorAttribute_onChange, Ark_NativePointer, KS
 
 // Accessors
 
+Ark_NativePointer impl_AlphabetIndexerOps_registerIndexerSelectedCallback(Ark_NativePointer node, KInteropNumber index, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        IndexerSelectedCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_IndexerSelectedCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_IndexerSelectedCallback))))};;
+        return GetAccessors()->getAlphabetIndexerOpsAccessor()->registerIndexerSelectedCallback(node, (const Ark_Number*) (&index), (const IndexerSelectedCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(AlphabetIndexerOps_registerIndexerSelectedCallback, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_TabsOps_registerIndexCallback(Ark_NativePointer node, KInteropNumber value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        IndexCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_IndexCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_IndexCallback))))};;
+        return GetAccessors()->getTabsOpsAccessor()->registerIndexCallback(node, (const Ark_Number*) (&value), (const IndexCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(TabsOps_registerIndexCallback, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_ListItemOps_registerSelectedCallback(Ark_NativePointer node, Ark_Boolean value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        SelectedCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SelectedCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SelectedCallback))))};;
+        return GetAccessors()->getListItemOpsAccessor()->registerSelectedCallback(node, value, (const SelectedCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(ListItemOps_registerSelectedCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_RefreshOps_registerRefreshingCallback(Ark_NativePointer node, Ark_Boolean value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        RefreshingCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean refreshing)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_RefreshingCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean refreshing)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_RefreshingCallback))))};;
+        return GetAccessors()->getRefreshOpsAccessor()->registerRefreshingCallback(node, value, (const RefreshingCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(RefreshOps_registerRefreshingCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_SwiperOps_registerIndexCallback(Ark_NativePointer node, KInteropNumber value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        IndexCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_IndexCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_IndexCallback))))};;
+        return GetAccessors()->getSwiperOpsAccessor()->registerIndexCallback(node, (const Ark_Number*) (&value), (const IndexCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(SwiperOps_registerIndexCallback, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KSerializerBuffer, int32_t)
 void impl_AnimationExtender_SetClipRect(Ark_NativePointer node, KFloat x, KFloat y, KFloat width, KFloat height) {
         GetAccessors()->getAnimationExtenderAccessor()->SetClipRect(node, x, y, width, height);
 }
@@ -31965,7 +31995,7 @@ Ark_NativePointer impl_LazyForEachOps_NeedMoreElements(Ark_NativePointer node, A
 KOALA_INTEROP_DIRECT_3(LazyForEachOps_NeedMoreElements, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer, Ark_Int32)
 void impl_LazyForEachOps_OnRangeUpdate(Ark_NativePointer node, Ark_Int32 totalCount, KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
-        Callback_RangeUpdate updater_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 index, const Ark_NativePointer mark, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_RangeUpdate)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 index, const Ark_NativePointer mark, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_RangeUpdate))))};;
+        Callback_RangeUpdate updater_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_RangeUpdate)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_RangeUpdate))))};;
         GetAccessors()->getLazyForEachOpsAccessor()->OnRangeUpdate(node, totalCount, (const Callback_RangeUpdate*)&updater_value);
 }
 KOALA_INTEROP_DIRECT_V4(LazyForEachOps_OnRangeUpdate, Ark_NativePointer, Ark_Int32, KSerializerBuffer, int32_t)
@@ -31981,6 +32011,13 @@ void impl_LazyForEachOps_NotifyChange(Ark_NativePointer node, Ark_Int32 startInd
         GetAccessors()->getLazyForEachOpsAccessor()->NotifyChange(node, startIndex, endIndex, count);
 }
 KOALA_INTEROP_DIRECT_V4(LazyForEachOps_NotifyChange, Ark_NativePointer, Ark_Int32, Ark_Int32, Ark_Int32)
+void impl_LazyForEachOps_Sync(Ark_NativePointer node, Ark_Int32 totalCount, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Callback_CreateItem creator_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_CreateItem)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 index, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_CreateItem))))};;
+        Callback_RangeUpdate updater_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_RangeUpdate)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Int32 start, const Ark_Int32 end)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_RangeUpdate))))};;
+        GetAccessors()->getLazyForEachOpsAccessor()->Sync(node, totalCount, (const Callback_CreateItem*)&creator_value, (const Callback_RangeUpdate*)&updater_value);
+}
+KOALA_INTEROP_DIRECT_V4(LazyForEachOps_Sync, Ark_NativePointer, Ark_Int32, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_SystemOps_StartFrame() {
         return GetAccessors()->getSystemOpsAccessor()->StartFrame();
 }
@@ -32738,6 +32775,12 @@ void impl_StateStylesOps_onStateStyleChange(Ark_NativePointer node, KSerializerB
     GetAccessors()->getStateStylesOpsAccessor()->onStateStyleChange(node, (const Callback_StateStylesChange*)&stateStyleChange_value);
 }
 KOALA_INTEROP_DIRECT_V3(StateStylesOps_onStateStyleChange, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_DragDropOps_registerOnDragStart(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Callback_onDragStart onDragStart_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer node, const Ark_DragEvent dragEvent, const Ark_String extraParam)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_onDragStart)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer node, const Ark_DragEvent dragEvent, const Ark_String extraParam)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_onDragStart))))};;
+    GetAccessors()->getDragDropOpsAccessor()->registerOnDragStart(node, (const Callback_onDragStart*)&onDragStart_value);
+}
+KOALA_INTEROP_DIRECT_V3(DragDropOps_registerOnDragStart, Ark_NativePointer, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_UIContextAtomicServiceBar_getBarRect() {
         const auto &retValue = GetAccessors()->getUIContextAtomicServiceBarAccessor()->getBarRect();
         Serializer _retSerializer {};
@@ -33675,6 +33718,13 @@ KInteropReturnBuffer impl_GlobalScope_ohos_font_getFontByName(const KStringPtr& 
         return _retSerializer.toReturnBuffer();
 }
 KOALA_INTEROP_1(GlobalScope_ohos_font_getFontByName, KInteropReturnBuffer, KStringPtr)
+KInteropReturnBuffer impl_GlobalScope_ohos_font_getUIFontConfig() {
+        const auto &retValue = GetAccessors()->getGlobalScope_ohos_fontAccessor()->getUIFontConfig();
+        Serializer _retSerializer {};
+        _retSerializer.writeUIFontConfig(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_0(GlobalScope_ohos_font_getUIFontConfig, KInteropReturnBuffer)
 Ark_Number impl_GlobalScope_ohos_measure_utils_measureText(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         Ark_MeasureOptions options_value = thisDeserializer.readMeasureOptions();;
@@ -33888,6 +33938,71 @@ Ark_NativePointer impl_FrameNode_getFrameNodeByKey(const KStringPtr& name) {
         return GetAccessors()->getFrameNodeAccessor()->getFrameNodeByKey((const Ark_String*) (&name));
 }
 KOALA_INTEROP_1(FrameNode_getFrameNodeByKey, Ark_NativePointer, KStringPtr)
+Ark_String impl_FrameNode_getId(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        return GetAccessors()->getFrameNodeAccessor()->getId(self);
+}
+KOALA_INTEROP_1(FrameNode_getId, KStringPtr, Ark_NativePointer)
+Ark_Int32 impl_FrameNode_getUniqueId(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        return GetAccessors()->getFrameNodeAccessor()->getUniqueId(self);  
+}
+KOALA_INTEROP_DIRECT_1(FrameNode_getUniqueId, Ark_Int32, Ark_NativePointer)
+Ark_Boolean impl_FrameNode_isVisible(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        return GetAccessors()->getFrameNodeAccessor()->isVisible(self);
+}
+KOALA_INTEROP_DIRECT_1(FrameNode_isVisible, Ark_Boolean, Ark_NativePointer)
+Ark_Boolean impl_FrameNode_isClipToFrame(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+       return GetAccessors()->getFrameNodeAccessor()->isClipToFrame(self);
+}
+KOALA_INTEROP_DIRECT_1(FrameNode_isClipToFrame, Ark_Boolean, Ark_NativePointer)
+Ark_Boolean impl_FrameNode_isAttached(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        return GetAccessors()->getFrameNodeAccessor()->isAttached(self);
+}
+KOALA_INTEROP_DIRECT_1(FrameNode_isAttached, Ark_Boolean, Ark_NativePointer)
+Ark_String impl_FrameNode_getInspectorInfo(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        return GetAccessors()->getFrameNodeAccessor()->getInspectorInfo(self);
+}
+KOALA_INTEROP_1(FrameNode_getInspectorInfo, KStringPtr, Ark_NativePointer)
+Ark_Int32 impl_FrameNode_onDraw(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+         Opt_DrawCallbackFunc callback__value_buf = {};
+        callback__value_buf.value = {
+            thisDeserializer.readCallbackResource(),
+            reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_DrawContext drawCallback)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_DrawCallback)))),
+            reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, Ark_DrawContext drawCallback)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_DrawCallback))))};
+          Opt_DrawCallbackFunc  callback__value = callback__value_buf;
+      GetAccessors()->getFrameNodeAccessor()->onDraw(self, (const Opt_DrawCallbackFunc*)&callback__value);
+     return 0;
+}
+KOALA_INTEROP_DIRECT_3(FrameNode_onDraw, Ark_Int32 ,Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_FrameNode_invalidate(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        GetAccessors()->getFrameNodeAccessor()->invalidate(self);
+}
+KOALA_INTEROP_DIRECT_V1(FrameNode_invalidate, Ark_NativePointer)
+void impl_FrameNode_disposeTree(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        GetAccessors()->getFrameNodeAccessor()->disposeTree(self);
+}
+KOALA_INTEROP_DIRECT_V1(FrameNode_disposeTree, Ark_NativePointer)
+
+Ark_Boolean impl_FrameNode_setCrossLanguageOptions(Ark_NativePointer thisPtr,Ark_Boolean attributeSettings) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        GetAccessors()->getFrameNodeAccessor()->setCrossLanguageOptions(self, attributeSettings);
+        return true;
+}
+KOALA_INTEROP_DIRECT_2(FrameNode_setCrossLanguageOptions, Ark_Boolean, Ark_NativePointer, Ark_Boolean)
+Ark_Boolean impl_FrameNode_getCrossLanguageOptions(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        return GetAccessors()->getFrameNodeAccessor()->getCrossLanguageOptions(self);
+}
+KOALA_INTEROP_DIRECT_1(FrameNode_getCrossLanguageOptions, Ark_Boolean, Ark_NativePointer)
 Ark_Number impl_FrameNode_getIdByFrameNode(Ark_NativePointer thisPtr, Ark_NativePointer node){
     Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
     return GetAccessors()->getFrameNodeAccessor()->getIdByFrameNode(self, static_cast<Ark_FrameNode>(node));
@@ -33941,6 +34056,19 @@ Ark_NativePointer impl_FrameNode_getRenderNode(Ark_NativePointer thisPtr) {
     return retValue;
 }
 KOALA_INTEROP_DIRECT_1(FrameNode_getRenderNode, Ark_NativePointer, Ark_NativePointer)
+Ark_NativePointer impl_FrameNode_getFrameNodePtr(Ark_NativePointer node) {
+        return GetAccessors()->getFrameNodeAccessor()->getFrameNodePtr(static_cast<Ark_FrameNode>(node));
+}
+KOALA_INTEROP_DIRECT_1(FrameNode_getFrameNodePtr, Ark_NativePointer, Ark_NativePointer)
+Ark_NativePointer impl_FrameNode_createTypedFrameNode(const KStringPtr& type) {
+        return GetAccessors()->getFrameNodeAccessor()->createTypedFrameNode((const Ark_String*) (&type));
+}
+KOALA_INTEROP_1(FrameNode_createTypedFrameNode, Ark_NativePointer, KStringPtr)
+Ark_String impl_FrameNode_getNodeType(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        return GetAccessors()->getFrameNodeAccessor()->getNodeType(self);
+}
+KOALA_INTEROP_1(FrameNode_getNodeType, KStringPtr, Ark_NativePointer)
 Ark_NativePointer impl_LengthMetrics_getFinalizer() {
         return GetAccessors()->getLengthMetricsAccessor()->getFinalizer();
 }
@@ -34107,6 +34235,102 @@ void impl_ShapeClip_setCommandPath(Ark_NativePointer thisPtr, KSerializerBuffer 
         GetAccessors()->getShapeClipAccessor()->setCommandPath(self, (const Ark_CommandPath*)&path_value);
 }
 KOALA_INTEROP_DIRECT_V3(ShapeClip_setCommandPath, Ark_NativePointer, KSerializerBuffer, int32_t)
+KInteropReturnBuffer impl_FrameNode_getPositionToParent(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getPositionToParent(self);
+        Serializer _retSerializer {};
+        _retSerializer.writePosition(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getPositionToParent, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getPositionToScreen(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getPositionToScreen(self);
+        Serializer _retSerializer {};
+        _retSerializer.writePosition(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getPositionToScreen, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getPositionToWindow(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getPositionToWindow(self);
+        Serializer _retSerializer {};
+        _retSerializer.writePosition(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getPositionToWindow, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getPositionToParentWithTransform(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getPositionToParentWithTransform(self);
+        Serializer _retSerializer {};
+        _retSerializer.writePosition(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getPositionToParentWithTransform, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getPositionToScreenWithTransform(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getPositionToScreenWithTransform(self);
+        Serializer _retSerializer {};
+        _retSerializer.writePosition(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getPositionToScreenWithTransform, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getPositionToWindowWithTransform1(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getPositionToWindowWithTransform1(self);
+        Serializer _retSerializer {};
+        _retSerializer.writePosition(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getPositionToWindowWithTransform1, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getMeasuredSize(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getMeasuredSize(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeSize(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getMeasuredSize, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getLayoutPosition(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getLayoutPosition(self);
+        Serializer _retSerializer {};
+        _retSerializer.writePosition(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getLayoutPosition, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getUserConfigBorderWidth(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getUserConfigBorderWidth(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeEdgesLengthMetrics(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getUserConfigBorderWidth, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getUserConfigPadding(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getUserConfigPadding(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeEdgesLengthMetrics(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getUserConfigPadding, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getUserConfigMargin(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getUserConfigMargin(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeEdgesLengthMetrics(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getUserConfigMargin, KInteropReturnBuffer, Ark_NativePointer)
+KInteropReturnBuffer impl_FrameNode_getUserConfigSize(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getUserConfigSize(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeSizeLengthMetrics(retValue);
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(FrameNode_getUserConfigSize, KInteropReturnBuffer, Ark_NativePointer)
 Ark_NativePointer impl_Matrix4Transit_ctor() {
         return GetAccessors()->getMatrix4TransitAccessor()->ctor();
 }
@@ -34806,6 +35030,20 @@ void impl_RenderNode_setLengthMetricsUnit(Ark_NativePointer thisPtr, Ark_Int32 l
         GetAccessors()->getRenderNodeAccessor()->setLengthMetricsUnit(self, static_cast<Ark_LengthMetricsUnit>(lengthMetricsUnit));
 }
 KOALA_INTEROP_DIRECT_V2(RenderNode_setLengthMetricsUnit, Ark_NativePointer, Ark_Int32)
+Ark_Boolean impl_GlobalScopeUicontextFontScale_isFollowingSystemFontScale() {
+        return GetAccessors()->getGlobalScopeUicontextFontScaleAccessor()->isFollowingSystemFontScale();
+}
+KOALA_INTEROP_DIRECT_0(GlobalScopeUicontextFontScale_isFollowingSystemFontScale, Ark_Boolean)
+Ark_Number impl_GlobalScopeUicontextFontScale_getMaxFontScale() {
+        return GetAccessors()->getGlobalScopeUicontextFontScaleAccessor()->getMaxFontScale();
+}
+KOALA_INTEROP_DIRECT_0(GlobalScopeUicontextFontScale_getMaxFontScale, KInteropNumber)
+void impl_GlobalScopeUicontextTextMenu_setMenuOptions(KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_TextMenuOptions options_value = thisDeserializer.readTextMenuOptions();;
+        GetAccessors()->getGlobalScopeUicontextTextMenuAccessor()->setMenuOptions((const Ark_TextMenuOptions*)&options_value);
+}
+KOALA_INTEROP_DIRECT_V2(GlobalScopeUicontextTextMenu_setMenuOptions, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_TabsOps_registerBarMode(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
@@ -34912,6 +35150,56 @@ Ark_NativePointer impl_VisualEffect_getFinalizer() {
         return GetAccessors()->getVisualEffectAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(VisualEffect_getFinalizer, Ark_NativePointer)
+Ark_NativePointer impl_BindSheetOps_registerShowCallback(Ark_NativePointer node, Ark_Boolean value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        ShowCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_ShowCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_ShowCallback))))};;
+        
+        const auto builder_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_CustomNodeBuilder builder_value_buf = {};
+        builder_value_buf.tag = builder_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (builder_value_buf_runtimeType))
+        {
+            builder_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomNodeBuilder))))};
+        }
+        Opt_CustomNodeBuilder builder_value = builder_value_buf;;
+
+        const auto options_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_SheetOptions options_value_buf = {};
+        options_value_buf.tag = options_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (options_value_buf_runtimeType))
+        {
+            options_value_buf.value = thisDeserializer.readSheetOptions();
+        }
+        Opt_SheetOptions options_value = options_value_buf;;
+
+        return GetAccessors()->getBindSheetOpsAccessor()->registerBindSheetShowCallback(node, value, (const ShowCallback*)&callback_value, (const Opt_CustomNodeBuilder*)&builder_value, (const Opt_SheetOptions*)&options_value);
+}
+KOALA_INTEROP_DIRECT_4(BindSheetOps_registerShowCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_BindSheetOps_registerBindContentCoverCallback(Ark_NativePointer node, Ark_Boolean value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        ShowCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_ShowCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_ShowCallback))))};;
+        
+        const auto builder_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_CustomNodeBuilder builder_value_buf = {};
+        builder_value_buf.tag = builder_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (builder_value_buf_runtimeType))
+        {
+            builder_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CustomNodeBuilder)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CustomNodeBuilder))))};
+        }
+        Opt_CustomNodeBuilder builder_value = builder_value_buf;;
+
+        const auto options_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_ContentCoverOptions options_value_buf = {};
+        options_value_buf.tag = options_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (options_value_buf_runtimeType))
+        {
+            options_value_buf.value = thisDeserializer.readContentCoverOptions();
+        }
+        Opt_ContentCoverOptions options_value = options_value_buf;;
+
+        return GetAccessors()->getBindSheetOpsAccessor()->registerContentCoverShowCallback(node, value, (const ShowCallback*)&callback_value, (const Opt_CustomNodeBuilder*)&builder_value, (const Opt_ContentCoverOptions*)&options_value);
+}
+KOALA_INTEROP_DIRECT_4(BindSheetOps_registerBindContentCoverCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_VisualEffect_backgroundColorBlender(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_VisualEffect self = reinterpret_cast<Ark_VisualEffect>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
@@ -34919,6 +35207,97 @@ Ark_NativePointer impl_VisualEffect_backgroundColorBlender(Ark_NativePointer thi
         return GetAccessors()->getVisualEffectAccessor()->backgroundColorBlender(self, (const Ark_BrightnessBlender*)&blender_value);
 }
 KOALA_INTEROP_DIRECT_3(VisualEffect_backgroundColorBlender, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_NavigationOps_registerNavBarWidthCallback(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_Length value = thisDeserializer.readLength();
+        NavBarWidthCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Length navBarWidth)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_NavBarWidthCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Length navBarWidth)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_NavBarWidthCallback))))};;
+        return GetAccessors()->getNavigationOpsAccessor()->registerNavBarWidthCallback(node, (const Ark_Length*)&value, (const NavBarWidthCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_3(NavigationOps_registerNavBarWidthCallback, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_RadioOps_registerCheckedCallback(Ark_NativePointer node, Ark_Boolean isChecked, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        CheckedCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean checked)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_CheckedCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean checked)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_CheckedCallback))))};;
+        return GetAccessors()->getRadioOpsAccessor()->registerCheckedCallback(node, isChecked, (const CheckedCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(RadioOps_registerCheckedCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_RatingOps_registerRatingCallback(Ark_NativePointer node, KInteropNumber rating, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        RatingCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number rating)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_RatingCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number rating)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_RatingCallback))))};;
+        return GetAccessors()->getRatingOpsAccessor()->registerRatingCallback(node, (const Ark_Number*) (&rating), (const RatingCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(RatingOps_registerRatingCallback, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_SelectOps_registerSelectedCallback(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const Ark_Int8 numCount_value_buf_selector = thisDeserializer.readInt8();
+        Ark_Union_Number_Resource numCount_value_buf = {};
+        numCount_value_buf.selector = numCount_value_buf_selector;
+        if (numCount_value_buf_selector == 0) {
+            numCount_value_buf.selector = 0;
+            numCount_value_buf.value0 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+        }
+        else if (numCount_value_buf_selector == 1) {
+            numCount_value_buf.selector = 1;
+            numCount_value_buf.value1 = thisDeserializer.readResource();
+        }
+        else {
+            INTEROP_FATAL("One of the branches for numCount_value_buf has to be chosen through deserialisation.");
+        }
+        Ark_Union_Number_Resource numCount_value = static_cast<Ark_Union_Number_Resource>(numCount_value_buf);;
+        SelectSelectedCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Union_Number_Resource selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SelectSelectedCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Union_Number_Resource selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SelectSelectedCallback))))};;
+        return GetAccessors()->getSelectOpsAccessor()->registerSelectedCallback(node, (const Ark_Union_Number_Resource*)&numCount_value, (const SelectSelectedCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_3(SelectOps_registerSelectedCallback, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_SelectOps_registerValueCallback(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const Ark_Int8 resStr_value_buf_selector = thisDeserializer.readInt8();
+        Ark_ResourceStr resStr_value_buf = {};
+        resStr_value_buf.selector = resStr_value_buf_selector;
+        if (resStr_value_buf_selector == 0) {
+            resStr_value_buf.selector = 0;
+            resStr_value_buf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+        }
+        else if (resStr_value_buf_selector == 1) {
+            resStr_value_buf.selector = 1;
+            resStr_value_buf.value1 = thisDeserializer.readResource();
+        }
+        else {
+            INTEROP_FATAL("One of the branches for resStr_value_buf has to be chosen through deserialisation.");
+        }
+        Ark_ResourceStr resStr_value = static_cast<Ark_ResourceStr>(resStr_value_buf);;
+        SelectValueCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_ResourceStr value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SelectValueCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ResourceStr value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SelectValueCallback))))};;
+        return GetAccessors()->getSelectOpsAccessor()->registerValueCallback(node, (const Ark_ResourceStr*)&resStr_value, (const SelectValueCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_3(SelectOps_registerValueCallback, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_SliderOps_registerValueCallback(Ark_NativePointer node, KInteropNumber value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        ValueCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_ValueCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_ValueCallback))))};;
+        return GetAccessors()->getSliderOpsAccessor()->registerValueCallback(node, (const Ark_Number*) (&value), (const ValueCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(SliderOps_registerValueCallback, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_CheckboxGroupOps_registerSelectAllCallback(Ark_NativePointer node, Ark_Boolean isAllSelected, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        SelectAllCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean selectAll)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SelectAllCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean selectAll)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SelectAllCallback))))};;
+        return GetAccessors()->getCheckboxGroupOpsAccessor()->registerSelectAllCallback(node, isAllSelected, (const SelectAllCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(CheckboxGroupOps_registerSelectAllCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_CheckboxOps_registerSelectCallback(Ark_NativePointer node, Ark_Boolean isSelected, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        SelectCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean select)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SelectCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean select)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SelectCallback))))};;
+        return GetAccessors()->getCheckboxOpsAccessor()->registerSelectCallback(node, isSelected, (const SelectCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(CheckboxOps_registerSelectCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_MenuItemOps_registerSelectedCallback(Ark_NativePointer node, Ark_Boolean value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        MenuSelectedCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_MenuSelectedCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_MenuSelectedCallback))))};;
+        return GetAccessors()->getMenuItemOpsAccessor()->registerSelectedCallback(node, value, (const MenuSelectedCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(MenuItemOps_registerSelectedCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_ToggleOps_registerIsOnCallback(Ark_NativePointer node, Ark_Boolean isOn, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        IsOnCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean isOn)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_IsOnCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean isOn)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_IsOnCallback))))};;
+        return GetAccessors()->getToggleOpsAccessor()->registerIsOnCallback(node, isOn, (const IsOnCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(ToggleOps_registerIsOnCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
 void impl_NavExtender_setUpdateStackCallback(Ark_NativePointer peer, KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         NavExtender_OnUpdateStack callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String name)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_NavExtender_OnUpdateStack)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String name)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_NavExtender_OnUpdateStack))))};;
@@ -34989,6 +35368,12 @@ void impl_NavExtender_subTitle(Ark_NativePointer navigation, const KStringPtr& s
         GetAccessors()->getNavExtenderAccessor()->subTitle(navigation, (const Ark_String*) (&subTitle));
 }
 KOALA_INTEROP_V2(NavExtender_subTitle, Ark_NativePointer, KStringPtr)
+Ark_NativePointer impl_SearchOps_registerSearchValueCallback(Ark_NativePointer node, const KStringPtr& value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        SearchValueCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_String value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SearchValueCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_String value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SearchValueCallback))))};;
+        return GetAccessors()->getSearchOpsAccessor()->registerSearchValueCallback(node, (const Ark_String*) (&value), (const SearchValueCallback*)&callback_value);
+}
+KOALA_INTEROP_4(SearchOps_registerSearchValueCallback, Ark_NativePointer, Ark_NativePointer, KStringPtr, KSerializerBuffer, int32_t)
 void impl_NavExtender_pushPath(Ark_NativePointer pathStack, Ark_NativePointer info, KSerializerBuffer thisArray, int32_t thisLength)
 {
     Deserializer thisDeserializer(thisArray, thisLength);
@@ -35041,6 +35426,24 @@ Ark_Number impl_NavExtender_popToName(Ark_NativePointer pathStack, const KString
     return GetAccessors()->getNavExtenderAccessor()->popToName(static_cast<Ark_NavPathStack>(pathStack), (const Ark_String*)(&name), animated);
 }
 KOALA_INTEROP_3(NavExtender_popToName, KInteropNumber, Ark_NativePointer, KStringPtr, Ark_Boolean)
+Ark_NativePointer impl_SideBarContainerOps_registerShowSideBarCallback(Ark_NativePointer node, Ark_Boolean value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        ShowSideBarCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean showSideBar)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_ShowSideBarCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean showSideBar)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_ShowSideBarCallback))))};;
+        return GetAccessors()->getSideBarContainerOpsAccessor()->registerShowSideBarCallback(node, value, (const ShowSideBarCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(SideBarContainerOps_registerShowSideBarCallback, Ark_NativePointer, Ark_NativePointer, Ark_Boolean, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_SideBarContainerOps_registerSideBarWidthCallback(Ark_NativePointer node, KInteropNumber value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        SideBarWidthCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number sideBarWidth)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SideBarWidthCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number sideBarWidth)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SideBarWidthCallback))))};;
+        return GetAccessors()->getSideBarContainerOpsAccessor()->registerSideBarWidthCallback(node, (const Ark_Number*) (&value), (const SideBarWidthCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(SideBarContainerOps_registerSideBarWidthCallback, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_StepperOps_registerStepperIndexCallback(Ark_NativePointer node, KInteropNumber value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        StepperIndexCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number stepperIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_StepperIndexCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number stepperIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_StepperIndexCallback))))};;
+        return GetAccessors()->getStepperOpsAccessor()->registerStepperIndexCallback(node, (const Ark_Number*) (&value), (const StepperIndexCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(StepperOps_registerStepperIndexCallback, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KSerializerBuffer, int32_t)
 void impl_EventEmulator_emitClickEvent(Ark_NativePointer node, Ark_NativePointer event) {
         GetAccessors()->getEventEmulatorAccessor()->emitClickEvent(node, static_cast<Ark_ClickEvent>(event));
 }
@@ -35049,6 +35452,27 @@ void impl_EventEmulator_emitTextInputEvent(Ark_NativePointer node, const KString
         GetAccessors()->getEventEmulatorAccessor()->emitTextInputEvent(node, (const Ark_String*) (&text));
 }
 KOALA_INTEROP_V2(EventEmulator_emitTextInputEvent, Ark_NativePointer, KStringPtr)
+Ark_NativePointer impl_TextFieldOps_registerTextFieldValueCallback(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const Ark_Int8 value_value_buf_selector = thisDeserializer.readInt8();
+        Ark_ResourceStr value_value_buf = {};
+        value_value_buf.selector = value_value_buf_selector;
+        if (value_value_buf_selector == 0) {
+            value_value_buf.selector = 0;
+            value_value_buf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+        }
+        else if (value_value_buf_selector == 1) {
+            value_value_buf.selector = 1;
+            value_value_buf.value1 = thisDeserializer.readResource();
+        }
+        else {
+            INTEROP_FATAL("One of the branches for value_value_buf has to be chosen through deserialisation.");
+        }
+        Ark_ResourceStr value_value = static_cast<Ark_ResourceStr>(value_value_buf);;
+        TextFieldValueCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_ResourceStr value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_TextFieldValueCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ResourceStr value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_TextFieldValueCallback))))};;
+        return GetAccessors()->getTextFieldOpsAccessor()->registerTextFieldValueCallback(node, (const Ark_ResourceStr*)&value_value, (const TextFieldValueCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_3(TextFieldOps_registerTextFieldValueCallback, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ActionSheet_show(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         Ark_ActionSheetOptions value_value = thisDeserializer.readActionSheetOptions();;
@@ -35079,6 +35503,25 @@ void impl_AlertDialog_show(KSerializerBuffer thisArray, int32_t thisLength) {
         GetAccessors()->getAlertDialogAccessor()->show((const Ark_Type_AlertDialog_show_value*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V2(AlertDialog_show, KSerializerBuffer, int32_t)
+void impl_PromptAction_showToast(KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_ShowToastOptions value_value = thisDeserializer.readShowToastOptions();;
+        GetAccessors()->getPromptActionAccessor()->showToast((const Ark_ShowToastOptions*)&value_value, nullptr);
+}
+KOALA_INTEROP_DIRECT_V2(PromptAction_showToast, KSerializerBuffer, int32_t)
+void impl_PromptAction_openToast(KSerializerBuffer thisArray, int32_t thisLength) {
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Ark_ShowToastOptions value_value = thisDeserializer.readShowToastOptions();;
+    Callback_Number_Void callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_Void))))};
+    GetAccessors()->getPromptActionAccessor()->showToast((const Ark_ShowToastOptions*)&value_value, (const Callback_Number_Void*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_V2(PromptAction_openToast, KSerializerBuffer, int32_t)
+void impl_PromptAction_closeToast(KSerializerBuffer thisArray, int32_t thisLength, KInteropNumber toastId) {
+    Deserializer thisDeserializer(thisArray, thisLength);
+    Callback_Number_Void callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Number_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number index)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Number_Void))))};
+    GetAccessors()->getPromptActionAccessor()->closeToast((const Ark_Number*) (&toastId), (const Callback_Number_Void*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_V3(PromptAction_closeToast, KSerializerBuffer, int32_t, KInteropNumber)
 Ark_NativePointer impl_SpringProp_ctor(KInteropNumber mass, KInteropNumber stiffness, KInteropNumber damping) {
         return GetAccessors()->getSpringPropAccessor()->ctor((const Ark_Number*) (&mass), (const Ark_Number*) (&stiffness), (const Ark_Number*) (&damping));
 }
@@ -35574,13 +36017,16 @@ void impl_ClickEvent_setHand(Ark_NativePointer thisPtr, Ark_Int32 hand) {
         GetAccessors()->getClickEventAccessor()->setHand(self, static_cast<Ark_InteractionHand>(hand));
 }
 KOALA_INTEROP_DIRECT_V2(ClickEvent_setHand, Ark_NativePointer, Ark_Int32)
-Ark_NativePointer impl_ClickEvent_getPreventDefault(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_ClickEvent_getPreventDefault(Ark_NativePointer thisPtr) {
         Ark_ClickEvent self = reinterpret_cast<Ark_ClickEvent>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getClickEventAccessor()->getPreventDefault(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
+        [[maybe_unused]] const auto &retValue = GetAccessors()->getClickEventAccessor()->getPreventDefault(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeCallbackResource(retValue.resource);
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(ClickEvent_getPreventDefault, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(ClickEvent_getPreventDefault, KInteropReturnBuffer, Ark_NativePointer)
 void impl_ClickEvent_setPreventDefault(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_ClickEvent self = reinterpret_cast<Ark_ClickEvent>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
@@ -35710,13 +36156,16 @@ void impl_HoverEvent_setDisplayY(Ark_NativePointer thisPtr, KInteropNumber displ
         GetAccessors()->getHoverEventAccessor()->setDisplayY(self, (const Ark_Number*) (&displayY));
 }
 KOALA_INTEROP_DIRECT_V2(HoverEvent_setDisplayY, Ark_NativePointer, KInteropNumber)
-Ark_NativePointer impl_HoverEvent_getStopPropagation(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_HoverEvent_getStopPropagation(Ark_NativePointer thisPtr) {
         Ark_HoverEvent self = reinterpret_cast<Ark_HoverEvent>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getHoverEventAccessor()->getStopPropagation(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
+        [[maybe_unused]] const auto &retValue = GetAccessors()->getHoverEventAccessor()->getStopPropagation(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeCallbackResource(retValue.resource);
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(HoverEvent_getStopPropagation, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(HoverEvent_getStopPropagation, KInteropReturnBuffer, Ark_NativePointer)
 void impl_HoverEvent_setStopPropagation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_HoverEvent self = reinterpret_cast<Ark_HoverEvent>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
@@ -35832,13 +36281,16 @@ void impl_MouseEvent_setY(Ark_NativePointer thisPtr, KInteropNumber y) {
         GetAccessors()->getMouseEventAccessor()->setY(self, (const Ark_Number*) (&y));
 }
 KOALA_INTEROP_DIRECT_V2(MouseEvent_setY, Ark_NativePointer, KInteropNumber)
-Ark_NativePointer impl_MouseEvent_getStopPropagation(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_MouseEvent_getStopPropagation(Ark_NativePointer thisPtr) {
         Ark_MouseEvent self = reinterpret_cast<Ark_MouseEvent>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getMouseEventAccessor()->getStopPropagation(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
+        [[maybe_unused]] const auto &retValue = GetAccessors()->getMouseEventAccessor()->getStopPropagation(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeCallbackResource(retValue.resource);
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(MouseEvent_getStopPropagation, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(MouseEvent_getStopPropagation, KInteropReturnBuffer, Ark_NativePointer)
 void impl_MouseEvent_setStopPropagation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_MouseEvent self = reinterpret_cast<Ark_MouseEvent>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
@@ -36093,13 +36545,16 @@ void impl_TouchEvent_setStopPropagation(Ark_NativePointer thisPtr, KSerializerBu
         GetAccessors()->getTouchEventAccessor()->setStopPropagation(self, (const Callback_Void*)&stopPropagation_value);
 }
 KOALA_INTEROP_DIRECT_V3(TouchEvent_setStopPropagation, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_TouchEvent_getPreventDefault(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_TouchEvent_getPreventDefault(Ark_NativePointer thisPtr) {
         Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getTouchEventAccessor()->getPreventDefault(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
+        [[maybe_unused]] const auto &retValue = GetAccessors()->getTouchEventAccessor()->getPreventDefault(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeCallbackResource(retValue.resource);
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(TouchEvent_getPreventDefault, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(TouchEvent_getPreventDefault, KInteropReturnBuffer, Ark_NativePointer)
 void impl_TouchEvent_setPreventDefault(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_TouchEvent self = reinterpret_cast<Ark_TouchEvent>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
@@ -36214,13 +36669,16 @@ void impl_AxisEvent_setScrollStep(Ark_NativePointer thisPtr, KInteropNumber scro
         GetAccessors()->getAxisEventAccessor()->setScrollStep(self, (const Ark_Number*) (&scrollStep));
 }
 KOALA_INTEROP_DIRECT_V2(AxisEvent_setScrollStep, Ark_NativePointer, KInteropNumber)
-Ark_NativePointer impl_AxisEvent_getPropagation(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_AxisEvent_getPropagation(Ark_NativePointer thisPtr) {
         Ark_AxisEvent self = reinterpret_cast<Ark_AxisEvent>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getAxisEventAccessor()->getPropagation(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
+        [[maybe_unused]] const auto &retValue = GetAccessors()->getAxisEventAccessor()->getPropagation(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeCallbackResource(retValue.resource);
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(AxisEvent_getPropagation, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(AxisEvent_getPropagation, KInteropReturnBuffer, Ark_NativePointer)
 void impl_AxisEvent_setPropagation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_AxisEvent self = reinterpret_cast<Ark_AxisEvent>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
@@ -36470,13 +36928,16 @@ void impl_KeyEvent_setTimestamp(Ark_NativePointer thisPtr, KLong timestamp) {
         GetAccessors()->getKeyEventAccessor()->setTimestamp(self, timestamp);
 }
 KOALA_INTEROP_DIRECT_V2(KeyEvent_setTimestamp, Ark_NativePointer, KLong)
-Ark_NativePointer impl_KeyEvent_getStopPropagation(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_KeyEvent_getStopPropagation(Ark_NativePointer thisPtr) {
         Ark_KeyEvent self = reinterpret_cast<Ark_KeyEvent>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getKeyEventAccessor()->getStopPropagation(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
+        [[maybe_unused]] const auto &retValue = GetAccessors()->getKeyEventAccessor()->getStopPropagation(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeCallbackResource(retValue.resource);
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(KeyEvent_getStopPropagation, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(KeyEvent_getStopPropagation, KInteropReturnBuffer, Ark_NativePointer)
 void impl_KeyEvent_setStopPropagation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_KeyEvent self = reinterpret_cast<Ark_KeyEvent>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
@@ -36551,13 +37012,16 @@ void impl_FocusAxisEvent_setAxisMap(Ark_NativePointer thisPtr, KSerializerBuffer
         GetAccessors()->getFocusAxisEventAccessor()->setAxisMap(self, (const Map_AxisModel_Number*)&axisMap_value);
 }
 KOALA_INTEROP_DIRECT_V3(FocusAxisEvent_setAxisMap, Ark_NativePointer, KSerializerBuffer, int32_t)
-Ark_NativePointer impl_FocusAxisEvent_getStopPropagation(Ark_NativePointer thisPtr) {
+KInteropReturnBuffer impl_FocusAxisEvent_getStopPropagation(Ark_NativePointer thisPtr) {
         Ark_FocusAxisEvent self = reinterpret_cast<Ark_FocusAxisEvent>(thisPtr);
-        [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getFocusAxisEventAccessor()->getStopPropagation(self);
-        // TODO: Value serialization needs to be implemented
-        return {};
+        [[maybe_unused]] const auto &retValue = GetAccessors()->getFocusAxisEventAccessor()->getStopPropagation(self);
+        Serializer _retSerializer {};
+        _retSerializer.writeCallbackResource(retValue.resource);
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
+        _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_DIRECT_1(FocusAxisEvent_getStopPropagation, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_1(FocusAxisEvent_getStopPropagation, KInteropReturnBuffer, Ark_NativePointer)
 void impl_FocusAxisEvent_setStopPropagation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_FocusAxisEvent self = reinterpret_cast<Ark_FocusAxisEvent>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
@@ -41482,6 +41946,50 @@ void impl_BounceSymbolEffect_setDirection(Ark_NativePointer thisPtr, Ark_Int32 d
         GetAccessors()->getBounceSymbolEffectAccessor()->setDirection(self, static_cast<Ark_EffectDirection>(direction));
 }
 KOALA_INTEROP_DIRECT_V2(BounceSymbolEffect_setDirection, Ark_NativePointer, Ark_Int32)
+Ark_NativePointer impl_BuilderNodeOps_ctor() {
+        return GetAccessors()->getBuilderNodeOpsAccessor()->ctor();
+}
+KOALA_INTEROP_DIRECT_0(BuilderNodeOps_ctor, Ark_NativePointer)
+Ark_NativePointer impl_BuilderNodeOps_getFinalizer() {
+        return GetAccessors()->getBuilderNodeOpsAccessor()->getFinalizer();
+}
+KOALA_INTEROP_DIRECT_0(BuilderNodeOps_getFinalizer, Ark_NativePointer)
+void impl_BuilderNodeOps_create(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_BuilderNodeOps self = reinterpret_cast<Ark_BuilderNodeOps>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Callback_Void buildFunc_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
+        GetAccessors()->getBuilderNodeOpsAccessor()->create(self, (const Callback_Void*)&buildFunc_value);
+}
+KOALA_INTEROP_DIRECT_V3(BuilderNodeOps_create, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_BuilderNodeOps_disposeNode(Ark_NativePointer thisPtr) {
+        Ark_BuilderNodeOps self = reinterpret_cast<Ark_BuilderNodeOps>(thisPtr);
+        GetAccessors()->getBuilderNodeOpsAccessor()->disposeNode(self);
+}
+KOALA_INTEROP_DIRECT_V1(BuilderNodeOps_disposeNode, Ark_NativePointer)
+void impl_BuilderNodeOps_setUpdateConfigurationCallback(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_BuilderNodeOps self = reinterpret_cast<Ark_BuilderNodeOps>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Callback_Void configurationUpdateFunc_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
+        GetAccessors()->getBuilderNodeOpsAccessor()->setUpdateConfigurationCallback(self, (const Callback_Void*)&configurationUpdateFunc_value);
+}
+KOALA_INTEROP_DIRECT_V3(BuilderNodeOps_setUpdateConfigurationCallback, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_BuilderNodeOps_setOptions(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_BuilderNodeOps self = reinterpret_cast<Ark_BuilderNodeOps>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_BuilderNodeOptions options_value = thisDeserializer.readBuilderNodeOptions();;
+        GetAccessors()->getBuilderNodeOpsAccessor()->setOptions(self, (const Ark_BuilderNodeOptions*)&options_value);
+}
+KOALA_INTEROP_DIRECT_V3(BuilderNodeOps_setOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_Boolean impl_BuilderNodeOps_postTouchEvent(Ark_NativePointer thisPtr, Ark_NativePointer event) {
+        Ark_BuilderNodeOps self = reinterpret_cast<Ark_BuilderNodeOps>(thisPtr);
+        return GetAccessors()->getBuilderNodeOpsAccessor()->postTouchEvent(self, static_cast<Ark_TouchEvent>(event));
+}
+KOALA_INTEROP_DIRECT_2(BuilderNodeOps_postTouchEvent, Ark_Boolean, Ark_NativePointer, Ark_NativePointer)
+Ark_NativePointer impl_BuilderNodeOps_setRootFrameNodeInBuilderNode(Ark_NativePointer thisPtr, Ark_NativePointer node) {
+        Ark_BuilderNodeOps self = reinterpret_cast<Ark_BuilderNodeOps>(thisPtr);
+        return GetAccessors()->getBuilderNodeOpsAccessor()->setRootFrameNodeInBuilderNode(self, node);
+}
+KOALA_INTEROP_DIRECT_2(BuilderNodeOps_setRootFrameNodeInBuilderNode, Ark_NativePointer, Ark_NativePointer, Ark_NativePointer)
 Ark_NativePointer impl_PulseSymbolEffect_ctor() {
         return GetAccessors()->getPulseSymbolEffectAccessor()->ctor();
 }
@@ -43743,10 +44251,45 @@ Ark_String impl_UrlStyle_getUrl(Ark_NativePointer thisPtr) {
         return GetAccessors()->getUrlStyleAccessor()->getUrl(self);
 }
 KOALA_INTEROP_1(UrlStyle_getUrl, KStringPtr, Ark_NativePointer)
-Ark_NativePointer impl_MutableStyledString_ctor() {
-        return GetAccessors()->getMutableStyledStringAccessor()->ctor();
+Ark_NativePointer impl_MutableStyledString_ctor(KSerializerBuffer thisArray, int32_t thisLength) {
+    Deserializer thisDeserializer(thisArray, thisLength);
+    const Ark_Int8 value_value_buf_selector = thisDeserializer.readInt8();
+    Ark_Union_String_ImageAttachment_CustomSpan value_value_buf = {};
+    value_value_buf.selector = value_value_buf_selector;
+    if (value_value_buf_selector == 0) {
+        value_value_buf.selector = 0;
+        value_value_buf.value0 = static_cast<Ark_String>(thisDeserializer.readString());
+    }
+    else if (value_value_buf_selector == 1) {
+        value_value_buf.selector = 1;
+        value_value_buf.value1 = static_cast<Ark_ImageAttachment>(thisDeserializer.readImageAttachment());
+    }
+    else if (value_value_buf_selector == 2) {
+        value_value_buf.selector = 2;
+        value_value_buf.value2 = static_cast<Ark_CustomSpan>(thisDeserializer.readCustomSpan());
+    }
+    else {
+        INTEROP_FATAL("One of the branches for value_value_buf has to be chosen through deserialisation.");
+    }
+    Ark_Union_String_ImageAttachment_CustomSpan value_value = static_cast<Ark_Union_String_ImageAttachment_CustomSpan>(value_value_buf);;
+    const auto styles_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_Array_StyleOptions styles_value_buf = {};
+    styles_value_buf.tag = styles_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((INTEROP_RUNTIME_UNDEFINED) != (styles_value_buf_runtimeType))
+    {
+        const Ark_Int32 styles_value_buf__length = thisDeserializer.readInt32();
+        Array_StyleOptions styles_value_buf_ = {};
+        thisDeserializer.resizeArray<std::decay<decltype(styles_value_buf_)>::type,
+    std::decay<decltype(*styles_value_buf_.array)>::type>(&styles_value_buf_, styles_value_buf__length);
+        for (int styles_value_buf__i = 0; styles_value_buf__i < styles_value_buf__length; styles_value_buf__i++) {
+            styles_value_buf_.array[styles_value_buf__i] = thisDeserializer.readStyleOptions();
+        }
+        styles_value_buf.value = styles_value_buf_;
+    }
+    Opt_Array_StyleOptions styles_value = styles_value_buf;;
+    return GetAccessors()->getMutableStyledStringAccessor()->ctor((const Ark_Union_String_ImageAttachment_CustomSpan*)&value_value, (const Opt_Array_StyleOptions*)&styles_value);
 }
-KOALA_INTEROP_DIRECT_0(MutableStyledString_ctor, Ark_NativePointer)
+KOALA_INTEROP_DIRECT_2(MutableStyledString_ctor, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_MutableStyledString_getFinalizer() {
         return GetAccessors()->getMutableStyledStringAccessor()->getFinalizer();
 }
@@ -44126,6 +44669,40 @@ Ark_Boolean impl_GlobalScope_focusControl_requestFocus(const KStringPtr& value) 
         return GetAccessors()->getGlobalScopeAccessor()->focusControl_requestFocus((const Ark_String*) (&value));
 }
 KOALA_INTEROP_1(GlobalScope_focusControl_requestFocus, Ark_Boolean, KStringPtr)
+Ark_NativePointer impl_RouterExtender_RouterPush1attribute(const KStringPtr& value) {
+        return GetAccessors()->getRouterExtenderAccessor()->push((const Ark_String*)(&value));
+}
+KOALA_INTEROP_1(RouterExtender_RouterPush1attribute, Ark_NativePointer, KStringPtr)
+Ark_NativePointer impl_RouterExtender_RouterReplace1attribute(KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto url = static_cast<Ark_String>(thisDeserializer.readString());
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Callback_Void value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            value_value_buf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};
+        }
+        Opt_Callback_Void value_value = value_value_buf;
+        return GetAccessors()->getRouterExtenderAccessor()->replace((const Ark_String*)(&url) ,(const Opt_Callback_Void*)&value_value);
+}
+KOALA_INTEROP_DIRECT_2(RouterExtender_RouterReplace1attribute, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_RouterExtender_MoveCommonUnderPageNode(Ark_NativePointer commonNode, Ark_NativePointer pageNode) {
+        return GetAccessors()->getRouterExtenderAccessor()->moveCommonUnderPageNode(commonNode, pageNode);
+}
+KOALA_INTEROP_DIRECT_V2(RouterExtender_MoveCommonUnderPageNode, Ark_NativePointer, Ark_NativePointer)
+void impl_RouterExtender_RouterBack0attribute() {
+        return GetAccessors()->getRouterExtenderAccessor()->back();
+}
+KOALA_INTEROP_DIRECT_V0(RouterExtender_RouterBack0attribute)
+Ark_NativePointer impl_RouterExtender_RouterRunPage(const KStringPtr& value) {
+        return GetAccessors()->getRouterExtenderAccessor()->runPage((const Ark_String*)(&value));
+}
+KOALA_INTEROP_1(RouterExtender_RouterRunPage, Ark_NativePointer, KStringPtr)
+void impl_RouterExtender_RouterClear() {
+        GetAccessors()->getRouterExtenderAccessor()->clear();
+}
+KOALA_INTEROP_DIRECT_V0(RouterExtender_RouterClear)
 Ark_Int64 impl_UIStateGet(Ark_NativePointer thisPtr) {
         return GetNodeModifiers()->getUIStateModifier()->getUIState(thisPtr);
 }

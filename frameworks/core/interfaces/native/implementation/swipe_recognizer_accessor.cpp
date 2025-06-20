@@ -15,16 +15,18 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "swipe_recognizer_peer.h"
 #include "arkoala_api_generated.h"
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwipeRecognizerAccessor {
 void DestroyPeerImpl(Ark_SwipeRecognizer peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_SwipeRecognizer CtorImpl()
 {
-    return nullptr;
+    return PeerUtils::CreatePeer<SwipeRecognizerPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,11 +34,15 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetVelocityThresholdImpl(Ark_SwipeRecognizer peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Number>(DEFAULT_SPEED);
+    CHECK_NULL_RETURN(peer, errorValue);
+    return Converter::ArkValue<Ark_Number>(peer->GetSpeed());
 }
 Ark_SwipeDirection GetDirectionImpl(Ark_SwipeRecognizer peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_SwipeDirection>(DEFAULT_DIRECT);
+    CHECK_NULL_RETURN(peer, errorValue);
+    return Converter::ArkValue<Ark_SwipeDirection>(peer->GetDirection());
 }
 } // SwipeRecognizerAccessor
 const GENERATED_ArkUISwipeRecognizerAccessor* GetSwipeRecognizerAccessor()

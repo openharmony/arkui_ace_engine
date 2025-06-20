@@ -22,6 +22,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr double DEFAULT_GAUGE_VALUE = 0;
+constexpr double DEFAULT_GAUGE_MIN = 0;
+constexpr double DEFAULT_GAUGE_MAX = 100;
 void SortColorStopOffset(std::vector<ColorStopArray>& colors)
 {
     for (auto& colorStopArray : colors) {
@@ -136,12 +139,21 @@ void SetGaugeOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
     auto min = Converter::OptConvert<float>(options->min);
     auto max = Converter::OptConvert<float>(options->max);
-    if (min && max && LessNotEqual(*max, *min)) {
-        min.reset();
-        max.reset();
+    if (!min) {
+        min = DEFAULT_GAUGE_MIN;
+    }
+    if (!max) {
+        max = DEFAULT_GAUGE_MAX;
+    }
+    if (LessNotEqual(*max, *min)) {
+        min = DEFAULT_GAUGE_MIN;
+        max = DEFAULT_GAUGE_MAX;
     }
     auto value = Converter::OptConvert<float>(options->value);
-    if (value && ((min && LessNotEqual(*value, *min)) || (max && GreatNotEqual(*value, *max)))) {
+    if (!value) {
+        value = DEFAULT_GAUGE_VALUE;
+    }
+    if (LessNotEqual(*value, *min) || GreatNotEqual(*value, *max)) {
         value = min;
     }
     GaugeModelStatic::SetValue(frameNode, value);
@@ -156,7 +168,11 @@ void ValueImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    GaugeModelStatic::SetValue(frameNode, Converter::OptConvert<float>(*value));
+    auto convValue = Converter::OptConvert<float>(*value);
+    if (!convValue) {
+        return;
+    }
+    GaugeModelStatic::SetValue(frameNode, convValue);
 }
 void StartAngleImpl(Ark_NativePointer node,
                     const Opt_Number* value)
@@ -235,7 +251,7 @@ void StrokeWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto strokeWidth = Converter::OptConvert<Dimension>(*value);
+    auto strokeWidth = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
     GaugeModelStatic::SetGaugeStrokeWidth(frameNode, strokeWidth);
@@ -289,7 +305,7 @@ void PrivacySensitiveImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    const auto sensitive = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    const auto sensitive = Converter::OptConvertPtr<bool>(value);
     GaugeModelStatic::SetPrivacySensitive(frameNode, sensitive);
 }
 void ContentModifierImpl(Ark_NativePointer node,

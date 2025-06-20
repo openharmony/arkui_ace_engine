@@ -212,7 +212,10 @@ export class PathStackUtils {
     static getParamByIndex(pathStack: NavPathStack, index: number): Object | undefined {
         const navDestinationId: string = NavExtender.getIdByIndex(pathStack, index as (int32));
         let pathInfo = PathStackUtils.getNavPathInfoById(navDestinationId)
-        return pathInfo?.param
+        if (pathInfo?.param === null) {
+            return undefined
+        }
+        return pathInfo?.param as Object | undefined
     }
     static getParamByName(pathStack: NavPathStack, name: string): Array<object | undefined> {
         let result: Array<Object | undefined> = new Array<Object | undefined>()

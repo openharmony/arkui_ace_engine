@@ -18,9 +18,15 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
 struct TextStylePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::FontSpan> span;
+
+protected:
+    TextStylePeer() = default;
+    ~TextStylePeer() = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };
 
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_TEXT_STYLE_PEER_IMPL_H

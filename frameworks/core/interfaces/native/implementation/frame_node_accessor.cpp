@@ -13,16 +13,25 @@
  * limitations under the License.
  */
 
+#include <optional>
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_property.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "ui/base/geometry/dimension.h"
+#include "ui/base/utils/utils.h"
 
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
+#include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/view_model_bridge.h"
+#include "core/interfaces/native/implementation/ui_common_event_peer.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG {
 enum class ExpandMode : uint32_t {
@@ -33,11 +42,37 @@ enum class ExpandMode : uint32_t {
 }
 std::map<int32_t, FrameNodePeer> FrameNodePeer::peerMap_;
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+#ifdef WRONG_GEN
+Opt_Number GetOptNumberFromDimension(const std::optional<Dimension>& dimension)
+{
+    return dimension.has_value() ? Converter::ArkValue<Opt_Number>(dimension->Value())
+                                 : Converter::ArkValue<Opt_Number>(std::nullopt);
+}
+Opt_LengthUnit GetOptLengthUnitFromDimension(const std::optional<Dimension>& dimension)
+{
+    return dimension.has_value() ? Converter::ArkValue<Opt_LengthUnit>(dimension->Unit())
+                                 : Converter::ArkValue<Opt_LengthUnit>(std::nullopt);
+}
+Opt_Number GetOptNumberFromCalcLength(const std::optional<CalcLength>& calcLength)
+{
+    return calcLength.has_value() ? GetOptNumberFromDimension(calcLength->GetDimension())
+                                  : Converter::ArkValue<Opt_Number>(std::nullopt);
+}
+Opt_LengthUnit GetOptLengthUnitFromCalcLength(const std::optional<CalcLength>& calcLength)
+{
+    return calcLength.has_value() ? GetOptLengthUnitFromDimension(calcLength->GetDimension())
+                                  : Converter::ArkValue<Opt_LengthUnit>(std::nullopt);
+}
+#endif
+} // namespace
 namespace FrameNodeAccessor {
+
 void DestroyPeerImpl(Ark_FrameNode peer)
 {
     FrameNodePeer::Destroy(peer);
 }
+
 Ark_FrameNode CtorImpl(Ark_UIContext uiContext)
 {
     auto peer = FrameNodePeer::Create(uiContext);
@@ -48,10 +83,12 @@ Ark_FrameNode CtorImpl(Ark_UIContext uiContext)
     FrameNodePeer::peerMap_.emplace(nodeId, *peer);
     return peer;
 }
+
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+
 Ark_Boolean IsModifiableImpl(Ark_FrameNode peer)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -59,6 +96,7 @@ Ark_Boolean IsModifiableImpl(Ark_FrameNode peer)
     auto isModifiable = peerNode->GetTag() == "CustomFrameNode";
     return Converter::ArkValue<Ark_Boolean>(isModifiable);
 }
+
 void AppendChildImpl(Ark_FrameNode peer,
                      Ark_FrameNode node)
 {
@@ -77,6 +115,7 @@ void AppendChildImpl(Ark_FrameNode peer,
     currentUINodeRef->AddChild(childNode);
     currentUINodeRef->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
+
 void InsertChildAfterImpl(Ark_FrameNode peer,
                           Ark_FrameNode child,
                           Ark_FrameNode sibling)
@@ -102,6 +141,7 @@ void InsertChildAfterImpl(Ark_FrameNode peer,
     currentUINodeRef->AddChild(childNode, index + 1);
     currentUINodeRef->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
+
 void RemoveChildImpl(Ark_FrameNode peer,
                      Ark_FrameNode node)
 {
@@ -118,6 +158,7 @@ void RemoveChildImpl(Ark_FrameNode peer,
     currentUINodeRef->RemoveChild(childNode);
     currentUINodeRef->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
+
 void ClearChildrenImpl(Ark_FrameNode peer)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -127,6 +168,7 @@ void ClearChildrenImpl(Ark_FrameNode peer)
     currentUINodeRef->Clean();
     currentUINodeRef->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
+
 FrameNode* GetChildNode(RefPtr<FrameNode> nodeRef, int32_t index, int32_t expandMode)
 {
     auto expandModeResult = static_cast<ExpandMode>(expandMode);
@@ -144,6 +186,7 @@ FrameNode* GetChildNode(RefPtr<FrameNode> nodeRef, int32_t index, int32_t expand
         }
     }
 }
+
 Ark_FrameNode GetChildImpl(Ark_FrameNode peer,
                            const Ark_Number* index,
                            const Ark_Number* expandMode)
@@ -158,6 +201,7 @@ Ark_FrameNode GetChildImpl(Ark_FrameNode peer,
     CHECK_NULL_RETURN(child, nullptr);
     return FrameNodePeer::Create(child);
 }
+
 Ark_FrameNode GetFirstChildImpl(Ark_FrameNode peer)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -167,6 +211,7 @@ Ark_FrameNode GetFirstChildImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(child, nullptr);
     return FrameNodePeer::Create(AceType::DynamicCast<FrameNode>(child));
 }
+
 RefPtr<FrameNode> GetParentNode(RefPtr<FrameNode> nodeRef)
 {
     auto parent = nodeRef->GetParent();
@@ -176,6 +221,7 @@ RefPtr<FrameNode> GetParentNode(RefPtr<FrameNode> nodeRef)
     return (parent == nullptr || parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == V2::STAGE_ETS_TAG)
                ? nullptr : AceType::DynamicCast<FrameNode>(parent);
 }
+
 Ark_FrameNode GetNextSiblingImpl(Ark_FrameNode peer)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -189,6 +235,7 @@ Ark_FrameNode GetNextSiblingImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(sibling, nullptr);
     return FrameNodePeer::Create(sibling);
 }
+
 Ark_FrameNode GetPreviousSiblingImpl(Ark_FrameNode peer)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -202,6 +249,7 @@ Ark_FrameNode GetPreviousSiblingImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(sibling, nullptr);
     return FrameNodePeer::Create(sibling);
 }
+
 Ark_FrameNode GetParentImpl(Ark_FrameNode peer)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -210,12 +258,14 @@ Ark_FrameNode GetParentImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(parent, nullptr);
     return FrameNodePeer::Create(parent);
 }
+
 Ark_Int32 GetChildrenCountImpl(Ark_FrameNode peer)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(peerNode, 0);
     return peerNode->GetAllChildrenWithBuild(false).size();
 }
+
 void DisposeImpl(Ark_FrameNode peer)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -229,11 +279,18 @@ void DisposeImpl(Ark_FrameNode peer)
 }
 Ark_String GetIdImpl(Ark_FrameNode peer)
 {
-    return {};
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto inspectorId = frameNode->GetInspectorId().value_or("");
+    return Converter::ArkValue<Ark_String>(inspectorId, Converter::FC);
 }
 Ark_Number GetUniqueIdImpl(Ark_FrameNode peer)
 {
-    return {};
+{
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, {});
+    return Converter::ArkValue<Ark_Number>(frameNode->GetId());
+}
 }
 Ark_Number GetOpacityImpl(Ark_FrameNode peer)
 {
@@ -245,33 +302,92 @@ Ark_Number GetOpacityImpl(Ark_FrameNode peer)
 }
 Ark_Boolean IsVisibleImpl(Ark_FrameNode peer)
 {
-    return {};
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto isVisible = frameNode->IsVisible();
+    auto parentNode = frameNode->GetParent();
+    while (isVisible && parentNode) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(parentNode);
+        if (parentFrameNode) {
+            isVisible = isVisible && parentFrameNode->IsVisible();
+            parentNode = parentNode->GetParent();
+        }
+    }
+    return isVisible;
 }
 Ark_Boolean IsClipToFrameImpl(Ark_FrameNode peer)
 {
-    return {};
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, false);
+    return ViewAbstract::GetClip(Referenced::RawPtr(frameNode));
 }
 Ark_Boolean IsAttachedImpl(Ark_FrameNode peer)
 {
-    return {};
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto isOnMainTree = frameNode->IsOnMainTree();
+    return isOnMainTree;
 }
 Ark_Object GetInspectorInfoImpl(Ark_FrameNode peer)
 {
+#ifdef WRONG_GEN
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto inspectorInfo = NG::Inspector::GetInspectorOfNode(frameNode);
+    return Converter::ArkValue<Ark_String>(inspectorInfo, Converter::FC);
+#else
     return {};
+#endif
 }
 void InvalidateImpl(Ark_FrameNode peer)
 {
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CustomFrameNodePattern>();
+    CHECK_NULL_VOID(pattern);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    pattern->Invalidate();
+    renderContext->RequestNextFrame();
 }
 void DisposeTreeImpl(Ark_FrameNode peer)
 {
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(frameNode);
+    auto parent = frameNode->GetParent();
+    if (parent && parent->GetTag() == "NodeContainer") {
+        auto pattern = AceType::DynamicCast<NodeContainerPattern>(parent);
+        CHECK_NULL_VOID(pattern);
+        pattern->CleanChild();
+    } else if (parent) {
+        parent->RemoveChild(frameNode);
+    }
 }
 void SetCrossLanguageOptionsImpl(Ark_FrameNode peer,
                                  const Ark_CrossLanguageOptions* options)
 {
+#ifdef WRONG_GEN
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(frameNode);
+    static const std::vector<const char*> nodeTypeArray = {
+        OHOS::Ace::V2::SCROLL_ETS_TAG,
+    };
+    auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), frameNode->GetTag());
+    if (pos == nodeTypeArray.end()) {
+        return;
+    }
+    frameNode->SetIsCrossLanguageAttributeSetting(attributeSettings);
+#endif
 }
 Ark_CrossLanguageOptions GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
 {
+#ifdef WRONG_GEN
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, false);
+    return frameNode->isCrossLanguageAttributeSetting();
+#else
     return {};
+#endif
 }
 Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
 {
@@ -282,10 +398,12 @@ Ark_Position GetPositionToWindowWithTransformImpl(Ark_FrameNode peer)
     offset.SetY(PipelineBase::Px2VpWithCurrentDensity(offset.GetY()));
     return Converter::ArkValue<Ark_Position>(offset);
 }
+
 Ark_FrameNode GetFrameNodeByKeyImpl(const Ark_String* name)
 {
     auto valueName = Converter::Convert<std::string>(*name);
     auto node = NG::Inspector::GetFrameNodeByKey(valueName, true);
+    CHECK_NULL_RETURN(node, nullptr);
     return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(node));
 }
 Ark_Number GetIdByFrameNodeImpl(Ark_FrameNode peer,
@@ -337,6 +455,7 @@ void MoveToImpl(Ark_FrameNode peer,
     toNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     moveNode->setIsMoving(false);
 }
+
 Ark_Number GetFirstChildIndexWithoutExpandImpl(Ark_FrameNode peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(-1);
@@ -349,6 +468,7 @@ Ark_Number GetFirstChildIndexWithoutExpandImpl(Ark_FrameNode peer)
     auto index = peer->node->GetFrameNodeIndex(childRef, true);
     return Converter::ArkValue<Ark_Number>(index);
 }
+
 Ark_Number GetLastChildIndexWithoutExpandImpl(Ark_FrameNode peer)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(-1);
@@ -356,11 +476,11 @@ Ark_Number GetLastChildIndexWithoutExpandImpl(Ark_FrameNode peer)
     CHECK_NULL_RETURN(peerNode, errValue);
     size_t size = static_cast<size_t>(peerNode->GetTotalChildCountWithoutExpanded());
     CHECK_NULL_RETURN(size > 0, errValue);
-    auto child = peer->node->GetFrameNodeChildByIndex(size - 1, false, false);
+    auto child = peerNode->GetFrameNodeChildByIndex(size - 1, false, false);
     CHECK_NULL_RETURN(child, errValue);
     auto* childNode = reinterpret_cast<FrameNode*>(child);
     auto childRef = Referenced::Claim<FrameNode>(childNode);
-    auto index = peer->node->GetFrameNodeIndex(childRef, true);
+    auto index = peerNode->GetFrameNodeIndex(childRef, true);
     return Converter::ArkValue<Ark_Number>(index);
 }
 Ark_FrameNode GetAttachedFrameNodeByIdImpl(const Ark_String* id)
@@ -374,6 +494,7 @@ Ark_FrameNode GetAttachedFrameNodeByIdImpl(const Ark_String* id)
     CHECK_NULL_RETURN(node, nullptr);
     return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(node));
 }
+
 Ark_FrameNode GetFrameNodeByIdImpl(const Ark_Number* id)
 {
     auto idInt = Converter::Convert<int32_t>(*id);
@@ -382,6 +503,7 @@ Ark_FrameNode GetFrameNodeByIdImpl(const Ark_Number* id)
     auto nodeRef = AceType::DynamicCast<NG::FrameNode>(node);
     return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(nodeRef));
 }
+
 Ark_FrameNode GetFrameNodeByUniqueIdImpl(const Ark_Number* id)
 {
     auto idInt = Converter::Convert<int32_t>(*id);
@@ -406,6 +528,14 @@ Ark_FrameNode GetFrameNodeByUniqueIdImpl(const Ark_Number* id)
     auto nodeRef = AceType::DynamicCast<NG::FrameNode>(node);
     return FrameNodePeer::Create(OHOS::Ace::AceType::RawPtr(nodeRef));
 }
+Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
+{
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto ret = PeerUtils::CreatePeer<UICommonEventPeer>();
+    ret->node = peer->node;
+    return ret;
+}
+
 void ReuseImpl(Ark_FrameNode peer)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -426,13 +556,273 @@ void RecycleImpl(Ark_FrameNode peer)
 }
 Ark_NativePointer GetFrameNodePtrImpl(Ark_FrameNode node)
 {
-    return {};
+    auto nodeRf = FrameNodePeer::GetFrameNodeByPeer(node);
+    return AceType::RawPtr(nodeRf);
 }
 Ark_RenderNode GetRenderNodeImpl(Ark_FrameNode peer)
 {
     CHECK_NULL_RETURN(peer && peer->node, nullptr);
     return peer->GetRenderNodePeer();
 }
+Ark_String GetNodeTypeImpl(Ark_FrameNode peer)
+{
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto nodeType = frameNode->GetTag();
+    return Converter::ArkValue<Ark_String>(nodeType, Converter::FC);
+}
+#ifdef WRONG_GEN
+void OnDrawImpl(Ark_FrameNode peer, const Opt_DrawCallbackFunc* drawContextCallback)
+{
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(frameNode);
+    auto onDraw = [arkCallback = CallbackHelper(drawContextCallback->value)](const Ark_DrawContext& info) -> void {};
+    LOGE("arkts 1.2 frame node onDraw callback not implemented");
+}
+Ark_Number GetIdByFrameNodeImpl(Ark_FrameNode peer, Ark_FrameNode node)
+{
+    const auto errValue = Converter::ArkValue<Ark_Number>(-1);
+    auto currentNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(currentNode, errValue);
+    auto nodeId = currentNode->GetId();
+    return Converter::ArkValue<Ark_Number>(nodeId);
+}
+
+static GENERATED_Ark_NodeType ParseNodeType(std::string& type)
+{
+    static const std::unordered_map<std::string, GENERATED_Ark_NodeType> typeMap = { { "List", GENERATED_ARKUI_LIST } };
+    GENERATED_Ark_NodeType nodeType = GENERATED_ARKUI_CUSTOM_NODE;
+    auto iter = typeMap.find(type);
+    if (iter != typeMap.end()) {
+        nodeType = iter->second;
+    }
+    return nodeType;
+}
+
+Ark_FrameNode CreateTypedFrameNodeImpl(const Ark_String* type)
+{
+    auto valueType = Converter::Convert<std::string>(*type);
+    int32_t nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    GENERATED_Ark_NodeType nodeType = ParseNodeType(valueType);
+    if (nodeType == GENERATED_ARKUI_CUSTOM_NODE) {
+        return nullptr;
+    }
+    auto node =  OHOS::Ace::NG::GeneratedBridge::CreateNode(nodeType, nodeId, 0);
+    CHECK_NULL_RETURN(node, nullptr);
+    auto newNode = AceType::Claim(reinterpret_cast<FrameNode*>(node));
+    newNode->SetIsArkTsFrameNode(true);
+    newNode->DecRefCount();
+    return FrameNodePeer::Create(newNode);
+}
+
+Ark_Position GetPositionToParentImpl(Ark_FrameNode peer)
+{
+    if (!peer) {
+        LOGW("This frameNode nullptr when GetPositionToParentImpl!");
+        return {};
+    }
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto currFrameRect = frameNode->GetRectWithRender();
+    auto offset = currFrameRect.GetOffset();
+    offset.SetX(PipelineBase::Px2VpWithCurrentDensity(offset.GetX()));
+    offset.SetY(PipelineBase::Px2VpWithCurrentDensity(offset.GetY()));
+    return Converter::ArkValue<Ark_Position>(offset);
+}
+
+Ark_Position GetPositionToScreenImpl(Ark_FrameNode peer)
+{
+    if (!peer) {
+        LOGW("This frameNode nullptr when GetPositionToScreenImpl!");
+        return {};
+    }
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto offset = frameNode->GetPositionToScreen();
+    offset.SetX(PipelineBase::Px2VpWithCurrentDensity(offset.GetX()));
+    offset.SetY(PipelineBase::Px2VpWithCurrentDensity(offset.GetY()));
+    return Converter::ArkValue<Ark_Position>(offset);
+}
+
+Ark_Position GetPositionToWindowImpl(Ark_FrameNode peer)
+{
+    if (!peer) {
+        LOGW("This frameNode nullptr when GetPositionToWindowImpl!");
+        return {};
+    }
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto offset = frameNode->GetOffsetRelativeToWindow();
+    offset.SetX(PipelineBase::Px2VpWithCurrentDensity(offset.GetX()));
+    offset.SetY(PipelineBase::Px2VpWithCurrentDensity(offset.GetY()));
+    return Converter::ArkValue<Ark_Position>(offset);
+}
+
+Ark_Position GetPositionToParentWithTransformImpl(Ark_FrameNode peer)
+{
+    if (!peer) {
+        LOGW("This frameNode nullptr when GetPositionToParentWithTransformImpl!");
+        return {};
+    }
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto offset = frameNode->GetPositionToParentWithTransform();
+    offset.SetX(PipelineBase::Px2VpWithCurrentDensity(offset.GetX()));
+    offset.SetY(PipelineBase::Px2VpWithCurrentDensity(offset.GetY()));
+    return Converter::ArkValue<Ark_Position>(offset);
+}
+
+Ark_Position GetPositionToScreenWithTransformImpl(Ark_FrameNode peer)
+{
+    if (!peer) {
+        LOGW("This frameNode nullptr when GetPositionToScreenWithTransformImpl!");
+        return {};
+    }
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto offset = frameNode->GetPositionToScreenWithTransform();
+    offset.SetX(PipelineBase::Px2VpWithCurrentDensity(offset.GetX()));
+    offset.SetY(PipelineBase::Px2VpWithCurrentDensity(offset.GetY()));
+    return Converter::ArkValue<Ark_Position>(offset);
+}
+
+Ark_Position GetPositionToWindowWithTransform1Impl(Ark_FrameNode peer)
+{
+    if (!peer) {
+        LOGW("This frameNode nullptr when GetPositionToWindowWithTransform1Impl!");
+        return {};
+    }
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto offset = frameNode->GetPositionToWindowWithTransform();
+    offset.SetX(PipelineBase::Px2VpWithCurrentDensity(offset.GetX()));
+    offset.SetY(PipelineBase::Px2VpWithCurrentDensity(offset.GetY()));
+    return Converter::ArkValue<Ark_Position>(offset);
+}
+
+Ark_Size GetMeasuredSizeImpl(Ark_FrameNode peer)
+{
+    if (!peer) {
+        LOGW("This frameNode nullptr when GetMeasuredSizeImpl!");
+        return {};
+    }
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, {});
+    auto size = geometryNode->GetFrameSize();
+    return Converter::ArkValue<Ark_Size>(size);
+}
+
+Ark_Position GetLayoutPositionImpl(Ark_FrameNode peer)
+{
+    if (!peer) {
+        LOGW("This frameNode nullptr when GetLayoutPositionImpl!");
+        return {};
+    }
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, {});
+    auto offset = geometryNode->GetMarginFrameOffset();
+    return Converter::ArkValue<Ark_Position>(offset);
+}
+
+Ark_EdgesLengthMetrics GetUserConfigBorderWidthImpl(Ark_FrameNode peer)
+{
+    if (!peer) {
+        LOGW("This frameNode nullptr when GetUserConfigBorderWidthImpl!");
+        return {};
+    }
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto borderWidth = ViewAbstract::GetLayoutBorderWidth(AceType::RawPtr(frameNode));
+    Ark_EdgesLengthMetrics retValue = {
+        .top = GetOptNumberFromDimension(borderWidth.topDimen),
+        .topUnit = GetOptLengthUnitFromDimension(borderWidth.topDimen),
+        .left = GetOptNumberFromDimension(borderWidth.leftDimen),
+        .leftUnit = GetOptLengthUnitFromDimension(borderWidth.leftDimen),
+        .bottom = GetOptNumberFromDimension(borderWidth.bottomDimen),
+        .bottomUnit = GetOptLengthUnitFromDimension(borderWidth.bottomDimen),
+        .right = GetOptNumberFromDimension(borderWidth.rightDimen),
+        .rightUnit = GetOptLengthUnitFromDimension(borderWidth.rightDimen),
+    };
+    return retValue;
+}
+
+Ark_EdgesLengthMetrics GetUserConfigPaddingImpl(Ark_FrameNode peer)
+{
+    if (!peer) {
+        LOGW("This frameNode nullptr when GetUserConfigPaddingImpl!");
+        return {};
+    }
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto padding = ViewAbstract::GetPadding(AceType::RawPtr(frameNode));
+    Ark_EdgesLengthMetrics retValue = {
+        .top = GetOptNumberFromCalcLength(padding.top),
+        .topUnit = GetOptLengthUnitFromCalcLength(padding.top),
+        .left = GetOptNumberFromCalcLength(padding.left),
+        .leftUnit = GetOptLengthUnitFromCalcLength(padding.left),
+        .bottom = GetOptNumberFromCalcLength(padding.bottom),
+        .bottomUnit = GetOptLengthUnitFromCalcLength(padding.bottom),
+        .right = GetOptNumberFromCalcLength(padding.right),
+        .rightUnit = GetOptLengthUnitFromCalcLength(padding.right),
+    };
+    return retValue;
+}
+
+Ark_EdgesLengthMetrics GetUserConfigMarginImpl(Ark_FrameNode peer)
+{
+    if (!peer) {
+        LOGW("This frameNode nullptr when GetUserConfigMarginImpl!");
+        return {};
+    }
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto margin = ViewAbstract::GetMargin(AceType::RawPtr(frameNode));
+    Ark_EdgesLengthMetrics retValue = {
+        .top = GetOptNumberFromCalcLength(margin.top),
+        .topUnit = GetOptLengthUnitFromCalcLength(margin.top),
+        .left = GetOptNumberFromCalcLength(margin.left),
+        .leftUnit = GetOptLengthUnitFromCalcLength(margin.left),
+        .bottom = GetOptNumberFromCalcLength(margin.bottom),
+        .bottomUnit = GetOptLengthUnitFromCalcLength(margin.bottom),
+        .right = GetOptNumberFromCalcLength(margin.right),
+        .rightUnit = GetOptLengthUnitFromCalcLength(margin.right),
+    };
+    return retValue;
+}
+
+Ark_SizeLengthMetrics GetUserConfigSizeImpl(Ark_FrameNode peer)
+{
+    if (!peer) {
+        LOGW("This frameNode nullptr when GetUserConfigSizeImpl!");
+        return {};
+    }
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto size = ViewAbstract::GetConfigSize(AceType::RawPtr(frameNode));
+    if (!size.has_value()) {
+        LOGW("This frameNode do not have config size, return default.");
+        auto width = std::make_optional<CalcLength>();
+        auto height = std::make_optional<CalcLength>();
+        auto calcSize = std::make_optional<CalcSize>(width, height);
+        Ark_SizeLengthMetrics retValue = { .width = GetOptNumberFromCalcLength(calcSize->Width()),
+            .widthUnit = GetOptLengthUnitFromCalcLength(calcSize->Width()),
+            .height = GetOptNumberFromCalcLength(calcSize->Height()),
+            .heightUnit = GetOptLengthUnitFromCalcLength(calcSize->Height()) };
+        return retValue;
+    }
+    Ark_SizeLengthMetrics retValue = {
+        .width = GetOptNumberFromCalcLength(size->Width()),
+        .widthUnit = GetOptLengthUnitFromCalcLength(size->Width()),
+        .height = GetOptNumberFromCalcLength(size->Height()),
+        .heightUnit = GetOptLengthUnitFromCalcLength(size->Height())
+    };
+    return retValue;
+}
+#endif
 } // FrameNodeAccessor
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
 {

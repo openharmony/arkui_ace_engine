@@ -36,6 +36,7 @@ void DestroyPeerImpl(Ark_PanGestureInterface peer)
 }
 Ark_PanGestureInterface CtorImpl(const Ark_Union_PanGestureInterface_Invoke_Literal_PanGestureOptions* value)
 {
+    CHECK_NULL_RETURN(value, nullptr);
     auto peer = PeerUtils::CreatePeer<PanGestureInterfacePeer>();
     int32_t fingers = DEFAULT_PAN_FINGERS;
     double distance = DEFAULT_PAN_DISTANCE.ConvertToPx();

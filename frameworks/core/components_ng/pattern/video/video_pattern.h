@@ -271,7 +271,7 @@ public:
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
 #endif
-
+    
     void SetVideoController(const RefPtr<VideoControllerV2>& videoController);
     RefPtr<VideoControllerV2> GetVideoController();
 

@@ -19,11 +19,13 @@
 #include "arkoala_api_generated.h"
 #include "ui/base/utils/utils.h"
 
+#include "bridge/arkts_frontend/arkts_frontend.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "core/interfaces/native/implementation/render_node_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
@@ -56,15 +58,6 @@ Ark_RenderNode CtorImpl()
         V2::RENDER_NODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<NG::RenderNodePattern>(); });
     frameNode->SetIsArkTsRenderNode(true);
     auto renderNodePeer = RenderNodePeer::Create(frameNode);
-
-    auto drawCallbackFunc = [callback = CallbackHelper(*callback)](const DrawingContext& context) -> void {
-
-    };
-    auto pattern = frameNode->GetPattern<NG::RenderNodePattern>();
-    if (pattern) {
-        pattern->SetDrawCallback(drawCallbackFunc);
-    }
-
     return renderNodePeer;
 #endif
     return nullptr;
@@ -698,7 +691,7 @@ void SetTransformImpl(Ark_RenderNode peer,
     CHECK_NULL_VOID(frameNode);
     auto matrix4 = std::make_optional<Matrix4>(value0, value4, value8, value12, value1, value5, value9, value13, value2,
         value6, value10, value14, value3, value7, value11, value15);
-    NG::ViewAbstract::SetTransformMatrix(AceType::RawPtr(frameNode), matrix4);
+    NG::ViewAbstractModelStatic::SetTransformMatrix(AceType::RawPtr(frameNode), matrix4);
 }
 Ark_Number GetShadowColorImpl(Ark_RenderNode peer)
 {

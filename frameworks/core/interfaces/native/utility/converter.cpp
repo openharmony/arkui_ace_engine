@@ -19,6 +19,7 @@
 
 #include "converter.h"
 
+#include "base/utils/string_utils.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/card_scope.h"
 #include "core/components/common/layout/constants.h"
@@ -48,8 +49,9 @@ namespace {
     constexpr double NUM_DOUBLE_1 = 1.;
     constexpr double NUM_DOUBLE_100 = 100.;
     constexpr int32_t NUM_PERCENT_100 = 100;
-
     constexpr int32_t DEFAULT_MULTIPLE = 100;
+    constexpr float GRADIENT_MIN_POSITION = 0.0f;
+    constexpr float GRADIENT_DEFAULT_MIN_POSITION = 0.0f;
     int32_t ConvertToVariableFontWeight(OHOS::Ace::FontWeight fontWeight)
     {
         OHOS::Ace::FontWeight convertValue;
@@ -196,6 +198,9 @@ void AssignGradientColors(Gradient *gradient,
     for (int32_t i = 0; i < colors->length; i++) {
         auto color = OptConvert<Color>(colors->array[i].value0);
         auto position = Convert<float>(colors->array[i].value1);
+        if (LessOrEqual(position, GRADIENT_MIN_POSITION)) {
+            position = GRADIENT_DEFAULT_MIN_POSITION;
+        }
         if (color.has_value()) {
             NG::GradientColor gradientColor;
             gradientColor.SetColor(color.value());
@@ -285,40 +290,103 @@ ResourceConverter::ResourceConverter(const Ark_Resource& resource)
     }
 }
 
+std::optional<std::string> ResourceConverter::GetStringResource()
+{
+    std::optional<std::string> result;
+    if (id_ != -1) {
+        result = themeConstants_->GetString(id_);
+        ReplaceHolder(result.value(), params_, 0);
+    } else if (!params_.empty()) {
+        result = themeConstants_->GetStringByName(params_.front());
+        ReplaceHolder(result.value(), params_, 1);
+    } else {
+        LOGE("Unknown resource value OHOS::Ace::NG::Converter::ResourceConverter");
+    }
+    return result;
+}
+
+std::optional<std::string> ResourceConverter::GetRawfilePath()
+{
+    std::optional<std::string> result;
+    if (!params_.empty()) {
+        result = themeConstants_->GetRawfile(params_.front());
+    }
+    return result;
+}
+
+std::optional<std::string> ResourceConverter::GetMediaPath()
+{
+    std::optional<std::string> result;
+    if (id_ != -1) {
+        result = themeConstants_->GetMediaPath(id_);
+    } else if (!params_.empty()) {
+        result = themeConstants_->GetMediaPathByName(params_.front());
+    }
+    return result;
+}
+
+std::optional<std::string> ResourceConverter::GetPluralResource()
+{
+    std::optional<std::string> result;
+    if (id_ != -1 && params_.size() == 2) {  // 2 means quantity and count in params_
+        result = themeConstants_->GetPluralString(id_, StringUtils::StringToInt(params_[0]));
+        ReplaceHolder(result.value(), params_, 1);
+    } else if (params_.size() == 3) {  // 3 means resName, quantity and count in params_
+        result = themeConstants_->GetPluralStringByName(params_[0], StringUtils::StringToInt(params_[1]));
+        ReplaceHolder(result.value(), params_, 2);  // 2 means data get from params_[2]
+    } else {
+        LOGE("Invalid PLURAL resource OHOS::Ace::NG::Converter::ResourceConverter");
+    }
+    return result;
+}
+
+std::optional<int32_t> ResourceConverter::GetIntegerResource()
+{
+    std::optional<int32_t> result;
+    if (id_ != -1) {
+        result = themeConstants_->GetInt(id_);
+    } else if (!params_.empty()) {
+        result = themeConstants_->GetIntByName(params_.front());
+    } else {
+        LOGE("Unknown INTEGER value OHOS::Ace::NG::Converter::ResourceConverter");
+    }
+    return result;
+}
+
+std::optional<double> ResourceConverter::GetFloatResource()
+{
+    std::optional<double> result;
+    if (id_ != -1) {
+        result = themeConstants_->GetDouble(id_);
+    } else if (!params_.empty()) {
+        result = themeConstants_->GetDoubleByName(params_.front());
+    } else {
+        LOGE("Unknown FLOAT value OHOS::Ace::NG::Converter::ResourceConverter");
+    }
+    return result;
+}
+
 std::optional<std::string> ResourceConverter::ToString()
 {
     std::optional<std::string> result;
     CHECK_NULL_RETURN(themeConstants_, result);
 
-    switch (type_) {
-        case ResourceType::STRING:
-            if (id_ != -1) {
-                result = themeConstants_->GetString(id_);
-                ReplaceHolder(result.value(), params_, 0);
-            } else if (!params_.empty()) {
-                result = themeConstants_->GetStringByName(params_.front());
-                ReplaceHolder(result.value(), params_, 1);
-            } else {
-                LOGE("Unknown resource value OHOS::Ace::NG::Converter::ResourceConverter");
-            }
-            break;
-
-        case ResourceType::RAWFILE:
-            if (!params_.empty()) {
-                result = themeConstants_->GetRawfile(params_.front());
-            }
-            break;
-
-        case ResourceType::MEDIA:
-            if (id_ != -1) {
-                result = themeConstants_->GetMediaPath(id_);
-            } else if (!params_.empty()) {
-                result = themeConstants_->GetMediaPathByName(params_.front());
-            }
-            break;
-
-        default:
-            break;
+    if (type_ == ResourceType::STRING) {
+        result = GetStringResource();
+    } else if (type_ == ResourceType::RAWFILE) {
+        result = GetRawfilePath();
+    } else if (type_ == ResourceType::MEDIA) {
+        result = GetMediaPath();
+    } else if (type_ == ResourceType::PLURAL) {
+        result = GetPluralResource();
+    } else if (type_ == ResourceType::INTEGER) {
+        auto intValue = GetIntegerResource();
+        result = intValue.has_value() ? std::make_optional(std::to_string(intValue.value())) : std::nullopt;
+    } else if (type_ == ResourceType::FLOAT) {
+        auto floatValue = GetFloatResource();
+        result = floatValue.has_value() ? std::make_optional(std::to_string(floatValue.value())) : std::nullopt;
+    } else {
+        LOGE("Unknown resource value OHOS::Ace::NG::Converter::ResourceConverter");
     }
     return result;
 }
@@ -402,6 +470,27 @@ std::optional<float> ResourceConverter::ToFloat()
             optFloat = static_cast<float>(themeConstants_->GetDoubleByName(params_[0]));
         } else {
             optFloat = static_cast<float>(themeConstants_->GetDouble(id_));
+        }
+    } else if (type_ == ResourceType::INTEGER) {
+        if (id_ == -1 && params_.size() > 0) {
+            optFloat = static_cast<float>(themeConstants_->GetIntByName(params_[0]));
+        } else {
+            optFloat = static_cast<float>(themeConstants_->GetInt(id_));
+        }
+    } else if (type_ == ResourceType::STRING) {
+        std::optional<std::string> result;
+        if (id_ != -1) {
+            result = themeConstants_->GetString(id_);
+            ReplaceHolder(result.value(), params_, 0);
+        } else if (!params_.empty()) {
+            result = themeConstants_->GetStringByName(params_.front());
+            ReplaceHolder(result.value(), params_, 1);
+        }
+        if (result.has_value()) {
+            double floatVal;
+            if (StringUtils::StringToDouble(result.value(), floatVal)) {
+                optFloat = floatVal;
+            }
         }
     }
     return optFloat;
@@ -550,6 +639,49 @@ Shadow Convert(const Ark_ShadowOptions& src)
 }
 
 template<>
+SheetHeight Convert(const Ark_SheetSize& src)
+{
+    SheetHeight detent;
+    detent.sheetMode = OptConvert<SheetMode>(src);
+    detent.height.reset();
+    return detent;
+}
+
+static SheetHeight SheetHeightFromDimension(std::optional<Dimension> src)
+{
+    SheetHeight detent;
+    Validator::ValidateNonNegative(src);
+    detent.height = src;
+    return detent;
+}
+
+template<>
+SheetHeight Convert(const Ark_String& src)
+{
+    return SheetHeightFromDimension(OptConvert<Dimension>(src));
+}
+
+template<>
+SheetHeight Convert(const Ark_Number& src)
+{
+    return SheetHeightFromDimension(OptConvert<Dimension>(src));
+}
+
+template<>
+SheetHeight Convert(const Ark_Resource& src)
+{
+    return SheetHeightFromDimension(OptConvert<Dimension>(src));
+}
+
+template<>
+SysOptions Convert(const Ark_SystemAdaptiveOptions& src)
+{
+    SysOptions sysOptions;
+    sysOptions.disableSystemAdaptation = OptConvert<bool>(src.disableSystemAdaptation).value_or(true);
+    return sysOptions;
+}
+
+template<>
 std::u16string Convert(const Ark_String& src)
 {
     auto str8 =  Converter::Convert<std::string>(src);
@@ -657,17 +789,14 @@ template<>
 Dimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);
-    return Dimension::FromString(str);
+    return StringUtils::StringToDimension(str, true);
 }
 
 template<>
 CalcDimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);
-    if (str.find("calc") != std::string::npos) {
-        return CalcDimension(str);
-    }
-    return Dimension::FromString(str);
+    return StringUtils::StringToCalcDimension(str, true);
 }
 
 template<>
@@ -677,7 +806,7 @@ CalcLength Convert(const Ark_String& src)
     if (str.find("calc") != std::string::npos) {
         return CalcLength(str);
     }
-    return CalcLength(Dimension::FromString(str));
+    return CalcLength(StringUtils::StringToDimension(str, true));
 }
 
 template<>
@@ -812,10 +941,10 @@ BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src)
     }
     bool hasSetBorderRadius = topStartOpt || topEndOpt || bottomStartOpt || bottomEndOpt;
     auto isRtl = hasSetBorderRadius && AceApplicationInfo::GetInstance().IsRightToLeft();
-    property.radiusTopStart = isRtl ? topEnd : topStart;
-    property.radiusTopEnd = isRtl ? topStart : topEnd;
-    property.radiusBottomStart = isRtl ? bottomEnd : bottomStart;
-    property.radiusBottomEnd = isRtl ? bottomStart : bottomEnd;
+    property.radiusTopLeft = isRtl ? topEnd : topStart;
+    property.radiusTopRight = isRtl ? topStart : topEnd;
+    property.radiusBottomLeft = isRtl ? bottomEnd : bottomStart;
+    property.radiusBottomRight = isRtl ? bottomStart : bottomEnd;
     property.multiValued = true;
     return property;
 }
@@ -1265,7 +1394,7 @@ TextDetectConfig Convert(const Ark_TextDataDetectorConfig& src)
         auto callback = [arkCallback = CallbackHelper(*onDetectResultUpdate)](const std::string& arg) -> void {
             ConvContext ctx;
             auto arkArg = ArkValue<Ark_String>(arg, &ctx);
-            arkCallback.Invoke(arkArg);
+            arkCallback.InvokeSync(arkArg);
         };
         ret.onResult = callback;
     }
@@ -1715,7 +1844,10 @@ EffectOption Convert(const Ark_BackgroundEffectOptions& src)
     dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
     dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
     dst.policy = OptConvert<BlurStyleActivePolicy>(src.policy).value_or(dst.policy);
-    dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
+    if (auto color = OptConvert<Color>(src.inactiveColor); color.has_value()) {
+        dst.inactiveColor = color.value();
+        dst.isValidColor = true;
+    }
     LOGE("OHOS::Ace::NG::Converter::Convert -> EffectOption::BlurType is not supported");
     return dst;
 }
@@ -1856,11 +1988,15 @@ BlurStyleOption Convert(const Ark_BackgroundBlurStyleOptions& src)
     dst.colorMode = OptConvert<ThemeColorMode>(src.colorMode).value_or(dst.colorMode);
     dst.adaptiveColor = OptConvert<AdaptiveColor>(src.adaptiveColor).value_or(dst.adaptiveColor);
     if (auto scaleOpt = OptConvert<float>(src.scale); scaleOpt) {
-        dst.scale = static_cast<double>(*scaleOpt);
+        auto scale = static_cast<double>(*scaleOpt);
+        dst.scale = std::clamp(scale, 0.0, 1.0);
     }
     dst.blurOption = OptConvert<BlurOption>(src.blurOptions).value_or(dst.blurOption);
     dst.policy = OptConvert<BlurStyleActivePolicy>(src.policy).value_or(dst.policy);
-    dst.inactiveColor = OptConvert<Color>(src.inactiveColor).value_or(dst.inactiveColor);
+    if (auto color = OptConvert<Color>(src.inactiveColor); color.has_value()) {
+        dst.inactiveColor = color.value();
+        dst.isValidColor = true;
+    }
     return dst;
 }
 
@@ -1884,9 +2020,9 @@ BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
         " handles invalid structure"
     );
     // the src.left/.right should be used instead .start/.end, interface_sdk-js/issues/IB0DVD
-    dst.leftColor = OptConvert<Color>(src.start);
+    dst.startColor = OptConvert<Color>(src.start);
     dst.topColor = OptConvert<Color>(src.top);
-    dst.rightColor = OptConvert<Color>(src.end);
+    dst.endColor = OptConvert<Color>(src.end);
     dst.bottomColor = OptConvert<Color>(src.bottom);
     dst.multiValued = true;
     return dst;
@@ -1954,6 +2090,22 @@ BorderRadiusProperty Convert(const Ark_Resource& src)
 }
 
 template<>
+BorderWidthProperty Convert(const Ark_EdgeOutlineWidths& src)
+{
+    BorderWidthProperty dst;
+    dst.leftDimen = OptConvert<Dimension>(src.left);
+    Validator::ValidateNonNegative(dst.leftDimen);
+    dst.topDimen = OptConvert<Dimension>(src.top);
+    Validator::ValidateNonNegative(dst.topDimen);
+    dst.rightDimen = OptConvert<Dimension>(src.right);
+    Validator::ValidateNonNegative(dst.rightDimen);
+    dst.bottomDimen = OptConvert<Dimension>(src.bottom);
+    Validator::ValidateNonNegative(dst.bottomDimen);
+    dst.multiValued = true;
+    return dst;
+}
+
+template<>
 BorderWidthProperty Convert(const Ark_EdgeWidths& src)
 {
     BorderWidthProperty widthProperty;
@@ -2010,11 +2162,11 @@ BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
     BorderWidthProperty widthProperty;
     widthProperty.topDimen = Converter::OptConvert<Dimension>(src.top);
     Validator::ValidateNonNegative(widthProperty.topDimen);
-    widthProperty.leftDimen = Converter::OptConvert<Dimension>(src.start);
+    widthProperty.startDimen = Converter::OptConvert<Dimension>(src.start);
     Validator::ValidateNonNegative(widthProperty.leftDimen);
     widthProperty.bottomDimen = Converter::OptConvert<Dimension>(src.bottom);
     Validator::ValidateNonNegative(widthProperty.bottomDimen);
-    widthProperty.rightDimen = Converter::OptConvert<Dimension>(src.end);
+    widthProperty.endDimen = Converter::OptConvert<Dimension>(src.end);
     Validator::ValidateNonNegative(widthProperty.rightDimen);
     widthProperty.multiValued = true;
     return widthProperty;
@@ -2242,12 +2394,6 @@ PickerValueType Convert(const Ark_Resource& src)
 }
 
 template<>
-PickerValueType Convert(const Array_String& src)
-{
-    return Converter::Convert<std::vector<std::string>>(src);
-}
-
-template<>
 PickerValueType Convert(const Array_ResourceStr& src)
 {
     auto value = Converter::Convert<std::vector<std::optional<std::string>>>(src);
@@ -2315,6 +2461,14 @@ LightSource Convert(const Ark_LightSource& src)
 }
 
 template<>
+Point Convert(const Ark_Tuple_Number_Number& src)
+{
+    auto x = Converter::Convert<double>(src.value0);
+    auto y = Converter::Convert<double>(src.value1);
+    return Point(x, y);
+}
+
+template<>
 PointLightStyle Convert(const Ark_PointLightStyle& src)
 {
     PointLightStyle pointLightStyle;
@@ -2325,6 +2479,14 @@ PointLightStyle Convert(const Ark_PointLightStyle& src)
     pointLightStyle.bloom = Converter::OptConvert<float>(src.bloom);
     Validator::ValidateBloom(pointLightStyle.bloom);
     return pointLightStyle;
+}
+
+template<>
+PointT<int32_t> Convert(const Ark_common2D_Point& src)
+{
+    auto x = Converter::Convert<int32_t>(src.x);
+    auto y = Converter::Convert<int32_t>(src.y);
+    return PointT<int32_t>(x, y);
 }
 
 template<>
@@ -2456,22 +2618,55 @@ ImageResizableSlice Convert(const Ark_EdgeWidths& src)
 }
 
 template<>
+NG::PreviewMenuOptions Convert(const Ark_PreviewMenuOptions& src)
+{
+    NG::PreviewMenuOptions previewMenuOptions;
+    auto feedbackMode = Converter::OptConvert<HapticFeedbackMode>(src.hapticFeedbackMode);
+    if (feedbackMode.has_value()) {
+        previewMenuOptions.hapticFeedbackMode = feedbackMode.value();
+    }
+    return previewMenuOptions;
+}
+
+template<>
 SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
 {
-    SelectMenuParam selectMenuParam = {.onAppear = [](int32_t start, int32_t end) {}, .onDisappear = []() {}};
+    SelectMenuParam selectMenuParam = {
+        .onAppear = [](int32_t start, int32_t end) {}, .onDisappear = []() {},
+        .onMenuShow = [](int32_t start, int32_t end) {}, .onMenuHide = [](int32_t start, int32_t end) {},
+        .previewMenuOptions = NG::PreviewMenuOptions()
+    };
     auto optOnAppear = Converter::GetOpt(src.onAppear);
     if (optOnAppear.has_value()) {
         selectMenuParam.onAppear =
             [arkCallback = CallbackHelper(optOnAppear.value())](int32_t start, int32_t end) {
-                arkCallback.Invoke(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+                arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
         };
     }
     auto optOnDisappear = Converter::GetOpt(src.onDisappear);
     if (optOnDisappear.has_value()) {
         selectMenuParam.onDisappear =
             [arkCallback = CallbackHelper(optOnDisappear.value())]() {
-                arkCallback.Invoke();
+                arkCallback.InvokeSync();
         };
+    }
+    auto optOnMenuShow = Converter::OptConvert<MenuCallback>(src.onMenuShow);
+    if (optOnMenuShow.has_value()) {
+        selectMenuParam.onMenuShow =
+            [arkCallback = CallbackHelper(optOnMenuShow.value())](int32_t start, int32_t end) {
+                arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+        };
+    }
+    auto optOnMenuHide = Converter::OptConvert<MenuCallback>(src.onMenuHide);
+    if (optOnMenuHide.has_value()) {
+        selectMenuParam.onMenuHide =
+            [arkCallback = CallbackHelper(optOnMenuHide.value())](int32_t start, int32_t end) {
+                arkCallback.InvokeSync(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+        };
+    }
+    auto previewMenuOptions = Converter::OptConvert<NG::PreviewMenuOptions>(src.previewMenuOptions);
+    if (previewMenuOptions.has_value()) {
+        selectMenuParam.previewMenuOptions = previewMenuOptions.value();
     }
     return selectMenuParam;
 }

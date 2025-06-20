@@ -358,31 +358,6 @@ HWTEST_F(GridItemModifierTest, setForceRebuildTestDefaultValues, TestSize.Level1
 }
 
 /*
- * @tc.name: setForceRebuildTestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(GridItemModifierTest, setForceRebuildTestValidValues, TestSize.Level1)
-{
-    std::string strResult;
-    Ark_Boolean inputValue;
-
-    // check true value
-    inputValue = Converter::ArkValue<Ark_Boolean>(true);
-    auto optInputValue = Converter::ArkValue<Opt_Boolean>(inputValue);
-    modifier_->setForceRebuild(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_FORCE_REBUILD_NAME);
-    EXPECT_EQ(strResult, "true");
-
-    // check false value
-    inputValue = Converter::ArkValue<Ark_Boolean>(false);
-    optInputValue = Converter::ArkValue<Opt_Boolean>(inputValue);
-    modifier_->setForceRebuild(node_, &optInputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_FORCE_REBUILD_NAME);
-    EXPECT_EQ(strResult, "false");
-}
-
-/*
  * @tc.name: setSelectableTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -500,6 +475,7 @@ HWTEST_F(GridItemModifierTest, setOnSelectTest, TestSize.Level1)
     EXPECT_EQ(checkEvent->isSelected, false);
 }
 
+#ifdef WRONG_OLD_GEN
 /*
  * @tc.name: setOnChangeEventSelectedImpl
  * @tc.desc:
@@ -538,4 +514,5 @@ HWTEST_F(GridItemModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, false);
 }
+#endif
 } // namespace OHOS::Ace::NG

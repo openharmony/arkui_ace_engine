@@ -17,6 +17,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "arkoala_api_generated.h"
+#include "core/components_ng/pattern/divider/divider_model_ng_static.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DividerModifier {
@@ -55,7 +56,7 @@ void ColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    DividerModelNG::SetDividerColor(frameNode, Converter::OptConvert<Color>(*value));
+    DividerModelNGStatic::SetDividerColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 
 void StrokeWidthImpl(Ark_NativePointer node,
@@ -67,7 +68,7 @@ void StrokeWidthImpl(Ark_NativePointer node,
     if (optValue && (optValue.value().Unit() == DimensionUnit::PERCENT)) {
         optValue.reset();
     }
-    DividerModelNG::StrokeWidth(frameNode, optValue);
+    DividerModelNGStatic::StrokeWidth(frameNode, optValue);
 }
 
 void LineCapImpl(Ark_NativePointer node,
@@ -75,7 +76,7 @@ void LineCapImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    DividerModelNG::LineCap(frameNode, Converter::OptConvert<LineCap>(*value));
+    DividerModelNGStatic::LineCap(frameNode, Converter::OptConvert<LineCap>(*value));
 }
 
 } // DividerAttributeModifier

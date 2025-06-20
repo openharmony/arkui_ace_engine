@@ -15,16 +15,19 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "pinch_recognizer_peer.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PinchRecognizerAccessor {
 void DestroyPeerImpl(Ark_PinchRecognizer peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_PinchRecognizer CtorImpl()
 {
-    return nullptr;
+    return PeerUtils::CreatePeer<PinchRecognizerPeer>();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,7 +35,9 @@ Ark_NativePointer GetFinalizerImpl()
 }
 Ark_Number GetDistanceImpl(Ark_PinchRecognizer peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Number>(DEFAULT_DISTANCE);
+    CHECK_NULL_RETURN(peer, errorValue);
+    return Converter::ArkValue<Ark_Number>(peer->GetDistance());
 }
 } // PinchRecognizerAccessor
 const GENERATED_ArkUIPinchRecognizerAccessor* GetPinchRecognizerAccessor()

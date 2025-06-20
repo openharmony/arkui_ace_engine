@@ -25,115 +25,17 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, CustomBuilder, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, UIScrollableCommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, UICommonMethod, OnWillScrollCallback, OnScrollCallback } from "./common"
+import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, CustomBuilder, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, CommonMethod, OnWillScrollCallback, OnScrollCallback } from "./common"
 import { ConstraintSizeOptions, Length, Dimension, Padding } from "./units"
 import { FlexDirection } from "./enums"
 import { Resource } from "global/resource"
-import { Callback_Void } from "./abilityComponent"
 import { Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain, Callback_Number_Number_Void } from "./grid"
 import { ScrollState } from "./list"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ComponentContent } from "./arkui-custom"
-import { Scroller } from "./scroll"
+import { Scroller, OnScrollFrameBeginCallback } from "./scroll"
+import { WaterFlowHandWritten } from "../handwritten/WaterFlowImpl"
 
-export class WaterFlowSectionsInternal {
-    public static fromPtr(ptr: KPointer): WaterFlowSections {
-        const obj : WaterFlowSections = new WaterFlowSections()
-        obj.peer = new Finalizable(ptr, WaterFlowSections.getFinalizer())
-        return obj
-    }
-}
-export class WaterFlowSections implements MaterializedBase {
-    peer?: Finalizable | undefined = undefined
-    public getPeer(): Finalizable | undefined {
-        return this.peer
-    }
-    static ctor_waterflowsections(): KPointer {
-        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_ctor()
-        return retval
-    }
-    constructor() {
-        const ctorPtr : KPointer = WaterFlowSections.ctor_waterflowsections()
-        this.peer = new Finalizable(ctorPtr, WaterFlowSections.getFinalizer())
-    }
-    static getFinalizer(): KPointer {
-        return ArkUIGeneratedNativeModule._WaterFlowSections_getFinalizer()
-    }
-    public splice(start: number, deleteCount?: number, sections?: Array<SectionOptions>): boolean {
-        const start_casted = start as (number)
-        const deleteCount_casted = deleteCount as (number | undefined)
-        const sections_casted = sections as (Array<SectionOptions> | undefined)
-        return this.splice_serialize(start_casted, deleteCount_casted, sections_casted)
-    }
-    public push(section: SectionOptions): boolean {
-        const section_casted = section as (SectionOptions)
-        return this.push_serialize(section_casted)
-    }
-    public update(sectionIndex: number, section: SectionOptions): boolean {
-        const sectionIndex_casted = sectionIndex as (number)
-        const section_casted = section as (SectionOptions)
-        return this.update_serialize(sectionIndex_casted, section_casted)
-    }
-    public values(): Array<SectionOptions> {
-        return this.values_serialize()
-    }
-    public length(): number {
-        return this.length_serialize()
-    }
-    private splice_serialize(start: number, deleteCount?: number, sections?: Array<SectionOptions>): boolean {
-        const thisSerializer : Serializer = Serializer.hold()
-        let deleteCount_type : int32 = RuntimeType.UNDEFINED
-        deleteCount_type = runtimeType(deleteCount)
-        thisSerializer.writeInt8(deleteCount_type as int32)
-        if ((RuntimeType.UNDEFINED) != (deleteCount_type)) {
-            const deleteCount_value  = deleteCount!
-            thisSerializer.writeNumber(deleteCount_value)
-        }
-        let sections_type : int32 = RuntimeType.UNDEFINED
-        sections_type = runtimeType(sections)
-        thisSerializer.writeInt8(sections_type as int32)
-        if ((RuntimeType.UNDEFINED) != (sections_type)) {
-            const sections_value  = sections!
-            thisSerializer.writeInt32(sections_value.length as int32)
-            for (let i = 0; i < sections_value.length; i++) {
-                const sections_value_element : SectionOptions = sections_value[i]
-                thisSerializer.writeSectionOptions(sections_value_element)
-            }
-        }
-        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_splice(this.peer!.ptr, start, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    private push_serialize(section: SectionOptions): boolean {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeSectionOptions(section)
-        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_push(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    private update_serialize(sectionIndex: number, section: SectionOptions): boolean {
-        const thisSerializer : Serializer = Serializer.hold()
-        thisSerializer.writeSectionOptions(section)
-        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_update(this.peer!.ptr, sectionIndex, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        return retval
-    }
-    private values_serialize(): Array<SectionOptions> {
-        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_values(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const buffer_length : int32 = retvalDeserializer.readInt32()
-        let buffer : Array<SectionOptions> = new Array<SectionOptions>(buffer_length)
-        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
-            buffer[buffer_i] = retvalDeserializer.readSectionOptions()
-        }
-        const returnResult : Array<SectionOptions> = buffer
-        return returnResult
-    }
-    private length_serialize(): number {
-        const retval  = ArkUIGeneratedNativeModule._WaterFlowSections_length(this.peer!.ptr)
-        return retval
-    }
-}
 export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -146,6 +48,7 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
         return _peer
     }
     setWaterFlowOptionsAttribute(options?: WaterFlowOptions): void {
+        WaterFlowHandWritten.hookWaterFlowOptionsImpl(this, options);
         const thisSerializer : Serializer = Serializer.hold()
         let options_type : int32 = RuntimeType.UNDEFINED
         options_type = runtimeType(options)
@@ -331,7 +234,7 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._WaterFlowAttribute_onReachEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onScrollFrameBeginAttribute(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): void {
+    onScrollFrameBeginAttribute(value: OnScrollFrameBeginCallback | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -381,13 +284,16 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
     }
 }
 export type GetItemMainSizeByIndex = (index: number) => number;
-export interface SectionOptions {
+export class SectionOptions {
     itemsCount: number;
     crossCount?: number;
     onGetItemMainSizeByIndex?: GetItemMainSizeByIndex;
     columnsGap?: Dimension;
     rowsGap?: Dimension;
     margin?: Padding | Dimension;
+    constructor() {
+        this.itemsCount = 1;
+    }
 }
 export enum WaterFlowLayoutMode {
     ALWAYS_TOP_DOWN = 0,
@@ -414,45 +320,10 @@ export interface WaterFlowAttribute extends ScrollableCommonMethod {
     cachedCount(count: number | undefined, show?: boolean): this
     onReachStart(value: (() => void) | undefined): this
     onReachEnd(value: (() => void) | undefined): this
-    onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this
+    onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this
     onScrollIndex(value: ((first: number,last: number) => void) | undefined): this
     onWillScroll(value: OnWillScrollCallback | undefined): this
     onDidScroll(value: OnScrollCallback | undefined): this
-}
-export interface UIWaterFlowAttribute extends UIScrollableCommonMethod {
-    /** @memo */
-    columnsTemplate(value: string | undefined): this
-    /** @memo */
-    itemConstraintSize(value: ConstraintSizeOptions | undefined): this
-    /** @memo */
-    rowsTemplate(value: string | undefined): this
-    /** @memo */
-    columnsGap(value: Length | undefined): this
-    /** @memo */
-    rowsGap(value: Length | undefined): this
-    /** @memo */
-    layoutDirection(value: FlexDirection | undefined): this
-    /** @memo */
-    nestedScroll(value: NestedScrollOptions | undefined): this
-    /** @memo */
-    enableScrollInteraction(value: boolean | undefined): this
-    /** @memo */
-    friction(value: number | Resource | undefined): this
-    /** @memo */
-    cachedCount(count: number | undefined, show?: boolean): this
-    /** @memo */
-    onReachStart(value: (() => void) | undefined): this
-    /** @memo */
-    onReachEnd(value: (() => void) | undefined): this
-    /** @memo */
-    onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this
-    /** @memo */
-    onScrollIndex(value: ((first: number,last: number) => void) | undefined): this
-    /** @memo */
-    onWillScroll(value: OnWillScrollCallback | undefined): this
-    /** @memo */
-    onDidScroll(value: OnScrollCallback | undefined): this
-    /** @memo */
 }
 export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements WaterFlowAttribute {
     columnsTemplate_value?: string | undefined
@@ -467,7 +338,7 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
     cachedCount_value?: number | undefined
     onReachStart_value?: (() => void) | undefined
     onReachEnd_value?: (() => void) | undefined
-    onScrollFrameBegin_value?: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined
+    onScrollFrameBegin_value?: OnScrollFrameBeginCallback | undefined
     onScrollIndex_value?: ((first: number,last: number) => void) | undefined
     onWillScroll_value?: OnWillScrollCallback | undefined
     onDidScroll_value?: OnScrollCallback | undefined
@@ -507,7 +378,7 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
     public onReachEnd(value: (() => void) | undefined): this {
         return this
     }
-    public onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this {
+    public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         return this
     }
     public onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
@@ -520,12 +391,10 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
         return this
     }
 }
-/** @memo:stable */
-export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent implements UIWaterFlowAttribute {
+export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent implements WaterFlowAttribute {
     getPeer(): ArkWaterFlowPeer {
         return (this.peer as ArkWaterFlowPeer)
     }
-    /** @memo */
     public setWaterFlowOptions(options?: WaterFlowOptions): this {
         if (this.checkPriority("setWaterFlowOptions")) {
             const options_casted = options as (WaterFlowOptions | undefined)
@@ -534,7 +403,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public columnsTemplate(value: string | undefined): this {
         if (this.checkPriority("columnsTemplate")) {
             const value_casted = value as (string | undefined)
@@ -543,7 +411,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public itemConstraintSize(value: ConstraintSizeOptions | undefined): this {
         if (this.checkPriority("itemConstraintSize")) {
             const value_casted = value as (ConstraintSizeOptions | undefined)
@@ -552,7 +419,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public rowsTemplate(value: string | undefined): this {
         if (this.checkPriority("rowsTemplate")) {
             const value_casted = value as (string | undefined)
@@ -561,7 +427,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public columnsGap(value: Length | undefined): this {
         if (this.checkPriority("columnsGap")) {
             const value_casted = value as (Length | undefined)
@@ -570,7 +435,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public rowsGap(value: Length | undefined): this {
         if (this.checkPriority("rowsGap")) {
             const value_casted = value as (Length | undefined)
@@ -579,7 +443,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public layoutDirection(value: FlexDirection | undefined): this {
         if (this.checkPriority("layoutDirection")) {
             const value_casted = value as (FlexDirection | undefined)
@@ -588,7 +451,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public nestedScroll(value: NestedScrollOptions | undefined): this {
         if (this.checkPriority("nestedScroll")) {
             const value_casted = value as (NestedScrollOptions | undefined)
@@ -597,7 +459,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public enableScrollInteraction(value: boolean | undefined): this {
         if (this.checkPriority("enableScrollInteraction")) {
             const value_casted = value as (boolean | undefined)
@@ -606,7 +467,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public friction(value: number | Resource | undefined): this {
         if (this.checkPriority("friction")) {
             const value_casted = value as (number | Resource | undefined)
@@ -615,7 +475,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public cachedCount(count: number | undefined, show?: boolean): this {
         if (this.checkPriority("cachedCount")) {
             const count_type = runtimeType(count)
@@ -635,7 +494,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public onReachStart(value: (() => void) | undefined): this {
         if (this.checkPriority("onReachStart")) {
             const value_casted = value as ((() => void) | undefined)
@@ -644,7 +502,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public onReachEnd(value: (() => void) | undefined): this {
         if (this.checkPriority("onReachEnd")) {
             const value_casted = value as ((() => void) | undefined)
@@ -653,16 +510,14 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
-    public onScrollFrameBegin(value: ((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined): this {
+    public onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         if (this.checkPriority("onScrollFrameBegin")) {
-            const value_casted = value as (((offset: number,state: ScrollState) => Literal_Number_offsetRemain) | undefined)
+            const value_casted = value as (OnScrollFrameBeginCallback | undefined)
             this.getPeer()?.onScrollFrameBeginAttribute(value_casted)
             return this
         }
         return this
     }
-    /** @memo */
     public onScrollIndex(value: ((first: number,last: number) => void) | undefined): this {
         if (this.checkPriority("onScrollIndex")) {
             const value_casted = value as (((first: number,last: number) => void) | undefined)
@@ -671,7 +526,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public onWillScroll(value?: OnWillScrollCallback | undefined): this {
         if (this.checkPriority("onWillScroll")) {
             const value_casted = value as (OnWillScrollCallback | undefined)
@@ -680,7 +534,6 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    /** @memo */
     public onDidScroll(value?: OnScrollCallback | undefined): this {
         if (this.checkPriority("onDidScroll")) {
             const value_casted = value as (OnScrollCallback | undefined)
@@ -698,7 +551,7 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
 /** @memo */
 export function WaterFlow(
     /** @memo */
-    style: ((attributes: UIWaterFlowAttribute) => void) | undefined,
+    style: ((attributes: WaterFlowAttribute) => void) | undefined,
     options?: WaterFlowOptions,
     /** @memo */
     content_?: (() => void) | undefined,

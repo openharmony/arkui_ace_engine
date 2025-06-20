@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_model_static.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -104,10 +103,10 @@ void FontImpl(Ark_NativePointer node,
     auto fontOpt = Converter::OptConvert<Font>(*value);
     if (fontOpt.has_value()) {
         // TODO: Reset value
-        MenuModelNG::SetFontSize(frameNode, fontOpt.value().fontSize);
-        MenuModelNG::SetFontWeight(frameNode, fontOpt.value().fontWeight);
-        MenuModelNG::SetFontStyle(frameNode, fontOpt.value().fontStyle);
-        MenuModelNG::SetFontFamily(frameNode, fontOpt.value().fontFamilies);
+        MenuModelStatic::SetFontSize(frameNode, fontOpt.value().fontSize);
+        MenuModelStatic::SetFontWeight(frameNode, fontOpt.value().fontWeight);
+        MenuModelStatic::SetFontStyle(frameNode, fontOpt.value().fontStyle);
+        MenuModelStatic::SetFontFamily(frameNode, fontOpt.value().fontFamilies);
     }
 }
 void FontColorImpl(Ark_NativePointer node,
@@ -115,7 +114,7 @@ void FontColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    MenuModelNG::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
+    MenuModelStatic::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
 }
 void RadiusImpl(Ark_NativePointer node,
                 const Opt_Union_Dimension_BorderRadiuses* value)
@@ -127,14 +126,14 @@ void RadiusImpl(Ark_NativePointer node,
         // TODO: Reset value
         if (auto radiusPtr = std::get_if<std::optional<Dimension>>(&(*radiusesOpt)); radiusPtr) {
             Validator::ValidateNonNegative(*radiusPtr);
-            MenuModelNG::SetBorderRadius(frameNode, *radiusPtr);
+            MenuModelStatic::SetBorderRadius(frameNode, *radiusPtr);
         }
         if (auto radiusPtr = std::get_if<BorderRadiusProperty>(&(*radiusesOpt)); radiusPtr) {
             Validator::ValidateNonNegative(radiusPtr->radiusTopLeft);
             Validator::ValidateNonNegative(radiusPtr->radiusTopRight);
             Validator::ValidateNonNegative(radiusPtr->radiusBottomLeft);
             Validator::ValidateNonNegative(radiusPtr->radiusBottomRight);
-            MenuModelNG::SetBorderRadius(frameNode,
+            MenuModelStatic::SetBorderRadius(frameNode,
                 radiusPtr->radiusTopLeft, radiusPtr->radiusTopRight,
                 radiusPtr->radiusBottomLeft, radiusPtr->radiusBottomRight);
         }
@@ -147,7 +146,7 @@ void MenuItemDividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
-    MenuModelNG::SetItemDivider(frameNode, divider, std::nullopt);
+    MenuModelStatic::SetItemDivider(frameNode, divider, std::nullopt);
 }
 void MenuItemGroupDividerImpl(Ark_NativePointer node,
                               const Opt_DividerStyleOptions* value)
@@ -156,14 +155,14 @@ void MenuItemGroupDividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
-    MenuModelNG::SetItemGroupDivider(frameNode, divider, std::nullopt);
+    MenuModelStatic::SetItemGroupDivider(frameNode, divider, std::nullopt);
 }
 void SubMenuExpandingModeImpl(Ark_NativePointer node,
                               const Opt_SubMenuExpandingMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    MenuModelNG::SetExpandingMode(frameNode, Converter::OptConvert<SubMenuExpandingMode>(*value));
+    MenuModelStatic::SetExpandingMode(frameNode, Converter::OptConvert<SubMenuExpandingMode>(*value));
 }
 } // MenuAttributeModifier
 const GENERATED_ArkUIMenuModifier* GetMenuModifier()

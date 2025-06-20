@@ -28,8 +28,8 @@ export class CommonModifier implements AttributeModifier<CommonAttribute> {
         this.attributeSet.size(value);
         return this;
     }
-    onClick(event: (event: ClickEvent) => void, distanceThreshold?: number | undefined): this {
-        this.attributeSet.onClick(event, distanceThreshold);
+    onClick(event: (event: ClickEvent) => void): this {
+        this.attributeSet.onClick(event);
         return this;
     }
     width(value: Length | undefined): this {

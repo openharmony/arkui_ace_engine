@@ -120,7 +120,10 @@ function implementedPackages(kind: ArkUIImplementation): string[] {
         'ohos.arkui.modifier',
         'ohos.animator',
         'ohos.arkui.componentUtils',
-        'ohos.observer'
+        'ohos.arkui.inspector',
+        'ohos.observer',
+        'ohos.mediaquery',
+        'ohos.arkui.componentSnapshot',
     ]
 
     assertUnreachable(kind)

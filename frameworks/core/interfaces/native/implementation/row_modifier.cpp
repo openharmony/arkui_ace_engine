@@ -17,6 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
+#include "core/components_ng/pattern/linear_layout/row_model_ng_static.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
@@ -70,7 +71,7 @@ void AlignItemsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto flexAlign = Converter::OptConvert<FlexAlign>(*value);
-    RowModelNG::SetAlignItems(frameNode, flexAlign);
+    RowModelNGStatic::SetAlignItems(frameNode, flexAlign);
 }
 void JustifyContentImpl(Ark_NativePointer node,
                         const Opt_FlexAlign* value)
@@ -78,7 +79,7 @@ void JustifyContentImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto flexAlign = Converter::OptConvert<FlexAlign>(*value);
-    RowModelNG::SetJustifyContent(frameNode, flexAlign);
+    RowModelNGStatic::SetJustifyContent(frameNode, flexAlign);
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Opt_PointLightStyle* value)
@@ -121,7 +122,7 @@ void ReverseImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    RowModelNG::SetIsReverse(frameNode, value ? Converter::OptConvert<bool>(*value) : std::nullopt);
+    RowModelNGStatic::SetIsReverse(frameNode, value ? Converter::OptConvert<bool>(*value) : std::nullopt);
 }
 } // RowAttributeModifier
 const GENERATED_ArkUIRowModifier* GetRowModifier()

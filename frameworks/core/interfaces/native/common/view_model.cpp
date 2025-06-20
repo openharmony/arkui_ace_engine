@@ -36,9 +36,9 @@
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_model_static.h"
+#include "core/components_ng/pattern/menu/menu_model_static.h"
+#include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view_static.h"
 #ifdef MODEL_COMPONENT_SUPPORTED
 #include "core/components_ng/pattern/model/model_view_ng.h"
 #endif //MODEL_COMPONENT_SUPPORTED
@@ -46,13 +46,16 @@
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_static.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
-#include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
+#include "core/components_ng/pattern/scroll_bar/scroll_bar_model_static.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/effect_component/effect_component_model_ng.h"
 #include "core/components_ng/pattern/shape/ellipse_model_ng.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
+#include "core/components_ng/pattern/shape/path_model_static.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_model_static.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
 #include "core/components_ng/pattern/stepper/stepper_model_ng.h"
@@ -92,8 +95,11 @@
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/shape/line_model_ng.h"
+#include "core/components_ng/pattern/shape/line_model_static.h"
 #include "core/components_ng/pattern/shape/polygon_model_ng.h"
+#include "core/components_ng/pattern/shape/polygon_model_static.h"
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
+#include "core/components_ng/pattern/shape/rect_model_static.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
@@ -116,8 +122,10 @@
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
+#include "core/components_ng/pattern/counter/counter_model_static.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
+#include "core/components_ng/pattern/video/video_model_static.h"
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/richtext_model_static.h"
 #include "core/components_ng/pattern/web/web_model_static.h"
@@ -130,7 +138,7 @@
 #include "core/interfaces/native/node/extension_companion_node.h"
 #include "core/pipeline/base/element_register.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
-#include "core/components_ng/pattern/plugin/plugin_model_ng.h"
+#include "core/components_ng/pattern/plugin/plugin_model_static.h"
 #endif
 
 namespace OHOS::Ace::NG::GeneratedViewModel {
@@ -335,12 +343,12 @@ void* createComponentRootNode(ArkUI_Int32 nodeId)
 void* createXComponentNode(ArkUI_Int32 nodeId)
 {
 #ifdef XCOMPONENT_SUPPORTED
-    auto frameNode = XComponentModelNG::CreateFrameNode(nodeId, std::nullopt, XComponentType::SURFACE, std::nullopt);
+    auto frameNode = XComponentModelNG::CreateFrameNode(nodeId, "", XComponentType::SURFACE, "");
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 #else
     return nullptr;
-#endif //XCOMPONENT_SUPPORTED
+#endif
 }
 
 void* createListItemGroupNode(ArkUI_Int32 nodeId)
@@ -675,7 +683,7 @@ void* createContainerSpanNode(ArkUI_Int32 nodeId)
 
 void* createCounterNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = CounterModelNG::CreateFrameNode(nodeId);
+    auto frameNode = CounterModelStatic::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -699,10 +707,11 @@ void* createEffectComponentNode(ArkUI_Int32 nodeId)
 
 void* createEllipseNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = EllipseModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = EllipseModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createEmbeddedComponentNode(ArkUI_Int32 nodeId)
@@ -719,10 +728,11 @@ void* createEmbeddedComponentNode(ArkUI_Int32 nodeId)
 
 void* createFolderStackNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = FolderStackModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    // auto frameNode = FolderStackModelNG::CreateFrameNode(nodeId);
+    // CHECK_NULL_RETURN(frameNode, nullptr);
+    // frameNode->IncRefCount();
+    // return AceType::RawPtr(frameNode);
+    return nullptr;
 }
 
 void* createFormComponentNode(ArkUI_Int32 nodeId)
@@ -769,7 +779,7 @@ void* createHyperlinkNode(ArkUI_Int32 nodeId)
 
 void* createLineNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = LineModelNG::CreateFrameNode(nodeId);
+    auto frameNode = LineModelStatic::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -790,7 +800,7 @@ void* createMediaCachedImageNode(ArkUI_Int32 nodeId)
 
 void* createMenuNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = MenuModelNG::CreateFrameNode(nodeId);
+    auto frameNode = MenuModelStatic::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -798,7 +808,7 @@ void* createMenuNode(ArkUI_Int32 nodeId)
 
 void* createMenuItemNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = MenuItemModelNG::CreateFrameNode(nodeId);
+    auto frameNode = MenuItemModelStatic::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -806,7 +816,7 @@ void* createMenuItemNode(ArkUI_Int32 nodeId)
 
 void* createMenuItemGroupNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = MenuItemGroupView::CreateFrameNode(nodeId);
+    auto frameNode = MenuItemGroupViewStatic::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -851,7 +861,7 @@ void* createPasteButtonNode(ArkUI_Int32 nodeId)
 
 void* createPathNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = PathModelNG::CreateFrameNode(nodeId);
+    auto frameNode = PathModelStatic::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -868,7 +878,7 @@ void* createPatternLockNode(ArkUI_Int32 nodeId)
 void* createPluginComponentNode(ArkUI_Int32 nodeId)
 {
 #ifdef PLUGIN_COMPONENT_SUPPORTED
-    auto frameNode = PluginModelNG::CreateFrameNode(nodeId);
+    auto frameNode = PluginModelStatic::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -879,7 +889,7 @@ void* createPluginComponentNode(ArkUI_Int32 nodeId)
 
 void* createPolygonNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = PolygonModelNG::CreateFrameNode(nodeId, true);
+    auto frameNode = PolygonModelStatic::CreateFrameNode(nodeId, true);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -887,7 +897,7 @@ void* createPolygonNode(ArkUI_Int32 nodeId)
 
 void* createPolylineNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = PolygonModelNG::CreateFrameNode(nodeId, false);
+    auto frameNode = PolygonModelStatic::CreateFrameNode(nodeId, false);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -895,7 +905,7 @@ void* createPolylineNode(ArkUI_Int32 nodeId)
 
 void* createRectNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = RectModelNG::CreateFrameNode(nodeId);
+    auto frameNode = RectModelStatic::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -903,7 +913,7 @@ void* createRectNode(ArkUI_Int32 nodeId)
 
 void* createRichEditorNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = RichEditorModelNG::CreateFrameNode(nodeId);
+    auto frameNode = RichEditorModelStatic::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -954,7 +964,7 @@ void* createScreenNode(ArkUI_Int32 nodeId)
 
 void* createScrollBarNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = ScrollBarModelNG::CreateFrameNode(nodeId);
+    auto frameNode = ScrollBarModelStatic::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -967,7 +977,7 @@ void* createSecurityComponentMethodNode(ArkUI_Int32 nodeId)
 
 void* createShapeNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = ShapeModelNG::CreateFrameNode(nodeId);
+    auto frameNode = ShapeModelStatic::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -1015,7 +1025,7 @@ void* createSymbolSpanNode(ArkUI_Int32 nodeId)
 
 void* createVideoNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = VideoModelNG::CreateFrameNode(nodeId);
+    auto frameNode = VideoModelStatic::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

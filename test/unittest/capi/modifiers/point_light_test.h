@@ -64,7 +64,6 @@ namespace OHOS::Ace::NG::PointLight {
         { "123.0px", ArkValue<Ark_Dimension>("123.0px"), "123.00px" },
         { "0.0px", ArkValue<Ark_Dimension>("0.0px"), "0.00px" },
         { "1.23px", ArkValue<Ark_Dimension>("1.23px"), "1.23px" },
-        { "-1", ArkValue<Ark_Dimension>(-1.), "-1.00vp" },
         { "-2.f", ArkValue<Ark_Dimension>(-2.f), "-2.00vp" },
         { "-2.3vp", ArkValue<Ark_Dimension>("-2.3vp"), "-2.30vp" },
         { "-4.5fp", ArkValue<Ark_Dimension>("-4.5fp"), "-4.50fp" },

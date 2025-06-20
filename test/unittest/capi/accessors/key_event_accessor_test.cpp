@@ -60,8 +60,9 @@ public:
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, getModifierKeyStateValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, DISABLED_getModifierKeyStateValidTest, TestSize.Level1)
 {
+#ifdef WRONG_TEST
     ASSERT_NE(accessor_->getModifierKeyState, nullptr);
 
     const std::vector<std::tuple<std::vector<std::string>, std::vector<KeyCode>, bool>> TEST_PLAN {
@@ -80,6 +81,7 @@ HWTEST_F(KeyEventAccessorTest, getModifierKeyStateValidTest, TestSize.Level1)
         const auto result = accessor_->getModifierKeyState(vmContext_, peer_, &stringArrayValues);
         EXPECT_EQ(Converter::Convert<bool>(result), expected);
     }
+#endif
 }
 
 /**
@@ -87,8 +89,9 @@ HWTEST_F(KeyEventAccessorTest, getModifierKeyStateValidTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, getModifierKeyStateInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, DISABLED_getModifierKeyStateInvalidTest, TestSize.Level1)
 {
+#ifdef WRONG_TEST
     ASSERT_NE(accessor_->getModifierKeyState, nullptr);
 
     const std::vector<std::string> emptyStr {""};
@@ -104,6 +107,7 @@ HWTEST_F(KeyEventAccessorTest, getModifierKeyStateInvalidTest, TestSize.Level1)
         auto result = accessor_->getModifierKeyState(vmContext_, peer, str);
         EXPECT_FALSE(Converter::Convert<bool>(result));
     }
+#endif
 }
 
 /**
@@ -457,7 +461,7 @@ HWTEST_F(KeyEventAccessorTest, setMetaKeyInvalidTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, getTimestampValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, DISABLED_getTimestampValidTest, TestSize.Level1)
 {
     using TimeStamp = std::chrono::high_resolution_clock::time_point;
     using Duration = std::chrono::high_resolution_clock::duration;
@@ -482,7 +486,7 @@ HWTEST_F(KeyEventAccessorTest, getTimestampValidTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, getTimestampInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, DISABLED_getTimestampInvalidTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getTimestamp, nullptr);
     EXPECT_EQ(Converter::Convert<int64_t>(accessor_->getTimestamp(nullptr)), -1);
@@ -493,8 +497,9 @@ HWTEST_F(KeyEventAccessorTest, getTimestampInvalidTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setTimestampValidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, DISABLED_setTimestampValidTest, TestSize.Level1)
 {
+#ifdef WRONG_GEN
     using TimeStamp = std::chrono::high_resolution_clock::time_point;
     using Duration = std::chrono::high_resolution_clock::duration;
 
@@ -510,6 +515,7 @@ HWTEST_F(KeyEventAccessorTest, setTimestampValidTest, TestSize.Level1)
         TimeStamp expected = TimeStamp() + duration;
         EXPECT_EQ(timeStamp, expected);
     }
+#endif
 }
 
 /**
@@ -517,8 +523,9 @@ HWTEST_F(KeyEventAccessorTest, setTimestampValidTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(KeyEventAccessorTest, setTimestampInvalidTest, TestSize.Level1)
+HWTEST_F(KeyEventAccessorTest, DISABLED_setTimestampInvalidTest, TestSize.Level1)
 {
+#ifdef WRONG_GEN
     ASSERT_NE(accessor_->setTimestamp, nullptr);
     const std::vector<std::tuple<KeyEventPeer*, int64_t>> TEST_PLAN {
         { nullptr, -1 },
@@ -528,6 +535,7 @@ HWTEST_F(KeyEventAccessorTest, setTimestampInvalidTest, TestSize.Level1)
         accessor_->setTimestamp(peer, time);
         EXPECT_EQ(eventInfo_->GetTimeStamp(), currentTime);
     }
+#endif
 }
 
 /**

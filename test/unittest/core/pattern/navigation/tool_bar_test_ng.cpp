@@ -976,6 +976,215 @@ HWTEST_F(ToolBarTestNg, ToolBarPatternHandleLongPressEventTest006, TestSize.Leve
 }
 
 /**
+ * @tc.name: ToolBarPatternHandleLongPressEventTest007
+ * @tc.desc: Test the HandleLongPressEvent function with toolbar options.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, ToolBarPatternHandleLongPressEventTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init relative params and set font scale to 1.75.
+     */
+    ToolBarTestNg::MockPipelineContextGetTheme();
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 1.75f;
+    TestParameters testParameters;
+    InitializationParameters(testParameters);
+
+    /**
+     * @tc.steps: step2. create toolBar and initialize children component. create more than five toolBar node.
+     */
+    auto containerNode = FrameNode::GetOrCreateFrameNode(
+        "Container", 101, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(containerNode, nullptr);
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(
+        "Toolbar", 301, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    ASSERT_NE(toolbarNode, nullptr);
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+    
+    NavigationToolbarOptions opt;
+    opt.bgOptions.color = std::make_optional(FRONT_COLOR);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    opt.bgOptions.blurStyleOption = blurStyleOption;
+    opt.brOptions.textHideOptions = true;
+    toolbarPattern->SetToolbarOptions(std::move(opt));
+    toolbarPattern->OnModifyDone();
+    EXPECT_EQ(
+        toolbarPattern->options_.bgOptions.color, FRONT_COLOR);
+    EXPECT_EQ(
+        toolbarPattern->options_.bgOptions.blurStyleOption->blurStyle, BlurStyle::NO_MATERIAL);
+    EXPECT_EQ(
+        toolbarPattern->options_.brOptions.textHideOptions, true);
+
+    std::vector<NG::BarItem> toolBarItems;
+    InitToolBarItemInfos(toolBarItems);
+    EXPECT_EQ(toolBarItems.size(), 6);
+    UpdateBarItemNodeWithItem(toolbarNode, toolBarItems);
+    toolbarPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step3. call HandleLongPressEvent.
+     * @tc.expected: dialog_ == nullptr
+     */
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 0.0f;
+    info.globalLocation_.deltaY_ = 0.0f;
+    toolbarPattern->HandleLongPressEvent(info);
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    toolbarPattern->HandleLongPressActionEnd();
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+}
+
+
+/**
+ * @tc.name: ToolBarPatternHandleLongPressEventTest008
+ * @tc.desc: Test the HandleLongPressEvent function with toolbar options.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, ToolBarPatternHandleLongPressEventTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init relative params and set font scale to 1.75.
+     */
+    ToolBarTestNg::MockPipelineContextGetTheme();
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 3.5f;
+    TestParameters testParameters;
+    InitializationParameters(testParameters);
+
+    /**
+     * @tc.steps: step2. create toolBar and initialize children component. create more than five toolBar node.
+     */
+    auto containerNode = FrameNode::GetOrCreateFrameNode(
+        "Container", 101, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(containerNode, nullptr);
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(
+        "Toolbar", 301, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    ASSERT_NE(toolbarNode, nullptr);
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+    
+    NavigationToolbarOptions opt;
+    opt.bgOptions.color = std::make_optional(FRONT_COLOR);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    opt.bgOptions.blurStyleOption = blurStyleOption;
+    opt.brOptions.textHideOptions = true;
+    toolbarPattern->SetToolbarOptions(std::move(opt));
+    toolbarPattern->OnModifyDone();
+    EXPECT_EQ(
+        toolbarPattern->options_.bgOptions.color, FRONT_COLOR);
+    EXPECT_EQ(
+        toolbarPattern->options_.bgOptions.blurStyleOption->blurStyle, BlurStyle::NO_MATERIAL);
+    EXPECT_EQ(
+        toolbarPattern->options_.brOptions.textHideOptions, true);
+
+    std::vector<NG::BarItem> toolBarItems;
+    InitToolBarItemInfos(toolBarItems);
+    EXPECT_EQ(toolBarItems.size(), 6);
+    UpdateBarItemNodeWithItem(toolbarNode, toolBarItems);
+    toolbarPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step3. call HandleLongPressEvent.
+     * @tc.expected: dialog_ == nullptr
+     */
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 1.0f;
+    info.globalLocation_.deltaY_ = 1.0f;
+    toolbarPattern->HandleLongPressEvent(info);
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    toolbarPattern->HandleLongPressActionEnd();
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+}
+
+
+/**
+ * @tc.name: ToolBarPatternHandleLongPressEventTest009
+ * @tc.desc: Test the HandleLongPressEvent function with toolbar options.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToolBarTestNg, ToolBarPatternHandleLongPressEventTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init relative params and set font scale to 1.75.
+     */
+    ToolBarTestNg::MockPipelineContextGetTheme();
+    auto context = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->fontScale_ = 0.75f;
+    TestParameters testParameters;
+    InitializationParameters(testParameters);
+
+    /**
+     * @tc.steps: step2. create toolBar and initialize children component. create more than five toolBar node.
+     */
+    auto containerNode = FrameNode::GetOrCreateFrameNode(
+        "Container", 101, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+    ASSERT_NE(containerNode, nullptr);
+    auto toolbarNode = NavToolbarNode::GetOrCreateToolbarNode(
+        "Toolbar", 301, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    ASSERT_NE(toolbarNode, nullptr);
+    toolbarNode->SetToolbarContainerNode(containerNode);
+    auto toolbarPattern = toolbarNode->GetPattern<NavToolbarPattern>();
+    ASSERT_NE(toolbarPattern, nullptr);
+    
+    NavigationToolbarOptions opt;
+    opt.bgOptions.color = std::make_optional(FRONT_COLOR);
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    opt.bgOptions.blurStyleOption = blurStyleOption;
+    opt.brOptions.textHideOptions = true;
+    toolbarPattern->SetToolbarOptions(std::move(opt));
+    toolbarPattern->OnModifyDone();
+    EXPECT_EQ(
+        toolbarPattern->options_.bgOptions.color, FRONT_COLOR);
+    EXPECT_EQ(
+        toolbarPattern->options_.bgOptions.blurStyleOption->blurStyle, BlurStyle::NO_MATERIAL);
+    EXPECT_EQ(
+        toolbarPattern->options_.brOptions.textHideOptions, true);
+
+    std::vector<NG::BarItem> toolBarItems;
+    InitToolBarItemInfos(toolBarItems);
+    EXPECT_EQ(toolBarItems.size(), 6);
+    UpdateBarItemNodeWithItem(toolbarNode, toolBarItems);
+    toolbarPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step3. call HandleLongPressEvent.
+     * @tc.expected: dialog_ == nullptr
+     */
+    GestureEvent info;
+    info.globalLocation_.deltaX_ = 1.0f;
+    info.globalLocation_.deltaY_ = 1.0f;
+    toolbarPattern->HandleLongPressEvent(info);
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleLongPressActionEnd.
+     * @tc.expected: dialog_ == nullptr
+     */
+    toolbarPattern->HandleLongPressActionEnd();
+    EXPECT_EQ(toolbarPattern->dialogNode_, nullptr);
+}
+
+/**
  * @tc.name: OnModifyDone001
  * @tc.desc: Branch: if (LessNotEqual(scale, GetDialogBigFontSizeScale())) = false
  * @tc.type: FUNC

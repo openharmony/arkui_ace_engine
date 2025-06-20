@@ -14,7 +14,7 @@
  */
 
 import { SerializerBase, Tags, RuntimeType, runtimeType, toPeerPtr, MaterializedBase, InteropNativeModule, ResourceHolder, nullptr, KPointer, isInstanceOf } from "@koalaui/interop"
-import { int32, float32, unsafeCast } from "@koalaui/common"
+import { int32, int64, float32, float64, unsafeCast } from "@koalaui/common"
 import { isResource, isPadding } from "./../../utils"
 import { CallbackKind } from "./CallbackKind"
 import { Finalizable } from "@koalaui/interop"
@@ -21873,7 +21873,7 @@ export class Serializer extends SerializerBase {
         const valueType = runtimeType(value)
         this.writeInt8(valueType)
         if ((RuntimeType.NUMBER) == (valueType)) {
-            this.writeFloat32(value as float32)
+            this.writeFloat32(value as float64 as float32)
         }
         else if ((RuntimeType.STRING) == (valueType)) {
             this.writeString(value as string)

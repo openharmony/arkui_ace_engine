@@ -687,17 +687,6 @@
             "invalidValues": ["-1"],
         },
         {
-            "name": "FlexBasisValid",
-            "type": "Ark_Number",
-            "validValues": [
-                ["123", "123.00vp"],
-                ["0", "0.00vp"],
-                ["1.23", "1.23vp"],
-                ["-2", "auto"],
-                ["-3.45", "auto"],
-            ],
-        },
-        {
             "name": "DimensionsStrNonPerc",
             "type": "Ark_String",
             "validValues": [
@@ -3106,6 +3095,10 @@
                 "setChainWeightTestChainWeightVerticalValidValues", //  Need float CMP
                 "setAlignRules0TestDefaultValues", // Stubbed in API 129
                 "setAlignRules0TestValidValues", // Stubbed in API 129
+
+                "setFlexBasisTestFlexBasisInvalidValues", // Bug. Reset commented in model
+                "setRotateTestRotateCenterXInvalidValues", // Bug in modifier
+                "setRotateTestRotateCenterYInvalidValues", // Bug in modifier
             ],
             "ignoreAttributes": [
                 "accessibilityChecked",
@@ -3195,6 +3188,7 @@
                 "mask",
                 "maskShape",
                 "monopolizeEvents",
+                "motionBlur", // No attribute in JSON
                 "motionPath",
                 "mouseResponseRegion",
                 "nextFocus",
@@ -3289,7 +3283,7 @@
                 {
                     "name": "flexBasis",
                     "default": "auto",
-                    "fixtures": ["FlexBasisValid","DimensionsStrNonNegNonPct"],
+                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNegNonPct"],
                 },
                 {
                     "name": "groupDefaultFocus",
@@ -3574,12 +3568,12 @@
                         {
                             "name": "centerX",
                             "default": "5000.00%",
-                            "fixtures": ["DimensionsNumAny","DimensionsStrNonPerc"],
+                            "fixtures": ["DimensionsNumAny","LengthAny"],
                         },
                         {
                             "name": "centerY",
                             "default": "5000.00%",
-                            "fixtures": ["DimensionsNumAny","DimensionsStrNonPerc"],
+                            "fixtures": ["DimensionsNumAny","LengthAny"],
                         },
                         {
                             "name": "centerZ",
@@ -3974,6 +3968,8 @@
 
                 "setColorTestColorInvalidValues", // broken LinearGradient
                 "setValueTestValueInvalidValues", // Bug
+
+                "setPrivacySensitiveTestPrivacySensitiveValidValues", // Bug: Code commented in model
             ],
             "attributes": [
                 {
@@ -4178,6 +4174,7 @@
 
                 "setShowTipsTestShowTipsInvalidValues", // Bug
                 "setSelectedColorTestSelectedColorInvalidValues", // Bug
+                "setEnableHapticFeedbackTestEnableHapticFeedbackValidValues", // Bug in NG model, need to switch to static model
             ],
             "ignoreAttributes": [
                 "blockStyle", // Wrong JSON format
@@ -4275,12 +4272,12 @@
                 {
                     "name": "trackBorderRadius",
                     "default": "",
-                    "type": "DimensionNonNeg",
+                    "type": "DimensionNonNegNonPct",
                 },
                 {
                     "name": "selectedBorderRadius",
                     "default": "",
-                    "type": "DimensionNonNeg",
+                    "type": "DimensionNonNegNonPct",
                 },
                 {
                     "name": "blockSize",

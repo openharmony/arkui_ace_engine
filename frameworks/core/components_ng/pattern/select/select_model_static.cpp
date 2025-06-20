@@ -212,4 +212,46 @@ void SelectModelStatic::SetValueChangeEvent(FrameNode* frameNode, NG::ValueChang
     CHECK_NULL_VOID(hub);
     hub->SetValueChangeEvent(std::move(valueChangeEvent));
 }
+
+NG::SelectDivider SelectModelStatic::GetDefaultDivider(FrameNode* frameNode)
+{
+    NG::SelectDivider defaultDivider;
+    CHECK_NULL_RETURN(frameNode, defaultDivider);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, defaultDivider);
+    auto selectTheme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(selectTheme, defaultDivider);
+    defaultDivider.strokeWidth = selectTheme->GetDefaultDividerWidth();
+    defaultDivider.color = selectTheme->GetLineColor();
+    Dimension defaultMargin = -1.0_vp;
+    defaultDivider.startMargin = defaultMargin;
+    defaultDivider.endMargin = defaultMargin;
+    return defaultDivider;
+}
+
+void SelectModelStatic::SetDividerStyle(
+    FrameNode* frameNode, const std::optional<NG::SelectDivider>& divider, const std::optional<DividerMode>& mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDivider(divider);
+    pattern->SetDividerMode(mode);
+}
+
+void SelectModelStatic::SetAvoidance(FrameNode* frameNode, const std::optional<Avoidance>& avoidance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetAvoidance(avoidance.value_or(Avoidance()));
+}
+
+void SelectModelStatic::SetMenuOutline(FrameNode* frameNode, const std::optional<MenuParam>& menuParam)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMenuOutline(menuParam.value_or(MenuParam()));
+}
 } // namespace OHOS::Ace::NG

@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, CustomBuilder, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { ResourceStr, Font, ResourceColor } from "./units"
 import { SymbolGlyphModifier } from "./arkui-external"
 import { Callback_Boolean_Void } from "./navigation"
@@ -32,6 +32,7 @@ import { Color } from "./enums"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { MenuItemOpsHandWritten } from "./../handwritten"
 
 export class ArkMenuItemPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -238,7 +239,7 @@ export interface MenuItemOptions {
 }
 export type MenuItemInterface = (value?: MenuItemOptions | CustomBuilder) => MenuItemAttribute;
 export interface MenuItemAttribute extends CommonMethod {
-    selected(value: boolean | undefined): this
+    selected(value: boolean | Bindable<boolean> | undefined): this
     selectIcon(value: boolean | ResourceStr | SymbolGlyphModifier | undefined): this
     onChange(value: ((isVisible: boolean) => void) | undefined): this
     contentFont(value: Font | undefined): this
@@ -246,25 +247,6 @@ export interface MenuItemAttribute extends CommonMethod {
     labelFont(value: Font | undefined): this
     labelFontColor(value: ResourceColor | undefined): this
     _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void
-}
-export interface UIMenuItemAttribute extends UICommonMethod {
-    /** @memo */
-    selected(value: boolean | undefined): this
-    /** @memo */
-    selectIcon(value: boolean | ResourceStr | SymbolGlyphModifier | undefined): this
-    /** @memo */
-    onChange(value: ((isVisible: boolean) => void) | undefined): this
-    /** @memo */
-    contentFont(value: Font | undefined): this
-    /** @memo */
-    contentFontColor(value: ResourceColor | undefined): this
-    /** @memo */
-    labelFont(value: Font | undefined): this
-    /** @memo */
-    labelFontColor(value: ResourceColor | undefined): this
-    /** @memo */
-    _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void
-    /** @memo */
 }
 export class ArkMenuItemStyle extends ArkCommonMethodStyle implements MenuItemAttribute {
     selected_value?: boolean | undefined
@@ -274,7 +256,7 @@ export class ArkMenuItemStyle extends ArkCommonMethodStyle implements MenuItemAt
     contentFontColor_value?: ResourceColor | undefined
     labelFont_value?: Font | undefined
     labelFontColor_value?: ResourceColor | undefined
-    public selected(value: boolean | undefined): this {
+    public selected(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
     public selectIcon(value: boolean | ResourceStr | SymbolGlyphModifier | undefined): this {
@@ -299,12 +281,10 @@ export class ArkMenuItemStyle extends ArkCommonMethodStyle implements MenuItemAt
         throw new Error("Unimplmented")
         }
 }
-/** @memo:stable */
-export class ArkMenuItemComponent extends ArkCommonMethodComponent implements UIMenuItemAttribute {
+export class ArkMenuItemComponent extends ArkCommonMethodComponent implements MenuItemAttribute {
     getPeer(): ArkMenuItemPeer {
         return (this.peer as ArkMenuItemPeer)
     }
-    /** @memo */
     public setMenuItemOptions(value?: MenuItemOptions | CustomBuilder): this {
         if (this.checkPriority("setMenuItemOptions")) {
             const value_casted = value as (MenuItemOptions | CustomBuilder | undefined)
@@ -313,16 +293,15 @@ export class ArkMenuItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
-    public selected(value: boolean | undefined): this {
-        if (this.checkPriority("selected")) {
+    public selected(value: boolean | Bindable<boolean> | undefined): this {
+        if (this.checkPriority("selected") && (typeof value === "boolean" || typeof value === "undefined")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.selectedAttribute(value_casted)
             return this
         }
+        MenuItemOpsHandWritten.hookMenuItemAttributeSelectedImpl(this.getPeer().peer.ptr, (value as Bindable<boolean>));
         return this
     }
-    /** @memo */
     public selectIcon(value: boolean | ResourceStr | SymbolGlyphModifier | undefined): this {
         if (this.checkPriority("selectIcon")) {
             const value_casted = value as (boolean | ResourceStr | SymbolGlyphModifier | undefined)
@@ -331,7 +310,6 @@ export class ArkMenuItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onChange(value: ((isVisible: boolean) => void) | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_casted = value as (((isVisible: boolean) => void) | undefined)
@@ -340,7 +318,6 @@ export class ArkMenuItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public contentFont(value: Font | undefined): this {
         if (this.checkPriority("contentFont")) {
             const value_casted = value as (Font | undefined)
@@ -349,7 +326,6 @@ export class ArkMenuItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public contentFontColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("contentFontColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -358,7 +334,6 @@ export class ArkMenuItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public labelFont(value: Font | undefined): this {
         if (this.checkPriority("labelFont")) {
             const value_casted = value as (Font | undefined)
@@ -367,7 +342,6 @@ export class ArkMenuItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public labelFontColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("labelFontColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -376,7 +350,6 @@ export class ArkMenuItemComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_selected(callback: ((select: boolean | undefined) => void)): void {
         if (this.checkPriority("_onChangeEvent_selected")) {
             const callback_casted = callback as (((select: boolean | undefined) => void))
@@ -394,7 +367,7 @@ export class ArkMenuItemComponent extends ArkCommonMethodComponent implements UI
 /** @memo */
 export function MenuItem(
     /** @memo */
-    style: ((attributes: UIMenuItemAttribute) => void) | undefined,
+    style: ((attributes: MenuItemAttribute) => void) | undefined,
     value?: MenuItemOptions | CustomBuilder,
     /** @memo */
     content_?: (() => void) | undefined,

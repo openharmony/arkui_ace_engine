@@ -15,8 +15,10 @@
 
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/shape/line_model_ng.h"
+#include "core/components_ng/pattern/shape/line_model_static.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_abstract_model_static.h"
 #include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
@@ -61,7 +63,7 @@ namespace LineModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = LineModelNG::CreateFrameNode(id);
+    auto frameNode = LineModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -78,10 +80,10 @@ void SetLineOptionsImpl(Ark_NativePointer node,
     auto opt = Converter::OptConvert<LineOptions>(*options);
     CHECK_NULL_VOID(opt);
     if (opt->width) {
-        ShapeAbstractModelNG::SetWidth(frameNode, opt->width);
+        ShapeAbstractModelStatic::SetWidth(frameNode, opt->width);
     }
     if (opt->height) {
-        ShapeAbstractModelNG::SetHeight(frameNode, opt->height);
+        ShapeAbstractModelStatic::SetHeight(frameNode, opt->height);
     }
 }
 } // LineInterfaceModifier

@@ -288,7 +288,7 @@ void GridPattern::FireOnScrollStart()
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->SuggestOpIncGroup();
+    host->SuggestOpIncGroup(GetAxis());
     PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     if (GetScrollAbort()) {
         return;

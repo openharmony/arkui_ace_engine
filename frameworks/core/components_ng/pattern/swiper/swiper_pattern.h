@@ -68,7 +68,7 @@ constexpr int32_t NEW_STYLE_MIN_TURN_PAGE_VELOCITY = 780;
 
 class SwiperPattern : public NestableScrollContainer, public LinearLazyContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer, LinearLazyContainer);
-
+    UNITEST_FRIEND_CLASS;
 
 public:
     using CustomContentTransitionPtr = std::shared_ptr<std::function<TabContentAnimatedTransition(int32_t, int32_t)>>;

@@ -116,10 +116,12 @@ void AssignArkValue(Ark_RichEditorUpdateTextSpanStyleOptions& dst, const TextSpa
         dst.textStyle = Converter::ArkValue<Ark_RichEditorTextStyle>(src.textStyle.value(), ctx);
     }
 }
-void AssignArkValue(Ark_Type_RichEditorController_updateSpanStyle_value& dst,
-                    const TextSpanOptionsForUpdate& src, Converter::ConvContext *ctx)
+void AssignArkValue(
+    Ark_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions& dst,
+    const TextSpanOptionsForUpdate& src, Converter::ConvContext *ctx)
 {
-    dst = Converter::ArkUnion<Ark_Type_RichEditorController_updateSpanStyle_value,
+    dst = Converter::ArkUnion<
+        Ark_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions,
         Ark_RichEditorUpdateTextSpanStyleOptions>(src, ctx);
 }
 
@@ -362,7 +364,9 @@ HWTEST_F(RichEditorControllerAccessorTest, updateSpanStyleTest, TestSize.Level1)
     updateOptions.end = TEST_END;
     updateOptions.textStyle = TextStyle(FONT_FAMILIES, FONT_SIZE, FONT_WEIGHT, FONT_STYLE, FONT_COLOUR);
     Converter::ConvContext ctx;
-    auto value = Converter::ArkValue<Ark_Type_RichEditorController_updateSpanStyle_value>(updateOptions, &ctx);
+    auto value = Converter::ArkValue<
+        Ark_Union_RichEditorUpdateTextSpanStyleOptions_RichEditorUpdateImageSpanStyleOptions_RichEditorUpdateSymbolSpanStyleOptions
+        >(updateOptions, &ctx);
 
     EXPECT_CALL(*mockRichEditorController_, UpdateSpanStyle(
         updateOptions.start, updateOptions.end, updateOptions.textStyle.value(), updateOptions.imageSpanAttribute
@@ -557,7 +561,7 @@ HWTEST_F(RichEditorControllerAccessorTest, fromStyledStringTest, TestSize.Level1
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), TEST_VALUE.length());
 
     Ark_StyledString inValue = StyledStringPeer::Create(spanString);
-    auto spans = accessor_->fromStyledString(vmContext_, peer_, inValue);
+    auto spans = accessor_->fromStyledString(peer_, inValue);
     ASSERT_TRUE(spans.length == 1);
     auto spansVec =
         Converter::Convert<std::vector<Ark_RichEditorSpan>>(spans);
@@ -590,7 +594,7 @@ HWTEST_F(RichEditorControllerAccessorTest, toStyledStringTest, TestSize.Level1)
     options.end = TEST_END;
     auto value = Converter::ArkValue<Ark_RichEditorRange>(options);
     EXPECT_CALL(*mockRichEditorController_, ToStyledString(TEST_START, TEST_END)).Times(1);
-    accessor_->toStyledString(vmContext_, peer_, &value);
+    accessor_->toStyledString(peer_, &value);
 }
 
 /**

@@ -24,7 +24,7 @@ const { formatCommand,
     checkForHelp } = require('./common')
 
 ark_link_path = process.env.ARKLINK_PATH
-ark_link_path = ark_link_path !== undefined ? ark_link_path : path.join(PANDA_SDK, ARCH_TOOLS, 'bin', 'ark_link')
+ark_link_path = ark_link_path ?? path.join(PANDA_SDK, ARCH_TOOLS, 'bin', 'ark_link')
 
 const ARGS_SPEC = [
     {

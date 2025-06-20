@@ -84,4 +84,19 @@ void ArktsAniUtils::ClearAniPendingError(ani_env* env)
         env->ResetError();
     }
 }
+
+ani_env* ArktsAniUtils::GetAniEnv(ani_vm* vm)
+{
+    if (!vm) {
+        LOGW("GetAniEnv from null vm");
+        return nullptr;
+    }
+    ani_env* env = nullptr;
+    ani_status status;
+    if ((status = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK) {
+        LOGW("GetAniEnv from vm failed, status: %{public}d", status);
+        return nullptr;
+    }
+    return env;
+}
 } // namespace OHOS::Ace

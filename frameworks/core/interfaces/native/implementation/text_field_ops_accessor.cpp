@@ -13,9 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/text_field/text_field_model_static.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextFieldOpsAccessor {
@@ -23,7 +27,25 @@ Ark_NativePointer RegisterTextFieldValueCallbackImpl(Ark_NativePointer node,
                                                      const Ark_ResourceStr* value,
                                                      const TextFieldValueCallback* callback)
 {
-    return {};
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode && value && callback, nullptr);
+    auto text = Converter::OptConvert<std::u16string>(*value);
+
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto textValue = pattern->GetTextUtf16Value();
+    if (text.has_value() && text.value() != textValue) {
+        auto changed = pattern->InitValueText(text.value());
+        pattern->SetTextChangedAtCreation(changed);
+    }
+
+    auto onEvent = [arkCallback = CallbackHelper(*callback)](const std::u16string& content) {
+        Converter::ConvContext ctx;
+        auto arkContent = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(content, &ctx);
+        arkCallback.Invoke(arkContent);
+    };
+    TextFieldModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
+    return node;
 }
 } // TextFieldOpsAccessor
 const GENERATED_ArkUITextFieldOpsAccessor* GetTextFieldOpsAccessor()

@@ -18,5 +18,8 @@
 #include "styled_string_peer.h"
 
 struct MutableStyledStringPeer : public StyledStringPeer {
+protected:
     ~MutableStyledStringPeer() override = default;
+    MutableStyledStringPeer() = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };

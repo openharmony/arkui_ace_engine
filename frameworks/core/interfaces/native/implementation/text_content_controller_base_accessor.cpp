@@ -87,11 +87,31 @@ Ark_TextRange GetSelectionImpl(Ark_TextContentControllerBase peer)
 }
 void ClearPreviewTextImpl(Ark_TextContentControllerBase peer)
 {
+    CHECK_NULL_VOID(peer && peer->controller_);
+    peer->controller_->ClearPreviewText();
 }
 Ark_String GetTextImpl(Ark_TextContentControllerBase peer,
                        const Opt_TextRange* range)
 {
-    return {};
+    std::u16string result = u"";
+    CHECK_NULL_RETURN(peer && peer->controller_ && range, Converter::ArkValue<Ark_String>(result));
+    auto rangeConv = range ? Converter::OptConvert<TextRange>(*range) : std::nullopt;
+    std::u16string content = peer->controller_->GetText();
+    int32_t startIndex = 0;
+    int32_t endIndex = content.length();
+    if (rangeConv) {
+        startIndex = rangeConv->start;
+        startIndex = startIndex < 0 ? 0 : startIndex;
+        startIndex = std::clamp(startIndex, 0, static_cast<int32_t>(content.length()));
+        endIndex = rangeConv->end;
+        endIndex = endIndex < 0 ? content.length() : endIndex;
+        endIndex = std::clamp(endIndex, 0, static_cast<int32_t>(content.length()));
+        if (startIndex > endIndex) {
+            std::swap(startIndex, endIndex);
+        }
+    }
+    result = content.substr(startIndex, endIndex - startIndex);
+    return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
 } // TextContentControllerBaseAccessor
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor()

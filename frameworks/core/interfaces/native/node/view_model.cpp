@@ -604,6 +604,14 @@ void* GetOrCreateCustomNode(ArkUI_CharPtr tag)
     return AceType::RawPtr(frameNode);
 }
 
+void* CreateCustomNodeByNodeId(ArkUI_CharPtr tag, ArkUI_Int32 nodeId)
+{
+    auto frameNode = CustomNodeExtModelNG::CreateFrameNode(std::string(tag), nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 
 static createArkUIFrameNode* createArkUIFrameNodes[] = {

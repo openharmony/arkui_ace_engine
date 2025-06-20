@@ -1143,7 +1143,7 @@ public:
     void SetOpIncCheckedOnce();
     bool GetOpIncCheckedOnce();
     void MarkAndCheckNewOpIncNode(Axis axis) override;
-    void SuggestOpIncGroup();
+    void SuggestOpIncGroup(Axis axis);
     ChildrenListWithGuard GetAllChildren();
     OPINC_TYPE_E FindSuggestOpIncNode(std::string& path, const SizeF& boundary, int32_t depth, Axis axis);
     void GetInspectorValue() override;
@@ -1344,6 +1344,8 @@ public:
 
     ScrollWindowAdapter* GetScrollWindowAdapter() const;
     ScrollWindowAdapter* GetOrCreateScrollWindowAdapter();
+    void MarkModifyDoneUnsafely();
+    void MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag);
 
     bool HasMultipleChild();
 

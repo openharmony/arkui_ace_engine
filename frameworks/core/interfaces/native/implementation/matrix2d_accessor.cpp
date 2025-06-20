@@ -29,7 +29,7 @@ void DestroyPeerImpl(Ark_Matrix2D peer)
 }
 Ark_Matrix2D Ctor0Impl()
 {
-    return nullptr;
+    return PeerUtils::CreatePeer<Matrix2DPeer>();
 }
 Ark_Matrix2D Ctor1Impl(Ark_LengthMetricsUnit unit)
 {
@@ -135,7 +135,7 @@ void SetRotateXImpl(Ark_Matrix2D peer,
 Opt_Number GetScaleYImpl(Ark_Matrix2D peer)
 {
     CHECK_NULL_RETURN(peer, ERROR_VALUE);
-    return Converter::ArkValue<Opt_Number>(peer->GetScaleX());
+    return Converter::ArkValue<Opt_Number>(peer->GetScaleY());
 }
 void SetScaleYImpl(Ark_Matrix2D peer,
                    const Opt_Number* scaleY)

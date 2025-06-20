@@ -384,34 +384,6 @@ export interface CalendarAttribute {
     onSelectChange(value: ((event: CalendarSelectedDate) => void) | undefined): this
     onRequestData(value: ((event: CalendarRequestedData) => void) | undefined): this
 }
-export interface UICalendarAttribute {
-    /** @memo */
-    showLunar(value: boolean | undefined): this
-    /** @memo */
-    showHoliday(value: boolean | undefined): this
-    /** @memo */
-    needSlide(value: boolean | undefined): this
-    /** @memo */
-    startOfWeek(value: number | undefined): this
-    /** @memo */
-    offDays(value: number | undefined): this
-    /** @memo */
-    direction(value: Axis | undefined): this
-    /** @memo */
-    currentDayStyle(value: CurrentDayStyle | undefined): this
-    /** @memo */
-    nonCurrentDayStyle(value: NonCurrentDayStyle | undefined): this
-    /** @memo */
-    todayStyle(value: TodayStyle | undefined): this
-    /** @memo */
-    weekStyle(value: WeekStyle | undefined): this
-    /** @memo */
-    workStateStyle(value: WorkStateStyle | undefined): this
-    /** @memo */
-    onSelectChange(value: ((event: CalendarSelectedDate) => void) | undefined): this
-    /** @memo */
-    onRequestData(value: ((event: CalendarRequestedData) => void) | undefined): this
-}
 export class ArkCalendarStyle implements CalendarAttribute {
     showLunar_value?: boolean | undefined
     showHoliday_value?: boolean | undefined
@@ -466,12 +438,10 @@ export class ArkCalendarStyle implements CalendarAttribute {
         return this
     }
 }
-/** @memo:stable */
-export class ArkCalendarComponent extends ComponentBase implements UICalendarAttribute {
+export class ArkCalendarComponent extends ComponentBase implements CalendarAttribute {
     getPeer(): ArkCalendarPeer {
         return (this.peer as ArkCalendarPeer)
     }
-    /** @memo */
     public setCalendarOptions(value: Type_CalendarInterface_callable0_value): this {
         if (this.checkPriority("setCalendarOptions")) {
             const value_casted = value as (Type_CalendarInterface_callable0_value)
@@ -480,7 +450,6 @@ export class ArkCalendarComponent extends ComponentBase implements UICalendarAtt
         }
         return this
     }
-    /** @memo */
     public showLunar(value: boolean | undefined): this {
         if (this.checkPriority("showLunar")) {
             const value_casted = value as (boolean | undefined)
@@ -489,7 +458,6 @@ export class ArkCalendarComponent extends ComponentBase implements UICalendarAtt
         }
         return this
     }
-    /** @memo */
     public showHoliday(value: boolean | undefined): this {
         if (this.checkPriority("showHoliday")) {
             const value_casted = value as (boolean | undefined)
@@ -498,7 +466,6 @@ export class ArkCalendarComponent extends ComponentBase implements UICalendarAtt
         }
         return this
     }
-    /** @memo */
     public needSlide(value: boolean | undefined): this {
         if (this.checkPriority("needSlide")) {
             const value_casted = value as (boolean | undefined)
@@ -507,7 +474,6 @@ export class ArkCalendarComponent extends ComponentBase implements UICalendarAtt
         }
         return this
     }
-    /** @memo */
     public startOfWeek(value: number | undefined): this {
         if (this.checkPriority("startOfWeek")) {
             const value_casted = value as (number | undefined)
@@ -516,7 +482,6 @@ export class ArkCalendarComponent extends ComponentBase implements UICalendarAtt
         }
         return this
     }
-    /** @memo */
     public offDays(value: number | undefined): this {
         if (this.checkPriority("offDays")) {
             const value_casted = value as (number | undefined)
@@ -525,7 +490,6 @@ export class ArkCalendarComponent extends ComponentBase implements UICalendarAtt
         }
         return this
     }
-    /** @memo */
     public direction(value: Axis | undefined): this {
         if (this.checkPriority("direction")) {
             const value_casted = value as (Axis | undefined)
@@ -534,7 +498,6 @@ export class ArkCalendarComponent extends ComponentBase implements UICalendarAtt
         }
         return this
     }
-    /** @memo */
     public currentDayStyle(value: CurrentDayStyle | undefined): this {
         if (this.checkPriority("currentDayStyle")) {
             const value_casted = value as (CurrentDayStyle | undefined)
@@ -543,7 +506,6 @@ export class ArkCalendarComponent extends ComponentBase implements UICalendarAtt
         }
         return this
     }
-    /** @memo */
     public nonCurrentDayStyle(value: NonCurrentDayStyle | undefined): this {
         if (this.checkPriority("nonCurrentDayStyle")) {
             const value_casted = value as (NonCurrentDayStyle | undefined)
@@ -552,7 +514,6 @@ export class ArkCalendarComponent extends ComponentBase implements UICalendarAtt
         }
         return this
     }
-    /** @memo */
     public todayStyle(value: TodayStyle | undefined): this {
         if (this.checkPriority("todayStyle")) {
             const value_casted = value as (TodayStyle | undefined)
@@ -561,7 +522,6 @@ export class ArkCalendarComponent extends ComponentBase implements UICalendarAtt
         }
         return this
     }
-    /** @memo */
     public weekStyle(value: WeekStyle | undefined): this {
         if (this.checkPriority("weekStyle")) {
             const value_casted = value as (WeekStyle | undefined)
@@ -570,7 +530,6 @@ export class ArkCalendarComponent extends ComponentBase implements UICalendarAtt
         }
         return this
     }
-    /** @memo */
     public workStateStyle(value: WorkStateStyle | undefined): this {
         if (this.checkPriority("workStateStyle")) {
             const value_casted = value as (WorkStateStyle | undefined)
@@ -579,7 +538,6 @@ export class ArkCalendarComponent extends ComponentBase implements UICalendarAtt
         }
         return this
     }
-    /** @memo */
     public onSelectChange(value: ((event: CalendarSelectedDate) => void) | undefined): this {
         if (this.checkPriority("onSelectChange")) {
             const value_casted = value as (((event: CalendarSelectedDate) => void) | undefined)
@@ -588,7 +546,6 @@ export class ArkCalendarComponent extends ComponentBase implements UICalendarAtt
         }
         return this
     }
-    /** @memo */
     public onRequestData(value: ((event: CalendarRequestedData) => void) | undefined): this {
         if (this.checkPriority("onRequestData")) {
             const value_casted = value as (((event: CalendarRequestedData) => void) | undefined)
@@ -605,7 +562,7 @@ export class ArkCalendarComponent extends ComponentBase implements UICalendarAtt
 /** @memo */
 export function Calendar(
     /** @memo */
-    style: ((attributes: UICalendarAttribute) => void) | undefined,
+    style: ((attributes: CalendarAttribute) => void) | undefined,
     value: Type_CalendarInterface_callable0_value,
     /** @memo */
     content_?: (() => void) | undefined,

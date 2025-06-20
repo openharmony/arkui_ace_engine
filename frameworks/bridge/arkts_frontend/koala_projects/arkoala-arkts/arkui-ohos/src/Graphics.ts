@@ -19,7 +19,7 @@
 // import { LengthUnit } from "./component/ArkArkuiExternalInterfaces"
 import { Resource } from "global/resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
-import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer } from "@koalaui/interop"
+import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, pointer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
 import { Serializer } from "./component"
 import { ResourceColor } from "./component/units"
@@ -27,9 +27,22 @@ import { Color, BorderStyle } from "./component/enums"
 import { DrawingCanvas } from "./component/arkui-drawing"
 import { Dimension } from "./component/units"
 import { common2D } from "@ohos/graphics/common2D"
+import { drawing } from "@ohos/graphics/drawing"
 export interface Size {
     width: number;
     height: number;
+}
+export interface SizeT<T> {
+    width: T,
+    height: T
+}
+export class SizeInternal implements Size {
+    width: number;
+    height: number;
+    constructor(width: number, height: number) {
+        this.width = width
+        this.height = height
+    }
 }
 export interface Frame {
     x: number;
@@ -71,140 +84,59 @@ export class LengthMetrics implements MaterializedBase {
         const retval = ArkUIGeneratedNativeModule._LengthMetrics_ctor()
         return retval
     }
-    constructor(value: number, unit?: LengthUnit) {
-        // Constructor does not have parameters.
-        // It means that the static method call invokes ctor method as well
-        // when all arguments are undefined.
-        const ctorPtr: KPointer = LengthMetrics.ctor_lengthmetrics()
-        this.peer = new Finalizable(ctorPtr, LengthMetrics.getFinalizer())
-        if (unit === undefined) {
-            this.setUnit(LengthUnit.VP);
-            this.setValue(value);
-            this.unit = LengthUnit.VP;
-            this.value = value;
-        } else {
-            if (unit >= LengthUnit.PX && unit <= LengthUnit.LPX) {
-                this.setUnit(unit);
-                this.setValue(value);
-                this.unit = unit;
-                this.value = value;
-            } else {
-                this.setUnit(LengthUnit.VP);
-                this.setValue(0);
-                this.unit = LengthUnit.VP;
-                this.value = 0;
-            }
-        }
-    }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._LengthMetrics_getFinalizer()
     }
-    public static px(value: number): LengthMetrics {
-        const value_casted = value as (number)
-        const obj: LengthMetrics = LengthMetrics.px_serialize(value_casted)
-        obj.unit = LengthUnit.PX
-        obj.value = value
-        return obj
+    constructor(value: number, unit?: LengthUnit) {
+        const ctorPtr: KPointer = LengthMetrics.ctor_lengthmetrics()
+        this.peer = new Finalizable(ctorPtr, LengthMetrics.getFinalizer())
+        this.value = value;
+        if (!unit || unit < LengthUnit.PX || unit > LengthUnit.LPX) {
+            this.unit = LengthUnit.VP;
+            this.value = !unit ? value : 0;
+        } else {
+            this.unit = unit!;
+            this.value = value;
+        }
+        this.setValue(this.value);
+        this.setUnit(this.unit);
     }
-    public static vp(value: number): LengthMetrics {
-        const value_casted = value as (number)
-        const obj: LengthMetrics = LengthMetrics.vp_serialize(value_casted)
-        obj.unit = LengthUnit.VP
-        obj.value = value
-        return obj
+    static px(value: number) {
+        return new LengthMetrics(value, LengthUnit.PX);
     }
-    public static fp(value: number): LengthMetrics {
-        const value_casted = value as (number)
-        const obj: LengthMetrics = LengthMetrics.fp_serialize(value_casted)
-        obj.unit = LengthUnit.FP
-        obj.value = value
-        return obj
+    static vp(value: number) {
+        return new LengthMetrics(value, LengthUnit.VP);
     }
-    public static percent(value: number): LengthMetrics {
-        const value_casted = value as (number)
-        const obj: LengthMetrics = LengthMetrics.percent_serialize(value_casted)
-        obj.unit = LengthUnit.PERCENT
-        obj.value = value
-        return obj
+    static fp(value: number) {
+        return new LengthMetrics(value, LengthUnit.FP);
     }
-    public static lpx(value: number): LengthMetrics {
-        const value_casted = value as (number)
-        const obj: LengthMetrics = LengthMetrics.lpx_serialize(value_casted)
-        obj.unit = LengthUnit.LPX
-        obj.value = value
-        return obj
+    static percent(value: number) {
+        return new LengthMetrics(value, LengthUnit.PERCENT);
     }
-    public static resource(value: Resource): LengthMetrics {
-        const value_casted = value as (Resource)
-        const obj: LengthMetrics = LengthMetrics.resource_serialize(value_casted)
-        obj.unit = obj.getUnit()
-        obj.value = obj.getValue()
-        return obj
+    static lpx(value: number) {
+        return new LengthMetrics(value, LengthUnit.LPX);
     }
-    private getUnit(): LengthUnit {
-        return this.getUnit_serialize()
+    static resource(res: Resource) {
+        //   let length:Array<number> = getUINativeModule().nativeUtils.resoureToLengthMetrics(res);
+        return new LengthMetrics(0, LengthUnit.PX);
     }
     private setUnit(unit: LengthUnit): void {
         const unit_casted = unit as (LengthUnit)
         this.setUnit_serialize(unit_casted)
         return
     }
-    private getValue(): number {
-        return this.getValue_serialize()
-    }
     private setValue(value: number): void {
         const value_casted = value as (number)
         this.setValue_serialize(value_casted)
         return
     }
-    private static px_serialize(value: number): LengthMetrics {
-        const retval = ArkUIGeneratedNativeModule._LengthMetrics_px(value)
-        const obj: LengthMetrics = LengthMetricsInternal.fromPtr(retval)
-        return obj
-    }
-    private static vp_serialize(value: number): LengthMetrics {
-        const retval = ArkUIGeneratedNativeModule._LengthMetrics_vp(value)
-        const obj: LengthMetrics = LengthMetricsInternal.fromPtr(retval)
-        return obj
-    }
-    private static fp_serialize(value: number): LengthMetrics {
-        const retval = ArkUIGeneratedNativeModule._LengthMetrics_fp(value)
-        const obj: LengthMetrics = LengthMetricsInternal.fromPtr(retval)
-        return obj
-    }
-    private static percent_serialize(value: number): LengthMetrics {
-        const retval = ArkUIGeneratedNativeModule._LengthMetrics_percent(value)
-        const obj: LengthMetrics = LengthMetricsInternal.fromPtr(retval)
-        return obj
-    }
-    private static lpx_serialize(value: number): LengthMetrics {
-        const retval = ArkUIGeneratedNativeModule._LengthMetrics_lpx(value)
-        const obj: LengthMetrics = LengthMetricsInternal.fromPtr(retval)
-        return obj
-    }
-    private static resource_serialize(value: Resource): LengthMetrics {
-        const thisSerializer: Serializer = Serializer.hold()
-        thisSerializer.writeResource(value)
-        const retval = ArkUIGeneratedNativeModule._LengthMetrics_resource(thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-        const obj: LengthMetrics = LengthMetricsInternal.fromPtr(retval)
-        return obj
-    }
-    private getUnit_serialize(): LengthUnit {
-        const retval = ArkUIGeneratedNativeModule._LengthMetrics_getUnit(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
-    }
     private setUnit_serialize(unit: LengthUnit): void {
         ArkUIGeneratedNativeModule._LengthMetrics_setUnit(this.peer!.ptr, unit.valueOf())
-    }
-    private getValue_serialize(): number {
-        const retval = ArkUIGeneratedNativeModule._LengthMetrics_getValue(this.peer!.ptr)
-        return retval
     }
     private setValue_serialize(value: number): void {
         ArkUIGeneratedNativeModule._LengthMetrics_setValue(this.peer!.ptr, value)
     }
-}
+  }
 
 export class ColorMetricsInternal {
     public static fromPtr(ptr: KPointer): ColorMetrics {
@@ -442,11 +374,26 @@ export class ShapeClip {
         this.roundRect = null;
     }
 }
-export interface DrawContext {
-    size: Size;
-    sizeInPixel: Size;
-    canvas: DrawingCanvas;
-}export interface Vector2T {
+export class DrawContext {
+    size_: Size;
+    sizeInPixel_: Size;
+    canvas_: drawing.Canvas;
+    constructor() {
+        this.size_ = { width: 0, height: 0 }
+        this.sizeInPixel_ = { width: 0, height: 0 }
+        this.canvas_ = new drawing.Canvas();
+    }
+    get size(): Size {
+        return this.size_;
+    }
+    get sizeInPixel(): Size {
+        return this.sizeInPixel_;
+    }
+    get canvas(): drawing.Canvas {
+        return this.canvas_
+    }
+}
+export interface Vector2T {
     x: number;
     y: number;
 }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { ArrayState, Equivalent, MutableState, StateManager, ValueTracker, createStateManager } from "./State"
+import { ArrayState, Equivalent, MutableState, StateManager, ValueTracker, createStateManager, StateManagerImpl } from "./State"
 import { int32 } from "@koalaui/common"
 
 /**
@@ -70,6 +70,10 @@ export class GlobalStateManager {
         }
         // @ts-ignore
         GlobalStateManager.localManagerMap.set(CoroutineExtras.getWorkerId(), manager)
+    }
+
+    public static getCurrentScopeId(): int32 | undefined {
+        return (GlobalStateManager.instance as StateManagerImpl).current ? (GlobalStateManager.instance as StateManagerImpl).current!.id : undefined;
     }
 }
 

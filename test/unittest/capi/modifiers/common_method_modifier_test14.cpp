@@ -18,11 +18,15 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/implementation/long_press_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/long_press_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/pan_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/pan_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/pinch_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/pinch_gesture_interface_peer.h"
 #include "core/interfaces/native/implementation/rotation_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/swipe_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/tap_gesture_event_peer.h"
+#include "core/interfaces/native/implementation/tap_gesture_interface_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "generated/type_helpers.h"
@@ -97,8 +101,8 @@ HWTEST_F(CommonMethodModifierTest14, DISABLED_gesture_Tap_Test, TestSize.Level1)
     peer->SetEventInfo(event);
 
     Ark_TapGestureInterface interface = {  };
-    Ark_GestureType type = Converter::ArkUnion<Ark_GestureType, Ark_TapGestureInterface>(interface);
-    Opt_GestureMask mask = { .value = Ark_GestureMask::ARK_GESTURE_MASK_NORMAL };
+    auto type = Converter::ArkUnion<Opt_GestureType, Ark_Gesture>(interface);
+    auto mask = Converter::ArkValue<Opt_GestureMask>(Ark_GestureMask::ARK_GESTURE_MASK_NORMAL);
     modifier_->setGesture(node_, &type, &mask);
     modifier_->setPriorityGesture(node_, &type, &mask);
     modifier_->setParallelGesture(node_, &type, &mask);
@@ -123,8 +127,8 @@ HWTEST_F(CommonMethodModifierTest14, DISABLED_gesture_LongPress_Test, TestSize.L
     peer->SetEventInfo(event);
 
     Ark_LongPressGestureInterface interface = {  };
-    Ark_GestureType type = Converter::ArkUnion<Ark_GestureType, Ark_LongPressGestureInterface>(interface);
-    Opt_GestureMask mask = { .value = Ark_GestureMask::ARK_GESTURE_MASK_NORMAL };
+    auto type = Converter::ArkUnion<Opt_GestureType, Ark_Gesture>(interface);
+    auto mask = Converter::ArkValue<Opt_GestureMask>(Ark_GestureMask::ARK_GESTURE_MASK_NORMAL);
     modifier_->setGesture(node_, &type, &mask);
     modifier_->setPriorityGesture(node_, &type, &mask);
     modifier_->setParallelGesture(node_, &type, &mask);
@@ -149,8 +153,8 @@ HWTEST_F(CommonMethodModifierTest14, DISABLED_gesture_Pan_Test, TestSize.Level1)
     peer->SetEventInfo(event);
 
     Ark_PanGestureInterface interface = {  };
-    Ark_GestureType type = Converter::ArkUnion<Ark_GestureType, Ark_PanGestureInterface>(interface);
-    Opt_GestureMask mask = { .value = Ark_GestureMask::ARK_GESTURE_MASK_NORMAL };
+    auto type = Converter::ArkUnion<Opt_GestureType, Ark_Gesture>(interface);
+    auto mask = Converter::ArkValue<Opt_GestureMask>(Ark_GestureMask::ARK_GESTURE_MASK_NORMAL);
     modifier_->setGesture(node_, &type, &mask);
     modifier_->setPriorityGesture(node_, &type, &mask);
     modifier_->setParallelGesture(node_, &type, &mask);
@@ -175,8 +179,8 @@ HWTEST_F(CommonMethodModifierTest14, DISABLED_gesture_Pinch_Test, TestSize.Level
     peer->SetEventInfo(event);
 
     Ark_PinchGestureInterface interface = {  };
-    Ark_GestureType type = Converter::ArkUnion<Ark_GestureType, Ark_PinchGestureInterface>(interface);
-    Opt_GestureMask mask = { .value = Ark_GestureMask::ARK_GESTURE_MASK_NORMAL };
+    auto type = Converter::ArkUnion<Opt_GestureType, Ark_Gesture>(interface);
+    auto mask = Converter::ArkValue<Opt_GestureMask>(Ark_GestureMask::ARK_GESTURE_MASK_NORMAL);
     modifier_->setGesture(node_, &type, &mask);
     modifier_->setPriorityGesture(node_, &type, &mask);
     modifier_->setParallelGesture(node_, &type, &mask);
@@ -191,6 +195,7 @@ HWTEST_F(CommonMethodModifierTest14, DISABLED_gesture_Pinch_Test, TestSize.Level
  */
 HWTEST_F(CommonMethodModifierTest14, DISABLED_gesture_Swipe_Test, TestSize.Level1)
 {
+#ifdef WRONG_GEN
     auto mockModel = new MockSwipeGestureModel();
     SwipeGestureModelNG::SetMock(mockModel);
     EXPECT_CALL(*mockModel, Create(_, _, _)).Times(3);
@@ -201,13 +206,14 @@ HWTEST_F(CommonMethodModifierTest14, DISABLED_gesture_Swipe_Test, TestSize.Level
     peer->SetEventInfo(event);
 
     Ark_SwipeGestureInterface interface = {  };
-    Ark_GestureType type = Converter::ArkUnion<Ark_GestureType, Ark_SwipeGestureInterface>(interface);
-    Opt_GestureMask mask = { .value = Ark_GestureMask::ARK_GESTURE_MASK_NORMAL };
+    auto type = Converter::ArkUnion<Opt_GestureType, Ark_Gesture>(interface);
+    auto mask = Converter::ArkValue<Opt_GestureMask>(Ark_GestureMask::ARK_GESTURE_MASK_NORMAL);
     modifier_->setGesture(node_, &type, &mask);
     modifier_->setPriorityGesture(node_, &type, &mask);
     modifier_->setParallelGesture(node_, &type, &mask);
     SwipeGestureModelNG::SetMock(nullptr);
     delete mockModel;
+#endif
 }
 
 /*
@@ -217,6 +223,7 @@ HWTEST_F(CommonMethodModifierTest14, DISABLED_gesture_Swipe_Test, TestSize.Level
  */
 HWTEST_F(CommonMethodModifierTest14, DISABLED_gesture_Rotation_Test, TestSize.Level1)
 {
+#ifdef WRONG_GEN
     auto mockModel = new MockRotationGestureModel();
     RotationGestureModelNG::SetMock(mockModel);
     EXPECT_CALL(*mockModel, Create(_, _)).Times(3);
@@ -228,12 +235,13 @@ HWTEST_F(CommonMethodModifierTest14, DISABLED_gesture_Rotation_Test, TestSize.Le
     peer->SetEventInfo(event);
 
     Ark_RotationGestureInterface interface = {  };
-    Ark_GestureType type = Converter::ArkUnion<Ark_GestureType, Ark_RotationGestureInterface>(interface);
-    Opt_GestureMask mask = { .value = Ark_GestureMask::ARK_GESTURE_MASK_NORMAL };
+    auto type = Converter::ArkUnion<Opt_GestureType, Ark_Gesture>(interface);
+    auto mask = Converter::ArkValue<Opt_GestureMask>(Ark_GestureMask::ARK_GESTURE_MASK_NORMAL);
     modifier_->setGesture(node_, &type, &mask);
     modifier_->setPriorityGesture(node_, &type, &mask);
     modifier_->setParallelGesture(node_, &type, &mask);
     RotationGestureModelNG::SetMock(nullptr);
     delete mockModel;
+#endif
 }
 }

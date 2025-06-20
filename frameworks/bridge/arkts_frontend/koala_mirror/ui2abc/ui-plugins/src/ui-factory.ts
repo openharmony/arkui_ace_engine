@@ -16,7 +16,8 @@
 import * as arkts from "@koalaui/libarkts"
 import {
     BuilderLambdaNames,
-    CustomComponentNames
+    CustomComponentNames,
+    InternalAnnotations
 } from "./utils";
 import { annotation } from "./common/arkts-utils";
 
@@ -75,7 +76,7 @@ export class factory {
     static createStyleParameter(typeName: string): arkts.ETSParameterExpression {
         const styleParam: arkts.Identifier = factory.createStyleIdentifier(typeName);
         const param = arkts.factory.createETSParameterExpression(styleParam, false);
-        param.setAnnotations([annotation("memo")]);
+        param.setAnnotations([annotation(InternalAnnotations.MEMO)]);
         return param;
     }
 
@@ -123,7 +124,7 @@ export class factory {
     static createContentParameter(): arkts.ETSParameterExpression {
         const contentParam: arkts.Identifier = factory.createContentIdentifier();
         const param = arkts.factory.createETSParameterExpression(contentParam, false);
-        param.setAnnotations([annotation("memo")]);
+        param.setAnnotations([annotation(InternalAnnotations.MEMO)]);
         return param;
     }
 

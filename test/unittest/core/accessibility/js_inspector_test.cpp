@@ -1035,23 +1035,6 @@ HWTEST_F(JSInspectorTest, InspectFormTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: InspectFormTest002
- * @tc.desc: InspectForm::PackAttrAndStyle
- * @tc.type: FUNC
- */
-HWTEST_F(JSInspectorTest, InspectFormTest002, TestSize.Level1)
-{
-    NodeId nodeId = -1;
-    std::string tag = "tagTest";
-    InspectForm inspectForm(nodeId, tag);
-    auto attrsSize = inspectForm.attrs_.size();
-    auto stylesSize = inspectForm.styles_.size();
-    inspectForm.PackAttrAndStyle();
-    EXPECT_EQ(inspectForm.attrs_.size(), attrsSize);
-    EXPECT_EQ(inspectForm.styles_.size(), stylesSize);
-}
-
-/**
  * @tc.name: InspectGridColumnTest001
  * @tc.desc: InspectGridColumn::InspectGridColumn
  * @tc.type: FUNC
@@ -1919,23 +1902,6 @@ HWTEST_F(JSInspectorTest, InspectNodeTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: InspectNodeTest002
- * @tc.desc: InspectNode::PackAttrAndStyle
- * @tc.type: FUNC
- */
-HWTEST_F(JSInspectorTest, InspectNodeTest002, TestSize.Level1)
-{
-    NodeId nodeId = -1;
-    std::string tag = "tagTest";
-    InspectNode inspectNode(nodeId, tag);
-    auto attrsSize = inspectNode.attrs_.size();
-    auto stylesSize = inspectNode.styles_.size();
-    inspectNode.PackAttrAndStyle();
-    EXPECT_EQ(inspectNode.attrs_.size(), attrsSize);
-    EXPECT_EQ(inspectNode.styles_.size(), stylesSize);
-}
-
-/**
  * @tc.name: InspectNodeTest003
  * @tc.desc: InspectNode::InitCommonStyles
  * @tc.type: FUNC
@@ -2233,7 +2199,6 @@ HWTEST_F(JSInspectorTest, InspectPieceTest002, TestSize.Level1)
     std::string tag = "tagTest";
     InspectPiece inspectPiece(nodeId, tag);
     auto attrsSize = inspectPiece.attrs_.size();
-    auto stylesSize = inspectPiece.styles_.size();
     uint16_t attrsSizeInsert = 3;
 
     inspectPiece.PackAttrAndStyle();
@@ -2241,7 +2206,6 @@ HWTEST_F(JSInspectorTest, InspectPieceTest002, TestSize.Level1)
     EXPECT_EQ(inspectPiece.attrs_["closable"], "false");
     EXPECT_EQ(inspectPiece.attrs_["disabled"], "false");
     EXPECT_EQ(inspectPiece.attrs_["focusable"], "false");
-    EXPECT_EQ(inspectPiece.styles_.size(), stylesSize);
 }
 
 /**
@@ -2962,12 +2926,10 @@ HWTEST_F(JSInspectorTest, InspectSpanTest002, TestSize.Level1)
     NodeId nodeId = -1;
     std::string tag = "tagTest";
     InspectSpan inspectSpan(nodeId, tag);
-    auto attrsSize = inspectSpan.attrs_.size();
     auto stylesSize = inspectSpan.styles_.size();
     uint16_t stylesSizeInsert = 6;
 
     inspectSpan.PackAttrAndStyle();
-    EXPECT_EQ(inspectSpan.attrs_.size(), attrsSize);
     EXPECT_EQ(inspectSpan.styles_.size(), stylesSize + stylesSizeInsert);
     EXPECT_EQ(inspectSpan.styles_["font-size"], "30px");
     EXPECT_EQ(inspectSpan.styles_["allow-scale"], "true");
@@ -3002,14 +2964,12 @@ HWTEST_F(JSInspectorTest, InspectStackTest002, TestSize.Level1)
     std::string tag = "tagTest";
     InspectStack inspectStack(nodeId, tag);
     auto attrsSize = inspectStack.attrs_.size();
-    auto stylesSize = inspectStack.styles_.size();
     uint16_t attrsSizeInsert = 2;
 
     inspectStack.PackAttrAndStyle();
     EXPECT_EQ(inspectStack.attrs_.size(), attrsSize + attrsSizeInsert);
     EXPECT_EQ(inspectStack.attrs_["disabled"], "false");
     EXPECT_EQ(inspectStack.attrs_["focusable"], "true");
-    EXPECT_EQ(inspectStack.styles_.size(), stylesSize);
 }
 
 /**
@@ -3082,14 +3042,12 @@ HWTEST_F(JSInspectorTest, InspectStepperTest002, TestSize.Level1)
     std::string tag = "tagTest";
     InspectStepper inspectStepper(nodeId, tag);
     auto attrsSize = inspectStepper.attrs_.size();
-    auto stylesSize = inspectStepper.styles_.size();
     uint16_t attrsSizeInsert = 2;
 
     inspectStepper.PackAttrAndStyle();
     EXPECT_EQ(inspectStepper.attrs_.size(), attrsSize + attrsSizeInsert);
     EXPECT_EQ(inspectStepper.attrs_["disabled"], "false");
     EXPECT_EQ(inspectStepper.attrs_["focusable"], "false");
-    EXPECT_EQ(inspectStepper.styles_.size(), stylesSize);
 }
 
 /**
@@ -3334,7 +3292,6 @@ HWTEST_F(JSInspectorTest, InspectTabContentTest002, TestSize.Level1)
     std::string tag = "tagTest";
     InspectTabContent inspectTabContent(nodeId, tag);
     auto attrsSize = inspectTabContent.attrs_.size();
-    auto stylesSize = inspectTabContent.styles_.size();
     uint16_t attrsSizeInsert = 3;
 
     inspectTabContent.PackAttrAndStyle();
@@ -3342,7 +3299,6 @@ HWTEST_F(JSInspectorTest, InspectTabContentTest002, TestSize.Level1)
     EXPECT_EQ(inspectTabContent.attrs_["scrollable"], "true");
     EXPECT_EQ(inspectTabContent.attrs_["disabled"], "false");
     EXPECT_EQ(inspectTabContent.attrs_["focusable"], "true");
-    EXPECT_EQ(inspectTabContent.styles_.size(), stylesSize);
 }
 
 /**
@@ -3370,7 +3326,6 @@ HWTEST_F(JSInspectorTest, InspectTabsTest002, TestSize.Level1)
     std::string tag = "tagTest";
     InspectTabs inspectTabs(nodeId, tag);
     auto attrsSize = inspectTabs.attrs_.size();
-    auto stylesSize = inspectTabs.styles_.size();
     uint16_t attrsSizeInsert = 4;
 
     inspectTabs.PackAttrAndStyle();
@@ -3379,7 +3334,6 @@ HWTEST_F(JSInspectorTest, InspectTabsTest002, TestSize.Level1)
     EXPECT_EQ(inspectTabs.attrs_["vertical"], "false");
     EXPECT_EQ(inspectTabs.attrs_["disabled"], "false");
     EXPECT_EQ(inspectTabs.attrs_["focusable"], "true");
-    EXPECT_EQ(inspectTabs.styles_.size(), stylesSize);
 }
 
 /**

@@ -175,6 +175,12 @@ inline void WriteToString(std::string *result, InteropNativePointer value)
 }
 
 template <>
+inline void WriteToString(std::string *result, const InteropNativePointer* value)
+{
+  result->append("0x" + std::to_string((uint64_t)(*value)));
+}
+
+template <>
 inline void WriteToString(std::string *result, InteropNodeHandle value)
 {
   result->append("0x" + std::to_string((uint64_t)value));

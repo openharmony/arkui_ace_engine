@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { Callback_Boolean_Void } from "./navigation"
 import { Length, Dimension, PX, VP, FP, LPX, Percentage, ResourceColor } from "./units"
 import { Callback_Opt_Boolean_Void } from "./checkbox"
@@ -30,7 +30,8 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { PixelMap } from "./arkui-pixelmap"
+import { PixelMap } from "#external"
+import { SideBarContainerOpsHandWritten } from "./../handwritten"
 
 export interface DividerStyle {
     strokeWidth: Length;
@@ -210,7 +211,10 @@ export class ArkSideBarContainerPeer extends ArkCommonMethodPeer {
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
         thisSerializer.writeInt8(value_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_type)) {
+        if (value === null) {
+            const newDivider = { strokeWidth: 0.0 } as DividerStyle
+            thisSerializer.writeDividerStyleSidebar(newDivider)
+        } else if ((RuntimeType.UNDEFINED) != (value_type)) {
             const value_value  = value!
             thisSerializer.writeDividerStyleSidebar(value_value)
         }
@@ -263,11 +267,11 @@ export interface ButtonStyle {
 }
 export type SideBarContainerInterface = (type?: SideBarContainerType) => SideBarContainerAttribute;
 export interface SideBarContainerAttribute extends CommonMethod {
-    showSideBar(value: boolean | undefined): this
+    showSideBar(value: boolean | Bindable<boolean> | undefined): this
     controlButton(value: ButtonStyle | undefined): this
     showControlButton(value: boolean | undefined): this
     onChange(value: ((isVisible: boolean) => void) | undefined): this
-    sideBarWidth(value: number | undefined): this
+    sideBarWidth(value: number | Bindable<number> | undefined): this
     minSideBarWidth(value: number | undefined): this
     maxSideBarWidth(value: number | undefined): this
     autoHide(value: boolean | undefined): this
@@ -275,47 +279,20 @@ export interface SideBarContainerAttribute extends CommonMethod {
     divider(value: DividerStyle | null | undefined): this
     minContentWidth(value: Dimension | undefined): this
     _onChangeEvent_showSideBar(callback: ((select: boolean | undefined) => void)): void
-}
-export interface UISideBarContainerAttribute extends UICommonMethod {
-    /** @memo */
-    showSideBar(value: boolean | undefined): this
-    /** @memo */
-    controlButton(value: ButtonStyle | undefined): this
-    /** @memo */
-    showControlButton(value: boolean | undefined): this
-    /** @memo */
-    onChange(value: ((isVisible: boolean) => void) | undefined): this
-    /** @memo */
-    sideBarWidth(value: number | undefined): this
-    /** @memo */
-    minSideBarWidth(value: number | undefined): this
-    /** @memo */
-    maxSideBarWidth(value: number | undefined): this
-    /** @memo */
-    autoHide(value: boolean | undefined): this
-    /** @memo */
-    sideBarPosition(value: SideBarPosition | undefined): this
-    /** @memo */
-    divider(value: DividerStyle | null | undefined): this
-    /** @memo */
-    minContentWidth(value: Dimension | undefined): this
-    /** @memo */
-    _onChangeEvent_showSideBar(callback: ((select: boolean | undefined) => void)): void
-    /** @memo */
 }
 export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements SideBarContainerAttribute {
-    showSideBar_value?: boolean | undefined
+    showSideBar_value?: boolean | Bindable<boolean> | undefined
     controlButton_value?: ButtonStyle | undefined
     showControlButton_value?: boolean | undefined
     onChange_value?: ((isVisible: boolean) => void) | undefined
-    sideBarWidth_value?: number | undefined
+    sideBarWidth_value?: number | Bindable<number> | undefined
     minSideBarWidth_value?: number | undefined
     maxSideBarWidth_value?: number | undefined
     autoHide_value?: boolean | undefined
     sideBarPosition_value?: SideBarPosition | undefined
     divider_value?: DividerStyle | null | undefined
     minContentWidth_value?: Dimension | undefined
-    public showSideBar(value: boolean | undefined): this {
+    public showSideBar(value: boolean | Bindable<boolean> | undefined): this {
         return this
     }
     public controlButton(value: ButtonStyle | undefined): this {
@@ -327,7 +304,7 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
     public onChange(value: ((isVisible: boolean) => void) | undefined): this {
         return this
     }
-    public sideBarWidth(value: number | undefined): this {
+    public sideBarWidth(value: number | Bindable<number> | undefined): this {
         return this
     }
     public minSideBarWidth(value: number | undefined): this {
@@ -352,12 +329,10 @@ export class ArkSideBarContainerStyle extends ArkCommonMethodStyle implements Si
         throw new Error("Unimplmented")
         }
 }
-/** @memo:stable */
-export class ArkSideBarContainerComponent extends ArkCommonMethodComponent implements UISideBarContainerAttribute {
+export class ArkSideBarContainerComponent extends ArkCommonMethodComponent implements SideBarContainerAttribute {
     getPeer(): ArkSideBarContainerPeer {
         return (this.peer as ArkSideBarContainerPeer)
     }
-    /** @memo */
     public setSideBarContainerOptions(type?: SideBarContainerType): this {
         if (this.checkPriority("setSideBarContainerOptions")) {
             const type_casted = type as (SideBarContainerType | undefined)
@@ -366,16 +341,18 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
-    public showSideBar(value: boolean | undefined): this {
-        if (this.checkPriority("showSideBar")) {
-            const value_casted = value as (boolean | undefined)
-            this.getPeer()?.showSideBarAttribute(value_casted)
-            return this
+    public showSideBar(value: boolean | Bindable<boolean> | undefined): this {
+        if (typeof value === "boolean" || typeof value === undefined) {
+            if (this.checkPriority("showSideBar")) {
+                const value_casted = value as (boolean | undefined)
+                this.getPeer()?.showSideBarAttribute(value_casted)
+                return this
+            }
         }
+        SideBarContainerOpsHandWritten.hookSideBarContainerAttributeShowSideBarImpl(this.getPeer().peer.ptr,
+            (value as Bindable<boolean>));
         return this
     }
-    /** @memo */
     public controlButton(value: ButtonStyle | undefined): this {
         if (this.checkPriority("controlButton")) {
             const value_casted = value as (ButtonStyle | undefined)
@@ -384,7 +361,6 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public showControlButton(value: boolean | undefined): this {
         if (this.checkPriority("showControlButton")) {
             const value_casted = value as (boolean | undefined)
@@ -393,7 +369,6 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public onChange(value: ((isVisible: boolean) => void) | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_casted = value as (((isVisible: boolean) => void) | undefined)
@@ -402,25 +377,30 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
-    public sideBarWidth(value: number | undefined): this {
-        if (this.checkPriority("sideBarWidth")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (number | undefined)
-                this.getPeer()?.sideBarWidth0Attribute(value_casted)
-                return this
+    public sideBarWidth(value: number | Bindable<number> | undefined): this {
+        /**
+         * check if param is number or undefined.If not, param is Bindable object.
+         */
+        if (typeof value === "number" || typeof value === undefined) {
+            if (this.checkPriority("sideBarWidth")) {
+                const value_type = runtimeType(value)
+                if ((RuntimeType.NUMBER == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                    const value_casted = value as (number | undefined)
+                    this.getPeer()?.sideBarWidth0Attribute(value_casted)
+                    return this
+                }
+                if ((RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
+                    const value_casted = value as (Length | undefined)
+                    this.getPeer()?.sideBarWidth1Attribute(value_casted)
+                    return this
+                }
+                throw new Error("Can not select appropriate overload")
             }
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (Length | undefined)
-                this.getPeer()?.sideBarWidth1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
         }
+        SideBarContainerOpsHandWritten.hookSideBarContainerAttributeSideBarWidthImpl(this.getPeer().peer.ptr,
+            (value as Bindable<number>));
         return this
     }
-    /** @memo */
     public minSideBarWidth(value: number | undefined): this {
         if (this.checkPriority("minSideBarWidth")) {
             const value_type = runtimeType(value)
@@ -438,7 +418,6 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public maxSideBarWidth(value: number | undefined): this {
         if (this.checkPriority("maxSideBarWidth")) {
             const value_type = runtimeType(value)
@@ -456,7 +435,6 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public autoHide(value: boolean | undefined): this {
         if (this.checkPriority("autoHide")) {
             const value_casted = value as (boolean | undefined)
@@ -465,7 +443,6 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public sideBarPosition(value: SideBarPosition | undefined): this {
         if (this.checkPriority("sideBarPosition")) {
             const value_casted = value as (SideBarPosition | undefined)
@@ -474,7 +451,6 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public divider(value: DividerStyle | null | undefined): this {
         if (this.checkPriority("divider")) {
             const value_casted = value as (DividerStyle | null | undefined)
@@ -483,7 +459,6 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public minContentWidth(value: Dimension | undefined): this {
         if (this.checkPriority("minContentWidth")) {
             const value_casted = value as (Dimension | undefined)
@@ -492,7 +467,6 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_showSideBar(callback: ((select: boolean | undefined) => void)): void {
         if (this.checkPriority("_onChangeEvent_showSideBar")) {
             const callback_casted = callback as (((select: boolean | undefined) => void))
@@ -510,7 +484,7 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
 /** @memo */
 export function SideBarContainer(
     /** @memo */
-    style: ((attributes: UISideBarContainerAttribute) => void) | undefined,
+    style: ((attributes: SideBarContainerAttribute) => void) | undefined,
     type?: SideBarContainerType,
     /** @memo */
     content_?: (() => void) | undefined,

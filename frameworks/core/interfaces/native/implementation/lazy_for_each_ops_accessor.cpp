@@ -16,6 +16,7 @@
 #include <cstdint>
 
 #include "arkoala_api_generated.h"
+#include "ui/base/utils/utils.h"
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
@@ -26,11 +27,34 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace LazyForEachOpsAccessor {
+void NotifyChangeImpl(Ark_NativePointer node, int32_t startIdx, int32_t endIdx, int32_t changeCnt)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<LazyContainer>();
+        CHECK_NULL_VOID(pattern);
+    if (startIdx >= 0) {
+        frameNode->ChildrenUpdatedFrom(startIdx);
+    }
+    if (endIdx >= 0) {
+        pattern->NotifyDataChange(endIdx, changeCnt);
+    }
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    pattern->RemoveItemsOnChange(startIdx);
+}
 void SyncImpl(Ark_NativePointer node,
               Ark_Int32 totalCount,
               const Callback_CreateItem* creator,
               const Callback_RangeUpdate* updater)
 {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode && creator && updater);
+    auto lazyComponent = frameNode->GetPattern<LazyContainer>();
+    CHECK_NULL_VOID(lazyComponent);
+    lazyComponent->Synchronize(
+        [callback = CallbackHelper(*creator)](
+            int32_t index) { return AceType::DynamicCast<FrameNode>(callback.BuildSync(index)); },
+        [cb = CallbackHelper(*updater)](int32_t start, int32_t end) { cb.InvokeSync(start, end); }, totalCount);
 }
 } // LazyForEachOpsAccessor
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
@@ -41,4 +65,4 @@ const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
     return &LazyForEachOpsAccessorImpl;
 }
 
-} // namespace OHOS::Ace::NG::GeneratedModifier
+}

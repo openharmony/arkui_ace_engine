@@ -26,7 +26,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ICurve, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ICurve, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { IndicatorComponentController } from "./indicatorcomponent"
 import { EdgeEffect, Curve, PageFlipMode } from "./enums"
 import { Callback_Number_Void, Callback_Opt_Number_Void } from "./alphabetIndexer"
@@ -35,6 +35,7 @@ import { Resource } from "global/resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
 import { LengthMetrics } from "../Graphics"
+import { SwiperOpsHandWritten } from "./../handwritten"
 export class SwiperControllerInternal {
     public static fromPtr(ptr: KPointer): SwiperController {
         const obj : SwiperController = new SwiperController()
@@ -884,7 +885,7 @@ export type OnSwiperAnimationStartCallback = (index: number, targetIndex: number
 export type OnSwiperAnimationEndCallback = (index: number, extraInfo: SwiperAnimationEvent) => void;
 export type OnSwiperGestureSwipeCallback = (index: number, extraInfo: SwiperAnimationEvent) => void;
 export interface SwiperAttribute extends CommonMethod {
-    index(value: number | undefined): this
+    index(value: number | Bindable<number> | undefined): this
     autoPlay(autoPlay: boolean | undefined, options?: AutoPlayOptions): this
     interval(value: number | undefined): this
     indicator(value: DotIndicator | DigitIndicator | boolean | undefined | IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this
@@ -915,71 +916,6 @@ export interface SwiperAttribute extends CommonMethod {
     prevMargin(value: Length | undefined, ignoreBlank?: boolean): this
     nextMargin(value: Length | undefined, ignoreBlank?: boolean): this
     _onChangeEvent_index(callback: ((selected: number | undefined) => void)): void
-}
-export interface UISwiperAttribute extends UICommonMethod {
-    /** @memo */
-    index(value: number | undefined): this
-    /** @memo */
-    autoPlay(autoPlay: boolean | undefined, options?: AutoPlayOptions): this
-    /** @memo */
-    interval(value: number | undefined): this
-    /** @memo */
-    indicator(value: DotIndicator | DigitIndicator | boolean | undefined | IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this
-    /** @memo */
-    loop(value: boolean | undefined): this
-    /** @memo */
-    duration(value: number | undefined): this
-    /** @memo */
-    vertical(value: boolean | undefined): this
-    /** @memo */
-    itemSpace(value: number | string | undefined): this
-    /** @memo */
-    displayMode(value: SwiperDisplayMode | undefined): this
-    /** @memo */
-    cachedCount(count: number | undefined, isShown?: boolean): this
-    /** @memo */
-    effectMode(value: EdgeEffect | undefined): this
-    /** @memo */
-    disableSwipe(value: boolean | undefined): this
-    /** @memo */
-    curve(value: Curve | string | ICurve | undefined): this
-    /** @memo */
-    onChange(value: ((index: number) => void) | undefined): this
-    /** @memo */
-    onSelected(value: ((index: number) => void) | undefined): this
-    /** @memo */
-    indicatorStyle(value: IndicatorStyle | undefined): this
-    /** @memo */
-    onUnselected(value: ((index: number) => void) | undefined): this
-    /** @memo */
-    onAnimationStart(value: OnSwiperAnimationStartCallback | undefined): this
-    /** @memo */
-    onAnimationEnd(value: OnSwiperAnimationEndCallback | undefined): this
-    /** @memo */
-    onGestureSwipe(value: OnSwiperGestureSwipeCallback | undefined): this
-    /** @memo */
-    nestedScroll(value: SwiperNestedScrollMode | undefined): this
-    /** @memo */
-    customContentTransition(value: SwiperContentAnimatedTransition | undefined): this
-    /** @memo */
-    onContentDidScroll(value: ContentDidScrollCallback | undefined): this
-    /** @memo */
-    indicatorInteractive(value: boolean | undefined): this
-    /** @memo */
-    pageFlipMode(value: PageFlipMode | undefined): this
-    /** @memo */
-    onContentWillScroll(value: ContentWillScrollCallback | undefined): this
-    /** @memo */
-    displayArrow(value: ArrowStyle | boolean | undefined, isHoverShow?: boolean): this
-    /** @memo */
-    displayCount(value: number | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this
-    /** @memo */
-    prevMargin(value: Length | undefined, ignoreBlank?: boolean): this
-    /** @memo */
-    nextMargin(value: Length | undefined, ignoreBlank?: boolean): this
-    /** @memo */
-    _onChangeEvent_index(callback: ((selected: number | undefined) => void)): void
-    /** @memo */
 }
 export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttribute {
     index_value?: number | undefined
@@ -1008,7 +944,7 @@ export class ArkSwiperStyle extends ArkCommonMethodStyle implements SwiperAttrib
     indicatorInteractive_value?: boolean | undefined
     pageFlipMode_value?: PageFlipMode | undefined
     onContentWillScroll_value?: ContentWillScrollCallback | undefined
-    public index(value: number | undefined): this {
+    public index(value: number | Bindable<number> | undefined): this {
         return this
     }
     public autoPlay(autoPlay: boolean | undefined, options?: AutoPlayOptions): this {
@@ -1114,12 +1050,10 @@ export interface SwiperContentWillScrollResult {
 }
 export type ContentDidScrollCallback = (selectedIndex: number, index: number, position: number, mainAxisLength: number) => void;
 export type ContentWillScrollCallback = (result: SwiperContentWillScrollResult) => boolean;
-/** @memo:stable */
-export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISwiperAttribute {
+export class ArkSwiperComponent extends ArkCommonMethodComponent implements SwiperAttribute {
     getPeer(): ArkSwiperPeer {
         return (this.peer as ArkSwiperPeer)
     }
-    /** @memo */
     public setSwiperOptions(controller?: SwiperController): this {
         if (this.checkPriority("setSwiperOptions")) {
             const controller_casted = controller as (SwiperController | undefined)
@@ -1128,16 +1062,18 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
-    public index(value: number | undefined): this {
-        if (this.checkPriority("index")) {
-            const value_casted = value as (number | undefined)
-            this.getPeer()?.indexAttribute(value_casted)
-            return this
+    public index(value: number | Bindable<number> | undefined): this {
+        if (typeof value === 'number' || typeof value === 'undefined') {
+            if (this.checkPriority("index")) {
+                const value_casted = value as (number | undefined)
+                this.getPeer()?.indexAttribute(value_casted)
+                return this
+            }
         }
+        SwiperOpsHandWritten.hookSwiperAttributeIndexImpl(this.getPeer().peer.ptr,
+            (value as Bindable<number>));
         return this
     }
-    /** @memo */
     public autoPlay(autoPlay: boolean | undefined, options?: AutoPlayOptions): this {
         if (this.checkPriority("autoPlay")) {
             const autoPlay_type = runtimeType(autoPlay)
@@ -1157,7 +1093,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public interval(value: number | undefined): this {
         if (this.checkPriority("interval")) {
             const value_casted = value as (number | undefined)
@@ -1166,7 +1101,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public indicator(value: DotIndicator | DigitIndicator | boolean | undefined | IndicatorComponentController | DotIndicator | DigitIndicator | boolean | undefined): this {
         if (this.checkPriority("indicator")) {
             const value_type = runtimeType(value)
@@ -1184,7 +1118,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public loop(value: boolean | undefined): this {
         if (this.checkPriority("loop")) {
             const value_casted = value as (boolean | undefined)
@@ -1193,7 +1126,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public duration(value: number | undefined): this {
         if (this.checkPriority("duration")) {
             const value_casted = value as (number | undefined)
@@ -1202,7 +1134,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public vertical(value: boolean | undefined): this {
         if (this.checkPriority("vertical")) {
             const value_casted = value as (boolean | undefined)
@@ -1211,7 +1142,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public itemSpace(value: number | string | undefined): this {
         if (this.checkPriority("itemSpace")) {
             const value_casted = value as (number | string | undefined)
@@ -1220,7 +1150,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public displayMode(value: SwiperDisplayMode | undefined): this {
         if (this.checkPriority("displayMode")) {
             const value_casted = value as (SwiperDisplayMode | undefined)
@@ -1229,7 +1158,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public cachedCount(count: number | undefined, isShown?: boolean): this {
         if (this.checkPriority("cachedCount")) {
             const count_type = runtimeType(count)
@@ -1249,7 +1177,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public effectMode(value: EdgeEffect | undefined): this {
         if (this.checkPriority("effectMode")) {
             const value_casted = value as (EdgeEffect | undefined)
@@ -1258,7 +1185,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public disableSwipe(value: boolean | undefined): this {
         if (this.checkPriority("disableSwipe")) {
             const value_casted = value as (boolean | undefined)
@@ -1267,7 +1193,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public curve(value: Curve | string | ICurve | undefined): this {
         if (this.checkPriority("curve")) {
             const value_casted = value as (Curve | string | ICurve | undefined)
@@ -1276,7 +1201,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public onChange(value: ((index: number) => void) | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_casted = value as (((index: number) => void) | undefined)
@@ -1285,7 +1209,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public onSelected(value: ((index: number) => void) | undefined): this {
         if (this.checkPriority("onSelected")) {
             const value_casted = value as (((index: number) => void) | undefined)
@@ -1294,7 +1217,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public indicatorStyle(value: IndicatorStyle | undefined): this {
         if (this.checkPriority("indicatorStyle")) {
             const value_casted = value as (IndicatorStyle | undefined)
@@ -1303,7 +1225,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public onUnselected(value: ((index: number) => void) | undefined): this {
         if (this.checkPriority("onUnselected")) {
             const value_casted = value as (((index: number) => void) | undefined)
@@ -1312,7 +1233,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public onAnimationStart(value: OnSwiperAnimationStartCallback | undefined): this {
         if (this.checkPriority("onAnimationStart")) {
             const value_casted = value as (OnSwiperAnimationStartCallback | undefined)
@@ -1321,7 +1241,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public onAnimationEnd(value: OnSwiperAnimationEndCallback | undefined): this {
         if (this.checkPriority("onAnimationEnd")) {
             const value_casted = value as (OnSwiperAnimationEndCallback | undefined)
@@ -1330,7 +1249,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public onGestureSwipe(value: OnSwiperGestureSwipeCallback | undefined): this {
         if (this.checkPriority("onGestureSwipe")) {
             const value_casted = value as (OnSwiperGestureSwipeCallback | undefined)
@@ -1339,7 +1257,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public nestedScroll(value: SwiperNestedScrollMode | undefined): this {
         if (this.checkPriority("nestedScroll")) {
             const value_casted = value as (SwiperNestedScrollMode | undefined)
@@ -1348,7 +1265,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public customContentTransition(value: SwiperContentAnimatedTransition | undefined): this {
         if (this.checkPriority("customContentTransition")) {
             const value_casted = value as (SwiperContentAnimatedTransition | undefined)
@@ -1357,7 +1273,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public onContentDidScroll(value: ContentDidScrollCallback | undefined): this {
         if (this.checkPriority("onContentDidScroll")) {
             const value_casted = value as (ContentDidScrollCallback | undefined)
@@ -1366,7 +1281,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public indicatorInteractive(value: boolean | undefined): this {
         if (this.checkPriority("indicatorInteractive")) {
             const value_casted = value as (boolean | undefined)
@@ -1375,7 +1289,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public pageFlipMode(value: PageFlipMode | undefined): this {
         if (this.checkPriority("pageFlipMode")) {
             const value_casted = value as (PageFlipMode | undefined)
@@ -1384,7 +1297,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public onContentWillScroll(value: ContentWillScrollCallback | undefined): this {
         if (this.checkPriority("onContentWillScroll")) {
             const value_casted = value as (ContentWillScrollCallback | undefined)
@@ -1393,7 +1305,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public displayArrow(value: ArrowStyle | boolean | undefined, isHoverShow?: boolean): this {
         if (this.checkPriority("displayArrow")) {
             const value_casted = value as (ArrowStyle | boolean | undefined)
@@ -1403,7 +1314,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public displayCount(value: number | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this {
         if (this.checkPriority("displayCount")) {
             const value_casted = value as (number | string | SwiperAutoFill | undefined)
@@ -1413,7 +1323,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public prevMargin(value: Length | undefined, ignoreBlank?: boolean): this {
         if (this.checkPriority("prevMargin")) {
             const value_casted = value as (Length | undefined)
@@ -1423,7 +1332,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public nextMargin(value: Length | undefined, ignoreBlank?: boolean): this {
         if (this.checkPriority("nextMargin")) {
             const value_casted = value as (Length | undefined)
@@ -1433,7 +1341,6 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_index(callback: ((selected: number | undefined) => void)): void {
         if (this.checkPriority("_onChangeEvent_index")) {
             const callback_casted = callback as (((selected: number | undefined) => void))
@@ -1451,7 +1358,7 @@ export class ArkSwiperComponent extends ArkCommonMethodComponent implements UISw
 /** @memo */
 export function Swiper(
     /** @memo */
-    style: ((attributes: UISwiperAttribute) => void) | undefined,
+    style: ((attributes: SwiperAttribute) => void) | undefined,
     controller?: SwiperController,
     /** @memo */
     content_?: (() => void) | undefined,

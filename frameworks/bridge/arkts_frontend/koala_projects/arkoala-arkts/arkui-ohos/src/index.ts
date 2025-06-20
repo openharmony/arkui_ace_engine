@@ -14,7 +14,7 @@
  */
 
 export { Observed, observableProxy } from "@koalaui/common"
-export * from "@koalaui/arkui-common"
+
 
 export * from "./component"
 // export * from "./handwritten"
@@ -22,7 +22,7 @@ export * from "./component"
 export * from "./ArkStructBase"
 export * from "./UserView"
 export * from "./stateOf"
-export * from "../ohos.router"
+export * from "@ohos/router"
 // export { AttributeUpdater, ColumnModifier, CommonModifier, SymbolGlyphModifier } from "./ohos.arkui.modifier"
 // export * from "./ArkNavigation"
 export * from "./PeerNode"
@@ -32,4 +32,5 @@ export * from "./component/peers/CallbacksChecker"
 // export * from "./ArkTestComponent"
 // export * from "./component/peers/ArkButtonPeer"
 export * from './stateManagement'
-export { LengthMetrics, LengthMetricsInternal } from './Graphics'
+export { LengthMetrics } from './Graphics'
+export * from "@ohos/promptAction"

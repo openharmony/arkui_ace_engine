@@ -67,7 +67,7 @@ constexpr auto ATTRIBUTE_DAILY_SIX_ROW_SPACE_NAME = "dailySixRowSpace";
 constexpr auto ATTRIBUTE_LUNAR_HEIGHT_NAME = "lunarHeight";
 constexpr auto ATTRIBUTE_UNDERSCORE_WIDTH_NAME = "underscoreWidth";
 constexpr auto ATTRIBUTE_UNDERSCORE_LENGTH_NAME = "underscoreLength";
-constexpr auto ATTRIBUTE_SCEDULE_MARKER_RADIUS_NAME = "scheduleMarkerRadius";
+constexpr auto ATTRIBUTE_SCHEDULE_MARKER_RADIUS_NAME = "scheduleMarkerRadius";
 constexpr auto ATTRIBUTE_BOUNDARY_ROW_OFFSET_NAME = "boundaryRowOffset";
 constexpr auto ATTRIBUTE_BOUNDARY_COL_OFFSET_NAME = "boundaryColOffset";
 
@@ -162,7 +162,7 @@ const std::vector<Ark_CalendarDay> nextDayArray {
 };
 Converter::ArkArrayHolder<Array_CalendarDay> nextDays(nextDayArray);
 
-const Ark_Type_CalendarInterface_callable0_value calendarOptions {
+const Ark_CalendarRequestedMonths calendarOptions {
     .date {
         .year = Converter::ArkValue<Ark_Number>(2024),
         .month = Converter::ArkValue<Ark_Number>(2),
@@ -738,7 +738,7 @@ HWTEST_F(CalendarModifierTest, currentDayStyleTest3, TestSize.Level1)
         EXPECT_EQ(resultStr, "15.00vp");
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNDERSCORE_LENGTH_NAME);
         EXPECT_EQ(resultStr, "16.00vp");
-        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCEDULE_MARKER_RADIUS_NAME);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCHEDULE_MARKER_RADIUS_NAME);
         EXPECT_EQ(resultStr, "17.00vp");
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BOUNDARY_ROW_OFFSET_NAME);
         EXPECT_EQ(resultStr, "18.00vp");

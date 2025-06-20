@@ -23,6 +23,7 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/implementation/pattern_lock_controller_accessor_peer_impl.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -101,7 +102,7 @@ void BackgroundColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<Color>(*value);
-    ViewAbstract::SetBackgroundColor(frameNode, convValue);
+    ViewAbstractModelStatic::SetBackgroundColor(frameNode, convValue);
 }
 void RegularColorImpl(Ark_NativePointer node,
                       const Opt_ResourceColor* value)

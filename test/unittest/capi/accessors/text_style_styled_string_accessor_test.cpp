@@ -33,8 +33,8 @@ const std::string g_fontWeight = "200";
 const Ace::FontStyle g_fontStyle = Ace::FontStyle::ITALIC;
 } // namespace
 
-class TextStyleStyledStringAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUITextStyle_styled_stringAccessor,
-    &GENERATED_ArkUIAccessors::getTextStyle_styled_stringAccessor, TextStyle_styled_stringPeer> {
+class TextStyleStyledStringAccessorTest : public AccessorTestCtorBase<GENERATED_ArkUITextStyleAccessor,
+    &GENERATED_ArkUIAccessors::getTextStyleAccessor, TextStylePeer> {
 public:
     static void SetUpTestCase()
     {

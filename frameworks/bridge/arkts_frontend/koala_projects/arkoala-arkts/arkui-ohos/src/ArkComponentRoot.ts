@@ -15,13 +15,11 @@
 
 import { mutableState, MutableState, NodeAttach, rememberDisposable, RunEffect, scheduleCallback } from "@koalaui/runtime"
 import { PeerNode } from "./PeerNode";
-import { ArkComponentRootPeer } from "./component";
+import { ArkComponentRootPeer, ArkCustomComponentRootPeer } from "./component";
 import { ArkCustomComponent } from "./ArkCustomComponent"
 import { int32 } from "@koalaui/common"
 import { InteropNativeModule } from "@koalaui/interop"
-import router from "../ohos.router"
-
-import { CurrentRouterTransitionState, VisibilityHiding, VisibilityShowing, WithRouterTransitionState } from "./handwritten/Router";
+import router from "@ohos/router"
 
 let _isNeedCreate: boolean = false
 
@@ -40,7 +38,7 @@ export function ArkComponentRoot(
 ) {
     InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot enter`)
     NodeAttach<PeerNode>(
-        () => ArkComponentRootPeer.create(undefined),
+        () => ArkCustomComponentRootPeer.create(component),
         (node: PeerNode) => {
             if (_isNeedCreate) {
                 rememberDisposable(() => {
@@ -57,20 +55,6 @@ export function ArkComponentRoot(
                 content()
                 InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach after content`)
                 return
-            }
-            let state = CurrentRouterTransitionState()
-            if (state) {
-                RunEffect<int32>(state.visibility, (visibility: int32) => {
-                    switch (visibility) {
-                        case VisibilityShowing:
-                            component.onPageShow()
-                            break
-                        case VisibilityHiding:
-                            component.onPageHide()
-                            break
-                        default: break
-                    }
-                })
             }
             let shown = rememberDisposable(() => {
                 let state = mutableState(false)
@@ -93,8 +77,8 @@ export function ArkComponentRoot(
             if (shown.value) {
                 InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach before WithRouterTransitionState`)
                 InteropNativeModule._NativeLog("AceRouter:ArkComponentRoot NodeAttach, UpdateRouter page visibility state")
+                content();
                 router.UpdateVisiblePagePeerNode(node);
-                WithRouterTransitionState(undefined, content) // skip first frame and hide router state
                 InteropNativeModule._NativeLog(`ArkTS ArkComponentRoot NodeAttach after WithRouterTransitionState`)
             }
         }

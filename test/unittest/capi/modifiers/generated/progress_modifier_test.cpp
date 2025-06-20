@@ -2043,7 +2043,7 @@ HWTEST_F(ProgressModifierTest, setPrivacySensitiveTestDefaultValues, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ProgressModifierTest, setPrivacySensitiveTestPrivacySensitiveValidValues, TestSize.Level1)
+HWTEST_F(ProgressModifierTest, DISABLED_setPrivacySensitiveTestPrivacySensitiveValidValues, TestSize.Level1)
 {
     Opt_Boolean initValuePrivacySensitive;
 

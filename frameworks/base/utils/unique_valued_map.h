@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_UNIQUE_VALUED_MAP_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_UNIQUE_VALUED_MAP_H
 
+#include <functional>
 #include <optional>
 #include <unordered_map>
 
@@ -103,6 +104,21 @@ public:
     {
         keyToValue.clear();
         valueToKey.clear();
+    }
+
+    void RemoveIf(std::function<bool(const Key&, const Value&)>&& pred)
+    {
+        if (!pred) {
+            return;
+        }
+        for (auto it = keyToValue.begin(); it != keyToValue.end();) {
+            if (pred(it->first, it->second)) {
+                valueToKey.erase(it->second);
+                it = keyToValue.erase(it);
+            } else {
+                ++it;
+            }
+        }
     }
 };
 } // namespace OHOS::Ace

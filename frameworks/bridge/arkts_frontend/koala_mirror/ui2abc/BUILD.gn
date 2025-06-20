@@ -16,7 +16,6 @@ import("//build/ohos.gni")
 node_version = "v16.20.2"
 host_arch = "${host_os}-${host_cpu}"
 
-koala_root = ".."
 libarkts_root = "./libarkts"
 
 action("install") {
@@ -27,10 +26,9 @@ action("install") {
     ]
 
     args = [
-        "--project-path", rebase_path("$koala_root"),
+        "--project-path", rebase_path("."),
         "--node-path", rebase_path("//prebuilts/build-tools/common/nodejs/node-${node_version}-${host_arch}/bin")
     ]
-
 }
 
 action("panda_sdk") {

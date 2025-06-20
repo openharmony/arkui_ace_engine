@@ -126,7 +126,9 @@ void DumpJsonToFile(Ark_NodeHandle node, int index)
         return;
     }
     std::stringstream fname;
-    fname << ::testing::UnitTest::GetInstance()->current_test_info()->name();
+    std::string name = ::testing::UnitTest::GetInstance()->current_test_info()->name();
+    std::replace(name.begin(), name.end(), '/', '_');
+    fname << name;
     if (index >= 0) {
         fname << index;
     }

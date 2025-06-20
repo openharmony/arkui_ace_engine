@@ -26,7 +26,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { VoidCallback } from "./units"
 import { XComponentType } from "./enums"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -406,21 +406,6 @@ export interface XComponentAttribute extends CommonMethod {
     hdrBrightness(value: number | undefined): this
     enableTransparentLayer(value: boolean | undefined): this
 }
-export interface UIXComponentAttribute extends UICommonMethod {
-    /** @memo */
-    onLoad(value: OnNativeLoadCallback | undefined): this
-    /** @memo */
-    onDestroy(value: VoidCallback | undefined): this
-    /** @memo */
-    enableAnalyzer(value: boolean | undefined): this
-    /** @memo */
-    enableSecure(value: boolean | undefined): this
-    /** @memo */
-    hdrBrightness(value: number | undefined): this
-    /** @memo */
-    enableTransparentLayer(value: boolean | undefined): this
-    /** @memo */
-}
 export class ArkXComponentStyle extends ArkCommonMethodStyle implements XComponentAttribute {
     onLoad_value?: OnNativeLoadCallback | undefined
     onDestroy_value?: VoidCallback | undefined
@@ -447,12 +432,10 @@ export class ArkXComponentStyle extends ArkCommonMethodStyle implements XCompone
         return this
         }
 }
-/** @memo:stable */
-export class ArkXComponentComponent extends ArkCommonMethodComponent implements UIXComponentAttribute {
+export class ArkXComponentComponent extends ArkCommonMethodComponent implements XComponentAttribute {
     getPeer(): ArkXComponentPeer {
         return (this.peer as ArkXComponentPeer)
     }
-    /** @memo */
     public setXComponentOptions(value: XComponentParameter | XComponentOptions | NativeXComponentParameters): this {
         if (this.checkPriority("setXComponentOptions")) {
             const value_type = runtimeType(value)
@@ -475,7 +458,6 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onLoad(value: OnNativeLoadCallback | undefined): this {
         if (this.checkPriority("onLoad")) {
             const value_casted = value as (OnNativeLoadCallback | undefined)
@@ -484,7 +466,6 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onDestroy(value: VoidCallback | undefined): this {
         if (this.checkPriority("onDestroy")) {
             const value_casted = value as (VoidCallback | undefined)
@@ -493,7 +474,6 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public enableAnalyzer(value: boolean | undefined): this {
         if (this.checkPriority("enableAnalyzer")) {
             const value_casted = value as (boolean | undefined)
@@ -502,7 +482,6 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public enableSecure(value: boolean | undefined): this {
         if (this.checkPriority("enableSecure")) {
             const value_casted = value as (boolean | undefined)
@@ -511,7 +490,6 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public hdrBrightness(value: number | undefined): this {
         if (this.checkPriority("hdrBrightness")) {
             const value_casted = value as (number | undefined)
@@ -520,7 +498,6 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public enableTransparentLayer(value: boolean | undefined): this {
         if (this.checkPriority("enableTransparentLayer")) {
             const value_casted = value as (boolean | undefined)
@@ -538,7 +515,7 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
 /** @memo */
 export function XComponent(
     /** @memo */
-    style: ((attributes: UIXComponentAttribute) => void) | undefined,
+    style: ((attributes: XComponentAttribute) => void) | undefined,
     value: XComponentParameter | XComponentOptions | NativeXComponentParameters,
     /** @memo */
     content_?: (() => void) | undefined,

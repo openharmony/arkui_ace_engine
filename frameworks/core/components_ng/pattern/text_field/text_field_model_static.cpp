@@ -23,7 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ime/text_edit_controller.h"
 #include "core/common/ime/text_input_type.h"
-
+#include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_model_static.h"
@@ -57,7 +57,7 @@ void TextFieldModelStatic::SetShowCounterBorder(FrameNode* frameNode, const std:
 
 void TextFieldModelStatic::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
 {
-    NG::ViewAbstract::SetBackgroundColor(frameNode, color);
+    NG::ViewAbstractModelStatic::SetBackgroundColor(frameNode, color);
     if (color) {
         TextFieldModelNG::SetBackgroundColor(frameNode, *color);
     } else {
@@ -179,6 +179,10 @@ void TextFieldModelStatic::SetSelectedBackgroundColor(FrameNode* frameNode, cons
 
 void TextFieldModelStatic::SetMaxViewLines(FrameNode* frameNode, const std::optional<uint32_t>& valueOpt)
 {
+    if (valueOpt.has_value() && valueOpt.value() <= 0) {
+        TextFieldModelNG::SetMaxViewLines(frameNode, MAX_LINES);
+        return;
+    }
     TextFieldModelNG::SetMaxViewLines(frameNode, valueOpt.value_or(MAX_LINES));
 }
 
@@ -708,5 +712,24 @@ void TextFieldModelStatic::SetShowUnderline(FrameNode* frameNode, const std::opt
 void TextFieldModelStatic::SetSelectAllValue(FrameNode* frameNode, const std::optional<bool>& isSelectAllValue)
 {
     TextFieldModelNG::SetSelectAllValue(frameNode, isSelectAllValue.value_or(false));
+}
+
+void TextFieldModelStatic::SetDefaultCancelIcon(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+
+    CalcDimension iconSize = theme->GetCancelIconSize();
+    Color color = theme->GetCancelButtonIconColor();
+    std::string srcStr = "";
+
+    TextFieldModelNG::SetCancelIconSize(frameNode, iconSize);
+    TextFieldModelNG::SetCancelIconColor(frameNode, color);
+    TextFieldModelNG::SetCanacelIconSrc(frameNode, srcStr);
 }
 } // namespace OHOS::Ace::NG

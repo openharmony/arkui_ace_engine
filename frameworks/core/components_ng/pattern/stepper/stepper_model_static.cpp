@@ -24,26 +24,32 @@ RefPtr<FrameNode> StepperModelStatic::CreateFrameNode(int32_t nodeId)
 {
     auto stepperNode = StepperNode::GetOrCreateStepperNode(
         V2::STEPPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StepperPattern>(); });
-
-    uint32_t index = 0;
-    auto swiperId = stepperNode->GetSwiperId();
-    auto swiperNode = CreateSwiperChild(swiperId, index);
-    swiperNode->MountToParent(stepperNode);
-
-    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    if (swiperPaintProperty) {
-        swiperPaintProperty->UpdateCurve(Curves::LINEAR);
-    }
     return stepperNode;
 }
 
 void StepperModelStatic::SetIndex(FrameNode* frameNode, const std::optional<int32_t>& index)
 {
     CHECK_NULL_VOID(frameNode);
-    if (index.has_value()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(StepperLayoutProperty, Index, index.value(), frameNode);
+    auto stepperNode = AceType::DynamicCast<StepperNode>(frameNode);
+    CHECK_NULL_VOID(stepperNode);
+    bool hasSwiperNode = stepperNode->HasSwiperNode();
+    auto swiperId = stepperNode->GetSwiperId();
+    RefPtr<FrameNode> swiperNode;
+    uint32_t value = index.value_or(0);
+    if (!hasSwiperNode) {
+        swiperNode = CreateSwiperChild(swiperId, value);
+        swiperNode->MountToParent(Referenced::Claim(stepperNode));
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(StepperLayoutProperty, Index, value, frameNode);
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(StepperLayoutProperty, Index, frameNode);
+        swiperNode = AceType::DynamicCast<FrameNode>(
+            stepperNode->GetChildAtIndex(stepperNode->GetChildIndexById(stepperNode->GetSwiperId())));
+        CHECK_NULL_VOID(swiperNode);
+        auto swiperController = swiperNode->GetPattern<SwiperPattern>()->GetSwiperController();
+        swiperController->SwipeTo(value);
+    }
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    if (swiperPaintProperty) {
+        swiperPaintProperty->UpdateCurve(Curves::LINEAR);
     }
 }
 

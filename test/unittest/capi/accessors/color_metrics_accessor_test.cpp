@@ -60,19 +60,19 @@ HWTEST_F(ColorMetricsAccessorTest, NumericTestValidValues, TestSize.Level1)
 HWTEST_F(ColorMetricsAccessorTest, RgbaTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(accessor_->rgba, nullptr);
-    using OneTestStep = std::tuple<Opt_Number, Ark_Number, Ark_Number, Ark_Number, uint32_t>;
+    using OneTestStep = std::tuple<Ark_Number, Ark_Number, Ark_Number, Ark_Number, uint32_t>;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Opt_Number>(0xaa), Converter::ArkValue<Ark_Number>(0x00),
+        { Converter::ArkValue<Ark_Number>(0xaa), Converter::ArkValue<Ark_Number>(0x00),
             Converter::ArkValue<Ark_Number>(0x00), Converter::ArkValue<Ark_Number>(0x11), 0xaa000011 },
-        { Converter::ArkValue<Opt_Number>(0xbb), Converter::ArkValue<Ark_Number>(0x00),
+        { Converter::ArkValue<Ark_Number>(0xbb), Converter::ArkValue<Ark_Number>(0x00),
             Converter::ArkValue<Ark_Number>(0x11), Converter::ArkValue<Ark_Number>(0x00), 0xbb001100 },
-        { Converter::ArkValue<Opt_Number>(0xcc), Converter::ArkValue<Ark_Number>(0x11),
+        { Converter::ArkValue<Ark_Number>(0xcc), Converter::ArkValue<Ark_Number>(0x11),
             Converter::ArkValue<Ark_Number>(0x00), Converter::ArkValue<Ark_Number>(0x00), 0xcc110000 },
-        { Converter::ArkValue<Opt_Number>(0xdd), Converter::ArkValue<Ark_Number>(0x11),
+        { Converter::ArkValue<Ark_Number>(0xdd), Converter::ArkValue<Ark_Number>(0x11),
             Converter::ArkValue<Ark_Number>(0x22), Converter::ArkValue<Ark_Number>(0x33), 0xdd112233 },
-        { Converter::ArkValue<Opt_Number>(0xff), Converter::ArkValue<Ark_Number>(0xff),
+        { Converter::ArkValue<Ark_Number>(0xff), Converter::ArkValue<Ark_Number>(0xff),
             Converter::ArkValue<Ark_Number>(0xff), Converter::ArkValue<Ark_Number>(0xff), 0xffffffff },
-        { Converter::ArkValue<Opt_Number>(0x00), Converter::ArkValue<Ark_Number>(0x00),
+        { Converter::ArkValue<Ark_Number>(0x00), Converter::ArkValue<Ark_Number>(0x00),
             Converter::ArkValue<Ark_Number>(0x00), Converter::ArkValue<Ark_Number>(0x00), 0x00000000 },
     };
     Ark_ColorMetrics resultPeer;
@@ -138,7 +138,7 @@ HWTEST_F(ColorMetricsAccessorTest, BlendColorTestValidValues, TestSize.Level1)
  */
 HWTEST_F(ColorMetricsAccessorTest, GetColorTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->getColor, nullptr);
+    ASSERT_NE(accessor_->color, nullptr);
     using OneTestStep = std::tuple<uint32_t, std::string>;
     static const std::vector<OneTestStep> testPlan = {
         { 0xff000011, "#FF000011" },
@@ -152,7 +152,7 @@ HWTEST_F(ColorMetricsAccessorTest, GetColorTestValidValues, TestSize.Level1)
     std::string resultValue;
     for (auto [inputValue, expectedValue]: testPlan) {
         peer_->colorValue.value = inputValue;
-        arkResultValue = accessor_->getColor(peer_);
+        arkResultValue = accessor_->color(peer_);
         resultValue = Converter::Convert<std::string>(arkResultValue);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
@@ -165,7 +165,7 @@ HWTEST_F(ColorMetricsAccessorTest, GetColorTestValidValues, TestSize.Level1)
  */
 HWTEST_F(ColorMetricsAccessorTest, GetRedTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->getRed, nullptr);
+    ASSERT_NE(accessor_->red, nullptr);
     using OneTestStep = std::tuple<uint32_t, int32_t>;
     static const std::vector<OneTestStep> testPlan = {
         { 0xff110011, 0x11 },
@@ -178,7 +178,7 @@ HWTEST_F(ColorMetricsAccessorTest, GetRedTestValidValues, TestSize.Level1)
     int32_t resultValue;
     for (auto [inputValue, expectedValue]: testPlan) {
         peer_->colorValue.value = inputValue;
-        arkResultValue = accessor_->getRed(peer_);
+        arkResultValue = accessor_->red(peer_);
         resultValue = Converter::Convert<int32_t>(arkResultValue);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
@@ -191,7 +191,7 @@ HWTEST_F(ColorMetricsAccessorTest, GetRedTestValidValues, TestSize.Level1)
  */
 HWTEST_F(ColorMetricsAccessorTest, GetGreenTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->getGreen, nullptr);
+    ASSERT_NE(accessor_->green, nullptr);
     using OneTestStep = std::tuple<uint32_t, int32_t>;
     static const std::vector<OneTestStep> testPlan = {
         { 0xff001111, 0x11 },
@@ -204,7 +204,7 @@ HWTEST_F(ColorMetricsAccessorTest, GetGreenTestValidValues, TestSize.Level1)
     int32_t resultValue;
     for (auto [inputValue, expectedValue]: testPlan) {
         peer_->colorValue.value = inputValue;
-        arkResultValue = accessor_->getGreen(peer_);
+        arkResultValue = accessor_->green(peer_);
         resultValue = Converter::Convert<int32_t>(arkResultValue);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
@@ -217,7 +217,7 @@ HWTEST_F(ColorMetricsAccessorTest, GetGreenTestValidValues, TestSize.Level1)
  */
 HWTEST_F(ColorMetricsAccessorTest, GetBlueTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->getBlue, nullptr);
+    ASSERT_NE(accessor_->blue, nullptr);
     using OneTestStep = std::tuple<uint32_t, int32_t>;
     static const std::vector<OneTestStep> testPlan = {
         { 0xff001111, 0x11 },
@@ -230,7 +230,7 @@ HWTEST_F(ColorMetricsAccessorTest, GetBlueTestValidValues, TestSize.Level1)
     int32_t resultValue;
     for (auto [inputValue, expectedValue]: testPlan) {
         peer_->colorValue.value = inputValue;
-        arkResultValue = accessor_->getBlue(peer_);
+        arkResultValue = accessor_->blue(peer_);
         resultValue = Converter::Convert<int32_t>(arkResultValue);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
@@ -243,7 +243,7 @@ HWTEST_F(ColorMetricsAccessorTest, GetBlueTestValidValues, TestSize.Level1)
  */
 HWTEST_F(ColorMetricsAccessorTest, GetAlphaTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->getAlpha, nullptr);
+    ASSERT_NE(accessor_->alpha, nullptr);
     using OneTestStep = std::tuple<uint32_t, int32_t>;
     static const std::vector<OneTestStep> testPlan = {
         { 0x11ff0011, 0x11 },
@@ -256,7 +256,7 @@ HWTEST_F(ColorMetricsAccessorTest, GetAlphaTestValidValues, TestSize.Level1)
     int32_t resultValue;
     for (auto [inputValue, expectedValue]: testPlan) {
         peer_->colorValue.value = inputValue;
-        arkResultValue = accessor_->getAlpha(peer_);
+        arkResultValue = accessor_->alpha(peer_);
         resultValue = Converter::Convert<int32_t>(arkResultValue);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }

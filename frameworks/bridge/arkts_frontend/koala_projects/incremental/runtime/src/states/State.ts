@@ -52,6 +52,7 @@ export interface StateManager extends StateContext {
     callCallbacks(): void
     frozen: boolean
     reset(): void
+    contextData: object | undefined
 }
 
 /**
@@ -110,6 +111,11 @@ export interface ComputableState<Value> extends Disposable, State<Value> {
      * If value will be recomputed on access.
      */
     readonly recomputeNeeded: boolean
+
+    /**
+      * force a complete rerender / update by executing all update functions
+      */
+    forceCompleteRerender(): void
 }
 
 /**
@@ -196,6 +202,7 @@ interface ManagedState extends Disposable {
 }
 
 interface ManagedScope extends Disposable, Dependency, ReadonlyTreeNode {
+    forceCompleteRerender():void
     hasDependencies(): boolean
     readonly id: KoalaCallsiteKey
     readonly node: IncrementalNode | undefined
@@ -525,7 +532,7 @@ class ParameterImpl<Value> implements MutableState<Value> {
     }
 }
 
-class StateManagerImpl implements StateManager {
+export class StateManagerImpl implements StateManager {
     private stateCreating: string | undefined = undefined
     private readonly statesNamed = new Map<string, Disposable>()
     private readonly statesCreated = new Set<ManagedState>()
@@ -533,7 +540,8 @@ class StateManagerImpl implements StateManager {
     current: ManagedScope | undefined = undefined
     external: Dependency | undefined = undefined
     updateNeeded = false
-    frozen = false
+    frozen: boolean = false
+    contextData: object | undefined = undefined;
     private readonly callbacks = markableQueue()
     readonly journal = new Journal()
 
@@ -891,6 +899,15 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
             if (child?.once)
                 continue
             child?.invalidateOnReuse()
+        }
+    }
+
+    forceCompleteRerender(): void {
+        this.recomputeNeeded = true
+        for (let child = this.child; child; child = child?.next) {
+            if (child?.once)
+                continue
+            child?.forceCompleteRerender()
         }
     }
 

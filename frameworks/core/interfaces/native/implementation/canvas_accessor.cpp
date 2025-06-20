@@ -13,18 +13,21 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+
 #include "arkoala_api_generated.h"
+#include "drawing_canvas_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Drawing_CanvasAccessor {
 void DestroyPeerImpl(Ark_drawing_Canvas peer)
 {
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_drawing_Canvas CtorImpl(Ark_image_PixelMap pixelmap)
 {
-    return nullptr;
+    CHECK_NULL_RETURN(pixelmap, nullptr);
+    return PeerUtils::CreatePeer<drawing_CanvasPeer>(pixelmap->pixelMap);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -40,6 +43,14 @@ void DrawRect1Impl(Ark_drawing_Canvas peer,
                    const Ark_Number* right,
                    const Ark_Number* bottom)
 {
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(left && top && right && bottom);
+    float x = Converter::Convert<float>(*left);
+    float y = Converter::Convert<float>(*top);
+    float w = Converter::Convert<float>(*right) - x;
+    float h = Converter::Convert<float>(*bottom) - y;
+    Rect rect(x, y, w, h);
+    peer->FillRect(rect);
 }
 void DrawRoundRectImpl(Ark_drawing_Canvas peer,
                        Ark_drawing_RoundRect roundRect)

@@ -27,7 +27,7 @@ class ImagePatternTestNg : public ImageBases {};
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, TriggerVisibleAreaChangeForChild001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, TriggerVisibleAreaChangeForChild001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -64,7 +64,7 @@ HWTEST_F(ImagePatternTestNg, TriggerVisibleAreaChangeForChild001, TestSize.Level
  * @tc.desc: Test ResetImage and SetObscured for ImagePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, SetObscured001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, SetObscured001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -89,7 +89,7 @@ HWTEST_F(ImagePatternTestNg, SetObscured001, TestSize.Level1)
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, SetColorFilter001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, SetColorFilter001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -134,7 +134,7 @@ HWTEST_F(ImagePatternTestNg, SetColorFilter001, TestSize.Level1)
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, OnSensitiveStyleChange001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, OnSensitiveStyleChange001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -162,7 +162,7 @@ HWTEST_F(ImagePatternTestNg, OnSensitiveStyleChange001, TestSize.Level1)
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, SetDuration001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, SetDuration001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -188,7 +188,7 @@ HWTEST_F(ImagePatternTestNg, SetDuration001, TestSize.Level1)
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, FindCacheImageNode001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, FindCacheImageNode001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -211,7 +211,7 @@ HWTEST_F(ImagePatternTestNg, FindCacheImageNode001, TestSize.Level1)
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, UpdateCacheImageInfo001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, UpdateCacheImageInfo001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -265,7 +265,7 @@ HWTEST_F(ImagePatternTestNg, UpdateCacheImageInfo001, TestSize.Level1)
  * @tc.desc: Test GetNextIndex and AddImageLoadSuccessEvent for ImagePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, AddImageLoadSuccessEvent001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, AddImageLoadSuccessEvent001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -316,7 +316,7 @@ HWTEST_F(ImagePatternTestNg, AddImageLoadSuccessEvent001, TestSize.Level1)
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, AdaptSelfSize001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, AdaptSelfSize001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -354,7 +354,7 @@ HWTEST_F(ImagePatternTestNg, AdaptSelfSize001, TestSize.Level1)
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, CreatePictureAnimation001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, CreatePictureAnimation001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -380,7 +380,7 @@ HWTEST_F(ImagePatternTestNg, CreatePictureAnimation001, TestSize.Level1)
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, OnVisibleAreaChange001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, OnVisibleAreaChange001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -407,7 +407,7 @@ HWTEST_F(ImagePatternTestNg, OnVisibleAreaChange001, TestSize.Level1)
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, InitCopy001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, InitCopy001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -452,7 +452,7 @@ HWTEST_F(ImagePatternTestNg, InitCopy001, TestSize.Level1)
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, ToJsonValue001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, ToJsonValue001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -486,7 +486,7 @@ HWTEST_F(ImagePatternTestNg, ToJsonValue001, TestSize.Level1)
  * @tc.desc: call TriggerFirstVisibleAreaChange.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, TriggerFirstVisibleAreaChange001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, TriggerFirstVisibleAreaChange001, TestSize.Level0)
 {
     auto frameNode = CreatePixelMapAnimator();
     EXPECT_NE(frameNode, nullptr);
@@ -501,7 +501,7 @@ HWTEST_F(ImagePatternTestNg, TriggerFirstVisibleAreaChange001, TestSize.Level1)
  * @tc.desc: call OnAreaChangedInner.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, OnAreaChangedInner001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, OnAreaChangedInner001, TestSize.Level0)
 {
     auto frameNode = CreatePixelMapAnimator();
     ASSERT_NE(frameNode, nullptr);
@@ -570,7 +570,7 @@ HWTEST_F(ImagePatternTestNg, DumpAdvanceInfo001, TestSize.Level1)
  * @tc.desc: call EnableAnalyzer.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, EnableAnalyzer001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, EnableAnalyzer001, TestSize.Level0)
 {
     auto frameNode = CreatePixelMapAnimator();
     ASSERT_NE(frameNode, nullptr);
@@ -589,7 +589,7 @@ HWTEST_F(ImagePatternTestNg, EnableAnalyzer001, TestSize.Level1)
  * @tc.desc: call OnDirtyLayoutWrapperSwap.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level0)
 {
     auto frameNode = CreatePixelMapAnimator();
     ASSERT_NE(frameNode, nullptr);
@@ -626,7 +626,7 @@ HWTEST_F(ImagePatternTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
  * @tc.desc: call UpdateFormDurationByRemainder.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, UpdateFormDurationByRemainder001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, UpdateFormDurationByRemainder001, TestSize.Level0)
 {
     auto frameNode = CreatePixelMapAnimator();
     ASSERT_NE(frameNode, nullptr);
@@ -645,7 +645,7 @@ HWTEST_F(ImagePatternTestNg, UpdateFormDurationByRemainder001, TestSize.Level1)
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, CheckCallback001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, CheckCallback001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -707,7 +707,7 @@ HWTEST_F(ImagePatternTestNg, CheckCallback001, TestSize.Level1)
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, CheckHandles001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, CheckHandles001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -734,7 +734,7 @@ HWTEST_F(ImagePatternTestNg, CheckHandles001, TestSize.Level1)
  * @tc.desc: Test Image InitOnKeyEvent method calls.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, ImagePatternInitOnKeyEvent001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, ImagePatternInitOnKeyEvent001, TestSize.Level0)
 {
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
@@ -753,7 +753,7 @@ HWTEST_F(ImagePatternTestNg, ImagePatternInitOnKeyEvent001, TestSize.Level1)
  * @tc.desc: Test Image OnKeyEvent method calls.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, ImagePatternOnKeyEvent001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, ImagePatternOnKeyEvent001, TestSize.Level0)
 {
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
@@ -779,7 +779,7 @@ HWTEST_F(ImagePatternTestNg, ImagePatternOnKeyEvent001, TestSize.Level1)
  * @tc.desc: Output the dump info of ImagePattern object.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, ImageDumpInfo001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, ImageDumpInfo001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. Out dump info.
@@ -1172,7 +1172,7 @@ HWTEST_F(ImagePatternTestNg, ImageSetExternalDecodeFormat001, TestSize.Level1)
  * @tc.desc: call OnAreaChangedInner.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, OnAreaChangedInner002, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, OnAreaChangedInner002, TestSize.Level0)
 {
     auto frameNode = CreatePixelMapAnimator();
     ASSERT_NE(frameNode, nullptr);
@@ -1191,7 +1191,7 @@ HWTEST_F(ImagePatternTestNg, OnAreaChangedInner002, TestSize.Level1)
  * @tc.desc: Test RemoveAreaChangeInner.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, ImageRemoveAreaChangeInner001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, ImageRemoveAreaChangeInner001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1235,7 +1235,7 @@ HWTEST_F(ImagePatternTestNg, ImageRemoveAreaChangeInner001, TestSize.Level1)
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, CheckCallback002, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, CheckCallback002, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1265,7 +1265,7 @@ HWTEST_F(ImagePatternTestNg, CheckCallback002, TestSize.Level1)
  * @tc.desc: Test function for ImagePattern.
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, ImageHandleCopyTest001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, ImageHandleCopyTest001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1459,7 +1459,7 @@ HWTEST_F(ImagePatternTestNg, ConvertOrientationToString002, TestSize.Level1)
  * @tc.desc: Prepare Animation
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, PrepareAnimation, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, PrepareAnimation, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1527,7 +1527,7 @@ HWTEST_F(ImagePatternTestNg, DumpFillColor, TestSize.Level1)
  * @tc.desc: SetImageAnalyzerConfig
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, SetImageAnalyzerConfig, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, SetImageAnalyzerConfig, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1561,7 +1561,7 @@ HWTEST_F(ImagePatternTestNg, SetImageAnalyzerConfig, TestSize.Level1)
  * @tc.desc: RecycleImageData001
  * @tc.type: FUNC
  */
-HWTEST_F(ImagePatternTestNg, RecycleImageData001, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, RecycleImageData001, TestSize.Level0)
 {
     /**
     * @tc.steps: step1. create Image frameNode.
@@ -1592,7 +1592,7 @@ HWTEST_F(ImagePatternTestNg, RecycleImageData001, TestSize.Level1)
 * @tc.desc: RecycleImageData002
 * @tc.type: FUNC
 */
-HWTEST_F(ImagePatternTestNg, RecycleImageData002, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, RecycleImageData002, TestSize.Level0)
 {
     /**
     * @tc.steps: step1. create Image frameNode.
@@ -1624,7 +1624,7 @@ HWTEST_F(ImagePatternTestNg, RecycleImageData002, TestSize.Level1)
 * @tc.desc: RecycleImageData003
 * @tc.type: FUNC
 */
-HWTEST_F(ImagePatternTestNg, RecycleImageData003, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, RecycleImageData003, TestSize.Level0)
 {
     /**
     * @tc.steps: step1. create Image frameNode.
@@ -1655,7 +1655,7 @@ HWTEST_F(ImagePatternTestNg, RecycleImageData003, TestSize.Level1)
 * @tc.desc: RecycleImageData004
 * @tc.type: FUNC
 */
-HWTEST_F(ImagePatternTestNg, RecycleImageData004, TestSize.Level1)
+HWTEST_F(ImagePatternTestNg, RecycleImageData004, TestSize.Level0)
 {
     /**
     * @tc.steps: step1. create Image frameNode.

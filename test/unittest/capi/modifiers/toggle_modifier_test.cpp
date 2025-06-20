@@ -815,6 +815,7 @@ HWTEST_F(ToggleModifierTest, setSwitchStyleTestTrackBorderRadiusInvalidValues, T
     }
 }
 
+#ifdef WRONG_OLD_GEN
 /*
  * @tc.name: setOnChangeEventIsOnImpl
  * @tc.desc:
@@ -854,5 +855,6 @@ HWTEST_F(ToggleModifierTest, setOnChangeEventIsOnImpl, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, false);
 }
+#endif
 
 } // namespace OHOS::Ace::NG

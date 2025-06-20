@@ -102,6 +102,8 @@ const auto ALEN_VP_POS = ArkValue<Ark_Length>(AFLT32_POS);
 const auto ALEN_VP_NEG = ArkValue<Ark_Length>(AFLT32_NEG);
 const auto OPT_LEN_VP_POS = ArkValue<Opt_Length>(AFLT32_POS);
 const auto OPT_LEN_VP_NEG = ArkValue<Opt_Length>(AFLT32_NEG);
+const auto OPT_DIM_VP_POS = ArkValue<Opt_Dimension>(AFLT32_POS);
+const auto OPT_DIM_VP_NEG = ArkValue<Opt_Dimension>(AFLT32_NEG);
 
 // check length
 const std::string CHECK_POSITIVE_VALUE_INT("1234.00px");
@@ -201,7 +203,7 @@ extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testNumberN
 extern std::vector<std::tuple<ResIntegerID, std::string, OHOS::Ace::ResRawValue>> resourceInitTable;
 
 const Ark_Font TEST_ARK_FONT = {
-    .size = ArkValue<Opt_Length>(12._px),
+    .size = ArkValue<Opt_Length>("12.0px"),
     .weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(ARK_FONT_WEIGHT_BOLD),
     .family = ArkUnion<Opt_Union_String_Resource, Ark_String>("TestFontFamily"),
     .style = ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC),

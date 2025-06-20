@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Color } from "./enums"
 import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -113,23 +113,16 @@ export type HyperlinkInterface = (address: string | Resource, content?: string |
 export interface HyperlinkAttribute extends CommonMethod {
     color(value: Color | number | string | Resource | undefined): this
 }
-export interface UIHyperlinkAttribute extends UICommonMethod {
-    /** @memo */
-    color(value: Color | number | string | Resource | undefined): this
-    /** @memo */
-}
 export class ArkHyperlinkStyle extends ArkCommonMethodStyle implements HyperlinkAttribute {
     color_value?: Color | number | string | Resource | undefined
     public color(value: Color | number | string | Resource | undefined): this {
         return this
         }
 }
-/** @memo:stable */
-export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements UIHyperlinkAttribute {
+export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements HyperlinkAttribute {
     getPeer(): ArkHyperlinkPeer {
         return (this.peer as ArkHyperlinkPeer)
     }
-    /** @memo */
     public setHyperlinkOptions(address: string | Resource, content?: string | Resource): this {
         if (this.checkPriority("setHyperlinkOptions")) {
             const address_casted = address as (string | Resource)
@@ -139,7 +132,6 @@ export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements U
         }
         return this
     }
-    /** @memo */
     public color(value: Color | number | string | Resource | undefined): this {
         if (this.checkPriority("color")) {
             const value_casted = value as (Color | number | string | Resource | undefined)
@@ -157,7 +149,7 @@ export class ArkHyperlinkComponent extends ArkCommonMethodComponent implements U
 /** @memo */
 export function Hyperlink(
     /** @memo */
-    style: ((attributes: UIHyperlinkAttribute) => void) | undefined,
+    style: ((attributes: HyperlinkAttribute) => void) | undefined,
     address: string | Resource, content?: string | Resource,
     /** @memo */
     content_?: (() => void) | undefined,

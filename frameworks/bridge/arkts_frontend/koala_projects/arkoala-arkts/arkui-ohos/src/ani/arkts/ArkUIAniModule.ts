@@ -13,10 +13,15 @@
  * limitations under the License.
  */
 
-import { KPointer, KInt } from "@koalaui/interop"
+import { KPointer, KInt, KLong } from "@koalaui/interop"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
 import common from "@ohos.app.ability.common"
+import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
+import { DrawContext } from "arkui/Graphics"
+import { DrawModifier, AsyncCallback } from "arkui/component"
+import { ArkCustomComponent } from "arkui/ArkCustomComponent"
+import { WaterFlowOptions,WaterFlowSections } from "arkui/component"
 
 export class ArkUIAniModule {
     static {
@@ -31,12 +36,45 @@ export class ArkUIAniModule {
 
     native static _ConvertUtils_ConvertToPixelMapAni(ptr: KPointer): image.PixelMap
 
+    // for __Common
     native static _Common_GetHostContext(): common.Context
 
     native static _Common_Sync_InstanceId(id: KInt): void
+
     native static _Common_Restore_InstanceId(): void
 
+    native static _Common_Get_Current_InstanceId(): KInt
+
+    // for CustomNode
+    native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
+
+    // for BuilderNode
+    native static _BuilderProxyNode_Construct(id: KInt): KPointer
+
+    // for ContentSlot
     native static _ContentSlot_construct(id: KInt): KPointer
 
     native static _ContentSlotInterface_setContentSlotOptions(slot: KPointer, content: KPointer): void
+
+    native static _SetDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
+
+    native static _SetDrawModifier(ptr: KPointer, drawModifier: DrawModifier): void
+    
+    native static _Invalidate(ptr: KPointer): void
+
+    native static _SetWaterFlowOptions(ptr: KPointer, options: WaterFlowOptions): void
+    
+    native static _DragEvent_Set_Data(ptr: KLong, data : unifiedDataChannel.UnifiedData) : void
+    native static _DragEvent_Get_Data(ptr: KLong) : unifiedDataChannel.UnifiedData
+    native static _DragEvent_Get_Summary(ptr: KLong) : unifiedDataChannel.Summary
+    native static _DragEvent_Set_PixelMap(ptr: KLong, pixelMap: image.PixelMap) : void
+    native static _DragEvent_Set_ExtraInfo(ptr: KLong, extraInfo: string) : void
+    native static _DragEvent_Set_CustomNode(ptr: KLong, customNode: KPointer) : void
+    
+    // for componentSnapshot
+    native static _ComponentSnapshot_createFromBuilderWithCallback(ptr: KPointer, destroyCallback: () => void,
+        callback: AsyncCallback<image.PixelMap>, delay?: number, checkImageStatus?: boolean): void
+    
+    native static _ComponentSnapshot_createFromBuilderWithPromise(ptr: KPointer, destroyCallback: () => void,
+        delay?: number, checkImageStatus?: boolean): Promise<image.PixelMap>
 }

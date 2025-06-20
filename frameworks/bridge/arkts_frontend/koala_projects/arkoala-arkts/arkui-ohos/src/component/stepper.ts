@@ -17,18 +17,18 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { int32, int64, float32 } from "@koalaui/common"
-import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, InteropNativeModule } from "@koalaui/interop"
 import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
-import { Callback_Void } from "./abilityComponent"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { Callback_Number_Number_Void } from "./grid"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { StepperOpsHandWritten } from "./../handwritten"
 
 export class ArkStepperPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -41,7 +41,7 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setStepperOptionsAttribute(value?: Literal_Number_index): void {
+    setStepperOptionsAttribute(value?: StepperOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -52,8 +52,13 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
             let value_value_index_type : int32 = RuntimeType.UNDEFINED
             value_value_index_type = runtimeType(value_value_index)
             thisSerializer.writeInt8(value_value_index_type as int32)
-            if ((RuntimeType.UNDEFINED) != (value_value_index_type)) {
-                const value_value_index_value  = value_value_index!
+            if ((RuntimeType.OBJECT) == (value_value_index_type)) {
+                StepperOpsHandWritten.hookStepperAttributeStepperIndexImpl(this.peer.ptr,
+                    (value_value_index as Bindable<number>));
+                thisSerializer.release()
+                return
+            } else if ((RuntimeType.NUMBER) == (value_value_index_type)) {
+                const value_value_index_value  = value_value_index! as number
                 thisSerializer.writeNumber(value_value_index_value)
             }
         }
@@ -127,32 +132,17 @@ export class ArkStepperPeer extends ArkCommonMethodPeer {
         thisSerializer.release()
     }
 }
-export interface Literal_Number_index {
-    index?: number;
+export interface StepperOptions {
+    index?: number | Bindable<number>;
 }
-export type StepperInterface = (value?: Literal_Number_index) => StepperAttribute;
+export type StepperInterface = (value?: StepperOptions) => StepperAttribute;
 export interface StepperAttribute extends CommonMethod {
     onFinish(value: (() => void) | undefined): this
     onSkip(value: (() => void) | undefined): this
     onChange(value: ((first: number,last: number) => void) | undefined): this
     onNext(value: ((first: number,last: number) => void) | undefined): this
     onPrevious(value: ((first: number,last: number) => void) | undefined): this
-    _onChangeEvent_index(callback: ((index: number) => void)): void
-}
-export interface UIStepperAttribute extends UICommonMethod {
-    /** @memo */
-    onFinish(value: (() => void) | undefined): this
-    /** @memo */
-    onSkip(value: (() => void) | undefined): this
-    /** @memo */
-    onChange(value: ((first: number,last: number) => void) | undefined): this
-    /** @memo */
-    onNext(value: ((first: number,last: number) => void) | undefined): this
-    /** @memo */
-    onPrevious(value: ((first: number,last: number) => void) | undefined): this
-    /** @memo */
-    _onChangeEvent_index(callback: ((index: number) => void)): void
-    /** @memo */
+    _onChangeEvent_index(callback: ((index: number | Bindable<number>) => void)): void
 }
 export class ArkStepperStyle extends ArkCommonMethodStyle implements StepperAttribute {
     onFinish_value?: (() => void) | undefined
@@ -175,25 +165,22 @@ export class ArkStepperStyle extends ArkCommonMethodStyle implements StepperAttr
     public onPrevious(value: ((first: number,last: number) => void) | undefined): this {
         return this
     }
-    public _onChangeEvent_index(callback: ((index: number) => void)): void {
+    public _onChangeEvent_index(callback: ((index: number | Bindable<number>) => void)): void {
         throw new Error("Unimplmented")
         }
 }
-/** @memo:stable */
-export class ArkStepperComponent extends ArkCommonMethodComponent implements UIStepperAttribute {
+export class ArkStepperComponent extends ArkCommonMethodComponent implements StepperAttribute {
     getPeer(): ArkStepperPeer {
         return (this.peer as ArkStepperPeer)
     }
-    /** @memo */
-    public setStepperOptions(value?: Literal_Number_index): this {
+    public setStepperOptions(value?: StepperOptions): this {
         if (this.checkPriority("setStepperOptions")) {
-            const value_casted = value as (Literal_Number_index | undefined)
+            const value_casted = value as (StepperOptions | undefined)
             this.getPeer()?.setStepperOptionsAttribute(value_casted)
             return this
         }
         return this
     }
-    /** @memo */
     public onFinish(value: (() => void) | undefined): this {
         if (this.checkPriority("onFinish")) {
             const value_casted = value as ((() => void) | undefined)
@@ -202,7 +189,6 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements UIS
         }
         return this
     }
-    /** @memo */
     public onSkip(value: (() => void) | undefined): this {
         if (this.checkPriority("onSkip")) {
             const value_casted = value as ((() => void) | undefined)
@@ -211,7 +197,6 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements UIS
         }
         return this
     }
-    /** @memo */
     public onChange(value: ((first: number,last: number) => void) | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_casted = value as (((first: number,last: number) => void) | undefined)
@@ -220,7 +205,6 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements UIS
         }
         return this
     }
-    /** @memo */
     public onNext(value: ((first: number,last: number) => void) | undefined): this {
         if (this.checkPriority("onNext")) {
             const value_casted = value as (((first: number,last: number) => void) | undefined)
@@ -229,7 +213,6 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements UIS
         }
         return this
     }
-    /** @memo */
     public onPrevious(value: ((first: number,last: number) => void) | undefined): this {
         if (this.checkPriority("onPrevious")) {
             const value_casted = value as (((first: number,last: number) => void) | undefined)
@@ -238,7 +221,6 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements UIS
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_index(callback: ((index: number) => void)): void {
         if (this.checkPriority("_onChangeEvent_index")) {
             const callback_casted = callback as (((index: number) => void))
@@ -256,8 +238,8 @@ export class ArkStepperComponent extends ArkCommonMethodComponent implements UIS
 /** @memo */
 export function Stepper(
     /** @memo */
-    style: ((attributes: UIStepperAttribute) => void) | undefined,
-    value?: Literal_Number_index,
+    style: ((attributes: StepperAttribute) => void) | undefined,
+    value?: StepperOptions,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {

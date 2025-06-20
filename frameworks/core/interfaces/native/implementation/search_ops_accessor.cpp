@@ -13,9 +13,13 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/search/search_model_static.h"
+#include "core/components_ng/pattern/search/search_model_ng.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SearchOpsAccessor {
@@ -23,7 +27,18 @@ Ark_NativePointer RegisterSearchValueCallbackImpl(Ark_NativePointer node,
                                                   const Ark_String* value,
                                                   const SearchValueCallback* callback)
 {
-    return {};
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode && value && callback, nullptr);
+    auto text = Converter::OptConvert<std::string>(*value);
+    SearchModelNG::SetTextValue(frameNode, text);
+
+    auto onEvent = [arkCallback = CallbackHelper(*callback)](const std::u16string& content) {
+        Converter::ConvContext ctx;
+        auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
+        arkCallback.Invoke(arkContent);
+    };
+    SearchModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
+    return node;
 }
 } // SearchOpsAccessor
 const GENERATED_ArkUISearchOpsAccessor* GetSearchOpsAccessor()

@@ -263,11 +263,7 @@ void ButtonModelStatic::SetStateEffect(FrameNode* frameNode, const std::optional
     CHECK_NULL_VOID(frameNode);
     auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
-    if (stateEffect) {
-        buttonEventHub->SetStateEffect(stateEffect.value());
-    } else {
-        buttonEventHub->SetStateEffect(false);
-    }
+    buttonEventHub->SetStateEffect(stateEffect.value_or(true));
 }
 
 void ButtonModelStatic::SetLabelStyle(FrameNode* frameNode, const std::optional<ButtonParameters>& buttonParameters)

@@ -120,12 +120,12 @@ HWTEST_F(GestureGroupInterfaceAccessorTest, CtorTestGestures, TestSize.Level1)
     std::vector<GestureTypeName> vectorGestureType;
 
     auto tapGestureInterfacePeer = fullAPI_->getAccessors()->getTapGestureInterfaceAccessor()->ctor(nullptr);
-    vectorData.push_back({ .selector = 0, .value0 = tapGestureInterfacePeer });
+    vectorData.push_back(Converter::ArkUnion<Ark_GestureType, Ark_Gesture>(tapGestureInterfacePeer));
     vectorGestureType.push_back(GestureTypeName::TAP_GESTURE);
 
     auto longPressGestureInterfacePeer =
         fullAPI_->getAccessors()->getLongPressGestureInterfaceAccessor()->ctor(nullptr);
-    vectorData.push_back({ .selector = 1, .value1 = longPressGestureInterfacePeer });
+    vectorData.push_back(Converter::ArkUnion<Ark_GestureType, Ark_Gesture>(longPressGestureInterfacePeer));
     vectorGestureType.push_back(GestureTypeName::LONG_PRESS_GESTURE);
 
     Converter::ArkArrayHolder<Array_GestureType> vectorHolder(vectorData);

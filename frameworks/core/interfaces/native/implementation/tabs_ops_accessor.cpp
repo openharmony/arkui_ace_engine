@@ -14,8 +14,10 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/tabs/tabs_model_ng.h"
+#include "core/components_ng/pattern/tabs/tabs_model_static.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
@@ -41,9 +43,9 @@ Ark_NativePointer RegisterBarModeImpl(Ark_NativePointer node,
                 barModeOptions.nonScrollableLayoutStyle = styleOpt;
             }
         }
-        TabsModelNG::SetScrollableBarModeOptions(frameNode, barModeOptions);
+        TabsModelStatic::SetScrollableBarModeOptions(frameNode, barModeOptions);
     }
-    TabsModelNG::SetTabBarMode(frameNode, mode);
+    TabsModelStatic::SetTabBarMode(frameNode, mode);
     return node;
 }
 Ark_NativePointer RegisterBarBackgroundBlurStyleImpl(Ark_NativePointer node,
@@ -61,7 +63,25 @@ Ark_NativePointer RegisterBarBackgroundBlurStyleImpl(Ark_NativePointer node,
     if (blurStyle) {
         option.blurStyle = blurStyle.value();
     }
-    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, option);
+    TabsModelStatic::SetBarBackgroundBlurStyle(frameNode, option);
+    return node;
+}
+Ark_NativePointer RegisterIndexCallbackImpl(Ark_NativePointer node,
+                                            const Ark_Number* value,
+                                            const IndexCallback* callback)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto conValue = Converter::OptConvert<int32_t>(*value);
+    TabsModelStatic::InitIndex(frameNode, conValue);
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onEvent = [arkCallback = CallbackHelper(*callback), weakNode](const BaseEventInfo* info) {
+        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        CHECK_NULL_VOID(tabsInfo);
+        PipelineContext::SetCallBackNode(weakNode);
+        arkCallback.Invoke(Converter::ArkValue<Ark_Number>(tabsInfo->GetIndex()));
+    };
+    TabsModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
     return node;
 }
 } // TabsOpsAccessor
@@ -70,6 +90,7 @@ const GENERATED_ArkUITabsOpsAccessor* GetTabsOpsAccessor()
     static const GENERATED_ArkUITabsOpsAccessor TabsOpsAccessorImpl {
         TabsOpsAccessor::RegisterBarModeImpl,
         TabsOpsAccessor::RegisterBarBackgroundBlurStyleImpl,
+        TabsOpsAccessor::RegisterIndexCallbackImpl,
     };
     return &TabsOpsAccessorImpl;
 }

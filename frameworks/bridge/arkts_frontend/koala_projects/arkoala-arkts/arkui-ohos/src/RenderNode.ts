@@ -27,6 +27,8 @@ import { Deserializer } from "./component/peers/Deserializer"
 import { CallbackTransformer } from "./component/peers/CallbackTransformer"
 import { PeerNode } from "./PeerNode"
 import { FrameNode } from "./FrameNode"
+import { Utils } from "@ohos/arkui/graphics"
+import { ArkUIAniModule } from "arkui.ani"
 export type DrawCallback = (context: DrawContext) => void;
 export class RenderNodeInternal {
     public static fromPtr(ptr: KPointer): RenderNode {
@@ -326,6 +328,7 @@ export class RenderNode implements MaterializedBase {
         }
         const peerId = PeerNode.nextId()
         const ctorPtr: KPointer = RenderNode.ctor_rendernode(peerId, this.draw)
+        ArkUIAniModule._SetDrawCallback(ctorPtr, this.draw)
         this.peer = new Finalizable(ctorPtr, RenderNode.getFinalizer())
         this.setClipToFrame(true)
     }
@@ -358,7 +361,7 @@ export class RenderNode implements MaterializedBase {
         }
         InteropNativeModule._NativeLog("FFZZYY insertChildAfter 444")
         if (sibling === undefined || sibling === null) {
-            this.childrenList.splice(0, 0, child)
+            this.childrenList.splice(0 as int32, 0 as int32, child)
         } else {
             this.childrenList.splice(indexOfSibling + 1, 0, child)
         }

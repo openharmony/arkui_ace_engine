@@ -387,8 +387,6 @@ class TestArrowFunction extends Log {
         GlobalStateHolder.globalState.value
         parameter(this.log)
     }
-
-
 }
 
 class TestOptionalProperties extends Log {
@@ -626,6 +624,66 @@ class TestImportedMemo {
         sharedMemoFunction()
         ut.sharedMemoFunction()
     }
+}
+
+/** @memo:stable */
+class TestMemoStable extends Log {
+    /** @memo */
+    functionReturnsThis(): this {
+        this.log.push(`function call`)
+        return this
+    }
+
+    /** @memo */
+    testFunctionReturnsThis(): void {
+        GlobalStateHolder.globalState.value
+        this.log.push(`test call`)
+        this.functionReturnsThis()
+    }
+
+    /** @memo */
+    functionReturnsString(): string {
+        this.log.push(`function call`)
+        return "a"
+    }
+
+    /** @memo */
+    testFunctionReturnsString(): void {
+        GlobalStateHolder.globalState.value
+        this.log.push(`test call`)
+        this.functionReturnsString()
+    }
+}
+
+class RefType {
+    public value: number
+
+    constructor() {
+        this.value = 0
+    }
+}
+
+class TestEquality {
+    static log: Array<string> = new Array<string>()
+
+    static val: number = 0
+
+    static ref: RefType = new RefType()
+
+    /** @memo */
+    static testFunction(): void {
+        GlobalStateHolder.globalState.value
+        TestEquality.log.push('testFunction call')
+        TestEquality.methodWithParams(TestEquality.val, TestEquality.ref)
+    }
+
+    /** @memo */
+    static methodWithParams(
+        value: number,
+        ref: RefType,
+    ) {
+        TestEquality.log.push(`methodWithParams: ${value} ${ref.value}`)
+    }
 
 }
 
@@ -834,7 +892,7 @@ suite("Basic memo semantic", () => {
         )
     })
 
-    test.expectFailure("Return type of functional type in lambda", () => {
+    test.expectFailure("Description of the problem", "Return type of functional type in lambda", () => {
         Assert.fail('implement me')
     })
 
@@ -957,7 +1015,7 @@ suite("Auto-deducing memo annotation", () => {
             "deduced variable call"
         )
     })
-    test.expectFailure("memo is assumed when pasing a TRAILING lambda argument to a memo parameter", () => {
+    test.expectFailure("Description of the problem", "memo is assumed when pasing a TRAILING lambda argument to a memo parameter", () => {
         Assert.fail("implement me")
     })
 })
@@ -1157,10 +1215,33 @@ suite("Tracking parameters", () => {
             `methodWithSkipParam: 50 call`,
         )
     })
-    test.expectFailure("Parameters (same as states) are compared as ===", () => {
-        Assert.fail("implement me")
+    test("Parameters (same as states) are compared as ===", () => {
+        const root = testRoot(TestEquality.testFunction)
+        assertResultArray(TestEquality.log,
+            "testFunction call",
+            "methodWithParams: 0 0",
+        )
+        TestEquality.val = 1
+        GlobalStateHolder.globalState.value ++
+        testTick(root)
+        assertResultArray(TestEquality.log,
+            "testFunction call",
+            "methodWithParams: 0 0",
+            "testFunction call",
+            "methodWithParams: 1 0",
+        )
+        TestEquality.ref.value = 1
+        GlobalStateHolder.globalState.value ++
+        testTick(root)
+        assertResultArray(TestEquality.log,
+            "testFunction call",
+            "methodWithParams: 0 0",
+            "testFunction call",
+            "methodWithParams: 1 0",
+            "testFunction call",
+        )
     })
-    test.expectFailure("By convention a lambda parameter with name `content` is not tracked", () => {
+    test.expectFailure("Description of the problem", "By convention a lambda parameter with name `content` is not tracked", () => {
         // This is to be addressed later when the compiler provides ability to compare
         // lambdas by code, not by closure object equality.
 
@@ -1366,7 +1447,7 @@ suite("Method receivers", () => {
         )
     })
 
-    test.expectFailure("lambda with receiver (ArkTS)", () => {
+    test.expectFailure("Description of the problem", "lambda with receiver (ArkTS)", () => {
         Assert.fail('implement me')
     })
 })
@@ -1439,9 +1520,7 @@ suite("Functions marked with @memo:intrinsic", () => {
             "intrinsicMethod", "1",
         )
     })
-
-    test.expect(isCompilerPlugin() ? true : false, "__key() function expanded by the plugin during compilation", () => {
-        // NOTE: currently nor working for memo-plugin
+    test("__key() function expanded by the plugin during compilation", () => {
         TestIntrinsic.log.length = 0
         const root = testRoot(TestIntrinsic.testKeyAccessor)
         assertResultArray(TestIntrinsic.log,
@@ -1494,5 +1573,23 @@ suite("Memo functions with all kinds of import and export statements", () => {
         )
     })
 })
+
+// suite("@memo_stable annotation", () => {
+//     test("method returns string", () => {
+//        const instance: TestMemoStable = new TestMemoStable()
+//        const root = testRoot(instance.testFunctionReturnsString)
+//        assertResultArray(instance.log,
+//            "test call",
+//            "function call"
+//        )
+//        GlobalStateHolder.globalState.value ++
+//        testTick(root)
+//        assertResultArray(instance.log,
+//            "test call",
+//            "function call",
+//            "test call",
+//        )
+//    })
+// })
 
 export const __ARKTEST__ = "common/basic.test"

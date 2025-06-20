@@ -82,7 +82,19 @@ void FormModelNG::SetModuleName(FrameNode* frameNode, const std::string& moduleN
     property->UpdateRequestFormInfo(formInfo);
 }
 
-void FormModelNG::SetSize(FrameNode* frameNode, const Dimension& width, const Dimension& height) {}
+void FormModelNG::SetSize(FrameNode* frameNode, const Dimension& width, const Dimension& height)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto property = frameNode->GetLayoutProperty<FormLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    if (!property->HasRequestFormInfo()) {
+        return;
+    }
+    auto formInfo = property->GetRequestFormInfoValue();
+    formInfo.width = width;
+    formInfo.height = height;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FormLayoutProperty, RequestFormInfo, formInfo, frameNode);
+}
 
 void FormModelNG::SetOnAcquired(FrameNode* frameNode, std::function<void(const std::string&)>&& onAcquired)
 {

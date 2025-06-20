@@ -716,6 +716,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         FireAllUIExtensionEvents();
     }
     FireAccessibilityEvents();
+    if (asyncEventsHookListener_ != nullptr) {
+        ACE_SCOPED_TRACE("arkoala callbacks");
+        asyncEventsHookListener_(); // fire all arkoala callbacks
+    }
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
     TriggerFrameDumpFuncIfExist();

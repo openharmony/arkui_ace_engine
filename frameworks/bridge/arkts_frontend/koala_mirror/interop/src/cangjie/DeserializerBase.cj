@@ -135,6 +135,14 @@ public open class DeserializerBase {
         return ResourceHolder.instance().get(resource.resourceId)
     }
 
+    public func readBuffer(): Array<UInt8> {
+        return Array<UInt8>()
+    }
+
+    public func readFunction(): Any {
+        return { => }
+    }
+
     public func readNumber(): Float64 {
         let tag = this.readInt8()
         if (tag == Tag.UNDEFINED.value) {

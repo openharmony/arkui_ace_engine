@@ -22,13 +22,14 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, BlurStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, BlurStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { ResourceColor, Font, Position, Length } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { AlphabetIndexerOpsHandWritten } from "./../handwritten"
 export class ArkAlphabetIndexerPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
@@ -594,7 +595,7 @@ export enum IndexerAlign {
 }
 export interface AlphabetIndexerOptions {
     arrayValue: Array<string>;
-    selected: number;
+    selected: number | Bindable<number>;
 }
 export type AlphabetIndexerInterface = (options: AlphabetIndexerOptions) => AlphabetIndexerAttribute;
 export type OnAlphabetIndexerSelectCallback = (index: number) => void;
@@ -621,7 +622,7 @@ export interface AlphabetIndexerAttribute extends CommonMethod {
     onSelect(value: OnAlphabetIndexerSelectCallback | undefined): this
     onRequestPopupData(value: OnAlphabetIndexerRequestPopupDataCallback | undefined): this
     onPopupSelect(value: OnAlphabetIndexerPopupSelectCallback | undefined): this
-    selected(value: number | undefined): this
+    selected(value: number | Bindable<number> | undefined): this
     popupPosition(value: Position | undefined): this
     autoCollapse(value: boolean | undefined): this
     popupItemBorderRadius(value: number | undefined): this
@@ -630,64 +631,6 @@ export interface AlphabetIndexerAttribute extends CommonMethod {
     popupTitleBackground(value: ResourceColor | undefined): this
     enableHapticFeedback(value: boolean | undefined): this
     alignStyle(value: IndexerAlign | undefined, offset?: Length): this
-    _onChangeEvent_selected(callback: ((selected: number | undefined) => void)): void
-}
-export interface UIAlphabetIndexerAttribute extends UICommonMethod {
-    /** @memo */
-    onSelected(value: ((index: number) => void) | undefined): this
-    /** @memo */
-    color(value: ResourceColor | undefined): this
-    /** @memo */
-    selectedColor(value: ResourceColor | undefined): this
-    /** @memo */
-    popupColor(value: ResourceColor | undefined): this
-    /** @memo */
-    selectedBackgroundColor(value: ResourceColor | undefined): this
-    /** @memo */
-    popupBackground(value: ResourceColor | undefined): this
-    /** @memo */
-    popupSelectedColor(value: ResourceColor | undefined): this
-    /** @memo */
-    popupUnselectedColor(value: ResourceColor | undefined): this
-    /** @memo */
-    popupItemBackgroundColor(value: ResourceColor | undefined): this
-    /** @memo */
-    usingPopup(value: boolean | undefined): this
-    /** @memo */
-    selectedFont(value: Font | undefined): this
-    /** @memo */
-    popupFont(value: Font | undefined): this
-    /** @memo */
-    popupItemFont(value: Font | undefined): this
-    /** @memo */
-    itemSize(value: string | number | undefined): this
-    /** @memo */
-    font(value: Font | undefined): this
-    /** @memo */
-    onSelect(value: OnAlphabetIndexerSelectCallback | undefined): this
-    /** @memo */
-    onRequestPopupData(value: OnAlphabetIndexerRequestPopupDataCallback | undefined): this
-    /** @memo */
-    onPopupSelect(value: OnAlphabetIndexerPopupSelectCallback | undefined): this
-    /** @memo */
-    selected(value: number | undefined): this
-    /** @memo */
-    popupPosition(value: Position | undefined): this
-    /** @memo */
-    autoCollapse(value: boolean | undefined): this
-    /** @memo */
-    popupItemBorderRadius(value: number | undefined): this
-    /** @memo */
-    itemBorderRadius(value: number | undefined): this
-    /** @memo */
-    popupBackgroundBlurStyle(value: BlurStyle | undefined): this
-    /** @memo */
-    popupTitleBackground(value: ResourceColor | undefined): this
-    /** @memo */
-    enableHapticFeedback(value: boolean | undefined): this
-    /** @memo */
-    alignStyle(value: IndexerAlign | undefined, offset?: Length): this
-    /** @memo */
     _onChangeEvent_selected(callback: ((selected: number | undefined) => void)): void
 }
 export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements AlphabetIndexerAttribute {
@@ -771,7 +714,7 @@ export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements Alp
     public onPopupSelect(value: OnAlphabetIndexerPopupSelectCallback | undefined): this {
         return this
     }
-    public selected(value: number | undefined): this {
+    public selected(value: number | Bindable<number> | undefined): this {
         return this
     }
     public popupPosition(value: Position | undefined): this {
@@ -802,22 +745,32 @@ export class ArkAlphabetIndexerStyle extends ArkCommonMethodStyle implements Alp
         throw new Error("Unimplmented")
     }
 }
-/** @memo:stable */
-export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implements UIAlphabetIndexerAttribute {
+export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implements AlphabetIndexerAttribute {
     getPeer(): ArkAlphabetIndexerPeer {
         return (this.peer as ArkAlphabetIndexerPeer)
     }
-    /** @memo */
+    AlphabetIndexerOptionsValueIsBindable(options: AlphabetIndexerOptions): boolean {
+        if ((RuntimeType.UNDEFINED) != runtimeType(options)) {
+            const options_num  = options!.selected;
+            if ((RuntimeType.UNDEFINED) != (runtimeType(options_num))) {
+                const options_num_value  = options_num!;
+                return TypeChecker.isBindableNumber(options_num_value);
+            }
+        }
+        return false;
+    }
     public setAlphabetIndexerOptions(options: AlphabetIndexerOptions): this {
         if (this.checkPriority("setAlphabetIndexerOptions")) {
             const options_casted = options as (AlphabetIndexerOptions)
             this.getPeer()?.setAlphabetIndexerOptionsAttribute(options_casted)
-            return this
+        }
+        if (this.AlphabetIndexerOptionsValueIsBindable(options!)) {
+            AlphabetIndexerOpsHandWritten.hookAlphabetIndexerAttributeSelectedImpl(this.getPeer().peer.ptr,
+                (options!.selected as Bindable<number>));
         }
         return this
     }
-    /** @memo */
-    public onSelected(value: ((index: number) => void) | undefined): this {
+        public onSelected(value: ((index: number) => void) | undefined): this {
         if (this.checkPriority("onSelected")) {
             const value_casted = value as (((index: number) => void) | undefined)
             this.getPeer()?.onSelectedAttribute(value_casted)
@@ -825,8 +778,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public color(value: ResourceColor | undefined): this {
+        public color(value: ResourceColor | undefined): this {
         if (this.checkPriority("color")) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.colorAttribute(value_casted)
@@ -834,8 +786,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public selectedColor(value: ResourceColor | undefined): this {
+        public selectedColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("selectedColor")) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.selectedColorAttribute(value_casted)
@@ -843,8 +794,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public popupColor(value: ResourceColor | undefined): this {
+        public popupColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("popupColor")) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.popupColorAttribute(value_casted)
@@ -852,8 +802,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public selectedBackgroundColor(value: ResourceColor | undefined): this {
+        public selectedBackgroundColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("selectedBackgroundColor")) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.selectedBackgroundColorAttribute(value_casted)
@@ -861,8 +810,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public popupBackground(value: ResourceColor | undefined): this {
+        public popupBackground(value: ResourceColor | undefined): this {
         if (this.checkPriority("popupBackground")) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.popupBackgroundAttribute(value_casted)
@@ -870,8 +818,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public popupSelectedColor(value: ResourceColor | undefined): this {
+        public popupSelectedColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("popupSelectedColor")) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.popupSelectedColorAttribute(value_casted)
@@ -879,8 +826,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public popupUnselectedColor(value: ResourceColor | undefined): this {
+        public popupUnselectedColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("popupUnselectedColor")) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.popupUnselectedColorAttribute(value_casted)
@@ -888,8 +834,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public popupItemBackgroundColor(value: ResourceColor | undefined): this {
+        public popupItemBackgroundColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("popupItemBackgroundColor")) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.popupItemBackgroundColorAttribute(value_casted)
@@ -897,8 +842,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public usingPopup(value: boolean | undefined): this {
+        public usingPopup(value: boolean | undefined): this {
         if (this.checkPriority("usingPopup")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.usingPopupAttribute(value_casted)
@@ -906,8 +850,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public selectedFont(value: Font | undefined): this {
+        public selectedFont(value: Font | undefined): this {
         if (this.checkPriority("selectedFont")) {
             const value_casted = value as (Font | undefined)
             this.getPeer()?.selectedFontAttribute(value_casted)
@@ -915,8 +858,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public popupFont(value: Font | undefined): this {
+        public popupFont(value: Font | undefined): this {
         if (this.checkPriority("popupFont")) {
             const value_casted = value as (Font | undefined)
             this.getPeer()?.popupFontAttribute(value_casted)
@@ -924,8 +866,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public popupItemFont(value: Font | undefined): this {
+        public popupItemFont(value: Font | undefined): this {
         if (this.checkPriority("popupItemFont")) {
             const value_casted = value as (Font | undefined)
             this.getPeer()?.popupItemFontAttribute(value_casted)
@@ -933,8 +874,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public itemSize(value: string | number | undefined): this {
+        public itemSize(value: string | number | undefined): this {
         if (this.checkPriority("itemSize")) {
             const value_casted = value as (string | number | undefined)
             this.getPeer()?.itemSizeAttribute(value_casted)
@@ -942,8 +882,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public font(value: Font | undefined): this {
+        public font(value: Font | undefined): this {
         if (this.checkPriority("font")) {
             const value_casted = value as (Font | undefined)
             this.getPeer()?.fontAttribute(value_casted)
@@ -951,8 +890,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public onSelect(value: OnAlphabetIndexerSelectCallback | undefined): this {
+        public onSelect(value: OnAlphabetIndexerSelectCallback | undefined): this {
         if (this.checkPriority("onSelect")) {
             const value_casted = value as (OnAlphabetIndexerSelectCallback | undefined)
             this.getPeer()?.onSelectAttribute(value_casted)
@@ -960,8 +898,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public onRequestPopupData(value: OnAlphabetIndexerRequestPopupDataCallback | undefined): this {
+        public onRequestPopupData(value: OnAlphabetIndexerRequestPopupDataCallback | undefined): this {
         if (this.checkPriority("onRequestPopupData")) {
             const value_casted = value as (OnAlphabetIndexerRequestPopupDataCallback | undefined)
             this.getPeer()?.onRequestPopupDataAttribute(value_casted)
@@ -969,8 +906,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public onPopupSelect(value: OnAlphabetIndexerPopupSelectCallback | undefined): this {
+        public onPopupSelect(value: OnAlphabetIndexerPopupSelectCallback | undefined): this {
         if (this.checkPriority("onPopupSelect")) {
             const value_casted = value as (OnAlphabetIndexerPopupSelectCallback | undefined)
             this.getPeer()?.onPopupSelectAttribute(value_casted)
@@ -978,17 +914,19 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public selected(value: number | undefined): this {
-        if (this.checkPriority("selected")) {
-            const value_casted = value as (number | undefined)
-            this.getPeer()?.selectedAttribute(value_casted)
-            return this
+        public selected(value: number | Bindable<number> | undefined): this {
+        if (typeof value === 'number' || typeof value === 'undefined') {
+            if (this.checkPriority("selected")) {
+                const value_casted = value as (number | undefined)
+                this.getPeer()?.selectedAttribute(value_casted)
+                return this
+            }
         }
+        AlphabetIndexerOpsHandWritten.hookAlphabetIndexerAttributeSelectedImpl(this.getPeer().peer.ptr,
+            (value as Bindable<number>));
         return this
     }
-    /** @memo */
-    public popupPosition(value: Position | undefined): this {
+        public popupPosition(value: Position | undefined): this {
         if (this.checkPriority("popupPosition")) {
             const value_casted = value as (Position | undefined)
             this.getPeer()?.popupPositionAttribute(value_casted)
@@ -996,8 +934,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public autoCollapse(value: boolean | undefined): this {
+        public autoCollapse(value: boolean | undefined): this {
         if (this.checkPriority("autoCollapse")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.autoCollapseAttribute(value_casted)
@@ -1005,8 +942,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public popupItemBorderRadius(value: number | undefined): this {
+        public popupItemBorderRadius(value: number | undefined): this {
         if (this.checkPriority("popupItemBorderRadius")) {
             const value_casted = value as (number | undefined)
             this.getPeer()?.popupItemBorderRadiusAttribute(value_casted)
@@ -1014,8 +950,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public itemBorderRadius(value: number | undefined): this {
+        public itemBorderRadius(value: number | undefined): this {
         if (this.checkPriority("itemBorderRadius")) {
             const value_casted = value as (number | undefined)
             this.getPeer()?.itemBorderRadiusAttribute(value_casted)
@@ -1023,8 +958,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public popupBackgroundBlurStyle(value: BlurStyle | undefined): this {
+        public popupBackgroundBlurStyle(value: BlurStyle | undefined): this {
         if (this.checkPriority("popupBackgroundBlurStyle")) {
             const value_casted = value as (BlurStyle | undefined)
             this.getPeer()?.popupBackgroundBlurStyleAttribute(value_casted)
@@ -1032,8 +966,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public popupTitleBackground(value: ResourceColor | undefined): this {
+        public popupTitleBackground(value: ResourceColor | undefined): this {
         if (this.checkPriority("popupTitleBackground")) {
             const value_casted = value as (ResourceColor | undefined)
             this.getPeer()?.popupTitleBackgroundAttribute(value_casted)
@@ -1041,8 +974,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public enableHapticFeedback(value: boolean | undefined): this {
+        public enableHapticFeedback(value: boolean | undefined): this {
         if (this.checkPriority("enableHapticFeedback")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.enableHapticFeedbackAttribute(value_casted)
@@ -1050,8 +982,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public alignStyle(value: IndexerAlign | undefined, offset?: Length): this {
+        public alignStyle(value: IndexerAlign | undefined, offset?: Length): this {
         if (this.checkPriority("alignStyle")) {
             const value_casted = value as (IndexerAlign | undefined)
             const offset_casted = offset as (Length)
@@ -1060,8 +991,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
         }
         return this
     }
-    /** @memo */
-    public _onChangeEvent_selected(callback: ((selected: number | undefined) => void)): void {
+        public _onChangeEvent_selected(callback: ((selected: number | undefined) => void)): void {
         if (this.checkPriority("_onChangeEvent_selected")) {
             const callback_casted = callback as (((selected: number | undefined) => void))
             this.getPeer()?._onChangeEvent_selectedAttribute(callback_casted)
@@ -1077,7 +1007,7 @@ export class ArkAlphabetIndexerComponent extends ArkCommonMethodComponent implem
 /** @memo */
 export function AlphabetIndexer(
     /** @memo */
-    style: ((attributes: UIAlphabetIndexerAttribute) => void) | undefined,
+    style: ((attributes: AlphabetIndexerAttribute) => void) | undefined,
     options: AlphabetIndexerOptions,
     /** @memo */
     content_?: (() => void) | undefined,

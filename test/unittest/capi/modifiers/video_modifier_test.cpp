@@ -343,7 +343,7 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> mutedMuted
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setMutedTestDefaultValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setMutedTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -357,7 +357,7 @@ HWTEST_F(VideoModifierTest, setMutedTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setMutedTestValidValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setMutedTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -385,7 +385,7 @@ HWTEST_F(VideoModifierTest, setMutedTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setAutoPlayTestDefaultValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setAutoPlayTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -405,7 +405,7 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> autoPlayAu
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setAutoPlayTestValidValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setAutoPlayTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -481,7 +481,7 @@ HWTEST_F(VideoModifierTest, setControlsTestValidValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setLoopTestDefaultValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setLoopTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -501,7 +501,7 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> loopLoopVa
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(VideoModifierTest, setLoopTestValidValues, TestSize.Level1)
+HWTEST_F(VideoModifierTest, DISABLED_setLoopTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;

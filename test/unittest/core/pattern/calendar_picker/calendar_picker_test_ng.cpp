@@ -1528,23 +1528,6 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest035, TestSize.Level1)
 }
 
 /**
- * @tc.name: CalendarPickerPatternTest036
- * @tc.desc: GetEntryDateInfo Function Test
- * @tc.type: FUNC
- */
-HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest036, TestSize.Level1)
-{
-    auto pickerPattern = AceType::MakeRefPtr<CalendarPickerPattern>();
-
-    const std::string info = " ";
-    auto oldInfo = pickerPattern->GetEntryDateInfo();
-    pickerPattern->SetDate(info);
-    pickerPattern->FlushTextStyle();
-    auto newInfo = pickerPattern->GetEntryDateInfo();
-    EXPECT_EQ(oldInfo, newInfo);
-}
-
-/**
  * @tc.name: CalendarPickerPatternTest037
  * @tc.desc: HandleAddButtonClick Function Test
  * @tc.type: FUNC

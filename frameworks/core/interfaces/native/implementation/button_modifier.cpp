@@ -101,22 +101,11 @@ void SetButtonOptions1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     auto buttonOptions = Converter::Convert<ButtonOptions>(*options);
-    if (buttonOptions.type) {
-        auto typeInt = EnumToInt(buttonOptions.type);
-        ButtonModelStatic::SetType(frameNode, typeInt);
-    }
-    if (buttonOptions.stateEffect) {
-        ButtonModelStatic::SetStateEffect(frameNode, buttonOptions.stateEffect.value());
-    }
-    if (buttonOptions.role) {
-        ButtonModelStatic::SetRole(frameNode, buttonOptions.role);
-    }
-    if (buttonOptions.controlSize) {
-        ButtonModelStatic::SetControlSize(frameNode, buttonOptions.controlSize);
-    }
-    if (buttonOptions.buttonStyle) {
-        ButtonModelStatic::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
-    }
+    ButtonModelStatic::SetType(frameNode, EnumToInt(buttonOptions.type));
+    ButtonModelStatic::SetStateEffect(frameNode, buttonOptions.stateEffect);
+    ButtonModelStatic::SetRole(frameNode, buttonOptions.role);
+    ButtonModelStatic::SetControlSize(frameNode, buttonOptions.controlSize);
+    ButtonModelStatic::SetButtonStyle(frameNode, buttonOptions.buttonStyle);
 }
 void SetButtonOptions2Impl(Ark_NativePointer node,
                            const Ark_ResourceStr* label,

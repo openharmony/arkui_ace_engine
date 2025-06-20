@@ -18,7 +18,7 @@
 
 import { ResourceColor, Position, Length, SizeOptions, ResourceStr, Font } from "./units"
 import { Color, TextOverflow, BorderStyle, TextHeightAdaptivePolicy } from "./enums"
-import { FontOptions, FontInfo } from "@ohos/font/font"
+import { FontOptions, FontInfo, UIFontConfig } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
 import { Resource } from "global/resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
@@ -28,7 +28,7 @@ import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
-import { PixelMap, PixelMapInternal } from "./arkui-pixelmap"
+import { PixelMap } from "#external"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Matrix4Transit } from "./arkui-matrix4"
 import { EffectScope } from "./symbolglyph"
@@ -869,6 +869,9 @@ export class GlobalScope_ohos_font {
         const fontName_casted = fontName as (string)
         return GlobalScope_ohos_font.getFontByName_serialize(fontName_casted)
     }
+    public static getInternalUIFontConfig(): UIFontConfig {
+        return GlobalScope_ohos_font.getUIFontConfig_serialize()
+    }
     private static registerFont_serialize(options: FontOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeFontOptions(options)
@@ -892,6 +895,19 @@ export class GlobalScope_ohos_font {
         const returnResult : FontInfo = retvalDeserializer.readFontInfo()
         return returnResult
     }
+    private static getUIFontConfig_serialize(): UIFontConfig {
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._GlobalScope_ohos_font_getUIFontConfig() as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const returnResult : UIFontConfig = retvalDeserializer.readUIFontConfig()
+        return returnResult
+    }
 }
 export class GlobalScope_ohos_measure_utils {
     public static measureText(options: MeasureOptions): number {
@@ -912,9 +928,16 @@ export class GlobalScope_ohos_measure_utils {
     private static measureTextSize_serialize(options: MeasureOptions): SizeOptions {
         const thisSerializer : Serializer = Serializer.hold()
         thisSerializer.writeMeasureOptions(options)
-        const retval  = ArkUIGeneratedNativeModule._GlobalScope_ohos_measure_utils_measureTextSize(thisSerializer.asBuffer(), thisSerializer.length())
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._GlobalScope_ohos_measure_utils_measureTextSize(thisSerializer.asBuffer(), thisSerializer.length()) as FixedArray<byte>
         thisSerializer.release()
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : SizeOptions = retvalDeserializer.readSizeOptions()
         return returnResult
     }
@@ -937,9 +960,23 @@ export interface WebHeader {
     headerKey: string;
     headerValue: string;
 }
+export interface SnapshotRegion {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+}
+export interface LocalizedSnapshotRegion {
+    start: number;
+    end: number;
+    top: number;
+    bottom: number;
+}
+export type SnapshotRegionType = SnapshotRegion | LocalizedSnapshotRegion;
 export interface SnapshotOptions {
     scale?: number;
     waitUntilRenderFinished?: boolean;
+    region?: SnapshotRegionType;
 }
 export type AsyncCallback_image_PixelMap_Void = (result: PixelMap) => void;
 export enum PerfMonitorActionType {

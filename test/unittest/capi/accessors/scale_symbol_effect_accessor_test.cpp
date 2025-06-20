@@ -113,15 +113,16 @@ HWTEST_F(ScaleSymbolEffectAccessorTest, setScopeTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setScope, nullptr);
     const std::vector<std::tuple<
-        Ark_ScaleSymbolEffect, Ark_EffectScope, std::optional<OHOS::Ace::ScopeType>
+        Ark_ScaleSymbolEffect, Opt_EffectScope, std::optional<OHOS::Ace::ScopeType>
     >> testPlan {
-        {peer_, ARK_EFFECT_SCOPE_LAYER, OHOS::Ace::ScopeType::LAYER},
-        {peer_, ARK_EFFECT_SCOPE_WHOLE, OHOS::Ace::ScopeType::WHOLE},
-        {nullptr, ARK_EFFECT_SCOPE_WHOLE, std::nullopt},
+        {peer_, Converter::ArkValue<Opt_EffectScope>(ARK_EFFECT_SCOPE_LAYER), OHOS::Ace::ScopeType::LAYER},
+        {peer_, Converter::ArkValue<Opt_EffectScope>(ARK_EFFECT_SCOPE_WHOLE), OHOS::Ace::ScopeType::WHOLE},
+        {peer_, Converter::ArkValue<Opt_EffectScope>(), std::nullopt},
+        {nullptr, Converter::ArkValue<Opt_EffectScope>(ARK_EFFECT_SCOPE_WHOLE), std::nullopt},
     };
     for (auto [peer, value, expected] : testPlan) {
         peer_->scope.reset();
-        accessor_->setScope(peer, value);
+        accessor_->setScope(peer, &value);
         EXPECT_EQ(peer_->scope, expected);
     }
 }
@@ -156,15 +157,16 @@ HWTEST_F(ScaleSymbolEffectAccessorTest, setDirectionTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->setDirection, nullptr);
     const std::vector<std::tuple<
-        Ark_ScaleSymbolEffect, Ark_EffectDirection, std::optional<OHOS::Ace::CommonSubType>
+        Ark_ScaleSymbolEffect, Opt_EffectDirection, std::optional<OHOS::Ace::CommonSubType>
     >> testPlan {
-        {peer_, ARK_EFFECT_DIRECTION_DOWN, OHOS::Ace::CommonSubType::DOWN},
-        {peer_, ARK_EFFECT_DIRECTION_UP, OHOS::Ace::CommonSubType::UP},
-        {nullptr, ARK_EFFECT_DIRECTION_DOWN, std::nullopt},
+        {peer_, Converter::ArkValue<Opt_EffectDirection>(ARK_EFFECT_DIRECTION_DOWN), OHOS::Ace::CommonSubType::DOWN},
+        {peer_, Converter::ArkValue<Opt_EffectDirection>(ARK_EFFECT_DIRECTION_UP), OHOS::Ace::CommonSubType::UP},
+        {peer_, Converter::ArkValue<Opt_EffectDirection>(), std::nullopt},
+        {nullptr, Converter::ArkValue<Opt_EffectDirection>(ARK_EFFECT_DIRECTION_DOWN), std::nullopt},
     };
     for (auto [peer, value, expected] : testPlan) {
         peer_->direction.reset();
-        accessor_->setDirection(peer, value);
+        accessor_->setDirection(peer, &value);
         EXPECT_EQ(peer_->direction, expected);
     }
 }

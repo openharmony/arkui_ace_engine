@@ -21,9 +21,11 @@ ohos_shared_library("componentSnapshot_ani") {
   include_dirs = [ "./include" ]
   sources = [ "./src/componentSnapshot.cpp" ]
   external_deps = [
-    "image_framework:image_ani",
+    "image_framework:image",
+    "image_framework:image_taihe",
     "napi:ace_napi",
     "runtime_core:ani",
+    "runtime_core:ani_helpers",
   ]
   configs = [ "$ace_root:ace_config" ]
   part_name = "ace_engine"
@@ -34,7 +36,7 @@ ohos_shared_library("componentSnapshot_ani") {
 #构建abc
 generate_static_abc("componentSnapshot") {
   base_url = "./ets"
-  files = [ "./ets/@ohos.componentSnapshot.ets" ]
+  files = [ "./ets/@ohos.arkui.componentSnapshot.ets" ]
   is_boot_abc = "True"
   device_dst_file = "/system/framework/componentSnapshot.abc"
 }

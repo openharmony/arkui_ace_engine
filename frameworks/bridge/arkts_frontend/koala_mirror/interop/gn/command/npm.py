@@ -22,7 +22,6 @@ import argparse
 NPM_REPO = "https://repo.huaweicloud.com/repository/npm/"
  
 parser = argparse.ArgumentParser(description="npm command parser")
-parser.add_argument("--root-path", help="root directory of koala repo")
 parser.add_argument("--project-path", help="project directory in koala repo")
 parser.add_argument("--node-path", help="nodejs path")
 parser.add_argument("--arklink-path", help="ark-link path")
@@ -32,10 +31,8 @@ parser.add_argument("--target-out-path", help="out directory of built target", d
 parser.add_argument("--built-file-path", help="result of building", default=None)
 parser.add_argument("--npm-args", nargs='+', help="npm command args")
 
- 
 args = parser.parse_args()
 
-root_path = args.root_path
 project_path = args.project_path
 node_path = args.node_path
 arklink_path = args.arklink_path
@@ -59,10 +56,13 @@ if (ets_stdlib_path != ""):
 
 koala_log = os.path.join(project_path, "koala_build.log")
 
-def install(dir):
+def execute(dir, args):
     os.chdir(dir)
+    if env.get("KOALA_LOG_STDOUT") is not None:
+        subprocess.run(args, env=env, text=True, check=True, stderr=subprocess.STDOUT)
+        return
     try:
-        ret = subprocess.run(["npm", "install", "--registry", NPM_REPO, "--verbose"], capture_output=True, env=env, text=True, check=True)
+        ret = subprocess.run(args, capture_output=True, env=env, text=True, check=True)
         with open(koala_log, "a+") as f:
             f.write("\n")
             f.write("install log:\n" + ret.stdout)
@@ -73,22 +73,14 @@ def install(dir):
             f.write("error message: "+ e.stderr + "\n")
             f.close()
 
+def install(dir):
+    execute(dir, ["npm", "install", "--registry", NPM_REPO, "--verbose"])
+
 def npm_command(dir, command):
-    os.chdir(dir)
-    try:
-        ret = subprocess.run(["npm"] + command, capture_output=True, env=env, text=True, check=True)
-        with open(koala_log, "a+") as f:
-            f.write("\n")
-            f.write("install log:\n" + ret.stdout + node_path + es2panda_path + ets_stdlib_path)
-            f.close()
-    except subprocess.CalledProcessError as e:
-        with open(koala_log, "a+") as f:
-            f.write("\n")
-            f.write("error message: "+ e.output + "\n")
-            f.close()
+    execute(dir, ["npm"] + command)
 
 def main():
-    install(root_path)
+    install(project_path)
     npm_command(project_path, npm_args)
 
     if target_out_path and built_file_path:
@@ -98,7 +90,6 @@ def main():
 
         out_dir = os.path.join(target_out_path, os.path.basename(built_file_path))
         shutil.copy(built_file_path, out_dir)
-    
 
 if __name__ == '__main__':
     main()

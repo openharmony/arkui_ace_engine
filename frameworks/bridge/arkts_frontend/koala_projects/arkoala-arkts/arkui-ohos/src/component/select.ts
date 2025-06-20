@@ -29,11 +29,12 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, BlurStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, BlurStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { OptionWidthMode, Color } from "./enums"
 import { ControlSize } from "./button"
 import { DividerOptions } from "./textPicker"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { SelectOpsHandWritten } from "./../handwritten"
 
 export interface MenuItemConfiguration {
     value: ResourceStr
@@ -855,15 +856,17 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             let value_value_type : int32 = RuntimeType.UNDEFINED
             value_value_type = runtimeType(value_value)
-            if (((RuntimeType.NUMBER) == (value_value_type)) || ((RuntimeType.STRING) == (value_value_type)) || (((RuntimeType.OBJECT) == (value_value_type)) && (TypeChecker.isResource(value_value, false, false, false, false, false)))) {
-                thisSerializer.writeInt8(0 as int32)
-                const value_value_0  = value_value as Dimension
-                thisSerializer.writeLength(value_value_0)
-            }
-            else if (TypeChecker.isOptionWidthMode(value_value)) {
+            if (TypeChecker.isOptionWidthMode(value_value)) {
                 thisSerializer.writeInt8(1 as int32)
-                const value_value_1  = value_value as OptionWidthMode
+                const value_value_1 = value_value as OptionWidthMode
                 thisSerializer.writeInt32(TypeChecker.OptionWidthMode_ToNumeric(value_value_1))
+            }
+            else if (((RuntimeType.NUMBER) == (value_value_type)) || ((RuntimeType.STRING) == (value_value_type)) ||
+                (((RuntimeType.OBJECT) == (value_value_type)) &&
+                    (TypeChecker.isResource(value_value, false, false, false, false, false)))) {
+                thisSerializer.writeInt8(0 as int32)
+                const value_value_0 = value_value as Dimension
+                thisSerializer.writeLength(value_value_0)
             }
         }
         ArkUIGeneratedNativeModule._SelectAttribute_optionWidth0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
@@ -1054,7 +1057,7 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_menuItemContentModifier1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    dividerAttribute(value: DividerOptions | undefined): void {
+    dividerAttribute(value: DividerOptions | null | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -1150,7 +1153,7 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._SelectAttribute_menuOutline(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    menuAlign0Attribute(alignType: MenuAlignType | undefined, offset?: Offset): void {
+    menuAlign0Attribute(alignType: MenuAlignType | undefined, offset?: Offset | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let alignType_type : int32 = RuntimeType.UNDEFINED
         alignType_type = runtimeType(alignType)
@@ -1229,8 +1232,8 @@ export type Callback_Number_String_Void = (index: number, value: string) => void
 export type Callback_Opt_Union_Number_Resource_Void = (selected: number | Resource | undefined) => void;
 export type Callback_Opt_ResourceStr_Void = (value: ResourceStr | undefined) => void;
 export interface SelectAttribute extends CommonMethod {
-    selected(value: number | Resource | undefined): this
-    value(value: ResourceStr | undefined): this
+    selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this
+    value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this
     font(value: Font | undefined): this
     fontColor(value: ResourceColor | undefined): this
     selectedOptionBgColor(value: ResourceColor | undefined): this
@@ -1248,7 +1251,7 @@ export interface SelectAttribute extends CommonMethod {
     menuBackgroundBlurStyle(value: BlurStyle | undefined): this
     controlSize(value: ControlSize | undefined): this
     menuItemContentModifier(value: ContentModifier | undefined): this
-    divider(value: DividerOptions | undefined): this
+    divider(value: DividerOptions | null | undefined): this
     textModifier(value: TextModifier | undefined): this
     arrowModifier(value: SymbolGlyphModifier | undefined): this
     optionTextModifier(value: TextModifier | undefined): this
@@ -1259,69 +1262,6 @@ export interface SelectAttribute extends CommonMethod {
     menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this
     _onChangeEvent_selected(callback: ((selected: number | Resource | undefined) => void)): void
     _onChangeEvent_value(callback: ((value: ResourceStr | undefined) => void)): void
-}
-export interface UISelectAttribute extends UICommonMethod {
-    /** @memo */
-    selected(value: number | Resource | undefined): this
-    /** @memo */
-    value(value: ResourceStr | undefined): this
-    /** @memo */
-    font(value: Font | undefined): this
-    /** @memo */
-    fontColor(value: ResourceColor | undefined): this
-    /** @memo */
-    selectedOptionBgColor(value: ResourceColor | undefined): this
-    /** @memo */
-    selectedOptionFont(value: Font | undefined): this
-    /** @memo */
-    selectedOptionFontColor(value: ResourceColor | undefined): this
-    /** @memo */
-    optionBgColor(value: ResourceColor | undefined): this
-    /** @memo */
-    optionFont(value: Font | undefined): this
-    /** @memo */
-    optionFontColor(value: ResourceColor | undefined): this
-    /** @memo */
-    onSelect(value: ((index: number,value: string) => void) | undefined | OnSelectCallback | undefined): this
-    /** @memo */
-    space(value: Length | undefined): this
-    /** @memo */
-    arrowPosition(value: ArrowPosition | undefined): this
-    /** @memo */
-    optionWidth(value: Dimension | OptionWidthMode | undefined): this
-    /** @memo */
-    optionHeight(value: Dimension | undefined): this
-    /** @memo */
-    menuBackgroundColor(value: ResourceColor | undefined): this
-    /** @memo */
-    menuBackgroundBlurStyle(value: BlurStyle | undefined): this
-    /** @memo */
-    controlSize(value: ControlSize | undefined): this
-    /** @memo */
-    menuItemContentModifier(value: ContentModifier | undefined): this
-    /** @memo */
-    divider(value: DividerOptions | undefined): this
-    /** @memo */
-    textModifier(value: TextModifier | undefined): this
-    /** @memo */
-    arrowModifier(value: SymbolGlyphModifier | undefined): this
-    /** @memo */
-    optionTextModifier(value: TextModifier | undefined): this
-    /** @memo */
-    selectedOptionTextModifier(value: TextModifier | undefined): this
-    /** @memo */
-    dividerStyle(value: DividerStyleOptions | undefined): this
-    /** @memo */
-    avoidance(value: AvoidanceMode | undefined): this
-    /** @memo */
-    menuOutline(value: MenuOutlineOptions | undefined): this
-    /** @memo */
-    menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this
-    /** @memo */
-    _onChangeEvent_selected(callback: ((selected: number | Resource | undefined) => void)): void
-    /** @memo */
-    _onChangeEvent_value(callback: ((value: ResourceStr | undefined) => void)): void
-    /** @memo */
 }
 export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttribute {
     selected_value?: number | Resource | undefined
@@ -1351,10 +1291,10 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
     dividerStyle_value?: DividerStyleOptions | undefined
     avoidance_value?: AvoidanceMode | undefined
     menuOutline_value?: MenuOutlineOptions | undefined
-    public selected(value: number | Resource | undefined): this {
+    public selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this {
         return this
     }
-    public value(value: ResourceStr | undefined): this {
+    public value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this {
         return this
     }
     public font(value: Font | undefined): this {
@@ -1408,7 +1348,7 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
     public menuItemContentModifier(value: ContentModifier | undefined): this {
         return this
     }
-    public divider(value: DividerOptions | undefined): this {
+    public divider(value: DividerOptions | null | undefined): this {
         return this
     }
     public textModifier(value: TextModifier | undefined): this {
@@ -1442,12 +1382,10 @@ export class ArkSelectStyle extends ArkCommonMethodStyle implements SelectAttrib
         throw new Error("Unimplmented")
         }
 }
-/** @memo:stable */
-export class ArkSelectComponent extends ArkCommonMethodComponent implements UISelectAttribute {
+export class ArkSelectComponent extends ArkCommonMethodComponent implements SelectAttribute {
     getPeer(): ArkSelectPeer {
         return (this.peer as ArkSelectPeer)
     }
-    /** @memo */
     public setSelectOptions(options: Array<SelectOption>): this {
         if (this.checkPriority("setSelectOptions")) {
             const options_casted = options as (Array<SelectOption>)
@@ -1456,9 +1394,8 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
-    public selected(value: number | Resource | undefined): this {
-        if (this.checkPriority("selected")) {
+    public selected(value: number | Resource | Bindable<number> | Bindable<Resource> | undefined): this {
+        if (this.checkPriority("selected") && (typeof value === "number" || TypeChecker.isResource(value, false, false, false, false, false) || typeof value === "undefined")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.NUMBER == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (number | Resource | undefined)
@@ -1472,10 +1409,14 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
             }
             throw new Error("Can not select appropriate overload")
         }
+        SelectOpsHandWritten.hookSelectAttributeSelectedImpl(this.getPeer().peer.ptr, (value as Bindable<number | Resource>));
         return this
     }
-    /** @memo */
-    public value(value: ResourceStr | undefined): this {
+    public value(value: ResourceStr | Bindable<string> | Bindable<Resource> | undefined): this {
+        if (TypeChecker.isBindableString(value) || TypeChecker.isBindableResource(value)) {
+            SelectOpsHandWritten.hookSelectAttributeValueImpl(this.getPeer().peer.ptr, (value as Bindable<ResourceStr>));
+            return this
+        }
         if (this.checkPriority("value")) {
             const value_type = runtimeType(value)
             if ((RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
@@ -1492,7 +1433,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public font(value: Font | undefined): this {
         if (this.checkPriority("font")) {
             const value_type = runtimeType(value)
@@ -1510,7 +1450,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public fontColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("fontColor")) {
             const value_type = runtimeType(value)
@@ -1528,7 +1467,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public selectedOptionBgColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("selectedOptionBgColor")) {
             const value_type = runtimeType(value)
@@ -1546,7 +1484,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public selectedOptionFont(value: Font | undefined): this {
         if (this.checkPriority("selectedOptionFont")) {
             const value_type = runtimeType(value)
@@ -1564,7 +1501,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public selectedOptionFontColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("selectedOptionFontColor")) {
             const value_type = runtimeType(value)
@@ -1582,7 +1518,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public optionBgColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("optionBgColor")) {
             const value_type = runtimeType(value)
@@ -1600,7 +1535,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public optionFont(value: Font | undefined): this {
         if (this.checkPriority("optionFont")) {
             const value_type = runtimeType(value)
@@ -1618,7 +1552,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public optionFontColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("optionFontColor")) {
             const value_type = runtimeType(value)
@@ -1636,7 +1569,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public onSelect(value: ((index: number,value: string) => void) | undefined | OnSelectCallback | undefined): this {
         if (this.checkPriority("onSelect")) {
             const value_type = runtimeType(value)
@@ -1654,7 +1586,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public space(value: Length | undefined): this {
         if (this.checkPriority("space")) {
             const value_type = runtimeType(value)
@@ -1672,25 +1603,18 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public arrowPosition(value: ArrowPosition | undefined): this {
         if (this.checkPriority("arrowPosition")) {
             const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
+            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (ArrowPosition | undefined)
                 this.getPeer()?.arrowPosition0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
-                const value_casted = value as (ArrowPosition | undefined)
-                this.getPeer()?.arrowPosition1Attribute(value_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
         }
         return this
     }
-    /** @memo */
     public optionWidth(value: Dimension | OptionWidthMode | undefined): this {
         if (this.checkPriority("optionWidth")) {
             const value_type = runtimeType(value)
@@ -1708,7 +1632,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public optionHeight(value: Dimension | undefined): this {
         if (this.checkPriority("optionHeight")) {
             const value_type = runtimeType(value)
@@ -1726,7 +1649,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public menuBackgroundColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("menuBackgroundColor")) {
             const value_type = runtimeType(value)
@@ -1744,43 +1666,30 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public menuBackgroundBlurStyle(value: BlurStyle | undefined): this {
         if (this.checkPriority("menuBackgroundBlurStyle")) {
             const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
+            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (BlurStyle | undefined)
                 this.getPeer()?.menuBackgroundBlurStyle0Attribute(value_casted)
                 return this
             }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
-                const value_casted = value as (BlurStyle | undefined)
-                this.getPeer()?.menuBackgroundBlurStyle1Attribute(value_casted)
-                return this
-            }
             throw new Error("Can not select appropriate overload")
         }
         return this
     }
-    /** @memo */
     public controlSize(value: ControlSize | undefined): this {
         if (this.checkPriority("controlSize")) {
             const value_type = runtimeType(value)
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
+            if ((RuntimeType.STRING == value_type) || (RuntimeType.UNDEFINED == value_type)) {
                 const value_casted = value as (ControlSize | undefined)
                 this.getPeer()?.controlSize0Attribute(value_casted)
                 return this
             }
-            if ((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) {
-                const value_casted = value as (ControlSize | undefined)
-                this.getPeer()?.controlSize1Attribute(value_casted)
-                return this
-            }
             throw new Error("Can not select appropriate overload")
         }
         return this
     }
-    /** @memo */
     public menuItemContentModifier(value: ContentModifier | undefined): this {
         if (this.checkPriority("menuItemContentModifier")) {
             const value_type = runtimeType(value)
@@ -1798,16 +1707,14 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
-    public divider(value: DividerOptions | undefined): this {
+    public divider(value: DividerOptions | null | undefined): this {
         if (this.checkPriority("divider")) {
-            const value_casted = value as (DividerOptions | undefined)
+            const value_casted = value as (DividerOptions | null | undefined)
             this.getPeer()?.dividerAttribute(value_casted)
             return this
         }
         return this
     }
-    /** @memo */
     public textModifier(value: TextModifier | undefined): this {
         if (this.checkPriority("textModifier")) {
             const value_casted = value as (TextModifier | undefined)
@@ -1816,7 +1723,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public arrowModifier(value: SymbolGlyphModifier | undefined): this {
         if (this.checkPriority("arrowModifier")) {
             const value_casted = value as (SymbolGlyphModifier | undefined)
@@ -1825,7 +1731,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public optionTextModifier(value: TextModifier | undefined): this {
         if (this.checkPriority("optionTextModifier")) {
             const value_casted = value as (TextModifier | undefined)
@@ -1834,7 +1739,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public selectedOptionTextModifier(value: TextModifier | undefined): this {
         if (this.checkPriority("selectedOptionTextModifier")) {
             const value_casted = value as (TextModifier | undefined)
@@ -1843,7 +1747,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public dividerStyle(value: DividerStyleOptions | undefined): this {
         if (this.checkPriority("dividerStyle")) {
             const value_casted = value as (DividerStyleOptions | undefined)
@@ -1852,7 +1755,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public avoidance(value: AvoidanceMode | undefined): this {
         if (this.checkPriority("avoidance")) {
             const value_casted = value as (AvoidanceMode | undefined)
@@ -1861,7 +1763,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
     public menuOutline(value: MenuOutlineOptions | undefined): this {
         if (this.checkPriority("menuOutline")) {
             const value_casted = value as (MenuOutlineOptions | undefined)
@@ -1870,28 +1771,20 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return this
     }
-    /** @memo */
-    public menuAlign(alignType: MenuAlignType | undefined, offset?: Offset): this {
+    public menuAlign(alignType: MenuAlignType | undefined, offset?: Offset | undefined): this {
         if (this.checkPriority("menuAlign")) {
             const alignType_type = runtimeType(alignType)
             const offset_type = runtimeType(offset)
-            if ((RuntimeType.OBJECT == alignType_type) || (RuntimeType.OBJECT == alignType_type)) {
+            if ((RuntimeType.NUMBER == alignType_type) || (RuntimeType.UNDEFINED == alignType_type)) {
                 const alignType_casted = alignType as (MenuAlignType | undefined)
-                const offset_casted = offset as (Offset)
+                const offset_casted = offset as (Offset | undefined)
                 this.getPeer()?.menuAlign0Attribute(alignType_casted, offset_casted)
-                return this
-            }
-            if ((RuntimeType.OBJECT == alignType_type) || (RuntimeType.OBJECT == alignType_type)) {
-                const alignType_casted = alignType as (MenuAlignType | undefined)
-                const offset_casted = offset as (Offset)
-                this.getPeer()?.menuAlign1Attribute(alignType_casted, offset_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_selected(callback: ((selected: number | Resource | undefined) => void)): void {
         if (this.checkPriority("_onChangeEvent_selected")) {
             const callback_casted = callback as (((selected: number | Resource | undefined) => void))
@@ -1900,7 +1793,6 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
         }
         return
     }
-    /** @memo */
     public _onChangeEvent_value(callback: ((value: ResourceStr | undefined) => void)): void {
         if (this.checkPriority("_onChangeEvent_value")) {
             const callback_casted = callback as (((value: ResourceStr | undefined) => void))
@@ -1918,7 +1810,7 @@ export class ArkSelectComponent extends ArkCommonMethodComponent implements UISe
 /** @memo */
 export function Select(
     /** @memo */
-    style: ((attributes: UISelectAttribute) => void) | undefined,
+    style: ((attributes: SelectAttribute) => void) | undefined,
     options: Array<SelectOption>,
     /** @memo */
     content_?: (() => void) | undefined,

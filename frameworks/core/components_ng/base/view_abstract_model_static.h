@@ -18,6 +18,7 @@
 
 #include <optional>
 #include <utility>
+#include "view_abstract.h"
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/vector.h"
@@ -140,6 +141,28 @@ public:
         std::function<void(const float)>&& onWidthDidChange,
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack);
 
+    static void SetForegroundBlurStyle(FrameNode* frameNode,
+        const std::optional<BlurStyleOption>& fgBlurStyle, const std::optional<SysOptions>& sysOptions)
+    {
+        ViewAbstract::SetForegroundBlurStyle(frameNode, fgBlurStyle.value_or(BlurStyleOption()),
+            sysOptions.value_or(DEFAULT_SYS_OPTIONS));
+    }
+
+    static void SetBackgroundEffect(FrameNode* frameNode,
+        const std::optional<EffectOption>& effectOption, const std::optional<SysOptions>& sysOptions)
+    {
+        ViewAbstract::SetBackgroundEffect(frameNode, effectOption.value_or(EffectOption()),
+            sysOptions.value_or(DEFAULT_SYS_OPTIONS));
+    }
+
+    static void SetFrontBlur(FrameNode* frameNode, const std::optional<float>& radius,
+        const std::optional<BlurOption>& blurOption, const std::optional<SysOptions>& sysOptions)
+    {
+        Dimension radiusPX(radius.value_or(0.0f), DimensionUnit::PX);
+        ViewAbstract::SetFrontBlur(frameNode, radiusPX, blurOption.value_or(BlurOption()),
+            sysOptions.value_or(DEFAULT_SYS_OPTIONS));
+    }
+
     static void BindBackground(FrameNode* frameNode,
         std::function<RefPtr<UINode>()>&& buildFunc, const std::optional<Alignment>& align);
     static void SetFlexGrow(FrameNode* frameNode, float value);
@@ -156,6 +179,9 @@ public:
     static void SetBorderWidth(FrameNode *frameNode, const BorderWidthProperty& value);
     static void SetBorderColor(FrameNode *frameNode, const BorderColorProperty& value);
     static void SetBorderRadius(FrameNode *frameNode, const BorderRadiusProperty& value);
+    static void SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& boderImage, uint8_t bitset);
+    static void SetBorderImageSource(FrameNode* frameNode, const std::string& imageSrc, const std::string& bundleName,
+        const std::string& moduleName);
     static void SetDashGap(FrameNode *frameNode, const BorderWidthProperty& value);
     static void SetDashWidth(FrameNode *frameNode, const BorderWidthProperty& value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
@@ -174,11 +200,59 @@ public:
     static void SetBias(FrameNode* frameNode, const std::optional<BiasPair>& biasPair);
     static void SetBias(FrameNode* frameNode, const std::optional<float>& horisontal,
         const std::optional<float>& vertical);
+    static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
+        const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
     static void SetPixelRound(FrameNode* frameNode, uint16_t value);
     static void SetMaxWidth(FrameNode* frameNode, const CalcDimension& minWidth);
     static void SetMaxHeight(FrameNode* frameNode, const CalcDimension& minHeight);
     static void SetDisplayIndex(FrameNode* frameNode, int32_t value);
-
+    static void SetBackgroundColor(FrameNode *frameNode, const std::optional<Color>& color);
+    static void SetPivot(FrameNode* frameNode, const std::optional<DimensionOffset>& optValue);
+    static void SetRotate(FrameNode* frameNode, const std::vector<std::optional<float>>& value);
+    static void SetBackdropBlur(FrameNode* frameNode, const std::optional<Dimension>& radius,
+        const std::optional<BlurOption> &blurOption, const SysOptions& sysOptions = SysOptions());
+    static void SetClipEdge(FrameNode* frameNode, std::optional<bool> isClip);
+    static void SetTransformMatrix(FrameNode* frameNode, const std::optional<Matrix4>& matrix);
+    static void SetLinearGradientBlur(FrameNode *frameNode,
+        const std::optional<NG::LinearGradientBlurPara>& blurPara);
+    static void SetRenderFit(FrameNode* frameNode, const std::optional<RenderFit>& renderFit);
+    static void SetForegroundColor(FrameNode* frameNode, const std::optional<Color>& color);
+    static void SetForegroundColorStrategy(FrameNode* frameNode,
+        const std::optional<ForegroundColorStrategy>& strategy);
+    static void SetForegroundEffect(FrameNode* frameNode, const std::optional<float>& radius);
+    static void SetBlendMode(FrameNode* frameNode, const std::optional<BlendMode>& blendMode);
+    static void SetFocusBoxStyle(FrameNode* frameNode, const std::optional<NG::FocusBoxStyle>& style);
+    static void SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId,
+        const std::optional<bool>& isGroup, const std::optional<bool>& arrowKeyStepOut);
+    static void SetFocusScopePriority(
+        FrameNode* frameNode, const std::string& focusScopeId, const std::optional<uint32_t>& focusPriority);
+    static void SetGrayScale(FrameNode* frameNode, const std::optional<Dimension>& grayScale);
+    static void SetColorBlend(FrameNode* frameNode, const std::optional<Color>& colorBlend);
+    static void SetUseShadowBatching(FrameNode* frameNode, std::optional<bool> useShadowBatching);
+    static void SetUseEffect(FrameNode* frameNode, std::optional<bool> useEffect);
+    static void SetDrawModifier(FrameNode* frameNode, const RefPtr<NG::DrawModifier>& drawModifier);
+    static void SetFreeze(FrameNode* frameNode, std::optional<bool> freeze);
+    static void SetClickEffectLevel(FrameNode* frameNode,
+        const std::optional<ClickEffectLevel>& level, std::optional<float> scaleValue);
+    static void SetBrightness(FrameNode* frameNode, const std::optional<Dimension>& brightness);
+    static void SetContrast(FrameNode* frameNode, const std::optional<Dimension>& contrast);
+    static void SetSphericalEffect(FrameNode* frameNode, const std::optional<double> radio);
+    static void SetLightUpEffect(FrameNode* frameNode, const std::optional<double> radio);
+    static void SetPixelStretchEffect(FrameNode* frameNode,
+        const std::optional<PixStretchEffectOption>& option);
+    static void SetBlendApplyType(FrameNode* frameNode, const std::optional<BlendApplyType>& blendApplyType);
+    static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
+    static void SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest);
+    static void SetOnGestureRecognizerJudgeBegin(
+        FrameNode* frameNode, GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool innerGestureFlag = false);
+    static void SetOuterBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value);
+    static void SetOuterBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value);
+    static void SetOuterBorderColor(FrameNode* frameNode, const BorderColorProperty& value);
+    static void SetOuterBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value);
+    static void SetAllowDrop(FrameNode* frameNode, const std::optional<std::set<std::string>>& allowDrop);
+    static void SetDragPreview(FrameNode* frameNode, const std::optional<DragDropInfo>& DragDropInfo);
+    static void SetBackgroundImage(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
+    static void SetBackgroundImageRepeat(FrameNode* frameNode, const std::optional<ImageRepeat>& imageRepeat);
 private:
     static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
     static void RegisterContextMenuKeyEvent(
@@ -188,6 +262,9 @@ private:
     static void BindContextMenuSingle(FrameNode* targetNode,
         std::function<void()>&& buildFunc, const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
 
+    static constexpr SysOptions DEFAULT_SYS_OPTIONS = {
+        .disableSystemAdaptation = false
+    };
 };
 } // namespace OHOS::Ace::NG
 

@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, PickerTextStyle, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, PickerTextStyle, PickerDialogButtonStyle, Rectangle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, ShadowOptions, ShadowStyle, HoverModeAreaType, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { Callback_Date_Void } from "./calendarPicker"
 import { CrownSensitivity } from "./enums"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -267,27 +267,6 @@ export interface DatePickerAttribute extends CommonMethod {
     enableHapticFeedback(value: boolean | undefined): this
     _onChangeEvent_selected(callback: ((parameter: Date) => void)): void
 }
-export interface UIDatePickerAttribute extends UICommonMethod {
-    /** @memo */
-    lunar(value: boolean | undefined): this
-    /** @memo */
-    disappearTextStyle(value: PickerTextStyle | undefined): this
-    /** @memo */
-    textStyle(value: PickerTextStyle | undefined): this
-    /** @memo */
-    selectedTextStyle(value: PickerTextStyle | undefined): this
-    /** @memo */
-    onChange(value: ((value: DatePickerResult) => void) | undefined): this
-    /** @memo */
-    onDateChange(value: ((parameter: Date) => void) | undefined): this
-    /** @memo */
-    digitalCrownSensitivity(value: CrownSensitivity | undefined): this
-    /** @memo */
-    enableHapticFeedback(value: boolean | undefined): this
-    /** @memo */
-    _onChangeEvent_selected(callback: ((parameter: Date) => void)): void
-    /** @memo */
-}
 export class ArkDatePickerStyle extends ArkCommonMethodStyle implements DatePickerAttribute {
     lunar_value?: boolean | undefined
     disappearTextStyle_value?: PickerTextStyle | undefined
@@ -363,12 +342,10 @@ export interface DatePickerDialogOptions extends DatePickerOptions {
     hoverModeArea?: HoverModeAreaType;
     enableHapticFeedback?: boolean;
 }
-/** @memo:stable */
-export class ArkDatePickerComponent extends ArkCommonMethodComponent implements UIDatePickerAttribute {
+export class ArkDatePickerComponent extends ArkCommonMethodComponent implements DatePickerAttribute {
     getPeer(): ArkDatePickerPeer {
         return (this.peer as ArkDatePickerPeer)
     }
-    /** @memo */
     public setDatePickerOptions(options?: DatePickerOptions): this {
         if (this.checkPriority("setDatePickerOptions")) {
             const options_casted = options as (DatePickerOptions | undefined)
@@ -377,7 +354,6 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public lunar(value: boolean | undefined): this {
         if (this.checkPriority("lunar")) {
             const value_type = runtimeType(value)
@@ -395,7 +371,6 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public disappearTextStyle(value: PickerTextStyle | undefined): this {
         if (this.checkPriority("disappearTextStyle")) {
             const value_type = runtimeType(value)
@@ -413,7 +388,6 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public textStyle(value: PickerTextStyle | undefined): this {
         if (this.checkPriority("textStyle")) {
             const value_type = runtimeType(value)
@@ -431,7 +405,6 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public selectedTextStyle(value: PickerTextStyle | undefined): this {
         if (this.checkPriority("selectedTextStyle")) {
             const value_type = runtimeType(value)
@@ -449,7 +422,6 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onChange(value: ((value: DatePickerResult) => void) | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_casted = value as (((value: DatePickerResult) => void) | undefined)
@@ -458,7 +430,6 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public onDateChange(value: ((parameter: Date) => void) | undefined): this {
         if (this.checkPriority("onDateChange")) {
             const value_type = runtimeType(value)
@@ -476,7 +447,6 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public digitalCrownSensitivity(value: CrownSensitivity | undefined): this {
         if (this.checkPriority("digitalCrownSensitivity")) {
             const value_casted = value as (CrownSensitivity | undefined)
@@ -485,7 +455,6 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public enableHapticFeedback(value: boolean | undefined): this {
         if (this.checkPriority("enableHapticFeedback")) {
             const value_casted = value as (boolean | undefined)
@@ -494,7 +463,6 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_selected(callback: ((parameter: Date) => void)): void {
         if (this.checkPriority("_onChangeEvent_selected")) {
             const callback_casted = callback as (((parameter: Date) => void))
@@ -512,7 +480,7 @@ export class ArkDatePickerComponent extends ArkCommonMethodComponent implements 
 /** @memo */
 export function DatePicker(
     /** @memo */
-    style: ((attributes: UIDatePickerAttribute) => void) | undefined,
+    style: ((attributes: DatePickerAttribute) => void) | undefined,
     options?: DatePickerOptions,
     /** @memo */
     content_?: (() => void) | undefined,

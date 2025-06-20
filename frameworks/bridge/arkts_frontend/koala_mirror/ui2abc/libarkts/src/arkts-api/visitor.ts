@@ -13,65 +13,65 @@
  * limitations under the License.
  */
 
-import { factory } from "./factory/nodeFactory"
-import { AstNode } from "./peers/AstNode"
 import {
     isArrayExpression,
     isArrowFunctionExpression,
     isAssignmentExpression,
+    isBinaryExpression,
     isBlockExpression,
     isBlockStatement,
-    isBinaryExpression,
     isCallExpression,
     isChainExpression,
     isClassDeclaration,
     isClassDefinition,
+    isClassProperty,
     isConditionalExpression,
+    isDoWhileStatement,
+    isETSFunctionType,
+    isETSImportDeclaration,
     isETSModule,
+    isETSNewClassInstanceExpression,
+    isETSParameterExpression,
     isETSStructDeclaration,
     isETSTuple,
+    isETSTypeReference,
+    isETSTypeReferencePart,
+    isETSUnionType,
     isExpressionStatement,
+    isForInStatement,
+    isForOfStatement,
+    isForUpdateStatement,
     isFunctionDeclaration,
     isFunctionExpression,
+    isIdentifier,
     isIfStatement,
     isMemberExpression,
     isMethodDefinition,
     isObjectExpression,
+    isProperty,
     isReturnStatement,
     isScriptFunction,
+    isSwitchCaseStatement,
+    isSwitchStatement,
     isTemplateLiteral,
     isTryStatement,
     isTSAsExpression,
     isTSInterfaceBody,
     isTSInterfaceDeclaration,
+    isTSNonNullExpression,
     isTSTypeAliasDeclaration,
+    isTSTypeParameterDeclaration,
+    isTSTypeParameterInstantiation,
+    isUpdateExpression,
     isVariableDeclaration,
     isVariableDeclarator,
-    isClassProperty,
-    isIdentifier,
-    isETSParameterExpression,
-    isETSUnionType,
-    isETSFunctionType,
-    isWhileStatement,
-    isForUpdateStatement,
-    isForInStatement,
-    isForOfStatement,
-    isDoWhileStatement,
-    isSwitchStatement,
-    isSwitchCaseStatement,
-    isETSImportDeclaration,
-    isProperty,
-    isETSNewClassInstanceExpression,
-    isTSNonNullExpression,
-    isUpdateExpression,
-    isETSTypeReference,
-    isETSTypeReferencePart,
-    isTSTypeParameterInstantiation,
-    isTSTypeParameterDeclaration
+    isWhileStatement
 } from "../generated"
-import { updateETSModuleByStatements } from "./utilities/public"
+import { Es2pandaImportKinds } from "../generated/Es2pandaEnums"
+import { factory } from "./factory/nodeFactory"
+import { AstNode } from "./peers/AstNode"
 import { global } from "./static/global"
-import { Es2pandaImportKinds, Es2pandaScriptFunctionFlags } from "../generated/Es2pandaEnums"
+import { updateETSModuleByStatements } from "./utilities/public"
 
 type Visitor = (node: AstNode, options?: object) => AstNode
 
@@ -201,12 +201,11 @@ export function visitEachChild(
         )
     }
     if (isClassDeclaration(node)) {
-        const _node = factory.updateClassDeclaration(
+        return factory.updateClassDeclaration(
             node,
-            nodeVisitor(node.definition, visitor)
+            nodeVisitor(node.definition, visitor),
+            node.modifierFlags,
         )
-        _node.modifierFlags = node.modifierFlags
-        return _node
     }
     if (isClassDefinition(node)) {
         return factory.updateClassDefinition(

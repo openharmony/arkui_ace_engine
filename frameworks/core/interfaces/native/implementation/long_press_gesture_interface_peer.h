@@ -16,8 +16,18 @@
 #pragma once
 
 #include "core/components_ng/gestures/long_press_gesture.h"
- 
-struct LongPressGestureInterfacePeer final {
+#include "gesture_peer.h"
+
+struct LongPressGestureInterfacePeer : public GesturePeer {
     OHOS::Ace::RefPtr<OHOS::Ace::NG::LongPressGesture> gesture;
+
+    inline OHOS::Ace::RefPtr<OHOS::Ace::NG::Gesture> GetGesture() override
+    {
+        return gesture;
+    }
+
+protected:
+    LongPressGestureInterfacePeer() = default;
+    ~LongPressGestureInterfacePeer() override = default;
+    friend OHOS::Ace::NG::PeerUtils;
 };
- 

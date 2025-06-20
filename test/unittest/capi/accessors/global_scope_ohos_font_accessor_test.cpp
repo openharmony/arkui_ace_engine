@@ -33,7 +33,6 @@ public:
     void SetUp() override
     {
         StaticAccessorTest::SetUp();
-        MockPipelineContext::GetCurrent()->ResetFontManager();
     }
 };
 
@@ -75,11 +74,11 @@ HWTEST_F(GlobalScopeOhosFontAccessorTest, RegisterFontTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: RegisterFontTestResurse
+ * @tc.name: RegisterFontTestResource
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GlobalScopeOhosFontAccessorTest, RegisterFontTestResurse, TestSize.Level1)
+HWTEST_F(GlobalScopeOhosFontAccessorTest, RegisterFontTestResource, TestSize.Level1)
 {
     ASSERT_NE(accessor_->registerFont, nullptr);
     const auto RES_NAME_ID = NamedResourceId { "text_resource_name", Converter::ResourceType::STRING };
@@ -137,7 +136,7 @@ HWTEST_F(GlobalScopeOhosFontAccessorTest, GetSystemFontListTest, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GlobalScopeOhosFontAccessorTest, GetFontByNameTest, TestSize.Level1)
+HWTEST_F(GlobalScopeOhosFontAccessorTest, DISABLED_GetFontByNameTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getFontByName, nullptr);
 

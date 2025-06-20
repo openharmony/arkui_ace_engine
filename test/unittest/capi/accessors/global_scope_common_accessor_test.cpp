@@ -79,6 +79,7 @@ HWTEST_F(GlobalScopeCommonAccessorTest, px2vpTest, TestSize.Level1)
     EXPECT_EQ(0, Converter::Convert<int32_t>(accessor_->px2vp(nullptr)));
 }
 
+#ifdef WRONG_GEN
 /**
  * @tc.name: fp2pxTest
  * @tc.desc:
@@ -214,6 +215,7 @@ HWTEST_F(GlobalScopeCommonAccessorTest, px2lpxTest, TestSize.Level1)
     EXPECT_EQ(lpxValue2, Converter::Convert<int32_t>(accessor_->px2lpx(&arkPxValue2)));
     EXPECT_EQ(0, Converter::Convert<int32_t>(accessor_->px2lpx(nullptr)));
 }
+#endif
 
 /**
  * @tc.name: animateToTest

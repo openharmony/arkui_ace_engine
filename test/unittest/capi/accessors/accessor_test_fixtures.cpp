@@ -290,8 +290,8 @@ std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureDimensi
 // Fixture 'DimensionsStrNonPerc' for type 'Ark_String'
 std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureDimensionsStrNonPercValidValues = {
     { "\"123vp\"", Converter::ArkValue<Ark_String>("123vp"), "123.00vp" },
-    { "\"0_fp\"", Converter::ArkValue<Ark_String>("0_fp"), "0.00fp" },
-    { "\"1.23_fp\"", Converter::ArkValue<Ark_String>("1.23_fp"), "1.23fp" },
+    { "\"0_fp\"", Converter::ArkValue<Ark_String>("0fp"), "0.00fp" },
+    { "\"1.23_fp\"", Converter::ArkValue<Ark_String>("1.23fp"), "1.23fp" },
 };
 
 // Fixture 'DimensionsNumNonNeg' for type 'Ark_Number'

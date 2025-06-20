@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -45,16 +45,12 @@ export class ArkScreenPeer extends ArkCommonMethodPeer {
 export type ScreenInterface = (screenId: number) => ScreenAttribute;
 export interface ScreenAttribute extends CommonMethod {
 }
-export interface UIScreenAttribute extends UICommonMethod {
-}
 export class ArkScreenStyle extends ArkCommonMethodStyle implements ScreenAttribute {
 }
-/** @memo:stable */
-export class ArkScreenComponent extends ArkCommonMethodComponent implements UIScreenAttribute {
+export class ArkScreenComponent extends ArkCommonMethodComponent implements ScreenAttribute {
     getPeer(): ArkScreenPeer {
         return (this.peer as ArkScreenPeer)
     }
-    /** @memo */
     public setScreenOptions(screenId: number): this {
         if (this.checkPriority("setScreenOptions")) {
             const screenId_casted = screenId as (number)
@@ -72,7 +68,7 @@ export class ArkScreenComponent extends ArkCommonMethodComponent implements UISc
 /** @memo */
 export function Screen(
     /** @memo */
-    style: ((attributes: UIScreenAttribute) => void) | undefined,
+    style: ((attributes: ScreenAttribute) => void) | undefined,
     screenId: number,
     /** @memo */
     content_?: (() => void) | undefined,

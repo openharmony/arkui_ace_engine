@@ -22,6 +22,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr float PROGRESS_MAX_VALUE = 100.f;
+constexpr float PROGRESS_DEFAULT_STROKE_WIDTH = 4.0f;
 struct ProgressOptions {
     double value = 0;
     double total = PROGRESS_MAX_VALUE;
@@ -103,6 +104,16 @@ auto g_setProgressStyle = [](FrameNode* frameNode, const Ark_ProgressStyleOption
     auto scaleWidth = Converter::OptConvert<Dimension>(options.scaleWidth);
     Validator::ValidatePositive(scaleWidth);
     Validator::ValidateNonPercent(scaleWidth);
+    if (scaleWidth.has_value()) {
+        auto strokeWidthValue = PROGRESS_DEFAULT_STROKE_WIDTH;
+        auto scaleWidthValue = scaleWidth.value().Value();
+        if (strokeWidth.has_value()) {
+            strokeWidthValue = strokeWidth.value().Value();
+        }
+        if (GreatNotEqual(scaleWidthValue, strokeWidthValue)) {
+            scaleWidth.reset();
+        }
+    }
     ProgressModelStatic::SetScaleWidth(frameNode, scaleWidth);
     // enableSmoothEffect
     ProgressModelStatic::SetSmoothEffect(frameNode, Converter::OptConvert<bool>(options.enableSmoothEffect));
@@ -261,8 +272,7 @@ void PrivacySensitiveImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     ProgressModelStatic::SetPrivacySensitive(frameNode, convValue);
 }
 void ContentModifierImpl(Ark_NativePointer node,

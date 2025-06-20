@@ -22,14 +22,19 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod, TouchEvent } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, TouchEvent } from "./common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { NodeController } from "../NodeController"
 import { UIContext } from "@ohos/arkui/UIContext"
-import { FrameNode } from "../FrameNode"
+import { UIContextImpl, ContextRecord } from "arkui/handwritten/UIContextImpl"
+import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
+import { FrameNode } from "arkui/FrameNode"
 import { Size } from "../Graphics"
+import { StateManager } from "@koalaui/runtime"
+import { __context } from "@koalaui/runtime"
+
 export type NodeContainer_AboutToResizeCallback = (size: Size) => void;
 export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -101,23 +106,23 @@ export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
 export type NodeContainerInterface = (controller: NodeController) => NodeContainerAttribute;
 export interface NodeContainerAttribute extends CommonMethod {
 }
-export interface UINodeContainerAttribute extends UICommonMethod {
-}
 export class ArkNodeContainerStyle extends ArkCommonMethodStyle implements NodeContainerAttribute {
 }
-/** @memo:stable */
-export class ArkNodeContainerComponent extends ArkCommonMethodComponent implements UINodeContainerAttribute {
+export class ArkNodeContainerComponent extends ArkCommonMethodComponent implements NodeContainerAttribute {
     private controller: NodeController | null = null;
+    private uiContext: UIContext
+    constructor(uiContext: UIContext) {
+        this.uiContext = uiContext
+    }
     getPeer(): ArkNodeContainerPeer {
         return (this.peer as ArkNodeContainerPeer)
     }
-    /** @memo */
     public setNodeContainerOptions(controller: NodeController): this {
         if (this.checkPriority("setNodeContainerOptions")) {
             if (this.controller) {
-                this.controller!.onWillUnBind(this.getPeer().getId())
+                this.controller!.onWillUnbind(this.getPeer().getId())
                 this.controller!.resetInternalField()
-                this.controller!.onUnBind(this.getPeer().getId())
+                this.controller!.onUnbind(this.getPeer().getId())
                 this.controller = null
             }
             controller.onWillBind(this.getPeer().getId())
@@ -145,12 +150,12 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
             controller.onBind(this.getPeer().getId())
             // makeNode
             const makeNodeFunc = controller.__makeNode__
-            const child = makeNodeFunc(new UIContext(100000))
+            const child = makeNodeFunc(this.uiContext)
             this.getPeer().addNodeContainerRootNode(child)
         }
         return this
     }
-    
+
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
         super.applyAttributesFinish()
@@ -158,7 +163,7 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
     public rebuild(): void {
         if (this.controller) {
             const makeNodeFunc = this.controller!.__makeNode__
-            const child = makeNodeFunc(new UIContext(100000))
+            const child = makeNodeFunc(this.uiContext)
             this.getPeer().addNodeContainerRootNode(child)
         }
     }
@@ -166,13 +171,16 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
 /** @memo */
 export function NodeContainer(
     /** @memo */
-    style: ((attributes: UINodeContainerAttribute) => void) | undefined,
+    style: ((attributes: NodeContainerAttribute) => void) | undefined,
     controller: NodeController,
     /** @memo */
     content_?: (() => void) | undefined,
 ): void {
+    const context: StateManager = __context() as StateManager;
+    const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
+    let uiContext = data?.uiContext
     const receiver = remember(() => {
-        return new ArkNodeContainerComponent()
+        return new ArkNodeContainerComponent(uiContext!)
     })
     NodeAttach<ArkNodeContainerPeer>((): ArkNodeContainerPeer => ArkNodeContainerPeer.create(receiver), (_: ArkNodeContainerPeer) => {
         receiver.setNodeContainerOptions(controller)

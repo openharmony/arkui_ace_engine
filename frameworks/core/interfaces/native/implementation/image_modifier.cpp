@@ -17,13 +17,12 @@
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/image/image_model_static.h"
-#include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/interfaces/native/implementation/image_common_methods.h"
+#include "core/interfaces/native/implementation/matrix4_transit_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
-
-#include "image_common_methods.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -102,9 +101,8 @@ void SetImageOptions0Impl(Ark_NativePointer node,
     // Note.
     // This function should skip InitImage invocation if info's optional is empty.
     if (info) {
-        auto frameNode = reinterpret_cast<FrameNode*>(node);
-        CHECK_NULL_VOID(frameNode);
-        ImageModelNG::InitImage(frameNode, info->GetSrc());
+        std::string source = info->GetSrc();
+        ImageModelNG::InitImage(frameNode, source);
     } else {
         ImageModelNG::ResetImageSrc(frameNode);
     }
@@ -113,12 +111,16 @@ void SetImageOptions1Impl(Ark_NativePointer node,
                           const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor* src,
                           const Ark_ImageAIOptions* imageAIOptions)
 {
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(src);
+    CHECK_NULL_VOID(imageAIOptions);
     auto info = Converter::OptConvert<ImageSourceInfo>(*src);
     if (info) {
-        auto frameNode = reinterpret_cast<FrameNode*>(node);
-        CHECK_NULL_VOID(frameNode);
-        ImageModelNG::InitImage(frameNode, info->GetSrc());
+        std::string source = info->GetSrc();
+        ImageModelNG::InitImage(frameNode, source);
+    } else {
+        ImageModelNG::ResetImageSrc(frameNode);
     }
 }
 } // ImageInterfaceModifier
@@ -165,7 +167,7 @@ void FillColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelStatic::SetImageFill(frameNode, Converter::OptConvert<Color>(*value));
+    ImageModelStatic::SetImageFill(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void ObjectFitImpl(Ark_NativePointer node,
                    const Opt_ImageFit* value)
@@ -180,8 +182,14 @@ void ImageMatrixImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ImageModelNG::SetImageMatrix(frameNode, convValue);
+    auto peerOpt = Converter::GetOptPtr(value);
+    std::optional<Matrix4> matrix;
+    if (peerOpt.has_value()) {
+        auto* peer = peerOpt.value();
+        CHECK_NULL_VOID(peer);
+        matrix = peer->matrix;
+    }
+    ImageModelStatic::SetImageMatrix(frameNode, matrix);
 }
 void ObjectRepeatImpl(Ark_NativePointer node,
                       const Opt_ImageRepeat* value)
@@ -418,7 +426,8 @@ void PrivacySensitiveImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetPrivacySensitive(frameNode, Converter::OptConvert<bool>(*value));
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ViewAbstractModelStatic::SetPrivacySensitive(frameNode, convValue);
 }
 void EnhancedImageQualityImpl(Ark_NativePointer node,
                               const Opt_image_ResolutionQuality* value)

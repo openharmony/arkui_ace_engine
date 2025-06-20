@@ -26,10 +26,8 @@ public:
     void Create(SplitType splitType) override;
     void SetResizable(NG::SplitType splitType, bool resizable) override;
     void SetDivider(NG::SplitType splitType, const NG::ItemDivider& divider) override;
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, SplitType splitType);
     static void SetResizable(FrameNode* frameNode, NG::SplitType splitType, bool resizable);
-    static void SetDivider(FrameNode* frameNode, NG::SplitType splitType,
-        const std::optional<ItemDivider>& optDivider);
+    static void SetDivider(FrameNode* frameNode, NG::SplitType splitType, const NG::ItemDivider& divider);
 };
 
 } // namespace OHOS::Ace::NG

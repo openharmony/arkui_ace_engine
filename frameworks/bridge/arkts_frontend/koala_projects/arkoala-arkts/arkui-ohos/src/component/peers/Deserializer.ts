@@ -22,30 +22,31 @@ import { CallbackKind } from "./CallbackKind"
 import { Serializer } from "./Serializer"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DataSyncOptions, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, DrawModifierInternal, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, Literal_String_value_Callback_Void_action, OnWillScrollCallback, ScrollResult } from "./../common"
+import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DataSyncOptions, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, DrawModifierInternal, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType, SelectedCallback, IndexCallback, IndexerSelectedCallback, RefreshingCallback } from "./../common"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions } from "./../button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../animationExtender"
-import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, PointerStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme } from "./../arkui-custom"
+import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, BuilderNodeOps, BuilderNodeOpsInternal, BuilderNodeOptions, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme, Callback_CreateItem } from "./../arkui-custom"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { ContentDidScrollCallback, ContentWillScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, SwiperAnimationEvent, SwiperAnimationMode, SwiperAttribute, DotIndicator, DigitIndicator, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, SwiperContentWillScrollResult, AutoPlayOptions, ArrowStyle, SwiperAutoFill, SwiperContentTransitionProxy, SwiperContentTransitionProxyInternal, SwiperController, SwiperControllerInternal, Callback_SwiperContentTransitionProxy_Void, Indicator } from "./../swiper"
 import { CustomNodeBuilder } from "./../customBuilder"
-import { EditableTextOnChangeCallback, OnDidChangeCallback, AutoCapitalizationMode, KeyboardAppearance, LayoutManager, LayoutManagerInternal, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, EditMenuOptions, TextEditControllerEx, TextEditControllerExInternal, PreviewText, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, CaretStyle, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextBaseControllerInternal, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuItemIdInternal, TextMenuShowMode, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, DecorationStyleResult } from "./../textCommon"
+import { EditableTextOnChangeCallback, OnDidChangeCallback, AutoCapitalizationMode, KeyboardAppearance, LayoutManager, LayoutManagerInternal, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, EditMenuOptions, TextEditControllerEx, TextEditControllerExInternal, PreviewText, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, CaretStyle, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextBaseControllerInternal, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuItemIdInternal, TextMenuShowMode, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, TextMenuOptions, DecorationStyleResult } from "./../textCommon"
 import { ErrorCallback } from "./../ohos.base"
 import { GetItemMainSizeByIndex, WaterFlowAttribute, WaterFlowLayoutMode, WaterFlowSections, WaterFlowSectionsInternal, SectionOptions, WaterFlowOptions } from "./../waterFlow"
 import { ImageCompleteCallback, ImageLoadResult } from "./../imageSpan"
 import { ImageErrorCallback, ColorContent, DynamicRangeMode, ImageContent, ImageInterpolation, ImageRenderMode, ImageRotateOrientation, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event, ImageError, ImageSourceSize, ResizableOptions } from "./../image"
 import { InterceptionModeCallback, InterceptionShowCallback, BarStyle, LaunchMode, NavBarPosition, NavigationMenuItem, NavigationOperation, NavigationTitleOptions, NavigationMenuOptions, ToolbarItem, NavigationToolbarOptions, NavigationAttribute, Tuple_Dimension_Dimension, NavigationMode, NavigationTitleMode, Callback_NavigationTitleMode_Void, Callback_Boolean_Void, Callback_NavigationMode_Void, Callback_String_Opt_Object_Void, Type_NavigationAttribute_customNavContentTransition_delegate, NavContentInfo, NavigationAnimatedTransition, NavigationCommonTitle, NavigationCustomTitle, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions, Callback_PopInfo_Void, PopInfo, NavigationInterception, ToolbarItemStatus, Callback_NavigationTransitionProxy_Void, NavigationTransitionProxy, NavigationTransitionProxyInternal, NavBar, MoreButtonOptions } from "./../navigation"
 import { LocationButtonCallback, LocationButtonOnClickResult, LocationDescription, LocationIconStyle, LocationButtonOptions } from "./../locationButton"
-import { MenuCallback, OnHoverCallback } from "./../sdk-stubs"
-import { MenuOnAppearCallback, PasteEventCallback, SubmitCallback, RichEditorAttribute, Callback_RichEditorSelection_Void, RichEditorSelection, Callback_RichEditorRange_Void, RichEditorRange, Callback_RichEditorInsertValue_Boolean, RichEditorInsertValue, Callback_RichEditorTextSpanResult_Void, RichEditorTextSpanResult, Callback_TextRange_Void, Callback_RichEditorDeleteValue_Boolean, RichEditorDeleteValue, PasteEvent, Callback_RichEditorChangeValue_Boolean, RichEditorChangeValue, Callback_CutEvent_Void, CutEvent, Callback_CopyEvent_Void, CopyEvent, RichEditorSpanType, RichEditorResponseType, SelectionMenuOptions, KeyboardOptions, PlaceholderStyle, RichEditorBaseController, RichEditorBaseControllerInternal, RichEditorTextStyle, RichEditorController, RichEditorControllerInternal, RichEditorTextSpanOptions, RichEditorImageSpanOptions, RichEditorBuilderSpanOptions, RichEditorSymbolSpanOptions, RichEditorUpdateTextSpanStyleOptions, RichEditorUpdateImageSpanStyleOptions, RichEditorUpdateSymbolSpanStyleOptions, RichEditorParagraphStyleOptions, RichEditorImageSpanResult, RichEditorParagraphResult, RichEditorSpan, RichEditorDeleteDirection, RichEditorOptions, RichEditorStyledStringController, RichEditorStyledStringControllerInternal, RichEditorStyledStringOptions, LeadingMarginPlaceholder, PreviewMenuOptions, RichEditorGesture, RichEditorSpanPosition, RichEditorLayoutStyle, RichEditorParagraphStyle, RichEditorSymbolSpanStyle, RichEditorSpanStyleOptions, RichEditorUrlStyle, RichEditorImageSpanStyle, RichEditorImageSpanStyleResult, RichEditorTextStyleResult } from "./../richEditor"
+import { MenuCallback, MenuOnAppearCallback, PasteEventCallback, SubmitCallback, RichEditorAttribute, Callback_RichEditorSelection_Void, RichEditorSelection, Callback_RichEditorRange_Void, RichEditorRange, Callback_RichEditorInsertValue_Boolean, RichEditorInsertValue, Callback_RichEditorTextSpanResult_Void, RichEditorTextSpanResult, Callback_TextRange_Void, Callback_RichEditorDeleteValue_Boolean, RichEditorDeleteValue, PasteEvent, Callback_RichEditorChangeValue_Boolean, RichEditorChangeValue, Callback_CutEvent_Void, CutEvent, Callback_CopyEvent_Void, CopyEvent, RichEditorSpanType, RichEditorResponseType, SelectionMenuOptions, KeyboardOptions, PlaceholderStyle, RichEditorBaseController, RichEditorBaseControllerInternal, RichEditorTextStyle, RichEditorController, RichEditorControllerInternal, RichEditorTextSpanOptions, RichEditorImageSpanOptions, RichEditorBuilderSpanOptions, RichEditorSymbolSpanOptions, RichEditorUpdateTextSpanStyleOptions, RichEditorUpdateImageSpanStyleOptions, RichEditorUpdateSymbolSpanStyleOptions, RichEditorParagraphStyleOptions, RichEditorImageSpanResult, RichEditorParagraphResult, RichEditorSpan, RichEditorDeleteDirection, RichEditorOptions, RichEditorStyledStringController, RichEditorStyledStringControllerInternal, RichEditorStyledStringOptions, LeadingMarginPlaceholder, PreviewMenuOptions, RichEditorGesture, RichEditorSpanPosition, RichEditorLayoutStyle, RichEditorParagraphStyle, RichEditorSymbolSpanStyle, RichEditorSpanStyleOptions, RichEditorUrlStyle, RichEditorImageSpanStyle, RichEditorImageSpanStyleResult, RichEditorTextStyleResult } from "./../richEditor"
+import { NavBarWidthCallback } from "./../navigationops"
 import { NavDestinationTransitionDelegate, NavDestinationActiveReason, NavDestinationAttribute, Callback_Boolean, Callback_Object_Void, NavDestinationMode, Callback_NavDestinationContext_Void, NavDestinationContext, NavDestinationContextInternal, NavigationSystemTransitionType, NestedScrollInfo, Callback_NavDestinationActiveReason_Void, Orientation, NavDestinationCommonTitle, NavDestinationCustomTitle, NavDestinationTransition, RouteMapConfig } from "./../navDestination"
 import { NavExtender_OnUpdateStack } from "./../navigationExtender"
-import { OnAdsBlockedCallback, OnContextMenuHideCallback, OnFirstMeaningfulPaintCallback, OnFullScreenEnterCallback, OnIntelligentTrackingPreventionCallback, OnLargestContentfulPaintCallback, OnNativeEmbedVisibilityChangeCallback, OnNavigationEntryCommittedCallback, OnOverrideUrlLoadingCallback, OnRenderProcessNotRespondingCallback, OnRenderProcessRespondingCallback, OnSafeBrowsingCheckResultCallback, OnSslErrorEventCallback, OnViewportFitChangedCallback, WebKeyboardCallback, BlurOnKeyboardHideMode, CacheMode, ClientAuthenticationHandler, ClientAuthenticationHandlerInternal, ConsoleMessage, ConsoleMessageInternal, MessageLevel, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, ControllerHandlerInternal, DataResubmissionHandler, DataResubmissionHandlerInternal, EventResult, EventResultInternal, FileSelectorMode, FileSelectorParam, FileSelectorParamInternal, FileSelectorResult, FileSelectorResultInternal, FullScreenExitHandler, FullScreenExitHandlerInternal, HitTestType, HttpAuthHandler, HttpAuthHandlerInternal, JsGeolocation, JsGeolocationInternal, JsResult, JsResultInternal, MixedMode, NativeEmbedStatus, NativeMediaPlayerConfig, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PermissionRequest, PermissionRequestInternal, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureHandlerInternal, ScreenCaptureConfig, SslError, SslErrorHandler, SslErrorHandlerInternal, ThreatType, ViewportFit, WebAttribute, JavaScriptProxy, WebDarkMode, WebMediaOptions, Callback_OnPageEndEvent_Void, OnPageEndEvent, Callback_OnPageBeginEvent_Void, OnPageBeginEvent, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, OnTitleReceiveEvent, Callback_OnGeolocationShowEvent_Void, OnGeolocationShowEvent, Callback_OnAlertEvent_Boolean, OnAlertEvent, Callback_OnBeforeUnloadEvent_Boolean, OnBeforeUnloadEvent, Callback_OnConfirmEvent_Boolean, OnConfirmEvent, Callback_OnPromptEvent_Boolean, OnPromptEvent, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, OnErrorReceiveEvent, Callback_OnHttpErrorReceiveEvent_Void, OnHttpErrorReceiveEvent, Callback_OnDownloadStartEvent_Void, OnDownloadStartEvent, Callback_OnRefreshAccessedHistoryEvent_Void, OnRefreshAccessedHistoryEvent, Type_WebAttribute_onUrlLoadIntercept_callback, Literal_Union_String_WebResourceRequest_data, WebResourceRequest, WebResourceRequestInternal, Callback_Literal_Function_handler_Object_error_Void, Literal_Function_handler_Object_error, Callback_OnRenderExitedEvent_Void, OnRenderExitedEvent, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Literal_Object_detail, Type_WebAttribute_onFileSelectorShow_callback, Literal_Function_callback__Object_fileSelector, Callback_OnResourceLoadEvent_Void, OnResourceLoadEvent, FullScreenEnterEvent, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, OnHttpAuthRequestEvent, Callback_OnInterceptRequestEvent_WebResourceResponse, OnInterceptRequestEvent, WebResourceResponse, WebResourceResponseInternal, Callback_OnPermissionRequestEvent_Void, OnPermissionRequestEvent, Callback_OnScreenCaptureRequestEvent_Void, OnScreenCaptureRequestEvent, Callback_OnContextMenuShowEvent_Boolean, OnContextMenuShowEvent, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, OnSslErrorEventReceiveEvent, SslErrorEvent, Callback_OnClientAuthenticationEvent_Void, OnClientAuthenticationEvent, Callback_OnWindowNewEvent_Void, OnWindowNewEvent, Callback_OnTouchIconUrlReceivedEvent_Void, OnTouchIconUrlReceivedEvent, Callback_OnFaviconReceivedEvent_Void, OnFaviconReceivedEvent, Callback_OnPageVisibleEvent_Void, OnPageVisibleEvent, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, FirstMeaningfulPaint, LargestContentfulPaint, Callback_OnLoadInterceptEvent_Boolean, OnLoadInterceptEvent, Callback_OnOverScrollEvent_Void, LoadCommittedDetails, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, Callback_NativeEmbedDataInfo_Void, NativeEmbedDataInfo, NativeEmbedVisibilityInfo, Callback_NativeEmbedTouchInfo_Void, NativeEmbedTouchInfo, RenderProcessNotRespondingData, ExpandedMenuItemOptions, WebKeyboardCallbackInfo, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebElementType, WebResponseType, SelectionMenuOptionsExt, WebCaptureMode, WebContextMenuParam, WebContextMenuParamInternal, WebContextMenuResult, WebContextMenuResultInternal, WebController, WebControllerInternal, Literal_String_script_Callback_String_Void_callback_, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Header, Literal_Object_object__String_name_Array_String_methodList, WebCookie, WebCookieInternal, WebKeyboardController, WebKeyboardControllerInternal, WebNavigationType, WebResourceError, WebResourceErrorInternal, Callback_Literal_String_plainText_Void, Literal_String_plainText, WebKeyboardOptions, WebOptions, NativeEmbedInfo } from "./../web"
+import { OnAdsBlockedCallback, OnContextMenuHideCallback, OnFirstMeaningfulPaintCallback, OnFullScreenEnterCallback, OnIntelligentTrackingPreventionCallback, OnLargestContentfulPaintCallback, OnNativeEmbedVisibilityChangeCallback, OnNavigationEntryCommittedCallback, OnOverrideUrlLoadingCallback, OnRenderProcessNotRespondingCallback, OnRenderProcessRespondingCallback, OnSafeBrowsingCheckResultCallback, OnSslErrorEventCallback, OnViewportFitChangedCallback, WebKeyboardCallback, BlurOnKeyboardHideMode, CacheMode, ClientAuthenticationHandler, ClientAuthenticationHandlerInternal, ConsoleMessage, ConsoleMessageInternal, MessageLevel, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, ControllerHandlerInternal, DataResubmissionHandler, DataResubmissionHandlerInternal, EventResult, EventResultInternal, FileSelectorMode, FileSelectorParam, FileSelectorParamInternal, FileSelectorResult, FileSelectorResultInternal, FullScreenExitHandler, FullScreenExitHandlerInternal, HitTestType, HttpAuthHandler, HttpAuthHandlerInternal, JsGeolocation, JsGeolocationInternal, JsResult, JsResultInternal, MixedMode, NativeEmbedStatus, NativeMediaPlayerConfig, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PermissionRequest, PermissionRequestInternal, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureHandlerInternal, ScreenCaptureConfig, SslError, SslErrorHandler, SslErrorHandlerInternal, ThreatType, ViewportFit, WebAttribute, JavaScriptProxy, WebDarkMode, WebMediaOptions, Callback_OnPageEndEvent_Void, OnPageEndEvent, Callback_OnPageBeginEvent_Void, OnPageBeginEvent, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, OnTitleReceiveEvent, Callback_OnGeolocationShowEvent_Void, OnGeolocationShowEvent, Callback_OnAlertEvent_Boolean, OnAlertEvent, Callback_OnBeforeUnloadEvent_Boolean, OnBeforeUnloadEvent, Callback_OnConfirmEvent_Boolean, OnConfirmEvent, Callback_OnPromptEvent_Boolean, OnPromptEvent, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, OnErrorReceiveEvent, Callback_OnHttpErrorReceiveEvent_Void, OnHttpErrorReceiveEvent, Callback_OnDownloadStartEvent_Void, OnDownloadStartEvent, Callback_OnRefreshAccessedHistoryEvent_Void, OnRefreshAccessedHistoryEvent, Type_WebAttribute_onUrlLoadIntercept_callback, Literal_Union_String_WebResourceRequest_data, WebResourceRequest, WebResourceRequestInternal, Callback_Literal_Function_handler_Object_error_Void, Literal_Function_handler_Object_error, Callback_OnRenderExitedEvent_Void, OnRenderExitedEvent, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Literal_Object_detail, Type_WebAttribute_onFileSelectorShow_callback, Literal_Function_callback__Object_fileSelector, Callback_OnResourceLoadEvent_Void, OnResourceLoadEvent, FullScreenEnterEvent, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, OnHttpAuthRequestEvent, Callback_OnInterceptRequestEvent_WebResourceResponse, OnInterceptRequestEvent, WebResourceResponse, WebResourceResponseInternal, Callback_OnPermissionRequestEvent_Void, OnPermissionRequestEvent, Callback_OnScreenCaptureRequestEvent_Void, OnScreenCaptureRequestEvent, Callback_OnContextMenuShowEvent_Boolean, OnContextMenuShowEvent, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, OnSslErrorEventReceiveEvent, SslErrorEvent, Callback_OnClientAuthenticationEvent_Void, OnClientAuthenticationEvent, Callback_OnWindowNewEvent_Void, OnWindowNewEvent, Callback_OnTouchIconUrlReceivedEvent_Void, OnTouchIconUrlReceivedEvent, Callback_OnFaviconReceivedEvent_Void, OnFaviconReceivedEvent, Callback_OnPageVisibleEvent_Void, OnPageVisibleEvent, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, FirstMeaningfulPaint, LargestContentfulPaint, Callback_OnLoadInterceptEvent_Boolean, OnLoadInterceptEvent, Callback_OnOverScrollEvent_Void, LoadCommittedDetails, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, Callback_NativeEmbedDataInfo_Void, NativeEmbedDataInfo, NativeEmbedVisibilityInfo, Callback_NativeEmbedTouchInfo_Void, NativeEmbedTouchInfo, RenderProcessNotRespondingData, ExpandedMenuItemOptions, WebKeyboardCallbackInfo, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebElementType, WebResponseType, SelectionMenuOptionsExt, WebCaptureMode, WebContextMenuParam, WebContextMenuParamInternal, WebContextMenuResult, WebContextMenuResultInternal, WebController, WebControllerInternal, Literal_String_script_Callback_String_Void_callback_, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Header, Literal_Object_object__String_name_Array_String_methodList, WebCookie, WebCookieInternal, WebKeyboardController, WebKeyboardControllerInternal, WebNavigationType, WebResourceError, WebResourceErrorInternal, Callback_Literal_String_plainText_Void, Literal_String_plainText, WebKeyboardOptions, WebOptionsSerializer, NativeEmbedInfo } from "./../web"
 import { OnAlphabetIndexerPopupSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerSelectCallback, AlphabetIndexerAttribute, Callback_Number_Void, IndexerAlign, Callback_Opt_Number_Void, AlphabetIndexerOptions } from "./../alphabetIndexer"
 import { OnCheckboxChangeCallback, Callback_Opt_Boolean_Void, CheckboxOptions } from "./../checkbox"
 import { OnCheckboxGroupChangeCallback, SelectStatus, CheckboxGroupResult, CheckboxGroupOptions } from "./../checkboxgroup"
 import { OnContentScrollCallback, OnPasteCallback, OnSubmitCallback, OnTextSelectionChangeCallback, ContentType, EnterKeyType, InputType, SubmitEvent, SubmitEventInternal, TextInputAttribute, TextInputStyle, PasswordIcon, UnderlineColor, TextInputController, TextInputControllerInternal, TextInputOptions } from "./../textInput"
 import { OnFoldStatusChangeCallback, OnHoverStatusChangeCallback, OnFoldStatusChangeInfo, HoverEventParam, FolderStackOptions } from "./../folderStack"
+import { OnHoverCallback } from "./../sdk-stubs"
 import { OnLinearIndicatorChangeCallback, LinearIndicatorController, LinearIndicatorControllerInternal, LinearIndicatorStartOptions, LinearIndicatorStyle } from "./../linearindicator"
 import { OnNativeLoadCallback, XComponentController, XComponentControllerInternal, Literal_Number_surfaceHeight_surfaceWidth, SurfaceRect, SurfaceRotationOptions, NativeXComponentParameters, XComponentOptions } from "./../xcomponent"
 import { OnRadioChangeCallback, RadioIndicatorType, RadioOptions, RadioStyle } from "./../radio"
@@ -61,21 +62,33 @@ import { PasteButtonCallback, PasteButtonOnClickResult, PasteDescription, PasteI
 import { PluginErrorCallback, PluginErrorData, PluginComponentTemplate, PluginComponentOptions } from "./../pluginComponent"
 import { ReceiveCallback, BaseShape, BaseShapeInternal, CircleShape, CircleShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, EllipseShape, EllipseShapeInternal, ImageModifier, IntentionCode, RectWidthStyle, RectHeightStyle, SymbolGlyphModifier, PathShape, PathShapeInternal, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShape, RectShapeInternal, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, SnapshotOptions, LabelStyle } from "./../arkui-external"
 import { SymbolEffect, SymbolEffectInternal, ReplaceSymbolEffect, ReplaceSymbolEffectInternal, ScaleSymbolEffect, ScaleSymbolEffectInternal } from "../symbolglyph"
-import { FontOptions, FontInfo } from "@ohos/font/font"
+import { FontOptions, FontInfo, UIFontAdjustInfo, UIFontAliasInfo, UIFontFallbackInfo, UIFontConfig, UIFontGenericInfo, UIFontFallbackGroupInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
+import { ShowCallback } from "./../bindSheetOpts"
 import { SaveButtonCallback, SaveButtonOnClickResult, SaveDescription, SaveIconStyle, SaveButtonOptions } from "./../saveButton"
 import { SearchSubmitCallback, CancelButtonStyle, SearchAttribute, IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, SearchType, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EditableTextChangeValue_Boolean, SearchButtonOptions, SearchController, SearchControllerInternal, SearchOptions } from "./../search"
-import { SelectedCallback } from "./../griditemops"
+import { SearchValueCallback } from "./../searchops"
+import { CheckedCallback } from "./../radioops"
+import { IsOnCallback } from "./../toggleops"
+import { MenuSelectedCallback } from "./../menuitemops"
+import { RatingCallback } from "./../ratingops"
+import { SelectAllCallback } from "./../checkboxgroupops"
+import { SelectCallback } from "./../checkboxops"
+import { SelectSelectedCallback, SelectValueCallback } from "./../selectops"
+import { ValueCallback } from "./../sliderops"
+import { ShowSideBarCallback, SideBarWidthCallback } from "./../sidebarcontainerops"
 import { SliderTriggerChangeCallback, SliderAttribute, Callback_Number_SliderChangeMode_Void, SliderChangeMode, SliderBlockStyle, SliderInteraction, SlideRange, SliderBlockType, SliderStyle, SliderOptions } from "./../slider"
-import { StyledStringMarshallCallback, StyledStringUnmarshallCallback, CustomSpan, CustomSpanInternal, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInternal, GestureStyleInterface, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, ImageAttachment, ImageAttachmentInternal, StyleOptions, StyledStringKey, SpanStyle, UserDataSpan, DecorationStyleInterface, UrlStyle, UrlStyleInternal, BaselineOffsetStyle, BaselineOffsetStyleInternal, LetterSpacingStyle, LetterSpacingStyleInternal, LineHeightStyle, LineHeightStyleInternal, TextShadowStyle, TextShadowStyleInternal, DecorationStyle, DecorationStyleInternal, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInternal, ParagraphStyleInterface, TextStyle_styled_string, TextStyle_styled_stringInternal, TextStyleInterface, BackgroundColorStyle, BackgroundColorStyleInternal, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
+import { StepperIndexCallback } from "./../stepperops"
+import { StyledStringMarshallCallback, StyledStringUnmarshallCallback, CustomSpan, CustomSpanInternal, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInternal, GestureStyleInterface, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, ImageAttachment, ImageAttachmentInternal, StyleOptions, StyledStringKey, SpanStyle, UserDataSpan, DecorationStyleInterface, UrlStyle, UrlStyleInternal, BaselineOffsetStyle, BaselineOffsetStyleInternal, LetterSpacingStyle, LetterSpacingStyleInternal, LineHeightStyle, LineHeightStyleInternal, TextShadowStyle, TextShadowStyleInternal, DecorationStyle, DecorationStyleInternal, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInternal, ParagraphStyleInterface, TextStyle, TextStyle_styled_stringInternal, TextStyleInterface, BackgroundColorStyle, BackgroundColorStyleInternal, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
 import { TextAreaSubmitCallback, TextAreaAttribute, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, TextAreaType, Callback_ResourceStr_Void, TextAreaController, TextAreaControllerInternal, TextAreaOptions } from "./../textArea"
+import { TextFieldValueCallback } from "./../textfieldops"
 import { VoidCallback, ResourceColor, Font, Position, Length, SizeOptions, Offset, ColorFilter, ColorFilterInternal, ResourceStr, Dimension, PX, VP, FP, LPX, Percentage, LengthConstrain, DividerStyleOptions, ConstraintSizeOptions, Area, AccessibilityOptions, Bias, BorderRadiuses, ChainWeightOptions, DirectionalEdgesT, EdgeOutlineStyles, EdgeOutlineWidths, EdgeWidths, OutlineRadiuses, Padding, EdgeColors, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdges, LocalizedEdgeWidths, LocalizedPadding, LocalizedPosition, MarkStyle, BorderOptions, OutlineOptions, EdgeStyles, Edges } from "./../units"
 import { WithThemeInterface, WithThemeAttribute, WithThemeOptions } from "./../withTheme"
 import { AccessibilityHoverType, Alignment, Color, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, ColoringStrategy, CopyOptions, CrownAction, CrownSensitivity, Curve, DialogButtonStyle, Direction, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FocusDrawLevel, FoldStatus, FontStyle, FontWeight, FunctionKey, GradientDirection, HeightBreakpoint, HitTestMode, HorizontalAlign, HoverEffect, IlluminatedType, ImageFit, ImageRepeat, ImageSize, ImageSpanAlignment, InteractionHand, ItemAlign, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, ModifierKey, MouseAction, MouseButton, NestedScrollMode, ObscuredReasons, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PlayMode, RelateType, RenderFit, ResponseType, ScrollSource, TextAlign, SharedTransitionEffectType, TextOverflow, TextContentStyle, TextHeightAdaptivePolicy, WordBreak, TextCase, TextSelectableMode, TextDecorationStyle, TextDecorationType, TitleHeight, TouchType, TransitionType, VerticalAlign, Visibility, Week, WidthBreakpoint, XComponentType } from "./../enums"
 import { Affinity, LineMetrics, TextBox, RunMetrics, TextDirection } from "./../arkui-graphics-text"
 import { Resource } from "global/resource"
 import { AnimatedDrawableDescriptor, AnimatedDrawableDescriptorInternal, DrawableDescriptor, DrawableDescriptorInternal, AnimationOptions, LayeredDrawableDescriptor, LayeredDrawableDescriptorInternal, PixelMapDrawableDescriptor, PixelMapDrawableDescriptorInternal } from "./../arkui-drawabledescriptor"
-import { PixelMap, PixelMapInternal } from "./../arkui-pixelmap"
+import { PixelMap } from "#external"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, GuideLinePosition, GuideLineStyle, LocalizedBarrierStyle } from "./../relativeContainer"
 import { BlendMode, DrawingCanvas, DrawingCanvasInternal, DrawingColorFilter, DrawingColorFilterInternal, DrawingLattice, DrawingLatticeInternal, RectType } from "./../arkui-drawing"
@@ -87,14 +100,13 @@ import { Matrix2D, Matrix2DInternal } from "./../matrix2d"
 import { ColorMode, LayoutDirection } from "./../stateManagement"
 import { Component3DAttribute, ModelType, SceneOptions } from "./../component3d"
 import { CustomDialogController, CustomDialogControllerInternal, CustomDialogControllerOptions } from "./../customDialogController"
-import { DrawContext, Rect, LengthMetricsUnit, LengthUnit, ColorMetrics, ColorMetricsInternal, ShapeClip, RoundRect, Circle, CommandPath, ShapeMask, Size, Vector2, Vector3, Corners, CornerRadius, Edges as EdgesT, Frame, Matrix4, LengthMetrics, LengthMetricsInternal, Position as GraphicsPosition } from "./../../Graphics"
+import { DrawContext, Rect, LengthMetricsUnit, LengthUnit, ColorMetrics, ColorMetricsInternal, ShapeClip, RoundRect, Circle, CommandPath, ShapeMask, Size, Vector2, Vector3, Corners, CornerRadius, Edges as EdgesT, Frame, Matrix4, LengthMetrics, Position as GraphicsPosition, SizeT } from "./../../Graphics"
 import { DataOperationType } from "./../lazyForEach"
 import { DataPanelType, LinearGradient, LinearGradientInternal, ColorStop, DataPanelOptions, DataPanelShadowOptions } from "./../dataPanel"
 import { DatePickerMode, Callback_DatePickerResult_Void, DatePickerResult, DatePickerOptions, LunarSwitchStyle, DatePickerDialogOptions } from "./../datePicker"
 import { DialogAlignment, DialogButtonDirection, LevelOrder, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
 import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater } from "./../particle"
 import { DpiFollowStrategy, UIExtensionProxy, UIExtensionProxyInternal, Callback_UIExtensionProxy_Void, WindowModeFollowStrategy, Callback_Literal_Number_code__want_Void, Literal_Number_code__want, Callback_Map_String_Object_Void, UIExtensionOptions } from "./../uiExtensionComponent"
-import { Callback_Void } from "./../abilityComponent"
 import { EditMode, ListItemStyle, Sticky, SwipeActionState, SwipeEdgeEffect, Callback_SwipeActionState_Void, ListItemOptions, SwipeActionItem, SwipeActionOptions } from "./../listItem"
 import { EffectFillStyle, PulseSymbolEffect, PulseSymbolEffectInternal, SymbolEffectStrategy, SymbolGlyphAttribute, SymbolRenderingStrategy, AppearSymbolEffect, AppearSymbolEffectInternal, BounceSymbolEffect, BounceSymbolEffectInternal, DisappearSymbolEffect, DisappearSymbolEffectInternal, HierarchicalSymbolEffect, HierarchicalSymbolEffectInternal } from "./../symbolglyph"
 import { EventTargetInfo, EventTargetInfoInternal, GestureControl, GestureGroupInterface, GestureGroupInterfaceInternal, GestureMode, GestureType, TapGestureInterface, TapGestureInterfaceInternal, LongPressGestureInterface, LongPressGestureInterfaceInternal, PanGestureInterface, PanGestureInterfaceInternal, PinchGestureInterface, PinchGestureInterfaceInternal, SwipeGestureInterface, SwipeGestureInterfaceInternal, RotationGestureInterface, RotationGestureInterfaceInternal, GestureJudgeResult, GestureMask, GesturePriority, GestureRecognizer, GestureRecognizerInternal, GestureRecognizerState, GestureInterface, Literal_Number_duration_fingers_Boolean_repeat, LongPressGestureHandlerOptions, Callback_GestureEvent_Void, GestureEvent, GestureEventInternal, LongPressRecognizer, LongPressRecognizerInternal, PanDirection, Literal_Number_distance_fingers_PanDirection_direction, PanGestureOptions, PanGestureOptionsInternal, PanGestureHandlerOptions, PanRecognizer, PanRecognizerInternal, Literal_Number_distance_fingers, PinchGestureHandlerOptions, PinchRecognizer, PinchRecognizerInternal, Literal_Number_angle_fingers, RotationGestureHandlerOptions, RotationRecognizer, RotationRecognizerInternal, ScrollableTargetInfo, ScrollableTargetInfoInternal, SwipeDirection, Literal_Number_fingers_speed_SwipeDirection_direction, SwipeGestureHandlerOptions, SwipeRecognizer, SwipeRecognizerInternal, TapGestureParameters, TapRecognizer, TapRecognizerInternal, GestureHandler, GestureInfo, BaseGestureEvent, BaseGestureEventInternal, FingerInfo, BaseHandlerOptions, LongPressGestureEvent, LongPressGestureEventInternal, PanGestureEvent, PanGestureEventInternal, PinchGestureEvent, PinchGestureEventInternal, RotationGestureEvent, RotationGestureEventInternal, SwipeGestureEvent, SwipeGestureEventInternal, TapGestureEvent, TapGestureEventInternal } from "./../gesture"
@@ -170,7 +182,10 @@ import { MenuItemOptions } from "./../menuItem"
 import { TextBackgroundStyle } from "./../span"
 import { DividerStyle as DividerStyle_sidebar } from "./../sidebar"
 import { NodeContainer_AboutToResizeCallback } from "./../nodeContainer"
-
+import { drawing } from "@ohos/graphics/drawing"
+import promptAction from '@ohos/promptAction'
+import { PointerStyle } from '#external'
+import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
 export class Deserializer extends DeserializerBase {
     constructor(data: KSerializerBuffer | KUint8ArrayPtr, length: int32) {
         super(data, length)
@@ -216,6 +231,11 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return BaseShapeInternal.fromPtr(ptr)
+    }
+    readBuilderNodeOps(): BuilderNodeOps {
+        let valueDeserializer : Deserializer = this
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return BuilderNodeOpsInternal.fromPtr(ptr)
     }
     readCalendarController(): CalendarController {
         let valueDeserializer : Deserializer = this
@@ -307,10 +327,11 @@ export class Deserializer extends DeserializerBase {
         let ptr : KPointer = valueDeserializer.readPointer()
         return DrawableDescriptorInternal.fromPtr(ptr)
     }
-    readDrawingCanvas(): DrawingCanvas {
+    readDrawingCanvas(): drawing.Canvas {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
-        return DrawingCanvasInternal.fromPtr(ptr)
+        return new drawing.Canvas()
+        // return DrawingCanvasInternal.fromPtr(ptr)
     }
     readDrawingColorFilter(): DrawingColorFilter {
         let valueDeserializer : Deserializer = this
@@ -671,9 +692,7 @@ export class Deserializer extends DeserializerBase {
         return PinchRecognizerInternal.fromPtr(ptr)
     }
     readPixelMap(): PixelMap {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return PixelMapInternal.fromPtr(ptr)
+        throw new Error("Interface with functions is not supported")
     }
     readPixelMapDrawableDescriptor(): PixelMapDrawableDescriptor {
         let valueDeserializer : Deserializer = this
@@ -1124,12 +1143,34 @@ export class Deserializer extends DeserializerBase {
         // let valueDeserializer : Deserializer = this
         // let ptr : KPointer = valueDeserializer.readPointer()
         // return UIContextInternal.fromPtr(ptr)
-        return new UIContext(100000)
+        let uiContext = UIContextUtil.getOrCreateUIContextById(100000);
+        return uiContext
     }
     readUIExtensionProxy(): UIExtensionProxy {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return UIExtensionProxyInternal.fromPtr(ptr)
+    }
+    readUIFontAdjustInfo(): UIFontAdjustInfo {
+        let valueDeserializer : Deserializer = this
+        const weight_result : number = (valueDeserializer.readNumber() as number)
+        const to_result : number = (valueDeserializer.readNumber() as number)
+        let value : UIFontAdjustInfo = ({weight: weight_result, to: to_result} as UIFontAdjustInfo)
+        return value
+    }
+    readUIFontAliasInfo(): UIFontAliasInfo {
+        let valueDeserializer : Deserializer = this
+        const name_result : string = (valueDeserializer.readString() as string)
+        const weight_result : number = (valueDeserializer.readNumber() as number)
+        let value : UIFontAliasInfo = ({name: name_result, weight: weight_result} as UIFontAliasInfo)
+        return value
+    }
+    readUIFontFallbackInfo(): UIFontFallbackInfo {
+        let valueDeserializer : Deserializer = this
+        const language_result : string = (valueDeserializer.readString() as string)
+        const family_result : string = (valueDeserializer.readString() as string)
+        let value : UIFontFallbackInfo = ({language: language_result, family: family_result} as UIFontFallbackInfo)
+        return value
     }
     readUIGestureEvent(): UIGestureEvent {
         throw new Error("Interface with functions is not supported")
@@ -1581,6 +1622,23 @@ export class Deserializer extends DeserializerBase {
     (isSync) ? (InteropNativeModule._CallCallbackSync(-120437466, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-120437466, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
+    }
+    public readCallback_CreateItem(isSync: boolean = false): Callback_CreateItem {
+        const _resource: CallbackResource = this.readCallbackResource()
+        const _call: KPointer = this.readPointer()
+        const _callSync: KPointer = this.readPointer()
+        return (index: int32): KPointer => { 
+    const _argsSerializer: Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeInt32(index);
+    let _continuationValue: KPointer | undefined|undefined ;
+    const _continuationCallback: ((value: KPointer) => void) = (value: KPointer): void => {     _continuationValue = value; }
+    _argsSerializer.holdAndWriteCallback(_continuationCallback);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-2019730059, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-2019730059, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return (_continuationValue as KPointer); }
     }
     readCallback_CrownEvent_Void(isSync: boolean = false): ((parameter: CrownEvent) => void) {
         const _resource : CallbackResource = this.readCallbackResource()
@@ -3470,17 +3528,16 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.release();
     return; }
     }
-    readCallback_RangeUpdate(isSync: boolean = false): Callback_RangeUpdate {
-        const _resource : CallbackResource = this.readCallbackResource()
-        const _call : KPointer = this.readPointer()
-        const _callSync : KPointer = this.readPointer()
-        return (index: int32, mark: KPointer, end: int32):void => { 
-    const _argsSerializer : Serializer = Serializer.hold();
+    public readCallback_RangeUpdate(isSync: boolean = false): Callback_RangeUpdate {
+        const _resource: CallbackResource = this.readCallbackResource()
+        const _call: KPointer = this.readPointer()
+        const _callSync: KPointer = this.readPointer()
+        return (start: int32, end: int32): void => { 
+    const _argsSerializer: Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
-    _argsSerializer.writeInt32(index);
-    _argsSerializer.writePointer(mark);
+    _argsSerializer.writeInt32(start);
     _argsSerializer.writeInt32(end);
     (isSync) ? (InteropNativeModule._CallCallbackSync(797834474, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(797834474, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
@@ -4363,6 +4420,34 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.release();
     return; }
     }
+    readIndexCallback(isSync: boolean = false): IndexCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (value: number):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNumber(value);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1271670107, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1271670107, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readIndexerSelectedCallback(isSync: boolean = false): IndexerSelectedCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (index: number):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNumber(index);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(372156059, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(372156059, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
     readInterceptionModeCallback(isSync: boolean = false): InterceptionModeCallback {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
@@ -4460,11 +4545,13 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return ():void => { 
+        return (start: number, end: number):void => { 
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
     _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNumber(start);
+    _argsSerializer.writeNumber(end);
     (isSync) ? (InteropNativeModule._CallCallbackSync(810927048, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(810927048, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
@@ -4484,6 +4571,20 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.release();
     return; }
     }
+    readNavBarWidthCallback(isSync: boolean = false): NavBarWidthCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (navBarWidth: Length):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeLength(navBarWidth);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-324352939, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-324352939, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }   
     readNavDestinationTransitionDelegate(isSync: boolean = false): NavDestinationTransitionDelegate {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
@@ -5379,6 +5480,20 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.release();
     return; }
     }
+    readRefreshingCallback(isSync: boolean = false): RefreshingCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (refreshing: boolean):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeBoolean(refreshing);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1858515962, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1858515962, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
     readRestrictedWorker_onerror_Callback(isSync: boolean = false): RestrictedWorker_onerror_Callback {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
@@ -5516,6 +5631,154 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.release();
     return; }
     }
+    readCheckedCallback(isSync: boolean = false): CheckedCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (checked: boolean):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeBoolean(checked);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1767915684, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1767915684, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readIsOnCallback(isSync: boolean = false): IsOnCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (isOn: boolean):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeBoolean(isOn);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1809395840, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1809395840, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readMenuSelectedCallback(isSync: boolean = false): MenuSelectedCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (selected: boolean):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeBoolean(selected);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1805198399, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1805198399, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readRatingCallback(isSync: boolean = false): RatingCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (rating: number):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNumber(rating);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(2100427644, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2100427644, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readSelectAllCallback(isSync: boolean = false): SelectAllCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (selectAll: boolean):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeBoolean(selectAll);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(706621298, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(706621298, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readSelectCallback(isSync: boolean = false): SelectCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (select: boolean):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeBoolean(select);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-237409101, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-237409101, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readSelectSelectedCallback(isSync: boolean = false): SelectSelectedCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (selected: number | Resource):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    let selected_type : int32 = RuntimeType.UNDEFINED;
+    selected_type = runtimeType(selected);
+    if (RuntimeType.NUMBER == selected_type) {
+        _argsSerializer.writeInt8(0 as int32);
+        const selected_0  = selected as number;
+        _argsSerializer.writeNumber(selected_0);
+    }
+    else if (RuntimeType.OBJECT == selected_type) {
+        _argsSerializer.writeInt8(1 as int32);
+        const selected_1  = selected as Resource;
+        _argsSerializer.writeResource(selected_1);
+    }
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1591979130, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1591979130, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readSelectValueCallback(isSync: boolean = false): SelectValueCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (value: ResourceStr):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    let value_type : int32 = RuntimeType.UNDEFINED;
+    value_type = runtimeType(value);
+    if (RuntimeType.STRING == value_type) {
+        _argsSerializer.writeInt8(0 as int32);
+        const value_0  = value as string;
+        _argsSerializer.writeString(value_0);
+    }
+    else if (RuntimeType.OBJECT == value_type) {
+        _argsSerializer.writeInt8(1 as int32);
+        const value_1  = value as Resource;
+        _argsSerializer.writeResource(value_1);
+    }
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-802444552, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-802444552, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readValueCallback(isSync: boolean = false): ValueCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (value: number):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNumber(value);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(-1882252848, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-1882252848, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
     readSelectedCallback(isSync: boolean = false): SelectedCallback {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
@@ -5549,6 +5812,20 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.release();
     return (_continuationValue as ScrollResult); }
     }
+    readSearchValueCallback(isSync: boolean = false): SearchValueCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (value: string):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeString(value);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(2049289694, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2049289694, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
     readShouldBuiltInRecognizerParallelWithCallback(isSync: boolean = false): ShouldBuiltInRecognizerParallelWithCallback {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
@@ -5570,6 +5847,34 @@ export class Deserializer extends DeserializerBase {
     (isSync) ? (InteropNativeModule._CallCallbackSync(-250780276, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-250780276, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return (_continuationValue as GestureRecognizer); }
+    }
+    readShowSideBarCallback(isSync: boolean = false): ShowSideBarCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (showSideBar: boolean):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeBoolean(showSideBar);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(2113738450, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2113738450, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readSideBarWidthCallback(isSync: boolean = false): SideBarWidthCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (sideBarWidth: number):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNumber(sideBarWidth);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(1771687607, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(1771687607, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
     }
     readSizeChangeCallback(isSync: boolean = false): SizeChangeCallback {
         const _resource : CallbackResource = this.readCallbackResource()
@@ -5598,6 +5903,20 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.writeNumber(value);
     _argsSerializer.writeInt32(TypeChecker.SliderChangeMode_ToNumeric(mode));
     (isSync) ? (InteropNativeModule._CallCallbackSync(711649376, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(711649376, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readStepperIndexCallback(isSync: boolean = false): StepperIndexCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (stepperIndex: number):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeNumber(stepperIndex);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(2068688176, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(2068688176, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -5686,6 +6005,31 @@ export class Deserializer extends DeserializerBase {
         _argsSerializer.writeSubmitEvent(event_value);
     }
     (isSync) ? (InteropNativeModule._CallCallbackSync(-401980571, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-401980571, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
+    readTextFieldValueCallback(isSync: boolean = false): TextFieldValueCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (value: ResourceStr):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    let value_type : int32 = RuntimeType.UNDEFINED;
+    value_type = runtimeType(value);
+    if (RuntimeType.STRING == value_type) {
+        _argsSerializer.writeInt8(0 as int32);
+        const value_0  = value as string;
+        _argsSerializer.writeString(value_0);
+    }
+    else if (RuntimeType.OBJECT == value_type) {
+        _argsSerializer.writeInt8(1 as int32);
+        const value_1  = value as Resource;
+        _argsSerializer.writeResource(value_1);
+    }
+    (isSync) ? (InteropNativeModule._CallCallbackSync(18061455, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(18061455, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
     }
@@ -6267,6 +6611,32 @@ export class Deserializer extends DeserializerBase {
         }
         const reference_result : BreakpointsReference | undefined = reference_buf
         let value : BreakPoints = ({value: value_result, reference: reference_result} as BreakPoints)
+        return value
+    }
+    readBuilderNodeOptions(): BuilderNodeOptions {
+        let valueDeserializer : Deserializer = this
+        const selfIdealSize_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let selfIdealSize_buf : Size | undefined
+        if ((RuntimeType.UNDEFINED) != (selfIdealSize_buf_runtimeType))
+        {
+            selfIdealSize_buf = valueDeserializer.readSize()
+        }
+        const selfIdealSize_result : Size | undefined = selfIdealSize_buf
+        const type_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let type_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
+        {
+            type_buf = (valueDeserializer.readNumber() as number)
+        }
+        const type_result : number | undefined = type_buf
+        const surfaceId_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let surfaceId_buf : string | undefined
+        if ((RuntimeType.UNDEFINED) != (surfaceId_buf_runtimeType))
+        {
+            surfaceId_buf = (valueDeserializer.readString() as string)
+        }
+        const surfaceId_result : string | undefined = surfaceId_buf
+        let value : BuilderNodeOptions = ({selfIdealSize: selfIdealSize_result, type: type_result, surfaceId: surfaceId_result} as BuilderNodeOptions)
         return value
     }
     readBrightnessBlender(): BrightnessBlender {
@@ -7188,8 +7558,8 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const size_result : Size = valueDeserializer.readSize()
         const sizeInPixel_result : Size = valueDeserializer.readSize()
-        const canvas_result : DrawingCanvas = (valueDeserializer.readDrawingCanvas() as DrawingCanvas)
-        let value : DrawContext = ({size: size_result, sizeInPixel: sizeInPixel_result, canvas: canvas_result} as DrawContext)
+        const canvas_result : drawing.Canvas = (valueDeserializer.readDrawingCanvas() as drawing.Canvas)
+        let value : DrawContext = ({size_: size_result, sizeInPixel_: sizeInPixel_result, canvas_: canvas_result} as DrawContext)
         return value
     }
     readDrawingRenderingContext(): DrawingRenderingContext {
@@ -7353,6 +7723,12 @@ export class Deserializer extends DeserializerBase {
         const right_result : number | undefined = right_buf
         let value : EdgesT<number> = ({top: top_result, left: left_result, bottom: bottom_result, right: right_result} as EdgesT<number>)
         return value
+    }
+    readEdgesLengthMetrics(): EdgesT<LengthMetrics> {
+        return { top: this.readLengthMetrics(), left: this.readLengthMetrics(), bottom: this.readLengthMetrics(), right: this.readLengthMetrics() }
+    }
+    readSizeLengthMetrics(): SizeT<LengthMetrics> {
+        return { width: this.readLengthMetrics(), height: this.readLengthMetrics() }
     }
     readEdgeStyles(): EdgeStyles {
         let valueDeserializer : Deserializer = this
@@ -8296,8 +8672,25 @@ export class Deserializer extends DeserializerBase {
     }
     readLengthMetrics(): LengthMetrics {
         let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return LengthMetricsInternal.fromPtr(ptr)
+
+        const value_runtimeType = (valueDeserializer.readInt8() as int32)
+        let value_buf: number | undefined
+        if ((RuntimeType.UNDEFINED) != (value_runtimeType)) {
+            value_buf = (valueDeserializer.readNumber() as number)
+        }
+        const value_result : number | undefined = value_buf
+
+        const unit_runtimeType = (valueDeserializer.readInt8() as int32)
+        let unit_buf: LengthUnit | undefined
+        if ((RuntimeType.UNDEFINED) != (unit_runtimeType)) {
+            unit_buf = (valueDeserializer.readInt32() as LengthUnit)
+        }
+        const unit_result : LengthUnit | undefined = unit_buf
+
+        if (!value_result) {
+            return new LengthMetrics(0, unit_result)
+        }
+        return new LengthMetrics(value_result!, unit_result)
     }
     readLetterSpacingStyle(): LetterSpacingStyle {
         let valueDeserializer : Deserializer = this
@@ -10964,7 +11357,7 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         const value_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let value_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (value_buf_runtimeType))
+        if ((RuntimeType.NUMBER) == (value_buf_runtimeType))
         {
             value_buf = (valueDeserializer.readNumber() as number)
         }
@@ -11525,6 +11918,18 @@ export class Deserializer extends DeserializerBase {
         let value : TextMarqueeOptions = ({start: start_result, step: step_result, loop: loop_result, fromStart: fromStart_result, delay: delay_result, fadeout: fadeout_result, marqueeStartPolicy: marqueeStartPolicy_result} as TextMarqueeOptions)
         return value
     }
+    readTextMenuOptions(): TextMenuOptions {
+        let valueDeserializer : Deserializer = this
+        const showMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let showMode_buf : TextMenuShowMode | undefined
+        if ((RuntimeType.UNDEFINED) != (showMode_buf_runtimeType))
+        {
+            showMode_buf = TypeChecker.TextMenuShowMode_FromNumeric(valueDeserializer.readInt32())
+        }
+        const showMode_result : TextMenuShowMode | undefined = showMode_buf
+        let value : TextMenuOptions = ({showMode: showMode_result} as TextMenuOptions)
+        return value
+    }
     readTextRange(): TextRange {
         let valueDeserializer : Deserializer = this
         const start_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -11686,7 +12091,7 @@ export class Deserializer extends DeserializerBase {
         const type_result : ToggleType = TypeChecker.ToggleType_FromNumeric(valueDeserializer.readInt32())
         const isOn_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let isOn_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (isOn_buf_runtimeType))
+        if ((RuntimeType.BOOLEAN) == (isOn_buf_runtimeType))
         {
             isOn_buf = valueDeserializer.readBoolean()
         }
@@ -11899,6 +12304,59 @@ export class Deserializer extends DeserializerBase {
         }
         const windowModeFollowStrategy_result : WindowModeFollowStrategy | undefined = windowModeFollowStrategy_buf
         let value : UIExtensionOptions = ({isTransferringCaller: isTransferringCaller_result, placeholder: placeholder_result, areaChangePlaceholder: areaChangePlaceholder_result, dpiFollowStrategy: dpiFollowStrategy_result, windowModeFollowStrategy: windowModeFollowStrategy_result} as UIExtensionOptions)
+        return value
+    }
+    readUIFontConfig(): UIFontConfig {
+        let valueDeserializer : Deserializer = this
+        const fontDir_buf_length : int32 = valueDeserializer.readInt32()
+        let fontDir_buf : Array<string> = new Array<string>(fontDir_buf_length)
+        for (let fontDir_buf_i = 0; fontDir_buf_i < fontDir_buf_length; fontDir_buf_i++) {
+            fontDir_buf[fontDir_buf_i] = (valueDeserializer.readString() as string)
+        }
+        const fontDir_result : Array<string> = fontDir_buf
+        const generic_buf_length : int32 = valueDeserializer.readInt32()
+        let generic_buf : Array<UIFontGenericInfo> = new Array<UIFontGenericInfo>(generic_buf_length)
+        for (let generic_buf_i = 0; generic_buf_i < generic_buf_length; generic_buf_i++) {
+            generic_buf[generic_buf_i] = valueDeserializer.readUIFontGenericInfo()
+        }
+        const generic_result : Array<UIFontGenericInfo> = generic_buf
+        const fallbackGroups_buf_length : int32 = valueDeserializer.readInt32()
+        let fallbackGroups_buf : Array<UIFontFallbackGroupInfo> = new Array<UIFontFallbackGroupInfo>(fallbackGroups_buf_length)
+        for (let fallbackGroups_buf_i = 0; fallbackGroups_buf_i < fallbackGroups_buf_length; fallbackGroups_buf_i++) {
+            fallbackGroups_buf[fallbackGroups_buf_i] = valueDeserializer.readUIFontFallbackGroupInfo()
+        }
+        const fallbackGroups_result : Array<UIFontFallbackGroupInfo> = fallbackGroups_buf
+        let value : UIFontConfig = ({fontDir: fontDir_result, generic: generic_result, fallbackGroups: fallbackGroups_result} as UIFontConfig)
+        return value
+    }
+    readUIFontFallbackGroupInfo(): UIFontFallbackGroupInfo {
+        let valueDeserializer : Deserializer = this
+        const fontSetName_result : string = (valueDeserializer.readString() as string)
+        const fallback_buf_length : int32 = valueDeserializer.readInt32()
+        let fallback_buf : Array<UIFontFallbackInfo> = new Array<UIFontFallbackInfo>(fallback_buf_length)
+        for (let fallback_buf_i = 0; fallback_buf_i < fallback_buf_length; fallback_buf_i++) {
+            fallback_buf[fallback_buf_i] = valueDeserializer.readUIFontFallbackInfo()
+        }
+        const fallback_result : Array<UIFontFallbackInfo> = fallback_buf
+        let value : UIFontFallbackGroupInfo = ({fontSetName: fontSetName_result, fallback: fallback_result} as UIFontFallbackGroupInfo)
+        return value
+    }
+    readUIFontGenericInfo(): UIFontGenericInfo {
+        let valueDeserializer : Deserializer = this
+        const family_result : string = (valueDeserializer.readString() as string)
+        const alias_buf_length : int32 = valueDeserializer.readInt32()
+        let alias_buf : Array<UIFontAliasInfo> = new Array<UIFontAliasInfo>(alias_buf_length)
+        for (let alias_buf_i = 0; alias_buf_i < alias_buf_length; alias_buf_i++) {
+            alias_buf[alias_buf_i] = valueDeserializer.readUIFontAliasInfo()
+        }
+        const alias_result : Array<UIFontAliasInfo> = alias_buf
+        const adjust_buf_length : int32 = valueDeserializer.readInt32()
+        let adjust_buf : Array<UIFontAdjustInfo> = new Array<UIFontAdjustInfo>(adjust_buf_length)
+        for (let adjust_buf_i = 0; adjust_buf_i < adjust_buf_length; adjust_buf_i++) {
+            adjust_buf[adjust_buf_i] = valueDeserializer.readUIFontAdjustInfo()
+        }
+        const adjust_result : Array<UIFontAdjustInfo> = adjust_buf
+        let value : UIFontGenericInfo = ({family: family_result, alias: alias_result, adjust: adjust_result} as UIFontGenericInfo)
         return value
     }
     readViewportRect(): ViewportRect {
@@ -12198,7 +12656,7 @@ export class Deserializer extends DeserializerBase {
         let value : WebMediaOptions = ({resumeInterval: resumeInterval_result, audioExclusive: audioExclusive_result} as WebMediaOptions)
         return value
     }
-    readWebOptions(): WebOptions {
+    readWebOptions(): WebOptionsSerializer {
         let valueDeserializer : Deserializer = this
         const src_buf_selector : int32 = valueDeserializer.readInt8()
         let src_buf : string | Resource | undefined
@@ -12212,18 +12670,6 @@ export class Deserializer extends DeserializerBase {
             throw new Error("One of the branches for src_buf has to be chosen through deserialisation.")
         }
         const src_result : string | Resource = (src_buf as string | Resource)
-        const controller_buf_selector : int32 = valueDeserializer.readInt8()
-        let controller_buf : WebController | WebviewController | undefined
-        if (controller_buf_selector == 0) {
-            controller_buf = (valueDeserializer.readWebController() as WebController)
-        }
-        else if (controller_buf_selector == 1) {
-            controller_buf = (valueDeserializer.readWebviewController() as WebviewController)
-        }
-        else {
-            throw new Error("One of the branches for controller_buf has to be chosen through deserialisation.")
-        }
-        const controller_result : WebController | WebviewController = (controller_buf as WebController | WebviewController)
         const renderMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let renderMode_buf : RenderMode | undefined
         if ((RuntimeType.UNDEFINED) != (renderMode_buf_runtimeType))
@@ -12245,7 +12691,7 @@ export class Deserializer extends DeserializerBase {
             sharedRenderProcessToken_buf = (valueDeserializer.readString() as string)
         }
         const sharedRenderProcessToken_result : string | undefined = sharedRenderProcessToken_buf
-        let value : WebOptions = ({src: src_result, controller: controller_result, renderMode: renderMode_result, incognitoMode: incognitoMode_result, sharedRenderProcessToken: sharedRenderProcessToken_result} as WebOptions)
+        let value : WebOptionsSerializer = ({src: src_result, renderMode: renderMode_result, incognitoMode: incognitoMode_result, sharedRenderProcessToken: sharedRenderProcessToken_result} as WebOptionsSerializer)
         return value
     }
     readWorkerOptions(): WorkerOptions {
@@ -17889,6 +18335,20 @@ export class Deserializer extends DeserializerBase {
         let value : PasswordIcon = ({onIconSrc: onIconSrc_result, offIconSrc: offIconSrc_result} as PasswordIcon)
         return value
     }
+    readShowCallback(isSync: boolean = false): ShowCallback {
+        const _resource : CallbackResource = this.readCallbackResource()
+        const _call : KPointer = this.readPointer()
+        const _callSync : KPointer = this.readPointer()
+        return (selected: boolean):void => { 
+    const _argsSerializer : Serializer = Serializer.hold();
+    _argsSerializer.writeInt32(_resource.resourceId);
+    _argsSerializer.writePointer(_call);
+    _argsSerializer.writePointer(_callSync);
+    _argsSerializer.writeBoolean(selected);
+    (isSync) ? (InteropNativeModule._CallCallbackSync(63936248, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(63936248, _argsSerializer.asBuffer(), _argsSerializer.length()));
+    _argsSerializer.release();
+    return; }
+    }
     readPickerDialogButtonStyle(): PickerDialogButtonStyle {
         let valueDeserializer : Deserializer = this
         const type_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -20112,7 +20572,7 @@ export class Deserializer extends DeserializerBase {
         let value : TextPickerResult = ({value: value_result, index: index_result} as TextPickerResult)
         return value
     }
-    readTextStyle_styled_string(): TextStyle_styled_string {
+    readTextStyle_styled_string(): TextStyle {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return TextStyle_styled_stringInternal.fromPtr(ptr)
@@ -21181,6 +21641,156 @@ export class Deserializer extends DeserializerBase {
         }
         const levelOrder_result : LevelOrder | undefined = levelOrder_buf
         let value : ActionSheetOptions = ({title: title_result, subtitle: subtitle_result, message: message_result, confirm: confirm_result, cancel: cancel_result, sheets: sheets_result, autoCancel: autoCancel_result, alignment: alignment_result, offset: offset_result, maskRect: maskRect_result, showInSubWindow: showInSubWindow_result, isModal: isModal_result, backgroundColor: backgroundColor_result, backgroundBlurStyle: backgroundBlurStyle_result, backgroundBlurStyleOptions: backgroundBlurStyleOptions_result, backgroundEffect: backgroundEffect_result, onWillDismiss: onWillDismiss_result, transition: transition_result, cornerRadius: cornerRadius_result, width: width_result, height: height_result, borderWidth: borderWidth_result, borderColor: borderColor_result, borderStyle: borderStyle_result, shadow: shadow_result, enableHoverMode: enableHoverMode_result, hoverModeArea: hoverModeArea_result, onDidAppear: onDidAppear_result, onDidDisappear: onDidDisappear_result, onWillAppear: onWillAppear_result, onWillDisappear: onWillDisappear_result, levelMode: levelMode_result, levelUniqueId: levelUniqueId_result, immersiveMode: immersiveMode_result, levelOrder: levelOrder_result} as ActionSheetOptions)
+        return value
+    }
+    readShowToastOptions(): promptAction.ShowToastOptions {
+        let valueDeserializer : Deserializer = this
+        const message_buf_selector : int32 = valueDeserializer.readInt8()
+        let message_buf : string | Resource | undefined
+        if (message_buf_selector == 0) {
+            message_buf = (valueDeserializer.readString() as string)
+        }
+        else if (message_buf_selector == 1) {
+            message_buf = valueDeserializer.readResource()
+        }
+        else {
+            throw new Error("One of the branches for message_buf has to be chosen through deserialisation.")
+        }
+        const message_result : ResourceStr = (message_buf as string | Resource)
+        const duration_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let duration_buf : number | undefined
+        if ((RuntimeType.UNDEFINED) != (duration_buf_runtimeType))
+        {
+            duration_buf = (valueDeserializer.readNumber() as number)
+        }
+        const duration_result : number | undefined = duration_buf
+        const bottom_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let bottom_buf : string | number | undefined
+        if ((RuntimeType.UNDEFINED) != (bottom_buf_runtimeType))
+        {
+            const bottom_buf__selector : int32 = valueDeserializer.readInt8()
+            let bottom_buf_ : string | number | undefined
+            if (bottom_buf__selector == 0) {
+                bottom_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (bottom_buf__selector == 1) {
+                bottom_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else {
+                throw new Error("One of the branches for bottom_buf_ has to be chosen through deserialisation.")
+            }
+            bottom_buf = (bottom_buf_ as string | number)
+        }
+        const bottom_result : string | number | undefined = bottom_buf
+        const showMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let showMode_buf : promptAction.ToastShowMode | undefined
+        if ((RuntimeType.UNDEFINED) != (showMode_buf_runtimeType))
+        {
+            showMode_buf = TypeChecker.ToastShowMode_FromNumeric(valueDeserializer.readInt32())
+        }
+        const showMode_result : promptAction.ToastShowMode | undefined = showMode_buf
+        const alignment_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let alignment_buf : Alignment | undefined
+        if ((RuntimeType.UNDEFINED) != (alignment_buf_runtimeType))
+        {
+            alignment_buf = TypeChecker.Alignment_FromNumeric(valueDeserializer.readInt32())
+        }
+        const alignment_result : Alignment | undefined = alignment_buf
+        const offset_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let offset_buf : Offset | undefined
+        if ((RuntimeType.UNDEFINED) != (offset_buf_runtimeType))
+        {
+            offset_buf = valueDeserializer.readOffset()
+        }
+        const offset_result : Offset | undefined = offset_buf
+        const backgroundColor_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let backgroundColor_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (backgroundColor_buf_runtimeType))
+        {
+            const backgroundColor_buf__selector : int32 = valueDeserializer.readInt8()
+            let backgroundColor_buf_ : Color | number | string | Resource | undefined
+            if (backgroundColor_buf__selector == 0) {
+                backgroundColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (backgroundColor_buf__selector == 1) {
+                backgroundColor_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (backgroundColor_buf__selector == 2) {
+                backgroundColor_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (backgroundColor_buf__selector == 3) {
+                backgroundColor_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for backgroundColor_buf_ has to be chosen through deserialisation.")
+            }
+            backgroundColor_buf = (backgroundColor_buf_ as Color | number | string | Resource)
+        }
+        const backgroundColor_result : ResourceColor | undefined = backgroundColor_buf
+        const textColor_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let textColor_buf : ResourceColor | undefined
+        if ((RuntimeType.UNDEFINED) != (textColor_buf_runtimeType))
+        {
+            const textColor_buf__selector : int32 = valueDeserializer.readInt8()
+            let textColor_buf_ : Color | number | string | Resource | undefined
+            if (textColor_buf__selector == 0) {
+                textColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
+            }
+            else if (textColor_buf__selector == 1) {
+                textColor_buf_ = (valueDeserializer.readNumber() as number)
+            }
+            else if (textColor_buf__selector == 2) {
+                textColor_buf_ = (valueDeserializer.readString() as string)
+            }
+            else if (textColor_buf__selector == 3) {
+                textColor_buf_ = valueDeserializer.readResource()
+            }
+            else {
+                throw new Error("One of the branches for textColor_buf_ has to be chosen through deserialisation.")
+            }
+            textColor_buf = (textColor_buf_ as Color | number | string | Resource)
+        }
+        const textColor_result : ResourceColor | undefined = textColor_buf
+        const backgroundBlurStyle_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let backgroundBlurStyle_buf : BlurStyle | undefined
+        if ((RuntimeType.UNDEFINED) != (backgroundBlurStyle_buf_runtimeType))
+        {
+            backgroundBlurStyle_buf = TypeChecker.BlurStyle_FromNumeric(valueDeserializer.readInt32())
+        }
+        const backgroundBlurStyle_result : BlurStyle | undefined = backgroundBlurStyle_buf
+        const shadow_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let shadow_buf : ShadowOptions | ShadowStyle | undefined
+        if ((RuntimeType.UNDEFINED) != (shadow_buf_runtimeType))
+        {
+            const shadow_buf__selector : int32 = valueDeserializer.readInt8()
+            let shadow_buf_ : ShadowOptions | ShadowStyle | undefined
+            if (shadow_buf__selector == 0) {
+                shadow_buf_ = valueDeserializer.readShadowOptions()
+            }
+            else if (shadow_buf__selector == 1) {
+                shadow_buf_ = TypeChecker.ShadowStyle_FromNumeric(valueDeserializer.readInt32())
+            }
+            else {
+                throw new Error("One of the branches for shadow_buf_ has to be chosen through deserialisation.")
+            }
+            shadow_buf = (shadow_buf_ as ShadowOptions | ShadowStyle)
+        }
+        const shadow_result : ShadowOptions | ShadowStyle | undefined = shadow_buf
+        const enableHoverMode_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let enableHoverMode_buf : boolean | undefined
+        if ((RuntimeType.UNDEFINED) != (enableHoverMode_buf_runtimeType))
+        {
+            enableHoverMode_buf = valueDeserializer.readBoolean()
+        }
+        const enableHoverMode_result : boolean | undefined = enableHoverMode_buf
+        const hoverModeArea_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
+        let hoverModeArea_buf : HoverModeAreaType | undefined
+        if ((RuntimeType.UNDEFINED) != (hoverModeArea_buf_runtimeType))
+        {
+            hoverModeArea_buf = TypeChecker.HoverModeAreaType_FromNumeric(valueDeserializer.readInt32())
+        }
+        const hoverModeArea_result : HoverModeAreaType | undefined = hoverModeArea_buf
+        let value : promptAction.ShowToastOptions = ({message: message_result, duration: duration_result, bottom: bottom_result, showMode: showMode_result, alignment: alignment_result, offset: offset_result, backgroundColor: backgroundColor_result, textColor: textColor_result, backgroundBlurStyle: backgroundBlurStyle_result, shadow: shadow_result, enableHoverMode: enableHoverMode_result, hoverModeArea: hoverModeArea_result} as promptAction.ShowToastOptions)
         return value
     }
     readAlertDialogParamWithButtons(): AlertDialogParamWithButtons {
@@ -23398,30 +24008,6 @@ export class Deserializer extends DeserializerBase {
             placement_buf = TypeChecker.Placement_FromNumeric(valueDeserializer.readInt32())
         }
         const placement_result : Placement | undefined = placement_buf
-        const maskColor_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let maskColor_buf : Color | string | Resource | number | undefined
-        if ((RuntimeType.UNDEFINED) != (maskColor_buf_runtimeType))
-        {
-            const maskColor_buf__selector : int32 = valueDeserializer.readInt8()
-            let maskColor_buf_ : Color | string | Resource | number | undefined
-            if (maskColor_buf__selector == 0) {
-                maskColor_buf_ = TypeChecker.Color_FromNumeric(valueDeserializer.readInt32())
-            }
-            else if (maskColor_buf__selector == 1) {
-                maskColor_buf_ = (valueDeserializer.readString() as string)
-            }
-            else if (maskColor_buf__selector == 2) {
-                maskColor_buf_ = valueDeserializer.readResource()
-            }
-            else if (maskColor_buf__selector == 3) {
-                maskColor_buf_ = (valueDeserializer.readNumber() as number)
-            }
-            else {
-                throw new Error("One of the branches for maskColor_buf_ has to be chosen through deserialisation.")
-            }
-            maskColor_buf = (maskColor_buf_ as Color | string | Resource | number)
-        }
-        const maskColor_result : Color | string | Resource | number | undefined = maskColor_buf
         const popupColor_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let popupColor_buf : Color | string | Resource | number | undefined
         if ((RuntimeType.UNDEFINED) != (popupColor_buf_runtimeType))
@@ -23461,12 +24047,12 @@ export class Deserializer extends DeserializerBase {
         }
         const autoCancel_result : boolean | undefined = autoCancel_buf
         const onStateChange_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let onStateChange_buf : ((event: Literal_Boolean_isVisible) => void) | undefined
+        let onStateChange_buf : PopupStateChangeCallback | undefined
         if ((RuntimeType.UNDEFINED) != (onStateChange_buf_runtimeType))
         {
-            onStateChange_buf = valueDeserializer.readCallback_Literal_Boolean_isVisible_Void()
+            onStateChange_buf = valueDeserializer.readPopupStateChangeCallback()
         }
-        const onStateChange_result : ((event: Literal_Boolean_isVisible) => void) | undefined = onStateChange_buf
+        const onStateChange_result : PopupStateChangeCallback | undefined = onStateChange_buf
         const arrowOffset_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let arrowOffset_buf : Length | undefined
         if ((RuntimeType.UNDEFINED) != (arrowOffset_buf_runtimeType))
@@ -23482,11 +24068,11 @@ export class Deserializer extends DeserializerBase {
         }
         const showInSubWindow_result : boolean | undefined = showInSubWindow_buf
         const mask_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let mask_buf : boolean | Literal_ResourceColor_color | undefined
+        let mask_buf : boolean | PopupMaskType | undefined
         if ((RuntimeType.UNDEFINED) != (mask_buf_runtimeType))
         {
             const mask_buf__selector : int32 = valueDeserializer.readInt8()
-            let mask_buf_ : boolean | Literal_ResourceColor_color | undefined
+            let mask_buf_ : boolean | PopupMaskType | undefined
             if (mask_buf__selector == 0) {
                 mask_buf_ = valueDeserializer.readBoolean()
             }
@@ -23509,14 +24095,14 @@ export class Deserializer extends DeserializerBase {
                     throw new Error("One of the branches for mask_buf__u_color_buf has to be chosen through deserialisation.")
                 }
                 const mask_buf__u_color : ResourceColor = (mask_buf__u_color_buf as Color | number | string | Resource)
-                mask_buf_ = ({color: mask_buf__u_color} as Literal_ResourceColor_color)
+                mask_buf_ = ({color: mask_buf__u_color} as PopupMaskType)
             }
             else {
                 throw new Error("One of the branches for mask_buf_ has to be chosen through deserialisation.")
             }
-            mask_buf = (mask_buf_ as boolean | Literal_ResourceColor_color)
+            mask_buf = (mask_buf_ as boolean | PopupMaskType)
         }
-        const mask_result : boolean | Literal_ResourceColor_color | undefined = mask_buf
+        const mask_result : boolean | PopupMaskType | undefined = mask_buf
         const targetSpace_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let targetSpace_buf : Length | undefined
         if ((RuntimeType.UNDEFINED) != (targetSpace_buf_runtimeType))
@@ -23644,7 +24230,7 @@ export class Deserializer extends DeserializerBase {
             keyboardAvoidMode_buf = TypeChecker.KeyboardAvoidMode_FromNumeric(valueDeserializer.readInt32())
         }
         const keyboardAvoidMode_result : KeyboardAvoidMode | undefined = keyboardAvoidMode_buf
-        let value : CustomPopupOptions = ({builder: builder_result, placement: placement_result, maskColor: maskColor_result, popupColor: popupColor_result, enableArrow: enableArrow_result, autoCancel: autoCancel_result, onStateChange: onStateChange_result, arrowOffset: arrowOffset_result, showInSubWindow: showInSubWindow_result, mask: mask_result, targetSpace: targetSpace_result, offset: offset_result, width: width_result, arrowPointPosition: arrowPointPosition_result, arrowWidth: arrowWidth_result, arrowHeight: arrowHeight_result, radius: radius_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, focusable: focusable_result, transition: transition_result, onWillDismiss: onWillDismiss_result, enableHoverMode: enableHoverMode_result, followTransformOfTarget: followTransformOfTarget_result, keyboardAvoidMode: keyboardAvoidMode_result} as CustomPopupOptions)
+        let value : CustomPopupOptions = ({builder: builder_result, placement: placement_result, popupColor: popupColor_result, enableArrow: enableArrow_result, autoCancel: autoCancel_result, onStateChange: onStateChange_result, arrowOffset: arrowOffset_result, showInSubWindow: showInSubWindow_result, mask: mask_result, targetSpace: targetSpace_result, offset: offset_result, width: width_result, arrowPointPosition: arrowPointPosition_result, arrowWidth: arrowWidth_result, arrowHeight: arrowHeight_result, radius: radius_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, focusable: focusable_result, transition: transition_result, onWillDismiss: onWillDismiss_result, enableHoverMode: enableHoverMode_result, followTransformOfTarget: followTransformOfTarget_result, keyboardAvoidMode: keyboardAvoidMode_result} as CustomPopupOptions)
         return value
     }
     readCustomTheme(): CustomTheme {
@@ -25549,9 +26135,9 @@ export class Deserializer extends DeserializerBase {
         const length_result : number | undefined = length_buf
         const styledKey_result : StyledStringKey = TypeChecker.StyledStringKey_FromNumeric(valueDeserializer.readInt32())
         const styledValue_buf_selector : int32 = valueDeserializer.readInt8()
-        let styledValue_buf : TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
+        let styledValue_buf : TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
         if (styledValue_buf_selector == 0) {
-            styledValue_buf = (valueDeserializer.readTextStyle_styled_string() as TextStyle_styled_string)
+            styledValue_buf = (valueDeserializer.readTextStyle_styled_string() as TextStyle)
         }
         else if (styledValue_buf_selector == 1) {
             styledValue_buf = (valueDeserializer.readDecorationStyle() as DecorationStyle)
@@ -25592,7 +26178,7 @@ export class Deserializer extends DeserializerBase {
         else {
             throw new Error("One of the branches for styledValue_buf has to be chosen through deserialisation.")
         }
-        const styledValue_result : StyledStringValue = (styledValue_buf as TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle)
+        const styledValue_result : StyledStringValue = (styledValue_buf as TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle)
         let value : StyleOptions = ({start: start_result, length: length_result, styledKey: styledKey_result, styledValue: styledValue_result} as StyleOptions)
         return value
     }
@@ -26630,13 +27216,6 @@ export class Deserializer extends DeserializerBase {
     readPopupOptions(): PopupOptions {
         let valueDeserializer : Deserializer = this
         const message_result : string = (valueDeserializer.readString() as string)
-        const placementOnTop_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let placementOnTop_buf : boolean | undefined
-        if ((RuntimeType.UNDEFINED) != (placementOnTop_buf_runtimeType))
-        {
-            placementOnTop_buf = valueDeserializer.readBoolean()
-        }
-        const placementOnTop_result : boolean | undefined = placementOnTop_buf
         const placement_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let placement_buf : Placement | undefined
         if ((RuntimeType.UNDEFINED) != (placement_buf_runtimeType))
@@ -26645,30 +27224,30 @@ export class Deserializer extends DeserializerBase {
         }
         const placement_result : Placement | undefined = placement_buf
         const primaryButton_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let primaryButton_buf : Literal_String_value_Callback_Void_action | undefined
+        let primaryButton_buf : PopupButton | undefined
         if ((RuntimeType.UNDEFINED) != (primaryButton_buf_runtimeType))
         {
             const primaryButton_buf__value : string = (valueDeserializer.readString() as string)
             const primaryButton_buf__action : (() => void) = valueDeserializer.readCallback_Void()
-            primaryButton_buf = ({value: primaryButton_buf__value, action: primaryButton_buf__action} as Literal_String_value_Callback_Void_action)
+            primaryButton_buf = ({value: primaryButton_buf__value, action: primaryButton_buf__action} as PopupButton)
         }
-        const primaryButton_result : Literal_String_value_Callback_Void_action | undefined = primaryButton_buf
+        const primaryButton_result : PopupButton | undefined = primaryButton_buf
         const secondaryButton_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let secondaryButton_buf : Literal_String_value_Callback_Void_action | undefined
+        let secondaryButton_buf : PopupButton | undefined
         if ((RuntimeType.UNDEFINED) != (secondaryButton_buf_runtimeType))
         {
             const secondaryButton_buf__value : string = (valueDeserializer.readString() as string)
             const secondaryButton_buf__action : (() => void) = valueDeserializer.readCallback_Void()
-            secondaryButton_buf = ({value: secondaryButton_buf__value, action: secondaryButton_buf__action} as Literal_String_value_Callback_Void_action)
+            secondaryButton_buf = ({value: secondaryButton_buf__value, action: secondaryButton_buf__action} as PopupButton)
         }
-        const secondaryButton_result : Literal_String_value_Callback_Void_action | undefined = secondaryButton_buf
+        const secondaryButton_result : PopupButton | undefined = secondaryButton_buf
         const onStateChange_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let onStateChange_buf : ((event: Literal_Boolean_isVisible) => void) | undefined
+        let onStateChange_buf : PopupStateChangeCallback | undefined
         if ((RuntimeType.UNDEFINED) != (onStateChange_buf_runtimeType))
         {
-            onStateChange_buf = valueDeserializer.readCallback_Literal_Boolean_isVisible_Void()
+            onStateChange_buf = valueDeserializer.readPopupStateChangeCallback()
         }
-        const onStateChange_result : ((event: Literal_Boolean_isVisible) => void) | undefined = onStateChange_buf
+        const onStateChange_result : PopupStateChangeCallback | undefined = onStateChange_buf
         const arrowOffset_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let arrowOffset_buf : Length | undefined
         if ((RuntimeType.UNDEFINED) != (arrowOffset_buf_runtimeType))
@@ -26684,11 +27263,11 @@ export class Deserializer extends DeserializerBase {
         }
         const showInSubWindow_result : boolean | undefined = showInSubWindow_buf
         const mask_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let mask_buf : boolean | Literal_ResourceColor_color | undefined
+        let mask_buf : boolean | PopupMaskType | undefined
         if ((RuntimeType.UNDEFINED) != (mask_buf_runtimeType))
         {
             const mask_buf__selector : int32 = valueDeserializer.readInt8()
-            let mask_buf_ : boolean | Literal_ResourceColor_color | undefined
+            let mask_buf_ : boolean | PopupMaskType | undefined
             if (mask_buf__selector == 0) {
                 mask_buf_ = valueDeserializer.readBoolean()
             }
@@ -26711,14 +27290,14 @@ export class Deserializer extends DeserializerBase {
                     throw new Error("One of the branches for mask_buf__u_color_buf has to be chosen through deserialisation.")
                 }
                 const mask_buf__u_color : ResourceColor = (mask_buf__u_color_buf as Color | number | string | Resource)
-                mask_buf_ = ({color: mask_buf__u_color} as Literal_ResourceColor_color)
+                mask_buf_ = ({color: mask_buf__u_color} as PopupMaskType)
             }
             else {
                 throw new Error("One of the branches for mask_buf_ has to be chosen through deserialisation.")
             }
-            mask_buf = (mask_buf_ as boolean | Literal_ResourceColor_color)
+            mask_buf = (mask_buf_ as boolean | PopupMaskType)
         }
-        const mask_result : boolean | Literal_ResourceColor_color | undefined = mask_buf
+        const mask_result : boolean | PopupMaskType | undefined = mask_buf
         const messageOptions_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let messageOptions_buf : PopupMessageOptions | undefined
         if ((RuntimeType.UNDEFINED) != (messageOptions_buf_runtimeType))
@@ -26884,7 +27463,7 @@ export class Deserializer extends DeserializerBase {
             keyboardAvoidMode_buf = TypeChecker.KeyboardAvoidMode_FromNumeric(valueDeserializer.readInt32())
         }
         const keyboardAvoidMode_result : KeyboardAvoidMode | undefined = keyboardAvoidMode_buf
-        let value : PopupOptions = ({message: message_result, placementOnTop: placementOnTop_result, placement: placement_result, primaryButton: primaryButton_result, secondaryButton: secondaryButton_result, onStateChange: onStateChange_result, arrowOffset: arrowOffset_result, showInSubWindow: showInSubWindow_result, mask: mask_result, messageOptions: messageOptions_result, targetSpace: targetSpace_result, enableArrow: enableArrow_result, offset: offset_result, popupColor: popupColor_result, autoCancel: autoCancel_result, width: width_result, arrowPointPosition: arrowPointPosition_result, arrowWidth: arrowWidth_result, arrowHeight: arrowHeight_result, radius: radius_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, transition: transition_result, onWillDismiss: onWillDismiss_result, enableHoverMode: enableHoverMode_result, followTransformOfTarget: followTransformOfTarget_result, keyboardAvoidMode: keyboardAvoidMode_result} as PopupOptions)
+        let value : PopupOptions = ({message: message_result, placement: placement_result, primaryButton: primaryButton_result, secondaryButton: secondaryButton_result, onStateChange: onStateChange_result, arrowOffset: arrowOffset_result, showInSubWindow: showInSubWindow_result, mask: mask_result, messageOptions: messageOptions_result, targetSpace: targetSpace_result, enableArrow: enableArrow_result, offset: offset_result, popupColor: popupColor_result, autoCancel: autoCancel_result, width: width_result, arrowPointPosition: arrowPointPosition_result, arrowWidth: arrowWidth_result, arrowHeight: arrowHeight_result, radius: radius_result, shadow: shadow_result, backgroundBlurStyle: backgroundBlurStyle_result, transition: transition_result, onWillDismiss: onWillDismiss_result, enableHoverMode: enableHoverMode_result, followTransformOfTarget: followTransformOfTarget_result, keyboardAvoidMode: keyboardAvoidMode_result} as PopupOptions)
         return value
     }
     readRichEditorImageSpanOptions(): RichEditorImageSpanOptions {
@@ -27047,9 +27626,9 @@ export class Deserializer extends DeserializerBase {
         const length_result : number = (valueDeserializer.readNumber() as number)
         const styledKey_result : StyledStringKey = TypeChecker.StyledStringKey_FromNumeric(valueDeserializer.readInt32())
         const styledValue_buf_selector : int32 = valueDeserializer.readInt8()
-        let styledValue_buf : TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
+        let styledValue_buf : TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle | undefined
         if (styledValue_buf_selector == 0) {
-            styledValue_buf = (valueDeserializer.readTextStyle_styled_string() as TextStyle_styled_string)
+            styledValue_buf = (valueDeserializer.readTextStyle_styled_string() as TextStyle)
         }
         else if (styledValue_buf_selector == 1) {
             styledValue_buf = (valueDeserializer.readDecorationStyle() as DecorationStyle)
@@ -27090,7 +27669,7 @@ export class Deserializer extends DeserializerBase {
         else {
             throw new Error("One of the branches for styledValue_buf has to be chosen through deserialisation.")
         }
-        const styledValue_result : StyledStringValue = (styledValue_buf as TextStyle_styled_string | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle)
+        const styledValue_result : StyledStringValue = (styledValue_buf as TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle)
         let value : SpanStyle = ({start: start_result, length: length_result, styledKey: styledKey_result, styledValue: styledValue_result} as SpanStyle)
         return value
     }

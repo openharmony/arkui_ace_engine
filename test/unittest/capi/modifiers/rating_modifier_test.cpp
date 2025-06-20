@@ -53,7 +53,7 @@ using VectorOptionsTest = std::vector<TupleOptionsTest>;
 TupleOptionsTest getTestTuple(const RatingOptionsTestRow& src)
 {
     Ark_RatingOptions arkInputValue = {
-        .rating = Converter::ArkValue<Ark_Number>(src.input.rating),
+        .rating = Converter::ArkValue<Opt_Number>(src.input.rating),
         .indicator = Converter::ArkValue<Opt_Boolean>(src.input.indicator)
     };
     auto optInputValue = Converter::ArkValue<Opt_RatingOptions>(arkInputValue);
@@ -226,28 +226,8 @@ HWTEST_F(RatingModifierTest, setStarsTestValidValues, TestSize.Level1)
     inputValueStars = initValueStars;
     for (auto&& value: starsStarsValidValues) {
         inputValueStars = std::get<1>(value);
-        modifier_->setStars0(node_, &inputValueStars);
-        jsonNode = GetJsonValue(node_);
-        resultValue = std::stoi(GetAttrValue<std::string>(jsonNode, ATTRIBUTE_STARS_NAME));
-        expectedValue = std::get<2>(value);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << std::get<0>(value);
-    }
-}
-
-/*
- * @tc.name: setStars1TestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RatingModifierTest, setStars1TestValidValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonNode;
-    int32_t resultValue;
-    int32_t expectedValue;
-    Opt_Number inputValue = {};
-    for (auto&& value: starsStarsValidValues) {
-        inputValue = Converter::ArkValue<Opt_Number>(std::get<1>(value));
-        modifier_->setStars1(node_, &inputValue);
+        auto optInputValueStars = Converter::ArkValue<Opt_Number>(inputValueStars);
+        modifier_->setStars(node_, &optInputValueStars);
         jsonNode = GetJsonValue(node_);
         resultValue = std::stoi(GetAttrValue<std::string>(jsonNode, ATTRIBUTE_STARS_NAME));
         expectedValue = std::get<2>(value);
@@ -265,13 +245,13 @@ HWTEST_F(RatingModifierTest, setStarsTestNullValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonNode;
     int32_t resultValue;
     int32_t expectedValue = ATTRIBUTE_STARS_DEFAULT_VALUE;
+    Opt_Number initValueStars;
 
-    modifier_->setStars0(node_, nullptr);
-    jsonNode = GetJsonValue(node_);
-    resultValue = std::stoi(GetAttrValue<std::string>(jsonNode, ATTRIBUTE_STARS_NAME));
-    EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    // Initial setup
+    initValueStars = Converter::ArkValue<Opt_Number>(std::get<1>(starsStarsValidValues[0]));
+    modifier_->setStars(node_, &initValueStars);
 
-    modifier_->setStars1(node_, nullptr);
+    modifier_->setStars(node_, nullptr);
     jsonNode = GetJsonValue(node_);
     resultValue = std::stoi(GetAttrValue<std::string>(jsonNode, ATTRIBUTE_STARS_NAME));
     EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -302,7 +282,8 @@ HWTEST_F(RatingModifierTest, setStarsTestInvalidValues, TestSize.Level1)
     inputValueStars = initValueStars;
     for (auto&& value: starsStarsInvalidValues) {
         inputValueStars = std::get<1>(value);
-        modifier_->setStars0(node_, &inputValueStars);
+        auto optInputValueStars = Converter::ArkValue<Opt_Number>(inputValueStars);
+        modifier_->setStars(node_, &optInputValueStars);
         jsonNode = GetJsonValue(node_);
         resultValue = std::stoi(GetAttrValue<std::string>(jsonNode, ATTRIBUTE_STARS_NAME));
         expectedValue = std::get<2>(value);
@@ -354,28 +335,8 @@ HWTEST_F(RatingModifierTest, setStepSizeTestValidValues, TestSize.Level1)
     inputValueStepSize = initValueStepSize;
     for (auto&& value: stepSizeStepSizeValidValues) {
         inputValueStepSize = std::get<1>(value);
-        modifier_->setStepSize0(node_, &inputValueStepSize);
-        jsonNode = GetJsonValue(node_);
-        resultValue = std::stof(GetAttrValue<std::string>(jsonNode, ATTRIBUTE_STEP_SIZE_NAME));
-        expectedValue = std::get<2>(value);
-        EXPECT_FLOAT_EQ(resultValue, expectedValue) << "Passed value is: " << std::get<0>(value);
-    }
-}
-
-/*
- * @tc.name: setStepSize1TestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RatingModifierTest, setStepSize1TestValidValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonNode;
-    float resultValue;
-    float expectedValue;
-    Opt_Number inputValue = {};
-    for (auto&& value: stepSizeStepSizeValidValues) {
-        inputValue = Converter::ArkValue<Opt_Number>(std::get<1>(value));
-        modifier_->setStepSize1(node_, &inputValue);
+        auto optInputValueStepSize = Converter::ArkValue<Opt_Number>(inputValueStepSize);
+        modifier_->setStepSize(node_, &optInputValueStepSize);
         jsonNode = GetJsonValue(node_);
         resultValue = std::stof(GetAttrValue<std::string>(jsonNode, ATTRIBUTE_STEP_SIZE_NAME));
         expectedValue = std::get<2>(value);
@@ -394,12 +355,7 @@ HWTEST_F(RatingModifierTest, setStepSizeTestNullValues, TestSize.Level1)
     int32_t resultValue;
     int32_t expectedValue = ATTRIBUTE_STEP_SIZE_DEFAULT_VALUE;
 
-    modifier_->setStepSize0(node_, nullptr);
-    jsonNode = GetJsonValue(node_);
-    resultValue = std::stoi(GetAttrValue<std::string>(jsonNode, ATTRIBUTE_STEP_SIZE_NAME));
-    EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
-
-    modifier_->setStepSize1(node_, nullptr);
+    modifier_->setStepSize(node_, nullptr);
     jsonNode = GetJsonValue(node_);
     resultValue = std::stoi(GetAttrValue<std::string>(jsonNode, ATTRIBUTE_STEP_SIZE_NAME));
     EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -430,7 +386,8 @@ HWTEST_F(RatingModifierTest, setStepSizeTestInvalidValues, TestSize.Level1)
     inputValueStepSize = initValueStepSize;
     for (auto&& value: setStepSizeTestInvalidValues) {
         inputValueStepSize = std::get<1>(value);
-        modifier_->setStepSize0(node_, &inputValueStepSize);
+        auto optInputValueStepSize = Converter::ArkValue<Opt_Number>(inputValueStepSize);
+        modifier_->setStepSize(node_, &optInputValueStepSize);
         jsonNode = GetJsonValue(node_);
         resultValue = std::stof(GetAttrValue<std::string>(jsonNode, ATTRIBUTE_STEP_SIZE_NAME));
         expectedValue = std::get<2>(value);
@@ -449,21 +406,21 @@ HWTEST_F(RatingModifierTest, setStarStyleTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'backgroundUri' of method 'starStyle'
-static std::vector<std::tuple<std::string, Ark_String, std::string>> starStyleBackgroundUriValidValues = {
-    {"\"\"", Converter::ArkValue<Ark_String>(""), ""},
-    {"\"abc\"", Converter::ArkValue<Ark_String>("abc"), "abc"},
+static std::vector<std::tuple<std::string, Ark_ResourceStr, std::string>> starStyleBackgroundUriValidValues = {
+    {"\"\"", Converter::ArkUnion<Ark_ResourceStr, Ark_String>(""), ""},
+    {"\"abc\"", Converter::ArkUnion<Ark_ResourceStr, Ark_String>("abc"), "abc"},
 };
 
 // Valid values for attribute 'foregroundUri' of method 'starStyle'
-static std::vector<std::tuple<std::string, Ark_String, std::string>> starStyleForegroundUriValidValues = {
-    {"\"\"", Converter::ArkValue<Ark_String>(""), ""},
-    {"\"abc\"", Converter::ArkValue<Ark_String>("abc"), "abc"},
+static std::vector<std::tuple<std::string, Ark_ResourceStr, std::string>> starStyleForegroundUriValidValues = {
+    {"\"\"", Converter::ArkUnion<Ark_ResourceStr, Ark_String>(""), ""},
+    {"\"abc\"", Converter::ArkUnion<Ark_ResourceStr, Ark_String>("abc"), "abc"},
 };
 
 // Valid values for attribute 'secondaryUri' of method 'starStyle'
-static std::vector<std::tuple<std::string, Opt_String, std::string>> starStyleSecondaryUriValidValues = {
-    {"\"\"", Converter::ArkValue<Opt_String>(""), ""},
-    {"\"abc\"", Converter::ArkValue<Opt_String>("abc"), "abc"},
+static std::vector<std::tuple<std::string, Opt_ResourceStr, std::string>> starStyleSecondaryUriValidValues = {
+    {"\"\"", Converter::ArkUnion<Opt_ResourceStr, Ark_String>(""), ""},
+    {"\"abc\"", Converter::ArkUnion<Opt_ResourceStr, Ark_String>("abc"), "abc"},
 };
 
 /*
@@ -489,7 +446,8 @@ HWTEST_F(RatingModifierTest, setStarStyleTestValidValues, TestSize.Level1)
     inputValueStarStyleOptions = initValueStarStyleOptions;
     for (auto&& value: starStyleBackgroundUriValidValues) {
         inputValueStarStyleOptions.backgroundUri = std::get<1>(value);
-        modifier_->setStarStyle0(node_, &inputValueStarStyleOptions);
+        auto optInputValueStarStyleOptions = Converter::ArkValue<Opt_StarStyleOptions>(inputValueStarStyleOptions);
+        modifier_->setStarStyle(node_, &optInputValueStarStyleOptions);
         jsonValue = GetJsonValue(node_);
         resStarStyleOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STAR_STYLE_OPTIONS_NAME);
         resultStr = GetAttrValue<std::string>(resStarStyleOptions, ATTRIBUTE_STAR_STYLE_OPTIONS_BACKGROUND_URI_NAME);
@@ -501,7 +459,8 @@ HWTEST_F(RatingModifierTest, setStarStyleTestValidValues, TestSize.Level1)
     inputValueStarStyleOptions = initValueStarStyleOptions;
     for (auto&& value: starStyleForegroundUriValidValues) {
         inputValueStarStyleOptions.foregroundUri = std::get<1>(value);
-        modifier_->setStarStyle0(node_, &inputValueStarStyleOptions);
+        auto optInputValueStarStyleOptions = Converter::ArkValue<Opt_StarStyleOptions>(inputValueStarStyleOptions);
+        modifier_->setStarStyle(node_, &optInputValueStarStyleOptions);
         jsonValue = GetJsonValue(node_);
         resStarStyleOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STAR_STYLE_OPTIONS_NAME);
         resultStr = GetAttrValue<std::string>(resStarStyleOptions, ATTRIBUTE_STAR_STYLE_OPTIONS_FOREGROUND_URI_NAME);
@@ -513,44 +472,12 @@ HWTEST_F(RatingModifierTest, setStarStyleTestValidValues, TestSize.Level1)
     inputValueStarStyleOptions = initValueStarStyleOptions;
     for (auto&& value: starStyleSecondaryUriValidValues) {
         inputValueStarStyleOptions.secondaryUri = std::get<1>(value);
-        modifier_->setStarStyle0(node_, &inputValueStarStyleOptions);
+        auto optInputValueStarStyleOptions = Converter::ArkValue<Opt_StarStyleOptions>(inputValueStarStyleOptions);
+        modifier_->setStarStyle(node_, &optInputValueStarStyleOptions);
         jsonValue = GetJsonValue(node_);
         resStarStyleOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STAR_STYLE_OPTIONS_NAME);
         resultStr = GetAttrValue<std::string>(resStarStyleOptions, ATTRIBUTE_STAR_STYLE_OPTIONS_SECONDARY_URI_NAME);
         expectedStr = std::get<2>(value);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-    }
-}
-
-/*
- * @tc.name: setStarStyle1TestValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RatingModifierTest, setStarStyle1TestValidValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    std::unique_ptr<JsonValue> resStarStyleOptions;
-    std::string resultStr;
-    std::string expectedStr;
-    Ark_StarStyleOptions styleOptions = {};
-
-    for (auto&& value: starStyleBackgroundUriValidValues) {
-        styleOptions = {};
-        styleOptions.backgroundUri = std::get<1>(value);
-        styleOptions.foregroundUri = std::get<1>(value);
-        styleOptions.secondaryUri = Converter::ArkValue<Opt_String>(std::get<1>(value));
-        auto optStyleOptions = Converter::ArkValue<Opt_StarStyleOptions>(styleOptions);
-
-        modifier_->setStarStyle1(node_, &optStyleOptions);
-        jsonValue = GetJsonValue(node_);
-        resStarStyleOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STAR_STYLE_OPTIONS_NAME);
-        expectedStr = std::get<2>(value);
-        resultStr = GetAttrValue<std::string>(resStarStyleOptions, ATTRIBUTE_STAR_STYLE_OPTIONS_BACKGROUND_URI_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-        resultStr = GetAttrValue<std::string>(resStarStyleOptions, ATTRIBUTE_STAR_STYLE_OPTIONS_FOREGROUND_URI_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
-        resultStr = GetAttrValue<std::string>(resStarStyleOptions, ATTRIBUTE_STAR_STYLE_OPTIONS_SECONDARY_URI_NAME);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
 }
@@ -563,16 +490,14 @@ HWTEST_F(RatingModifierTest, setStarStyle1TestValidValues, TestSize.Level1)
 HWTEST_F(RatingModifierTest, setStarStyleTestNullValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonNode;
-    modifier_->setStarStyle0(node_, nullptr);
-    CheckDefaultStarStyle();
-    modifier_->setStarStyle1(node_, nullptr);
+    modifier_->setStarStyle(node_, nullptr);
     CheckDefaultStarStyle();
 }
 
 
 // Invalid values for attribute 'secondaryUri' of method 'starStyle'
-static std::vector<std::tuple<std::string, Opt_String>> starStyleSecondaryUriInvalidValues = {
-    {"Ark_Empty()", Converter::ArkValue<Opt_String>(Ark_Empty())},
+static std::vector<std::tuple<std::string, Opt_ResourceStr>> starStyleSecondaryUriInvalidValues = {
+    {"Ark_Empty()", Converter::ArkValue<Opt_ResourceStr>(Ark_Empty())},
 };
 
 /*
@@ -597,9 +522,11 @@ HWTEST_F(RatingModifierTest, setStarStyleTestInvalidValues, TestSize.Level1)
     // Verifying attribute's 'secondaryUri'  values
     for (auto&& value: starStyleSecondaryUriInvalidValues) {
         inputValueStarStyleOptions = initValueStarStyleOptions;
-        modifier_->setStarStyle0(node_, &inputValueStarStyleOptions);
+        auto optInputValueStarStyleOptions = Converter::ArkValue<Opt_StarStyleOptions >(inputValueStarStyleOptions);
+        modifier_->setStarStyle(node_, &optInputValueStarStyleOptions);
         inputValueStarStyleOptions.secondaryUri = std::get<1>(value);
-        modifier_->setStarStyle0(node_, &inputValueStarStyleOptions);
+        optInputValueStarStyleOptions = Converter::ArkValue<Opt_StarStyleOptions >(inputValueStarStyleOptions);
+        modifier_->setStarStyle(node_, &optInputValueStarStyleOptions);
         jsonValue = GetJsonValue(node_);
         resStarStyleOptions = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_STAR_STYLE_OPTIONS_NAME);
         resultStr = GetAttrValue<std::string>(resStarStyleOptions, ATTRIBUTE_STAR_STYLE_OPTIONS_SECONDARY_URI_NAME);
@@ -615,7 +542,7 @@ HWTEST_F(RatingModifierTest, setStarStyleTestInvalidValues, TestSize.Level1)
  */
 HWTEST_F(RatingModifierTest, setOnChangeTest, TestSize.Level1)
 {
-    EXPECT_NE(modifier_->setOnChange0, nullptr);
+    EXPECT_NE(modifier_->setOnChange, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     EXPECT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<RatingEventHub>();
@@ -626,7 +553,7 @@ HWTEST_F(RatingModifierTest, setOnChangeTest, TestSize.Level1)
         float index;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_Number_Void onChangeCallback = {
+    OnRatingChangeCallback onChangeCallback = {
         .resource = {.resourceId = frameNode->GetId()},
         .call = [](Ark_Int32 nodeId, const Ark_Number index) {
             checkEvent = CheckEvent{
@@ -635,7 +562,8 @@ HWTEST_F(RatingModifierTest, setOnChangeTest, TestSize.Level1)
             };
         }
     };
-    modifier_->setOnChange0(node_, &onChangeCallback);
+    auto optOnChangeCallback = Converter::ArkValue<Opt_OnRatingChangeCallback>(onChangeCallback);
+    modifier_->setOnChange(node_, &optOnChangeCallback);
     EXPECT_FALSE(checkEvent.has_value());
     eventHub->FireChangeEvent("55.5");
     ASSERT_EQ(checkEvent.has_value(), true);
@@ -647,51 +575,7 @@ HWTEST_F(RatingModifierTest, setOnChangeTest, TestSize.Level1)
     EXPECT_EQ(checkEvent->index, 0.0);
 }
 
-/*
- * @tc.name: setOnChange1Test
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(RatingModifierTest, setOnChange1Test, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<NG::RatingEventHub>();
-    struct CheckEvent {
-        int32_t nodeId;
-        float index;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_Number parameter) {
-        checkEvent = {
-            .nodeId = resourceId,
-            .index = Converter::Convert<float>(parameter)
-        };
-    };
-    OnRatingChangeCallback arkCallback =
-        Converter::ArkValue<OnRatingChangeCallback>(checkCallback, frameNode->GetId());
-    Opt_OnRatingChangeCallback optCb = Converter::ArkValue<Opt_OnRatingChangeCallback>(arkCallback);
-    modifier_->setOnChange1(node_, &optCb);
-    EXPECT_FALSE(checkEvent.has_value());
-    eventHub->FireChangeEvent("55.5");
-    ASSERT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->index, 55.5);
-    eventHub->FireChangeEvent("0.0");
-    ASSERT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->index, 0.0);
-}
-
-// /*
-//  * @tc.name: DISABLED_setContentModifierTest
-//  * @tc.desc:
-//  * @tc.type: FUNC
-//  */
-HWTEST_F(RatingModifierTest, DISABLED_setContentModifierTest, TestSize.Level1)
-{
-    // CustomObjects is not implemented yet!
-}
-
+#ifdef WRONG_OLD_GEN
 /*
  * @tc.name: setOnChangeEventRatingImpl
  * @tc.desc:
@@ -727,4 +611,5 @@ HWTEST_F(RatingModifierTest, setOnChangeEventRatingImpl, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_NEAR(checkEvent->value, 55.5f, FLT_EPSILON);
 }
+#endif
 } // namespace OHOS::Ace::NG

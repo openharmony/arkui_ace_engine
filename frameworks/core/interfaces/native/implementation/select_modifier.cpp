@@ -28,6 +28,11 @@
 namespace OHOS::Ace::NG {
 
 namespace Converter {
+struct SelectDividerStyle {
+    SelectDivider selectDivider;
+    std::optional<DividerMode> dividerMode;
+};
+
 template<>
 void AssignCast(std::optional<ArrowPosition>& dst, const Ark_ArrowPosition& src)
 {
@@ -57,6 +62,47 @@ void AssignCast(std::optional<bool>& dst, const Ark_OptionWidthMode& src)
         case ARK_OPTION_WIDTH_MODE_FIT_TRIGGER: dst = true; break;
         default: LOGE("Unexpected enum value in Ark_OptionWidthMode: %{public}d", src);
     }
+}
+
+template<>
+void AssignCast(std::optional<AvoidanceMode>& dst, const Ark_AvoidanceMode& src)
+{
+    switch (src) {
+        case ARK_AVOIDANCE_MODE_COVER_TARGET:
+            dst = AvoidanceMode::COVER_TARGET;
+            break;
+        case ARK_AVOIDANCE_MODE_AVOID_AROUND_TARGET:
+            dst = AvoidanceMode::AVOID_AROUND_TARGET;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_AvoidanceMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::DividerMode>& dst, const Ark_DividerMode& src)
+{
+    switch (src) {
+        case ARK_DIVIDER_MODE_FLOATING_ABOVE_MENU:
+            dst = DividerMode::FLOATING_ABOVE_MENU;
+            break;
+        case ARK_DIVIDER_MODE_EMBEDDED_IN_MENU:
+            dst = DividerMode::EMBEDDED_IN_MENU;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_DividerMode: %{public}d", src);
+    }
+}
+
+template<>
+Avoidance Convert(const Ark_AvoidanceMode& src)
+{
+    Avoidance avoidance;
+    auto mode = OptConvert<AvoidanceMode>(src);
+    if (mode) {
+        avoidance.mode = *mode;
+    }
+    return avoidance;
 }
 
 template<>
@@ -94,6 +140,48 @@ SelectDivider Convert(const Ark_DividerOptions& src)
     if (endMarginOpt.has_value()) {
         dst.endMargin = endMarginOpt.value();
     }
+    return dst;
+}
+
+template<>
+SelectDividerStyle Convert(const Ark_DividerStyleOptions& src)
+{
+    SelectDivider dst;
+    auto colorOpt = OptConvert<Color>(src.color);
+    if (colorOpt.has_value()) {
+        dst.color = *colorOpt;
+    }
+    auto strokeWidth = OptConvert<Dimension>(src.strokeWidth);
+    Validator::ValidateNonNegative(strokeWidth);
+    if (strokeWidth.has_value()) {
+        dst.strokeWidth = strokeWidth.value();
+    }
+    auto startMargin = OptConvert<Dimension>(src.startMargin);
+    Validator::ValidateNonNegative(startMargin);
+    if (startMargin.has_value()) {
+        dst.startMargin = startMargin.value();
+    }
+    auto endMargin = OptConvert<Dimension>(src.endMargin);
+    Validator::ValidateNonNegative(endMargin);
+    if (endMargin.has_value()) {
+        dst.endMargin = endMargin.value();
+    }
+    return {
+        .selectDivider = dst,
+        .dividerMode = OptConvert<OHOS::Ace::DividerMode>(src.mode),
+    };
+}
+
+template<>
+MenuParam Convert(const Ark_MenuOutlineOptions& src)
+{
+    MenuParam dst;
+    dst.outlineWidth = OptConvert<BorderWidthProperty>(src.width);
+    Validator::ValidateNonPercent(dst.outlineWidth->topDimen);
+    Validator::ValidateNonPercent(dst.outlineWidth->rightDimen);
+    Validator::ValidateNonPercent(dst.outlineWidth->bottomDimen);
+    Validator::ValidateNonPercent(dst.outlineWidth->leftDimen);
+    dst.outlineColor = OptConvert<BorderColorProperty>(src.color);
     return dst;
 }
 } // namespace Converter
@@ -138,8 +226,7 @@ void SelectedImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto arkVal = value ? Converter::GetOpt(*value) : std::nullopt;
-    auto convVal = arkVal.has_value() ? Converter::OptConvert<int32_t>(arkVal.value()) : std::nullopt;
+    auto convVal = Converter::OptConvertPtr<int32_t>(value);
     Validator::ValidateNonNegative(convVal);
     SelectModelStatic::SetSelected(frameNode, convVal);
 }
@@ -308,6 +395,7 @@ void OptionHeightImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
     Validator::ValidatePositive(convValue);
+    Validator::ValidateNonPercent(convValue);
     SelectModelStatic::SetOptionHeight(frameNode, convValue);
 }
 void MenuBackgroundColorImpl(Ark_NativePointer node,
@@ -350,8 +438,36 @@ void DividerImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto divider = Converter::OptConvert<SelectDivider>(*value);
-    SelectModelStatic::SetDivider(frameNode, divider);
+    auto divider = SelectModelStatic::GetDefaultDivider(frameNode);
+    if (value->tag == INTEROP_TAG_UNDEFINED) {
+        SelectModelStatic::SetDivider(frameNode, divider);
+        return;
+    }
+    auto dividerOptions = value->value;
+    auto strokeWidthOpt = Converter::OptConvert<Dimension>(dividerOptions.strokeWidth);
+    Validator::ValidateNonNegative(strokeWidthOpt);
+    Validator::ValidateNonPercent(strokeWidthOpt);
+    if (strokeWidthOpt.has_value()) {
+        divider.strokeWidth = strokeWidthOpt.value();
+    }
+    auto colorOpt = Converter::OptConvert<Color>(dividerOptions.color);
+    if (colorOpt.has_value()) {
+        divider.color = colorOpt.value();
+    }
+    auto startMarginOpt = Converter::OptConvert<Dimension>(dividerOptions.startMargin);
+    Validator::ValidateNonNegative(startMarginOpt);
+    Validator::ValidateNonPercent(startMarginOpt);
+    if (startMarginOpt.has_value()) {
+        divider.startMargin = startMarginOpt.value();
+    }
+    auto endMarginOpt = Converter::OptConvert<Dimension>(dividerOptions.endMargin);
+    Validator::ValidateNonNegative(endMarginOpt);
+    Validator::ValidateNonPercent(endMarginOpt);
+    if (endMarginOpt.has_value()) {
+        divider.endMargin = endMarginOpt.value();
+    }
+    std::optional<SelectDivider> dividerOpt = divider;
+    SelectModelStatic::SetDivider(frameNode, dividerOpt);
 }
 void TextModifierImpl(Ark_NativePointer node,
                       const Opt_TextModifier* value)
@@ -388,26 +504,30 @@ void SelectedOptionTextModifierImpl(Ark_NativePointer node,
 void DividerStyleImpl(Ark_NativePointer node,
                       const Opt_DividerStyleOptions* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SelectModelNG::SetDividerStyle(frameNode, convValue);
+    auto divider = value ? Converter::OptConvert<Converter::SelectDividerStyle>(*value) : std::nullopt;
+    if (divider) {
+        SelectModelStatic::SetDividerStyle(frameNode, divider->selectDivider, divider->dividerMode);
+    } else {
+        SelectModelStatic::SetDivider(frameNode, std::nullopt);
+    }
 }
 void AvoidanceImpl(Ark_NativePointer node,
                    const Opt_AvoidanceMode* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SelectModelNG::SetAvoidance(frameNode, convValue);
+    SelectModelStatic::SetAvoidance(frameNode, Converter::OptConvertPtr<Avoidance>(value));
 }
 void MenuOutlineImpl(Ark_NativePointer node,
                      const Opt_MenuOutlineOptions* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //SelectModelNG::SetMenuOutline(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    auto optConvert = Converter::OptConvert<MenuParam>(*value);
+    SelectModelStatic::SetMenuOutline(frameNode, optConvert);
 }
 void MenuAlignImpl(Ark_NativePointer node,
                    const Opt_MenuAlignType* alignType,

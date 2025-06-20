@@ -25,7 +25,7 @@ namespace CounterModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = CounterModelNG::CreateFrameNode(id);
+    auto frameNode = CounterModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -51,7 +51,7 @@ void OnIncImpl(Ark_NativePointer node,
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
         arkCallback.Invoke();
     };
-    CounterModelNG::SetOnInc(frameNode, onEvent);
+    CounterModelStatic::SetOnInc(frameNode, onEvent);
 }
 void OnDecImpl(Ark_NativePointer node,
                const Opt_VoidCallback* value)
@@ -66,7 +66,7 @@ void OnDecImpl(Ark_NativePointer node,
     auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
         arkCallback.Invoke();
     };
-    CounterModelNG::SetOnDec(frameNode, onEvent);
+    CounterModelStatic::SetOnDec(frameNode, onEvent);
 }
 void EnableDecImpl(Ark_NativePointer node,
                    const Opt_Boolean* value)

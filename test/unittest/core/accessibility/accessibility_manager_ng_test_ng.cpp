@@ -101,8 +101,6 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest001, TestSize.L
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, mouseEvent);
     mouseEvent.action = MouseAction::PULL_UP;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, mouseEvent);
-    EXPECT_EQ(mouseEvent.action, MouseAction::PULL_UP);
-    accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, mouseEvent);
     accessibilityManagerNg.hoverState_.idle = false;
     mouseEvent.sourceType = SourceType::MOUSE;
     mouseEvent.action = MouseAction::MOVE;
@@ -146,7 +144,6 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest002, TestSize.L
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, touchEvent);
     touchEvent.type = TouchType::HOVER_EXIT;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, touchEvent);
-    EXPECT_EQ(touchEvent.type, TouchType::HOVER_EXIT);
     touchEvent.type = TouchType::UNKNOWN;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, touchEvent);
     touchEvent.sourceType = SourceType::TOUCH;
@@ -174,7 +171,6 @@ HWTEST_F(AccessibilityManagerNgTestNg, AccessibilityManagerNgTest002, TestSize.L
     touchEvent.sourceType = SourceType::TOUCH;
     accessibilityManagerNg.hoverState_.source = SourceType::TOUCH;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, touchEvent);
-    EXPECT_EQ(touchEvent.type, TouchType::UNKNOWN);
     
     touchEvent.sourceType = SourceType::NONE;
     accessibilityManagerNg.HandleAccessibilityHoverEvent(frameNode, touchEvent);

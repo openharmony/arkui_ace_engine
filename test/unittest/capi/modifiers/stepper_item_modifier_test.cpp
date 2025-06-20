@@ -53,9 +53,9 @@ HWTEST_F(StepperItemModifierTest, DISABLED_setPrevLabelTestDefaultValues, TestSi
 }
 
 // Valid values for attribute 'prevLabel' of method 'prevLabel'
-static std::vector<std::tuple<std::string, Ark_String, std::string>> prevLabelPrevLabelValidValues = {
-    {"\"\"", Converter::ArkValue<Ark_String>(""), ""},
-    {"\"abc\"", Converter::ArkValue<Ark_String>("abc"), "abc"},
+static std::vector<std::tuple<std::string, Opt_String, std::string>> prevLabelPrevLabelValidValues = {
+    {"\"\"", Converter::ArkValue<Opt_String>(""), ""},
+    {"\"abc\"", Converter::ArkValue<Opt_String>("abc"), "abc"},
 };
 
 /*
@@ -68,8 +68,8 @@ HWTEST_F(StepperItemModifierTest, setPrevLabelTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_String inputValuePrevLabel;
-    Ark_String initValuePrevLabel;
+    Opt_String inputValuePrevLabel;
+    Opt_String initValuePrevLabel;
 
     // Initial setup
     initValuePrevLabel = std::get<1>(prevLabelPrevLabelValidValues[0]);
@@ -101,9 +101,9 @@ HWTEST_F(StepperItemModifierTest, DISABLED_setNextLabelTestDefaultValues, TestSi
 }
 
 // Valid values for attribute 'nextLabel' of method 'nextLabel'
-static std::vector<std::tuple<std::string, Ark_String, std::string>> nextLabelNextLabelValidValues = {
-    {"\"\"", Converter::ArkValue<Ark_String>(""), ""},
-    {"\"abc\"", Converter::ArkValue<Ark_String>("abc"), "abc"},
+static std::vector<std::tuple<std::string, Opt_String, std::string>> nextLabelNextLabelValidValues = {
+    {"\"\"", Converter::ArkValue<Opt_String>(""), ""},
+    {"\"abc\"", Converter::ArkValue<Opt_String>("abc"), "abc"},
 };
 
 /*
@@ -116,8 +116,8 @@ HWTEST_F(StepperItemModifierTest, setNextLabelTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Ark_String inputValueNextLabel;
-    Ark_String initValueNextLabel;
+    Opt_String inputValueNextLabel;
+    Opt_String initValueNextLabel;
 
     // Initial setup
     initValueNextLabel = std::get<1>(nextLabelNextLabelValidValues[0]);

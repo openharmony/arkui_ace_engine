@@ -73,20 +73,16 @@ void ConversionPart2(TextStyle& ret, const Ark_RichEditorTextStyle& src)
         ret.SetLineHeight(lineHeight.value());
     }
 
-#ifdef WRONG_GEN
     if (auto halfLeading = Converter::OptConvert<bool>(src.halfLeading)) {
         ret.SetHalfLeading(halfLeading.value());
     }
-#endif
 
     if (auto fontFeatureSettings = Converter::OptConvert<std::string>(src.fontFeature)) {
         ret.SetFontFeatures(ParseFontFeatureSettings(fontFeatureSettings.value()));
     }
 
-#ifdef WRONG_GEN
     auto textBackgroundStyle = Converter::OptConvert<TextBackgroundStyle>(src.textBackgroundStyle);
     ret.SetTextBackgroundStyle(textBackgroundStyle);
-#endif
 }
 
 template<>
@@ -268,7 +264,6 @@ UserGestureOptions Convert(const Ark_RichEditorGesture& src)
             callback.InvokeSync(event.ArkValue());
         };
     }
-#ifdef WRONG_GEN
     const auto arkDoubleClickOpt = Converter::OptConvert<Callback_GestureEvent_Void>(src.onDoubleClick);
     if (arkDoubleClickOpt) {
         result.onDoubleClick = [callback = CallbackHelper(arkDoubleClickOpt.value())](OHOS::Ace::GestureEvent& info) {
@@ -276,7 +271,6 @@ UserGestureOptions Convert(const Ark_RichEditorGesture& src)
             callback.InvokeSync(event.ArkValue());
         };
     }
-#endif
     return result;
 }
 
@@ -401,6 +395,7 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src)
     dst.wordBreak = Converter::ArkValue<Opt_WordBreak>(static_cast<WordBreak>(src.wordBreak));
     dst.lineBreakStrategy = Converter::ArkValue<Opt_LineBreakStrategy>(
         static_cast<LineBreakStrategy>(src.lineBreakStrategy));
+    dst.paragraphSpacing = Converter::ArkValue<Opt_Number>(src.paragraphSpacing);
 }
 void AssignArkValue(Ark_RichEditorParagraphResult& dst, const ParagraphInfo& src)
 {
@@ -468,13 +463,38 @@ void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const ResultObject& src, 
     dst.spanPosition = ArkValue<Ark_RichEditorSpanPosition>(src.spanPosition);
     dst.value = ArkValue<Ark_String>(src.valueString, ctx);
     dst.textStyle = ArkValue<Ark_RichEditorTextStyleResult>(src.textStyle, ctx);
+    dst.offsetInSpan.value0 = Converter::ArkValue<Ark_Number>(src.offsetInSpan[0]);
+    dst.offsetInSpan.value1 = Converter::ArkValue<Ark_Number>(src.offsetInSpan[1]);
     dst.symbolSpanStyle = ArkValue<Opt_RichEditorSymbolSpanStyle>(src.symbolSpanStyle, ctx);
+
     if (src.valueResource) {
         dst.valueResource = ArkValue<Opt_Resource>(*src.valueResource, ctx);
     } else {
         dst.valueResource = ArkValue<Opt_Resource>();
     }
+
     dst.previewText = ArkValue<Opt_String>(src.previewText, ctx);
+    LOGW("RichEditorController accessor :: urlStyle conversion is not implemented yet.");
+    dst.urlStyle = ArkValue<Opt_RichEditorUrlStyle>(src.urlAddress, ctx); // urlAddress?
+
+    LeadingMargin leadingMargin {
+        .size = LeadingMarginSize(
+            StringUtils::StringToDimension(src.textStyle.leadingMarginSize[0]),
+            StringUtils::StringToDimension(src.textStyle.leadingMarginSize[1])),
+        .pixmap = nullptr, // not implemented yet, valuePixelMap?
+    };
+
+    Ark_RichEditorParagraphStyle paragraphStyle {
+        .textAlign = Converter::ArkValue<Opt_TextAlign>(static_cast<TextAlign>(src.textStyle.textAlign)),
+        .leadingMargin =
+            Converter::ArkUnion<Opt_Union_Dimension_LeadingMarginPlaceholder, Ark_LeadingMarginPlaceholder>(
+                leadingMargin),
+        .wordBreak = Converter::ArkValue<Opt_WordBreak>(static_cast<WordBreak>(src.textStyle.wordBreak)),
+        .lineBreakStrategy =Converter::ArkValue<Opt_LineBreakStrategy>(
+            static_cast<LineBreakStrategy>(src.textStyle.lineBreakStrategy)),
+        .paragraphSpacing = Converter::ArkValue<Opt_Number>(src.textStyle.paragraphSpacing)
+    };
+    dst.paragraphStyle = Converter::ArkValue<Opt_RichEditorParagraphStyle>(paragraphStyle);
 }
 
 void AssignArkValue(Ark_RichEditorImageSpanResult& dst, const ResultObject& src, ConvContext *ctx)

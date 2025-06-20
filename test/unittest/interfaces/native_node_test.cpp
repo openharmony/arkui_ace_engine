@@ -4852,6 +4852,9 @@ HWTEST_F(NativeNodeTest, NativeNodeTest064, TestSize.Level1)
         ARKUI_ERROR_CODE_PARAM_INVALID);
     ArkUI_NumberValue layoutModeV[] = {{.i32 = ArkUI_WaterFlowLayoutMode::ARKUI_WATER_FLOW_LAYOUT_MODE_SLIDING_WINDOW}};
     ArkUI_AttributeItem layoutModeAttr = {layoutModeV, 1, nullptr, nullptr};
+    
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(rootNode->uiNodeHandle);
+    frameNode->AttachContext(NG::MockPipelineContext::GetCurrent().GetRawPtr());
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_WATER_FLOW_LAYOUT_MODE, &layoutModeAttr),
         ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_WATER_FLOW_LAYOUT_MODE)->value->i32,
@@ -6663,5 +6666,55 @@ HWTEST_F(NativeNodeTest, NativeNodeTest126, TestSize.Level1)
     OH_ArkUI_SwiperArrowStyle_SetArrowSize(arrowStyle, 25.0f);
     EXPECT_EQ(OH_ArkUI_SwiperArrowStyle_GetArrowSize(arrowStyle), 25.0f);
     OH_ArkUI_SwiperArrowStyle_Destroy(arrowStyle);
+}
+
+/**
+ * @tc.name: NativeNodeTest144
+ * @tc.desc: Test IsValidArkUINode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest144, TestSize.Level1)
+{
+    EXPECT_EQ(NodeModel::IsValidArkUINode(nullptr), false);
+
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto notFreeNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    EXPECT_EQ(NodeModel::IsValidArkUINode(notFreeNode), true);
+    nodeAPI->disposeNode(notFreeNode);
+
+    auto nodeAPI2 = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_MULTI_THREAD_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto freeNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
+    EXPECT_EQ(NodeModel::IsValidArkUINode(freeNode), true);
+    nodeAPI2->disposeNode(freeNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest145
+ * @tc.desc: Test GetNativeNodeEventType
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest145, TestSize.Level1)
+{
+    ArkUINodeEvent event;
+    event.extraParam = reinterpret_cast<ArkUI_Int64>(nullptr);
+    EXPECT_EQ(NodeModel::GetNativeNodeEventType(&event), -1);
+
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto notFreeNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ArkUINodeEvent event1;
+    event1.extraParam = reinterpret_cast<ArkUI_Int64>(notFreeNode);
+    EXPECT_EQ(NodeModel::GetNativeNodeEventType(&event1), -1);
+    nodeAPI->disposeNode(notFreeNode);
+
+    auto nodeAPI2 = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_MULTI_THREAD_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto freeNode = nodeAPI2->createNode(ARKUI_NODE_STACK);
+    ArkUINodeEvent event2;
+    event2.extraParam = reinterpret_cast<ArkUI_Int64>(freeNode);
+    EXPECT_EQ(NodeModel::GetNativeNodeEventType(&event2), -1);
+    nodeAPI2->disposeNode(freeNode);
 }
 } // namespace OHOS::Ace

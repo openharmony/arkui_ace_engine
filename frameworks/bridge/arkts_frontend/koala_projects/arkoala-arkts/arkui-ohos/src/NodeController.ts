@@ -47,7 +47,7 @@ export abstract class NodeController {
     onAttach() { }
     onDetach() { }
     onBind(containerId: number) { }
-    onUnBind(containerId: number) { }
+    onUnbind(containerId: number) { }
     onWillBind(containerId: number) { }
-    onWillUnBind(containerId: number) { }
+    onWillUnbind(containerId: number) { }
 }

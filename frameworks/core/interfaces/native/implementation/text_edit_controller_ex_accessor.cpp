@@ -57,12 +57,9 @@ Ark_Number GetCaretOffsetImpl(Ark_TextEditControllerEx peer)
 }
 Ark_PreviewText GetPreviewTextImpl(Ark_TextEditControllerEx peer)
 {
-#ifdef WRONG_GEN
     CHECK_NULL_RETURN(peer, {});
     auto result = peer->GetPreviewText();
     return Converter::ArkValue<Ark_PreviewText>(result, Converter::FC);
-#endif
-    return {};
 }
 } // TextEditControllerExAccessor
 const GENERATED_ArkUITextEditControllerExAccessor* GetTextEditControllerExAccessor()

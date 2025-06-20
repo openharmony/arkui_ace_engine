@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "core/components_v2/list/list_properties.h"
 #include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
+#include "core/interfaces/native/implementation/axis_event_peer.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
@@ -65,6 +66,7 @@
 #include "core/interfaces/native/implementation/nav_destination_context_peer.h"
 #include "core/interfaces/native/implementation/navigation_transition_proxy_peer.h"
 #include "core/interfaces/native/implementation/submit_event_peer.h"
+#include "core/interfaces/native/implementation/swipe_recognizer_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
@@ -171,6 +173,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_AnimationMode& dst, const TabAnimateMode& src);
     void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src);
     void AssignArkValue(Ark_Axis& dst, const Axis& src);
+    void AssignArkValue(Ark_AxisAction& dst, const AxisAction& src);
     void AssignArkValue(Ark_AxisModel& dst, const AxisModel& src);
     void AssignArkValue(Ark_BarMode& dst, const TabBarMode& src);
     void AssignArkValue(Ark_BarPosition& dst, const BarPosition& src);
@@ -190,6 +193,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Dimension& dst, const Dimension& src, ConvContext *ctx);
     void AssignArkValue(Ark_Dimension& dst, const char *src);
     void AssignArkValue(Ark_Dimension& dst, const float& src);
+    void AssignArkValue(Ark_Dimension& dst, const int& src);
     void AssignArkValue(Ark_Dimension& dst, const std::string& src, ConvContext *ctx);
     void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src);
     void AssignArkValue(Ark_DismissReason& dst, const DialogDismissReason& src);
@@ -211,6 +215,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src);
     void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src);
     void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src);
+    void AssignArkValue(Ark_GestureRecognizerState &dst, const NG::RefereeState& src);
     void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src);
     void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src);
     void AssignArkValue(Ark_ImageAttachmentLayoutStyle& dst, const ImageSpanAttribute& src);
@@ -234,6 +239,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Length& dst, const int& src);
     void AssignArkValue(Ark_Length& dst, const std::string& src, ConvContext *ctx);
     void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src);
+    void AssignArkValue(Ark_LengthMetricsUnit& dst, const OHOS::Ace::CanvasUnit& src);
     void AssignArkValue(Ark_LengthUnit& dst, const DimensionUnit& src);
     void AssignArkValue(Ark_LineBreakStrategy& dst, const LineBreakStrategy& src);
     void AssignArkValue(Ark_ListItemAlign& dst, const V2::ListItemAlign& src);
@@ -290,9 +296,10 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RichEditorSpanPosition& dst, const SpanPosition& src);
     void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src);
     void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const ResultObject& src, ConvContext *ctx);
-    void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractSpanResult& src);
+    void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractSpanResult& src, ConvContext *ctx);
     void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const TextStyleResult& src, ConvContext *ctx);
+    void AssignArkValue(Ark_RichEditorUrlStyle& dst, const std::u16string& src, ConvContext *ctx);
     void AssignArkValue(Ark_SaveButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_ScrollAlign& dst, const ScrollAlign& src);
     void AssignArkValue(Ark_ScrollSnapAlign& dst, const V2::ScrollSnapAlign& src);
@@ -318,6 +325,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src);
     void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src);
     void AssignArkValue(Ark_SwipeActionState& dst, const SwipeActionState& src);
+    void AssignArkValue(Ark_SwipeDirection &dst, const OHOS::Ace::SwipeDirection &src);
     void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
     void AssignArkValue(Ark_TextAlign& dst, const TextAlign& src);
     void AssignArkValue(Ark_TextBackgroundStyle& dst, const TextBackgroundStyle& src, ConvContext *ctx);
@@ -356,6 +364,13 @@ namespace OHOS::Ace::NG::Converter {
     // Passthrough version
     template<typename T>
     void AssignArkValue(T &dst, const T& src, ConvContext *ctx)
+    {
+        dst = src;
+    }
+
+    template<typename To, typename From>
+    std::enable_if_t<std::is_pointer_v<To> && std::is_pointer_v<From> && std::is_assignable_v<To&, From>>
+    AssignArkValue(To& dst, const From& src)
     {
         dst = src;
     }
@@ -784,6 +799,7 @@ namespace OHOS::Ace::NG::Converter {
     using ArkMouseEventSync = SyncEvent<Ark_MouseEvent>;
     using ArkSubmitEventSync = SyncEvent<Ark_SubmitEvent>;
     using ArkTouchEventSync = SyncEvent<Ark_TouchEvent>;
+    using ArkAxisEventSync = SyncEvent<Ark_AxisEvent>;
 } // namespace OHOS::Ace::NG::Converter
 
 #endif  // FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_REVERSE_CONVERTER_H

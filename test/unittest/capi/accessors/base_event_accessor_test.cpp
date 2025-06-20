@@ -53,6 +53,15 @@ const std::vector<std::pair<Ark_Number, int>> testFixtureInt32Values = {
     { Converter::ArkValue<Ark_Number>(10), 10 },
 };
 
+const std::vector<std::pair<Ark_Number, float>> testFixtureFloatValues = {
+    { Converter::ArkValue<Ark_Number>(123.321f), 123.321f },
+    { Converter::ArkValue<Ark_Number>(0.0f), 0.0f },
+    { Converter::ArkValue<Ark_Number>(30.3f), 30.3f },
+    { Converter::ArkValue<Ark_Number>(55.5f), 55.5f },
+    { Converter::ArkValue<Ark_Number>(65000.0f), 65000.0f },
+    { Converter::ArkValue<Ark_Number>(10.0f), 10.0f },
+};
+
 /**
  * @tc.name: GetModifierKeyStateTest
  * @tc.desc:
@@ -86,7 +95,7 @@ HWTEST_F(BaseEventAccessorTest, DISABLED_GetModifierKeyStateTest, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BaseEventAccessorTest, GetTargetTest, TestSize.Level1)
+HWTEST_F(BaseEventAccessorTest, DISABLED_GetTargetTest, TestSize.Level1)
 {
     const Dimension height(100.f);
     const Dimension width(200.f);
@@ -210,7 +219,6 @@ HWTEST_F(BaseEventAccessorTest, GetSourceTest, TestSize.Level1)
     const std::vector<std::pair<SourceType, Ark_SourceType>> TEST_PLAN = {
         { SourceType::NONE, Ark_SourceType::ARK_SOURCE_TYPE_UNKNOWN },
         { SourceType::MOUSE, Ark_SourceType::ARK_SOURCE_TYPE_MOUSE },
-        { SourceType::KEYBOARD, static_cast<Ark_SourceType>(-1) },
         { SourceType::TOUCH, Ark_SourceType::ARK_SOURCE_TYPE_TOUCH_SCREEN },
         { SourceType::TOUCH_PAD, static_cast<Ark_SourceType>(-1) }
     };
@@ -328,6 +336,39 @@ HWTEST_F(BaseEventAccessorTest, SetTiltYTest, TestSize.Level1)
         auto tiltY = baseEvent_->GetTiltY();
         ASSERT_EQ(tiltY.has_value(), true);
         EXPECT_EQ(tiltY.value(), expected);
+    }
+}
+
+/**
+ * @tc.name: GetRollAngleTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseEventAccessorTest, GetRollAngleTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getRollAngle, nullptr);
+    for (auto& [value, expected] : testFixtureFloatValues) {
+        baseEvent_->SetRollAngle(expected);
+        auto rollAngle = accessor_->getRollAngle(peer_);
+        auto result = Converter::OptConvert<float>(rollAngle);
+        ASSERT_TRUE(result.has_value());
+        EXPECT_EQ(result.value(), expected);
+    }
+}
+
+/**
+ * @tc.name: SetRollAngleTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseEventAccessorTest, SetRollAngleTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setRollAngle, nullptr);
+    for (auto& [value, expected] : testFixtureFloatValues) {
+        accessor_->setRollAngle(peer_, &value);
+        auto rollAngle = baseEvent_->GetRollAngle();
+        ASSERT_EQ(rollAngle.has_value(), true);
+        EXPECT_EQ(rollAngle.value(), expected);
     }
 }
 

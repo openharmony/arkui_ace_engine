@@ -15,7 +15,9 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/shape/polygon_model_ng.h"
+#include "core/components_ng/pattern/shape/polygon_model_static.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_abstract_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
@@ -46,7 +48,7 @@ namespace PolygonModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = PolygonModelNG::CreateFrameNode(id, true);
+    auto frameNode = PolygonModelStatic::CreateFrameNode(id, true);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -62,9 +64,9 @@ void SetPolygonOptionsImpl(Ark_NativePointer node,
     auto opt = Converter::OptConvert<PolygonOptions>(*options);
     CHECK_NULL_VOID(opt);
     Validator::ValidateNonNegative(opt->width);
-    ShapeAbstractModelNG::SetWidth(frameNode, opt->width);
+    ShapeAbstractModelStatic::SetWidth(frameNode, opt->width);
     Validator::ValidateNonNegative(opt->height);
-    ShapeAbstractModelNG::SetHeight(frameNode, opt->height);
+    ShapeAbstractModelStatic::SetHeight(frameNode, opt->height);
 }
 } // PolygonInterfaceModifier
 namespace PolygonAttributeModifier {
@@ -77,7 +79,7 @@ void PointsImpl(Ark_NativePointer node,
     if (points && points->size() < POINTS_NUMBER_MIN) {
         points.reset();
     }
-    PolygonModelNG::SetPoints(frameNode, points);
+    PolygonModelStatic::SetPoints(frameNode, points);
 }
 } // PolygonAttributeModifier
 const GENERATED_ArkUIPolygonModifier* GetPolygonModifier()

@@ -91,6 +91,10 @@ ohos_shared_library("ace_uicontent") {
     "runtime_core:ani",
   ]
 
+  if (build_ohos_sdk) {
+    external_deps -= [ "runtime_core:ani" ]
+  }
+
   if (current_os == "ohos") {
     external_deps += [ "c_utils:utils" ]
   } else if (is_arkui_x || use_mingw_win || use_mac || use_linux) {

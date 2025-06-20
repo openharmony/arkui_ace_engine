@@ -23,7 +23,6 @@ import { Serializer } from "./peers/Serializer"
 import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
-import { Callback_Void } from "./abilityComponent"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { InteractionHand } from "./enums"
 import { SourceTool, BaseEvent, BaseEventInternal, Callback } from "./common"
@@ -907,20 +906,20 @@ export class GestureRecognizer implements MaterializedBase {
 export enum PanDirection {
     NONE = 0,
     None = 0,
-    HORIZONTAL = 1,
-    Horizontal = 1,
-    LEFT = 2,
-    Left = 2,
-    RIGHT = 3,
-    Right = 3,
-    VERTICAL = 4,
-    Vertical = 4,
-    UP = 5,
-    Up = 5,
-    DOWN = 6,
-    Down = 6,
-    ALL = 7,
-    All = 7
+    HORIZONTAL = 3,
+    Horizontal = 3,
+    LEFT = 1,
+    Left = 1,
+    RIGHT = 2,
+    Right = 2,
+    VERTICAL = 12,
+    Vertical = 12,
+    UP = 4,
+    Up = 4,
+    DOWN = 8,
+    Down = 8,
+    ALL = 15,
+    All = 15
 }
 export enum SwipeDirection {
     NONE = 0,
@@ -1446,7 +1445,7 @@ export interface BaseGestureEvent {
 }
 export class BaseGestureEventInternal extends BaseEventInternal implements MaterializedBase,BaseGestureEvent {
     get fingerList(): Array<FingerInfo> {
-        throw new Error("Not implemented")
+        return this.getFingerList();
     }
     set fingerList(fingerList: Array<FingerInfo>) {
         this.setFingerList(fingerList)
@@ -1472,8 +1471,15 @@ export class BaseGestureEventInternal extends BaseEventInternal implements Mater
         return
     }
     private getFingerList_serialize(): Array<FingerInfo> {
-        const retval  = ArkUIGeneratedNativeModule._BaseGestureEvent_getFingerList(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._BaseGestureEvent_getFingerList(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const buffer_length : int32 = retvalDeserializer.readInt32()
         let buffer : Array<FingerInfo> = new Array<FingerInfo>(buffer_length)
         for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {

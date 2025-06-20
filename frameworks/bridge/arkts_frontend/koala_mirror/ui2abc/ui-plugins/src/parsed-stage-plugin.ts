@@ -20,18 +20,24 @@ import { CallTransformer } from "./call-transformer"
 import { Importer } from "./utils"
 import { ImportsTransformer } from "./imports-transformer"
 import { StructRecorder, StructTable } from "./struct-recorder"
+import { StructCallRewriter } from "./struct-call-rewriter"
+
 
 export default function parsedTransformer(
     userPluginOptions?: ComponentTransformerOptions
-) {
-    const imports = new Importer()
-    const structTable = new StructTable()
-    return (program: arkts.Program) => [
+): arkts.ProgramTransformer {
+    return (program: arkts.Program, _compilationOptions: arkts.CompilationOptions, context: arkts.PluginContext) => {
+        const importer = new Importer()
+        const structTable = new StructTable()
+        context.setParameter("structTable", structTable)
+        const tranformers: arkts.AbstractVisitor[] = [
             new StructRecorder(structTable),
-            new ComponentTransformer(imports, structTable, userPluginOptions),
+            new ComponentTransformer(importer, userPluginOptions),
+            new StructCallRewriter(importer, structTable),
             new AnnotationsTransformer(),
-            new CallTransformer(imports, userPluginOptions),
-            new ImportsTransformer(program, imports)
+            new CallTransformer(importer, userPluginOptions),
+            new ImportsTransformer(importer)
         ]
-        .reduce((node: arkts.AstNode, transformer) => transformer.visitor(node), program.astNode)
+        tranformers.reduce((node: arkts.AstNode, transformer: arkts.AbstractVisitor) => transformer.visitor(node), program.astNode)
+    }
 }

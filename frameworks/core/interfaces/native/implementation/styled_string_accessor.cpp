@@ -21,6 +21,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/implementation/background_color_style_peer.h"
 #include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
+#include "core/interfaces/native/implementation/custom_span_peer.h"
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
 #include "core/interfaces/native/implementation/image_attachment_peer.h"
@@ -67,6 +68,22 @@ BorderRadiusProperty Convert(const Ark_ImageAttachmentLayoutStyle& src)
     return result.value();
 }
 
+static bool CheckKeyAndValueTypeEqual(int32_t styledKey, int32_t valueTypeId)
+{
+    static int32_t KeyAndValueTypeMap[] = {
+        ARK_STYLED_STRING_KEY_FONT, ARK_STYLED_STRING_KEY_DECORATION, ARK_STYLED_STRING_KEY_BASELINE_OFFSET,
+        ARK_STYLED_STRING_KEY_LETTER_SPACING, ARK_STYLED_STRING_KEY_TEXT_SHADOW, ARK_STYLED_STRING_KEY_GESTURE,
+        ARK_STYLED_STRING_KEY_IMAGE, ARK_STYLED_STRING_KEY_PARAGRAPH_STYLE, ARK_STYLED_STRING_KEY_LINE_HEIGHT,
+        ARK_STYLED_STRING_KEY_URL, ARK_STYLED_STRING_KEY_CUSTOM_SPAN, ARK_STYLED_STRING_KEY_USER_DATA,
+        ARK_STYLED_STRING_KEY_BACKGROUND_COLOR
+    };
+    if ((valueTypeId >= sizeof(KeyAndValueTypeMap) / sizeof(int32_t)) || (valueTypeId < 0) ||
+        KeyAndValueTypeMap[valueTypeId] != styledKey) {
+        return false;
+    }
+    return true;
+}
+
 template<>
 RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
 {
@@ -74,6 +91,10 @@ RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
     Converter::VisitUnion(src.styledValue,
         [&result, &src](const auto& peer) {
             CHECK_NULL_VOID(peer);
+            auto valueTypeId = Converter::Convert<int32_t>(src.styledValue.selector);
+            if (!CheckKeyAndValueTypeEqual(static_cast<int32_t>(src.styledKey), valueTypeId)) {
+                return;
+            }
             result = peer->span;
             CHECK_NULL_VOID(result);
             auto start = Converter::OptConvert<int32_t>(src.start).value_or(0);
@@ -161,8 +182,10 @@ Ark_StyledString CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* val
                 auto options = peerImageAttachment->span->GetImageSpanOptions();
                 peer->spanString = AceType::MakeRefPtr<SpanString>(options);
             },
-            [](const Ark_CustomSpan& arkCustomSpan) {
-                LOGE("StyledStringAccessor::CtorImpl unsupported Ark_CustomSpan");
+            [&peer](const Ark_CustomSpan& arkCustomSpan) {
+                CustomSpanPeer* peerCustomSpan = arkCustomSpan;
+                CHECK_NULL_VOID(peerCustomSpan && peerCustomSpan->span);
+                peer->spanString = AceType::MakeRefPtr<SpanString>(peerCustomSpan->span);
             },
             []() {}
         );
@@ -246,7 +269,7 @@ void FromHtmlImpl(Ark_VMContext vmContext,
 {
     ContainerScope scope(Container::CurrentIdSafely());
     StringArray errorsStr;
-    Ark_StyledString peer = GetMutableStyledStringAccessor()->ctor();
+    Ark_StyledString peer = GetStyledStringAccessor()->ctor(nullptr, nullptr);
 
     auto callback = [arkCallback = CallbackHelper(*outputArgumentForReturningPromise)]
         (Ark_StyledString peer, const StringArray& errors) {

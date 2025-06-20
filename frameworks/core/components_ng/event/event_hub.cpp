@@ -77,12 +77,14 @@ void EventHub::SetSupportedStates(UIState state)
     stateStyleMgr_->SetSupportedStates(state);
 }
 
-void EventHub::AddSupportedUIStateWithCallback(UIState state, std::function<void(uint64_t)>& callback, bool isInner)
+void EventHub::AddSupportedUIStateWithCallback(
+    UIState state, std::function<void(uint64_t)>& callback, bool isInner, bool excludeInner)
 {
     if (!stateStyleMgr_) {
         stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
     }
-    stateStyleMgr_->AddSupportedUIStateWithCallback(state, callback, isInner);
+    stateStyleMgr_->AddSupportedUIStateWithCallback(state, callback, isInner, excludeInner);
+    AddPressedListener();
 }
 
 void EventHub::RemoveSupportedUIState(UIState state, bool isInner)
@@ -173,13 +175,18 @@ void EventHub::FireEnabledTask()
     }
 }
 
+void EventHub::AddPressedListener()
+{
+    if (stateStyleMgr_ && stateStyleMgr_->HasStateStyle(UI_STATE_PRESSED)) {
+        GetOrCreateGestureEventHub()->AddTouchEvent(stateStyleMgr_->GetPressedListener());
+    }
+}
+
 void EventHub::MarkModifyDone()
 {
     if (stateStyleMgr_) {
         // focused style is managered in focus event hub.
-        if (stateStyleMgr_->HasStateStyle(UI_STATE_PRESSED)) {
-            GetOrCreateGestureEventHub()->AddTouchEvent(stateStyleMgr_->GetPressedListener());
-        }
+        AddPressedListener();
         if (stateStyleMgr_->HasStateStyle(UI_STATE_DISABLED)) {
             if (enabled_) {
                 stateStyleMgr_->ResetCurrentUIState(UI_STATE_DISABLED);

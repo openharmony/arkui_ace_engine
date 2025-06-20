@@ -464,10 +464,10 @@ HWTEST_F(CommonShapeMethodModifierTest, setStrokeDashOffsetTest, TestSize.Level1
              "11.00lpx" },
         { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("0.5lpx")),
              "0.50lpx" },
-        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("3")), "3.00fp" },
+        { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("3")), "3.00vp" },
         { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("")), "0.00px" },
         { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("10.65")),
-             "10.65fp" },
+             "10.65vp" },
         { Converter::ArkValue<Opt_Union_Number_String>(ArkUnion<Ark_Union_Number_String, Ark_String>("23%")),
              "0.00px" },
     };

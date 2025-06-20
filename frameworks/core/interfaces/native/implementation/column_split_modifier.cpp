@@ -18,6 +18,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/components_ng/pattern/linear_split/linear_split_model_ng_static.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -48,7 +49,7 @@ namespace ColumnSplitModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = LinearSplitModelNG::CreateFrameNode(id, NG::SplitType::COLUMN_SPLIT);
+    auto frameNode = LinearSplitModelNGStatic::CreateFrameNode(id, NG::SplitType::COLUMN_SPLIT);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -80,7 +81,7 @@ void DividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<ItemDivider>(*value);
-    LinearSplitModelNG::SetDivider(frameNode, NG::SplitType::COLUMN_SPLIT, divider);
+    LinearSplitModelNGStatic::SetDivider(frameNode, NG::SplitType::COLUMN_SPLIT, divider);
 }
 } // ColumnSplitAttributeModifier
 const GENERATED_ArkUIColumnSplitModifier* GetColumnSplitModifier()

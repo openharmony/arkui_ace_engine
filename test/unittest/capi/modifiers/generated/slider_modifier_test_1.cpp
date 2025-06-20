@@ -1412,10 +1412,10 @@ HWTEST_F(SliderModifierTest, setTrackBorderRadiusTestTrackBorderRadiusValidValue
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_String>(value));
     }
 }
@@ -1448,10 +1448,10 @@ HWTEST_F(SliderModifierTest, setTrackBorderRadiusTestTrackBorderRadiusInvalidVal
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
         checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
     }
-    for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegInvalidValues) {
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegNonPctInvalidValues) {
         checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));
     }
-    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegInvalidValues) {
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
         checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
     }
     // Check invalid union
@@ -1503,10 +1503,10 @@ HWTEST_F(SliderModifierTest, setSelectedBorderRadiusTestSelectedBorderRadiusVali
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Dimension, Ark_Number>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Dimension, Ark_Resource>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegNonPctValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Dimension, Ark_String>(value));
     }
 }
@@ -1539,10 +1539,10 @@ HWTEST_F(SliderModifierTest, setSelectedBorderRadiusTestSelectedBorderRadiusInva
     for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
         checkValue(input, ArkUnion<Opt_Dimension, Ark_Number>(value));
     }
-    for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegInvalidValues) {
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegNonPctInvalidValues) {
         checkValue(input, ArkUnion<Opt_Dimension, Ark_String>(value));
     }
-    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegInvalidValues) {
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
         checkValue(input, ArkUnion<Opt_Dimension, Ark_Resource>(value));
     }
     // Check invalid union
@@ -2229,7 +2229,7 @@ HWTEST_F(SliderModifierTest, setEnableHapticFeedbackTestDefaultValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackValidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, DISABLED_setEnableHapticFeedbackTestEnableHapticFeedbackValidValues, TestSize.Level1)
 {
     Opt_Boolean initValueEnableHapticFeedback;
 

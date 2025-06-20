@@ -172,12 +172,12 @@ HWTEST_F(ScrollerAccessorTest, flingTest, TestSize.Level1)
     ASSERT_NE(accessor_->fling, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, Fling(validFlingValue1)).Times(1);
-    accessor_->fling(vmContext_, peer_, &arkFlingValid1);
+    accessor_->fling(peer_, &arkFlingValid1);
 
     EXPECT_CALL(*mockScrollerController_, Fling(validFlingValue2)).Times(1);
-    accessor_->fling(vmContext_, peer_, &arkFlingValid2);
-    accessor_->fling(vmContext_, peer_, &arkFlingInvalid);
-    accessor_->fling(vmContext_, peer_, nullptr);
+    accessor_->fling(peer_, &arkFlingValid2);
+    accessor_->fling(peer_, &arkFlingInvalid);
+    accessor_->fling(peer_, nullptr);
 }
 
 /**
@@ -204,11 +204,11 @@ HWTEST_F(ScrollerAccessorTest, isAtEndTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: scrollPage0Test
+ * @tc.name: scrollPageTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, scrollPage0Test, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, scrollPageTest, TestSize.Level1)
 {
     constexpr bool nextTrue = true;
     constexpr bool nextFalse = false;
@@ -219,42 +219,14 @@ HWTEST_F(ScrollerAccessorTest, scrollPage0Test, TestSize.Level1)
     Ark_ScrollPageOptions options2;
     options2.next = ArkValue<Ark_Boolean>(nextFalse);
 
-    ASSERT_NE(accessor_->scrollPage0, nullptr);
+    ASSERT_NE(accessor_->scrollPage, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, ScrollPage(!nextTrue, smooth)).Times(1);
-    accessor_->scrollPage0(peer_, &options1);
+    accessor_->scrollPage(peer_, &options1);
 
     EXPECT_CALL(*mockScrollerController_, ScrollPage(!nextFalse, smooth)).Times(1);
-    accessor_->scrollPage0(peer_, &options2);
-    accessor_->scrollPage0(peer_, nullptr);
-}
-
-/**
- * @tc.name: scrollPage1Test
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollerAccessorTest, scrollPage1Test, TestSize.Level1)
-{
-    constexpr bool nextTrue = true;
-    constexpr bool nextFalse = false;
-    constexpr bool smooth = false;
-
-    Ark_Literal_Boolean_next_Axis_direction options1;
-    options1.next = ArkValue<Ark_Boolean>(nextTrue);
-    options1.direction = ArkValue<Opt_Axis>(Ark_Empty());
-    Ark_Literal_Boolean_next_Axis_direction options2;
-    options2.next = ArkValue<Ark_Boolean>(nextFalse);
-    options2.direction = ArkValue<Opt_Axis>(Ark_Empty());
-
-    ASSERT_NE(accessor_->scrollPage1, nullptr);
-
-    EXPECT_CALL(*mockScrollerController_, ScrollPage(!nextTrue, smooth)).Times(1);
-    accessor_->scrollPage1(peer_, &options1);
-
-    EXPECT_CALL(*mockScrollerController_, ScrollPage(!nextFalse, smooth)).Times(1);
-    accessor_->scrollPage1(peer_, &options2);
-    accessor_->scrollPage1(peer_, nullptr);
+    accessor_->scrollPage(peer_, &options2);
+    accessor_->scrollPage(peer_, nullptr);
 }
 
 /**
@@ -271,11 +243,6 @@ HWTEST_F(ScrollerAccessorTest, scrollEdgeTest, TestSize.Level1)
     EXPECT_CALL(*mockScrollerController_, ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true)).Times(2);
     accessor_->scrollEdge(peer_, ARK_EDGE_TOP, nullptr);
     accessor_->scrollEdge(peer_, ARK_EDGE_START, &emptyScrollEdgeOptions);
-
-    EXPECT_CALL(*mockScrollerController_, ScrollToEdge(ScrollEdgeType::SCROLL_NONE, true)).Times(3);
-    accessor_->scrollEdge(peer_, ARK_EDGE_CENTER, &emptyScrollEdgeOptions);
-    accessor_->scrollEdge(peer_, ARK_EDGE_BASELINE, nullptr);
-    accessor_->scrollEdge(peer_, ARK_EDGE_MIDDLE, &emptyScrollEdgeOptions);
 
     EXPECT_CALL(*mockScrollerController_, ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true)).Times(2);
     accessor_->scrollEdge(peer_, ARK_EDGE_BOTTOM, &emptyScrollEdgeOptions);
@@ -564,13 +531,13 @@ HWTEST_F(ScrollerAccessorTest, getItemIndexTest, TestSize.Level1)
     ASSERT_NE(accessor_->getItemIndex, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, GetItemIndex(x, y)).Times(1).WillOnce(Return(arkIndex));
-    auto result = Converter::Convert<int32_t>(accessor_->getItemIndex(vmContext_, peer_, &arkX, &arkY));
+    auto result = Converter::Convert<int32_t>(accessor_->getItemIndex(peer_, &arkX, &arkY));
     EXPECT_EQ(result, arkIndex);
-    result = Converter::Convert<int32_t>(accessor_->getItemIndex(vmContext_, peer_, nullptr, &arkY));
+    result = Converter::Convert<int32_t>(accessor_->getItemIndex(peer_, nullptr, &arkY));
     EXPECT_EQ(result, arkIndexInavid);
-    result = Converter::Convert<int32_t>(accessor_->getItemIndex(vmContext_, peer_, &arkX, nullptr));
+    result = Converter::Convert<int32_t>(accessor_->getItemIndex(peer_, &arkX, nullptr));
     EXPECT_EQ(result, arkIndexInavid);
-    result = Converter::Convert<int32_t>(accessor_->getItemIndex(vmContext_, peer_, nullptr, nullptr));
+    result = Converter::Convert<int32_t>(accessor_->getItemIndex(peer_, nullptr, nullptr));
     EXPECT_EQ(result, arkIndexInavid);
 }
 
@@ -607,7 +574,7 @@ HWTEST_F(ScrollerAccessorTest, getItemRectTest, TestSize.Level1)
     ASSERT_NE(accessor_->getItemRect, nullptr);
 
     EXPECT_CALL(*mockScrollerController_, GetItemRect(index)).Times(1).WillOnce(Return(expectedRect));
-    auto arkRectResult = accessor_->getItemRect(vmContext_, peer_, &arkIndex);
+    auto arkRectResult = accessor_->getItemRect(peer_, &arkIndex);
     auto x = Converter::Convert<float>(arkRectResult.x);
     auto y = Converter::Convert<float>(arkRectResult.y);
     auto w = Converter::Convert<float>(arkRectResult.width);

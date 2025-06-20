@@ -25,9 +25,8 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { AnimationStatus, Curve, FillMode, PlayMode } from "./enums"
-import { Callback_Void } from "./abilityComponent"
 import { Callback_Number_Void } from "./alphabetIndexer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class SpringPropInternal {
@@ -338,36 +337,6 @@ export interface AnimatorAttribute extends CommonMethod {
     onFinish(value: (() => void) | undefined): this
     onFrame(value: ((index: number) => void) | undefined): this
 }
-export interface UIAnimatorAttribute extends UICommonMethod {
-    /** @memo */
-    state(value: AnimationStatus | undefined): this
-    /** @memo */
-    duration(value: number | undefined): this
-    /** @memo */
-    curve(value: Curve | undefined): this
-    /** @memo */
-    delay(value: number | undefined): this
-    /** @memo */
-    fillMode(value: FillMode | undefined): this
-    /** @memo */
-    iterations(value: number | undefined): this
-    /** @memo */
-    playMode(value: PlayMode | undefined): this
-    /** @memo */
-    motion(value: SpringMotion | undefined): this
-    /** @memo */
-    onStart(value: (() => void) | undefined): this
-    /** @memo */
-    onPause(value: (() => void) | undefined): this
-    /** @memo */
-    onRepeat(value: (() => void) | undefined): this
-    /** @memo */
-    onCancel(value: (() => void) | undefined): this
-    /** @memo */
-    onFinish(value: (() => void) | undefined): this
-    /** @memo */
-    onFrame(value: ((index: number) => void) | undefined): this
-}
 export class ArkAnimatorStyle extends ArkCommonMethodStyle implements AnimatorAttribute {
     state_value?: AnimationStatus | undefined
     duration_value?: number | undefined
@@ -426,12 +395,10 @@ export class ArkAnimatorStyle extends ArkCommonMethodStyle implements AnimatorAt
         return this
     }
 }
-/** @memo:stable */
-export class ArkAnimatorComponent extends ArkCommonMethodComponent implements UIAnimatorAttribute {
+export class ArkAnimatorComponent extends ArkCommonMethodComponent implements AnimatorAttribute {
     getPeer(): ArkAnimatorPeer {
         return (this.peer as ArkAnimatorPeer)
     }
-    /** @memo */
     public setAnimatorOptions(value: string): this {
         if (this.checkPriority("setAnimatorOptions")) {
             const value_casted = value as (string)
@@ -440,7 +407,6 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public state(value: AnimationStatus | undefined): this {
         if (this.checkPriority("state")) {
             const value_casted = value as (AnimationStatus | undefined)
@@ -449,7 +415,6 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public duration(value: number | undefined): this {
         if (this.checkPriority("duration")) {
             const value_casted = value as (number | undefined)
@@ -458,7 +423,6 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public curve(value: Curve | undefined): this {
         if (this.checkPriority("curve")) {
             const value_casted = value as (Curve | undefined)
@@ -467,7 +431,6 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public delay(value: number | undefined): this {
         if (this.checkPriority("delay")) {
             const value_casted = value as (number | undefined)
@@ -476,7 +439,6 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public fillMode(value: FillMode | undefined): this {
         if (this.checkPriority("fillMode")) {
             const value_casted = value as (FillMode | undefined)
@@ -485,7 +447,6 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public iterations(value: number | undefined): this {
         if (this.checkPriority("iterations")) {
             const value_casted = value as (number | undefined)
@@ -494,7 +455,6 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public playMode(value: PlayMode | undefined): this {
         if (this.checkPriority("playMode")) {
             const value_casted = value as (PlayMode | undefined)
@@ -503,7 +463,6 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public motion(value: SpringMotion | undefined): this {
         if (this.checkPriority("motion")) {
             const value_casted = value as (SpringMotion | undefined)
@@ -512,7 +471,6 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onStart(value: (() => void) | undefined): this {
         if (this.checkPriority("onStart")) {
             const value_casted = value as ((() => void) | undefined)
@@ -521,7 +479,6 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onPause(value: (() => void) | undefined): this {
         if (this.checkPriority("onPause")) {
             const value_casted = value as ((() => void) | undefined)
@@ -530,7 +487,6 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onRepeat(value: (() => void) | undefined): this {
         if (this.checkPriority("onRepeat")) {
             const value_casted = value as ((() => void) | undefined)
@@ -539,7 +495,6 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onCancel(value: (() => void) | undefined): this {
         if (this.checkPriority("onCancel")) {
             const value_casted = value as ((() => void) | undefined)
@@ -548,7 +503,6 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onFinish(value: (() => void) | undefined): this {
         if (this.checkPriority("onFinish")) {
             const value_casted = value as ((() => void) | undefined)
@@ -557,7 +511,6 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public onFrame(value: ((index: number) => void) | undefined): this {
         if (this.checkPriority("onFrame")) {
             const value_casted = value as (((index: number) => void) | undefined)
@@ -574,7 +527,7 @@ export class ArkAnimatorComponent extends ArkCommonMethodComponent implements UI
 /** @memo */
 export function Animator(
     /** @memo */
-    style: ((attributes: UIAnimatorAttribute) => void) | undefined,
+    style: ((attributes: AnimatorAttribute) => void) | undefined,
     value: string,
     /** @memo */
     content_?: (() => void) | undefined,

@@ -29,6 +29,17 @@
 #include "test/mock/core/common/mock_theme_style.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+namespace OHOS::Ace {
+inline void PrintTo(const Dimension& dim, std::ostream* os)
+{
+    *os << dim.ToString();
+}
+inline void PrintTo(const CalcDimension& dim, std::ostream* os)
+{
+    *os << dim.ToString();
+}
+} // namespace OHOS::Ace
+
 namespace OHOS::Ace::NG {
 
 extern "C" const OH_AnyAPI* GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind kind, int version);

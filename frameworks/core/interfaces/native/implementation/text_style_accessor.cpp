@@ -27,12 +27,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextStyleAccessor {
 void DestroyPeerImpl(Ark_TextStyle peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_TextStyle CtorImpl(const Opt_TextStyleInterface* value)
 {
-    auto peer = new TextStylePeer();
-    Font font;
+    auto peer = PeerUtils::CreatePeer<TextStylePeer>();
+    Font font {};
 
     auto options = value ? Converter::OptConvert<Ark_TextStyleInterface>(*value) : std::nullopt;
     if (options) {

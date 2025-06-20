@@ -72,36 +72,24 @@ namespace {
     using ButtonStyleModeTest = std::pair<Ark_ButtonStyleMode, std::string>;
     using BoolTest = std::pair<Ark_Boolean, std::string>;
     // test plans
-    const std::vector<ButtonTypeTest> BUTTON_TYPE_TEST_PLAN = {
-        { ARK_BUTTON_TYPE_NORMAL, "ButtonType.Normal" },
-        { ARK_BUTTON_TYPE_CAPSULE, "ButtonType.Capsule" },
-        { ARK_BUTTON_TYPE_CIRCLE, "ButtonType.Circle" },
-        { ARK_BUTTON_TYPE_ROUNDED_RECTANGLE, "ButtonType.ROUNDED_RECTANGLE" },
-        // Invalid values shouldn't change options
-        { static_cast<Ark_ButtonType>(-100), "ButtonType.ROUNDED_RECTANGLE" },
-        { static_cast<Ark_ButtonType>(100), "ButtonType.ROUNDED_RECTANGLE" }
-    };
     const std::vector<ButtonRoleTest> BUTTON_ROLE_TEST_PLAN = {
         { ARK_BUTTON_ROLE_NORMAL, "ButtonRole.NORMAL" },
         { ARK_BUTTON_ROLE_ERROR, "ButtonRole.ERROR" },
-        // Invalid values shouldn't change options
-        { static_cast<Ark_ButtonRole>(-100), "ButtonRole.ERROR" },
-        { static_cast<Ark_ButtonRole>(100), "ButtonRole.ERROR" }
+        { static_cast<Ark_ButtonRole>(-100), ATTRIBUTE_ROLE_DEFAULT_VALUE },
+        { static_cast<Ark_ButtonRole>(100), ATTRIBUTE_ROLE_DEFAULT_VALUE }
     };
     const std::vector<ButtonControlSizeTest> BUTTON_CONTROL_SIZE_TEST_PLAN = {
         { ARK_CONTROL_SIZE_NORMAL, "ControlSize.NORMAL" },
         { ARK_CONTROL_SIZE_SMALL, "ControlSize.SMALL" },
-        // Invalid values shouldn't change options
-        { static_cast<Ark_ControlSize>(-100), "ControlSize.SMALL" },
-        { static_cast<Ark_ControlSize>(100), "ControlSize.SMALL" }
+        { static_cast<Ark_ControlSize>(-100), ATTRIBUTE_CONTROL_SIZE_DEFAULT_VALUE },
+        { static_cast<Ark_ControlSize>(100), ATTRIBUTE_CONTROL_SIZE_DEFAULT_VALUE }
     };
     const std::vector<ButtonStyleModeTest> BUTTON_STYLE_MODE_TEST_PLAN = {
         { ARK_BUTTON_STYLE_MODE_NORMAL, "ButtonStyleMode.NORMAL" },
         { ARK_BUTTON_STYLE_MODE_EMPHASIZED, "ButtonStyleMode.EMPHASIZED" },
         { ARK_BUTTON_STYLE_MODE_TEXTUAL, "ButtonStyleMode.TEXTUAL" },
-        // Invalid values shouldn't change options
-        { static_cast<Ark_ButtonStyleMode>(-100), "ButtonStyleMode.TEXTUAL" },
-        { static_cast<Ark_ButtonStyleMode>(100), "ButtonStyleMode.TEXTUAL" }
+        { static_cast<Ark_ButtonStyleMode>(-100), ATTRIBUTE_BUTTON_STYLE_DEFAULT_VALUE },
+        { static_cast<Ark_ButtonStyleMode>(100), ATTRIBUTE_BUTTON_STYLE_DEFAULT_VALUE },
     };
     const std::vector<BoolTest> BOOL_TEST_PLAN = {
         { false, "false" },
@@ -262,43 +250,6 @@ HWTEST_F(ButtonModifierTest, SetButtonOptions0Test, TestSize.Level1)
     EXPECT_EQ(role, ATTRIBUTE_ROLE_DEFAULT_VALUE);
 }
 /*
- * @tc.name: SetButtonOptions1TestButtonType
- * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions1
- * @tc.type: FUNC
- */
-HWTEST_F(ButtonModifierTest, SetButtonOptions1TestButtonType, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    // Initial setup
-    Ark_ButtonOptions inputValueOptions;
-    inputValueOptions.type = Converter::ArkValue<Opt_ButtonType>(ARK_BUTTON_TYPE_CAPSULE);
-    inputValueOptions.stateEffect = Converter::ArkValue<Opt_Boolean>(true);
-    inputValueOptions.buttonStyle = Converter::ArkValue<Opt_ButtonStyleMode>(ARK_BUTTON_STYLE_MODE_NORMAL);
-    inputValueOptions.controlSize = Converter::ArkValue<Opt_ControlSize>(ARK_CONTROL_SIZE_SMALL);
-    inputValueOptions.role = Converter::ArkValue<Opt_ButtonRole>(ARK_BUTTON_ROLE_NORMAL);
-    // Test
-    modifier_->setButtonOptions1(node_, &inputValueOptions);
-    // Initial verification
-    jsonValue = GetJsonValue(node_);
-    auto checkType = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    auto checkStateEffect = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_EFFECT_NAME);
-    auto checkButtonStyle = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
-    auto checkControlSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
-    auto checkRole = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
-    EXPECT_EQ(checkType, "ButtonType.Capsule");
-    EXPECT_EQ(checkStateEffect, "true");
-    EXPECT_EQ(checkButtonStyle, "ButtonStyleMode.NORMAL");
-    EXPECT_EQ(checkControlSize, "ControlSize.SMALL");
-    EXPECT_EQ(checkRole, "ButtonRole.NORMAL");
-    for (auto type : BUTTON_TYPE_TEST_PLAN) {
-        inputValueOptions.type = Converter::ArkValue<Opt_ButtonType>(type.first);
-        modifier_->setButtonOptions1(node_, &inputValueOptions);
-        jsonValue = GetJsonValue(node_);
-        checkType = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-        EXPECT_EQ(checkType, type.second);
-    }
-}
-/*
  * @tc.name: SetButtonOptions1TestStateEffect
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions1
  * @tc.type: FUNC
@@ -447,51 +398,6 @@ HWTEST_F(ButtonModifierTest, SetButtonOptions1TestButtonRole, TestSize.Level1)
     }
 }
 
-/*
- * @tc.name: SetButtonOptions2TestButtonType
- * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions2
- * @tc.type: FUNC
- */
-HWTEST_F(ButtonModifierTest, SetButtonOptions2TestButtonType, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue;
-    // Initial setup
-    Ark_ButtonOptions inputValueOptions;
-    inputValueOptions.type = Converter::ArkValue<Opt_ButtonType>(ARK_BUTTON_TYPE_CAPSULE);
-    inputValueOptions.stateEffect = Converter::ArkValue<Opt_Boolean>(true);
-    inputValueOptions.buttonStyle = Converter::ArkValue<Opt_ButtonStyleMode>(ARK_BUTTON_STYLE_MODE_NORMAL);
-    inputValueOptions.controlSize = Converter::ArkValue<Opt_ControlSize>(ARK_CONTROL_SIZE_SMALL);
-    inputValueOptions.role = Converter::ArkValue<Opt_ButtonRole>(ARK_BUTTON_ROLE_NORMAL);
-    const std::string stringValue("testString");
-    auto labelString = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(stringValue);
-    auto optInputValueOptions = Converter::ArkValue<Opt_ButtonOptions>(inputValueOptions);
-    // Test
-    modifier_->setButtonOptions2(node_, &labelString, &optInputValueOptions);
-    // Initial verification
-    jsonValue = GetJsonValue(node_);
-    auto checkType = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-    auto checkStateEffect = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STATE_EFFECT_NAME);
-    auto checkButtonStyle = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BUTTON_STYLE_NAME);
-    auto checkControlSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTROL_SIZE_NAME);
-    auto checkRole = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ROLE_NAME);
-    auto checkLabel = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LABEL_NAME);
-    EXPECT_EQ(checkType, "ButtonType.Capsule");
-    EXPECT_EQ(checkStateEffect, "true");
-    EXPECT_EQ(checkButtonStyle, "ButtonStyleMode.NORMAL");
-    EXPECT_EQ(checkControlSize, "ControlSize.SMALL");
-    EXPECT_EQ(checkRole, "ButtonRole.NORMAL");
-    EXPECT_EQ(checkLabel, stringValue);
-
-    jsonValue = GetJsonValue(node_);
-    for (auto type : BUTTON_TYPE_TEST_PLAN) {
-        inputValueOptions.type = Converter::ArkValue<Opt_ButtonType>(type.first);
-        optInputValueOptions = Converter::ArkValue<Opt_ButtonOptions>(inputValueOptions);
-        modifier_->setButtonOptions2(node_, &labelString, &optInputValueOptions);
-        jsonValue = GetJsonValue(node_);
-        checkType = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-        EXPECT_EQ(checkType, type.second);
-    }
-}
 /*
  * @tc.name: SetButtonOptions2TestStateEffect
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions2

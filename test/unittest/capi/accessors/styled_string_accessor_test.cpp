@@ -20,6 +20,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/background_color_style_peer.h"
 #include "core/interfaces/native/implementation/baseline_offset_style_peer.h"
+#include "core/interfaces/native/implementation/custom_span_peer.h"
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
@@ -71,16 +72,16 @@ constexpr int TEST_START_PSPM = TEST_START_PSST + TEST_LENGTH + 1;
 constexpr auto STRING_TEST_VALUE = "This is a test string for styled text, and more text to test it out.\n";
 
 static Converter::ConvContext s_ctx;
-PixelMapPeer* CreatePixelMap()
+image_PixelMapPeer* CreatePixelMap()
 {
-    static PixelMapPeer pixelMapPeer;
+    static image_PixelMapPeer pixelMapPeer;
     static std::string src = "test";
     auto voidChar = src.data();
     void* voidPtr = static_cast<void*>(voidChar);
     pixelMapPeer.pixelMap = PixelMap::CreatePixelMap(voidPtr);
     return &pixelMapPeer;
 }
-const Ark_PixelMap TEST_PIXELMAP = CreatePixelMap();
+const Ark_image_PixelMap TEST_PIXELMAP = CreatePixelMap();
 const std::string TEST_SIZEOPTIONS = "1.00px";
 const Ark_SizeOptions TEST_ARK_SIZEOPTIONS {
     .width = Converter::ArkValue<Opt_Length>(TEST_SIZEOPTIONS),
@@ -168,7 +169,7 @@ const std::vector<std::pair<int, Ace::SpanType>> SPAN_TYPE_TEST_VALUES = {
 namespace GeneratedModifier {
     const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor();
     const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor();
-    const GENERATED_ArkUITextStyle_styled_stringAccessor* GetTextStyle_styled_stringAccessor();
+    const GENERATED_ArkUITextStyleAccessor* GetTextStyleAccessor();
     const GENERATED_ArkUIDecorationStyleAccessor* GetDecorationStyleAccessor();
     const GENERATED_ArkUIBaselineOffsetStyleAccessor* GetBaselineOffsetStyleAccessor();
     const GENERATED_ArkUILetterSpacingStyleAccessor* GetLetterSpacingStyleAccessor();
@@ -220,16 +221,6 @@ struct StyleOptionsKeeper {
 
     void TearDown()
     {
-        GeneratedModifier::GetTextStyle_styled_stringAccessor()->destroyPeer(peerTextStyle);
-        GeneratedModifier::GetDecorationStyleAccessor()->destroyPeer(decorationStylePeer);
-        GeneratedModifier::GetBaselineOffsetStyleAccessor()->destroyPeer(peerBaselineOffsetStyle);
-        GeneratedModifier::GetLetterSpacingStyleAccessor()->destroyPeer(peerLetterSpacingStyle);
-        GeneratedModifier::GetTextShadowStyleAccessor()->destroyPeer(peerTextShadowStyle);
-        GeneratedModifier::GetLineHeightStyleAccessor()->destroyPeer(peerLineHeightStyle);
-        GeneratedModifier::GetBackgroundColorStyleAccessor()->destroyPeer(peerBackgroundColorStyle);
-        GeneratedModifier::GetUrlStyleAccessor()->destroyPeer(peerUrlStyle);
-        GeneratedModifier::GetParagraphStyleAccessor()->destroyPeer(peerParagraphStyle);
-        GeneratedModifier::GetParagraphStyleAccessor()->destroyPeer(peerParagraphStylePM);
         while (!lengthMetrics.empty()) {
             auto item = lengthMetrics.back();
             lengthMetrics.pop_back();
@@ -247,7 +238,7 @@ private:
     }
 
     // TextStyle_styled_string
-    Ark_TextStyle_styled_string peerTextStyle = {};
+    Ark_TextStyle peerTextStyle = {};
     void FillTextStyle(Ark_StyledStringValue& styledValue)
     {
         auto fontSizePeer = CreateLengthMetricsPeer(std::get<1>(TEST_FONT_SIZE));
@@ -260,8 +251,8 @@ private:
             .fontStyle = Converter::ArkValue<Opt_FontStyle>(TEST_FONT_STYLE),
         };
         auto optTextStyle = Converter::ArkValue<Opt_TextStyleInterface>(textStyle);
-        peerTextStyle = GeneratedModifier::GetTextStyle_styled_stringAccessor()->ctor(&optTextStyle);
-        styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_TextStyle_styled_string>(peerTextStyle);
+        peerTextStyle = GeneratedModifier::GetTextStyleAccessor()->ctor(&optTextStyle);
+        styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_TextStyle>(peerTextStyle);
     };
 
     // DecorationStyle
@@ -422,18 +413,31 @@ struct StyledStringUnionString {
 struct StyledStringUnionImageAttachment {
     Ark_Union_String_ImageAttachment_CustomSpan* Union()
     {
-        peer = GeneratedModifier::GetImageAttachmentAccessor()->ctor(&IMAGEATTACHMENT_TEST_VALUE);
+        auto inputValue = Converter::ArkUnion<Ark_Union_ImageAttachmentInterface_Opt_AttachmentType,
+            Ark_ImageAttachmentInterface>(IMAGEATTACHMENT_TEST_VALUE);
+        peer = GeneratedModifier::GetImageAttachmentAccessor()->ctor(&inputValue);
         static Ark_Union_String_ImageAttachment_CustomSpan value = Converter::ArkUnion<
             Ark_Union_String_ImageAttachment_CustomSpan, Ark_ImageAttachment>(peer);
         return &value;
     }
     Opt_Array_StyleOptions* Styles() { return nullptr; }
-    void TearDown()
-    {
-        GeneratedModifier::GetImageAttachmentAccessor()->destroyPeer(peer);
-    }
+    void TearDown() {}
 private:
     ImageAttachmentPeer* peer = nullptr;
+};
+
+struct StyledStringUnionCustomSpan {
+    Ark_Union_String_ImageAttachment_CustomSpan* Union()
+    {
+        peer = PeerUtils::CreatePeer<CustomSpanPeer>(AceType::MakeRefPtr<CustomSpan>());
+        static Ark_Union_String_ImageAttachment_CustomSpan value = Converter::ArkUnion<
+            Ark_Union_String_ImageAttachment_CustomSpan, Ark_CustomSpan>(peer);
+        return &value;
+    }
+    Opt_Array_StyleOptions* Styles() { return nullptr; }
+    void TearDown() {}
+private:
+    CustomSpanPeer* peer = nullptr;
 };
 
 template <typename V1>
@@ -500,6 +504,7 @@ private:
 using StyledStringAccessorUnionNullTest = StyledStringAccessorTest<StyledStringUnionNull>;
 using StyledStringAccessorUnionStringTest = StyledStringAccessorTest<StyledStringUnionString>;
 using StyledStringAccessorUnionImageAttachmentTest = StyledStringAccessorTest<StyledStringUnionImageAttachment>;
+using StyledStringAccessorUnionCustomSpanTest = StyledStringAccessorTest<StyledStringUnionCustomSpan>;
 
 /**
  * @tc.name: peerSucceeded
@@ -859,10 +864,10 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringGetStyles, TestSize.Le
     auto start = Converter::ArkValue<Ark_Number>(TEST_START_TSH);
     auto length = Converter::ArkValue<Ark_Number>(TEST_LENGTH);
     auto key = Converter::ArkValue<Opt_StyledStringKey>(Ace::SpanType::ParagraphStyle);
-    auto resultArk = accessor_->getStyles(vmContext_, peer_, &start, &length, &key);
+    auto resultArk = accessor_->getStyles(peer_, &start, &length, &key);
     auto result = Converter::Convert<std::vector<RefPtr<SpanBase>>>(resultArk);
     EXPECT_EQ(result.size(), 0);
-    resultArk = accessor_->getStyles(vmContext_, peer_, &start, &length, nullptr);
+    resultArk = accessor_->getStyles(peer_, &start, &length, nullptr);
     result = Converter::Convert<std::vector<RefPtr<SpanBase>>>(resultArk);
     EXPECT_EQ(result.size(), 1);
 }
@@ -945,7 +950,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, toHtmlTest, TestSize.Level1)
     SpanToHtml toHtml;
     auto htmlFromSpan = toHtml.ToHtml(*peer_->spanString);
 
-    Ark_String arkString = accessor_->toHtml(vmContext_, peer_);
+    Ark_String arkString = accessor_->toHtml(peer_);
     auto result = Converter::Convert<std::string>(arkString);
 
     EXPECT_EQ(result, htmlFromSpan);
@@ -1051,5 +1056,24 @@ HWTEST_F(StyledStringAccessorUnionImageAttachmentTest, ctorImageAttachmentTest, 
     ASSERT_TRUE(imageAttribute.value().paddingProp.has_value());
     auto paddingStr = imageAttribute.value().paddingProp.value().ToString();
     EXPECT_EQ(paddingStr, TEST_LENGTHMETRICS_STR);
+}
+
+/**
+ * @tc.name: ctorCustomSpanTest
+ * @tc.desc: CustomSpan check
+ * @tc.type: FUNC
+ */
+HWTEST_F(StyledStringAccessorUnionCustomSpanTest, ctorCustomSpanTest, TestSize.Level1)
+{
+    ASSERT_NE(peer_->spanString, nullptr);
+    auto spans = peer_->spanString->GetSpans(0, 1);
+    ASSERT_EQ(spans.size(), 1);
+    auto customSpan = AceType::DynamicCast<CustomSpan>(spans[0]);
+    ASSERT_NE(customSpan, nullptr);
+    EXPECT_EQ(customSpan->ToString(), "CustomSpan [0:1]");
+    EXPECT_EQ(customSpan->GetLength(), 1);
+    EXPECT_EQ(customSpan->GetStartIndex(), 0);
+    EXPECT_EQ(customSpan->GetEndIndex(), 1);
+    EXPECT_EQ(customSpan->GetSpanType(), SpanType::CustomSpan);
 }
 } // namespace OHOS::Ace::NG

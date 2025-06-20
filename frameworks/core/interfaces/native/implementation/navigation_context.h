@@ -37,9 +37,11 @@ using ExternalData = RefPtr<ExternalDataKeeper>;
 using OnPopCallback = CallbackHelper<Callback_PopInfo_Void>;
 
 struct Interception {
-    CallbackHelper<InterceptionModeCallback> modeChange;
-    CallbackHelper<InterceptionShowCallback> willShow;
-    CallbackHelper<InterceptionShowCallback> didShow;
+    std::function<void(NG::NavigationMode)> modeChange;
+    std::function<void(const RefPtr<NG::NavDestinationContext>&,
+        const RefPtr<NG::NavDestinationContext>&, NG::NavigationOperation, bool)> willShow;
+    std::function<void(const RefPtr<NG::NavDestinationContext>&,
+        const RefPtr<NG::NavDestinationContext>&, NG::NavigationOperation, bool)> didShow;
 };
 using InterceptionType = struct Interception *;
 
@@ -62,7 +64,7 @@ public:
     std::string name_;
     ParamType param_;
     OnPopCallback onPop_;
-    int index_;
+    int index_ = -1;
     bool needUpdate_;
     bool needBuildNewInstance_;
     std::optional<std::string> navDestinationId_;
@@ -82,6 +84,7 @@ struct PopInfo {
 };
 
 using PushDestinationResultType = int32_t;
+using ReplaceDestinationResultType = int32_t;
 
 class NavigationStack;
 
@@ -111,7 +114,7 @@ public:
     void PushPathByName(const std::string& name,
         const ParamType& param, const OnPopCallback& onPop, std::optional<bool> animated);
     std::pair<LaunchMode, bool> ParseNavigationOptions(const std::optional<NavigationOptions>& param);
-    bool PushWithLaunchModeAndAnimated(PathInfo info, LaunchMode launchMode, bool animated);
+    bool PushWithLaunchModeAndAnimated(const PathInfo& info, LaunchMode launchMode, bool animated);
     void PushPath(PathInfo info, const std::optional<NavigationOptions>& optionParam);
     PushDestinationResultType PushDestinationByName(const std::string& name,
         const ParamType& param, const OnPopCallback& onPop, std::optional<bool> animated);
@@ -119,6 +122,8 @@ public:
         const std::optional<NavigationOptions>& optionParam);
     void ReplacePath(PathInfo info, const std::optional<NavigationOptions>& optionParam);
     void ReplacePathByName(std::string name, const ParamType&  param, const std::optional<bool>& animated);
+    ReplaceDestinationResultType ReplaceDestination(PathInfo info,
+        const std::optional<NavigationOptions>& optionParam);
     void SetIsReplace(enum IsReplace value);
     void SetAnimated(bool value);
     PathInfo Pop(bool isAnimated);

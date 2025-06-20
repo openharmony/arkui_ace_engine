@@ -20,6 +20,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
 
+#include "arkoala_api_generated.h"
 #include "reverse_converter.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -241,6 +242,22 @@ void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &
     }
 }
 
+void AssignArkValue(Ark_GestureRecognizerState &dst, const NG::RefereeState& src)
+{
+    switch (src) {
+        case NG::RefereeState::READY: dst = ARK_GESTURE_RECOGNIZER_STATE_READY; break;
+        case NG::RefereeState::DETECTING: dst = ARK_GESTURE_RECOGNIZER_STATE_DETECTING; break;
+        case NG::RefereeState::PENDING: dst = ARK_GESTURE_RECOGNIZER_STATE_PENDING; break;
+        case NG::RefereeState::PENDING_BLOCKED: dst = ARK_GESTURE_RECOGNIZER_STATE_BLOCKED; break;
+        case NG::RefereeState::SUCCEED_BLOCKED: dst = ARK_GESTURE_RECOGNIZER_STATE_BLOCKED; break;
+        case NG::RefereeState::SUCCEED: dst = ARK_GESTURE_RECOGNIZER_STATE_SUCCESSFUL; break;
+        case NG::RefereeState::FAIL: dst = ARK_GESTURE_RECOGNIZER_STATE_FAILED; break;
+        default:
+            dst = INVALID_ENUM_VAL<Ark_GestureRecognizerState>;
+            LOGE("Unexpected enum value in RefereeState: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_IntentionCode& dst, const KeyIntention& src)
 {
     switch (src) {
@@ -359,6 +376,7 @@ void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src)
         case MouseAction::RELEASE: dst = ARK_MOUSE_ACTION_RELEASE; break;
         case MouseAction::MOVE: dst = ARK_MOUSE_ACTION_MOVE; break;
         case MouseAction::HOVER: dst = ARK_MOUSE_ACTION_HOVER; break;
+        case MouseAction::CANCEL: dst = ARK_MOUSE_ACTION_CANCEL; break;
         default: {
             dst = static_cast<Ark_MouseAction>(-1);
             LOGE("Unexpected enum value in MouseAction: %{public}d", src);
@@ -378,6 +396,21 @@ void AssignArkValue(Ark_MouseButton& dst, const MouseButton& src)
         default: {
             dst = static_cast<Ark_MouseButton>(-1);
             LOGE("Unexpected enum value in MouseButton: %{public}d", src);
+        }
+    }
+}
+
+void AssignArkValue(Ark_AxisAction& dst, const AxisAction& src)
+{
+    switch (src) {
+        case AxisAction::NONE: dst = ARK_AXIS_ACTION_NONE; break;
+        case AxisAction::BEGIN: dst = ARK_AXIS_ACTION_BEGIN; break;
+        case AxisAction::UPDATE: dst = ARK_AXIS_ACTION_UPDATE; break;
+        case AxisAction::END: dst = ARK_AXIS_ACTION_END; break;
+        case AxisAction::CANCEL: dst = ARK_AXIS_ACTION_CANCEL; break;
+        default: {
+            dst = static_cast<Ark_AxisAction>(-1);
+            LOGE("Unexpected enum value in AxisAction: %{public}d", src);
         }
     }
 }
@@ -585,6 +618,20 @@ void AssignArkValue(Ark_SwipeActionState& dst, const SwipeActionState& src)
         default: {
             dst = static_cast<Ark_SwipeActionState>(-1);
             LOGE("Unexpected enum value in SwipeActionState: %{public}d", src);
+        }
+    }
+}
+
+void AssignArkValue(Ark_SwipeDirection& dst, const OHOS::Ace::SwipeDirection& src)
+{
+    switch (src.type) {
+        case SwipeDirection::NONE: dst = ARK_SWIPE_DIRECTION_NONE; break;
+        case SwipeDirection::HORIZONTAL: dst = ARK_SWIPE_DIRECTION_HORIZONTAL; break;
+        case SwipeDirection::VERTICAL: dst = ARK_SWIPE_DIRECTION_VERTICAL; break;
+        case SwipeDirection::ALL: dst = ARK_SWIPE_DIRECTION_ALL; break;
+        default: {
+            dst = static_cast<Ark_SwipeDirection>(-1);
+            LOGE("Unexpected enum value in OHOS::Ace::SwipeDirection: %{public}d", src.type);
         }
     }
 }
@@ -887,6 +934,15 @@ void AssignArkValue(Ark_SelectStatus& dst, const int32_t& src)
         case valuePart: dst = ARK_SELECT_STATUS_PART; break;
         case valueNone: dst = ARK_SELECT_STATUS_NONE; break;
         default: dst = static_cast<Ark_SelectStatus>(-1);
+    }
+}
+
+void AssignArkValue(Ark_LengthMetricsUnit& dst, const OHOS::Ace::CanvasUnit& src)
+{
+    switch (src) {
+        case OHOS::Ace::CanvasUnit::DEFAULT: dst = ARK_LENGTH_METRICS_UNIT_DEFAULT; break;
+        case OHOS::Ace::CanvasUnit::PX: dst = ARK_LENGTH_METRICS_UNIT_PX; break;
+        default: dst = static_cast<Ark_LengthMetricsUnit>(-1);
     }
 }
 } // namespace OHOS::Ace::NG::Converter

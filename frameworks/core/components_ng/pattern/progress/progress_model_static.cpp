@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/progress/progress_component.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
@@ -280,11 +281,11 @@ void ProgressModelStatic::SetStrokeRadius(FrameNode* frameNode, const std::optio
 
 void ProgressModelStatic::SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag)
 {
-    if (flag) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, IsSensitive, *flag, frameNode);
-    } else {
-        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
-    }
-    ViewAbstract::SetPrivacySensitive(frameNode, flag);
+    // if (flag) {
+    //     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, IsSensitive, *flag, frameNode);
+    // } else {
+    //     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, IsSensitive, PROPERTY_UPDATE_RENDER, frameNode);
+    // }
+    // ViewAbstractModelStatic::SetPrivacySensitive(frameNode, flag);
 }
 } // namespace OHOS::Ace::NG

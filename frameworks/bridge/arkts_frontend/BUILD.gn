@@ -17,7 +17,11 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 group("arkts_frontend_native_package") {
   deps = [ "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:ace_ani_native_package" ]
 }
-
+group("arkoala_ui2abc") {
+  deps = [
+    "koala_projects/arkoala-arkts:arkoala"
+  ]
+}
 template("arkts_frontend") {
   forward_variables_from(invoker, "*")
 
@@ -26,20 +30,18 @@ template("arkts_frontend") {
     part_name = ace_engine_part
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
-    deps = [
-      ":ArkoalaNative_ark",
-      "arkoala:arkoala_prebuild",
-    ]
-
-    if (build_ohos_sdk) {
-      deps -= [
+    if (!build_ohos_sdk) {
+      deps = [
         ":ArkoalaNative_ark",
-        "arkoala:arkoala_prebuild",
+        # "arkoala:arkoala_prebuild",
+        ":arkoala_ui2abc"
       ]
     }
 
     sources = [
       "ani_context_module.cpp",
+      "ani_graphics_module.cpp",
+      "ani_water_flow_module.cpp",
       "arkts_ani_utils.cpp",
       "arkts_frontend.cpp",
       "arkts_plugin_frontend.cpp",
@@ -47,8 +49,11 @@ template("arkts_frontend") {
     ]
     external_deps = [
       "hilog:libhilog",
-      "runtime_core:ani"
+      "runtime_core:ani",
     ]
+    if (current_os == "ohos") {
+      external_deps += [ "graphic_2d:drawing_ani" ]
+    }
   }
 }
 

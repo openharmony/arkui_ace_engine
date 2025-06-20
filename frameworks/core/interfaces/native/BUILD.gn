@@ -132,11 +132,22 @@ template("ace_core_interfaces_native_node") {
 
     sources += [
       "ani/common_ani_modifier.cpp",
+      "ani/component_snapshot_ani_modifier.cpp",
       "ani/content_slot_ani_modifier.cpp",
+      "ani/drag_ani_modifier.cpp",
       "ani/image_ani_modifier.cpp",
       "ani/node_ani_modifier.cpp",
       "ani/web_ani_modifier.cpp",
+      "ani/custom_node_ani_modifier.cpp",
+      "ani/waterflow_ani_modifier.cpp",
     ]
+    if (build_ohos_sdk) {
+      sources -= [
+        "ani/common_ani_modifier.cpp",
+        "ani/node_ani_modifier.cpp",
+        "ani/waterflow_ani_modifier.cpp",
+      ]
+    }
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
     if (defined(config.web_components_support) &&

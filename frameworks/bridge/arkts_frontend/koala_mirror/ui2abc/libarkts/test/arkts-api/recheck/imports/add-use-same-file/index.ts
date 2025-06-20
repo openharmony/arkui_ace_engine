@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 import * as arkts from "../../../../../src/arkts-api"
 
 export function addUseImportSameFile(program: arkts.Program, options: arkts.CompilationOptions) {
@@ -31,23 +31,27 @@ export function addUseImportSameFile(program: arkts.Program, options: arkts.Comp
                 )
             ]
         )
-        arkts.factory.createETSImportDeclaration(
-            arkts.factory.createStringLiteral(
-                './library'
-            ),
+        arkts.updateETSModuleByStatements(
+            program.astNode,
             [
-                arkts.factory.createImportSpecifier(
-                    arkts.factory.createIdentifier(
-                        'testFunction'
+                arkts.factory.createETSImportDeclaration(
+                    arkts.factory.createStringLiteral(
+                        './library'
                     ),
-                    arkts.factory.createIdentifier(
-                        'testFunction'
-                    )
-                )
-            ],
-            arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
-            arkts.arktsGlobal.compilerContext.program,
-            arkts.Es2pandaImportFlags.IMPORT_FLAGS_NONE
+                    [
+                        arkts.factory.createImportSpecifier(
+                            arkts.factory.createIdentifier(
+                                'testFunction'
+                            ),
+                            arkts.factory.createIdentifier(
+                                'testFunction'
+                            )
+                        )
+                    ],
+                    arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL
+                ),
+                ...program.astNode.statements,
+            ]
         )
     }
     return program

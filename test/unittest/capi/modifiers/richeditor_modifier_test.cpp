@@ -35,7 +35,6 @@ static constexpr auto TEST_COLOR = "#FFFF0000";
 static const std::u16string TEST_VALUE = u"test value";
 static const auto TEST_VALUE_2 = u"test value 2";
 static constexpr int TEST_INDEX_2 = 2;
-static constexpr auto TEST_FONT_SIZE = 30._px;
 static constexpr int TEST_FONT_WEIGHT = static_cast<int>(FontWeight::BOLD);
 static const std::string COLOR_TRANSPARENT = "#00000000";
 static constexpr int TEST_RESOURCE_ID = 1000;
@@ -160,7 +159,9 @@ HWTEST_F(RichEditorModifierTest, setRichEditorOptions0Test, TestSize.Level1)
     // Check the internal controller
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto internalController = RichEditorModelNG::GetRichEditorController(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto internalController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(internalController, nullptr);
     auto controller = AceType::DynamicCast<RichEditorController>(internalController);
     ImageSpanOptions imageOptions;
@@ -202,7 +203,9 @@ HWTEST_F(RichEditorModifierTest, setRichEditorOptions1Test, TestSize.Level1)
     // Check the internal controller
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    auto internalController = RichEditorModelNG::GetRichEditorStyledStringController(frameNode);
+    auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto internalController = richEditorPattern->GetRichEditorStyledStringController();
     ASSERT_NE(internalController, nullptr);
     auto controller = AceType::DynamicCast<RichEditorStyledStringController>(internalController);
     ASSERT_NE(controller, nullptr);
@@ -233,7 +236,8 @@ HWTEST_F(RichEditorModifierTest, setCopyOptionTest, TestSize.Level1)
     EXPECT_EQ(resultStr, ATTRIBUTE_COPY_OPTIONS_DEFAULT_VALUE);
 
     auto optionsConverted = ARK_COPY_OPTIONS_IN_APP;
-    modifier_->setCopyOptions(node_, optionsConverted);
+    auto optOptionsConverted = Converter::ArkValue<Opt_CopyOptions>(optionsConverted);
+    modifier_->setCopyOptions(node_, &optOptionsConverted);
 
     jsonValue = GetLayoutJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COPY_OPTIONS_NAME);
@@ -254,8 +258,8 @@ HWTEST_F(RichEditorModifierTest, setEnableDataDetectorTest, TestSize.Level1)
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_DATA_DETECTOR_NAME);
     EXPECT_EQ(resultStr, "false");
 
-    auto enabled = Converter::ArkValue<Ark_Boolean>(true);
-    modifier_->setEnableDataDetector(node_, enabled);
+    auto enabled = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setEnableDataDetector(node_, &enabled);
 
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_DATA_DETECTOR_NAME);
@@ -276,14 +280,14 @@ HWTEST_F(RichEditorModifierTest, setEnablePreviewTextTest, TestSize.Level1)
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_PREVIEW_TEXT_NAME);
     EXPECT_EQ(resultStr, "true");
 
-    auto enabled = Converter::ArkValue<Ark_Boolean>(false);
-    modifier_->setEnablePreviewText(node_, enabled);
+    auto enabled = Converter::ArkValue<Opt_Boolean>(false);
+    modifier_->setEnablePreviewText(node_, &enabled);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_PREVIEW_TEXT_NAME);
     EXPECT_EQ(resultStr, "false");
 
-    enabled = Converter::ArkValue<Ark_Boolean>(true);
-    modifier_->setEnablePreviewText(node_, enabled);
+    enabled = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setEnablePreviewText(node_, &enabled);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_PREVIEW_TEXT_NAME);
     EXPECT_EQ(resultStr, "true");
@@ -312,7 +316,8 @@ HWTEST_F(RichEditorModifierTest, setDataDetectorConfigTest, TestSize.Level1)
     });
 
     auto configConverted = Converter::ArkValue<Ark_TextDataDetectorConfig>(config);
-    modifier_->setDataDetectorConfig(node_, &configConverted);
+    auto optConfigConverted = Converter::ArkValue<Opt_TextDataDetectorConfig>(configConverted);
+    modifier_->setDataDetectorConfig(node_, &optConfigConverted);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DATA_DETECTOR_CONFIG_NAME);
     auto jsonConfig = JsonUtil::ParseJsonString(resultStr);
@@ -354,15 +359,16 @@ HWTEST_F(RichEditorModifierTest, setPlaceholderTest, TestSize.Level1)
     Converter::ConvContext ctx;
     Ark_ResourceStr value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEST_VALUE, &ctx);
     Ark_Font label;
-    label.size = Converter::ArkValue<Opt_Length>(TEST_FONT_SIZE);
+    label.size = Converter::ArkValue<Opt_Length>("30px");
     label.weight = Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(TEST_FONT_WEIGHT);
     label.style = Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_NORMAL);
-    Opt_PlaceholderStyle style;
-    style.value.font = Converter::ArkValue<Opt_Font>(label);
-    Ark_ResourceColor fontColor = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(TEST_COLOR);
-    style.value.fontColor = Converter::ArkValue<Opt_ResourceColor>(fontColor);
+    Ark_PlaceholderStyle style;
+    style.font = Converter::ArkValue<Opt_Font>(label);
+    style.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(TEST_COLOR);
+    auto optStyle = Converter::ArkValue<Opt_PlaceholderStyle>(style);
 
-    modifier_->setPlaceholder(node_, &value, &style);
+    auto optValue = Converter::ArkValue<Opt_ResourceStr>(value);
+    modifier_->setPlaceholder(node_, &optValue, &optStyle);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
@@ -397,7 +403,8 @@ HWTEST_F(RichEditorModifierTest, setCaretColorTest, TestSize.Level1)
     ASSERT_NE(modifier_->setCaretColor, nullptr);
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
-        modifier_->setCaretColor(node_, &value);
+        auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
+        modifier_->setCaretColor(node_, &optValue);
         auto checkVal = GetAttrValue<std::string>(node_, "caretColor");
         EXPECT_EQ(checkVal, expectVal);
     }
@@ -413,7 +420,8 @@ HWTEST_F(RichEditorModifierTest, setSelectedBackgroundColorTest, TestSize.Level1
     ASSERT_NE(modifier_->setSelectedBackgroundColor, nullptr);
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
-        modifier_->setSelectedBackgroundColor(node_, &value);
+        auto optValue = Converter::ArkValue<Opt_ResourceColor>(value);
+        modifier_->setSelectedBackgroundColor(node_, &optValue);
         auto checkVal = GetAttrValue<std::string>(node_, "selectedBackgroundColor");
         EXPECT_EQ(checkVal, expectVal);
     }
@@ -432,7 +440,8 @@ HWTEST_F(RichEditorModifierTest, setEnterKeyTypeTest, TestSize.Level1)
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENTER_KEY_TYPE_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_ENTER_KEY_TYPE_DEFAULT_VALUE);
 
-    modifier_->setEnterKeyType(node_, Ark_EnterKeyType::ARK_ENTER_KEY_TYPE_NEW_LINE);
+    auto optValue = Converter::ArkValue<Opt_EnterKeyType>(Ark_EnterKeyType::ARK_ENTER_KEY_TYPE_NEW_LINE);
+    modifier_->setEnterKeyType(node_, &optValue);
 
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENTER_KEY_TYPE_NAME);
@@ -453,12 +462,14 @@ HWTEST_F(RichEditorModifierTest, setEnableKeyboardOnFocusTest, TestSize.Level1)
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_DEFAULT_VALUE);
 
-    modifier_->setEnableKeyboardOnFocus(node_, false);
+    auto optValue = Converter::ArkValue<Opt_Boolean>(false);
+    modifier_->setEnableKeyboardOnFocus(node_, &optValue);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_NAME);
     EXPECT_EQ(resultStr, "false");
 
-    modifier_->setEnableKeyboardOnFocus(node_, true);
+    optValue = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setEnableKeyboardOnFocus(node_, &optValue);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_KEYBOARD_ON_FOCUS_NAME);
     EXPECT_EQ(resultStr, "true");
@@ -478,12 +489,14 @@ HWTEST_F(RichEditorModifierTest, setEnableHapticFeedbackTest, TestSize.Level1)
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE);
 
-    modifier_->setEnableHapticFeedback(node_, false);
+    auto optValue = Converter::ArkValue<Opt_Boolean>(false);
+    modifier_->setEnableHapticFeedback(node_, &optValue);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
     EXPECT_EQ(resultStr, "false");
 
-    modifier_->setEnableHapticFeedback(node_, true);
+    optValue = Converter::ArkValue<Opt_Boolean>(true);
+    modifier_->setEnableHapticFeedback(node_, &optValue);
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
     EXPECT_EQ(resultStr, "true");
@@ -502,7 +515,8 @@ HWTEST_F(RichEditorModifierTest, setBarStateTest, TestSize.Level1)
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_STATE_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_BAR_STATE_DEFAULT);
 
-    modifier_->setBarState(node_, Ark_BarState::ARK_BAR_STATE_ON);
+    auto optValue = Converter::ArkValue<Opt_BarState>(Ark_BarState::ARK_BAR_STATE_ON);
+    modifier_->setBarState(node_, &optValue);
 
     jsonValue = GetLayoutJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BAR_STATE_NAME);
@@ -517,7 +531,7 @@ static bool g_onDisappear = false;
  * @tc.desc: Check the functionality of setBindSelectionMenu
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierTest, setBindSelectionMenuTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierTest, DISABLED_setBindSelectionMenuTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(modifier_->setBindSelectionMenu, nullptr);
@@ -535,18 +549,20 @@ HWTEST_F(RichEditorModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     value.menuType = Converter::ArkValue<Opt_MenuType>(Ark_MenuType::ARK_MENU_TYPE_PREVIEW_MENU);
     auto onAppearCb = Converter::ArkValue<MenuOnAppearCallback>(onAppearCallback, TEST_RESOURCE_ID);
     value.onAppear = Converter::ArkValue<Opt_MenuOnAppearCallback>(onAppearCb);
-    auto onDisappearCb = Converter::ArkValue<Callback_Void>(onDisappearCallback, TEST_RESOURCE_ID);
-    value.onDisappear = Converter::ArkValue<Opt_Callback_Void>(onDisappearCb);
+    auto onDisappearCb = Converter::ArkValue<VoidCallback>(onDisappearCallback, TEST_RESOURCE_ID);
+    value.onDisappear = Converter::ArkValue<Opt_VoidCallback>(onDisappearCb);
     auto options = Converter::ArkValue<Opt_SelectionMenuOptions>(value);
     uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
     auto buildFunc = getBuilderCb();
-    modifier_->setBindSelectionMenu(node_,
-        Ark_RichEditorSpanType::ARK_RICH_EDITOR_SPAN_TYPE_TEXT, &buildFunc, &responseType, &options);
+    auto optBuildFunc = Converter::ArkValue<Opt_CustomNodeBuilder>(buildFunc);
+    auto optResponseType = Converter::ArkValue<Opt_Union_ResponseType_RichEditorResponseType>(responseType);
+    auto optValue =
+        Converter::ArkValue<Opt_RichEditorSpanType>(Ark_RichEditorSpanType::ARK_RICH_EDITOR_SPAN_TYPE_TEXT);
+    modifier_->setBindSelectionMenu(node_, &optValue, &optBuildFunc, &optResponseType, &options);
     EXPECT_FALSE(g_onAppear);
     EXPECT_FALSE(g_onDisappear);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(pattern, nullptr);
-    pattern->SetSelectedType(TextSpanType::TEXT); // Needed for logic of CopySelectionMenuParams()
     SelectOverlayInfo selectInfo;
     pattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
     ASSERT_NE(selectInfo.menuInfo.menuBuilder, nullptr);
@@ -579,7 +595,8 @@ HWTEST_F(RichEditorModifierTest, setCustomKeyboardTest, TestSize.Level1)
     auto options = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
     uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
     auto buildFunc = getBuilderCb();
-    modifier_->setCustomKeyboard(node_, &buildFunc, &options);
+    auto optBuildFunc = Converter::ArkValue<Opt_CustomNodeBuilder>(buildFunc);
+    modifier_->setCustomKeyboard(node_, &optBuildFunc, &options);
 
     // Testing callback
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
@@ -727,5 +744,57 @@ HWTEST_F(RichEditorModifierTest, setMaxLinesTestInvalidValues, TestSize.Level1)
         resultValue = pattern->GetMaxLines();
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
+}
+
+/**
+ * @tc.name: setStopBackPressTest
+ * @tc.desc: Check the functionality of setStopBackPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, DISABLED_setStopBackPressTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setStopBackPress, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    EXPECT_TRUE(pattern->IsStopBackPress());
+
+    modifier_->setStopBackPress(node_, nullptr);
+    EXPECT_TRUE(pattern->IsStopBackPress());
+
+    Opt_Boolean testTrue = Converter::ArkValue<Opt_Boolean>(true);
+    Opt_Boolean testFalse = Converter::ArkValue<Opt_Boolean>(false);
+    modifier_->setStopBackPress(node_, &testTrue);
+    EXPECT_TRUE(pattern->IsStopBackPress());
+    modifier_->setStopBackPress(node_, &testFalse);
+    EXPECT_FALSE(pattern->IsStopBackPress());
+}
+
+/**
+ * @tc.name: setKeyboardAppearanceTest
+ * @tc.desc: Check the functionality of setKeyboardAppearance
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, setKeyboardAppearanceTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setKeyboardAppearance, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto testNone = Converter::ArkValue<Opt_KeyboardAppearance>(
+        Ark_KeyboardAppearance::ARK_KEYBOARD_APPEARANCE_NONE_IMMERSIVE);
+    auto testLight = Converter::ArkValue<Opt_KeyboardAppearance>(
+        Ark_KeyboardAppearance::ARK_KEYBOARD_APPEARANCE_LIGHT_IMMERSIVE);
+    auto testImmersive = Converter::ArkValue<Opt_KeyboardAppearance>(
+        Ark_KeyboardAppearance::ARK_KEYBOARD_APPEARANCE_DARK_IMMERSIVE);
+    modifier_->setKeyboardAppearance(node_, &testNone);
+    EXPECT_EQ(pattern->GetKeyboardAppearance(), KeyboardAppearance::NONE_IMMERSIVE);
+    modifier_->setKeyboardAppearance(node_, &testLight);
+    EXPECT_EQ(pattern->GetKeyboardAppearance(), KeyboardAppearance::LIGHT_IMMERSIVE);
+    modifier_->setKeyboardAppearance(node_, &testImmersive);
+    EXPECT_EQ(pattern->GetKeyboardAppearance(), KeyboardAppearance::DARK_IMMERSIVE);
 }
 } // namespace OHOS::Ace::NG

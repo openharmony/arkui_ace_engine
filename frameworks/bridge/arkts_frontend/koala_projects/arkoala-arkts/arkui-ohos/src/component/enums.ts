@@ -110,28 +110,28 @@ export enum InteractionHand {
     RIGHT = 2
 }
 export enum MouseButton {
-    LEFT = 0,
-    Left = 0,
-    RIGHT = 1,
-    Right = 1,
-    MIDDLE = 2,
-    Middle = 2,
-    BACK = 3,
-    Back = 3,
-    FORWARD = 4,
-    Forward = 4,
-    NONE = 5,
-    None = 5
+    LEFT = 1,
+    Left = 1,
+    RIGHT = 2,
+    Right = 2,
+    MIDDLE = 4,
+    Middle = 4,
+    BACK = 8,
+    Back = 8,
+    FORWARD = 16,
+    Forward = 16,
+    NONE = 0,
+    None = 0
 }
 export enum MouseAction {
-    PRESS = 0,
-    Press = 0,
-    RELEASE = 1,
-    Release = 1,
-    MOVE = 2,
-    Move = 2,
-    HOVER = 3,
-    Hover = 3,
+    PRESS = 1,
+    Press = 1,
+    RELEASE = 2,
+    Release = 2,
+    MOVE = 3,
+    Move = 3,
+    HOVER = 4,
+    Hover = 4,
     CANCEL = 13
 }
 export enum AnimationStatus {

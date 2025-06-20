@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-void SetDefaultBorderRadius(void)
+void SetDefaultBorderRadius(FrameNode* frameNode)
 {
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         return;
@@ -32,8 +32,8 @@ void SetDefaultBorderRadius(void)
     auto theme = pipeline->GetTheme<DataPanelTheme>();
     CHECK_NULL_VOID(theme);
     auto defaultRadiusDimension = theme->GetDefaultBorderRadius();
-    ViewAbstract::SetBorderRadius(defaultRadiusDimension);
-    ViewAbstract::SetClipEdge(true);
+    ViewAbstract::SetBorderRadius(frameNode, defaultRadiusDimension);
+    ViewAbstract::SetClipEdge(frameNode, true);
 }
 } // namespace
 
@@ -88,7 +88,7 @@ void DataPanelModelStatic::SetType(FrameNode* frameNode, const std::optional<int
     if (type.has_value()) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, DataPanelType, type.value(), frameNode);
         if (type.value() != static_cast<int32_t>(DataPanelType::CIRCLE)) {
-            SetDefaultBorderRadius();
+            SetDefaultBorderRadius(frameNode);
         }
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, DataPanelType, frameNode);

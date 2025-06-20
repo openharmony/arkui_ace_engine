@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/accessor_utils.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
@@ -190,6 +191,14 @@ Ark_Number GetVelocityImpl(Ark_DragEvent peer)
 void ExecuteDropAnimationImpl(Ark_DragEvent peer,
                               const Callback_Void* customDropAnimation)
 {
+    CHECK_NULL_VOID(customDropAnimation);
+    CHECK_NULL_VOID(peer);
+    auto info = peer->dragInfo;
+    CHECK_NULL_VOID(info);
+    auto customDropAnimationCallback = [callback = CallbackHelper(*customDropAnimation)]() {
+        callback.InvokeSync();
+    };
+    info->SetDropAnimation(std::move(customDropAnimationCallback));
 }
 Ark_DragBehavior GetDragBehaviorImpl(Ark_DragEvent peer)
 {

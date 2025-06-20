@@ -5906,7 +5906,7 @@ export class TypeChecker {
             throw new Error("Can not discriminate value typeof FormShape")
         }
     }
-    static isFrameNode(value: object|string|number|undefined|null|boolean): boolean {
+    static isFrameNode(value: object|string|number|undefined|null|boolean, arg0: boolean): boolean {
         throw new Error("Can not discriminate value typeof FrameNode")
     }
     static isFrictionMotion(value: object|string|number|undefined|null|boolean): boolean {

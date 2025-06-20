@@ -22,11 +22,13 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Dimension } from "./units"
+import { ArkColumnSplitNode } from '../handwritten/modifiers/ArkColumnSplitNode';
+import { ArkColumnSplitAttributeSet, ColumnSplitModifier } from '../ColumnSplitModifier';
 
 export class ArkColumnSplitPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -76,13 +78,6 @@ export interface ColumnSplitAttribute extends CommonMethod {
     resizeable(value: boolean | undefined): this
     divider(value: ColumnSplitDividerStyle | undefined): this
 }
-export interface UIColumnSplitAttribute extends UICommonMethod {
-    /** @memo */
-    resizeable(value: boolean | undefined): this
-    /** @memo */
-    divider(value: ColumnSplitDividerStyle | undefined): this
-    /** @memo */
-}
 export class ArkColumnSplitStyle extends ArkCommonMethodStyle implements ColumnSplitAttribute {
     resizeable_value?: boolean | undefined
     divider_value?: ColumnSplitDividerStyle | undefined
@@ -93,12 +88,34 @@ export class ArkColumnSplitStyle extends ArkCommonMethodStyle implements ColumnS
         return this
         }
 }
-/** @memo:stable */
-export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements UIColumnSplitAttribute {
+export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements ColumnSplitAttribute {
+    protected _modifierHost: ArkColumnSplitNode | undefined;
+    setModifierHost(value: ArkColumnSplitNode): void {
+        this._modifierHost = value;
+    }
+    getModifierHost(): ArkColumnSplitNode {
+        if (this._modifierHost === undefined || this._modifierHost === null) {
+            this._modifierHost = new ArkColumnSplitNode();
+            this._modifierHost!.setPeer(this.getPeer());
+        }
+        return this._modifierHost!;
+    }
+    getAttributeSet(): ArkColumnSplitAttributeSet  {
+        return this.getPeer()._attributeSet as ArkColumnSplitAttributeSet;
+    }
+ 
+    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
+        let isCommonModifier: boolean = modifier instanceof ColumnSplitModifier;
+        if (isCommonModifier) {
+            let commonModifier = modifier as object as ColumnSplitModifier;
+            this.getPeer()._attributeSet = commonModifier.attributeSet;
+        } else if (this.getPeer()._attributeSet == null) {
+            this.getPeer()._attributeSet = new ArkColumnSplitAttributeSet();
+        }
+    }
     getPeer(): ArkColumnSplitPeer {
         return (this.peer as ArkColumnSplitPeer)
     }
-    /** @memo */
     public setColumnSplitOptions(): this {
         if (this.checkPriority("setColumnSplitOptions")) {
             this.getPeer()?.setColumnSplitOptionsAttribute()
@@ -106,7 +123,6 @@ export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public resizeable(value: boolean | undefined): this {
         if (this.checkPriority("resizeable")) {
             const value_casted = value as (boolean | undefined)
@@ -115,7 +131,6 @@ export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements
         }
         return this
     }
-    /** @memo */
     public divider(value: ColumnSplitDividerStyle | undefined): this {
         if (this.checkPriority("divider")) {
             const value_casted = value as (ColumnSplitDividerStyle | undefined)
@@ -133,7 +148,7 @@ export class ArkColumnSplitComponent extends ArkCommonMethodComponent implements
 /** @memo */
 export function ColumnSplit(
     /** @memo */
-    style: ((attributes: UIColumnSplitAttribute) => void) | undefined,
+    style: ((attributes: ColumnSplitAttribute) => void) | undefined,
     
     /** @memo */
     content_?: (() => void) | undefined,

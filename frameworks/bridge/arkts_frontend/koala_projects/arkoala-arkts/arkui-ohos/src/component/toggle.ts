@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
 import { Callback_Boolean_Void } from "./navigation"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
 import { ResourceColor } from "./units"
@@ -31,6 +31,7 @@ import { Resource } from "global/resource"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ToggleOpsHandWritten } from "./../handwritten"
 
 export class ArkTogglePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -179,7 +180,7 @@ export interface ToggleConfiguration extends CommonConfiguration {
 }
 export interface ToggleOptions {
     type: ToggleType;
-    isOn?: boolean;
+    isOn?: boolean | Bindable<boolean>;
 }
 export type ToggleInterface = (options: ToggleOptions) => ToggleAttribute;
 export interface ToggleAttribute extends CommonMethod {
@@ -189,21 +190,6 @@ export interface ToggleAttribute extends CommonMethod {
     switchPointColor(value: ResourceColor | undefined): this
     switchStyle(value: SwitchStyle | undefined): this
     _onChangeEvent_isOn(callback: ((isVisible: boolean) => void)): void
-}
-export interface UIToggleAttribute extends UICommonMethod {
-    /** @memo */
-    onChange(value: ((isVisible: boolean) => void) | undefined): this
-    /** @memo */
-    contentModifier(value: ContentModifier | undefined): this
-    /** @memo */
-    selectedColor(value: ResourceColor | undefined): this
-    /** @memo */
-    switchPointColor(value: ResourceColor | undefined): this
-    /** @memo */
-    switchStyle(value: SwitchStyle | undefined): this
-    /** @memo */
-    _onChangeEvent_isOn(callback: ((isVisible: boolean) => void)): void
-    /** @memo */
 }
 export class ArkToggleStyle extends ArkCommonMethodStyle implements ToggleAttribute {
     onChange_value?: ((isVisible: boolean) => void) | undefined
@@ -230,21 +216,31 @@ export class ArkToggleStyle extends ArkCommonMethodStyle implements ToggleAttrib
         throw new Error("Unimplmented")
         }
 }
-/** @memo:stable */
-export class ArkToggleComponent extends ArkCommonMethodComponent implements UIToggleAttribute {
+export class ArkToggleComponent extends ArkCommonMethodComponent implements ToggleAttribute {
     getPeer(): ArkTogglePeer {
         return (this.peer as ArkTogglePeer)
     }
-    /** @memo */
+    ToggleOptionsIsOnIsBindable(options?: ToggleOptions): boolean {
+        if ((RuntimeType.UNDEFINED) != runtimeType(options)) {
+            const options_isOn  = options!.isOn;
+            if ((RuntimeType.UNDEFINED) != (runtimeType(options_isOn))) {
+                const options_isOn_value  = options_isOn!;
+                return TypeChecker.isBindableBoolean(options_isOn_value);
+            }
+        }
+        return false;
+    }
     public setToggleOptions(options: ToggleOptions): this {
         if (this.checkPriority("setToggleOptions")) {
             const options_casted = options as (ToggleOptions)
             this.getPeer()?.setToggleOptionsAttribute(options_casted)
-            return this
+        }
+        if (this.ToggleOptionsIsOnIsBindable(options)) {
+            ToggleOpsHandWritten.hookToggleAttributeIsOnImpl(this.getPeer().peer.ptr,
+                (options!.isOn as Bindable<boolean>));
         }
         return this
     }
-    /** @memo */
     public onChange(value: ((isVisible: boolean) => void) | undefined): this {
         if (this.checkPriority("onChange")) {
             const value_casted = value as (((isVisible: boolean) => void) | undefined)
@@ -253,7 +249,6 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements UITo
         }
         return this
     }
-    /** @memo */
     public contentModifier(value: ContentModifier | undefined): this {
         if (this.checkPriority("contentModifier")) {
             const value_casted = value as (ContentModifier | undefined)
@@ -262,7 +257,6 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements UITo
         }
         return this
     }
-    /** @memo */
     public selectedColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("selectedColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -271,7 +265,6 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements UITo
         }
         return this
     }
-    /** @memo */
     public switchPointColor(value: ResourceColor | undefined): this {
         if (this.checkPriority("switchPointColor")) {
             const value_casted = value as (ResourceColor | undefined)
@@ -280,7 +273,6 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements UITo
         }
         return this
     }
-    /** @memo */
     public switchStyle(value: SwitchStyle | undefined): this {
         if (this.checkPriority("switchStyle")) {
             const value_casted = value as (SwitchStyle | undefined)
@@ -289,7 +281,6 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements UITo
         }
         return this
     }
-    /** @memo */
     public _onChangeEvent_isOn(callback: ((isVisible: boolean) => void)): void {
         if (this.checkPriority("_onChangeEvent_isOn")) {
             const callback_casted = callback as (((isVisible: boolean) => void))
@@ -307,7 +298,7 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements UITo
 /** @memo */
 export function Toggle(
     /** @memo */
-    style: ((attributes: UIToggleAttribute) => void) | undefined,
+    style: ((attributes: ToggleAttribute) => void) | undefined,
     options: ToggleOptions,
     /** @memo */
     content_?: (() => void) | undefined,

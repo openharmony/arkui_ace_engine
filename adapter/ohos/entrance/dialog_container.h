@@ -60,6 +60,10 @@ public:
 
     static bool OnBackPressed(int32_t instanceId);
 
+    // ArkTS 1.2
+    static void ShowToastStatic(int32_t instanceId, const NG::ToastInfo& toastInfo,
+        std::function<void(int32_t)>&& callback);
+    static void CloseToastStatic(int32_t instanceId, const int32_t toastId, std::function<void(int32_t)>&& callback);
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DialogContainer);
 };

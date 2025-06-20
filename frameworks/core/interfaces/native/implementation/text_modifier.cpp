@@ -19,6 +19,7 @@
 #include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_static.h"
 #include "base/log/log_wrapper.h"
@@ -222,7 +223,7 @@ void FontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontSize = Converter::OptConvert<Dimension>(*value);
+    auto fontSize = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(fontSize);
     Validator::ValidateNonPercent(fontSize);
     TextModelStatic::SetFontSize(frameNode, fontSize);
@@ -232,7 +233,7 @@ void MinFontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontSize = Converter::OptConvert<Dimension>(*value);
+    auto fontSize = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(fontSize);
     Validator::ValidateNonPercent(fontSize);
     TextModelStatic::SetAdaptMinFontSize(frameNode, fontSize);
@@ -242,7 +243,7 @@ void MaxFontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontSize = Converter::OptConvert<Dimension>(*value);
+    auto fontSize = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(fontSize);
     Validator::ValidateNonPercent(fontSize);
     TextModelStatic::SetAdaptMaxFontSize(frameNode, fontSize);
@@ -299,7 +300,7 @@ void LineHeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto lineHeight = Converter::OptConvert<Dimension>(*value);
+    auto lineHeight = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(lineHeight);
     TextModelStatic::SetLineHeight(frameNode, lineHeight);
 }
@@ -550,7 +551,7 @@ void PrivacySensitiveImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetPrivacySensitive(frameNode, Converter::OptConvert<bool>(*value));
+    ViewAbstractModelStatic::SetPrivacySensitive(frameNode, Converter::OptConvert<bool>(*value));
 }
 void TextSelectableImpl(Ark_NativePointer node,
                         const Opt_TextSelectableMode* value)

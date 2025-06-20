@@ -17,34 +17,34 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { int32, int64, float32, unsafeCast } from "@koalaui/common"
+import { int32, int64, float32, float64, unsafeCast } from "@koalaui/common"
 import { CallbackKind } from "./CallbackKind"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DataSyncOptions, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, DrawModifierInternal, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, Literal_String_value_Callback_Void_action, ScrollResult } from "./../common"
+import { AccessibilityCallback, AccessibilityFocusCallback, Bindable, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DataSyncOptions, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, DrawModifierInternal, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, Literal_String_value_Callback_Void_action, ScrollResult, PopupMaskType } from "./../common"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions } from "./../button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../animationExtender"
-import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, PointerStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme } from "./../arkui-custom"
+import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, BuilderNodeOps, BuilderNodeOpsInternal, BuilderNodeOptions, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme } from "./../arkui-custom"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { ContentDidScrollCallback, ContentWillScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, SwiperAnimationEvent, SwiperAnimationMode, SwiperAttribute, DotIndicator, DigitIndicator, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, SwiperContentWillScrollResult, AutoPlayOptions, ArrowStyle, SwiperAutoFill, SwiperContentTransitionProxy, SwiperContentTransitionProxyInternal, SwiperController, SwiperControllerInternal, Callback_SwiperContentTransitionProxy_Void, Indicator } from "./../swiper"
 import { CustomNodeBuilder } from "./../customBuilder"
-import { EditableTextOnChangeCallback, OnDidChangeCallback, AutoCapitalizationMode, KeyboardAppearance, LayoutManager, LayoutManagerInternal, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, EditMenuOptions, TextEditControllerEx, TextEditControllerExInternal, PreviewText, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, CaretStyle, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextBaseControllerInternal, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuItemIdInternal, TextMenuShowMode, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, DecorationStyleResult } from "./../textCommon"
+import { EditableTextOnChangeCallback, OnDidChangeCallback, AutoCapitalizationMode, KeyboardAppearance, LayoutManager, LayoutManagerInternal, PositionWithAffinity, TextRange, MenuType, TextDataDetectorConfig, EditMenuOptions, TextEditControllerEx, TextEditControllerExInternal, PreviewText, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener, CaretStyle, TextChangeOptions, InsertValue, DeleteValue, EditableTextChangeValue, FontSettingOptions, TextBaseController, TextBaseControllerInternal, TextDataDetectorType, TextDeleteDirection, TextMenuItemId, TextMenuItemIdInternal, TextMenuShowMode, AsyncCallback_Array_TextMenuItem_Array_TextMenuItem, TextMenuItem, AsyncCallback_TextMenuItem_TextRange_Boolean, Callback_StyledStringChangeValue_Boolean, StyledStringChangeValue, TextMenuOptions, DecorationStyleResult } from "./../textCommon"
 import { ErrorCallback } from "./../ohos.base"
 import { GetItemMainSizeByIndex, WaterFlowAttribute, WaterFlowLayoutMode, WaterFlowSections, WaterFlowSectionsInternal, SectionOptions, WaterFlowOptions } from "./../waterFlow"
 import { ImageCompleteCallback, ImageLoadResult } from "./../imageSpan"
 import { ImageErrorCallback, ColorContent, DynamicRangeMode, ImageContent, ImageInterpolation, ImageRenderMode, ImageRotateOrientation, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event, ImageError, ImageSourceSize, ResizableOptions } from "./../image"
 import { InterceptionModeCallback, InterceptionShowCallback, BarStyle, LaunchMode, NavBarPosition, NavigationMenuItem, NavigationOperation, NavigationTitleOptions, NavigationMenuOptions, ToolbarItem, NavigationToolbarOptions, NavigationAttribute, Tuple_Dimension_Dimension, NavigationMode, NavigationTitleMode, Callback_NavigationTitleMode_Void, Callback_Boolean_Void, Callback_NavigationMode_Void, Callback_String_Opt_Object_Void, Type_NavigationAttribute_customNavContentTransition_delegate, NavContentInfo, NavigationAnimatedTransition, NavigationCommonTitle, NavigationCustomTitle, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions, Callback_PopInfo_Void, PopInfo, NavigationInterception, ToolbarItemStatus, Callback_NavigationTransitionProxy_Void, NavigationTransitionProxy, NavigationTransitionProxyInternal, NavBar, MoreButtonOptions } from "./../navigation"
 import { LocationButtonCallback, LocationButtonOnClickResult, LocationDescription, LocationIconStyle, LocationButtonOptions } from "./../locationButton"
-import { MenuCallback, OnHoverCallback } from "./../sdk-stubs"
-import { MenuOnAppearCallback, PasteEventCallback, SubmitCallback, RichEditorAttribute, Callback_RichEditorSelection_Void, RichEditorSelection, Callback_RichEditorRange_Void, RichEditorRange, Callback_RichEditorInsertValue_Boolean, RichEditorInsertValue, Callback_RichEditorTextSpanResult_Void, RichEditorTextSpanResult, Callback_TextRange_Void, Callback_RichEditorDeleteValue_Boolean, RichEditorDeleteValue, PasteEvent, Callback_RichEditorChangeValue_Boolean, RichEditorChangeValue, Callback_CutEvent_Void, CutEvent, Callback_CopyEvent_Void, CopyEvent, RichEditorSpanType, RichEditorResponseType, SelectionMenuOptions, KeyboardOptions, PlaceholderStyle, RichEditorBaseController, RichEditorBaseControllerInternal, RichEditorTextStyle, RichEditorController, RichEditorControllerInternal, RichEditorTextSpanOptions, RichEditorImageSpanOptions, RichEditorBuilderSpanOptions, RichEditorSymbolSpanOptions, RichEditorUpdateTextSpanStyleOptions, RichEditorUpdateImageSpanStyleOptions, RichEditorUpdateSymbolSpanStyleOptions, RichEditorParagraphStyleOptions, RichEditorImageSpanResult, RichEditorParagraphResult, RichEditorSpan, RichEditorDeleteDirection, RichEditorOptions, RichEditorStyledStringController, RichEditorStyledStringControllerInternal, RichEditorStyledStringOptions, LeadingMarginPlaceholder, PreviewMenuOptions, RichEditorGesture, RichEditorSpanPosition, RichEditorLayoutStyle, RichEditorParagraphStyle, RichEditorSymbolSpanStyle, RichEditorSpanStyleOptions, RichEditorUrlStyle, RichEditorImageSpanStyle, RichEditorImageSpanStyleResult, RichEditorTextStyleResult } from "./../richEditor"
+import { MenuCallback, MenuOnAppearCallback, PasteEventCallback, SubmitCallback, RichEditorAttribute, Callback_RichEditorSelection_Void, RichEditorSelection, Callback_RichEditorRange_Void, RichEditorRange, Callback_RichEditorInsertValue_Boolean, RichEditorInsertValue, Callback_RichEditorTextSpanResult_Void, RichEditorTextSpanResult, Callback_TextRange_Void, Callback_RichEditorDeleteValue_Boolean, RichEditorDeleteValue, PasteEvent, Callback_RichEditorChangeValue_Boolean, RichEditorChangeValue, Callback_CutEvent_Void, CutEvent, Callback_CopyEvent_Void, CopyEvent, RichEditorSpanType, RichEditorResponseType, SelectionMenuOptions, KeyboardOptions, PlaceholderStyle, RichEditorBaseController, RichEditorBaseControllerInternal, RichEditorTextStyle, RichEditorController, RichEditorControllerInternal, RichEditorTextSpanOptions, RichEditorImageSpanOptions, RichEditorBuilderSpanOptions, RichEditorSymbolSpanOptions, RichEditorUpdateTextSpanStyleOptions, RichEditorUpdateImageSpanStyleOptions, RichEditorUpdateSymbolSpanStyleOptions, RichEditorParagraphStyleOptions, RichEditorImageSpanResult, RichEditorParagraphResult, RichEditorSpan, RichEditorDeleteDirection, RichEditorOptions, RichEditorStyledStringController, RichEditorStyledStringControllerInternal, RichEditorStyledStringOptions, LeadingMarginPlaceholder, PreviewMenuOptions, RichEditorGesture, RichEditorSpanPosition, RichEditorLayoutStyle, RichEditorParagraphStyle, RichEditorSymbolSpanStyle, RichEditorSpanStyleOptions, RichEditorUrlStyle, RichEditorImageSpanStyle, RichEditorImageSpanStyleResult, RichEditorTextStyleResult } from "./../richEditor"
 import { NavDestinationTransitionDelegate, NavDestinationActiveReason, NavDestinationAttribute, Callback_Boolean, Callback_Object_Void, NavDestinationMode, Callback_NavDestinationContext_Void, NavDestinationContext, NavDestinationContextInternal, NavigationSystemTransitionType, NestedScrollInfo, Callback_NavDestinationActiveReason_Void, Orientation, NavDestinationCommonTitle, NavDestinationCustomTitle, NavDestinationTransition, RouteMapConfig } from "./../navDestination"
 import { NavExtender_OnUpdateStack } from "./../navigationExtender"
-import { OnAdsBlockedCallback, OnContextMenuHideCallback, OnFirstMeaningfulPaintCallback, OnFullScreenEnterCallback, OnIntelligentTrackingPreventionCallback, OnLargestContentfulPaintCallback, OnNativeEmbedVisibilityChangeCallback, OnNavigationEntryCommittedCallback, OnOverrideUrlLoadingCallback, OnRenderProcessNotRespondingCallback, OnRenderProcessRespondingCallback, OnSafeBrowsingCheckResultCallback, OnSslErrorEventCallback, OnViewportFitChangedCallback, WebKeyboardCallback, BlurOnKeyboardHideMode, CacheMode, ClientAuthenticationHandler, ClientAuthenticationHandlerInternal, ConsoleMessage, ConsoleMessageInternal, MessageLevel, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, ControllerHandlerInternal, DataResubmissionHandler, DataResubmissionHandlerInternal, EventResult, EventResultInternal, FileSelectorMode, FileSelectorParam, FileSelectorParamInternal, FileSelectorResult, FileSelectorResultInternal, FullScreenExitHandler, FullScreenExitHandlerInternal, HitTestType, HttpAuthHandler, HttpAuthHandlerInternal, JsGeolocation, JsGeolocationInternal, JsResult, JsResultInternal, MixedMode, NativeEmbedStatus, NativeMediaPlayerConfig, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PermissionRequest, PermissionRequestInternal, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureHandlerInternal, ScreenCaptureConfig, SslError, SslErrorHandler, SslErrorHandlerInternal, ThreatType, ViewportFit, WebAttribute, JavaScriptProxy, WebDarkMode, WebMediaOptions, Callback_OnPageEndEvent_Void, OnPageEndEvent, Callback_OnPageBeginEvent_Void, OnPageBeginEvent, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, OnTitleReceiveEvent, Callback_OnGeolocationShowEvent_Void, OnGeolocationShowEvent, Callback_OnAlertEvent_Boolean, OnAlertEvent, Callback_OnBeforeUnloadEvent_Boolean, OnBeforeUnloadEvent, Callback_OnConfirmEvent_Boolean, OnConfirmEvent, Callback_OnPromptEvent_Boolean, OnPromptEvent, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, OnErrorReceiveEvent, Callback_OnHttpErrorReceiveEvent_Void, OnHttpErrorReceiveEvent, Callback_OnDownloadStartEvent_Void, OnDownloadStartEvent, Callback_OnRefreshAccessedHistoryEvent_Void, OnRefreshAccessedHistoryEvent, Type_WebAttribute_onUrlLoadIntercept_callback, Literal_Union_String_WebResourceRequest_data, WebResourceRequest, WebResourceRequestInternal, Callback_Literal_Function_handler_Object_error_Void, Literal_Function_handler_Object_error, Callback_OnRenderExitedEvent_Void, OnRenderExitedEvent, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Literal_Object_detail, Type_WebAttribute_onFileSelectorShow_callback, Literal_Function_callback__Object_fileSelector, Callback_OnResourceLoadEvent_Void, OnResourceLoadEvent, FullScreenEnterEvent, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, OnHttpAuthRequestEvent, Callback_OnInterceptRequestEvent_WebResourceResponse, OnInterceptRequestEvent, WebResourceResponse, WebResourceResponseInternal, Callback_OnPermissionRequestEvent_Void, OnPermissionRequestEvent, Callback_OnScreenCaptureRequestEvent_Void, OnScreenCaptureRequestEvent, Callback_OnContextMenuShowEvent_Boolean, OnContextMenuShowEvent, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, OnSslErrorEventReceiveEvent, SslErrorEvent, Callback_OnClientAuthenticationEvent_Void, OnClientAuthenticationEvent, Callback_OnWindowNewEvent_Void, OnWindowNewEvent, Callback_OnTouchIconUrlReceivedEvent_Void, OnTouchIconUrlReceivedEvent, Callback_OnFaviconReceivedEvent_Void, OnFaviconReceivedEvent, Callback_OnPageVisibleEvent_Void, OnPageVisibleEvent, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, FirstMeaningfulPaint, LargestContentfulPaint, Callback_OnLoadInterceptEvent_Boolean, OnLoadInterceptEvent, Callback_OnOverScrollEvent_Void, LoadCommittedDetails, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, Callback_NativeEmbedDataInfo_Void, NativeEmbedDataInfo, NativeEmbedVisibilityInfo, Callback_NativeEmbedTouchInfo_Void, NativeEmbedTouchInfo, RenderProcessNotRespondingData, ExpandedMenuItemOptions, WebKeyboardCallbackInfo, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebElementType, WebResponseType, SelectionMenuOptionsExt, WebCaptureMode, WebContextMenuParam, WebContextMenuParamInternal, WebContextMenuResult, WebContextMenuResultInternal, WebController, WebControllerInternal, Literal_String_script_Callback_String_Void_callback_, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Header, Literal_Object_object__String_name_Array_String_methodList, WebCookie, WebCookieInternal, WebKeyboardController, WebKeyboardControllerInternal, WebNavigationType, WebResourceError, WebResourceErrorInternal, Callback_Literal_String_plainText_Void, Literal_String_plainText, WebKeyboardOptions, WebOptions, NativeEmbedInfo } from "./../web"
+import { OnAdsBlockedCallback, OnContextMenuHideCallback, OnFirstMeaningfulPaintCallback, OnFullScreenEnterCallback, OnIntelligentTrackingPreventionCallback, OnLargestContentfulPaintCallback, OnNativeEmbedVisibilityChangeCallback, OnNavigationEntryCommittedCallback, OnOverrideUrlLoadingCallback, OnRenderProcessNotRespondingCallback, OnRenderProcessRespondingCallback, OnSafeBrowsingCheckResultCallback, OnSslErrorEventCallback, OnViewportFitChangedCallback, WebKeyboardCallback, BlurOnKeyboardHideMode, CacheMode, ClientAuthenticationHandler, ClientAuthenticationHandlerInternal, ConsoleMessage, ConsoleMessageInternal, MessageLevel, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, ControllerHandlerInternal, DataResubmissionHandler, DataResubmissionHandlerInternal, EventResult, EventResultInternal, FileSelectorMode, FileSelectorParam, FileSelectorParamInternal, FileSelectorResult, FileSelectorResultInternal, FullScreenExitHandler, FullScreenExitHandlerInternal, HitTestType, HttpAuthHandler, HttpAuthHandlerInternal, JsGeolocation, JsGeolocationInternal, JsResult, JsResultInternal, MixedMode, NativeEmbedStatus, NativeMediaPlayerConfig, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PermissionRequest, PermissionRequestInternal, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureHandlerInternal, ScreenCaptureConfig, SslError, SslErrorHandler, SslErrorHandlerInternal, ThreatType, ViewportFit, WebAttribute, JavaScriptProxy, WebDarkMode, WebMediaOptions, Callback_OnPageEndEvent_Void, OnPageEndEvent, Callback_OnPageBeginEvent_Void, OnPageBeginEvent, Callback_OnProgressChangeEvent_Void, Callback_OnTitleReceiveEvent_Void, OnTitleReceiveEvent, Callback_OnGeolocationShowEvent_Void, OnGeolocationShowEvent, Callback_OnAlertEvent_Boolean, OnAlertEvent, Callback_OnBeforeUnloadEvent_Boolean, OnBeforeUnloadEvent, Callback_OnConfirmEvent_Boolean, OnConfirmEvent, Callback_OnPromptEvent_Boolean, OnPromptEvent, Callback_OnConsoleEvent_Boolean, Callback_OnErrorReceiveEvent_Void, OnErrorReceiveEvent, Callback_OnHttpErrorReceiveEvent_Void, OnHttpErrorReceiveEvent, Callback_OnDownloadStartEvent_Void, OnDownloadStartEvent, Callback_OnRefreshAccessedHistoryEvent_Void, OnRefreshAccessedHistoryEvent, Type_WebAttribute_onUrlLoadIntercept_callback, Literal_Union_String_WebResourceRequest_data, WebResourceRequest, WebResourceRequestInternal, Callback_Literal_Function_handler_Object_error_Void, Literal_Function_handler_Object_error, Callback_OnRenderExitedEvent_Void, OnRenderExitedEvent, Callback_OnShowFileSelectorEvent_Boolean, Callback_Literal_Object_detail_Boolean, Literal_Object_detail, Type_WebAttribute_onFileSelectorShow_callback, Literal_Function_callback__Object_fileSelector, Callback_OnResourceLoadEvent_Void, OnResourceLoadEvent, FullScreenEnterEvent, Callback_OnScaleChangeEvent_Void, Callback_OnHttpAuthRequestEvent_Boolean, OnHttpAuthRequestEvent, Callback_OnInterceptRequestEvent_WebResourceResponse, OnInterceptRequestEvent, WebResourceResponse, WebResourceResponseInternal, Callback_OnPermissionRequestEvent_Void, OnPermissionRequestEvent, Callback_OnScreenCaptureRequestEvent_Void, OnScreenCaptureRequestEvent, Callback_OnContextMenuShowEvent_Boolean, OnContextMenuShowEvent, Callback_OnSearchResultReceiveEvent_Void, Callback_OnScrollEvent_Void, Callback_OnSslErrorEventReceiveEvent_Void, OnSslErrorEventReceiveEvent, SslErrorEvent, Callback_OnClientAuthenticationEvent_Void, OnClientAuthenticationEvent, Callback_OnWindowNewEvent_Void, OnWindowNewEvent, Callback_OnTouchIconUrlReceivedEvent_Void, OnTouchIconUrlReceivedEvent, Callback_OnFaviconReceivedEvent_Void, OnFaviconReceivedEvent, Callback_OnPageVisibleEvent_Void, OnPageVisibleEvent, Callback_OnDataResubmittedEvent_Void, Callback_OnAudioStateChangedEvent_Void, Callback_OnFirstContentfulPaintEvent_Void, FirstMeaningfulPaint, LargestContentfulPaint, Callback_OnLoadInterceptEvent_Boolean, OnLoadInterceptEvent, Callback_OnOverScrollEvent_Void, LoadCommittedDetails, IntelligentTrackingPreventionDetails, ScriptItem, WebLayoutMode, NestedScrollOptionsExt, Callback_NativeEmbedDataInfo_Void, NativeEmbedDataInfo, NativeEmbedVisibilityInfo, Callback_NativeEmbedTouchInfo_Void, NativeEmbedTouchInfo, RenderProcessNotRespondingData, ExpandedMenuItemOptions, WebKeyboardCallbackInfo, AdsBlockedDetails, WebKeyboardAvoidMode, EmbedOptions, WebElementType, WebResponseType, SelectionMenuOptionsExt, WebCaptureMode, WebContextMenuParam, WebContextMenuParamInternal, WebContextMenuResult, WebContextMenuResultInternal, WebController, WebControllerInternal, Literal_String_script_Callback_String_Void_callback_, Literal_String_baseUrl_data_encoding_historyUrl_mimeType, Literal_Union_String_Resource_url_Array_Header_headers, Header, Literal_Object_object__String_name_Array_String_methodList, WebCookie, WebCookieInternal, WebKeyboardController, WebKeyboardControllerInternal, WebNavigationType, WebResourceError, WebResourceErrorInternal, Callback_Literal_String_plainText_Void, Literal_String_plainText, WebKeyboardOptions, WebOptionsSerializer, NativeEmbedInfo } from "./../web"
 import { OnAlphabetIndexerPopupSelectCallback, OnAlphabetIndexerRequestPopupDataCallback, OnAlphabetIndexerSelectCallback, AlphabetIndexerAttribute, Callback_Number_Void, IndexerAlign, Callback_Opt_Number_Void, AlphabetIndexerOptions } from "./../alphabetIndexer"
 import { OnCheckboxChangeCallback, Callback_Opt_Boolean_Void, CheckboxOptions } from "./../checkbox"
 import { OnCheckboxGroupChangeCallback, SelectStatus, CheckboxGroupResult, CheckboxGroupOptions } from "./../checkboxgroup"
 import { OnContentScrollCallback, OnPasteCallback, OnSubmitCallback, OnTextSelectionChangeCallback, ContentType, EnterKeyType, InputType, SubmitEvent, SubmitEventInternal, TextInputAttribute, TextInputStyle, PasswordIcon, UnderlineColor, TextInputController, TextInputControllerInternal, TextInputOptions } from "./../textInput"
 import { OnFoldStatusChangeCallback, OnHoverStatusChangeCallback, OnFoldStatusChangeInfo, HoverEventParam, FolderStackOptions } from "./../folderStack"
+import { OnHoverCallback } from "./../sdk-stubs"
 import { OnLinearIndicatorChangeCallback, LinearIndicatorController, LinearIndicatorControllerInternal, LinearIndicatorStartOptions, LinearIndicatorStyle } from "./../linearindicator"
 import { OnNativeLoadCallback, XComponentController, XComponentControllerInternal, Literal_Number_surfaceHeight_surfaceWidth, SurfaceRect, SurfaceRotationOptions, NativeXComponentParameters, XComponentOptions } from "./../xcomponent"
 import { OnRadioChangeCallback, RadioIndicatorType, RadioOptions, RadioStyle } from "./../radio"
@@ -60,23 +60,26 @@ import { PasteButtonCallback, PasteButtonOnClickResult, PasteDescription, PasteI
 import { PluginErrorCallback, PluginErrorData, PluginComponentTemplate, PluginComponentOptions } from "./../pluginComponent"
 import { ReceiveCallback, BaseShape, BaseShapeInternal, CircleShape, CircleShapeInternal, ShapeSize, CommonShape, CommonShapeInternal, WebviewController, WebviewControllerInternal, Summary, EllipseShape, EllipseShapeInternal, ImageModifier, IntentionCode, RectWidthStyle, RectHeightStyle, SymbolGlyphModifier, PathShape, PathShapeInternal, PathShapeOptions, PerfMonitorActionType, PerfMonitorSourceType, RectShape, RectShapeInternal, RectShapeOptions, RoundRectShapeOptions, ResolutionQuality, TextModifier, IndicatorStyle, WebHeader, WindowStatusType, AsyncCallback_image_PixelMap_Void, SnapshotOptions, LabelStyle } from "./../arkui-external"
 import { SymbolEffect, SymbolEffectInternal, ReplaceSymbolEffect, ReplaceSymbolEffectInternal, ScaleSymbolEffect, ScaleSymbolEffectInternal } from "../symbolglyph"
-import { FontOptions, FontInfo } from "@ohos/font/font"
+import { FontOptions, FontInfo, UIFontAdjustInfo, UIFontAliasInfo, UIFontFallbackInfo, UIFontConfig, UIFontGenericInfo, UIFontFallbackGroupInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
 import { SaveButtonCallback, SaveButtonOnClickResult, SaveDescription, SaveIconStyle, SaveButtonOptions } from "./../saveButton"
 import { SearchSubmitCallback, CancelButtonStyle, SearchAttribute, IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, SearchType, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EditableTextChangeValue_Boolean, SearchButtonOptions, SearchController, SearchControllerInternal, SearchOptions } from "./../search"
+import { SearchValueCallback } from "./../searchops"
 import { SliderTriggerChangeCallback, SliderAttribute, Callback_Number_SliderChangeMode_Void, SliderChangeMode, SliderBlockStyle, SliderInteraction, SlideRange, SliderBlockType, SliderStyle, SliderOptions } from "./../slider"
-import { StyledStringMarshallCallback, StyledStringUnmarshallCallback, CustomSpan, CustomSpanInternal, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInternal, GestureStyleInterface, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, ImageAttachment, ImageAttachmentInternal, StyleOptions, StyledStringKey, SpanStyle, UserDataSpan, DecorationStyleInterface, UrlStyle, UrlStyleInternal, BaselineOffsetStyle, BaselineOffsetStyleInternal, LetterSpacingStyle, LetterSpacingStyleInternal, LineHeightStyle, LineHeightStyleInternal, TextShadowStyle, TextShadowStyleInternal, DecorationStyle, DecorationStyleInternal, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInternal, ParagraphStyleInterface, TextStyle_styled_string, TextStyle_styled_stringInternal, TextStyleInterface, BackgroundColorStyle, BackgroundColorStyleInternal, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
+import { StyledStringMarshallCallback, StyledStringUnmarshallCallback, CustomSpan, CustomSpanInternal, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, GestureStyle, GestureStyleInternal, GestureStyleInterface, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, ImageAttachment, ImageAttachmentInternal, StyleOptions, StyledStringKey, SpanStyle, UserDataSpan, DecorationStyleInterface, UrlStyle, UrlStyleInternal, BaselineOffsetStyle, BaselineOffsetStyleInternal, LetterSpacingStyle, LetterSpacingStyleInternal, LineHeightStyle, LineHeightStyleInternal, TextShadowStyle, TextShadowStyleInternal, DecorationStyle, DecorationStyleInternal, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInternal, ParagraphStyleInterface, TextStyle, TextStyle_styled_stringInternal, TextStyleInterface, BackgroundColorStyle, BackgroundColorStyleInternal, ColorFilterType, ImageAttachmentInterface, AttachmentType, ResourceImageAttachmentOptions, StyledStringValue } from "./../styledString"
 import { TextAreaSubmitCallback, TextAreaAttribute, Callback_EnterKeyType_Void, Callback_String_PasteEvent_Void, TextAreaType, Callback_ResourceStr_Void, TextAreaController, TextAreaControllerInternal, TextAreaOptions } from "./../textArea"
+import { TextFieldValueCallback } from "./../textfieldops"
 import { VoidCallback, ResourceColor, Font, Position, Length, SizeOptions, Offset, ColorFilter, ColorFilterInternal, ResourceStr, Dimension, PX, VP, FP, LPX, Percentage, LengthConstrain, DividerStyleOptions, ConstraintSizeOptions, Area, AccessibilityOptions, Bias, BorderRadiuses, ChainWeightOptions, DirectionalEdgesT, EdgeOutlineStyles, EdgeOutlineWidths, EdgeWidths, OutlineRadiuses, Padding, EdgeColors, LocalizedBorderRadiuses, LocalizedEdgeColors, LocalizedEdges, LocalizedEdgeWidths, LocalizedPadding, LocalizedPosition, MarkStyle, BorderOptions, OutlineOptions, EdgeStyles, Edges } from "./../units"
 import { WithThemeInterface, WithThemeAttribute, WithThemeOptions } from "./../withTheme"
 import { AccessibilityHoverType, Alignment, Color, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, ColoringStrategy, CopyOptions, CrownAction, CrownSensitivity, Curve, DialogButtonStyle, Direction, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FocusDrawLevel, FoldStatus, FontStyle, FontWeight, FunctionKey, GradientDirection, HeightBreakpoint, HitTestMode, HorizontalAlign, HoverEffect, IlluminatedType, ImageFit, ImageRepeat, ImageSize, ImageSpanAlignment, InteractionHand, ItemAlign, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, ModifierKey, MouseAction, MouseButton, NestedScrollMode, ObscuredReasons, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PlayMode, RelateType, RenderFit, ResponseType, ScrollSource, TextAlign, SharedTransitionEffectType, TextOverflow, TextContentStyle, TextHeightAdaptivePolicy, WordBreak, TextCase, TextSelectableMode, TextDecorationStyle, TextDecorationType, TitleHeight, TouchType, TransitionType, VerticalAlign, Visibility, Week, WidthBreakpoint, XComponentType } from "./../enums"
 import { Affinity, LineMetrics, TextBox, RunMetrics, TextDirection } from "./../arkui-graphics-text"
 import { Resource } from "global/resource"
 import { AnimatedDrawableDescriptor, AnimatedDrawableDescriptorInternal, DrawableDescriptor, DrawableDescriptorInternal, AnimationOptions, LayeredDrawableDescriptor, LayeredDrawableDescriptorInternal, PixelMapDrawableDescriptor, PixelMapDrawableDescriptorInternal } from "./../arkui-drawabledescriptor"
-import { PixelMap, PixelMapInternal } from "./../arkui-pixelmap"
+import { PixelMap } from "#external"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, GuideLinePosition, GuideLineStyle, LocalizedBarrierStyle } from "./../relativeContainer"
 import { BlendMode, DrawingCanvas, DrawingCanvasInternal, DrawingColorFilter, DrawingColorFilterInternal, DrawingLattice, DrawingLatticeInternal, RectType } from "./../arkui-drawing"
+import { drawing } from "@ohos/graphics/drawing"
 import { BreakpointsReference, GridRowDirection, Callback_String_Void, BreakPoints, GridRowColumnOption, GridRowSizeOption, GutterOption, GridRowOptions } from "./../gridRow"
 import { CalendarAlign, CalendarPickerAttribute, Callback_Date_Void, CalendarOptions, CalendarDialogOptions } from "./../calendarPicker"
 import { CalendarController, CalendarControllerInternal, Literal_Number_day_month_year, Callback_CalendarRequestedData_Void, CalendarRequestedData, Callback_CalendarSelectedDate_Void, CalendarSelectedDate, CalendarDay, MonthData, CurrentDayStyle, NonCurrentDayStyle, TodayStyle, WeekStyle, WorkStateStyle } from "./../calendar"
@@ -92,7 +95,6 @@ import { DatePickerMode, Callback_DatePickerResult_Void, DatePickerResult, DateP
 import { DialogAlignment, DialogButtonDirection, LevelOrder, TextStyle_alert_dialog, AlertDialogButtonBaseOptions, AlertDialogButtonOptions, AlertDialogParamWithButtons, AlertDialogParam, AlertDialogParamWithConfirm, AlertDialogParamWithOptions } from "./../alertDialog"
 import { DistributionType, DisturbanceFieldShape, ParticleEmitterShape, ParticleType, ParticleUpdater } from "./../particle"
 import { DpiFollowStrategy, UIExtensionProxy, UIExtensionProxyInternal, Callback_UIExtensionProxy_Void, WindowModeFollowStrategy, Callback_Literal_Number_code__want_Void, Literal_Number_code__want, Callback_Map_String_Object_Void, UIExtensionOptions } from "./../uiExtensionComponent"
-import { Callback_Void } from "./../abilityComponent"
 import { EditMode, ListItemStyle, Sticky, SwipeActionState, SwipeEdgeEffect, Callback_SwipeActionState_Void, ListItemOptions, SwipeActionItem, SwipeActionOptions } from "./../listItem"
 import { EffectFillStyle, PulseSymbolEffect, PulseSymbolEffectInternal, SymbolEffectStrategy, SymbolGlyphAttribute, SymbolRenderingStrategy, AppearSymbolEffect, AppearSymbolEffectInternal, BounceSymbolEffect, BounceSymbolEffectInternal, DisappearSymbolEffect, DisappearSymbolEffectInternal, HierarchicalSymbolEffect, HierarchicalSymbolEffectInternal } from "./../symbolglyph"
 import { EventTargetInfo, EventTargetInfoInternal, GestureControl, GestureGroupInterface, GestureGroupInterfaceInternal, GestureMode, GestureType, TapGestureInterface, TapGestureInterfaceInternal, LongPressGestureInterface, LongPressGestureInterfaceInternal, PanGestureInterface, PanGestureInterfaceInternal, PinchGestureInterface, PinchGestureInterfaceInternal, SwipeGestureInterface, SwipeGestureInterfaceInternal, RotationGestureInterface, RotationGestureInterfaceInternal, GestureJudgeResult, GestureMask, GesturePriority, GestureRecognizer, GestureRecognizerInternal, GestureRecognizerState, GestureInterface, Literal_Number_duration_fingers_Boolean_repeat, LongPressGestureHandlerOptions, Callback_GestureEvent_Void, GestureEvent, GestureEventInternal, LongPressRecognizer, LongPressRecognizerInternal, PanDirection, Literal_Number_distance_fingers_PanDirection_direction, PanGestureOptions, PanGestureOptionsInternal, PanGestureHandlerOptions, PanRecognizer, PanRecognizerInternal, Literal_Number_distance_fingers, PinchGestureHandlerOptions, PinchRecognizer, PinchRecognizerInternal, Literal_Number_angle_fingers, RotationGestureHandlerOptions, RotationRecognizer, RotationRecognizerInternal, ScrollableTargetInfo, ScrollableTargetInfoInternal, SwipeDirection, Literal_Number_fingers_speed_SwipeDirection_direction, SwipeGestureHandlerOptions, SwipeRecognizer, SwipeRecognizerInternal, TapGestureParameters, TapRecognizer, TapRecognizerInternal, GestureHandler, GestureInfo, BaseGestureEvent, BaseGestureEventInternal, FingerInfo, BaseHandlerOptions, LongPressGestureEvent, LongPressGestureEventInternal, PanGestureEvent, PanGestureEventInternal, PinchGestureEvent, PinchGestureEventInternal, RotationGestureEvent, RotationGestureEventInternal, SwipeGestureEvent, SwipeGestureEventInternal, TapGestureEvent, TapGestureEventInternal } from "./../gesture"
@@ -168,7 +170,8 @@ import { MenuItemGroupOptions } from "./../menuItemGroup"
 import { MenuItemOptions } from "./../menuItem"
 import { TextBackgroundStyle } from "./../span"
 import { DividerStyle as DividerStyle_sidebar } from "./../sidebar"
-
+import promptAction from '@ohos/promptAction'
+import { PointerStyle } from '#external'
 export class Serializer extends SerializerBase {
     private static pool?: Array<Serializer> | undefined = undefined
     private static poolTop: int32 = -1
@@ -214,6 +217,10 @@ export class Serializer extends SerializerBase {
         valueSerializer.writePointer(toPeerPtr(value))
     }
     writeBaseShape(value: BaseShape): void {
+        let valueSerializer : Serializer = this
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    writeBuilderNodeOps(value: BuilderNodeOps): void {
         let valueSerializer : Serializer = this
         valueSerializer.writePointer(toPeerPtr(value))
     }
@@ -287,9 +294,9 @@ export class Serializer extends SerializerBase {
         let valueSerializer : Serializer = this
         valueSerializer.writePointer(toPeerPtr(value))
     }
-    writeDrawingCanvas(value: DrawingCanvas): void {
+    writeDrawingCanvas(value: drawing.Canvas): void {
         let valueSerializer : Serializer = this
-        valueSerializer.writePointer(toPeerPtr(value))
+        valueSerializer.holdAndWriteObject(value)
     }
     writeDrawingColorFilter(value: DrawingColorFilter): void {
         let valueSerializer : Serializer = this
@@ -1027,6 +1034,27 @@ export class Serializer extends SerializerBase {
         let valueSerializer : Serializer = this
         valueSerializer.writePointer(toPeerPtr(value))
     }
+    writeUIFontAdjustInfo(value: UIFontAdjustInfo): void {
+        let valueSerializer : Serializer = this
+        const value_weight  = value.weight
+        valueSerializer.writeNumber(value_weight)
+        const value_to  = value.to
+        valueSerializer.writeNumber(value_to)
+    }
+    writeUIFontAliasInfo(value: UIFontAliasInfo): void {
+        let valueSerializer : Serializer = this
+        const value_name  = value.name
+        valueSerializer.writeString(value_name)
+        const value_weight  = value.weight
+        valueSerializer.writeNumber(value_weight)
+    }
+    writeUIFontFallbackInfo(value: UIFontFallbackInfo): void {
+        let valueSerializer : Serializer = this
+        const value_language  = value.language
+        valueSerializer.writeString(value_language)
+        const value_family  = value.family
+        valueSerializer.writeString(value_family)
+    }
     writeUIGestureEvent(value: UIGestureEvent): void {
     }
     writeUnifiedData(value: UnifiedData): void {
@@ -1171,8 +1199,23 @@ export class Serializer extends SerializerBase {
             const value_arrayValue_element : string = value_arrayValue[i]
             valueSerializer.writeString(value_arrayValue_element)
         }
-        const value_selected  = value.selected
-        valueSerializer.writeNumber(value_selected)
+        const value_value  = value.selected
+        let value_value_type : int32 = RuntimeType.UNDEFINED
+        value_value_type = runtimeType(value_value)
+        valueSerializer.writeInt8(value_value_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_value_type)) {
+            const value_value_value  = value_value!
+            let value_value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_value_type = runtimeType(value_value_value)
+            if (RuntimeType.NUMBER == value_value_value_type) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_value_value_0  = value_value_value as number
+                valueSerializer.writeNumber(value_value_value_0)
+            }
+            else if (TypeChecker.isBindableNumber(value_value_value)) {
+                valueSerializer.writeInt8(1 as int32)
+            }
+        }
     }
     writeAnimationOptions(value: AnimationOptions): void {
         let valueSerializer : Serializer = this
@@ -1412,6 +1455,33 @@ export class Serializer extends SerializerBase {
         if ((RuntimeType.UNDEFINED) != (value_reference_type)) {
             const value_reference_value  = (value_reference as BreakpointsReference)
             valueSerializer.writeInt32(TypeChecker.BreakpointsReference_ToNumeric(value_reference_value))
+        }
+    }
+    writeBuilderNodeOptions(value: BuilderNodeOptions): void {
+        let valueSerializer : Serializer = this
+        const value_selfIdealSize  = value.selfIdealSize
+        let value_selfIdealSize_type : int32 = RuntimeType.UNDEFINED
+        value_selfIdealSize_type = runtimeType(value_selfIdealSize)
+        valueSerializer.writeInt8(value_selfIdealSize_type)
+        if ((RuntimeType.UNDEFINED) != (value_selfIdealSize_type)) {
+            const value_selfIdealSize_value  = value_selfIdealSize!
+            valueSerializer.writeSize(value_selfIdealSize_value)
+        }
+        const value_type  = value.type
+        let value_type_type : int32 = RuntimeType.UNDEFINED
+        value_type_type = runtimeType(value_type)
+        valueSerializer.writeInt8(value_type_type)
+        if ((RuntimeType.UNDEFINED) != (value_type_type)) {
+            const value_type_value  = value_type!
+            valueSerializer.writeNumber(value_type_value)
+        }
+        const value_surfaceId  = value.surfaceId
+        let value_surfaceId_type : int32 = RuntimeType.UNDEFINED
+        value_surfaceId_type = runtimeType(value_surfaceId)
+        valueSerializer.writeInt8(value_surfaceId_type)
+        if ((RuntimeType.UNDEFINED) != (value_surfaceId_type)) {
+            const value_surfaceId_value  = value_surfaceId!
+            valueSerializer.writeString(value_surfaceId_value)
         }
     }
     writeBrightnessBlender(value: BrightnessBlender): void {
@@ -5361,7 +5431,16 @@ export class Serializer extends SerializerBase {
     writeRatingOptions(value: RatingOptions): void {
         let valueSerializer : Serializer = this
         const value_rating  = value.rating
-        valueSerializer.writeNumber(value_rating)
+        let value_rating_type : int32 = RuntimeType.UNDEFINED
+        value_rating_type = runtimeType(value_rating)
+        if (RuntimeType.NUMBER == value_rating_type) {
+            valueSerializer.writeInt8(0 as int32)
+            const value_rating_0  = value_rating as number
+            valueSerializer.writeNumber(value_rating_0)
+        }
+        else if (TypeChecker.isBindableNumber(value_rating)) {
+            valueSerializer.writeInt8(1 as int32)
+        }
         const value_indicator  = value.indicator
         let value_indicator_type : int32 = RuntimeType.UNDEFINED
         value_indicator_type = runtimeType(value_indicator)
@@ -5443,16 +5522,7 @@ export class Serializer extends SerializerBase {
             const value_params_value  = value_params!
             valueSerializer.writeInt32(value_params_value.length as int32)
             for (let i = 0; i < value_params_value.length; i++) {
-                const value_params_value_type = runtimeType(value_params_value[i])
-                if (value_params_value_type == RuntimeType.STRING) {
-                    const value_params_value_element: string = value_params_value[i] as string
-                    valueSerializer.writeString(value_params_value_element)
-                } else if (value_params_value_type == RuntimeType.NUMBER) {
-                    const value_params_value_element : number = value_params_value[i] as number
-                    valueSerializer.writeString(String(value_params_value_element))
-                } else {
-                    throw new Error("Unsupported params type, expect string or number.")
-                }
+                valueSerializer.writeString(String(value_params_value[i]))
             }
         }
         const value_type  = value.type
@@ -6367,7 +6437,16 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_value_type)) {
             const value_value_value  = value_value!
-            valueSerializer.writeNumber(value_value_value)
+            let value_value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_value_type = runtimeType(value_value_value)
+            if (RuntimeType.NUMBER == value_value_value_type) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_value_value_0  = value_value_value as number
+                valueSerializer.writeNumber(value_value_value_0)
+            }
+            else if (TypeChecker.isBindableNumber(value_value_value)) {
+                valueSerializer.writeInt8(1 as int32)
+            }
         }
         const value_min  = value.min
         let value_min_type : int32 = RuntimeType.UNDEFINED
@@ -7001,6 +7080,17 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeInt32(TypeChecker.MarqueeStartPolicy_ToNumeric(value_marqueeStartPolicy_value))
         }
     }
+    writeTextMenuOptions(value: TextMenuOptions): void {
+        let valueSerializer : Serializer = this
+        const value_showMode  = value.showMode
+        let value_showMode_type : int32 = RuntimeType.UNDEFINED
+        value_showMode_type = runtimeType(value_showMode)
+        valueSerializer.writeInt8(value_showMode_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_showMode_type)) {
+            const value_showMode_value  = (value_showMode as TextMenuShowMode)
+            valueSerializer.writeInt32(TypeChecker.TextMenuShowMode_ToNumeric(value_showMode_value))
+        }
+    }
     writeTextRange(value: TextRange): void {
         let valueSerializer : Serializer = this
         const value_start  = value.start
@@ -7174,7 +7264,16 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_isOn_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_isOn_type)) {
             const value_isOn_value  = value_isOn!
-            valueSerializer.writeBoolean(value_isOn_value)
+            let value_isOn_value_type : int32 = RuntimeType.UNDEFINED
+            value_isOn_value_type = runtimeType(value_isOn_value)
+            if (RuntimeType.BOOLEAN == value_isOn_value_type) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_isOn_value_0  = value_isOn_value as boolean
+                valueSerializer.writeBoolean(value_isOn_value_0)
+            }
+            else if (TypeChecker.isBindableBoolean(value_isOn_value)) {
+                valueSerializer.writeInt8(1 as int32)
+            }
         }
     }
     writeTouchObject(value: TouchObject): void {
@@ -7398,6 +7497,55 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeInt32(TypeChecker.WindowModeFollowStrategy_ToNumeric(value_windowModeFollowStrategy_value))
         }
     }
+    writeUIFontConfig(value: UIFontConfig): void {
+        let valueSerializer : Serializer = this
+        const value_fontDir  = value.fontDir
+        valueSerializer.writeInt32(value_fontDir.length as int32)
+        for (let i = 0; i < value_fontDir.length; i++) {
+            const value_fontDir_element : string = value_fontDir[i]
+            valueSerializer.writeString(value_fontDir_element)
+        }
+        const value_generic  = value.generic
+        valueSerializer.writeInt32(value_generic.length as int32)
+        for (let i = 0; i < value_generic.length; i++) {
+            const value_generic_element : UIFontGenericInfo = value_generic[i]
+            valueSerializer.writeUIFontGenericInfo(value_generic_element)
+        }
+        const value_fallbackGroups  = value.fallbackGroups
+        valueSerializer.writeInt32(value_fallbackGroups.length as int32)
+        for (let i = 0; i < value_fallbackGroups.length; i++) {
+            const value_fallbackGroups_element : UIFontFallbackGroupInfo = value_fallbackGroups[i]
+            valueSerializer.writeUIFontFallbackGroupInfo(value_fallbackGroups_element)
+        }
+    }
+    writeUIFontFallbackGroupInfo(value: UIFontFallbackGroupInfo): void {
+        let valueSerializer : Serializer = this
+        const value_fontSetName  = value.fontSetName
+        valueSerializer.writeString(value_fontSetName)
+        const value_fallback  = value.fallback
+        valueSerializer.writeInt32(value_fallback.length as int32)
+        for (let i = 0; i < value_fallback.length; i++) {
+            const value_fallback_element : UIFontFallbackInfo = value_fallback[i]
+            valueSerializer.writeUIFontFallbackInfo(value_fallback_element)
+        }
+    }
+    writeUIFontGenericInfo(value: UIFontGenericInfo): void {
+        let valueSerializer : Serializer = this
+        const value_family  = value.family
+        valueSerializer.writeString(value_family)
+        const value_alias  = value.alias
+        valueSerializer.writeInt32(value_alias.length as int32)
+        for (let i = 0; i < value_alias.length; i++) {
+            const value_alias_element : UIFontAliasInfo = value_alias[i]
+            valueSerializer.writeUIFontAliasInfo(value_alias_element)
+        }
+        const value_adjust  = value.adjust
+        valueSerializer.writeInt32(value_adjust.length as int32)
+        for (let i = 0; i < value_adjust.length; i++) {
+            const value_adjust_element : UIFontAdjustInfo = value_adjust[i]
+            valueSerializer.writeUIFontAdjustInfo(value_adjust_element)
+        }
+    }
     writeViewportRect(value: ViewportRect): void {
         let valueSerializer : Serializer = this
         const value_x  = value.x
@@ -7618,7 +7766,7 @@ export class Serializer extends SerializerBase {
             const value_footer_value  = value_footer!
             valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_footer_value))
         }
-        const value_footerContent  = value.footerContent
+        const value_footerContent  = undefined
         let value_footerContent_type : int32 = RuntimeType.UNDEFINED
         value_footerContent_type = runtimeType(value_footerContent)
         valueSerializer.writeInt8(value_footerContent_type as int32)
@@ -7704,7 +7852,7 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeBoolean(value_audioExclusive_value)
         }
     }
-    writeWebOptions(value: WebOptions): void {
+    writeWebOptions(value: WebOptionsSerializer): void {
         let valueSerializer : Serializer = this
         const value_src  = value.src
         let value_src_type : int32 = RuntimeType.UNDEFINED
@@ -7718,19 +7866,6 @@ export class Serializer extends SerializerBase {
             valueSerializer.writeInt8(1 as int32)
             const value_src_1  = value_src as Resource
             valueSerializer.writeResource(value_src_1)
-        }
-        const value_controller  = value.controller
-        let value_controller_type : int32 = RuntimeType.UNDEFINED
-        value_controller_type = runtimeType(value_controller)
-        if (TypeChecker.isWebController(value_controller)) {
-            valueSerializer.writeInt8(0 as int32)
-            const value_controller_0  = value_controller as WebController
-            valueSerializer.writeWebController(value_controller_0)
-        }
-        else if (TypeChecker.isWebviewController(value_controller)) {
-            valueSerializer.writeInt8(1 as int32)
-            const value_controller_1  = value_controller as WebviewController
-            valueSerializer.writeWebviewController(value_controller_1)
         }
         const value_renderMode  = value.renderMode
         let value_renderMode_type : int32 = RuntimeType.UNDEFINED
@@ -11437,14 +11572,6 @@ export class Serializer extends SerializerBase {
                 }
             }
         }
-        const value_modifier  = value.modifier
-        let value_modifier_type : int32 = RuntimeType.UNDEFINED
-        value_modifier_type = runtimeType(value_modifier)
-        valueSerializer.writeInt8(value_modifier_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_modifier_type)) {
-            const value_modifier_value  = value_modifier!
-            valueSerializer.writeImageModifier(value_modifier_value)
-        }
         const value_numberBadge  = value.numberBadge
         let value_numberBadge_type : int32 = RuntimeType.UNDEFINED
         value_numberBadge_type = runtimeType(value_numberBadge)
@@ -12097,7 +12224,7 @@ export class Serializer extends SerializerBase {
         const value_force  = value.force
         valueSerializer.writeNumber(value_force)
         const value_timestamp  = value.timestamp
-        valueSerializer.writeInt64(value_timestamp)
+        valueSerializer.writeNumber(value_timestamp)
     }
     writeHoverEvent(value: HoverEvent): void {
         let valueSerializer : Serializer = this
@@ -14428,7 +14555,7 @@ export class Serializer extends SerializerBase {
         const value_template  = value.template
         valueSerializer.writePluginComponentTemplate(value_template)
         const value_data  = value.data
-        valueSerializer.writeString(value_data)
+        valueSerializer.writeString(value_data == undefined || value_data == null ? '' : JSON.stringify(value_data));
     }
     writeRadioStyle(value: RadioStyle): void {
         let valueSerializer : Serializer = this
@@ -14670,7 +14797,22 @@ export class Serializer extends SerializerBase {
     writeRefreshOptions(value: RefreshOptions): void {
         let valueSerializer : Serializer = this
         const value_refreshing  = value.refreshing
-        valueSerializer.writeBoolean(value_refreshing)
+        let value_refreshing_type : int32 = RuntimeType.UNDEFINED
+        value_refreshing_type = runtimeType(value_refreshing)
+        valueSerializer.writeInt8(value_refreshing_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_refreshing_type)) {
+            const value_refreshing_value  = value_refreshing!
+            let value_refreshing_value_type : int32 = RuntimeType.UNDEFINED
+            value_refreshing_value_type = runtimeType(value_refreshing_value)
+            if (RuntimeType.BOOLEAN == value_refreshing_value_type) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_refreshing_value_0  = value_refreshing_value as boolean
+                valueSerializer.writeBoolean(value_refreshing_value_0)
+            }
+            else if (TypeChecker.isBindableBoolean(value_refreshing_value)) {
+                valueSerializer.writeInt8(1 as int32)
+            }
+        }
         const value_offset  = value.offset
         let value_offset_type : int32 = RuntimeType.UNDEFINED
         value_offset_type = runtimeType(value_offset)
@@ -14736,7 +14878,7 @@ export class Serializer extends SerializerBase {
             const value_builder_value  = value_builder!
             valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(value_builder_value))
         }
-        const value_refreshingContent  = value.refreshingContent
+        const value_refreshingContent  = undefined
         let value_refreshingContent_type : int32 = RuntimeType.UNDEFINED
         value_refreshingContent_type = runtimeType(value_refreshingContent)
         valueSerializer.writeInt8(value_refreshingContent_type as int32)
@@ -15292,7 +15434,16 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_value_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_value_type)) {
             const value_value_value  = value_value!
-            valueSerializer.writeString(value_value_value)
+            let value_value_value_type : int32 = RuntimeType.UNDEFINED
+            value_value_value_type = runtimeType(value_value_value)
+            if (RuntimeType.STRING == value_value_value_type) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_value_value_0  = value_value_value as string
+                valueSerializer.writeString(value_value_value_0)
+            }
+            else if (TypeChecker.isBindableResourceStr(value_value_value)) {
+                valueSerializer.writeInt8(1 as int32)
+            }
         }
         const value_placeholder  = value.placeholder
         let value_placeholder_type : int32 = RuntimeType.UNDEFINED
@@ -15514,14 +15665,14 @@ export class Serializer extends SerializerBase {
                 valueSerializer.writeResource(value_icon_value_1)
             }
         }
-        const value_symbolIcon  = value.symbolIcon
+        // const value_symbolIcon  = value.symbolIcon
         let value_symbolIcon_type : int32 = RuntimeType.UNDEFINED
-        value_symbolIcon_type = runtimeType(value_symbolIcon)
+        // value_symbolIcon_type = runtimeType(value_symbolIcon)
         valueSerializer.writeInt8(value_symbolIcon_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_symbolIcon_type)) {
-            const value_symbolIcon_value  = value_symbolIcon!
-            valueSerializer.writeSymbolGlyphModifier(value_symbolIcon_value)
-        }
+        // if ((RuntimeType.UNDEFINED) != (value_symbolIcon_type)) {
+        //     const value_symbolIcon_value  = value_symbolIcon!
+        //     valueSerializer.writeSymbolGlyphModifier(value_symbolIcon_value)
+        // }
     }
     writeShadowOptions(value: ShadowOptions): void {
         let valueSerializer : Serializer = this
@@ -16086,7 +16237,16 @@ export class Serializer extends SerializerBase {
         valueSerializer.writeInt8(value_index_type as int32)
         if ((RuntimeType.UNDEFINED) != (value_index_type)) {
             const value_index_value  = value_index!
-            valueSerializer.writeNumber(value_index_value)
+            let value_index_value_type : int32 = RuntimeType.UNDEFINED
+            value_index_value_type = runtimeType(value_index_value)
+            if (RuntimeType.NUMBER == value_index_value_type) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_index_value_0  = value_index_value as number
+                valueSerializer.writeNumber(value_index_value_0)
+            }
+            else if (TypeChecker.isBindableNumber(value_index_value)) {
+                valueSerializer.writeInt8(1 as int32)
+            }
         }
         const value_controller  = value.controller
         let value_controller_type : int32 = RuntimeType.UNDEFINED
@@ -16096,7 +16256,7 @@ export class Serializer extends SerializerBase {
             const value_controller_value  = value_controller!
             valueSerializer.writeTabsController(value_controller_value)
         }
-        const value_barModifier  = value.barModifier
+        const value_barModifier  = undefined
         let value_barModifier_type : int32 = RuntimeType.UNDEFINED
         value_barModifier_type = runtimeType(value_barModifier)
         valueSerializer.writeInt8(value_barModifier_type as int32)
@@ -16151,7 +16311,10 @@ export class Serializer extends SerializerBase {
             const value_text_value  = value_text!
             let value_text_value_type : int32 = RuntimeType.UNDEFINED
             value_text_value_type = runtimeType(value_text_value)
-            if (RuntimeType.STRING == value_text_value_type) {
+            if (TypeChecker.isBindableResourceStr(value_text_value)) {
+                valueSerializer.writeInt8(2 as int32)
+            }
+            else if (RuntimeType.STRING == value_text_value_type) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_text_value_0  = value_text_value as string
                 valueSerializer.writeString(value_text_value_0)
@@ -16332,7 +16495,10 @@ export class Serializer extends SerializerBase {
             const value_text_value  = value_text!
             let value_text_value_type : int32 = RuntimeType.UNDEFINED
             value_text_value_type = runtimeType(value_text_value)
-            if (RuntimeType.STRING == value_text_value_type) {
+            if (TypeChecker.isBindableResourceStr(value_text_value)) {
+                valueSerializer.writeInt8(2 as int32)
+            }
+            else if (RuntimeType.STRING == value_text_value_type) {
                 valueSerializer.writeInt8(0 as int32)
                 const value_text_value_0  = value_text_value as string
                 valueSerializer.writeString(value_text_value_0)
@@ -16589,7 +16755,7 @@ export class Serializer extends SerializerBase {
             }
         }
     }
-    writeTextStyle_styled_string(value: TextStyle_styled_string): void {
+    writeTextStyle_styled_string(value: TextStyle): void {
         let valueSerializer : Serializer = this
         valueSerializer.writePointer(toPeerPtr(value))
     }
@@ -17791,6 +17957,174 @@ export class Serializer extends SerializerBase {
         if ((RuntimeType.UNDEFINED) != (value_levelOrder_type)) {
             const value_levelOrder_value  = value_levelOrder!
             valueSerializer.writeLevelOrder(value_levelOrder_value)
+        }
+    }
+    writeShowToastOptions(value: promptAction.ShowToastOptions): void {
+        let valueSerializer : Serializer = this
+        const value_message  = value.message
+        let value_message_type : int32 = RuntimeType.UNDEFINED
+        value_message_type = runtimeType(value_message)
+        if (RuntimeType.STRING == value_message_type) {
+            valueSerializer.writeInt8(0 as int32)
+            const value_message_0  = value_message as string
+            valueSerializer.writeString(value_message_0)
+        }
+        else if (RuntimeType.OBJECT == value_message_type) {
+            valueSerializer.writeInt8(1 as int32)
+            const value_message_1  = value_message as Resource
+            valueSerializer.writeResource(value_message_1)
+        }
+        const value_duration  = value.duration
+        let value_duration_type : int32 = RuntimeType.UNDEFINED
+        value_duration_type = runtimeType(value_duration)
+        valueSerializer.writeInt8(value_duration_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_duration_type)) {
+            const value_duration_value  = value_duration!
+            valueSerializer.writeNumber(value_duration_value)
+        }
+        const value_bottom  = value.bottom
+        let value_bottom_type : int32 = RuntimeType.UNDEFINED
+        value_bottom_type = runtimeType(value_bottom)
+        valueSerializer.writeInt8(value_bottom_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_bottom_type)) {
+            const value_bottom_value  = value_bottom!
+            let value_bottom_value_type : int32 = RuntimeType.UNDEFINED
+            value_bottom_value_type = runtimeType(value_bottom_value)
+            if (RuntimeType.STRING == value_bottom_value_type) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_bottom_value_0  = value_bottom_value as string
+                valueSerializer.writeString(value_bottom_value_0)
+            }
+            else if (RuntimeType.NUMBER == value_bottom_value_type) {
+                valueSerializer.writeInt8(1 as int32)
+                const value_bottom_value_1  = value_bottom_value as number
+                valueSerializer.writeNumber(value_bottom_value_1)
+            }
+        }
+        const value_showMode = value.showMode
+        let value_showMode_type : int32 = RuntimeType.UNDEFINED
+        value_showMode_type = runtimeType(value_showMode)
+        valueSerializer.writeInt8(value_showMode_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_showMode_type)) {
+            const value_showMode_value  = (value_showMode as promptAction.ToastShowMode)
+            valueSerializer.writeInt32(TypeChecker.ToastShowMode_ToNumeric(value_showMode_value))
+        }
+        const value_alignment  = value.alignment
+        let value_alignment_type : int32 = RuntimeType.UNDEFINED
+        value_alignment_type = runtimeType(value_alignment)
+        valueSerializer.writeInt8(value_alignment_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_alignment_type)) {
+            const value_alignment_value  = (value_alignment as Alignment)
+            valueSerializer.writeInt32(TypeChecker.Alignment_ToNumeric(value_alignment_value))
+        }
+        const value_offset  = value.offset
+        let value_offset_type : int32 = RuntimeType.UNDEFINED
+        value_offset_type = runtimeType(value_offset)
+        valueSerializer.writeInt8(value_offset_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_offset_type)) {
+            const value_offset_value  = value_offset!
+            valueSerializer.writeOffset(value_offset_value)
+        }
+        const value_backgroundColor  = value.backgroundColor
+        let value_backgroundColor_type : int32 = RuntimeType.UNDEFINED
+        value_backgroundColor_type = runtimeType(value_backgroundColor)
+        valueSerializer.writeInt8(value_backgroundColor_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_backgroundColor_type)) {
+            const value_backgroundColor_value  = value_backgroundColor!
+            let value_backgroundColor_value_type : int32 = RuntimeType.UNDEFINED
+            value_backgroundColor_value_type = runtimeType(value_backgroundColor_value)
+            if (TypeChecker.isColor(value_backgroundColor_value)) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_backgroundColor_value_0  = value_backgroundColor_value as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_backgroundColor_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_backgroundColor_value_type) {
+                valueSerializer.writeInt8(1 as int32)
+                const value_backgroundColor_value_1  = value_backgroundColor_value as number
+                valueSerializer.writeNumber(value_backgroundColor_value_1)
+            }
+            else if (RuntimeType.STRING == value_backgroundColor_value_type) {
+                valueSerializer.writeInt8(2 as int32)
+                const value_backgroundColor_value_2  = value_backgroundColor_value as string
+                valueSerializer.writeString(value_backgroundColor_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_backgroundColor_value_type) {
+                valueSerializer.writeInt8(3 as int32)
+                const value_backgroundColor_value_3  = value_backgroundColor_value as Resource
+                valueSerializer.writeResource(value_backgroundColor_value_3)
+            }
+        }
+        const value_textColor  = value.textColor
+        let value_textColor_type : int32 = RuntimeType.UNDEFINED
+        value_textColor_type = runtimeType(value_textColor)
+        valueSerializer.writeInt8(value_textColor_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_textColor_type)) {
+            const value_textColor_value  = value_textColor!
+            let value_textColor_value_type : int32 = RuntimeType.UNDEFINED
+            value_textColor_value_type = runtimeType(value_textColor_value)
+            if (TypeChecker.isColor(value_textColor_value)) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_textColor_value_0  = value_textColor_value as Color
+                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_textColor_value_0))
+            }
+            else if (RuntimeType.NUMBER == value_textColor_value_type) {
+                valueSerializer.writeInt8(1 as int32)
+                const value_textColor_value_1  = value_textColor_value as number
+                valueSerializer.writeNumber(value_textColor_value_1)
+            }
+            else if (RuntimeType.STRING == value_textColor_value_type) {
+                valueSerializer.writeInt8(2 as int32)
+                const value_textColor_value_2  = value_textColor_value as string
+                valueSerializer.writeString(value_textColor_value_2)
+            }
+            else if (RuntimeType.OBJECT == value_textColor_value_type) {
+                valueSerializer.writeInt8(3 as int32)
+                const value_textColor_value_3  = value_textColor_value as Resource
+                valueSerializer.writeResource(value_textColor_value_3)
+            }
+        }
+        const value_backgroundBlurStyle  = value.backgroundBlurStyle
+        let value_backgroundBlurStyle_type : int32 = RuntimeType.UNDEFINED
+        value_backgroundBlurStyle_type = runtimeType(value_backgroundBlurStyle)
+        valueSerializer.writeInt8(value_backgroundBlurStyle_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_backgroundBlurStyle_type)) {
+            const value_backgroundBlurStyle_value  = (value_backgroundBlurStyle as BlurStyle)
+            valueSerializer.writeInt32(TypeChecker.BlurStyle_ToNumeric(value_backgroundBlurStyle_value))
+        }
+        const value_shadow  = value.shadow
+        let value_shadow_type : int32 = RuntimeType.UNDEFINED
+        value_shadow_type = runtimeType(value_shadow)
+        valueSerializer.writeInt8(value_shadow_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_shadow_type)) {
+            const value_shadow_value  = value_shadow!
+            let value_shadow_value_type : int32 = RuntimeType.UNDEFINED
+            value_shadow_value_type = runtimeType(value_shadow_value)
+            if (RuntimeType.OBJECT == value_shadow_value_type) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_shadow_value_0  = value_shadow_value as ShadowOptions
+                valueSerializer.writeShadowOptions(value_shadow_value_0)
+            }
+            else if (TypeChecker.isShadowStyle(value_shadow_value)) {
+                valueSerializer.writeInt8(1 as int32)
+                const value_shadow_value_1  = value_shadow_value as ShadowStyle
+                valueSerializer.writeInt32(TypeChecker.ShadowStyle_ToNumeric(value_shadow_value_1))
+            }
+        }
+        const value_enableHoverMode  = value.enableHoverMode
+        let value_enableHoverMode_type : int32 = RuntimeType.UNDEFINED
+        value_enableHoverMode_type = runtimeType(value_enableHoverMode)
+        valueSerializer.writeInt8(value_enableHoverMode_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_enableHoverMode_type)) {
+            const value_enableHoverMode_value  = value_enableHoverMode!
+            valueSerializer.writeBoolean(value_enableHoverMode_value)
+        }
+        const value_hoverModeArea  = value.hoverModeArea
+        let value_hoverModeArea_type : int32 = RuntimeType.UNDEFINED
+        value_hoverModeArea_type = runtimeType(value_hoverModeArea)
+        valueSerializer.writeInt8(value_hoverModeArea_type as int32)
+        if ((RuntimeType.UNDEFINED) != (value_hoverModeArea_type)) {
+            const value_hoverModeArea_value  = (value_hoverModeArea as HoverModeAreaType)
+            valueSerializer.writeInt32(TypeChecker.HoverModeAreaType_ToNumeric(value_hoverModeArea_value))
         }
     }
     writeAlertDialogParamWithButtons(value: AlertDialogParamWithButtons): void {
@@ -19315,7 +19649,7 @@ export class Serializer extends SerializerBase {
                 const value_color_value_0  = value_color_value as EdgeColors
                 valueSerializer.writeEdgeColors(value_color_value_0)
             }
-            else if ((TypeChecker.isColor(value_color_value)) || (RuntimeType.NUMBER == value_color_value_type) || (RuntimeType.STRING == value_color_value_type) || (RuntimeType.OBJECT == value_color_value_type)) {
+            else if ((TypeChecker.isColor(value_color_value)) || (RuntimeType.NUMBER == value_color_value_type) || (RuntimeType.STRING == value_color_value_type) || (RuntimeType.OBJECT == value_color_value_type && (TypeChecker.isResource(value_color_value, false, false, false, false, false)))) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_color_value_1  = value_color_value as ResourceColor
                 let value_color_value_1_type : int32 = RuntimeType.UNDEFINED
@@ -20271,35 +20605,6 @@ export class Serializer extends SerializerBase {
             const value_placement_value  = (value_placement as Placement)
             valueSerializer.writeInt32(TypeChecker.Placement_ToNumeric(value_placement_value))
         }
-        const value_maskColor  = value.maskColor
-        let value_maskColor_type : int32 = RuntimeType.UNDEFINED
-        value_maskColor_type = runtimeType(value_maskColor)
-        valueSerializer.writeInt8(value_maskColor_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_maskColor_type)) {
-            const value_maskColor_value  = value_maskColor!
-            let value_maskColor_value_type : int32 = RuntimeType.UNDEFINED
-            value_maskColor_value_type = runtimeType(value_maskColor_value)
-            if (TypeChecker.isColor(value_maskColor_value)) {
-                valueSerializer.writeInt8(0 as int32)
-                const value_maskColor_value_0  = value_maskColor_value as Color
-                valueSerializer.writeInt32(TypeChecker.Color_ToNumeric(value_maskColor_value_0))
-            }
-            else if (RuntimeType.STRING == value_maskColor_value_type) {
-                valueSerializer.writeInt8(1 as int32)
-                const value_maskColor_value_1  = value_maskColor_value as string
-                valueSerializer.writeString(value_maskColor_value_1)
-            }
-            else if (RuntimeType.OBJECT == value_maskColor_value_type) {
-                valueSerializer.writeInt8(2 as int32)
-                const value_maskColor_value_2  = value_maskColor_value as Resource
-                valueSerializer.writeResource(value_maskColor_value_2)
-            }
-            else if (RuntimeType.NUMBER == value_maskColor_value_type) {
-                valueSerializer.writeInt8(3 as int32)
-                const value_maskColor_value_3  = value_maskColor_value as number
-                valueSerializer.writeNumber(value_maskColor_value_3)
-            }
-        }
         const value_popupColor  = value.popupColor
         let value_popupColor_type : int32 = RuntimeType.UNDEFINED
         value_popupColor_type = runtimeType(value_popupColor)
@@ -20384,7 +20689,7 @@ export class Serializer extends SerializerBase {
             }
             else if (RuntimeType.OBJECT == value_mask_value_type) {
                 valueSerializer.writeInt8(1 as int32)
-                const value_mask_value_1  = value_mask_value as Literal_ResourceColor_color
+                const value_mask_value_1  = value_mask_value as PopupMaskType
                 const value_mask_value_1_color  = value_mask_value_1.color
                 let value_mask_value_1_color_type : int32 = RuntimeType.UNDEFINED
                 value_mask_value_1_color_type = runtimeType(value_mask_value_1_color)
@@ -22765,7 +23070,7 @@ export class Serializer extends SerializerBase {
         value_styledValue_type = runtimeType(value_styledValue)
         if (TypeChecker.isTextStyle_styled_string(value_styledValue, false, false, false, false, false)) {
             valueSerializer.writeInt8(0 as int32)
-            const value_styledValue_0  = value_styledValue as TextStyle_styled_string
+            const value_styledValue_0  = value_styledValue as TextStyle
             valueSerializer.writeTextStyle_styled_string(value_styledValue_0)
         }
         else if (TypeChecker.isDecorationStyle(value_styledValue, false, false, false)) {
@@ -22818,15 +23123,15 @@ export class Serializer extends SerializerBase {
             const value_styledValue_10  = value_styledValue as CustomSpan
             valueSerializer.writeCustomSpan(value_styledValue_10)
         }
-        else if (RuntimeType.OBJECT == value_styledValue_type) {
-            valueSerializer.writeInt8(11 as int32)
-            const value_styledValue_11  = value_styledValue as UserDataSpan
-            valueSerializer.writeUserDataSpan(value_styledValue_11)
-        }
         else if (TypeChecker.isBackgroundColorStyle(value_styledValue, false)) {
             valueSerializer.writeInt8(12 as int32)
             const value_styledValue_12  = value_styledValue as BackgroundColorStyle
             valueSerializer.writeBackgroundColorStyle(value_styledValue_12)
+        }
+        else if (RuntimeType.OBJECT == value_styledValue_type) {
+            valueSerializer.writeInt8(11 as int32)
+            const value_styledValue_11  = value_styledValue as UserDataSpan
+            valueSerializer.writeUserDataSpan(value_styledValue_11)
         }
     }
     writeTextDataDetectorConfig(value: TextDataDetectorConfig): void {
@@ -24143,14 +24448,7 @@ export class Serializer extends SerializerBase {
         let valueSerializer : Serializer = this
         const value_message  = value.message
         valueSerializer.writeString(value_message)
-        const value_placementOnTop  = value.placementOnTop
-        let value_placementOnTop_type : int32 = RuntimeType.UNDEFINED
-        value_placementOnTop_type = runtimeType(value_placementOnTop)
-        valueSerializer.writeInt8(value_placementOnTop_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_placementOnTop_type)) {
-            const value_placementOnTop_value  = value_placementOnTop!
-            valueSerializer.writeBoolean(value_placementOnTop_value)
-        }
+
         const value_placement  = value.placement
         let value_placement_type : int32 = RuntimeType.UNDEFINED
         value_placement_type = runtimeType(value_placement)
@@ -24220,7 +24518,7 @@ export class Serializer extends SerializerBase {
             }
             else if (RuntimeType.OBJECT == value_mask_value_type) {
                 valueSerializer.writeInt8(1 as int32)
-                const value_mask_value_1  = value_mask_value as Literal_ResourceColor_color
+                const value_mask_value_1  = value_mask_value as PopupMaskType
                 const value_mask_value_1_color  = value_mask_value_1.color
                 let value_mask_value_1_color_type : int32 = RuntimeType.UNDEFINED
                 value_mask_value_1_color_type = runtimeType(value_mask_value_1_color)
@@ -24618,7 +24916,7 @@ export class Serializer extends SerializerBase {
         value_styledValue_type = runtimeType(value_styledValue)
         if (TypeChecker.isTextStyle_styled_string(value_styledValue, false, false, false, false, false)) {
             valueSerializer.writeInt8(0 as int32)
-            const value_styledValue_0  = value_styledValue as TextStyle_styled_string
+            const value_styledValue_0  = value_styledValue as TextStyle
             valueSerializer.writeTextStyle_styled_string(value_styledValue_0)
         }
         else if (TypeChecker.isDecorationStyle(value_styledValue, false, false, false)) {
@@ -25500,7 +25798,7 @@ export class Serializer extends SerializerBase {
         const valueType  = runtimeType(value)
         this.writeInt8(valueType)
         if ((RuntimeType.NUMBER) == (valueType)) {
-            this.writeFloat32(value as float32)
+            this.writeFloat32(value as float64 as float32)
         }
         else if ((RuntimeType.STRING) == (valueType)) {
             this.writeString(value as string)

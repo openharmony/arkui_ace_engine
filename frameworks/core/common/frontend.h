@@ -150,6 +150,14 @@ public:
 
     virtual void PushPage(const std::string& url, const std::string& params) = 0;
 
+    // For ArkTS1.2
+    virtual void* PushExtender(const std::string& url, const std::string& params) { return nullptr; };
+    virtual void* ReplaceExtender(
+        const std::string& url, const std::string& params, std::function<void()>&& finishCallback) { return nullptr; };
+    virtual void* RunPageExtender(const std::string& url, const std::string& params) { return nullptr; };
+    virtual void BackExtender(const std::string& url, const std::string& params) {};
+    virtual void ClearExtender() {};
+
     // Gets front-end event handler to handle ace event.
     virtual RefPtr<AceEventHandler> GetEventHandler() = 0;
 

@@ -22,12 +22,14 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
 import { ItemAlign } from "./enums"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Length } from "./units"
+import { ArkGridRowNode } from '../handwritten/modifiers/ArkGridRowNode';
+import { ArkGridRowAttributeSet, GridRowModifier } from '../GridRowModifier';
 
 export class ArkGridRowPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -125,13 +127,6 @@ export interface GridRowAttribute extends CommonMethod {
     onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this
     alignItems(value: ItemAlign | undefined): this
 }
-export interface UIGridRowAttribute extends UICommonMethod {
-    /** @memo */
-    onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this
-    /** @memo */
-    alignItems(value: ItemAlign | undefined): this
-    /** @memo */
-}
 export class ArkGridRowStyle extends ArkCommonMethodStyle implements GridRowAttribute {
     onBreakpointChange_value?: ((breakpoints: string) => void) | undefined
     alignItems_value?: ItemAlign | undefined
@@ -142,12 +137,34 @@ export class ArkGridRowStyle extends ArkCommonMethodStyle implements GridRowAttr
         return this
         }
 }
-/** @memo:stable */
-export class ArkGridRowComponent extends ArkCommonMethodComponent implements UIGridRowAttribute {
+export class ArkGridRowComponent extends ArkCommonMethodComponent implements GridRowAttribute {
+    protected _modifierHost: ArkGridRowNode | undefined;
+    setModifierHost(value: ArkGridRowNode): void {
+        this._modifierHost = value;
+    }
+    getModifierHost(): ArkGridRowNode {
+        if (this._modifierHost === undefined || this._modifierHost === null) {
+            this._modifierHost = new ArkGridRowNode()
+            this._modifierHost!.setPeer(this.getPeer());
+        }
+        return this._modifierHost!;
+    }
+    getAttributeSet(): ArkGridRowAttributeSet  {
+        return this.getPeer()._attributeSet as ArkGridRowAttributeSet;
+    }
+    
+    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
+        let isCommonModifier: boolean = modifier instanceof GridRowModifier;
+        if (isCommonModifier) {
+            let commonModifier = modifier as object as GridRowModifier;
+            this.getPeer()._attributeSet = commonModifier.attributeSet;
+        } else if (this.getPeer()._attributeSet == null) {
+            this.getPeer()._attributeSet = new ArkGridRowAttributeSet();
+        }
+    }
     getPeer(): ArkGridRowPeer {
         return (this.peer as ArkGridRowPeer)
     }
-    /** @memo */
     public setGridRowOptions(option?: GridRowOptions): this {
         if (this.checkPriority("setGridRowOptions")) {
             const option_casted = option as (GridRowOptions | undefined)
@@ -156,7 +173,6 @@ export class ArkGridRowComponent extends ArkCommonMethodComponent implements UIG
         }
         return this
     }
-    /** @memo */
     public onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this {
         if (this.checkPriority("onBreakpointChange")) {
             const value_casted = value as (((breakpoints: string) => void) | undefined)
@@ -165,7 +181,6 @@ export class ArkGridRowComponent extends ArkCommonMethodComponent implements UIG
         }
         return this
     }
-    /** @memo */
     public alignItems(value: ItemAlign | undefined): this {
         if (this.checkPriority("alignItems")) {
             const value_casted = value as (ItemAlign | undefined)
@@ -183,7 +198,7 @@ export class ArkGridRowComponent extends ArkCommonMethodComponent implements UIG
 /** @memo */
 export function GridRow(
     /** @memo */
-    style: ((attributes: UIGridRowAttribute) => void) | undefined,
+    style: ((attributes: GridRowAttribute) => void) | undefined,
     option?: GridRowOptions,
     /** @memo */
     content_?: (() => void) | undefined,

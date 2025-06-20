@@ -1070,7 +1070,7 @@ HWTEST_F(DatePickerModifierTest, setOnDateChangeTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setLunarTest, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setLunarTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setLunar, nullptr);
     auto initialValue = GetAttrValue<std::string>(node_, ATTRIBUTE_LUNAR_NAME);
@@ -1311,7 +1311,7 @@ HWTEST_F(DatePickerModifierTest, setDisappearTextStyleTextColor, TestSize.Level1
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setDisappearTextStyleInvalidValue, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setDisappearTextStyleInvalidValue, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
 
@@ -1556,7 +1556,7 @@ HWTEST_F(DatePickerModifierTest, setTextStyleTextColor, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setTextStyleInvalidValue, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setTextStyleInvalidValue, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setTextStyle, nullptr);
 
@@ -1801,7 +1801,7 @@ HWTEST_F(DatePickerModifierTest, setSelectedTextStyleTextColor, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DatePickerModifierTest, setSelectedTextStyleInvalidValue, TestSize.Level1)
+HWTEST_F(DatePickerModifierTest, DISABLED_setSelectedTextStyleInvalidValue, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
 

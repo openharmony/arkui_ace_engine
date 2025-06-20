@@ -32,7 +32,6 @@ void AssignArkValue(Ark_StyledStringChangeValue& dst, const StyledStringChangeVa
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-const GENERATED_ArkUIMutableStyledStringAccessor* GetMutableStyledStringAccessor();
 namespace RichEditorStyledStringControllerAccessor {
 void DestroyPeerImpl(Ark_RichEditorStyledStringController peer)
 {
@@ -55,7 +54,7 @@ void SetStyledStringImpl(Ark_RichEditorStyledStringController peer,
 }
 Ark_MutableStyledString GetStyledStringImpl(Ark_RichEditorStyledStringController peer)
 {
-    auto mutableString = reinterpret_cast<MutableStyledStringPeer*>(GetMutableStyledStringAccessor()->ctor());
+    auto mutableString = PeerUtils::CreatePeer<MutableStyledStringPeer>();
     CHECK_NULL_RETURN(peer && mutableString, mutableString);
     mutableString->spanString = AceType::DynamicCast<MutableSpanString>(peer->GetStyledString());
     return mutableString;

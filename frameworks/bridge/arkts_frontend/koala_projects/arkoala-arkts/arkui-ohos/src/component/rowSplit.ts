@@ -22,10 +22,12 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, UICommonMethod } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from './common';
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ArkRowSplitNode } from '../handwritten/modifiers/ArkRowSplitNode';
+import { ArkRowSplitAttributeSet, RowSplitModifier } from '../RowSplitModifier';
 
 export class ArkRowSplitPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -58,23 +60,40 @@ export type RowSplitInterface = () => RowSplitAttribute;
 export interface RowSplitAttribute extends CommonMethod {
     resizeable(value: boolean | undefined): this
 }
-export interface UIRowSplitAttribute extends UICommonMethod {
-    /** @memo */
-    resizeable(value: boolean | undefined): this
-    /** @memo */
-}
 export class ArkRowSplitStyle extends ArkCommonMethodStyle implements RowSplitAttribute {
     resizeable_value?: boolean | undefined
     public resizeable(value: boolean | undefined): this {
         return this
         }
 }
-/** @memo:stable */
-export class ArkRowSplitComponent extends ArkCommonMethodComponent implements UIRowSplitAttribute {
+export class ArkRowSplitComponent extends ArkCommonMethodComponent implements RowSplitAttribute {
+    protected _modifierHost: ArkRowSplitNode | undefined;
+    setModifierHost(value: ArkRowSplitNode): void {
+        this._modifierHost = value;
+    }
+    getModifierHost(): ArkRowSplitNode {
+        if (this._modifierHost === undefined || this._modifierHost === null) {
+            this._modifierHost = new ArkRowSplitNode()
+            this._modifierHost!.setPeer(this.getPeer());
+        }
+        return this._modifierHost!;
+    }
+    getAttributeSet(): ArkRowSplitAttributeSet  {
+        return this.getPeer()._attributeSet as ArkRowSplitAttributeSet;
+    }
+ 
+    initAttributeSet<T>(modifier: AttributeModifier<T>): void {
+        let isCommonModifier: boolean = modifier instanceof RowSplitModifier;
+        if (isCommonModifier) {
+            let commonModifier = modifier as object as RowSplitModifier;
+            this.getPeer()._attributeSet = commonModifier.attributeSet;
+        } else if (this.getPeer()._attributeSet == null) {
+            this.getPeer()._attributeSet = new ArkRowSplitAttributeSet();
+        }
+    }
     getPeer(): ArkRowSplitPeer {
         return (this.peer as ArkRowSplitPeer)
     }
-    /** @memo */
     public setRowSplitOptions(): this {
         if (this.checkPriority("setRowSplitOptions")) {
             this.getPeer()?.setRowSplitOptionsAttribute()
@@ -82,7 +101,6 @@ export class ArkRowSplitComponent extends ArkCommonMethodComponent implements UI
         }
         return this
     }
-    /** @memo */
     public resizeable(value: boolean | undefined): this {
         if (this.checkPriority("resizeable")) {
             const value_casted = value as (boolean | undefined)
@@ -100,7 +118,7 @@ export class ArkRowSplitComponent extends ArkCommonMethodComponent implements UI
 /** @memo */
 export function RowSplit(
     /** @memo */
-    style: ((attributes: UIRowSplitAttribute) => void) | undefined,
+    style: ((attributes: RowSplitAttribute) => void) | undefined,
     
     /** @memo */
     content_?: (() => void) | undefined,

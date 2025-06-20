@@ -16,6 +16,8 @@
 import * as util from "../../test-util"
 import * as arkts from "../../../src/arkts-api"
 
+const PANDA_SDK_PATH = process.env.PANDA_SDK_PATH ?? '../../incremental/tools/panda/node_modules/@panda/sdk'
+
 function createConfig() {
     arkts.arktsGlobal.config = arkts.Config.create([
         '_',
@@ -25,7 +27,7 @@ function createConfig() {
         '--extension',
         'ets',
         '--stdlib',
-        '../build/sdk/ets/stdlib',
+        `${PANDA_SDK_PATH}/ets/stdlib`,
         '--output',
         './build/main.abc'
     ]).peer
@@ -59,26 +61,32 @@ suite(util.basename(__filename), () => {
 
         arkts.proceedToState(arkts.Es2pandaContextState.ES2PANDA_STATE_PARSED)
 
+        const importStorage = new arkts.ImportStorage(arkts.arktsGlobal.compilerContext.program, true)
         const module = arkts.createETSModuleFromContext()
 
-        arkts.factory.createETSImportDeclaration(
-            arkts.factory.createStringLiteral(
-                './library'
-            ),
+        arkts.updateETSModuleByStatements(
+            module,
             [
-                arkts.factory.createImportSpecifier(
-                    arkts.factory.createIdentifier(
-                        'testFunction'
+                arkts.factory.createETSImportDeclaration(
+                    arkts.factory.createStringLiteral(
+                        './library'
                     ),
-                    arkts.factory.createIdentifier(
-                        'testFunction'
-                    )
-                )
-            ],
-            arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
-            arkts.arktsGlobal.compilerContext.program,
-            arkts.Es2pandaImportFlags.IMPORT_FLAGS_NONE
+                    [
+                        arkts.factory.createImportSpecifier(
+                            arkts.factory.createIdentifier(
+                                'testFunction'
+                            ),
+                            arkts.factory.createIdentifier(
+                                'testFunction'
+                            )
+                        )
+                    ],
+                    arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
+                ),
+                ...module.statements,
+            ]
         )
+        importStorage.update()
 
         arkts.arktsGlobal.es2panda._AstNodeUpdateAll(arkts.arktsGlobal.context, module.peer)
         arkts.proceedToState(arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED)
@@ -98,7 +106,7 @@ console.log("test");
         arkts.proceedToState(arkts.Es2pandaContextState.ES2PANDA_STATE_BIN_GENERATED)
     })
 
-    test.skip("change function name in main program and in dependency", function() {
+    test("change function name in main program and in dependency", function() {
         createConfig()
 
         const code =
@@ -111,42 +119,55 @@ console.log("test");
 
         arkts.proceedToState(arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED)
 
+        const importStorage = new arkts.ImportStorage(arkts.arktsGlobal.compilerContext.program, true)
         const module = arkts.createETSModuleFromContext()
 
         arkts.arktsGlobal.compilerContext.program.externalSources.forEach(it => {
             if (!it.getName().includes("library")) return
             it.programs.forEach(program => {
                 new RenameTestFunction().visitor(program.astNode)
+                arkts.arktsGlobal.es2panda._AstNodeUpdateAll(program.astNode.peer, module.peer)
             })
         })
 
-        arkts.factory.createETSImportDeclaration(
-            arkts.factory.createStringLiteral(
-                './library'
-            ),
+        arkts.updateETSModuleByStatements(
+            module,
             [
-                arkts.factory.createImportSpecifier(
-                    arkts.factory.createIdentifier(
-                        'testFunctionChanged'
+                arkts.factory.updateETSImportDeclaration(
+                    module.statements[0] as arkts.ETSImportDeclaration,
+                    arkts.factory.createStringLiteral(
+                        './library'
                     ),
-                    arkts.factory.createIdentifier(
-                        'testFunctionChanged'
-                    )
-                )
-            ],
-            arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
-            arkts.arktsGlobal.compilerContext.program,
-            arkts.Es2pandaImportFlags.IMPORT_FLAGS_NONE
+                    [
+                        arkts.factory.createImportSpecifier(
+                            arkts.factory.createIdentifier(
+                                'testFunctionChanged'
+                            ),
+                            arkts.factory.createIdentifier(
+                                'testFunctionChanged'
+                            )
+                        )
+                    ],
+                    arkts.Es2pandaImportKinds.IMPORT_KINDS_ALL,
+                ),
+                ...module.statements.slice(1),
+            ]
         )
 
         new RenameTestFunction().visitor(module)
 
+        importStorage.update()
         arkts.arktsGlobal.es2panda._AstNodeUpdateAll(arkts.arktsGlobal.context, module.peer)
         arkts.recheckSubtree(module)
 
         util.assert.equal(
             module.dumpSrc(), `
-testFunctionChanged()
+import { testFunctionChanged as testFunctionChanged } from "./library";
+
+function main() {}
+
+testFunctionChanged();
+
 `,
         `invalid result: ${module.dumpSrc()}`)
 

@@ -22,21 +22,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DecorationStyleAccessor {
 void DestroyPeerImpl(Ark_DecorationStyle peer)
 {
-    delete peer;
+    PeerUtils::DestroyPeer(peer);
 }
 Ark_DecorationStyle CtorImpl(const Ark_DecorationStyleInterface* value)
 {
-    RefPtr<DecorationSpan> span;
+    auto peer = PeerUtils::CreatePeer<DecorationStylePeer>();
     if (value) {
         auto aceTypeOpt = Converter::OptConvert<TextDecoration>(value->type);
         auto aceColorOpt = Converter::OptConvert<Color>(value->color);
         auto aceStyleOpt = Converter::OptConvert<TextDecorationStyle>(value->style);
-        span = AceType::MakeRefPtr<DecorationSpan>(aceTypeOpt.value_or(TextDecoration::NONE),
+        peer->span = AceType::MakeRefPtr<DecorationSpan>(aceTypeOpt.value_or(TextDecoration::NONE),
             aceColorOpt, aceStyleOpt);
     } else {
-        span = AceType::MakeRefPtr<DecorationSpan>();
+        peer->span = AceType::MakeRefPtr<DecorationSpan>();
     }
-    return new DecorationStylePeer{ .span = span };
+    return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

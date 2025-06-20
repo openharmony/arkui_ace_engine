@@ -47,6 +47,7 @@
 #include "base/ressched/ressched_report.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -810,6 +811,7 @@ private:
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, VMType vmType)
     : runtime_(runtime), vmType_(vmType)
 {
+    MultiThreadBuildManager::InitOnUIThread();
     CHECK_NULL_VOID(context);
     context_ = context->weak_from_this();
     bundleName_ = context->GetBundleName();
@@ -822,6 +824,7 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
     : runtime_(runtime), isFormRender_(isCard)
 {
+    MultiThreadBuildManager::InitOnUIThread();
     CHECK_NULL_VOID(context);
     bundleName_ = context->GetBundleName();
     if (CJUtils::IsCJFrontendContext(context)) {
@@ -841,6 +844,7 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
 
 UIContentImpl::UIContentImpl(OHOS::AppExecFwk::Ability* ability)
 {
+    MultiThreadBuildManager::InitOnUIThread();
     CHECK_NULL_VOID(ability);
     context_ = ability->GetAbilityContext();
     auto context = context_.lock();

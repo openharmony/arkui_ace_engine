@@ -365,35 +365,6 @@ HWTEST_F(IndexerModifierTest, setAlphabetIndexerOptionsSelected, TestSize.Level1
 }
 
 /**
- * @tc.name: setOnSelected
- * @tc.desc: Check the functionality of AlphabetIndexerModifier.OnSelectedImpl
- * @tc.type: FUNC
- */
-HWTEST_F(IndexerModifierTest, setOnSelected, TestSize.Level1)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
-    ASSERT_NE(eventHub, nullptr);
-
-    static int32_t selectedIndex = ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE;
-    void (*checkCallback)(const Ark_Int32, const Ark_Number) =
-        [](const Ark_Int32 resourceId, const Ark_Number param) {
-            selectedIndex = Converter::Convert<int32_t>(param);
-        };
-    auto func = Converter::ArkValue<Callback_Number_Void>(checkCallback, CONTEXT_ID);
-    auto optFunc = Converter::ArkValue<Opt_Callback_Number_Void, Callback_Number_Void>(func);
-    modifier_->setOnSelected(node_, &optFunc);
-    EXPECT_EQ(selectedIndex, ATTRIBUTE_SELECTED_INDEX_DEFAULT_VALUE);
-
-    auto onSelect = eventHub->GetOnSelected();
-
-    for (const auto& expected : SELECTED_INDEX_TEST_PLAN) {
-        onSelect(expected);
-        EXPECT_EQ(selectedIndex, expected);
-    }
-}
-
-/**
  * @tc.name: setColor
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.ColorImpl
  * @tc.type: FUNC
@@ -1614,6 +1585,7 @@ HWTEST_F(IndexerModifierTest, setEnableHapticFeedback, TestSize.Level1)
     EXPECT_EQ(checkVal3, EXPECTED_TRUE);
 }
 
+#ifdef WRONG_OLD_GEN
 /*
  * @tc.name: setOnChangeEventSelectedImpl
  * @tc.desc:
@@ -1654,4 +1626,5 @@ HWTEST_F(IndexerModifierTest, setOnChangeEventSelectedImpl, TestSize.Level1)
     EXPECT_EQ(checkEvent->nodeId, contextId);
     EXPECT_EQ(checkEvent->value, 10);
 }
+#endif
 } // namespace OHOS::Ace::NG

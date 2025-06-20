@@ -43,6 +43,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
+#include "core/common/multi_thread_build_manager.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -55,6 +56,7 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "core/components_ng/pattern/scrollable/lazy_compose_adapter.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -823,6 +825,10 @@ void FrameNode::DumpCommonInfo()
     if (layoutProperty_->GetLayoutRect()) {
         DumpLog::GetInstance().AddDesc(
             std::string("LayoutRect: ").append(layoutProperty_->GetLayoutRect().value().ToString().c_str()));
+    }
+    if (GetSuggestOpIncMarked()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("SuggestOpIncMarked: ").append(std::to_string(static_cast<int32_t>(GetSuggestOpIncMarked()))));
     }
     DumpExtensionHandlerInfo();
     DumpSafeAreaInfo();
@@ -2415,7 +2421,7 @@ void FrameNode::RebuildRenderContextTree()
     needSyncRenderTree_ = false;
 }
 
-void FrameNode::MarkModifyDone()
+void FrameNode::MarkModifyDoneUnsafely()
 {
     pattern_->OnModifyDone();
     auto pipeline = PipelineContext::GetCurrentContextSafely();
@@ -2460,6 +2466,19 @@ void FrameNode::MarkModifyDone()
 #endif
 }
 
+void FrameNode::MarkModifyDone()
+{
+    if (!IsFreeState()) {
+        MarkModifyDoneUnsafely();
+    } else {
+        PostAfterAttachMainTreeTask([weak = WeakClaim(this)]() {
+            auto host = weak.Upgrade();
+            CHECK_NULL_VOID(host);
+            host->MarkModifyDoneUnsafely();
+        });
+    }
+}
+
 [[deprecated("using AfterMountToParent")]] void FrameNode::OnMountToParentDone()
 {
     pattern_->OnMountToParentDone();
@@ -2477,7 +2496,7 @@ void FrameNode::FlushUpdateAndMarkDirty()
     MarkDirtyNode();
 }
 
-void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
+void FrameNode::MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag)
 {
     if (IsFreeze()) {
         // store the flag.
@@ -2496,6 +2515,19 @@ void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
         return;
     }
     MarkDirtyNode(IsMeasureBoundary(), IsRenderBoundary(), extraFlag);
+}
+
+void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
+{
+    if (!IsFreeState()) {
+        MarkDirtyNodeUnsafely(extraFlag);
+    } else {
+        PostAfterAttachMainTreeTask([weak = WeakClaim(this), extraFlag]() {
+            auto host = weak.Upgrade();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNodeUnsafely(extraFlag);
+        });
+    }
 }
 
 void FrameNode::ProcessFreezeNode()
@@ -4824,24 +4856,27 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
-    RefPtr<LayoutWrapper> overrideChild = pattern_->GetOrCreateChildByIndex(index);
-    if (!overrideChild) {
-        overrideChild = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
+    auto* lazyItemAdapter = pattern_->GetArkoalaLazyAdapter();
+    if (lazyItemAdapter) {
+        auto node = lazyItemAdapter->GetOrCreateChild(index);
+        AddChild(node);
+        return node;
     }
-    if (overrideChild) {
-        overrideChild->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
+    auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
+    if (child) {
+        child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
         if (addToRenderTree) {
-            overrideChild->SetActive(true);
+            child->SetActive(true);
         }
     }
-    return overrideChild;
+    return child;
 }
 
 RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index, bool isCache)
 {
-    auto* scrollWindowAdapter = GetScrollWindowAdapter();
-    if (scrollWindowAdapter) {
-        return scrollWindowAdapter->GetChildByIndex(index);
+    auto* lazyItemAdapter = pattern_->GetArkoalaLazyAdapter();
+    if (lazyItemAdapter) {
+        return lazyItemAdapter->GetChild(index);
     }
     return frameProxy_->GetFrameNodeByIndex(index, false, isCache, false);
 }
@@ -4892,14 +4927,23 @@ void FrameNode::RemoveAllChildInRenderTree()
 
 void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
 {
-    auto* adapter = GetScrollWindowAdapter();
+    auto* adapter = pattern_->GetArkoalaLazyAdapter();
     if (adapter) {
         int32_t startIndex = showCached ? std::max(0, start - cacheStart) : start;
         int32_t endIndex = showCached ? std::min(GetTotalChildCount() - 1, end + cacheEnd) : end;
+        std::vector<RefPtr<UINode>> toRemove;
         for (const auto& child : GetChildren()) {
             const int32_t index = static_cast<int32_t>(adapter->GetIndexOfChild(DynamicCast<FrameNode>(child)));
-            child->SetActive(index >= startIndex && index <= endIndex);
+            if (index >= startIndex && index <= endIndex) {
+                child->SetActive(true);
+            } else {
+                toRemove.push_back(child);
+            }
         }
+        for (auto&& node : toRemove) {
+            RemoveChild(node);
+        }
+        adapter->SetActiveRange(startIndex - cacheStart, endIndex + cacheEnd);
         return;
     }
     if (showCached) {
@@ -5976,9 +6020,9 @@ void FrameNode::MarkAndCheckNewOpIncNode(Axis axis)
     }
 }
 
-void FrameNode::SuggestOpIncGroup()
+void FrameNode::SuggestOpIncGroup(Axis axis)
 {
-    if (!SystemProperties::IsOpIncEnable()) {
+    if (!SystemProperties::IsOpIncEnable() || axis != Axis::VERTICAL) {
         return;
     }
     if (GetSuggestOpIncActivatedOnce()) {
@@ -6355,6 +6399,9 @@ void FrameNode::BuildLayoutInfo(std::unique_ptr<JsonValue>& json)
     if (layoutProperty_->GetLayoutRect()) {
         json->Put("LayoutRect", layoutProperty_->GetLayoutRect().value().ToString().c_str());
     }
+    if (static_cast<int32_t>(GetSuggestOpIncMarked()) != 0) {
+        json->Put("SuggestOpIncMarked", static_cast<int32_t>(GetSuggestOpIncMarked()));
+    }
 }
 
 void FrameNode::DumpCommonInfo(std::unique_ptr<JsonValue>& json)
@@ -6639,12 +6686,12 @@ const RefPtr<Kit::FrameNode>& FrameNode::GetKitNode() const
 
 ScrollWindowAdapter* FrameNode::GetScrollWindowAdapter() const
 {
-    return pattern_->GetScrollWindowAdapter();
+    return nullptr;
 }
 
 ScrollWindowAdapter* FrameNode::GetOrCreateScrollWindowAdapter()
 {
-    return pattern_->GetOrCreateScrollWindowAdapter();
+    return nullptr;
 }
 
 bool FrameNode::IsDrawFocusOnTop() const

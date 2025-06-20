@@ -56,6 +56,7 @@ public:
     static void SetStep(FrameNode* frameNode, const std::optional<float>& value);
     static void SetReverse(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetSliderMode(FrameNode* frameNode, const std::optional<SliderModel::SliderMode>& value);
+    static void SetOnChangeEvent(FrameNode* frameNode, SliderOnValueChangeEvent&& onChangeEvent);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SLIDER_SLIDER_MODEL_STATIC_H

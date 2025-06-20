@@ -22,7 +22,7 @@ import { Serializer } from "./peers/Serializer"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { ArkSecurityComponentMethodPeer, SecurityComponentMethod, ArkSecurityComponentMethodComponent, ArkSecurityComponentMethodStyle, UISecurityComponentMethod } from "./securityComponent"
+import { ArkSecurityComponentMethodPeer, SecurityComponentMethod, ArkSecurityComponentMethodComponent, ArkSecurityComponentMethodStyle } from "./securityComponent"
 import { ClickEvent } from "./common"
 import { BusinessError } from "#external"
 import { CallbackKind } from "./peers/CallbackKind"
@@ -96,23 +96,16 @@ export type SaveButtonCallback = (event: ClickEvent, result: SaveButtonOnClickRe
 export interface SaveButtonAttribute extends SecurityComponentMethod {
     onClick(value: SaveButtonCallback | undefined): this
 }
-export interface UISaveButtonAttribute extends UISecurityComponentMethod {
-    /** @memo */
-    onClick(value: SaveButtonCallback | undefined): this
-    /** @memo */
-}
 export class ArkSaveButtonStyle extends ArkSecurityComponentMethodStyle implements SaveButtonAttribute {
     onClick_value?: SaveButtonCallback | undefined
     public onClick(value: SaveButtonCallback | undefined): this {
         return this
         }
 }
-/** @memo:stable */
-export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent implements UISaveButtonAttribute {
+export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent implements SaveButtonAttribute {
     getPeer(): ArkSaveButtonPeer {
         return (this.peer as ArkSaveButtonPeer)
     }
-    /** @memo */
     public setSaveButtonOptions(options?: SaveButtonOptions): this {
         if (options) {
             const options_type = runtimeType(options)
@@ -122,7 +115,6 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
         this.getPeer()?.setSaveButtonOptions0Attribute()
         return this
     }
-    /** @memo */
     public onClick(value: SaveButtonCallback | undefined): this {
         if (this.checkPriority("onClick")) {
             const value_casted = value as (SaveButtonCallback | undefined)
@@ -140,7 +132,7 @@ export class ArkSaveButtonComponent extends ArkSecurityComponentMethodComponent 
 /** @memo */
 export function SaveButton(
     /** @memo */
-    style: ((attributes: UISaveButtonAttribute) => void) | undefined,
+    style: ((attributes: SaveButtonAttribute) => void) | undefined,
     options?: SaveButtonOptions,
     /** @memo */
     content_?: (() => void) | undefined,

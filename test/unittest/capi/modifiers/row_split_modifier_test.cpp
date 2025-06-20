@@ -48,9 +48,9 @@ HWTEST_F(RowSplitModifierTest, setResizeableTestDefaultValues, TestSize.Level1)
 }
 
 // Valid values for attribute 'resizeable' of method 'resizeable'
-static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> resizeableValidValues = {
-    {"true", Converter::ArkValue<Ark_Boolean>(true), "true"},
-    {"false", Converter::ArkValue<Ark_Boolean>(false), "false"},
+static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> resizeableValidValues = {
+    {"true", Converter::ArkValue<Opt_Boolean>(true), "true"},
+    {"false", Converter::ArkValue<Opt_Boolean>(false), "false"},
 };
 
 /*
@@ -63,7 +63,7 @@ HWTEST_F(RowSplitModifierTest, setResizeableTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     for (auto [passed, checkVal, expected]: resizeableValidValues) {
-        modifier_->setResizeable(node_, checkVal);
+        modifier_->setResizeable(node_, &checkVal);
         jsonValue = GetJsonValue(node_);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RESIZEABLE_NAME);
         EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;

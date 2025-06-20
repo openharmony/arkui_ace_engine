@@ -19,7 +19,7 @@
 
 namespace OHOS::Ace::Ani {
 
-void SetWebOptions(ani_env* env, ani_object aniClass, ani_object node, ani_object object)
+void SetWebOptions(ani_env* env, ani_class aniClass, ani_long node, ani_object object)
 {
     auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
     const auto* modifier = GetNodeAniModifier();

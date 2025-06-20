@@ -210,6 +210,7 @@ void StrokeWidthImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto width = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
     Validator::ValidateNonNegative(width);
+    Validator::ValidateNonPercent(width);
     DataPanelModelStatic::SetStrokeWidth(frameNode, width);
 }
 void TrackShadowImpl(Ark_NativePointer node,

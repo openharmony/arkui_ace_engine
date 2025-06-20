@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,17 +18,19 @@
 
 #include "core/components_ng/pattern/image/image_model_ng.h"
 
+#include "interfaces/native/node/resource.h"
+
+#include "base/image/image_defines.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/image/image_source_info.h"
 #ifndef ACE_UNITTEST
 #include "core/components_ng/base/view_abstract.h"
 #endif
-#include "interfaces/native/node/resource.h"
-
-#include "core/components_ng/pattern/text/span_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -78,18 +80,7 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
         return;
     }
 
-    // set draggable for framenode
-    if (!imageInfoConfig.isImageSpan) {
-        auto pipeline = frameNode->GetContext();
-        CHECK_NULL_VOID(pipeline);
-        auto draggable = pipeline->GetDraggable<ImageTheme>();
-        if (draggable && !frameNode->IsDraggable()) {
-            auto gestureHub = frameNode->GetOrCreateGestureEventHub();
-            CHECK_NULL_VOID(gestureHub);
-            gestureHub->InitDragDropEvent();
-        }
-        frameNode->SetDraggable(true);
-    }
+    SetDraggableForFrameNode(frameNode, imageInfoConfig.isImageSpan);
     auto srcInfo =
         CreateSourceInfo(imageInfoConfig.src, pixMap, imageInfoConfig.bundleName, imageInfoConfig.moduleName);
     srcInfo.SetIsUriPureNumber(imageInfoConfig.isUriPureNumber);
@@ -110,6 +101,36 @@ void ImageModelNG::Create(const ImageInfoConfig& imageInfoConfig, RefPtr<PixelMa
     pattern->SetImageType(ImageType::BASE);
 
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
+}
+
+void ImageModelNG::Create(const RefPtr<DrawableDescriptor>& drawable)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    stack->Push(frameNode);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    pattern->SetNeedLoadAlt(true);
+    pattern->SetImageType(ImageType::PIXELMAP_DRAWABLE);
+    pattern->SetDrawable(drawable);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    SetDraggableForFrameNode(frameNode);
+}
+
+void ImageModelNG::SetDraggableForFrameNode(RefPtr<FrameNode> frameNode, bool isImageSpan)
+{
+    if (frameNode->IsFirstBuilding() && !isImageSpan) {
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto draggable = pipeline->GetDraggable<ImageTheme>();
+        if (draggable && !frameNode->IsDraggable()) {
+            auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+            CHECK_NULL_VOID(gestureHub);
+            gestureHub->InitDragDropEvent();
+        }
+        frameNode->SetDraggable(draggable);
+    }
 }
 
 void ImageModelNG::ResetImage()
@@ -257,7 +278,6 @@ void ImageModelNG::SetSmoothEdge(float value)
 
 void ImageModelNG::SetSmoothEdge(FrameNode* frameNode, float value)
 {
-    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SmoothEdge, value, frameNode);
 }
 
@@ -269,7 +289,6 @@ void ImageModelNG::SetDynamicRangeMode(DynamicRangeMode dynamicRangeMode)
 
 void ImageModelNG::SetDynamicRangeMode(FrameNode* frameNode, DynamicRangeMode dynamicRangeMode)
 {
-    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode, frameNode);
 }
@@ -283,7 +302,6 @@ void ImageModelNG::SetEnhancedImageQuality(AIImageQuality imageQuality)
 
 void ImageModelNG::SetEnhancedImageQuality(FrameNode* frameNode, AIImageQuality imageQuality)
 {
-    CHECK_NULL_VOID(frameNode);
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetImageQuality(imageQuality);
@@ -573,7 +591,7 @@ bool ImageModelNG::UpdateDragItemInfo(DragItemInfo& itemInfo)
     return false;
 }
 
-void ImageModelNG::InitImage(FrameNode *frameNode, const std::string& src)
+void ImageModelNG::InitImage(FrameNode* frameNode, std::string& src)
 {
     std::string bundleName;
     std::string moduleName;
@@ -650,7 +668,6 @@ void ImageModelNG::SetDrawingColorFilter(FrameNode* frameNode, RefPtr<DrawingCol
 
 void ImageModelNG::SetCopyOption(FrameNode* frameNode, CopyOptions copyOption)
 {
-    CHECK_NULL_VOID(frameNode);
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetCopyOption(copyOption);
@@ -702,13 +719,11 @@ void ImageModelNG::ResetResizableLattice(FrameNode* frameNode)
 
 void ImageModelNG::SetImageRepeat(FrameNode* frameNode, ImageRepeat imageRepeat)
 {
-    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRepeat, imageRepeat, frameNode);
 }
 
 void ImageModelNG::SetImageRenderMode(FrameNode* frameNode, ImageRenderMode imageRenderMode)
 {
-    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRenderMode, imageRenderMode, frameNode);
 }
 
@@ -721,11 +736,6 @@ void ImageModelNG::SetImageFit(FrameNode* frameNode, ImageFit value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFit, value, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageFit, value, frameNode);
-}
-
-void ImageModelNG::SetImageFit(FrameNode *frameNode, std::optional<ImageFit> value)
-{
-    SetImageFit(frameNode, value.value_or(ImageFit::COVER));
 }
 
 void ImageModelNG::SetFitOriginSize(FrameNode* frameNode, bool value)
@@ -742,7 +752,6 @@ void ImageModelNG::SetSyncMode(FrameNode* frameNode, bool syncMode)
 
 void ImageModelNG::SetImageSourceSize(FrameNode* frameNode, const std::pair<Dimension, Dimension>& size)
 {
-    CHECK_NULL_VOID(frameNode);
     SizeF sourceSize =
         SizeF(static_cast<float>(size.first.ConvertToPx()), static_cast<float>(size.second.ConvertToPx()));
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, SourceSize, sourceSize, frameNode);
@@ -755,14 +764,12 @@ void ImageModelNG::SetMatchTextDirection(FrameNode* frameNode, bool value)
 
 void ImageModelNG::SetImageFill(FrameNode* frameNode, const Color& color)
 {
-    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
 }
 
 void ImageModelNG::SetAlt(FrameNode* frameNode, const ImageSourceInfo& src)
 {
-    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, src, frameNode);
 }
 
@@ -790,7 +797,6 @@ void ImageModelNG::SetAltPixelMap(FrameNode* frameNode, void* pixelMap)
 
 void ImageModelNG::SetImageInterpolation(FrameNode* frameNode, ImageInterpolation interpolation)
 {
-    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, interpolation, frameNode);
 }
 
@@ -1085,7 +1091,6 @@ void ImageModelNG::SetOrientation(ImageRotateOrientation orientation)
 
 void ImageModelNG::SetOrientation(FrameNode* frameNode, ImageRotateOrientation orientation)
 {
-    CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageRotateOrientation, orientation, frameNode);
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);

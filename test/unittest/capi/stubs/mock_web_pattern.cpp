@@ -346,6 +346,10 @@ void WebPattern::SetWebSrc(const std::string &webSrc)
 {
 }
 
+void WebPattern::SetWebSrcStatic(const std::string &webSrc)
+{
+}
+
 void WebPattern::SetWebData(const std::string& webData)
 {
     webData_ = webData;
