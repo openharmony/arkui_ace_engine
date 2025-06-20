@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 #include "core/components_v2/extensions/extension.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "test/mock/base/mock_system_properties.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -63,6 +64,29 @@ void SideBarPatternTestTwoNg::SetUpTestCase()
 void SideBarPatternTestTwoNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test SideBar OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SideBarPatternTestTwoNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    auto sideBarFrameNode = FrameNode::CreateFrameNode(OHOS::Ace::V2::SIDE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SideBarContainerPattern>());
+    ASSERT_NE(sideBarFrameNode, nullptr);
+    auto sideBarPattern = sideBarFrameNode->GetPattern<SideBarContainerPattern>();
+    ASSERT_NE(sideBarPattern, nullptr);
+    auto sideBarLayoutProperty = sideBarFrameNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
+    ASSERT_NE(sideBarLayoutProperty, nullptr);
+
+    sideBarPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(sideBarPattern->dragEvent_, nullptr);
+    g_isConfigChangePerform = true;
+    sideBarPattern->OnColorConfigurationUpdate();
+    EXPECT_NE(sideBarPattern->dragEvent_, nullptr);
+    g_isConfigChangePerform = false;
 }
 
 /**

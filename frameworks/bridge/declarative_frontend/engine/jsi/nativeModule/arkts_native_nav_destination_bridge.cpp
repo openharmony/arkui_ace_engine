@@ -258,10 +258,10 @@ ArkUINativeModuleValue NavDestinationBridge::SetBackButtonIcon(ArkUIRuntimeCallI
     std::string moduleName;
     
     Framework::JSViewAbstract::GetJsMediaBundleInfo(info[1], bundleName, moduleName);
-    if (!SystemProperties::ConfigChangePerform()) {
-        NavDestinationModelNG::SetBackButtonIcon(frameNode, src, noPixMap, pixMap);
-    } else {
+    if (SystemProperties::ConfigChangePerform() && backButtonIconResObj) {
         NavDestinationModelNG::SetBackButtonIcon(frameNode, noPixMap, pixMap, backButtonIconResObj);
+    } else {
+        NavDestinationModelNG::SetBackButtonIcon(frameNode, src, noPixMap, pixMap);
     }
     return panda::JSValueRef::Undefined(vm);
 }

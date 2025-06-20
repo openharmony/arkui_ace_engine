@@ -100,6 +100,8 @@ public:
         needInitRealSideBarWidth_ = value;
     }
 
+    void OnColorConfigurationUpdate() override;
+
     void SetControlButtonClick(bool value)
     {
         isControlButtonClick_ = value;

@@ -614,6 +614,7 @@ void SideBarContainerModelNG::SetMinContentWidth(const RefPtr<ResourceObject>& r
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
         CHECK_NULL_VOID(pattern);
+        pattern->MarkNeedInitRealSideBarWidth(true);
         CalcDimension minContentWidth;
         std::string minContentWidthValue = pattern->GetResCacheMapByKey(key);
         if (minContentWidthValue.empty()) {
@@ -815,6 +816,7 @@ void SideBarContainerModelNG::SetMinContentWidth(FrameNode* frameNode, const Ref
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern<SideBarContainerPattern>();
         CHECK_NULL_VOID(pattern);
+        pattern->MarkNeedInitRealSideBarWidth(true);
         CalcDimension minContentWidth;
         std::string minContentWidthValue = pattern->GetResCacheMapByKey(key);
         if (minContentWidthValue.empty()) {

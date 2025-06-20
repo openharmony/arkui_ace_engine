@@ -831,10 +831,10 @@ ArkUINativeModuleValue NavigationBridge::SetBackButtonIcon(ArkUIRuntimeCallInfo*
     }
     imageOption.noPixMap = noPixMap;
     imageOption.isValidImage = isValidImage;
-    if (!SystemProperties::ConfigChangePerform()) {
-        NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap);
-    } else {
+    if (SystemProperties::ConfigChangePerform() && backButtonIconResObj) {
         NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, imageOption, pixMap, backButtonIconResObj);
+    } else {
+        NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap);
     }
     return panda::JSValueRef::Undefined(vm);
 }
