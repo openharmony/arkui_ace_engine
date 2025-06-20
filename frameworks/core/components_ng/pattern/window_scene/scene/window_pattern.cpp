@@ -61,7 +61,6 @@ constexpr Dimension SNAPSHOT_RADIUS = 16.0_vp;
 constexpr uint32_t SNAPSHOT_LOAD_COMPLETE = 1;
 constexpr uint32_t ROTATION_COUNT = 4;
 constexpr uint32_t ROTATION_COUNT_SNAPSHOT = 2;
-constexpr uint32_t VALUE_OFFSET = 1;
 } // namespace
 
 class LifecycleListener : public Rosen::ILifecycleListener {
@@ -616,7 +615,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "id: %{public}d isSavingSnapshot: %{public}d, hasSnapshot: %{public}d",
             persistentId, isSavingSnapshot, hasSnapshot);
-        auto matchSnapshot = isSavingSnapshot || hasSnapshot;
+        const bool matchSnapshot = isSavingSnapshot || hasSnapshot;
         ImageRotateOrientation rotate;
         auto lastRotation = session_->GetLastOrientation();
         auto windowRotation = static_cast<uint32_t>(session_->GetWindowOrientation());
@@ -636,6 +635,9 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             sourceInfo = ImageSourceInfo("file://" + scenePersistence->GetSnapshotFilePath(key));
             auto snapshotRotation =
                 static_cast<uint32_t>(scenePersistence->rotate_[key.first][key.second]);
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+                "lastRotation: %{public}d windowRotation: %{public}d, snapshotRotation: %{public}d",
+                lastRotation, windowRotation, snapshotRotation);
             if (!matchSnapshot) {
                 auto orientation = TransformOrientationForDisMatchSnapshot(lastRotation,
                     windowRotation, snapshotRotation);
@@ -775,26 +777,39 @@ void WindowPattern::RemoveChild(const RefPtr<FrameNode>& host, const RefPtr<Fram
 ImageRotateOrientation WindowPattern::TransformOrientationForMatchSnapshot(uint32_t lastRotation,
     uint32_t windowRotation)
 {
-    auto orientation = static_cast<ImageRotateOrientation>((lastRotation - windowRotation + ROTATION_COUNT) %
-        ROTATION_COUNT + VALUE_OFFSET);
+    auto orientation = static_cast<ImageRotateOrientation>(
+        TransformOrientation(lastRotation, windowRotation, ROTATION_COUNT));
     if (orientation == ImageRotateOrientation::DOWN) {
         orientation = ImageRotateOrientation::UP;
     }
     return orientation;
 }
 
-ImageRotateOrientation WindowPattern::TransformOrientationDisForMatchSnapshot(uint32_t lastRotation,
+ImageRotateOrientation WindowPattern::TransformOrientationForDisMatchSnapshot(uint32_t lastRotation,
     uint32_t windowRotation, uint32_t snapshotRotation)
 {
     ImageRotateOrientation orientation = ImageRotateOrientation::UP;
-    if (lastRotation != snapshotRotation && ((lastRotation - snapshotRotation + ROTATION_COUNT) %
-        ROTATION_COUNT_SNAPSHOT != 0)) {
-        orientation = static_cast<ImageRotateOrientation>((windowRotation - snapshotRotation +
-            ROTATION_COUNT) % ROTATION_COUNT + VALUE_OFFSET);
-    } else if (lastRotation != snapshotRotation && ((lastRotation - snapshotRotation + ROTATION_COUNT) %
-        ROTATION_COUNT_SNAPSHOT == 0)) {
-        orientation = ImageRotateOrientation::DOWN;
+    if (lastRotation != snapshotRotation) {
+        if (TransformOrientation(lastRotation, snapshotRotation, ROTATION_COUNT_SNAPSHOT) != 0) {
+            if (TransformOrientation(lastRotation, windowRotation, ROTATION_COUNT_SNAPSHOT) != 0) {
+                orientation = static_cast<ImageRotateOrientation>(
+                    TransformOrientation(lastRotation, windowRotation, ROTATION_COUNT));
+            } else {
+                orientation = static_cast<ImageRotateOrientation>(
+                    TransformOrientation(windowRotation, snapshotRotation, ROTATION_COUNT));
+            }
+        } else if (windowRotation != snapshotRotation) {
+            orientation = ImageRotateOrientation::DOWN;
+        }
     }
-    return orientation
+    return orientation;
+}
+
+uint32_t WindowPattern::TransformOrientation(uint32_t lastRotation, uint32_t windowRotation, uint32_t count)
+{
+    if (count == 0) {
+        return 0;
+    }
+    return (lastRotation - windowRotation + ROTATION_COUNT) % count + 1;
 }
 } // namespace OHOS::Ace::NG
