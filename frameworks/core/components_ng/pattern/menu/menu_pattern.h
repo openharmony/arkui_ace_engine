@@ -91,6 +91,31 @@ public:
         return { 0, 0 };
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return IsMultiMenu();
+    }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return IsMultiMenu();
+    }
+
+    bool IsEnableFix() override
+    {
+        return IsMultiMenu();
+    }
+
+    bool IsChildColumnLayout() override
+    {
+        return IsMultiMenu();
+    }
+
+    bool IsChildComponentContent() override
+    {
+        return IsMultiMenu();
+    }
+
     bool IsFocusViewLegal() override
     {
         return type_ == MenuType::MENU || type_ == MenuType::CONTEXT_MENU || type_ == MenuType::SUB_MENU;

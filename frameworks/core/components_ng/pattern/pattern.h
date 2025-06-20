@@ -138,6 +138,16 @@ public:
         return false;
     }
 
+    virtual bool IsChildComponentContent()
+    {
+        return false;
+    }
+
+    virtual bool IsChildColumnLayout()
+    {
+        return false;
+    }
+
     virtual std::optional<RenderContext::ContextParam> GetContextParam() const
     {
         return std::nullopt;

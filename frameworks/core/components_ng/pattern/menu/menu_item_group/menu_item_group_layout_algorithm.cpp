@@ -113,6 +113,40 @@ void MenuItemGroupLayoutAlgorithm::MeasureMenuItems(
     }
 }
 
+bool MenuItemGroupLayoutAlgorithm::UpdateLayoutSizeBasedOnPolicy(LayoutWrapper* layoutWrapper, SizeF& menuItemGroupSize)
+{
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    if (!layoutProperty) {
+        return false;
+    }
+
+    auto layoutPolicyProperty = layoutProperty->GetLayoutPolicyProperty();
+    // Only perform size adjustments when width and height policies are FIX_AT_IDEAL_SIZE or WRAP_CONTENT
+    if (layoutPolicyProperty.has_value() && layoutPolicyProperty.value().IsAdaptive()) {
+        const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+        auto parentIdealWidth = layoutConstraint->parentIdealSize.Width();
+        auto parentIdealHeight = layoutConstraint->parentIdealSize.Height();
+
+        const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+        AddPaddingToSize(padding, menuItemGroupSize);
+
+        if (layoutPolicyProperty.value().IsWidthWrap() && parentIdealWidth.has_value()) {
+            auto maxWidth = std::min(parentIdealWidth.value(), menuItemGroupSize.Width());
+            menuItemGroupSize.SetWidth(maxWidth);
+        }
+        if (layoutPolicyProperty.value().IsHeightWrap() && parentIdealHeight.has_value()) {
+            auto maxHeight = std::min(parentIdealHeight.value(), menuItemGroupSize.Height());
+            menuItemGroupSize.SetHeight(maxHeight);
+        }
+
+        // If width and height are not set, determine the size by adding the component's padding to the child's
+        // dimensions, for FIX_AT_IDEAL_SIZE, do the same by directly using the child's size plus padding
+        layoutWrapper->GetGeometryNode()->SetFrameSize(menuItemGroupSize);
+        return true;
+    }
+    return false;
+}
+
 void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -139,6 +173,12 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float footerPadding = needFooterPadding_ ? groupDividerPadding_ : 0.0f;
     totalHeight += footerPadding;
     menuItemGroupSize.SetHeight(totalHeight);
+
+    if (UpdateLayoutSizeBasedOnPolicy(layoutWrapper, menuItemGroupSize)) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        return;
+    }
+
     if (menuItemGroupSize != layoutWrapper->GetGeometryNode()->GetFrameSize()) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(menuItemGroupSize);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

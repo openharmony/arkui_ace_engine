@@ -77,6 +77,21 @@ public:
         }
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     inline RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<MenuItemEventHub>();
