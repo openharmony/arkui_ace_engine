@@ -1742,4 +1742,35 @@ HWTEST_F(ViewAbstractTestNg, BackgroundResourceTest003, TestSize.Level1)
     ViewAbstract::SetBackgroundImageSizeUpdateFunc(BACKGROUNDSIZE, nullptr, "width");
     EXPECT_TRUE(resMap.find("backgroundImageSizeWidth") == resMap.end());
 }
+
+/**
+ * @tc.name: ViewAbstractClearJSFrameNodeOnClickTest001
+ * @tc.desc: Test ClearJsFrameNodeOnClick.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractClearJSFrameNodeOnClickTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create a FrameNode and set a native onClick event via SetJSFrameNodeOnClick.
+     * @tc.expected: The nodeEventRegistered should be true.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    GestureEventFunc onClick = [](GestureEvent&) {};
+    ViewAbstract::SetJSFrameNodeOnClick(AceType::RawPtr(frameNode), std::move(onClick));
+
+    auto* uiNode = reinterpret_cast<UINode*>(AceType::RawPtr(frameNode));
+    ASSERT_NE(uiNode, nullptr);
+    auto currentInfo = uiNode->GetInteractionEventBindingInfo();
+    EXPECT_EQ(currentInfo.nodeEventRegistered, true);
+
+    /**
+     * @tc.steps2: ClearJSFrameNodeOnClick.
+     * @tc.expected: The nodeEventRegistered should be false.
+     */
+    ViewAbstract::ClearJSFrameNodeOnClick(AceType::RawPtr(frameNode));
+    currentInfo = uiNode->GetInteractionEventBindingInfo();
+    EXPECT_EQ(currentInfo.nodeEventRegistered, false);
+}
 } // namespace OHOS::Ace::NG

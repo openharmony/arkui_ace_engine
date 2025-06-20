@@ -7709,6 +7709,9 @@ void ViewAbstract::ClearJSFrameNodeOnClick(FrameNode* frameNode)
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->ClearJSFrameNodeOnClick();
+    auto* uiNode = reinterpret_cast<UINode*>(frameNode);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->SetNodeEventRegistrationState(false);
 }
 
 void ViewAbstract::SetJSFrameNodeOnTouch(FrameNode* frameNode, TouchEventFunc&& touchEventFunc)
