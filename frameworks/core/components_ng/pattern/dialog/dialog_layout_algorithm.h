@@ -43,6 +43,7 @@ class ACE_EXPORT DialogLayoutAlgorithm : public LayoutAlgorithm {
 
 public:
     DialogLayoutAlgorithm() = default;
+    DialogLayoutAlgorithm(WeakPtr<PipelineContext> context) : context_(context) {}
     ~DialogLayoutAlgorithm() override = default;
 
     void Measure(LayoutWrapper* layoutWrapper) override;
@@ -65,7 +66,7 @@ private:
 
     bool ComputeInnerLayoutSizeParam(LayoutConstraintF& innerLayout, const RefPtr<DialogLayoutProperty>& dialogProp);
     bool IsGetExpandDisplayValidHeight(const RefPtr<DialogLayoutProperty>& dialogProp);
-    RefPtr<PipelineContext> GetCurrentPipelineContext();
+    RefPtr<PipelineContext> GetPipelineContext() const;
     void ComputeInnerLayoutParam(LayoutConstraintF& innerLayout, const RefPtr<DialogLayoutProperty>& dialogProp);
     double GetMaxWidthBasedOnGridType(const RefPtr<GridColumnInfo>& info, GridSizeType type, DeviceType deviceType);
     int32_t GetDeviceColumns(GridSizeType type, DeviceType deviceType);
@@ -147,6 +148,8 @@ private:
     float embeddedDialogOffsetY_ = 0.0f;
     float stackRootDialogOffsetY_ = 0.0f;
     float safeAreaBottomLength_ = 0.0f;
+
+    WeakPtr<PipelineContext> context_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(DialogLayoutAlgorithm);
 };

@@ -102,10 +102,7 @@ public:
         return AceType::MakeRefPtr<DialogLayoutProperty>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return AceType::MakeRefPtr<DialogLayoutAlgorithm>();
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
