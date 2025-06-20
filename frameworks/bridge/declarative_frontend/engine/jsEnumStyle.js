@@ -2815,7 +2815,12 @@ class NavPathStack {
   popToName(name, result, animated) {
     let index = this.pathArray.findIndex(element => element.name === name);
     if (index === -1) {
-      return -1;
+      if (this.pathArray.length === 0) {
+        return -1;
+      }
+      if (!this.nativeStack?.isHomeName(name)) {
+        return -1;
+      }
     }
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     this.pathArray.splice(index + 1);

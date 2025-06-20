@@ -58,7 +58,7 @@ private:
 
     void MeasurePrimaryContentNode(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& homePositionDestSize);
-    void MeasureNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+    void MeasureNavBarOrHomeDestination(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& navBarSize);
 
     void MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,

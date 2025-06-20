@@ -315,6 +315,16 @@ public:
         return destType_;
     }
 
+    virtual void SystemTransitionPushStart(bool transitionIn) {}
+    virtual void SystemTransitionPushEnd(bool transitionIn) {}
+    virtual void SystemTransitionPushFinish(bool transitionIn, int32_t animationId = -1) {}
+
+    virtual void SystemTransitionPopStart(bool transitionIn) {}
+    virtual void SystemTransitionPopEnd(bool transitionIn) {}
+    virtual bool SystemTransitionPopFinish(int32_t animationId = -1, bool isNeedCleanContent = true)
+    {
+        return true;
+    }
     void SetIsHomeDestination(bool isHome)
     {
         isHomeDestination_ = isHome;

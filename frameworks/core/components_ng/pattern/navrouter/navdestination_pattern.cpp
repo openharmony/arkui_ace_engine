@@ -489,6 +489,22 @@ void NavDestinationPattern::OnWindowHide()
     stack->SetIsEntryByIndex(index, false);
 }
 
+void NavDestinationPattern::OnDetachFromMainTree()
+{
+    backupStyle_.reset();
+    currStyle_.reset();
+    auto host = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    if (!host->IsHomeDestination()) {
+        return;
+    }
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navigationNode_.Upgrade());
+    CHECK_NULL_VOID(navigationNode);
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(navigationPattern);
+    navigationPattern->NotifyDestinationLifecycle(host, NavDestinationLifecycle::ON_WILL_DISAPPEAR);
+}
+
 void NavDestinationPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("name", name_.c_str());
