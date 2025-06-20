@@ -161,4 +161,26 @@ HWTEST_F(UiEventTest, UiEventTest005, TestSize.Level1)
     bool result = UIEventFunc::Get().IsAvailable();
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: UiEventTest006
+ * @tc.desc: test UIEvent GetSimplifiedInspectorTree
+ * @tc.type: FUNC
+ */
+HWTEST_F(UiEventTest, UiEventTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    std::string tree = "treeTest";
+
+    /**
+     * @tc.steps2: Call the function GetSimplifiedInspectorTree.
+     * @tc.expected: The function is run ok.
+     */
+    TreeParams params;
+    params.infoType = InspectorInfoType::PAGE_PARAM;
+    UIEvent::GetSimplifiedInspectorTree(params, tree);
+    EXPECT_FALSE(tree.empty());
+}
 } // namespace OHOS::Ace
