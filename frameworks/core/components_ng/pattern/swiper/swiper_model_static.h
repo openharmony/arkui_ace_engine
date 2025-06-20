@@ -69,6 +69,7 @@ public:
         const std::optional<bool> &ignoreBlank = false);
     static void SetOnChangeEvent(FrameNode* frameNode,
         std::function<void(const BaseEventInfo* info)>&& onChangeEvent);
+    static void SetBindIndicator(FrameNode* frameNode, bool bind);
 };
 } // namespace OHOS::Ace::NG
 

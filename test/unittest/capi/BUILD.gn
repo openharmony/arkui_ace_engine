@@ -134,6 +134,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/folder_stack/folder_stack_model_ng_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_col/grid_col_model_ng_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/grid_row/grid_row_model_ng_static.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/line_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_abstract_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/path_model_static.cpp",

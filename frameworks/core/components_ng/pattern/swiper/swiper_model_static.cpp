@@ -446,4 +446,8 @@ void SwiperModelStatic::SetOnChangeEvent(FrameNode* frameNode,
         event(&eventInfo);
     });
 }
+void SwiperModelStatic::SetBindIndicator(FrameNode* frameNode, bool bind)
+{
+    SwiperModelNG::SetBindIndicator(frameNode, bind);
+}
 } // namespace OHOS::Ace::NG
