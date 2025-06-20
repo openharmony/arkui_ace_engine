@@ -74,6 +74,7 @@ const std::string MESSAGE = "hello world";
 const std::string BOTTOMSTRING = "test";
 constexpr int32_t DURATION = 2;
 constexpr double DOUBLEONE = 1.0f;
+constexpr int32_t CALLBACK_COUNT = 3;
 } // namespace
 class OverlayManagerToastTestNg : public testing::Test {
 public:
@@ -2017,5 +2018,35 @@ HWTEST_F(OverlayManagerToastTestNg, ToastPatternUpdateHoverModeRect002, TestSize
     EXPECT_TRUE(safeAreaManager->GetKeyboardInset().IsValid());
     toastProps->propHoverModeArea_ = HoverModeAreaType::BOTTOM_SCREEN;
     toastPattern->UpdateHoverModeRect(toastProps, safeAreaManager, 0.0f, 0.0f);
+}
+
+/**
+ * @tc.name: OnAttachToFrameNode001
+ * @tc.desc: Test OnAttachToFrameNode with empty displayInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, OnAttachToFrameNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    auto containerId = Container::CurrentId();
+    auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+    auto current_context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = parentContainerId < 0 ? current_context : PipelineContext::GetMainPipelineContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto currentCallBackId = pipeline->callbackId_;
+    toastPattern->OnAttachToFrameNode();
+    toastPattern->OnDetachFromFrameNode(nullptr);
+    EXPECT_EQ(toastPattern->rowKeyboardCallbackId_, currentCallBackId + CALLBACK_COUNT);
 }
 } // namespace OHOS::Ace::NG

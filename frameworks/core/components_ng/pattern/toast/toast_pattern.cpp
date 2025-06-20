@@ -457,6 +457,12 @@ void ToastPattern::OnAttachToFrameNode()
             }
         });
     UpdateHalfFoldHoverChangedCallbackId(halfFoldHoverCallbackId);
+    rowKeyboardCallbackId_ =
+        pipeline->RegisterRawKeyboardChangedCallback([weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FoldStatusChangedAnimation();
+        });
     InitUIExtensionHostWindowRect();
 }
 
@@ -473,6 +479,7 @@ void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
     if (HasHalfFoldHoverChangedCallbackId()) {
         pipeline->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverChangedCallbackId_.value_or(-1));
     }
+    pipeline->UnRegisterRawKeyboardChangedCallback(rowKeyboardCallbackId_);
 }
 
 double ToastPattern::GetTextMaxHeight()

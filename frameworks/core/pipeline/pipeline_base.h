@@ -1215,6 +1215,7 @@ public:
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) {}
     virtual void OnFoldStatusChange(FoldStatus foldStatus) {}
     virtual void OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) {}
+    virtual void OnRawKeyboardChangedCallback() {}
 
     void SetIsAppWindow(bool isAppWindow)
     {
