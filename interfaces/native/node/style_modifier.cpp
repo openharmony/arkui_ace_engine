@@ -1196,6 +1196,15 @@ int32_t SetMargin(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMargin(
             node->uiNodeHandle, &top, &right, &bottom, &left, nullptr);
+    } else if (node->type == ARKUI_NODE_TOGGLE) {
+        fullImpl->getNodeModifiers()->getToggleModifier()->setToggleMargin(
+            node->uiNodeHandle, &top, &right, &bottom, &left);
+    } else if (node->type == ARKUI_NODE_CHECKBOX) {
+        fullImpl->getNodeModifiers()->getCheckboxModifier()->setCheckboxMargin(
+            node->uiNodeHandle, &top, &right, &bottom, &left);
+    } else if (node->type == ARKUI_NODE_RADIO) {
+        fullImpl->getNodeModifiers()->getRadioModifier()->setRadioMargin(
+            node->uiNodeHandle, &top, &right, &bottom, &left);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setMargin(node->uiNodeHandle, &top, &right, &bottom, &left);
     }
@@ -1210,6 +1219,12 @@ void ResetMargin(ArkUI_NodeHandle node)
         fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputMargin(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->resetTextAreaMargin(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_TOGGLE) {
+        fullImpl->getNodeModifiers()->getToggleModifier()->resetToggleMargin(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_CHECKBOX) {
+        fullImpl->getNodeModifiers()->getCheckboxModifier()->resetCheckboxMargin(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_RADIO) {
+        fullImpl->getNodeModifiers()->getRadioModifier()->resetRadioMargin(node->uiNodeHandle);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->resetMargin(node->uiNodeHandle);
     }

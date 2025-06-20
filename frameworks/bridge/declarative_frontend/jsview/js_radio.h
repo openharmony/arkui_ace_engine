@@ -28,6 +28,7 @@ public:
     static void ParseIndicator(const JSCallbackInfo& info, std::optional<int32_t>& indicator,
         std::function<void()>& customBuilderFunc, JSRef<JSVal>& builderObject);
     static void JsPadding(const JSCallbackInfo& info);
+    static void JsMargin(const JSCallbackInfo& info);
     static void JsRadioStyle(const JSCallbackInfo& info);
     static void JsResponseRegion(const JSCallbackInfo& info);
     static void JsSize(const JSCallbackInfo& args);
