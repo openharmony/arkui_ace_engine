@@ -265,7 +265,8 @@ static std::vector<std::tuple<std::string, Ark_SymbolEffectStrategy, std::string
     effectStrategyValidValues = {
     {"ARK_SYMBOL_EFFECT_STRATEGY_NONE", ARK_SYMBOL_EFFECT_STRATEGY_NONE, "SymbolEffectStrategy.NONE"},
     {"ARK_SYMBOL_EFFECT_STRATEGY_SCALE", ARK_SYMBOL_EFFECT_STRATEGY_SCALE, "SymbolEffectStrategy.SCALE"},
-    {"ARK_SYMBOL_EFFECT_STRATEGY_HIERARCHICAL", ARK_SYMBOL_EFFECT_STRATEGY_HIERARCHICAL, "SymbolEffectStrategy.HIERARCHICAL"},
+    {"ARK_SYMBOL_EFFECT_STRATEGY_HIERARCHICAL", ARK_SYMBOL_EFFECT_STRATEGY_HIERARCHICAL,
+        "SymbolEffectStrategy.HIERARCHICAL"},
 };
 
 /*
