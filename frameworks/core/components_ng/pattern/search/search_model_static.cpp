@@ -154,11 +154,19 @@ void SearchModelStatic::SetSearchImageIcon(FrameNode *frameNode, std::optional<I
 
 void SearchModelStatic::SetSearchButtonFontSize(FrameNode* frameNode, const std::optional<Dimension>& value)
 {
+    CHECK_NULL_VOID(frameNode);
     if (value.has_value()) {
         SearchModelNG::SetSearchButtonFontSize(frameNode, value.value());
+        auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+        CHECK_NULL_VOID(buttonFrameNode);
+        auto textNode = AceType::DynamicCast<FrameNode>(buttonFrameNode->GetFirstChild());
+        CHECK_NULL_VOID(textNode);
+        auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->ResetAdaptMinFontSize();
+        textLayoutProperty->ResetAdaptMaxFontSize();
         return;
     }
-    CHECK_NULL_VOID(frameNode);
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     CHECK_NULL_VOID(buttonFrameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontSize, buttonFrameNode);
