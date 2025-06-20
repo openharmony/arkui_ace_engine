@@ -17,6 +17,7 @@
 
 #include "core/common/ai/image_analyzer_mgr.h"
 #include "core/common/ai/image_analyzer_default.h"
+#include "key_event.h"
 
 namespace OHOS::Ace {
 ImageAnalyzerMgr& ImageAnalyzerMgr::GetInstance()
@@ -120,9 +121,9 @@ void ImageAnalyzerMgr::UpdateAIButtonConfig(void** overlayData, AIButtonConfig* 
 void ImageAnalyzerMgr::UpdateKeyEvent(void** overlayData, void* keyEvent)
 {
     if (engine_ && keyEvent != nullptr) {
-        auto* event = static_cast<KeyEvent*>(keyEvent);
-        LOGI("ImageAnalyzerMgr::UpdateKeyEvent event.action: %{public}d, event.code: %{public}d",
-            static_cast<int32_t>(event->action), static_cast<int32_t>(event->code));
+        auto* event = static_cast<OHOS::MMI::KeyEvent*>(keyEvent);
+        LOGI("ImageAnalyzerMgr::UpdateKeyEvent event.action: %{public}d, event.code: %{public}d", event->GetKeyAction(),
+            event->GetKeyCode());
         return engine_->UpdateKeyEvent(overlayData, keyEvent);
     }
 }
