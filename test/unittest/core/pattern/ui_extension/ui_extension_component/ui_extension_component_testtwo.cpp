@@ -55,6 +55,7 @@
 
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/render/mock_rosen_render_context.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.h"
 #include "test/unittest/core/pattern/ui_extension/mock/mock_window_scene_helper.h"
@@ -1145,6 +1146,47 @@ HWTEST_F(UIExtensionComponentTestTwoNg, OnHandleOcclusionScene001, TestSize.Leve
 
 /**
  * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test UIExtensionComponent UIExtensionNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentUIExtensionNode, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct UIExtensionNode
+    */
+    auto uiExtensionNodeId1 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode1 = UIExtensionNode::GetOrCreateUIExtensionNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId1, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
+    ASSERT_NE(uiExtensionNode1, nullptr);
+    auto uiExtensionNodeId2 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode2 = UIExtensionNode::GetOrCreateUIExtensionNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId2, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
+    ASSERT_NE(uiExtensionNode2, nullptr);
+    uiExtensionNode1->MountToParent(uiExtensionNode2);
+    EXPECT_EQ(uiExtensionNode1->GetId(), uiExtensionNodeId1);
+    /**
+    * @tc.steps: step2. test UIExtensionNode diff tag
+    */
+    auto uiExtensionNode3 = UIExtensionNode::GetOrCreateUIExtensionNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId1, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
+    ASSERT_NE(uiExtensionNode3, nullptr);
+    EXPECT_EQ(uiExtensionNode3->GetId(), uiExtensionNodeId1);
+    auto uiExtensionNode4 = UIExtensionNode::GetOrCreateUIExtensionNode(
+        "tag", uiExtensionNodeId1, []() {
+            return AceType::MakeRefPtr<UIExtensionPattern>();
+        });
+    ASSERT_NE(uiExtensionNode4, nullptr);
+    EXPECT_EQ(uiExtensionNode4->GetId(), uiExtensionNodeId1);
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
  * @tc.desc: Test UIExtensionComponent Touch Delegate
  * @tc.type: FUNC
  */
@@ -1186,5 +1228,88 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTouchDelegate, TestS
     TouchEvent touchEvent;
     uiExtensionTouchDelegate.DelegateTouchEvent(touchEvent);
     EXPECT_EQ(uiExtensionTouchDelegate.pattern_.Upgrade(), pattern);
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test UIExtension HandleMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionHandleMouseEvent, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct UIExtensionNode and get pattern
+    */
+    auto uiextensionNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, 1,
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiextensionNode, nullptr);
+    auto pattern = uiextensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. call HandleMouseEvent.
+     * @tc.expected: test HandleTouchEvent with different action.
+     */
+    MouseInfo mouseInfo;
+    mouseInfo.SetSourceDevice(SourceType::NONE);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = std::make_shared<MMI::PointerEvent>(1);
+    mouseInfo.SetPointerEvent(pointerEvent);
+    pattern->HandleMouseEvent(mouseInfo);
+    EXPECT_FALSE(pattern->lastPointerEvent_);
+ 
+    mouseInfo.SetSourceDevice(SourceType::MOUSE);
+    mouseInfo.SetPullAction(MouseAction::PULL_MOVE);
+    pattern->HandleMouseEvent(mouseInfo);
+    EXPECT_FALSE(pattern->lastPointerEvent_);
+ 
+    mouseInfo.SetPullAction(MouseAction::PULL_UP);
+    pattern->HandleMouseEvent(mouseInfo);
+    EXPECT_FALSE(pattern->lastPointerEvent_);
+ 
+    mouseInfo.SetPullAction(MouseAction::PRESS);
+    pattern->HandleMouseEvent(mouseInfo);
+    EXPECT_TRUE(pattern->lastPointerEvent_);
+ 
+    mouseInfo.SetPullAction(MouseAction::RELEASE);
+    pattern->HandleMouseEvent(mouseInfo);
+    EXPECT_TRUE(pattern->lastPointerEvent_);
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test UIExtension HandleTouch pull and mouse
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionHandleTouchPullAndMouse, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct UIExtensionNode and get pattern
+    */
+    auto uiextensionNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, 1,
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiextensionNode, nullptr);
+    auto pattern = uiextensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+    * @tc.steps: step2. Test UIExtension pattern HandleTouch
+    */
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = std::make_shared<MMI::PointerEvent>(1);
+
+    pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE);
+    auto ret = pattern->HandleTouchEvent(pointerEvent);
+    EXPECT_FALSE(ret);
+
+    pointerEvent->SetSourceType(OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN);
+
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE);
+    ret = pattern->HandleTouchEvent(pointerEvent);
+    EXPECT_FALSE(ret);
+ 
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP);
+    ret = pattern->HandleTouchEvent(pointerEvent);
+    EXPECT_FALSE(ret);
+
+    pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_UP);
+    ret = pattern->HandleTouchEvent(pointerEvent);
+    EXPECT_TRUE(ret);
 }
 } // namespace OHOS::Ace::NG

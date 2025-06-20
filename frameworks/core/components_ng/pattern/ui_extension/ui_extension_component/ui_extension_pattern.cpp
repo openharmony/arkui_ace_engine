@@ -1175,6 +1175,14 @@ bool UIExtensionPattern::HandleTouchEvent(
     CHECK_NULL_RETURN(pointerEvent, false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
+    if (pointerEvent->GetSourceType() == OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE) {
+        return false;
+    }
+    auto originalAction = pointerEvent->GetPointerAction();
+    if (originalAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
+        originalAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
+        return false;
+    }
     auto newPointerEvent =
         PlatformUtils::CopyPointerEventWithExtraProperty(pointerEvent, AceLogTag::ACE_UIEXTENSIONCOMPONENT);
     CHECK_NULL_RETURN(newPointerEvent, false);
