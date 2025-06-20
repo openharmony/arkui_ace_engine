@@ -123,6 +123,7 @@ protected:
 
     virtual void GetList();
     ListModelNG CreateList();
+    RefPtr<FrameNode> CreateList(const std::function<void(ListModelNG)>& callback);
     ListItemModelNG CreateListItem(V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
     void CreateListItems(
         int32_t itemNumber = TOTAL_ITEM_NUMBER, V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
