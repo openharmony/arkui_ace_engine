@@ -2598,4 +2598,48 @@ HWTEST_F(ImagePatternTestNg, UpdateOffsetForImageAnalyzerOverlay002, TestSize.Le
     imagePattern->UpdateOffsetForImageAnalyzerOverlay();
     EXPECT_FALSE(imagePattern->imageAnalyzerManager_->IsOverlayCreated());
 }
+
+/**
+ * @tc.name: TestImageJsonImageWidth_Height01
+ * @tc.desc: Test image tojson.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, TestImageJsonImageWidth_Height01, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    image.Create(imageInfoConfig, pixMap);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
+        ImageSourceInfo(IMAGE_SRC_URL, IMAGE_SOURCEINFO_WIDTH, IMAGE_SOURCEINFO_HEIGHT),
+        LoadNotifier(nullptr, nullptr, nullptr));
+    
+    /**
+     * @tc.steps: step2. call ToJsonValue.
+     * @tc.expected: as follows
+     */
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    frameNode->ToJsonValue(json, filter);
+
+    /**
+     * @tc.steps: check the key value.
+     * @tc.expected: it should be width = 300 , height = 200.
+     */
+    auto imageWidth = StringUtils::StringToInt(json->GetString("imageWidth"));
+    EXPECT_EQ(imageWidth, 300);
+    auto imageHeight = StringUtils::StringToInt(json->GetString("imageHeight"));
+    EXPECT_EQ(imageHeight, 200);
+}
 } // namespace OHOS::Ace::NG
