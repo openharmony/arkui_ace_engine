@@ -120,6 +120,18 @@ ListModelNG ListTestNg::CreateList()
     return model;
 }
 
+RefPtr<FrameNode> ListTestNg::CreateList(const std::function<void(ListModelNG)>& callback)
+{
+    ListModelNG model;
+    model.Create();
+    if (callback) {
+        callback(model);
+    }
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ViewStackProcessor::GetInstance()->PopContainer();
+    return AceType::DynamicCast<FrameNode>(element);
+}
+
 void ListTestNg::CreateListItems(int32_t itemNumber, V2::ListItemStyle listItemStyle)
 {
     for (int32_t index = 0; index < itemNumber; index++) {

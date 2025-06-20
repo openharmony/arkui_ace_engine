@@ -2992,4 +2992,40 @@ HWTEST_F(ListLayoutTestNg, InitialIndex002, TestSize.Level1)
      */
     EXPECT_TRUE(IsEqual(pattern_->GetStartIndex(), 2));
 }
+
+/**
+ * @tc.name: LayoutPolicyTest001
+ * @tc.desc: test the measure result when setting matchParent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, LayoutPolicyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default list
+     */
+    RefPtr<FrameNode> list;
+    auto column = CreateColumn([this, &list](ColumnModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        ListModelNG listModel;
+        listModel.Create();
+        ViewAbstractModelNG model1;
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+        model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+        RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ViewStackProcessor::GetInstance()->PopContainer();
+        list = AceType::DynamicCast<FrameNode>(element);
+    });
+    ASSERT_NE(column, nullptr);
+    ASSERT_EQ(column->GetChildren().size(), 1);
+    CreateLayoutTask(column);
+
+    // Expect list's width is 500, height is 300 land offset is [0.0, 0.0].
+    auto geometryNode = list->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+}
 } // namespace OHOS::Ace::NG

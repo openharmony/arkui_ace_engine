@@ -245,6 +245,21 @@ public:
 
     bool FindHeadOrTailChild(const RefPtr<FocusHub>& childFocus, FocusStep step, WeakPtr<FocusHub>& target);
 
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
 protected:
     void OnModifyDone() override;
     virtual void SetListItemDefaultAttributes(const RefPtr<FrameNode>& listItemNode);
