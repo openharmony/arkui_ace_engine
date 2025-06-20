@@ -81,6 +81,21 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInScreen(ArkUI_NodeHandle node, ArkU
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
+int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInGlobalDisplay(ArkUI_NodeHandle node, ArkUI_IntOffset* offset)
+{
+    if (node == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    ArkUI_Float32 tempOffset[2];
+    impl->getNodeModifiers()->getFrameNodeModifier()->getGlobalPositionOnDisplay(
+        node->uiNodeHandle, &tempOffset, false);
+    offset->x = tempOffset[0];
+    offset->y = tempOffset[1];
+
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
 int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow(ArkUI_NodeHandle node, ArkUI_IntOffset* translateOffset)
 {
     if (node == nullptr) {

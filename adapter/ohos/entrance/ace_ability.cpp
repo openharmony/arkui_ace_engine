@@ -487,6 +487,14 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
             rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
             return rect;
         });
+        context->SetGlobalDisplayWindowRectCallback([window]() -> Rect {
+            Rect rect;
+            CHECK_NULL_RETURN(window, rect);
+            auto globalDisplayWindowRect = window->GetGlobalDisplayRect();
+            rect.SetRect(globalDisplayWindowRect.posX_, globalDisplayWindowRect.posY_, globalDisplayWindowRect.width_,
+                globalDisplayWindowRect.height_);
+            return rect;
+        });
         auto rsConfig = window->GetKeyboardAnimationConfig();
         KeyboardAnimationCurve curveIn = {
             rsConfig.curveIn.curveType_, rsConfig.curveIn.curveParams_, rsConfig.curveIn.duration_};

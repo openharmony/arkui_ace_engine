@@ -1066,7 +1066,11 @@ public:
 
     void SetGetWindowRectImpl(std::function<Rect()>&& callback);
 
+    void SetGlobalDisplayWindowRectCallback(std::function<Rect()>&& callback);
+
     Rect GetCurrentWindowRect() const;
+
+    Rect GetGlobalDisplayWindowRect() const;
 
     using SafeAreaInsets = NG::SafeAreaInsets;
 

@@ -9253,6 +9253,19 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInWindow(ArkUI_NodeHandle node, ArkU
 int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInScreen(ArkUI_NodeHandle node, ArkUI_IntOffset* screenOffset);
 
 /**
+ * @brief Obtains the offset of a component relative to the global display.
+ * The relative position does not count in transformation attributes, such as translate.
+ *
+ * @param node Pointer to the <b>ArkUI_NodeHandle</b> representing the component.
+ * @param offset Offset of the component relative to the global display, in px.
+ * @return Result code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInGlobalDisplay(ArkUI_NodeHandle node, ArkUI_IntOffset* offset);
+
+/**
  * @brief Obtain the position of the component in the window, including the properties of graphic translation changes.
  *
  * @param node ArkUI_NodeHandle pointer.

@@ -534,6 +534,10 @@ public:
 
     OffsetF GetPositionToScreen();
 
+    OffsetF GetGlobalPositionOnDisplay() const;
+
+    OffsetF GetFinalOffsetRelativeToWindow(PipelineContext* pipelineContext) const;
+
     OffsetF GetPositionToParentWithTransform() const;
 
     OffsetF GetPositionToScreenWithTransform();

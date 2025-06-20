@@ -1538,6 +1538,8 @@ struct ArkUIHoverEvent {
      *
      */
     bool stopPropagation;
+    ArkUI_Float64 globalDisplayX;
+    ArkUI_Float64 globalDisplayY;
 };
 
 struct ArkUINodeEvent {
@@ -6658,6 +6660,8 @@ struct ArkUIFrameNodeModifier {
     void (*getPositionToParent)(ArkUINodeHandle node, ArkUI_Float32 (*parentOffset)[2], ArkUI_Bool useVp);
     void (*getPositionToScreen)(ArkUINodeHandle node, ArkUI_Float32 (*screenPosition)[2], ArkUI_Bool useVp);
     void (*getPositionToWindow)(ArkUINodeHandle node, ArkUI_Float32 (*windowOffset)[2], ArkUI_Bool useVp);
+    void (*getGlobalPositionOnDisplay)(
+        ArkUINodeHandle node, ArkUI_Float32 (*globalDisplayPosition)[2], ArkUI_Bool useVp);
     void (*getPositionToParentWithTransform)(
         ArkUINodeHandle node, ArkUI_Float32 (*parentPosition)[2], ArkUI_Bool useVp);
     void (*getPositionToScreenWithTransform)(
