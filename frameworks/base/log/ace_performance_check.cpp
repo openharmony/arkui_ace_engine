@@ -238,7 +238,7 @@ void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(int32_t pageNodeCoun
 void AceScopedPerformanceCheck::RecordFunctionTimeout()
 {
     for (auto record : records_) {
-         if (record.first < AceChecker::GetFunctionTimeout()) {
+        if (record.first < AceChecker::GetFunctionTimeout()) {
             continue;
         }
         auto codeInfo = GetCodeInfo(1, 1);
@@ -359,7 +359,7 @@ void AceScopedPerformanceCheck::RecordFlexLayoutsCount(
             pageJson->Put("components", componentsJson);
         }
     }
-    LOGI("9905 pageJson: %{public}s", pageJson->ToString().c_str());
+    LOGI("pageJson 9905: %{public}s", pageJson->ToString().c_str());
     ruleJson->Put(pageJson);
 }
 
