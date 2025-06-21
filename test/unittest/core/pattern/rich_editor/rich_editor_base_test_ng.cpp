@@ -558,6 +558,38 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel017, TestSize.Level1)
 }
 
 /**
+ * @tc.name: KeyboardAvoidance001
+ * @tc.desc: test for keyboardAvoidance
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, KeyboardAvoidance001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. setCustomKeyboard
+     */
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(host, nullptr);
+    auto richEditorPattern = host->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isEditing_ = true;
+
+    auto func = []() {};
+    richEditorModel.SetCustomKeyboard(func, true);
+    EXPECT_TRUE(richEditorPattern->keyboardAvoidance_);
+
+    /**
+     * @tc.steps: step2. check keyboardAvoidance
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto overlayManager = pipeline->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    EXPECT_TRUE(overlayManager->keyboardAvoidance_);
+}
+
+/**
  * @tc.name: RichEditorModel018
  * @tc.desc: test SetEnableHapticFeedback.
  * @tc.type: FUNC
