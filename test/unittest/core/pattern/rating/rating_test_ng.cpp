@@ -1177,7 +1177,7 @@ HWTEST_F(RatingTestNg, RatingTestBuilderFunc001, TestSize.Level1)
      */
     RatingModelNG rating;
     rating.Create();
-    rating.SetIndicator(false);
+    rating.SetIndicator(RATING_INDICATOR_FALSE);
     rating.SetStepSize(1); // Default step size as 1.
     rating.SetStars(5); // Default stars as 5.
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -1255,7 +1255,7 @@ HWTEST_F(RatingTestNg, RatingTestBuilderFunc002, TestSize.Level1)
      */
     RatingModelNG rating;
     rating.Create();
-    rating.SetIndicator(false);
+    rating.SetIndicator(RATING_INDICATOR_FALSE);
     rating.SetStepSize(1); // Default step size as 1.
     rating.SetStars(5); // Default stars as 5.
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());

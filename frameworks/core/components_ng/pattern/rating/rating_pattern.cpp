@@ -252,7 +252,7 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
     }
     auto&& ratingGroup = ratingLayoutProperty->GetOrCreateRatingPropertyGroup();
     CHECK_NULL_RETURN(ratingGroup, nullptr);
-    ratingModifier_->SetIndicator(ratingGroup->GetIndicatorValue());
+    ratingModifier_->SetIndicator(ratingGroup->HasIndicator() ? ratingGroup->GetIndicatorValue() : false);
     ratingModifier_->SetImageInfoFromTheme(isForegroundImageInfoFromTheme_ &&
         isSecondaryImageInfoFromTheme_ && isBackgroundImageInfoFromTheme_);
     ratingModifier_->SetUseContentModifier(UseContentModifier());
