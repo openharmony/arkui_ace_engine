@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 group("frameworks_unittest") {
   testonly = true
   deps = [
+    "base/perfmonitor:perf_monitor_test",
     "base/ressched:ressched_report_test",
     "core/common:color_inverter_test",
     "core/common:container_scope_test",

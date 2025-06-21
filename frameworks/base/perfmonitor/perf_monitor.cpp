@@ -118,6 +118,11 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank,
     PerfInterfaces::SetFrameTime(vsyncTime, duration, jank, windowName);
 }
 
+void PerfMonitor::SetSubHealthInfo(const std::string& info, const std::string& reason, const int32_t duration)
+{
+    PerfInterfaces::SetSubHealthInfo(info, reason, duration);
+}
+
 void PerfMonitor::ReportJankFrameApp(double jank)
 {
     PerfInterfaces::ReportJankFrameApp(jank, JANK_SKIPPED_THRESHOLD);

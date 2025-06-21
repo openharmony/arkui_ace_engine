@@ -129,6 +129,11 @@ void PerfInterfaces::SetFrameTime(int64_t vsyncTime, int64_t duration, double ja
     PerfMonitorAdapter::GetInstance().SetFrameTime(vsyncTime, duration, jank, windowName);
 }
 
+void PerfInterfaces::SetSubHealthInfo(const std::string& info, const std::string& reason, const int32_t duration)
+{
+    PerfMonitorAdapter::GetInstance().SetSubHealthInfo(info, reason, duration);
+}
+
 void PerfInterfaces::ReportJankFrameApp(double jank, int32_t jankThreshold)
 {
     PerfMonitorAdapter::GetInstance().ReportJankFrameApp(jank, jankThreshold);
