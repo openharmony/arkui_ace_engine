@@ -340,7 +340,7 @@ bool ParseResourceParamType(ani_env *env, ani_object objects, ResourceInfo& info
     }
     ani_double type;
     if (ANI_OK !=env->Object_CallMethodByName_Double(
-        static_cast<ani_object>(type_ref), "doubleValue", nullptr, &type)) {
+        static_cast<ani_object>(type_ref), "unboxed", nullptr, &type)) {
         return false;
     }
     info.type = static_cast<int32_t>(type);
@@ -565,7 +565,7 @@ bool ParseAniColor(ani_env *env, ani_ref resourceColor_ref, OHOS::Ace::Color& re
     if (GetIsNumberObject(env, resourceColor_ref)) {
         ani_double resourceColorValue;
         if (ANI_OK !=env->Object_CallMethodByName_Double(
-            static_cast<ani_object>(resourceColor_ref), "doubleValue", nullptr, &resourceColorValue)) {
+            static_cast<ani_object>(resourceColor_ref), "unboxed", nullptr, &resourceColorValue)) {
             return false;
         }
         resourceColor = static_cast<OHOS::Ace::Color>(resourceColorValue);
@@ -616,7 +616,7 @@ bool ParseLengthToDimension(ani_env *env, ani_ref source_ref, OHOS::Ace::Dimensi
     if (GetIsNumberObject(env, source_ref)) {
         ani_double numberValue;
         if (ANI_OK !=env->Object_CallMethodByName_Double(
-            static_cast<ani_object>(source_ref), "doubleValue", nullptr, &numberValue)) {
+            static_cast<ani_object>(source_ref), "unboxed", nullptr, &numberValue)) {
             return false;
         }
         result.SetUnit(defaultUnit);
@@ -738,7 +738,7 @@ bool ParseShadowOptionsOffset(ani_env *env, ani_ref offset_ref, double& offset)
     if (GetIsNumberObject(env, offset_ref)) {
         ani_double offsetValue;
         if (ANI_OK !=env->Object_CallMethodByName_Double(
-            static_cast<ani_object>(offset_ref), "doubleValue", nullptr, &offsetValue)) {
+            static_cast<ani_object>(offset_ref), "unboxed", nullptr, &offsetValue)) {
             return false;
         }
         offset = static_cast<double>(offsetValue);
@@ -848,7 +848,7 @@ bool ParseRadiusNumberToDouble(ani_env *env, ani_object resource_object, double&
 {
     double radiusValue = 0.0;
     ani_double radiu_ani;
-    if (ANI_OK !=env->Object_CallMethodByName_Double(resource_object, "doubleValue", nullptr, &radiu_ani)) {
+    if (ANI_OK !=env->Object_CallMethodByName_Double(resource_object, "unboxed", nullptr, &radiu_ani)) {
         return false;
     }
     radiusValue = static_cast<double>(radiu_ani);

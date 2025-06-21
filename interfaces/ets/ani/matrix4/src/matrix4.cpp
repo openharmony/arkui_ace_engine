@@ -172,7 +172,7 @@ bool ParseOption(ani_env* env, ani_object options, double& input, const char* pr
     }
     ani_double propertyValue;
     if (ANI_OK != env->Object_CallMethodByName_Double(static_cast<ani_object>(property_ref),
-        "doubleValue", nullptr, &propertyValue)) {
+        "unboxed", nullptr, &propertyValue)) {
         return false;
     }
     input = static_cast<int32_t>(propertyValue);
