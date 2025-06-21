@@ -3880,10 +3880,9 @@ void SetBackgroundImagePositionUpdateFunc(
     if (direction.empty()) {
         return;
     }
-    auto& updater = bgImgPosition.GetResObjUpdater();
     if (!resObj) {
-        (direction == "x") ? updater.RemoveResource("backgroundImagePositionX")
-                        : updater.RemoveResource("backgroundImagePositionY");
+        (direction == "x") ? bgImgPosition.RemoveResource("backgroundImagePositionX")
+                        : bgImgPosition.RemoveResource("backgroundImagePositionY");
         return;
     }
     auto&& updateFunc = [direction](const RefPtr<ResourceObject>& resObj, BackgroundImagePosition& position) {
@@ -3902,9 +3901,8 @@ void SetBackgroundImagePositionUpdateFunc(
         (direction == "x") ? position.SetSizeX(AnimatableDimension(value, type, option))
                         : position.SetSizeY(AnimatableDimension(value, type, option));
     };
-    updater.BindResObj(&bgImgPosition);
-    (direction == "x") ? updater.AddResource("backgroundImagePositionX", resObj, std::move(updateFunc))
-                    : updater.AddResource("backgroundImagePositionY", resObj, std::move(updateFunc));
+    (direction == "x") ? bgImgPosition.AddResource("backgroundImagePositionX", resObj, std::move(updateFunc))
+                    : bgImgPosition.AddResource("backgroundImagePositionY", resObj, std::move(updateFunc));
 }
 
 void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)

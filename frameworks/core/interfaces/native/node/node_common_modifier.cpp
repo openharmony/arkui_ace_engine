@@ -2361,9 +2361,8 @@ void SetBackgroundImagePositionUpdateFunc(
         (direction == "x") ? position.SetSizeX(AnimatableDimension(value, type, option))
                            : position.SetSizeY(AnimatableDimension(value, type, option));
     };
-    auto& updater = bgImgPosition.GetResObjUpdater();
-    (direction == "x") ? updater.AddResource("backgroundImagePositionX", resObj, std::move(updateFunc))
-                       : updater.AddResource("backgroundImagePositionY", resObj, std::move(updateFunc));
+    (direction == "x") ? bgImgPosition.AddResource("backgroundImagePositionX", resObj, std::move(updateFunc))
+                       : bgImgPosition.AddResource("backgroundImagePositionY", resObj, std::move(updateFunc));
 }
 
 void SetBackgroundImagePosition(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types,

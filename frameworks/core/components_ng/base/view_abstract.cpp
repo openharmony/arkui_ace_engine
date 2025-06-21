@@ -578,7 +578,7 @@ void ViewAbstract::SetBackgroundColorWithResourceObj(const Color& color, const R
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern<Pattern>();
         CHECK_NULL_VOID(pattern);
-        Color backgroundColor;
+        Color backgroundColor = Color::TRANSPARENT;
         ResourceParseUtils::ParseResColor(resObj, backgroundColor);
         auto pipeline = frameNode->GetContext();
         if (pipeline != nullptr) {
@@ -744,10 +744,9 @@ void ViewAbstract::SetBackgroundImageSizeUpdateFunc(
     if (direction.empty()) {
         return;
     }
-    auto& updater = bgImgSize.GetResObjUpdater();
     if (!resObj) {
-        (direction == "width") ? updater.RemoveResource("backgroundImageSizeWidth")
-                            : updater.RemoveResource("backgroundImageSizeHeight");
+        (direction == "width") ? bgImgSize.RemoveResource("backgroundImageSizeWidth")
+                            : bgImgSize.RemoveResource("backgroundImageSizeHeight");
         return;
     }
     auto&& updateFunc = [direction](const RefPtr<ResourceObject>& resObj, BackgroundImageSize& bgImgSize) {
@@ -768,9 +767,8 @@ void ViewAbstract::SetBackgroundImageSizeUpdateFunc(
             bgImgSize.SetSizeValueY(value);
         }
     };
-    updater.BindResObj(&bgImgSize);
-    (direction == "width") ? updater.AddResource("backgroundImageSizeWidth", resObj, std::move(updateFunc))
-                        : updater.AddResource("backgroundImageSizeHeight", resObj, std::move(updateFunc));
+    (direction == "width") ? bgImgSize.AddResource("backgroundImageSizeWidth", resObj, std::move(updateFunc))
+                        : bgImgSize.AddResource("backgroundImageSizeHeight", resObj, std::move(updateFunc));
 }
 
 void ViewAbstract::SetBackgroundImageSize(BackgroundImageSize& bgImgSize)
@@ -789,7 +787,7 @@ void ViewAbstract::SetBackgroundImageSize(BackgroundImageSize& bgImgSize)
             auto frameNode = weak.Upgrade();
             CHECK_NULL_VOID(frameNode);
             BackgroundImageSize bgImgSizeValue = bgImgSize;
-            bgImgSizeValue.GetResObjUpdater().ReloadResources();
+            bgImgSizeValue.ReloadResources();
             ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSize, bgImgSizeValue, frameNode);
         };
         pattern->AddResObj("backgroundImageSize", resObj, std::move(updateFunc));
@@ -813,7 +811,7 @@ void ViewAbstract::SetBackgroundImageSize(FrameNode* frameNode, BackgroundImageS
                 auto frameNode = weak.Upgrade();
                 CHECK_NULL_VOID(frameNode);
                 BackgroundImageSize bgImgSizeValue = bgImgSize;
-                bgImgSizeValue.GetResObjUpdater().ReloadResources();
+                bgImgSizeValue.ReloadResources();
                 ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSize, bgImgSizeValue, frameNode);
             };
             pattern->AddResObj("backgroundImageSize", resObj, std::move(updateFunc));
@@ -832,7 +830,7 @@ void SetBackgroundImagePositionUpdateFunc(FrameNode* frameNode, BackgroundImageP
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
         BackgroundImagePosition bgImgPositionValue = bgImgPosition;
-        bgImgPositionValue.GetResObjUpdater().ReloadResources();
+        bgImgPositionValue.ReloadResources();
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImagePosition, bgImgPositionValue, frameNode);
     };
     pattern->AddResObj("backgroundImagePosition", resObj, std::move(updateFunc));
