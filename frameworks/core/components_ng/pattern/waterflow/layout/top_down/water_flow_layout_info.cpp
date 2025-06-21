@@ -44,6 +44,9 @@ void WaterFlowLayoutInfo::UpdateStartIndex()
     auto mainHeight = GetMaxMainHeight();
     // need more items for currentOffset_
     if (LessOrEqual(currentOffset_ + mainHeight, 0.0f)) {
+        if (measureInNextFrame_) {
+            startIndex_ = endIndex_;
+        }
         return;
     }
 
