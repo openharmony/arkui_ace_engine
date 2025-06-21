@@ -22,6 +22,7 @@ perf.data*
 **/arktsconfig-unmemoized-merged.json
 arkoala-arkts/arkui-ohos-preprocess/
 arkoala-arkts/arkui-ui2abc-processed/
+arkoala-arkts/arkui-preprocessed/
 arkoala-arkts/ui2abcconfig-m3-merged.json
 arkoala-arkts/build-m3-impl/
 **/*/koala_build.log
@@ -31,3 +32,4 @@ ui2abc/libarkts/.rollup.cache
 ui2abc/**/*/lib/
 **/.ninja_deps
 incremental/runtime/ets/
+incremental/runtime/ets-processed/
