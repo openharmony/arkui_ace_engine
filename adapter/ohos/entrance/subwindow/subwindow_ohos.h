@@ -180,9 +180,11 @@ public:
     bool IsSameDisplayWithParentWindow(bool useInitializedId = false) override;
 
     void InitializeSafeArea();
-    void SetFollowParentWindowLayoutEnabled(bool enable) override
+    bool SetFollowParentWindowLayoutEnabled(bool enable) override
     {
-        window_->SetFollowParentWindowLayoutEnabled(enable);
+        CHECK_NULL_RETURN(window_, false);
+        OHOS::Rosen::WMError ret = window_->SetFollowParentWindowLayoutEnabled(enable);
+        return ret == OHOS::Rosen::WMError::WM_OK;
     }
     bool ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode) override;
 
