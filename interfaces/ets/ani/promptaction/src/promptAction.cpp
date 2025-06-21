@@ -77,7 +77,7 @@ bool GetToastDuration(ani_env *env, ani_object options, int32_t& durationInt)
     }
     ani_double duration;
     if (ANI_OK !=env->Object_CallMethodByName_Double(
-        static_cast<ani_object>(duration_ref), "doubleValue", nullptr, &duration)) {
+        static_cast<ani_object>(duration_ref), "unboxed", nullptr, &duration)) {
         return false;
     }
     durationInt = static_cast<int32_t>(duration);
@@ -100,7 +100,7 @@ bool GetToastBottom(ani_env *env, ani_object options, std::string& bottomString)
     if (GetIsNumberObject(env, bottom_ref)) {
         ani_double bottom;
         if (ANI_OK !=env->Object_CallMethodByName_Double(
-            static_cast<ani_object>(bottom_ref), "doubleValue", nullptr, &bottom)) {
+            static_cast<ani_object>(bottom_ref), "unboxed", nullptr, &bottom)) {
             return false;
         }
         double botm = static_cast<double>(bottom);
