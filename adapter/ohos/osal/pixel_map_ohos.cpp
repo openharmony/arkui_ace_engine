@@ -448,23 +448,17 @@ uint32_t PixelMapOhos::WritePixels(const WritePixelsOptions& opts)
     return pixmap_->WritePixels(options);
 }
 
-bool PixelMapOhos::GetIsWideColorGamut() const
+uint32_t PixelMapOhos::GetInnerColorGamut() const
 {
+#ifdef IMAGE_COLORSPACE_FLAG
     if (!pixmap_) {
         TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap_ is nullptr");
-        return false;
+        return ColorManager::ColorSpaceName::NONE;
     }
-#ifdef IMAGE_COLORSPACE_FLAG
-    switch (pixmap_->InnerGetGrColorSpace().GetColorSpaceName()) {
-        case OHOS::ColorManager::ColorSpaceName::DISPLAY_P3:
-        case OHOS::ColorManager::ColorSpaceName::DCI_P3:
-        case OHOS::ColorManager::ColorSpaceName::BT2020_HLG:
-            return true;
-        default:
-            return false;
-    }
+#else
+    return pixmap_->InnerGetGrColorSpace().GetColorSpaceName()；
 #endif
-    return false;
+    return 0;
 }
 
 void PixelMapOhos::SetMemoryName(std::string pixelMapName) const

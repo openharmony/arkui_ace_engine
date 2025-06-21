@@ -7885,13 +7885,13 @@ std::shared_ptr<Rosen::RSCanvasNode> RosenRenderContext::GetCanvasNode() const
     return canvasNode_;
 }
 
-void RosenRenderContext::SetIsWideColorGamut(bool isWideColorGamut)
+void RosenRenderContext::SetColorGamut(uint32_t colorGamut)
 {
     auto rsCanvasNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
     CHECK_NULL_VOID(rsCanvasNode);
-    if (isWideColorGamut_ != isWideColorGamut) {
-        isWideColorGamut_ = isWideColorGamut;
-        rsCanvasNode->SetIsWideColorGamut(isWideColorGamut_);
+    if (colorGamut_ != colorGamut) {
+        colorGamut = colorGamut_;
+        rsCanvasNode->SetColorGamut(colorGamut);
         return;
     }
 }
