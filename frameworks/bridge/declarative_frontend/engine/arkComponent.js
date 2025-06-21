@@ -2143,7 +2143,7 @@ class OnTouchTestDoneModifier extends ModifierWithKey {
     }
   }
 }
-OnGestureRecognizerJudgeBeginModifier.identity = Symbol('onOnTouchTestDone');
+OnTouchTestDoneModifier.identity = Symbol('onOnTouchTestDone');
 class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
