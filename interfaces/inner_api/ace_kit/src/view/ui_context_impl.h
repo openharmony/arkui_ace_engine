@@ -51,6 +51,8 @@ public:
     bool GreatOrEqualTargetAPIVersion(int32_t version) override;
     int32_t GetContainerModalTitleHeight() override;
     int32_t GetContainerModalButtonsWidth() override;
+    void RegisterArkUIObjectLifecycleCallback(ArkUIObjectLifecycleCallback&& callback) override;
+    void UnregisterArkUIObjectLifecycleCallback() override;
 private:
     NG::PipelineContext* context_ = nullptr;
     RefPtr<OverlayManager> overlayManager_;

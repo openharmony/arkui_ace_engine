@@ -45,8 +45,15 @@ class NodeAdapter extends Disposable {
         );
     }
 
+    getNodeType(): string {
+        return getUINativeModule().nodeAdapter.getNodeType(this.nativePtr_);
+    }
+
     dispose(): void {
         super.dispose();
+        if (this.nativePtr_) {
+            getUINativeModule().nodeAdapter.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'NodeAdapter', this.getNodeType() || 'NodeAdapter', this.nativePtr_);
+        }
         let hostNode = this.attachedNodeRef_.deref();
         if (hostNode !== undefined) {
             NodeAdapter.detachNodeAdapter(hostNode);

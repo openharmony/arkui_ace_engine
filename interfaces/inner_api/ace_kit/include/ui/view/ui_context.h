@@ -26,6 +26,7 @@
 namespace OHOS::Ace::Kit {
 
 using Task = std::function<void()>;
+using ArkUIObjectLifecycleCallback = std::function<void(void*)>;
 class OverlayManager;
 
 class ACE_FORCE_EXPORT UIContext : public AceType {
@@ -57,6 +58,8 @@ public:
     virtual bool GreatOrEqualTargetAPIVersion(int32_t version) = 0;
     virtual int32_t GetContainerModalTitleHeight() = 0;
     virtual int32_t GetContainerModalButtonsWidth() = 0;
+    virtual void RegisterArkUIObjectLifecycleCallback(ArkUIObjectLifecycleCallback&& callback) = 0;
+    virtual void UnregisterArkUIObjectLifecycleCallback() = 0;
 };
 
 }

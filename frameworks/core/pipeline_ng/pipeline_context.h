@@ -1233,6 +1233,9 @@ public:
         keyOcclusionNodes_[frameNodeId] = enable;
     }
     const RefPtr<NodeRenderStatusMonitor>& GetNodeRenderStatusMonitor();
+    void RegisterArkUIObjectLifecycleCallback(Kit::ArkUIObjectLifecycleCallback&& callback);
+    void UnregisterArkUIObjectLifecycleCallback();
+    void FireArkUIObjectLifecycleCallback(void* data);
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1571,6 +1574,7 @@ private:
     std::set<WeakPtr<NG::UINode>> needRenderForDrawChildrenNodes_;
     std::unordered_map<int32_t, bool> keyOcclusionNodes_;
     RefPtr<NodeRenderStatusMonitor> nodeRenderStatusMonitor_;
+    Kit::ArkUIObjectLifecycleCallback objectLifecycleCallback_;
 };
 
 /**

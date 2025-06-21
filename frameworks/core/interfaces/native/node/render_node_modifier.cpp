@@ -539,6 +539,13 @@ void SetTransformScale(ArkUINodeHandle node, ArkUI_Float32 xF, ArkUI_Float32 yF)
     renderContext->RequestNextFrame();
 }
 
+ArkUI_CharPtr GetNodeTypeInRenderNode(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, "");
+    return currentNode->GetTag().c_str();
+}
+
 namespace NodeModifier {
 const ArkUIRenderNodeModifier* GetRenderNodeModifier()
 {
@@ -581,6 +588,7 @@ const ArkUIRenderNodeModifier* GetRenderNodeModifier()
         .setPosition = SetPosition,
         .setMarkNodeGroup = SetMarkNodeGroup,
         .setTransformScale = SetTransformScale,
+        .getNodeType = GetNodeTypeInRenderNode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
