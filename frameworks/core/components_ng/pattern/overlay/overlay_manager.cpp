@@ -3418,7 +3418,7 @@ void OverlayManager::CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::fun
 }
 
 RefPtr<FrameNode> OverlayManager::UpdateCustomDialogInner(
-    const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
+    const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, const std::function<void(int32_t)>& callback)
 {
     if (!callback) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "Parameters of UpdateCustomDialog are incomplete because of no callback.");
@@ -3459,7 +3459,7 @@ RefPtr<FrameNode> OverlayManager::UpdateCustomDialogInner(
 void OverlayManager::UpdateCustomDialog(
     const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback)
 {
-    auto dialogNode = UpdateCustomDialogInner(node, dialogProps, std::move(callback));
+    auto dialogNode = UpdateCustomDialogInner(node, dialogProps, callback);
     if (dialogNode) {
         callback(ERROR_CODE_NO_ERROR);
     }
@@ -3468,7 +3468,7 @@ void OverlayManager::UpdateCustomDialog(
 void OverlayManager::UpdateCustomDialogWithNode(
     const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
 {
-    auto dialogNode = UpdateCustomDialogInner(node, dialogProps, std::move(callback));
+    auto dialogNode = UpdateCustomDialogInner(node, dialogProps, callback);
     if (dialogNode) {
         callback(dialogNode->GetId());
         dialogMap_[dialogNode->GetId()] = dialogNode;
