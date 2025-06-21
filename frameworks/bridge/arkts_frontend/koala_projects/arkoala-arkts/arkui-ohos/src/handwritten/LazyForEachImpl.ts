@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+import { __memo_context_type , __memo_id_type  } from "arkui.stateManagement.runtime";
 import { __id, ComputableState, contextNode, GlobalStateManager, Disposable, memoEntry2, remember, rememberDisposable, rememberMutableState, StateContext, scheduleCallback } from "@koalaui/runtime";
 import { InteropNativeModule, nullptr, pointer } from "@koalaui/interop";
 import { PeerNode } from "../PeerNode";
@@ -33,8 +33,7 @@ export function updateLazyItems() {
 
 /** @memo:intrinsic */
 export function LazyForEachImpl<T>(dataSource: IDataSource<T>,
-    /** @memo */
-    itemGenerator: (item: T, index: number) => void,
+    itemGenerator: (__memo_context: __memo_context_type, __memo_id: __memo_id_type,item: T, index: number) => void,
     keyGenerator?: (item: T, index: number) => string,
 ) {
     const parent = contextNode<PeerNode>()
@@ -120,8 +119,7 @@ class LazyItemPool implements Disposable {
     getOrCreate<T>(
         index: int32,
         data: T,
-        /** @memo */
-        itemGenerator: (item: T, index: number) => void,
+        itemGenerator: (__memo_context: __memo_context_type, __memo_id: __memo_id_type,item: T, index: number) => void,
     ): pointer {
         if (this._activeItems.has(index)) {
             const node = this._activeItems.get(index)!

@@ -18,7 +18,7 @@
 
 import { ResourceColor, Position, Length, SizeOptions, ResourceStr, Font } from "./units"
 import { Color, TextOverflow, BorderStyle, TextHeightAdaptivePolicy } from "./enums"
-import { FontOptions, FontInfo } from "@ohos/font/font"
+import { FontOptions, FontInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
 import { Resource } from "global/resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"

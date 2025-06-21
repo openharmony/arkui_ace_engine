@@ -14,10 +14,10 @@
  */
 
 import { Resource } from "global/resource"
-import { Alignment } from "./src/component/enums"
-import { ResourceColor, Offset } from "./src/component/units"
-import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType } from "./src/component/common"
-import { Serializer } from "./src/component/peers/Serializer"
+import { Alignment } from "arkui/component/enums"
+import { ResourceColor, Offset } from "arkui/component/units"
+import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType } from "arkui/component/common"
+import { Serializer } from "arkui/component/peers/Serializer"
 import { ArkUIGeneratedNativeModule } from "#components"
 
 namespace promptAction {
