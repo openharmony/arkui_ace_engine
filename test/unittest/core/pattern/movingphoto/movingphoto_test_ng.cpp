@@ -1044,7 +1044,6 @@ HWTEST_F(MovingphotoTestNg, ShouldUpdateImageAnalyzer001, TestSize.Level1)
     ASSERT_NE(movingphotoPattern, nullptr);
     auto movingPhotoLayoutProperty = frameNode->GetLayoutProperty<MovingPhotoLayoutProperty>();
     ASSERT_NE(movingPhotoLayoutProperty, nullptr);
-
     EXPECT_FALSE(movingphotoPattern->ShouldUpdateImageAnalyzer());
 }
 
