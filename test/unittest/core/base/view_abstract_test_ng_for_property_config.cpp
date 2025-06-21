@@ -1740,6 +1740,7 @@ HWTEST_F(ViewAbstractTestNg, BackgroundResourceTest003, TestSize.Level1)
     ViewAbstract::SetBackgroundImageSizeUpdateFunc(BACKGROUNDSIZE, resourceObject, "height");
     pattern->resourceMgr_->ReloadResources();
     ViewAbstract::SetBackgroundImageSizeUpdateFunc(BACKGROUNDSIZE, nullptr, "width");
+    ViewAbstract::SetBackgroundImageSizeUpdateFunc(BACKGROUNDSIZE, nullptr, "height");
     EXPECT_TRUE(resMap.find("backgroundImageSizeWidth") == resMap.end());
 }
 
