@@ -1332,6 +1332,9 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0046, TestSize.Level1)
     auto ret3 = OH_ArkUI_DragAction_SetDataLoadParams(dragAction, dataLoadParams);
     OH_UdmfDataLoadParams_Destroy(dataLoadParams);
     EXPECT_EQ(ret3, ARKUI_ERROR_CODE_NO_ERROR);
+    auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
+    ASSERT_NE(dragAction, nullptr);
+    EXPECT_EQ(dragActions->useDataLoadParams, true);
 }
 
 /**
@@ -1373,6 +1376,7 @@ HWTEST_F(DragAndDropTest, DragAndDropTest0047, TestSize.Level1)
     OH_UdmfDataLoadInfo_Destroy(info);
     OH_UdmfDataLoadParams_Destroy(dataLoadParams);
     EXPECT_EQ(ret3, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(dragEvent.useDataLoadParams, true);
 }
 
 /**

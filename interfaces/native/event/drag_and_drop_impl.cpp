@@ -61,6 +61,7 @@ int32_t OH_ArkUI_DragEvent_SetData(ArkUI_DragEvent* event, OH_UdmfData* data)
     if (!event || !data || !dragEvent) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    dragEvent->useDataLoadParams = false;
     dragEvent->unifiedData = data;
 
     return ARKUI_ERROR_CODE_NO_ERROR;
@@ -257,6 +258,7 @@ int32_t OH_ArkUI_DragAction_SetData(ArkUI_DragAction* dragAction, OH_UdmfData* d
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
+    dragActions->useDataLoadParams = false;
     dragActions->unifiedData = data;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
@@ -285,6 +287,7 @@ ArkUI_ErrorCode OH_ArkUI_DragAction_SetDataLoadParams(
     if (!dragActions) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    dragActions->useDataLoadParams = true;
     dragActions->dataLoadParams = dataLoadParams;
 
     return ARKUI_ERROR_CODE_NO_ERROR;
@@ -798,6 +801,7 @@ ArkUI_ErrorCode OH_ArkUI_DragEvent_SetDataLoadParams(ArkUI_DragEvent* event, OH_
     if (!dragEvent) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
+    dragEvent->useDataLoadParams = true;
     dragEvent->dataLoadParams = dataLoadParams;
 
     return ARKUI_ERROR_CODE_NO_ERROR;

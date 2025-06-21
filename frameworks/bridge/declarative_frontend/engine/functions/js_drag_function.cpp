@@ -245,6 +245,7 @@ void JsDragEvent::SetData(const JSCallbackInfo& args)
     napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedData(nativeValue);
     CHECK_NULL_VOID(udData);
+    dragEvent_->SetUseDataLoadParams(false);
     dragEvent_->SetData(udData);
 }
 
@@ -265,6 +266,7 @@ void JsDragEvent::SetDataLoadParams(const JSCallbackInfo& args)
     napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
     RefPtr<DataLoadParams> udDataLoadParams = UdmfClient::GetInstance()->TransformDataLoadParams(env, nativeValue);
     CHECK_NULL_VOID(udDataLoadParams);
+    dragEvent_->SetUseDataLoadParams(true);
     dragEvent_->SetDataLoadParams(udDataLoadParams);
 }
 

@@ -404,6 +404,7 @@ struct ArkUIDragEvent {
     bool isRemoteDev;
     ArkUI_Int32 displayId;
     void* dataLoadParams;
+    bool useDataLoadParams;
 };
 
 struct ArkUIFocusAxisEvent {
@@ -1990,6 +1991,7 @@ struct ArkUIDragAction {
     void* dataLoadParams;
     bool hasTouchPoint = false;
     void** pixelmapNativeList;
+    bool useDataLoadParams;
 };
 struct ArkUI_SystemFontStyleEvent {
     ArkUI_Float64 fontSize;
