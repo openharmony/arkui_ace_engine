@@ -1662,4 +1662,39 @@ HWTEST_F(PatternLockTestNg, PatternLockTestCreateWithResourceObj001, TestSize.Le
 
     EXPECT_EQ(layoutProperty->GetRegularColor(), testColor);
 }
+
+/**
+ * @tc.name: PatternLockTestGetTouchOffsetToNode001
+ * @tc.desc: Test GetTouchOffsetToNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockTestGetTouchOffsetToNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PatternLock ModelNG and Pattern.
+     */
+    PatternLockModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<PatternLockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set offset location.
+     */
+    float offsetX = 0.0f;
+    float offsetY = 0.0f;
+    Offset offset(offsetX, offsetY);
+    TouchLocationInfo locationInfo(0);
+    locationInfo.SetLocalLocation(offset);
+
+    /**
+     * @tc.steps: step3. call GetTouchOffsetToNode.
+     * @tc.expected: (0,0).
+     */
+    auto NodeOffset = pattern->GetTouchOffsetToNode();
+    auto offsetZero = OffsetF(0.0f, 0.0f);
+    EXPECT_EQ(NodeOffset, offsetZero);
+}
 } // namespace OHOS::Ace::NG

@@ -1408,6 +1408,67 @@ HWTEST_F(ImageTestThreeNg, ImagePatternGetImageColorFilterStr, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ImagePatternGetSrcTypeToString001
+ * @tc.desc: call GetSrcTypeToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternGetSrcTypeToString001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode and imagePattern.
+     */
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. SrcType value should be we set.
+     */
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::UNSUPPORTED).c_str(), "unsupported");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::FILE).c_str(), "file");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::ASSET).c_str(), "asset");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::NETWORK).c_str(), "network");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::MEMORY).c_str(), "memory");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::BASE64).c_str(), "base64");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::INTERNAL).c_str(), "internal");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::RESOURCE).c_str(), "resource");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::DATA_ABILITY).c_str(), "dataAbility");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::DATA_ABILITY_DECODED).c_str(), "dataAbilityDecoded");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::RESOURCE_ID).c_str(), "resourceId");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::PIXMAP).c_str(), "pixmap");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::ASTC).c_str(), "astc");
+}
+
+/**
+ * @tc.name: ImagePatternGetSrcTypeToString002
+ * @tc.desc: call GetSrcTypeToString with error type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternGetSrcTypeToString002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode and imagePattern.
+     */
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    std::string retStr;
+
+    /**
+     * @tc.steps: step2. call GetSrcTypeToString with error value.
+     */
+    auto errType = static_cast<SrcType>(99);
+    retStr = imagePattern->GetSrcTypeToString(errType);
+
+    /**
+     * @tc.steps: step3. SrcType value should be null string.
+     */
+    EXPECT_STREQ(retStr.c_str(), "");
+}
+
+/**
  * @tc.name: ImagePatternSetImageAnalyzerConfig
  * @tc.desc: call SetImageAnalyzerConfig.
  * @tc.type: FUNC

@@ -917,6 +917,7 @@ void TextPickerPattern::OnColumnsBuildingCascade()
                 isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
             textPickerColumnPattern->SetEnterIndex(
                 isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
+            textPickerColumnPattern->HandleAccessibilityTextChange();
             std::vector<NG::RangeContent> rangeContents;
             for (uint32_t i = 0; i < cascadeOptions_[index].rangeResult.size(); i++) {
                 NG::RangeContent rangeContent;
@@ -945,6 +946,7 @@ void TextPickerPattern::OnColumnsBuildingUnCascade()
                 isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
             textPickerColumnPattern->SetEnterIndex(
                 isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
+            textPickerColumnPattern->HandleAccessibilityTextChange();
             std::vector<NG::RangeContent> rangeContents;
             for (uint32_t i = 0; i < cascadeOptions_[it.first].rangeResult.size(); i++) {
                 NG::RangeContent rangeContent;
@@ -965,6 +967,7 @@ void TextPickerPattern::OnColumnsBuildingUnCascade()
                 isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
             textPickerColumnPattern->SetEnterIndex(
                 isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
+            textPickerColumnPattern->HandleAccessibilityTextChange();
             textPickerColumnPattern->SetOptions(options_);
             textPickerColumnPattern->SetColumnKind(columnsKind_);
             it.second->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1383,10 +1386,12 @@ void TextPickerPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool is
                 SupplementOption(reOptions, rangeContents, patterIndex);
                 textPickerColumnPattern->SetCurrentIndex(currentSelectedIndex);
                 textPickerColumnPattern->SetOptions(rangeContents);
+                textPickerColumnPattern->HandleAccessibilityTextChange();
                 textPickerColumnPattern->FlushCurrentOptions();
             } else {
                 textPickerColumnPattern->ClearOptions();
                 textPickerColumnPattern->SetCurrentIndex(0);
+                textPickerColumnPattern->HandleAccessibilityTextChange();
                 textPickerColumnPattern->FlushCurrentOptions(false, false, true);
             }
         }

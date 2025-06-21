@@ -352,6 +352,19 @@ Dimension PickerColumnPattern::LinearFontSize(
     }
 }
 
+void PickerColumnPattern::HandleAccessibilityTextChange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto accessibilityProperty = blendNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetUserTextValue(GetCurrentOption());
+    accessibilityProperty->SetAccessibilityText(GetCurrentOption());
+    blendNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
+}
+
 bool PickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropertiesOnly, bool isUpdateAnimationProperties)
 {
     auto host = GetHost();
@@ -376,13 +389,7 @@ bool PickerColumnPattern::InnerHandleScroll(bool isDown, bool isUpatePropertiesO
     HandleChangeCallback(isDown, true);
     HandleEventCallback(true);
 
-    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
-    CHECK_NULL_RETURN(blendNode, false);
-    auto accessibilityProperty = blendNode->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_RETURN(accessibilityProperty, false);
-    accessibilityProperty->SetUserTextValue(GetCurrentOption());
-    accessibilityProperty->SetAccessibilityText(GetCurrentOption());
-    blendNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
+    HandleAccessibilityTextChange();
     return true;
 }
 
