@@ -210,6 +210,7 @@ private:
     void RemoveFrsNode();
     void ReleaseRenderer();
     void DelayDeleteImageNode(bool needHandleCachedClick);
+    void DelayRemoveFormChildNode(FormChildNodeType formChildNodeType);
     void SetNonTransparentAfterRecover();
     void DeleteImageNodeAfterRecover(bool needHandleCachedClick);
     void HandleStaticFormEvent(const PointF& touchPoint);

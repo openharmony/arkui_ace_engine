@@ -2071,4 +2071,22 @@ HWTEST_F(FormPatternTest, FormPatternTest_056, TestSize.Level1)
     textNode = pattern->CreateForbiddenTextNode(APP_LOCKED_RESOURCE_NAME, false);
     EXPECT_NE(textNode, nullptr);
 }
+
+/**
+ * @tc.name: FormPatternTest_057
+ * @tc.desc: DelayRemoveFormChildNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_057, TestSize.Level1)
+{
+    RefPtr<FormNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    EXPECT_NE(pattern, nullptr);
+    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    pattern->AddFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE, childNode);
+    pattern->DelayRemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
+    int32_t num = formNode->GetTotalChildCount();
+    EXPECT_EQ(num, 0);
+}
 } // namespace OHOS::Ace::NG
