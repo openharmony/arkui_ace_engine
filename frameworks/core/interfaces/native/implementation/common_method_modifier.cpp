@@ -65,6 +65,14 @@ constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
 constexpr double VISIBLE_RATIO_MIN = 0.0;
 constexpr double VISIBLE_RATIO_MAX = 1.0;
+constexpr double BRIGHTNESS_MAX = 1.0;
+constexpr double CONTRAST_MAX = 1.0;
+constexpr double SATURATE_MAX = 1.0;
+constexpr double LIGHTUPEFFECT_MAX = 1.0;
+constexpr double BRIGHTNESS_MIN = 0.0;
+constexpr double CONTRAST_MIN = 0.0;
+constexpr double SATURATE_MIN = 0.0;
+constexpr double LIGHTUPEFFECT_MIN = 0.0;
 constexpr uint32_t DEFAULT_DURATION = 1000; // ms
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int NUM_3 = 3;
@@ -3022,7 +3030,14 @@ void Brightness0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    auto convValue = Converter::OptConvert<Dimension>(*value);
+    if (!convValue.has_value()) {
+        convValue = Dimension(BRIGHTNESS_MAX);
+    } else {
+        if (LessOrEqual(convValue.value().Value(), BRIGHTNESS_MIN)) {
+            convValue.value().SetValue(BRIGHTNESS_MIN);
+        }
+    }
     Validator::ValidateNonNegative(convValue);
     ViewAbstractModelStatic::SetBrightness(frameNode, convValue);
 }
@@ -3037,7 +3052,14 @@ void Contrast0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
+    if (!convValue.has_value()) {
+        convValue = Dimension(CONTRAST_MAX);
+    } else {
+        if (LessOrEqual(convValue.value().Value(), CONTRAST_MIN)) {
+            convValue.value().SetValue(CONTRAST_MIN);
+        }
+    }
     Validator::ValidateNonNegative(convValue);
     ViewAbstractModelStatic::SetContrast(frameNode, convValue);
 }
@@ -3082,8 +3104,15 @@ void Saturate0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    if (!convValue.has_value()) {
+        convValue = Dimension(1.0);
+    } else {
+        if (LessOrEqual(convValue.value().Value(), 0.0f)) {
+            convValue.value().SetValue(0);
+        }
+    }
     Validator::ValidateNonNegative(convValue);
-    // ViewAbstract::SetSaturate(frameNode, convValue);
+    ViewAbstract::SetSaturate(frameNode, convValue.value());
 }
 void Saturate1Impl(Ark_NativePointer node,
                    const Opt_Number* value)
@@ -4277,10 +4306,15 @@ void LightUpEffect0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<float>(value);
-    const float minValue = 0.0;
-    const float maxValue = 1.0;
-    Validator::ValidateByRange(convValue, minValue, maxValue);
+    auto convValue = value ? Converter::OptConvert<float>(*value) : std::nullopt;
+    if (!convValue.has_value()) {
+        convValue = LIGHTUPEFFECT_MAX;
+    } else {
+        if (LessOrEqual(convValue.value(), LIGHTUPEFFECT_MIN)) {
+            convValue = LIGHTUPEFFECT_MIN;
+        }
+    }
+    Validator::ValidateByRange(convValue, LIGHTUPEFFECT_MIN, LIGHTUPEFFECT_MAX);
     ViewAbstractModelStatic::SetLightUpEffect(frameNode, convValue);
 }
 void LightUpEffect1Impl(Ark_NativePointer node,
