@@ -2073,11 +2073,11 @@ HWTEST_F(FormPatternTest, FormPatternTest_056, TestSize.Level1)
 }
 
 /**
- * @tc.name: FormPatternTest_056
+ * @tc.name: FormPatternTest_057
  * @tc.desc: DelayRemoveFormChildNode
  * @tc.type: FUNC
  */
-HWTEST_F(FormPatternTest, FormPatternTest_056, TestSize.Level1)
+HWTEST_F(FormPatternTest, FormPatternTest_057, TestSize.Level1)
 {
     RefPtr<FormNode> formNode = CreateFromNode();
     auto pattern = formNode->GetPattern<FormPattern>();
