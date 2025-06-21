@@ -94,13 +94,8 @@ void WindowSceneTest::TearDown()
     ssm_->sceneSessionMap_.clear();
 }
 
-RefPtr<WindowScene> WindowSceneTest::CreateWindowSceneForStartingWindowTest()
+RefPtr<WindowScene> WindowSceneTest::CreateWindowSceneForStartingWindowTest(Rosen::SessionInfo& sessionInfo)
 {
-    Rosen::SessionInfo sessionInfo = {
-        .abilityName_ = ABILITY_NAME,
-        .bundleName_ = BUNDLE_NAME,
-        .moduleName_ = MODULE_NAME,
-    };
     auto session = ssm_->RequestSceneSession(sessionInfo);
     CHECK_EQUAL_RETURN(session, nullptr, nullptr);
     auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
@@ -182,7 +177,12 @@ HWTEST_F(WindowSceneTest, BufferAvailableCallback01, TestSize.Level1)
     /**
      * @tc.steps: step1. Create windowScene.
      */
-    auto windowScene = CreateWindowSceneForStartingWindowTest();
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
     ASSERT_NE(windowScene, nullptr);
     auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
@@ -208,7 +208,12 @@ HWTEST_F(WindowSceneTest, BufferAvailableCallback02, TestSize.Level1)
     /**
      * @tc.steps: step1. Create windowScene.
      */
-    auto windowScene = CreateWindowSceneForStartingWindowTest();
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
     ASSERT_NE(windowScene, nullptr);
     auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
@@ -234,7 +239,12 @@ HWTEST_F(WindowSceneTest, BufferAvailableCallback03, TestSize.Level1)
     /**
      * @tc.steps: step1. Create windowScene.
      */
-    auto windowScene = CreateWindowSceneForStartingWindowTest();
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
     ASSERT_NE(windowScene, nullptr);
     auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
@@ -260,7 +270,12 @@ HWTEST_F(WindowSceneTest, BufferAvailableCallback04, TestSize.Level1)
     /**
      * @tc.steps: step1. Create windowScene.
      */
-    auto windowScene = CreateWindowSceneForStartingWindowTest();
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
     ASSERT_NE(windowScene, nullptr);
     auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
@@ -286,7 +301,12 @@ HWTEST_F(WindowSceneTest, OnAppRemoveStartingWindow01, TestSize.Level1)
     /**
      * @tc.steps: step1. Create windowScene.
      */
-    auto windowScene = CreateWindowSceneForStartingWindowTest();
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
     ASSERT_NE(windowScene, nullptr);
     auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
@@ -313,7 +333,12 @@ HWTEST_F(WindowSceneTest, OnAppRemoveStartingWindow02, TestSize.Level1)
     /**
      * @tc.steps: step1. Create windowScene.
      */
-    auto windowScene = CreateWindowSceneForStartingWindowTest();
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
     ASSERT_NE(windowScene, nullptr);
     auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
@@ -340,7 +365,12 @@ HWTEST_F(WindowSceneTest, OnAppRemoveStartingWindow03, TestSize.Level1)
     /**
      * @tc.steps: step1. Create windowScene.
      */
-    auto windowScene = CreateWindowSceneForStartingWindowTest();
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
     ASSERT_NE(windowScene, nullptr);
     auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
@@ -367,7 +397,12 @@ HWTEST_F(WindowSceneTest, OnAppRemoveStartingWindow04, TestSize.Level1)
     /**
      * @tc.steps: step1. Create windowScene.
      */
-    auto windowScene = CreateWindowSceneForStartingWindowTest();
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
     ASSERT_NE(windowScene, nullptr);
     auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
@@ -394,7 +429,12 @@ HWTEST_F(WindowSceneTest, OnUpdateSnapshotWindow, TestSize.Level1)
     /**
      * @tc.steps: step1. Create windowScene.
      */
-    auto windowScene = CreateWindowSceneForStartingWindowTest();
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
     ASSERT_NE(windowScene, nullptr);
     auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
@@ -420,7 +460,12 @@ HWTEST_F(WindowSceneTest, OnAddRemoveSnapshot, TestSize.Level1)
     /**
      * @tc.steps: step1. Create windowScene.
      */
-    auto windowScene = CreateWindowSceneForStartingWindowTest();
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
     ASSERT_NE(windowScene, nullptr);
     /**
      * @tc.steps: step2. Test and check
@@ -461,36 +506,67 @@ HWTEST_F(WindowSceneTest, IsMainSessionRecent, TestSize.Level1)
  * @tc.desc: HideStartingWindow
  * @tc.type: FUNC
  */
-HWTEST_F(WindowSceneTest, HideStartingWindow, TestSize.Level1)
+HWTEST_F(WindowSceneTest, HideStartingWindowInvisible, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create windowScene.                
+     * @tc.steps: step1. Create windowScene.
      */
-    auto windowScene = CreateWindowSceneForStartingWindowTest();
-    ASSERT_NE(windowScene, nullptr);
-    /**
-     * @tc.steps: step2. Set sub session.
-     */
-    Rosen::SessionInfo subSessionInfo = {
-        .abilityName_ = "SUB_ABILITY_NAME",
-        .bundleName_ = "SUB_BUNDLE_NAME",
-        .moduleName_ = "SUB_MODULE_NAME",
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
         .startWindowType_ = Rosen::StartWindowType::RETAIN_AND_INVISIBLE,
     };
-    auto subSession = ssm_->RequestSceneSession(subSessionInfo);
-    ASSERT_NE(subSession, nullptr);
-    Rosen::RSSurfaceNodeConfig config = {
-        .SurfaceNodeName = "SurfaceNode"
-    };
-    subSession->surfaceNode_ = Rosen::RSSurfaceNode::Create(config);
-    ASSERT_NE(subSession->surfaceNode_, nullptr);
-    subSession->surfaceNode_->SetVisible(false);
-    windowScene->weakSubSessions_.push_back(subSession);
+    auto session = ssm_->RequestSceneSession(sessionInfo);
+    CHECK_EQUAL_RETURN(session, nullptr, nullptr);
+    auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
+    CHECK_EQUAL_RETURN(windowScene, nullptr, nullptr);
+    ASSERT_NE(windowScene, nullptr);
+
+    /**
+     * @tc.steps: step2. Set hiding.
+     */
+    windowScene->CreateStartWindow();
+
     /**
      * @tc.steps: step3. Test and check
      */
     windowScene->SetSubSessionVisible();
-    ASSERT_EQ(subSession->surfaceNode_->GetStagingProperties().GetVisible(), true);
+    ASSERT_EQ(windowScene->session_->GetHideStartingWindow(), true);
+}
+
+/**
+ * @tc.name: HideStartingWindow
+ * @tc.desc: HideStartingWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, HideStartingWindowDefalut, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create windowScene.
+     */
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+        .startWindowType_ = Rosen::StartWindowType::DEFAULT,
+    };
+    auto session = ssm_->RequestSceneSession(sessionInfo);
+    CHECK_EQUAL_RETURN(session, nullptr, nullptr);
+    auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
+    CHECK_EQUAL_RETURN(windowScene, nullptr, nullptr);
+    ASSERT_NE(windowScene, nullptr);
+
+    /**
+     * @tc.steps: step2. Set default.
+     */
+    windowScene->CreateStartWindow();
+
+    /**
+     * @tc.steps: step3. Test and check
+     */
+    windowScene->SetSubSessionVisible();
+    ASSERT_EQ(windowScene->session_->GetHideStartingWindow(), false);
 }
 
 /**
@@ -503,7 +579,12 @@ HWTEST_F(WindowSceneTest, SetSubSessionVisible, TestSize.Level1)
     /**
      * @tc.steps: step1. Create windowScene.
      */
-    auto windowScene = CreateWindowSceneForStartingWindowTest();
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
     ASSERT_NE(windowScene, nullptr);
     /**
      * @tc.steps: step2. Set sub session.
@@ -539,7 +620,12 @@ HWTEST_F(WindowSceneTest, OnLayoutFinished, TestSize.Level1)
     /**
      * @tc.steps: step1. Create windowScene.
      */
-    auto windowScene = CreateWindowSceneForStartingWindowTest();
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
     ASSERT_NE(windowScene, nullptr);
     auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
