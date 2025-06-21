@@ -27,7 +27,9 @@ constexpr float RIGHT_ROW_MAX_WIDTH_WEIGHT = 3;
 void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -364,10 +366,13 @@ float MenuItemLayoutAlgorithm::GetBordersHeight(LayoutWrapper* layoutWrapper)
         border->bottomDimen.value_or(Dimension(0.0)).ConvertToPx();
 }
 
-float MenuItemLayoutAlgorithm::GetMenuItemVerticalPadding()
+float MenuItemLayoutAlgorithm::GetMenuItemVerticalPadding(LayoutWrapper* layoutWrapper)
 {
     float ret = 0.0f;
-    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(layoutWrapper, ret);
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, ret);
+    auto pipeline = hostNode->GetContext();
     CHECK_NULL_RETURN(pipeline, ret);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, ret);
@@ -459,7 +464,7 @@ void MenuItemLayoutAlgorithm::MeasureMenuItem(LayoutWrapper* layoutWrapper, cons
     const RefPtr<LayoutProperty>& props, std::optional<LayoutConstraintF>& layoutConstraint)
 {
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        verInterval_ = GetMenuItemVerticalPadding() - GetBordersHeight(layoutWrapper);
+        verInterval_ = GetMenuItemVerticalPadding(layoutWrapper) - GetBordersHeight(layoutWrapper);
     }
     InitPadding(props, layoutConstraint);
     CHECK_NULL_VOID(layoutWrapper);

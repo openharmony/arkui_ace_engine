@@ -535,6 +535,7 @@ private:
 
     void HandleOptionBackgroundColor();
     void HandleOptionFontColor();
+    RefPtr<SelectTheme> GetCurrentSelectTheme();
 
     std::list<TouchRegion> hoverRegions_;
 
