@@ -5647,8 +5647,8 @@ void KeyboardShortcutImpl(Ark_NativePointer node,
         return;
     }
     auto strValue = Converter::OptConvertPtr<std::string>(value);
-    if (!strValue.has_value() || strValue.value().size() != 1) {
-        // ViewAbstract::SetKeyboardShortcut(frameNode, {}, {}, nullptr);
+    if (value->value.selector == 0 && (!strValue.has_value() || strValue.value().size() != 1)) {
+        ViewAbstractModelStatic::SetKeyboardShortcut(frameNode, {}, {}, nullptr);
         return;
     }
     auto keysOptVect = Converter::OptConvertPtr<std::vector<std::optional<ModifierKey>>>(keys);
