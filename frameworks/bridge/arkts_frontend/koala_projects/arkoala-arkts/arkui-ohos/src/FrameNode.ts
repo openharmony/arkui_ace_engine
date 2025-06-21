@@ -540,7 +540,7 @@ export class FrameNodeUtils {
     }
 }
 
-abstract class TypedFrameNode<T extends ArkBaseNode> extends FrameNode {
+abstract class TypedFrameNode<T extends Object> extends FrameNode {
     attribute_: T | undefined = undefined;
     attrCreator_: (node: FrameNode, type: ModifierType) => T
     type_: string = "";
@@ -557,7 +557,7 @@ abstract class TypedFrameNode<T extends ArkBaseNode> extends FrameNode {
         if (this.attribute_ === undefined) {
             this.attribute_ = this.attrCreator_(this, ModifierType.FRAME_NODE);
         }
-        const a = this.attribute_ as ArkBaseNode;
+        const a = this.attribute_ as Object as ArkBaseNode;
         const allowCount: number = a.allowChildCount();
         const childrenCount = this.getChildrenCount();
         if (allowCount != -1) {
@@ -582,6 +582,12 @@ abstract class TypedFrameNode<T extends ArkBaseNode> extends FrameNode {
         }
         return true;
     }
+    get attribute(): T {
+        if (this.attribute_ === undefined) {
+            this.attribute_ = this.attrCreator_(this, ModifierType.FRAME_NODE);
+        }
+        return this.attribute_!;
+    }
 }
 export namespace typeNode {
     class ListFrameNode extends TypedFrameNode<ArkListNode> {
@@ -591,12 +597,6 @@ export namespace typeNode {
         initialize(options: ListOptions): ListAttribute {
             let arkListNode = this.attribute as ArkListNode;
             return arkListNode!.initialize(options);
-        }
-        get attribute(): ListAttribute {
-            if (this.attribute_ === undefined) {
-                this.attribute_ = this.attrCreator_(this, ModifierType.FRAME_NODE);
-            }
-            return this.attribute_!;
         }
     }
 
