@@ -523,6 +523,11 @@ enum class TextHeightAdaptivePolicy {
     LAYOUT_CONSTRAINT_FIRST,
 };
 
+enum class TextEffectStrategy {
+    NONE = 0,
+    FLIP,
+};
+
 enum class MarqueeDirection {
     LEFT,
     RIGHT,

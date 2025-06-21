@@ -199,6 +199,8 @@ public:
     void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) override {}
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
         double distanceThreshold) override;
+    void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+        Dimension distanceThreshold) override;
     void SetOnGestureJudgeBegin(NG::GestureJudgeFunc&& gestureJudgeFunc) override {}
     void SetOnTouchIntercept(NG::TouchInterceptFunc&& touchInterceptFunc) override {}
     void SetShouldBuiltInRecognizerParallelWith(
@@ -417,14 +419,12 @@ public:
     void SetMarkAnchorStart(Dimension& markAnchorStart) override {};
     void ResetMarkAnchorStart() override {};
     void SetOffsetLocalizedEdges(bool needLocalized) override {};
-    void CreateWithColorResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, PopupType& type) override {};
-    void CreateWithBoolResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj) override {};
-    void CreateWithResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, PopupType type) override {};
+    void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj,
+        const PopupType& type) override {};
     void CreateWithResourceObj(
         const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) override {};
+    void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& resourceObj, const PopupOptionsType& type) override {};
 };
 
 } // namespace OHOS::Ace::Framework

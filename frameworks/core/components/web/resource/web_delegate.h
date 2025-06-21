@@ -251,13 +251,16 @@ class FileSelectorResultOhos : public FileSelectorResult {
     DECLARE_ACE_TYPE(FileSelectorResultOhos, FileSelectorResult)
 
 public:
-    explicit FileSelectorResultOhos(std::shared_ptr<OHOS::NWeb::NWebStringVectorValueCallback> callback)
-        : callback_(callback) {}
+    FileSelectorResultOhos(
+        std::shared_ptr<OHOS::NWeb::NWebStringVectorValueCallback> callback, const WeakPtr<WebDelegate>& delegate)
+        : callback_(callback), delegate_(delegate)
+    {}
 
     void HandleFileList(std::vector<std::string>& result) override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebStringVectorValueCallback> callback_;
+    WeakPtr<WebDelegate> delegate_;
 };
 
 class ContextMenuParamOhos : public WebContextMenuParam {
@@ -865,6 +868,7 @@ public:
     void UpdateIntrinsicSizeEnabled(bool isIntrinsicSizeEnabled);
     void UpdateCssDisplayChangeEnabled(bool isCssDisplayChangeEnabled);
     void UpdateBypassVsyncCondition(const WebBypassVsyncCondition& condition);
+    void UpdateGestureFocusMode(const GestureFocusMode& mode);
     void UpdateNativeEmbedRuleTag(const std::string& tag);
     void UpdateNativeEmbedRuleType(const std::string& type);
     void UpdateCopyOptionMode(const int32_t copyOptionModeValue);
@@ -955,7 +959,7 @@ public:
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
     void OnProgressChanged(int param);
-    void OnReceivedTitle(const std::string& param);
+    void OnReceivedTitle(const std::string& title, bool isRealTitle = false);
     void ExitFullScreen();
     void OnFullScreenExit();
     void OnGeolocationPermissionsHidePrompt();
@@ -1237,11 +1241,19 @@ public:
     int GetLastHitTestResult();
     int GetHitTestResult();
 
-    void RemoveSnapshotFrameNode();
+    void RemoveSnapshotFrameNode(int removeDelayTime);
 
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id,  int width, int height);
     void SetPipNativeWindow(int delegate_id, int child_id, int frame_routing_id, void* window);
     void SendPipEvent(int delegate_id, int child_id, int frame_routing_id, int event);
+    void SetIsFileSelectorShow(bool isFileSelectorShow) { isFileSelectorShow_ = isFileSelectorShow; }
+    bool IsFileSelectorShow() { return isFileSelectorShow_; }
+
+
+    bool ShowMagnifier();
+    bool HideMagnifier();
+    void UpdateSingleHandleVisible(bool isVisible);
+    void SetTouchHandleExistState(bool touchHandleExist);
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1473,6 +1485,7 @@ private:
 
     // data detector js state
     bool initDataDetectorJS_ = false;
+    bool isFileSelectorShow_ = false;
 
 #endif
 };

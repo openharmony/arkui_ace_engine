@@ -144,6 +144,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     swiperLayoutProperty->ResetIgnorePrevMarginAndNextMargin();
     auto isSingleCase = SwiperUtils::CheckIsSingleCase(swiperLayoutProperty);
     OptionalSizeF contentIdealSize;
+    // originally swiper contentIdealSize, set width/height wrapContent same originally
     if (isSingleCase) {
         contentIdealSize = CreateIdealSizeByPercentRef(contentConstraint, axis_, MeasureType::MATCH_CONTENT);
         if (mainSizeIsMeasured_) {
@@ -158,6 +159,24 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (layoutWrapper->ConstraintChanged()) {
             mainSizeIsMeasured_ = false;
             jumpIndex_ = jumpIndex_.value_or(currentIndex_);
+        }
+    }
+
+    auto layoutPolicy = swiperLayoutProperty->GetLayoutPolicyProperty();
+    auto isMainMatchParent = false;
+    auto isCrossMatchParent = false;
+    if (layoutPolicy.has_value()) {
+        bool isHorizontal = axis_ == Axis::HORIZONTAL;
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        isMainMatchParent = (isHorizontal ? widthLayoutPolicy : heightLayoutPolicy) == LayoutCalPolicy::MATCH_PARENT;
+        isCrossMatchParent = (isHorizontal ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::MATCH_PARENT;
+
+        // when the main/cross axis is set matchParent, Update contentIdealSize
+        if (isMainMatchParent || isCrossMatchParent) {
+            auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(contentConstraint,
+                widthLayoutPolicy, heightLayoutPolicy, axis_);
+            contentIdealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
         }
     }
 
@@ -203,10 +222,15 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto cachedChildIdealSize = contentIdealSize;
 
     auto crossSize = contentIdealSize.CrossSize(axis_);
-    if ((crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) || !crossSize.has_value()) {
-        contentCrossSize_ = GetChildMaxSize(layoutWrapper, false);
-        contentIdealSize.SetCrossSize(contentCrossSize_, axis_);
-        crossMatchChild_ = true;
+    // when matchParent, idealSize'crossSize Keep the original value
+    if (!isCrossMatchParent) {
+        if ((crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) || !crossSize.has_value()) {
+            contentCrossSize_ = GetChildMaxSize(layoutWrapper, false);
+            contentIdealSize.SetCrossSize(contentCrossSize_, axis_);
+            crossMatchChild_ = true;
+        } else {
+            contentCrossSize_ = crossSize.value();
+        }
     } else {
         contentCrossSize_ = crossSize.value();
     }

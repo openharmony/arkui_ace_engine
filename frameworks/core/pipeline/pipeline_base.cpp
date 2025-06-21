@@ -277,7 +277,8 @@ bool PipelineBase::NeedTouchInterpolation()
     auto uIContentType = container->GetUIContentType();
     return SystemProperties::IsNeedResampleTouchPoints() &&
         (uIContentType == UIContentType::SECURITY_UI_EXTENSION ||
-        uIContentType == UIContentType::MODAL_UI_EXTENSION);
+        uIContentType == UIContentType::MODAL_UI_EXTENSION ||
+        uIContentType == UIContentType::UI_EXTENSION);
 }
 
 void PipelineBase::SetFontWeightScale(float fontWeightScale)
@@ -889,6 +890,12 @@ void PipelineBase::SetGetWindowRectImpl(std::function<Rect()>&& callback)
     }
 }
 
+void PipelineBase::SetGlobalDisplayWindowRectCallback(std::function<Rect()>&& callback)
+{
+    CHECK_NULL_VOID(window_);
+    window_->SetGlobalDisplayWindowRectCallback(std::move(callback));
+}
+
 void PipelineBase::ContainerModalUnFocus() {}
 
 Rect PipelineBase::GetCurrentWindowRect() const
@@ -897,6 +904,12 @@ Rect PipelineBase::GetCurrentWindowRect() const
         return window_->GetCurrentWindowRect();
     }
     return {};
+}
+
+Rect PipelineBase::GetGlobalDisplayWindowRect() const
+{
+    CHECK_NULL_RETURN(window_, {});
+    return window_->GetGlobalDisplayWindowRect();
 }
 
 bool PipelineBase::HasFloatTitle() const

@@ -718,6 +718,21 @@ std::shared_ptr<void> AceContainer::SerializeValue(
     return jsEngine->SerializeValue(jsValue);
 }
 
+void AceContainer::TriggerModuleSerializer()
+{
+    ContainerScope scope(instanceId_);
+#ifdef NG_BUILD
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
+#else
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+#endif
+    CHECK_NULL_VOID(declarativeFrontend);
+    auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(
+        declarativeFrontend->GetJsEngine());
+    CHECK_NULL_VOID(jsEngine);
+    jsEngine->TriggerModuleSerializer();
+}
+
 void AceContainer::SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder)
 {
     ContainerScope scope(instanceId_);
@@ -3047,6 +3062,15 @@ void AceContainer::InitWindowCallback()
         rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
         return rect;
     });
+
+    pipelineContext_->SetGlobalDisplayWindowRectCallback([window = uiWindow_]() -> Rect {
+        Rect rect;
+        CHECK_NULL_RETURN(window, rect);
+        auto globalDisplayWindowRect = window->GetGlobalDisplayRect();
+        rect.SetRect(globalDisplayWindowRect.posX_, globalDisplayWindowRect.posY_, globalDisplayWindowRect.width_,
+            globalDisplayWindowRect.height_);
+        return rect;
+    });
 }
 
 NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(
@@ -3883,6 +3907,8 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
         dragPointerEvent.windowX = pointerItem.GetWindowX();
         dragPointerEvent.windowY = pointerItem.GetWindowY();
     }
+    dragPointerEvent.globalDisplayX = pointerItem.GetGlobalX();
+    dragPointerEvent.globalDisplayY = pointerItem.GetGlobalY();
     dragPointerEvent.deviceId = pointerItem.GetDeviceId();
     dragPointerEvent.sourceTool = static_cast<SourceTool>(pointerItem.GetToolType());
     dragPointerEvent.displayId = currentPointerEvent->GetTargetDisplayId();
@@ -3938,6 +3964,8 @@ bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEve
         dragPointerEvent.windowX = pointerItem.GetWindowX();
         dragPointerEvent.windowY = pointerItem.GetWindowY();
     }
+    dragPointerEvent.globalDisplayX = pointerItem.GetGlobalX();
+    dragPointerEvent.globalDisplayY = pointerItem.GetGlobalY();
     return true;
 }
 

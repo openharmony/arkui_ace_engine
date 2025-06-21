@@ -17,6 +17,7 @@
 
 #include "include/codec/SkCodec.h"
 #ifdef USE_NEW_SKIA
+#include "include/codec/SkEncodedImageFormat.h"
 #include "include/core/SkStream.h"
 #endif
 
@@ -174,18 +175,6 @@ ImageCodec DrawingImageData::Parse() const
         imageSize.SetSizeT(SizeF(astcSize.first, astcSize.second));
         return { imageSize, ASTC_FRAME_COUNT, ImageRotateOrientation::UP };
     }
-    uint32_t errorCode = 0;
-    auto imageSource =
-        ImageSource::Create(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize(), errorCode);
-    if (imageSource) {
-        auto encodedFormat = imageSource->GetEncodedFormat();
-        if (encodedFormat == "image/heic" || encodedFormat == "image/heif") {
-            auto orientation = GetImageSourceRotateOrientation(imageSource->GetProperty("Orientation"));
-            auto originImageSize = imageSource->GetImageSize();
-            imageSize.SetSizeT(SizeF(originImageSize.first, originImageSize.second));
-            return { imageSize, imageSource->GetFrameCount(), orientation };
-        }
-    }
 
     RSDataWrapper* wrapper = new RSDataWrapper { rsData };
     auto skData = SkData::MakeWithProc(rsData->GetData(), rsData->GetSize(), RSDataWrapperReleaseProc, wrapper);
@@ -201,6 +190,17 @@ ImageCodec DrawingImageData::Parse() const
             "codec in Parse is null, rsDataSize = %{public}d, nodeID = %{public}d-%{public}lld.",
             static_cast<int32_t>(rsData->GetSize()), nodeId_, static_cast<long long>(accessibilityId_));
         return {};
+    }
+    if (codec->getEncodedFormat() == SkEncodedImageFormat::kHEIF) {
+        uint32_t errorCode = 0;
+        auto imageSource =
+            ImageSource::Create(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize(), errorCode);
+        if (imageSource) {
+            auto orientation = GetImageSourceRotateOrientation(imageSource->GetProperty("Orientation"));
+            auto originImageSize = imageSource->GetImageSize();
+            imageSize.SetSizeT(SizeF(originImageSize.first, originImageSize.second));
+            return { imageSize, imageSource->GetFrameCount(), orientation };
+        }
     }
     auto orientation = GetImageRotateOrientation(codec->getOrigin());
     imageSize.SetSizeT(SizeF(codec->dimensions().fWidth, codec->dimensions().fHeight));

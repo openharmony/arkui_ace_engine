@@ -520,6 +520,9 @@ HWTEST_F(MenuLayoutPropertyTestNg, ToJsonValue001, TestSize.Level1)
     property.UpdateItemGroupDivider(ITEM_DIVIDER);
     property.UpdateExpandingMode(SubMenuExpandingMode::EMBEDDED);
 
+    auto node = FrameNode::CreateFrameNode(
+        V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    property.SetHost(node);
     auto json = JsonUtil::Create(true);
     property.ToJsonValue(json, filter);
     auto fontJsonObject = json->GetObject("font");

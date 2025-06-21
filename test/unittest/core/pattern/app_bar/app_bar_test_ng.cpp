@@ -58,6 +58,11 @@ class AppBarTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+
+    void SetUp() override
+    {
+        ViewStackProcessor::GetInstance()->SetCustomAppBarNode(nullptr);
+    }
 };
 
 void AppBarTestNg::SetUpTestSuite()
@@ -1021,5 +1026,56 @@ HWTEST_F(AppBarTestNg, TestAppScreenCallBack031, TestSize.Level1)
     CHECK_NULL_VOID(pipeline);
     AppBarView::BuildAppbar(pipeline);
     EXPECT_EQ(atom, appBar->atomicService_.Upgrade());
+}
+
+/**
+ * @tc.name: TestOnBackPressedCallback032
+ * @tc.desc: Test OnBackPressedCallback function
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, TestOnBackPressedCallback032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create stage, appBar, atom, pattern.
+     * @tc.expected: stage, appBar, atom, pattern are not null.
+     */
+    auto stage = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(stage, nullptr);
+    auto appBar = AceType::MakeRefPtr<AppBarView>();
+    ASSERT_NE(appBar, nullptr);
+    auto atom = appBar->Create(stage);
+    ASSERT_NE(atom, nullptr);
+    auto pattern = atom->GetPattern<AtomicServicePattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create CustomAppBarNode and set callback.
+     */
+    auto custom = CustomAppBarNode::CreateCustomAppBarNode(-1, "");
+    ViewStackProcessor::GetInstance()->SetCustomAppBarNode(custom);
+
+    bool callbackCalled = false;
+    std::string callbackName;
+    std::string callbackValue;
+    
+    auto callback =
+        [&callbackCalled, &callbackName, &callbackValue](const std::string& name, const std::string& value) mutable {
+        callbackCalled = true;
+        callbackName = name;
+        callbackValue = value;
+    };
+
+    custom->SetCustomCallback(std::move(callback));
+    auto customAppBar = pattern->GetJSAppBarContainer();
+    ASSERT_NE(customAppBar, nullptr);
+
+    /**
+     * @tc.steps: step3. Call OnBackPressedCallback and verify the callback is triggered.
+     * @tc.expected: The callback should be called with ARKUI_APP_BAR_ON_BACK_PRESSED and value "true".
+     */
+    pattern->OnBackPressedCallback();
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_EQ(callbackName, ARKUI_APP_BAR_ON_BACK_PRESSED);
+    EXPECT_EQ(callbackValue, "true");
 }
 } // namespace OHOS::Ace::NG

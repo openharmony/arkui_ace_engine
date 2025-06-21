@@ -19,12 +19,14 @@
 #define private public
 #define protected public
 
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_canvas.h"
 
+#include "core/common/ace_engine.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
@@ -722,6 +724,14 @@ HWTEST_F(MenuExpandTestNg, MenuExpandTestNg016, TestSize.Level1)
 {
     RefPtr<GeometryNode> previewGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<GeometryNode> menuGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<MenuPattern>(NODE_ID, "menu", MenuType::MENU));
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
     SizeF totalSize(TEN_FLOAT, TEN_FLOAT);
     float menuItemTotalHeight = FIVE_FLOAT;
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
@@ -733,14 +743,14 @@ HWTEST_F(MenuExpandTestNg, MenuExpandTestNg016, TestSize.Level1)
     layoutAlgorithm->param_.topSecurity = ONE_FLOAT;
     layoutAlgorithm->param_.bottomSecurity = ONE_FLOAT;
     layoutAlgorithm->LayoutNormalTopPreviewBottomMenu(
-        previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight);
+        previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight, layoutWrapper);
     EXPECT_EQ(previewGeometryNode->frame_.rect_.width_, ZERO_FLOAT);
     previewGeometryNode->frame_.rect_.width_ = THIRTY_FLOAT;
     previewGeometryNode->frame_.rect_.height_ = THIRTY_FLOAT;
     layoutAlgorithm->wrapperRect_.height_ = TWENTY_FLOAT;
     layoutAlgorithm->param_.previewMenuGap = NEGATIVE_EIGHTEEN;
     layoutAlgorithm->LayoutNormalTopPreviewBottomMenu(
-        previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight);
+        previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight, layoutWrapper);
     EXPECT_EQ(previewGeometryNode->frame_.rect_.width_, THIRTY_FLOAT);
 }
 
@@ -753,6 +763,14 @@ HWTEST_F(MenuExpandTestNg, MenuExpandTestNg017, TestSize.Level1)
 {
     RefPtr<GeometryNode> previewGeometryNode = AceType::MakeRefPtr<GeometryNode>();
     RefPtr<GeometryNode> menuGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<MenuPattern>(NODE_ID, "menu", MenuType::MENU));
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    ASSERT_NE(layoutWrapper, nullptr);
     SizeF totalSize(TEN_FLOAT, TEN_FLOAT);
     float menuItemTotalHeight = FIVE_FLOAT;
     RefPtr<MenuLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<MenuLayoutAlgorithm>();
@@ -764,14 +782,14 @@ HWTEST_F(MenuExpandTestNg, MenuExpandTestNg017, TestSize.Level1)
     layoutAlgorithm->param_.topSecurity = ONE_FLOAT;
     layoutAlgorithm->param_.bottomSecurity = ONE_FLOAT;
     layoutAlgorithm->LayoutNormalBottomPreviewTopMenu(
-        previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight);
+        previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight, layoutWrapper);
     EXPECT_EQ(previewGeometryNode->frame_.rect_.width_, ZERO_FLOAT);
     previewGeometryNode->frame_.rect_.width_ = THIRTY_FLOAT;
     previewGeometryNode->frame_.rect_.height_ = THIRTY_FLOAT;
     layoutAlgorithm->wrapperRect_.height_ = TWENTY_FLOAT;
     layoutAlgorithm->param_.previewMenuGap = NEGATIVE_EIGHTEEN;
     layoutAlgorithm->LayoutNormalBottomPreviewTopMenu(
-        previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight);
+        previewGeometryNode, menuGeometryNode, totalSize, menuItemTotalHeight, layoutWrapper);
     EXPECT_EQ(previewGeometryNode->frame_.rect_.width_, THIRTY_FLOAT);
 }
 
@@ -807,6 +825,13 @@ HWTEST_F(MenuExpandTestNg, MenuExpandTestNg019, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode(
         V2::MENU_ETS_TAG, TARGET_ID, AceType::MakeRefPtr<MenuPattern>(NODE_ID, "menu", MenuType::MENU));
     ASSERT_NE(frameNode, nullptr);
+    MockContainer::SetUp();
+    MockPipelineContext::SetUp();
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    auto container = MockContainer::Current();
+    container->pipelineContext_ = pipelineContext;
+    frameNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     frameNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
     auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
     ASSERT_NE(refLayoutWrapper, nullptr);
@@ -849,6 +874,8 @@ HWTEST_F(MenuExpandTestNg, MenuExpandTestNg019, TestSize.Level1)
     menuLayoutProps->UpdateSelectModifiedHeight(NEGATIVE_EIGHT);
     layoutAlgorithm->UpdateConstraintSelectHeight(layoutWrapper, layoutConstraintF);
     EXPECT_EQ(layoutConstraintF.maxSize.height_, NEGATIVE_EIGHT);
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 /**

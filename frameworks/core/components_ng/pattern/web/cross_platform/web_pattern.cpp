@@ -83,7 +83,7 @@ void WebPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
     host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddNodesToNotifyMemoryLevel(host->GetId());
     auto OnAreaChangedCallBack = [weak = WeakClaim(this)](float x, float y, float w, float h) mutable {
@@ -107,7 +107,7 @@ void WebPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     delegate_->OnBlur();
 
     auto id = frameNode->GetId();
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafelyWithCheck());
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
@@ -135,7 +135,7 @@ void WebPattern::InitEvent()
     CHECK_NULL_VOID(focusHub);
     InitFocusEvent(focusHub);
 
-    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto langTask = [weak = AceType::WeakClaim(this)]() {
         auto WebPattern = weak.Upgrade();
@@ -753,7 +753,7 @@ void WebPattern::RegistVirtualKeyBoardListener()
     if (!needUpdateWeb_) {
         return;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetVirtualKeyBoardCallback(
         [weak = AceType::WeakClaim(this)](int32_t width, int32_t height, double keyboard, bool isCustomKeyboard) {
@@ -788,10 +788,8 @@ void WebPattern::OnModifyDone()
     if (!delegate_) {
         // first create case,
 #if defined(IOS_PLATFORM) || defined(ANDROID_PLATFORM)
-        WeakPtr<PipelineContext> context = WeakPtr<PipelineContext>(
-            PipelineContext::GetCurrentContextSafelyWithCheck());
-        delegate_ = AceType::MakeRefPtr<WebDelegateCross>(
-            PipelineContext::GetCurrentContextSafelyWithCheck(), nullptr, "web");
+        WeakPtr<PipelineContext> context = WeakPtr<PipelineContext>(PipelineContext::GetCurrentContext());
+        delegate_ = AceType::MakeRefPtr<WebDelegateCross>(PipelineContext::GetCurrentContext(), nullptr, "web");
         delegate_->SetNGWebPattern(Claim(this));
         delegate_->CreatePlatformResource(Size(0, 0), Offset(0, 0), context);
         if (setWebIdCallback_) {
@@ -807,10 +805,9 @@ void WebPattern::OnModifyDone()
         }
 
 #else
-        delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContextSafelyWithCheck(), nullptr, "");
+        delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContext(), nullptr, "");
         CHECK_NULL_VOID(delegate_);
-        observer_ = AceType::MakeRefPtr<WebDelegateObserver>(
-            delegate_, PipelineContext::GetCurrentContextSafelyWithCheck());
+        observer_ = AceType::MakeRefPtr<WebDelegateObserver>(delegate_, PipelineContext::GetCurrentContext());
         CHECK_NULL_VOID(observer_);
         delegate_->SetObserver(observer_);
         delegate_->SetRenderMode(renderMode_);
@@ -824,7 +821,7 @@ void WebPattern::OnModifyDone()
         if (isEnhanceSurface_) {
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);
-            delegate_->InitOHOSWeb(PipelineContext::GetCurrentContextSafelyWithCheck());
+            delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext());
         } else {
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);
@@ -839,7 +836,7 @@ void WebPattern::OnModifyDone()
             }
             renderSurface_->InitSurface();
             renderSurface_->UpdateSurfaceConfig();
-            delegate_->InitOHOSWeb(PipelineContext::GetCurrentContextSafelyWithCheck(), renderSurface_);
+            delegate_->InitOHOSWeb(PipelineContext::GetCurrentContext(), renderSurface_);
         }
 #endif
         delegate_->UpdateBackgroundColor(GetBackgroundColorValue(
@@ -904,7 +901,7 @@ void WebPattern::OnModifyDone()
         };
         PostTaskToUI(std::move(task));
     }
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddOnAreaChangeNode(host->GetId());
 }
@@ -950,7 +947,7 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height)
     rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
     frameNode->GetRenderContext()->SyncGeometryProperties(rect);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     context->SetRootRect(width, height, 0);
 }
@@ -996,7 +993,7 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
     if (isDragging_) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
@@ -1025,7 +1022,7 @@ void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
 
 bool WebPattern::ParseTouchInfo(const TouchEventInfo& info, std::list<TouchInfo>& touchInfos)
 {
-    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
     auto viewScale = context->GetViewScale();
     if (info.GetChangedTouches().empty()) {
@@ -1364,7 +1361,7 @@ void WebPattern::OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode)
 
 
 void WebPattern::UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-    const NG::OnMenuItemClickCallback&& onMenuItemClick)
+    const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
     // cross platform is not support now;
 }
@@ -1455,6 +1452,11 @@ void WebPattern::OnEnableFollowSystemFontWeightUpdate(bool value)
 }
 
 void WebPattern::SetDefaultBackgroundColor()
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnGestureFocusModeUpdate(GestureFocusMode mode)
 {
     // cross platform is not support now;
 }

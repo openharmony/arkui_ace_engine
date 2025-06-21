@@ -1064,4 +1064,303 @@ HWTEST_F(ScrollPatternTwoTestNg, UpdateCurrentOffset001, TestSize.Level1)
     auto result = scrollPattern->UpdateCurrentOffset(2.0f, SCROLL_FROM_NONE);
     EXPECT_FALSE(result);
 }
+
+
+/**
+ * @tc.name: ScrollSnapTrigger_001
+ * @tc.desc: Test ScrollPattern ScrollSnapTrigger
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, ScrollSnapTrigger_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<ScrollLayoutProperty> layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::NONE);
+    frameNode->layoutProperty_ = layoutProperty;
+    RefPtr<ScrollBar> scrollBar = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
+    RefPtr<ScrollBarProxy> scrollBarProxy = AceType::MakeRefPtr<ScrollBarProxy>();
+    RefPtr<PipelineBase> context = AceType::MakeRefPtr<PipelineContext>();
+    auto animator = Animator::CreateAnimator(nullptr, context, nullptr);
+    animator->status_ = Animator::Status::STOPPED;
+    scrollPattern->animator_ = animator;
+    scrollPattern->isAnimationStop_ = true;
+    scrollPattern->scrollableEvent_ = nullptr;
+    scrollPattern->scrollBar_ = scrollBar;
+    scrollPattern->scrollBarProxy_ = scrollBarProxy;
+    scrollPattern->snapOffsets_ = { -6.0f, 0.0f };
+    scrollPattern->enablePagingStatus_ = ScrollPagingStatus::VALID;
+    scrollPattern->currentOffset_ = 8.0f;
+    scrollPattern->lastPageLength_ = 18.0f;
+    scrollPattern->scrollableDistance_ = 8.0f;
+    scrollPattern->viewPortLength_ = 3.0f;
+
+    /**
+     * @tc.steps: step2. Set isScrolling_ of scrollPattern to false
+     */
+    scrollPattern->isScrolling_ = false;
+
+    /**
+     * @tc.steps: step3. Calling the ScrollSnapTrigger function
+     * @tc.expected: The isScrolling_ of scrollPattern to be true
+     */
+    scrollPattern->ScrollSnapTrigger();
+    EXPECT_TRUE(scrollPattern->isScrolling_);
+}
+
+/**
+ * @tc.name: OnScrollEndCallback_001
+ * @tc.desc: Test ScrollPattern OnScrollEndCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, OnScrollEndCallback_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<PipelineBase> context = AceType::MakeRefPtr<PipelineContext>();
+    auto animator = Animator::CreateAnimator(nullptr, context, nullptr);
+    animator->status_ = Animator::Status::STOPPED;
+    scrollPattern->animator_ = animator;
+    scrollPattern->isAnimationStop_ = false;
+    RefPtr<ScrollEventHub> eventHub = AceType::MakeRefPtr<ScrollEventHub>();
+
+    /**
+     * @tc.steps: step2. Set isScrollEnd to false
+     * set scrollStop_ of scrollPattern to false
+     */
+    bool isScrollEnd = false;
+    eventHub->onScrollEnd_ = [&isScrollEnd]() { isScrollEnd = true; };
+    frameNode->eventHub_ = eventHub;
+    scrollPattern->scrollStop_ = false;
+
+    /**
+     * @tc.steps: step3. Calling the OnScrollEndCallback function
+     * @tc.expected: The scrollStop_ of scrollPattern is not changed
+     */
+    scrollPattern->OnScrollEndCallback();
+    EXPECT_TRUE(isScrollEnd);
+    EXPECT_FALSE(scrollPattern->scrollStop_);
+}
+
+/**
+ * @tc.name: ScrollPageCheck_001
+ * @tc.desc: Test ScrollPattern ScrollPageCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, ScrollPageCheck_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Calling the ScrollPageCheck function
+     * @tc.expected: The result of function return true
+     */
+    auto result = scrollPattern->ScrollPageCheck(2.0f, SCROLL_FROM_ANIMATION);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ValidateOffset_Two_Parameters
+ * @tc.desc: Test ScrollPattern ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, ValidateOffset_Two_Parameters, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set scrollableDistance_ of scrollPattern to be greater than 0
+     * set axis_ of scrollPattern to HORIZONTAL and direction_ to ROW_REVERSE
+     */
+    scrollPattern->scrollableDistance_ = 2.0f;
+    scrollPattern->axis_ = Axis::HORIZONTAL;
+    scrollPattern->direction_ = FlexDirection::ROW_REVERSE;
+
+    /**
+     * @tc.steps: step3. Set source to SCROLL_FROM_AXIS and willScrollOffset to 4.0f
+     * @tc.expected: The result of function return 2.0f
+     */
+    auto result = scrollPattern->ValidateOffset(SCROLL_FROM_AXIS, 4.0f);
+    EXPECT_EQ(result, 2.0f);
+}
+
+/**
+ * @tc.name: ValidateOffset_One_Parameter
+ * @tc.desc: Test ScrollPattern ValidateOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, ValidateOffset_One_Parameter, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    RefPtr<ScrollPattern> scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set scrollableDistance_ of scrollPattern to be greater than 0
+     * set axis_ of scrollPattern to HORIZONTAL and direction_ to ROW_REVERSE
+     * and set currentOffset_ of scrollPattern to 4.0f
+     */
+    scrollPattern->scrollableDistance_ = 3.0f;
+    scrollPattern->axis_ = Axis::HORIZONTAL;
+    scrollPattern->direction_ = FlexDirection::ROW_REVERSE;
+    scrollPattern->currentOffset_ = 4.0f;
+
+    /**
+     * @tc.steps: step3. Set source to SCROLL_FROM_AXIS
+     * @tc.expected: The currentOffset_ of scrollPattern to be 3.0f
+     */
+    scrollPattern->ValidateOffset(SCROLL_FROM_AXIS);
+    EXPECT_EQ(scrollPattern->currentOffset_, 3.0f);
+}
+
+/**
+ * @tc.name: OnAnimateStop_001
+ * @tc.desc: Test ScrollPattern OnAnimateStop
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, OnAnimateStop_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollPattern->frameNode_ = frameNode;
+    scrollPattern->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::HORIZONTAL);
+    scrollPattern->scrollableEvent_->scrollable_ =
+        AceType::MakeRefPtr<Scrollable>([](double position, int32_t source) { return true; }, Axis::VERTICAL);
+
+    /**
+     * @tc.steps: step2. Set isDragging_ and scrollAbort_ to true
+     * and set scrollStop_ of scrollPattern to false
+     */
+    scrollPattern->scrollableEvent_->scrollable_->isDragging_ = true;
+    scrollPattern->scrollAbort_ = true;
+    scrollPattern->scrollStop_ = false;
+
+    /**
+     * @tc.steps: step3. Calling the OnAnimateStop
+     * @tc.expected: The scrollStop_ of scrollPattern to be true
+     */
+    scrollPattern->OnAnimateStop();
+    EXPECT_TRUE(scrollPattern->scrollStop_);
+}
+
+/**
+ * @tc.name: OnAnimateStop_002
+ * @tc.desc: Test ScrollPattern OnAnimateStop
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, OnAnimateStop_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollPattern->frameNode_ = frameNode;
+    scrollPattern->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::HORIZONTAL);
+    scrollPattern->scrollableEvent_->scrollable_ =
+        AceType::MakeRefPtr<Scrollable>([](double position, int32_t source) { return true; }, Axis::VERTICAL);
+
+    /**
+     * @tc.steps: step2. Set isDragging_ to true and scrollAbort_ to false
+     * and set scrollStop_ of scrollPattern to false
+     */
+    scrollPattern->scrollableEvent_->scrollable_->isDragging_ = true;
+    scrollPattern->scrollAbort_ = false;
+    scrollPattern->scrollStop_ = false;
+
+    /**
+     * @tc.steps: step3. Calling the OnAnimateStop
+     * @tc.expected: The scrollStop_ of scrollPattern to be unchanged
+     */
+    scrollPattern->OnAnimateStop();
+    EXPECT_FALSE(scrollPattern->scrollStop_);
+}
+
+/**
+ * @tc.name: OnAnimateStop_003
+ * @tc.desc: Test ScrollPattern OnAnimateStop
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, OnAnimateStop_003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollPattern->frameNode_ = frameNode;
+    scrollPattern->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::HORIZONTAL);
+    scrollPattern->scrollableEvent_->scrollable_ =
+        AceType::MakeRefPtr<Scrollable>([](double position, int32_t source) { return true; }, Axis::VERTICAL);
+
+    /**
+     * @tc.steps: step2. Set isDragging_ to false and scrollAbort_ to true
+     * and set scrollStop_ of scrollPattern to false
+     */
+    scrollPattern->scrollableEvent_->scrollable_->isDragging_ = false;
+    scrollPattern->scrollAbort_ = true;
+    scrollPattern->scrollStop_ = false;
+
+    /**
+     * @tc.steps: step3. Calling the OnAnimateStop
+     * @tc.expected: The scrollStop_ of scrollPattern to be true
+     */
+    scrollPattern->OnAnimateStop();
+    EXPECT_TRUE(scrollPattern->scrollStop_);
+}
+
+/**
+ * @tc.name: ScrollToEdge_None
+ * @tc.desc: Test ScrollPattern ScrollToEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, ScrollToEdge_None, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct the objects for test preparation
+     */
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set scrollEdgeType_ of scrollPattern to SCROLL_NONE
+     */
+    scrollPattern->scrollEdgeType_ = ScrollEdgeType::SCROLL_NONE;
+
+    /**
+     * @tc.steps: step3. Calling the ScrollToEdge
+     * @tc.expected: The scrollEdgeType_ of scrollPattern to be unchanged
+     */
+    scrollPattern->ScrollToEdge(ScrollEdgeType::SCROLL_NONE, false);
+    EXPECT_EQ(scrollPattern->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
+}
 } // namespace OHOS::Ace::NG

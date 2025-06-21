@@ -130,7 +130,8 @@ public:
     static void GetFractionStops(
         std::vector<std::pair<float, float>>& fractionStops, const JSRef<JSVal>& array);
     static void NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
-    static void NewGetJsGradientColorStops(NG::Gradient& gradient, const JSRef<JSVal>& colorStops);
+    static void NewGetJsGradientColorStops(NG::Gradient& gradient, const JSRef<JSVal>& colorStops,
+        const int32_t mapIdx = 0);
     static void NewGetJsGradientColorStopsCheck(NG::Gradient& gradient, const JSRef<JSVal>& colorStops);
 
     static void JsScale(const JSCallbackInfo& info);
@@ -526,6 +527,8 @@ public:
     static void JsClip(const JSCallbackInfo& info);
     static void JsClipShape(const JSCallbackInfo& info);
 
+    static void ParseProgressMaskResObj(const JSRef<JSVal>& jColor, Color& colorVal,
+        RefPtr<NG::ProgressMaskProperty>& progressMask);
     static void ParseJsMaskProperty(const JSRef<JSObject>& paramObject);
     static void JsMask(const JSCallbackInfo& info);
     static void JsMaskShape(const JSCallbackInfo& info);
@@ -687,6 +690,7 @@ public:
         CalcDimension& bottomLeft, CalcDimension& bottomRight);
     static bool ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
         CalcDimension& bottomLeft, CalcDimension& bottomRight, TextBackgroundStyle& textBackgroundStyle);
+    static void ParseAllBorderRadiuses(JSRef<JSObject>& object, NG::BorderRadiusProperty& borderRadius);
     static void JsPointLight(const JSCallbackInfo& info);
 
     template<typename T>
@@ -890,21 +894,27 @@ private:
     static void GetBorderRadiusBottomRight(const JSRef<JSVal>& jsValue, NG::BorderRadiusProperty& borderRadius);
     static void ParseSweepGradientCenter(NG::Gradient& newGradient, const JSRef<JSArray> centerArray);
     static void ParseRadialGradientCenter(NG::Gradient& newGradient, const JSRef<JSArray> centerArray);
-    static void NewParseGradientColor(NG::Gradient& gradient, JSRef<JSArray>& subArray,
-        NG::GradientColor& gradientColor, size_t& i, size_t& length);
+    static void NewParseGradientColor(NG::Gradient& gradient, RefPtr<ResourceObject>& resObj,
+        NG::GradientColor& gradientColor, int32_t& indx);
+    static void NewParseSweepGradientColor(NG::Gradient& gradient, RefPtr<ResourceObject>& resObj,
+        NG::GradientColor& gradientColor, int32_t& indx);
+    static void NewParseRadialGradientColor(NG::Gradient& gradient, RefPtr<ResourceObject>& resObj,
+        NG::GradientColor& gradientColor, int32_t& indx);
     static bool ParseBackgroundBuilder(
         const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, std::function<void()>& builderFunc);
     static void SetBorderColorProps(const Color& color, NG::BorderColorProperty& props, const char* corner);
     static void ParseBorderColorProps(
         const JSRef<JSObject>& object, NG::BorderColorProperty& props, const char* propName);
     static void GetBorderColors(const JSRef<JSObject>& object, NG::BorderColorProperty& borderColor);
-    static bool GetBorderColorsFromResource(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
+    static void GetBorderColorsFromResource(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
     static void SetBorderRadiusProps(const CalcDimension& dim, NG::BorderRadiusProperty& props, const char* propName);
-    static void GetBorderRadiusProps(
-        const JSRef<JSObject>& object, NG::BorderRadiusProperty& props, bool notNegative, const char* propName);
-    static bool GetBorderRadiusFromResource(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props);
-    static void ParseBorderWidthFromResource(const JSRef<JSVal>& jsVal, NG::BorderWidthProperty& props);
-    static bool GetBorderWidthFromResource(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty);
+    static void GetBorderRadiusUpdate(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props);
+    static void ParseBorderRadiusPropsUpdate(
+        const char* key, const JSRef<JSObject>& object, NG::BorderRadiusProperty& props);
+    static void GetBorderRadiusByLengthMetricsUpdate(
+        const char* key, const JSRef<JSObject>& object, NG::BorderRadiusProperty& props, bool notNegative);
+    static void GetBorderRadiusObject(const JSRef<JSObject>& object, NG::BorderRadiusProperty& props, bool notNegative);
+    static void GetBorderWidthFromResource(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty);
     static void GetBorderWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty);
     static void GetBorderEndWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty);
     static void GetBorderStartWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty);

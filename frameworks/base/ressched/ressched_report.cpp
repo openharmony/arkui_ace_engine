@@ -16,6 +16,8 @@
 #include "base/ressched/ressched_report.h"
 
 namespace OHOS::Ace {
+std::atomic<int32_t> ResSchedReport::createPageCount(0);
+bool ResSchedReport::triggerExecuted(false);
 namespace Ressched {
 constexpr uint32_t RES_TYPE_CLICK_RECOGNIZE = 9;
 constexpr uint32_t RES_TYPE_PUSH_PAGE       = 10;
@@ -52,6 +54,7 @@ constexpr int32_t AXIS_IS_MOUSE = 1;
 constexpr int64_t TIME_INTERVAL = 300;
 constexpr int32_t ABILITY_OR_PAGE_SWITCH_START_EVENT = 0;
 constexpr int32_t ABILITY_OR_PAGE_SWITCH_END_EVENT = 1;
+constexpr int32_t MODULE_SERIALIZER_COUNT = 3;
 #ifdef FFRT_EXISTS
 constexpr int32_t LONG_FRAME_START_EVENT = 0;
 constexpr int32_t LONG_FRAME_END_EVENT = 1;
@@ -126,6 +129,39 @@ ResSchedReport::ResSchedReport()
 {
     reportDataFunc_ = LoadReportDataFunc();
     reportSyncEventFunc_ = LoadReportSyncEventFunc();
+}
+
+void ResSchedReport::TriggerModuleSerializer()
+{
+    if (triggerExecuted) {
+        return;
+    }
+    auto curContainer = Container::Current();
+    auto taskExecutor = curContainer->GetTaskExecutor();
+    auto serializerTask = [weak = WeakPtr<Container>(curContainer)]() {
+        auto container = weak.Upgrade();
+        if (!container) {
+            LOGW("container is null, serializerTask failed.");
+            return;
+        }
+        container->TriggerModuleSerializer();
+    };
+    if (createPageCount == MODULE_SERIALIZER_COUNT) {
+        taskExecutor->PostTask(serializerTask, TaskExecutor::TaskType::UI, "TriggerModuleSerializer");
+        triggerExecuted = true;
+        delayTask_.Cancel();
+        return;
+    }
+    auto task = [taskExecutor, serializerTask]() {
+        if (!triggerExecuted) {
+            taskExecutor->PostTask(serializerTask, TaskExecutor::TaskType::UI, "TriggerModuleSerializer");
+            triggerExecuted = true;
+        }
+    };
+    delayTask_.Cancel();
+    delayTask_.Reset(std::move(task));
+    const uint32_t delay = 5000;
+    taskExecutor->PostDelayedTask(delayTask_, TaskExecutor::TaskType::UI, delay, "TriggerModuleSerializer");
 }
 
 void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_map<std::string, std::string>& param)
@@ -256,6 +292,20 @@ bool ResSchedReport::AppWhiteListCheck(const std::unordered_map<std::string, std
 
 void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config)
 {
+    if (!triggerExecuted) {
+        auto curContainer = Container::Current();
+        auto taskExecutor = curContainer->GetTaskExecutor();
+        auto serializerTask = [weak = WeakPtr<Container>(curContainer)]() {
+            auto container = weak.Upgrade();
+            if (!container) {
+                LOGW("container is null, serializerTask failed.");
+                return;
+            }
+            container->TriggerModuleSerializer();
+        };
+        taskExecutor->PostTask(serializerTask, TaskExecutor::TaskType::UI, "TriggerModuleSerializer");
+        triggerExecuted = true;
+    }
     switch (touchEvent.type) {
         case TouchType::DOWN:
             HandleTouchDown(touchEvent, config);
@@ -376,6 +426,7 @@ void ResSchedReport::HandleTouchUp(const TouchEvent& touchEvent, const ReportCon
     RecordTouchEvent(touchEvent);
     payload[Ressched::NAME] = TOUCH;
     payload[UP_SPEED_KEY] = std::to_string(GetUpVelocity(lastTouchEvent_, curTouchEvent_));
+    LoadAceApplicationContext(payload);
     ResSchedDataReport(RES_TYPE_CLICK_RECOGNIZE, TOUCH_UP_EVENT, payload);
     isInSlide_ = false;
     isInTouch_ = false;
@@ -564,7 +615,7 @@ void ResSchedReport::OnAxisEvent(const AxisEvent& axisEvent)
 void ResSchedReport::HandlePageTransition(const std::string& fromPage,
     const std::string& toPage, const std::string& mode)
 {
-    if (fromPage.empty() || toPage.empty()) {
+    if (fromPage.empty() && toPage.empty()) {
         TAG_LOGD(AceLogTag::ACE_ROUTER, "rss report page transition empty info:%{public}s, %{public}s",
             fromPage.c_str(), toPage.c_str());
         return;
@@ -591,6 +642,10 @@ ResSchedReportScope::ResSchedReportScope(const std::string& name,
 
 ResSchedReportScope::~ResSchedReportScope()
 {
+    if (!ResSchedReport::triggerExecuted) {
+        ResSchedReport::createPageCount++;
+        ResSchedReport::GetInstance().TriggerModuleSerializer();
+    }
     if (name_ == PUSH_PAGE) {
         ResSchedReport::GetInstance().ResSchedDataReport(RES_TYPE_PUSH_PAGE, PUSH_PAGE_COMPLETE_EVENT, payload_);
     }

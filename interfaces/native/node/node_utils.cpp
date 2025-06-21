@@ -20,6 +20,7 @@
 
 #include "base/utils/utils.h"
 #include "base/error/error_code.h"
+#include "core/common/container_consts.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 #ifdef __cplusplus
@@ -76,6 +77,21 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInScreen(ArkUI_NodeHandle node, ArkU
     impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToScreen(node->uiNodeHandle, &tempOffset, false);
     screenOffset->x = tempOffset[0];
     screenOffset->y = tempOffset[1];
+
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInGlobalDisplay(ArkUI_NodeHandle node, ArkUI_IntOffset* offset)
+{
+    if (node == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    ArkUI_Float32 tempOffset[2];
+    impl->getNodeModifiers()->getFrameNodeModifier()->getGlobalPositionOnDisplay(
+        node->uiNodeHandle, &tempOffset, false);
+    offset->x = tempOffset[0];
+    offset->y = tempOffset[1];
 
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
@@ -573,6 +589,21 @@ ArkUI_ErrorCode OH_ArkUI_RemoveSupportedUIStates(ArkUI_NodeHandle node, int32_t 
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     impl->getNodeModifiers()->getFrameNodeModifier()->removeSupportedUIStates(node->uiNodeHandle, uiStates);
     return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_SetForceDarkConfig(
+    ArkUI_ContextHandle uiContext, bool forceDark, ArkUI_NodeType nodeType, uint32_t (*colorInvertFunc)(uint32_t color))
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR);
+    int32_t instanceId = OHOS::Ace::INSTANCE_ID_UNDEFINED;
+    if (uiContext) {
+        auto* context = reinterpret_cast<ArkUI_Context*>(uiContext);
+        instanceId = context->id;
+    }
+    int32_t errorCode = impl->getNodeModifiers()->getFrameNodeModifier()->setForceDarkConfig(
+        instanceId, forceDark, OHOS::Ace::NodeModel::ConvertNodeTypeToTag(nodeType).c_str(), colorInvertFunc);
+    return errorCode;
 }
 
 #ifdef __cplusplus

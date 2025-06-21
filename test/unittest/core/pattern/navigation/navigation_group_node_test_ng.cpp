@@ -865,4 +865,57 @@ HWTEST_F(NavigationGroupNodeTestNg, RemoveDialogDestination, TestSize.Level1)
     navigation->RemoveDialogDestination();
     EXPECT_EQ(layoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_MEASURE, PROPERTY_UPDATE_MEASURE);
 }
+
+/*
+ * @tc.name: GetNavBarOrHomeDestinationNode001
+ * @tc.desc: Branch: if (useHomeDestination_.has_value() && useHomeDestination_.value()) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, GetNavBarOrHomeDestinationNode001, TestSize.Level1)
+{
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    navigation->useHomeDestination_ = true;
+    auto node = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(node, nullptr);
+    navigation->customHomeDestination_ = node;
+    auto retNode = navigation->GetNavBarOrHomeDestinationNode();
+    EXPECT_EQ(retNode, node);
+    NavigationGroupNodeTestNg::TearDownTestCase();
+}
+
+/*
+ * @tc.name: GetNavBarOrHomeDestinationNode002
+ * @tc.desc: Branch: if (useHomeDestination_.has_value() && useHomeDestination_.value()) { => false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, GetNavBarOrHomeDestinationNode002, TestSize.Level1)
+{
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    auto node = FrameNode::GetOrCreateFrameNode(V2::NAVBAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    ASSERT_NE(node, nullptr);
+    navigation->navBarNode_ = node;
+
+    navigation->useHomeDestination_ = std::nullopt;
+    auto retNode = navigation->GetNavBarOrHomeDestinationNode();
+    EXPECT_EQ(retNode, node);
+
+    navigation->useHomeDestination_ = false;
+    retNode = navigation->GetNavBarOrHomeDestinationNode();
+    EXPECT_EQ(retNode, node);
+    NavigationGroupNodeTestNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG

@@ -69,14 +69,15 @@ void GetAnimationCurveInfo(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Uint32& 
     auto object = Framework::JSRef<Framework::JSObject>::Cast(info[TABS_ARG_INDEX_1]);
     Framework::JSRef<Framework::JSVal> onCallBack = object->GetProperty("__curveCustomFunc");
     if (onCallBack->IsFunction()) {
-        auto jsFunc = Framework::JSRef<Framework::JSFunc>::Cast(onCallBack);
-        auto func = jsFunc->GetLocalHandle();
-        customCallBack = [vm, func = panda::CopyableGlobal(vm, func), id = Container::CurrentId()](
-                             float time) -> float {
+        RefPtr<Framework::JsFunction> jsFuncCallBack =
+            AceType::MakeRefPtr<Framework::JsFunction>(Framework::JSRef<Framework::JSObject>(),
+            Framework::JSRef<Framework::JSFunc>::Cast(onCallBack));
+        customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentId()](float time) -> float {
             ContainerScope scope(id);
-            panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, time) };
-            auto result = func->Call(vm, func.ToLocal(), params, 1);
-            auto resultValue = result->IsNumber() ? static_cast<float>(result->ToNumber(vm)->Value()) : 1.0f;
+            Framework::JSRef<Framework::JSVal> params[1];
+            params[0] = Framework::JSRef<Framework::JSVal>::Make(Framework::ToJSValue(time));
+            auto result = func->ExecuteJS(1, params);
+            auto resultValue = result->IsNumber() ? result->ToNumber<float>() : 1.0f;
             return resultValue;
         };
     }
@@ -811,27 +812,12 @@ ArkUINativeModuleValue TabsBridge::SetTabsOptionsBarModifier(ArkUIRuntimeCallInf
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    Local<JSValueRef> barModifierArg = runtimeCallInfo->GetCallArgRef(1);
-    if (barModifierArg->IsUndefined() || barModifierArg->IsNull() || !barModifierArg->IsObject(vm)) {
-        GetArkUINodeModifiers()->getTabsModifier()->resetTabsOptionsBarModifier(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
-    }
-    auto globalObj = JSNApi::GetGlobalObject(vm);
-    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyCommonModifierToNode"));
-    if (globalFunc->IsFunction(vm)) {
-        panda::Local<panda::FunctionRef> funcRef = globalFunc;
-        auto func = panda::CopyableGlobal(vm, funcRef);
-        auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
-        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-        auto tabsNode = AceType::DynamicCast<NG::TabsNode>(frameNode);
-        CHECK_NULL_RETURN(tabsNode, panda::JSValueRef::Undefined(vm));
-        auto tabBarNode = AceType::DynamicCast<NG::FrameNode>(tabsNode->GetTabBar());
-        CHECK_NULL_RETURN(tabBarNode, panda::JSValueRef::Undefined(vm));
-        panda::Local<panda::JSValueRef> params[SIZE_OF_VALUES] = { barModifierArg,
-            panda::NativePointerRef::New(vm, AceType::RawPtr(tabBarNode)) };
-        func->Call(vm, func.ToLocal(), params, SIZE_OF_VALUES);
-    }
-    return panda::JSValueRef::Undefined(vm);
+    std::function<void(WeakPtr<NG::FrameNode>)> onApply;
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    Framework::JSTabs::SetBarModifierApply(runtimeCallInfo, onApply, info[1]);
+    GetArkUINodeModifiers()->getTabsModifier()->setTabsOptionsBarModifier(
+        nativeNode, reinterpret_cast<void*>(&onApply));
+    return panda::JSValueRef::Undefined(runtimeCallInfo->GetVM());
 }
 
 ArkUINativeModuleValue TabsBridge::ResetTabsOptionsBarModifier(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1668,40 +1654,35 @@ void TabsBridge::ParseCustomContentTransition(
     const Framework::JSRef<Framework::JSFunc>& transitionFunc, const Framework::JsiCallbackInfo& info)
 {
     using namespace OHOS::Ace::Framework;
-    auto vm = info.GetVm();
-    auto customAnimationFunc = transitionFunc->GetLocalHandle();
-    auto onCustomAnimation = [vm, customAnimationFunc = panda::CopyableGlobal(vm, customAnimationFunc)](
+    RefPtr<JsTabsFunction> jsCustomAnimationFunc =
+        AceType::MakeRefPtr<JsTabsFunction>(transitionFunc);
+    auto onCustomAnimation = [execCtx = info.GetExecutionContext(), func = std::move(jsCustomAnimationFunc)](
                                  int32_t from, int32_t to) -> TabContentAnimatedTransition {
         TabContentAnimatedTransition transitionInfo;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, transitionInfo);
 
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch trycatch(vm);
-        panda::Local<panda::JSValueRef> params[SIZE_OF_VALUES] = { panda::NumberRef::New(vm, from),
-            panda::NumberRef::New(vm, to) };
-        auto ret = customAnimationFunc->Call(vm, customAnimationFunc.ToLocal(), params, SIZE_OF_VALUES);
-        if (!ret->IsObject(vm)) {
+        auto ret = func->Execute(from, to);
+        if (!ret->IsObject()) {
             return transitionInfo;
         }
-        auto transitionObj = ret->ToObject(vm);
-        auto timeoutProperty = transitionObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "timeout"));
+
+        auto transitionObj = JSRef<JSObject>::Cast(ret);
+        JSRef<JSVal> timeoutProperty = transitionObj->GetProperty("timeout");
         transitionInfo.timeout = DEFAULT_CUSTOM_ANIMATION_TIMEOUT;
         if (timeoutProperty->IsNumber()) {
-            auto timeout = static_cast<int32_t>(timeoutProperty->ToNumber(vm)->Value());
+            auto timeout = timeoutProperty->ToNumber<int32_t>();
             transitionInfo.timeout = timeout < 0 ? DEFAULT_CUSTOM_ANIMATION_TIMEOUT : timeout;
         }
-        auto transition = transitionObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "transition"));
-        if (transition->IsFunction(vm)) {
-            panda::Local<panda::FunctionRef> onTransitionFunc = transition;
-            auto onTransition = [vm, onTransitionFunc = panda::CopyableGlobal(vm, onTransitionFunc)](
+
+        JSRef<JSVal> transition = transitionObj->GetProperty("transition");
+        if (transition->IsFunction()) {
+            RefPtr<JsTabsFunction> jsOnTransition =
+                AceType::MakeRefPtr<JsTabsFunction>(transition);
+            auto onTransition = [execCtx, func = std::move(jsOnTransition)](
                                     const RefPtr<TabContentTransitionProxy>& proxy) {
-                panda::LocalScope pandaScope(vm);
-                panda::TryCatch trycatch(vm);
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
                 ACE_SCORING_EVENT("onTransition");
-                JSRef<JSObject> proxyObj = JSClass<JsTabContentTransitionProxy>::NewInstance();
-                auto jsProxy = Referenced::Claim(proxyObj->Unwrap<JsTabContentTransitionProxy>());
-                jsProxy->SetProxy(proxy);
-                panda::Local<panda::JSValueRef> params[1] = { proxyObj->GetLocalHandle() };
-                onTransitionFunc->Call(vm, onTransitionFunc.ToLocal(), params, 1);
+                func->Execute(proxy);
             };
 
             transitionInfo.transition = std::move(onTransition);

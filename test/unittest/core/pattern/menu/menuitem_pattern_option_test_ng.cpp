@@ -26,6 +26,7 @@
 
 #include "base/geometry/ng/rect_t.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/button/button_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/geometry_node.h"
@@ -53,6 +54,8 @@ const Dimension HEIGHT = 50.0_vp;
 const Dimension DIVIDER_STROKE_WIDTH = 1.0_vp;
 const Dimension DIVIDER_START_MARGIN = 10.0_vp;
 const Dimension DIVIDER_END_MARGIN = 15.0_vp;
+constexpr int32_t TARGET_ID = 3;
+constexpr MenuType TYPE = MenuType::MENU;
 } // namespace
 
 class MenuItemPatternOptionTestNg : public testing::Test {
@@ -61,6 +64,7 @@ public:
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
+    void MockPipelineContextGetTheme();
     bool InitOptionTestNg();
     RefPtr<FrameNode> frameNode_;
     RefPtr<MenuItemPattern> optionPattern_;
@@ -100,6 +104,25 @@ PaintWrapper* MenuItemPatternOptionTestNg::GetPaintWrapper(RefPtr<MenuItemPaintP
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
     return paintWrapper;
+}
+
+void MenuItemPatternOptionTestNg::MockPipelineContextGetTheme()
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == IconTheme::TypeId()) {
+            return AceType::MakeRefPtr<IconTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else if (type == ButtonTheme::TypeId()) {
+            return AceType::MakeRefPtr<ButtonTheme>();
+        } else {
+            return AceType::MakeRefPtr<MenuTheme>();
+        }
+    });
 }
 
 bool MenuItemPatternOptionTestNg::InitOptionTestNg()
@@ -676,5 +699,219 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg005, TestSize.Level
     EXPECT_NE(result, nullptr);
     delete paintWrapper;
     paintWrapper = nullptr;
+}
+
+/**
+ * @tc.name: OptionPaintMethodTestNg006
+ * @tc.desc: Test MenuItemPattern OnPress next node's divider exists when showDefaultSelectedIcon.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create option node and next node.
+     * @tc.expected: option node and next node are not null
+     */
+
+    MockPipelineContextGetTheme();
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "fakeIcon", nullptr);
+    optionParams.emplace_back("MenuItem2", "", nullptr);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 2);
+
+    auto firstOption = menuPattern->GetOptions()[0];
+    ASSERT_NE(firstOption, nullptr);
+    auto firstPattern = firstOption->GetPattern<MenuItemPattern>();
+    ASSERT_NE(firstPattern, nullptr);
+    auto secondOption = menuPattern->GetOptions()[1];
+    ASSERT_NE(secondOption, nullptr);
+    auto nextOptionPattern = secondOption->GetPattern<MenuItemPattern>();
+    ASSERT_NE(nextOptionPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. isOptionPattern_ and showDefaultSelectedIcon_ are true.
+     * @tc.expected: next node's divider exists.
+     */
+
+    auto paintProp = secondOption->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
+    paintProp->UpdateNeedDivider(true);
+    firstPattern->SetSelected(true);
+    firstPattern->isOptionPattern_ = true;
+    firstPattern->showDefaultSelectedIcon_ = true;
+    nextOptionPattern->UpdateNeedDivider(true);
+    nextOptionPattern->SetSelected(false);
+
+    UIState pressedState = UI_STATE_PRESSED;
+    firstPattern->OnPress(pressedState);
+    EXPECT_EQ(paintProp->GetNeedDividerValue(), true);
+}
+
+/**
+ * @tc.name: OptionPaintMethodTestNg007
+ * @tc.desc: Test MenuItemPattern OnPress next node's divider exists when showDefaultSelectedIcon.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create option node and next node.
+     * @tc.expected: option node and next node are not null
+     */
+
+    MockPipelineContextGetTheme();
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "fakeIcon", nullptr);
+    optionParams.emplace_back("MenuItem2", "", nullptr);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 2);
+
+    auto firstOption = menuPattern->GetOptions()[0];
+    ASSERT_NE(firstOption, nullptr);
+    auto firstPattern = firstOption->GetPattern<MenuItemPattern>();
+    ASSERT_NE(firstPattern, nullptr);
+    auto secondOption = menuPattern->GetOptions()[1];
+    ASSERT_NE(secondOption, nullptr);
+    auto nextOptionPattern = secondOption->GetPattern<MenuItemPattern>();
+    ASSERT_NE(nextOptionPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. isOptionPattern_ and showDefaultSelectedIcon_ are true.
+     * @tc.expected: next node's divider exists.
+     */
+
+    auto paintProp = secondOption->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
+    paintProp->UpdateNeedDivider(true);
+    firstPattern->SetSelected(true);
+    firstPattern->isOptionPattern_ = false;
+    firstPattern->showDefaultSelectedIcon_ = true;
+    nextOptionPattern->UpdateNeedDivider(true);
+    nextOptionPattern->SetSelected(false);
+
+    UIState pressedState = UI_STATE_PRESSED;
+    firstPattern->OnPress(pressedState);
+    EXPECT_EQ(paintProp->GetNeedDividerValue(), false);
+}
+
+/**
+ * @tc.name: OptionPaintMethodTestNg008
+ * @tc.desc: Test MenuItemPattern OnPress next node's divider exists when showDefaultSelectedIcon.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create option node and next node.
+     * @tc.expected: option node and next node are not null
+     */
+
+    MockPipelineContextGetTheme();
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "fakeIcon", nullptr);
+    optionParams.emplace_back("MenuItem2", "", nullptr);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 2);
+
+    auto firstOption = menuPattern->GetOptions()[0];
+    ASSERT_NE(firstOption, nullptr);
+    auto firstPattern = firstOption->GetPattern<MenuItemPattern>();
+    ASSERT_NE(firstPattern, nullptr);
+    auto secondOption = menuPattern->GetOptions()[1];
+    ASSERT_NE(secondOption, nullptr);
+    auto nextOptionPattern = secondOption->GetPattern<MenuItemPattern>();
+    ASSERT_NE(nextOptionPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. isOptionPattern_ and showDefaultSelectedIcon_ are true.
+     * @tc.expected: next node's divider exists.
+     */
+
+    auto paintProp = secondOption->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
+    paintProp->UpdateNeedDivider(true);
+    firstPattern->SetSelected(true);
+    firstPattern->isOptionPattern_ = true;
+    firstPattern->showDefaultSelectedIcon_ = false;
+    nextOptionPattern->UpdateNeedDivider(true);
+    nextOptionPattern->SetSelected(false);
+
+    UIState pressedState = UI_STATE_PRESSED;
+    firstPattern->OnPress(pressedState);
+    EXPECT_EQ(paintProp->GetNeedDividerValue(), false);
+}
+
+/**
+ * @tc.name: OptionPaintMethodTestNg009
+ * @tc.desc: Test MenuItemPattern OnPress next node's divider exists when showDefaultSelectedIcon.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create option node and next node.
+     * @tc.expected: option node and next node are not null
+     */
+
+    MockPipelineContextGetTheme();
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "fakeIcon", nullptr);
+    optionParams.emplace_back("MenuItem2", "", nullptr);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), TARGET_ID, "", TYPE, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    ASSERT_EQ(menuWrapperNode->GetChildren().size(), 1);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    ASSERT_EQ(menuPattern->GetOptions().size(), 2);
+
+    auto firstOption = menuPattern->GetOptions()[0];
+    ASSERT_NE(firstOption, nullptr);
+    auto firstPattern = firstOption->GetPattern<MenuItemPattern>();
+    ASSERT_NE(firstPattern, nullptr);
+    auto secondOption = menuPattern->GetOptions()[1];
+    ASSERT_NE(secondOption, nullptr);
+    auto nextOptionPattern = secondOption->GetPattern<MenuItemPattern>();
+    ASSERT_NE(nextOptionPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. isOptionPattern_ and showDefaultSelectedIcon_ are true.
+     * @tc.expected: next node's divider exists.
+     */
+
+    auto paintProp = secondOption->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
+    paintProp->UpdateNeedDivider(true);
+    firstPattern->SetSelected(true);
+    firstPattern->isOptionPattern_ = false;
+    firstPattern->showDefaultSelectedIcon_ = false;
+
+    UIState pressedState = UI_STATE_PRESSED;
+    firstPattern->OnPress(pressedState);
+    EXPECT_EQ(paintProp->GetNeedDividerValue(), false);
 }
 } // namespace OHOS::Ace::NG

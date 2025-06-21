@@ -48,6 +48,37 @@ void SetRadioStyle(ArkUINodeHandle node, ArkUI_Uint32 checkedBackgroundColor, Ar
     RadioModelNG::SetCheckedBackgroundColor(frameNode, Color(checkedBackgroundColor));
     RadioModelNG::SetUncheckedBorderColor(frameNode, Color(uncheckedBorderColor));
     RadioModelNG::SetIndicatorColor(frameNode, Color(indicatorColor));
+    RadioModelNG::SetCheckedBackgroundColorSetByUser(frameNode, true);
+    RadioModelNG::SetUncheckedBorderColorSetByUser(frameNode, true);
+    RadioModelNG::SetIndicatorColorSetByUser(frameNode, true);
+}
+
+void SetRadioStylePtr(ArkUINodeHandle node, ArkUI_Uint32 checkedBackgroundColor, ArkUI_Uint32 uncheckedBorderColor,
+    ArkUI_Uint32 indicatorColor, const ArkUIRadioColorStruct& resObjStru)
+{
+    CHECK_NULL_VOID(node);
+    SetRadioStyle(node, checkedBackgroundColor, uncheckedBorderColor, indicatorColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        if (resObjStru.checkedBackgroundColor) {
+            auto* backgroundColor = reinterpret_cast<ResourceObject*>(resObjStru.checkedBackgroundColor);
+            auto backgroundColorResObj = AceType::Claim(backgroundColor);
+            RadioModelNG::CreateWithColorResourceObj(frameNode, backgroundColorResObj,
+                RadioColorType::CHECKED_BACKGROUND_COLOR);
+        }
+        if (resObjStru.uncheckedBorderColor) {
+            auto* unBorderColor = reinterpret_cast<ResourceObject*>(resObjStru.uncheckedBorderColor);
+            auto unBorderrResObj = AceType::Claim(unBorderColor);
+            RadioModelNG::CreateWithColorResourceObj(frameNode, unBorderrResObj,
+                RadioColorType::UNCHECKED_BORDER_COLOR);
+        }
+        if (resObjStru.indicatorColor) {
+            auto* indicatorColor = reinterpret_cast<ResourceObject*>(resObjStru.indicatorColor);
+            auto indicatorResObj = AceType::Claim(indicatorColor);
+            RadioModelNG::CreateWithColorResourceObj(frameNode, indicatorResObj, RadioColorType::INDICATOR_COLOR);
+        }
+    }
 }
 
 void ResetRadioStyle(ArkUINodeHandle node)
@@ -65,6 +96,15 @@ void ResetRadioStyle(ArkUINodeHandle node)
     RadioModelNG::SetCheckedBackgroundColor(frameNode, theme->GetActiveColor());
     RadioModelNG::SetUncheckedBorderColor(frameNode, theme->GetInactiveColor());
     RadioModelNG::SetIndicatorColor(frameNode, theme->GetPointColor());
+    RadioModelNG::SetCheckedBackgroundColorSetByUser(frameNode, false);
+    RadioModelNG::SetUncheckedBorderColorSetByUser(frameNode, false);
+    RadioModelNG::SetIndicatorColorSetByUser(frameNode, false);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto resObj = AceType::MakeRefPtr<ResourceObject>();
+        RadioModelNG::CreateWithColorResourceObj(frameNode, resObj, RadioColorType::CHECKED_BACKGROUND_COLOR);
+        RadioModelNG::CreateWithColorResourceObj(frameNode, resObj, RadioColorType::UNCHECKED_BORDER_COLOR);
+        RadioModelNG::CreateWithColorResourceObj(frameNode, resObj, RadioColorType::INDICATOR_COLOR);
+    }
 }
 
 void SetRadioWidth(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue)
@@ -329,6 +369,51 @@ void ResetRadioOnChange(ArkUINodeHandle node)
     RadioModelNG::SetOnChange(frameNode, nullptr);
 }
 
+void SetRadioMargin(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
+    const struct ArkUISizeType* bottom, const struct ArkUISizeType* left)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcLength topDimen;
+    CalcLength rightDimen;
+    CalcLength bottomDimen;
+    CalcLength leftDimen;
+    if (top->string != nullptr) {
+        topDimen = CalcLength(top->string);
+    } else {
+        topDimen = CalcLength(top->value, static_cast<DimensionUnit>(top->unit));
+    }
+    if (right->string != nullptr) {
+        rightDimen = CalcLength(right->string);
+    } else {
+        rightDimen = CalcLength(right->value, static_cast<DimensionUnit>(right->unit));
+    }
+    if (bottom->string != nullptr) {
+        bottomDimen = CalcLength(bottom->string);
+    } else {
+        bottomDimen = CalcLength(bottom->value, static_cast<DimensionUnit>(bottom->unit));
+    }
+    if (left->string != nullptr) {
+        leftDimen = CalcLength(left->string);
+    } else {
+        leftDimen = CalcLength(left->value, static_cast<DimensionUnit>(left->unit));
+    }
+    NG::PaddingProperty paddings;
+    paddings.top = std::optional<CalcLength>(topDimen);
+    paddings.bottom = std::optional<CalcLength>(bottomDimen);
+    paddings.left = std::optional<CalcLength>(leftDimen);
+    paddings.right = std::optional<CalcLength>(rightDimen);
+    RadioModelNG::SetIsUserSetMargin(frameNode, true);
+    ViewAbstract::SetMargin(frameNode, paddings);
+}
+
+void ResetRadioMargin(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RadioModelNG::SetIsUserSetMargin(frameNode, true);
+    ViewAbstract::SetMargin(frameNode, NG::CalcLength(0.0));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -339,6 +424,7 @@ const ArkUIRadioModifier* GetRadioModifier()
         .setRadioChecked = SetRadioChecked,
         .resetRadioChecked = ResetRadioChecked,
         .setRadioStyle = SetRadioStyle,
+        .setRadioStylePtr = SetRadioStylePtr,
         .resetRadioStyle = ResetRadioStyle,
         .setRadioWidth = SetRadioWidth,
         .resetRadioWidth = ResetRadioWidth,
@@ -363,6 +449,8 @@ const ArkUIRadioModifier* GetRadioModifier()
         .setRadioOptions = SetRadioOptions,
         .setRadioOnChange = SetRadioOnChange,
         .resetRadioOnChange = ResetRadioOnChange,
+        .setRadioMargin = SetRadioMargin,
+        .resetRadioMargin = ResetRadioMargin,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

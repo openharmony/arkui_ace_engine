@@ -52,7 +52,7 @@ private:
     void UpdateSelfSize(LayoutWrapper* layoutWrapper, float width, float itemHeight, float expandableHeight);
     float GetDividerStroke(LayoutWrapper* layoutWrapper);
     float GetBordersHeight(LayoutWrapper* layoutWrapper);
-    float GetMenuItemVerticalPadding();
+    float GetMenuItemVerticalPadding(LayoutWrapper* layoutWrapper);
     std::optional<float> GetIdealWidth(LayoutWrapper* layoutWrapper);
     void UpdateIconMargin(LayoutWrapper* layoutWrapper);
     void UpdateIdealSize(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props,

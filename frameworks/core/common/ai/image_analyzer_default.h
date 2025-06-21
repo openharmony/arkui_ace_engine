@@ -42,6 +42,7 @@ public:
     void UpdateOverlayStatus(void** overlayData, ImageAnalyzerInnerConfig* config) override {}
     void UpdateOverlayActiveStatus(void** overlayData, bool status) override {}
     void UpdateAIButtonConfig(void** overlayData, AIButtonConfig* config) override {}
+    void UpdateKeyEvent(void** overlayData, void* keyEvent) override {}
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_IMAGE_ANALYZER_DEFAULT_H

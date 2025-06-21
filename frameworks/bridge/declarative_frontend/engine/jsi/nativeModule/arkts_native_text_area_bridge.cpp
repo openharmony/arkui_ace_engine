@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_area_bridge.h"
+#include <cstdint>
 
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_input_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/common/layout/constants.h"
@@ -273,12 +275,12 @@ ArkUINativeModuleValue TextAreaBridge::SetMaxLines(ArkUIRuntimeCallInfo *runtime
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
-    auto maxLines = INT32_MAX;
+    auto maxLines = static_cast<uint32_t>(INT32_MAX);
     if (maxLinesArg->IsNumber() && maxLinesArg->Int32Value(vm) > NUM_0) {
         maxLines = maxLinesArg->Uint32Value(vm);
     }
 
-    auto overflowMode = NUM_0;
+    uint32_t overflowMode = 0;
 
     if (overflowModeArg->IsNumber() &&
         (overflowModeArg->Int32Value(vm) == NUM_0 || overflowModeArg->Int32Value(vm) == NUM_1)) {
@@ -2045,9 +2047,7 @@ ArkUINativeModuleValue TextAreaBridge::SetBorder(ArkUIRuntimeCallInfo* runtimeCa
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorder(
         nativeNode, options.data(), options.size(), colorAndStyleOptions.data(), colorAndStyleOptions.size());
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
-        SetBorderDash(runtimeCallInfo, vm, nativeNode);
-    }
+    SetBorderDash(runtimeCallInfo, vm, nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2108,17 +2108,10 @@ ArkUINativeModuleValue TextAreaBridge::SetBorderWidth(ArkUIRuntimeCallInfo* runt
         SetBorderWidthArrayByDimen(bottom, values, units, NUM_2);
         SetBorderWidthArrayByDimen(isRightToLeft ? right : left, values, units, NUM_3);
     } else {
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY)) {
-            ArkTSUtils::SetBorderWidthArray(vm, topArgs, values, units, NUM_0);
-            ArkTSUtils::SetBorderWidthArray(vm, rightArgs, values, units, NUM_1);
-            ArkTSUtils::SetBorderWidthArray(vm, bottomArgs, values, units, NUM_2);
-            ArkTSUtils::SetBorderWidthArray(vm, leftArgs, values, units, NUM_3);
-        } else {
-            ArkTSUtils::SetBorderWidthArray(vm, leftArgs, values, units, NUM_0);
-            ArkTSUtils::SetBorderWidthArray(vm, rightArgs, values, units, NUM_1);
-            ArkTSUtils::SetBorderWidthArray(vm, topArgs, values, units, NUM_2);
-            ArkTSUtils::SetBorderWidthArray(vm, bottomArgs, values, units, NUM_3);
-        }
+        ArkTSUtils::SetBorderWidthArray(vm, topArgs, values, units, NUM_0);
+        ArkTSUtils::SetBorderWidthArray(vm, rightArgs, values, units, NUM_1);
+        ArkTSUtils::SetBorderWidthArray(vm, bottomArgs, values, units, NUM_2);
+        ArkTSUtils::SetBorderWidthArray(vm, leftArgs, values, units, NUM_3);
     }
 
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorderWidth(nativeNode, values, units, size);
@@ -2707,7 +2700,8 @@ ArkUINativeModuleValue TextAreaBridge::SetTextAreaInitialize(ArkUIRuntimeCallInf
     } else {
         GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaPlaceholderString(nativeNode, "");
     }
-    std::string text, value;
+    std::string text;
+    std::string value;
     auto changeEventVal = Framework::JSRef<Framework::JSVal>::Make();
     if (textVal->IsString(vm) && ArkTSUtils::ParseJsString(vm, textVal, text)) {
         value = text;
@@ -2749,6 +2743,10 @@ ArkUINativeModuleValue TextAreaBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCal
     Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (TextInputBridge::ParseLayoutPolicy(vm, widthArg, true)) {
+        GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaWidth(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
     auto value = widthArg->ToString(vm)->ToString(vm);
     if (value.empty()) {
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaWidth(nativeNode);

@@ -707,6 +707,26 @@ float OH_ArkUI_DragEvent_GetTouchPointYToDisplay(ArkUI_DragEvent* event)
     return result;
 }
 
+float OH_ArkUI_DragEvent_GetTouchPointXToGlobalDisplay(ArkUI_DragEvent* event)
+{
+    if (!event) {
+        return 0.0f;
+    }
+    auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    auto result = static_cast<float>(dragEvent->globalDisplayX);
+    return result;
+}
+
+float OH_ArkUI_DragEvent_GetTouchPointYToGlobalDisplay(ArkUI_DragEvent* event)
+{
+    if (!event) {
+        return 0.0f;
+    }
+    auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    auto result = static_cast<float>(dragEvent->globalDisplayY);
+    return result;
+}
+
 float OH_ArkUI_DragEvent_GetVelocityX(ArkUI_DragEvent* event)
 {
     if (!event) {
@@ -778,19 +798,7 @@ ArkUI_ErrorCode OH_ArkUI_DragEvent_SetDataLoadParams(ArkUI_DragEvent* event, OH_
     if (!dragEvent) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    OH_UdmfDataLoadParams& ndkDataLoadParams = *dataLoadParams;
-    OHOS::UDMF::DataLoadParams udmfDataLoadParams;
-    auto status = static_cast<int32_t>(
-        OHOS::UDMF::DataParamsConversion::GetDataLoaderParams(ndkDataLoadParams, udmfDataLoadParams));
-    if (status != 0) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
-
-    std::string key = dragEvent->key;
-    status = OHOS::UDMF::UdmfClient::GetInstance().SetDelayInfo(udmfDataLoadParams, key);
-    if (status != 0) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
+    dragEvent->dataLoadParams = dataLoadParams;
 
     return ARKUI_ERROR_CODE_NO_ERROR;
 }

@@ -82,6 +82,7 @@ class WebPattern : public Pattern, public SelectionHost {
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
+    using SetWebDetachCallback = std::function<void(int32_t)>;
     using SetHapPathCallback = std::function<void(const std::string&)>;
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
@@ -204,6 +205,16 @@ public:
     SetWebIdCallback GetSetWebIdCallback() const
     {
         return setWebIdCallback_;
+    }
+
+    void SetSetWebDetachCallback(SetWebDetachCallback&& SetDetachCallback)
+    {
+        setWebDetachCallback_ = std::move(SetDetachCallback);
+    }
+
+    SetWebDetachCallback GetSetWebDetachCallback() const
+    {
+        return setWebDetachCallback_;
     }
 
     void SetRenderMode(RenderMode renderMode)
@@ -386,6 +397,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDataDetector, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, BypassVsyncCondition, WebBypassVsyncCondition);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, GestureFocusMode, GestureFocusMode);
     void RequestFullScreen();
     void ExitFullScreen();
     bool IsFullScreen() const
@@ -451,7 +463,7 @@ public:
     bool Backward();
     void OnSelectionMenuOptionsUpdate(const WebMenuOptionsParam& webMenuOption);
     void UpdateEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick);
+        const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     void UpdateDataDetectorConfig(const TextDetectConfig& config);
     WebInfoType GetWebInfoType();
     void SetUpdateInstanceIdCallback(std::function<void(int32_t)> &&callabck);
@@ -579,6 +591,7 @@ private:
     void OnOptimizeParserBudgetEnabledUpdate(bool value);
     void OnEnableDataDetectorUpdate(bool enable);
     void OnEnableFollowSystemFontWeightUpdate(bool value);
+    void OnGestureFocusModeUpdate(GestureFocusMode mode);
 
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -644,6 +657,7 @@ private:
     std::optional<std::string> customScheme_;
     RefPtr<WebController> webController_;
     SetWebIdCallback setWebIdCallback_ = nullptr;
+    SetWebDetachCallback setWebDetachCallback_ = nullptr;
     RenderMode renderMode_;
     bool incognitoMode_ = false;
     SetHapPathCallback setHapPathCallback_ = nullptr;

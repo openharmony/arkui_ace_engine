@@ -94,16 +94,32 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     Axis axis = layoutProperty->GetAxis();
     auto idealSize =
         CreateIdealSize(layoutProperty->GetLayoutConstraint().value(), axis, layoutProperty->GetMeasureType(), true);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    auto isMainWrap = false;
+    if (layoutPolicy.has_value()) {
+        auto isVertical = axis == Axis::VERTICAL;
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto isMainFix = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+        isMainWrap = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
+        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
+            layoutProperty->GetLayoutConstraint().value(), widthLayoutPolicy, heightLayoutPolicy, axis);
+        idealSize.UpdateIllegalSizeWithCheck(layoutPolicySize.ConvertToSizeT());
+        if (isMainFix) {
+            idealSize.SetMainSize(Infinity<float>(), axis);
+        }
+    }
     if (NearZero(GetCrossAxisSize(idealSize, axis))) {
         TAG_LOGI(AceLogTag::ACE_WATERFLOW, "cross size is 0, skip measure");
         skipMeasure_ = true;
         return;
     }
-    auto matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(idealSize, axis));
+    auto matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(idealSize, axis)) || isMainWrap;
     if (!matchChildren) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     }
-    syncLoad_ = layoutProperty->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren;
+    syncLoad_ = layoutProperty->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren ||
+                layoutInfo_->targetIndex_.has_value();
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
 
     GetExpandArea(layoutProperty, layoutInfo_);
@@ -139,7 +155,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureToTarget(layoutWrapper, layoutInfo_->endIndex_, std::nullopt);
     }
     if (matchChildren) {
-        mainSize_ = layoutInfo_->GetMaxMainHeight() + footerMainSize_;
+        mainSize_ = std::min(mainSize_, layoutInfo_->GetMaxMainHeight() + footerMainSize_);
         idealSize.SetMainSize(mainSize_, axis_);
         AddPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);

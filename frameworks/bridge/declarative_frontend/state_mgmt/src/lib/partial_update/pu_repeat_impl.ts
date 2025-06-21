@@ -27,9 +27,6 @@ class __RepeatImpl<T> {
 
     private key2Item_ = new Map<string, __RepeatItemInfo<T>>();
 
-    // tell if UINode subtree reuse / item update is allowed at all
-    private allowItemUpdate_: boolean = true;
-
     /**/
     constructor() {
     }
@@ -102,9 +99,6 @@ class __RepeatImpl<T> {
         // C++: mv children_ aside to tempchildren_
         RepeatNative.startRender();
 
-        // tell if UINode subtree reuse / item update is allowed at all
-        this.allowItemUpdate_ = this.allowItemUpdate();
-
         let index = 0;
         this.key2Item_.forEach((itemInfo, key) => {
             const item = this.arr_[index];
@@ -121,10 +115,10 @@ class __RepeatImpl<T> {
                 RepeatNative.moveChild(oldIndex);
 
                 // TBD moveChild() only when item types are same
-            } else if (deletedKeysAndIndex.length && this.allowItemUpdate_) {
+            } else if (deletedKeysAndIndex.length) {
                 // case #2:
                 // new array item, there is an deleted array items whose
-                // UINode children can be re-used
+                // UINode children cab re-used
                 const oldItemInfo = deletedKeysAndIndex.pop();
                 const reuseKey = oldItemInfo!.key;
                 const oldKeyIndex = oldItemInfo!.index;
@@ -194,19 +188,6 @@ class __RepeatImpl<T> {
         itemFunc(repeatItem);
 
         RepeatNative.createNewChildFinish(key);
-    }
-
-    /**
-     * tell if UINode subtree reuse / item update is allowed at all.
-     * currently the only scenario when re-use is not allowed is when rerendering in response to
-     * a source data array changed by animateTo.
-     * 
-     */
-    private allowItemUpdate(): boolean {
-        // ask from C++ PipelineContext is inside an animation closure
-        const res = RepeatNative.isInAnimation();
-        stateMgmtConsole.debug(`__RepeatImpl: isInAnimation ${res}`);
-        return !res;
     }
 
 };

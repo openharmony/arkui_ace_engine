@@ -316,6 +316,63 @@ HWTEST_F(MenuItemTestNg, MenuItemLayoutAlgorithm001, TestSize.Level1)
         CalcSize(CalcLength(MENU_ITEM_SIZE_WIDTH), CalcLength(MENU_ITEM_SIZE_HEIGHT)));
     algorithm->Measure(AceType::RawPtr(menuItemNode));
     EXPECT_TRUE(props->calcLayoutConstraint_->selfIdealSize.has_value());
+
+    algorithm->showDefaultSelectedIcon_ = true;
+    algorithm->Measure(AceType::RawPtr(menuItemNode));
+    algorithm->Layout(AceType::RawPtr(menuItemNode));
+    EXPECT_TRUE(props->calcLayoutConstraint_->selfIdealSize.has_value());
+}
+
+/**
+ * @tc.name: MenuItemLayoutAlgorithmMeasureRow001
+ * @tc.desc: Test MenuItemLayoutAlgorithm MeasureRow
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestNg, MenuItemLayoutAlgorithmMeasureRow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create menuItem.
+     */
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::CONTEXT_MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    auto leftNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    auto rightNode = FrameNode::CreateFrameNode("", -1, AceType::MakeRefPtr<Pattern>());
+    menuItemNode->AddChild(leftNode);
+    menuItemNode->AddChild(rightNode);
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto algorithm = AceType::DynamicCast<MenuItemLayoutAlgorithm>(menuItemPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(algorithm, nullptr);
+    auto props = menuItemNode->GetLayoutProperty();
+    ASSERT_NE(props, nullptr);
+    SizeF value(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT);
+    props->UpdateMarginSelfIdealSize(value);
+    props->UpdateContentConstraint();
+    algorithm->isOption_ = true;
+
+    /**
+     * @tc.steps: step2. execute Measure
+     * @tc.expected: prop is set as expected
+     */
+    LayoutConstraintF constraint;
+    algorithm->MeasureRow(AceType::RawPtr(wrapperNode), menuItemNode, constraint);
+
+    auto size = menuItemNode->GetGeometryNode()->GetFrameSize();
+    algorithm->showDefaultSelectedIcon_ = true;
+    algorithm->MeasureRow(AceType::RawPtr(wrapperNode), menuItemNode, constraint);
+    size = menuItemNode->GetGeometryNode()->GetFrameSize();
+    EXPECT_FLOAT_EQ(size.Height(), 0.0);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -364,6 +421,21 @@ HWTEST_F(MenuItemTestNg, MenuItemLayoutAlgorithm002, TestSize.Level1)
 
     props->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(MENU_ITEM_SIZE_WIDTH), CalcLength(MENU_ITEM_SIZE_HEIGHT)));
+    algorithm->Measure(AceType::RawPtr(menuItemNode));
+    EXPECT_TRUE(props->calcLayoutConstraint_->selfIdealSize.has_value());
+    algorithm->isOption_ = true;
+    algorithm->Measure(AceType::RawPtr(menuItemNode));
+    algorithm->isOption_ = false;
+    algorithm->showDefaultSelectedIcon_ = true;
+    algorithm->Measure(AceType::RawPtr(menuItemNode));
+    algorithm->isOption_ = true;
+    algorithm->Measure(AceType::RawPtr(menuItemNode));
+    menuItemPattern->SetIsSelectOption(true);
+    algorithm->Measure(AceType::RawPtr(menuItemNode));
+    menuItemPattern->SetIsSelectOption(false);
+    menuItemPattern->SetHasOptionWidth(true);
+    algorithm->Measure(AceType::RawPtr(menuItemNode));
+    menuItemPattern->SetIsSelectOption(true);
     algorithm->Measure(AceType::RawPtr(menuItemNode));
     EXPECT_TRUE(props->calcLayoutConstraint_->selfIdealSize.has_value());
 

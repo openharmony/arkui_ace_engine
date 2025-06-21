@@ -25,10 +25,11 @@ void DialogEventHub::FireCancelEvent() const
     onCancel_();
 }
 
-void DialogEventHub::FireSuccessEvent(int32_t buttonIdx)
+void DialogEventHub::FireSuccessEvent(int32_t buttonIdx, const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(onSuccess_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->GetTaskExecutor()->PostTask(
         [onSuccess = onSuccess_, buttonIdx] { onSuccess(0, buttonIdx); },

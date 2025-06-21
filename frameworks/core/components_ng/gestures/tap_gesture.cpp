@@ -18,6 +18,16 @@
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 
 namespace OHOS::Ace::NG {
+TapGesture::TapGesture(int32_t count, int32_t fingers, Dimension distanceThreshold, bool isLimitFingerCount)
+    : Gesture(fingers, isLimitFingerCount), count_(count), distanceThreshold_(distanceThreshold)
+{
+    if (gestureInfo_) {
+        gestureInfo_->SetType(GestureTypeName::TAP_GESTURE);
+        gestureInfo_->SetRecognizerType(GestureTypeName::TAP_GESTURE);
+    } else {
+        gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::TAP_GESTURE, GestureTypeName::TAP_GESTURE, false);
+    }
+}
 
 RefPtr<NGGestureRecognizer> TapGesture::CreateRecognizer()
 {

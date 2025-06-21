@@ -533,6 +533,41 @@ void JSShapeAbstract::SetSize(const JSCallbackInfo& info)
     }
 }
 
+void JSShapeAbstract::ObjectPositionUpdate(DimensionOffset& position, RefPtr<ResourceObject>& xResObj,
+    RefPtr<ResourceObject>& yResObj)
+{
+    if (SystemProperties::ConfigChangePerform() && xResObj) {
+        auto&& updateFunc = [position](const RefPtr<ResourceObject>& resObj, BasicShape& basicShape) {
+            DimensionOffset& value = const_cast<DimensionOffset&>(position);
+            CalcDimension x;
+            CalcDimension y;
+            if (!ResourceParseUtils::ParseResDimensionVp(resObj, x)) {
+                x = basicShape.GetPosition().GetX();
+            }
+            y = basicShape.GetPosition().GetY();
+            value.SetX(x);
+            value.SetY(y);
+            basicShape.SetPosition(value);
+        };
+        basicShape_->AddResource("shapeAbstract.position.xResObj", xResObj, std::move(updateFunc));
+    }
+    if (SystemProperties::ConfigChangePerform() && yResObj) {
+        auto&& updateFunc = [position](const RefPtr<ResourceObject>& resObj, BasicShape& basicShape) {
+            DimensionOffset& value = const_cast<DimensionOffset&>(position);
+            CalcDimension x;
+            CalcDimension y;
+            x = basicShape.GetPosition().GetX();
+            if (!ResourceParseUtils::ParseResDimensionVp(resObj, y)) {
+                y = basicShape.GetPosition().GetY();
+            }
+            value.SetX(x);
+            value.SetY(y);
+            basicShape.SetPosition(value);
+        };
+        basicShape_->AddResource("shapeAbstract.position.yResObj", yResObj, std::move(updateFunc));
+    }
+}
+
 void JSShapeAbstract::ObjectPosition(const JSCallbackInfo& info)
 {
     info.ReturnSelf();
@@ -555,23 +590,7 @@ void JSShapeAbstract::ObjectPosition(const JSCallbackInfo& info)
     if (ParseJsDimensionVp(yVal, y, yResObj)) {
         position.SetY(y);
     }
-    if (SystemProperties::ConfigChangePerform() && (xResObj || yResObj)) {
-        auto&& updateFunc = [position](const RefPtr<ResourceObject>& resObj, BasicShape& basicShape) {
-            DimensionOffset& value = const_cast<DimensionOffset&>(position);
-            CalcDimension x;
-            CalcDimension y;
-            if (!ResourceParseUtils::ParseResDimensionVp(resObj, x)) {
-                x = basicShape.GetPosition().GetX();
-            }
-            if (!ResourceParseUtils::ParseResDimensionVp(resObj, y)) {
-                y = basicShape.GetPosition().GetY();
-            }
-            value.SetX(x);
-            value.SetY(y);
-            basicShape.SetPosition(value);
-        };
-        basicShape_->AddResource("shapeAbstract.position.xResObj", xResObj, std::move(updateFunc));
-    }
+    ObjectPositionUpdate(position, xResObj, yResObj);
     basicShape_->SetPosition(position);
 }
 

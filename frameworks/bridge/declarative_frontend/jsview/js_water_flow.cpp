@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -247,7 +247,8 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
         }
         if (footerObject->IsFunction()) {
             // ignore footer if sections are present
-            auto footerAction = [jsFunc = JSRef<JSFunc>::Cast(footerObject)]() { jsFunc->Call(JSRef<JSObject>()); };
+            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(footerObject));
+            auto footerAction = [builderFunc]() { builderFunc->Execute(); };
             WaterFlowModel::GetInstance()->SetFooter(footerAction);
         }
     }
@@ -267,6 +268,9 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("rowsTemplate", &JSWaterFlow::SetRowsTemplate, opt);
     JSClass<JSWaterFlow>::StaticMethod("nestedScroll", &JSWaterFlow::SetNestedScroll);
     JSClass<JSWaterFlow>::StaticMethod("enableScrollInteraction", &JSWaterFlow::SetScrollEnabled);
+    JSClass<JSWaterFlow>::StaticMethod("onReachStart", &JSWaterFlow::ReachStartCallback);
+    JSClass<JSWaterFlow>::StaticMethod("onReachEnd", &JSWaterFlow::ReachEndCallback);
+    JSClass<JSWaterFlow>::StaticMethod("onScrollFrameBegin", &JSWaterFlow::ScrollFrameBeginCallback);
     JSClass<JSWaterFlow>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSWaterFlow>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSWaterFlow>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -281,8 +285,12 @@ void JSWaterFlow::JSBind(BindingTarget globalObj)
     JSClass<JSWaterFlow>::StaticMethod("clip", &JSScrollable::JsClip);
     JSClass<JSWaterFlow>::StaticMethod("cachedCount", &JSWaterFlow::SetCachedCount);
     JSClass<JSWaterFlow>::StaticMethod("edgeEffect", &JSWaterFlow::SetEdgeEffect);
+    JSClass<JSWaterFlow>::StaticMethod("syncLoad", &JSWaterFlow::SetSyncLoad);
 
     JSClass<JSWaterFlow>::StaticMethod("onScroll", &JSWaterFlow::JsOnScroll);
+    JSClass<JSWaterFlow>::StaticMethod("onScrollStart", &JSWaterFlow::JsOnScrollStart);
+    JSClass<JSWaterFlow>::StaticMethod("onScrollStop", &JSWaterFlow::JsOnScrollStop);
+    JSClass<JSWaterFlow>::StaticMethod("onScrollIndex", &JSWaterFlow::JsOnScrollIndex);
 
     JSClass<JSWaterFlow>::StaticMethod("scrollBar", &JSWaterFlow::SetScrollBar, opt);
     JSClass<JSWaterFlow>::StaticMethod("scrollBarWidth", &JSWaterFlow::SetScrollBarWidth, opt);
@@ -428,6 +436,62 @@ void JSWaterFlow::SetFriction(const JSCallbackInfo& info)
     WaterFlowModel::GetInstance()->SetFriction(friction);
 }
 
+void JSWaterFlow::ReachStartCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onReachStart");
+            return;
+        };
+        WaterFlowModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
+    }
+    args.ReturnSelf();
+}
+
+void JSWaterFlow::ReachEndCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onReachEnd");
+            return;
+        };
+        WaterFlowModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
+    }
+    args.ReturnSelf();
+}
+
+void JSWaterFlow::ScrollFrameBeginCallback(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollBegin = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                 const Dimension& offset, const ScrollState& state) -> ScrollFrameResult {
+            ScrollFrameResult scrollRes { .offset = offset };
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
+            auto params = ConvertToJSValues(offset, state);
+            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+            if (result.IsEmpty()) {
+                LOGE("Error calling onScrollFrameBegin, result is empty.");
+                return scrollRes;
+            }
+
+            if (!result->IsObject()) {
+                LOGE("Error calling onScrollFrameBegin, result is not object.");
+                return scrollRes;
+            }
+
+            auto resObj = JSRef<JSObject>::Cast(result);
+            auto dxRemainValue = resObj->GetProperty("offsetRemain");
+            if (dxRemainValue->IsNumber()) {
+                scrollRes.offset = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+            }
+            return scrollRes;
+        };
+        WaterFlowModel::GetInstance()->SetOnScrollFrameBegin(std::move(onScrollBegin));
+    }
+}
+
 void JSWaterFlow::SetCachedCount(const JSCallbackInfo& info)
 {
     int32_t cachedCount = 1;
@@ -461,16 +525,68 @@ void JSWaterFlow::SetEdgeEffect(const JSCallbackInfo& info)
     WaterFlowModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled, effectEdge);
 }
 
+void JSWaterFlow::SetSyncLoad(const JSCallbackInfo& info)
+{
+    bool syncLoad = false;
+    if (info.Length() >= 1) {
+        auto value = info[0];
+        if (value->IsBoolean()) {
+            syncLoad = value->ToBoolean();
+        }
+    }
+    WaterFlowModel::GetInstance()->SetSyncLoad(syncLoad);
+}
+
 void JSWaterFlow::JsOnScroll(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto onScroll = [func = JSRef<JSFunc>::Cast(args[0])](
+        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
                             const CalcDimension& scrollOffset, const ScrollState& scrollState) {
             auto params = ConvertToJSValues(scrollOffset, scrollState);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
             return;
         };
         WaterFlowModel::GetInstance()->SetOnScroll(std::move(onScroll));
+    }
+    args.ReturnSelf();
+}
+
+void JSWaterFlow::JsOnScrollStart(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        WaterFlowModel::GetInstance()->SetOnScrollStart(std::move(onScrollStart));
+    }
+    args.ReturnSelf();
+}
+
+void JSWaterFlow::JsOnScrollStop(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        WaterFlowModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
+    }
+    args.ReturnSelf();
+}
+
+void JSWaterFlow::JsOnScrollIndex(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                 const int32_t first, const int32_t last) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto params = ConvertToJSValues(first, last);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollIndex");
+            return;
+        };
+        WaterFlowModel::GetInstance()->SetOnScrollIndex(std::move(onScrollIndex));
     }
     args.ReturnSelf();
 }

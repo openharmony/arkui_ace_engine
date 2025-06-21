@@ -194,7 +194,9 @@ void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
     auto layoutProperty = sheetPage->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    auto needAvoidKeyboard = sheetStyle.sheetKeyboardAvoidMode == SheetKeyboardAvoidMode::POPUP_SHEET;
     placement_ = sheetStyle.placement.value_or(Placement::BOTTOM);
+    sheetPopupInfo_.Reset();    // everytime sheetWrapper changed, we need to reset sheetPopupInfo to default value
     sheetPopupInfo_.finalPlacement = placement_;
     sheetPopupInfo_.placementOnTarget = sheetStyle.placementOnTarget.value_or(true);
     windowGlobalRect_ = pipeline->GetDisplayWindowRectInfo();
@@ -209,6 +211,18 @@ void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
         pipeline->GetContainerModalButtonsRect(floatContainerModal, titleRect);
         auto offsetY = safeArea.top_.Length() + titleRect.Height();
         auto height = windowGlobalRect_.Height() - offsetY - safeArea.bottom_.Length();
+        auto manager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID(manager);
+        auto keyboardInset = manager->GetKeyboardInset();
+        auto focusHub = sheetPage->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        auto isFocused = focusHub->IsCurrentFocus();
+        if (keyboardInset.Length() != 0 && isFocused && needAvoidKeyboard) {
+            sheetPopupInfo_.keyboardShow = true;
+            height -= keyboardInset.Length() - safeArea.bottom_.Length();
+            sheetPopupInfo_.showArrow =
+                !IsTargetNodeHideByKeyboard(keyboardInset, sheetWrapperPattern->GetTargetNode());
+        }
         // windowRect neet to set as origin point, because sheet offset is relative to window rect
         windowGlobalRect_ = Rect(0.f, offsetY, windowGlobalRect_.Width(), height);
     }
@@ -392,10 +406,17 @@ Placement SheetWrapperLayoutAlgorithm::AvoidanceRuleOfPlacement(
     TAG_LOGD(AceLogTag::ACE_SHEET, "After directionCheck, placement: %{public}s",
         PlacementUtils::ConvertPlacementToString(finalPlacement).c_str());
     // step2: check whether placement direction is NONE;
+    // if finalPlacement == None, it means nowhere can place the sheetPage after direction check.
     if (finalPlacement == Placement::NONE) {
         sheetPopupInfo_.placementRechecked = true;
         if (sheetPopupInfo_.placementOnTarget) {
             finalPlacement = placement_;
+            // when placementOnTarget and avoid keyboard is set true, the best place is user set placement.
+            if (sheetPopupInfo_.keyboardShow) {
+                // aovid keyboard need decrease sheetHeight.
+                sheetHeight_ = std::min(static_cast<double>(sheetHeight_),
+                    (windowGlobalRect_.Height() - DOUBLE_SIZE * WINDOW_EDGE_SPACE.ConvertToPx()));
+            }
         } else {
             SizeF bestSize = SizeF(0.f, 0.f);
             finalPlacement = RecheckBestPlacementWithInsufficientSpace(targetSize, targetOffset, bestSize);
@@ -893,12 +914,14 @@ void SheetWrapperLayoutAlgorithm::RestrictOffsetInSpaceBottom(float& offsetX, fl
         windowGlobalRect_.Width() - sheetWidth_ - windowEdgeWidth_);
 
     offsetY = std::clamp(static_cast<double>(offsetY), windowGlobalRect_.Top() + WINDOW_EDGE_SPACE.ConvertToPx(),
-        windowGlobalRect_.Height() + windowGlobalRect_.Top() - sheetHeight_ - WINDOW_EDGE_SPACE.ConvertToPx());
+        std::max(windowGlobalRect_.Height() + windowGlobalRect_.Top() - sheetHeight_ - WINDOW_EDGE_SPACE.ConvertToPx(),
+            windowGlobalRect_.Top() + WINDOW_EDGE_SPACE.ConvertToPx()));
 
     if (sheetPopupInfo_.placementRechecked && sheetPopupInfo_.placementOnTarget) {
         sheetPopupInfo_.showArrow = false;
-        offsetY =
-            windowGlobalRect_.Height() + windowGlobalRect_.Top() - sheetHeight_ - WINDOW_EDGE_SPACE.ConvertToPx();
+        offsetY = std::max(
+            windowGlobalRect_.Height() + windowGlobalRect_.Top() - sheetHeight_ - WINDOW_EDGE_SPACE.ConvertToPx(),
+            windowGlobalRect_.Top() + WINDOW_EDGE_SPACE.ConvertToPx());
     }
 }
 
@@ -908,7 +931,8 @@ void SheetWrapperLayoutAlgorithm::RestrictOffsetInSpaceTop(float& offsetX, float
         windowGlobalRect_.Width() - sheetWidth_ - windowEdgeWidth_);
 
     offsetY = std::clamp(static_cast<double>(offsetY), windowGlobalRect_.Top() + WINDOW_EDGE_SPACE.ConvertToPx(),
-        windowGlobalRect_.Height() + windowGlobalRect_.Top() - sheetHeight_ - WINDOW_EDGE_SPACE.ConvertToPx());
+        std::max(windowGlobalRect_.Height() + windowGlobalRect_.Top() - sheetHeight_ - WINDOW_EDGE_SPACE.ConvertToPx(),
+            windowGlobalRect_.Top() + WINDOW_EDGE_SPACE.ConvertToPx()));
 
     if (sheetPopupInfo_.placementRechecked && sheetPopupInfo_.placementOnTarget) {
         sheetPopupInfo_.showArrow = false;
@@ -1086,6 +1110,16 @@ void SheetWrapperLayoutAlgorithm::LayoutMaskNode(LayoutWrapper* layoutWrapper)
 void SheetWrapperLayoutAlgorithm::RemeasureForPopup(LayoutWrapper* layoutWrapper)
 {
     UpdateSheetNodePopupInfo(layoutWrapper);
+}
+
+bool SheetWrapperLayoutAlgorithm::IsTargetNodeHideByKeyboard(
+    const SafeAreaInsets::Inset& keyboardInset, const RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, false);
+    auto windowHeight = windowGlobalRect_.Height();
+    auto keyboardHeight = keyboardInset.Length();
+    auto targetRect = targetNode->GetPaintRectToWindowWithTransform();
+    return GreatOrEqual(targetRect.Top(), windowHeight - keyboardHeight);
 }
 
 void SheetWrapperLayoutAlgorithm::UpdateSheetNodePopupInfo(LayoutWrapper* layoutWrapper)

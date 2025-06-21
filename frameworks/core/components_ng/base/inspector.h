@@ -37,6 +37,7 @@ struct InspectorChildrenParameters {
     int32_t pageId = 0;
     bool isActive = false;
     bool isLayoutInspector = false;
+    bool needHandleInternal = false;
 };
 
 class ACE_FORCE_EXPORT Inspector {

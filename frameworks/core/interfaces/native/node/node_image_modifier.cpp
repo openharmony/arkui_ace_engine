@@ -199,6 +199,14 @@ void SetCopyOption(ArkUINodeHandle node, ArkUI_Int32 copyOption)
 }
 
 void SetImageShowSrc(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName,
+    ArkUI_Bool isUriPureNumber)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetInitialSrc(frameNode, src, bundleName, moduleName, isUriPureNumber);
+}
+
+void SetImageShowSrcRes(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName,
     ArkUI_Bool isUriPureNumber, void* srcRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -409,11 +417,18 @@ void ResetMatchTextDirection(ArkUINodeHandle node)
     ImageModelNG::SetMatchTextDirection(frameNode, false);
 }
 
-void SetFillColor(ArkUINodeHandle node, ArkUI_Uint32 value, void* colorRawPtr)
+void SetFillColor(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetImageFill(frameNode, Color(value));
+}
+
+void SetFillColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 value, ArkUI_Uint32 colorSpace, void* colorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetImageFill(frameNode, Color(value, static_cast<ColorSpace>(colorSpace)));
     if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
         auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
         auto colorResObj = AceType::Claim(color);
@@ -439,7 +454,18 @@ void ResetFillColor(ArkUINodeHandle node)
     ImageModelNG::SetImageFill(frameNode, theme->GetFillColor());
 }
 
-void SetAlt(ArkUINodeHandle node, const char* src, const char* bundleName, const char* moduleName, void* srcRawPtr)
+void SetAlt(ArkUINodeHandle node, const char* src, const char* bundleName, const char* moduleName)
+{
+    if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
+        return;
+    }
+
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetAlt(frameNode, ImageSourceInfo { src, bundleName, moduleName });
+}
+
+void SetAltRes(ArkUINodeHandle node, const char* src, const char* bundleName, const char* moduleName, void* srcRawPtr)
 {
     if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
         return;
@@ -1057,6 +1083,7 @@ const ArkUIImageModifier* GetImageModifier()
     static const ArkUIImageModifier modifier = {
         .setSrc = SetImageSrc,
         .setImageShowSrc = SetImageShowSrc,
+        .setImageShowSrcRes = SetImageShowSrcRes,
         .setImageResource = SetImageResource,
         .setCopyOption = SetCopyOption,
         .resetCopyOption = ResetCopyOption,
@@ -1079,9 +1106,11 @@ const ArkUIImageModifier* GetImageModifier()
         .setMatchTextDirection = SetMatchTextDirection,
         .resetMatchTextDirection = ResetMatchTextDirection,
         .setFillColor = SetFillColor,
+        .setFillColorWithColorSpace = SetFillColorWithColorSpace,
         .resetImageFill = ResetImageFill,
         .resetFillColor = ResetFillColor,
         .setAlt = SetAlt,
+        .setAltRes = SetAltRes,
         .resetAlt = ResetAlt,
         .setImageInterpolation = SetImageInterpolation,
         .resetImageInterpolation = ResetImageInterpolation,
@@ -1159,6 +1188,7 @@ const CJUIImageModifier* GetCJUIImageModifier()
     static const CJUIImageModifier modifier = {
         .setSrc = SetImageSrc,
         .setImageShowSrc = SetImageShowSrc,
+        .setImageShowSrcRes = SetImageShowSrcRes,
         .setCopyOption = SetCopyOption,
         .resetCopyOption = ResetCopyOption,
         .setAutoResize = SetAutoResize,
@@ -1178,8 +1208,10 @@ const CJUIImageModifier* GetCJUIImageModifier()
         .setMatchTextDirection = SetMatchTextDirection,
         .resetMatchTextDirection = ResetMatchTextDirection,
         .setFillColor = SetFillColor,
+        .setFillColorWithColorSpace = SetFillColorWithColorSpace,
         .resetFillColor = ResetFillColor,
         .setAlt = SetAlt,
+        .setAltRes = SetAltRes,
         .resetAlt = ResetAlt,
         .setImageInterpolation = SetImageInterpolation,
         .resetImageInterpolation = ResetImageInterpolation,

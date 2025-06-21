@@ -112,31 +112,26 @@ ScopedDelegate EngineHelper::GetDelegateByContainer(RefPtr<Container> container)
     return { engine ? engine->GetFrontend() : nullptr, container->GetInstanceId() };
 }
 
-std::pair<int32_t, int32_t> EngineHelper::StringToPair(const std::string& match)
-{
-    std::vector<std::string> arr;
-    std::pair<int32_t, int32_t> res;
-    StringUtils::SplitStr(match, ":", arr);
-    res.first = StringUtils::StringToInt(arr[0]);
-    res.second = StringUtils::StringToInt(arr[1]);
-    return res;
-}
-
-std::pair<int32_t, int32_t> EngineHelper::GetPositionOnJsCode()
+std::tuple<std::string, int32_t, int32_t> EngineHelper::GetPositionOnJsCode()
 {
     if (!AceChecker::IsPerformanceCheckEnabled()) {
-        return { 0, 0 };
+        return {"", 0, 0 };
     }
     auto jsEngine = GetCurrentEngine();
     std::string stack;
-    CHECK_NULL_RETURN(jsEngine, std::make_pair(0, 0));
+    CHECK_NULL_RETURN(jsEngine, std::make_tuple("", 0, 0));
     jsEngine->GetStackTrace(stack);
-    std::regex reg("\\d+:\\d+");
+    std::regex reg("([^|]+)\\|([^|]+)\\|[^|]+\\|([^:]+):(\\d+):(\\d+)");
     std::smatch match;
     if (std::regex_search(stack, match, reg)) {
-        return StringToPair(match[0].str());
+        std::string filePath = match[2].str() + "/" + match[3].str();
+        return {
+            filePath,
+            StringUtils::StringToInt(match[4].str()),
+            StringUtils::StringToInt(match[5].str())
+        };
     }
-    return { 0, 0 };
+    return {"", 0, 0 };
 }
 
 void EngineHelper::RegisterRemoveUIContextFunc(const std::function<void(int32_t)>& removeUIContextFunc)

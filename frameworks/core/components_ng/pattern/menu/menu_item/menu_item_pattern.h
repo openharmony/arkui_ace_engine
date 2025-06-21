@@ -77,6 +77,21 @@ public:
         }
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     inline RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<MenuItemEventHub>();
@@ -409,6 +424,7 @@ public:
     void UpdateCheckMarkColor(const Color& color);
     void SetShowDefaultSelectedIcon(bool show);
     void SetCheckMarkVisibleType(VisibleType type);
+    void OnColorConfigurationUpdate() override;
 
 protected:
     void RegisterOnKeyEvent();
@@ -519,6 +535,7 @@ private:
 
     void HandleOptionBackgroundColor();
     void HandleOptionFontColor();
+    RefPtr<SelectTheme> GetCurrentSelectTheme();
 
     std::list<TouchRegion> hoverRegions_;
 

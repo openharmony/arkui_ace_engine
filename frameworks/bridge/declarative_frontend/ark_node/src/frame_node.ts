@@ -452,6 +452,11 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
     return { x: position[0], y: position[1] };
   }
 
+  getGlobalPositionOnDisplay(): Position {
+    const position = getUINativeModule().frameNode.getGlobalPositionOnDisplay(this.getNodePtr());
+    return { x: position[0], y: position[1] };
+  }
+
   getPositionToParentWithTransform(): Position {
     const position = getUINativeModule().frameNode.getPositionToParentWithTransform(this.getNodePtr());
     return { x: position[0], y: position[1] };

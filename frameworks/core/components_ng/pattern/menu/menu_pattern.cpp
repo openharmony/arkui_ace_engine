@@ -420,7 +420,7 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     auto props = scroll->GetLayoutProperty<ScrollLayoutProperty>();
     props->UpdateAxis(Axis::VERTICAL);
     props->UpdateAlignment(Alignment::CENTER_LEFT);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = scroll->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -796,6 +796,54 @@ void MenuPattern::UpdateDividerProperty(
     for (size_t i = childCount; i > updateCount; i--) {
         RemoveOption();
     }
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuPattern::UpdateSelectOptionTextByIndex(int32_t index, const std::string& text)
+{
+    if (!isSelectMenu_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& children = GetOptions();
+    auto childCount = children.size();
+    if (index >= childCount) {
+        return;
+    }
+    auto childIt = children.at(index);
+    const auto& childNode = AceType::DynamicCast<FrameNode>(childIt);
+    CHECK_NULL_VOID(childNode);
+    auto optionPattern = childNode->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(optionPattern);
+    optionPattern->UpdateText(text);
+    childNode->MarkModifyDone();
+    childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void MenuPattern::UpdateSelectOptionIconByIndex(int32_t index, const std::string& icon)
+{
+    if (!isSelectMenu_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& children = GetOptions();
+    auto childCount = children.size();
+    if (index >= childCount) {
+        return;
+    }
+    auto childIt = children.at(index);
+    const auto& childNode = AceType::DynamicCast<FrameNode>(childIt);
+    CHECK_NULL_VOID(childNode);
+    auto optionPattern = childNode->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(optionPattern);
+    optionPattern->UpdateIcon(icon, nullptr);
+    childNode->MarkModifyDone();
+    childNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -1532,7 +1580,7 @@ void MenuPattern::ShowStackMenuAppearAnimation()
         TAG_LOGW(AceLogTag::ACE_MENU, "not found parent MenuItem when show stack sub menu");
     }
     ShowStackMenuAppearOpacityAndBlurAnimation(mainMenuContext);
-    
+
     subMenuContext->UpdatePosition(
         OffsetT<Dimension>(Dimension(originOffset.GetX()), Dimension(originOffset.GetY())));
 
@@ -2133,7 +2181,9 @@ void MenuPattern::OnColorConfigurationUpdate()
     auto renderContext = host->GetRenderContext();
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()
         || menuTheme->GetMenuBlendBgColor()) {
-        renderContext->UpdateBackgroundColor(menuTheme->GetBackgroundColor());
+        if (!isDisableMenuBgColor_) {
+            renderContext->UpdateBackgroundColor(menuTheme->GetBackgroundColor());
+        }
     } else {
         renderContext->UpdateBackBlurStyle(renderContext->GetBackBlurStyle());
     }
@@ -2147,6 +2197,15 @@ void MenuPattern::OnColorConfigurationUpdate()
         child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     host->SetNeedCallChildrenUpdate(false);
+
+    auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProperty);
+    if (SystemProperties::ConfigChangePerform() && !menuLayoutProperty->GetFontColorSetByUser().value_or(false)) {
+        auto themeFontColor = menuTheme->GetMenuFontColor();
+        menuLayoutProperty->UpdateFontColor(themeFontColor);
+        host->MarkModifyDone();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void MenuPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -2499,7 +2558,7 @@ void MenuPattern::InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuThem
         disappearOffset_ = endOffset_;
         return;
     }
-    
+
     auto preview = menuWrapperPattern->GetPreview();
     CHECK_NULL_VOID(preview);
     auto previewGeometryNode = preview->GetGeometryNode();

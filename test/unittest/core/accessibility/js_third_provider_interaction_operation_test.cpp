@@ -671,4 +671,100 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, GetNodeConfig01, TestSize.Leve
     jsInteractionOperation->GetNodeConfig(config);
     EXPECT_EQ(config.pageId, 10);
 }
+
+/**
+ * @tc.name: JsThirdProviderInteractionOperationTest012
+ * @tc.desc: ExecuteAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOperationTest012, TestSize.Level1)
+{
+    auto ohAccessibilityProvider
+        = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+
+    auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
+        ohAccessibilityProvider, jsAccessibilityManager, frameNode);
+    jsInteractionOperation->SetBelongTreeId(0);
+    int64_t elementId = 0;
+    int32_t requestId = 2;
+    int32_t action = static_cast<int32_t>(ActionType::ACCESSIBILITY_ACTION_CLICK);
+    std::map<std::string, std::string> actionArguments =
+        ohAccessibilityProvider->providerMockResult_.originActionArguments_;
+    std::string hmacTest = "test";
+    uint64_t timeTest = 123456;
+    MockAccessibilityElementOperatorCallback operatorCallback;
+
+    // 3 ExecuteAccessibilityAction normal, callback should receive same request id and true
+    ohAccessibilityProvider->providerMockResult_.Reset();
+    jsInteractionOperation->ExecuteAction(
+        elementId, action, actionArguments, requestId, operatorCallback);
+    EXPECT_EQ(operatorCallback.mockSucceeded_, true);
+    EXPECT_EQ(operatorCallback.mockRequestId, requestId);
+
+    auto& resultActionArguments = ohAccessibilityProvider->providerMockResult_.resultActionArguments_;
+
+    auto it = resultActionArguments.find(ACTION_ARGU_CLICK_ENHANCE_DATA);
+    ASSERT_FALSE(it != resultActionArguments.end());
+    it = resultActionArguments.find(ACTION_ARGU_CLICK_TIMESTAMP);
+    ASSERT_FALSE(it != resultActionArguments.end());
+
+    // 3 ExecuteAccessibilityAction normal, callback should receive same request id and true
+    actionArguments[ACTION_ARGU_CLICK_ENHANCE_DATA] = hmacTest;
+    actionArguments[ACTION_ARGU_CLICK_TIMESTAMP] = std::to_string(timeTest);
+    actionArguments["testNotFiltered"] = "testNotFiltered";
+    ohAccessibilityProvider->providerMockResult_.Reset();
+    jsInteractionOperation->ExecuteAction(
+        elementId, action, actionArguments, requestId, operatorCallback);
+    EXPECT_EQ(operatorCallback.mockSucceeded_, true);
+    EXPECT_EQ(operatorCallback.mockRequestId, requestId);
+
+    // click filter security click arguments
+    it = resultActionArguments.find(ACTION_ARGU_CLICK_ENHANCE_DATA);
+    ASSERT_FALSE(it != resultActionArguments.end());
+    it = resultActionArguments.find(ACTION_ARGU_CLICK_TIMESTAMP);
+    ASSERT_FALSE(it != resultActionArguments.end());
+    it = resultActionArguments.find("testNotFiltered");
+    ASSERT_TRUE(it != resultActionArguments.end());
+}
+
+/**
+ * @tc.name: JsThirdProviderInteractionOperationTest013
+ * @tc.desc: SearchElementInfoByAccessibilityId
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOperationTest013, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create jsAccessibilityManager.
+    */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+
+    int64_t elementId = -1;
+    int32_t requestId = 2;
+    int32_t mode = 8; // search tree
+    int32_t windowId = 1;
+    jsAccessibilityManager->SetWindowId(windowId);
+
+    MockAccessibilityElementOperatorCallback operatorCallback;
+
+    jsAccessibilityManager->SearchElementInfoByAccessibilityId(
+        elementId, requestId,
+        operatorCallback, mode, windowId);
+
+    EXPECT_EQ(operatorCallback.mockInfos_.size(), 1);
+    EXPECT_EQ(operatorCallback.mockRequestId, requestId);
+
+    jsAccessibilityManager->SearchElementInfoByAccessibilityId(
+        elementId, requestId,
+        operatorCallback, mode, 2);
+    EXPECT_EQ(operatorCallback.mockRequestId, requestId);
+}
 } // namespace OHOS::Ace::NG

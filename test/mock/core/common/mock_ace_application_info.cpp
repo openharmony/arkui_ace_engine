@@ -46,6 +46,11 @@ class MockAceApplicationInfo : public AceApplicationInfo {
         return true;
     }
 
+    void SetApiTargetVersion(int32_t apiVersion)
+    {
+        apiVersion_ = apiVersion;
+    }
+
 public:
     static MockAceApplicationInfo& GetInstance()
     {

@@ -115,6 +115,16 @@ public:
         return isInHover_;
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
     RefPtr<InputEvent>& GetHoverListener()
     {
         return hoverListener_;
@@ -195,6 +205,22 @@ public:
 
     void DumpSubInfo(RefPtr<ButtonLayoutProperty> layoutProperty);
 
+    void HandleBackgroundColor();
+
+    void UpdateComponentColor(const Color& color, const ButtonColorType buttonColorType);
+
+    void UpdateComponentString(const std::string& value, const ButtonStringType buttonStringType);
+
+    void UpdateComponentDimension(const CalcDimension value, const ButtonDimensionType buttonDimensionType);
+
+    void UpdateComponentDouble(const double value, const ButtonDoubleType buttonDoubleType);
+
+    void UpdateComponentFamilies(const std::vector<std::string>& value, const ButtonStringType buttonStringType);
+
+    std::string VectorToString(const std::vector<std::string>& vec, const std::string& delimiter = " ");
+
+    std::vector<std::string> StringToVector(const std::string& str, char delimiter = ' ');
+
 protected:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -204,7 +230,6 @@ protected:
     void HandlePressedStyle();
     void HandleNormalStyle();
     void HandleHoverEvent(bool isHover);
-    void HandleBackgroundColor();
     void UpdateTexOverflow(bool isMarqueeStart);
     void HandleEnabled();
     void InitButtonLabel();

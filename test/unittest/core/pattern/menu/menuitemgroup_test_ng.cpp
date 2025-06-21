@@ -497,6 +497,58 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupLayoutAlgorithmTestNg006, TestSize.Le
     EXPECT_EQ(needFooterPadding, true);
 }
 /**
+ * @tc.name: MenuItemGroupLayoutAlgorithmTestNg007
+ * @tc.desc: Test MATCH_PARENT、WRAP_CONTENT and FIX_AT_IDEAL_SIZE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, MenuItemGroupLayoutAlgorithmTestNg007, TestSize.Level1)
+{
+    // create menu item group
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    auto menuItemGroup = FrameNode::CreateFrameNode(V2::MENU_ITEM_GROUP_ETS_TAG, -1, menuItemGroupPattern);
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    menuItemGroup->MountToParent(wrapperNode);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    wrapperPattern->OnModifyDone();
+    auto algorithm = AceType::MakeRefPtr<MenuItemGroupLayoutAlgorithm>(-1, -1, 0);
+    ASSERT_TRUE(algorithm);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    auto* layoutWrapper = new LayoutWrapperNode(menuItemGroup, geometryNode, layoutProp);
+
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = FULL_SCREEN_SIZE;
+    parentLayoutConstraint.percentReference = FULL_SCREEN_SIZE;
+    auto props = layoutWrapper->GetLayoutProperty();
+    props->UpdateLayoutConstraint(parentLayoutConstraint);
+    props->UpdateContentConstraint();
+    // create menu item
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        SizeF frameSize(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT);
+        itemGeoNode->SetFrameSize(frameSize);
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp);
+        layoutWrapper->AppendChild(childWrapper);
+    }
+    props->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    props->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    SizeF frameSize(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT);
+    auto isUpdate = algorithm->UpdateLayoutSizeBasedOnPolicy(layoutWrapper, frameSize);
+    EXPECT_NE(isUpdate, true);
+    props->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+    props->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
+    isUpdate = algorithm->UpdateLayoutSizeBasedOnPolicy(layoutWrapper, frameSize);
+    EXPECT_TRUE(isUpdate);
+    props->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
+    props->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
+    isUpdate = algorithm->UpdateLayoutSizeBasedOnPolicy(layoutWrapper, frameSize);
+    EXPECT_TRUE(isUpdate);
+}
+/**
  * @tc.name: MenuItemGroupPaintMethod001
  * @tc.desc: Test MenuItemGroup GetOverlayDrawFunction.
  * @tc.type: FUNC
@@ -517,8 +569,11 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPaintMethod001, TestSize.Level1)
      * @tc.steps: step2. update paint property and execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    WeakPtr<RenderContext> renderContext;
+    RefPtr<RenderContext> renderContext = AceType::MakeRefPtr<RenderContext>();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    renderContext->SetHostNode(wrapperNode);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -562,8 +617,11 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPaintMethod002, TestSize.Level1)
      * @tc.steps: step2. update paint property and execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    WeakPtr<RenderContext> renderContext;
+    RefPtr<RenderContext> renderContext = AceType::MakeRefPtr<RenderContext>();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    renderContext->SetHostNode(wrapperNode);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -601,8 +659,11 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupPaintMethod003, TestSize.Level1)
      * @tc.steps: step2. update paint property and execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    WeakPtr<RenderContext> renderContext;
+    RefPtr<RenderContext> renderContext = AceType::MakeRefPtr<RenderContext>();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    renderContext->SetHostNode(wrapperNode);
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -1250,5 +1311,52 @@ HWTEST_F(MenuItemGroupTestNg, SetBackgroundEffect003, TestSize.Level1)
     ASSERT_NE(renderContext->GetBackgroundEffect(), std::nullopt);
     EXPECT_EQ(renderContext->GetBackgroundEffect()->saturation, EFFECT_SATURATION);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: MenuItemGroupSetHeaderContentTest001
+ * @tc.desc: Test MenuItemGroupPattern::SetHeaderContent with valid header content
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, MenuItemGroupSetHeaderContentTest001, TestSize.Level1)
+{
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    ASSERT_NE(menuItemGroupPattern, nullptr);
+
+    menuItemGroupPattern->headerContent_ = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(menuItemGroupPattern->headerContent_, nullptr);
+
+    std::string testText = "Test Header Content";
+    menuItemGroupPattern->SetHeaderContent(testText);
+
+    auto textLayoutProperty = menuItemGroupPattern->headerContent_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), UtfUtils::Str8DebugToStr16(testText));
+}
+
+/**
+ * @tc.name: MenuItemGroupSetFooterContentTest001
+ * @tc.desc: Test MenuItemGroupPattern::SetFooterContent with valid footer content
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemGroupTestNg, MenuItemGroupSetFooterContentTest001, TestSize.Level1)
+{
+    auto menuItemGroupPattern = AceType::MakeRefPtr<MenuItemGroupPattern>();
+    ASSERT_NE(menuItemGroupPattern, nullptr);
+
+    menuItemGroupPattern->footerContent_ = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(menuItemGroupPattern->footerContent_, nullptr);
+
+    std::string testText = "Test Footer Content";
+
+    menuItemGroupPattern->SetFooterContent(testText);
+
+    auto textLayoutProperty = menuItemGroupPattern->footerContent_->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), UtfUtils::Str8DebugToStr16(testText));
 }
 } // namespace OHOS::Ace::NG

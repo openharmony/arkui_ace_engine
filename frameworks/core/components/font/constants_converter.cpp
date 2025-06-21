@@ -24,6 +24,7 @@
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/adapter/drawing_decoration_painter.h"
 #include "base/geometry/ng/rect_t.h"
+#include "draw/color.h"
 
 namespace OHOS::Ace::Constants {
 namespace {
@@ -684,6 +685,19 @@ void ConvertForegroundPaint(const TextStyle& textStyle, double width, double hei
     txtStyle.foregroundBrush = brush;
 }
 
+Rosen::SymbolColor ConvertToNativeSymbolColor(const std::vector<SymbolGradient>& intermediate)
+{
+    Rosen::SymbolColor symbolColor;
+    symbolColor.colorType = Rosen::SymbolColorType::GRADIENT_TYPE;
+    for (const auto& grad : intermediate) {
+        if (auto nativeGradient = CreateNativeGradient(grad)) {
+            symbolColor.gradients.push_back(nativeGradient);
+        }
+    }
+
+    return symbolColor;
+}
+
 void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
 {
     if (!textStyle.isSymbolGlyph_) {
@@ -698,6 +712,13 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
         symbolColors.emplace_back(ConvertSkColor(symbolColor[i]));
     }
     txtStyle.symbol.SetRenderColor(symbolColors);
+
+    if (auto intermediateStyle = textStyle.GetShaderStyle(); !intermediateStyle.empty()) {
+        txtStyle.symbol.SetSymbolColor(ConvertToNativeSymbolColor(intermediateStyle));
+    }
+
+    txtStyle.symbol.SetSymbolShadow(ConvertToNativeSymbolShadow(textStyle.GetSymbolShadow()));
+
     if (textStyle.GetSymbolEffectOptions().has_value()) {
         auto options = textStyle.GetSymbolEffectOptions().value();
         auto effectType = options.GetEffectType();
@@ -784,5 +805,63 @@ void ConvertPlaceholderRun(const PlaceholderRun& span, Rosen::PlaceholderSpan& t
 float GetVariableFontWeight(FontWeight fontWeight)
 {
     return (static_cast<int32_t>(ConvertTxtFontWeight(fontWeight)) + 1) * DEFAULT_MULTIPLE;
+}
+
+std::optional<Rosen::SymbolShadow> ConvertToNativeSymbolShadow(const SymbolShadow& shadow)
+{
+    if (shadow.IsDefault()) {
+        return std::nullopt;
+    }
+    Rosen::SymbolShadow rosenShadow;
+
+    rosenShadow.color = ConvertSkColor(shadow.color);
+
+    rosenShadow.offset = Rosen::Drawing::Point(
+        shadow.offset.first,
+        shadow.offset.second);
+
+    rosenShadow.blurRadius = shadow.radius;
+
+    return rosenShadow;
+}
+
+std::shared_ptr<Rosen::SymbolGradient> CreateNativeGradient(const SymbolGradient& grad)
+{
+    switch (grad.type) {
+        case SymbolGradientType::COLOR_SHADER: {
+            auto gradient = std::make_shared<Rosen::SymbolGradient>();
+            gradient->SetColors(ConvertColors(grad.symbolColor));
+            return gradient;
+        }
+        case SymbolGradientType::LINEAR_GRADIENT: {
+            auto gradient = std::make_shared<Rosen::SymbolLineGradient>(grad.angle.value());
+            gradient->SetColors(ConvertColors(grad.symbolColor));
+            gradient->SetPositions(grad.symbolOpacities);
+            gradient->SetTileMode(grad.repeating ?
+                Rosen::Drawing::TileMode::REPEAT : Rosen::Drawing::TileMode::CLAMP);
+            return gradient;
+        }
+        case SymbolGradientType::RADIAL_GRADIENT: {
+            Rosen::Drawing::Point centerPt(grad.center.x, grad.center.y);
+            auto gradient = std::make_shared<Rosen::SymbolRadialGradient>(centerPt, grad.radius);
+            gradient->SetRadius(grad.radius);
+            gradient->SetColors(ConvertColors(grad.symbolColor));
+            gradient->SetPositions(grad.symbolOpacities);
+            gradient->SetTileMode(grad.repeating ?
+                Rosen::Drawing::TileMode::REPEAT : Rosen::Drawing::TileMode::CLAMP);
+            return gradient;
+        }
+        default:
+            return nullptr;
+    }
+}
+
+std::vector<Rosen::Drawing::ColorQuad> ConvertColors(const std::vector<Color>& colors)
+{
+    std::vector<Rosen::Drawing::ColorQuad> symbolColors;
+    for (const auto& color : colors) {
+        symbolColors.emplace_back(ConvertSkColor(color));
+    }
+    return symbolColors;
 }
 } // namespace OHOS::Ace::Constants

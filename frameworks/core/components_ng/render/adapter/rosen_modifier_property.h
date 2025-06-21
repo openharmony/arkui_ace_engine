@@ -16,10 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_RENDER_ADAPTER_ROSEN_MODIFIER_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_RENDER_ADAPTER_ROSEN_MODIFIER_PROPERTY_H
 
+#ifndef MODIFIER_NG
 #include "render_service_client/core/modifier/rs_property_modifier.h"
+#endif
 #include "render_service_client/core/ui/rs_node.h"
 
 namespace OHOS::Ace::NG {
+#ifndef MODIFIER_NG
 template<typename T>
 bool CreateOrSetModifierValue(std::shared_ptr<Rosen::RSAnimatableProperty<T>>& property, const T& value);
 
@@ -103,6 +106,6 @@ struct WindowBlurModifier {
     std::shared_ptr<Rosen::RSBehindWindowFilterMaskColorModifier>& modifier,
     std::shared_ptr<Rosen::RSAnimatableProperty<Rosen::RSColor>>& property, const Rosen::RSColor& value);
 };
+#endif
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_RENDER_ADAPTER_ROSEN_MODIFIER_PROPERTY_H

@@ -41,6 +41,7 @@ class ACE_FORCE_EXPORT AppBarView : public Referenced {
 public:
     AppBarView() = default;
     RefPtr<FrameNode> Create(const RefPtr<FrameNode>& stage);
+    RefPtr<Pattern> GetAtomicServicePattern();
     void SetVisible(bool visible) {}
     void SetRowColor(const std::optional<Color>& color) {}
     void SetContent(const std::string& content) {}

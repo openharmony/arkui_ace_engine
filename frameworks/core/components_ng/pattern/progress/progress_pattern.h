@@ -49,7 +49,7 @@ public:
         CHECK_NULL_RETURN(progressLayoutProperty, nullptr);
         progressType_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
         if (!progressModifier_) {
-            ProgressAnimatableProperty progressAnimatableProperty{};
+            ProgressAnimatableProperty progressAnimatableProperty {};
             InitAnimatableProperty(progressAnimatableProperty);
             progressModifier_ = AceType::MakeRefPtr<ProgressModifier>(GetHost(), progressAnimatableProperty);
         }
@@ -62,7 +62,7 @@ public:
         progressModifier_->SetUseContentModifier(UseContentModifier());
         if ((progressLayoutProperty->GetType() == ProgressType::RING ||
                 progressLayoutProperty->GetType() == ProgressType::SCALE) &&
-                progressLayoutProperty->GetPaddingProperty()) {
+            progressLayoutProperty->GetPaddingProperty()) {
             const auto& padding = progressLayoutProperty->GetPaddingProperty();
             auto leftPadding = padding->left.value_or(CalcLength(0.0_vp)).GetDimension();
             progressModifier_->SetRingProgressLeftPadding(leftPadding);
@@ -208,6 +208,7 @@ private:
     void ObscureText(bool isSensitive);
     void FireBuilder();
     void ReportProgressEvent();
+    void OnColorConfigurationUpdate() override;
     RefPtr<FrameNode> BuildContentModifierNode();
     std::optional<ProgressMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;

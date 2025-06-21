@@ -43,7 +43,7 @@ public:
         onSuccess_ = event;
     }
 
-    void FireSuccessEvent(int32_t buttonIdx);
+    void FireSuccessEvent(int32_t buttonIdx, const RefPtr<FrameNode>& frameNode);
 
 private:
     DialogOnCancelEvent onCancel_;

@@ -165,7 +165,9 @@ void MenuWrapperPattern::ChangeCurMenuItemBgColor()
     if (!currentTouchItem_) {
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
@@ -463,7 +465,9 @@ void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)
     AnimationOption option;
     option.SetOnFinishEvent(
         [weak = WeakClaim(RawPtr(host)), subMenuWk = WeakClaim(RawPtr(subMenu))] {
-            auto pipeline = PipelineBase::GetCurrentContext();
+            auto host = weak.Upgrade();
+            CHECK_NULL_VOID(host);
+            auto pipeline = host->GetContext();
             CHECK_NULL_VOID(pipeline);
             auto taskExecutor = pipeline->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
@@ -738,13 +742,13 @@ void MenuWrapperPattern::MarkAllMenuNoDraggable()
 bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     forceUpdateEmbeddedMenu_ = false;
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, false);
     auto expandDisplay = theme->GetExpandDisplay();
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
     auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
     CHECK_NULL_RETURN(menuNode, false);
     auto menuPattern = AceType::DynamicCast<MenuPattern>(menuNode->GetPattern());
@@ -769,7 +773,9 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
 bool MenuWrapperPattern::IsNeedSetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, false);
@@ -931,7 +937,9 @@ OffsetT<Dimension> MenuWrapperPattern::GetAnimationOffset()
 {
     OffsetT<Dimension> offset;
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, offset);
+    auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, offset);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, offset);
@@ -1106,6 +1114,7 @@ void MenuWrapperPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("DefaultPlacement: " + dumpInfo_.defaultPlacement);
     DumpLog::GetInstance().AddDesc("FinalPosition: " + dumpInfo_.finalPosition.ToString());
     DumpLog::GetInstance().AddDesc("FinalPlacement: " + dumpInfo_.finalPlacement);
+    DumpLog::GetInstance().AddDesc("AnchorPosition: " + dumpInfo_.anchorPosition.ToString());
     auto modalMode = ConvertModalModeToString(menuParam_.modalMode);
     DumpLog::GetInstance().AddDesc("ModalMode: " + modalMode);
 }
@@ -1132,6 +1141,7 @@ void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("DefaultPlacement", dumpInfo_.defaultPlacement.c_str());
     json->Put("FinalPosition", dumpInfo_.finalPosition.ToString().c_str());
     json->Put("FinalPlacement", dumpInfo_.finalPlacement.c_str());
+    json->Put("AnchorPosition", dumpInfo_.anchorPosition.ToString().c_str());
     auto modalMode = ConvertModalModeToString(menuParam_.modalMode);
     json->Put("ModalMode", modalMode.c_str());
 }

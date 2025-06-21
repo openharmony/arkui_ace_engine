@@ -1239,13 +1239,13 @@ void FrameNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConf
     if (!id.empty()) {
         json->Put(TreeKey::ID, id.c_str());
     }
-    if (!config.contentOnly) {
+    if (!config.contentOnly && config.callingOnMain) {
         auto eventHub = eventHub_ ? eventHub_->GetOrCreateGestureEventHub() : nullptr;
         if (eventHub) {
-            json->Put(TreeKey::CLICKABLE, eventHub->IsClickable());
-            json->Put(TreeKey::LONG_CLICKABLE, eventHub->IsLongClickable());
+            json->Put(TreeKey::CLICKABLE, eventHub->IsAccessibilityClickable());
+            json->Put(TreeKey::LONG_CLICKABLE, eventHub->IsAccessibilityLongClickable());
         }
-        if (config.callingOnMain && renderContext_) {
+        if (renderContext_) {
             json->Put("opacity", renderContext_->GetOpacityValue(1.0));
         }
     }
@@ -1256,6 +1256,9 @@ void FrameNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConf
         }
         if (!accessibilityProperty_->GetAccessibilityDescription().empty()) {
             json->Put("accessilityDescription", accessibilityProperty_->GetAccessibilityDescription().c_str());
+        }
+        if (!config.contentOnly) {
+            json->Put(TreeKey::SCROLLABLE, accessibilityProperty_->IsScrollable());
         }
     }
 }
@@ -1551,11 +1554,6 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
     auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->OnAccessibilityDetachFromMainTree();
-
-    if (isRenderDirtyMarked_) {
-        context->RemoveNodeFromDirtyRenderNode(GetId(), GetPageId());
-        isRenderDirtyMarked_ = false;
-    }
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
@@ -1733,7 +1731,7 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp, int32_t area
 #endif
     if (eventHub_ && (eventHub_->HasOnAreaChanged() || eventHub_->HasInnerOnAreaChanged()) && lastFrameRect_ &&
         lastParentOffsetToWindow_) {
-        auto currFrameRect = geometryNode_->GetFrameRect();
+        auto currFrameRect = GetFrameRectWithSafeArea();
         if (renderContext_ && renderContext_->GetPositionProperty()) {
             if (renderContext_->GetPositionProperty()->HasPosition()) {
                 auto renderPosition = ContextPositionConvertToPX(
@@ -2258,6 +2256,13 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
         if (self->GetInspectorId() || (eventHub && eventHub->HasNDKDrawCompletedCallback())) {
             CHECK_NULL_VOID(pipeline);
             pipeline->SetNeedRenderNode(weak);
+        }
+        if (self->IsObservedByDrawChildren()) {
+            auto pipeline = self->GetContextRefPtr();
+            CHECK_NULL_VOID(pipeline);
+            auto frameNode = AceType::DynamicCast<FrameNode>(self->GetObserverParentForDrawChildren());
+            CHECK_NULL_VOID(frameNode);
+            pipeline->SetNeedRenderForDrawChildrenNode(WeakPtr<FrameNode>(frameNode));
         }
     };
     if (forceUseMainThread || wrapper->CheckShouldRunOnMain()) {
@@ -3688,18 +3693,38 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
 // ex. textInput component wrap offset relative to screen into a config and send to ime framework
 OffsetF FrameNode::GetPositionToScreen()
 {
-    auto offsetCurrent = GetOffsetRelativeToWindow();
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
+    auto offsetCurrent = GetFinalOffsetRelativeToWindow(pipelineContext);
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
+    OffsetF offset(windowOffset.GetX() + offsetCurrent.GetX(), windowOffset.GetY() + offsetCurrent.GetY());
+    return offset;
+}
+
+// returns a node's collected offset(see GetOffsetRelativeToWindow)
+// with offset of window to globalDisplay
+// ex. textInput component wrap offset relative to globalDisplay into a config and send to ime framework
+OffsetF FrameNode::GetGlobalPositionOnDisplay() const
+{
+    auto pipelineContext = GetContext();
+    CHECK_NULL_RETURN(pipelineContext, OffsetF());
+    auto offsetCurrent = GetFinalOffsetRelativeToWindow(pipelineContext);
+    auto globalDisplayWindowOffset = pipelineContext->GetGlobalDisplayWindowRect().GetOffset();
+    OffsetF offset(globalDisplayWindowOffset.GetX() + offsetCurrent.GetX(),
+        globalDisplayWindowOffset.GetY() + offsetCurrent.GetY());
+    return offset;
+}
+
+OffsetF FrameNode::GetFinalOffsetRelativeToWindow(PipelineContext* pipelineContext) const
+{
+    auto offsetCurrent = GetOffsetRelativeToWindow();
     auto windowManager = pipelineContext->GetWindowManager();
     auto container = Container::CurrentSafely();
     if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
         auto windowScale = container->GetWindowScale();
         offsetCurrent = offsetCurrent * windowScale;
     }
-    OffsetF offset(windowOffset.GetX() + offsetCurrent.GetX(), windowOffset.GetY() + offsetCurrent.GetY());
-    return offset;
+    return offsetCurrent;
 }
 
 // returns a node's offset relative to parent and consider graphic transform rotate properties
@@ -4866,7 +4891,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
             isLayoutDirtyMarked_ = true;
         }
         needSyncRsNode = false;
-    } else {
+    } else if (frameSizeChange && renderContext_->IsSynced()) {
         auto borderRadius = renderContext_->GetBorderRadius();
         if (borderRadius.has_value()) {
             renderContext_->SetBorderRadius(borderRadius.value());
@@ -5586,7 +5611,7 @@ OffsetF FrameNode::CalculateCachedTransformRelativeOffset(uint64_t nanoTimestamp
 
 OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag, int32_t areaChangeMinDepth)
 {
-    auto currOffset = geometryNode_->GetFrameOffset();
+    auto currOffset = GetFrameRectWithSafeArea().GetOffset();
     if (renderContext_ && renderContext_->GetPositionProperty()) {
         if (renderContext_->GetPositionProperty()->HasPosition()) {
             auto renderPosition =
@@ -5709,6 +5734,7 @@ void SetChangeInfo(const TouchEvent& touchEvent, TouchLocationInfo &changedInfo)
 {
     changedInfo.SetGlobalLocation(Offset(touchEvent.x, touchEvent.y));
     changedInfo.SetScreenLocation(Offset(touchEvent.screenX, touchEvent.screenY));
+    changedInfo.SetGlobalDisplayLocation(Offset(touchEvent.globalDisplayX, touchEvent.globalDisplayY));
     changedInfo.SetTouchType(touchEvent.type);
     changedInfo.SetForce(touchEvent.force);
     changedInfo.SetPressedTime(touchEvent.pressedTime);
@@ -5772,6 +5798,8 @@ void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEv
         float globalY = item.y;
         float screenX = item.screenX;
         float screenY = item.screenY;
+        double globalDisplayX = item.globalDisplayX;
+        double globalDisplayY = item.globalDisplayY;
         PointF localPoint(globalX, globalY);
         NGGestureRecognizer::Transform(localPoint, Claim(this), false, false);
         auto localX = static_cast<float>(localPoint.GetX());
@@ -5780,6 +5808,7 @@ void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEv
         info.SetGlobalLocation(Offset(globalX, globalY));
         info.SetLocalLocation(Offset(localX, localY));
         info.SetScreenLocation(Offset(screenX, screenY));
+        info.SetGlobalDisplayLocation(Offset(globalDisplayX, globalDisplayY));
         info.SetTouchType(touchEvent.type);
         info.SetForce(item.force);
         info.SetPressedTime(item.downTime);
@@ -6987,7 +7016,6 @@ void FrameNode::CleanupPipelineResources()
         pipeline->RemoveChangedFrameNode(GetId());
         pipeline->RemoveFrameNodeChangeListener(GetId());
         pipeline->GetNodeRenderStatusMonitor()->NotifyFrameNodeRelease(this);
-        pipeline->GetRemovedDirtyRenderAndErase(GetId());
     }
 }
 } // namespace OHOS::Ace::NG

@@ -500,43 +500,6 @@ globalThis.Scroll.attributeModifier = function (modifier: ArkComponent): void {
   });
 };
 
-globalThis.Scroll.onScrollFrameBegin = function (value: (offset: number, state: ScrollState) => { offsetRemain: number }): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scroll.setScrollOnScrollFrameBegin(nodePtr, value);
-};
-globalThis.Scroll.onWillScroll = function (value: (xOffset: number, yOffset: number,
-  scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scroll.setScrollOnWillScroll(nodePtr, value);
-};
-globalThis.Scroll.onDidScroll = function (value: (xOffset: number, yOffset: number, scrollState: ScrollState) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scroll.setScrollOnDidScroll(nodePtr, value);
-};
-globalThis.Scroll.onScrollEdge = function (value: (side: Edge) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scroll.setScrollOnScrollEdge(nodePtr, value);
-};
-globalThis.Scroll.onScrollEnd = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scroll.setScrollOnScrollEnd(nodePtr, value);
-};
-globalThis.Scroll.onScrollStart = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scroll.setScrollOnScrollStart(nodePtr, value);
-};
-globalThis.Scroll.onScrollStop = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scroll.setScrollOnScrollStop(nodePtr, value);
-};
-globalThis.Scroll.onReachStart = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scrollable.setOnReachStart(nodePtr, value);
-};
-globalThis.Scroll.onReachEnd = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().scrollable.setOnReachEnd(nodePtr, value);
-};
 globalThis.Scroll.onWillStopDragging = function (value: (velocity: number) => void) {
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
   getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);

@@ -163,6 +163,7 @@ void* GetNativeXComponent(ArkUINodeHandle node)
         return nullptr;
     }
     auto pair = xcPattern->GetNativeXComponent();
+    xcPattern->SetHasGotNativeXComponent(true);
     return reinterpret_cast<void*>(pair.second.lock().get());
 }
 

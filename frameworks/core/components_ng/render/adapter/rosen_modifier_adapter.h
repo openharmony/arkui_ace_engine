@@ -22,17 +22,24 @@
 
 #include "include/core/SkCanvas.h"
 #include "modifier/rs_property.h"
+#if defined(MODIFIER_NG)
+#include "render_service_client/core/modifier_ng/custom/rs_content_style_modifier.h"
+#include "render_service_client/core/modifier_ng/custom/rs_foreground_style_modifier.h"
+#include "render_service_client/core/modifier_ng/custom/rs_node_modifier.h"
+#include "render_service_client/core/modifier_ng/overlay/rs_overlay_style_modifier.h"
+#else
 #include "render_service_client/core/modifier/rs_extended_modifier.h"
 #include "render_service_client/core/modifier/rs_modifier.h"
+#endif
 #include "render_service_client/core/ui/rs_node.h"
+#include "ui/view/draw/content_modifier.h"
+#include "ui/view/draw/modifier.h"
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/drawing.h"
-#include "ui/view/draw/content_modifier.h"
-#include "ui/view/draw/modifier.h"
 
 namespace OHOS::Ace::Kit {
 class Modifier;
@@ -40,7 +47,6 @@ class Modifier;
 
 namespace OHOS::Ace::NG {
 
-using RSModifier = Rosen::RSModifier;
 using RSNode = Rosen::RSNode;
 using RSAnimationTimingProtocol = Rosen::RSAnimationTimingProtocol;
 using RSAnimationTimingCurve = Rosen::RSAnimationTimingCurve;
@@ -50,12 +56,25 @@ template<typename T>
 using RSProperty = Rosen::RSProperty<T>;
 template<typename T>
 using RSAnimatableArithmetic = Rosen::RSAnimatableArithmetic<T>;
+
+using RSPropertyBase = Rosen::RSPropertyBase;
+
+#if defined(MODIFIER_NG)
+using RSModifier = Rosen::ModifierNG::RSModifier;
+using RSDrawingContext = Rosen::ModifierNG::RSDrawingContext;
+using RSPropertyType = Rosen::ModifierNG::RSPropertyType;
+using RSContentStyleModifier = Rosen::ModifierNG::RSContentStyleModifier;
+using RSOverlayStyleModifier = Rosen::ModifierNG::RSOverlayStyleModifier;
+using RSForegroundStyleModifier = Rosen::ModifierNG::RSForegroundStyleModifier;
+using RSNodeModifier = Rosen::ModifierNG::RSNodeModifier;
+#else
+using RSModifier = Rosen::RSModifier;
+using RSDrawingContext = Rosen::RSDrawingContext;
 using RSContentStyleModifier = Rosen::RSContentStyleModifier;
 using RSOverlayStyleModifier = Rosen::RSOverlayStyleModifier;
 using RSForegroundStyleModifier = Rosen::RSForegroundStyleModifier;
 using RSNodeModifier = Rosen::RSNodeModifier;
-using RSDrawingContext = Rosen::RSDrawingContext;
-using RSPropertyBase = Rosen::RSPropertyBase;
+#endif
 
 class ContentModifierAdapter : public RSContentStyleModifier {
 public:
@@ -124,7 +143,9 @@ public:
     RSNodeModifierImpl() = default;
     virtual ~RSNodeModifierImpl() = default;
 
+#ifndef MODIFIER_NG
     void Modify(RSNode& target) const override {}
+#endif
 
     void AddProperty(const RefPtr<PropertyBase>& property);
 
@@ -138,7 +159,5 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(RSNodeModifierImpl);
 };
-
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_MODIFIER_ADAPTER_H

@@ -623,7 +623,7 @@ void ArcIndexerPattern::OnTouchUp(const TouchEventInfo& info)
     childPressIndex_ = -1;
     ResetStatus();
     ApplyIndexChanged(true, true, true);
-    OnSelect();
+    ItemSelectedChangedAnimation();
 }
 
 void ArcIndexerPattern::MoveIndexByOffset(const Offset& offset)
@@ -792,9 +792,14 @@ void ArcIndexerPattern::ResetStatus()
 
 void ArcIndexerPattern::OnSelect()
 {
+    FireOnSelect(selected_, false);
+    ItemSelectedChangedAnimation();
+}
+ 
+void ArcIndexerPattern::ItemSelectedChangedAnimation()
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    FireOnSelect(selected_, false);
     animateSelected_ = selected_;
     if (animateSelected_ >= 0) {
         auto selectedFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(animateSelected_));

@@ -1215,6 +1215,25 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest047, TestSize.Level1)
     auto rotationYUserModifier = std::make_shared<Rosen::RSAnimatableProperty<float>>(rotate);
     auto rotationZUserModifier = std::make_shared<Rosen::RSAnimatableProperty<float>>(rotate);
     auto cameraDistanceUserModifier = std::make_shared<Rosen::RSAnimatableProperty<float>>(rotate);
+#if defined(MODIFIER_NG)
+    rosenRenderContext->rotationXUserModifier_ = std::make_shared<Rosen::ModifierNG::RSTransformModifier>();
+    rosenRenderContext->rotationXUserModifier_->AttachProperty(
+        Rosen::ModifierNG::RSPropertyType::ROTATION_X, rotationXUserModifier);
+    rosenRenderContext->rotationYUserModifier_ = std::make_shared<Rosen::ModifierNG::RSTransformModifier>();
+    rosenRenderContext->rotationYUserModifier_->AttachProperty(
+        Rosen::ModifierNG::RSPropertyType::ROTATION_Y, rotationYUserModifier);
+    rosenRenderContext->rotationZUserModifier_ = std::make_shared<Rosen::ModifierNG::RSTransformModifier>();
+    rosenRenderContext->rotationZUserModifier_->AttachProperty(
+        Rosen::ModifierNG::RSPropertyType::ROTATION, rotationZUserModifier);
+    rosenRenderContext->cameraDistanceUserModifier_ = std::make_shared<Rosen::ModifierNG::RSTransformModifier>();
+    rosenRenderContext->cameraDistanceUserModifier_->AttachProperty(
+        Rosen::ModifierNG::RSPropertyType::CAMERA_DISTANCE, cameraDistanceUserModifier);
+    rosenRenderContext->OnTransformRotateAngleUpdate({ rotateX, rotateY, rotateZ, perspective });
+    auto rotationXValue = rosenRenderContext->rotationXUserModifier_->GetRotationX();
+    auto rotationYValue = rosenRenderContext->rotationYUserModifier_->GetRotationY();
+    auto rotationZValue = rosenRenderContext->rotationZUserModifier_->GetRotation();
+    auto cameraDistanceValue = rosenRenderContext->cameraDistanceUserModifier_->GetCameraDistance();
+#else
     rosenRenderContext->rotationXUserModifier_ = std::make_shared<Rosen::RSRotationXModifier>(rotationXUserModifier);
     rosenRenderContext->rotationYUserModifier_ = std::make_shared<Rosen::RSRotationYModifier>(rotationYUserModifier);
     rosenRenderContext->rotationZUserModifier_ = std::make_shared<Rosen::RSRotationModifier>(rotationZUserModifier);
@@ -1229,6 +1248,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest047, TestSize.Level1)
         rosenRenderContext->rotationZUserModifier_->GetProperty())->Get();
     auto cameraDistanceValue = std::static_pointer_cast<Rosen::RSAnimatableProperty<float>>(
         rosenRenderContext->cameraDistanceUserModifier_->GetProperty()) ->Get();
+#endif
     EXPECT_EQ(rotationXValue, -rotateX);
     EXPECT_EQ(rotationYValue, -rotateY);
     EXPECT_EQ(rotationZValue, rotateZ);
@@ -2020,13 +2040,23 @@ HWTEST_F(RosenRenderContextTest, OnTransform3DMatrixUpdate001, TestSize.Level1)
     Matrix4 matrix4(INDEX_1, INDEX_0, INDEX_0, INDEX_0, INDEX_0, INDEX_1, INDEX_0, INDEX_0, INDEX_0, INDEX_0, INDEX_1,
         INDEX_0, INDEX_100, INDEX_0, INDEX_0, INDEX_1);
     rosenRenderContext->OnTransform3DMatrixUpdate(matrix4);
-    auto perspectiveValue = rosenRenderContext->transformMatrixModifier_->perspectiveValue.get()->Get();
-    auto xyTranslateValue = rosenRenderContext->transformMatrixModifier_->translateXYValue.get()->Get();
-    auto translateZValue = rosenRenderContext->transformMatrixModifier_->translateZValue.get()->Get();
-    auto scaleXYValue = rosenRenderContext->transformMatrixModifier_->scaleXYValue.get()->Get();
-    auto scaleZValue = rosenRenderContext->transformMatrixModifier_->scaleZValue.get()->Get();
-    auto skewValue = rosenRenderContext->transformMatrixModifier_->skewValue.get()->Get();
-    auto quaternionValue = rosenRenderContext->transformMatrixModifier_->quaternionValue.get()->Get();
+#if defined(MODIFIER_NG)
+    auto perspectiveValue = rosenRenderContext->transformModifier_->GetPersp();
+    auto xyTranslateValue = rosenRenderContext->transformModifier_->GetTranslate();
+    auto translateZValue = rosenRenderContext->transformModifier_->GetTranslateZ();
+    auto scaleXYValue = rosenRenderContext->transformModifier_->GetScale();
+    auto scaleZValue = rosenRenderContext->transformModifier_->GetScaleZ();
+    auto skewValue = rosenRenderContext->transformModifier_->GetSkew();
+    auto quaternionValue = rosenRenderContext->transformModifier_->GetQuaternion();
+#else
+    auto perspectiveValue = rosenRenderContext->transformModifier_->perspectiveValue.get()->Get();
+    auto xyTranslateValue = rosenRenderContext->transformModifier_->translateXYValue.get()->Get();
+    auto translateZValue = rosenRenderContext->transformModifier_->translateZValue.get()->Get();
+    auto scaleXYValue = rosenRenderContext->transformModifier_->scaleXYValue.get()->Get();
+    auto scaleZValue = rosenRenderContext->transformModifier_->scaleZValue.get()->Get();
+    auto skewValue = rosenRenderContext->transformModifier_->skewValue.get()->Get();
+    auto quaternionValue = rosenRenderContext->transformModifier_->quaternionValue.get()->Get();
+#endif
     EXPECT_NE(perspectiveValue[0], 0);
     EXPECT_EQ(perspectiveValue[1], 0);
     EXPECT_EQ(perspectiveValue[2], 0);

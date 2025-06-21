@@ -2452,7 +2452,7 @@ void OnClick0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onClick = [callback = CallbackHelper(*value)](GestureEvent& info) {
         const auto event = Converter::ArkClickEventSync(info);
-        callback.InvokeSync(event.ArkValue());
+        callback.Invoke(event.ArkValue());
     };
     NG::ViewAbstract::SetOnClick(frameNode, std::move(onClick));
 }

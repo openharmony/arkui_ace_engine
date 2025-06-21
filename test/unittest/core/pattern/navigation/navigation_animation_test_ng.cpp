@@ -929,9 +929,9 @@ HWTEST_F(NavigationAnimationTest, SystemAnimation001, TestSize.Level1)
      * @tc.steps: step2. do navbar system transition
      * @tc.expected: step2. properties should match enter and exit animation condition.
      */
-    navBarNode->InitSystemTransitionPop();
+    navBarNode->SystemTransitionPopStart(true);
     EXPECT_EQ(navBarNode->GetTransitionType(), PageTransitionType::ENTER_POP);
-    navBarNode->SystemTransitionPushAction(true);
+    navBarNode->SystemTransitionPushStart(false);
     EXPECT_EQ(navBarNode->GetTransitionType(), PageTransitionType::EXIT_PUSH);
 }
 
@@ -957,20 +957,20 @@ HWTEST_F(NavigationAnimationTest, SystemAnimation002, TestSize.Level1)
      * @tc.steps: step2. do navdestination enter push animation
      * @tc.expected: step2. properties should match enter push condition.
      */
-    navdestination->InitSystemTransitionPush(true);
+    navdestination->SystemTransitionPushStart(true);
     EXPECT_EQ(navdestination->GetTransitionType(), PageTransitionType::ENTER_PUSH);
     EXPECT_TRUE(navdestination->IsOnAnimation());
-    navdestination->SystemTransitionPushCallback(true, -1);
+    navdestination->SystemTransitionPushFinish(true, -1);
     EXPECT_FALSE(navdestination->IsOnAnimation());
 
     /**
      * @tc.steps: step3. do navdestination exit push animation
      * @tc.expected: step2. properties should match exit push condition.
      */
-    navdestination->InitSystemTransitionPush(false);
+    navdestination->SystemTransitionPushStart(false);
     EXPECT_EQ(navdestination->GetTransitionType(), PageTransitionType::EXIT_PUSH);
     EXPECT_TRUE(navdestination->IsOnAnimation());
-    navdestination->SystemTransitionPushCallback(false, -1);
+    navdestination->SystemTransitionPushFinish(false, -1);
     EXPECT_FALSE(navdestination->IsOnAnimation());
     auto navdestinationLayoutProperty = navdestination->GetLayoutProperty();
     ASSERT_NE(navdestinationLayoutProperty, nullptr);
@@ -998,12 +998,12 @@ HWTEST_F(NavigationAnimationTest, SystemAnimation003, TestSize.Level1)
      * @tc.steps: step2. do navdestination enter or exit pop animation
      * @tc.expected: step2. properties should match enter or exit pop condition.
      */
-    navdestination->InitSystemTransitionPop(true);
+    navdestination->SystemTransitionPopStart(true);
     EXPECT_EQ(navdestination->GetTransitionType(), PageTransitionType::ENTER_POP);
-    navdestination->InitSystemTransitionPop(false);
+    navdestination->SystemTransitionPopStart(false);
     EXPECT_EQ(navdestination->GetTransitionType(), PageTransitionType::EXIT_POP);
     EXPECT_TRUE(navdestination->IsOnAnimation());
-    navdestination->SystemTransitionPopCallback(-1);
+    navdestination->SystemTransitionPopFinish(-1);
     EXPECT_FALSE(navdestination->IsOnAnimation());
     auto backButton = FrameNode::CreateFrameNode("BackButton", 33, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(backButton, nullptr);

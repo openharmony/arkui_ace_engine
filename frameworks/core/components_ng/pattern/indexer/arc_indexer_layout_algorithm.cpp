@@ -49,6 +49,31 @@ void ArcIndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto actualHeight = selfIdealSize.Height().has_value()
                             ? selfIdealSize.Height().value()
                             : Dimension(ARC_INDEXER_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        auto isMainMatchParent =
+            (layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH)
+                == LayoutCalPolicy::MATCH_PARENT);
+        auto isCrossMatchParent =
+            (layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH)
+                == LayoutCalPolicy::MATCH_PARENT);
+
+        // When the width parameter is MATCH_PARENT, set the width to be equal to the parent's width.
+        if (isMainMatchParent) {
+            auto parentMainSize = GetMainAxisSize(layoutConstraint.parentIdealSize, Axis::VERTICAL);
+            if (parentMainSize) {
+                actualHeight = parentMainSize.value();
+            }
+        }
+
+        // When the height parameter is MATCH_PARENT, set the height to be equal to the parent's height.
+        if (isCrossMatchParent) {
+            auto parentCrossSize = GetCrossAxisSize(layoutConstraint.parentIdealSize, Axis::VERTICAL);
+            if (parentCrossSize) {
+                actualWidth = parentCrossSize.value();
+            }
+        }
+    }
     actualSize_ = actualWidth > actualHeight ? actualHeight : actualWidth;
     layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(actualWidth, actualHeight));
     MeasureArc(layoutWrapper);

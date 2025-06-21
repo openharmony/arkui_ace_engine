@@ -16,8 +16,8 @@
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 
 #include <string>
-
 #include "base/geometry/dimension.h"
+#include "base/utils/system_properties.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
@@ -25,8 +25,10 @@
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
+
 void WaterFlowModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -296,7 +298,11 @@ void WaterFlowModelNG::SetFriction(double friction)
 
 void WaterFlowModelNG::SetCachedCount(int32_t value, bool show)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value);
+    int32_t count = value;
+    if (SystemProperties::IsWhiteBlockEnabled()) {
+        count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, count);
     ACE_UPDATE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, ShowCachedItems, show);
 }
 
@@ -304,7 +310,11 @@ void WaterFlowModelNG::SetCachedCount(FrameNode* frameNode, const std::optional<
 {
     CHECK_NULL_VOID(frameNode);
     if (value) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, value.value(), frameNode);
+        int32_t count = value.value();
+        if (SystemProperties::IsWhiteBlockEnabled()) {
+            count = ScrollAdjustmanager::GetInstance().AdjustCachedCount(count);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, count, frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(WaterFlowLayoutProperty, CachedCount, frameNode);
     }
@@ -779,12 +789,12 @@ void WaterFlowModelNG::ParseResObjFriction(FrameNode* frameNode, const RefPtr<Re
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj("waterflow.Friction");
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern](const RefPtr<ResourceObject>& resObj) {
-        double result;
-        if (!ResourceParseUtils::ParseResourceToDouble(resObj, result)) {
-            return;
-        }
-        pattern->SetFriction(result);
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern))](const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        double friction = -1.0;
+        ResourceParseUtils::ParseResDouble(resObj, friction);
+        pattern->SetFriction(friction);
     };
     pattern->AddResObj("waterflow.Friction", resObj, std::move(updateFunc));
 }

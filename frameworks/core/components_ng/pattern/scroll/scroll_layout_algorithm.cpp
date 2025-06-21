@@ -40,6 +40,17 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto idealSize = CreateIdealSize(constraint.value(), axis, MeasureType::MATCH_CONTENT);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    auto isMainFix = false;
+    if (layoutPolicy.has_value()) {
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto layoutPolicySize =
+            ConstrainIdealSizeByLayoutPolicy(constraint.value(), widthLayoutPolicy, heightLayoutPolicy, axis);
+        isMainFix = (axis == Axis::VERTICAL && layoutPolicy.value().IsHeightFix()) ||
+                    (axis == Axis::HORIZONTAL && layoutPolicy.value().IsWidthFix());
+        idealSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
+    }
     auto padding = layoutProperty->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, idealSize);
     // Calculate child layout constraint.
@@ -61,7 +72,9 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     AddPaddingToSize(padding, idealSize);
     auto selfSize = idealSize.ConvertToSizeT();
-    selfSize.Constrain(constraint->minSize, constraint->maxSize);
+    if (!isMainFix) {
+        selfSize.Constrain(constraint->minSize, constraint->maxSize);
+    }
     auto scrollNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(scrollNode);
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
@@ -129,7 +142,7 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     viewPortExtent_ = childSize;
     viewPortLength_ = GetMainAxisSize(viewPort_, axis);
-    auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, 0.0f);
+    auto currentOffset = axis == Axis::VERTICAL ? OffsetF(0.0f, currentOffset_) : OffsetF(currentOffset_, crossOffset_);
     if (layoutDirection == TextDirection::RTL && axis == Axis::HORIZONTAL) {
         currentOffset = OffsetF(std::min(size.Width() - childSize.Width(), 0.f) - currentOffset_, 0.0f);
     }

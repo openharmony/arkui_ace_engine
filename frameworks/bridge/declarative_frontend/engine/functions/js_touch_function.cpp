@@ -30,6 +30,7 @@ JSRef<JSObject> JsTouchFunction::CreateTouchInfo(const TouchLocationInfo& touchI
     const OHOS::Ace::Offset& globalLocation = touchInfo.GetGlobalLocation();
     const OHOS::Ace::Offset& localLocation = touchInfo.GetLocalLocation();
     const OHOS::Ace::Offset& screenLocation = touchInfo.GetScreenLocation();
+    const OHOS::Ace::Offset& globalDisplayLocation = touchInfo.GetGlobalDisplayLocation();
     touchInfoObj->SetProperty<int32_t>("type", static_cast<int32_t>(touchInfo.GetTouchType()));
     touchInfoObj->SetProperty<int32_t>("id", touchInfo.GetFingerId());
     touchInfoObj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
@@ -40,6 +41,10 @@ JSRef<JSObject> JsTouchFunction::CreateTouchInfo(const TouchLocationInfo& touchI
     touchInfoObj->SetProperty<double>("screenY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
     touchInfoObj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));
     touchInfoObj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
+    touchInfoObj->SetProperty<double>(
+        "globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX()));
+    touchInfoObj->SetProperty<double>(
+        "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY()));
     touchInfoObj->SetProperty<double>(
         "pressedTime", static_cast<double>(touchInfo.GetPressedTime().time_since_epoch().count()));
     touchInfoObj->SetProperty<double>("pressure", PipelineBase::Px2VpWithCurrentDensity(touchInfo.GetForce()));

@@ -17,6 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
+#include "base/utils/system_properties.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
@@ -25,6 +26,7 @@
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -329,7 +331,11 @@ void WaterFlowPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFun
     CHECK_NULL_VOID(indexChanged);
     itemRange_ = { layoutInfo_->FirstIdx(), layoutInfo_->endIndex_ };
     CHECK_NULL_VOID(onScrollIndex);
-    onScrollIndex(layoutInfo_->FirstIdx(), layoutInfo_->endIndex_);
+    int32_t endIndex = layoutInfo_->endIndex_;
+    if (SystemProperties::IsWhiteBlockEnabled()) {
+        endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(layoutInfo_->endIndex_);
+    }
+    onScrollIndex(layoutInfo_->FirstIdx(), endIndex);
 }
 
 bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -338,7 +344,9 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         return false;
     }
     prevOffset_ += layoutInfo_->CalibrateOffset(); // adjust prevOffset_ to keep in sync with calibrated TotalOffset
-    TriggerPostLayoutEvents();
+    if (!layoutInfo_->measureInNextFrame_) {
+        TriggerPostLayoutEvents();
+    }
 
     if (targetIndex_.has_value()) {
         ScrollToTargetIndex(targetIndex_.value());
@@ -353,8 +361,6 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     UpdateScrollBarOffset();
     CheckScrollable();
 
-    isInitialized_ = true;
-
     if (layoutInfo_->measureInNextFrame_) {
         GetContext()->AddAfterLayoutTask([weak = AceType::WeakClaim(this)]() {
             ACE_SCOPED_TRACE("WaterFlow MeasureInNextFrame");
@@ -364,6 +370,8 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
                 waterFlow->layoutInfo_->measureInNextFrame_ = false;
             }
         });
+    } else {
+        isInitialized_ = true;
     }
 
     if (layoutInfo_->startIndex_ == 0 && CheckMisalignment(layoutInfo_)) {

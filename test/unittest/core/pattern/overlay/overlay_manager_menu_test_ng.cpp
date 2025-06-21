@@ -890,11 +890,11 @@ HWTEST_F(OverlayManagerMenuTestNg, RemoveMenuFilter001, TestSize.Level1)
 }
 
 /**
- * @tc.name: RemoveMenuWrapperFromRoot001
- * @tc.desc: Test OverlayManager::RemoveMenuWrapperFromRoot
+ * @tc.name: CallMenuDisappearWithStatus001
+ * @tc.desc: Test OverlayManager::CallMenuDisappearWithStatus
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerMenuTestNg, RemoveMenuWrapperFromRoot001, TestSize.Level1)
+HWTEST_F(OverlayManagerMenuTestNg, CallMenuDisappearWithStatus001, TestSize.Level1)
 {
     auto rootNode = FrameNode::CreateFrameNode(
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
@@ -924,10 +924,10 @@ HWTEST_F(OverlayManagerMenuTestNg, RemoveMenuWrapperFromRoot001, TestSize.Level1
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     ASSERT_NE(overlayManager, nullptr);
-    overlayManager->RemoveMenuWrapperFromRoot(rootNode, menuWrapper);
+    overlayManager->CallMenuDisappearWithStatus(menuWrapper);
     EXPECT_EQ(callCount, EXPECT_CALL_TWICE_TIMES);
     menuWrapperPattern->menuStatus_ = MenuStatus::ON_HIDE_ANIMATION;
-    overlayManager->RemoveMenuWrapperFromRoot(rootNode, menuWrapper);
+    overlayManager->CallMenuDisappearWithStatus(menuWrapper);
     EXPECT_EQ(callCount, EXPECT_CALL_THREE_TIMES);
 }
 } // namespace OHOS::Ace::NG

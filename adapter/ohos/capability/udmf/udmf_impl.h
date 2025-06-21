@@ -101,7 +101,7 @@ public:
     DataLoadParamsImpl() = default;
     ~DataLoadParamsImpl() = default;
 
-    std::shared_ptr<UDMF::DataLoadParams> GetDataLoadParams();
+    std::shared_ptr<UDMF::DataLoadParams> GetDataLoadParams() const;
     void SetDataLoadParams(const std::shared_ptr<UDMF::DataLoadParams>& dataLoadParams);
 
 private:

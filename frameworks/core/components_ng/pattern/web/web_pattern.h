@@ -128,6 +128,7 @@ class WebPattern : public NestableScrollContainer,
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
+    using SetWebDetachCallback = std::function<void(int32_t)>;
     using SetHapPathCallback = std::function<void(const std::string&)>;
     using JsProxyCallback = std::function<void()>;
     using OnControllerAttachedCallback = std::function<void()>;
@@ -236,17 +237,6 @@ public:
         }
     }
 
-    void SetWebSrcStatic(const std::string& webSrc)
-    {
-        if (webSrc_ != webSrc) {
-            webSrc_ = webSrc;
-            OnWebSrcUpdate();
-        }
-        if (webPaintProperty_) {
-            webPaintProperty_->SetWebPaintData(webSrc);
-        }
-    }
-
     const std::optional<std::string>& GetWebSrc() const
     {
         return webSrc_;
@@ -306,6 +296,16 @@ public:
     SetWebIdCallback GetSetWebIdCallback() const
     {
         return setWebIdCallback_;
+    }
+
+    void SetSetWebDetachCallback(SetWebDetachCallback&& callback)
+    {
+        setWebDetachCallback_ = std::move(callback);
+    }
+
+    SetWebDetachCallback GetSetWebDetachCallback() const
+    {
+        return setWebDetachCallback_;
     }
 
     void SetPermissionClipboardCallback(PermissionClipboardCallback&& Callback)
@@ -527,6 +527,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebMediaAVSessionEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDataDetector, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, GestureFocusMode, GestureFocusMode);
 
     bool IsFocus() const
     {
@@ -780,6 +781,10 @@ public:
     {
         return isDragging_;
     }
+    bool IsDefaultGestureFocusMode() const
+    {
+        return gestureFocusMode_ == GestureFocusMode::DEFAULT;
+    }
 
     void SetPreviewSelectionMenu(const std::shared_ptr<WebPreviewSelectionMenuParam>& param);
 
@@ -834,6 +839,12 @@ public:
     void SetPipNativeWindow(int delegateId, int childId, int frameRoutingId, void* window);
     void SendPipEvent(int delegateId, int childId, int frameRoutingId, int event);
     void SetDefaultBackgroundColor();
+    bool CheckVisible();
+
+    void UpdateSingleHandleVisible(bool isVisible);
+    void OnShowMagnifier();
+    void OnHideMagnifier();
+    void SetTouchHandleExistState(bool touchHandleExist);
 private:
     friend class WebContextSelectOverlay;
     friend class WebSelectOverlay;
@@ -947,6 +958,7 @@ private:
     void OnOptimizeParserBudgetEnabledUpdate(bool value);
     void OnEnableFollowSystemFontWeightUpdate(bool value);
     void OnEnableDataDetectorUpdate(bool enable);
+    void OnGestureFocusModeUpdate(GestureFocusMode mode);
 
     int GetWebId();
 
@@ -1133,6 +1145,7 @@ private:
     CursorStyleInfo GetAndUpdateCursorStyleInfo(
         const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
     bool MenuAvoidKeyboard(bool hideOrClose, double height = 0.0f);
+    int32_t GetVisibleViewportAvoidHeight();
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -1141,6 +1154,7 @@ private:
     std::optional<int32_t> transformHintChangedCallbackId_;
     uint32_t rotation_ = 0;
     SetWebIdCallback setWebIdCallback_ = nullptr;
+    SetWebDetachCallback setWebDetachCallback_ = nullptr;
     PermissionClipboardCallback permissionClipboardCallback_ = nullptr;
     OnOpenAppLinkCallback onOpenAppLinkCallback_ = nullptr;
     DefaultFileSelectorShowCallback defaultFileSelectorShowCallback_ = nullptr;
@@ -1292,7 +1306,7 @@ private:
     bool isRenderModeInit_ = false;
     bool isAutoFillClosing_ = true;
     std::shared_ptr<ViewDataCommon> viewDataCommon_;
-    RectF lastPageNodeRectRelativeToWeb_;
+    OffsetF requestedWebOffset_;
     bool isPasswordFill_ = false;
     bool isEnabledHapticFeedback_ = true;
     bool isTouchpadSliding_ = false;
@@ -1333,6 +1347,8 @@ private:
 
     WebBypassVsyncCondition webBypassVsyncCondition_ = WebBypassVsyncCondition::NONE;
     bool needSetDefaultBackgroundColor_ = false;
+    GestureFocusMode gestureFocusMode_ = GestureFocusMode::DEFAULT;
+
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;

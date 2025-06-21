@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/common/mock_theme_manager.h"
@@ -34,6 +35,8 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const std::string PAGE01 = "Page01";
+const std::string BUNDLE_NAME = "com.example.test";
+const std::string MODULE_NAME = "entry";
 }
 
 class NavDestinationModelTestNg : public testing::Test {
@@ -280,8 +283,11 @@ HWTEST_F(NavDestinationModelTestNg, ParseCommonTitle001, TestSize.Level1)
     titleInfo.hasSubTitle = true;
     titleInfo.hasMainTitle = true;
     navDestinationNode->UpdatePrevTitleIsCustom(false);
+    RefPtr<ResourceObject> mainResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    RefPtr<ResourceObject> subResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
 
     NavDestinationModelNG::ParseCommonTitle(AceType::RawPtr(navDestinationNode), titleInfo);
+    NavDestinationModelNG::ParseCommonTitle(AceType::RawPtr(navDestinationNode), mainResObj, subResObj);
     EXPECT_TRUE(navDestinationNode->propPrevTitleIsCustom_);
     EXPECT_EQ(titleBarNode->GetTitle(), textNode);
     NavDestinationModelTestNg::TearDownTestCase();
@@ -310,8 +316,11 @@ HWTEST_F(NavDestinationModelTestNg, ParseCommonTitle002, TestSize.Level1)
     titleInfo.hasSubTitle = false;
     titleInfo.hasMainTitle = true;
     navDestinationNode->UpdatePrevTitleIsCustom(true);
+    RefPtr<ResourceObject> mainResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    RefPtr<ResourceObject> subResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
 
     NavDestinationModelNG::ParseCommonTitle(AceType::RawPtr(navDestinationNode), titleInfo);
+    NavDestinationModelNG::ParseCommonTitle(AceType::RawPtr(navDestinationNode), mainResObj, subResObj);
     EXPECT_TRUE(navDestinationNode->propPrevTitleIsCustom_);
     EXPECT_NE(titleBarNode->GetTitle(), nullptr);
     EXPECT_NE(titleBarNode->GetTitle(), textNode);
@@ -348,8 +357,11 @@ HWTEST_F(NavDestinationModelTestNg, ParseCommonTitle003, TestSize.Level1)
     ASSERT_NE(titleBarLayoutProperty, nullptr);
     Dimension titleHeight = 40.0_vp;
     titleBarLayoutProperty->UpdateTitleHeight(titleHeight);
+    RefPtr<ResourceObject> mainResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    RefPtr<ResourceObject> subResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
 
     NavDestinationModelNG::ParseCommonTitle(AceType::RawPtr(navDestinationNode), titleInfo);
+    NavDestinationModelNG::ParseCommonTitle(AceType::RawPtr(navDestinationNode), mainResObj, subResObj);
     EXPECT_TRUE(navDestinationNode->propPrevTitleIsCustom_);
     EXPECT_NE(titleBarNode->GetTitle(), nullptr);
     EXPECT_NE(titleBarNode->GetTitle(), textNode);
@@ -382,8 +394,11 @@ HWTEST_F(NavDestinationModelTestNg, ParseCommonTitle004, TestSize.Level1)
     ASSERT_NE(titleBarLayoutProperty, nullptr);
     Dimension titleHeight = 40.0_vp;
     titleBarLayoutProperty->UpdateTitleHeight(titleHeight);
+    RefPtr<ResourceObject> mainResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    RefPtr<ResourceObject> subResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
 
     NavDestinationModelNG::ParseCommonTitle(AceType::RawPtr(navDestinationNode), titleInfo);
+    NavDestinationModelNG::ParseCommonTitle(AceType::RawPtr(navDestinationNode), mainResObj, subResObj);
     EXPECT_TRUE(navDestinationNode->propPrevTitleIsCustom_);
     EXPECT_EQ(titleBarNode->GetTitle(), textNode);
     EXPECT_EQ(titleBarLayoutProperty->GetTitleHeight(), titleHeight);
@@ -613,6 +628,50 @@ HWTEST_F(NavDestinationModelTestNg, SetMenuItems103, TestSize.Level1)
     std::vector<NG::BarItem> titleBarMenuItems = navDestinationPattern->GetTitleBarMenuItems();
     ASSERT_EQ(titleBarMenuItems.size(), 1);
     EXPECT_EQ(titleBarMenuItems.at(0).icon, "Add");
+    ViewStackProcessor::GetInstance()->ClearStack();
+    NavDestinationModelTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: SetMenuItems104
+ * @tc.desc: Branch: if (!SystemProperties::ConfigChangePerform()) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, SetMenuItems104, TestSize.Level1)
+{
+    NavDestinationModelTestNg::SetUpTestCase();
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    auto columnNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    navDestinationNode->menu_ = columnNode;
+    navDestinationNode->UpdatePrevMenuIsCustom(true);
+    navDestinationNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
+    std::vector<NG::BarItem> menuItems;
+    BarItem barItem01;
+    barItem01.activeIcon = "ActiveAdd";
+    barItem01.icon = "Add";
+    barItem01.status = NG::NavToolbarItemStatus::ACTIVE;
+    menuItems.push_back(barItem01);
+    g_isConfigChangePerform = true;
+
+    navdestinationModel.SetMenuItems(std::move(menuItems));
+    EXPECT_EQ(navDestinationNode->GetMenuNodeOperation(), ChildNodeOperation::REPLACE);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    navDestinationPattern->OnColorModeChange(1);
+    std::vector<NG::BarItem> titleBarMenuItems = navDestinationPattern->GetTitleBarMenuItems();
+    ASSERT_EQ(titleBarMenuItems.size(), 1);
+    EXPECT_EQ(titleBarMenuItems.at(0).icon, "Add");
+    g_isConfigChangePerform = false;
     ViewStackProcessor::GetInstance()->ClearStack();
     NavDestinationModelTestNg::TearDownTestCase();
 }
@@ -1071,6 +1130,8 @@ HWTEST_F(NavDestinationModelTestNg, SetTitleHeight101, TestSize.Level1)
     ASSERT_NE(navDestinationNode, nullptr);
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
     auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     titleBarNode->title_ = textNode;
@@ -1079,6 +1140,11 @@ HWTEST_F(NavDestinationModelTestNg, SetTitleHeight101, TestSize.Level1)
     titleBarLayoutProperty->UpdateTitleHeight(Dimension(20.0_vp));
 
     navdestinationModel.SetTitleHeight(Dimension(25.0_vp), false);
+    EXPECT_EQ(titleBarLayoutProperty->GetTitleHeight(), std::nullopt);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    navdestinationModel.SetTitleHeight(resObj, false);
+    std::string titleHeightKey = "navDestination.title.customtitle";
+    CalcDimension height = navdestinationModel.ParseTitleHeight(resObj);
     EXPECT_EQ(titleBarLayoutProperty->GetTitleHeight(), std::nullopt);
     ViewStackProcessor::GetInstance()->ClearStack();
     NavDestinationModelTestNg::TearDownTestCase();
@@ -1100,6 +1166,8 @@ HWTEST_F(NavDestinationModelTestNg, SetTitleHeight102, TestSize.Level1)
     ASSERT_NE(navDestinationNode, nullptr);
     auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
     auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     titleBarNode->title_ = textNode;
@@ -1109,6 +1177,11 @@ HWTEST_F(NavDestinationModelTestNg, SetTitleHeight102, TestSize.Level1)
 
     navdestinationModel.SetTitleHeight(Dimension(25.0_vp), true);
     EXPECT_EQ(titleBarLayoutProperty->GetTitleHeight(), Dimension(25.0_vp));
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    navdestinationModel.SetTitleHeight(resObj, true);
+    std::string titleHeightKey = "navDestination.title.customtitle";
+    CalcDimension height = navdestinationModel.ParseTitleHeight(resObj);
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(titleHeightKey), height.ToString());
     ViewStackProcessor::GetInstance()->ClearStack();
     NavDestinationModelTestNg::TearDownTestCase();
 }
@@ -1396,5 +1469,367 @@ HWTEST_F(NavDestinationModelTestNg, CanRecoveryTest002, TestSize.Level1)
     ASSERT_EQ(navdestinationNode->CanRecovery(), false);
     navdestinationNode->fromNavrouterAndNoRouteInfo_ = true;
     ASSERT_EQ(navdestinationNode->CanRecovery(), false);
+}
+
+/**
+ * @tc.name: ParseCommonTitle005
+ * @tc.desc: Test ParseCommonTitle with resObj and cover all conditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, ParseCommonTitle005, TestSize.Level1)
+{
+    NavDestinationModelTestNg::SetUpTestCase();
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    titleBarNode->title_ = textNode;
+    navDestinationNode->titleBarNode_ = titleBarNode;
+    bool hasMainTitle = true;
+    bool hasSubTitle = true;
+    RefPtr<ResourceObject> mainResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    RefPtr<ResourceObject> subResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    bool result = navdestinationModel.ParseCommonTitle(hasSubTitle, hasMainTitle, subResObj, mainResObj);
+    EXPECT_TRUE(result);
+    hasSubTitle = false;
+    result = navdestinationModel.ParseCommonTitle(hasSubTitle, hasMainTitle, subResObj, mainResObj);
+    EXPECT_TRUE(result);
+    hasMainTitle = false;
+    result = navdestinationModel.ParseCommonTitle(hasSubTitle, hasMainTitle, subResObj, mainResObj);
+    EXPECT_FALSE(result);
+    hasSubTitle = true;
+    result = navdestinationModel.ParseCommonTitle(hasSubTitle, hasMainTitle, subResObj, mainResObj);
+    EXPECT_TRUE(result);
+    NavDestinationModelTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: UpdateTitle001
+ * @tc.desc: Test UpdateMainTitle and UpdateSubTitle with Specific frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, UpdateTitle001, TestSize.Level1)
+{
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    titleBarNode->title_ = FrameNode::CreateFrameNode("title", 101, AceType::MakeRefPtr<TextPattern>());
+    titleBarNode->subtitle_ = FrameNode::CreateFrameNode("subTitle", 102, AceType::MakeRefPtr<TextPattern>());
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+
+    RefPtr<ResourceObject> titleResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    RefPtr<ResourceObject> subtitleResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    navdestinationModel.UpdateMainTitle(titleBarNode, titleResObj);
+    NavDestinationModelNG::UpdateMainTitleInfo(titleBarNode, titleResObj);
+    std::string mainTitleKey = "navDestination.title.commonMainTitle";
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(mainTitleKey), "");
+    navdestinationModel.UpdateSubTitle(titleBarNode, subtitleResObj);
+    NavDestinationModelNG::UpdateSubTitleInfo(titleBarNode, subtitleResObj);
+    std::string subTitleKey = "navDestination.title.commonSubTitle";
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(subTitleKey), "");
+    titleBarPattern->OnColorModeChange(1);
+    std::string mainTitle;
+    ResourceParseUtils::ParseResString(titleResObj, mainTitle);
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(mainTitleKey), mainTitle);
+    std::string subTitle;
+    ResourceParseUtils::ParseResString(subtitleResObj, subTitle);
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(subTitleKey), subTitle);
+}
+
+/**
+ * @tc.name: SetBackButtonIcon001
+ * @tc.desc: Test SetBackButtonIcon with Specific frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, SetBackButtonIcon001, TestSize.Level1)
+{
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+
+    bool noPixMap = true;
+    RefPtr<PixelMap> pixMap = nullptr;
+    std::vector<std::string> nameList;
+    ImageOption imageOption;
+    nameList.push_back("");
+    nameList.push_back("");
+    imageOption.noPixMap = noPixMap;
+    imageOption.isValidImage = true;
+    auto onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+    };
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = onApply;
+    std::string backButtonIconKey = "navDestination.backButtonIcon.icon";
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(backButtonIconKey), "");
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    navdestinationModel.SetBackButtonIcon(iconSymbol, resObj, imageOption, pixMap, nameList);
+
+    titleBarPattern->OnColorModeChange(1);
+    std::string result;
+    ResourceParseUtils::ParseResMedia(resObj, result);
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(backButtonIconKey), result);
+}
+
+/**
+ * @tc.name: SetBackButtonIcon002
+ * @tc.desc: Test SetBackButtonIconSrcAndTextRes with Specific frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, SetBackButtonIcon002, TestSize.Level1)
+{
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+
+    bool noPixMap = true;
+    RefPtr<PixelMap> pixMap = nullptr;
+    std::vector<std::string> nameList;
+    ImageOption imageOption;
+    nameList.push_back("");
+    nameList.push_back("");
+    imageOption.noPixMap = noPixMap;
+    imageOption.isValidImage = true;
+    auto onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+    };
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = onApply;
+    std::string backButtonIconKey = "navDestination.backButtonIcon.icon";
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(backButtonIconKey), "");
+    std::string backButtonTextKey = "navDestination.backButtonIcon.accessibilityText";
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(backButtonTextKey), "");
+    RefPtr<ResourceObject> backButtonIconResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    RefPtr<ResourceObject> backButtonTextResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    navdestinationModel.SetBackButtonIconSrcAndTextRes(
+        iconSymbol, backButtonIconResObj, imageOption, pixMap, nameList, true, backButtonTextResObj);
+
+    titleBarPattern->OnColorModeChange(1);
+    std::string icon;
+    ResourceParseUtils::ParseResMedia(backButtonIconResObj, icon);
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(backButtonIconKey), icon);
+    std::string text;
+    ResourceParseUtils::ParseResString(backButtonIconResObj, text);
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(backButtonIconKey), text);
+}
+
+/**
+ * @tc.name: SetBackButtonIcon003
+ * @tc.desc: Test UpdateBackButtonIcon with Specific frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, SetBackButtonIcon003, TestSize.Level1)
+{
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+
+    std::vector<std::string> nameList;
+    nameList.push_back("");
+    nameList.push_back("");
+    std::string backButtonIconKey = "navDestination.backButtonIcon.icon";
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(backButtonIconKey), "");
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    navdestinationModel.UpdateBackButtonIcon(nameList, titleBarNode, resObj);
+
+    titleBarPattern->OnColorModeChange(1);
+    std::string result;
+    ResourceParseUtils::ParseResMedia(resObj, result);
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(backButtonIconKey), result);
+}
+
+/**
+ * @tc.name: SetBackButtonIcon004
+ * @tc.desc: Test UpdateBackButtonIconText with Specific frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, SetBackButtonIcon004, TestSize.Level1)
+{
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+
+    std::string backButtonTextKey = "navDestination.backButtonIcon.accessibilityText";
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(backButtonTextKey), "");
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    navdestinationModel.UpdateBackButtonIconText(true, titleBarNode, resObj);
+
+    titleBarPattern->OnColorModeChange(1);
+    std::string result;
+    ResourceParseUtils::ParseResString(resObj, result);
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(backButtonTextKey), result);
+}
+
+/**
+ * @tc.name: SetBackButtonIcon005
+ * @tc.desc: Test SetBackButtonIconTextRes with Specific frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, SetBackButtonIcon005, TestSize.Level1)
+{
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+
+    std::string imageSource = "src";
+    bool noPixMap = true;
+    RefPtr<PixelMap> pixMap = nullptr;
+    std::vector<std::string> nameList;
+    ImageOption imageOption;
+    nameList.push_back("");
+    nameList.push_back("");
+    imageOption.noPixMap = noPixMap;
+    imageOption.isValidImage = true;
+    auto onApply = [](WeakPtr<NG::FrameNode> frameNode) {
+        auto node = frameNode.Upgrade();
+        CHECK_NULL_VOID(node);
+    };
+    std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol = onApply;
+    std::string backButtonTextKey = "navDestination.backButtonIcon.accessibilityText";
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(backButtonTextKey), "");
+    RefPtr<ResourceObject> backButtonTextResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    navdestinationModel.SetBackButtonIconTextRes(
+        iconSymbol, imageSource, imageOption, pixMap, nameList, true, backButtonTextResObj);
+
+    titleBarPattern->OnColorModeChange(1);
+    std::string result;
+    ResourceParseUtils::ParseResString(backButtonTextResObj, result);
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(backButtonTextKey), result);
+}
+
+/**
+ * @tc.name: SetBackButtonIcon006
+ * @tc.desc: Test SetBackButtonIcon modifier with Specific frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, SetBackButtonIcon006, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+
+    bool noPixMap = true;
+    RefPtr<PixelMap> pixMap = nullptr;
+    std::string backButtonIconKey = "navDestination.backButtonIcon.icon";
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(backButtonIconKey), "");
+    RefPtr<ResourceObject> backButtonIconResObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    NavDestinationModelNG::SetBackButtonIcon(frameNode, noPixMap, pixMap, backButtonIconResObj);
+
+    titleBarPattern->OnColorModeChange(1);
+    std::string result;
+    ResourceParseUtils::ParseResMedia(backButtonIconResObj, result);
+    EXPECT_EQ(titleBarPattern->GetResCacheMapByKey(backButtonIconKey), result);
+}
+
+/**
+ * @tc.name: ParseTitleHeight001
+ * @tc.desc: Test ParseTitleHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, ParseTitleHeight001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: init
+     * @tc.expected: All pointer is non-null.
+     */
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call the function and verify the value.
+     */
+    std::string heighValue;
+    std::string key = "navigation.title.customtitle";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(BUNDLE_NAME, MODULE_NAME, 0);
+    navdestinationModel.ParseTitleHeight(resObj);
+    std::string heighString = titleBarPattern->GetResCacheMapByKey(key);
+    EXPECT_EQ(heighString, "");
+    ResourceParseUtils::ParseResString(resObj, key);
+    CalcDimension height;
+    bool isValid = ResourceParseUtils::ParseResDimensionVpNG(resObj, height);
+    EXPECT_EQ(isValid, false);
+}
+
+/**
+ * @tc.name: SetBeforeCreateLayoutWrapperCallBack001
+ * @tc.desc: Branch: if frameNode valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationModelTestNg, SetBeforeCreateLayoutWrapperCallBack001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navDestination and call SetBeforeCreateLayoutWrapperCallBack.
+     */
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    auto navdestinationNode =
+        AceType::DynamicCast<NavDestinationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navdestinationNode, nullptr);
+    bool isCallbackCalled = false;
+    NavDestinationModelNG::SetBeforeCreateLayoutWrapperCallBack(
+        Referenced::RawPtr(navdestinationNode), [&isCallbackCalled]() {
+        isCallbackCalled = true;
+    });
+    /**
+     * @tc.steps: step2. verify the BeforeCreateLayoutWrapper callback valid.
+     */
+    auto eventHub = navdestinationNode->GetEventHub<NavDestinationEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    ASSERT_NE(eventHub->beforeCreateLayoutWrapper_, nullptr);
+    ASSERT_EQ(isCallbackCalled, false);
+    eventHub->beforeCreateLayoutWrapper_();
+    ASSERT_EQ(isCallbackCalled, true);
 }
 } // namespace OHOS::Ace::NG

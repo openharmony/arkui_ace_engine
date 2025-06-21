@@ -167,4 +167,27 @@ void QRCodePattern::UpdateContentOpacity(double opacity, bool isFristLoad)
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
+
+void QRCodePattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<QrcodeTheme>();
+    CHECK_NULL_VOID(theme);
+    auto pops = host->GetPaintProperty<QRCodePaintProperty>();
+    CHECK_NULL_VOID(pops);
+    if (!pops->HasQRCodeColorSetByUser() ||
+        (pops->HasQRCodeColorSetByUser() && !pops->GetQRCodeColorSetByUserValue())) {
+        UpdateColor(theme->GetQrcodeColor(), false);
+    }
+    if (!pops->HasQRBackgroundColorSetByUser() ||
+        (pops->HasQRBackgroundColorSetByUser() && !pops->GetQRBackgroundColorSetByUserValue())) {
+        UpdateBackgroundColor(theme->GetBackgroundColor(), false);
+    }
+}
 } // namespace OHOS::Ace::NG

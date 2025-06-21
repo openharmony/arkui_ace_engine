@@ -41,6 +41,12 @@ std::optional<SizeF> RadioLayoutAlgorithm::MeasureContent(
         return std::nullopt;
     }
     InitializeParam(host);
+    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
+
+    if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
+        return LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, layoutWrapper);
+    }
+
     // Case 1: Width and height are set in the front end.
     if (contentConstraint.selfIdealSize.IsValid() && contentConstraint.selfIdealSize.IsNonNegative()) {
         auto height = contentConstraint.selfIdealSize.Height().value();
@@ -145,5 +151,21 @@ void RadioLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto translate = offset + paddingOffset;
         content->SetOffset(translate);
     }
+}
+
+std::optional<SizeF> RadioLayoutAlgorithm::LayoutPolicyIsMatchParent(const LayoutConstraintF& contentConstraint,
+    std::optional<NG::LayoutPolicyProperty> layoutPolicy, LayoutWrapper* layoutWrapper)
+{
+    auto height = contentConstraint.parentIdealSize.Height().value();
+    auto width = contentConstraint.parentIdealSize.Width().value();
+    if (layoutPolicy->IsAllMatch()) {
+        auto length = std::min(width, height);
+        return SizeF(length, length);
+    } else if (layoutPolicy->IsWidthMatch()) {
+        return SizeF(width, width);
+    } else if (layoutPolicy->IsHeightMatch()) {
+        return SizeF(height, height);
+    }
+    return SizeF();
 }
 } // namespace OHOS::Ace::NG

@@ -50,7 +50,8 @@ public:
     void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetSelectionMenuOptions(const OnCreateMenuCallback&& onCreateMenuCallback,
-        const OnMenuItemClickCallback&& onMenuItemClick) override;
+        const OnMenuItemClickCallback&& onMenuItemClick,
+        const OnPrepareMenuCallback&& onPrepareMenuCallback) override;
     void SetRequestKeyboardOnFocus(bool needToRequest) override;
     void SetEnableHapticFeedback(bool isEnabled) override;
     void SetPreviewMenuParam(TextSpanType spanType, std::function<void()>& buildFunc,
@@ -91,8 +92,9 @@ public:
     static void SetAboutToIMEInput(FrameNode* frameNode, std::function<bool(const RichEditorInsertValue&)>&& callback);
     static void SetRequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
     static void SetSupportPreviewText(FrameNode* frameNode, bool value);
-    static void SetSelectionMenuOptions(FrameNode* frameNode, const OnCreateMenuCallback&& onCreateMenuCallback,
-        const OnMenuItemClickCallback&& onMenuItemClick);
+    static void SetSelectionMenuOptions(FrameNode* frameNode,
+        const OnCreateMenuCallback&& onCreateMenuCallback, const OnMenuItemClickCallback&& onMenuItemClick,
+        const OnPrepareMenuCallback&& onPrepareMenuCallback);
     static void SetPreviewMenuParam(FrameNode* frameNode,
         TextSpanType spanType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
     static void SetBarState(FrameNode* frameNode, DisplayMode mode);

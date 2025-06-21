@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -28,6 +29,10 @@ public:
     void CreateGroupWithHeader(
         int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber = GROUP_ITEM_NUMBER);
     void CreateGroupWithFooter(
+        int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber = GROUP_ITEM_NUMBER);
+    void CreateGroupOnlySmallItem(
+        int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber = GROUP_ITEM_NUMBER);
+    void CreateGroupOnlyBigItem(
         int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber = GROUP_ITEM_NUMBER);
 };
 
@@ -59,6 +64,77 @@ void ListGroupAlgTestNg::CreateGroupWithFooter(
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
+}
+
+void ListGroupAlgTestNg::CreateGroupOnlySmallItem(
+    int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber)
+{
+    for (int32_t index = 0; index < groupNumber; index++) {
+        ListItemGroupModelNG groupModel = CreateListItemGroup(listItemGroupStyle);
+        groupModel.SetSpace(Dimension(SPACE));
+        CreateListItems(itemNumber, static_cast<V2::ListItemStyle>(listItemGroupStyle));
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
+void ListGroupAlgTestNg::CreateGroupOnlyBigItem(
+    int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber)
+{
+    for (int32_t index = 0; index < groupNumber; index++) {
+        ListItemGroupModelNG groupModel = CreateListItemGroup(listItemGroupStyle);
+        // 5: Increase the average height of elements by enlarging the space.
+        groupModel.SetSpace(Dimension(SPACE * 5));
+        CreateListItems(itemNumber, static_cast<V2::ListItemStyle>(listItemGroupStyle));
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
+/**
+ * @tc.name: BigJumpAccuracyTest001
+ * @tc.desc: jump with big offset and check position
+ * @tc.type: FUNC
+ */
+
+HWTEST_F(ListGroupAlgTestNg, BigJumpAccuracyTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. Create ListItemGroup with big/small average height
+    * @tc.expected: big/small ListItemGroup height is 760/700
+    */
+    auto model = CreateList();
+    model.SetInitialIndex(0);
+    CreateGroupOnlySmallItem(10, V2::ListItemGroupStyle::NONE, 7);
+    CreateGroupOnlyBigItem(10, V2::ListItemGroupStyle::NONE, 5);
+    CreateDone();
+    EXPECT_EQ(pattern_->currentOffset_, 0.f);
+
+    /**
+    * @tc.steps: step2. Slide to bottom
+    * @tc.expected: pos is 760 * 10 + 700 * 10 - 400 = 14200
+    */
+    UpdateCurrentOffset(-14200.f, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->currentOffset_, 14200.f);
+
+    /**
+    * @tc.steps: step3. Simulate LazyForEach. reset ListItemGroup layoutInfo.
+    */
+    for (auto i = 0; i < 10; i++) {
+        auto groupNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(i));
+        auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
+        groupPattern->ResetLayoutedInfo();
+        groupPattern->cachedItemPosition_.clear();
+        groupPattern->mainSize_ = 0.f;
+        groupNode->GetGeometryNode()->Reset();
+    }
+
+    /**
+    * @tc.steps: step4. backToTop. Simulate big offset callback.
+    * @tc.expected: after scroll, pos is 14200 - 10000 = 4200
+    */
+    UpdateCurrentOffset(10000.f, SCROLL_FROM_STATUSBAR);
+    EXPECT_EQ(pattern_->currentOffset_, 4200.f);
 }
 
 /**
@@ -1303,5 +1379,357 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupOffsetTest001, TestSize.Level1)
     EXPECT_EQ(group0->layoutAlgorithm_, nullptr);
     auto group1 = GetChildFrameNode(frameNode_, 1);
     EXPECT_EQ(group1->layoutAlgorithm_, nullptr);
+}
+
+/**
+ * @tc.name: ParseResObjDividerStrokeWidth001
+ * @tc.desc: Test ParseResObjDividerStrokeWidth in ListItemGroupModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ParseResObjDividerStrokeWidth001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    RefPtr<UINode> listItemGroupNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto listItemGroup = AceType::DynamicCast<FrameNode>(listItemGroupNode);
+    ASSERT_NE(listItemGroup, nullptr);
+    auto listItemGroupPattern = listItemGroup->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(listItemGroupPattern, nullptr);
+    ASSERT_EQ(listItemGroupPattern->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    groupModel.ParseResObjDividerStrokeWidth(invalidResObj);
+    ASSERT_NE(listItemGroupPattern->resourceMgr_, nullptr);
+    EXPECT_NE(listItemGroupPattern->resourceMgr_->resMap_.size(), 0);
+
+    V2::ItemDivider divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    divider.strokeWidth = 1000.0_vp;
+    listItemGroupPattern->resourceMgr_->ReloadResources();
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    EXPECT_NE(divider.strokeWidth, 1000.0_vp);
+
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+    groupModel.ParseResObjDividerStrokeWidth(resObj);
+    ASSERT_NE(listItemGroupPattern->resourceMgr_, nullptr);
+    EXPECT_NE(listItemGroupPattern->resourceMgr_->resMap_.size(), 0);
+
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    divider.strokeWidth = 1000.0_vp;
+    listItemGroupPattern->resourceMgr_->ReloadResources();
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    EXPECT_NE(divider.strokeWidth, 1000.0_vp);
+}
+
+/**
+ * @tc.name: ParseResObjDividerStrokeWidth002
+ * @tc.desc: Test ParseResObjDividerStrokeWidth in ListItemGroupModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ParseResObjDividerStrokeWidth002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    RefPtr<UINode> listItemGroupNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto listItemGroup = AceType::DynamicCast<FrameNode>(listItemGroupNode);
+    ASSERT_NE(listItemGroup, nullptr);
+    auto listItemGroupPattern = listItemGroup->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(listItemGroupPattern, nullptr);
+    ASSERT_EQ(listItemGroupPattern->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    ListItemGroupModelNG::ParseResObjDividerStrokeWidth(AceType::RawPtr(listItemGroup), invalidResObj);
+    ASSERT_NE(listItemGroupPattern->resourceMgr_, nullptr);
+    EXPECT_NE(listItemGroupPattern->resourceMgr_->resMap_.size(), 0);
+
+    V2::ItemDivider divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    divider.strokeWidth = 1000.0_vp;
+    listItemGroupPattern->resourceMgr_->ReloadResources();
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    EXPECT_NE(divider.strokeWidth, 1000.0_vp);
+
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+    ListItemGroupModelNG::ParseResObjDividerStrokeWidth(AceType::RawPtr(listItemGroup), resObj);
+    ASSERT_NE(listItemGroupPattern->resourceMgr_, nullptr);
+    EXPECT_NE(listItemGroupPattern->resourceMgr_->resMap_.size(), 0);
+
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    divider.strokeWidth = 1000.0_vp;
+    listItemGroupPattern->resourceMgr_->ReloadResources();
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    EXPECT_NE(divider.strokeWidth, 1000.0_vp);
+}
+
+/**
+ * @tc.name: ParseResObjDividerColor001
+ * @tc.desc: Test ParseResObjDividerColor in ListItemGroupModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ParseResObjDividerColor001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    RefPtr<UINode> listItemGroupNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto listItemGroup = AceType::DynamicCast<FrameNode>(listItemGroupNode);
+    ASSERT_NE(listItemGroup, nullptr);
+    auto listItemGroupPattern = listItemGroup->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(listItemGroupPattern, nullptr);
+    ASSERT_EQ(listItemGroupPattern->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    groupModel.ParseResObjDividerColor(invalidResObj);
+    ASSERT_NE(listItemGroupPattern->resourceMgr_, nullptr);
+    EXPECT_NE(listItemGroupPattern->resourceMgr_->resMap_.size(), 0);
+
+    V2::ItemDivider divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    divider.color = Color::BLUE;
+    listItemGroupPattern->resourceMgr_->ReloadResources();
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    EXPECT_NE(divider.color, Color::BLUE);
+
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+    groupModel.ParseResObjDividerColor(resObj);
+    ASSERT_NE(listItemGroupPattern->resourceMgr_, nullptr);
+    EXPECT_NE(listItemGroupPattern->resourceMgr_->resMap_.size(), 0);
+
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    divider.color = Color::BLUE;
+    listItemGroupPattern->resourceMgr_->ReloadResources();
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    EXPECT_NE(divider.color, Color::BLUE);
+}
+
+/**
+ * @tc.name: ParseResObjDividerColor002
+ * @tc.desc: Test ParseResObjDividerColor in ListItemGroupModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ParseResObjDividerColor002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    RefPtr<UINode> listItemGroupNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto listItemGroup = AceType::DynamicCast<FrameNode>(listItemGroupNode);
+    ASSERT_NE(listItemGroup, nullptr);
+    auto listItemGroupPattern = listItemGroup->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(listItemGroupPattern, nullptr);
+    ASSERT_EQ(listItemGroupPattern->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    ListItemGroupModelNG::ParseResObjDividerColor(AceType::RawPtr(listItemGroup), invalidResObj);
+    ASSERT_NE(listItemGroupPattern->resourceMgr_, nullptr);
+    EXPECT_NE(listItemGroupPattern->resourceMgr_->resMap_.size(), 0);
+
+    V2::ItemDivider divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    divider.color = Color::BLUE;
+    listItemGroupPattern->resourceMgr_->ReloadResources();
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    EXPECT_NE(divider.color, Color::BLUE);
+
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+    ListItemGroupModelNG::ParseResObjDividerColor(AceType::RawPtr(listItemGroup), resObj);
+    ASSERT_NE(listItemGroupPattern->resourceMgr_, nullptr);
+    EXPECT_NE(listItemGroupPattern->resourceMgr_->resMap_.size(), 0);
+
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    divider.color = Color::BLUE;
+    listItemGroupPattern->resourceMgr_->ReloadResources();
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    EXPECT_NE(divider.color, Color::BLUE);
+}
+
+/**
+ * @tc.name: ParseResObjDividerStartMargin001
+ * @tc.desc: Test ParseResObjDividerStartMargin in ListItemGroupModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ParseResObjDividerStartMargin001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    RefPtr<UINode> listItemGroupNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto listItemGroup = AceType::DynamicCast<FrameNode>(listItemGroupNode);
+    ASSERT_NE(listItemGroup, nullptr);
+    auto listItemGroupPattern = listItemGroup->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(listItemGroupPattern, nullptr);
+    ASSERT_EQ(listItemGroupPattern->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    groupModel.ParseResObjDividerStartMargin(invalidResObj);
+    ASSERT_NE(listItemGroupPattern->resourceMgr_, nullptr);
+    EXPECT_NE(listItemGroupPattern->resourceMgr_->resMap_.size(), 0);
+
+    V2::ItemDivider divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    divider.startMargin = 1000.0_vp;
+    listItemGroupPattern->resourceMgr_->ReloadResources();
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    EXPECT_NE(divider.startMargin, 1000.0_vp);
+
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+    groupModel.ParseResObjDividerStartMargin(resObj);
+    ASSERT_NE(listItemGroupPattern->resourceMgr_, nullptr);
+    EXPECT_NE(listItemGroupPattern->resourceMgr_->resMap_.size(), 0);
+
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    divider.startMargin = 1000.0_vp;
+    listItemGroupPattern->resourceMgr_->ReloadResources();
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    EXPECT_NE(divider.startMargin, 1000.0_vp);
+}
+
+/**
+ * @tc.name: ParseResObjDividerStartMargin002
+ * @tc.desc: Test ParseResObjDividerStartMargin in ListItemGroupModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ParseResObjDividerStartMargin002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    RefPtr<UINode> listItemGroupNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto listItemGroup = AceType::DynamicCast<FrameNode>(listItemGroupNode);
+    ASSERT_NE(listItemGroup, nullptr);
+    auto listItemGroupPattern = listItemGroup->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(listItemGroupPattern, nullptr);
+    ASSERT_EQ(listItemGroupPattern->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    ListItemGroupModelNG::ParseResObjDividerStartMargin(AceType::RawPtr(listItemGroup), invalidResObj);
+    ASSERT_NE(listItemGroupPattern->resourceMgr_, nullptr);
+    EXPECT_NE(listItemGroupPattern->resourceMgr_->resMap_.size(), 0);
+
+    V2::ItemDivider divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    divider.startMargin = 1000.0_vp;
+    listItemGroupPattern->resourceMgr_->ReloadResources();
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    EXPECT_NE(divider.startMargin, 1000.0_vp);
+
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+    ListItemGroupModelNG::ParseResObjDividerStartMargin(AceType::RawPtr(listItemGroup), resObj);
+    ASSERT_NE(listItemGroupPattern->resourceMgr_, nullptr);
+    EXPECT_NE(listItemGroupPattern->resourceMgr_->resMap_.size(), 0);
+
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    divider.startMargin = 1000.0_vp;
+    listItemGroupPattern->resourceMgr_->ReloadResources();
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    EXPECT_NE(divider.startMargin, 1000.0_vp);
+}
+
+/**
+ * @tc.name: ParseResObjDividerEndMargin001
+ * @tc.desc: Test ParseResObjDividerEndMargin in ListItemGroupModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ParseResObjDividerEndMargin001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    RefPtr<UINode> listItemGroupNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto listItemGroup = AceType::DynamicCast<FrameNode>(listItemGroupNode);
+    ASSERT_NE(listItemGroup, nullptr);
+    auto listItemGroupPattern = listItemGroup->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(listItemGroupPattern, nullptr);
+    ASSERT_EQ(listItemGroupPattern->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    groupModel.ParseResObjDividerEndMargin(invalidResObj);
+    ASSERT_NE(listItemGroupPattern->resourceMgr_, nullptr);
+    EXPECT_NE(listItemGroupPattern->resourceMgr_->resMap_.size(), 0);
+
+    V2::ItemDivider divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    divider.endMargin = 1000.0_vp;
+    listItemGroupPattern->resourceMgr_->ReloadResources();
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    EXPECT_NE(divider.endMargin, 1000.0_vp);
+
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+    groupModel.ParseResObjDividerEndMargin(resObj);
+    ASSERT_NE(listItemGroupPattern->resourceMgr_, nullptr);
+    EXPECT_NE(listItemGroupPattern->resourceMgr_->resMap_.size(), 0);
+
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    divider.endMargin = 1000.0_vp;
+    listItemGroupPattern->resourceMgr_->ReloadResources();
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    EXPECT_NE(divider.endMargin, 1000.0_vp);
+}
+
+/**
+ * @tc.name: ParseResObjDividerEndMargin002
+ * @tc.desc: Test ParseResObjDividerEndMargin in ListItemGroupModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, ParseResObjDividerEndMargin002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    RefPtr<UINode> listItemGroupNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto listItemGroup = AceType::DynamicCast<FrameNode>(listItemGroupNode);
+    ASSERT_NE(listItemGroup, nullptr);
+    auto listItemGroupPattern = listItemGroup->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(listItemGroupPattern, nullptr);
+    ASSERT_EQ(listItemGroupPattern->resourceMgr_, nullptr);
+
+    RefPtr<ResourceObject> invalidResObj = AceType::MakeRefPtr<ResourceObject>("", "", 0);
+    ListItemGroupModelNG::ParseResObjDividerEndMargin(AceType::RawPtr(listItemGroup), invalidResObj);
+    ASSERT_NE(listItemGroupPattern->resourceMgr_, nullptr);
+    EXPECT_NE(listItemGroupPattern->resourceMgr_->resMap_.size(), 0);
+
+    V2::ItemDivider divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    divider.endMargin = 1000.0_vp;
+    listItemGroupPattern->resourceMgr_->ReloadResources();
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    EXPECT_NE(divider.endMargin, 1000.0_vp);
+
+    std::vector<ResourceObjectParams> params;
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(0, static_cast<int32_t>(ResourceType::INTEGER), params, "", "", 0);
+    ListItemGroupModelNG::ParseResObjDividerEndMargin(AceType::RawPtr(listItemGroup), resObj);
+    ASSERT_NE(listItemGroupPattern->resourceMgr_, nullptr);
+    EXPECT_NE(listItemGroupPattern->resourceMgr_->resMap_.size(), 0);
+
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    divider.endMargin = 1000.0_vp;
+    listItemGroupPattern->resourceMgr_->ReloadResources();
+    divider = ListItemGroupModelNG::GetDivider(AceType::RawPtr(listItemGroup));
+    EXPECT_NE(divider.endMargin, 1000.0_vp);
 }
 } // namespace OHOS::Ace::NG

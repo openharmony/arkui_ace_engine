@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_common_utils.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::Framework::CommonUtils {
 
@@ -73,6 +74,8 @@ bool SetBaseGestureEventInfo(JSRef<JSObject> obj, const std::shared_ptr<BaseGest
     obj->SetProperty<int32_t>("targetDisplayId", info->GetTargetDisplayId());
     obj->SetProperty<float>("axisVertical", info->GetVerticalAxis());
     obj->SetProperty<float>("axisHorizontal", info->GetHorizontalAxis());
+    obj->SetPropertyObject(
+        "getModifierKeyState", JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
     CreateFingerInfosObject(info, obj);
     return true;
 }

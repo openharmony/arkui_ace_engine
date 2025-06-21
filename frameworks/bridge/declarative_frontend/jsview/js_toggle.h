@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,10 +33,12 @@ public:
     static void JsWidth(const JSCallbackInfo& info);
     static void JsHeight(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
+    static void JsMargin(const JSCallbackInfo& info);
     static void JsResponseRegion(const JSCallbackInfo& info);
     static void JsWidth(const JSRef<JSVal>& jsValue);
     static void JsHeight(const JSRef<JSVal>& jsValue);
     static void JsSize(const JSCallbackInfo& info);
+    static void OnChange(const JSCallbackInfo& info);
     static void SelectedColor(const JSCallbackInfo& info);
     static void SwitchPointColor(const JSCallbackInfo& info);
     static void SetBackgroundColor(const JSCallbackInfo& info);
@@ -53,6 +55,12 @@ public:
 
 private:
     static int32_t toggleType_;
+    static void CreateWithDimensionResourceObj(RefPtr<ResourceObject>& resObj, const int32_t resType);
+    static void CreateWithColorResourceObj(RefPtr<ResourceObject>& resObj, const int32_t resType);
+    static void SetPointRadius(const JSRef<JSObject>& jsObj);
+    static void SetUnselectedColor(const JSRef<JSObject>& jsObj);
+    static void SetPointColor(const JSRef<JSObject>& jsObj);
+    static void SetTrackBorderRadius(const JSRef<JSObject>& jsObj);
 };
 
 } // namespace OHOS::Ace::Framework

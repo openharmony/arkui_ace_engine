@@ -52,7 +52,21 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto props = DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
 
     float mainSize = MeasureSelf(props);
-    bool matchChildren = GreaterOrEqualToInfinity(mainSize);
+    auto gridLayoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(gridLayoutProperty);
+    auto layoutPolicy = gridLayoutProperty->GetLayoutPolicyProperty();
+    auto isMainWrap = false;
+    if (layoutPolicy.has_value()) {
+        auto isVertical = info_.axis_ == Axis::VERTICAL;
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto isMainFix = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+        isMainWrap = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
+        if (isMainFix) {
+            frameSize_.SetMainSize(Infinity<float>(), info_.axis_);
+        }
+    }
+    bool matchChildren = GreaterOrEqualToInfinity(mainSize) || isMainWrap;
     Init(props);
 
     if (info_.targetIndex_) {

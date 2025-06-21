@@ -297,13 +297,7 @@ void SearchPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!layoutProperty->GetMarginProperty()) {
-        MarginProperty margin;
-        margin.top = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
-        margin.bottom = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
-        layoutProperty->UpdateMargin(margin);
-    }
-
+    InitMargin(layoutProperty);
     InitSearchTheme();
     HandleBackgroundColor();
 
@@ -1753,6 +1747,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     json->PutExtAttr("stopBackPress", textFieldLayoutProperty->GetStopBackPressValue(true), filter);
     json->PutExtAttr("keyboardAppearance", static_cast<int32_t>(textFieldPattern->GetKeyboardAppearance()), filter);
     json->PutExtAttr("enableHapticFeedback", textFieldPattern->GetEnableHapticFeedback() ? "true" : "false", filter);
+    json->PutExtAttr("autoCapitalizationMode", textFieldPattern->AutoCapTypeToString().c_str(), filter);
     textFieldPattern->ToJsonValueForStroke(json, filter);
     json->PutExtAttr("enableAutoSpacing", std::to_string(
         textFieldLayoutProperty->GetEnableAutoSpacing().value_or(false)).c_str(), filter);
@@ -3386,5 +3381,30 @@ void SearchPattern::OnColorModeChange(uint32_t colorMode)
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     frameNode->MarkModifyDone();
+}
+
+void SearchPattern::InitMargin(const RefPtr<SearchLayoutProperty>& property)
+{
+    if (!property->GetMarginProperty()) {
+        MarginProperty margin;
+        margin.top = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
+        margin.bottom = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
+        property->UpdateMargin(margin);
+    }
+    if (property->HasUserMargin()) {
+        return;
+    }
+    auto layoutPolicyProperty = property->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicyProperty);
+    MarginProperty margin;
+    auto hasWidthPolicy = layoutPolicyProperty->widthLayoutPolicy_.has_value() &&
+                          layoutPolicyProperty->widthLayoutPolicy_.value() != LayoutCalPolicy::NO_MATCH;
+    auto hasHeightPolicy = layoutPolicyProperty->heightLayoutPolicy_.has_value() &&
+                           layoutPolicyProperty->heightLayoutPolicy_.value() != LayoutCalPolicy::NO_MATCH;
+    if (!hasWidthPolicy && !hasHeightPolicy) {
+        margin.top = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
+        margin.bottom = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
+    }
+    property->UpdateMargin(margin);
 }
 } // namespace OHOS::Ace::NG

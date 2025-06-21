@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -233,6 +233,20 @@ class WaterFlowCachedCountModifier extends ModifierWithKey<ArkScrollableCacheOpt
   }
 }
 
+class WaterFlowSyncLoadModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('waterFlowSyncLoad');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().waterFlow.resetSyncLoad(node);
+    } else {
+      getUINativeModule().waterFlow.setSyncLoad(node, this.value);
+    }
+  }
+}
+
 class WaterFlowFlingSpeedLimitModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -449,6 +463,10 @@ class ArkWaterFlowComponent extends ArkScrollable<WaterFlowAttribute> implements
     modifierWithKey(this._modifiersWithKeys, WaterFlowCachedCountModifier.identity, WaterFlowCachedCountModifier, opt);
     return this;
   }
+  syncLoad(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowSyncLoadModifier.identity, WaterFlowSyncLoadModifier, value);
+    return this;
+  }
   onReachStart(event: () => void): this {
     modifierWithKey(this._modifiersWithKeys, WaterFlowOnReachStartModifier.identity, WaterFlowOnReachStartModifier, event);
     return this;
@@ -526,39 +544,6 @@ globalThis.WaterFlow.attributeModifier = function (modifier: ArkComponent): void
   });
 };
 
-globalThis.WaterFlow.onReachStart = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().waterFlow.setOnReachStart(nodePtr, value);
-};
-globalThis.WaterFlow.onReachEnd = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().waterFlow.setOnReachEnd(nodePtr, value);
-};
-globalThis.WaterFlow.onScrollFrameBegin = function (value: (offset: number, state: ScrollState) => { offsetRemain: number; }): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().waterFlow.setOnScrollFrameBegin(nodePtr, value);
-};
-globalThis.WaterFlow.onScrollStart = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().waterFlow.setOnScrollStart(nodePtr, value);
-};
-globalThis.WaterFlow.onScrollStop = function (value: () => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().waterFlow.setOnScrollStop(nodePtr, value);
-};
-globalThis.WaterFlow.onScrollIndex = function (value: (first: number, last: number) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().waterFlow.setOnScrollIndex(nodePtr, value);
-};
-globalThis.WaterFlow.onWillScroll = function (value: (xOffset: number, yOffset: number,
-  scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().waterFlow.setOnWillScroll(nodePtr, value);
-};
-globalThis.WaterFlow.onDidScroll = function (value: (xOffset: number, yOffset: number, scrollState: ScrollState) => void): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().waterFlow.setOnDidScroll(nodePtr, value);
-};
 globalThis.WaterFlow.onWillStopDragging = function (value: (velocity: number) => void) {
   let nodePtr = getUINativeModule().frameNode.getStackTopNode();
   getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);

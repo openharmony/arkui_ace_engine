@@ -277,4 +277,27 @@ HWTEST_F(RichEditorPatternTestSevenNg, ProvideabilityNameText, TestSize.Level1)
 #endif
 }
 
+/**
+ * @tc.name: GetSpanRangeByResultObject
+ * @tc.desc: test GetSpanRangeByResultObject function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, GetSpanRangeByResultObject, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto rangeStart = 1;
+    SpanPosition spanPosition;
+    spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = rangeStart;
+    ResultObject result;
+    result.spanPosition = spanPosition;
+    result.offsetInSpan[0] = 1;
+    result.offsetInSpan[1] = 2;
+    auto [selectStartResult, selectEndResult] = richEditorPattern->GetSpanRangeByResultObject(result);
+    auto selectStart = 2;
+    auto selectEnd = 3;
+    EXPECT_EQ(selectStart, selectStartResult);
+    EXPECT_EQ(selectEnd, selectEndResult);
+}
 } // namespace OHOS::Ace::NG

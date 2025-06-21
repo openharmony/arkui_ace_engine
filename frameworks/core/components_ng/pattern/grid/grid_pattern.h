@@ -328,6 +328,10 @@ private:
     KeyEvent keyEvent_;
     GridFocus focusHandler_ { *this, info_ };
 
+    // index of first and last GridItem in viewport
+    int32_t startIndex_ = 0;
+    int32_t endIndex_ = -1;
+
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
     std::optional<int32_t> targetIndex_;
     std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;

@@ -52,8 +52,6 @@ public:
     RefPtr<Paragraph> GetSingleParagraph() const;
 
 protected:
-    void GetSpanParagraphStyle(LayoutWrapper* layoutWrapper, const RefPtr<SpanItem>& spanItem, ParagraphStyle& pStyle);
-    virtual ParagraphStyle GetParagraphStyle(const TextStyle& textStyle) const;
     virtual bool CreateParagraph(
         const TextStyle& textStyle, std::u16string content, LayoutWrapper* layoutWrapper, double maxWidth = 0.0) = 0;
     virtual void HandleEmptyParagraph(RefPtr<Paragraph> paragraph, const std::list<RefPtr<SpanItem>>& spanGroup) {}
@@ -62,8 +60,6 @@ protected:
         CHECK_NULL_RETURN(!spanGroup.empty(), nullptr);
         return spanGroup.front();
     }
-    void ApplyIndent(ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width,
-        const TextStyle& textStyle);
     void ConstructTextStyles(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle);
     bool ParagraphReLayout(const LayoutConstraintF& contentConstraint);
@@ -112,12 +108,19 @@ protected:
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
     virtual void AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
-    static TextDirection GetTextDirection(const std::u16string& content, LayoutWrapper* layoutWrapper);
     void MeasureChildren(LayoutWrapper* layoutWrapper, const TextStyle& textStyle);
     bool ReLayoutParagraphBySpan(LayoutWrapper* layoutWrapper, ParagraphStyle& paraStyle, const TextStyle& textStyle,
         std::vector<TextStyle>& textStyles);
     virtual ChildrenListWithGuard GetAllChildrenWithBuild(LayoutWrapper* layoutWrapper);
     void UpdateShaderStyle(const RefPtr<TextLayoutProperty>& layoutProperty, TextStyle& textStyle);
+    virtual bool IsNeedParagraphReLayout() const
+    {
+        return false;
+    }
+    virtual double GetIndentMaxWidth(double width) const
+    {
+        return width;
+    }
 
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     RefPtr<ParagraphManager> paragraphManager_;
@@ -139,7 +142,6 @@ private:
     {
         return 0.0f;
     }
-    static TextDirection GetTextDirectionByContent(const std::u16string& content);
 
     void UpdateSymbolSpanEffect(
         RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph, const std::list<RefPtr<SpanItem>>& spans);
@@ -164,6 +166,7 @@ private:
     void UpdateSymbolStyle(TextStyle& textStyle, bool isSymbol);
     std::optional<OHOS::Ace::Gradient> ToGradient(const NG::Gradient& gradient);
     AnimatableDimension ToAnimatableDimension(const Dimension& dimension);
+    void MeasureWithFixAtIdealSize(LayoutWrapper* layoutWrapper);
 
     ACE_DISALLOW_COPY_AND_MOVE(MultipleParagraphLayoutAlgorithm);
 };

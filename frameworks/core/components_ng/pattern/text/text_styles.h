@@ -225,6 +225,8 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LineThicknessScale, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(FontForegroudGradiantColor, FontForegroudGradiantColor);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(GradientShaderStyle, Gradient);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolShadow, SymbolShadow);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ShaderStyle, std::vector<SymbolGradient>);
     
     void UpdateColorByResourceId();
 
@@ -292,6 +294,8 @@ struct HandleInfoNG {
     RectF rect;
     RectF originalRect;
 };
+
+PlaceholderAlignment GetPlaceHolderAlignmentFromVerticalAlign(VerticalAlign verticalAlign);
 
 TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
     const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme, bool isSymbol = false);

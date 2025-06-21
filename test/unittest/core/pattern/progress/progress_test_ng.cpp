@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "progress_test_ng.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_container.h"
 
 namespace OHOS::Ace::NG {
@@ -2153,5 +2154,159 @@ HWTEST_F(ProgressTestNg, ProgressModelNGSetText002, TestSize.Level1)
     ProgressModelNG::SetText(Referenced::RawPtr(frameNode_), std::nullopt);
     EXPECT_EQ(paintProperty_->GetTextValue(""), "50%");
     EXPECT_DOUBLE_EQ(paintProperty_->GetValueValue(0.0), 50);
+}
+
+/**
+ * @tc.name: ProgressPatternOnColorConfigurationUpdateTest001
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternOnColorConfigurationUpdateTest001, TestSize.Level1)
+{
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = false;
+    pattern->OnColorConfigurationUpdate();
+    g_isConfigChangePerform = true;
+    pattern->OnColorConfigurationUpdate();
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->ResetGradientColorSetByUser();
+    paintProperty->ResetCapsuleStyleSetByUser();
+    paintProperty->ResetCapsuleStyleFontColorSetByUser();
+    paintProperty->UpdateProgressType(ProgressType::LINEAR);
+    pattern->OnColorConfigurationUpdate();
+    paintProperty->UpdateGradientColorSetByUser(true);
+    paintProperty->UpdateCapsuleStyleSetByUser(true);
+    paintProperty->UpdateCapsuleStyleFontColorSetByUser(true);
+    pattern->OnColorConfigurationUpdate();
+    paintProperty->UpdateCapsuleStyleFontColorSetByUser(false);
+    pattern->OnColorConfigurationUpdate();
+
+    paintProperty->UpdateGradientColorSetByUser(false);
+    paintProperty->UpdateCapsuleStyleSetByUser(false);
+    paintProperty->UpdateProgressType(ProgressType::CAPSULE);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipeline = host->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    ASSERT_NE(theme, nullptr);
+    Color testColor = theme->GetCapsuleParseFailedSelectColor();
+    pattern->OnColorConfigurationUpdate();
+    paintProperty->UpdateCapsuleStyleFontColorSetByUser(true);
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(paintProperty->GetColor(), testColor);
+}
+
+/**
+ * @tc.name: ProgressPatternCreateWithResourceObjTest001
+ * @tc.desc: Test model ng  CreateWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternCreateWithResourceObjTest001, TestSize.Level1)
+{
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHTEEN));
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    ASSERT_NE(resObj, nullptr);
+
+    for (int i = static_cast<int>(JsProgressResourceType::COLOR); i <= static_cast<int>(JsProgressResourceType::Text);
+         ++i) {
+        auto jsResourceType = static_cast<JsProgressResourceType>(i);
+        modelNg.CreateWithResourceObj(jsResourceType, resObj);
+    }
+    modelNg.CreateWithResourceObj(static_cast<JsProgressResourceType>(100), resObj);
+    modelNg.SetCapsuleStyleFontColor(true);
+    modelNg.SetCapsuleStyle(true);
+    modelNg.SetGradientColorByUser(true);
+
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+
+    paintProperty->UpdateProgressType(ProgressType::CAPSULE);
+    pattern->OnColorModeChange(colorMode);
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHT));
+    int32_t minPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_EIGHT));
+    paintProperty->UpdateProgressType(ProgressType::LINEAR);
+    pattern->OnColorModeChange(colorMode);
+    paintProperty->UpdateProgressType(ProgressType::RING);
+    pattern->OnColorModeChange(colorMode);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    Color testColor = theme->GetBorderColor();
+    EXPECT_EQ(paintProperty->GetBorderColor(), testColor);
+    EXPECT_TRUE(paintProperty->GetCapsuleStyleSetByUser());
+    EXPECT_TRUE(paintProperty->GetGradientColorSetByUser());
+    EXPECT_TRUE(paintProperty->GetCapsuleStyleFontColorSetByUser());
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(minPlatformVersion);
+}
+
+/**
+ * @tc.name: ProgressPatternCreateWithResourceObjTest002
+ * @tc.desc: Test model ng  CreateWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressPatternCreateWithResourceObjTest002, TestSize.Level1)
+{
+    ProgressModelNG modelNg = CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    ResourceObjectParams params { .value = "test", .type = ResourceObjectParamType::STRING };
+    std::vector<ResourceObjectParams> resObjParamsList;
+    resObjParamsList.push_back(params);
+    RefPtr<ResourceObject> resObjWithId =
+        AceType::MakeRefPtr<ResourceObject>(100000, 10003, resObjParamsList, "com.example.test", "entry", 100000);
+    RefPtr<ResourceObject> resObjWithDimensionId =
+        AceType::MakeRefPtr<ResourceObject>(100000, 10007, resObjParamsList, "com.example.test", "entry", 100000);
+    RefPtr<ResourceObject> resObjId =
+        AceType::MakeRefPtr<ResourceObject>(-1, 100001, resObjParamsList, "com.example.test", "entry", 100000);
+    RefPtr<ResourceObject> resObjBoolId =
+        AceType::MakeRefPtr<ResourceObject>(100000, 10005, resObjParamsList, "com.example.test", "entry", 100000);
+    for (int i = static_cast<int>(JsProgressResourceType::LSStrokeWidth);
+         i <= static_cast<int>(JsProgressResourceType::Text); ++i) {
+        auto jsResourceType = static_cast<JsProgressResourceType>(i);
+        modelNg.CreateWithResourceObj(jsResourceType, resObjWithDimensionId);
+    }
+    modelNg.CreateWithResourceObj(JsProgressResourceType::COLOR, resObjId);
+    modelNg.CreateWithResourceObj(JsProgressResourceType::RingStatus, resObjWithId);
+    modelNg.CreateWithResourceObj(JsProgressResourceType::FontWeight, resObjWithId);
+    modelNg.CreateWithResourceObj(JsProgressResourceType::Text, resObjWithId);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+    for (int i = static_cast<int>(JsProgressResourceType::LSStrokeWidth);
+         i <= static_cast<int>(JsProgressResourceType::Text); ++i) {
+        auto jsResourceType = static_cast<JsProgressResourceType>(i);
+        modelNg.CreateWithResourceObj(jsResourceType, resObjBoolId);
+    }
+
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    paintProperty->UpdateProgressType(ProgressType::CAPSULE);
+    pattern->OnColorModeChange(colorMode);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    Color testColor = theme->GetBorderColor();
+    EXPECT_EQ(paintProperty->GetBorderColor(), testColor);
 }
 } // namespace OHOS::Ace::NG

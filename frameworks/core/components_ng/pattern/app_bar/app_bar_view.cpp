@@ -73,6 +73,11 @@ void AssembleUiExtensionParams(
 #endif
 } // namespace
 
+RefPtr<Pattern> AppBarView::GetAtomicServicePattern()
+{
+    return atomicService_.Upgrade()->GetPattern<NG::AtomicServicePattern>();
+}
+
 void AppBarView::RegistAppBarNodeBuilder(
     std::function<RefPtr<FrameNode>(NG::AppBarView* appBar, const RefPtr<FrameNode>& stage)> appBarNodeBuilder)
 {

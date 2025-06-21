@@ -17,7 +17,9 @@
 
 #include <dlfcn.h>
 
+#include "ui_event_observer.h"
 #include "core/common/container.h"
+#include "core/common/container_scope.h"
 #include "core/common/recorder/event_controller.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/inspector_tree_collector.h"
@@ -26,6 +28,34 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace {
+namespace {
+std::string GetWebLanguageByNodeId(int32_t nodeId)
+{
+    auto& weakNodeCache = Recorder::EventRecorder::Get().GetWeakNodeMap();
+    auto iter = weakNodeCache.find(nodeId);
+    if (iter == weakNodeCache.end()) {
+        return "";
+    }
+    auto node = iter->second.Upgrade();
+    CHECK_NULL_RETURN(node, "");
+    auto pattern = node->GetPattern();
+    CHECK_NULL_RETURN(pattern, "");
+    return pattern->GetCurrentLanguage();
+}
+
+std::string GetCurrentPageParam()
+{
+    ContainerScope scope(Container::CurrentIdSafely());
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, "");
+    auto frontend = container->GetFrontend();
+    if (frontend) {
+        return frontend->GetTopNavDestinationInfo(false, true);
+    }
+    return "";
+}
+} // namespace
+
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_RegisterUIEventObserver(
     const std::string& config, const std::shared_ptr<UIEventObserver>& observer)
 {
@@ -46,22 +76,12 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetNodeProperty(
     Recorder::NodeDataCache::Get().GetNodeData(pageUrl, nodeProperties);
 }
 
-std::string GetWebLanguageByNodeId(int32_t nodeId)
-{
-    auto& weakNodeCache = Recorder::EventRecorder::Get().GetWeakNodeMap();
-    auto iter = weakNodeCache.find(nodeId);
-    if (iter == weakNodeCache.end()) {
-        return "";
-    }
-    auto node = iter->second.Upgrade();
-    CHECK_NULL_RETURN(node, "");
-    auto pattern = node->GetPattern();
-    CHECK_NULL_RETURN(pattern, "");
-    return pattern->GetCurrentLanguage();
-}
-
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTree(const TreeParams& params, std::string& tree)
 {
+    if (params.infoType == InspectorInfoType::PAGE_PARAM) {
+        tree = GetCurrentPageParam();
+        return;
+    }
     auto containerId = Recorder::EventRecorder::Get().GetContainerId(params.inspectorType == InspectorPageType::FOCUS);
     auto container = Container::GetContainer(containerId);
     if (!container) {

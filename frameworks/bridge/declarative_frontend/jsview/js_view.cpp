@@ -827,9 +827,10 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
     if (AceChecker::IsPerformanceCheckEnabled()) {
         auto uiNode = AceType::DynamicCast<NG::UINode>(node);
         if (uiNode) {
-            auto codeInfo = EngineHelper::GetPositionOnJsCode();
-            uiNode->SetRow(codeInfo.first);
-            uiNode->SetCol(codeInfo.second);
+            auto [sources, row, col] = EngineHelper::GetPositionOnJsCode();
+            uiNode->SetRow(row);
+            uiNode->SetCol(col);
+            uiNode->SetFilePath(sources);
         }
     }
     return node;

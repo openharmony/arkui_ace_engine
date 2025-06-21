@@ -91,6 +91,31 @@ public:
         return { 0, 0 };
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return IsMultiMenu();
+    }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return IsMultiMenu();
+    }
+
+    bool IsEnableFix() override
+    {
+        return IsMultiMenu();
+    }
+
+    bool IsChildColumnLayout() override
+    {
+        return IsMultiMenu();
+    }
+
+    bool IsChildComponentContent() override
+    {
+        return IsMultiMenu();
+    }
+
     bool IsFocusViewLegal() override
     {
         return type_ == MenuType::MENU || type_ == MenuType::CONTEXT_MENU || type_ == MenuType::SUB_MENU;
@@ -618,6 +643,9 @@ public:
         return customNode_.Upgrade();
     }
 
+    void UpdateSelectOptionTextByIndex(int32_t index, const std::string& text);
+    void UpdateSelectOptionIconByIndex(int32_t index, const std::string& icon);
+
     void InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuTheme);
 
     float GetSelectMenuWidthFromTheme() const;
@@ -660,6 +688,11 @@ public:
     void SetOriginPreviewYForStack(float tmp)
     {
         originPreviewYForStack_ = tmp;
+    }
+
+    void SetDisableMenuBgColor(bool ret = false)
+    {
+        isDisableMenuBgColor_ = ret;
     }
 
 protected:
@@ -791,7 +824,7 @@ private:
     float translateYForStack_ = 0.0f;
     float originMenuYForStack_ = 0.0f;
     float originPreviewYForStack_ = 0.0f;
-
+    bool isDisableMenuBgColor_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };
 

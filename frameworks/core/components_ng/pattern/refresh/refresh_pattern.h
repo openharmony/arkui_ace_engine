@@ -107,6 +107,21 @@ public:
         return !NearZero(scrollOffset_);
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -151,6 +166,8 @@ private:
     void UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus);
     void InitProgressColumn();
     void UpdateLoadingTextOpacity(float opacity);
+    void BeginTrailingTrace();
+    void EndTrailingTrace();
     float GetLoadingProgressOpacity();
     float GetLoadingTextOpacity();
     Color GetLoadingProgressColor();
@@ -178,6 +195,7 @@ private:
     RefPtr<NodeAnimatablePropertyFloat> offsetProperty_;
     std::shared_ptr<AnimationUtils::Animation> animation_;
     std::optional<float> ratio_;
+    bool hasBeginTrailingTrace_ = false;
     // API version 10
     void InitLowVersionOffset();
     void UpdateChild();

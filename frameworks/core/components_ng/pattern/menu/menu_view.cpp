@@ -874,7 +874,7 @@ static void SetFilter(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNod
     ContainerScope scope(containerId);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = menuWrapperNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(manager);
@@ -988,7 +988,7 @@ void SetHasCustomRadius(
         auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
         CHECK_NULL_VOID(menuProperty);
         menuWrapperPattern->SetHasCustomRadius(false);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = menuWrapperNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(theme);
@@ -1375,11 +1375,8 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
-    } else {
-        if (menuWrapperPattern->GetHasCustomOutlineWidth()) {
-            menuWrapperPattern->SetMenuParam(menuParam);
-        }
     }
+    menuWrapperPattern->SetMenuParam(menuParam);
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     if (menuProperty) {
         menuProperty->UpdateTitle(menuParam.title);
@@ -1388,6 +1385,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
             menuProperty->UpdateMenuPlacement(menuParam.placement.value_or(OHOS::Ace::Placement::BOTTOM));
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
+        menuProperty->UpdateAnchorPosition(menuParam.anchorPosition);
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
     auto scroll = CreateMenuScroll(column);
@@ -1500,6 +1498,7 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     menuWrapperPattern->SetMenuParam(menuParam);
     menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
 
+    ReloadMenuParam(menuParam);
     CustomPreviewNodeProc(previewNode, menuParam, previewCustomNode);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
@@ -1528,6 +1527,26 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         SetFilter(targetNode, wrapperNode);
     }
     return wrapperNode;
+}
+
+void MenuView::ReloadMenuParam(const MenuParam& menuParam)
+{
+    MenuParam& menuParamValue = const_cast<MenuParam&>(menuParam);
+    if (SystemProperties::ConfigChangePerform()) {
+        menuParamValue.ReloadResources();
+        if (menuParamValue.borderRadius) {
+            menuParamValue.borderRadius->ReloadResources();
+        }
+        if (menuParamValue.previewBorderRadius) {
+            menuParamValue.previewBorderRadius->ReloadResources();
+        }
+        if (menuParamValue.outlineColor) {
+            menuParamValue.outlineColor->ReloadResources();
+        }
+        if (menuParamValue.outlineWidth) {
+            menuParamValue.outlineWidth->ReloadResources();
+        }
+    }
 }
 
 void MenuView::UpdateMenuParam(
@@ -1564,6 +1583,7 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
             menuProperty->UpdateMenuPlacement(menuParam.placement.value());
         }
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
+        menuProperty->UpdateAnchorPosition(menuParam.anchorPosition);
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
 }
@@ -2014,7 +2034,8 @@ RefPtr<FrameNode> MenuView::CreateSymbol(const std::function<void(WeakPtr<NG::Fr
     CHECK_NULL_RETURN(iconNode, nullptr);
     auto props = iconNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(props, nullptr);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(parent, nullptr);
+    auto pipeline = parent->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -2050,7 +2071,8 @@ RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<Fr
     auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textProperty, nullptr);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(parent, nullptr);
+    auto pipeline = parent->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -2103,7 +2125,7 @@ RefPtr<FrameNode> MenuView::CreateIcon(const std::string& icon, const RefPtr<Fra
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(iconNode, nullptr);
     auto props = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = parent->GetContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
@@ -2230,7 +2252,7 @@ RefPtr<FrameNode> MenuView::Create(int32_t index)
     // set border radius
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);

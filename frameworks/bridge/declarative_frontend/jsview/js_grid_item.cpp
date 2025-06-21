@@ -68,17 +68,16 @@ void JSGridItem::CreateForPartialUpdate(const JSCallbackInfo& args)
     }
 
     auto isLazy = args[1]->ToBoolean();
-    auto vm = args.GetVm();
-    auto jsFunc = JSRef<JSFunc>::Cast(args[0]);
-    auto func = jsFunc->GetLocalHandle();
-    auto gridItemDeepRenderFunc = [vm, func = panda::CopyableGlobal(vm, func)](int32_t elmtId) {
+    auto jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(args[0]));
+    auto gridItemDeepRenderFunc = [execCtx = args.GetExecutionContext(), jsDeepRenderFunc = std::move(jsDeepRender)](
+                                      int32_t elmtId) {
         ACE_SCOPED_TRACE("JSGridItem::ExecuteDeepRender");
         ACE_DCHECK(componentsStack_.empty());
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch trycatch(vm);
-        panda::Local<panda::JSValueRef> params[2] = { panda::NumberRef::New(vm, elmtId),
-            panda::BooleanRef::New(vm, true) };
-        func->Call(vm, func.ToLocal(), params, 2);
+        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+        JSRef<JSVal> jsParams[2];
+        jsParams[0] = JSRef<JSVal>::Make(ToJSValue(elmtId));
+        jsParams[1] = JSRef<JSVal>::Make(ToJSValue(true));
+        jsDeepRenderFunc->ExecuteJS(2, jsParams);
     };
 
     NG::GridItemStyle gridItemStyle = NG::GridItemStyle::NONE;
@@ -129,6 +128,23 @@ void JSGridItem::SetSelectable(const JSCallbackInfo& info)
     GridItemModel::GetInstance()->SetSelectable(selectable);
 }
 
+void JSGridItem::SelectCallback(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+
+    RefPtr<JsMouseFunction> jsOnSelectFunc = AceType::MakeRefPtr<JsMouseFunction>(JSRef<JSFunc>::Cast(args[0]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onSelectId = [execCtx = args.GetExecutionContext(), func = std::move(jsOnSelectFunc), node = targetNode](
+                          bool isSelected) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        PipelineContext::SetCallBackNode(node);
+        func->SelectExecute(isSelected);
+    };
+    GridItemModel::GetInstance()->SetOnSelect(std::move(onSelectId));
+}
+
 void JSGridItem::SetSelected(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -150,17 +166,15 @@ void JSGridItem::SetSelected(const JSCallbackInfo& info)
     GridItemModel::GetInstance()->SetSelected(select);
 
     if (changeEventVal->IsFunction()) {
-        auto vm = info.GetVm();
-        auto jsFunc = JSRef<JSFunc>::Cast(changeEventVal);
-        auto func = jsFunc->GetLocalHandle();
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
         auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        auto changeEvent = [vm, func = panda::CopyableGlobal(vm, func), node = targetNode](bool param) {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
+        auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                               bool param) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("GridItem.ChangeEvent");
+            auto newJSVal = JSRef<JSVal>::Make(ToJSValue(param));
             PipelineContext::SetCallBackNode(node);
-            panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, param) };
-            func->Call(vm, func.ToLocal(), params, 1);
+            func->ExecuteJS(1, &newJSVal);
         };
         GridItemModel::GetInstance()->SetSelectChangeEvent(std::move(changeEvent));
     }
@@ -178,6 +192,7 @@ void JSGridItem::JSBind(BindingTarget globalObj)
     JSClass<JSGridItem>::StaticMethod("rowEnd", &JSGridItem::SetRowEnd, opt);
     JSClass<JSGridItem>::StaticMethod("forceRebuild", &JSGridItem::ForceRebuild, opt);
     JSClass<JSGridItem>::StaticMethod("selectable", &JSGridItem::SetSelectable, opt);
+    JSClass<JSGridItem>::StaticMethod("onSelect", &JSGridItem::SelectCallback);
     JSClass<JSGridItem>::StaticMethod("width", &JSGridItem::SetGridItemWidth);
     JSClass<JSGridItem>::StaticMethod("height", &JSGridItem::SetGridItemHeight);
     JSClass<JSGridItem>::StaticMethod("selected", &JSGridItem::SetSelected);

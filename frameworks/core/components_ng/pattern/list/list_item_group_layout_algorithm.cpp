@@ -66,6 +66,16 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto contentConstraint = layoutProperty->GetContentLayoutConstraint().value();
     auto contentIdealSize = CreateIdealSize(
         contentConstraint, axis_, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS));
+    auto listItemGroupLayoutProperty =
+        AceType::DynamicCast<ListItemGroupLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(listItemGroupLayoutProperty);
+    auto layoutPolicy = listItemGroupLayoutProperty->GetLayoutPolicyProperty();
+    auto isCrossWrap =
+        layoutPolicy.has_value() && ((axis_ == Axis::VERTICAL && layoutPolicy.value().IsWidthWrap()) ||
+                                        (axis_ == Axis::HORIZONTAL && layoutPolicy.value().IsHeightWrap()));
+    auto isCrossFix =
+        layoutPolicy.has_value() && ((axis_ == Axis::VERTICAL && layoutPolicy.value().IsWidthFix()) ||
+                                        (axis_ == Axis::HORIZONTAL && layoutPolicy.value().IsHeightFix()));
 
     auto mainPercentRefer = GetMainAxisSize(contentConstraint.percentReference, axis_);
     auto space = layoutProperty->GetSpace().value_or(Dimension(0));
@@ -131,8 +141,11 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     ReverseLayoutedItemInfo(totalItemCount_, totalMainSize_);
     auto crossSize = contentIdealSize.CrossSize(axis_);
-    if (crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) {
+    if ((crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) || isCrossFix) {
         contentIdealSize.SetCrossSize(GetChildMaxCrossSize(layoutWrapper, axis_), axis_);
+    } else if (isCrossWrap) {
+        contentIdealSize.SetCrossSize(
+            std::min(GetChildMaxCrossSize(layoutWrapper, axis_), crossSize.value_or(0.0f)), axis_);
     }
     contentIdealSize.SetMainSize(totalMainSize_, axis_);
     AddPaddingToSize(padding, contentIdealSize);
@@ -1145,6 +1158,7 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
             if (GreatOrEqual(pos->second.endPos, startPos - referencePos)) {
                 break;
             }
+            recycledItemPosition_.insert(*pos);
             cachedItemPosition_.insert(*pos);
             pos = itemPosition_.erase(pos);
         }
@@ -1155,6 +1169,7 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
         if (LessOrEqual(pos->second.startPos, endPos - (referencePos - totalMainSize_))) {
             break;
         }
+        recycledItemPosition_.insert(*pos);
         cachedItemPosition_.insert(*pos);
         removeIndexes.emplace_back(pos->first);
     }
@@ -1652,7 +1667,7 @@ bool ListItemGroupLayoutAlgorithm::IsRoundingMode(LayoutWrapper* layoutWrapper)
 
 void ListItemGroupLayoutAlgorithm::ResetLayoutItem(LayoutWrapper* layoutWrapper)
 {
-    for (auto& pos : cachedItemPosition_) {
+    for (auto& pos : recycledItemPosition_) {
         auto wrapper = GetListItem(layoutWrapper, pos.first);
         auto wrapperFrameNode = AceType::DynamicCast<FrameNode>(wrapper);
         if (wrapperFrameNode) {

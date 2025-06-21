@@ -23,19 +23,21 @@
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+enum class MenuItemGroupStringType {
+    HEADER,
+    FOOTER
+};
 class ACE_FORCE_EXPORT MenuItemGroupView {
 public:
     // createMenuItem with custom
     static void Create();
-    static RefPtr<FrameNode>CreateFrameNode(int32_t nodeId);
     static void SetHeader(const RefPtr<UINode>& header);
     static void SetHeader(const std::string& headerStr);
     static void SetFooter(const RefPtr<UINode>& footer);
     static void SetFooter(const std::string& footerStr);
-    static void SetHeader(FrameNode* frameNode, const std::optional<std::string>& headerStr);
-    static void SetHeader(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);
-    static void SetFooter(FrameNode* frameNode, const std::optional<std::string>& footerStr);
-    static void SetFooter(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);
+    static void CreateWithStringResourceObj(
+        const RefPtr<ResourceObject>& resObj, MenuItemGroupStringType type);
+    static const std::string StringTypeToString(const MenuItemGroupStringType type);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_GROUP_MENU_ITEM_GROUP_VIEW_H

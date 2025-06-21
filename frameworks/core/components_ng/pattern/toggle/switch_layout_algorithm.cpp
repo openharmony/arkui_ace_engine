@@ -60,6 +60,12 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
             frameHeight = contentConstraint.maxSize.Height();
         }
     }
+
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+
+    if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
+        LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, frameWidth, frameHeight);
+    }
     float width = 0.0f;
     float height = 0.0f;
     CalcHeightAndWidth(frameNode, height, width, frameHeight, frameWidth);
@@ -129,6 +135,17 @@ void SwitchLayoutAlgorithm::CalcHeightAndWidth(
             height = frameHeight;
             width = frameWidth;
         }
+    }
+}
+
+void SwitchLayoutAlgorithm::LayoutPolicyIsMatchParent(const LayoutConstraintF& contentConstraint,
+    std::optional<NG::LayoutPolicyProperty> layoutPolicy, float& frameWidth, float& frameHeight)
+{
+    if (layoutPolicy->IsWidthMatch()) {
+        frameWidth = contentConstraint.parentIdealSize.Width().value();
+    }
+    if (layoutPolicy->IsHeightMatch()) {
+        frameHeight = contentConstraint.parentIdealSize.Height().value();
     }
 }
 } // namespace OHOS::Ace::NG

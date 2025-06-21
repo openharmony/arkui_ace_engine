@@ -78,6 +78,7 @@ public:
     void SetResizableSlice(ImageResizableSlice& slice) override;
     void SetResizableLattice(const RefPtr<DrawingLattice>& lattice) override;
     void ResetResizableLattice() override;
+    void SetImageFillSetByUser(bool value) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
     static void InitImage(FrameNode* frameNode, const std::string& src);

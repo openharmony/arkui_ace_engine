@@ -140,6 +140,12 @@ ace_unittest("focus_view_test_ng") {
   sources = [ "focus_view_test_ng.cpp" ]
 }
 
+ace_unittest("scroll_adjust_manager_test_ng") {
+  type = "new"
+  module_output = "manager"
+  sources = [ "scroll_adjust_manager_test_ng.cpp" ]
+}
+
 ace_unittest("safe_area_manager_test_ng") {
   type = "new"
   module_output = "manager"
@@ -206,5 +212,6 @@ group("core_manager_unittest") {
     ":select_overlay_proxy_test_ng",
     ":shared_overlay_manager_test_ng",
     ":theme_manager_test_ng",
+    ":scroll_adjust_manager_test_ng",
   ]
 }

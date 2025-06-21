@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,48 +66,48 @@ const std::vector<FlexDirection> LAYOUT_DIRECTION = { FlexDirection::ROW, FlexDi
 const size_t GRID_ITEM_SIZE_RESULT_LENGTH = 2;
 const size_t GRID_ITEM_RECT_RESULT_LENGTH = 4;
 
-void ParseGridItemSize(const panda::ecmascript::EcmaVM* vm, const Local<JSValueRef>& value, GridItemSize& gridItemSize)
+void ParseGridItemSize(const JSRef<JSVal>& value, GridItemSize& gridItemSize)
 {
-    if (value->IsArray(vm)) {
-        auto array = Local<panda::ArrayRef>(value);
-        auto length = array->Length(vm);
+    if (value->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(value);
+        auto length = array->Length();
         if (length != GRID_ITEM_SIZE_RESULT_LENGTH) {
             return;
         }
-        auto rows = panda::ArrayRef::GetValueAt(vm, array, 0);
+        JSRef<JSVal> rows = array->GetValueAt(0);
         if (rows->IsNumber()) {
-            gridItemSize.rows = static_cast<int32_t>(rows->ToNumber(vm)->Value());
+            gridItemSize.rows = rows->ToNumber<int32_t>();
         }
-        auto columns = panda::ArrayRef::GetValueAt(vm, array, 1);
+        JSRef<JSVal> columns = array->GetValueAt(1);
         if (columns->IsNumber()) {
-            gridItemSize.columns = static_cast<int32_t>(columns->ToNumber(vm)->Value());
+            gridItemSize.columns = columns->ToNumber<int32_t>();
         }
     }
 }
 
-void ParseGridItemRect(const panda::ecmascript::EcmaVM* vm, const Local<JSValueRef>& value, GridItemRect& gridItemRect)
+void ParseGridItemRect(const JSRef<JSVal>& value, GridItemRect& gridItemRect)
 {
-    if (value->IsArray(vm)) {
-        auto array = Local<panda::ArrayRef>(value);
-        auto length = array->Length(vm);
+    if (value->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(value);
+        auto length = array->Length();
         if (length != GRID_ITEM_RECT_RESULT_LENGTH) {
             return;
         }
-        auto rowStart = panda::ArrayRef::GetValueAt(vm, array, GridItemRect::ROW_START);
+        JSRef<JSVal> rowStart = array->GetValueAt(GridItemRect::ROW_START);
         if (rowStart->IsNumber()) {
-            gridItemRect.rowStart = static_cast<int32_t>(rowStart->ToNumber(vm)->Value());
+            gridItemRect.rowStart = rowStart->ToNumber<int32_t>();
         }
-        auto rowSpan = panda::ArrayRef::GetValueAt(vm, array, GridItemRect::ROW_SPAN);
+        JSRef<JSVal> rowSpan = array->GetValueAt(GridItemRect::ROW_SPAN);
         if (rowSpan->IsNumber()) {
-            gridItemRect.rowSpan = static_cast<int32_t>(rowSpan->ToNumber(vm)->Value());
+            gridItemRect.rowSpan = rowSpan->ToNumber<int32_t>();
         }
-        auto columnStart = panda::ArrayRef::GetValueAt(vm, array, GridItemRect::COLUMN_START);
+        JSRef<JSVal> columnStart = array->GetValueAt(GridItemRect::COLUMN_START);
         if (columnStart->IsNumber()) {
-            gridItemRect.columnStart = static_cast<int32_t>(columnStart->ToNumber(vm)->Value());
+            gridItemRect.columnStart = columnStart->ToNumber<int32_t>();
         }
-        auto columnSpan = panda::ArrayRef::GetValueAt(vm, array, GridItemRect::COLUMN_SPAN);
+        JSRef<JSVal> columnSpan = array->GetValueAt(GridItemRect::COLUMN_SPAN);
         if (columnSpan->IsNumber()) {
-            gridItemRect.columnSpan = static_cast<int32_t>(columnSpan->ToNumber(vm)->Value());
+            gridItemRect.columnSpan = columnSpan->ToNumber<int32_t>();
         }
     }
 }
@@ -116,19 +116,17 @@ void ParseGetGridItemSize(const JSCallbackInfo& info, JSRef<JSObject>& obj, Grid
 {
     auto getSizeByIndex = obj->GetProperty("onGetIrregularSizeByIndex");
     if (getSizeByIndex->IsFunction()) {
-        auto vm = info.GetVm();
-        auto jsFunc = JSRef<JSFunc>::Cast(getSizeByIndex);
-        auto func = jsFunc->GetLocalHandle();
-        auto onGetIrregularSizeByIndex = [vm, func = panda::CopyableGlobal(vm, func)](int32_t index) {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
+        auto onGetIrregularSizeByIndex = [execCtx = info.GetExecutionContext(),
+                                             func = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
+                                                 JSRef<JSFunc>::Cast(getSizeByIndex))](int32_t index) {
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
             GridItemSize gridItemSize;
-            panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, index) };
-            auto result = func->Call(vm, func.ToLocal(), params, 1);
-            if (!result->IsArray(vm)) {
+            JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
+            auto result = func->ExecuteJS(1, &itemIndex);
+            if (!result->IsArray()) {
                 return gridItemSize;
             }
-            ParseGridItemSize(vm, result, gridItemSize);
+            ParseGridItemSize(result, gridItemSize);
             return gridItemSize;
         };
         option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
@@ -139,19 +137,17 @@ void ParseGetGridItemRect(const JSCallbackInfo& info, JSRef<JSObject>& obj, Grid
 {
     auto getRectByIndex = obj->GetProperty("onGetRectByIndex");
     if (getRectByIndex->IsFunction()) {
-        auto vm = info.GetVm();
-        auto jsFunc = JSRef<JSFunc>::Cast(getRectByIndex);
-        auto func = jsFunc->GetLocalHandle();
-        auto onGetRectByIndex = [vm, func = panda::CopyableGlobal(vm, func)](int32_t index) {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
+        auto onGetRectByIndex = [execCtx = info.GetExecutionContext(),
+                                    func = AceType::MakeRefPtr<JsFunction>(
+                                        JSRef<JSObject>(), JSRef<JSFunc>::Cast(getRectByIndex))](int32_t index) {
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
             GridItemRect gridItemRect;
-            panda::Local<panda::JSValueRef> params[1] = { panda::NumberRef::New(vm, index) };
-            auto result = func->Call(vm, func.ToLocal(), params, 1);
-            if (!result->IsArray(vm)) {
+            JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
+            auto result = func->ExecuteJS(1, &itemIndex);
+            if (!result->IsArray()) {
                 return gridItemRect;
             }
-            ParseGridItemRect(vm, result, gridItemRect);
+            ParseGridItemRect(result, gridItemRect);
             return gridItemRect;
         };
         option.getRectByIndex = std::move(onGetRectByIndex);
@@ -166,7 +162,7 @@ void SetGridLayoutOptions(const JSCallbackInfo& info)
     GridLayoutOptions option;
     auto obj = JSRef<JSObject>::Cast(info[1]);
     auto value = obj->GetProperty("regularSize");
-    ParseGridItemSize(info.GetVm(), value->GetLocalHandle(), option.regularSize);
+    ParseGridItemSize(value, option.regularSize);
 
     // only support regularSize(1, 1)
     option.regularSize.rows = 1;
@@ -192,6 +188,25 @@ void SetGridLayoutOptions(const JSCallbackInfo& info)
     ParseGetGridItemRect(info, obj, option);
 
     GridModel::GetInstance()->SetLayoutOptions(option);
+}
+
+void JsOnScrollToIndex(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto onScrollIndex = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(info[0])](
+                             const BaseEventInfo* event) {
+        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<V2::GridEventInfo>(event);
+        if (!eventInfo) {
+            return;
+        }
+        auto params = ConvertToJSValues(eventInfo->GetScrollIndex());
+        func->Call(JSRef<JSObject>(), static_cast<int>(params.size()), params.data());
+    };
+    GridModel::GetInstance()->SetOnScrollToIndex(std::move(onScrollIndex));
 }
 } // namespace
 
@@ -295,6 +310,35 @@ void JSGrid::JsGridHeight(const JSCallbackInfo& info)
     GridModel::GetInstance()->SetGridHeight(value);
 }
 
+void JSGrid::JsOnScrollBarUpdate(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto onScrollBarUpdate = [execCtx = info.GetExecutionContext(),
+                                 func = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(),
+                                     JSRef<JSFunc>::Cast(info[0]))](int32_t index, const Dimension& offset) {
+        JSRef<JSVal> itemIndex = JSRef<JSVal>::Make(ToJSValue(index));
+        JSRef<JSVal> itemOffset = ConvertToJSValue(offset);
+        JSRef<JSVal> params[2] = { itemIndex, itemOffset };
+        auto result = func->ExecuteJS(2, params);
+        if (result->IsObject()) {
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(result);
+
+            Dimension totalOffset_;
+            Dimension totalLength_;
+            if (!ConvertFromJSValue(obj->GetProperty("totalOffset"), totalOffset_) ||
+                !ConvertFromJSValue(obj->GetProperty("totalLength"), totalLength_)) {
+                return std::pair<float, float>(0, 0);
+            } else {
+                return std::pair<float, float>(totalOffset_.ConvertToPx(), totalLength_.ConvertToPx());
+            }
+        }
+        return std::pair<float, float>(0, 0);
+    };
+    GridModel::GetInstance()->SetOnScrollBarUpdate(std::move(onScrollBarUpdate));
+}
+
 void JSGrid::SetScrollEnabled(const JSCallbackInfo& args)
 {
     GridModel::GetInstance()->SetScrollEnabled(args[0]->IsBoolean() ? args[0]->ToBoolean() : true);
@@ -326,6 +370,7 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("scrollBarColor", &JSGrid::SetScrollBarColor, opt);
     JSClass<JSGrid>::StaticMethod("clip", &JSScrollable::JsClip);
 
+    JSClass<JSGrid>::StaticMethod("onScrollBarUpdate", &JSGrid::JsOnScrollBarUpdate);
     JSClass<JSGrid>::StaticMethod("cachedCount", &JSGrid::SetCachedCount);
     JSClass<JSGrid>::StaticMethod("editMode", &JSGrid::SetEditMode, opt);
     JSClass<JSGrid>::StaticMethod("multiSelectable", &JSGrid::SetMultiSelectable, opt);
@@ -337,15 +382,27 @@ void JSGrid::JSBind(BindingTarget globalObj)
     JSClass<JSGrid>::StaticMethod("edgeEffect", &JSGrid::SetEdgeEffect, opt);
     JSClass<JSGrid>::StaticMethod("direction", &JSGrid::SetDirection, opt);
     JSClass<JSGrid>::StaticMethod("supportAnimation", &JSGrid::SetSupportAnimation, opt);
+    JSClass<JSGrid>::StaticMethod("onItemDragEnter", &JSGrid::JsOnGridDragEnter);
+    JSClass<JSGrid>::StaticMethod("onItemDragMove", &JSGrid::JsOnGridDragMove);
+    JSClass<JSGrid>::StaticMethod("onItemDragLeave", &JSGrid::JsOnGridDragLeave);
+    JSClass<JSGrid>::StaticMethod("onItemDragStart", &JSGrid::JsOnGridDragStart);
     JSClass<JSGrid>::StaticMethod("height", &JSGrid::JsGridHeight);
+    JSClass<JSGrid>::StaticMethod("onItemDrop", &JSGrid::JsOnGridDrop);
     JSClass<JSGrid>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
     JSClass<JSGrid>::StaticMethod("nestedScroll", &JSGrid::SetNestedScroll);
     JSClass<JSGrid>::StaticMethod("enableScrollInteraction", &JSGrid::SetScrollEnabled);
     JSClass<JSGrid>::StaticMethod("friction", &JSGrid::SetFriction);
     JSClass<JSGrid>::StaticMethod("focusWrapMode", &JSGrid::SetFocusWrapMode);
     JSClass<JSGrid>::StaticMethod("alignItems", &JSGrid::SetAlignItems);
+    JSClass<JSGrid>::StaticMethod("syncLoad", &JSGrid::SetSyncLoad);
 
     JSClass<JSGrid>::StaticMethod("onScroll", &JSGrid::JsOnScroll);
+    JSClass<JSGrid>::StaticMethod("onReachStart", &JSGrid::JsOnReachStart);
+    JSClass<JSGrid>::StaticMethod("onReachEnd", &JSGrid::JsOnReachEnd);
+    JSClass<JSGrid>::StaticMethod("onScrollStart", &JSGrid::JsOnScrollStart);
+    JSClass<JSGrid>::StaticMethod("onScrollStop", &JSGrid::JsOnScrollStop);
+    JSClass<JSGrid>::StaticMethod("onScrollIndex", &JSGrid::JsOnScrollIndex);
+    JSClass<JSGrid>::StaticMethod("onScrollFrameBegin", &JSGrid::JsOnScrollFrameBegin);
 
     JSClass<JSGrid>::InheritAndBind<JSScrollableBase>(globalObj);
 }
@@ -475,6 +532,101 @@ void JSGrid::SetDirection(const std::string& dir)
     GridModel::GetInstance()->SetIsRTL(direction);
 }
 
+void JSGrid::JsOnGridDragEnter(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onItemDragEnter = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc)](
+                               const ItemDragInfo& dragInfo) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Grid.onItemDragEnter");
+        func->ItemDragEnterExecute(dragInfo);
+    };
+    GridModel::GetInstance()->SetOnItemDragEnter(std::move(onItemDragEnter));
+}
+
+void JSGrid::JsOnGridDragMove(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onItemDragMove = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc)](
+                              const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Grid.onItemDragMove");
+        func->ItemDragMoveExecute(dragInfo, itemIndex, insertIndex);
+    };
+    GridModel::GetInstance()->SetOnItemDragMove(std::move(onItemDragMove));
+}
+
+void JSGrid::JsOnGridDragLeave(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onItemDragLeave = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc)](
+                               const ItemDragInfo& dragInfo, int32_t itemIndex) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Grid.onItemDragLeave");
+        func->ItemDragLeaveExecute(dragInfo, itemIndex);
+    };
+    GridModel::GetInstance()->SetOnItemDragLeave(std::move(onItemDragLeave));
+}
+
+void JSGrid::JsOnGridDragStart(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto jsOnDragFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onItemDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragFunc), node = targetNode](
+                               const ItemDragInfo& dragInfo, int32_t itemIndex) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Grid.onItemDragStart");
+        auto ret = func->ItemDragStartExecute(dragInfo, itemIndex);
+        if (!ret->IsObject()) {
+            return;
+        }
+
+        auto builderObj = JSRef<JSObject>::Cast(ret);
+        auto builder = builderObj->GetProperty("builder");
+        if (!builder->IsFunction()) {
+            return;
+        }
+        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+        CHECK_NULL_VOID(builderFunc);
+        PipelineContext::SetCallBackNode(node);
+        builderFunc->Execute();
+    };
+    GridModel::GetInstance()->SetOnItemDragStart(std::move(onItemDragStart));
+}
+
+void JSGrid::JsOnGridDrop(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onItemDrop = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
+                          const ItemDragInfo& dragInfo, int32_t itemIndex, int32_t insertIndex, bool isSuccess) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Grid.onItemDrop");
+        func->ItemDropExecute(dragInfo, itemIndex, insertIndex, isSuccess);
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onItemDrop");
+    };
+    GridModel::GetInstance()->SetOnItemDrop(std::move(onItemDrop));
+}
+
 void JSGrid::SetMultiSelectable(bool multiSelectable)
 {
     GridModel::GetInstance()->SetMultiSelectable(multiSelectable);
@@ -551,10 +703,22 @@ void JSGrid::SetAlignItems(const JSCallbackInfo& info)
     }
 }
 
+void JSGrid::SetSyncLoad(const JSCallbackInfo& info)
+{
+    bool syncLoad = false;
+    if (info.Length() >= 1) {
+        auto value = info[0];
+        if (value->IsBoolean()) {
+            syncLoad = value->ToBoolean();
+        }
+    }
+    GridModel::GetInstance()->SetSyncLoad(syncLoad);
+}
+
 void JSGrid::JsOnScroll(const JSCallbackInfo& args)
 {
     if (args[0]->IsFunction()) {
-        auto onScroll = [func = JSRef<JSFunc>::Cast(args[0])](
+        auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
                             const CalcDimension& scrollOffset, const ScrollState& scrollState) {
             auto params = ConvertToJSValues(scrollOffset, scrollState);
             func->Call(JSRef<JSObject>(), params.size(), params.data());
@@ -564,4 +728,104 @@ void JSGrid::JsOnScroll(const JSCallbackInfo& args)
     }
     args.ReturnSelf();
 }
+
+void JSGrid::JsOnScrollStart(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            return;
+        };
+        GridModel::GetInstance()->SetOnScrollStart(std::move(onScrollStart));
+    }
+    args.ReturnSelf();
+}
+
+void JSGrid::JsOnScrollStop(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onScrollStop");
+            return;
+        };
+        GridModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
+    }
+    args.ReturnSelf();
+}
+
+void JSGrid::JsOnScrollIndex(const JSCallbackInfo& args)
+{
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        JsOnScrollToIndex(args);
+        return;
+    }
+
+    if (args[0]->IsFunction()) {
+        auto onScrollIndex = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                 const int32_t first, const int32_t last) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto params = ConvertToJSValues(first, last);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+            return;
+        };
+        GridModel::GetInstance()->SetOnScrollIndex(std::move(onScrollIndex));
+    }
+    args.ReturnSelf();
+}
+
+void JSGrid::JsOnScrollFrameBegin(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onScrollBegin = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
+                                 const Dimension& offset, const ScrollState& state) -> ScrollFrameResult {
+            ScrollFrameResult scrollRes { .offset = offset };
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, scrollRes);
+            auto params = ConvertToJSValues(offset, state);
+            auto result = func->Call(JSRef<JSObject>(), params.size(), params.data());
+            if (result.IsEmpty()) {
+                return scrollRes;
+            }
+
+            if (!result->IsObject()) {
+                return scrollRes;
+            }
+
+            auto resObj = JSRef<JSObject>::Cast(result);
+            auto dxRemainValue = resObj->GetProperty("offsetRemain");
+            if (dxRemainValue->IsNumber()) {
+                scrollRes.offset = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+            }
+            return scrollRes;
+        };
+        GridModel::GetInstance()->SetOnScrollFrameBegin(std::move(onScrollBegin));
+    }
+}
+
+void JSGrid::JsOnReachStart(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onReachStart");
+            return;
+        };
+        GridModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
+    }
+    args.ReturnSelf();
+}
+
+void JSGrid::JsOnReachEnd(const JSCallbackInfo& args)
+{
+    if (args[0]->IsFunction()) {
+        auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
+            func->Call(JSRef<JSObject>());
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onReachEnd");
+            return;
+        };
+        GridModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
+    }
+    args.ReturnSelf();
+}
+
 } // namespace OHOS::Ace::Framework

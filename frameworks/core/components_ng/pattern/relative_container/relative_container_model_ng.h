@@ -24,6 +24,7 @@ public:
     void Create() override;
     void SetBarrier(const std::vector<BarrierInfo>& barrierInfo) override;
     void SetGuideline(const std::vector<GuidelineInfo>& guidelineInfo) override;
+    void ResetResObj(const std::string& key) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetBarrier(FrameNode* frameNode, const std::vector<BarrierInfo>& barrierInfo);
@@ -34,6 +35,7 @@ public:
 
     static void ResetBarrier(FrameNode* frameNode);
     static void ResetGuideline(FrameNode* frameNode);
+    static void ResetResObj(FrameNode* frameNode, const std::string& key);
 
 };
 } // namespace OHOS::Ace::NG

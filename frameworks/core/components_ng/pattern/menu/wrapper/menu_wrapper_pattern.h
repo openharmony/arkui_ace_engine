@@ -500,6 +500,7 @@ public:
         dumpInfo_.defaultPlacement = dumpInfo.defaultPlacement;
         dumpInfo_.finalPosition = dumpInfo.finalPosition;
         dumpInfo_.finalPlacement = dumpInfo.finalPlacement;
+        dumpInfo_.anchorPosition = dumpInfo.anchorPosition;
     }
 
     bool GetHasCustomRadius() const

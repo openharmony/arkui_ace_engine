@@ -57,6 +57,25 @@ const char INSPECTOR_ID[] = "$ID";
 const char INSPECTOR_DEBUGLINE[] = "$debugLine";
 const char INSPECTOR_ATTRS[] = "$attrs";
 const char INSPECTOR_CHILDREN[] = "$children";
+
+class InspectorTestNode : public UINode {
+    DECLARE_ACE_TYPE(InspectorTestNode, UINode);
+
+public:
+    static RefPtr<InspectorTestNode> CreateTestNode(int32_t nodeId)
+    {
+        auto node = MakeRefPtr<InspectorTestNode>(nodeId);
+        return node;
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
+    explicit InspectorTestNode(int32_t nodeId) : UINode("InspectorTestNode", nodeId) {}
+    ~InspectorTestNode() override = default;
+};
 }; // namespace
 
 class MockStageManager : public StageManager {
@@ -905,6 +924,52 @@ HWTEST_F(InspectorTestNg, GetRecordAllPagesNodes_001, TestSize.Level1)
     EXPECT_EQ(node3->GetParentId(), 6);
 }
 
+HWTEST_F(InspectorTestNg, GetRecordAllPagesNodes_002, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    // STEP1:Create stageNode->pageA->frameNode
+    RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode("stageNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    stageNode->children_.clear();
+    const RefPtr<FrameNode> pageA = FrameNode::CreateFrameNode("pageA", 2,
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageA);
+    auto frameNode = FrameNode::CreateFrameNode("frameNode0", 5, AceType::MakeRefPtr<Pattern>(), true);
+    pageA->AddChild(frameNode);
+    // STEP2:parent is CustomNode,stageNode->pageA->frameNode->customNode->customNodeChild
+    auto customNode = CustomNode::CreateCustomNode(100, "custom");
+    auto customNodeChild = FrameNode::CreateFrameNode("customNodeChild", 103, AceType::MakeRefPtr<Pattern>(), true);
+    customNodeChild->isActive_ = true;
+    customNode->AddChild(customNodeChild);
+    frameNode->AddChild(customNode);
+    // STEP3:parent is SpanNode,stageNode->pageA->frameNode->spanNode->spanNodeChild
+    auto spanNode = SpanNode::GetOrCreateSpanNode(int32_t(101));
+    auto spanNodeChild = FrameNode::CreateFrameNode("spanNodeChild", 104, AceType::MakeRefPtr<Pattern>(), true);
+    spanNodeChild->isActive_ = true;
+    spanNode->AddChild(spanNodeChild);
+    frameNode->AddChild(spanNode);
+    // STEP4:parent is TestNode,stageNode->pageA->frameNode->testNode->testNodeChild
+    auto testNode = InspectorTestNode::CreateTestNode(102);
+    auto testNodeChild = FrameNode::CreateFrameNode("testNodeChild", 105, AceType::MakeRefPtr<Pattern>(), true);
+    testNodeChild->isActive_ = true;
+    testNode->AddChild(testNodeChild);
+    frameNode->AddChild(testNode);
+    NG::InspectorTreeMap treesInfos;
+    Inspector::GetRecordAllPagesNodes(treesInfos);
+    auto treeNode = treesInfos[102];
+    EXPECT_TRUE(treeNode == nullptr);
+    treeNode = treesInfos[103];
+    EXPECT_TRUE(treeNode != nullptr);
+    EXPECT_EQ(treeNode->GetParentId(), 100);
+    treeNode = treesInfos[104];
+    EXPECT_TRUE(treeNode != nullptr);
+    EXPECT_EQ(treeNode->GetParentId(), 101);
+    treeNode = treesInfos[105];
+    EXPECT_TRUE(treeNode != nullptr);
+    EXPECT_EQ(treeNode->GetParentId(), 5);
+}
+
 /**
  * @tc.name: InspectorTestNg022
  * @tc.desc: Test the method GetInspectorChildrenInfo
@@ -1717,5 +1782,71 @@ HWTEST_F(InspectorTestNg, SimplifiedInspectorTest003, TestSize.Level1)
     inspector->GetInspectorBackgroundAsync(collector);
     EXPECT_TRUE(inspector->isBackground_);
     EXPECT_TRUE(inspector->isAsync_);
+}
+
+bool HasInternalIds(const std::unique_ptr<JsonValue>& children)
+{
+    auto hasInternalIds = false;
+    CHECK_NULL_RETURN(children, false);
+    for (size_t i = 0; i < children->GetArraySize(); i++) {
+        auto child = children->GetArrayItem(i);
+        if (child->GetValue("$type")->GetString() == "button") {
+            auto internal = child->Contains("$INTERNAL_IDS");
+            if (internal) {
+                hasInternalIds = true;
+                break;
+            }
+        }
+    }
+    return hasInternalIds;
+}
+
+/**
+ * @tc.name: InspectorTestNg027
+ * @tc.desc: Test the operation of GetInspector
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg027, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode("sageNode", id, AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    stageNode->children_.clear();
+
+    auto id2 = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> pageA = FrameNode::CreateFrameNode("PageA", id2,
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageA);
+    auto id3 = ElementRegister::GetInstance()->MakeUniqueId();
+    
+    auto button = FrameNode::CreateFrameNode("button", id3, AceType::MakeRefPtr<Pattern>(), true);
+    pageA->AddChild(button);
+
+    auto id4 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto text = FrameNode::CreateFrameNode("text", id4, AceType::MakeRefPtr<Pattern>(), true);
+    button->AddChild(text);
+    button->isActive_ = true;
+
+    std::string tree = Inspector::GetInspector();
+    auto jsonRoot  = JsonUtil::ParseJsonString(tree);
+    ASSERT_NE(jsonRoot, nullptr);
+    
+    auto children = jsonRoot->GetValue("$children");
+    ASSERT_TRUE(children->IsArray());
+    auto hasInternalIds = HasInternalIds(children);
+    ASSERT_FALSE(hasInternalIds);
+
+    text->SetInternal();
+    tree = Inspector::GetInspector();
+    jsonRoot  = JsonUtil::ParseJsonString(tree);
+    ASSERT_NE(jsonRoot, nullptr);
+    
+    children = jsonRoot->GetValue("$children");
+    ASSERT_TRUE(children->IsArray());
+    hasInternalIds = HasInternalIds(children);
+    ASSERT_TRUE(hasInternalIds);
 }
 } // namespace OHOS::Ace::NG

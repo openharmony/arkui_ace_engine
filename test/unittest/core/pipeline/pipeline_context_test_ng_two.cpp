@@ -878,11 +878,13 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg154, TestSize.Level1)
     context_->FlushMouseEventForHover();
     EXPECT_FALSE(context_->lastMouseEvent_->pointerEvent);
 
+    context_->lastMouseEvent_->action = MouseAction::WINDOW_ENTER;
     context_->lastMouseEvent_->isMockWindowTransFlag = false;
     context_->windowSizeChangeReason_ = WindowSizeChangeReason::MAXIMIZE;
     context_->FlushMouseEventForHover();
     EXPECT_FALSE(context_->lastMouseEvent_->pointerEvent);
 
+    context_->lastMouseEvent_->action = MouseAction::WINDOW_LEAVE;
     context_->lastMouseEvent_->isMockWindowTransFlag = false;
     context_->windowSizeChangeReason_ = WindowSizeChangeReason::RECOVER;
     context_->FlushMouseEventForHover();
@@ -2445,6 +2447,24 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg402, TestSize.Level1)
     EXPECT_TRUE(context_->attachedNodeSet_.count(AceType::WeakClaim(AceType::RawPtr(node))));
     node->DetachContext(false);
     EXPECT_FALSE(context_->attachedNodeSet_.count(AceType::WeakClaim(AceType::RawPtr(node))));
+}
+
+/**
+ * @tc.name: PipelineContextTestNg300
+ * @tc.desc: Test the function NotifyColorModeChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg403, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Call Function NotifyColorModeChange.
+     * @tc.expected: context_->instanceId_ == Container::CurrentIdSafely().
+     */
+    ASSERT_NE(context_, nullptr);
+    uint32_t colorMode = static_cast<uint32_t>(ColorMode::LIGHT);
+    context_->rootNode_->isDarkMode_ = false;
+    context_->NotifyColorModeChange(colorMode);
+    EXPECT_EQ(context_->instanceId_, Container::CurrentIdSafely());
 }
 } // namespace NG
 } // namespace OHOS::Ace

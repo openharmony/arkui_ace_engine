@@ -70,8 +70,8 @@ void ConvertResourceColor(const EcmaVM* vm, const Local<JSValueRef>& item, std::
     colors.emplace_back(colorStopArray);
 }
 
-void ConvertGradientColor(
-    const EcmaVM* vm, const Local<JSValueRef>& itemParam, std::vector<NG::ColorStopArray>& colors, NG::GaugeType& type)
+void ConvertGradientColor(const EcmaVM* vm, const Local<JSValueRef>& itemParam, std::vector<NG::ColorStopArray>& colors,
+    NG::GaugeType& type, bool& isGradientColor)
 {
     if (!itemParam->IsObject(vm)) {
         type = NG::GaugeType::TYPE_CIRCULAR_MONOCHROME;
@@ -90,6 +90,7 @@ void ConvertGradientColor(
         colorStopArray.emplace_back(std::make_pair(ERROR_COLOR, Dimension(0.0)));
         colors.emplace_back(colorStopArray);
     } else {
+        isGradientColor = true;
         colors.emplace_back(jsLinearGradient->GetGradient());
     }
 }
@@ -98,55 +99,70 @@ void SetGradientColorsObject(const EcmaVM* vm, const Local<JSValueRef>& info, st
     std::vector<float>& weights, NG::GaugeType& type, ArkUINodeHandle nativeNode)
 {
     ArkUIGradientType gradient;
-    ConvertGradientColor(vm, info, colors, type);
+    bool isGradientColor = false;
+    ConvertGradientColor(vm, info, colors, type, isGradientColor);
     auto colorStruct = std::make_unique<uint32_t[]>(colors[0].size());
+    auto colorResourceIdStruct = std::make_unique<uint32_t[]>(colors[0].size());
     auto offsetStruct = std::make_unique<ArkUILengthType[]>(colors[0].size());
     std::vector<uint32_t> linearLengths { colors[0].size() };
     for (uint32_t i = 0; i < colors[0].size(); i++) {
         colorStruct[i] = colors[0][i].first.GetValue();
+        colorResourceIdStruct[i] = colors[0][i].first.GetResourceId();
         offsetStruct[i].number = colors[0][i].second.Value();
         offsetStruct[i].unit = static_cast<int8_t>(colors[0][i].second.Unit());
     }
     gradient.color = colorStruct.get();
+    gradient.colorResourceId = colorResourceIdStruct.get();
     gradient.offset = offsetStruct.get();
     gradient.gradientLength = &(*linearLengths.begin());
     gradient.weight = nullptr;
     gradient.type = static_cast<uint32_t>(type);
     gradient.length = 1;
+    gradient.isGradientColor = isGradientColor;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_VOID(nodeModifiers);
     nodeModifiers->getGaugeModifier()->setGradientColors(nativeNode, &gradient, 0);
 }
 
-void SetGradientColorsArray(const EcmaVM* vm, const Local<JSValueRef>& info, std::vector<NG::ColorStopArray>& colors,
-    std::vector<float>& weights, NG::GaugeType& type, ArkUINodeHandle nativeNode)
+struct GradientParams {
+    std::vector<float>& weights;
+    std::vector<NG::ColorStopArray>& colors;
+    bool& isGradientColor;
+};
+
+void SetGradientColorsArray(const EcmaVM* vm, const Local<JSValueRef>& info, ArkUINodeHandle nativeNode,
+    NG::GaugeType& type, const GradientParams& params)
 {
     ArkUIGradientType gradient;
     uint32_t totalLength = 0;
-    std::vector<uint32_t> linearLengths(colors.size(), 0);
-    for (uint32_t i = 0; i < colors.size(); i++) {
-        linearLengths[i] = colors[i].size();
-        totalLength += colors[i].size();
+    std::vector<uint32_t> linearLengths(params.colors.size(), 0);
+    for (uint32_t i = 0; i < params.colors.size(); i++) {
+        linearLengths[i] = params.colors[i].size();
+        totalLength += params.colors[i].size();
     }
     auto colorStruct = std::make_unique<uint32_t[]>(totalLength);
+    auto colorResourceIdStruct = std::make_unique<uint32_t[]>(totalLength);
     auto offsetStruct = std::make_unique<ArkUILengthType[]>(totalLength);
     int32_t pos = 0;
-    for (uint32_t i = 0; i < colors.size(); i++) {
-        for (uint32_t j = 0; j < colors[i].size(); j++, pos++) {
-            colorStruct[pos] = colors[i][j].first.GetValue();
-            offsetStruct[pos].number = colors[i][j].second.Value();
-            offsetStruct[pos].unit = static_cast<int8_t>(colors[i][j].second.Unit());
+    for (uint32_t i = 0; i < params.colors.size(); i++) {
+        for (uint32_t j = 0; j < params.colors[i].size(); j++, pos++) {
+            colorStruct[pos] = params.colors[i][j].first.GetValue();
+            colorResourceIdStruct[pos] = params.colors[i][j].first.GetResourceId();
+            offsetStruct[pos].number = params.colors[i][j].second.Value();
+            offsetStruct[pos].unit = static_cast<int8_t>(params.colors[i][j].second.Unit());
         }
     }
     gradient.color = colorStruct.get();
+    gradient.colorResourceId = colorResourceIdStruct.get();
     gradient.offset = offsetStruct.get();
     gradient.gradientLength = &(*linearLengths.begin());
-    gradient.weight = &(*weights.begin());
+    gradient.weight = &(*params.weights.begin());
     gradient.type = static_cast<uint32_t>(type);
-    gradient.length = colors.size();
+    gradient.length = params.colors.size();
+    gradient.isGradientColor = params.isGradientColor;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_VOID(nodeModifiers);
-    nodeModifiers->getGaugeModifier()->setGradientColors(nativeNode, &gradient, weights.size());
+    nodeModifiers->getGaugeModifier()->setGradientColors(nativeNode, &gradient, params.weights.size());
 }
 
 void SetGradientColors(const EcmaVM* vm, const Local<JSValueRef>& info, ArkUINodeHandle nativeNode)
@@ -170,7 +186,7 @@ void SetGradientColors(const EcmaVM* vm, const Local<JSValueRef>& info, ArkUINod
         nodeModifiers->getGaugeModifier()->resetGradientColors(nativeNode);
         return;
     }
-
+    bool isGradientColor = false;
     for (size_t i = 0; i < jsColorsArray->Length(vm); ++i) {
         if (static_cast<int32_t>(i) >= NG::COLORS_MAX_COUNT) {
             break;
@@ -191,11 +207,11 @@ void SetGradientColors(const EcmaVM* vm, const Local<JSValueRef>& info, ArkUINod
         weights.push_back(weight);
         // Get color
         auto jsColorValue = tempColors->GetValueAt(vm, jsValue, 0);
-        ConvertGradientColor(vm, jsColorValue, colors, type);
+        ConvertGradientColor(vm, jsColorValue, colors, type, isGradientColor);
     }
     type = NG::GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT;
     SortColorStopOffset(colors);
-    SetGradientColorsArray(vm, info, colors, weights, type, nativeNode);
+    SetGradientColorsArray(vm, info, nativeNode, type, { weights, colors, isGradientColor });
 }
 
 ArkUINativeModuleValue GaugeBridge::SetColors(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -376,13 +392,16 @@ ArkUINativeModuleValue GaugeBridge::SetGaugeStrokeWidth(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
 
     CalcDimension strokeWidth;
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, strokeWidth) || strokeWidth.Unit() == DimensionUnit::PERCENT) {
+    RefPtr<ResourceObject> strokeWidthResObj;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, strokeWidth, strokeWidthResObj) ||
+        strokeWidth.Unit() == DimensionUnit::PERCENT) {
         strokeWidth = CalcDimension(0);
     }
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getGaugeModifier()->setGaugeStrokeWidth(
-        nativeNode, strokeWidth.Value(), static_cast<int>(strokeWidth.Unit()));
+    auto strokeWidthRawPtr = AceType::RawPtr(strokeWidthResObj);
+    nodeModifiers->getGaugeModifier()->setGaugeStrokeWidthPtr(
+        nativeNode, strokeWidth.Value(), static_cast<int>(strokeWidth.Unit()), strokeWidthRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -424,27 +443,28 @@ ArkUINativeModuleValue GaugeBridge::SetGaugeTrackShadow(ArkUIRuntimeCallInfo* ru
         nodeModifiers->getGaugeModifier()->setIsShowIndicator(nativeNode, true);
         return panda::JSValueRef::Undefined(vm);
     }
-
-    double radius = 0.0;
-    if (!ArkTSUtils::ParseJsDouble(vm, radiusArg, radius)) {
-        radius = DEFAULT_GAUGE_SHADOW_RADIUS;
+    ArkUIGaugeShadowOptions shadowOptions = { .isShadowVisible = true, .radius = 0.0, .offsetX = 0.0, .offsetY = 0.0 };
+    ArkUIShadowOptionsResource shadowOptionsResource;
+    RefPtr<ResourceObject> radiusResObj;
+    if (!ArkTSUtils::ParseJsDouble(vm, radiusArg, shadowOptions.radius, radiusResObj)) {
+        shadowOptions.radius = DEFAULT_GAUGE_SHADOW_RADIUS;
     }
-
-    if (NonPositive(radius)) {
-        radius = DEFAULT_GAUGE_SHADOW_RADIUS;
+    if (NonPositive(shadowOptions.radius)) {
+        shadowOptions.radius = DEFAULT_GAUGE_SHADOW_RADIUS;
     }
-
-    double offsetX = 0.0;
-    if (!ArkTSUtils::ParseJsDouble(vm, offsetXArg, offsetX)) {
-        offsetX = DEFAULT_GAUGE_SHADOW_OFFSETX;
+    RefPtr<ResourceObject> offsetXResObj;
+    if (!ArkTSUtils::ParseJsDouble(vm, offsetXArg, shadowOptions.offsetX, offsetXResObj)) {
+        shadowOptions.offsetX = DEFAULT_GAUGE_SHADOW_OFFSETX;
     }
-
-    double offsetY = 0.0;
-    if (!ArkTSUtils::ParseJsDouble(vm, offsetYArg, offsetY)) {
-        offsetY = DEFAULT_GAUGE_SHADOW_OFFSETY;
+    RefPtr<ResourceObject> offsetYResObj;
+    if (!ArkTSUtils::ParseJsDouble(vm, offsetYArg, shadowOptions.offsetY, offsetYResObj)) {
+        shadowOptions.offsetY = DEFAULT_GAUGE_SHADOW_OFFSETY;
     }
+    shadowOptionsResource.radiusRawPtr = AceType::RawPtr(radiusResObj);
+    shadowOptionsResource.offsetXRawPtr = AceType::RawPtr(offsetXResObj);
+    shadowOptionsResource.offsetYRawPtr = AceType::RawPtr(offsetYResObj);
 
-    nodeModifiers->getGaugeModifier()->setShadowOptions(nativeNode, radius, offsetX, offsetY, true);
+    nodeModifiers->getGaugeModifier()->setShadowOptionsPtr(nativeNode, shadowOptions, shadowOptionsResource);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -474,24 +494,28 @@ ArkUINativeModuleValue GaugeBridge::SetGaugeIndicator(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getGaugeModifier()->setIsShowIndicator(nativeNode, true);
     std::string iconPath;
-    if (ArkTSUtils::ParseJsMedia(vm, iconArg, iconPath)) {
+    RefPtr<ResourceObject> iconPathResObj;
+    if (ArkTSUtils::ParseJsMedia(vm, iconArg, iconPath, iconPathResObj)) {
         std::string bundleName;
         std::string moduleName;
+        auto iconPathRawPtr = AceType::RawPtr(iconPathResObj);
         ArkTSUtils::GetJsMediaBundleInfo(vm, iconArg, bundleName, moduleName);
-        nodeModifiers->getGaugeModifier()->setIndicatorIconPath(nativeNode,
-            iconPath.c_str(), bundleName.c_str(), moduleName.c_str());
+        nodeModifiers->getGaugeModifier()->setIndicatorIconPathPtr(
+            nativeNode, iconPath.c_str(), bundleName.c_str(), moduleName.c_str(), iconPathRawPtr);
     } else {
         nodeModifiers->getGaugeModifier()->resetIndicatorIconPath(nativeNode);
     }
     CalcDimension space;
+    RefPtr<ResourceObject> spaceResObj;
     if (!ArkTSUtils::ParseJsDimensionVpNG(vm, spaceArg, space, false)) {
         space = NG::INDICATOR_DISTANCE_TO_TOP;
     }
     if (space.IsNegative()) {
         space = NG::INDICATOR_DISTANCE_TO_TOP;
     }
-    nodeModifiers->getGaugeModifier()->setIndicatorSpace(nativeNode,
-        space.CalcValue().c_str(), space.Value(), static_cast<int32_t>(space.Unit()));
+    auto spaceRawPtr = AceType::RawPtr(spaceResObj);
+    nodeModifiers->getGaugeModifier()->setIndicatorSpacePtr(
+        nativeNode, space.CalcValue().c_str(), space.Value(), static_cast<int32_t>(space.Unit()), spaceRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 

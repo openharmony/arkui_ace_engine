@@ -213,6 +213,7 @@ void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(
         componentJson->Put("name", iter.nodeTag.c_str());
         componentJson->Put("items", iter.childrenSize);
         componentJson->Put("sourceLine", GetCodeInfo(iter.codeRow, iter.codeCol).row);
+        componentJson->Put("pagePath", iter.pagePath.c_str());
         std::unique_ptr<JsonValue> componentsJson;
         if (pageJson->Contains("components")) {
             componentsJson = pageJson->GetValue("components");
@@ -223,6 +224,7 @@ void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(
             pageJson->Put("components", componentsJson);
         }
     }
+    LOGI("9901 pageJson: %{public}s", pageJson->ToString().c_str());
     ruleJson->Put(pageJson);
 }
 
@@ -271,6 +273,7 @@ void AceScopedPerformanceCheck::RecordVsyncTimeout(
             componentJson->Put("name", node.second.nodeTag.c_str());
             componentJson->Put("costTime", layoutTime);
             componentJson->Put("sourceLine", GetCodeInfo(node.second.codeRow, node.second.codeCol).row);
+            componentJson->Put("pagePath", node.second.pagePath.c_str());
             std::unique_ptr<JsonValue> componentsJson;
             if (pageJson->Contains("components")) {
                 componentsJson = pageJson->GetValue("components");
@@ -282,6 +285,7 @@ void AceScopedPerformanceCheck::RecordVsyncTimeout(
             }
         }
     }
+    LOGI("9903 pageJson: %{public}s", pageJson->ToString().c_str());
     ruleJson->Put(pageJson);
 }
 
@@ -302,6 +306,7 @@ void AceScopedPerformanceCheck::RecordForEachItemsCount(
         componentJson->Put("name", iter.second.nodeTag.c_str());
         componentJson->Put("items", iter.second.foreachItems + 1);
         componentJson->Put("sourceLine", GetCodeInfo(iter.second.codeRow, iter.second.codeCol).row);
+        componentJson->Put("pagePath", iter.second.pagePath.c_str());
         std::unique_ptr<JsonValue> componentsJson;
         if (pageJson->Contains("components")) {
             componentsJson = pageJson->GetValue("components");
@@ -312,6 +317,7 @@ void AceScopedPerformanceCheck::RecordForEachItemsCount(
             pageJson->Put("components", componentsJson);
         }
     }
+    LOGI("9904 pageJson: %{public}s", pageJson->ToString().c_str());
     ruleJson->Put(pageJson);
 }
 
@@ -332,6 +338,7 @@ void AceScopedPerformanceCheck::RecordFlexLayoutsCount(
         componentJson->Put("name", node.nodeTag.c_str());
         componentJson->Put("flexTime", node.flexLayouts);
         componentJson->Put("sourceLine", GetCodeInfo(node.codeRow, node.codeCol).row);
+        componentJson->Put("pagePath", node.pagePath.c_str());
         std::unique_ptr<JsonValue> componentsJson;
         if (pageJson->Contains("components")) {
             componentsJson = pageJson->GetValue("components");
@@ -342,6 +349,7 @@ void AceScopedPerformanceCheck::RecordFlexLayoutsCount(
             pageJson->Put("components", componentsJson);
         }
     }
+    LOGI("9905 pageJson: %{public}s", pageJson->ToString().c_str());
     ruleJson->Put(pageJson);
 }
 

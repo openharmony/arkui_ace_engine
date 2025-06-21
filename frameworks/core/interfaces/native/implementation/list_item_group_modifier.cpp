@@ -73,7 +73,6 @@ void DividerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
-    ListItemGroupModelNG::SetDivider(frameNode, divider);
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,
                           Ark_ChildrenMainSize value)
