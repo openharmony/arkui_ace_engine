@@ -4810,19 +4810,6 @@ void ViewAbstract::SetClipEdge(FrameNode* frameNode, bool isClip)
     }
 }
 
-void ViewAbstract::SetClipEdge(FrameNode* frameNode, std::optional<bool> isClip)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto target = frameNode->GetRenderContext();
-    if (target) {
-        if (target->GetClipShape().has_value()) {
-            target->ResetClipShape();
-            target->OnClipShapeUpdate(nullptr);
-        }
-        target->UpdateClipEdge(isClip.value_or(false));
-    }
-}
-
 void ViewAbstract::SetMask(const RefPtr<BasicShape>& basicShape)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
