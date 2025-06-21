@@ -897,7 +897,7 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionOnWindowTest, Te
 
 /**
  * @tc.name: SecurityUIExtensionVisibleTest
- * @tc.desc: Test pattern onVisibleChange function
+ * @tc.desc: Test pattern OnVisibleChangeInner function
  * @tc.type: FUNC
  */
 HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionVisibleTest, TestSize.Level1)
@@ -909,17 +909,17 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionVisibleTest, Tes
     auto pattern = CreateSecurityUEC();
 
     /**
-     * @tc.steps: step2. OnVisibleChange false, state change to BACKGROUND
+     * @tc.steps: step2. OnVisibleChangeInner false, state change to BACKGROUND
      */
     pattern->state_ = SecurityUIExtensionPattern::AbilityState::FOREGROUND;
-    pattern->OnVisibleChange(false);
+    pattern->OnVisibleChangeInner(false);
     EXPECT_FALSE(pattern->isVisible_);
     ASSERT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::BACKGROUND);
 
     /**
-     * @tc.steps: step3. OnVisibleChange true, state change to FOREGROUND
+     * @tc.steps: step3. OnVisibleChangeInner true, state change to FOREGROUND
      */
-    pattern->OnVisibleChange(true);
+    pattern->OnVisibleChangeInner(true);
     EXPECT_TRUE(pattern->isVisible_);
     ASSERT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::FOREGROUND);
 #endif
@@ -1689,14 +1689,14 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionComponentLifeCyc
     pattern->OnWindowShow();
     EXPECT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::FOREGROUND);
     /**
-     * @tc.steps: step6. test Life Cycle OnVisibleChange false
+     * @tc.steps: step6. test Life Cycle OnVisibleChangeInner false
      */
-    pattern->OnVisibleChange(false);
+    pattern->OnVisibleChangeInner(false);
     EXPECT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::BACKGROUND);
     /**
-     * @tc.steps: step7. test Life Cycle OnVisibleChange true
+     * @tc.steps: step7. test Life Cycle OnVisibleChangeInner true
      */
-    pattern->OnVisibleChange(true);
+    pattern->OnVisibleChangeInner(true);
     EXPECT_EQ(pattern->state_, SecurityUIExtensionPattern::AbilityState::FOREGROUND);
     /**
      * @tc.steps: step8. test Life Cycle OnTerminated
