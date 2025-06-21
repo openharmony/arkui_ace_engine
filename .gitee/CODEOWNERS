@@ -237,6 +237,12 @@ component_ext/movingphoto/ @wangrunsen
 
 [Examples]
 examples/ @arkuipopupwindow
+examples/Image/ @arkui_image
+examples/Dialog_C/ @arkui_image
+examples/Info/ @arkui_image
+examples/ImageAnimator/ @arkui_image
+examples/Picker/ @arkui_image
+examples/PickDialog/ @arkui_image
 
 [Frameworks Base]
 frameworks/base/background_task_helper/background_task_helper.h @arkuiframework
