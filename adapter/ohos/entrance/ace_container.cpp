@@ -1532,6 +1532,8 @@ void AceContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiW
     container->SetUIWindowInner(uiWindow);
     if (!container->IsSceneBoardWindow()) {
         ResourceManager::GetInstance().SetResourceCacheSize(RESOURCE_CACHE_DEFAULT_SIZE);
+    } else {
+        OHOS::Rosen::RSUIDirector::SetTypicalResidentProcess(true);
     }
 }
 
@@ -2501,6 +2503,12 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
     }
     CHECK_NULL_VOID(assetManagerImpl);
     assetManagerImpl->SetLibPath("default", libPath);
+}
+
+void AceContainer::SetIsFormRender(bool isFormRender)
+{
+    OHOS::Rosen::RSUIDirector::SetTypicalResidentProcess(isFormRender);
+    isFormRender_ = isFormRender;
 }
 
 void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, float width,
