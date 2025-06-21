@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_adapter.h"
 
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -24,7 +25,7 @@ RefPtr<FrameNode> UIExtensionAdapter::CreateEmbeddedComponent(
 {
     auto* stack = ViewStackProcessor::GetInstance();
     SessionType sessionType = SessionType::EMBEDDED_UI_EXTENSION;
-    RefPtr<FrameNode> frameNode = FrameNode::GetOrCreateFrameNode(V2::EMBEDDED_COMPONENT_ETS_TAG, nodeId,
+    RefPtr<FrameNode> frameNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::EMBEDDED_COMPONENT_ETS_TAG, nodeId,
         [sessionType]() { return AceType::MakeRefPtr<UIExtensionPattern>(false, false, false, sessionType); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);
