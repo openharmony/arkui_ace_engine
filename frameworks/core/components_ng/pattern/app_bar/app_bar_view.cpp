@@ -61,7 +61,11 @@ void AssembleUiExtensionParams(
     if (missionId != -1) {
         params.try_emplace("missionId", std::to_string(missionId));
     }
-
+    auto frontend = Container::Current()->GetFrontend();
+    if (frontend) {
+        auto info = frontend->GetTopNavDestinationInfo(false, true);
+        params.try_emplace("TopNavPathInfo", info);
+    }
     if (firstTry) {
         params.try_emplace("ability.want.params.uiExtensionType", "sysDialog/atomicServicePanel");
         appGalleryBundleName = OHOS::Ace::SystemProperties::GetAtomicServiceBundleName();
