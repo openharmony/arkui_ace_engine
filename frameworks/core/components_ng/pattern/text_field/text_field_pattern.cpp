@@ -5769,11 +5769,11 @@ void TextFieldPattern::RecordSubmitEvent() const
 
 void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
 {
+    auto result = UtfUtils::Str8DebugToStr16(value->text);
 #if !defined(ENABLE_STANDARD_INPUT)
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     if (layoutProperty && layoutProperty->HasMaxLength()) {
         bool textChange = false;
-        auto result = UtfUtils::Str8DebugToStr16(value->text);
         contentController_->FilterTextInputStyle(textChange, result);
         auto resultLen = static_cast<int32_t>(result.length());
         auto maxLen = static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
@@ -5781,11 +5781,15 @@ void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue
             showCountBorderStyle_ = resultLen > maxLen;
             HandleCountStyle();
         }
+        auto deleteSize = resultLen - maxLen;
+        if (resultLen > maxLen && value->selection.baseOffset >= deleteSize) {
+            result.erase(value->selection.baseOffset - deleteSize, deleteSize);
+            value->selection.baseOffset -= deleteSize;
+        }
     }
 #endif
-
     UpdateEditingValueToRecord();
-    contentController_->SetTextValue(UtfUtils::Str8DebugToStr16(value->text));
+    contentController_->SetTextValue(result);
     selectController_->UpdateCaretIndex(value->selection.baseOffset);
     ContainerScope scope(GetInstanceId());
     CloseSelectOverlay();
