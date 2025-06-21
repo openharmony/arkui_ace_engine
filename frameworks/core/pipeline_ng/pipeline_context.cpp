@@ -3477,6 +3477,8 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-injectionkeycode" && params.size() > PARAM_NUM) {
         UiSessionManager::GetInstance()->SendCommand(params[1]);
 #endif
+    } else if (params[0] == "-forcedark" && params.size() > 2) { // 2 means the forcedark needs at least 3 args
+        DumpForceColor(params);
     }
     return true;
 }
@@ -6377,5 +6379,17 @@ void PipelineContext::FireArkUIObjectLifecycleCallback(void* data)
 {
     CHECK_NULL_VOID(objectLifecycleCallback_);
     objectLifecycleCallback_(data);
+}
+
+void PipelineContext::DumpForceColor(const std::vector<std::string>& params) const
+{
+    int32_t nodeId = StringUtils::StringToInt(params[1], -1);
+    if (nodeId < 0) {
+        return;
+    }
+    Color color = Color::FromString(params[2]); // Index 2 represents the third parameter
+    auto invertColor = ColorInverter::GetInstance().Invert(
+        color, PipelineContext::GetCurrentContext(), params[2]); // Index 2 represents the third parameter
+    DumpLog::GetInstance().Print(1, "InvertColor: [" + invertColor.ToString() + "]");
 }
 } // namespace OHOS::Ace::NG
