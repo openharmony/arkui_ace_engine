@@ -2223,4 +2223,43 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage078, TestSi
     EXPECT_NE(dragDropManager->GetDragPreviewInfo().imageNode, nullptr);
     EXPECT_NE(dragDropManager->GetDragPreviewInfo().scale, 1);
 }
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage079
+ * @tc.desc: Test GetDragMoveLastPointByCurrentPointer
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage079, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. update point of pointer 0.
+     * @tc.expected: update successfully.
+     */
+    Point point(1, 1);
+    int pointerId = 0;
+    dragDropManager->UpdatePointInfoForFinger(pointerId, point);
+
+    /**
+     * @tc.steps: step3. get point of pointer 0.
+     * @tc.expected: get successfully, pointer x is 1.
+     */
+    auto pointerPoint = dragDropManager->GetDragMoveLastPointByCurrentPointer(pointerId);
+    EXPECT_EQ(pointerPoint.GetX(), 1);
+
+    /**
+     * @tc.steps: step4. get point of pointer 1.
+     * @tc.expected: no point of pointer 1, return default value, pointer x is 0.
+     */
+    pointerId = 1;
+    pointerPoint = dragDropManager->GetDragMoveLastPointByCurrentPointer(pointerId);
+    EXPECT_EQ(pointerPoint.GetX(), 0);
+}
 } // namespace OHOS::Ace::NG
