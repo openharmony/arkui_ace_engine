@@ -32,7 +32,7 @@ void AceScopedPerformanceCheck::RecordPerformanceCheckData(const PerformanceChec
     std::string path, std::string fromPath, std::string moduleName, bool isNavigation)
 {}
 
-AceScopedPerformanceCheck::AceScopedPerformanceCheck(const std::string&, const std::string&) {}
+AceScopedPerformanceCheck::AceScopedPerformanceCheck(const std::string& /* name */) {}
 
 AceScopedPerformanceCheck::~AceScopedPerformanceCheck() {}
 
