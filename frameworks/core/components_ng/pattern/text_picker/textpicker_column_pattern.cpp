@@ -1932,6 +1932,19 @@ bool TextPickerColumnPattern::NotLoopOptions() const
     return !canLoop;
 }
 
+void TextPickerColumnPattern::HandleAccessibilityTextChange()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto accessibilityProperty = blendNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetUserTextValue(GetOption(GetCurrentIndex()));
+    accessibilityProperty->SetAccessibilityText(GetOption(GetCurrentIndex()));
+    blendNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
+}
+
 bool TextPickerColumnPattern::InnerHandleScroll(
     bool isDown, bool isUpdatePropertiesOnly, bool isUpdateAnimationProperties)
 {
@@ -1963,13 +1976,7 @@ bool TextPickerColumnPattern::InnerHandleScroll(
 
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 
-    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
-    CHECK_NULL_RETURN(blendNode, false);
-    auto accessibilityProperty = blendNode->GetAccessibilityProperty<AccessibilityProperty>();
-    CHECK_NULL_RETURN(accessibilityProperty, false);
-    accessibilityProperty->SetUserTextValue(GetOption(GetCurrentIndex()));
-    accessibilityProperty->SetAccessibilityText(GetOption(GetCurrentIndex()));
-    blendNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
+    HandleAccessibilityTextChange();
     return true;
 }
 

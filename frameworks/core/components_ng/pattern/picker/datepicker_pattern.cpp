@@ -2238,6 +2238,7 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
             auto datePickerColumnPattern = yearColumn->GetPattern<DatePickerColumnPattern>();
             CHECK_NULL_VOID(datePickerColumnPattern);
             datePickerColumnPattern->SetCurrentIndex(options_[yearColumn].size());
+            datePickerColumnPattern->HandleAccessibilityTextChange();
         }
         options_[yearColumn].emplace_back(PickerDateF::CreateYear(index));
     }
@@ -2254,6 +2255,7 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
             auto datePickerColumnPattern = monthColumn->GetPattern<DatePickerColumnPattern>();
             CHECK_NULL_VOID(datePickerColumnPattern);
             datePickerColumnPattern->SetCurrentIndex(options_[monthColumn].size());
+            datePickerColumnPattern->HandleAccessibilityTextChange();
         }
         options_[monthColumn].emplace_back(PickerDateF::CreateMonth(index, true, false));
 
@@ -2262,6 +2264,7 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
                 auto datePickerColumnPattern = monthColumn->GetPattern<DatePickerColumnPattern>();
                 CHECK_NULL_VOID(datePickerColumnPattern);
                 datePickerColumnPattern->SetCurrentIndex(options_[monthColumn].size());
+                datePickerColumnPattern->HandleAccessibilityTextChange();
             }
             options_[monthColumn].emplace_back(PickerDateF::CreateMonth(index, true, true));
         }
@@ -2277,6 +2280,7 @@ void DatePickerPattern::LunarColumnsBuilding(const LunarDate& current)
             auto datePickerColumnPattern = dayColumn->GetPattern<DatePickerColumnPattern>();
             CHECK_NULL_VOID(datePickerColumnPattern);
             datePickerColumnPattern->SetCurrentIndex(options_[dayColumn].size());
+            datePickerColumnPattern->HandleAccessibilityTextChange();
         }
         options_[dayColumn].emplace_back(PickerDateF::CreateDay(index, true));
     }
@@ -2359,6 +2363,7 @@ void DatePickerPattern::SolarColumnsBuilding(const PickerDate& current)
             auto datePickerColumnPattern = yearColumn->GetPattern<DatePickerColumnPattern>();
             CHECK_NULL_VOID(datePickerColumnPattern);
             datePickerColumnPattern->SetCurrentIndex(options_[yearColumn].size());
+            datePickerColumnPattern->HandleAccessibilityTextChange();
         }
         options_[yearColumn].emplace_back(PickerDateF::CreateYear(year));
     }
@@ -2374,6 +2379,7 @@ void DatePickerPattern::SolarColumnsBuilding(const PickerDate& current)
             CHECK_NULL_VOID(datePickerColumnPattern);
             // back index = size - 1
             datePickerColumnPattern->SetCurrentIndex(options_[monthColumn].size());
+            datePickerColumnPattern->HandleAccessibilityTextChange();
         }
 
         options_[monthColumn].emplace_back(PickerDateF::CreateMonth(month, false, false));
@@ -2389,6 +2395,7 @@ void DatePickerPattern::SolarColumnsBuilding(const PickerDate& current)
             auto datePickerColumnPattern = dayColumn->GetPattern<DatePickerColumnPattern>();
             CHECK_NULL_VOID(datePickerColumnPattern);
             datePickerColumnPattern->SetCurrentIndex(options_[dayColumn].size());
+            datePickerColumnPattern->HandleAccessibilityTextChange();
         }
         options_[dayColumn].emplace_back(PickerDateF::CreateDay(day, false));
     }
@@ -2451,6 +2458,7 @@ void DatePickerPattern::LunarMonthDaysColumnBuilding(const LunarDate& current)
             auto datePickerColumnPattern = yearColumn->GetPattern<DatePickerColumnPattern>();
             CHECK_NULL_VOID(datePickerColumnPattern);
             datePickerColumnPattern->SetCurrentIndex(options_[yearColumn].size());
+            datePickerColumnPattern->HandleAccessibilityTextChange();
         }
         options_[yearColumn].emplace_back(PickerDateF::CreateYear(index));
     }
@@ -2508,6 +2516,7 @@ void DatePickerPattern::SolarMonthDaysColumnsBuilding(const PickerDate& current)
                 auto datePickerColumnPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
                 CHECK_NULL_VOID(datePickerColumnPattern);
                 datePickerColumnPattern->SetCurrentIndex(options_[monthDaysColumn].size());
+                datePickerColumnPattern->HandleAccessibilityTextChange();
             }
             options_[monthDaysColumn].emplace_back(PickerDateF::CreateMonthDay(index, dayIndex, false, false));
         }
@@ -2531,6 +2540,7 @@ void DatePickerPattern::FillSolarYearOptions(const PickerDate& current, RefPtr<F
             auto datePickerColumnPattern = yearColumn->GetPattern<DatePickerColumnPattern>();
             CHECK_NULL_VOID(datePickerColumnPattern);
             datePickerColumnPattern->SetCurrentIndex(options_[yearColumn].size());
+            datePickerColumnPattern->HandleAccessibilityTextChange();
         }
         options_[yearColumn].emplace_back(PickerDateF::CreateYear(year));
     }
@@ -2553,6 +2563,7 @@ void DatePickerPattern::FillLunarMonthDaysOptions(const LunarDate& current, RefP
                 auto datePickerColumnPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
                 CHECK_NULL_VOID(datePickerColumnPattern);
                 datePickerColumnPattern->SetCurrentIndex(options_[monthDaysColumn].size());
+                datePickerColumnPattern->HandleAccessibilityTextChange();
             }
             options_[monthDaysColumn].emplace_back(PickerDateF::CreateMonthDay(index, dayIndex, true, false));
         }
@@ -2567,6 +2578,7 @@ void DatePickerPattern::FillLunarMonthDaysOptions(const LunarDate& current, RefP
                 auto datePickerColumnPattern = monthDaysColumn->GetPattern<DatePickerColumnPattern>();
                 CHECK_NULL_VOID(datePickerColumnPattern);
                 datePickerColumnPattern->SetCurrentIndex(options_[monthDaysColumn].size());
+                datePickerColumnPattern->HandleAccessibilityTextChange();
             }
             options_[monthDaysColumn].emplace_back(PickerDateF::CreateMonthDay(index, dayIndex, true, true));
         }

@@ -313,6 +313,7 @@ public:
     virtual float GetShiftDistance(uint32_t index, PickerScrollDirection dir);
     virtual void UpdateTextPropertiesLinear(bool isDown, double scale);
     virtual void UpdateToss(double offsetY);
+    virtual void HandleAccessibilityTextChange();
 #ifdef SUPPORT_DIGITAL_CROWN
     virtual void HandleCrownBeginEvent(const CrownEvent& event);
     virtual void HandleCrownMoveEvent(const CrownEvent& event);
