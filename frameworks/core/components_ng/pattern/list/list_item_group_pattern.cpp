@@ -1101,15 +1101,18 @@ bool ListItemGroupPattern::DetermineSingleLaneStep(
 {
     // Only for GetNextFocusNode
     // ListItemGroup does not handle HOME/END, bubble it up to List for processing.
+    auto parentList = GetListFrameNode();
+    CHECK_NULL_RETURN(parentList, false);
+    auto listPattern = parentList->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(listPattern, false);
+    auto isDefault = listPattern->GetFocusWrapMode() == FocusWrapMode::DEFAULT;
     if (step == FocusStep::UP_END || step == FocusStep::LEFT_END || step == FocusStep::DOWN_END ||
         step == FocusStep::RIGHT_END) {
         return false;
-    } else if ((isVertical && (step == FocusStep::DOWN)) || (!isVertical && step == FocusStep::RIGHT) ||
-               (step == FocusStep::TAB)) {
+    } else if (ListPattern::IsForwardStep(step, isVertical, isDefault)) {
         moveStep = 1;
         nextIndex += moveStep;
-    } else if ((isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::LEFT) ||
-               (step == FocusStep::SHIFT_TAB)) {
+    } else if (ListPattern::IsBackwardStep(step, isVertical, isDefault)) {
         moveStep = -1;
         nextIndex += moveStep;
     } else if ((!isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::DOWN)) {
