@@ -48,6 +48,7 @@ template("ace_core_interfaces_native_node") {
       "node/extension_custom_node.cpp",
       "node/flex_modifier.cpp",
       "node/frame_node_modifier.cpp",
+      "node/frame_node_modifier_multi_thread.cpp",
       "node/gauge_modifier.cpp",
       "node/grid_col_modifier.cpp",
       "node/grid_item_modifier.cpp",
@@ -68,6 +69,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_adapter_impl.cpp",
       "node/node_animate.cpp",
       "node/node_api.cpp",
+      "node/node_api_multi_thread.cpp",
       "node/node_canvas_modifier.cpp",
       "node/node_checkbox_modifier.cpp",
       "node/node_common_modifier.cpp",
@@ -133,6 +135,7 @@ template("ace_core_interfaces_native_node") {
       "node/util_modifier.cpp",
       "node/video_modifier.cpp",
       "node/view_model.cpp",
+      "node/view_model_multi_thread.cpp",
       "node/water_flow_modifier.cpp",
       "runtime/runtime_init.cpp"
     ]

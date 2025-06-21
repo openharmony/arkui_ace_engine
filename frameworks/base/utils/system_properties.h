@@ -773,6 +773,11 @@ public:
 
     static std::string GetMapSearchPrefix();
 
+    static bool GetDebugThreadSafeNodeEnabled()
+    {
+        return debugThreadSafeNodeEnable_;
+    }
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -872,6 +877,7 @@ private:
     static bool syncLoadEnabled_;
     static bool whiteBlockEnabled_;
     static std::string mapSearchPrefix_;
+    static bool debugThreadSafeNodeEnable_;
 };
 
 } // namespace OHOS::Ace
