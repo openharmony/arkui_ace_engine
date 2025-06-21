@@ -57,7 +57,7 @@ void GridTestNg::SetUpTestSuite()
     EXPECT_CALL(*(AceType::DynamicCast<MockContainer>(container)), GetWindowId()).Times(AnyNumber());
     MockAnimationManager::Enable(true);
 #ifndef TEST_IRREGULAR_GRID
-    g_irregularGrid = false;
+    SystemProperties::gridIrregularLayoutEnable_ = false;
 #endif
 }
 
