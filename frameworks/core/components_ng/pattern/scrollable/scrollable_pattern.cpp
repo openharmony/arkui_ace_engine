@@ -1198,7 +1198,7 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
         }
         auto barColor = property->GetScrollBarColor();
         if (barColor) {
-            scrollBar_->SetForegroundColor(barColor.value());
+            scrollBar_->SetForegroundColor(barColor.value(), isRoundScroll_);
         }
         auto scrollableBarMargin = property->GetScrollBarMargin();
         if (scrollableBarMargin) {
@@ -4281,7 +4281,7 @@ void ScrollablePattern::OnColorConfigurationUpdate()
     if (paintProperty) {
         auto barColor = paintProperty->GetScrollBarColor();
         if (barColor) {
-            scrollBar_->SetForegroundColor(barColor.value());
+            scrollBar_->SetForegroundColor(barColor.value(), isRoundScroll_);
             return;
         }
     }
@@ -4289,8 +4289,8 @@ void ScrollablePattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(theme);
-    scrollBar_->SetForegroundColor(theme->GetForegroundColor());
-    scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
+    scrollBar_->SetForegroundColor(theme->GetForegroundColor(), isRoundScroll_);
+    scrollBar_->SetBackgroundColor(theme->GetBackgroundColor(), isRoundScroll_);
 }
 
 SizeF ScrollablePattern::GetViewSizeMinusPadding() const

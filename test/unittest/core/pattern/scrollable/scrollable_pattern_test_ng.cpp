@@ -20,6 +20,8 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -1191,6 +1193,29 @@ HWTEST_F(ScrollablePatternTestNg, OnColorConfigurationUpdate003, TestSize.Level1
     scrollablePattern->scrollBar_ = scrollBar;
     scrollablePattern->OnColorConfigurationUpdate();
     EXPECT_EQ(scrollablePattern->scrollBar_->foregroundColor_.colorValue_.value, 0xff0000ff);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate004
+ * @tc.desc: Test ScrollablePattern OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, OnColorConfigurationUpdate004, TestSize.Level1)
+{
+    RefPtr<ArcListPattern> scrollablePattern = AceType::MakeRefPtr<ArcListPattern>();
+    RefPtr<ArcScrollBar> arcScrollBar = AceType::MakeRefPtr<ArcScrollBar>();
+    arcScrollBar->SetDisplayMode(DisplayMode::AUTO);
+    arcScrollBar->SetShapeMode(ShapeMode::ROUND);
+    Color color(Color::RED);
+    bool isRoundScroll = true;
+    arcScrollBar->SetForegroundColor(color, isRoundScroll);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollablePattern);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->paintProperty_ = nullptr;
+    scrollablePattern->frameNode_ = frameNode;
+    scrollablePattern->scrollBar_ = arcScrollBar;
+    scrollablePattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(scrollablePattern->scrollBar_->arcForegroundColor_, Color::RED);
 }
 
 /**
