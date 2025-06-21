@@ -2086,6 +2086,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_056, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     pattern->AddFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE, childNode);
     pattern->DelayRemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
-    EXPECT_EQ(formNode->GetTotalChildCount(), 0);
+    int32_t num = formNode->GetTotalChildCount();
+    EXPECT_EQ(num, 0);
 }
 } // namespace OHOS::Ace::NG
