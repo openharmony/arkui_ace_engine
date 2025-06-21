@@ -109,4 +109,13 @@ void SetCustomCallback(ani_env* env, ani_object obj, ani_long ptr,
     }
     modifier->getCommonAniModifier()->setCustomCallback(env, ptr, fnObjMeasure, fnObjLayout);
 }
+
+ani_int RequireArkoalaNodeId(ani_env* env, ani_object obj, ani_int capacity)
+{
+    auto idCapacity = reinterpret_cast<ArkUI_Int32>(capacity);
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, -1);
+    auto cursor = modifier->getCommonAniModifier()->requireArkoalaNodeId(idCapacity);
+    return cursor;
+}
 } // namespace OHOS::Ace::Ani

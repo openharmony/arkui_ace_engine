@@ -110,4 +110,5 @@ export class ArkUIAniModule {
     native static _SetCustomCallback(ptr: KPointer,
         measureCallback: ((width1: number, height1: number, width2: number, height2: number, width3: number,
         height3: number) => void), layoutCallback: ((x: number, y: number) => void)): void
+    native static _RequireArkoalaNodeId(capacity: KInt): KInt
 }

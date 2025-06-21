@@ -249,6 +249,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetCustomCallback)
         },
+        ani_native_function {
+            "_RequireArkoalaNodeId",
+            "I:I",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RequireArkoalaNodeId)
+        },
     };
 
     auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
