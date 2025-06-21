@@ -7,7 +7,6 @@
         "./fast-arktsc",
         "./memo-plugin",
         "./ui-plugins",
-        "./tests-memo",
         "../incremental/build-common",
         "../interop",
         "../incremental/harness",
@@ -38,7 +37,7 @@
         "commander": "^13.1.0"
     },
     "scripts": {
-        "clean:all": "npm run clean --prefix libarkts && npm run clean:plugins --prefix libarkts && npm run clean --prefix memo-plugin && npm run runtime:clean --prefix memo-plugin && npm run clean --prefix memo-plugin/demo && npm run clean --prefix ../arkoala-arkts/trivial/user && npm run clean --prefix ../incremental/harness && npm run clean --prefix tests-memo",
+        "clean:all": "npm run clean --prefix libarkts && npm run clean:plugins --prefix libarkts && npm run clean --prefix memo-plugin && npm run runtime:clean --prefix memo-plugin && npm run clean --prefix memo-plugin/demo && npm run clean --prefix ../arkoala-arkts/trivial/user && npm run clean --prefix ../incremental/harness",
         "build:all": "npm run compile --prefix fast-arktsc && npm run compile --prefix libarkts && npm run compile:plugins --prefix libarkts && npm run compile --prefix memo-plugin && npm run runtime:prepare --prefix memo-plugin && npm run compile --prefix ui-plugins",
         "build:gn": "npm run compile --prefix fast-arktsc && npm run compile --prefix memo-plugin && npm run compile --prefix ui-plugins",
         "test:all": "npm run build:harness --prefix ../incremental/harness && npm run test:light --prefix libarkts && npm run demo:run:light --prefix memo-plugin && npm run test:all:light --prefix memo-plugin",

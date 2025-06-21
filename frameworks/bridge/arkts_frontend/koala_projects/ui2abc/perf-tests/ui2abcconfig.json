@@ -9,7 +9,6 @@
             "@ohos.router": ["../../arkoala-arkts/arkui/sdk/ohos/router.ets"],
             "@koalaui/builderLambda": ["../../arkoala-arkts/arkui/sdk/annotations"],
             "@koalaui/interop": ["../../interop/src/arkts"],
-            "@koalaui/harness": ["../../incremental/harness/src/arkts"],
             "@koalaui/compat": [ "../../incremental/compat/src/arkts" ],
             "@koalaui/common": [ "../../incremental/common/src" ],
             "@koalaui/runtime": [ "../../incremental/runtime/ets" ],

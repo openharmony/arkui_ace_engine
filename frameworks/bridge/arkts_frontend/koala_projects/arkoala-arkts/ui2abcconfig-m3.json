@@ -114,7 +114,6 @@
         "./arkui-ui2abc-processed/arkui/index-test.d.ets"
     ],
     "dependencies": {
-        "@koalaui/arkui-common": ["../arkoala/arkui-common/ui2abcconfig.json"],
         "@koalaui/runtime": ["../incremental/runtime/ui2abcconfig.json"]
     }
 }
