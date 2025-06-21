@@ -5108,6 +5108,18 @@ void TextPattern::OnColorConfigurationUpdate()
     if (GetOrCreateMagnifier()) {
         magnifierController_->SetColorModeChange(true);
     }
+    if (isSpanStringMode_) {
+        for (const auto& item : spans_) {
+            if (!item) {
+                continue;
+            }
+            item->fontStyle->UpdateColorByResourceId();
+            if (item->backgroundStyle) {
+                item->backgroundStyle->UpdateColorByResourceId();
+            }
+        }
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
     ACE_TEXT_SCOPED_TRACE("OnColorConfigurationUpdate[Text][self:%d]", host->GetId());
 }
 
