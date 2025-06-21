@@ -19,29 +19,33 @@ import { WatchFuncType } from '../decorator';
 import { ILinkDecoratedVariable } from '../decorator';
 import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
-/** 
-* implementation of V1 @Link
-* 
-* must no have local init
-* must have source of same type
-* source most be a Decorated variable
-* source is allowed to be immutable (@ObjectLink), 
-*   when the unsolved issues arises that a set on @Link has no effect
-* @Link reads-through from source, and if source mutable also writes-through 
-* to source. Therefore, source meta.addRef and meta.fireChange is enough to 
-* manage dependencies of the @link: LinkDecoratedVariable does not use its meta
-*/
-export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements ILinkDecoratedVariable<T> {
-
+/**
+ * implementation of V1 @Link
+ *
+ * must no have local init
+ * must have source of same type
+ * source most be a Decorated variable
+ * source is allowed to be immutable (@ObjectLink),
+ *   when the unsolved issues arises that a set on @Link has no effect
+ * @Link reads-through from source, and if source mutable also writes-through
+ * to source. Therefore, source meta.addRef and meta.fireChange is enough to
+ * manage dependencies of the @link: LinkDecoratedVariable does not use its meta
+ */
+export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements ILinkDecoratedVariable<T> {
     private readonly sourceGet_: () => T;
     private readonly sourceSet_?: (newValue: T) => void;
 
     // localInitValue is the rhs of @state variable : type = localInitialValue;
     // caller ensure it is IObseredObject, eg. by wrapping
-    constructor(owningView: ExtendableComponent | null, varName: string, sourceGet: () => T, sourceSet: (newValue: T) => void, watchFunc?: WatchFuncType) {
+    constructor(
+        owningView: ExtendableComponent | null,
+        varName: string,
+        sourceGet: () => T,
+        sourceSet: (newValue: T) => void,
+        watchFunc?: WatchFuncType
+    ) {
         super('@Link', owningView, varName, watchFunc);
-        const initValue = sourceGet()
+        const initValue = sourceGet();
         this.sourceGet_ = sourceGet;
         this.sourceSet_ = sourceSet;
 
@@ -62,9 +66,9 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
         ObserveSingleton.instance.setV1RenderId(value as NullableObject);
 
         // a @Link get triggers a meta.addRef of the Link source XXXXDecoratedVariable
-        // therefore, when the source changes (its meta.fireChabge), the bindings using 
+        // therefore, when the source changes (its meta.fireChabge), the bindings using
         // the @Link also update
-        // source will trigger also update 
+        // source will trigger also update
         return value;
     }
 

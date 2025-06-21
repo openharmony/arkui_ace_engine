@@ -18,21 +18,20 @@ import { IMutableStateMeta, IMutableKeyedStateMeta } from '../decorator';
 import { ISubscribedWatches } from '../decorator';
 import { FactoryInternalImpl } from './factoryInternal';
 /**
- * iFactoryInternal is the state mgmt factory for classes, which are not exposed 
+ * iFactoryInternal is the state mgmt factory for classes, which are not exposed
  * by the SDK and not used by UIPlugin generated code. So 'internal' use classes.
- * Using a factory still has benefit, in the case of mkDecoratorValue and 
- * mkMutableKeyedStateMeta the benefit is unit tests creating special 
+ * Using a factory still has benefit, in the case of mkDecoratorValue and
+ * mkMutableKeyedStateMeta the benefit is unit tests creating special
  * derived classes to support the testing.
  */
 export interface IFactoryInternal {
-
     // IBackingValue for Decorator implementations
     mkDecoratorValue<T>(info: string, initValue: T): IBackingValue<T>;
 
-    mkMutableStateMeta(info : string) : IMutableStateMeta;
+    mkMutableStateMeta(info: string): IMutableStateMeta;
 
     // IMutableKeyedStateMeta used by wrapper classes for Array, Map, Set, Date
-    mkMutableKeyedStateMeta(info : string) : IMutableKeyedStateMeta;
+    mkMutableKeyedStateMeta(info: string): IMutableKeyedStateMeta;
 
     // create a Proxy for observed interface / intrinsic object T
     // see also InterfaceProxyHandler

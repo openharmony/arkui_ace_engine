@@ -23,7 +23,7 @@ import {
     IObjectLinkDecoratedVariable,
     IStorageLinkDecoratedVariable,
     IStoragePropDecoratedVariable,
-    LinkSourceType
+    LinkSourceType,
 } from '../decorator';
 import { IMutableStateMeta } from '../decorator';
 import { MutableStateMeta } from './mutableStateMeta';
@@ -31,7 +31,7 @@ import { ExtendableComponent } from '../../component/extendableComponent';
 import { ISubscribedWatches, WatchFuncType } from '../decorator';
 import { StateDecoratedVariable } from '../decoratorImpl/decoratorState';
 import { PropDecoratedVariable } from '../decoratorImpl/decoratorProp';
-import { ObjectLinkDecoratedVariable } from '../decoratorImpl/decoratorObjectLink'
+import { ObjectLinkDecoratedVariable } from '../decoratorImpl/decoratorObjectLink';
 import { TypeChecker } from '#components';
 import { LinkDecoratedVariable } from '../decoratorImpl/decoratorLink';
 import { ProvideDecoratedVariable } from '../decoratorImpl/decoratorProvide';
@@ -49,15 +49,30 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
     public makeSubscribedWatches(): ISubscribedWatches {
         return new SubscribedWatches();
     }
-    makeState<T>(owningView: ExtendableComponent, varName: string, initValue: T, watchFunc?: WatchFuncType): IStateDecoratedVariable<T> {
-        return new StateDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue as Object) as T, watchFunc);
+    makeState<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        initValue: T,
+        watchFunc?: WatchFuncType
+    ): IStateDecoratedVariable<T> {
+        return new StateDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T, watchFunc);
     }
 
-    makeProp<T>(owningView: ExtendableComponent, varName: string, initValue: T, watchFunc?: WatchFuncType): IPropDecoratedVariable<T> {
-        return new PropDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue as Object) as T, watchFunc);
+    makeProp<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        initValue: T,
+        watchFunc?: WatchFuncType
+    ): IPropDecoratedVariable<T> {
+        return new PropDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T, watchFunc);
     }
 
-    makeLink<T>(owningView: ExtendableComponent, varName: string, source: LinkSourceType<T>, watchFunc?: WatchFuncType): ILinkDecoratedVariable<T> {
+    makeLink<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        source: LinkSourceType<T>,
+        watchFunc?: WatchFuncType
+    ): ILinkDecoratedVariable<T> {
         if (StateMgmtTool.isIStateDecoratedVariable(source)) {
             return this.makeLinkOnState(owningView, varName, source as Object as IStateDecoratedVariable<T>, watchFunc);
         }
@@ -68,101 +83,250 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
             return this.makeLinkOnLink(owningView, varName, source as Object as ILinkDecoratedVariable<T>, watchFunc);
         }
         if (StateMgmtTool.isIObjectLinkDecoratedVariable(source)) {
-            return this.makeLinkOnObjectLink(owningView, varName, source as Object as IObjectLinkDecoratedVariable<T>, watchFunc);
+            return this.makeLinkOnObjectLink(
+                owningView,
+                varName,
+                source as Object as IObjectLinkDecoratedVariable<T>,
+                watchFunc
+            );
         }
         if (StateMgmtTool.isIProvideDecoratedVariable(source)) {
-            return this.makeLinkOnProvide(owningView, varName, source as Object as IProvideDecoratedVariable<T>, watchFunc);
+            return this.makeLinkOnProvide(
+                owningView,
+                varName,
+                source as Object as IProvideDecoratedVariable<T>,
+                watchFunc
+            );
         }
         if (StateMgmtTool.isIConsumeDecoratedVariable(source)) {
-            return this.makeLinkOnConsume(owningView, varName, source as Object as IConsumeDecoratedVariable<T>, watchFunc);
+            return this.makeLinkOnConsume(
+                owningView,
+                varName,
+                source as Object as IConsumeDecoratedVariable<T>,
+                watchFunc
+            );
         }
         if (StateMgmtTool.isIStorageLinkDecoratedVariable(source)) {
-            return this.makeLinkOnStorageLink(owningView, varName, source as Object as IStorageLinkDecoratedVariable<T>, watchFunc);
+            return this.makeLinkOnStorageLink(
+                owningView,
+                varName,
+                source as Object as IStorageLinkDecoratedVariable<T>,
+                watchFunc
+            );
         }
         if (StateMgmtTool.isIStoragePropDecoratedVariable(source)) {
-            return this.makeLinkOnStorageProp(owningView, varName, source as Object as IStoragePropDecoratedVariable<T>, watchFunc);
+            return this.makeLinkOnStorageProp(
+                owningView,
+                varName,
+                source as Object as IStoragePropDecoratedVariable<T>,
+                watchFunc
+            );
         }
         throw new Error('inValid Link source');
-
     }
-    public makeLinkOnState<T>(owningView: ExtendableComponent, varName: string,
-        source: IStateDecoratedVariable<T>, watchFunc?: WatchFuncType): ILinkDecoratedVariable<T> {
-        const link = new LinkDecoratedVariable<T>(owningView, varName, () => source.get(), (newValue: T) => source.set(newValue), watchFunc);
+    public makeLinkOnState<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        source: IStateDecoratedVariable<T>,
+        watchFunc?: WatchFuncType
+    ): ILinkDecoratedVariable<T> {
+        const link = new LinkDecoratedVariable<T>(
+            owningView,
+            varName,
+            () => source.get(),
+            (newValue: T) => source.set(newValue),
+            watchFunc
+        );
         source.registerWatchToSource(link);
         return link;
     }
 
-    protected makeLinkOnProp<T>(owningView: ExtendableComponent, varName: string,
-        source: IPropDecoratedVariable<T>, watchFunc?: WatchFuncType): ILinkDecoratedVariable<T> {
-        const link = new LinkDecoratedVariable<T>(owningView, varName, () => source.get(), (newValue: T) => source.set(newValue), watchFunc);
+    protected makeLinkOnProp<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        source: IPropDecoratedVariable<T>,
+        watchFunc?: WatchFuncType
+    ): ILinkDecoratedVariable<T> {
+        const link = new LinkDecoratedVariable<T>(
+            owningView,
+            varName,
+            () => source.get(),
+            (newValue: T) => source.set(newValue),
+            watchFunc
+        );
         source.registerWatchToSource(link);
         return link;
     }
 
-    protected makeLinkOnLink<T>(owningView: ExtendableComponent, varName: string,
-        source: ILinkDecoratedVariable<T>, watchFunc?: WatchFuncType): ILinkDecoratedVariable<T> {
-        const link = new LinkDecoratedVariable<T>(owningView, varName, () => source.get(), (newValue: T) => source.set(newValue), watchFunc);
+    protected makeLinkOnLink<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        source: ILinkDecoratedVariable<T>,
+        watchFunc?: WatchFuncType
+    ): ILinkDecoratedVariable<T> {
+        const link = new LinkDecoratedVariable<T>(
+            owningView,
+            varName,
+            () => source.get(),
+            (newValue: T) => source.set(newValue),
+            watchFunc
+        );
         source.registerWatchToSource(link);
         return link;
     }
 
-    protected makeLinkOnStorageLink<T>(owningView: ExtendableComponent, varName: string,
-        source: IStorageLinkDecoratedVariable<T>, watchFunc?: WatchFuncType): ILinkDecoratedVariable<T> {
-        const link = new LinkDecoratedVariable<T>(owningView, varName, () => source.get(), (newValue: T) => source.set(newValue), watchFunc);
+    protected makeLinkOnStorageLink<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        source: IStorageLinkDecoratedVariable<T>,
+        watchFunc?: WatchFuncType
+    ): ILinkDecoratedVariable<T> {
+        const link = new LinkDecoratedVariable<T>(
+            owningView,
+            varName,
+            () => source.get(),
+            (newValue: T) => source.set(newValue),
+            watchFunc
+        );
         source.registerWatchToSource(link);
         return link;
     }
 
-    protected makeLinkOnStorageProp<T>(owningView: ExtendableComponent, varName: string,
-        source: IStoragePropDecoratedVariable<T>, watchFunc?: WatchFuncType): ILinkDecoratedVariable<T> {
-        const link = new LinkDecoratedVariable<T>(owningView, varName, () => source.get(), (newValue: T) => source.set(newValue), watchFunc);
+    protected makeLinkOnStorageProp<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        source: IStoragePropDecoratedVariable<T>,
+        watchFunc?: WatchFuncType
+    ): ILinkDecoratedVariable<T> {
+        const link = new LinkDecoratedVariable<T>(
+            owningView,
+            varName,
+            () => source.get(),
+            (newValue: T) => source.set(newValue),
+            watchFunc
+        );
         source.registerWatchToSource(link);
         return link;
     }
 
-    protected makeLinkOnProvide<T>(owningView: ExtendableComponent, varName: string,
-        source: IProvideDecoratedVariable<T>, watchFunc?: WatchFuncType): ILinkDecoratedVariable<T> {
-        const link = new LinkDecoratedVariable<T>(owningView, varName, () => source.get(), (newValue: T) => source.set(newValue), watchFunc);
+    protected makeLinkOnProvide<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        source: IProvideDecoratedVariable<T>,
+        watchFunc?: WatchFuncType
+    ): ILinkDecoratedVariable<T> {
+        const link = new LinkDecoratedVariable<T>(
+            owningView,
+            varName,
+            () => source.get(),
+            (newValue: T) => source.set(newValue),
+            watchFunc
+        );
         source.registerWatchToSource(link);
         return link;
     }
 
-    protected makeLinkOnConsume<T>(owningView: ExtendableComponent, varName: string,
-        source: IConsumeDecoratedVariable<T>, watchFunc?: WatchFuncType): ILinkDecoratedVariable<T> {
-        const link = new LinkDecoratedVariable<T>(owningView, varName, () => source.get(), (newValue: T) => source.set(newValue), watchFunc);
+    protected makeLinkOnConsume<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        source: IConsumeDecoratedVariable<T>,
+        watchFunc?: WatchFuncType
+    ): ILinkDecoratedVariable<T> {
+        const link = new LinkDecoratedVariable<T>(
+            owningView,
+            varName,
+            () => source.get(),
+            (newValue: T) => source.set(newValue),
+            watchFunc
+        );
         source.registerWatchToSource(link);
         return link;
     }
 
-    protected makeLinkOnObjectLink<T>(owningView: ExtendableComponent, varName: string,
-        source: IObjectLinkDecoratedVariable<T>, watchFunc?: WatchFuncType): ILinkDecoratedVariable<T> {
-        const link = new LinkDecoratedVariable<T>(owningView, varName, () => source.get(), (newValue: T) => {/* set do nothing */}, watchFunc);
+    protected makeLinkOnObjectLink<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        source: IObjectLinkDecoratedVariable<T>,
+        watchFunc?: WatchFuncType
+    ): ILinkDecoratedVariable<T> {
+        const link = new LinkDecoratedVariable<T>(
+            owningView,
+            varName,
+            () => source.get(),
+            (newValue: T) => {
+                /* set do nothing */
+            },
+            watchFunc
+        );
         source.registerWatchToSource(link);
         return link;
     }
 
-    makeObjectLink<T>(owningView: ExtendableComponent, varName: string, initValue: T, watchFunc?: WatchFuncType): IObjectLinkDecoratedVariable<T> {
-        return new ObjectLinkDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue as Object) as T, watchFunc);
+    makeObjectLink<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        initValue: T,
+        watchFunc?: WatchFuncType
+    ): IObjectLinkDecoratedVariable<T> {
+        return new ObjectLinkDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T, watchFunc);
     }
 
-    makeProvide<T>(owningView: ExtendableComponent, varName: string, provideAlias: string,
-        initValue: T, allowOverride: boolean, watchFunc?: WatchFuncType): IProvideDecoratedVariable<T> {
-        return new ProvideDecoratedVariable<T>(owningView, varName, provideAlias, UIUtils.makeObserved(initValue as Object) as T, allowOverride, watchFunc);
+    makeProvide<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        provideAlias: string,
+        initValue: T,
+        allowOverride: boolean,
+        watchFunc?: WatchFuncType
+    ): IProvideDecoratedVariable<T> {
+        return new ProvideDecoratedVariable<T>(
+            owningView,
+            varName,
+            provideAlias,
+            UIUtils.makeObserved(initValue) as T,
+            allowOverride,
+            watchFunc
+        );
     }
 
-    makeConsume<T>(owningView: ExtendableComponent, varName: string, provideAlias: string,
-        watchFunc?: WatchFuncType): IConsumeDecoratedVariable<T> {
+    makeConsume<T>(
+        owningView: ExtendableComponent,
+        varName: string,
+        provideAlias: string,
+        watchFunc?: WatchFuncType
+    ): IConsumeDecoratedVariable<T> {
         return new ConsumeDecoratedVariable<T>(owningView, varName, provideAlias, watchFunc);
     }
 
-    makeStorageProp<T>(owningView: ExtendableComponent, propName: string, varName: string,
-        initValue: T, watchFunc?: WatchFuncType): IStoragePropDecoratedVariable<T> {
-        return new StoragePropDecoratedVariable<T>(owningView, propName, varName, UIUtils.makeObserved(initValue as Object) as T, watchFunc);
+    makeStorageProp<T>(
+        owningView: ExtendableComponent,
+        propName: string,
+        varName: string,
+        initValue: T,
+        watchFunc?: WatchFuncType
+    ): IStoragePropDecoratedVariable<T> {
+        return new StoragePropDecoratedVariable<T>(
+            owningView,
+            propName,
+            varName,
+            UIUtils.makeObserved(initValue) as T,
+            watchFunc
+        );
     }
 
-    makeStorageLink<T>(owningView: ExtendableComponent, propName: string, varName: string,
-        initValue: T, watchFunc?: WatchFuncType): IStorageLinkDecoratedVariable<T> {
-        return new StorageLinkDecoratedVariable<T>(owningView, propName, varName, UIUtils.makeObserved(initValue as Object) as T, watchFunc);
+    makeStorageLink<T>(
+        owningView: ExtendableComponent,
+        propName: string,
+        varName: string,
+        initValue: T,
+        watchFunc?: WatchFuncType
+    ): IStorageLinkDecoratedVariable<T> {
+        return new StorageLinkDecoratedVariable<T>(
+            owningView,
+            propName,
+            varName,
+            UIUtils.makeObserved(initValue) as T,
+            watchFunc
+        );
     }
-
 }

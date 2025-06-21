@@ -23,20 +23,26 @@ import { ExtendableComponent } from '../../component/extendableComponent';
 import { IStorageLinkDecoratedVariable } from '../decorator';
 import { ObserveSingleton } from '../base/observeSingleton';
 
-
-export class StorageLinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements IStorageLinkDecoratedVariable<T> {
-
-    private asLink : LinkDecoratedVariable<NullableObject>;
+export class StorageLinkDecoratedVariable<T>
+    extends DecoratedV1VariableBase<T>
+    implements IStorageLinkDecoratedVariable<T>
+{
+    private asLink: LinkDecoratedVariable<NullableObject>;
     private readonly propertyName_: string;
 
-    constructor(owningView: ExtendableComponent, propName: string, varName: string, localValue: T, watchFunc?: WatchFuncType) {
+    constructor(
+        owningView: ExtendableComponent,
+        propName: string,
+        varName: string,
+        localValue: T,
+        watchFunc?: WatchFuncType
+    ) {
         super('@StorageLink', owningView, varName, watchFunc);
         this.propertyName_ = propName;
         this.asLink = AppStorage.createLink<T>(propName, localValue);
-        const value : T = this.asLink!.get() as T;
+        const value: T = this.asLink!.get() as T;
         this.registerWatchForObservedObjectChanges(value);
-        this.asLink!.addWatch(watchFunc)
+        this.asLink!.addWatch(watchFunc);
         // registerWatchToSource in mkLink
     }
 
@@ -51,7 +57,7 @@ export class StorageLinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     }
 
     public set(newValue: T): void {
-        const oldValue : T = this.asLink!.get() as T;
+        const oldValue: T = this.asLink!.get() as T;
         if (oldValue === newValue) {
             return;
         }

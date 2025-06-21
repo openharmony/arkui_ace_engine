@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-import { uiUtils } from "./base/uiUtilsImpl";
+import { uiUtils } from './base/uiUtilsImpl';
 
 export class UIUtils {
     static makeObserved<T>(source: T): T {
-        return uiUtils.makeObserved(source as Object) as T;
+        return uiUtils.makeObserved(source) as T;
     }
 }

@@ -24,14 +24,21 @@ import { ExtendableComponent } from '../../component/extendableComponent';
 import { IStoragePropDecoratedVariable } from '../decorator';
 import { ObserveSingleton } from '../base/observeSingleton';
 
-export class StoragePropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements IStoragePropDecoratedVariable<T> {
-
-    private asProp : PropDecoratedVariable<NullableObject> | undefined;
-    constructor(owningView: ExtendableComponent, propName: string, varName:string, localVal: T, watchFunc?: WatchFuncType) {
+export class StoragePropDecoratedVariable<T>
+    extends DecoratedV1VariableBase<T>
+    implements IStoragePropDecoratedVariable<T>
+{
+    private asProp: PropDecoratedVariable<NullableObject> | undefined;
+    constructor(
+        owningView: ExtendableComponent,
+        propName: string,
+        varName: string,
+        localVal: T,
+        watchFunc?: WatchFuncType
+    ) {
         super('StorageProp', owningView, varName, undefined);
         this.asProp = AppStorage.createProp<T>(propName, localVal);
-        const value : T = this.asProp!.get() as T;
+        const value: T = this.asProp!.get() as T;
         this.registerWatchForObservedObjectChanges(value);
         this.asProp!.addWatch(watchFunc);
     }
@@ -47,7 +54,7 @@ export class StoragePropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     }
 
     public set(newValue: T): void {
-        const oldValue : T = this.asProp!.get() as T;
+        const oldValue: T = this.asProp!.get() as T;
         if (oldValue === newValue) {
             return;
         }
