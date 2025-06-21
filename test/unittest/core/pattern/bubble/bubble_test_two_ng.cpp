@@ -293,6 +293,45 @@ HWTEST_F(BubbleTestTwoNg, InitWrapperRect001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateBubbleMaxSize001
+ * @tc.desc: Test UpdateBubbleMaxSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, UpdateBubbleMaxSize001, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto id = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(id, targetTag));
+    auto childNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(childNode, nullptr);
+    frameNode->AddChild(childNode);
+    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto bubbleLayoutProperty = bubblePattern->GetLayoutProperty<BubbleLayoutProperty>();
+    ASSERT_NE(bubbleLayoutProperty, nullptr);
+    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    bool showInSubwindow = false;
+    layoutAlgorithm->useCustom_ = false;
+    layoutAlgorithm->UpdateBubbleMaxSize(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    layoutAlgorithm->useCustom_ = true;
+    layoutAlgorithm->UpdateBubbleMaxSize(AceType::RawPtr(layoutWrapper), showInSubwindow);
+    auto childProp = childNode->GetLayoutProperty();
+    ASSERT_NE(childProp, nullptr);
+    auto layoutConstraint = childProp->GetLayoutConstraint();
+    CHECK_EQUAL_VOID(layoutConstraint.has_value(), false);
+    EXPECT_EQ(layoutConstraint->maxSize.Width(), 0);
+}
+
+/**
  * @tc.name: CreateBubbleNode001
  * @tc.desc: Test CreateBubbleNode
  * @tc.type: FUNC
