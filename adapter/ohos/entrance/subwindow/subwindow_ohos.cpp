@@ -1552,6 +1552,7 @@ bool SubwindowOhos::InitToastDialogView(int32_t width, int32_t height, float den
     Platform::AceViewOhos::SurfaceCreated(aceView, dialogWindow_);
     // set view
     Platform::DialogContainer::SetView(aceView, density, width, height, dialogWindow_);
+    container->CheckAndSetFontFamily();
     Ace::Platform::DialogContainer::SetUIWindow(childContainerId_, dialogWindow_);
     ViewportConfig config(width, height, density);
     Platform::AceViewOhos::SetViewportMetrics(aceView, config);
