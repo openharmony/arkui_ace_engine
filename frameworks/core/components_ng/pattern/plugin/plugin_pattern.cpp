@@ -225,7 +225,7 @@ void PluginPattern::CreatePluginSubContainer()
 
     PluginManager::GetInstance().AddPluginSubContainer(pluginSubContainerId_, pluginSubContainer_);
     PluginManager::GetInstance().AddPluginParentContainer(pluginSubContainerId_, parentcontainerId);
-    pluginSubContainer_->Initialize();
+    pluginSubContainer_->Initialize(GetPackageCodeLanguage(GetPluginRequestInfo()));
     auto weak = WeakClaim(this);
     pluginSubContainer_->SetPluginPattern(weak);
     auto pattern = weak.Upgrade();
@@ -386,6 +386,33 @@ void PluginPattern::SplitString(const std::string& str, char tag, std::vector<st
     }
 }
 
+std::string PluginPattern::GetPackageCodeLanguage(const RequestPluginInfo& info) const
+{
+    std::string codeLanguage;
+
+    std::vector<std::string> strList;
+    SplitString(info.bundleName, '/', strList);
+    if (strList.empty()) {
+        return codeLanguage;
+    }
+
+    std::vector<int32_t> userIds;
+    GetActiveAccountIds(userIds);
+
+    auto bms = PluginComponentManager::GetInstance()->GetBundleManager();
+    if (!bms) {
+        return codeLanguage;
+    }
+
+    AppExecFwk::BundleInfo bundleInfo;
+    bool ret = bms->GetBundleInfo(strList[0], AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo,
+        userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID);
+    if (!ret) {
+        return codeLanguage;
+    }
+    return bundleInfo.applicationInfo.codeLanguage;
+}
+
 std::string PluginPattern::GetPackagePath(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info) const
 {
     std::string packagePathStr;
@@ -418,7 +445,7 @@ std::string PluginPattern::GetPackagePathByWant(const WeakPtr<PluginPattern>& we
         return packagePathStr;
     }
     GetAbilityNameByWant(weak, info);
-    packagePathStr = GerPackagePathByBms(weak, info, strList, userIds);
+    packagePathStr = GetPackagePathByBms(weak, info, strList, userIds);
 
     return packagePathStr;
 }
@@ -483,7 +510,7 @@ void PluginPattern::GetAbilityNameByWant(const WeakPtr<PluginPattern>& weak, Req
     }
 }
 
-std::string PluginPattern::GerPackagePathByBms(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info,
+std::string PluginPattern::GetPackagePathByBms(const WeakPtr<PluginPattern>& weak, RequestPluginInfo& info,
     const std::vector<std::string>& strList, const std::vector<int32_t>& userIds) const
 {
     std::string packagePathStr;
