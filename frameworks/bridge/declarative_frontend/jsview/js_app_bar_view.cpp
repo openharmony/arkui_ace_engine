@@ -35,6 +35,7 @@ const std::string EVENT_NAME_CUSTOM_APP_BAR_CLOSE_CLICK_NG = "arkui_custom_app_b
 const std::string EVENT_NAME_CUSTOM_APP_BAR_DID_BUILD = "arkui_custom_app_bar_did_build";
 const std::string EVENT_NAME_CUSTOM_APP_BAR_CREATE_SERVICE_PANEL = "arkui_custom_app_bar_create_service_panel";
 const std::string EVENT_NAME_APP_BAR_ON_BACK_PRESSED = "arkui_app_bar_on_back_pressed";
+const std::string EVENT_NAME_APP_BAR_ON_BACK_PRESSED_CONSUMED = "arkui_app_bar_on_back_pressed_consumed";
 
 constexpr int32_t SERVICE_PANEL_PARAM_COUNT = 2;
 constexpr int32_t PARAM_FIRST = 1;
@@ -70,6 +71,16 @@ void JSAppBar::RequestAtomicServiceTerminate(const JSCallbackInfo& info)
     auto appBar = container->GetAppBar();
     CHECK_NULL_VOID(appBar);
     appBar->RequestAtomicServiceTerminate();
+}
+
+void JSAppBar::SetOnBackPressedConsumed(const JSCallbackInfo& info)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "JSAppBar SetOnBackPressedConsumed");
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto appBar = container->GetAppBar();
+    CHECK_NULL_VOID(appBar);
+    appBar->SetOnBackPressedConsumed();
 }
 
 void JSAppBar::OnDidBuild(const JSCallbackInfo& info)

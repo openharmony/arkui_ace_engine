@@ -2754,8 +2754,7 @@ bool PipelineContext::OnBackPressed()
             CHECK_NULL_VOID(appBar);
             auto atomicServicePattern = appBar->GetAtomicServicePattern();
             CHECK_NULL_VOID(atomicServicePattern);
-            atomicServicePattern->OnBackPressedCallback();
-            result = true;
+            result = atomicServicePattern->OnBackPressedCallback();
         },
         TaskExecutor::TaskType::UI, "ArkUIBackPressedAppBar");
 
