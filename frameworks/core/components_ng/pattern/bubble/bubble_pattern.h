@@ -416,8 +416,7 @@ private:
     void RegisterButtonOnTouch();
     void ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& buttonNode);
     void ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& buttonNode);
-    void PopBubble();
-    void PopTipsBubble();
+    void PopBubble(bool tips = false);
     void Animation(
         RefPtr<RenderContext>& renderContext, const Color& endColor, int32_t duration, const RefPtr<Curve>& curve);
 

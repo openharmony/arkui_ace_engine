@@ -228,9 +228,9 @@ void calculateArrowPoint(Dimension height, Dimension width)
     ARROW_REPLACE_END_HORIZON_P5_OFFSET_Y = p1x;
 }
 
-void ResetTipsMaxLines(const RefPtr<LayoutWrapper>& childWrapper, bool followCursor)
+void ResetTipsMaxLines(const RefPtr<LayoutWrapper>& childWrapper, bool isTips)
 {
-    if (!followCursor) {
+    if (!isTips) {
         return;
     }
     auto children = childWrapper->GetAllChildrenWithBuild();
@@ -338,9 +338,9 @@ void BubbleLayoutAlgorithm::FitAvailableRect(LayoutWrapper* layoutWrapper, bool 
     if (showInSubWindow) {
         CHECK_EQUAL_VOID(container->IsSceneBoardWindow(), true);
         marginTop_ = std::max(marginTop_,
-            static_cast<float>(availableRect.Top() + (followCursor_ ? TIPS_MARGIN_SPACE.ConvertToPx() : .0f)));
+            static_cast<float>(availableRect.Top() + (isTips_ ? TIPS_MARGIN_SPACE.ConvertToPx() : .0f)));
         marginBottom_ = std::max(marginBottom_, static_cast<float>(wrapperSize_.Height()
-            - availableRect.Top() - availableRect.Height() + (followCursor_ ? TIPS_MARGIN_SPACE.ConvertToPx() : .0f)));
+            - availableRect.Top() - availableRect.Height() + (isTips_ ? TIPS_MARGIN_SPACE.ConvertToPx() : .0f)));
     } else {
         auto displayWindowRect = pipelineContext->GetDisplayWindowRectInfo();
         auto wrapperOffset = layoutWrapper->GetParentGlobalOffsetWithSafeArea();
@@ -449,10 +449,13 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto childProp = child->GetLayoutProperty();
     CHECK_NULL_VOID(childProp);
     childProp->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
-    ResetTipsMaxLines(child, followCursor_);
+    ResetTipsMaxLines(child, isTips_);
     child->Measure(childLayoutConstraint);
     measureChildSizeAfter_ = child->GetGeometryNode()->GetFrameSize();
-    MeasureTipsRegion(child, childLayoutConstraint);
+    if (isTips_) {
+        followCursor_ ? MeasureTipsRegion(child, childLayoutConstraint)
+                      : MeasureTipsFollowTarget(child, childLayoutConstraint);
+    }
     if (!NearEqual(measureChildSizeBefore_, measureChildSizeAfter_)) {
         auto childShowWidth = child->GetGeometryNode()->GetFrameSize().Width() + BUBBLE_ARROW_HEIGHT.ConvertToPx() * 2;
         auto childShowHeight =
@@ -812,8 +815,8 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     UpdateDumpInfo();
     marginStart_ = (isTips_ ? TIPS_MARGIN_SPACE : MARGIN_SPACE + DRAW_EDGES_SPACE).ConvertToPx();
     marginEnd_ = (isTips_ ? TIPS_MARGIN_SPACE : MARGIN_SPACE + DRAW_EDGES_SPACE).ConvertToPx();
-    marginTop_ = top_ + (followCursor_ ? TIPS_MARGIN_SPACE : DRAW_EDGES_SPACE).ConvertToPx();
-    marginBottom_ = bottom_ + (followCursor_ ? TIPS_MARGIN_SPACE : DRAW_EDGES_SPACE).ConvertToPx();
+    marginTop_ = top_ + (isTips_ ? TIPS_MARGIN_SPACE : DRAW_EDGES_SPACE).ConvertToPx();
+    marginBottom_ = bottom_ + (isTips_ ? TIPS_MARGIN_SPACE : DRAW_EDGES_SPACE).ConvertToPx();
     HandleKeyboard(layoutWrapper, showInSubWindow);
     showArrow_ = false;
     minHeight_ = popupTheme->GetMinHeight();
@@ -1271,6 +1274,26 @@ void BubbleLayoutAlgorithm::MeasureTipsRegion(
     }
     tipsPlacement_ = placement_;
     placement_ = origin;
+}
+
+void BubbleLayoutAlgorithm::MeasureTipsFollowTarget(
+    const RefPtr<LayoutWrapper>& childWrapper, const LayoutConstraintF& childConstraint)
+{
+    CHECK_NULL_VOID(childWrapper);
+    const double maxTipsWidth = MAX_TIP_WIDTH.ConvertToPx();
+    float height = isHalfFoldHover_ ? wrapperRect_.Height() : (wrapperSize_.Height() - marginTop_ - marginBottom_);
+    float width = std::min(wrapperSize_.Width() - marginEnd_ - marginStart_, static_cast<float>(maxTipsWidth));
+    SizeF newSize(width, height);
+    LayoutConstraintF columnConstraint = childConstraint;
+    columnConstraint.maxSize = newSize;
+    auto childProp = childWrapper->GetLayoutProperty();
+    if (childProp) {
+        childProp->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    }
+    UpdateTextNodeMaxLines(childWrapper, columnConstraint);
+    childWrapper->Measure(columnConstraint);
+    CHECK_NULL_VOID(childWrapper->GetGeometryNode());
+    measureChildSizeAfter_ = childWrapper->GetGeometryNode()->GetFrameSize();
 }
 
 Placement BubbleLayoutAlgorithm::CalculateTipsDirections(SizeF& newSize)

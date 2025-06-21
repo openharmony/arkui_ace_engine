@@ -267,6 +267,7 @@ private:
 
     void UpdateTextNodeMaxLines(const RefPtr<LayoutWrapper>& childWrapper, const LayoutConstraintF& layoutConstraint);
     void MeasureTipsRegion(const RefPtr<LayoutWrapper>& childWrapper, const LayoutConstraintF& childContraint);
+    void MeasureTipsFollowTarget(const RefPtr<LayoutWrapper>& childWrapper, const LayoutConstraintF& childContraint);
     Placement CalculateTipsDirections(SizeF& newSize);
 
     OffsetF GetChildPosition(
