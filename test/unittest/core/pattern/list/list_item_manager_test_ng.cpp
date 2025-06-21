@@ -124,7 +124,8 @@ HWTEST_F(ListItemManagerTestNg, HandleScrollCallback002, TestSize.Level1)
     auto frameRect = host->geometryNode_->GetMarginFrameRect();
     auto from = listItemDragManager->GetIndex();
     auto paddingOffset = listItemDragManager->GetParentPaddingOffset();
-    auto to = listItemDragManager->ScaleNearItem(from, frameRect, listItemDragManager->realOffset_ - frameRect.GetOffset() + paddingOffset);
+    auto to = listItemDragManager->ScaleNearItem(from, frameRect, listItemDragManager->realOffset_
+        - frameRect.GetOffset() + paddingOffset);
     listItemDragManager->HandleScrollCallback();
     EXPECT_EQ(from, to);
 }
