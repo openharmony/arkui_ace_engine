@@ -15,8 +15,8 @@
 
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 
-#include "base/log/log_wrapper.h"
 #include "base/log/event_report.h"
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
@@ -460,7 +460,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     }
     if (enableSkipping_) {
         SkipLargeOffset(mainSize, layoutWrapper);
-        syncLoad_ = syncLoad_ || (reason_ == GridReloadReason::SKIP_LARGE_OFFSET);
+        syncLoad_ = syncLoad_ || (reason_ == GridReloadReason::SKIP_LARGE_OFFSET && scrollSource_ != SCROLL_FROM_JUMP);
     }
 
     if (!info_.lastCrossCount_) {
