@@ -254,4 +254,15 @@ void SelectModelStatic::SetMenuOutline(FrameNode* frameNode, const std::optional
     CHECK_NULL_VOID(pattern);
     pattern->SetMenuOutline(menuParam.value_or(MenuParam()));
 }
+
+void SelectModelStatic::SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    if (controlSize.has_value()) {
+        pattern->SetControlSize(controlSize.value());
+    } else {
+        pattern->SetControlSize(ControlSize::NORMAL);
+    }
+}
 } // namespace OHOS::Ace::NG

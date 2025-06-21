@@ -520,7 +520,7 @@ void ControlSize0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SelectModelNG::SetControlSize(frameNode, Converter::OptConvert<ControlSize>(*value));
+    SelectModelStatic::SetControlSize(frameNode, Converter::OptConvert<ControlSize>(*value));
 }
 void ControlSize1Impl(Ark_NativePointer node,
                       const Opt_ControlSize* value)
