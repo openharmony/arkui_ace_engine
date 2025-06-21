@@ -122,7 +122,11 @@ DragDropManager::DragDropManager()
 
 const Point DragDropManager::GetDragMoveLastPointByCurrentPointer(int32_t pointerId)
 {
-    return fingerPointInfo_[pointerId];
+    auto it = fingerPointInfo_.find(pointerId);
+    if (it != fingerPointInfo_.end()) {
+        return it->second;
+    }
+    return Point(0, 0);
 }
 
 void DragDropManager::UpdatePointInfoForFinger(int32_t pointerId, Point point)
