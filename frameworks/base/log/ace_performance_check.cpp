@@ -190,7 +190,7 @@ void AceScopedPerformanceCheck::RecordPerformanceCheckData(const PerformanceChec
     if (isNavgation) {
         pageRoute = "H:NavDestination Page from " + fromPath + " to " + path + ", navDestinationName: " + moduleName;
     } else {
-        pageRoute = "H:Router Page to" + path;
+        pageRoute = "H:Router Page to " + path;
     }
     RecordFunctionTimeout();
     RecordPageNodeCountAndDepth(nodeMap.size(), maxDepth, pageNodeList, codeInfo, pageRoute);
@@ -232,7 +232,7 @@ void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(int32_t pageNodeCoun
             pageJson->Put("components", componentsJson);
         }
     }
-    LOGI("JX666 9901 pageJson: %{public}s", pageJson->ToString().c_str());
+    LOGI("9901 pageJson: %{public}s", pageJson->ToString().c_str());
     ruleJson->Put(pageJson);
 }
 
@@ -256,7 +256,7 @@ void AceScopedPerformanceCheck::RecordFunctionTimeout()
         pageJson->Put("functionName", std::get<1>(record).c_str());
         pageJson->Put("costTime", std::get<0>(record));
         ruleJson->Put(pageJson);
-        LOGI("JX666 9902 pageJson: %{public}s", pageJson->ToString().c_str());
+        LOGI("9902 pageJson: %{public}s", pageJson->ToString().c_str());
     }
     records_.clear();
 }
@@ -295,7 +295,7 @@ void AceScopedPerformanceCheck::RecordVsyncTimeout(
             }
         }
     }
-    LOGI("JX666 9903 pageJson: %{public}s", pageJson->ToString().c_str());
+    LOGI("9903 pageJson: %{public}s", pageJson->ToString().c_str());
     ruleJson->Put(pageJson);
 }
 
@@ -328,7 +328,7 @@ void AceScopedPerformanceCheck::RecordForEachItemsCount(int32_t count,
             pageJson->Put("components", componentsJson);
         }
     }
-    LOGI("JX666 9904 pageJson: %{public}s", pageJson->ToString().c_str());
+    LOGI("9904 pageJson: %{public}s", pageJson->ToString().c_str());
     ruleJson->Put(pageJson);
 }
 
@@ -361,7 +361,7 @@ void AceScopedPerformanceCheck::RecordFlexLayoutsCount(
             pageJson->Put("components", componentsJson);
         }
     }
-    LOGI("JX666 9905 pageJson: %{public}s", pageJson->ToString().c_str());
+    LOGI("9905 pageJson: %{public}s", pageJson->ToString().c_str());
     ruleJson->Put(pageJson);
 }
 
