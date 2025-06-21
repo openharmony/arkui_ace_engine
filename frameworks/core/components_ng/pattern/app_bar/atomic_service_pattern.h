@@ -65,7 +65,8 @@ public:
     std::optional<bool> settedColorMode = std::nullopt;
     ACE_FORCE_EXPORT static void RegisterBeforeCreateLayoutBuilder(
         std::function<void(RefPtr<FrameNode> host, std::optional<bool> settedColorMode)> beforeCreateLayoutBuilder);
-    void OnBackPressedCallback() override;
+    bool OnBackPressedCallback() override;
+    void SetOnBackPressedConsumed();
 
 private:
     void UpdateLayoutMargin();
@@ -73,6 +74,7 @@ private:
     void MenuBarSafeAreaCallBack();
     void ContentSafeAreaCallBack();
     static std::function<void(RefPtr<FrameNode> host, std::optional<bool> settedColorMode)> beforeCreateLayoutBuilder_;
+    std::optional<bool> onBackPressedConsumed_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ATOMIC_SERVICE_PATTERN_H

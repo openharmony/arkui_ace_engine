@@ -1063,6 +1063,11 @@ HWTEST_F(AppBarTestNg, TestOnBackPressedCallback032, TestSize.Level1)
         callbackCalled = true;
         callbackName = name;
         callbackValue = value;
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto appBar = container->GetAppBar();
+        CHECK_NULL_VOID(appBar);
+        appBar->SetOnBackPressedConsumed();
     };
 
     custom->SetCustomCallback(std::move(callback));
@@ -1077,5 +1082,11 @@ HWTEST_F(AppBarTestNg, TestOnBackPressedCallback032, TestSize.Level1)
     EXPECT_TRUE(callbackCalled);
     EXPECT_EQ(callbackName, ARKUI_APP_BAR_ON_BACK_PRESSED);
     EXPECT_EQ(callbackValue, "true");
+
+    /**
+     * @tc.steps: step4. Verify onBackPressedConsumed_ flag is reset correctly.
+     * @tc.expected: The flag should be reset (no value) after the callback is executed.
+     */
+    EXPECT_FALSE(pattern->onBackPressedConsumed_.has_value());
 }
 } // namespace OHOS::Ace::NG

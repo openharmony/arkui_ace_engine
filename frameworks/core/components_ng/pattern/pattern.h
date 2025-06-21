@@ -538,7 +538,10 @@ public:
         return -1;
     }
 
-    virtual void OnBackPressedCallback() {};
+    virtual bool OnBackPressedCallback()
+    {
+        return false;
+    }
     
     virtual void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) {};
