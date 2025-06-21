@@ -518,9 +518,8 @@ HWTEST_F(WindowSceneTest, HideStartingWindowInvisible, TestSize.Level1)
         .startWindowType_ = Rosen::StartWindowType::RETAIN_AND_INVISIBLE,
     };
     auto session = ssm_->RequestSceneSession(sessionInfo);
-    CHECK_EQUAL_RETURN(session, nullptr, nullptr);
+    ASSERT_NE(session, nullptr);
     auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
-    CHECK_EQUAL_RETURN(windowScene, nullptr, nullptr);
     ASSERT_NE(windowScene, nullptr);
 
     /**
@@ -531,7 +530,6 @@ HWTEST_F(WindowSceneTest, HideStartingWindowInvisible, TestSize.Level1)
     /**
      * @tc.steps: step3. Test and check
      */
-    windowScene->SetSubSessionVisible();
     ASSERT_EQ(windowScene->session_->GetHideStartingWindow(), true);
 }
 
@@ -552,9 +550,8 @@ HWTEST_F(WindowSceneTest, HideStartingWindowDefalut, TestSize.Level1)
         .startWindowType_ = Rosen::StartWindowType::DEFAULT,
     };
     auto session = ssm_->RequestSceneSession(sessionInfo);
-    CHECK_EQUAL_RETURN(session, nullptr, nullptr);
+    ASSERT_NE(session, nullptr);
     auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
-    CHECK_EQUAL_RETURN(windowScene, nullptr, nullptr);
     ASSERT_NE(windowScene, nullptr);
 
     /**
@@ -565,7 +562,6 @@ HWTEST_F(WindowSceneTest, HideStartingWindowDefalut, TestSize.Level1)
     /**
      * @tc.steps: step3. Test and check
      */
-    windowScene->SetSubSessionVisible();
     ASSERT_EQ(windowScene->session_->GetHideStartingWindow(), false);
 }
 

@@ -360,9 +360,9 @@ void WindowScene::BufferAvailableCallback()
         }
 
         CHECK_NULL_VOID(self->session_);
-        if (self->session->GetHidingStartingWindow()) {
-            self->session->SetHidingStartingWindow(false);
-            self->session->SetBufferAvailable(true, true);
+        if (self->session_->GetHidingStartingWindow()) {
+            self->session_->SetHidingStartingWindow(false);
+            self->session_->SetBufferAvailable(true, true);
         }
         auto surfaceNode = self->session_->GetSurfaceNode();
         bool isWindowSizeEqual = self->IsWindowSizeEqual();
