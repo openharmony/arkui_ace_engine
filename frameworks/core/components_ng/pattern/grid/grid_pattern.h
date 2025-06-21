@@ -22,7 +22,6 @@
 #include "core/components_ng/pattern/grid/grid_focus.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
-#include "core/components_ng/pattern/scrollable/lazy_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -37,13 +36,11 @@ struct GridItemAdapter {
     std::function<RefPtr<FrameNode>(int32_t index)> getItemFunc;
 };
 
-class ACE_EXPORT GridPattern : public ScrollablePattern, public LazyContainer {
-    DECLARE_ACE_TYPE(GridPattern, ScrollablePattern, LazyContainer);
+class ACE_EXPORT GridPattern : public ScrollablePattern {
+    DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
 
 public:
     GridPattern() = default;
-
-    void OnAttachToFrameNode() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -282,10 +279,6 @@ public:
     }
 
     void HandleOnItemFocus(int32_t index);
-
-    RefPtr<FillAlgorithm> CreateFillAlgorithm() final;
-
-    int32_t ConvertLargeDelta(float delta) final;
 
 private:
     /**

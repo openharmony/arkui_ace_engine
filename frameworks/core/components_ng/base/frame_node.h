@@ -72,7 +72,6 @@ class Pattern;
 class StateModifyTask;
 class UITask;
 struct DirtySwapConfig;
-class ScrollWindowAdapter;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
@@ -1344,9 +1343,6 @@ public:
     void AddVisibilityDumpInfo(const std::pair<uint64_t, std::pair<VisibleType, bool>>& dumpInfo);
 
     std::string PrintVisibilityDumpInfo() const;
-
-    ScrollWindowAdapter* GetScrollWindowAdapter() const;
-    ScrollWindowAdapter* GetOrCreateScrollWindowAdapter();
 
     bool HasMultipleChild();
 
