@@ -1344,8 +1344,6 @@ public:
 
     ScrollWindowAdapter* GetScrollWindowAdapter() const;
     ScrollWindowAdapter* GetOrCreateScrollWindowAdapter();
-    void MarkModifyDoneUnsafely();
-    void MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag);
 
     bool HasMultipleChild();
 
@@ -1492,6 +1490,11 @@ private:
     const char* GetPatternTypeName() const;
     const char* GetLayoutPropertyTypeName() const;
     const char* GetPaintPropertyTypeName() const;
+
+    void MarkModifyDoneMultiThread();
+    void MarkDirtyNodeMultiThread(PropertyChangeFlag extraFlag);
+    void RebuildRenderContextTreeMultiThread();
+    void MarkNeedRenderMultiThread(bool isRenderBoundary);
 
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
