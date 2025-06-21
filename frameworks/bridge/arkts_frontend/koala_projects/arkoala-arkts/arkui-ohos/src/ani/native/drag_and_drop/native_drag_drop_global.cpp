@@ -15,8 +15,8 @@
 
 #include "native_drag_drop_global.h"
 
-#include "ani_utils.h"
-#include "log.h"
+#include "utils/ani_utils.h"
+#include "log/log.h"
 #include "utils/convert_utils.h"
 #include "core/gestures/drag_event.h"
 #include "load.h"

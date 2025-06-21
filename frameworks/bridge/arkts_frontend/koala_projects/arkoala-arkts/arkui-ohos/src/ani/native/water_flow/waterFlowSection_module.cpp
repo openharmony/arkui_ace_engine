@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-#include <memory>
-#include "common_module.h"
 #include "waterFlowSection_module.h"
-#include "base/utils/utils.h"
-#include "load.h"
-#include "base/log/log.h"
 
+#include <memory>
+
+#include "common/common_module.h"
+#include "load.h"
 
 namespace OHOS::Ace::Ani {
 void SetWaterFlowOptions(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_object waterFlowOptions)
