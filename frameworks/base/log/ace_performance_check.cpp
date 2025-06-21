@@ -39,7 +39,7 @@ constexpr char CHECK_RESULT[] = "{\"message_type\": \"SendArkPerformanceCheckRes
 
 std::unique_ptr<JsonValue> AcePerformanceCheck::performanceInfo_ = nullptr;
 std::string AceScopedPerformanceCheck::currentPath_;
-std::vector<std::tuple<int64_t, std::string, std::string>> AceScopedPerformanceCheck::records_;
+std::vector<std::pair<int64_t, std::string>> AceScopedPerformanceCheck::records_;
 void AcePerformanceCheck::Start()
 {
     if (AceChecker::IsPerformanceCheckEnabled()) {
@@ -72,12 +72,11 @@ void AcePerformanceCheck::Stop()
 
 // ============================== specific implementation ======================================================
 
-AceScopedPerformanceCheck::AceScopedPerformanceCheck(const std::string& name, const std::string& pagePath)
+AceScopedPerformanceCheck::AceScopedPerformanceCheck(const std::string& name)
 {
     // micro time.
     markTime_ = GetSysTimestamp();
     name_ = name;
-    pagePath_ = pagePath;
 }
 
 AceScopedPerformanceCheck::~AceScopedPerformanceCheck()
@@ -88,7 +87,7 @@ AceScopedPerformanceCheck::~AceScopedPerformanceCheck()
     }
     if (AcePerformanceCheck::performanceInfo_) {
         // convert micro time to ms with 1000.
-        std::tuple recordInfo { time, name_, pagePath_ };
+        std::pair recordInfo { time, name_ };
         records_.push_back(recordInfo);
     }
 }
@@ -157,7 +156,7 @@ bool AceScopedPerformanceCheck::CheckPage(const CodeInfo& codeInfo, const std::s
 }
 
 void AceScopedPerformanceCheck::RecordPerformanceCheckData(const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout,
-    std::string path, std::string fromPath, std::string moduleName, bool isNavgation)
+    std::string path, std::string fromPath, std::string moduleName, bool isNavigation)
 {
     currentPath_ = path;
     auto codeInfo = GetCodeInfo(1, 1);
@@ -187,7 +186,7 @@ void AceScopedPerformanceCheck::RecordPerformanceCheckData(const PerformanceChec
         }
     }
     std::string pageRoute;
-    if (isNavgation) {
+    if (isNavigation) {
         pageRoute = "H:NavDestination Page from " + fromPath + " to " + path + ", navDestinationName: " + moduleName;
     } else {
         pageRoute = "H:Router Page to " + path;
@@ -232,14 +231,14 @@ void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(int32_t pageNodeCoun
             pageJson->Put("components", componentsJson);
         }
     }
-    LOGI("9901 pageJson: %{public}s", pageJson->ToString().c_str());
+    LOGI("pageJson 9901: %{public}s", pageJson->ToString().c_str());
     ruleJson->Put(pageJson);
 }
 
 void AceScopedPerformanceCheck::RecordFunctionTimeout()
 {
     for (auto record : records_) {
-        if (std::get<0>(record) < AceChecker::GetFunctionTimeout()) {
+         if (record.first < AceChecker::GetFunctionTimeout()) {
             continue;
         }
         auto codeInfo = GetCodeInfo(1, 1);
@@ -252,11 +251,10 @@ void AceScopedPerformanceCheck::RecordFunctionTimeout()
         auto ruleJson = AcePerformanceCheck::performanceInfo_->GetValue("9902");
         auto pageJson = JsonUtil::Create(true);
         pageJson->Put("eventTime", eventTime.c_str());
-        pageJson->Put("pagePath", std::get<2>(record).c_str());
-        pageJson->Put("functionName", std::get<1>(record).c_str());
-        pageJson->Put("costTime", std::get<0>(record));
+        pageJson->Put("pagePath", codeInfo.sources.c_str());
+        pageJson->Put("functionName", record.second.c_str());
+        pageJson->Put("costTime", record.first);
         ruleJson->Put(pageJson);
-        LOGI("9902 pageJson: %{public}s", pageJson->ToString().c_str());
     }
     records_.clear();
 }
@@ -295,7 +293,7 @@ void AceScopedPerformanceCheck::RecordVsyncTimeout(
             }
         }
     }
-    LOGI("9903 pageJson: %{public}s", pageJson->ToString().c_str());
+    LOGI("pageJson 9903: %{public}s", pageJson->ToString().c_str());
     ruleJson->Put(pageJson);
 }
 
@@ -328,7 +326,7 @@ void AceScopedPerformanceCheck::RecordForEachItemsCount(int32_t count,
             pageJson->Put("components", componentsJson);
         }
     }
-    LOGI("9904 pageJson: %{public}s", pageJson->ToString().c_str());
+    LOGI("pageJson 9904: %{public}s", pageJson->ToString().c_str());
     ruleJson->Put(pageJson);
 }
 

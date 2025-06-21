@@ -29,7 +29,7 @@ int32_t AceChecker::foreachItems_ = 0;
 int32_t AceChecker::flexLayouts_ = 0;
 
 void AceScopedPerformanceCheck::RecordPerformanceCheckData(const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout,
-    std::string path, std::string fromPath, std::string moduleName, bool isNavgation)
+    std::string path, std::string fromPath, std::string moduleName, bool isNavigation)
 {}
 
 AceScopedPerformanceCheck::AceScopedPerformanceCheck(const std::string&, const std::string&) {}

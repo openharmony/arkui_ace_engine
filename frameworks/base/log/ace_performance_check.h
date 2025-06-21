@@ -67,7 +67,7 @@ private:
 
 class ACE_EXPORT AceScopedPerformanceCheck final {
 public:
-    explicit AceScopedPerformanceCheck(const std::string& name, const std::string& pagePath);
+    explicit AceScopedPerformanceCheck(const std::string& name);
     ~AceScopedPerformanceCheck();
 
     static CodeInfo GetCodeInfo(int32_t row, int32_t col);
@@ -93,7 +93,7 @@ private:
     std::string name_;
     std::string pagePath_;
     static std::string currentPath_;
-    static std::vector<std::tuple<int64_t, std::string, std::string>> records_;
+    static std::vector<std::pair<int64_t, std::string>> records_;
     ACE_DISALLOW_COPY_AND_MOVE(AceScopedPerformanceCheck);
 };
 } // namespace OHOS::Ace
