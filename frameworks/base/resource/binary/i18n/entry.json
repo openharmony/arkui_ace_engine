@@ -1653,7 +1653,7 @@
             "copy":"Копировать",
             "search":"Найти",
             "share":"Отправить",
-            "translate":"Перевести"
+            "translate":"Перевод"
         },
         "refresh":{
             "last_updated":"Обновлено: %s"
