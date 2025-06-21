@@ -65,4 +65,22 @@ void DividerPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("DividerColor: ", DumpDividerColor().c_str());
 }
+
+void DividerPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<DividerTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    auto paintProperty = host->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->GetDividerColorSetByTheme().value_or(true)) {
+        paintProperty->UpdateDividerColorByTheme(theme->GetColor());
+    }
+}
 } // namespace OHOS::Ace::NG
