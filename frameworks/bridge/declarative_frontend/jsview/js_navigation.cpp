@@ -72,16 +72,11 @@ constexpr int32_t NAVIGATION_MODE_RANGE = 2;
 constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 240;
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
-constexpr uint32_t SAFE_AREA_TYPE_LIMIT = 3;
-constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
-constexpr uint32_t SAFE_AREA_EDGE_SYSTEM = 0;
-constexpr uint32_t SAFE_AREA_EDGE_TOP = 0;
-constexpr uint32_t SAFE_AREA_EDGE_BOTTOM = 1;
 constexpr int32_t PARAMETER_LENGTH_ONE  = 1;
 constexpr int32_t PARAMETER_LENGTH_TWO  = 2;
 constexpr int32_t PARAMETER_LENGTH_THREE  = 3;
-constexpr int32_t FIRST_INDEX  = 0;
-constexpr int32_t SECOND_INDEX  = 1;
+constexpr int32_t LAYOUT_SAFE_AREA_TYPE_LIMIT = 2;
+constexpr int32_t LAYOUT_SAFE_AREA_EDGE_LIMIT = 6;
 constexpr bool ENABLE_TOOLBAR_ADAPTATION_DEFULT = true;
 constexpr char MORE_BUTTON_OPTIONS_PROPERTY[] = "moreButtonOptions";
 constexpr char HOME_DESTINATION_INFO_NAME[] = "name";
@@ -1139,38 +1134,35 @@ void JSNavigation::SetIgnoreLayoutSafeArea(const JSCallbackInfo& info)
     if (NavigationModel::GetInstance()->UseHomeDestination()) {
         return;
     }
-    NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL};
-    if (info.Length() >= PARAMETER_LENGTH_ONE && info[FIRST_INDEX]->IsArray()) {
+    NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .rawEdges = NG::LAYOUT_SAFE_AREA_EDGE_ALL };
+    if (info.Length() >= PARAMETER_LENGTH_ONE && info[0]->IsArray()) {
         auto paramArray = JSRef<JSArray>::Cast(info[0]);
-        uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
+        uint32_t layoutSafeAreaType = NG::LAYOUT_SAFE_AREA_TYPE_NONE;
         for (size_t i = 0; i < paramArray->Length(); ++i) {
-            auto value = paramArray->GetValueAt(i);
-            if (!value->IsNumber() ||
-                value->ToNumber<uint32_t>() >= SAFE_AREA_TYPE_LIMIT ||
-                value->ToNumber<uint32_t>() == SAFE_AREA_EDGE_SYSTEM) {
-                safeAreaType = NG::SAFE_AREA_TYPE_SYSTEM;
+            if (!paramArray->GetValueAt(i)->IsNumber() ||
+                paramArray->GetValueAt(i)->ToNumber<uint32_t>() > LAYOUT_SAFE_AREA_TYPE_LIMIT) {
+                layoutSafeAreaType = NG::SAFE_AREA_TYPE_SYSTEM;
                 break;
             }
+            layoutSafeAreaType |=
+                NG::IgnoreLayoutSafeAreaOpts::TypeToMask(paramArray->GetValueAt(i)->ToNumber<uint32_t>());
         }
-        opts.type = safeAreaType;
+        opts.type = layoutSafeAreaType;
     }
-
-    if (info.Length() >= PARAMETER_LENGTH_TWO && info[SECOND_INDEX]->IsArray()) {
+    if (info.Length() >= PARAMETER_LENGTH_TWO && info[1]->IsArray()) {
         auto paramArray = JSRef<JSArray>::Cast(info[1]);
-        uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
+        uint32_t layoutSafeAreaEdge = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
         for (size_t i = 0; i < paramArray->Length(); ++i) {
-            auto value = paramArray->GetValueAt(i);
-            if (!value->IsNumber() ||
-                value->ToNumber<uint32_t>() >= SAFE_AREA_EDGE_LIMIT) {
-                safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
+            if (!paramArray->GetValueAt(i)->IsNumber() ||
+                paramArray->GetValueAt(i)->ToNumber<uint32_t>() > LAYOUT_SAFE_AREA_EDGE_LIMIT) {
+                layoutSafeAreaEdge = NG::LAYOUT_SAFE_AREA_EDGE_ALL;
                 break;
             }
-            if (value->ToNumber<uint32_t>() == SAFE_AREA_EDGE_TOP ||
-                value->ToNumber<uint32_t>() == SAFE_AREA_EDGE_BOTTOM) {
-                    safeAreaEdge |= (1 << value->ToNumber<uint32_t>());
-                }
+            layoutSafeAreaEdge |=
+                NG::IgnoreLayoutSafeAreaOpts::EdgeToMask(paramArray->GetValueAt(i)->ToNumber<uint32_t>());
         }
-        opts.edges = safeAreaEdge;
+        opts.rawEdges = layoutSafeAreaEdge;
     }
     NavigationModel::GetInstance()->SetIgnoreLayoutSafeArea(opts);
 }

@@ -494,6 +494,7 @@ void NavigationPattern::OnModifyDone()
 {
     // !!! Do not add operations about NavPathStack here, see @SyncWithJsStackIfNeeded
     Pattern::OnModifyDone();
+    UpdateChildLayoutPolicy();
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     hostNode->CreateHomeDestinationIfNeeded();
@@ -5607,5 +5608,27 @@ void NavigationPattern::FireHomeDestinationLifeCycleIfNeeded(
         return;
     }
     NotifyDestinationLifecycle(destNode, lifecycle, reason);
+}
+void NavigationPattern::UpdateChildLayoutPolicy()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto navigationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+    CHECK_NULL_VOID(navigationContentNode);
+    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        navigationContentNode->GetLayoutProperty()->UpdateLayoutPolicyProperty(
+            layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH), true);
+        navigationContentNode->GetLayoutProperty()->UpdateLayoutPolicyProperty(
+            layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH), false);
+        navBarNode->GetLayoutProperty()->UpdateLayoutPolicyProperty(
+            layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH), true);
+        navBarNode->GetLayoutProperty()->UpdateLayoutPolicyProperty(
+            layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH), false);
+    }
 }
 } // namespace OHOS::Ace::NG

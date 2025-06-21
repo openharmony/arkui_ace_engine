@@ -1899,9 +1899,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationInterceptionTest005, TestSize.Level1
      */
     NavigationModelNG navigationModel;
     navigationModel.Create();
-    auto stackCreator = []() -> RefPtr<MockNavigationStack> {
-        return AceType::MakeRefPtr<MockNavigationStack>();
-    };
+    auto stackCreator = []() -> RefPtr<MockNavigationStack> { return AceType::MakeRefPtr<MockNavigationStack>(); };
     auto stackUpdater = [&navigationModel](RefPtr<NG::NavigationStack> stack) {
         navigationModel.SetNavigationStackProvided(false);
         auto mockStack = AceType::DynamicCast<MockNavigationStack>(stack);

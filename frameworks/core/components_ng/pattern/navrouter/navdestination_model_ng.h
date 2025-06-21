@@ -92,8 +92,8 @@ public:
     void SetCustomMenu(const RefPtr<AceType>& customNode) override;
     void SetMenuOptions(NavigationMenuOptions&& opt) override;
     void SetBackgroundColor(const Color& color, bool isVaild = true) override;
-    void SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts) override;
-    static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
+    void SetIgnoreLayoutSafeArea(const NG::IgnoreLayoutSafeAreaOpts& opts) override;
+    static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::IgnoreLayoutSafeAreaOpts& opts);
     void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath) override;
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) override;
     static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo);

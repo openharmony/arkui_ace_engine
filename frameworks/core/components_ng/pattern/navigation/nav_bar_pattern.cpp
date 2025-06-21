@@ -471,6 +471,15 @@ void NavBarPattern::OnModifyDone()
     auto parent = hostNode->GetParent();
     CHECK_NULL_VOID(parent);
     titleBarNode->SetInnerParentId(parent->GetInspectorId().value_or(""));
+    auto layoutPolicy = navBarLayoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        auto content = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+        CHECK_NULL_VOID(content);
+        content->GetLayoutProperty()->UpdateLayoutPolicyProperty(
+            layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH), true);
+        content->GetLayoutProperty()->UpdateLayoutPolicyProperty(
+            layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH), false);
+    }
 }
 
 void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)

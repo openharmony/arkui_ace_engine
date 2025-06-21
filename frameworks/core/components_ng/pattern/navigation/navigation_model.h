@@ -126,7 +126,7 @@ public:
     virtual void SetMenuCount(int32_t menuCount) = 0;
     virtual void SetCustomTransition(NavigationTransitionEvent&& animationTransition);
     virtual void SetIsCustomAnimation(bool isCustom);
-    virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
+    virtual void SetIgnoreLayoutSafeArea(const NG::IgnoreLayoutSafeAreaOpts& opts) {};
     virtual void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) {};
     virtual void SetRecoverable(bool recoverable) {}
     virtual void SetEnableDragBar(bool recoverable) {}

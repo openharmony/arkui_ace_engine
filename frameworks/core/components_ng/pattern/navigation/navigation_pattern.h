@@ -679,6 +679,7 @@ private:
     void SetNavigationWidthToolBarManager(float navBarWidth, float navDestWidth, float dividerWidth);
     void NavigationModifyDoneToolBarManager();
     void UpdateNavigationStatus();
+    void UpdateChildLayoutPolicy();
 
     void GetVisibleNodes(bool isPre, std::vector<WeakPtr<NavDestinationNodeBase>>& visibleNodes);
     void UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestinationGroupNode>& preTopDestination,
@@ -697,6 +698,11 @@ private:
     bool IsEquivalentToStackMode();
     void ClearPageAndNavigationConfig();
     bool CustomizeExpandSafeArea() override;
+
+    bool IsEnableMatchParent() override
+    {
+        return false;
+    }
 
     void RegisterForceSplitListener(PipelineContext* context, int32_t nodeId);
     void UnregisterForceSplitListener(PipelineContext* context, int32_t nodeId);

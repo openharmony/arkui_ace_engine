@@ -93,13 +93,13 @@ void SetIgnoreLayoutSafeArea(ArkUINodeHandle node, const char* typeStr, const ch
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
+    NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
     uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
     uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
     std::string safeAreaTypeStr = std::string(typeStr);
     std::string safeAreaEdgeStr = std::string(edgesStr);
     if (safeAreaTypeStr == "" || safeAreaEdgeStr == "") {
-        NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_NONE, .edges = NG::SAFE_AREA_EDGE_NONE};
+        NG::IgnoreLayoutSafeAreaOpts opts { .type = NG::SAFE_AREA_TYPE_NONE, .edges = NG::SAFE_AREA_EDGE_NONE};
         NavDestinationModelNG::SetIgnoreLayoutSafeArea(frameNode, opts);
         return;
     }
@@ -109,19 +109,23 @@ void SetIgnoreLayoutSafeArea(ArkUINodeHandle node, const char* typeStr, const ch
     std::string edges;
     while ((pos = safeAreaTypeStr.find(delimiter)) != std::string::npos) {
         type = safeAreaTypeStr.substr(0, pos);
-        safeAreaType |= (1 << StringUtils::StringToUint(type));
+        safeAreaType |= IgnoreLayoutSafeAreaOpts::TypeToMask(StringUtils::StringToUint(type));
         safeAreaTypeStr.erase(0, pos + delimiter.length());
     }
-    safeAreaType |= (1 << StringUtils::StringToUint(safeAreaTypeStr));
+    if (safeAreaTypeStr != "") {
+        safeAreaType |= IgnoreLayoutSafeAreaOpts::TypeToMask(StringUtils::StringToUint(safeAreaTypeStr));
+    }
     pos = 0;
     while ((pos = safeAreaEdgeStr.find(delimiter)) != std::string::npos) {
         edges = safeAreaEdgeStr.substr(0, pos);
-        safeAreaEdge |= (1 << StringUtils::StringToUint(edges));
+        safeAreaEdge |= IgnoreLayoutSafeAreaOpts::EdgeToMask(StringUtils::StringToUint(edges));
         safeAreaEdgeStr.erase(0, pos + delimiter.length());
     }
-    safeAreaEdge |= (1 << StringUtils::StringToUint(safeAreaEdgeStr));
+    if (safeAreaEdgeStr != "") {
+        safeAreaEdge |= IgnoreLayoutSafeAreaOpts::EdgeToMask(StringUtils::StringToUint(safeAreaEdgeStr));
+    }
     opts.type = safeAreaType;
-    opts.edges = safeAreaEdge;
+    opts.rawEdges = safeAreaEdge;
     NavDestinationModelNG::SetIgnoreLayoutSafeArea(frameNode, opts);
 }
 
@@ -129,9 +133,9 @@ void ResetIgnoreLayoutSafeArea(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NG::SafeAreaExpandOpts opts;
+    NG::IgnoreLayoutSafeAreaOpts opts;
     opts.type = DEFAULT_SAFE_AREA_TYPE;
-    opts.edges = DEFAULT_SAFE_AREA_EDGE;
+    opts.rawEdges = DEFAULT_SAFE_AREA_EDGE;
     NavDestinationModelNG::SetIgnoreLayoutSafeArea(frameNode, opts);
 }
 
