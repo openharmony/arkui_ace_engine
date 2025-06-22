@@ -193,28 +193,6 @@ void EventManager::LogTouchTestResultInfo(const TouchEvent& touchPoint, const Re
     }
 }
 
-void EventManager::LogAndForceCleanReferee(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
-    TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
-{
-    LogTouchTestResultInfo(touchPoint, frameNode, touchRestrict, offset, viewScale, needAppend);
-    LogTouchTestResultRecognizers(touchTestResults_[touchPoint.id], touchPoint.touchEventId);
-    TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "GestureReferee is not ready, force clean gestureReferee.");
-    std::list<std::pair<int32_t, std::string>> dumpList;
-#ifndef IS_RELEASE_VERSION
-    eventTree_.Dump(dumpList, 0);
-#else
-    eventTree_.DumpBriefInfo(dumpList, 0);
-#endif
-    for (auto& item : dumpList) {
-        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s.", item.second.c_str());
-    }
-    eventTree_.eventTreeList.clear();
-    FalsifyCancelEventAndDispatch(touchPoint);
-    refereeNG_->ForceCleanGestureReferee();
-    responseCtrl_->Reset();
-    refereeNG_->CleanAll();
-}
-
 void EventManager::CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
     TouchRestrict& touchRestrict, const Offset& offset, float viewScale, bool needAppend)
 {
@@ -224,7 +202,21 @@ void EventManager::CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint,
     int64_t lastEventTime = static_cast<int64_t>(lastEventTime_.time_since_epoch().count());
     int64_t duration = static_cast<int64_t>((currentEventTime - lastEventTime) / TRANSLATE_NS_TO_MS);
     if (duration >= EVENT_CLEAR_DURATION && !refereeNG_->IsReady()) {
-        LogAndForceCleanReferee(touchPoint, frameNode, touchRestrict, offset, viewScale, needAppend);
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "GestureReferee is not ready, force clean gestureReferee.");
+#ifndef IS_RELEASE_VERSION
+        std::list<std::pair<int32_t, std::string>> dumpList;
+        eventTree_.Dump(dumpList, 0);
+        for (auto& item : dumpList) {
+            TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: " SEC_PLD(%{public}s) ".",
+                SEC_PARAM(item.second.c_str()));
+        }
+#endif
+        eventTree_.eventTreeList.clear();
+        FalsifyCancelEventAndDispatch(touchPoint);
+        refereeNG_->ForceCleanGestureReferee();
+        responseCtrl_->Reset();
+        refereeNG_->CleanAll();
+
         TouchTestResult reHitTestResult;
         ResponseLinkResult reResponseLinkResult;
         onTouchTestDoneFrameNodeList_.clear();
@@ -904,7 +896,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
 
 void EventManager::UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool sendOnTouch)
 {
-    if ((point.type == TouchType::UP || point.type == TouchType::CANCEL) && !point.isFalsified) {
+    if (point.type == TouchType::UP || point.type == TouchType::CANCEL) {
         LogTouchTestRecognizerStates(point.id);
         FrameTraceAdapter* ft = FrameTraceAdapter::GetInstance();
         if (ft != nullptr) {
