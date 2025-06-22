@@ -45,6 +45,7 @@ void ResetPatternLockActiveColor(ArkUINodeHandle node)
     Color activeColor = patternLockTheme->GetActiveColor();
     PatternLockModelNG::SetActiveColor(frameNode, activeColor);
     if (SystemProperties::ConfigChangePerform()) {
+        PatternLockModelNG::SetActiveColorByUser(frameNode, false);
         PatternLockModelNG::CreateWithResourceObj(frameNode, PatternLockResourceType::ACTIVECOLOR, nullptr);
     }
 }
@@ -111,6 +112,7 @@ void ResetPatternLockSelectedColor(ArkUINodeHandle node)
     Color selectedColor = patternLockTheme->GetSelectedColor();
     PatternLockModelNG::SetSelectedColor(frameNode, selectedColor);
     if (SystemProperties::ConfigChangePerform()) {
+        PatternLockModelNG::SetSelectedColorByUser(frameNode, false);
         PatternLockModelNG::CreateWithResourceObj(frameNode, PatternLockResourceType::SELECTEDCOLOR, nullptr);
     }
 }
@@ -206,6 +208,7 @@ void ResetPatternLockRegularColor(ArkUINodeHandle node)
     Color regularColor = patternLockTheme->GetRegularColor();
     PatternLockModelNG::SetRegularColor(frameNode, regularColor);
     if (SystemProperties::ConfigChangePerform()) {
+        PatternLockModelNG::SetRegularColorByUser(frameNode, false);
         PatternLockModelNG::CreateWithResourceObj(frameNode, PatternLockResourceType::REGULARCOLOR, nullptr);
     }
 }
@@ -238,6 +241,7 @@ void ResetPatternLockPathColor(ArkUINodeHandle node)
     Color pathColor = patternLockTheme->GetPathColor();
     PatternLockModelNG::SetPathColor(frameNode, pathColor);
     if (SystemProperties::ConfigChangePerform()) {
+        PatternLockModelNG::SetPathColorByUser(frameNode, false);
         PatternLockModelNG::CreateWithResourceObj(frameNode, PatternLockResourceType::PATHCOLOR, nullptr);
     }
 }
@@ -268,6 +272,7 @@ void ResetPatternLockActiveCircleColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     PatternLockModelNG::SetActiveCircleColor(frameNode, Color::TRANSPARENT);
     if (SystemProperties::ConfigChangePerform()) {
+        PatternLockModelNG::SetActiveCircleColorByUser(frameNode, false);
         PatternLockModelNG::CreateWithResourceObj(frameNode, PatternLockResourceType::ACTIVECIRCLECOLOR, nullptr);
     }
 }

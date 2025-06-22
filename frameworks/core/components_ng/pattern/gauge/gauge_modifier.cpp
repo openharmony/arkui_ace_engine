@@ -182,7 +182,8 @@ void GaugeModifier::UpdateProperty(RefPtr<GaugePaintProperty>& paintProperty)
         }
     }
 
-    if (paintProperty->GetIsShowIndicatorValue(false)) {
+    if (paintProperty->GetIsShowIndicatorValue(false) ||
+        (SystemProperties::ConfigChangePerform() && paintProperty->GetUseSpecialDefaultIndicatorValue(false))) {
         auto indicatorChange = indicatorChange_->Get();
         indicatorChange_->Set(!indicatorChange);
     }

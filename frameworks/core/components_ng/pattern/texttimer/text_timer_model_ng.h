@@ -52,6 +52,9 @@ public:
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
     void CreateWithResourceObj(JsTextTimerResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override;
+    void SetFontSizeByUser(bool value) override;
+    void SetFontWeightByUser(bool value) override;
+    void SetFontFamilyByUser(bool value) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<TextTimerController> InitTextController(FrameNode* frameNode);
     static void SetIsCountDown(FrameNode* frameNode, bool isCountDown);
@@ -73,6 +76,10 @@ public:
     static void HandleFontFamily(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void CreateWithResourceObj(
         FrameNode* frameNode, JsTextTimerResourceType jsResourceType, const RefPtr<ResourceObject>& resObj);
+    static void SetTextColorByUser(FrameNode* frameNode, bool isSetByUser);
+    static void SetFontSizeByUser(FrameNode* frameNode, bool value);
+    static void SetFontWeightByUser(FrameNode* frameNode, bool value);
+    static void SetFontFamilyByUser(FrameNode* frameNode, bool value);
 };
 } // namespace OHOS::Ace::NG
 

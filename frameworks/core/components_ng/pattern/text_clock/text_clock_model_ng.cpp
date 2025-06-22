@@ -494,4 +494,14 @@ void TextClockModelNG::CreateWithFormatResourceObj(FrameNode* frameNode, const R
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
+void TextClockModelNG::RemoveResObjByKey(const std::string& key)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
+}
+
+
 } // namespace OHOS::Ace::NG

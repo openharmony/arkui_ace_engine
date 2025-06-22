@@ -49,6 +49,7 @@ public:
     virtual void CreateWithFontFamilyResourceObj(const RefPtr<ResourceObject>& resObj) = 0;
     virtual void CreateWithFontWeightResourceObj(const RefPtr<ResourceObject>& resObj) = 0;
     virtual void CreateWithFormatResourceObj(const RefPtr<ResourceObject>& resObj) = 0;
+    virtual void RemoveResObjByKey(const std::string& key) = 0;
 
 private:
     static std::unique_ptr<TextClockModel> instance_;

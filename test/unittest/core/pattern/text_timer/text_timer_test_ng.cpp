@@ -923,6 +923,33 @@ HWTEST_F(TextTimerTestNg, TextTimerTest015, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextTimerSetTextColorByUserTest001
+ * @tc.desc: Test SetTextColorByUser with different conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerSetTextColorByUserTest001, TestSize.Level1)
+{
+    TextTimerModelNG textTimerModel;
+    textTimerModel.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    textTimerModel.SetTextColorByUser(frameNode, true);
+    textTimerModel.SetFontSizeByUser(frameNode, false);
+    textTimerModel.SetFontWeightByUser(frameNode, false);
+    textTimerModel.SetFontFamilyByUser(frameNode, false);
+    textTimerModel.SetFontSizeByUser(false);
+    textTimerModel.SetFontWeightByUser(false);
+    textTimerModel.SetFontFamilyByUser(false);
+
+    EXPECT_TRUE(layoutProperty->GetTextColorSetByUser());
+    EXPECT_FALSE(layoutProperty->GetTextFontFamilySetByUserValue(false));
+    EXPECT_FALSE(layoutProperty->GetTextFontWeightSetByUserValue(false));
+    EXPECT_FALSE(layoutProperty->GetTextFontSizeSetByUserValue(false));
+}
+
+/**
  * @tc.name: TextTimerPatternTest001
  * @tc.desc: Test UpdateTextColor with different conditions
  * @tc.type: FUNC

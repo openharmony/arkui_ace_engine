@@ -926,5 +926,31 @@ HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest021, TestSize.Level1)
     pattern_->OnModifyDone();
     EXPECT_TRUE(pattern_->textAccessibilityNodeVec_.size() == 0);
 }
+
+/**
+ * @tc.name: PatternLockPatternTest022
+ * @tc.desc: Test PatternLockAccessibility .
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockPatternTestNg, PatternLockPatternTest022, TestSize.Level1)
+{
+    PatternLockModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetPaintProperty<PatternLockPaintProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    model.SetSelectedColorByUser(frameNode, true);
+    model.SetPathColorByUser(frameNode, true);
+    model.SetActiveColorByUser(frameNode, true);
+    model.SetRegularColorByUser(frameNode, true);
+    model.SetActiveCircleColorByUser(frameNode, true);
+
+    EXPECT_TRUE(layoutProperty->GetPathColorSetByUser());
+    EXPECT_TRUE(layoutProperty->GetSelectedColorSetByUser());
+    EXPECT_TRUE(layoutProperty->GetActiveColorSetByUser());
+    EXPECT_TRUE(layoutProperty->GetRegularColorSetByUser());
+    EXPECT_TRUE(layoutProperty->GetActiveCircleColorSetByUser());
+}
 }
 }

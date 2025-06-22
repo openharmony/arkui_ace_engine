@@ -202,19 +202,31 @@ void ParseTrackShadowProperties(EcmaVM* vm, const Local<panda::ObjectRef>& obj, 
     if (!ArkTSUtils::ParseJsDouble(vm, jsRadius, trackShadow.radius, radiusResObj) || NonPositive(trackShadow.radius)) {
         trackShadow.radius = theme->GetTrackShadowRadius().ConvertToVp();
     }
-    shadowOptionsRes.radiusRawPtr = AceType::RawPtr(radiusResObj);
 
     RefPtr<ResourceObject> offsetXResObj;
     if (!ArkTSUtils::ParseJsDouble(vm, jsOffsetX, trackShadow.offsetX, offsetXResObj)) {
         trackShadow.offsetX = theme->GetTrackShadowOffsetX().ConvertToVp();
     }
-    shadowOptionsRes.offsetXRawPtr = AceType::RawPtr(offsetXResObj);
 
     RefPtr<ResourceObject> offsetYResObj;
     if (!ArkTSUtils::ParseJsDouble(vm, jsOffsetY, trackShadow.offsetY, offsetYResObj)) {
         trackShadow.offsetY = theme->GetTrackShadowOffsetY().ConvertToVp();
     }
-    shadowOptionsRes.offsetYRawPtr = AceType::RawPtr(offsetYResObj);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        shadowOptionsRes.radiusRawPtr = AceType::RawPtr(radiusResObj);
+        if (radiusResObj != nullptr) {
+            radiusResObj->IncRefCount();
+        }
+        shadowOptionsRes.offsetXRawPtr = AceType::RawPtr(offsetXResObj);
+        if (offsetXResObj != nullptr) {
+            offsetXResObj->IncRefCount();
+        }
+        shadowOptionsRes.offsetYRawPtr = AceType::RawPtr(offsetYResObj);
+        if (offsetYResObj != nullptr) {
+            offsetYResObj->IncRefCount();
+        }
+    }
 }
 
 void ParseTrackShadowColors(EcmaVM* vm, const Local<panda::ObjectRef>& obj,

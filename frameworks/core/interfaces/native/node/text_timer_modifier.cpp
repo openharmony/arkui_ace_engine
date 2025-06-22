@@ -61,6 +61,7 @@ void ResetFontColor(ArkUINodeHandle node)
     TextTimerModelNG::SetFontColor(frameNode, theme->GetTextStyle().GetTextColor());
     if (SystemProperties::ConfigChangePerform()) {
         TextTimerModelNG::CreateWithResourceObj(frameNode, JsTextTimerResourceType::TEXTCOLOR, nullptr);
+        TextTimerModelNG::SetTextColorByUser(frameNode, false);
     }
 }
 
@@ -94,6 +95,7 @@ void ResetFontSize(ArkUINodeHandle node)
     TextTimerModelNG::SetFontSize(frameNode, DEFAULT_FONT_SIZE);
     if (SystemProperties::ConfigChangePerform()) {
         TextTimerModelNG::CreateWithResourceObj(frameNode, JsTextTimerResourceType::FONTSIZE, nullptr);
+        TextTimerModelNG::SetFontSizeByUser(frameNode, false);
     }
 }
 
@@ -143,6 +145,7 @@ void ResetFontWeight(ArkUINodeHandle node)
     TextTimerModelNG::SetFontWeight(frameNode, DEFAULT_FONT_WEIGHT);
     if (SystemProperties::ConfigChangePerform()) {
         TextTimerModelNG::CreateWithResourceObj(frameNode, JsTextTimerResourceType::FONTWEIGHT, nullptr);
+        TextTimerModelNG::SetFontWeightByUser(frameNode, false);
     }
 }
 
@@ -180,6 +183,7 @@ void ResetFontFamily(ArkUINodeHandle node)
     TextTimerModelNG::SetFontFamily(frameNode, DEFAULT_FONT_FAMILY);
     if (SystemProperties::ConfigChangePerform()) {
         TextTimerModelNG::CreateWithResourceObj(frameNode, JsTextTimerResourceType::FONTFAMILY, nullptr);
+        TextTimerModelNG::SetFontFamilyByUser(frameNode, false);
     }
 }
 

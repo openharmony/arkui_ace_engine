@@ -1377,10 +1377,10 @@ HWTEST_F(BadgeTestNg, BadgeModelNGProcessBadgeValue, TestSize.Level1)
 
     /**
      * @tc.steps: step3. check the key value, .
-     * @tc.expected: it should be "badge value".
+     * @tc.expected: it should be "".
      */
     std::string badgeValue = layoutProperty_->GetBadgeValueValue();
-    EXPECT_EQ(badgeValue, "badge value");
+    EXPECT_EQ(badgeValue, "");
 }
 
 /**

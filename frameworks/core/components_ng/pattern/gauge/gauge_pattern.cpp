@@ -404,7 +404,7 @@ void GaugePattern::OnColorModeChange(uint32_t colorMode)
     CHECK_NULL_VOID(pipelineContext);
     if (host->GetRerenderable()) {
         host->MarkModifyDone();
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 

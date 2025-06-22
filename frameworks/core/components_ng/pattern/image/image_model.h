@@ -38,7 +38,7 @@
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
-enum class ImageResourceType { SRC, ALT, FILL_COLOR };
+enum class ImageResourceType { SRC, ALT, FILL_COLOR, BORDER_RADIUS };
 
 struct ACE_FORCE_EXPORT ImageInfoConfig {
     std::shared_ptr<std::string> src;

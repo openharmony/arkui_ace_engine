@@ -281,14 +281,56 @@ void FillShadowColorsWithResource(const ArkUIGradientType* gradient,
     }
 }
 
-void AddShadowResource(const char* key, bool enabled, void* rawPtr,
-    std::function<void(const RefPtr<ResourceObject>&, OHOS::Ace::NG::DataPanelShadow&)> updateFunc,
-    OHOS::Ace::NG::DataPanelShadow& shadow)
+
+void AddShadowResource(const struct ArkUIShadowOptionsResource* shadowRes, NG::DataPanelShadow& shadow)
 {
-    if (enabled && SystemProperties::ConfigChangePerform()) {
-        auto* obj = reinterpret_cast<ResourceObject*>(rawPtr);
-        auto resObj = AceType::Claim(obj);
-        shadow.AddResource(key, resObj, std::move(updateFunc));
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    auto* radiusObj = reinterpret_cast<ResourceObject*>(shadowRes->radiusRawPtr);
+    auto resObjValue = AceType::Claim(radiusObj);
+    shadow.AddResource("shadow.radius", resObjValue,
+        [](const RefPtr<ResourceObject>& resRadius, NG::DataPanelShadow& shadow) {
+            RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+            double radius = theme->GetTrackShadowRadius().ConvertToVp();
+            ResourceParseUtils::ParseResDouble(resRadius, radius);
+            if (NonPositive(radius)) {
+                radius = theme->GetTrackShadowRadius().ConvertToVp();
+            }
+            shadow.SetRadius(radius);
+        });
+    if (radiusObj != nullptr) {
+        radiusObj->DecRefCount();
+    }
+
+    auto* offsetXObj = reinterpret_cast<ResourceObject*>(shadowRes->offsetXRawPtr);
+    auto offsetXObjValue = AceType::Claim(offsetXObj);
+    shadow.AddResource("shadow.offsetX", offsetXObjValue,
+        [](const RefPtr<ResourceObject>& resOffsetX, NG::DataPanelShadow& shadow) {
+            RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+            double val = theme->GetTrackShadowOffsetX().ConvertToVp();
+            ResourceParseUtils::ParseResDouble(resOffsetX, val);
+            if (val < 0.0) {
+                val = theme->GetTrackShadowOffsetX().ConvertToVp();
+            }
+            shadow.SetOffsetX(val);
+        });
+    if (offsetXObj != nullptr) {
+        offsetXObj->DecRefCount();
+    }
+
+    auto* offsetYObj = reinterpret_cast<ResourceObject*>(shadowRes->offsetYRawPtr);
+    auto offsetYObjValue = AceType::Claim(offsetYObj);
+    shadow.AddResource("shadow.offsetY", offsetYObjValue,
+        [](const RefPtr<ResourceObject>& resOffsetY, NG::DataPanelShadow& shadow) {
+            RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+            double val = theme->GetTrackShadowOffsetY().ConvertToVp();
+            ResourceParseUtils::ParseResDouble(resOffsetY, val);
+            shadow.SetOffsetY(val);
+        });
+    if (offsetYObj != nullptr) {
+        offsetYObj->DecRefCount();
     }
 }
 
@@ -297,44 +339,16 @@ void SetTrackShadowPtr(ArkUINodeHandle node, const struct ArkUIGradientType* gra
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    OHOS::Ace::NG::DataPanelShadow shadow;
+    NG::DataPanelShadow shadow;
 
-    std::vector<OHOS::Ace::NG::Gradient> shadowColors(gradient->length);
+    std::vector<NG::Gradient> shadowColors(gradient->length);
     std::vector<RefPtr<ResourceObject>> colorVectorObj;
     if (trackShadow->colorRawPtr) {
         colorVectorObj = *(static_cast<std::vector<RefPtr<ResourceObject>>*>(trackShadow->colorRawPtr));
     }
     FillShadowColorsWithResource(gradient, colorVectorObj, shadowColors);
 
-    AddShadowResource("shadow.radius", trackShadow->radius, shadowRes->radiusRawPtr,
-        [](const RefPtr<ResourceObject>& resRadius, OHOS::Ace::NG::DataPanelShadow& shadow) {
-            RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
-            double radius = theme->GetTrackShadowRadius().ConvertToVp();
-            ResourceParseUtils::ParseResDouble(resRadius, radius);
-            if (NonPositive(radius)) {
-                radius = theme->GetTrackShadowRadius().ConvertToVp();
-            }
-            shadow.SetRadius(radius);
-        }, shadow);
-
-    AddShadowResource("shadow.offsetX", trackShadow->offsetX, shadowRes->offsetXRawPtr,
-        [](const RefPtr<ResourceObject>& resOffsetX, OHOS::Ace::NG::DataPanelShadow& shadow) {
-            RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
-            double val = theme->GetTrackShadowOffsetX().ConvertToVp();
-            ResourceParseUtils::ParseResDouble(resOffsetX, val);
-            if (val < 0.0) {
-                val = theme->GetTrackShadowOffsetX().ConvertToVp();
-            }
-            shadow.SetOffsetX(val);
-        }, shadow);
-
-    AddShadowResource("shadow.offsetY", trackShadow->offsetY, shadowRes->offsetYRawPtr,
-        [](const RefPtr<ResourceObject>& resOffsetY, OHOS::Ace::NG::DataPanelShadow& shadow) {
-            RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
-            double val = theme->GetTrackShadowOffsetY().ConvertToVp();
-            ResourceParseUtils::ParseResDouble(resOffsetY, val);
-            shadow.SetOffsetY(val);
-        }, shadow);
+    AddShadowResource(shadowRes, shadow);
 
     shadow.radius = trackShadow->radius;
     shadow.offsetX = trackShadow->offsetX;

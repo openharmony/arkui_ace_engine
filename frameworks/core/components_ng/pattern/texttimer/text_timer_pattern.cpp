@@ -496,5 +496,14 @@ void TextTimerPattern::OnColorConfigurationUpdate()
     if (!pops->HasTextColorSetByUser() || (pops->HasTextColorSetByUser() && !pops->GetTextColorSetByUserValue())) {
         UpdateTextColor(theme->GetTextStyle().GetTextColor(), false);
     }
+    if (!pops->GetTextFontSizeSetByUserValue(false)) {
+        UpdateFontSize(theme->GetTextStyle().GetFontSize(), false);
+    }
+    if (!pops->GetTextFontWeightSetByUserValue(false)) {
+        UpdateFontWeight(theme->GetTextStyle().GetFontWeight(), false);
+    }
+    if (!pops->GetTextFontFamilySetByUserValue(false)) {
+        UpdateFontFamily(theme->GetTextStyle().GetFontFamilies(), false);
+    }
 }
 } // namespace OHOS::Ace::NG

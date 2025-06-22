@@ -163,6 +163,8 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
             } else if (themeColors) {
                 badgeParameters.badgeTextColor = themeColors->FontOnPrimary();
                 badgeParameters.badgeTextColorByUser = false;
+            } else {
+                badgeParameters.badgeTextColorByUser = false;
             }
         } else {
             if (ParseJsColor(colorValue, colorVal)) {

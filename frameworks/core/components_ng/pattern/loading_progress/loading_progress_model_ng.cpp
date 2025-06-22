@@ -77,7 +77,7 @@ void LoadingProgressModelNG::ResetColor()
     CHECK_NULL_VOID(pattern);
     pattern->SetColorLock(false);
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(LoadingProgressPaintProperty, Color, PROPERTY_UPDATE_RENDER);
-    ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, ColorSetByUser, false);
+    ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, ColorSetByUser, true);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorFlag);
@@ -115,7 +115,7 @@ void LoadingProgressModelNG::SetColor(FrameNode* frameNode, const std::optional<
 
 void LoadingProgressModelNG::SetColorByUser(FrameNode* frameNode, bool isSetByUser)
 {
-    ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, ColorSetByUser, isSetByUser);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(LoadingProgressPaintProperty, ColorSetByUser, isSetByUser, frameNode);
 }
 
 bool LoadingProgressModelNG::GetEnableLoading(FrameNode* frameNode)
@@ -151,7 +151,7 @@ void LoadingProgressModelNG::SetBuilderFunc(FrameNode* frameNode, NG::LoadingPro
 void LoadingProgressModelNG::ResetColor(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(LoadingProgressPaintProperty, Color, PROPERTY_UPDATE_RENDER, frameNode);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(LoadingProgressPaintProperty, ColorSetByUser, false, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(LoadingProgressPaintProperty, ColorSetByUser, true, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
@@ -160,7 +160,7 @@ void LoadingProgressModelNG::ResetColor(FrameNode* frameNode)
 void LoadingProgressModelNG::ResetForegroundColor(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(LoadingProgressPaintProperty, Color, PROPERTY_UPDATE_RENDER, frameNode);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(LoadingProgressPaintProperty, ColorSetByUser, false, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(LoadingProgressPaintProperty, ColorSetByUser, true, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);

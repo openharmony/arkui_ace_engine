@@ -261,6 +261,8 @@ void JSCounter::JsBackgroundColor(const JSCallbackInfo& args)
         }
         CounterModel::GetInstance()->SetBackgroundColor(color);
         args.ReturnSelf();
+    } else if (SystemProperties::ConfigChangePerform()) {
+        CounterModel::GetInstance()->CreateWithResourceObj(JsCounterResourceType::BackgroundColor, nullptr);
     }
 }
 

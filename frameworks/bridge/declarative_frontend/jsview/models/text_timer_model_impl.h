@@ -38,6 +38,9 @@ public:
     void SetFontFamily(const std::vector<std::string>& value) override;
     void CreateWithResourceObj(
         JsTextTimerResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override {};
+    void SetFontSizeByUser(bool value) override {};
+    void SetFontWeightByUser(bool value) override {};
+    void SetFontFamilyByUser(bool value) override {};
 
 private:
     static RefPtr<TextTimerComponent> GetComponent();

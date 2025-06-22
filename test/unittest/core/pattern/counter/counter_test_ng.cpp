@@ -542,19 +542,19 @@ HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest001, TestSize.Lev
     model.CreateWithResourceObj(jsResourceType, resObj);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<CounterPattern>();
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto pipeline = PipelineBase::GetCurrentContext();
-    EXPECT_NE(pipeline, nullptr);
+    ASSERT_NE(pipeline, nullptr);
     auto counterTheme = pipeline->GetTheme<CounterTheme>();
-    EXPECT_NE(counterTheme, nullptr);
+    ASSERT_NE(counterTheme, nullptr);
 
     g_isConfigChangePerform = true;
     int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
     pattern->OnColorModeChange(colorMode);
     auto layoutProperty = frameNode->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
+    ASSERT_NE(layoutProperty, nullptr);
     auto selfIdealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
     EXPECT_EQ(selfIdealSize->Height()->dimension_.Value(), counterTheme->GetHeight().Value());
 }
@@ -574,19 +574,19 @@ HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest002, TestSize.Lev
 
     model.CreateWithResourceObj(jsResourceType, resObj);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<CounterPattern>();
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto pipeline = PipelineBase::GetCurrentContext();
-    EXPECT_NE(pipeline, nullptr);
+    ASSERT_NE(pipeline, nullptr);
     auto counterTheme = pipeline->GetTheme<CounterTheme>();
-    EXPECT_NE(counterTheme, nullptr);
+    ASSERT_NE(counterTheme, nullptr);
 
     g_isConfigChangePerform = true;
     int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
     pattern->OnColorModeChange(colorMode);
     auto layoutProperty = frameNode->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
+    ASSERT_NE(layoutProperty, nullptr);
     auto selfIdealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
     EXPECT_EQ(selfIdealSize->Width()->dimension_.Value(), counterTheme->GetWidth().Value());
 }
@@ -611,11 +611,11 @@ HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest003, TestSize.Lev
 
     auto element = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto frameNode = AceType::DynamicCast<CounterNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<CounterPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto pipelineContext = frameNode->GetContext();
-    EXPECT_NE(pipelineContext, nullptr);
+    ASSERT_NE(pipelineContext, nullptr);
     pipelineContext->SetIsSystemColorChange(true);
 
     g_isConfigChangePerform = true;
@@ -623,7 +623,7 @@ HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest003, TestSize.Lev
     pattern->OnColorModeChange(colorMode);
 
     auto layoutProperty = frameNode->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
+    ASSERT_NE(layoutProperty, nullptr);
     auto selfIdealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
     EXPECT_EQ(selfIdealSize->Height()->dimension_.Value(), 0);
 }
@@ -648,11 +648,11 @@ HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest004, TestSize.Lev
 
     auto element = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto frameNode = AceType::DynamicCast<CounterNode>(element);
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<CounterPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto pipelineContext = frameNode->GetContext();
-    EXPECT_NE(pipelineContext, nullptr);
+    ASSERT_NE(pipelineContext, nullptr);
     pipelineContext->SetIsSystemColorChange(true);
 
     g_isConfigChangePerform = true;
@@ -660,7 +660,7 @@ HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest004, TestSize.Lev
     pattern->OnColorModeChange(colorMode);
 
     auto layoutProperty = frameNode->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
+    ASSERT_NE(layoutProperty, nullptr);
     auto selfIdealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
     EXPECT_EQ(selfIdealSize->Width()->dimension_.Value(), 0);
 }
@@ -680,18 +680,19 @@ HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest005, TestSize.Lev
 
     model.CreateWithResourceObj(jsResourceType, resObj);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<CounterPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto pipeline = PipelineBase::GetCurrentContext();
-    EXPECT_NE(pipeline, nullptr);
+    ASSERT_NE(pipeline, nullptr);
     auto counterTheme = pipeline->GetTheme<CounterTheme>();
-    EXPECT_NE(counterTheme, nullptr);
+    ASSERT_NE(counterTheme, nullptr);
 
     g_isConfigChangePerform = true;
     int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
     pattern->OnColorModeChange(colorMode);
-    EXPECT_EQ(Color(Color::TRANSPARENT), counterTheme->GetBackGroundColor());
+    auto renderContext = frameNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColor().has_value(), false);
 }
 
 /**
@@ -713,26 +714,27 @@ HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest006, TestSize.Lev
 
     model.CreateWithResourceObj(jsResourceType, resObj);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<CounterPattern>();
-    EXPECT_NE(pattern, nullptr);
+    ASSERT_NE(pattern, nullptr);
     auto pipeline = PipelineBase::GetCurrentContext();
-    EXPECT_NE(pipeline, nullptr);
+    ASSERT_NE(pipeline, nullptr);
     auto counterTheme = pipeline->GetTheme<CounterTheme>();
-    EXPECT_NE(counterTheme, nullptr);
+    ASSERT_NE(counterTheme, nullptr);
 
     auto pipelineContext = frameNode->GetContext();
-    EXPECT_NE(pipelineContext, nullptr);
+    ASSERT_NE(pipelineContext, nullptr);
     pipelineContext->SetIsSystemColorChange(true);
-
+    g_isConfigChangePerform = false;
     int32_t colorMode = static_cast<int32_t>(ColorMode::LIGHT);
     pattern->OnColorModeChange(static_cast<int32_t>(ColorMode::DARK));
-    EXPECT_EQ(Color(Color::TRANSPARENT), counterTheme->GetBackGroundColor());
+    auto renderContext = frameNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColor().has_value(), true);
 
     g_isConfigChangePerform = true;
     colorMode = static_cast<int32_t>(ColorMode::DARK);
     pattern->OnColorModeChange(colorMode);
-    EXPECT_EQ(Color(Color(0x00000000)), counterTheme->GetBackGroundColor());
+    EXPECT_EQ(renderContext->GetBackgroundColor().has_value(), true);
 }
 
 /**
@@ -748,11 +750,12 @@ HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest007, TestSize.Lev
     auto jsResourceType = static_cast<JsCounterResourceType>(-1);
     model.CreateWithResourceObj(jsResourceType, resObj);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    EXPECT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode, nullptr);
     auto pipeline = PipelineBase::GetCurrentContext();
-    EXPECT_NE(pipeline, nullptr);
+    ASSERT_NE(pipeline, nullptr);
     auto counterTheme = pipeline->GetTheme<CounterTheme>();
-    EXPECT_NE(counterTheme, nullptr);
-    EXPECT_EQ(Color(Color::TRANSPARENT), counterTheme->GetBackGroundColor());
+    ASSERT_NE(counterTheme, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColor().has_value(), false);
 }
 } // namespace OHOS::Ace::NG

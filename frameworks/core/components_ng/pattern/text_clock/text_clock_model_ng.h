@@ -52,6 +52,7 @@ public:
     void CreateWithFontFamilyResourceObj(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithFontWeightResourceObj(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithFormatResourceObj(const RefPtr<ResourceObject>& resObj) override;
+    void RemoveResObjByKey(const std::string& key) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<TextClockController> InitTextController(FrameNode* frameNode);

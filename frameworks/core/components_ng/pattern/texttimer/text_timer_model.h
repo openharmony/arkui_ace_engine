@@ -50,6 +50,9 @@ public:
     virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
     virtual void CreateWithResourceObj(
         JsTextTimerResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) = 0;
+    virtual void SetFontSizeByUser(bool value) = 0;
+    virtual void SetFontWeightByUser(bool value) = 0;
+    virtual void SetFontFamilyByUser(bool value) = 0;
 
 private:
     static std::unique_ptr<TextTimerModel> instance_;
