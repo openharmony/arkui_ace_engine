@@ -1237,6 +1237,18 @@ let ModalMode;
   ModalMode[ModalMode.TARGET_WINDOW = 2] = 'TARGET_WINDOW';
 })(ModalMode || (ModalMode = {}));
 
+let PreviewScaleMode;
+(function (PreviewScaleMode) {
+  PreviewScaleMode[PreviewScaleMode.AUTO = 0] = 'AUTO';
+  PreviewScaleMode[PreviewScaleMode.CONSTANT = 1] = 'CONSTANT';
+  PreviewScaleMode[PreviewScaleMode.MAINTAIN = 2] = 'MAINTAIN';
+})(PreviewScaleMode || (PreviewScaleMode = {}));
+
+let AvailableLayoutArea;
+(function (AvailableLayoutArea) {
+  AvailableLayoutArea[AvailableLayoutArea.SAFE_AREA = 0] = 'SAFE_AREA';
+})(AvailableLayoutArea || (AvailableLayoutArea = {}));
+
 let TextChangeReason;
 (function (TextChangeReason) {
   TextChangeReason[TextChangeReason.UNKNOWN = 0] = 'UNKNOWN';

@@ -1205,6 +1205,34 @@ void JSViewPopups::ParseMenuModalMode(const JSRef<JSObject>& menuOptions, NG::Me
     }
 }
 
+void JSViewPopups::ParseMenuPreviewScaleMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto previewScaleModeProperty = menuOptions->GetProperty("previewScaleMode");
+    if (!previewScaleModeProperty->IsNumber()) {
+        return;
+    }
+    auto previewScaleMode = previewScaleModeProperty->ToNumber<int32_t>();
+    if (previewScaleMode == static_cast<int32_t>(NG::PreviewScaleMode::AUTO)) {
+        menuParam.previewScaleMode = NG::PreviewScaleMode::AUTO;
+    } else if (previewScaleMode == static_cast<int32_t>(NG::PreviewScaleMode::CONSTANT)) {
+        menuParam.previewScaleMode = NG::PreviewScaleMode::CONSTANT;
+    } else if (previewScaleMode == static_cast<int32_t>(NG::PreviewScaleMode::MAINTAIN)) {
+        menuParam.previewScaleMode = NG::PreviewScaleMode::MAINTAIN;
+    }
+}
+
+void JSViewPopups::ParseMenuAvailableLayoutArea(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto availableLayoutAreaModeProperty = menuOptions->GetProperty("availableLayoutArea");
+    if (!availableLayoutAreaModeProperty->IsNumber()) {
+        return;
+    }
+    auto availableLayoutAreaMode = availableLayoutAreaModeProperty->ToNumber<int32_t>();
+    if (availableLayoutAreaMode == static_cast<int32_t>(NG::AvailableLayoutAreaMode::SAFE_AREA)) {
+        menuParam.availableLayoutAreaMode = NG::AvailableLayoutAreaMode::SAFE_AREA;
+    }
+}
+
 void JSViewPopups::GetMenuShowInSubwindow(NG::MenuParam& menuParam)
 {
     menuParam.isShowInSubWindow = false;
@@ -1426,6 +1454,8 @@ void JSViewPopups::ParseMenuParam(
     JSViewPopups::ParseMenuEffectOption(menuOptions, menuParam);
     JSViewPopups::ParseMenuHapticFeedbackMode(menuOptions, menuParam);
     JSViewPopups::ParseMenuModalMode(menuOptions, menuParam);
+    JSViewPopups::ParseMenuPreviewScaleMode(menuOptions, menuParam);
+    JSViewPopups::ParseMenuAvailableLayoutArea(menuOptions, menuParam);
     auto outlineWidthValue = menuOptions->GetProperty("outlineWidth");
     JSViewPopups::ParseMenuOutlineWidth(outlineWidthValue, menuParam);
     auto outlineColorValue = menuOptions->GetProperty("outlineColor");
