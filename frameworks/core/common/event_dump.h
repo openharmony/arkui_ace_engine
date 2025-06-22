@@ -107,8 +107,6 @@ struct EventTreeRecord {
     void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth, int32_t startNumber = 0) const;
 
     void Dump(std::unique_ptr<JsonValue>& json, int32_t depth, int32_t startNumber = 0) const;
-    void DumpBriefInfo(
-        std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth, int32_t startNumber = 0) const;
     void BuildTouchPoints(std::list<TouchPointSnapshot> touchPoints, std::unique_ptr<JsonValue>& json) const;
     void BuildAxis(std::list<AxisSnapshot> axis, std::unique_ptr<JsonValue>& json) const;
 
