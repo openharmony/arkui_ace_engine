@@ -7,6 +7,7 @@
     "pages/scrollable/EnabledScroll",
     "pages/scrollable/NestedWeb",
     "pages/scrollable/ScrollEventObserver",
+    "pages/scrollable/FreeScroll",
     "pages/Tabs/TabsMainPage",
     "pages/Tabs/BarBackgroundBlurStyle",
     "pages/Tabs/OnContentWillChange",
