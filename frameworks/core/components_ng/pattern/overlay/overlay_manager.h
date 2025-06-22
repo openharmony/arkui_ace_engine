@@ -945,8 +945,8 @@ private:
     RefPtr<UINode> RebuildCustomBuilder(RefPtr<UINode>& contentNode);
     void OpenCustomDialogInner(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback,
         const RefPtr<FrameNode> dialog, bool showComponentContent);
-    RefPtr<FrameNode> UpdateCustomDialogInner(
-        const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback);
+    RefPtr<FrameNode> UpdateCustomDialogInner(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
+        const std::function<void(int32_t)>& callback);
 
     void DumpPopupMapInfo() const;
     void DumpMapInfo(
