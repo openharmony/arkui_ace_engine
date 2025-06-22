@@ -97,10 +97,9 @@ public:
     bool ShowAIEntityMenu(
         const AISpan& aiSpan, const NG::RectF& aiRect, const RefPtr<NG::FrameNode>& targetNode, AIMenuInfo info);
     bool GetAiEntityMenuOptions(const AISpan& aiSpan, const RefPtr<NG::FrameNode>& targetNode, AIMenuInfo info,
-        std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
-        const std::function<void()>& onMenuDisappear = nullptr);
-    RefPtr<NG::FrameNode> CreateAIEntityMenu(const AISpan& aiSpan, const RefPtr<NG::FrameNode>& targetNode,
-        AIMenuInfo info, const std::function<void()>& onMenuDisappear);
+        std::vector<std::pair<std::string, std::function<void()>>>& menuOptions);
+    RefPtr<NG::FrameNode> CreateAIEntityMenu(
+        const AISpan& aiSpan, const RefPtr<NG::FrameNode>& targetNode, AIMenuInfo info);
     void ResponseBestMatchItem(const AISpan& aiSpan);
     void GetAIEntityMenu();
     void MarkDirtyNode() const;
@@ -109,9 +108,9 @@ private:
     friend class NG::RichEditorPattern;
 
     std::function<void()> GetDetectDelayTask(const std::map<int32_t, AISpan>& aiSpanMap);
+    std::function<void()> GetPreviewMenuOptionCallback(TextDataDetectType type, const std::string& content);
     void OnClickAIMenuOption(const AISpan& aiSpan, const std::pair<std::string, FuncVariant>& menuOption,
-        const RefPtr<NG::FrameNode>& targetNode = nullptr, const std::function<void()>& onMenuDisappear = nullptr,
-        bool isFirst = false);
+        const RefPtr<NG::FrameNode>& targetNode = nullptr);
 
     WeakPtr<NG::FrameNode> frameNode_;
     bool aiDetectInitialized_ = false;
