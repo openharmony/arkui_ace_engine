@@ -62,6 +62,9 @@ std::optional<Dimension> ParseDimension(ani_env* env, ani_ref dimensionRef)
     if (isDouble) {
         ani_double dimension;
         env->Object_CallMethodByName_Double(static_cast<ani_object>(dimensionRef), "unboxed", ":D", &dimension);
+        if (dimension < 0) {
+            dimension = 0;
+        }
         res = CalcDimension(dimension, DimensionUnit::VP);
     }
 
@@ -70,6 +73,9 @@ std::optional<Dimension> ParseDimension(ani_env* env, ani_ref dimensionRef)
     if (isString) {
         auto stringDimension = ANIUtils_ANIStringToStdString(env, static_cast<ani_string>(dimensionRef));
         res = StringUtils::StringToDimension(stringDimension, true);
+        if (res->Value() < 0) {
+            res->SetValue(0.0);
+        }
     }
     return res;
 }
@@ -150,7 +156,6 @@ std::optional<NG::MarginProperty> ParseMargin(ani_env* env, ani_ref marginRef)
     }
     return std::make_optional(res);
 }
-
 } // namespace
 
 namespace OHOS::Ace::Framework {
@@ -175,35 +180,32 @@ NG::WaterFlowSections::Section AniWaterFlowModule::ParseSectionOptions(ani_env* 
     if (!isUndefined) {
         ani_double crossCnt;
         env->Object_CallMethodByName_Double(static_cast<ani_object>(crossCount), "unboxed", ":D", &crossCnt);
+        if (crossCnt <= 0) {
+            crossCnt = 1;
+        }
         curSection.crossCount = static_cast<int32_t>(crossCnt);
     }
 
     ani_ref columnsGap;
-    if (env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "columnsGap", &columnsGap) != ANI_OK) {
-    }
+    env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "columnsGap", &columnsGap);
     isUndefined = false;
-    if (env->Reference_IsUndefined(columnsGap, &isUndefined) != ANI_OK) {
-    }
+    env->Reference_IsUndefined(columnsGap, &isUndefined);
     if (!isUndefined) {
         curSection.columnsGap = ParseDimension(env, columnsGap);
     }
 
     ani_ref rowsGap;
-    if (env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "rowsGap", &rowsGap) != ANI_OK) {
-    }
+    env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "rowsGap", &rowsGap);
     isUndefined = false;
-    if (env->Reference_IsUndefined(rowsGap, &isUndefined) != ANI_OK) {
-    }
+    env->Reference_IsUndefined(rowsGap, &isUndefined);
     if (!isUndefined) {
         curSection.rowsGap = ParseDimension(env, rowsGap);
     }
 
     ani_ref margin;
-    if (env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "margin", &margin) != ANI_OK) {
-    }
+    env->Object_GetPropertyByName_Ref(static_cast<ani_object>(section), "margin", &margin);
     isUndefined = false;
-    if (env->Reference_IsUndefined(margin, &isUndefined) != ANI_OK) {
-    }
+    env->Reference_IsUndefined(margin, &isUndefined);
     if (!isUndefined) {
         curSection.margin = ParseMargin(env, margin);
     }
@@ -223,15 +225,23 @@ void AniWaterFlowModule::ParseWaterFlowSections(ani_env* env, ani_ref sections, 
     ani_size changeArrayLength;
     if (env->Array_GetLength(static_cast<ani_array_ref>(changeArray), &changeArrayLength) != ANI_OK) {
     }
+
+    ani_class sectionChangeInfo;
+    if (env->FindClass("Larkui/component/waterFlow/SectionChangeInfo;", &sectionChangeInfo) != ANI_OK) {
+        return;
+    }
+
+    ani_class sectionOptions;
+    if (env->FindClass("Larkui/component/waterFlow/SectionOptions;", &sectionOptions) != ANI_OK) {
+        return;
+    }
+
     for (int32_t i = 0; i < changeArrayLength; i++) {
         ani_ref change;
-        if (env->Array_Get_Ref(static_cast<ani_array_ref>(changeArray), 0, &change) != ANI_OK) {
+        if (env->Array_Get_Ref(static_cast<ani_array_ref>(changeArray), i, &change) != ANI_OK) {
+            continue;
         }
 
-        ani_class sectionChangeInfo;
-        if (env->FindClass("Larkui/component/waterFlow/SectionChangeInfo;", &sectionChangeInfo) != ANI_OK) {
-            return;
-        }
         ani_boolean isSectionChangeInfo;
         env->Object_InstanceOf(static_cast<ani_object>(change), sectionChangeInfo, &isSectionChangeInfo);
         if (!isSectionChangeInfo) {
@@ -240,19 +250,20 @@ void AniWaterFlowModule::ParseWaterFlowSections(ani_env* env, ani_ref sections, 
 
         ani_double start = 0.0;
         if (env->Object_GetPropertyByName_Double(static_cast<ani_object>(change), "start", &start) != ANI_OK) {
+            continue;
         }
         ani_double deleteCount = 0.0;
         if (env->Object_GetPropertyByName_Double(static_cast<ani_object>(change), "deleteCount", &deleteCount) !=
             ANI_OK) {
+            continue;
         }
 
         ani_ref sectionOptionsArray;
-        if (env->Object_GetPropertyByName_Ref(static_cast<ani_object>(change), "sections", &sectionOptionsArray) !=
-            ANI_OK) {
-        }
+        env->Object_GetPropertyByName_Ref(static_cast<ani_object>(change), "sections", &sectionOptionsArray);
 
         ani_size aniLength;
         if (env->Array_GetLength(static_cast<ani_array_ref>(sectionOptionsArray), &aniLength) != ANI_OK) {
+            continue;
         }
 
         int32_t length = static_cast<int32_t>(aniLength);
@@ -262,18 +273,16 @@ void AniWaterFlowModule::ParseWaterFlowSections(ani_env* env, ani_ref sections, 
             if (env->Array_Get_Ref(static_cast<ani_array_ref>(sectionOptionsArray), j, &section) != ANI_OK) {
                 continue;
             }
-
-            ani_class sectionOptions;
-            if (env->FindClass("Larkui/component/waterFlow/SectionOptions;", &sectionOptions) != ANI_OK) {
-                continue;
-            }
             ani_boolean isSectionOptions;
             env->Object_InstanceOf(static_cast<ani_object>(section), sectionOptions, &isSectionOptions);
-
-            if (isSectionOptions) {
-                NG::WaterFlowSections::Section curSection = ParseSectionOptions(env, section);
-                newSections.emplace_back(curSection);
+            if (!isSectionOptions) {
+                continue;
             }
+            NG::WaterFlowSections::Section curSection = ParseSectionOptions(env, section);
+            if (curSection.itemsCount < 0) {
+                continue;
+            }
+            newSections.emplace_back(curSection);
         }
         waterFlowSections->ChangeData(start, deleteCount, newSections);
     }
