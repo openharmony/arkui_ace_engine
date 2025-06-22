@@ -248,7 +248,8 @@ bool ParseCalcDimensions(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t offset,
 }
 
 ParseResult ParseCalcDimensionsNG(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t offset, uint32_t count,
-    std::vector<std::optional<CalcDimension>>& results, const CalcDimension& defValue)
+    std::vector<std::optional<CalcDimension>>& results, std::vector<RefPtr<ResourceObject>>& edgesResObj,
+    const CalcDimension& defValue)
 {
     auto end = offset + count;
     auto argsNumber = runtimeCallInfo->GetArgsNumber();
@@ -260,9 +261,10 @@ ParseResult ParseCalcDimensionsNG(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_
     for (uint32_t index = offset; index < end; index++) {
         auto arg = runtimeCallInfo->GetCallArgRef(index);
         std::optional<CalcDimension> optCalcDimension;
+        RefPtr<ResourceObject> resObj;
         CalcDimension dimension(defValue);
         // Parse string, '10abc' return false
-        if (ArkTSUtils::ParseJsDimensionVpNG(vm, arg, dimension, true)) {
+        if (ArkTSUtils::ParseJsDimensionVpNG(vm, arg, dimension, resObj, true)) {
             optCalcDimension = dimension;
             res = ParseResult::DIMENSION_SUCCESS;
         } else if (ArkTSUtils::ParseJsLengthMetrics(vm, arg, dimension)) {
@@ -270,6 +272,9 @@ ParseResult ParseCalcDimensionsNG(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_
             res = ParseResult::LENGTHMETRICS_SUCCESS;
         }
         results.push_back(optCalcDimension);
+        if (SystemProperties::ConfigChangePerform()) {
+            edgesResObj.push_back(resObj);
+        }
     }
     return res;
 }
@@ -987,13 +992,6 @@ void ParseOuterBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, st
     PushOuterBorderColorVector(bottomColor, values);
 }
 
-void ParseOuterBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values,
-    int32_t argsIndex, bool needLocalized = false)
-{
-    std::vector<RefPtr<ResourceObject>> resObj;
-    ParseOuterBorderColor(runtimeCallInfo, vm, values, argsIndex, resObj, needLocalized);
-}
-
 bool ParseLocalizedBorderRadius(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result)
 {
     if (ArkTSUtils::ParseJsLengthMetrics(vm, value, result)) {
@@ -1011,9 +1009,14 @@ void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args, std::optional<C
     RefPtr<ResourceObject> resObj;
     ArkTSUtils::ParseOuterBorder(vm, args, optionalDimension, resObj);
     if (SystemProperties::ConfigChangePerform()) {
-        if (resObj) {
-            resObjs.push_back(resObj);
-        } else {
+        resObjs.push_back(resObj);
+    }
+}
+
+void ParseNullptrResObj(std::vector<RefPtr<ResourceObject>>& resObjs, int32_t index)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        for (uint32_t i = 0; i < index; i++) {
             resObjs.push_back(nullptr);
         }
     }
@@ -1048,10 +1051,7 @@ void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, s
             PushOuterBorderDimensionVector(topEndOptional, values);
             PushOuterBorderDimensionVector(bottomStartOptional, values);
             PushOuterBorderDimensionVector(bottomEndOptional, values);
-            if (SystemProperties::ConfigChangePerform()) {
-                std::vector<RefPtr<ResourceObject>> vectorResObj(4, nullptr);
-                resObjs = vectorResObj;
-            }
+            ParseNullptrResObj(resObjs, NUM_4);
             return;
         }
     }
@@ -1070,13 +1070,6 @@ void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, s
     PushOuterBorderDimensionVector(topRightOptional, values);
     PushOuterBorderDimensionVector(bottomLeftOptional, values);
     PushOuterBorderDimensionVector(bottomRightOptional, values);
-}
-
-void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values,
-    int32_t argsIndex, bool needLocalized = false)
-{
-    std::vector<RefPtr<ResourceObject>> resObj;
-    ParseOuterBorderRadius(runtimeCallInfo, vm, values, argsIndex, resObj, needLocalized);
 }
 
 void PushOuterBorderStyleVector(const std::optional<BorderStyle>& value, std::vector<uint32_t> &options)
@@ -1121,8 +1114,18 @@ void ParseOuterBorderStyle(
     PushOuterBorderStyleVector(styleBottom, values);
 }
 
+void ParseOuterBorderForDashParams(EcmaVM* vm, const Local<JSValueRef>& args,
+    std::optional<CalcDimension>& optionalDimension, std::vector<RefPtr<ResourceObject>>& resObjs)
+{
+    RefPtr<ResourceObject> resObj;
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, args, optionalDimension, resObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        resObjs.push_back(resObj);
+    }
+}
+
 void ParseOuterBorderDashParam(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, std::vector<ArkUI_Float32> &values,
-    int32_t argsIndex)
+    int32_t argsIndex, std::vector<RefPtr<ResourceObject>>& resObjs)
 {
     Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(argsIndex);
     Local<JSValueRef> rightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
@@ -1133,10 +1136,10 @@ void ParseOuterBorderDashParam(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm
     std::optional<CalcDimension> topDim;
     std::optional<CalcDimension> bottomDim;
 
-    ArkTSUtils::ParseOuterBorderForDashParams(vm, leftArgs, leftDim);
-    ArkTSUtils::ParseOuterBorderForDashParams(vm, rightArgs, rightDim);
-    ArkTSUtils::ParseOuterBorderForDashParams(vm, topArgs, topDim);
-    ArkTSUtils::ParseOuterBorderForDashParams(vm, bottomArgs, bottomDim);
+    ParseOuterBorderForDashParams(vm, leftArgs, leftDim, resObjs);
+    ParseOuterBorderForDashParams(vm, rightArgs, rightDim, resObjs);
+    ParseOuterBorderForDashParams(vm, topArgs, topDim, resObjs);
+    ParseOuterBorderForDashParams(vm, bottomArgs, bottomDim, resObjs);
 
     PushOuterBorderDimensionVector(leftDim, values);
     PushOuterBorderDimensionVector(rightDim, values);
@@ -1427,7 +1430,8 @@ void ParseDynamicBrightnessOption(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM*
 }
 
 bool ParseCalcDimension(const EcmaVM* vm,
-    ArkUINodeHandle node, const Local<JSValueRef>& value, CalcDimension& result, bool isWidth)
+    ArkUINodeHandle node, const Local<JSValueRef>& value, CalcDimension& result, bool isWidth,
+    RefPtr<ResourceObject>& resourceObject)
 {
     CHECK_NULL_RETURN(vm, false);
     bool undefined = value->IsUndefined();
@@ -1436,11 +1440,11 @@ bool ParseCalcDimension(const EcmaVM* vm,
         return true;
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, value, result)) {
+        if (!ArkTSUtils::ParseJsDimensionVpNG(vm, value, result, resourceObject)) {
             GetArkUINodeModifiers()->getCommonModifier()->clearWidthOrHeight(node, isWidth);
             return false;
         }
-    } else if (!ArkTSUtils::ParseJsDimensionVp(vm, value, result)) {
+    } else if (!ArkTSUtils::ParseJsDimensionVp(vm, value, result, resourceObject)) {
         return false;
     }
 
@@ -1448,12 +1452,13 @@ bool ParseCalcDimension(const EcmaVM* vm,
         result.SetValue(0.0);
     }
     std::string calc = result.CalcValue();
+    auto RawResObj = AceType::RawPtr(resourceObject);
     if (isWidth) {
         GetArkUINodeModifiers()->getCommonModifier()->setWidth(
-            node, result.Value(), static_cast<int32_t>(result.Unit()), calc.c_str());
+            node, result.Value(), static_cast<int32_t>(result.Unit()), calc.c_str(), RawResObj);
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->setHeight(
-            node, result.Value(), static_cast<int32_t>(result.Unit()), calc.c_str());
+            node, result.Value(), static_cast<int32_t>(result.Unit()), calc.c_str(), RawResObj);
     }
     return true;
 }
@@ -1618,20 +1623,25 @@ ArkUINativeModuleValue CommonBridge::ResetBackgroundColor(ArkUIRuntimeCallInfo *
 }
 
 void SetBorderWidthArray(const EcmaVM* vm, const Local<JSValueRef>& args, ArkUI_Float32 values[],
-    int units[], int index)
+    int units[], int index, std::vector<RefPtr<ResourceObject>>& resObj)
 {
     CalcDimension borderDimension;
+    RefPtr<ResourceObject> borderDimensionResObj;
     if (!args->IsUndefined()) {
-        if (ArkTSUtils::ParseAllBorder(vm, args, borderDimension)) {
+        if (ArkTSUtils::ParseAllBorder(vm, args, borderDimension, borderDimensionResObj)) {
             values[index] = borderDimension.Value();
             units[index] = static_cast<int>(borderDimension.Unit());
         } else {
             values[index] = 0;
             units[index] = static_cast<int>(DimensionUnit::VP);
         }
+        if (SystemProperties::ConfigChangePerform()) {
+            resObj.push_back(borderDimensionResObj);
+        }
     } else {
         values[index] = -1;
         units[index] = static_cast<int>(DimensionUnit::INVALID);
+        ParseNullptrResObj(resObj, NUM_1);
     }
 }
 
@@ -1651,6 +1661,13 @@ void SetBorderWidthArrayByDimen(CalcDimension& borderDimension, ArkUI_Float32 va
 {
     values[index] = borderDimension.Value();
     units[index] = static_cast<int>(borderDimension.Unit());
+}
+
+void ParseBorderWidthLengthMetrics(EcmaVM* vm, Local<JSValueRef> arg, CalcDimension& dimension, bool& isLengthMetrics)
+{
+    if (arg->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedBorderWidth(vm, arg, dimension);
+    }
 }
 
 ArkUINativeModuleValue CommonBridge::SetBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1674,21 +1691,14 @@ ArkUINativeModuleValue CommonBridge::SetBorderWidth(ArkUIRuntimeCallInfo* runtim
     CalcDimension left;
     bool isLengthMetrics = false;
 
-    if (topArgs->IsObject(vm)) {
-        isLengthMetrics |= ParseLocalizedBorderWidth(vm, topArgs, top);
-    }
-    if (rightArgs->IsObject(vm)) {
-        isLengthMetrics |= ParseLocalizedBorderWidth(vm, rightArgs, right);
-    }
-    if (bottomArgs->IsObject(vm)) {
-        isLengthMetrics |= ParseLocalizedBorderWidth(vm, bottomArgs, bottom);
-    }
-    if (leftArgs->IsObject(vm)) {
-        isLengthMetrics |= ParseLocalizedBorderWidth(vm, leftArgs, left);
-    }
+    ParseBorderWidthLengthMetrics(vm, topArgs, top, isLengthMetrics);
+    ParseBorderWidthLengthMetrics(vm, rightArgs, right, isLengthMetrics);
+    ParseBorderWidthLengthMetrics(vm, bottomArgs, bottom, isLengthMetrics);
+    ParseBorderWidthLengthMetrics(vm, leftArgs, left, isLengthMetrics);
 
     uint32_t size = SIZE_OF_FOUR;
     ArkUI_Float32 values[size];
+    std::vector<RefPtr<ResourceObject>> resObj;
     int units[size];
 
     if (isLengthMetrics) {
@@ -1697,14 +1707,16 @@ ArkUINativeModuleValue CommonBridge::SetBorderWidth(ArkUIRuntimeCallInfo* runtim
         SetBorderWidthArrayByDimen(isRightToLeft ? left : right, values, units, NUM_1);
         SetBorderWidthArrayByDimen(bottom, values, units, NUM_2);
         SetBorderWidthArrayByDimen(isRightToLeft ? right : left, values, units, NUM_3);
+        ParseNullptrResObj(resObj, NUM_4);
     } else {
-        SetBorderWidthArray(vm, topArgs, values, units, NUM_0);
-        SetBorderWidthArray(vm, rightArgs, values, units, NUM_1);
-        SetBorderWidthArray(vm, bottomArgs, values, units, NUM_2);
-        SetBorderWidthArray(vm, leftArgs, values, units, NUM_3);
+        SetBorderWidthArray(vm, topArgs, values, units, NUM_0, resObj);
+        SetBorderWidthArray(vm, rightArgs, values, units, NUM_1, resObj);
+        SetBorderWidthArray(vm, bottomArgs, values, units, NUM_2, resObj);
+        SetBorderWidthArray(vm, leftArgs, values, units, NUM_3, resObj);
     }
 
-    GetArkUINodeModifiers()->getCommonModifier()->setBorderWidth(nativeNode, values, units, size);
+    auto rawPtr = static_cast<void*>(&resObj);
+    GetArkUINodeModifiers()->getCommonModifier()->setBorderWidth(nativeNode, values, units, size, rawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1739,6 +1751,7 @@ void CommonBridge::ParseOuterBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo, 
         ArkTSUtils::ParseOuterBorderForDashParams(vm, endArgs, endDim);
         ArkTSUtils::ParseOuterBorderForDashParams(vm, topArgs, topDim);
         ArkTSUtils::ParseOuterBorderForDashParams(vm, bottomArgs, bottomDim);
+        ParseNullptrResObj(resObjs, NUM_2);
     } else {
         ParseOuterBorder(vm, topArgs, topDim, resObjs);
         ParseOuterBorder(vm, bottomArgs, bottomDim, resObjs);
@@ -1821,6 +1834,23 @@ bool SetBackShadowForShadowStyle(const ArkUINodeHandle nativeNode, const EcmaVM 
     return false;
 }
 
+void SetBorderRadiusArray(const EcmaVM* vm, const Local<JSValueRef>& args, CalcDimension& result,
+    std::vector<RefPtr<ResourceObject>>& resObjs)
+{
+    RefPtr<ResourceObject> resObj;
+    ArkTSUtils::ParseAllBorder(vm, args, result, resObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        resObjs.push_back(resObj);
+    }
+}
+
+void ParseBorderRadiusLengthMetrics(EcmaVM* vm, Local<JSValueRef> arg, CalcDimension& dimension, bool& isLengthMetrics)
+{
+    if (arg->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedBorderRadius(vm, arg, dimension);
+    }
+}
+
 ArkUINativeModuleValue CommonBridge::SetBorderRadius(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
@@ -1840,24 +1870,19 @@ ArkUINativeModuleValue CommonBridge::SetBorderRadius(ArkUIRuntimeCallInfo *runti
     CalcDimension topRight;
     CalcDimension bottomLeft;
     CalcDimension bottomRight;
+    std::vector<RefPtr<ResourceObject>> resObj;
     bool isLengthMetrics = false;
-    if (topLeftArgs->IsObject(vm)) {
-        isLengthMetrics |= ParseLocalizedBorderRadius(vm, topLeftArgs, topLeft);
-    }
-    if (topRightArgs->IsObject(vm)) {
-        isLengthMetrics |= ParseLocalizedBorderRadius(vm, topRightArgs, topRight);
-    }
-    if (bottomLeftArgs->IsObject(vm)) {
-        isLengthMetrics |= ParseLocalizedBorderRadius(vm, bottomLeftArgs, bottomLeft);
-    }
-    if (bottomRightArgs->IsObject(vm)) {
-        isLengthMetrics |= ParseLocalizedBorderRadius(vm, bottomRightArgs, bottomRight);
-    }
+    ParseBorderRadiusLengthMetrics(vm, topLeftArgs, topLeft, isLengthMetrics);
+    ParseBorderRadiusLengthMetrics(vm, topRightArgs, topRight, isLengthMetrics);
+    ParseBorderRadiusLengthMetrics(vm, bottomLeftArgs, bottomLeft, isLengthMetrics);
+    ParseBorderRadiusLengthMetrics(vm, bottomRightArgs, bottomRight, isLengthMetrics);
     if (!isLengthMetrics) {
-        ArkTSUtils::ParseAllBorder(vm, topLeftArgs, topLeft);
-        ArkTSUtils::ParseAllBorder(vm, topRightArgs, topRight);
-        ArkTSUtils::ParseAllBorder(vm, bottomLeftArgs, bottomLeft);
-        ArkTSUtils::ParseAllBorder(vm, bottomRightArgs, bottomRight);
+        SetBorderRadiusArray(vm, topLeftArgs, topLeft, resObj);
+        SetBorderRadiusArray(vm, topRightArgs, topRight, resObj);
+        SetBorderRadiusArray(vm, bottomLeftArgs, bottomLeft, resObj);
+        SetBorderRadiusArray(vm, bottomRightArgs, bottomRight, resObj);
+    } else {
+        ParseNullptrResObj(resObj, NUM_4);
     }
     ArkUI_Float32 values[SIZE_OF_FOUR];
     int units[SIZE_OF_FOUR];
@@ -1866,7 +1891,8 @@ ArkUINativeModuleValue CommonBridge::SetBorderRadius(ArkUIRuntimeCallInfo *runti
     ParseMirrorDimen(values, units, NUM_1, isMirror ? topLeft : topRight);
     ParseMirrorDimen(values, units, NUM_2, isMirror ? bottomRight : bottomLeft);
     ParseMirrorDimen(values, units, NUM_3, isMirror ? bottomLeft : bottomRight);
-    GetArkUINodeModifiers()->getCommonModifier()->setBorderRadius(nativeNode, values, units, SIZE_OF_FOUR);
+    auto rawPtr = static_cast<void*>(&resObj);
+    GetArkUINodeModifiers()->getCommonModifier()->setBorderRadius(nativeNode, values, units, SIZE_OF_FOUR, rawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1902,8 +1928,9 @@ ArkUINativeModuleValue CommonBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallI
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(NUM_1);
     CalcDimension width;
+    RefPtr<ResourceObject> widthResObj;
     std::string calcStr;
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width)) {
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, width, widthResObj)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetWidth(nativeNode);
         if (jsValue->IsObject(vm)) {
             auto obj = jsValue->ToObject(vm);
@@ -1924,12 +1951,13 @@ ArkUINativeModuleValue CommonBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallI
             width.SetValue(0.0);
         }
 
+        auto widthRawResObj = AceType::RawPtr(widthResObj);
         if (width.Unit() == DimensionUnit::CALC) {
             GetArkUINodeModifiers()->getCommonModifier()->setWidth(
-                nativeNode, 0, static_cast<int32_t>(width.Unit()), width.CalcValue().c_str());
+                nativeNode, 0, static_cast<int32_t>(width.Unit()), width.CalcValue().c_str(), widthRawResObj);
         } else {
             GetArkUINodeModifiers()->getCommonModifier()->setWidth(
-                nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), calcStr.c_str());
+                nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), calcStr.c_str(), widthRawResObj);
         }
     }
     ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
@@ -1954,8 +1982,9 @@ ArkUINativeModuleValue CommonBridge::SetHeight(ArkUIRuntimeCallInfo* runtimeCall
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(NUM_1);
     CalcDimension height;
+    RefPtr<ResourceObject> heightResObj;
     std::string calcStr;
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height)) {
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, height, heightResObj)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetHeight(nativeNode);
         if (jsValue->IsObject(vm)) {
             auto obj = jsValue->ToObject(vm);
@@ -1975,12 +2004,13 @@ ArkUINativeModuleValue CommonBridge::SetHeight(ArkUIRuntimeCallInfo* runtimeCall
             }
             height.SetValue(0.0);
         }
+        auto heightRawResObj = AceType::RawPtr(heightResObj);
         if (height.Unit() == DimensionUnit::CALC) {
-            GetArkUINodeModifiers()->getCommonModifier()->setHeight(
-                nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), height.CalcValue().c_str());
+            GetArkUINodeModifiers()->getCommonModifier()->setHeight(nativeNode, height.Value(),
+                static_cast<int32_t>(height.Unit()), height.CalcValue().c_str(), heightRawResObj);
         } else {
             GetArkUINodeModifiers()->getCommonModifier()->setHeight(
-                nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), calcStr.c_str());
+                nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), calcStr.c_str(), heightRawResObj);
         }
     }
     ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
@@ -2006,19 +2036,24 @@ ArkUINativeModuleValue CommonBridge::SetPosition(ArkUIRuntimeCallInfo* runtimeCa
     bool useEdges = runtimeCallInfo->GetCallArgRef(NUM_1)->ToBoolean(vm)->Value();
     std::vector<ArkUIStringAndFloat> options;
     std::vector<std::optional<CalcDimension>> edges;
+    std::vector<RefPtr<ResourceObject>> edgesResObj;
 
     if (useEdges) {
-        ParseResult res = ParseCalcDimensionsNG(runtimeCallInfo, NUM_2, NUM_4, edges, CalcDimension(0.0));
+        ParseResult res = ParseCalcDimensionsNG(runtimeCallInfo, NUM_2, NUM_4, edges, edgesResObj, CalcDimension(0.0));
         if (res == ParseResult::LENGTHMETRICS_SUCCESS && AceApplicationInfo::GetInstance().IsRightToLeft()) {
             // Swap left and right
             std::swap(edges[NUM_1], edges[NUM_3]);
         }
         PushDimensionsToVector(options, edges);
-        GetArkUINodeModifiers()->getCommonModifier()->setPositionEdges(nativeNode, useEdges, options.data());
+        auto edgesRawPtr = static_cast<void*>(&edgesResObj);
+        GetArkUINodeModifiers()->getCommonModifier()->setPositionEdges(
+            nativeNode, useEdges, options.data(), edgesRawPtr);
     } else {
-        ParseCalcDimensionsNG(runtimeCallInfo, NUM_2, NUM_2, edges, CalcDimension(0.0));
+        ParseCalcDimensionsNG(runtimeCallInfo, NUM_2, NUM_2, edges, edgesResObj, CalcDimension(0.0));
         PushDimensionsToVector(options, edges);
-        GetArkUINodeModifiers()->getCommonModifier()->setPositionEdges(nativeNode, useEdges, options.data());
+        auto edgesRawPtr = static_cast<void*>(&edgesResObj);
+        GetArkUINodeModifiers()->getCommonModifier()->setPositionEdges(
+            nativeNode, useEdges, options.data(), edgesRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -2133,30 +2168,35 @@ ArkUINativeModuleValue CommonBridge::SetBorderColor(ArkUIRuntimeCallInfo *runtim
     Local<JSValueRef> isLocalizedArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto isLocalized = (isLocalizedArg->IsBoolean()) ? isLocalizedArg->ToBoolean(vm)->Value() : false;
+    std::vector<RefPtr<ResourceObject>> resObj;
 
     Color topColor;
     Color rightColor;
     Color bottomColor;
     Color leftColor;
 
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, topArg, topColor)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, topArg, topColor, resObj)) {
         topColor.SetValue(COLOR_ALPHA_VALUE);
     }
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, rightArg, rightColor)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, rightArg, rightColor, resObj)) {
         rightColor.SetValue(COLOR_ALPHA_VALUE);
     }
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottomColor)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottomColor, resObj)) {
         bottomColor.SetValue(COLOR_ALPHA_VALUE);
     }
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, leftArg, leftColor)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, leftArg, leftColor, resObj)) {
         leftColor.SetValue(COLOR_ALPHA_VALUE);
     }
     auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (SystemProperties::ConfigChangePerform() && isRightToLeft && isLocalized) {
+        std::swap(resObj[1], resObj[3]);
+    }
+    auto rawPtr = static_cast<void*>(&resObj);
     GetArkUINodeModifiers()->getCommonModifier()->setBorderColor(nativeNode,
         topColor.GetValue(),
         (isRightToLeft && isLocalized) ? leftColor.GetValue() : rightColor.GetValue(),
         bottomColor.GetValue(),
-        (isRightToLeft && isLocalized) ? rightColor.GetValue() : leftColor.GetValue());
+        (isRightToLeft && isLocalized) ? rightColor.GetValue() : leftColor.GetValue(), rawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -3302,15 +3342,17 @@ ArkUINativeModuleValue CommonBridge::SetBorder(ArkUIRuntimeCallInfo* runtimeCall
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     std::vector<ArkUI_Float32> options;
-    ParseOuterBorderWidth(runtimeCallInfo, vm, options);         // Border Width args start index from 1
-    ParseOuterBorderRadius(runtimeCallInfo, vm, options, NUM_9); // Border Radius args start index
+    std::vector<RefPtr<ResourceObject>> resObj;
+    ParseOuterBorderWidth(runtimeCallInfo, vm, options, resObj);         // Border Width args start index from 1
+    ParseOuterBorderRadius(runtimeCallInfo, vm, options, NUM_9, resObj); // Border Radius args start index
 
     std::vector<uint32_t> colorAndStyleOptions;
-    ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5);  // Border Color args start index
+    ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5, resObj);  // Border Color args start index
     ParseOuterBorderStyle(runtimeCallInfo, vm, colorAndStyleOptions, NUM_13); // Border Style args start index
 
+    auto rawPtr = static_cast<void*>(&resObj);
     GetArkUINodeModifiers()->getCommonModifier()->setBorder(nativeNode, options.data(), options.size(),
-        colorAndStyleOptions.data(), colorAndStyleOptions.size(), false, false, false);
+        colorAndStyleOptions.data(), colorAndStyleOptions.size(), false, false, false, rawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -3323,11 +3365,12 @@ ArkUINativeModuleValue CommonBridge::SetLocalizedBorder(ArkUIRuntimeCallInfo* ru
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     std::vector<ArkUI_Float32> options;
-    ParseOuterBorderWidth(runtimeCallInfo, vm, options, true);         // Border Width args start index from 1
-    ParseOuterBorderRadius(runtimeCallInfo, vm, options, NUM_9, true); // Border Radius args start index
+    std::vector<RefPtr<ResourceObject>> resObj;
+    ParseOuterBorderWidth(runtimeCallInfo, vm, options, resObj, true);         // Border Width args start index from 1
+    ParseOuterBorderRadius(runtimeCallInfo, vm, options, NUM_9, resObj, true); // Border Radius args start index
 
     std::vector<uint32_t> colorAndStyleOptions;
-    ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5, true);  // Border Color args start index
+    ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5, resObj, true);  // Border Color args start index
     ParseOuterBorderStyle(runtimeCallInfo, vm, colorAndStyleOptions, NUM_13); // Border Style args start index
 
     int32_t isLocalizedBorderWidth = 0;
@@ -3335,9 +3378,10 @@ ArkUINativeModuleValue CommonBridge::SetLocalizedBorder(ArkUIRuntimeCallInfo* ru
     int32_t isLocalizedBorderRadius = 0;
     ParseLocalizedBorder(runtimeCallInfo, isLocalizedBorderWidth, isLocalizedBorderColor, isLocalizedBorderRadius);
 
+    auto rawPtr = static_cast<void*>(&resObj);
     GetArkUINodeModifiers()->getCommonModifier()->setBorder(nativeNode, options.data(), options.size(),
         colorAndStyleOptions.data(), colorAndStyleOptions.size(), isLocalizedBorderWidth, isLocalizedBorderColor,
-        isLocalizedBorderRadius);
+        isLocalizedBorderRadius, rawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -3378,7 +3422,8 @@ ArkUINativeModuleValue CommonBridge::SetBorderWithDashParams(ArkUIRuntimeCallInf
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     std::vector<ArkUI_Float32> dashOptions;
-    ParseOuterBorderDashParam(runtimeCallInfo, vm, dashOptions, 17); // Border DashGap args start index from 17
+    std::vector<RefPtr<ResourceObject>> resObj;
+    ParseOuterBorderDashParam(runtimeCallInfo, vm, dashOptions, 17, resObj); // Border DashGap args start index from 17
     Local<JSValueRef> startDashGap = runtimeCallInfo->GetCallArgRef(36); // Border DashGap args start index from 36
     Local<JSValueRef> endDashGap = runtimeCallInfo->GetCallArgRef(37); // Border DashGap args end index from 37
     std::optional<CalcDimension> startDashGapDim;
@@ -3388,7 +3433,7 @@ ArkUINativeModuleValue CommonBridge::SetBorderWithDashParams(ArkUIRuntimeCallInf
     ArkTSUtils::PushOuterBorderDimensionVector(startDashGapDim, dashOptions);
     ArkTSUtils::PushOuterBorderDimensionVector(endDashGapDim, dashOptions);
 
-    ParseOuterBorderDashParam(runtimeCallInfo, vm, dashOptions, 21); // Border DashWidth args start index from 21
+    ParseOuterBorderDashParam(runtimeCallInfo, vm, dashOptions, 21, resObj); // Border DashWidth args start index from 21
     Local<JSValueRef> startDashWidth = runtimeCallInfo->GetCallArgRef(38); // Border DashWidth args start index from 38
     Local<JSValueRef> endDashWidth = runtimeCallInfo->GetCallArgRef(39); // Border DashWidth args end index from 39
     std::optional<CalcDimension> startDashWidthDim;
@@ -3398,8 +3443,9 @@ ArkUINativeModuleValue CommonBridge::SetBorderWithDashParams(ArkUIRuntimeCallInf
     ArkTSUtils::PushOuterBorderDimensionVector(startDashWidthDim, dashOptions);
     ArkTSUtils::PushOuterBorderDimensionVector(endDashWidthDim, dashOptions);
 
+    auto rawPtr = static_cast<void*>(&resObj);
     GetArkUINodeModifiers()->getCommonModifier()->setBorderDashParams(nativeNode, dashOptions.data(),
-        dashOptions.size());
+        dashOptions.size(), rawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -4865,19 +4911,22 @@ ArkUINativeModuleValue CommonBridge::SetOffset(ArkUIRuntimeCallInfo* runtimeCall
     bool useEdges = runtimeCallInfo->GetCallArgRef(NUM_1)->ToBoolean(vm)->Value();
     std::vector<ArkUIStringAndFloat> options;
     std::vector<std::optional<CalcDimension>> edges;
+    std::vector<RefPtr<ResourceObject>> edgesResObj;
 
     if (useEdges) {
-        ParseResult res = ParseCalcDimensionsNG(runtimeCallInfo, NUM_2, NUM_4, edges, CalcDimension(0.0));
+        ParseResult res = ParseCalcDimensionsNG(runtimeCallInfo, NUM_2, NUM_4, edges, edgesResObj, CalcDimension(0.0));
         if (res == ParseResult::LENGTHMETRICS_SUCCESS && AceApplicationInfo::GetInstance().IsRightToLeft()) {
             // Swap left and right
             std::swap(edges[NUM_1], edges[NUM_3]);
         }
         PushDimensionsToVector(options, edges);
-        GetArkUINodeModifiers()->getCommonModifier()->setOffsetEdges(nativeNode, useEdges, options.data());
+        auto edgesRawPtr = static_cast<void*>(&edgesResObj);
+        GetArkUINodeModifiers()->getCommonModifier()->setOffsetEdges(nativeNode, useEdges, options.data(), edgesRawPtr);
     } else {
-        ParseCalcDimensionsNG(runtimeCallInfo, NUM_2, NUM_2, edges, CalcDimension(0.0));
+        ParseCalcDimensionsNG(runtimeCallInfo, NUM_2, NUM_2, edges, edgesResObj, CalcDimension(0.0));
         PushDimensionsToVector(options, edges);
-        GetArkUINodeModifiers()->getCommonModifier()->setOffsetEdges(nativeNode, useEdges, options.data());
+        auto edgesRawPtr = static_cast<void*>(&edgesResObj);
+        GetArkUINodeModifiers()->getCommonModifier()->setOffsetEdges(nativeNode, useEdges, options.data(), edgesRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -4893,9 +4942,11 @@ ArkUINativeModuleValue CommonBridge::ResetOffset(ArkUIRuntimeCallInfo *runtimeCa
     return panda::JSValueRef::Undefined(vm);
 }
 
-void ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result)
+void ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result,
+    std::vector<RefPtr<ResourceObject>>& resObjs)
 {
-    if (ArkTSUtils::ParseJsDimensionVp(vm, value, dimen)) {
+    RefPtr<ResourceObject> resObj;
+    if (ArkTSUtils::ParseJsDimensionVp(vm, value, dimen, resObj)) {
         if (LessOrEqual(dimen.Value(), 0.0)) {
             dimen.SetValue(0.0);
             dimen.SetUnit(DimensionUnit::VP);
@@ -4906,6 +4957,9 @@ void ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimensio
         } else {
             result.value = dimen.Value();
         }
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        resObjs.push_back(resObj);
     }
 }
 
@@ -4948,6 +5002,7 @@ ArkUINativeModuleValue CommonBridge::SetPadding(ArkUIRuntimeCallInfo *runtimeCal
     CalcDimension rightDimen(0, DimensionUnit::VP);
     CalcDimension bottomDimen(0, DimensionUnit::VP);
     CalcDimension leftDimen(0, DimensionUnit::VP);
+    std::vector<RefPtr<ResourceObject>> resObj;
 
     bool isLengthMetrics = false;
     if (secondArg->IsObject(vm)) {
@@ -4969,15 +5024,17 @@ ArkUINativeModuleValue CommonBridge::SetPadding(ArkUIRuntimeCallInfo *runtimeCal
             &top,
             isRightToLeft ? &left : &right,
             &bottom,
-            isRightToLeft ? &right : &left);
+            isRightToLeft ? &right : &left,
+            nullptr);
         return panda::JSValueRef::Undefined(vm);
     }
 
-    ParsePadding(vm, secondArg, topDimen, top);
-    ParsePadding(vm, thirdArg, rightDimen, right);
-    ParsePadding(vm, forthArg, bottomDimen, bottom);
-    ParsePadding(vm, fifthArg, leftDimen, left);
-    GetArkUINodeModifiers()->getCommonModifier()->setPadding(nativeNode, &top, &right, &bottom, &left);
+    ParsePadding(vm, secondArg, topDimen, top, resObj);
+    ParsePadding(vm, thirdArg, rightDimen, right, resObj);
+    ParsePadding(vm, forthArg, bottomDimen, bottom, resObj);
+    ParsePadding(vm, fifthArg, leftDimen, left, resObj);
+    auto rawPtr = static_cast<void*>(&resObj);
+    GetArkUINodeModifiers()->getCommonModifier()->setPadding(nativeNode, &top, &right, &bottom, &left, rawPtr);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -5006,15 +5063,28 @@ bool ParseLocalizedMargin(const EcmaVM* vm, const Local<JSValueRef>& value, Calc
     return false;
 }
 
-void ParseMargin(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result)
+void ParseMargin(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result,
+    std::vector<RefPtr<ResourceObject>>& resObjs)
 {
-    if (ArkTSUtils::ParseJsDimensionVp(vm, value, dimen)) {
+    RefPtr<ResourceObject> resObj;
+    if (ArkTSUtils::ParseJsDimensionVp(vm, value, dimen, resObj)) {
         result.unit = static_cast<int8_t>(dimen.Unit());
         if (dimen.CalcValue() != "") {
             result.string = dimen.CalcValue().c_str();
         } else {
             result.value = dimen.Value();
         }
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        resObjs.push_back(resObj);
+    }
+}
+
+void ParseMarginLengthMetrics(EcmaVM* vm, Local<JSValueRef> arg, CalcDimension& dimension, ArkUISizeType& sizeType,
+    bool& isLengthMetrics)
+{
+    if (arg->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedMargin(vm, arg, dimension, sizeType);
     }
 }
 
@@ -5036,34 +5106,30 @@ ArkUINativeModuleValue CommonBridge::SetMargin(ArkUIRuntimeCallInfo *runtimeCall
     CalcDimension rightDimen(0, DimensionUnit::VP);
     CalcDimension bottomDimen(0, DimensionUnit::VP);
     CalcDimension leftDimen(0, DimensionUnit::VP);
+    std::vector<RefPtr<ResourceObject>> resObj;
 
     bool isLengthMetrics = false;
-    if (secondArg->IsObject(vm)) {
-        isLengthMetrics |= ParseLocalizedMargin(vm, secondArg, topDimen, top);
-    }
-    if (thirdArg->IsObject(vm)) {
-        isLengthMetrics |= ParseLocalizedMargin(vm, thirdArg, rightDimen, right);
-    }
-    if (forthArg->IsObject(vm)) {
-        isLengthMetrics |= ParseLocalizedMargin(vm, forthArg, bottomDimen, bottom);
-    }
-    if (fifthArg->IsObject(vm)) {
-        isLengthMetrics |= ParseLocalizedMargin(vm, fifthArg, leftDimen, left);
-    }
+    ParseMarginLengthMetrics(vm, secondArg, topDimen, top, isLengthMetrics);
+    ParseMarginLengthMetrics(vm, thirdArg, rightDimen, right, isLengthMetrics);
+    ParseMarginLengthMetrics(vm, forthArg, bottomDimen, bottom, isLengthMetrics);
+    ParseMarginLengthMetrics(vm, fifthArg, leftDimen, left, isLengthMetrics);
     if (isLengthMetrics) {
         auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
         GetArkUINodeModifiers()->getCommonModifier()->setMargin(nativeNode,
             &top,
             isRightToLeft ? &left : &right,
             &bottom,
-            isRightToLeft ? &right : &left);
+            isRightToLeft ? &right : &left,
+            nullptr);
+        ParseNullptrResObj(resObj, NUM_4);
         return panda::JSValueRef::Undefined(vm);
     }
-    ParseMargin(vm, secondArg, topDimen, top);
-    ParseMargin(vm, thirdArg, rightDimen, right);
-    ParseMargin(vm, forthArg, bottomDimen, bottom);
-    ParseMargin(vm, fifthArg, leftDimen, left);
-    GetArkUINodeModifiers()->getCommonModifier()->setMargin(nativeNode, &top, &right, &bottom, &left);
+    ParseMargin(vm, secondArg, topDimen, top, resObj);
+    ParseMargin(vm, thirdArg, rightDimen, right, resObj);
+    ParseMargin(vm, forthArg, bottomDimen, bottom, resObj);
+    ParseMargin(vm, fifthArg, leftDimen, left, resObj);
+    auto rawPtr = static_cast<void*>(&resObj);
+    GetArkUINodeModifiers()->getCommonModifier()->setMargin(nativeNode, &top, &right, &bottom, &left, rawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -5096,6 +5162,7 @@ ArkUINativeModuleValue CommonBridge::SetSafeAreaPadding(ArkUIRuntimeCallInfo* ru
     CalcDimension bottomDimen(0, DimensionUnit::VP);
     CalcDimension startDimen(0, DimensionUnit::VP);
     bool isLengthMetrics = false;
+    std::vector<RefPtr<ResourceObject>> resObj;
     if (secondArg->IsObject(vm)) {
         isLengthMetrics |= ParseLocalizedPadding(vm, secondArg, topDimen, top);
     }
@@ -5109,17 +5176,21 @@ ArkUINativeModuleValue CommonBridge::SetSafeAreaPadding(ArkUIRuntimeCallInfo* ru
         isLengthMetrics |= ParseLocalizedPadding(vm, fifthArg, startDimen, start);
     }
     if (!isLengthMetrics) {
-        ParsePadding(vm, secondArg, topDimen, top);
-        ParsePadding(vm, thirdArg, endDimen, end);
-        ParsePadding(vm, forthArg, bottomDimen, bottom);
-        ParsePadding(vm, fifthArg, startDimen, start);
+        ParsePadding(vm, secondArg, topDimen, top, resObj);
+        ParsePadding(vm, thirdArg, endDimen, end, resObj);
+        ParsePadding(vm, forthArg, bottomDimen, bottom, resObj);
+        ParsePadding(vm, fifthArg, startDimen, start, resObj);
+    } else {
+        ParseNullptrResObj(resObj, NUM_4);
     }
     struct ArkUIPaddingType localizedPadding;
     localizedPadding.top = top;
     localizedPadding.end = end;
     localizedPadding.bottom = bottom;
     localizedPadding.start = start;
-    GetArkUINodeModifiers()->getCommonModifier()->setSafeAreaPadding(nativeNode, &localizedPadding, isLengthMetrics);
+    auto rawPtr = static_cast<void*>(&resObj);
+    GetArkUINodeModifiers()->getCommonModifier()->setSafeAreaPadding(nativeNode, &localizedPadding, isLengthMetrics,
+        rawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -5143,16 +5214,21 @@ ArkUINativeModuleValue CommonBridge::SetMarkAnchor(ArkUIRuntimeCallInfo* runtime
     auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
     CalcDimension x(0.0, DimensionUnit::VP);
     CalcDimension y(0.0, DimensionUnit::VP);
+    RefPtr<ResourceObject> xResObj;
+    RefPtr<ResourceObject> yResObj;
     bool useLengthMetrics = ArkTSUtils::ParseJsLengthMetrics(vm, xArg, x);
     useLengthMetrics = ArkTSUtils::ParseJsLengthMetrics(vm, yArg, y) || useLengthMetrics;
     if (useLengthMetrics && AceApplicationInfo::GetInstance().IsRightToLeft()) {
         x.SetValue(-x.Value());
     }
-    bool hasX = useLengthMetrics || ArkTSUtils::ParseJsDimensionNG(vm, xArg, x, DimensionUnit::VP);
-    bool hasY = useLengthMetrics || ArkTSUtils::ParseJsDimensionNG(vm, yArg, y, DimensionUnit::VP);
+    bool hasX = useLengthMetrics || ArkTSUtils::ParseJsDimensionNG(vm, xArg, x, DimensionUnit::VP, xResObj);
+    bool hasY = useLengthMetrics || ArkTSUtils::ParseJsDimensionNG(vm, yArg, y, DimensionUnit::VP, yResObj);
     if (useLengthMetrics || hasX || hasY) {
+        auto xRawPtr = AceType::RawPtr(xResObj);
+        auto yRawPtr = AceType::RawPtr(yResObj);
         GetArkUINodeModifiers()->getCommonModifier()->setMarkAnchor(
-            nativeNode, x.Value(), static_cast<int32_t>(x.Unit()), y.Value(), static_cast<int32_t>(y.Unit()));
+            nativeNode, x.Value(), static_cast<int32_t>(x.Unit()), y.Value(), static_cast<int32_t>(y.Unit()),
+            xRawPtr, yRawPtr);
     } else {
         GetArkUINodeModifiers()->getCommonModifier()->resetMarkAnchor(nativeNode);
     }
@@ -5368,51 +5444,59 @@ ArkUINativeModuleValue CommonBridge::SetConstraintSize(ArkUIRuntimeCallInfo* run
     struct ArkUISizeType minHeightValue = {0.0, 0};
     struct ArkUISizeType maxHeightValue = {0.0, 0};
 
+    RefPtr<ResourceObject> minWidthResObj;
+    RefPtr<ResourceObject> maxWidthResObj;
+    RefPtr<ResourceObject> minHeightResObj;
+    RefPtr<ResourceObject> maxHeightResObj;
     bool version10OrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
-    if (ArkTSUtils::ParseJsDimensionVp(vm, secondArg, minWidth, false)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, secondArg, minWidth, minWidthResObj, false)) {
         if (minWidth.CalcValue() != "") {
             minWidthValue.string = minWidth.CalcValue().c_str();
         } else {
             minWidthValue.value = minWidth.Value();
             minWidthValue.unit = static_cast<int8_t>(minWidth.Unit());
         }
-        GetArkUINodeModifiers()->getCommonModifier()->setMinWidth(nativeNode, &minWidthValue);
+        auto minWidthRawResPtr = AceType::RawPtr(minWidthResObj);
+        GetArkUINodeModifiers()->getCommonModifier()->setMinWidth(nativeNode, &minWidthValue, minWidthRawResPtr);
     } else if (version10OrLarger) {
         GetArkUINodeModifiers()->getCommonModifier()->resetMinWidth(nativeNode);
     }
 
-    if (ArkTSUtils::ParseJsDimensionVp(vm, thirdArg, maxWidth, false)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, thirdArg, maxWidth, maxWidthResObj, false)) {
         if (maxWidth.CalcValue() != "") {
             maxWidthValue.string = maxWidth.CalcValue().c_str();
         } else {
             maxWidthValue.value = maxWidth.Value();
             maxWidthValue.unit = static_cast<int8_t>(maxWidth.Unit());
         }
-        GetArkUINodeModifiers()->getCommonModifier()->setMaxWidth(nativeNode, &maxWidthValue);
+        auto maxWidthRawResPtr = AceType::RawPtr(maxWidthResObj);
+        GetArkUINodeModifiers()->getCommonModifier()->setMaxWidth(nativeNode, &maxWidthValue, maxWidthRawResPtr);
     } else if (version10OrLarger) {
         GetArkUINodeModifiers()->getCommonModifier()->resetMaxWidth(nativeNode);
     }
 
-    if (ArkTSUtils::ParseJsDimensionVp(vm, forthArg, minHeight, false)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, forthArg, minHeight, minHeightResObj, false)) {
         if (minHeight.CalcValue() != "") {
             minHeightValue.string = minHeight.CalcValue().c_str();
         } else {
             minHeightValue.value = minHeight.Value();
             minHeightValue.unit = static_cast<int8_t>(minHeight.Unit());
         }
-        GetArkUINodeModifiers()->getCommonModifier()->setMinHeight(nativeNode, &minHeightValue);
+        auto minHeightRawResPtr = AceType::RawPtr(minHeightResObj);
+        GetArkUINodeModifiers()->getCommonModifier()->setMinHeight(nativeNode, &minHeightValue, minHeightRawResPtr);
     } else if (version10OrLarger) {
         GetArkUINodeModifiers()->getCommonModifier()->resetMinHeight(nativeNode);
     }
 
-    if (ArkTSUtils::ParseJsDimensionVp(vm, fifthArg, maxHeight, false)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, fifthArg, maxHeight, maxHeightResObj, false)) {
         if (maxHeight.CalcValue() != "") {
             maxHeightValue.string = maxHeight.CalcValue().c_str();
         } else {
             maxHeightValue.value = maxHeight.Value();
             maxHeightValue.unit = static_cast<int8_t>(maxHeight.Unit());
         }
-        GetArkUINodeModifiers()->getCommonModifier()->setMaxHeight(nativeNode, &maxHeightValue);
+        auto maxHeightRawResPtr = AceType::RawPtr(maxHeightResObj);
+        GetArkUINodeModifiers()->getCommonModifier()->setMaxHeight(nativeNode, &maxHeightValue, maxHeightRawResPtr);
     } else if (version10OrLarger) {
         GetArkUINodeModifiers()->getCommonModifier()->resetMaxHeight(nativeNode);
     }
@@ -5512,8 +5596,10 @@ ArkUINativeModuleValue CommonBridge::SetSize(ArkUIRuntimeCallInfo* runtimeCallIn
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CalcDimension wVal(0.0, DimensionUnit::VP);
     CalcDimension hVal(0.0, DimensionUnit::VP);
-    ParseCalcDimension(vm, nativeNode, secondArg, wVal, true);
-    ParseCalcDimension(vm, nativeNode, thirdArg, hVal, false);
+    RefPtr<ResourceObject> widthResObj;
+    RefPtr<ResourceObject> heightResObj;
+    ParseCalcDimension(vm, nativeNode, secondArg, wVal, true, widthResObj);
+    ParseCalcDimension(vm, nativeNode, thirdArg, hVal, false, heightResObj);
     return panda::JSValueRef::Undefined(vm);
 }
 

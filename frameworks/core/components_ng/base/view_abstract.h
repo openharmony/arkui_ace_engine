@@ -630,7 +630,9 @@ public:
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj);
     static void SetWidth(FrameNode* frameNode, const CalcLength& width);
+    static void SetWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetHeight(FrameNode* frameNode, const CalcLength& height);
+    static void SetHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void ClearWidthOrHeight(FrameNode* frameNode, bool isWidth);
     static void SetBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value);
     static void SetBorderRadius(FrameNode* frameNode, const Dimension& value);
@@ -654,6 +656,10 @@ public:
     static void SetDashWidth(FrameNode* frameNode, const Dimension& value);
     static void SetBackShadow(FrameNode* frameNode, const Shadow& shadow);
     static void SetPosition(FrameNode* frameNode, const OffsetT<Dimension>& value);
+    static void SetPosition(FrameNode* frameNode, const Dimension& x, const Dimension& y,
+        const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj);
+    static void SetPositionX(FrameNode* frameNode, OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj);
+    static void SetPositionY(FrameNode* frameNode, OffsetT<Dimension>& value, const RefPtr<ResourceObject>& yresObj);
     static void SetPositionEdges(FrameNode* frameNode, const EdgesParam& value);
     static void ResetPosition(FrameNode* frameNode);
     static void SetTransformMatrix(FrameNode* frameNode, const Matrix4& matrix);
@@ -738,8 +744,18 @@ public:
     static void SetDefaultFocus(FrameNode* frameNode, bool isSet);
     static void SetDisplayIndex(FrameNode* frameNode, int32_t value);
     static void SetOffset(FrameNode* frameNode, const OffsetT<Dimension>& value);
+    static void SetOffset(FrameNode* frameNode, const Dimension& x, const Dimension& y,
+        const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj);
+    static void SetOffsetX(FrameNode* frameNode, OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj);
+    static void SetOffsetY(FrameNode* frameNode, OffsetT<Dimension>& value, const RefPtr<ResourceObject>& yresObj);
     static void SetOffsetEdges(FrameNode* frameNode, const EdgesParam& value);
     static void MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& value);
+    static void MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj,
+        const RefPtr<ResourceObject>& yresObj);
+    static void MarkAnchorX(
+        FrameNode* frameNode, const OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj);
+    static void MarkAnchorY(
+        FrameNode* frameNode, const OffsetT<Dimension>& value, const RefPtr<ResourceObject>& yresObj);
     static void SetVisibility(FrameNode* frameNode, VisibleType visible);
     static void SetMargin(FrameNode* frameNode, const CalcLength& value);
     static void SetMargin(FrameNode* frameNode, const PaddingProperty& value);
@@ -759,9 +775,13 @@ public:
     static void ResetMaxSize(FrameNode* frameNode, bool resetWidth);
     static void ResetMinSize(FrameNode* frameNode, bool resetWidth);
     static void SetMinWidth(FrameNode* frameNode, const CalcLength& minWidth);
+    static void SetMinWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetMaxWidth(FrameNode* frameNode, const CalcLength& maxWidth);
+    static void SetMaxWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetMinHeight(FrameNode* frameNode, const CalcLength& minHeight);
+    static void SetMinHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetMaxHeight(FrameNode* frameNode, const CalcLength& maxHeight);
+    static void SetMaxHeight(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetAlignRules(FrameNode* frameNode, const std::map<AlignDirection, AlignRule>& alignRules);
     static void SetChainStyle(FrameNode* frameNode, const ChainInfo& chainInfo);
     static ChainInfo GetChainStyle(FrameNode* frameNode);
@@ -971,6 +991,7 @@ public:
         bool arrowKeyStepOut);
     static void SetFocusScopePriority(FrameNode* frameNode, const std::string& focusScopeId,
         const uint32_t focusPriority);
+    static void ResetResObj(FrameNode* frameNode, const std::string& key);
     static void ResetBias(FrameNode* frameNode);
     static void ResetAlignRules(FrameNode* frameNode);
     static void ResetResObj(const std::string& key);

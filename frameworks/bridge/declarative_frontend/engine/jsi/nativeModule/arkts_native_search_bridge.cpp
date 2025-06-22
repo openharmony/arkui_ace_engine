@@ -751,10 +751,10 @@ ArkUINativeModuleValue SearchBridge::SetSearchHeight(ArkUIRuntimeCallInfo* runti
         }
         if (height.Unit() == DimensionUnit::CALC) {
             GetArkUINodeModifiers()->getCommonModifier()->setHeight(
-                nativeNode, height.Value(), static_cast<int>(height.Unit()), height.CalcValue().c_str());
+                nativeNode, height.Value(), static_cast<int>(height.Unit()), height.CalcValue().c_str(), nullptr);
         } else {
             GetArkUINodeModifiers()->getCommonModifier()->setHeight(
-                nativeNode, height.Value(), static_cast<int>(height.Unit()), calcStr.c_str());
+                nativeNode, height.Value(), static_cast<int>(height.Unit()), calcStr.c_str(), nullptr);
         }
         GetArkUINodeModifiers()->getSearchModifier()->setSearchHeight(
             nativeNode, height.Value(), static_cast<int>(height.Unit()));

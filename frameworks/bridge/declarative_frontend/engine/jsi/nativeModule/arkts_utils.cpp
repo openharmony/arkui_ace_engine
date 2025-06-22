@@ -940,7 +940,7 @@ bool ArkTSUtils::ParseAllBorder(const EcmaVM* vm, const Local<JSValueRef>& args,
 bool ArkTSUtils::ParseAllBorder(const EcmaVM* vm, const Local<JSValueRef>& args, CalcDimension& result,
     RefPtr<ResourceObject>& resourceObject)
 {
-    if (ParseJsDimensionVp(vm, args, result)) {
+    if (ParseJsDimensionVp(vm, args, result, resourceObject)) {
         if (result.IsNegative()) {
             result.Reset();
         }
@@ -1804,6 +1804,13 @@ void ArkTSUtils::ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args,
 void ArkTSUtils::ParseOuterBorderForDashParams(
     EcmaVM* vm, const Local<JSValueRef>& args, std::optional<CalcDimension>& optionalDimension)
 {
+    RefPtr<ResourceObject> resObj;
+    ParseOuterBorderForDashParams(vm, args, optionalDimension, resObj);
+}
+
+void ArkTSUtils::ParseOuterBorderForDashParams(EcmaVM* vm, const Local<JSValueRef>& args,
+    std::optional<CalcDimension>& optionalDimension, RefPtr<ResourceObject>& resObj)
+{
     CalcDimension valueDim;
     if (!args->IsUndefined()) {
         if (ArkTSUtils::ParseJsLengthMetrics(vm, args, valueDim)) {
@@ -1811,7 +1818,7 @@ void ArkTSUtils::ParseOuterBorderForDashParams(
                 valueDim.Reset();
             }
             optionalDimension = valueDim;
-        } else if (ArkTSUtils::ParseJsDimensionVpNG(vm, args, valueDim, false)) {
+        } else if (ArkTSUtils::ParseJsDimensionVpNG(vm, args, valueDim, resObj, false)) {
             if (valueDim.IsNegative() || valueDim.Unit() == DimensionUnit::PERCENT) {
                 valueDim.Reset();
             }

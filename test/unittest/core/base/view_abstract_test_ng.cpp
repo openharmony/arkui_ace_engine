@@ -3520,4 +3520,25 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractSetClickFocusTest001, TestSize.Level1)
     ASSERT_NE(focusHub2, nullptr);
     EXPECT_TRUE(focusHub2->IsFocusable());
 }
+
+/**
+ * @tc.name: ViewAbstractTestNg0097
+ * @tc.desc: test position attribute, use Edges type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0097, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, EdgesParam& edges) {};
+    EdgesParam edgesParam;
+    edgesParam.AddResource("edges.top", resObj, std::move(updateFunc));
+    EXPECT_EQ(edgesParam.resMap_.empty(), false);
+    ViewAbstract::SetPositionEdges(frameNode, edgesParam);
+    auto renderContext = frameNode->GetRenderContext();
+    EXPECT_EQ(renderContext->HasPositionEdges(), true);
+}
 } // namespace OHOS::Ace::NG
