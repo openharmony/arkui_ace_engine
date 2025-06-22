@@ -147,6 +147,26 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventSetCustomNode)
         },
         ani_native_function {
+            "_Drag_Set_AllowDrop_Null",
+            "J:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragSetAllowDropNull)
+        },
+        ani_native_function {
+            "_Drag_Set_AllowDrop",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragSetAllowDrop)
+        },
+        ani_native_function {
+            "_Drag_Set_DragPreview",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragSetDragPreview)
+        },
+        ani_native_function {
+            "_DragEvent_ConvertFromPixelMapToAniPointer",
+            "L@ohos/multimedia/image/image/PixelMap;:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConvertFromPixelMapToAniPointer)
+        },
+        ani_native_function {
             "_ComponentSnapshot_createFromBuilderWithCallback",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::CreateFromBuilderWithCallback)

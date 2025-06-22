@@ -22,6 +22,7 @@ import { DrawContext } from "arkui/Graphics"
 import { DrawModifier, AsyncCallback } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
 import { WaterFlowOptions,WaterFlowSections } from "arkui/component"
+import { HookDragInfo } from "arkui/handwritten"
 
 export class ArkUIAniModule {
     static {
@@ -43,12 +44,29 @@ export class ArkUIAniModule {
     native static _SetDrawModifier(ptr: KPointer, drawModifier: DrawModifier): void
     native static _Invalidate(ptr: KPointer): void
     native static _SetWaterFlowOptions(ptr: KPointer, options: WaterFlowOptions): void
+
+    // for Drag
     native static _DragEvent_Set_Data(ptr: KLong, data : unifiedDataChannel.UnifiedData) : void
+
     native static _DragEvent_Get_Data(ptr: KLong) : unifiedDataChannel.UnifiedData
+
     native static _DragEvent_Get_Summary(ptr: KLong) : unifiedDataChannel.Summary
+
     native static _DragEvent_Set_PixelMap(ptr: KLong, pixelMap: image.PixelMap) : void
+
     native static _DragEvent_Set_ExtraInfo(ptr: KLong, extraInfo: string) : void
+
     native static _DragEvent_Set_CustomNode(ptr: KLong, customNode: KPointer) : void
+
+    native static _DragEvent_ConvertFromPixelMapToAniPointer(pixelMap: image.PixelMap) : KPointer
+
+    native static _Drag_Set_AllowDrop_Null(ptr: KLong) : void
+
+    native static _Drag_Set_AllowDrop(ptr: KPointer, thisArray: Array<string>, thisLength: KInt): void
+
+    native static _Drag_Set_DragPreview(ptr: KPointer, dragInfo: HookDragInfo): void
+
+    // for componentSnapshot
     native static _ComponentSnapshot_createFromBuilderWithCallback(ptr: KPointer, destroyCallback: () => void,
         callback: AsyncCallback<image.PixelMap>, delay?: number, checkImageStatus?: boolean): void
     native static _ComponentSnapshot_createFromBuilderWithPromise(ptr: KPointer, destroyCallback: () => void,

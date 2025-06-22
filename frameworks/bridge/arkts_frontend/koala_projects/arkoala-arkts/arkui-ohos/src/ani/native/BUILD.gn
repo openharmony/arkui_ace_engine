@@ -44,6 +44,9 @@ ohos_shared_library("arkoala_native_ani") {
     "image_framework:image_taihe",
     "runtime_core:ani",
     "runtime_core:ani_helpers",
+    "udmf:udmf_taihe_native",
+    "udmf:udmf_client",
+    "udmf:libudmf",
   ]
 
   configs = [ "$ace_root:ace_config" ]
