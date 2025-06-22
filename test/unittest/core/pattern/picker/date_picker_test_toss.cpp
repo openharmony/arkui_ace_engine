@@ -423,4 +423,33 @@ HWTEST_F(DatePickerTestToss, DatePickerPatternDirty000, TestSize.Level1)
     dirtySwapConfig.skipMeasure = true;
     EXPECT_FALSE(pickerPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig));
 }
+
+/**
+ * @tc.name: GetDisappearTextStyle001
+ * @tc.desc: Test DatePickerModelNG GetDisappearTextStyle by frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestToss, GetDisappearTextStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create DatePicker.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.step: step2. call SetDisappearTextStyle & getDisappearTextStyle.
+     * @tc.expected: the result of fontStyle & textColor is equal to preset value.
+     */
+    NG::PickerTextStyle textStyle;
+    textStyle.fontStyle = Ace::FontStyle::ITALIC;
+    textStyle.textColor = Color::WHITE;
+    DatePickerModelNG::SetDisappearTextStyle(frameNode, theme, textStyle);
+    auto curTextStyle = DatePickerModelNG::getDisappearTextStyle(frameNode);
+    EXPECT_EQ(curTextStyle.fontStyle.value(), Ace::FontStyle::ITALIC);
+    EXPECT_EQ(curTextStyle.textColor.value(), Color::WHITE);
+}
 } // namespace OHOS::Ace::NG
