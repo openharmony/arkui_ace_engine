@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 #include "common_ani_modifier.h"
+#include "base/log/log.h"
+#include "base/memory/ace_type.h"
+#include "core/common/container_scope.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "bridge/arkts_frontend/ani_graphics_module.h"
+#include "bridge/arkts_frontend/arkts_frontend.h"
+#include "bridge/arkts_frontend/ani_context_module.h"
 
 #include <memory>
 #include <vector>
-
-#include "base/log/log.h"
-#include "bridge/arkts_frontend/ani_graphics_module.h"
-#include "core/common/container_scope.h"
-#include "core/components_ng/pattern/stack/stack_pattern.h"
-#include "frameworks/bridge/arkts_frontend/ani_context_module.h"
 
 namespace OHOS::Ace::NG {
 
@@ -74,6 +76,31 @@ ani_long BuilderProxyNodeConstruct(ArkUI_Int32 id)
     return reinterpret_cast<ani_long>(AceType::RawPtr(proxyNode));
 }
 
+ani_ref GetSharedLocalStorage()
+{
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    if (context == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetSharedLocalStorage-ani can not get current context.");
+        return nullptr;
+    }
+    auto frontend = context->GetFrontend();
+    if (frontend == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetSharedLocalStorage-ani can not get current frontend.");
+        return nullptr;
+    }
+    auto arkTsFrontend = AceType::DynamicCast<ArktsFrontend>(frontend);
+    if (arkTsFrontend == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetSharedLocalStorage-ani can not convert to arkts frontend.");
+        return nullptr;
+    }
+    int32_t currentInstance = Container::CurrentIdSafely();
+    auto storage = arkTsFrontend->GetShared(currentInstance);
+    if (storage) {
+        return storage;
+    }
+    return nullptr;
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -82,7 +109,9 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .restoreInstanceId = OHOS::Ace::NG::RestoreInstanceId,
         .setDrawCallback = OHOS::Ace::NG::SetDrawCallback,
         .getCurrentInstanceId = OHOS::Ace::NG::GetCurrentInstanceId,
-        .builderProxyNodeConstruct = OHOS::Ace::NG::BuilderProxyNodeConstruct };
+        .builderProxyNodeConstruct = OHOS::Ace::NG::BuilderProxyNodeConstruct,
+        .getSharedLocalStorage = OHOS::Ace::NG::GetSharedLocalStorage,
+    };
     return &impl;
 }
 

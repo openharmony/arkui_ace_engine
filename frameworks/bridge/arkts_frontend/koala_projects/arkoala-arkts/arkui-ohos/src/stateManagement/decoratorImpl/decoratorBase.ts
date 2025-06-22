@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import { WatchFunc } from './decoratorWatch';
 import { TypeChecker } from '#components';
 import { IObservedObject } from '../decorator';
@@ -22,7 +21,7 @@ import { ExtendableComponent } from '../../component/extendableComponent';
 import { IObserve, OBSERVE } from '../decorator';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
-import { SubscribedAbstractProperty } from '../decorator';
+
 /**
 It is useful to have separate class implement each variable decoratore,  e.g. for DFX, not use `MutableState` as currently done.
 V1 decorator implementations can limit permissableAddRef (the reading depth for recording dependencies when starting to read from a V1 variable)
@@ -73,13 +72,14 @@ base class for all V1 decorated DecoratedVariableBase implements DecoratedVariab
 
 export abstract class DecoratedV1VariableBase<T>
     extends DecoratedVariableBase<T>
-    implements IDecoratedV1Variable<T>, SubscribedAbstractProperty<T>
+    implements IDecoratedV1Variable<T>
 {
     // V1 decorators can optionally have one @Watch function
     // to manage Local/AppStorge dependencies additional WatchFunc are required
     // therefore _watchFuncs is an Map<WatchIdType, WatchFunc>
     /* compiler BUG: change to protcted */
     public readonly _watchFuncs: Map<WatchIdType, WatchFunc> = new Map<WatchIdType, WatchFunc>();
+    protected myTriggerFromSourceWatchId_ : WatchIdType = -1;
 
     constructor(
         decorator: string,
@@ -93,16 +93,26 @@ export abstract class DecoratedV1VariableBase<T>
             this._watchFuncs.set(w.id(), w);
         }
     }
+
     public info(): string {
         return this.varName;
     }
+
     get(): T {
         return undefined as T;
     }
+
     set(newValue: T): void {
         return;
     }
-    public aboutToBeDeleted(): void {}
+
+    public setMyTriggerFromSourceWatchId(id :WatchIdType) : void {
+        this.myTriggerFromSourceWatchId_ = id;
+    }
+
+    public getMyTriggerFromSourceWatchId() : WatchIdType {
+        return this.myTriggerFromSourceWatchId_;
+    }
 
     public addWatch(watchFunc?: WatchFuncType): void {
         if (watchFunc) {

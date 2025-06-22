@@ -310,7 +310,7 @@ public:
         storageMap_.erase(id);
     }
 
-    void* GetShared(int32_t id);
+    ani_ref GetShared(int32_t id);
     
     void RegisterLayoutInspectorCallback(const RefPtr<InspectorEvent>& layoutFunc, const std::string& componentId)
     {

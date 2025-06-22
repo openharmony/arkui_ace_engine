@@ -38,7 +38,8 @@ import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
 import inspector from "@ohos/arkui/inspector"
 import router from '@ohos/router'
 import promptAction from '@ohos/promptAction';
-import { AsyncCallback, CustomBuilder } from 'arkui/component'
+import { AsyncCallback, CustomBuilder } from 'arkui/component';
+import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver {
@@ -238,6 +239,9 @@ export class UIContext {
     }
     public getFrameNodeById(id: string): FrameNode | null {
         throw Error("getFrameNodeById not implemented in UIContext!")
+    }
+    public getSharedLocalStorage(): LocalStorage | undefined {
+        throw Error('getFrameNodeById not implemented in UIContext!');
     }
     getAttachedFrameNodeById(id: string): FrameNode | null {
         throw Error("getAttachedFrameNodeById not implemented in UIContext!")

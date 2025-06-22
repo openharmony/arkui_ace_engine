@@ -22,6 +22,8 @@ import {
     IConsumeDecoratedVariable,
     IObjectLinkDecoratedVariable,
     IStorageLinkDecoratedVariable,
+    IStoragePropRefDecoratedVariable,
+    ILocalStorageLinkDecoratedVariable,
     IStoragePropDecoratedVariable,
     LinkSourceType,
 } from '../decorator';
@@ -40,7 +42,8 @@ import { StoragePropDecoratedVariable } from '../decoratorImpl/decoratorStorageP
 import { StorageLinkDecoratedVariable } from '../decoratorImpl/decoratorStorageLink';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
-import { UIUtils } from '../utils';
+import { UIUtils } from '../utils';  
+import { AppStorage } from '../storage/appStorage';
 
 export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
     public makeMutableStateMeta(): IMutableStateMeta {
@@ -55,7 +58,12 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         initValue: T,
         watchFunc?: WatchFuncType
     ): IStateDecoratedVariable<T> {
-        return new StateDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T, watchFunc);
+        return new StateDecoratedVariable<T>(
+            owningView,
+            varName,
+            UIUtils.makeObserved(initValue) as T,
+            watchFunc
+        );
     }
 
     makeProp<T>(
@@ -64,7 +72,12 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         initValue: T,
         watchFunc?: WatchFuncType
     ): IPropDecoratedVariable<T> {
-        return new PropDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T, watchFunc);
+        return new PropDecoratedVariable<T>(
+            owningView,
+            varName,
+            UIUtils.makeObserved(initValue) as T,
+            watchFunc
+        );
     }
 
     makeLink<T>(
@@ -268,7 +281,12 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         initValue: T,
         watchFunc?: WatchFuncType
     ): IObjectLinkDecoratedVariable<T> {
-        return new ObjectLinkDecoratedVariable<T>(owningView, varName, UIUtils.makeObserved(initValue) as T, watchFunc);
+        return new ObjectLinkDecoratedVariable<T>(
+            owningView,
+            varName,
+            UIUtils.makeObserved(initValue) as T,
+            watchFunc
+        );
     }
 
     makeProvide<T>(
@@ -295,38 +313,65 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         provideAlias: string,
         watchFunc?: WatchFuncType
     ): IConsumeDecoratedVariable<T> {
-        return new ConsumeDecoratedVariable<T>(owningView, varName, provideAlias, watchFunc);
-    }
-
-    makeStorageProp<T>(
-        owningView: ExtendableComponent,
-        propName: string,
-        varName: string,
-        initValue: T,
-        watchFunc?: WatchFuncType
-    ): IStoragePropDecoratedVariable<T> {
-        return new StoragePropDecoratedVariable<T>(
+        return new ConsumeDecoratedVariable<T>(
             owningView,
-            propName,
             varName,
-            UIUtils.makeObserved(initValue) as T,
+            provideAlias,
             watchFunc
         );
+    }
+
+    makeLocalStorageLink<T>(
+        owningView: ExtendableComponent,
+        propertyNameInAppStorage: string,
+        varName: string,
+        defaultValue: T,
+        ttype: Type,
+        watchFunc?: WatchFuncType
+    ): ILocalStorageLinkDecoratedVariable<T> {
+        const result: ILocalStorageLinkDecoratedVariable<T> | undefined =
+            owningView.localStorage_.__makeStorageLink<T>(owningView, propertyNameInAppStorage, varName, defaultValue, ttype, watchFunc);
+        if (result === undefined) {
+            throw new TypeError(`@StorageLink('${propertyNameInAppStorage}') ${varName}
+                configured Type ${ttype.toString()} does not match property type in storage`);
+            // error of unutilized variable can not be recovered, must throw.
+        }
+        return result;
     }
 
     makeStorageLink<T>(
         owningView: ExtendableComponent,
-        propName: string,
+        propertyNameInAppStorage: string,
         varName: string,
-        initValue: T,
+        defaultValue: T,
+        ttype: Type,
         watchFunc?: WatchFuncType
     ): IStorageLinkDecoratedVariable<T> {
-        return new StorageLinkDecoratedVariable<T>(
-            owningView,
-            propName,
-            varName,
-            UIUtils.makeObserved(initValue) as T,
-            watchFunc
-        );
+        const result: IStorageLinkDecoratedVariable<T> | undefined =
+            AppStorage.__makeStorageLink<T>(owningView, propertyNameInAppStorage, varName, defaultValue, ttype, watchFunc);
+        if (result === undefined) {
+            throw new TypeError(`@LocalStorageLink('${propertyNameInAppStorage}') ${varName}
+                configured Type ${ttype.toString()} does not match property type in storage`);
+            // error of unutilized variable can not be recovered, must throw.
+        }
+        return result;
+    }
+
+    makeStoragePropRef<T>(
+        owningView: ExtendableComponent,
+        propertyNameInAppStorage: string,
+        varName: string,
+        defaultValue: T,
+        ttype: Type,
+        watchFunc?: WatchFuncType
+    ): IStoragePropRefDecoratedVariable<T> {
+        const result: IStoragePropRefDecoratedVariable<T> | undefined =
+            AppStorage.__makeStorageLink<T>(owningView, propertyNameInAppStorage, varName, defaultValue, ttype, watchFunc);
+        if (result === undefined) {
+            throw new TypeError(`@StoragePropRef('${propertyNameInAppStorage}') ${varName}
+                configured Type ${ttype.toString()} does not match property type in storage`);
+            // error of unutilized variable can not be recovered, must throw.
+        }
+        return result;
     }
 }

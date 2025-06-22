@@ -81,6 +81,9 @@
             ],
             "@ohos/promptAction": [
                 "./@ohos.promptAction.ts"
+            ],            
+            "@ohos.arkui.stateManagement": [
+                "arkui/stateManagement/index.ts"
             ],
             "#stateMgmtTool": [
                 "arkui/stateManagement/tools/ts"

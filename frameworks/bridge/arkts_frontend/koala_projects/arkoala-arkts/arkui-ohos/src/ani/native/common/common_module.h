@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::Ani {
 ani_object GetHostContext([[maybe_unused]] ani_env* env);
+ani_object GetSharedLocalStorage([[maybe_unused]] ani_env* env);
 void SyncInstanceId(ani_env* env, ani_object obj, ani_int id);
 void RestoreInstanceId(ani_env* env);
 ani_int GetCurrentInstanceId(ani_env* env);

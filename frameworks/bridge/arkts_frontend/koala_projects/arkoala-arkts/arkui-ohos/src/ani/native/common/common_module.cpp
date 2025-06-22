@@ -90,6 +90,7 @@ void Invalidate(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr
     }
     modifier->getArkUIAniDrawModifier()->invalidate(env, ptr);
 }
+
 ani_long BuilderProxyNodeConstruct(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id)
 {
     auto nodeId = reinterpret_cast<ArkUI_Int32>(id);
@@ -99,5 +100,19 @@ ani_long BuilderProxyNodeConstruct(ani_env* env, [[maybe_unused]] ani_object ani
     auto builderProxyNode = modifier->getCommonAniModifier()->builderProxyNodeConstruct(nodeId);
     CHECK_NULL_RETURN(builderProxyNode, nativeObj);
     return reinterpret_cast<ani_long>(builderProxyNode);
+}
+
+ani_object GetSharedLocalStorage([[maybe_unused]] ani_env* env)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return nullptr;
+    }
+    ani_ref storage = modifier->getCommonAniModifier()->getSharedLocalStorage();
+    if (storage) {
+        ani_object storage_object = reinterpret_cast<ani_object>(storage);
+        return storage_object;
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::Ani

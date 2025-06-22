@@ -13,19 +13,20 @@
  * limitations under the License.
  */
 
-import { KPointer, KInt, KLong } from "@koalaui/interop"
-import image from "@ohos.multimedia.image"
-import webview from "@ohos.web.webview"
-import common from "@ohos.app.ability.common"
-import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
-import { DrawContext } from "arkui/Graphics"
-import { DrawModifier, AsyncCallback } from "arkui/component"
-import { ArkCustomComponent } from "arkui/ArkCustomComponent"
-import { WaterFlowOptions,WaterFlowSections } from "arkui/component"
+import { KPointer, KInt, KLong } from '@koalaui/interop';
+import image from '@ohos.multimedia.image';
+import webview from '@ohos.web.webview';
+import common from '@ohos.app.ability.common';
+import unifiedDataChannel from '@ohos.data.unifiedDataChannel';
+import { LocalStorage } from '@ohos.arkui.stateManagement';
+import { DrawContext } from 'arkui/Graphics';
+import { DrawModifier, AsyncCallback } from 'arkui/component';
+import { ArkCustomComponent } from 'arkui/ArkCustomComponent';
+import { WaterFlowOptions,WaterFlowSections } from 'arkui/component';
 
 export class ArkUIAniModule {
     static {
-        loadLibrary("arkoala_native_ani")
+        loadLibrary('arkoala_native_ani')
     }
 
     native static _Web_SetWebOptions(ptr: KPointer, webviewController: webview.WebviewController): void
@@ -35,6 +36,7 @@ export class ArkUIAniModule {
     native static _Common_Sync_InstanceId(id: KInt): void
     native static _Common_Restore_InstanceId(): void
     native static _Common_Get_Current_InstanceId(): KInt
+    native static _Common_GetSharedLocalStorage(): LocalStorage
     native static _CustomNode_Construct(id: KInt, component: ArkCustomComponent): KPointer
     native static _BuilderProxyNode_Construct(id: KInt): KPointer
     native static _ContentSlot_construct(id: KInt): KPointer
