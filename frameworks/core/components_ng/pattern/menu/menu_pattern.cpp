@@ -1583,15 +1583,19 @@ void MenuPattern::ShowStackSubMenuAnimation(const RefPtr<FrameNode>& mainMenu, c
     AnimationOption translateOption = AnimationOption();
     translateOption.SetCurve(STACK_SUB_MENU_ANIMATION_CURVE);
     translateOption.SetDuration(STACK_MENU_APPEAR_DURATION);
-    AnimationUtils::Animate(translateOption, [subMenuContext, menuPosition = endOffset]() {
-        subMenuContext->UpdatePosition(
+    AnimationUtils::Animate(translateOption, [weak = WeakClaim(subMenuContext), menuPosition = endOffset]() {
+        auto subMenuContextUpgrade = weak.Upgrade();
+        CHECK_NULL_VOID(subMenuContextUpgrade);
+        subMenuContextUpgrade->UpdatePosition(
             OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
     });
     AnimationOption opacityOption = AnimationOption();
     opacityOption.SetCurve(Curves::FRICTION);
     opacityOption.SetDuration(STACK_MENU_APPEAR_DURATION);
-    AnimationUtils::Animate(opacityOption, [subMenuContext]() {
-        subMenuContext->UpdateOpacity(1.0f);
+    AnimationUtils::Animate(opacityOption, [weak = WeakClaim(subMenuContext)]() {
+        auto subMenuContextUpgrade = weak.Upgrade();
+        CHECK_NULL_VOID(subMenuContextUpgrade);
+        subMenuContextUpgrade->UpdateOpacity(1.0f);
     });
     AnimationOption contentOpacityOption = AnimationOption();
     contentOpacityOption.SetCurve(Curves::FRICTION);
@@ -1599,10 +1603,12 @@ void MenuPattern::ShowStackSubMenuAnimation(const RefPtr<FrameNode>& mainMenu, c
     contentOpacityOption.SetDuration(STACK_MENU_APPEAR_DURATION);
     auto titleContentNode = GetTitleContentNode(subMenuNode);
     CHECK_NULL_VOID(titleContentNode);
-    AnimationUtils::Animate(contentOpacityOption, [otherMenuItemContext, subMenuNode, titleContentNode]() {
+    AnimationUtils::Animate(contentOpacityOption, [otherMenuItemContext, titleContentNode]() {
         for (auto menuItemContext : otherMenuItemContext) {
+            CHECK_NULL_CONTINUE(menuItemContext);
             menuItemContext->UpdateOpacity(1.0f);
         }
+        CHECK_NULL_VOID(titleContentNode);
         auto textProperty = titleContentNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textProperty);
         textProperty->UpdateFontWeight(FontWeight::BOLD);
@@ -1615,8 +1621,6 @@ void MenuPattern::ShowStackSubMenuAnimation(const RefPtr<FrameNode>& mainMenu, c
 void MenuPattern::ShowStackMainMenuAnimation(const RefPtr<FrameNode>& mainMenu, const RefPtr<FrameNode>& subMenuNode,
     const RefPtr<FrameNode>& menuWrapper)
 {
-    auto mainMenuContext = mainMenu->GetRenderContext();
-    CHECK_NULL_VOID(mainMenuContext);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     auto preview = isShowHoverImage_ ? menuWrapperPattern->GetHoverImageFlexNode() : menuWrapperPattern->GetPreview();
@@ -1626,8 +1630,11 @@ void MenuPattern::ShowStackMainMenuAnimation(const RefPtr<FrameNode>& mainMenu, 
     AnimationOption translateOption = AnimationOption();
     translateOption.SetCurve(STACK_SUB_MENU_ANIMATION_CURVE);
     translateOption.SetDuration(STACK_MAIN_MENU_APPEAR_DURATION);
-    AnimationUtils::Animate(translateOption, [mainMenuContext, mainMenu, translateYForStack, preview]() {
+    AnimationUtils::Animate(translateOption, [mainMenu, translateYForStack, preview]() {
+        CHECK_NULL_VOID(mainMenu);
         auto mainMenuOffset = mainMenu->GetPaintRectOffset(false, true);
+        auto mainMenuContext = mainMenu->GetRenderContext();
+        CHECK_NULL_VOID(mainMenuContext);
         mainMenuContext->UpdateTransformScale(VectorF(MOUNT_MENU_FINAL_SCALE, MOUNT_MENU_FINAL_SCALE));
         if (NearZero(translateYForStack)) {
             return;
@@ -1926,6 +1933,7 @@ void MenuPattern::ShowStackSubMenuDisappearAnimation(const RefPtr<FrameNode>& me
     double subMenuDisappearDuration = 200.0f;
     contentOpacityOption.SetDuration(subMenuDisappearDuration);
     AnimationUtils::Animate(contentOpacityOption, [otherMenuItemContext, titleContentNode]() {
+        CHECK_NULL_VOID(titleContentNode);
         auto textProperty = titleContentNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textProperty);
         textProperty->UpdateFontWeight(FontWeight::MEDIUM);
@@ -1946,6 +1954,7 @@ void MenuPattern::ShowStackSubMenuDisappearAnimation(const RefPtr<FrameNode>& me
     translateOption.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 26.0f));
     translateOption.SetDuration(STACK_MENU_DISAPPEAR_DURATION);
     AnimationUtils::Animate(translateOption, [menuPosition, subMenuContext]() {
+        CHECK_NULL_VOID(subMenuContext);
         subMenuContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(menuPosition.GetX()), Dimension(menuPosition.GetY())));
     });
@@ -1953,6 +1962,7 @@ void MenuPattern::ShowStackSubMenuDisappearAnimation(const RefPtr<FrameNode>& me
     opacityOption.SetCurve(Curves::FRICTION);
     opacityOption.SetDuration(STACK_MENU_DISAPPEAR_DURATION);
     AnimationUtils::Animate(opacityOption, [subMenuContext]() {
+        CHECK_NULL_VOID(subMenuContext);
         subMenuContext->UpdateOpacity(0.0f);
     });
 }
@@ -1965,12 +1975,13 @@ void MenuPattern::ShowStackMainMenuDisappearAnimation(const RefPtr<FrameNode>& m
     auto menuPosition = OffsetF(subMenuPos.GetX(), originOffset.GetY());
 
     option.SetCurve(STACK_SUB_MENU_ANIMATION_CURVE);
-    auto menuWarpper = GetMenuWrapper();
-    CHECK_NULL_VOID(menuWarpper);
-    auto menuWrapperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     auto preview = isShowHoverImage_ ? menuWrapperPattern->GetHoverImageFlexNode() : menuWrapperPattern->GetPreview();
     AnimationUtils::Animate(option, [menuNode, menuPosition, preview]() {
+        CHECK_NULL_VOID(menuNode);
         auto menuContext = menuNode->GetRenderContext();
         if (menuContext) {
             menuContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
@@ -1983,6 +1994,7 @@ void MenuPattern::ShowStackMainMenuDisappearAnimation(const RefPtr<FrameNode>& m
                     menuPattern->GetOriginMenuYForStack()));
             }
             if (GreatNotEqual(menuPattern->GetOriginPreviewYForStack(), 0.0f)) {
+                CHECK_NULL_VOID(preview);
                 auto previewRenderContext = preview->GetRenderContext();
                 CHECK_NULL_VOID(previewRenderContext);
                 auto previewFrameOffsetX = preview->GetGeometryNode()->GetFrameOffset().GetX();
@@ -1999,6 +2011,7 @@ void MenuPattern::ShowStackMainMenuDisappearAnimation(const RefPtr<FrameNode>& m
     option.SetDelay(STACK_MAIN_MENU_DISAPPEAR_DELAY);
     option.SetDuration(STACK_MENU_DISAPPEAR_DURATION);
     AnimationUtils::Animate(option, [menuNode]() {
+        CHECK_NULL_VOID(menuNode);
         auto scroll = menuNode->GetFirstChild();
         CHECK_NULL_VOID(scroll);
         auto innerMenu = scroll->GetFirstChild();
