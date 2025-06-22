@@ -84,7 +84,6 @@ void SideLengthImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<Dimension>(*value);
-    Validator::ValidateNonNegative(convValue);
     PatternLockModelStatic::SetSideLength(frameNode, convValue);
 }
 void CircleRadiusImpl(Ark_NativePointer node,

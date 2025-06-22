@@ -170,6 +170,7 @@ void ValueImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<float>(*value);
     if (!convValue) {
+        GaugeModelNG::SetValue(frameNode, DEFAULT_GAUGE_VALUE);
         return;
     }
     GaugeModelStatic::SetValue(frameNode, convValue);
