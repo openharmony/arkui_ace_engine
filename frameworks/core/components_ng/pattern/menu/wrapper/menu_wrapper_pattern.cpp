@@ -303,6 +303,7 @@ void MenuWrapperPattern::HideSubMenuByDepth(const RefPtr<FrameNode>& menuItem)
             continue;
         }
         auto subMenuPattern = childNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(subMenuPattern);
         if (subMenuPattern->GetSubMenuDepth() <= curDepth) {
             break;
         }
