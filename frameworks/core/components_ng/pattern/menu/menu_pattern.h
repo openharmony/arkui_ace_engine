@@ -700,7 +700,7 @@ public:
         subMenuDepth_ = depth;
     }
 
-    int32_t GetSubMenuDepth()
+    int32_t GetSubMenuDepth() const
     {
         return subMenuDepth_;
     }
