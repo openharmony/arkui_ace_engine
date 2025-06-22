@@ -1083,6 +1083,8 @@ const RefPtr<NodeRenderStatusMonitor>& PipelineContext::GetNodeRenderStatusMonit
 void PipelineContext::FlushDirtyPropertyNodes()
 {
 }
+
+void PipelineContext::DumpForceColor(const std::vector<std::string>& params) const {}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
