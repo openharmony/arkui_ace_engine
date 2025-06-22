@@ -67,9 +67,9 @@ void SetDividerColor(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
     if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
         auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
         auto colorResObj = AceType::Claim(color);
-        DividerModelNG::SetDividerColor(frameNode, colorResObj, true);
+        DividerModelNG::SetDividerColor(frameNode, colorResObj, false);
     } else {
-        DividerModelNG::SetDividerColor(frameNode, Color(color), true);
+        DividerModelNG::SetDividerColor(frameNode, Color(color), false);
     }
 }
 
@@ -81,7 +81,7 @@ void ResetDividerColor(ArkUINodeHandle node)
     auto theme = GetTheme<DividerTheme>();
     CHECK_NULL_VOID(theme);
     Color dividerColor = theme->GetColor();
-    DividerModelNG::SetDividerColor(frameNode, dividerColor, false);
+    DividerModelNG::SetDividerColor(frameNode, dividerColor, true);
 }
 
 void SetDividerVertical(ArkUINodeHandle node, ArkUI_Bool value)
