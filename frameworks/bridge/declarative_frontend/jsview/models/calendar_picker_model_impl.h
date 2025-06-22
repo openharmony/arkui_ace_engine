@@ -36,6 +36,7 @@ public:
     void ClearBorderWidth() override {};
     void ClearPadding() override {};
     void SetMarkToday(bool isMarkToday) override {};
+    void CalendarPickerRemoveResObj(const std::string& key) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CALENDAR_PICKER_MODEL_IMPL_H

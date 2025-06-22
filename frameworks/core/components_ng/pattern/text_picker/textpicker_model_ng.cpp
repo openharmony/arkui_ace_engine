@@ -1882,20 +1882,29 @@ void TextPickerModelNG::ParseSingleIconTextResourceObj(const std::vector<NG::Ran
         auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
         CHECK_NULL_VOID(textPickerPattern);
         std::vector<NG::RangeContent> rangeVector;
+        std::vector<NG::RangeContent> oldRangeVector = textPickerPattern->GetRange();
+        uint32_t index = 0;
         rangeVector.clear();
         for (auto& item : value) {
             std::string icon;
             std::string text;
             NG::RangeContent content;
-            if (item.iconResObj_ && ResourceParseUtils::ParseResMedia(item.iconResObj_, icon)) {
+            if (item.iconResObj_) {
+                ResourceParseUtils::ParseResMedia(item.iconResObj_, icon);
                 content.icon_ = icon;
+            } else {
+                content.icon_ = index < oldRangeVector.size() ? oldRangeVector[index].icon_ : "";
             }
 
-            if (item.textResObj_ && ResourceParseUtils::ParseResString(item.textResObj_, text)) {
+            if (item.textResObj_) {
+                ResourceParseUtils::ParseResString(item.textResObj_, text);
                 content.text_ = text;
+            } else {
+                content.text_ = index < oldRangeVector.size() ? oldRangeVector[index].text_ : "";
             }
 
             rangeVector.emplace_back(content);
+            index++;
         }
         uint32_t selectedIndex = textPickerPattern->GetSelected();
         textPickerPattern->SetSelected(selectedIndex);
