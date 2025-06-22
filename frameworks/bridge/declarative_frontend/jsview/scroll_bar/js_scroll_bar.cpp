@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/models/scroll_bar_model_impl.h"
@@ -76,25 +77,32 @@ void JSScrollBar::Create(const JSCallbackInfo& info)
     int directionNum = -1;
     int stateNum = -1;
     bool infoflag = false;
-    if (info.Length() > 0 && info[0]->IsObject()) {
+    if (info.Length() <= 0) {
+        ScrollBarModel::GetInstance()->Create(proxy, infoflag, proxyFlag, directionNum, stateNum);
+        return;
+    }
+    auto jsVal = info[0];
+    if (jsVal->IsObject()) {
         infoflag = true;
-        auto obj = JSRef<JSObject>::Cast(info[0]);
-        auto scrollerValue = obj->GetProperty("scroller");
-        if (scrollerValue->IsObject() && JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>()) {
+        auto obj = JSRef<JSObject>::Cast(jsVal);
+        auto scrollerValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::SCROLLER));
+        if (scrollerValue->IsObject()) {
             auto jsScroller = JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>();
-            jsScroller->SetInstanceId(Container::CurrentId());
-            auto scrollBarProxy = jsScroller->GetScrollBarProxy();
-            proxyFlag = true;
-            proxy = ScrollBarModel::GetInstance()->GetScrollBarProxy(scrollBarProxy);
-            jsScroller->SetScrollBarProxy(proxy);
+            if (jsScroller) {
+                jsScroller->SetInstanceId(Container::CurrentId());
+                auto scrollBarProxy = jsScroller->GetScrollBarProxy();
+                proxyFlag = true;
+                proxy = ScrollBarModel::GetInstance()->GetScrollBarProxy(scrollBarProxy);
+                jsScroller->SetScrollBarProxy(proxy);
+            }
         }
 
-        auto directionValue = obj->GetProperty("direction");
+        auto directionValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::DIRECTION));
         if (directionValue->IsNumber()) {
             directionNum = directionValue->ToNumber<int32_t>();
         }
 
-        auto stateValue = obj->GetProperty("state");
+        auto stateValue = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::STATE));
         if (stateValue->IsNumber()) {
             stateNum = stateValue->ToNumber<int32_t>();
         }
