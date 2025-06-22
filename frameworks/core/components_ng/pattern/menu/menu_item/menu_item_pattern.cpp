@@ -657,8 +657,7 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     auto outterMenuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(outterMenuLayoutProps);
     param.isShowInSubWindow = outterMenuLayoutProps->GetShowInSubWindowValue(false);
-    auto focusMenuRenderContext = menuNode->GetRenderContext();
-    if (!ParseMenuBlurStyleEffect(param, focusMenuRenderContext)) {
+    if (!ParseMenuBlurStyleEffect(param, menuNode->GetRenderContext())) {
         return;
     }
     param.type = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
