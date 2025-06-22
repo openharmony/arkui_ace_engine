@@ -61,6 +61,7 @@ constexpr Dimension SNAPSHOT_RADIUS = 16.0_vp;
 constexpr uint32_t SNAPSHOT_LOAD_COMPLETE = 1;
 constexpr uint32_t ROTATION_COUNT = 4;
 constexpr uint32_t ROTATION_COUNT_SNAPSHOT = 2;
+constexpr uint32_t STARTING_WINDOW_TIMEOUT_MS = 10000;
 } // namespace
 
 class LifecycleListener : public Rosen::ILifecycleListener {
@@ -469,8 +470,40 @@ bool WindowPattern::CheckAndAddStartingWindowAboveLocked()
     return true;
 }
 
+void WindowPattern::HideStartingWindow()
+{
+    session_->SetHidingStartingWindow(true);
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "hide startWindow: %{public}d", session_->GetPersistentId());
+
+    ContainerScope scope(instanceId_);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    interruptStartingTask_.Cancel();
+    interruptStartingTask_.Reset([weakThis = WeakClaim(this)]() {
+        ACE_SCOPED_TRACE("WindowScene::InterruptStartingTask");
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        CHECK_NULL_VOID(self->startingWindow_);
+        auto session = self->session_;
+        CHECK_NULL_VOID(session);
+        auto ret = session->Clear();
+        TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE, "Terminate StartingWindow, ret: %{public}d", ret);
+    });
+    taskExecutor->PostDelayedTask(
+        interruptStartingTask_, TaskExecutor::TaskType::UI, STARTING_WINDOW_TIMEOUT_MS, "ArkUICleanStartingWindow");
+}
+
 void WindowPattern::CreateStartingWindow()
 {
+    if (session_->GetSessionInfo().startWindowType_ == Rosen::StartWindowType::RETAIN_AND_INVISIBLE) {
+        HideStartingWindow();
+        startingWindow_ = FrameNode::CreateFrameNode(
+            V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        return;
+    }
+
     const auto& sessionInfo = session_->GetSessionInfo();
 #ifdef ATOMIC_SERVICE_ATTRIBUTION_ENABLE
     if (sessionInfo.isAtomicService_) {
