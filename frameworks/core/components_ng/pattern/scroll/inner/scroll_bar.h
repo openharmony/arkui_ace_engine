@@ -83,16 +83,24 @@ public:
     {
         return padding_;
     }
-    void SetBackgroundColor(const Color& backgroundColor)
+    void SetBackgroundColor(const Color& backgroundColor, const bool isRoundScroll = false)
     {
+        if (isRoundScroll) {
+            arcBackgroundColor_ = backgroundColor;
+            return;
+        }
         backgroundColor_ = backgroundColor;
     }
     const Color& GetBackgroundColor() const
     {
         return backgroundColor_;
     }
-    void SetForegroundColor(const Color& foregroundColor)
+        void SetForegroundColor(const Color& foregroundColor, const bool isRoundScroll = false)
     {
+        if (isRoundScroll) {
+            arcForegroundColor_ = foregroundColor;
+            return;
+        }
         foregroundColor_ = foregroundColor;
     }
     void SetForegroundHoverBlendColor(const Color& foregroundHoverBlendColor)
@@ -422,6 +430,7 @@ public:
     {
         arcBackgroundColor_ = backgroundColor;
     }
+
     const Color& GetArcBackgroundColor() const
     {
         return arcBackgroundColor_;
