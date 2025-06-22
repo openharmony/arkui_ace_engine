@@ -695,6 +695,16 @@ public:
         isDisableMenuBgColor_ = ret;
     }
 
+    void SetSubMenuDepth(int32_t depth)
+    {
+        subMenuDepth_ = depth;
+    }
+
+    int32_t GetSubMenuDepth()
+    {
+        return subMenuDepth_;
+    }
+
 protected:
     void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -825,6 +835,10 @@ private:
     float originMenuYForStack_ = 0.0f;
     float originPreviewYForStack_ = 0.0f;
     bool isDisableMenuBgColor_ = false;
+
+    // only used for Side sub menu
+    int32_t subMenuDepth_ = 0;
+
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };
 

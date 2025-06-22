@@ -1846,4 +1846,95 @@ HWTEST_F(MenuItemPatternTestOneNg, AddStackSubMenuHeader001, TestSize.Level1)
     CHECK_NULL_VOID(menuStackProperty);
     EXPECT_NE(menuStackProperty->GetExpandSymbol(), nullptr);
 }
+
+/**
+ * @tc.name: ShowSubMenu001
+ * @tc.desc: Verify ShowSubMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, ShowSubMenu001, TestSize.Level1)
+{
+    std::function<void()> buildFun = []() {
+        MenuModelNG MenuModelInstance;
+        MenuModelInstance.Create();
+    };
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->SetSubBuilder(buildFun);
+    menuItemPattern->ShowSubMenu();
+
+    auto parentMenuPattern = mainMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(parentMenuPattern, nullptr);
+    ASSERT_EQ(parentMenuPattern->GetSubMenuDepth(), 0);
+
+    auto showedSubMenu = parentMenuPattern->GetShowedSubMenu();
+    ASSERT_NE(showedSubMenu, nullptr);
+
+    auto subMenuPattern = showedSubMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(subMenuPattern, nullptr);
+    ASSERT_EQ(subMenuPattern->GetSubMenuDepth(), 1);
+}
+
+/**
+ * @tc.name: OnHover001
+ * @tc.desc: Verify OnHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, OnHover001, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->OnHover(true);
+
+    auto menuWrapper = menuItemPattern->GetMenuWrapper();
+    ASSERT_NE(menuWrapper, nullptr);
+    ASSERT_EQ(menuWrapper->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: OnHover002
+ * @tc.desc: Verify OnHover.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, OnHover002, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenu = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto dummySubMenu = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, 3, AceType::MakeRefPtr<TextPattern>());
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 4, AceType::MakeRefPtr<MenuItemPattern>());
+    menuItemNode->MountToParent(mainMenu);
+    mainMenu->MountToParent(wrapperNode);
+    dummySubMenu->MountToParent(wrapperNode);
+    subMenu->MountToParent(wrapperNode);
+    auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
+    ASSERT_NE(subMenuPattern, nullptr);
+    subMenuPattern->SetSubMenuDepth(1);
+    
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->OnHover(true);
+
+    auto menuWrapper = menuItemPattern->GetMenuWrapper();
+    ASSERT_NE(menuWrapper, nullptr);
+    ASSERT_EQ(menuWrapper->GetChildren().size(), 2);
+}
 } // namespace OHOS::Ace::NG
