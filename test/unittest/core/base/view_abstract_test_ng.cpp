@@ -2650,12 +2650,14 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0055, TestSize.Level1)
     std::string moduleName = "entry";
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
 
+    g_isConfigChangePerform = true;
     ViewAbstract::CreateWithOpacityResourceObj(resObj);
     double result;
     ResourceParseUtils::ParseResDouble(resObj, result);
     opacityStr = pattern->GetResCacheMapByKey("viewAbstract.opacity");
     EXPECT_EQ(opacityStr, std::to_string(result));
     pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
 }
 
 /**
