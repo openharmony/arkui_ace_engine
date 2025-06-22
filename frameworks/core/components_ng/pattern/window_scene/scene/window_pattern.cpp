@@ -59,12 +59,9 @@ constexpr uint32_t COLOR_TRANSLUCENT_WHITE = 0x66ffffff;
 constexpr uint32_t COLOR_TRANSLUCENT_BLACK = 0x66000000;
 constexpr Dimension SNAPSHOT_RADIUS = 16.0_vp;
 constexpr uint32_t SNAPSHOT_LOAD_COMPLETE = 1;
-<<<<<<< HEAD
 constexpr uint32_t ROTATION_COUNT = 4;
 constexpr uint32_t ROTATION_COUNT_SNAPSHOT = 2;
-=======
 constexpr uint32_t STARTING_WINDOW_TIMEOUT_MS = 10000;
->>>>>>> 5eae7d4e631 (hiding startwindow)
 } // namespace
 
 class LifecycleListener : public Rosen::ILifecycleListener {

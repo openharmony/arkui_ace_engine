@@ -58,7 +58,7 @@ public:
     void TearDown() override;
     static sptr<Rosen::SceneSessionManager> ssm_;
 
-    RefPtr<WindowScene> CreateWindowSceneForStartingWindowTest();
+    RefPtr<WindowScene> CreateWindowSceneForStartingWindowTest(Rosen::SessionInfo& sessionInfo);
 };
 
 sptr<Rosen::SceneSessionManager> WindowSceneTest::ssm_ = nullptr;
@@ -525,12 +525,12 @@ HWTEST_F(WindowSceneTest, HideStartingWindowInvisible, TestSize.Level1)
     /**
      * @tc.steps: step2. Set hiding.
      */
-    windowScene->CreateStartWindow();
+    windowScene->CreateStartingWindow();
 
     /**
      * @tc.steps: step3. Test and check
      */
-    ASSERT_EQ(windowScene->session_->GetHideStartingWindow(), true);
+    ASSERT_EQ(windowScene->session_->GetHidingStartingWindow(), true);
 }
 
 /**
@@ -557,12 +557,12 @@ HWTEST_F(WindowSceneTest, HideStartingWindowDefalut, TestSize.Level1)
     /**
      * @tc.steps: step2. Set default.
      */
-    windowScene->CreateStartWindow();
+    windowScene->CreateStartingWindow();
 
     /**
      * @tc.steps: step3. Test and check
      */
-    ASSERT_EQ(windowScene->session_->GetHideStartingWindow(), false);
+    ASSERT_EQ(windowScene->session_->GetHidingStartingWindow(), false);
 }
 
 /**
