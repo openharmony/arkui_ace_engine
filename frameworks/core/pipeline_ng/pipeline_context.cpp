@@ -6246,6 +6246,9 @@ void PipelineContext::FlushMouseEventForHover()
         lastMouseEvent_->action == MouseAction::PRESS || lastSourceType_ == SourceType::TOUCH) {
         return;
     }
+    if (lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
+        return;
+    }
     CHECK_NULL_VOID(rootNode_);
     if (lastMouseEvent_->isMockWindowTransFlag || windowSizeChangeReason_ == WindowSizeChangeReason::DRAG) {
         return;
@@ -6263,7 +6266,7 @@ void PipelineContext::FlushMouseEventForHover()
     event.deviceId = lastMouseEvent_->deviceId;
     event.sourceTool = lastMouseEvent_->sourceTool;
     event.sourceType = lastMouseEvent_->sourceType;
-    if (lastMouseEvent_->action == MouseAction::WINDOW_ENTER || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE) {
+    if (lastMouseEvent_->action == MouseAction::WINDOW_ENTER) {
         event.action = MouseAction::MOVE;
     } else {
         event.action = lastMouseEvent_->action;
