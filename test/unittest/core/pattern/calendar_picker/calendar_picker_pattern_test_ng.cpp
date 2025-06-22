@@ -25,6 +25,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/base/mock_system_properties.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -938,4 +939,46 @@ HWTEST_F(CalendarPickerPatternTestNg, CalendarDialogLayoutAlgorithmTest001, Test
     EXPECT_EQ(layoutWrapperNode->GetGeometryNode()->GetFrameSize().Width(), 0.f);
     EXPECT_EQ(layoutWrapperNode->GetGeometryNode()->GetFrameSize().Height(), 0.f);
 }
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Text OnColorConfigurationUpdate function when ConfigChangePerform is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CalendarPicker.
+     * @tc.expected: step1. Create success.
+     */
+    CreateCalendarPicker();
+    auto node = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(node->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(node));
+    ASSERT_NE(dialogNode, nullptr);
+    auto layoutWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(layoutWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    ASSERT_NE(dialogPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set g_isConfigChangePerform to true.
+     */
+    g_isConfigChangePerform = true;
+    auto swiperNode = dialogPattern->GetSwiperFrameNode();
+    ASSERT_NE(swiperNode, nullptr);
+    const auto& swiperNodeLayoutProperty = swiperNode->GetLayoutProperty();
+    ASSERT_NE(swiperNodeLayoutProperty, nullptr);
+    swiperNodeLayoutProperty->CleanDirty();
+
+    /**
+     * @tc.steps: step3. Call OnColorConfigurationUpdate function.
+     */
+    dialogPattern->OnColorConfigurationUpdate();
+    auto layoutFlag = swiperNodeLayoutProperty->GetPropertyChangeFlag();
+    EXPECT_EQ(layoutFlag, PROPERTY_UPDATE_BY_CHILD_REQUEST);
+}
+
 } // namespace OHOS::Ace::NG
