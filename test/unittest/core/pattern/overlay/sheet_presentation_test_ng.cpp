@@ -355,6 +355,7 @@ HWTEST_F(SheetPresentationTestNg, OnAttachToFrameNode001, TestSize.Level1)
     SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
     sheetPattern->OnAttachToFrameNode();
     EXPECT_EQ(sheetPattern->GetSheetType(), SheetType::SHEET_POPUP);
+    EXPECT_EQ(sheetPattern->sheetThemeType_, "popup");
     innerOnAreaChangeCallback(oldRect, oldOrigin, rect, origin);
     SheetPresentationTestNg::TearDownTestCase();
 }
