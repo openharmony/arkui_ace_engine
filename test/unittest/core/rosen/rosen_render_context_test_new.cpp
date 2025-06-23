@@ -1181,33 +1181,11 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew043, TestSize.Level1)
 }
 
 /**
- * @tc.name: RosenRenderContextTestNew044
- * @tc.desc: UpdateBackBlurStyle().
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew044, TestSize.Level1)
-{
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
-    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
-    g_isConfigChangePerform = true;
-    BlurStyleOption blur;
-    blur.blurStyle = BlurStyle::NO_MATERIAL;
-    SysOptions sysOptions;
-    auto pattern = frameNode->GetPattern<Pattern>();
-    ASSERT_NE(pattern, nullptr);
-    rosenRenderContext->UpdateBackBlurStyle(blur, sysOptions);
-    std::string blurStyleStr = pattern->GetResCacheMapByKey("backgroundBlurStyle.blurStyle");
-    EXPECT_EQ(blurStyleStr, "");
-    g_isConfigChangePerform = false;
-}
-
-/**
  * @tc.name: RosenRenderContextTestNew045
  * @tc.desc: UpdateFrontBlurStyle().
  * @tc.type: FUNC
  */
-HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew045, TestSize.Level1)
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew044, TestSize.Level1)
 {
     auto frameNode =
         FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });

@@ -452,9 +452,9 @@ public:
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
     static bool GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
     static void ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double& radius, Shadow& shadow);
-    static bool ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow);
+    static bool ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow, const bool configChangePerform = false);
     static void ParseShadowOffsetXY(const JSRef<JSObject>& jsObj, Shadow& shadow);
-    static bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
+    static bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow, const bool configChangePerform = false);
     static bool ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension& result,
         RefPtr<ResourceObject>& resObj);
