@@ -8523,4 +8523,13 @@ void WebDelegate::SetTouchHandleExistState(bool touchHandleExist)
     CHECK_NULL_VOID(nweb_);
     nweb_->SetTouchHandleExistState(touchHandleExist);
 }
+
+void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight,
+    double borderRadiusBottomLeft, double borderRadiusBottomRight)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->SetBorderRadiusFromWeb(
+        borderRadiusTopLeft, borderRadiusTopRight, borderRadiusBottomLeft, borderRadiusBottomRight);
+}
+
 } // namespace OHOS::Ace

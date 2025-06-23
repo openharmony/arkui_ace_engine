@@ -1254,6 +1254,10 @@ public:
     bool HideMagnifier();
     void UpdateSingleHandleVisible(bool isVisible);
     void SetTouchHandleExistState(bool touchHandleExist);
+
+    void SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight, double borderRadiusBottomLeft,
+        double borderRadiusBottomRight);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
