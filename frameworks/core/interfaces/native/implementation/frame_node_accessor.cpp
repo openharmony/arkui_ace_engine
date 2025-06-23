@@ -577,7 +577,10 @@ Ark_Number GetIdByFrameNodeImpl(Ark_FrameNode peer, Ark_FrameNode node)
 
 static GENERATED_Ark_NodeType ParseNodeType(std::string& type)
 {
-    static const std::unordered_map<std::string, GENERATED_Ark_NodeType> typeMap = { { "List", GENERATED_ARKUI_LIST } };
+    static const std::unordered_map<std::string, GENERATED_Ark_NodeType> typeMap = {
+        { "List", GENERATED_ARKUI_LIST },
+        { "Text", GENERATED_ARKUI_TEXT },
+    };
     GENERATED_Ark_NodeType nodeType = GENERATED_ARKUI_CUSTOM_NODE;
     auto iter = typeMap.find(type);
     if (iter != typeMap.end()) {
