@@ -1227,8 +1227,22 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         ArkUIGeneratedNativeModule._KeyEvent_setIntentionCode(this.peer!.ptr, TypeChecker.IntentionCode_ToNumeric(intentionCode))
     }
     private getUnicode_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getUnicode(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getUnicode(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType))
+        {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setUnicode_serialize(unicode: number): void {
         ArkUIGeneratedNativeModule._KeyEvent_setUnicode(this.peer!.ptr, unicode)
