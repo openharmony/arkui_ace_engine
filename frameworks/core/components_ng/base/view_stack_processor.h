@@ -197,6 +197,7 @@ struct PrebuildCompCmd {
 class ACE_EXPORT ViewStackProcessor final {
 public:
     friend class ScopedViewStackProcessor;
+    friend class InteropViewStackProcessor;
 
     ACE_FORCE_EXPORT static ViewStackProcessor* GetInstance();
     ~ViewStackProcessor() = default;
@@ -597,7 +598,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ViewStackProcessor);
 };
 
-class ACE_FORCE_EXPORT ScopedViewStackProcessor final : public Referenced {
+class ACE_FORCE_EXPORT ScopedViewStackProcessor final {
 public:
     ScopedViewStackProcessor(int32_t containerId = OHOS::Ace::INSTANCE_ID_UNDEFINED);
     ScopedViewStackProcessor(std::unique_ptr<ViewStackProcessor>& instance,
@@ -610,6 +611,21 @@ private:
     std::unique_ptr<ViewStackProcessor> instance_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ScopedViewStackProcessor);
+};
+
+class ACE_FORCE_EXPORT InteropViewStackProcessor final : public Referenced {
+public:
+    InteropViewStackProcessor(int32_t containerId = OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    InteropViewStackProcessor(std::unique_ptr<OHOS::Ace::NG::ViewStackProcessor>& instance,
+        int32_t containerId = OHOS::Ace::INSTANCE_ID_UNDEFINED);
+    ~InteropViewStackProcessor();
+    void SwapViewStackProcessor(std::unique_ptr<OHOS::Ace::NG::ViewStackProcessor>& instance);
+
+private:
+    void Init(int32_t containerId);
+    std::unique_ptr<OHOS::Ace::NG::ViewStackProcessor> instance_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(InteropViewStackProcessor);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_STACK_PROCESSOR_H

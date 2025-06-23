@@ -33,7 +33,7 @@ namespace OHOS::Ace::NG {
 namespace GeneratedApiImpl {
 Ark_NodeHandle CreateViewStackProcessor()
 {
-    auto pointer = Referenced::MakeRefPtr<OHOS::Ace::NG::ScopedViewStackProcessor>();
+    auto pointer = Referenced::MakeRefPtr<OHOS::Ace::NG::InteropViewStackProcessor>();
     auto raw = AceType::RawPtr(pointer);
     raw->IncRefCount();
     return reinterpret_cast<Ark_NodeHandle>(raw);
@@ -49,7 +49,7 @@ Ark_NodeHandle PopViewStackProcessor()
 
 void DeleteViewStackProcessor(Ark_NodeHandle pointer)
 {
-    reinterpret_cast<OHOS::Ace::NG::ScopedViewStackProcessor*>(pointer)->DecRefCount();
+    reinterpret_cast<OHOS::Ace::NG::InteropViewStackProcessor*>(pointer)->DecRefCount();
 }
 
 void ShowCrash(Ark_CharPtr message)

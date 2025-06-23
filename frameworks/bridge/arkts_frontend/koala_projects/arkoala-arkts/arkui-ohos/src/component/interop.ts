@@ -20,12 +20,12 @@ import { int32 } from '@koalaui/common';
 import { NodeAttach } from '@koalaui/runtime';
 
 export class CompatiblePeerNode extends PeerNode {
-    protected constructor(peerPtr: KPointer, id: int32, view: Object, name: string = '', flags: int32 = 0) {
+    protected constructor(peerPtr: KPointer, id: int32, view: ESValue, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags);
         this.view = view;
     }
-    public view: Object;
-    public static create(_peerPtr: KPointer, view: Object, flags: int32 = 0) {
+    public view: ESValue;
+    public static create(_peerPtr: KPointer, view: ESValue, flags: int32 = 0) {
         const peerId = PeerNode.nextId();
         const _peer = new CompatiblePeerNode(_peerPtr, peerId, view, 'ComponentRoot', flags);
         return _peer;
@@ -34,13 +34,13 @@ export class CompatiblePeerNode extends PeerNode {
 
 export interface CompatibleComponentInfo {
     name: string,
-    component: Object
+    component: ESValue
 }
 
 /** @memo */
 export function ArkUICompatible(
     init: () => CompatibleComponentInfo,
-    update: (instance: Object) => void
+    update: (instance: ESValue) => void
 ): void {
     NodeAttach<CompatiblePeerNode>((): CompatiblePeerNode => {
         const ptr = ArkUINativeModule._CreateViewStackProcessor();
