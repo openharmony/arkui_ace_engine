@@ -141,8 +141,8 @@ public:
     static void SetEnableDragBar(FrameNode* frameNode, bool enableDragBar);
     static void SetEnableToolBarAdaptation(FrameNode* frameNode, bool enable);
 
-    void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) override;
-    static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::SafeAreaExpandOpts& opts);
+    void SetIgnoreLayoutSafeArea(const NG::IgnoreLayoutSafeAreaOpts& opts) override;
+    static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::IgnoreLayoutSafeAreaOpts& opts);
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) override;
     static void ParseCommonTitle(FrameNode* frameNode, const NG::NavigationTitleInfo& titleInfo,
         bool ignoreMainTitle = false);

@@ -106,7 +106,7 @@ public:
         return false;
     }
 
-    virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
+    virtual void SetIgnoreLayoutSafeArea(const NG::IgnoreLayoutSafeAreaOpts& opts) {};
     virtual void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) {};
     virtual void SetSystemTransitionType(NG::NavigationSystemTransitionType type) {};
     virtual void SetScrollableProcessor(

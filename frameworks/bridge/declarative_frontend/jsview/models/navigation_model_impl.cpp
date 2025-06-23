@@ -324,5 +324,5 @@ void NavigationModelImpl::SetCustomTransition(NavigationTransitionEvent&& animat
 
 void NavigationModelImpl::SetIsCustomAnimation(bool isCustom) {}
 
-void NavigationModelImpl::SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {}
+void NavigationModelImpl::SetIgnoreLayoutSafeArea(const NG::IgnoreLayoutSafeAreaOpts& opts) {}
 } // namespace OHOS::Ace::Framework

@@ -2620,7 +2620,7 @@ void NavigationModelNG::SetMenuOptions(NavigationMenuOptions&& opt)
     navBarPattern->AddResObj("navigation.navigationMenuOptions", resObj, std::move(updateFunc));
 }
 
-void NavigationModelNG::SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts)
+void NavigationModelNG::SetIgnoreLayoutSafeArea(const NG::IgnoreLayoutSafeAreaOpts& opts)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -2629,10 +2629,15 @@ void NavigationModelNG::SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts)
     CHECK_NULL_VOID(navBarNode);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
-    navBarLayoutProperty->UpdateIgnoreLayoutSafeArea(opts);
+    navBarLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    auto content = AceType::DynamicCast<FrameNode>(navBarNode->GetContentNode());
+    CHECK_NULL_VOID(content);
+    auto contentLayoutProperty = content->GetLayoutProperty();
+    CHECK_NULL_VOID(contentLayoutProperty);
+    contentLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
 }
 
-void NavigationModelNG::SetIgnoreLayoutSafeArea(FrameNode* frameNode, const SafeAreaExpandOpts& opts)
+void NavigationModelNG::SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::IgnoreLayoutSafeAreaOpts& opts)
 {
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
@@ -2640,7 +2645,12 @@ void NavigationModelNG::SetIgnoreLayoutSafeArea(FrameNode* frameNode, const Safe
     CHECK_NULL_VOID(navBarNode);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
-    navBarLayoutProperty->UpdateIgnoreLayoutSafeArea(opts);
+    navBarLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    auto content = AceType::DynamicCast<FrameNode>(navBarNode->GetContentNode());
+    CHECK_NULL_VOID(content);
+    auto contentLayoutProperty = content->GetLayoutProperty();
+    CHECK_NULL_VOID(contentLayoutProperty);
+    contentLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
 }
 
 void NavigationModelNG::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)

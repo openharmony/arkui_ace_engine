@@ -466,6 +466,7 @@ protected:
     void UpdateLayoutProperty(const LayoutProperty* layoutProperty);
 
     virtual void Clone(RefPtr<LayoutProperty> layoutProperty) const;
+    std::optional<LayoutConstraintF> layoutConstraint_;
 
 private:
     // This will call after ModifyLayoutConstraint.
@@ -489,7 +490,6 @@ private:
     void SafeAreaPaddingToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     // available in measure process.
-    std::optional<LayoutConstraintF> layoutConstraint_;
     std::optional<LayoutConstraintF> contentConstraint_;
 
     // layoutConstraint_ set by builderNode

@@ -1291,7 +1291,7 @@ void NavDestinationModelNG::SetOnWillDisAppear(FrameNode* frameNode, std::functi
     navDestinationEventHub->SetOnWillDisAppear(willDisAppear);
 }
 
-void NavDestinationModelNG::SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& opts)
+void NavDestinationModelNG::SetIgnoreLayoutSafeArea(const NG::IgnoreLayoutSafeAreaOpts& opts)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -1299,16 +1299,26 @@ void NavDestinationModelNG::SetIgnoreLayoutSafeArea(const SafeAreaExpandOpts& op
     CHECK_NULL_VOID(navDestination);
     auto navdestinationLayoutProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navdestinationLayoutProperty);
-    navdestinationLayoutProperty->UpdateIgnoreLayoutSafeArea(opts);
+    navdestinationLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
+    auto content = AceType::DynamicCast<FrameNode>(navDestination->GetContentNode());
+    CHECK_NULL_VOID(content);
+    auto contentLayoutProperty = content->GetLayoutProperty();
+    CHECK_NULL_VOID(contentLayoutProperty);
+    contentLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
 }
 
-void NavDestinationModelNG::SetIgnoreLayoutSafeArea(FrameNode* frameNode, const SafeAreaExpandOpts& opts)
+void NavDestinationModelNG::SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::IgnoreLayoutSafeAreaOpts& opts)
 {
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestination);
     auto navdestinationLayoutProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navdestinationLayoutProperty);
     navdestinationLayoutProperty->UpdateIgnoreLayoutSafeArea(opts);
+    auto content = AceType::DynamicCast<FrameNode>(navDestination->GetContentNode());
+    CHECK_NULL_VOID(content);
+    auto contentLayoutProperty = content->GetLayoutProperty();
+    CHECK_NULL_VOID(contentLayoutProperty);
+    contentLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
 }
 
 void NavDestinationModelNG::SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath)

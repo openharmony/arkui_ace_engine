@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
 
+#include "core/components_ng/pattern/navigation/navigation_layout_util.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 
@@ -724,6 +725,7 @@ void NavigationLayoutAlgorithm::MeasureNavBarOrHomeDestination(
     auto adjustConstraint = targetNode->AdjustLayoutConstarintIfNeeded(constraint);
     targetNodeWrapper->Measure(adjustConstraint);
     realNavBarHeight_ = targetNodeWrapper->GetGeometryNode()->GetFrameSize().Height();
+    realNavBarWidth_ = targetNodeWrapper->GetGeometryNode()->GetFrameSize().Width();
 }
 
 void NavigationLayoutAlgorithm::MeasureContentChild(LayoutWrapper* layoutWrapper,
@@ -739,14 +741,11 @@ void NavigationLayoutAlgorithm::MeasureContentChild(LayoutWrapper* layoutWrapper
     if (contentNode->GetChildren().empty()) {
         constraint.selfIdealSize = OptionalSizeF(0.0f, 0.0f);
     } else {
-        if (IsAutoHeight(navigationLayoutProperty)) {
-            constraint.selfIdealSize.SetWidth(contentSize.Width());
-        } else {
-            constraint.selfIdealSize = OptionalSizeF(contentSize.Width(), contentSize.Height());
-        }
+        NavigationLayoutUtil::UpdateConstraintWhenFixOrWrap(navigationLayoutProperty, constraint, contentSize);
     }
     contentWrapper->Measure(constraint);
     realContentHeight_ = contentWrapper->GetGeometryNode()->GetFrameSize().Height();
+    realContentWidth_ = contentWrapper->GetGeometryNode()->GetFrameSize().Width();
 }
 
 void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -795,8 +794,16 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MeasureDragBar(layoutWrapper, hostNode, navigationLayoutProperty, dividerSize_);
     MeasureSplitPlaceholder(layoutWrapper, hostNode, navigationLayoutProperty, contentSize_);
 
-    if (IsAutoHeight(navigationLayoutProperty)) {
+    auto layoutPolicy = navigationLayoutProperty->GetLayoutPolicyProperty();
+    bool isHeightWrapOrFix =
+        layoutPolicy.has_value() ? (layoutPolicy->IsHeightWrap() || layoutPolicy->IsHeightFix()) : false;
+    bool isWidthWrapOrFix =
+        layoutPolicy.has_value() ? (layoutPolicy->IsWidthWrap() || layoutPolicy->IsWidthFix()) : false;
+    if (IsAutoHeight(navigationLayoutProperty) || isHeightWrapOrFix) {
         SetNavigationHeight(layoutWrapper, size);
+    }
+    if (isWidthWrapOrFix) {
+        SetNavigationWidth(layoutWrapper, size);
     }
     size.AddWidth(padding.left.value_or(0.0f) + padding.right.value_or(0.0f));
     size.AddHeight(padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f));
@@ -862,6 +869,27 @@ void NavigationLayoutAlgorithm::SetNavigationHeight(LayoutWrapper* layoutWrapper
     } else if (navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
         float navHeight = std::max(realContentHeight_, realNavBarHeight_);
         size.SetHeight(navHeight);
+    }
+}
+
+void NavigationLayoutAlgorithm::SetNavigationWidth(LayoutWrapper* layoutWrapper, SizeF& size)
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_VOID(hostNode);
+    auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
+    CHECK_NULL_VOID(navigationPattern);
+    auto navigationStack = navigationPattern->GetNavigationStack();
+    CHECK_NULL_VOID(navigationStack);
+    auto navigationLayoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(navigationLayoutProperty);
+    if (navigationStack->Empty()) {
+        size.SetWidth(realNavBarWidth_);
+    } else if (navigationPattern->GetNavigationMode() == NavigationMode::STACK) {
+        size.SetWidth(realContentWidth_);
+    } else if (navigationPattern->GetNavigationMode() == NavigationMode::SPLIT) {
+        float navWidth = realContentWidth_ + realNavBarWidth_;
+        size.SetWidth(navWidth);
+        size.AddWidth(realDividerWidth_);
     }
 }
 
