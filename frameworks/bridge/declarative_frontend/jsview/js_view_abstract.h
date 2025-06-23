@@ -849,6 +849,8 @@ public:
     static void ParseDragSpringLoadingConfiguration(
         const JSRef<JSObject>& paramObj, const RefPtr<NG::DragSpringLoadingConfiguration>& config);
     static void ParseDialogWidthAndHeight(DialogProperties& properties, const JSRef<JSObject>& obj);
+    static void SetBorderRadiusWithCheck(std::optional<NG::BorderRadiusProperty>& result,
+        NG::BorderRadiusProperty& dimension);
 
 private:
     static bool ParseJsStrArrayInternal(const JSRef<JSArray>& jsArray, std::vector<std::string>& result,

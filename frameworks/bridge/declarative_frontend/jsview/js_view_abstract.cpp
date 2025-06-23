@@ -13258,4 +13258,15 @@ void JSViewAbstract::GetBorderWidthFromResource(const JSRef<JSVal>& args, NG::Bo
         GetBorderWidth(obj, borderWidthProperty);
     }
 }
+
+void JSViewAbstract::SetBorderRadiusWithCheck(std::optional<NG::BorderRadiusProperty>& result,
+    NG::BorderRadiusProperty& borderRadius)
+{
+    if (borderRadius.radiusTopLeft.has_value() && !borderRadius.radiusTopLeft->IsNegative() &&
+        borderRadius.radiusTopRight.has_value() && !borderRadius.radiusTopRight->IsNegative() &&
+        borderRadius.radiusBottomLeft.has_value() && !borderRadius.radiusBottomLeft->IsNegative() &&
+        borderRadius.radiusBottomRight.has_value() && !borderRadius.radiusBottomRight->IsNegative()) {
+        result = borderRadius;
+    }
+}
 } // namespace OHOS::Ace::Framework
