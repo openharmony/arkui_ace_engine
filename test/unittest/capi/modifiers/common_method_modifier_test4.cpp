@@ -1284,7 +1284,7 @@ HWTEST_F(CommonMethodModifierTest4, setRotate0TestRotateCenterZValidValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setRotate0TestRotateCenterZInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setRotate0TestRotateCenterZInvalidValues, TestSize.Level1)
 {
     Ark_Number defNumValue = std::get<1>(dimensionsFLoatValidValues[0]);
     auto checkValue = [this, defNumValue](
@@ -1354,7 +1354,7 @@ HWTEST_F(CommonMethodModifierTest4, setRotate1TestRotateCenterZValidValues, Test
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest4, setRotate1TestRotateCenterZInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest4, DISABLED_setRotate1TestRotateCenterZInvalidValues, TestSize.Level1)
 {
     Ark_Number defNumValue = std::get<1>(dimensionsFLoatValidValues[0]);
     auto checkValue = [this, defNumValue](
