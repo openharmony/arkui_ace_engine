@@ -79,6 +79,7 @@
     "src/lib/partial_update/pu_view.ts",
     "src/lib/partial_update/pu_recycle_manager.ts",
     "src/lib/partial_update/pu_builder_proxy.ts",
+    "src/lib/partial_update/pu_builder_binding.ts",
 
     // 'new' stateMgmt vers 2
     "src/lib/v2/v2_observed_proxy.ts",

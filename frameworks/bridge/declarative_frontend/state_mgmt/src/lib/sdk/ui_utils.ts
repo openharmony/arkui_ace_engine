@@ -49,6 +49,14 @@ class UIUtilsImpl {
       return target;
     }
 
+    // Function overloading.
+    public makeBinding<T>(getter: () => T): Binding<T>;
+    public makeBinding<T>(getter: () => T, setter: (newValue: T) => void): MutableBinding<T>;
+    public makeBinding<T>(getter: () => T, setter?:
+    (newValue: T) => void): Binding<T> | MutableBinding<T> {
+      return setter ? new MutableBinding(getter, setter) : new Binding(getter);
+    } 
+
     public static instance(): UIUtilsImpl {
       if (UIUtilsImpl.instance_) {
         return UIUtilsImpl.instance_;
