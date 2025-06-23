@@ -153,7 +153,6 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
     if (args[0]->IsString()) {
         src = args[0]->ToString();
     } else {
-        srcValid = ParseJsMedia(args[0], src);
         srcValid = ParseJsMedia(args[0], src, resObj);
     }
     if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
@@ -182,7 +181,7 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
     auto srcInfo = CreateSourceInfo(srcRef, pixmap, bundleName, moduleName);
     srcInfo.SetIsUriPureNumber((resId == -1));
     ImageModel::GetInstance()->SetAlt(srcInfo);
-    if (SystemProperties::ConfigChangePerform() && resObj) {
+    if (SystemProperties::ConfigChangePerform()) {
         ImageModel::GetInstance()->CreateWithResourceObj(ImageResourceType::ALT, resObj);
     }
 }
