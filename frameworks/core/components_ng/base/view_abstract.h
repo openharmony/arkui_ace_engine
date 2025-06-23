@@ -61,6 +61,7 @@ class BrightnessBlender;
 namespace OHOS::Ace {
 class ImageSourceInfo;
 class BasicShape;
+class SpanString;
 }
 
 namespace OHOS::Ace::NG {
@@ -391,9 +392,10 @@ public:
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
         const RefPtr<UINode> &customNode);
-    static void BindTips(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode);
+    static void BindTips(
+        const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<SpanString>& spanString);
     static void HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
-        PopupInfo& tipsInfo, bool showInSubWindow, int32_t instanceId);
+        PopupInfo& tipsInfo, bool showInSubWindow, const RefPtr<SpanString>& spanString);
     static void AddHoverEventForTips(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
         PopupInfo& tipsInfo, bool showInSubWindow);
     static RefPtr<OverlayManager> GetCurOverlayManager(const RefPtr<UINode>& node);

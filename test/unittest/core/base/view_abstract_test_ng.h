@@ -23,6 +23,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/error/error_code.h"
+#include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -39,16 +40,16 @@
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigator/navigator_model_ng.h"
 #include "core/components_ng/pattern/navrouter/navrouter_model_ng.h"
+#include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
+#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/property/property.h"
 #include "core/interfaces/native/node/node_api.h"
+#include "core/pipeline/base/element.h"
 #include "core/pipeline/base/element_register.h"
-#include "frameworks/core/components/common/layout/position_param.h"
-#include "frameworks/core/components_ng/pattern/panel/sliding_panel_model_ng.h"
-#include "frameworks/core/pipeline/base/element.h"
 
 #undef private
 #undef protected

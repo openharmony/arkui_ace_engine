@@ -114,6 +114,13 @@ public:
         CHECK_NULL_VOID(targetNode);
         ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
     }
+
+    static void BindTips(FrameNode* targetNode, const RefPtr<PopupParam>& param, const RefPtr<SpanString>& spanString)
+    {
+        CHECK_NULL_VOID(targetNode);
+        ViewAbstract::BindTips(param, AceType::Claim(targetNode), spanString);
+    }
+
     static void SetAccessibilityVirtualNode(FrameNode* frameNode, std::function<RefPtr<NG::UINode>()>&& buildFunc);
     static void DisableOnAccessibilityHover(FrameNode* frameNode);
     static void SetOnAccessibilityHover(FrameNode* frameNode, OnAccessibilityHoverFunc &&onAccessibilityHoverEventFunc);
