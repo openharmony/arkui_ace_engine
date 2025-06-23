@@ -1441,7 +1441,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage041
     dragEvent->SetUseDataLoadParams(true);
     EXPECT_CALL(*unifiedData, GetSize()).WillRepeatedly(testing::Return(0));
     ASSERT_NE(dragEvent->GetData(), nullptr);
-    auto dataLoadParams = AceType::MakeRefPtr<DataLoadParams>();
+    auto dataLoadParams = AceType::MakeRefPtr<MockDataLoadParams>();
     ASSERT_NE(dataLoadParams, nullptr);
     EXPECT_CALL(*mockUdmfClient, SetDelayInfo(_, _)).WillRepeatedly(testing::Return(0));
     EXPECT_CALL(*mockUdmfClient, SetData(_, _)).WillRepeatedly(testing::Return(0));
@@ -1473,7 +1473,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage042
 {
     auto dragAction = std::make_shared<OHOS::Ace::NG::ArkUIInteralDragAction>();
     ASSERT_NE(dragAction, nullptr);
-    dragAction->dataLoadParams = AceType::MakeRefPtr<DataLoadParams>();
+    dragAction->dataLoadParams = AceType::MakeRefPtr<MockDataLoadParams>();
     ASSERT_NE(dragAction->dataLoadParams, nullptr);
     std::string udKey = "test";
     auto mockUdmfClient = static_cast<MockUdmfClient*>(UdmfClient::GetInstance());

@@ -43,7 +43,7 @@ static void DragActionConvert(
     } else {
         internalDragAction->previewOption.isShowBadge = dragAction->dragPreviewOption.isShowBadge;
     }
-    if (dragAction->useDataLoadParams) {
+    if (!dragAction->useDataLoadParams) {
         RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedDataForNative(dragAction->unifiedData);
         internalDragAction->unifiedData = udData;
     } else {

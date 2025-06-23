@@ -883,9 +883,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     std::map<std::string, int64_t> summary;
     std::map<std::string, int64_t> detailedSummary;
     int32_t ret = -1;
-    auto unifiedData = dragEvent->GetData();
     DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, summary, detailedSummary, ret);
-    int32_t recordsSize = GetBadgeNumber(unifiedData);
+    int32_t recordsSize = GetBadgeNumber(dragEvent);
     RefPtr<PixelMap> pixelMap = dragDropInfo.pixelMap;
     if (pixelMap) {
         SetPixelMap(pixelMap);
@@ -1674,19 +1673,26 @@ void GestureEventHub::UpdateMenuNode(
     data.menuNode = newMenuNode;
 }
 
-int32_t GestureEventHub::GetBadgeNumber(const RefPtr<UnifiedData>& unifiedData)
+int32_t GestureEventHub::GetBadgeNumber(const RefPtr<OHOS::Ace::DragEvent>& dragEvent)
 {
+    CHECK_NULL_RETURN(dragEvent, 1);
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, 1);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_RETURN(pattern, 1);
     int32_t badgeNumber = 1;
     pattern->ResetDragOption();
+    auto unifiedData = dragEvent->GetData();
+    auto dataLoadParams = dragEvent->GetDataLoadParams();
+    auto isUseDataLoadParams = dragEvent->IsUseDataLoadParams();
     if (pattern->GetDragRecordSize() >= 0) {
         badgeNumber = pattern->GetDragRecordSize();
-    } else if (unifiedData) {
+    } else if (unifiedData && !isUseDataLoadParams) {
         auto recordSize = unifiedData->GetSize();
         badgeNumber = recordSize > 1 ? recordSize : 1;
+    } else if (dataLoadParams && isUseDataLoadParams) {
+        auto recodeCount = dataLoadParams->GetRecordCount();
+        badgeNumber = static_cast<int32_t>(recodeCount) > 1 ? recodeCount : 1;
     }
 
     auto dragPreviewOptions = frameNode->GetDragPreviewOption();

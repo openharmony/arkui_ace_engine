@@ -257,6 +257,12 @@ void UnifiedDataImpl::SetUnifiedData(std::shared_ptr<UDMF::UnifiedData> unifiedD
     unifiedData_ = unifiedData;
 }
 
+uint32_t DataLoadParamsImpl::GetRecordCount()
+{
+    CHECK_NULL_RETURN(dataLoadParams_, 0);
+    return dataLoadParams_->dataLoadInfo.recordCount;
+}
+
 std::shared_ptr<UDMF::DataLoadParams> DataLoadParamsImpl::GetDataLoadParams() const
 {
     return dataLoadParams_;

@@ -101,6 +101,7 @@ public:
     DataLoadParamsImpl() = default;
     ~DataLoadParamsImpl() = default;
 
+    uint32_t GetRecordCount() override;
     std::shared_ptr<UDMF::DataLoadParams> GetDataLoadParams() const;
     void SetDataLoadParams(const std::shared_ptr<UDMF::DataLoadParams>& dataLoadParams);
 

@@ -852,8 +852,18 @@ HWTEST_F(GestureEventHubTestNg, GetBadgeNumber_001, TestSize.Level1)
      * @tc.steps: step3. call GetBadgeNumber.
      */
     RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
-    auto badgeNumber = guestureEventHub->GetBadgeNumber(unifiedData);
-    EXPECT_NE(badgeNumber, 0);
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    dragEvent->SetUseDataLoadParams(false);
+    auto ret1 = guestureEventHub->GetBadgeNumber(dragEvent);
+    EXPECT_NE(ret1, 0);
+
+    dragEvent->SetUseDataLoadParams(true);
+    RefPtr<MockDataLoadParams> mockDataLoadParams = AceType::MakeRefPtr<MockDataLoadParams>();
+    ASSERT_NE(mockDataLoadParams, nullptr);
+    EXPECT_CALL(*mockDataLoadParams, GetRecordCount()).WillRepeatedly(testing::Return(10));
+    auto ret2 = guestureEventHub->GetBadgeNumber(dragEvent);
+    EXPECT_NE(ret2, 10);
 }
 
 /**
