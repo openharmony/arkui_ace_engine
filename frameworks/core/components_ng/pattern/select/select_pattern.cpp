@@ -1889,10 +1889,11 @@ void SelectPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(menuPattern);
     auto renderContext = menuNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
-
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
         renderContext->UpdateBackBlurStyle(renderContext->GetBackBlurStyle());
+    } else {
+        renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
+        SetOptionBgColor(selectTheme->GetBackgroundColor());
     }
 
     auto optionNode = menuPattern->GetOptions();
@@ -1907,7 +1908,6 @@ void SelectPattern::OnColorConfigurationUpdate()
         child->MarkModifyDone();
         child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    SetOptionBgColor(selectTheme->GetBackgroundColor());
     UpdateMenuScrollColorConfiguration(menuNode);
     host->SetNeedCallChildrenUpdate(false);
     SetColorByUser(host);

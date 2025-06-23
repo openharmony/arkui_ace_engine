@@ -586,6 +586,72 @@ HWTEST_F(SelectControlSizeNg, ResetShowInSubWindow001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnColorConfigurationUpdateTest001
+ * @tc.desc: Test OnColorConfigurationUpdate when ConfigChangePerform is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectControlSizeNg, OnColorConfigurationUpdateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set up test conditions.
+     * - SystemProperties::ConfigChangePerform() must return false to enter the target branch.
+     * - Mock the theme to provide a specific background color.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(pipeline->GetThemeManager());
+    ASSERT_NE(themeManager, nullptr);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    const Color themeBgColor = Color::BLUE;
+    selectTheme->backgroundColor_ = themeBgColor;
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly(Return(selectTheme));
+
+    /**
+     * @tc.steps: step2. Create a Select component with options.
+     */
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+
+    auto viewStackProcessor = ViewStackProcessor::GetInstance();
+    ASSERT_NE(viewStackProcessor, nullptr);
+    auto frameNode = viewStackProcessor->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto selectLayoutProps = frameNode->GetLayoutProperty<SelectLayoutProperty>();
+    ASSERT_NE(selectLayoutProps, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_FALSE(pattern->GetOptions().empty());
+    auto menuNode = pattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    
+    auto menuRenderContext = menuNode->GetRenderContext();
+    ASSERT_NE(menuRenderContext, nullptr);
+    menuRenderContext->UpdateBackgroundColor(Color::BLACK);
+    auto firstOption = pattern->GetOptions().front();
+    ASSERT_NE(firstOption, nullptr);
+    auto optionPaintProperty = firstOption->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(optionPaintProperty, nullptr);
+    optionPaintProperty->UpdateOptionBgColor(Color::BLACK);
+
+    /**
+     * @tc.steps: step3. Call the function under test.
+     */
+    pattern->OnColorConfigurationUpdate();
+
+    /**
+     * @tc.steps: step4. Verify that the menu's background color and option's background color were updated.
+     */
+    EXPECT_EQ(menuRenderContext->GetBackgroundColorValue(Color::RED), themeBgColor);
+    EXPECT_EQ(optionPaintProperty->GetOptionBgColorValue(Color::RED), themeBgColor);
+    ViewStackProcessor::GetInstance()->ClearStack();
+}
+
+/**
  * @tc.name: SetShowDefaultSelectedIcon001
  * @tc.desc: Test SelectPattern SetShowDefaultSelectedIcon.
  * @tc.type: FUNC
