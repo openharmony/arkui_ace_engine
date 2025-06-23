@@ -560,14 +560,13 @@ void PipelineContext::FlushDragEvents()
     if (!manager->IsDragFwkShow()) {
         manager->DoDragMoveAnimate(manager->GetDragAnimationPointerEvent());
     }
-    std::string extraInfo = manager->GetExtraInfo();
-    std::unordered_set<int32_t> moveEventIds;
     decltype(dragEvents_) dragEvents(std::move(dragEvents_));
     if (dragEvents.empty()) {
         canUseLongPredictTask_ = true;
         nodeToPointEvent_.clear();
-        return ;
+        return;
     }
+    std::string extraInfo = manager->GetExtraInfo();
     canUseLongPredictTask_ = false;
     for (auto iter = dragEvents.begin(); iter != dragEvents.end(); ++iter) {
         FlushDragEvents(manager, extraInfo, iter->first, iter->second);
@@ -575,7 +574,7 @@ void PipelineContext::FlushDragEvents()
 }
 
 void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
-    std::string extraInfo,
+    const std::string& extraInfo,
     const RefPtr<FrameNode>& node,
     const std::list<DragPointerEvent>& pointEvent)
 {
@@ -613,9 +612,9 @@ void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
 }
 
 void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
-    std::unordered_map<int32_t, DragPointerEvent> newIdPoints,
-    std::string& extraInfo,
-    std::unordered_map<int, DragPointerEvent> &idToPoints,
+    const std::unordered_map<int32_t, DragPointerEvent>& newIdPoints,
+    const std::string& extraInfo,
+    const std::unordered_map<int, DragPointerEvent>& idToPoints,
     const RefPtr<FrameNode>& node)
 {
     std::map<WeakPtr<FrameNode>, std::vector<DragPointerEvent>> nodeToPointEvent;
