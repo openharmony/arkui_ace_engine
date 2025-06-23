@@ -1252,15 +1252,20 @@ void SelectPattern::UpdateComponentColor(const Color& color, const SelectColorTy
         switch (selectColorType) {
             case SelectColorType::FONT_COLOR:
                 SetFontColor(color);
+                text_->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
                 break;
             case SelectColorType::BACKGROUND_COLOR:
                 renderContext->UpdateBackgroundColor(color);
                 break;
             case SelectColorType::SELECTED_OPTION_BG_COLOR:
                 SetSelectedOptionBgColor(color);
+                host->MarkModifyDone();
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 break;
             case SelectColorType::SELECTED_OPTION_FONT_COLOR:
                 SetSelectedOptionFontColor(color);
+                host->MarkModifyDone();
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 break;
             case SelectColorType::OPTION_BG_COLOR:
                 SetOptionBgColor(color);
@@ -1269,9 +1274,13 @@ void SelectPattern::UpdateComponentColor(const Color& color, const SelectColorTy
                 break;
             case SelectColorType::OPTION_FONT_COLOR:
                 SetOptionFontColor(color);
+                host->MarkModifyDone();
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 break;
             case SelectColorType::MENU_BACKGROUND_COLOR:
                 SetMenuBackgroundColor(color);
+                host->MarkModifyDone();
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 break;
             default:
                 break;
@@ -1296,7 +1305,11 @@ void SelectPattern::UpdateMenuOption(int32_t index, const std::string& value, co
         case SelectOptionType::ICON:
             menuPattern->UpdateSelectOptionIconByIndex(index, value);
             break;
+        default:
+            break;
     }
+    menu->MarkModifyDone();
+    menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SelectPattern::UpdateLastSelectedProps(int32_t index)
@@ -1875,9 +1888,7 @@ void SelectPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(menuPattern);
     auto renderContext = menuNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    if (!SystemProperties::ConfigChangePerform()) {
-        renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
-    }
+    renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
 
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
         renderContext->UpdateBackBlurStyle(renderContext->GetBackBlurStyle());
@@ -1895,56 +1906,10 @@ void SelectPattern::OnColorConfigurationUpdate()
         child->MarkModifyDone();
         child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    if (!SystemProperties::ConfigChangePerform()) {
-        SetOptionBgColor(selectTheme->GetBackgroundColor());
-    }
+    SetOptionBgColor(selectTheme->GetBackgroundColor());
     UpdateMenuScrollColorConfiguration(menuNode);
     host->SetNeedCallChildrenUpdate(false);
     SetColorByUser(host);
-}
-
-void SelectPattern::SetMenuBackgroundColorByUser(Color themeColor)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto props = host->GetPaintProperty<SelectPaintProperty>();
-    CHECK_NULL_VOID(props);
-    auto menu = GetMenuNode();
-    CHECK_NULL_VOID(menu);
-    auto renderContext = menu->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto pattern = host->GetPattern<SelectPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto menuNode = pattern->GetMenuNode();
-    CHECK_NULL_VOID(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    menuPattern->SetDisableMenuBgColor(true);
-    Color menuBackgroundColor = themeColor;
-    if (!props->GetMenuBackgroundColorSetByUser().value_or(false) && menuBackgroundColor_.has_value()) {
-        menuBackgroundColor = menuBackgroundColor_.value();
-    }
-    renderContext->UpdateBackgroundColor(menuBackgroundColor);
-}
-
-void SelectPattern::SetOptionBgColorByUser(Color themeColor)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto props = host->GetPaintProperty<SelectPaintProperty>();
-    CHECK_NULL_VOID(props);
-    Color optionBgColor = themeColor;
-    if (props->GetOptionBgColorSetByUser().value_or(false) && optionBgColor_.has_value()) {
-        optionBgColor = optionBgColor_.value();
-    }
-    optionBgColor_ = optionBgColor;
-    for (const auto& option : options_) {
-        auto paintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        paintProperty->UpdateOptionBgColor(optionBgColor);
-        option->MarkModifyDone();
-        option->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
-    }
 }
 
 void SelectPattern::SetColorByUser(const RefPtr<FrameNode>& host)
@@ -1955,40 +1920,15 @@ void SelectPattern::SetColorByUser(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto theme = pipeline->GetTheme<SelectTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
-    auto themeBgColor = theme->GetBackgroundColor();
-    SetMenuBackgroundColorByUser(themeBgColor);
-    SetOptionBgColorByUser(themeBgColor);
     auto props = host->GetPaintProperty<SelectPaintProperty>();
     CHECK_NULL_VOID(props);
-    auto spinnerId = GetSpinnerId();
-    auto spinner = FrameNode::GetOrCreateFrameNode(
-        V2::SYMBOL_ETS_TAG, spinnerId, []() { return AceType::MakeRefPtr<TextPattern>(); });
-    CHECK_NULL_VOID(spinner);
-    InitSpinner(spinner, theme);
-    spinner->MarkModifyDone();
-
-    auto rowId = GetRowId();
-    auto row = FrameNode::GetOrCreateFrameNode(
-        V2::ROW_ETS_TAG, rowId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-    CHECK_NULL_VOID(row);
-    row->MarkModifyDone();
-    row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-
-    if (!props->GetFontColorSetByUser().value_or(false)) {
-        ResetFontColor();
-    }
-    if (!props->GetOptionFontColorSetByUser().value_or(false)) {
-        SetOptionFontColor(theme->GetMenuFontColor());
-    }
-
-    if (!props->GetSelectedOptionBgColorSetByUser().value_or(false)) {
+    auto layoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    SetModifierByUser(host, props, layoutProps);
+    if (!layoutProps->GetShowDefaultSelectedIconValue(false) && !props->GetSelectedOptionBgColorSetByUserValue(false)) {
         SetSelectedOptionBgColor(theme->GetSelectedColor());
-    }
-
-    if (!props->GetSelectedOptionFontColorSetByUser().value_or(false)) {
-        SetSelectedOptionFontColor(theme->GetSelectedColorText());
     }
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -2152,7 +2092,6 @@ void SelectPattern::SetOptionHeight(const Dimension& value)
 
 void SelectPattern::SetMenuBackgroundColor(const Color& color)
 {
-    menuBackgroundColor_ = color;
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     auto renderContext = menu->GetRenderContext();
@@ -2495,5 +2434,52 @@ void SelectPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc("OptionFontColor: " + optionFont_.FontColor.value_or(Color()).ToString());
     DumpLog::GetInstance().AddDesc("OptionBgColor: " + optionBgColor_.value_or(Color()).ToString());
     DumpLog::GetInstance().AddDesc("ControlSize: " + ConvertControlSizeToString(controlSize_));
+}
+
+void SelectPattern::SetModifierByUser(const RefPtr<FrameNode>& frameNode, const RefPtr<SelectPaintProperty>& props,
+    const RefPtr<SelectLayoutProperty>& layoutProps)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(props);
+    CHECK_NULL_VOID(layoutProps);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>(frameNode->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    if (props->GetTextModifierSetByUserValue(false)) {
+        SetTextModifierApply(textApply_);
+    } else if (!props->GetFontColorSetByUserValue(false)) {
+        ResetFontColor();
+    }
+
+    if (props->GetOptionTextModifierSetByUserValue(false)) {
+        SetOptionTextModifier(textOptionApply_);
+    } else if (!props->GetOptionFontColorSetByUserValue(false)) {
+        SetOptionFontColor(theme->GetMenuFontColor());
+    }
+
+    if (props->GetSelectedOptionTextModifierSetByUserValue(false)) {
+        SetSelectedOptionTextModifier(textSelectOptionApply_);
+    } else if (!layoutProps->GetShowDefaultSelectedIconValue(false) &&
+               !props->GetSelectedOptionFontColorSetByUserValue(false)) {
+        SetSelectedOptionFontColor(theme->GetSelectedColorText());
+    }
+
+    if (props->GetArrowModifierSetByUserValue(false)) {
+        SetArrowModifierApply(arrowApply_);
+    } else {
+        auto spinnerId = GetSpinnerId();
+        auto spinner = FrameNode::GetOrCreateFrameNode(
+            V2::SYMBOL_ETS_TAG, spinnerId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+        CHECK_NULL_VOID(spinner);
+        InitSpinner(spinner, theme);
+        spinner->MarkModifyDone();
+        auto rowId = GetRowId();
+        auto row = FrameNode::GetOrCreateFrameNode(
+            V2::ROW_ETS_TAG, rowId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+        CHECK_NULL_VOID(row);
+        row->MarkModifyDone();
+        row->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    }
 }
 } // namespace OHOS::Ace::NG

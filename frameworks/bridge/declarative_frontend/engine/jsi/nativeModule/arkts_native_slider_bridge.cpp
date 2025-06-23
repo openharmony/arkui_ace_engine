@@ -355,11 +355,10 @@ ArkUINativeModuleValue SliderBridge::SetTrackBackgroundColor(ArkUIRuntimeCallInf
         auto colorLength = gradient.GetColors().size();
         std::vector<uint32_t> colorValues;
         std::vector<ArkUILengthType> offsetValues;
+        GetArkUINodeModifiers()->getSliderModifier()->resetTrackBackgroundColor(nativeNode);
         if (colorLength <= 0) {
-            GetArkUINodeModifiers()->getSliderModifier()->resetTrackBackgroundColor(nativeNode);
             return panda::JSValueRef::Undefined(vm);
         }
-
         for (int32_t i = 0; i < static_cast<int32_t>(colorLength); i++) {
             colorValues.push_back(gradient.GetColors()[i].GetLinearColor().GetValue());
             offsetValues.push_back(ArkUILengthType {
@@ -522,7 +521,7 @@ ArkUINativeModuleValue SliderBridge::SetBlockStyle(ArkUIRuntimeCallInfo* runtime
         std::string moduleName;
         Framework::JSViewAbstract::GetJsMediaBundleInfo(image, bundleName, moduleName);
         SliderModelNG::SetBlockImage(frameNode, src, bundleName, moduleName);
-        if (SystemProperties::ConfigChangePerform() && mediaResObj) {
+        if (SystemProperties::ConfigChangePerform()) {
             SliderModelNG::CreateWithMediaResourceObj(frameNode, mediaResObj, bundleName, moduleName);
         }
     } else if (type == SliderModel::BlockStyleType::SHAPE) {

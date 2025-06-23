@@ -1312,6 +1312,8 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg078, TestSize.Level1)
     ASSERT_EQ(menuPattern->GetOptions().size(), 4);
     menuPattern->OnColorConfigurationUpdate();
     EXPECT_EQ(menuNode->needCallChildrenUpdate_, false);
+    menuPattern->isDisableMenuBgColorByUser_ = true;
+    menuPattern->OnColorConfigurationUpdate();
 }
 
 /**
@@ -1803,5 +1805,96 @@ HWTEST_F(MenuPatternTestNg, RegisterAccessibilityChildActionNotify001, TestSize.
     ASSERT_NE(callback, nullptr);
     auto reuslt = callback(menuItemNode, NotifyChildActionType::ACTION_CLICK);
     EXPECT_EQ(reuslt, AccessibilityActionResult::ACTION_RISE);
+}
+
+/**
+ * @tc.name: UpdateSelectOptionTextByIndex
+ * @tc.desc: Test UpdateSelectOptionTextByIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, UpdateSelectOptionTextByIndex, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create parent and child frame nodes.
+     * @tc.expected: step1. Parent and child nodes are not null.
+     */
+    auto parent = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_GROUP_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, V2::JS_IF_ELSE_ETS_TAG, MenuType::MENU));
+    ASSERT_NE(parent, nullptr);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 2, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(child, nullptr);
+    auto parentPattern = parent->GetPattern<MenuPattern>();
+    ASSERT_NE(parentPattern, nullptr);
+    auto childPattern = child->GetPattern<MenuItemPattern>();
+    ASSERT_NE(childPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test UpdateSelectOptionTextByIndex with non-select menu.
+     * @tc.expected: step2. No changes should occur.
+     */
+    parentPattern->isSelectMenu_ = false;
+    std::string text = "Text";
+    parentPattern->UpdateSelectOptionTextByIndex(2, text);
+
+    /**
+     * @tc.steps: step3. Test UpdateSelectOptionTextByIndex with select menu.
+     * @tc.expected: step3. Text should be updated correctly.
+     */
+    parentPattern->isSelectMenu_ = true;
+    parentPattern->AddOptionNode(child);
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 3, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    childPattern->SetTextNode(textNode);
+    auto textProp = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProp, nullptr);
+    parentPattern->UpdateSelectOptionTextByIndex(2, text);
+    auto content = textProp->GetContent();
+    EXPECT_FALSE(content.has_value());
+    parentPattern->UpdateSelectOptionTextByIndex(0, text);
+    auto ret = childPattern->GetText();
+    EXPECT_EQ(text, ret);
+}
+
+/**
+ * @tc.name: UpdateSelectOptionIconByIndex
+ * @tc.desc: Test UpdateSelectOptionIconByIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternTestNg, UpdateSelectOptionIconByIndex, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create parent and child frame nodes.
+     * @tc.expected: step1. Parent and child nodes are not null.
+     */
+    auto parent = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_GROUP_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, V2::JS_IF_ELSE_ETS_TAG, MenuType::MENU));
+    ASSERT_NE(parent, nullptr);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 2, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(child, nullptr);
+    auto parentPattern = parent->GetPattern<MenuPattern>();
+    ASSERT_NE(parentPattern, nullptr);
+    auto childPattern = child->GetPattern<MenuItemPattern>();
+    ASSERT_NE(childPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test UpdateSelectOptionIconByIndex with non-select menu.
+     * @tc.expected: step2. No changes should occur.
+     */
+    parentPattern->isSelectMenu_ = false;
+    std::string icon = "TestChildIcon";
+    parentPattern->UpdateSelectOptionIconByIndex(0, icon);
+
+    /**
+     * @tc.steps: step3. Test UpdateSelectOptionIconByIndex with select menu.
+     * @tc.expected: step3. Icon should be updated correctly.
+     */
+    parentPattern->isSelectMenu_ = true;
+    parentPattern->AddOptionNode(child);
+    parentPattern->UpdateSelectOptionIconByIndex(2, icon);
+    auto ret = childPattern->GetIcon();
+    EXPECT_NE(icon, ret);
+    parentPattern->UpdateSelectOptionIconByIndex(0, icon);
+    ret = childPattern->GetIcon();
+    EXPECT_EQ(icon, ret);
 }
 } // namespace OHOS::Ace::NG

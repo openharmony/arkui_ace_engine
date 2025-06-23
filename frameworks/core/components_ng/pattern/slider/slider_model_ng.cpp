@@ -895,7 +895,6 @@ void SliderModelNG::CreateWithColorResourceObj(
         Gradient gradient = SliderModelNG::CreateSolidGradient(result);
         pattern->UpdateSliderComponentColor(result, sliderColorType, gradient);
     };
-    updateFunc(resObj);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
@@ -916,19 +915,20 @@ void SliderModelNG::CreateWithMediaResourceObj(FrameNode* frameNode, const RefPt
     std::string key = "sliderImage";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [bundleName, moduleName, weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+    auto&& updateFunc = [bundleName, moduleName, weak = AceType::WeakClaim(frameNode)](
         const RefPtr<ResourceObject>& resObj) {
-        auto pattern = weak.Upgrade();
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<SliderPattern>();
         CHECK_NULL_VOID(pattern);
         std::string result;
         if (ResourceParseUtils::ParseResMedia(resObj, result)) {
-            ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockImage, result);
-            ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockImageBundleName, bundleName);
-            ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, BlockImageModuleName, moduleName);
+            ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockImage, result, frameNode);
+            ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockImageBundleName, bundleName, frameNode);
+            ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, BlockImageModuleName, moduleName, frameNode);
             pattern->UpdateSliderComponentMedia();
         }
     };
-    updateFunc(resObj);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
@@ -957,7 +957,6 @@ void SliderModelNG::CreateWithStringResourceObj(FrameNode* frameNode, const RefP
             pattern->UpdateSliderComponentString(isShowTips, result);
         }
     };
-    updateFunc(resObj);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 

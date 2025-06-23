@@ -745,7 +745,7 @@ public:
         resourceArrowHeightObj_ = obj;
     }
 
-    const RefPtr<ResourceObject>& GeArrowHeightResourceObject()
+    const RefPtr<ResourceObject>& GetArrowHeightResourceObject()
     {
         return resourceArrowHeightObj_;
     }
@@ -755,7 +755,7 @@ public:
         resourceRadiusObj_ = obj;
     }
 
-    const RefPtr<ResourceObject>& GeRadiusResourceObject()
+    const RefPtr<ResourceObject>& GetRadiusResourceObject()
     {
         return resourceRadiusObj_;
     }
@@ -765,7 +765,7 @@ public:
         resourceOutlineWidthObj_ = obj;
     }
 
-    const RefPtr<ResourceObject>& GeOutlineWidthResourceObject()
+    const RefPtr<ResourceObject>& GetOutlineWidthResourceObject()
     {
         return resourceOutlineWidthObj_;
     }
@@ -775,7 +775,7 @@ public:
         resourceBorderWidthObj_ = obj;
     }
 
-    const RefPtr<ResourceObject>& GeBorderWidthResourceObject()
+    const RefPtr<ResourceObject>& GetBorderWidthResourceObject()
     {
         return resourceBorderWidthObj_;
     }

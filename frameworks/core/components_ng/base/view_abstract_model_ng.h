@@ -1661,7 +1661,7 @@ public:
         const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj);
     static std::string PopupOptionTypeStr(const PopupOptionsType& type);
     static void ParseOptionsDimension(const RefPtr<NG::FrameNode>& frameNode,
-        const RefPtr<ResourceObject>& dimensionResObj, const PopupOptionsType& type, CalcDimension& dimession);
+        const RefPtr<ResourceObject>& dimensionResObj, const PopupOptionsType& type, CalcDimension& dimension);
     static void CreateWithDimensionResourceObj(const RefPtr<NG::FrameNode>& frameNode,
         const RefPtr<ResourceObject>& dimensionResObj, const PopupOptionsType& type);
     virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,

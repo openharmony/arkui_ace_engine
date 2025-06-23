@@ -53,7 +53,7 @@ public:
     void SetSelectedOptionFontFamily(const std::vector<std::string>& value) override;
     void SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value) override;
     void SetSelectedOptionFontColor(const Color& color) override;
-    void SetOptionBgColor(const Color& color, bool isNormal = true) override;
+    void SetOptionBgColor(const Color& color) override;
     void SetOptionFontSize(const Dimension& value) override;
     void SetOptionFontWeight(const FontWeight& value) override;
     void SetOptionFontFamily(const std::vector<std::string>& value) override;
@@ -84,17 +84,16 @@ public:
     void SetMenuBackgroundBlurStyle(const BlurStyleOption& blurStyle) override;
     void SetDivider(const NG::SelectDivider& divider) override;
     void SetDividerStyle(const NG::SelectDivider& divider, const DividerMode& mode) override;
-    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
-        const SelectColorType selectColorType) override;
+    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj, const SelectColorType& type) override;
     void CreateWithValueIconResourceObj(const std::vector<SelectResObjParam>& resObjVec) override;
     void CreateWithIntegerResourceObj(const RefPtr<ResourceObject>& resObj) override;
     void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj) override;
     static RefPtr<SelectTheme> GetSelectTheme(FrameNode* frameNode);
     static void SetDefaultBackGroundColor(FrameNode* frameNode);
-    static void UpdateSelectComponentColor(FrameNode* frameNode, const SelectColorType selectColorType);
-    static std::string ModifierColorTypeToString(const SelectColorType selectColorType);
+    static void ResetComponentColor(FrameNode* frameNode, const SelectColorType& type);
+    static std::string ModifierColorTypeToString(const SelectColorType& selectColorType);
     static void CreateWithColorResourceObj(
-        FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, const SelectColorType selectColorType);
+        FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, const SelectColorType& type);
     static void CreateWithIntegerResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void CreateWithStringResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetDivider(FrameNode* frameNode, const NG::SelectDivider& divider);
@@ -140,7 +139,7 @@ public:
     static void SetOptionFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
     static void SetOptionItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value);
     static void SetOptionFontColor(FrameNode* frameNode, const Color& color);
-    static void SetOptionBgColor(FrameNode* frameNode, const Color& color, bool isNormal = true);
+    static void SetOptionBgColor(FrameNode* frameNode, const Color& color);
     static void SetSelectedOptionFontColor(FrameNode* frameNode, const Color& color);
     static void SetSelectedOptionFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetSelectedOptionFontWeight(FrameNode* frameNode, const FontWeight& value);
@@ -157,10 +156,18 @@ public:
     static void SetMenuOutline(FrameNode* frameNode, const MenuParam& menuParam);
     static void SetShowInSubWindow(FrameNode* frameNode, bool isShowInSubWindow);
     static void SetShowDefaultSelectedIcon(FrameNode* frameNode, bool show);
+    static void SetColorStatus(FrameNode* frameNode, const SelectColorType& type);
+    void SetMenuBackgroundColorByUser(bool isFromModifier) override;
+    static void SetMenuBackgroundColorByUser(FrameNode* frameNode, bool isFromModifier);
+    void SetOptionFontColorByUser(bool isValidValue) override;
+    static void SetOptionFontColorByUser(FrameNode* frameNode, bool isValidValue);
+    void SetFontColorByUser(bool isValidValue) override;
+    static void SetFontColorByUser(FrameNode* frameNode, bool isValidValue);
+
 private:
-    std::string ColorTypeToString(const SelectColorType selectColorType);
-    void AddResObjWithCallBack(std::string key, const RefPtr<ResourceObject>& resObj,
-        const int32_t index, const SelectOptionType optionType);
+    std::string ColorTypeToString(const SelectColorType& selectColorType);
+    void AddResObjWithCallBack(
+        std::string key, const RefPtr<ResourceObject>& resObj, const int32_t index, const SelectOptionType& optionType);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_NG_H

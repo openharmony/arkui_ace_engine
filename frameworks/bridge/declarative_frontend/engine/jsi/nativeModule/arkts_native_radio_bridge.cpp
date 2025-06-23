@@ -91,10 +91,15 @@ ArkUINativeModuleValue RadioBridge::SetRadioStyle(ArkUIRuntimeCallInfo* runtimeC
     RefPtr<ResourceObject> unBorderColorResObj;
     RefPtr<ResourceObject> indicatorColorResObj;
     ArkUIRadioColorStruct resObjStru;
+    bool jsBgColorSetByUser = false;
+    bool jsUnBorderColorSetByUser = false;
+    bool jsIndicatorColorSetByUser = false;
+
     if (checkedBackgroundColor->IsNull() || checkedBackgroundColor->IsUndefined() ||
         !ArkTSUtils::ParseJsColorAlpha(vm, checkedBackgroundColor, checkedBackgroundColorVal, backgroundColorResObj)) {
         checkedBackgroundColorVal = radioTheme->GetActiveColor();
     } else {
+        jsBgColorSetByUser = true;
         resObjStru.checkedBackgroundColor = AceType::RawPtr(backgroundColorResObj);
     }
     Color uncheckedBorderColorVal;
@@ -102,6 +107,7 @@ ArkUINativeModuleValue RadioBridge::SetRadioStyle(ArkUIRuntimeCallInfo* runtimeC
         !ArkTSUtils::ParseJsColorAlpha(vm, uncheckedBorderColor, uncheckedBorderColorVal, unBorderColorResObj)) {
         uncheckedBorderColorVal = radioTheme->GetInactiveColor();
     } else {
+        jsUnBorderColorSetByUser = true;
         resObjStru.uncheckedBorderColor = AceType::RawPtr(unBorderColorResObj);
     }
     Color indicatorColorVal;
@@ -109,9 +115,12 @@ ArkUINativeModuleValue RadioBridge::SetRadioStyle(ArkUIRuntimeCallInfo* runtimeC
         !ArkTSUtils::ParseJsColorAlpha(vm, indicatorColor, indicatorColorVal, indicatorColorResObj)) {
         indicatorColorVal = radioTheme->GetPointColor();
     } else {
+        jsIndicatorColorSetByUser = true;
         resObjStru.indicatorColor = AceType::RawPtr(indicatorColorResObj);
     }
 
+    GetArkUINodeModifiers()->getRadioModifier()->setRadioColorSetByUser(
+        nativeNode, jsBgColorSetByUser, jsUnBorderColorSetByUser, jsIndicatorColorSetByUser);
     GetArkUINodeModifiers()->getRadioModifier()->setRadioStylePtr(nativeNode,
         checkedBackgroundColorVal.GetValue(), uncheckedBorderColorVal.GetValue(),
         indicatorColorVal.GetValue(), resObjStru);

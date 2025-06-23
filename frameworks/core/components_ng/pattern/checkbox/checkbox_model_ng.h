@@ -88,9 +88,10 @@ public:
     static std::string GetCheckboxGroup(FrameNode* frameNode);
 
     static void SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange);
-    static void UpdateComponentColor(FrameNode* frameNode, const CheckBoxColorType checkBoxColorType);
+    static void ResetComponentColor(FrameNode* frameNode, const CheckBoxColorType type);
+    static void UpdateComponentColor(FrameNode* frameNode, const CheckBoxColorType type, const Color& color);
     static void CreateWithResourceObj(
-        FrameNode* frameNode, const CheckBoxColorType jsResourceType, const RefPtr<ResourceObject>& resObj);
+        FrameNode* frameNode, const CheckBoxColorType type, const RefPtr<ResourceObject>& resObj);
 
 private:
     static std::string ColorTypeToString(const CheckBoxColorType checkBoxColorType);
