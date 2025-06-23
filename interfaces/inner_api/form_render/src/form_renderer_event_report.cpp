@@ -38,6 +38,7 @@ namespace {
 }
 
 std::unordered_map<int64_t, int32_t> FormRenderEventReport::waitSurfaceNodeTimerMap_ = {};
+std::mutex FormRenderEventReport::timerMutex_;
 
 void FormRenderEventReport::StartSurfaceNodeTimeoutReportTimer(int64_t formId, const std::string &bundleName,
     const std::string &formName)
@@ -60,11 +61,13 @@ void FormRenderEventReport::StartSurfaceNodeTimeoutReportTimer(int64_t formId, c
     int32_t timerId = OHOS::HiviewDFX::XCollie::GetInstance().SetTimer(
         taskName, SURFACE_NODE_CREATE_TIMEOUT, timeoutCallback, nullptr, HiviewDFX::XCOLLIE_FLAG_NOOP);
     HILOG_INFO("wait surface node create start, formId: %{public}" PRId64 "timerId: %{public}d", formId, timerId);
+    std::lock_guard<std::mutex> lock(FormRenderEventReport::timerMutex_);
     FormRenderEventReport::waitSurfaceNodeTimerMap_.emplace(formId, timerId);
 }
 
 void FormRenderEventReport::StopTimer(int64_t formId)
 {
+    std::lock_guard<std::mutex> lock(FormRenderEventReport::timerMutex_);
     auto iter = FormRenderEventReport::waitSurfaceNodeTimerMap_.find(formId);
     if (iter != FormRenderEventReport::waitSurfaceNodeTimerMap_.end()) {
         int32_t timerId = iter->second;

@@ -858,4 +858,16 @@ HWTEST_F(FormRenderTest, FormRenderTest031, TestSize.Level1)
         FormRenderEventReport::waitSurfaceNodeTimerMap_.end());
 }
 
+HWTEST_F(FormRenderTest, FormRenderTest032, TestSize.Level1)
+{
+    int64_t formId = 100;
+    std::string bundleName = "testBundleName";
+    std::string formName = "testFormName";
+
+    FormRenderEventReport::waitSurfaceNodeTimerMap_[formId] = 100;
+    FormRenderEventReport::StopTimer(formId);
+    EXPECT_EQ(FormRenderEventReport::waitSurfaceNodeTimerMap_.find(formId),
+        FormRenderEventReport::waitSurfaceNodeTimerMap_.end());
+}
+
 } // namespace OHOS::Ace
