@@ -368,6 +368,7 @@ HWTEST_F(BubbleTipsTestNg, TipsFitAvailableRect001, TestSize.Level1)
      * @tc.steps: step2. test FitAvailableRect.
      */
     pipelineContext->UpdateDisplayAvailableRect(Rect(0.0f, 0.0f, 0.0f, 0.0f));
+    layoutAlgorithm->isTips_ = true;
     layoutAlgorithm->followCursor_ = true;
     layoutAlgorithm->expandDisplay_ = true;
     layoutAlgorithm->FitAvailableRect(AceType::RawPtr(layoutWrapper), true);
@@ -606,6 +607,37 @@ HWTEST_F(BubbleTipsTestNg, IsPaintDoubleBorderTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsPaintDoubleBorderTest002
+ * @tc.desc: Test IsPaintDoubleBorder function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, IsPaintDoubleBorderTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    const int32_t version = 20;
+    auto param = CreateTipsParamForCursor();
+    param->SetAnchorType(TipsAnchorType::TARGET);
+    auto tipsNode = CreateTipsNode(param, TIPS_MSG_1);
+    BubbleView::UpdateCommonParam(tipsNode->GetId(), param);
+    auto pipeline = tipsNode->GetContext();
+    pipeline->minPlatformVersion_ = version;
+    auto pattern = tipsNode->GetPattern<BubblePattern>();
+    auto paintMethod = AceType::DynamicCast<BubblePaintMethod>(pattern->CreateNodePaintMethod());
+    tipsNode->geometryNode_ = AceType::MakeRefPtr<GeometryNode>();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(
+        tipsNode->GetRenderContext(), tipsNode->geometryNode_, tipsNode->paintProperty_);
+    /**
+     * @tc.steps: step2. test IsPaintDoubleBorder.
+     */
+    popupTheme->tipsDoubleBorderEnable_ = false;
+    EXPECT_EQ(paintMethod->IsPaintDoubleBorder(AceType::RawPtr(paintWrapper)), false);
+    popupTheme->tipsDoubleBorderEnable_ = true;
+    EXPECT_EQ(paintMethod->IsPaintDoubleBorder(AceType::RawPtr(paintWrapper)), true);
+}
+
+/**
  * @tc.name: FitMouseOffset001
  * @tc.desc: Test FitMouseOffset.
  * @tc.type: FUNC
@@ -723,5 +755,40 @@ HWTEST_F(BubbleTipsTestNg, FitMouseOffset003, TestSize.Level1)
     layoutAlgorithm->FitMouseOffset(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutAlgorithm->targetOffset_, targetPosition);
     AceType::DynamicCast<MockContainer>(AceEngine::Get().GetContainer(containerId))->isSubContainer_ = false;
+}
+
+/**
+ * @tc.name: MeasureTipsFollowTarget001
+ * @tc.desc: Test MeasureTipsFollowTarget.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, MeasureTipsFollowTarget001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto param = CreateTipsParamForCursor();
+    param->SetAnchorType(TipsAnchorType::TARGET);
+    auto tipsNode = CreateTipsNode(param, TIPS_MSG_1);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(tipsNode->layoutAlgorithm_->GetLayoutAlgorithm());
+    layoutAlgorithm->wrapperRect_ = { 0, 0, DEVICE_WIDTH, DEVICE_HEIGHT };
+    layoutAlgorithm->wrapperSize_ = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    layoutAlgorithm->measureChildSizeAfter_ = ConstructParagraphs(TIPS_MSG_1, 1);
+
+    auto tipsLayoutWrapper = tipsNode->CreateLayoutWrapper();
+    auto childWrapper = tipsLayoutWrapper->GetAllChildrenWithBuild().front();
+    auto children = childWrapper->GetAllChildrenWithBuild();
+    auto text = children.front();
+    auto layoutProps = AceType::DynamicCast<TextLayoutProperty>(text->GetLayoutProperty());
+    ASSERT_NE(layoutProps, nullptr);
+    layoutProps->ResetMaxLines();
+    
+    /**
+     * @tc.steps: step2. expect text node set maxlines.
+     */
+    LayoutConstraintF childConstraint;
+    layoutAlgorithm->MeasureTipsFollowTarget(childWrapper, childConstraint);
+    EXPECT_TRUE(layoutProps->HasMaxLines());
 }
 } // namespace OHOS::Ace::NG

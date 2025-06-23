@@ -123,7 +123,7 @@ void BubblePattern::OnAttachToFrameNode()
         popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         auto pattern = weak.Upgrade();
         if (pattern) {
-            pattern->PopTipsBubble();
+            pattern->PopBubble(true);
         }
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
@@ -374,7 +374,7 @@ RefPtr<FrameNode> BubblePattern::GetButtonRowNode()
     return buttonRowNode;
 }
 
-void BubblePattern::PopBubble()
+void BubblePattern::PopBubble(bool tips)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -383,40 +383,7 @@ void BubblePattern::PopBubble()
     auto overlayManager = pipelineNg->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     auto popupInfo = overlayManager->GetPopupInfo(targetNodeId_);
-    if (!popupInfo.isCurrentOnShow) {
-        return;
-    }
-    popupInfo.markNeedUpdate = true;
-    CHECK_NULL_VOID(host);
-    auto layoutProp = host->GetLayoutProperty<BubbleLayoutProperty>();
-    CHECK_NULL_VOID(layoutProp);
-    auto showInSubWindow = layoutProp->GetShowInSubWindow().value_or(false);
-    auto isTips = layoutProp->GetIsTips().value_or(false);
-    if (showInSubWindow) {
-        if (isTips) {
-            SubwindowManager::GetInstance()->HideTipsNG(targetNodeId_, 0);
-        } else {
-            SubwindowManager::GetInstance()->HidePopupNG(targetNodeId_);
-        }
-    } else {
-        if (isTips) {
-            overlayManager->HideTips(targetNodeId_, popupInfo, 0);
-        } else {
-            overlayManager->HidePopup(targetNodeId_, popupInfo);
-        }
-    }
-}
-
-void BubblePattern::PopTipsBubble()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineNg = host->GetContextRefPtr();
-    CHECK_NULL_VOID(pipelineNg);
-    auto overlayManager = pipelineNg->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    auto popupInfo = overlayManager->GetPopupInfo(targetNodeId_);
-    if (!popupInfo.isCurrentOnShow || !popupInfo.isTips) {
+    if (!popupInfo.isCurrentOnShow || (tips && !popupInfo.isTips)) {
         return;
     }
     popupInfo.markNeedUpdate = true;
