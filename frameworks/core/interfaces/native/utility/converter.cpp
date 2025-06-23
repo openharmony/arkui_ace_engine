@@ -431,14 +431,18 @@ std::optional<StringArray> ResourceConverter::ToFontFamilies()
 std::optional<Dimension> ResourceConverter::ToDimension()
 {
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
-    if (type_ == ResourceType::FLOAT) {
+    if (type_ == ResourceType::INTEGER) {
+        auto resource = ToInt();
+        if (!resource) return std::nullopt;
+        return Dimension(*resource, DimensionUnit::VP);
+    } else if (type_ == ResourceType::FLOAT) {
         if (id_ == -1 && !params_.empty()) {
             return themeConstants_->GetDimensionByName(params_.front());
-        }
-        if (id_ != -1) {
+        } else if (id_ != -1) {
             return themeConstants_->GetDimension(id_);
+        } else {
+            LOGE("ResourceConverter::ToDimension Unknown resource value");
         }
-        LOGE("ResourceConverter::ToDimension Unknown resource value");
     }
     return std::nullopt;
 }
