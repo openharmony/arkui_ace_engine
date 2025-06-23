@@ -178,7 +178,7 @@ class UserLinker {
 
     public createUserObject(className: string): Object {
         if (className.startsWith("class=")) {
-            className = className.substring(6);
+            className = className.substring(6).replaceChar(c'/', c'.');
         }
 
         console.log('UserLinker: trying load class:' + className);
