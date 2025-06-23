@@ -166,6 +166,8 @@ static bool g_isDragging = false;
     if (!*_##name->isValid_) {                          \
         ifInvalid;                                      \
     }
+#define PETALMAPS_SEARCH_URL(address) \
+    (std::string("https://www.petalmaps.com/search/?q=") + (address) + "&utm_source=fb")
 
 struct UIContentImplHelper {
     explicit UIContentImplHelper(UIContentImpl* uiContent) : uiContent_(uiContent)
@@ -2463,6 +2465,18 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         auto url = urlPrefix + appName;
         want.SetUri(url);
         abilityContext->StartAbility(want, REQUEST_CODE);
+    });
+
+    container->SetOpenLinkOnMapSearch([context = context_](const std::string& address) {
+        auto sharedContext = context.lock();
+        CHECK_NULL_VOID(sharedContext);
+        auto abilityContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+        CHECK_NULL_VOID(abilityContext);
+        AAFwk::Want want;
+        auto url = PETALMAPS_SEARCH_URL(address);
+        want.SetUri(url);
+        abilityContext->OpenLink(want, REQUEST_CODE);
     });
 
     container->SetAbilityOnJumpBrowser([context = context_](const std::string& address) {

@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "core/common/font_change_observer.h"
 #include "core/common/font_loader.h"
+#include "core/components/common/layout/constants.h"
 #include "core/pipeline/pipeline_base.h"
 #ifdef ACE_ENABLE_VK
 #include "core/components_ng/base/frame_node.h"
@@ -145,8 +146,17 @@ public:
         startAbilityOnJumpBrowserHandler_ = std::move(listener);
     }
 
+    using OpenLinkOnMapSearchHandler = std::function<void(const std::string& address)>;
+    void SetOpenLinkOnMapSearchHandler(OpenLinkOnMapSearchHandler&& listener)
+    {
+        startOpenLinkOnMapSearchHandler_ = std::move(listener);
+    }
+
     void StartAbilityOnJumpBrowser(const std::string& address) const;
     void StartAbilityOnInstallAppInStore(const std::string& appName) const;
+    void OpenLinkOnMapSearch(const std::string& address);
+
+    void OnPreviewMenuOptionClick(TextDataDetectType type, const std::string& content);
 
 protected:
     static float fontWeightScale_;
@@ -168,9 +178,10 @@ private:
     std::set<WeakPtr<FontChangeObserver>> observers_;
     std::map<WeakPtr<NG::UINode>, ExternalLoadFontPair> externalLoadCallbacks_;
     bool hasRegisterLoadFontCallback_ = false;
-    
+
     StartAbilityOnInstallAppInStoreHandler startAbilityOnInstallAppInStoreHandler_;
     StartAbilityOnJumpBrowserHandler startAbilityOnJumpBrowserHandler_;
+    OpenLinkOnMapSearchHandler startOpenLinkOnMapSearchHandler_;
 
 #ifdef ACE_ENABLE_VK
     std::mutex hybridRenderNodesMutex_;

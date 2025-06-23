@@ -26,6 +26,8 @@
 #include "core/components_ng/property/menu_property.h"
 
 namespace OHOS::Ace::NG {
+using AIPreviewMenuErrorCallback =
+    std::function<void(int32_t code, const std::string& name, const std::string& message)>;
 class PreviewMenuController : public virtual AceType {
     DECLARE_ACE_TYPE(PreviewMenuController, AceType);
 
@@ -48,14 +50,20 @@ public:
 
 private:
     void CreateAIEntityMenu();
-    static RefPtr<FrameNode> CreateContactNode(const std::string& content, std::function<void()>&& disappearCallback);
-    static RefPtr<FrameNode> CreateLinkingNode(TextDataDetectType type, std::function<void()>&& disappearCallback);
+    static void CreateContactErrorNode(
+        const RefPtr<FrameNode>& previewNode, const std::string& content, std::function<void()>&& disappearCallback);
+    static void CreateLinkingErrorNode(
+        const RefPtr<FrameNode>& previewNode, TextDataDetectType type, std::function<void()>&& disappearCallback);
+    static RefPtr<FrameNode> CreateLinkingPreviewNode();
+    static RefPtr<FrameNode> CreateContactPreviewNode();
     static void UpdateNonLinkNodeProperty(const RefPtr<ImageLayoutProperty>& imageLayoutProperty,
         const RefPtr<TextLayoutProperty>& textLayoutProperty, const std::string& content);
-    static void UpdateLinkNodeProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
-        const RefPtr<FlexLayoutProperty>& flexLayoutProperty, TextDataDetectType type);
-    static RefPtr<FrameNode> CreateErrorNode(
-        TextDataDetectType type, const std::string& content, std::function<void()>&& disappearCallback);
+    static void UpdateLinkNodeProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty, TextDataDetectType type);
+    static RefPtr<FrameNode> CreatePreview(TextDataDetectType type);
+    static void MountErrorNode(const RefPtr<FrameNode>& previewNode, TextDataDetectType type,
+        const std::string& content, std::function<void()> disappearCallback);
+    static AIPreviewMenuErrorCallback GetErrorCallback(const RefPtr<FrameNode>& previewNode, TextDataDetectType type,
+        const std::string& content, std::function<void()>&& disappearCallback);
     std::function<void()> GetDisappearCallback();
     static std::function<void()> GetLinkingCallback(const std::string& appName);
 

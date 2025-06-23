@@ -332,24 +332,36 @@ bool TextPattern::IsAiSelected()
 
 void TextPattern::ShowAIEntityMenuForCancel()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(IsAiSelected() && dataDetectorAdapter_ && previewController_);
+    auto [start, end] = GetSelectedStartAndEnd();
+    ResetAISelected(AIResetSelectionReason::SHOW_FOR_CANCEL);
     if (SystemProperties::GetTextTraceEnabled()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         TAG_LOGI(AceLogTag::ACE_TEXT,
-            "TextPattern::ShowAIEntityMenuForCancel id:%{public}d IsPreviewMenuShow:%{public}d", host->GetId(),
-            previewController_->IsPreviewMenuShow());
+            "TextPattern::ShowAIEntityMenuForCancel id:%{public}d IsPreviewMenuShow:%{public}d start:%{public}d, "
+            "end:%{public}d",
+            host->GetId(), previewController_->IsPreviewMenuShow(), start, end);
     }
-    // ai预览菜单已显示，长按回落无需再弹出ai菜单
+    // ai预览菜单已显示，长按回落无需再选中
     if (previewController_->IsPreviewMenuShow()) {
         return;
     }
-    auto aiSpan = dataDetectorAdapter_->aiSpanMap_.find(textSelector_.aiStart.value());
+    auto aiSpan = dataDetectorAdapter_->aiSpanMap_.find(start);
     if (aiSpan == dataDetectorAdapter_->aiSpanMap_.end()) {
         return;
     }
-    ShowAIEntityMenu(aiSpan->second);
-    ResetAISelected(AIResetSelectionReason::SHOW_FOR_CANCEL);
+    HandleSelectionChange(start, end);
+    textResponseType_ = TextResponseType::LONG_PRESS;
+    UpdateSelectionSpanType(start, end);
+    parentGlobalOffset_ = GetParentGlobalOffset();
+    CalculateHandleOffsetAndShowOverlay();
+    ShowSelectOverlay({ .animation = true });
+    TAG_LOGI(AceLogTag::ACE_TEXT,
+        "TextPattern::ShowAIEntityMenuForCancel id:%{public}d IsPreviewMenuShow:%{public}d start:%{public}d, "
+        "end:%{public}d",
+        host->GetId(), previewController_->IsPreviewMenuShow(), start, end);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 AISpan TextPattern::GetSelectedAIData()
@@ -582,7 +594,7 @@ void TextPattern::ShowAIEntityPreviewMenuTimer()
         task, TaskExecutor::TaskType::UI, PREVIEW_MENU_DELAY, "ArkShowAIEntityPreviewMenuTimer");
 }
 
-RefPtr<FrameNode> TextPattern::CreateAIEntityMenu(const std::function<void()>& onMenuDisappear)
+RefPtr<FrameNode> TextPattern::CreateAIEntityMenu()
 {
     CHECK_NULL_RETURN(IsAiSelected() && dataDetectorAdapter_, nullptr);
     auto aiSpan = dataDetectorAdapter_->aiSpanMap_.find(textSelector_.aiStart.value());
@@ -593,8 +605,7 @@ RefPtr<FrameNode> TextPattern::CreateAIEntityMenu(const std::function<void()>& o
     CHECK_NULL_RETURN(host, nullptr);
     SetOnClickMenu(aiSpan->second, nullptr, nullptr);
     auto [isShowCopy, isShowSelectText] = GetCopyAndSelectable();
-    return dataDetectorAdapter_->CreateAIEntityMenu(
-        aiSpan->second, host, { isShowCopy, isShowSelectText }, onMenuDisappear);
+    return dataDetectorAdapter_->CreateAIEntityMenu(aiSpan->second, host, { isShowCopy, isShowSelectText });
 }
 
 bool TextPattern::ShowShadow(const PointF& textOffset, const Color& color)

@@ -15,6 +15,8 @@
 
 #include "core/common/font_manager.h"
 
+#include <regex>
+
 #include "base/i18n/localization.h"
 #include "core/components/text/render_text.h"
 #include "core/components_ng/base/frame_node.h"
@@ -34,6 +36,24 @@ namespace OHOS::Ace {
 std::string FontManager::appCustomFont_ = "";
 float FontManager::fontWeightScale_ = 1.0f;
 bool FontManager::isDefaultFontChanged_ = false;
+const std::string URL_HTTP = "http://";
+const std::string URL_HTTPS = "https://";
+namespace {
+bool CheckWebUrlType(const std::string& type)
+{
+    return std::regex_match(type, std::regex("^http(s)?:\\/\\/.+", std::regex_constants::icase));
+}
+
+bool CheckHttpType(const std::string& type)
+{
+    return std::regex_match(type, std::regex("^http:\\/\\/.+", std::regex_constants::icase));
+}
+
+bool CheckHttpsType(const std::string& type)
+{
+    return std::regex_match(type, std::regex("^https:\\/\\/.+", std::regex_constants::icase));
+}
+} // namespace
 
 void FontManager::RegisterFont(const std::string& familyName, const std::string& familySrc,
     const RefPtr<PipelineBase>& context, const std::string& bundleName, const std::string& moduleName)
@@ -473,6 +493,32 @@ void FontManager::StartAbilityOnInstallAppInStore(const std::string& appName) co
 {
     if (startAbilityOnInstallAppInStoreHandler_) {
         startAbilityOnInstallAppInStoreHandler_(appName);
+    }
+}
+
+void FontManager::OpenLinkOnMapSearch(const std::string& address)
+{
+    if (startOpenLinkOnMapSearchHandler_) {
+        startOpenLinkOnMapSearchHandler_(address);
+    }
+}
+
+void FontManager::OnPreviewMenuOptionClick(TextDataDetectType type, const std::string& content)
+{
+    if (type == TextDataDetectType::URL) {
+        std::string url = content;
+        if (!CheckWebUrlType(url)) {
+            url = "https://" + url;
+        } else if (CheckHttpType(url) && url.length() > URL_HTTP.length()) {
+            url.replace(0, URL_HTTP.length(), URL_HTTP);
+        } else if (CheckHttpsType(url) && url.length() > URL_HTTPS.length()) {
+            url.replace(0, URL_HTTPS.length(), URL_HTTPS);
+        }
+        StartAbilityOnJumpBrowser(url);
+    }
+
+    if (type == TextDataDetectType::ADDRESS) {
+        OpenLinkOnMapSearch(content);
     }
 }
 

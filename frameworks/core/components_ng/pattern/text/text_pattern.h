@@ -844,7 +844,7 @@ public:
     virtual void UpdateAIMenuOptions();
     bool PrepareAIMenuOptions(std::unordered_map<TextDataDetectType, AISpan>& aiMenuOptions);
     bool IsAiSelected();
-    RefPtr<FrameNode> CreateAIEntityMenu(const std::function<void()>& onMenuDisappear);
+    RefPtr<FrameNode> CreateAIEntityMenu();
     void InitAiSelection(const Offset& globalOffset);
     bool CanAIEntityDrag() override;
     RefPtr<PreviewMenuController> GetOrCreatePreviewMenuController();
