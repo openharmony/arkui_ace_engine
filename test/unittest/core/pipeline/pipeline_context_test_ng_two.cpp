@@ -885,6 +885,9 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg154, TestSize.Level1)
     EXPECT_FALSE(context_->lastMouseEvent_->pointerEvent);
 
     context_->lastMouseEvent_->action = MouseAction::WINDOW_LEAVE;
+    context_->FlushMouseEventForHover();
+
+    context_->lastMouseEvent_->action = MouseAction::MOVE;
     context_->lastMouseEvent_->isMockWindowTransFlag = false;
     context_->windowSizeChangeReason_ = WindowSizeChangeReason::RECOVER;
     context_->FlushMouseEventForHover();
