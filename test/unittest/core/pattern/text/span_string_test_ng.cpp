@@ -2447,6 +2447,70 @@ HWTEST_F(SpanStringTestNg, Tlv011, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Tlv012
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv012, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    TLVUtil::WriteUint8(buffer, TLV_TEXTSHADOW_TAG);
+    TLVUtil::WriteInt32(buffer, -100);
+
+    int32_t cursor = 0;
+    std::vector<Shadow> readShadows = TLVUtil::ReadTextShadows(buffer, cursor);
+    EXPECT_TRUE(readShadows.empty());
+}
+
+/**
+ * @tc.name: Tlv013
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv013, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    TLVUtil::WriteUint8(buffer, TLV_FONTFAMILIES_TAG);
+    TLVUtil::WriteInt32(buffer, -100);
+
+    int32_t cursor = 0;
+    std::vector<std::string> vec = TLVUtil::ReadFontFamily(buffer, cursor);
+    EXPECT_TRUE(vec.empty());
+}
+
+
+/**
+ * @tc.name: Tlv014
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv014, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    TLVUtil::WriteInt32(buffer, -100);
+
+    int32_t cursor = 0;
+    std::vector<TextDecoration> vec = TLVUtil::ReadTextDecorations(buffer, cursor);
+    EXPECT_TRUE(vec.empty());
+}
+
+/**
+ * @tc.name: Tlv015
+ * @tc.desc: Test basic function of TLV
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, Tlv015, TestSize.Level1)
+{
+    std::vector<uint8_t> buffer;
+    TLVUtil::WriteUint8(buffer, TLV_FONTFEATURE_TAG);
+    TLVUtil::WriteInt32(buffer, -100);
+
+    int32_t cursor = 0;
+    std::list<std::pair<std::string, int32_t>> list = TLVUtil::ReadFontFeature(buffer, cursor);
+    EXPECT_TRUE(list.empty());
+}
+
+/**
  * @tc.name: GetSpanResultObject001
  * @tc.desc: Test GetSpanResultObject
  * @tc.type: FUNC
