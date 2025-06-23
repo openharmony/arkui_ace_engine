@@ -15,7 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #ifdef WEB_SUPPORTED
-#include "core/components_ng/pattern/web/web_model_static.h"
+#include "core/components_ng/pattern/web/ani/web_model_static.h"
 #endif // WEB_SUPPORTED
 #include "core/interfaces/native/implementation/controller_handler_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +16,14 @@
 #include <climits>
 #include <functional>
 
-#include "core/components_ng/pattern/web/web_model_static.h"
+#include "core/components_ng/pattern/web/ani/web_model_static.h"
 
 #ifdef ARKUI_CAPI_UNITTEST
 #include "test/unittest/capi/stubs/mock_nweb_helper.h"
-#include "test/unittest/capi/stubs/mock_web_pattern.h"
+#include "test/unittest/capi/stubs/mock_web_pattern_static.h"
 #else
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
-#include "core/components_ng/pattern/web/web_pattern.h"
+#include "core/components_ng/pattern/web/ani/web_pattern_static.h"
 #else
 #include "core/components_ng/pattern/web/cross_platform/web_pattern.h"
 #endif // !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
@@ -36,10 +36,10 @@ namespace OHOS::Ace::NG {
 RefPtr<FrameNode> WebModelStatic::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    CHECK_NULL_RETURN(webPattern, frameNode);
-    webPattern->SetNestedScrollExt(NestedScrollOptionsExt({
+        V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPatternStatic>(); });
+    auto webPatternStatic = frameNode->GetPattern<WebPatternStatic>();
+    CHECK_NULL_RETURN(webPatternStatic, frameNode);
+    webPatternStatic->SetNestedScrollExt(NestedScrollOptionsExt({
         .scrollUp = NestedScrollMode::SELF_FIRST,
         .scrollDown = NestedScrollMode::SELF_FIRST,
         .scrollLeft = NestedScrollMode::SELF_FIRST,
@@ -51,32 +51,32 @@ RefPtr<FrameNode> WebModelStatic::CreateFrameNode(int32_t nodeId)
 void WebModelStatic::SetWebIdCallback(FrameNode* frameNode, std::function<void(int32_t)>&& webIdCallback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->SetSetWebIdCallback(std::move(webIdCallback));
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetSetWebIdCallback(std::move(webIdCallback));
 }
 
 void WebModelStatic::SetHapPathCallback(FrameNode* frameNode, std::function<void(const std::string&)>&& hapPathCallback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->SetSetHapPathCallback(std::move(hapPathCallback));
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetSetHapPathCallback(std::move(hapPathCallback));
 }
 
 void WebModelStatic::SetWebSrc(FrameNode* frameNode, const std::optional<std::string>& webSrc)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->SetWebSrcStatic(webSrc.value_or(""));
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetWebSrcStatic(webSrc.value_or(""));
 }
 
 void WebModelStatic::SetRenderMode(FrameNode* frameNode, const std::optional<RenderMode>& renderMode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
     auto rm = RenderMode::ASYNC_RENDER;
     if (renderMode) {
         rm = renderMode.value();
@@ -94,160 +94,160 @@ void WebModelStatic::SetRenderMode(FrameNode* frameNode, const std::optional<Ren
         TAG_LOGI(AceLogTag::ACE_WEB, "WebModelStatic::SetRenderMode use debug render mode: %{public}s",
             debugRenderMode.c_str());
     }
-    webPattern->SetRenderMode(rm);
+    webPatternStatic->SetRenderMode(rm);
 }
 
 void WebModelStatic::SetIncognitoMode(FrameNode* frameNode, const std::optional<bool>& incognitoMode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->SetIncognitoMode(incognitoMode.value_or(false));
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetIncognitoMode(incognitoMode.value_or(false));
 }
 
 void WebModelStatic::SetSharedRenderProcessToken(FrameNode* frameNode,
     const std::optional<std::string>& sharedRenderProcessToken)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->SetSharedRenderProcessToken(sharedRenderProcessToken.value_or(""));
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetSharedRenderProcessToken(sharedRenderProcessToken.value_or(""));
 }
 
 void WebModelStatic::SetWebController(FrameNode* frameNode, const RefPtr<WebController>& webController)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->SetWebController(webController);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetWebController(webController);
 }
 
 void WebModelStatic::SetOnLineImageAccessEnabled(FrameNode* frameNode, bool isOnLineImageAccessEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateOnLineImageAccessEnabled(isOnLineImageAccessEnabled);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateOnLineImageAccessEnabled(isOnLineImageAccessEnabled);
 }
 
 void WebModelStatic::SetImageAccessEnabled(FrameNode* frameNode, bool isImageAccessEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateImageAccessEnabled(isImageAccessEnabled);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateImageAccessEnabled(isImageAccessEnabled);
 }
 
 void WebModelStatic::SetGeolocationAccessEnabled(FrameNode* frameNode, bool isGeolocationAccessEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateGeolocationAccessEnabled(isGeolocationAccessEnabled);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateGeolocationAccessEnabled(isGeolocationAccessEnabled);
 }
 
 void WebModelStatic::SetForceDarkAccess(FrameNode* frameNode, bool access)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateForceDarkAccess(access);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateForceDarkAccess(access);
 }
 
 void WebModelStatic::SetOverviewModeAccessEnabled(FrameNode* frameNode, bool isOverviewModeAccessEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateOverviewModeAccessEnabled(isOverviewModeAccessEnabled);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateOverviewModeAccessEnabled(isOverviewModeAccessEnabled);
 }
 
 void WebModelStatic::SetDatabaseAccessEnabled(FrameNode* frameNode, bool isDatabaseAccessEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateDatabaseAccessEnabled(isDatabaseAccessEnabled);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateDatabaseAccessEnabled(isDatabaseAccessEnabled);
 }
 
 void WebModelStatic::SetMetaViewport(FrameNode* frameNode, bool enabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateMetaViewport(enabled);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateMetaViewport(enabled);
 }
 
 void WebModelStatic::SetMediaPlayGestureAccess(FrameNode* frameNode, bool isNeedGestureAccess)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateMediaPlayGestureAccess(isNeedGestureAccess);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateMediaPlayGestureAccess(isNeedGestureAccess);
 }
 
 void WebModelStatic::SetOverlayScrollbarEnabled(FrameNode* frameNode, bool isEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateOverlayScrollbarEnabled(isEnabled);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateOverlayScrollbarEnabled(isEnabled);
 }
 
 void WebModelStatic::SetBlockNetwork(FrameNode* frameNode, bool isNetworkBlocked)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateBlockNetwork(isNetworkBlocked);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateBlockNetwork(isNetworkBlocked);
 }
 
 void WebModelStatic::SetHorizontalScrollBarAccessEnabled(FrameNode* frameNode, bool isHorizontalScrollBarAccessEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateHorizontalScrollBarAccessEnabled(isHorizontalScrollBarAccessEnabled);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateHorizontalScrollBarAccessEnabled(isHorizontalScrollBarAccessEnabled);
 }
 
 void WebModelStatic::SetVerticalScrollBarAccessEnabled(FrameNode* frameNode, bool isVerticalScrollBarAccessEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateVerticalScrollBarAccessEnabled(isVerticalScrollBarAccessEnabled);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateVerticalScrollBarAccessEnabled(isVerticalScrollBarAccessEnabled);
 }
 
 void WebModelStatic::SetPinchSmoothModeEnabled(FrameNode* frameNode, bool isPinchSmoothModeEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdatePinchSmoothModeEnabled(isPinchSmoothModeEnabled);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdatePinchSmoothModeEnabled(isPinchSmoothModeEnabled);
 }
 
 void WebModelStatic::SetNativeEmbedModeEnabled(FrameNode* frameNode, bool isEmbedModeEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateNativeEmbedModeEnabled(isEmbedModeEnabled);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateNativeEmbedModeEnabled(isEmbedModeEnabled);
 }
 
 void WebModelStatic::SetTextAutosizing(FrameNode* frameNode, bool isTextAutosizing)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateTextAutosizing(isTextAutosizing);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateTextAutosizing(isTextAutosizing);
 }
 
 void WebModelStatic::SetEnabledHapticFeedback(FrameNode* frameNode, bool isEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateEnabledHapticFeedback(isEnabled);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateEnabledHapticFeedback(isEnabled);
 }
 
 void WebModelStatic::SetOptimizeParserBudgetEnabled(FrameNode *frameNode, const std::optional<bool>& enable)
@@ -266,25 +266,25 @@ void WebModelStatic::SetEnableFollowSystemFontWeight(FrameNode *frameNode,
 void WebModelStatic::SetWebMediaAVSessionEnabled(FrameNode *frameNode, const std::optional<bool>& enable)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateWebMediaAVSessionEnabled(enable.value());
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateWebMediaAVSessionEnabled(enable.value());
 }
 
 void WebModelStatic::JavaScriptOnDocumentStart(FrameNode* frameNode, const ScriptItems& scriptItems)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->JavaScriptOnDocumentStart(scriptItems);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->JavaScriptOnDocumentStart(scriptItems);
 }
 
 void WebModelStatic::JavaScriptOnDocumentEnd(FrameNode* frameNode, const ScriptItems& scriptItems)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->JavaScriptOnDocumentEnd(scriptItems);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->JavaScriptOnDocumentEnd(scriptItems);
 }
 
 void WebModelStatic::JavaScriptOnHeadEnd(FrameNode *frameNode, const ScriptItems& scriptItems)
@@ -296,267 +296,267 @@ void WebModelStatic::JavaScriptOnHeadEnd(FrameNode *frameNode, const ScriptItems
 void WebModelStatic::SetNativeEmbedOptions(FrameNode *frameNode, bool supportDefaultIntrinsicSize)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateIntrinsicSizeEnabled(supportDefaultIntrinsicSize);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateIntrinsicSizeEnabled(supportDefaultIntrinsicSize);
 }
 
 void WebModelStatic::SetMixedMode(FrameNode* frameNode, const std::optional<MixedModeContent>& mixedContentMode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
     if (mixedContentMode) {
-        webPattern->UpdateMixedMode(mixedContentMode.value());
+        webPatternStatic->UpdateMixedMode(mixedContentMode.value());
     } else {
-        webPattern->ResetMixedMode();
+        webPatternStatic->ResetMixedMode();
     }
 }
 
 void WebModelStatic::SetCacheMode(FrameNode* frameNode, const std::optional<WebCacheMode>& cacheMode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
     if (cacheMode) {
-        webPattern->UpdateCacheMode(cacheMode.value());
+        webPatternStatic->UpdateCacheMode(cacheMode.value());
     } else {
-        webPattern->ResetCacheMode();
+        webPatternStatic->ResetCacheMode();
     }
 }
 
 void WebModelStatic::SetDarkMode(FrameNode* frameNode, const std::optional<WebDarkMode>& mode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
     if (mode) {
-        webPattern->UpdateDarkMode(mode.value());
+        webPatternStatic->UpdateDarkMode(mode.value());
     } else {
-        webPattern->ResetDarkMode();
+        webPatternStatic->ResetDarkMode();
     }
 }
 
 void WebModelStatic::SetOverScrollMode(FrameNode* frameNode, const std::optional<OverScrollMode>& mode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
     if (mode) {
-        webPattern->UpdateOverScrollMode(mode.value());
+        webPatternStatic->UpdateOverScrollMode(mode.value());
     } else {
-        webPattern->ResetOverScrollMode();
+        webPatternStatic->ResetOverScrollMode();
     }
 }
 
 void WebModelStatic::SetLayoutMode(FrameNode* frameNode, const std::optional<WebLayoutMode>& mode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->SetLayoutMode(mode.value_or(WebLayoutMode::NONE));
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetLayoutMode(mode.value_or(WebLayoutMode::NONE));
 }
 
 void WebModelStatic::SetCopyOptionMode(FrameNode* frameNode, const std::optional<CopyOptions>& mode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
     if (mode) {
-        webPattern->UpdateCopyOptionMode(static_cast<int32_t>(mode.value()));
+        webPatternStatic->UpdateCopyOptionMode(static_cast<int32_t>(mode.value()));
     } else {
-        webPattern->ResetCopyOptionMode();
+        webPatternStatic->ResetCopyOptionMode();
     }
 }
 
 void WebModelStatic::SetKeyboardAvoidMode(FrameNode* frameNode, const std::optional<WebKeyboardAvoidMode>& mode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
     if (mode) {
-        webPattern->UpdateKeyboardAvoidMode(mode.value());
+        webPatternStatic->UpdateKeyboardAvoidMode(mode.value());
     } else {
-        webPattern->ResetKeyboardAvoidMode();
+        webPatternStatic->ResetKeyboardAvoidMode();
     }
 }
 
 void WebModelStatic::SetAudioResumeInterval(FrameNode* frameNode, const std::optional<int32_t>& resumeInterval)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
     if (resumeInterval) {
-        webPattern->UpdateAudioResumeInterval(resumeInterval.value());
+        webPatternStatic->UpdateAudioResumeInterval(resumeInterval.value());
     } else {
-        webPattern->ResetAudioResumeInterval();
+        webPatternStatic->ResetAudioResumeInterval();
     }
 }
 
 void WebModelStatic::SetAudioExclusive(FrameNode* frameNode, const std::optional<bool>& audioExclusive)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
     if (audioExclusive) {
-        webPattern->UpdateAudioExclusive(audioExclusive.value());
+        webPatternStatic->UpdateAudioExclusive(audioExclusive.value());
     } else {
-        webPattern->ResetAudioExclusive();
+        webPatternStatic->ResetAudioExclusive();
     }
 }
 
 void WebModelStatic::SetBlurOnKeyboardHideMode(FrameNode* frameNode, const std::optional<BlurOnKeyboardHideMode>& mode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
     if (mode) {
-        webPattern->UpdateBlurOnKeyboardHideMode(mode.value());
+        webPatternStatic->UpdateBlurOnKeyboardHideMode(mode.value());
     } else {
-        webPattern->ResetBlurOnKeyboardHideMode();
+        webPatternStatic->ResetBlurOnKeyboardHideMode();
     }
 }
 
 void WebModelStatic::SetTextZoomRatio(FrameNode* frameNode, int32_t textZoomRatioNum)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateTextZoomRatio(textZoomRatioNum);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateTextZoomRatio(textZoomRatioNum);
 }
 
 void WebModelStatic::InitialScale(FrameNode* frameNode, float scale)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateInitialScale(scale);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateInitialScale(scale);
 }
 
 void WebModelStatic::SetUserAgent(FrameNode* frameNode, const std::string& userAgent)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateUserAgent(userAgent);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateUserAgent(userAgent);
 }
 
 void WebModelStatic::SetWebStandardFont(FrameNode* frameNode, const std::string& standardFontFamily)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateWebStandardFont(standardFontFamily);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateWebStandardFont(standardFontFamily);
 }
 
 void WebModelStatic::SetWebSerifFont(FrameNode* frameNode, const std::string& serifFontFamily)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateWebSerifFont(serifFontFamily);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateWebSerifFont(serifFontFamily);
 }
 
 void WebModelStatic::SetWebSansSerifFont(FrameNode* frameNode, const std::string& sansSerifFontFamily)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateWebSansSerifFont(sansSerifFontFamily);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateWebSansSerifFont(sansSerifFontFamily);
 }
 
 void WebModelStatic::SetWebFixedFont(FrameNode* frameNode, const std::string& fixedFontFamily)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateWebFixedFont(fixedFontFamily);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateWebFixedFont(fixedFontFamily);
 }
 
 void WebModelStatic::SetWebFantasyFont(FrameNode* frameNode, const std::string& fantasyFontFamily)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateWebFantasyFont(fantasyFontFamily);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateWebFantasyFont(fantasyFontFamily);
 }
 
 void WebModelStatic::SetWebCursiveFont(FrameNode* frameNode, const std::string& cursiveFontFamily)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateWebCursiveFont(cursiveFontFamily);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateWebCursiveFont(cursiveFontFamily);
 }
 
 void WebModelStatic::SetDefaultFixedFontSize(FrameNode* frameNode, int32_t defaultFixedFontSize)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateDefaultFixedFontSize(defaultFixedFontSize);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateDefaultFixedFontSize(defaultFixedFontSize);
 }
 
 void WebModelStatic::SetDefaultFontSize(FrameNode* frameNode, int32_t defaultFontSize)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateDefaultFontSize(defaultFontSize);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateDefaultFontSize(defaultFontSize);
 }
 
 void WebModelStatic::SetMinFontSize(FrameNode* frameNode, int32_t minFontSize)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateMinFontSize(minFontSize);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateMinFontSize(minFontSize);
 }
 
 void WebModelStatic::SetMinLogicalFontSize(FrameNode* frameNode, int32_t minLogicalFontSize)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateMinLogicalFontSize(minLogicalFontSize);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateMinLogicalFontSize(minLogicalFontSize);
 }
 
 void WebModelStatic::SetDefaultTextEncodingFormat(FrameNode* frameNode, const std::string& textEncodingFormat)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
     if (textEncodingFormat.empty()) {
-        webPattern->ResetDefaultTextEncodingFormat();
+        webPatternStatic->ResetDefaultTextEncodingFormat();
     } else {
-        webPattern->UpdateDefaultTextEncodingFormat(textEncodingFormat);
+        webPatternStatic->UpdateDefaultTextEncodingFormat(textEncodingFormat);
     }
 }
 
 void WebModelStatic::RegisterNativeEmbedRule(FrameNode* frameNode, const std::string& tag, const std::string& type)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateNativeEmbedRuleTag(tag);
-    webPattern->UpdateNativeEmbedRuleType(type);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateNativeEmbedRuleTag(tag);
+    webPatternStatic->UpdateNativeEmbedRuleType(type);
 }
 
 void WebModelStatic::SetNativeVideoPlayerConfig(FrameNode* frameNode, bool enable, bool shouldOverlay)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateNativeVideoPlayerConfig(std::make_tuple(enable, shouldOverlay));
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateNativeVideoPlayerConfig(std::make_tuple(enable, shouldOverlay));
 }
 
 void WebModelStatic::SetNestedScrollExt(FrameNode* frameNode, const std::optional<NestedScrollOptionsExt>& nestedOpt)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
     if (nestedOpt) {
-        webPattern->SetNestedScrollExt(nestedOpt.value());
+        webPatternStatic->SetNestedScrollExt(nestedOpt.value());
     } else {
         NestedScrollOptionsExt defaultNestedOpt = {
             .scrollUp = NestedScrollMode::SELF_FIRST,
@@ -564,42 +564,42 @@ void WebModelStatic::SetNestedScrollExt(FrameNode* frameNode, const std::optiona
             .scrollLeft = NestedScrollMode::SELF_FIRST,
             .scrollRight = NestedScrollMode::SELF_FIRST,
         };
-        webPattern->SetNestedScrollExt(defaultNestedOpt);
+        webPatternStatic->SetNestedScrollExt(defaultNestedOpt);
     }
 }
 
 void WebModelStatic::SetSelectionMenuOptions(FrameNode* frameNode, const WebMenuOptionsParam& webMenuOption)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateSelectionMenuOptions(std::move(webMenuOption));
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateSelectionMenuOptions(std::move(webMenuOption));
 }
 
 void WebModelStatic::SetEditMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
     const NG::OnMenuItemClickCallback&& onMenuItemClick)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateEditMenuOptions(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
 void WebModelStatic::SetNewDragStyle(FrameNode* frameNode, bool isNewDragStyle)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->SetNewDragStyle(isNewDragStyle);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetNewDragStyle(isNewDragStyle);
 }
 
 void WebModelStatic::SetPreviewSelectionMenu(
     FrameNode* frameNode, const std::shared_ptr<WebPreviewSelectionMenuParam>& param)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->SetPreviewSelectionMenu(param);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetPreviewSelectionMenu(param);
 }
 
 void WebModelStatic::SetOnPageFinish(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
@@ -1081,9 +1081,9 @@ void WebModelStatic::SetOnLoadIntercept(FrameNode* frameNode, std::function<bool
 void WebModelStatic::SetOnControllerAttached(FrameNode* frameNode, std::function<void()>&& callback)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->SetOnControllerAttachedCallback(std::move(callback));
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetOnControllerAttachedCallback(std::move(callback));
 }
 
 void WebModelStatic::SetOverScrollId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
@@ -1232,48 +1232,48 @@ void WebModelStatic::NotifyPopupWindowResultStatic(int32_t webId, bool result)
 void WebModelStatic::SetJsEnabled(FrameNode* frameNode, bool isJsEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateJsEnabled(isJsEnabled);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateJsEnabled(isJsEnabled);
 }
 
 void WebModelStatic::SetFileAccessEnabled(FrameNode* frameNode, bool isFileAccessEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateFileAccessEnabled(isFileAccessEnabled);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateFileAccessEnabled(isFileAccessEnabled);
 }
 
 void WebModelStatic::SetDomStorageAccessEnabled(FrameNode* frameNode, bool isDomStorageAccessEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateDomStorageAccessEnabled(isDomStorageAccessEnabled);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateDomStorageAccessEnabled(isDomStorageAccessEnabled);
 }
 
 void WebModelStatic::SetZoomAccessEnabled(FrameNode* frameNode, bool isZoomAccessEnabled)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateZoomAccessEnabled(isZoomAccessEnabled);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateZoomAccessEnabled(isZoomAccessEnabled);
 }
 
 void WebModelStatic::SetMultiWindowAccessEnabled(FrameNode* frameNode, bool isMultiWindowAccessEnable)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateMultiWindowAccessEnabled(isMultiWindowAccessEnable);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateMultiWindowAccessEnabled(isMultiWindowAccessEnable);
 }
 
 void WebModelStatic::SetAllowWindowOpenMethod(FrameNode* frameNode, bool isAllowWindowOpenMethod)
 {
     CHECK_NULL_VOID(frameNode);
-    auto webPattern = AceType::DynamicCast<WebPattern>(frameNode->GetPattern());
-    CHECK_NULL_VOID(webPattern);
-    webPattern->UpdateAllowWindowOpenMethod(isAllowWindowOpenMethod);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateAllowWindowOpenMethod(isAllowWindowOpenMethod);
 }
 } // namespace OHOS::Ace::NG
