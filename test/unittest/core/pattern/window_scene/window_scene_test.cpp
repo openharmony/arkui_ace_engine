@@ -440,7 +440,7 @@ HWTEST_F(WindowSceneTest, OnPreLoadStartingWindowFinished, TestSize.Level1)
 
     windowScene->OnPreLoadStartingWindowFinished();
     usleep(WAIT_SYNC_IN_NS);
-    EXPECT_EQ(windowScene->startingWindow_, nullptr);
+    ASSERT_NE(windowScene->startingWindow_, nullptr);
 }
 
 /**
