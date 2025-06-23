@@ -100,6 +100,7 @@ public:
     using TransformHintChangedCallbackMap = std::unordered_map<int32_t, std::function<void(uint32_t)>>;
     using PredictTask = std::function<void(int64_t, bool)>;
     using RotationEndCallbackMap = std::unordered_map<int32_t, std::function<void()>>;
+    using RawKeyboardChangedCallbackMap = std::unordered_map<int32_t, std::function<void()>>;
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
@@ -686,6 +687,20 @@ public:
         halfFoldHoverChangedCallbackMap_.erase(callbackId);
     }
 
+    int32_t RegisterRawKeyboardChangedCallback(std::function<void()>&& callback)
+    {
+        if (callback) {
+            rawKeyboardChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
+
+    void UnRegisterRawKeyboardChangedCallback(int32_t callbackId)
+    {
+        rawKeyboardChangedCallbackMap_.erase(callbackId);
+    }
+
     void UpdateHalfFoldHoverStatus(int32_t windowWidth, int32_t windowHeight);
 
     bool IsHalfFoldHoverStatus()
@@ -694,6 +709,8 @@ public:
     }
 
     void OnHalfFoldHoverChangedCallback();
+
+    void OnRawKeyboardChangedCallback() override;
 
     int32_t RegisterFoldDisplayModeChangedCallback(std::function<void(FoldDisplayMode)>&& callback)
     {
@@ -1437,6 +1454,7 @@ private:
     HalfFoldHoverChangedCallbackMap halfFoldHoverChangedCallbackMap_;
     FoldDisplayModeChangedCallbackMap foldDisplayModeChangedCallbackMap_;
     TransformHintChangedCallbackMap transformHintChangedCallbackMap_;
+    RawKeyboardChangedCallbackMap rawKeyboardChangedCallbackMap_;
 
     bool isOnAreaChangeNodesCacheVaild_ = false;
     std::vector<FrameNode*> onAreaChangeNodesCache_;

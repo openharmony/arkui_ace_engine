@@ -185,6 +185,7 @@ private:
     bool expandDisplay_ = false;
     Rect uiExtensionHostWindowRect_;
     Dimension limitPos_;
+    int32_t rowKeyboardCallbackId_ = -1;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOAST_TOAST_PATTERN_H

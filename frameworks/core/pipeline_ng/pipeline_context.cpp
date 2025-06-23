@@ -6026,6 +6026,16 @@ void PipelineContext::OnHalfFoldHoverChangedCallback()
     }
 }
 
+void PipelineContext::OnRawKeyboardChangedCallback()
+{
+    auto tempRawKeyboardChangedCallbackMap = rawKeyboardChangedCallbackMap_;
+    for (auto&& [id, callback] : tempRawKeyboardChangedCallbackMap) {
+        if (callback) {
+            callback();
+        }
+    }
+}
+
 void PipelineContext::StartFoldStatusDelayTask(FoldStatus foldStatus)
 {
     if (foldStatusDelayTask_) {

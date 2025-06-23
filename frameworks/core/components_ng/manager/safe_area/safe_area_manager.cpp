@@ -455,6 +455,9 @@ void SafeAreaManager::SetKeyboardInfo(float height)
         keyboardOrientation, height);
     SetRawKeyboardHeight(height);
     keyboardOrientation_ = keyboardOrientation;
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->OnRawKeyboardChangedCallback();
 }
 
 bool SafeAreaManager::CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode)
