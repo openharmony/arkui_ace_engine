@@ -301,6 +301,7 @@ void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageFit& src)
         case ARK_IMAGE_FIT_BOTTOM_START: dst = ImageFit::BOTTOM_START; break;
         case ARK_IMAGE_FIT_BOTTOM: dst = ImageFit::BOTTOM; break;
         case ARK_IMAGE_FIT_BOTTOM_END: dst = ImageFit::BOTTOM_END; break;
+        case ARK_IMAGE_FIT_MATRIX: dst = ImageFit::MATRIX; break;
         default: LOGE("Unexpected enum value in Ark_ImageFit: %{public}d", src);
     }
 }
