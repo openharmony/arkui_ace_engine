@@ -63,7 +63,7 @@ void ScrollBarPattern::OnModifyDone()
     }
     auto axis = axis_;
     axis_ = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         SetScrollBar(DisplayMode::ON);
     }
     if (axis_ == axis && scrollableEvent_) {
@@ -730,8 +730,9 @@ void ScrollBarPattern::InitPanRecognizer()
     PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.Value() } };
     auto context = GetContext();
     if (context && (context->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN)) {
-        distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
-            { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
+        double dipScale = context->GetDipScale();
+        distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.Value() * dipScale },
+            { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.Value() * dipScale } };
     }
     panRecognizer_ = MakeRefPtr<PanRecognizer>(1, panDirection, distanceMap);
     panRecognizer_->SetOnActionUpdate([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {

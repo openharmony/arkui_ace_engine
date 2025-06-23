@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -377,7 +378,7 @@ public:
     virtual float CalcPatternOffset(float scrollBarOffset) const;
     Color GetForegroundColor() const;
     void SetHoverWidth(const RefPtr<ScrollBarTheme>& theme);
-    void SetNormalWidth(const Dimension& normalWidth);
+    void SetNormalWidth(const Dimension& normalWidth, const RefPtr<PipelineContext>& context = nullptr);
     void SetScrollable(bool isScrollable);
     void SetPositionMode(PositionMode positionMode);
     void SetDisplayMode(DisplayMode displayMode);
@@ -390,8 +391,8 @@ public:
     void SetGestureEvent();
     void SetMouseEvent();
     void SetHoverEvent();
-    void FlushBarWidth();
-    virtual void CalcReservedHeight();
+    void FlushBarWidth(const RefPtr<PipelineContext>& context = nullptr);
+    virtual void CalcReservedHeight(const RefPtr<PipelineContext>& context = nullptr);
     void ScheduleDisappearDelayTask();
     float GetMainOffset(const Offset& offset) const;
     float GetMainSize(const Size& size) const;
@@ -448,10 +449,10 @@ public:
 
 protected:
     void InitTheme();
-    virtual void SetBarRegion(const Offset& offset, const Size& size);
+    virtual void SetBarRegion(const Offset& offset, const Size& size, const RefPtr<PipelineContext>& context = nullptr);
     virtual void SetRoundTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset,
         double mainScrollExtent);
-    double NormalizeToPx(const Dimension& dimension) const;
+    double NormalizeToPx(const Dimension& dimension, const RefPtr<PipelineContext>& context = nullptr) const;
     Dimension GetNormalWidth()
     {
         return normalWidth_;
@@ -635,8 +636,7 @@ protected:
 
 private:
     void SetRectTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent,
-        int32_t scrollSource);
-    void SetRectTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent);
+        int32_t scrollSource, const RefPtr<PipelineContext>& context = nullptr);
 
     void UpdateActiveRectSize(double activeSize);
     void UpdateActiveRectOffset(double activeMainOffset);
@@ -649,7 +649,8 @@ private:
     void ProcessFrictionMotionStop();
     void CalcScrollBarRegion(double activeMainOffset, double activeSize, const Offset& offset, const Size& size,
         double& inactiveMainOffset, double& inactiveSize);
-    void GetRadiusAndPadding(float& startRadius, float& endRadius, float& padding);
+    void GetRadiusAndPadding(
+        float& startRadius, float& endRadius, float& padding, const RefPtr<PipelineContext>& context = nullptr);
     DisplayMode displayMode_ = DisplayMode::AUTO;
     ShapeMode shapeMode_ = ShapeMode::RECT;
     PositionMode positionMode_ = PositionMode::RIGHT;

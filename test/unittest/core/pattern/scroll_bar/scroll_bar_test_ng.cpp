@@ -350,8 +350,8 @@ HWTEST_F(ScrollBarTestNg, HandleDragUpdate001, TestSize.Level1)
     pattern_->HandleDragUpdate(info);
     FlushUITasks();
     EXPECT_EQ(pattern_->currentOffset_, 10.f);
-    auto scrollDelta = pattern_->scrollBarProxy_->CalcPatternOffset(scrollPattern_->scrollableDistance_,
-        pattern_->scrollableDistance_, -pattern_->currentOffset_);
+    auto scrollDelta = pattern_->scrollBarProxy_->CalcPatternOffset(
+        scrollPattern_->scrollableDistance_, pattern_->scrollableDistance_, -pattern_->currentOffset_);
     EXPECT_EQ(scrollPattern_->currentOffset_, scrollDelta);
 
     info.SetMainDelta(10.f);
@@ -1172,7 +1172,8 @@ HWTEST_F(ScrollBarTestNg, SetScrollBarColorTest, TestSize.Level1)
 {
     ScrollBarModelNG scrollBarModel;
     auto scrollBarProxy = scrollBarModel.GetScrollBarProxy(nullptr);
-    scrollBarModel.Create(scrollBarProxy, true, true, static_cast<int>(Axis::VERTICAL), static_cast<int>( DisplayMode::ON));
+    scrollBarModel.Create(
+        scrollBarProxy, true, true, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON));
     scrollBarModel.SetScrollBarColor(Color::FromString(SCROLLBAR_COLOR_BLUE));
     GetScrollBar();
     CreateScrollBarChild();
