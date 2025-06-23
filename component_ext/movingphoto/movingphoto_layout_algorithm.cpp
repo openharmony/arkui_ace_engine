@@ -19,6 +19,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t ROUND_XMAGE_MODE_VALUE = 10;
+constexpr int32_t ROUND_XMAGE_PIXEL_GAP = 2;
 }
 
 void MovingPhotoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -122,8 +123,8 @@ void MovingPhotoLayoutAlgorithm::MeasureInRoundXmageMode(LayoutWrapper* layoutWr
             auto columnSize = contentSize;
             SizeF xmageOffsetRatio = pattern->CalculateXmageOffsetRatio(contentSize);
             SizeF imageSize = layoutProperty->GetImageSize().value();
-            columnSize.SetHeight(imageSize.Height() * xmageOffsetRatio.Height() + 1);
-            columnSize.SetWidth(imageSize.Width() * xmageOffsetRatio.Width() + 1);
+            columnSize.SetHeight(imageSize.Height() * xmageOffsetRatio.Height() + ROUND_XMAGE_PIXEL_GAP);
+            columnSize.SetWidth(imageSize.Width() * xmageOffsetRatio.Width() + ROUND_XMAGE_PIXEL_GAP);
             layoutConstraintForColumn.UpdateSelfMarginSizeWithCheck(OptionalSizeF(columnSize));
             layoutConstraintForColumn.UpdateMaxSizeWithCheck(columnSize);
             layoutConstraintForColumn.UpdateMinSizeWithCheck(columnSize);
@@ -161,8 +162,8 @@ void MovingPhotoLayoutAlgorithm::ChildMeasureInXmage(RefPtr<LayoutWrapper> child
         if (columnChild->GetHostTag() == V2::COLUMN_ETS_TAG) {
             auto layoutConstraintForVideo = layoutConstraint;
             auto videoSize = contentSize;
-            videoSize.SetHeight(imageSize.Height() * xmageRatio.Height());
-            videoSize.SetWidth(imageSize.Width() * xmageRatio.Width());
+            videoSize.SetHeight(imageSize.Height() * xmageRatio.Height() + ROUND_XMAGE_PIXEL_GAP);
+            videoSize.SetWidth(imageSize.Width() * xmageRatio.Width() + ROUND_XMAGE_PIXEL_GAP);
             layoutConstraintForVideo.UpdateSelfMarginSizeWithCheck(OptionalSizeF(videoSize));
             layoutConstraintForVideo.UpdateMaxSizeWithCheck(videoSize);
             layoutConstraintForVideo.UpdateMinSizeWithCheck(videoSize);
@@ -195,7 +196,8 @@ SizeF MovingPhotoLayoutAlgorithm::GetRoundXmageLayoutOffset(LayoutWrapper* layou
         }
         SizeF xmageOffset = layoutProperty->GetXmageOffset().value();
         SizeF xmageOffsetRatio = pattern->CalculateXmageOffsetRatio(contentSize);
-        ret = SizeF(xmageOffset.Width() * xmageOffsetRatio.Width(), xmageOffset.Height() * xmageOffsetRatio.Height());
+        ret = SizeF(xmageOffset.Width() * xmageOffsetRatio.Width() - 1,
+                    xmageOffset.Height() * xmageOffsetRatio.Height() - 1);
     }
     return ret;
 }

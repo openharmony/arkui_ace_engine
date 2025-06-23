@@ -36,7 +36,7 @@ constexpr int32_t ROUND_XMAGE_MODE_VALUE = 10;
 constexpr int64_t PERIOD_START = 0;
 constexpr int32_t PREPARE_RETURN = 0;
 constexpr int64_t VIDEO_PLAYTIME_START_POSITION = 0;
-constexpr int32_t IMAGE_LOADING_COMPLETE = 0;
+constexpr int32_t IMAGE_DECODE_COMPLETE = 1;
 constexpr int32_t DURATION_FLAG = -1;
 const std::string THUMBNAIL_MEDIUM_JOINT = "?&oper=thumbnail&width=-1&height=-1&path=";
 const std::string COVER_POSITION = "cover_positon";
@@ -54,6 +54,7 @@ constexpr int32_t ANALYZER_DELAY_TIME = 100;
 constexpr int32_t ANALYZER_CAPTURE_DELAY_TIME = 1000;
 constexpr int32_t AVERAGE_VALUE = 2;
 constexpr int32_t US_CONVERT = 1000;
+constexpr int32_t ROUND_XMAGE_PIXEL_GAP = 2;
 }
 MovingPhotoPattern::MovingPhotoPattern(const RefPtr<MovingPhotoController>& controller)
     : instanceId_(Container::CurrentId()), controller_(controller)
@@ -429,7 +430,7 @@ void MovingPhotoPattern::HandleImageCompleteEvent(const LoadImageSuccessEvent& i
 {
     auto loadingStatus = info.GetLoadingStatus();
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "HandleImageCompleteEvent start:%{public}d.", loadingStatus);
-    if (loadingStatus == IMAGE_LOADING_COMPLETE) {
+    if (loadingStatus == IMAGE_DECODE_COMPLETE) {
         FireMediaPlayerImageComplete();
     }
 }
@@ -822,7 +823,6 @@ void MovingPhotoPattern::SetRenderContextBoundsInRoundXmage(
     CHECK_NULL_VOID(host);
     auto pattern = DynamicCast<MovingPhotoPattern>(host->GetPattern());
     CHECK_NULL_VOID(pattern);
-    float ratio = 0;
     SizeF xmageOffset = SizeF(0, 0);
     SizeF imageSize = SizeF(0, 0);
     SizeF xmageOffsetRatio = SizeF(0, 0);
@@ -831,23 +831,18 @@ void MovingPhotoPattern::SetRenderContextBoundsInRoundXmage(
     }
     if (layoutProperty->HasImageSize()) {
         imageSize = layoutProperty->GetImageSize().value();
-        ratio = CalculateRatio(movingPhotoNodeSize);
         xmageOffsetRatio = pattern->CalculateXmageOffsetRatio(movingPhotoNodeSize);
     }
     if (columnRenderContext_) {
-        columnRenderContext_->SetBounds(
-            (movingPhotoNodeSize.Width() - videoFrameSize.Width()) / HALF,
-            (movingPhotoNodeSize.Height() - videoFrameSize.Height()) / HALF, imageSize.Width() * ratio,
-            imageSize.Height() * ratio);
+        columnRenderContext_->SetBounds(0, 0, imageSize.Width() * xmageOffsetRatio.Width() + ROUND_XMAGE_PIXEL_GAP,
+            imageSize.Height() * xmageOffsetRatio.Height() + ROUND_XMAGE_PIXEL_GAP);
     }
     if (renderContextForMediaPlayer_) {
-        renderContextForMediaPlayer_->SetBounds(
-            (movingPhotoNodeSize.Width() - videoFrameSize.Width()) / HALF,
-            (movingPhotoNodeSize.Height() - videoFrameSize.Height()) / HALF, imageSize.Width() * ratio,
-            imageSize.Height() * ratio);
+        renderContextForMediaPlayer_->SetBounds(0, 0,
+            imageSize.Width() * xmageOffsetRatio.Width() + ROUND_XMAGE_PIXEL_GAP,
+            imageSize.Height() * xmageOffsetRatio.Height() + ROUND_XMAGE_PIXEL_GAP);
     }
 }
-
 SizeF MovingPhotoPattern::CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize)
 {
     if (NearZero(rawSize.Height()) || NearZero(rawSize.Width()) || NearZero(layoutSize.Height())) {
