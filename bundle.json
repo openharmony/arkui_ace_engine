@@ -23,6 +23,7 @@
             "ace_engine_feature_enable_web",
             "ace_engine_feature_enable_pgo",
             "ace_engine_feature_enable_codemerge",
+            "ace_engine_feature_enable_inst_prefetch",
             "ace_engine_feature_pgo_path",
             "ace_engine_feature_enable_atomic",
             "ace_engine_feature_enable_coverage",
