@@ -38,7 +38,7 @@ export interface CompatibleComponentInfo {
 }
 
 /** @memo */
-export function ArkUICompatible(
+export function compatibleComponent(
     init: () => CompatibleComponentInfo,
     update: (instance: ESValue) => void
 ): void {
