@@ -860,8 +860,9 @@ public:
         return textEffect_;
     }
     RefPtr<TextEffect> GetOrCreateTextEffect(const std::u16string& content, bool& needUpdateTypography);
-    bool CheckWhetherNeedResetTextEffect(bool isNumber = true);
-    void ReseTextEffect();
+    void RelayoutResetOrUpdateTextEffect();
+    void ReseTextEffect(bool clear = true);
+    bool ResetTextEffectBeforeLayout();
     
 protected:
     int32_t GetClickedSpanPosition()

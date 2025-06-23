@@ -27,7 +27,7 @@ class MockTextEffect : public TextEffect {
 public:
     MockTextEffect();
     ~MockTextEffect() = default;
-    int UpdateEffectConfig(const std::unordered_map<TextEffectAttribute, std::string>& config) override;
+    int UpdateEffectConfig(TextFlipDirection direction, bool enableBlur) override;
     int AppendTypography(const std::vector<RefPtr<Paragraph>>& paragraphs) override;
     void RemoveTypography(const std::vector<RefPtr<Paragraph>>& paragraphs) override;
     int UpdateTypography(std::vector<std::pair<RefPtr<Paragraph>, RefPtr<Paragraph>>>& paragraphs) override;
