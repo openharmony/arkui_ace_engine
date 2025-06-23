@@ -551,6 +551,23 @@ static const std::unordered_set<std::string> unsupportedTargetsInCustomEnv = {
     "UIExtensionProxy",
     "FormLink",
     "AbilityController",
+    "Navigation",
+    "Navigator",
+    "NavRouter",
+    "NavDestination",
+    "XComponent",
+    "XComponentController",
+    "EffectComponent",
+    "RichText",
+    "WebController",
+    "Web",
+    "LocationButton",
+    "PasteButton",
+    "SaveButton",
+    "WithTheme",
+    "Camera",
+    "Piece",
+    "Rating",
 };
 
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {

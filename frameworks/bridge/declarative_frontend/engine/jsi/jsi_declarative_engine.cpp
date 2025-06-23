@@ -190,6 +190,28 @@ shared_ptr<JsValue> RequireNativeModule(const shared_ptr<JsRuntime>& runtime, co
     return runtime->NewNull();
 }
 
+shared_ptr<JsValue> RequireNativeModuleForCustomRuntime(const shared_ptr<JsRuntime>& runtime,
+    const shared_ptr<JsValue>& thisObj, const std::vector<shared_ptr<JsValue>>& argv, int32_t argc)
+{
+    std::string moduleName = argv[0]->ToString(runtime);
+
+    // has already init module object
+    shared_ptr<JsValue> global = runtime->GetGlobal();
+    shared_ptr<JsValue> moduleObject = global->GetProperty(runtime, moduleName);
+    if (moduleObject != nullptr && moduleObject->IsObject(runtime)) {
+        return moduleObject;
+    }
+
+    // init module object first time
+    shared_ptr<JsValue> newObject = runtime->NewObject();
+    if (ModuleManager::GetInstance()->InitModuleForCustomRuntime(runtime, newObject, moduleName)) {
+        global->SetProperty(runtime, moduleName, newObject);
+        return newObject;
+    }
+
+    return runtime->NewNull();
+}
+
 inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
 {
     std::string str("arkui_binary_jsEnumStyle_abc_loadFile");
@@ -324,6 +346,13 @@ inline bool PreloadExports(const shared_ptr<JsRuntime>& runtime, const shared_pt
 inline bool PreloadRequireNative(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
 {
     return global->SetProperty(runtime, "requireNativeModule", runtime->NewFunction(RequireNativeModule));
+}
+
+[[maybe_unused]] inline bool PreloadRequireNativeForCustomRuntime(
+    const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
+{
+    return global->SetProperty(
+        runtime, "requireNativeModule", runtime->NewFunction(RequireNativeModuleForCustomRuntime));
 }
 
 /**
@@ -824,6 +853,10 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtim
 
     // preload perfutil
     PreloadPerfutil(arkRuntime, global);
+
+    // preload exports and requireNative
+    PreloadExports(arkRuntime, global);
+    PreloadRequireNativeForCustomRuntime(arkRuntime, global);
 
     // preload js enums
     LOGI("preload js enums in PreloadAceModuleForCustomRuntime");
