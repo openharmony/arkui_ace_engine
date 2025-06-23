@@ -139,7 +139,7 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
     itemGenFuncs_: Map<string, RepeatItemBuilder<T>> = new Map<string, RepeatItemBuilder<T>>();
     keyGenFunc_?: (item: T, index: number) => string;
     dataLength_: number = 0;
-    totalCount_: number | (() => number) = 0;
+    totalCount_: number = 0;
     templateCacheSize_: Map<string, number> = new Map<string, number>();
     ttypeGenFunc_: TemplateTypedFunc<T> = () => RepeatEachFuncType;
     reusable_: boolean = false;
@@ -167,7 +167,7 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
 
     /** @memo */
     virtualScroll(options?: VirtualScrollOptions): UIRepeatAttributeImpl<T> {
-        this.totalCount_ = options?.onTotalCount ?? options?.totalCount ?? this.dataLength_;
+        this.totalCount_ = options?.onTotalCount?.() ?? options?.totalCount ?? this.dataLength_;
         this.reusable_ = options?.reusable !== false;
 
         this.isVirtualScroll_ = true;
@@ -202,8 +202,7 @@ function virtualRender<T>(
     repeatId: KoalaCallsiteKey,
 ): void {
     let dataSource = remember(() => new RepeatDataSource<T>(arr));
-    const count = (typeof attributes.totalCount_ === 'function') ? attributes.totalCount_() : attributes.totalCount_;
-    dataSource.updateData(arr, count);
+    dataSource.updateData(arr, attributes.totalCount_);
     /** @memo */
     const itemGen = (item: T, index: number): void => {
         const ri = new RepeatItemImpl<T>(item, index);
