@@ -2252,7 +2252,7 @@ class OnTouchTestDoneModifier extends ModifierWithKey<TouchTestDoneCallback> {
   static identity: Symbol = Symbol('onTouchTestDone');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().common.resetOnOnTouchTestDone(node);
+      getUINativeModule().common.resetOnTouchTestDone(node);
     } else {
       getUINativeModule().common.setOnTouchTestDone(node, this.value);
     }
