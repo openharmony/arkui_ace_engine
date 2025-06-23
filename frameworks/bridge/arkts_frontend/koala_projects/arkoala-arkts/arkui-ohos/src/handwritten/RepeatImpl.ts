@@ -45,7 +45,7 @@ export function RepeatImpl<T>(
         scheduleCallback(() => // postpone until node is attached
             repeat.templateCacheSize_.forEach((size: number, template: string) => node.setReusePoolSize(size, template + repeatId))
         );
-        virtualRender<T>(arr, repeat.itemGenFuncs_, repeatId, repeat.keyGenFunc_, repeat.ttypeGenFunc_, repeat.reusable_);
+        virtualRender<T>(arr, repeat, repeatId);
     } else {
         nonVirtualRender<T>(arr, repeat.itemGenFuncs_.get(RepeatEachFuncType)!, repeat.keyGenFunc_);
     }
@@ -79,17 +79,19 @@ class RepeatItemImpl<T> implements RepeatItem<T> {
 
 class RepeatDataSource<T> implements IDataSource<T> {
     private arr_: RepeatArray<T>;
-    private listener?: InternalListener
+    private listener_?: InternalListener;
+    private total_: number;
 
     constructor(arr: RepeatArray<T>) {
         this.arr_ = arr;
     }
 
     totalCount(): number {
-        return this.arr_.length;
+        return this.total_;
     }
 
-    updateData(newArr: RepeatArray<T>) {
+    updateData(newArr: RepeatArray<T>, totalCount: number) {
+        this.total_ = totalCount
         // Compare array references first
         if (this.arr_ === newArr) {
             return;
@@ -97,13 +99,13 @@ class RepeatDataSource<T> implements IDataSource<T> {
         // Shallow compare: check length and each element by reference
         if (this.arr_.length !== newArr.length) {
             this.arr_ = newArr;
-            this.listener?.update(0, Number.POSITIVE_INFINITY, this.arr_.length - newArr.length)
+            this.listener_?.update(0, Number.POSITIVE_INFINITY, this.arr_.length - newArr.length);
             return;
         }
         for (let i = 0; i < newArr.length; i++) {
             if (this.arr_[i] !== newArr[i]) {
                 this.arr_ = newArr;
-                this.listener?.update(i, Number.POSITIVE_INFINITY, 0)
+                this.listener_?.update(i, Number.POSITIVE_INFINITY, 0);
                 return;
             }
         }
@@ -119,14 +121,14 @@ class RepeatDataSource<T> implements IDataSource<T> {
 
     registerDataChangeListener(listener: DataChangeListener): void {
         if (listener instanceof InternalListener)
-            this.listener = listener as InternalListener
+            this.listener_ = listener as InternalListener;
         else
-            throw Error("Invalid listener registration. Repeat's data source object shouldn't be exposed to other modules")
+            throw Error("Invalid listener registration. Repeat's data source object shouldn't be exposed to other modules");
     }
 
     unregisterDataChangeListener(listener: DataChangeListener): void {
-        if (listener !== this.listener) throw Error("Invalid deregistration")
-        this.listener = undefined
+        if (listener !== this.listener_) throw Error("Invalid deregistration");
+        this.listener_ = undefined;
     }
 }
 
@@ -136,16 +138,15 @@ const RepeatEachFuncType: string = '';
 export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
     itemGenFuncs_: Map<string, RepeatItemBuilder<T>> = new Map<string, RepeatItemBuilder<T>>();
     keyGenFunc_?: (item: T, index: number) => string;
-    dataLength_: number = 0
-    totalCount_?: number | (() => number);
-    totalCountSpecified_?: boolean;
+    dataLength_: number = 0;
+    totalCount_: number | (() => number) = 0;
     templateCacheSize_: Map<string, number> = new Map<string, number>();
-    ttypeGenFunc_?: TemplateTypedFunc<T>;
-    reusable_?: boolean;
+    ttypeGenFunc_: TemplateTypedFunc<T> = () => RepeatEachFuncType;
+    reusable_: boolean = false;
     isVirtualScroll_: boolean = false;
 
     updateDataLength(value: number) {
-        this.dataLength_ = value
+        this.dataLength_ = value;
     }
 
     /** @memo */
@@ -166,22 +167,8 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
 
     /** @memo */
     virtualScroll(options?: VirtualScrollOptions): UIRepeatAttributeImpl<T> {
-        // use array length as default value
-        this.totalCount_ = this.dataLength_;
-        this.totalCountSpecified_ = false;
-
-        if (options?.totalCount && Number.isInteger(options?.totalCount!) && (options?.totalCount as number) >= 0) {
-            this.totalCount_ = options?.totalCount;
-            this.totalCountSpecified_ = true;
-        }
-        if (typeof options?.reusable === 'boolean') {
-            this.reusable_ = options!.reusable;
-        } else if (options?.reusable === null) {
-            this.reusable_ = true;
-            throw new Error('Repeat.reusable type should be boolean. Use default value: true.');
-        } else {
-            this.reusable_ = true;
-        }
+        this.totalCount_ = options?.onTotalCount ?? options?.totalCount ?? this.dataLength_;
+        this.reusable_ = options?.reusable !== false;
 
         this.isVirtualScroll_ = true;
         return this;
@@ -208,38 +195,37 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
     }
 }
 
-/** @memo */
-function virtualRender<T>(arr: RepeatArray<T>,
-    itemGenFuncs: Map<string, RepeatItemBuilder<T>>,
+/** @memo:intrinsic */
+function virtualRender<T>(
+    arr: RepeatArray<T>,
+    attributes: UIRepeatAttributeImpl<T>,
     repeatId: KoalaCallsiteKey,
-    keyGenerator?: (element: T, index: number) => string,
-    typedFunc?: TemplateTypedFunc<T>,
-    reusable?: boolean,
 ): void {
     let dataSource = remember(() => new RepeatDataSource<T>(arr));
-    dataSource.updateData(arr);
+    const count = (typeof attributes.totalCount_ === 'function') ? attributes.totalCount_() : attributes.totalCount_;
+    dataSource.updateData(arr, count);
     /** @memo */
     const itemGen = (item: T, index: number): void => {
-        const ri = new RepeatItemImpl<T>(item, index as number);
-        let _type: string = typedFunc ? typedFunc!(item, index as number) : RepeatEachFuncType;
-        if (!itemGenFuncs.has(_type)) {
+        const ri = new RepeatItemImpl<T>(item, index);
+        let _type: string = attributes.ttypeGenFunc_(item, index);
+        if (!attributes.itemGenFuncs_.has(_type)) {
             _type = RepeatEachFuncType;
         }
         /** @memo */
-        const itemBuilder = itemGenFuncs.get(_type)!;
+        const itemBuilder = attributes.itemGenFuncs_.get(_type)!;
         /**
          * wrap in reusable node.
          * To optimize performance, insert reuseKey through compiler plugin to the content of itemBuilder.
          */
-        if (reusable) {
+        if (attributes.reusable_) {
             NodeAttach(() => ArkColumnPeer.create(undefined), (node: ArkColumnPeer) => {
                 itemBuilder(ri);
-            }, _type + repeatId) // using type as reuseKey
+            }, _type + repeatId); // using type as reuseKey
         } else {
             itemBuilder(ri);
         }
-    }
-    LazyForEachImpl<T>(dataSource, itemGen, keyGenerator);
+    };
+    LazyForEachImpl<T>(dataSource, itemGen, attributes.keyGenFunc_);
 }
 
 /** @memo */
