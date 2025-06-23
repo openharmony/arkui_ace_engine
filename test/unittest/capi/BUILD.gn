@@ -123,6 +123,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/root/root_scene_model.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/screen/screen_model.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/calendar_picker/calendar_picker_model_static.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/linear_layout/column_model_ng_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/linear_layout/row_model_ng_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/linear_split/linear_split_model_ng_static.cpp",
