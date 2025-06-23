@@ -613,6 +613,8 @@ protected:
         return 0.0f;
     }
 
+    void LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int32_t start, int32_t end);
+
     virtual void MeasureHeader(LayoutWrapper* layoutWrapper) {}
     virtual void LayoutHeader(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize) {}
     virtual void CalcContentOffset(const RefPtr<ListLayoutProperty>& property);

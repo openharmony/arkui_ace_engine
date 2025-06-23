@@ -416,6 +416,11 @@ public:
         focusGroupIndex_ = index;
     }
 
+    std::optional<int32_t> GetFocusIndex() const
+    {
+        return focusIndex_;
+    }
+
     void UpdateGroupFocusIndexForDataChange(int32_t groupIndexInList, int32_t indexInGroup, int32_t count);
     bool CheckFocusOnHeaderOrFooter(const RefPtr<FocusHub>& childFocusHub);
     void AdjustFocusGroupIndex(int32_t index, int32_t& indexInGroup);
