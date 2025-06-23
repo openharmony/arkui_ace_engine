@@ -17,15 +17,14 @@ import { AttributeModifier } from '../../component/common'
 import { AccessibilityCallback, AlignRuleOption, AnimateParam, Bindable, BackgroundBlurStyleOptions, BackgroundBrightnessOptions, BackgroundEffectOptions, BlendApplyType, BlurOptions, BlurStyle, BorderImageOption, ChainStyle, ClickEffect, ClickEvent, CommonAttribute, ContentCoverOptions, ContextMenuOptions, CustomBuilder, CustomPopupOptions, DragEvent, DragInteractionOptions, DragItemInfo, DragPreviewOptions, DrawModifier, EffectType, ForegroundBlurStyleOptions, ForegroundEffectOptions, GeometryTransitionOptions, GestureModifier, GestureRecognizerJudgeBeginCallback, HoverEvent, InvertOptions, KeyEvent, LinearGradientBlurOptions, Literal_Alignment_align, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs, LocalizedAlignRuleOptions, MenuElement, MenuOptions, ModalTransition, MotionBlurOptions, MotionPathOptions, MouseEvent, OutlineStyle, OverlayOptions, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, PreDragStatus, ProgressMask, Rectangle, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle, SheetOptions, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, StateStyles, TouchEvent, TouchResult, TouchTestInfo, TransitionEffect, TransitionFinishCallback, TransitionOptions, TranslateOptions, VisibleAreaChangeCallback, sharedTransitionOptions, BackgroundImageOptions, ArkCommonMethodPeer, SystemAdaptiveOptions, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, LinearGradientOptions, OnDragEventCallback, LayoutPolicy, PreviewConfiguration, DropOptions, SweepGradientOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, ReuseOptions, TipsMessageType, TipsOptions, VisibleAreaEventOptions, RadialGradientOptions, CommonMethod } from "../../component/common";
 import { Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey } from '../../component/enums'
 import { ResourceColor, ConstraintSizeOptions, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, EdgeStyles, Edges } from '../../component/units'
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { LengthMetrics } from "../../Graphics"
-import { PixelMap } from '#external'
+import { PixelMap, UniformDataType } from '#external'
 import { ResizableOptions } from "../../component/image"
 import { VisualEffect, Filter, BrightnessBlender } from "../../component/arkui-uieffect"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "../../component/arkui-external"
 import { FocusBoxStyle, FocusPriority } from "../../component/focus"
 import { TransformationMatrix } from "../../component/arkui-common"
-import { UniformDataType } from "../../component/arkui-uniformtypedescriptor"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "../../component/gesture"
 import { ComponentContent } from "../../component/arkui-custom"
 import { BlendMode } from "../../component/arkui-drawing"
@@ -1653,7 +1652,7 @@ export class ArkCommonAttributeSet implements CommonAttribute {
   public onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
       return this
   }
-  public allowDrop(value: Array<UniformDataType> | undefined): this {
+  public allowDrop(value: Array<UniformDataType> | null | undefined): this {
       return this
   }
   public draggable(value: boolean | undefined): this {

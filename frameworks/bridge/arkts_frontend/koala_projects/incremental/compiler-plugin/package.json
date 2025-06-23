@@ -10,8 +10,7 @@
     ],
     "keywords": [],
     "dependencies": {
-        "@koalaui/common": "1.7.3+devel",
-        "@koalaui/harness": "1.7.3+devel"
+        "@koalaui/common": "1.7.3+devel"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^5.20.0",

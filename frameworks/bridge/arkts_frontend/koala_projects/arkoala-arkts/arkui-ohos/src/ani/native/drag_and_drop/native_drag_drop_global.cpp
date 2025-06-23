@@ -15,34 +15,82 @@
 
 #include "native_drag_drop_global.h"
 
-#include "ani_utils.h"
-#include "log.h"
+#include "utils/ani_utils.h"
+#include "log/log.h"
 #include "utils/convert_utils.h"
 #include "core/gestures/drag_event.h"
 #include "load.h"
 #include "pixel_map_taihe_ani.h"
+#include "udmf_ani_converter_utils.h"
+#include "core/common/udmf/udmf_client.h"
 
 namespace OHOS::Ace::Ani {
 void DragEventSetData([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object data)
 {
-    // not implemented
+    auto dragEvent = reinterpret_cast<ani_ref>(pointer);
+    auto dataValue = OHOS::UDMF::AniConverter::UnwrapUnifiedData(env, data);
+    auto unifiedData = reinterpret_cast<void*>(dataValue.get());
+    if (!dragEvent || !unifiedData) {
+        return;
+    }
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragAniModifier() || !env) {
+        return;
+    }
+    modifier->getDragAniModifier()->setDragData(dragEvent, reinterpret_cast<ani_ref>(unifiedData));
 }
 
 ani_object DragEventGetData([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer)
 {
-    // not implemented
     ani_object result_obj = {};
-    return result_obj;
+    auto dragEvent = reinterpret_cast<ani_ref>(pointer);
+    if (!dragEvent) {
+        return result_obj;
+    }
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragAniModifier() || !env) {
+        return result_obj;
+    }
+    auto unifiedDataPtr = reinterpret_cast<OHOS::UDMF::UnifiedData*>(
+        modifier->getDragAniModifier()->getDragData(dragEvent));
+    std::shared_ptr<OHOS::UDMF::UnifiedData> unifiedData(unifiedDataPtr);
+    auto unifiedData_obj = OHOS::UDMF::AniConverter::WrapUnifiedData(env, unifiedData);
+    ani_boolean isUnifiedData;
+    ani_class dataClass;
+    env->FindClass("L@ohos/data/unifiedDataChannel/unifiedDataChannel/UnifiedData;", &dataClass);
+    env->Object_InstanceOf(unifiedData_obj, dataClass, &isUnifiedData);
+    if (!isUnifiedData) {
+        return result_obj;
+    }
+    return unifiedData_obj;
 }
 
 ani_object DragEventGetSummary([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer)
 {
-    // not implemented
     ani_object result_obj = {};
-    return result_obj;
+    auto dragEvent = reinterpret_cast<ani_ref>(pointer);
+    if (!dragEvent) {
+        return result_obj;
+    }
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragAniModifier() || !env) {
+        return result_obj;
+    }
+    auto summary = std::make_shared<OHOS::UDMF::Summary>();
+    modifier->getDragAniModifier()->getDragSummary(dragEvent, reinterpret_cast<ani_ref>(summary.get()));
+
+    auto summary_obj = OHOS::UDMF::AniConverter::WrapSummary(env, summary);
+    ani_boolean isSummary;
+    ani_class summaryClass;
+    env->FindClass("L@ohos/data/unifiedDataChannel/unifiedDataChannel/Summary;", &summaryClass);
+    env->Object_InstanceOf(summary_obj, summaryClass, &isSummary);
+    if (!isSummary) {
+        return result_obj;
+    }
+    return summary_obj;
 }
 
 void DragEventSetPixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -73,7 +121,7 @@ void DragEventSetExtraInfo([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_o
         return;
     }
     std::string aniExtraInfo = AniUtils::ANIStringToStdString(env, extraInfo);
-    modifier->getDragAniModifier()->setDragDropInfoExtraInfo(dragEvent, aniExtraInfo);
+    modifier->getDragAniModifier()->setDragDropInfoExtraInfo(dragEvent, aniExtraInfo.c_str());
 }
 
 void DragEventSetCustomNode([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -89,5 +137,111 @@ void DragEventSetCustomNode([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_
         return;
     }
     modifier->getDragAniModifier()->setDragDropInfoCustomNode(dragEvent, customNode);
+}
+
+void DragSetAllowDropNull([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer)
+{
+    auto* frameNode = reinterpret_cast<ArkUINodeHandle>(pointer);
+    if (!frameNode) {
+        return;
+    }
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragAniModifier() || !env) {
+        return;
+    }
+    modifier->getDragAniModifier()->setDragAllowDropNull(frameNode);
+}
+
+void DragSetAllowDrop([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_array_ref array, [[maybe_unused]] ani_int length)
+{
+    auto* frameNode = reinterpret_cast<ArkUINodeHandle>(pointer);
+    if (!frameNode || length < 0) {
+        return;
+    }
+
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragAniModifier() || !env) {
+        return;
+    }
+    if (length == 0) {
+        modifier->getDragAniModifier()->setDragAllowDrop(frameNode, nullptr, 0);
+        return;
+    }
+    ani_ref ref = nullptr;
+    const char** allowDrops = new const char* [length];
+    std::vector<std::string> allowDropsSave(length);
+    for (int i = 0; i < length; i++) {
+        if (ANI_OK == env->Array_Get_Ref(array, i, &ref)) {
+            ani_string stringValue = static_cast<ani_string>(ref);
+            std::string dataType = AniUtils::ANIStringToStdString(env, stringValue);
+            allowDropsSave[i] = dataType;
+            allowDrops[i] = dataType.c_str();
+        }
+    }
+    modifier->getDragAniModifier()->setDragAllowDrop(frameNode, allowDrops, static_cast<ArkUI_Int32>(length));
+    delete[] allowDrops;
+}
+
+void DragSetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object dragInfo)
+{
+    auto* frameNode = reinterpret_cast<ArkUINodeHandle>(pointer);
+    if (!frameNode || !dragInfo) {
+        return;
+    }
+    ani_boolean isUndef = ANI_FALSE;
+    ArkUIDragInfo info;
+    ani_ref pixelMap;
+    if (ANI_OK == env->Object_GetFieldByName_Ref(dragInfo, "pixelMap", &pixelMap)) {
+        env->Reference_IsUndefined(pixelMap, &isUndef);
+        if (isUndef != ANI_TRUE) {
+            ani_object value = static_cast<ani_object>(pixelMap);
+            ani_long pixelMapPtr;
+            if (ANI_OK == env->Object_CallMethodByName_Long(value, "unboxed", ":J", &pixelMapPtr)) {
+                info.pixelMap = reinterpret_cast<void*>(pixelMapPtr);
+            }
+        }
+    }
+
+    ani_ref onlyForLifting;
+    if (ANI_OK == env->Object_GetFieldByName_Ref(dragInfo, "onlyForLifting", &onlyForLifting)) {
+        env->Reference_IsUndefined(onlyForLifting, &isUndef);
+        if (isUndef != ANI_TRUE) {
+            ani_object value = static_cast<ani_object>(onlyForLifting);
+            ani_boolean onlyForLiftingValue;
+            if (ANI_OK == env->Object_CallMethodByName_Boolean(value, "unboxed", ":z", &onlyForLiftingValue)) {
+                info.onlyForLifting = static_cast<bool>(onlyForLiftingValue);
+            }
+        }
+    }
+
+    ani_ref delayCreating;
+    if (ANI_OK == env->Object_GetFieldByName_Ref(dragInfo, "onlyForLifting", &delayCreating)) {
+        env->Reference_IsUndefined(delayCreating, &isUndef);
+        if (isUndef != ANI_TRUE) {
+            ani_object value = static_cast<ani_object>(delayCreating);
+            ani_boolean delayCreatingValue;
+            if (ANI_OK == env->Object_CallMethodByName_Boolean(value, "unboxed", ":z", &delayCreatingValue)) {
+                info.delayCreating = static_cast<bool>(delayCreatingValue);
+            }
+        }
+    }
+
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragAniModifier() || !env) {
+        return;
+    }
+    modifier->getDragAniModifier()->setDragPreview(frameNode, info);
+}
+
+ani_long ConvertFromPixelMapToAniPointer(ani_env* env, [[maybe_unused]]ani_object object, ani_object pixelMap)
+{
+    auto pixelMapValue = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMap);
+    if (!pixelMapValue) {
+        return {};
+    }
+    return reinterpret_cast<ani_long>(pixelMapValue.get());
 }
 } // namespace OHOS::Ace::Ani

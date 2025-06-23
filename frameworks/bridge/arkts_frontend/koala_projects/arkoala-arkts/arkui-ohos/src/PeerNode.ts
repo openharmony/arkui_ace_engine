@@ -14,11 +14,12 @@
  */
 
 import { int32, KoalaCallsiteKey } from "@koalaui/common"
-import { Disposable, IncrementalNode, scheduleCallback } from "@koalaui/runtime"
+import { Disposable, GlobalStateManager, IncrementalNode, MutableState, scheduleCallback } from "@koalaui/runtime"
 import { NativePeerNode } from "./NativePeerNode"
-import { nullptr, pointer, InteropNativeModule } from "@koalaui/interop"
+import { nullptr, pointer } from "@koalaui/interop"
 import { ArkRootPeer } from "./component"
 import { ReusablePool } from "./ReusablePool"
+import { StateStylesOps } from './component/arkui-custom'
 
 export const PeerNodeType = 11
 export const RootPeerType = 33
@@ -38,6 +39,7 @@ export class PeerNode extends IncrementalNode {
     // Pool to store recycled child scopes, grouped by type
     private _reusePool?: Map<string, ReusablePool>
     reusable: boolean = false
+    private _uiStateStyle?: MutableState<int32>;
 
     getPeerPtr(): pointer {
         return this.peer.ptr
@@ -96,10 +98,17 @@ export class PeerNode extends IncrementalNode {
     }
 
     setReusePoolSize(size: number, reuseKey: string): void {
+        if (size < 0) return
         if (!this.isKind(RootPeerType)) {
             if (this.parent?.isKind(PeerNodeType))
                 (this.parent! as PeerNode).setReusePoolSize(size, reuseKey)
             return
+        }
+        if (!this._reusePool) {
+            this._reusePool = new Map<string, ReusablePool>()
+        }
+        if (!this._reusePool?.has(reuseKey)) {
+            this._reusePool?.set(reuseKey, new ReusablePool())
         }
         this._reusePool?.get(reuseKey)?.setMaxSize(size)
     }
@@ -180,7 +189,22 @@ export class PeerNode extends IncrementalNode {
         this._reusePool = undefined
         this._recycleCb = undefined
         this._reuseCb = undefined
+        this._uiStateStyle = undefined;
         super.dispose()
+    }
+
+    public getOrCreateStateStyleMutable(): MutableState<int32> | undefined {
+        if (this._uiStateStyle !== undefined) {
+            return this._uiStateStyle!;
+        }
+        else {
+            const manager = GlobalStateManager.instance
+            this._uiStateStyle = manager.mutableState<int32>(0 as int32, true)
+            StateStylesOps.onStateStyleChange(this.getPeerPtr(), (state: int32) => {
+                this._uiStateStyle!.value = state
+            })
+            return this._uiStateStyle!;
+        }
     }
 }
 

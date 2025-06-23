@@ -20,8 +20,7 @@ import { WatchFuncType } from '../decorator';
 import { IConsumeDecoratedVariable } from '../decorator';
 import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
-export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements IConsumeDecoratedVariable<T> {
+export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IConsumeDecoratedVariable<T> {
     provideAliasName: string;
     sourceProvide_: IProvideDecoratedVariable<T> | null;
     constructor(owningView: ExtendableComponent, varName: string, provideAliasName: string, watchFunc?: WatchFuncType) {
@@ -34,7 +33,7 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T>
         if (this.sourceProvide_) {
             // check type
         }
-        const initValue = this.sourceProvide_!.get()
+        const initValue = this.sourceProvide_!.get();
         this.registerWatchForObservedObjectChanges(initValue);
         this.sourceProvide_!.registerWatchToSource(this);
     }

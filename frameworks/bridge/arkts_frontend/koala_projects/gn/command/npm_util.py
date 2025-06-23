@@ -61,11 +61,13 @@ def run(args, dir = None):
         return
     try:
         ret = subprocess.run(["npm"] + args, capture_output=True, env=os.environ, text=True, check=True)
+        print("install log:\n" + ret.stdout + "\n")
         with open(koala_log, "a+") as f:
             f.write("\n")
             f.write("install log:\n" + ret.stdout)
             f.close()
     except subprocess.CalledProcessError as e:
+        print("error message: "+ e.stderr + "\n")
         with open(koala_log, "a+") as f:
             f.write("\n")
             f.write(e.stdout + "\n")

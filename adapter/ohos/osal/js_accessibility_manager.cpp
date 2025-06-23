@@ -3885,16 +3885,6 @@ bool CheckAndGetEventTestArgument(std::vector<std::string>::const_iterator start
     argument.eventId = StringUtils::StringToInt(*arg);
     return true;
 }
-
-void DumpFromProperty(const RefPtr<NG::AccessibilityProperty>& accessibilityProperty)
-{
-    CHECK_NULL_VOID(accessibilityProperty);
-    DumpLog::GetInstance().AddDesc("offset: ", accessibilityProperty->GetScrollOffSet());
-    DumpLog::GetInstance().AddDesc("childTreeId: ", accessibilityProperty->GetChildTreeId());
-    DumpLog::GetInstance().AddDesc("childWindowId: ", accessibilityProperty->GetChildWindowId());
-    DumpLog::GetInstance().AddDesc("accessibilitySamePage: ", accessibilityProperty->GetAccessibilitySamePage());
-    DumpLog::GetInstance().AddDesc("focusDrawTop: ", accessibilityProperty->GetFocusDrawLevel());
-}
 } // DFX related
 
 void JsAccessibilityManager::DumpTreeNG(bool useWindowId, uint32_t windowId, int64_t rootId, bool isDumpSimplify)
@@ -4305,7 +4295,9 @@ void JsAccessibilityManager::DumpPropertyNG(int64_t nodeID)
     DumpAccessibilityPropertyNG(nodeInfo);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
     if (accessibilityProperty) {
-        DumpFromProperty(accessibilityProperty);
+        DumpLog::GetInstance().AddDesc("offset: ", accessibilityProperty->GetScrollOffSet());
+        DumpLog::GetInstance().AddDesc("childTreeId: ", accessibilityProperty->GetChildTreeId());
+        DumpLog::GetInstance().AddDesc("childWindowId: ", accessibilityProperty->GetChildWindowId());
     }
     DumpLog::GetInstance().Print(0, nodeInfo.GetComponentType(), nodeInfo.GetChildCount());
 }

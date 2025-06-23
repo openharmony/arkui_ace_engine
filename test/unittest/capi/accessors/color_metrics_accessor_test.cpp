@@ -43,7 +43,7 @@ HWTEST_F(ColorMetricsAccessorTest, NumericTestValidValues, TestSize.Level1)
         { Converter::ArkValue<Ark_Number>(0xff110000), 0xff110000 },
         { Converter::ArkValue<Ark_Number>(0xaa112233), 0xaa112233 },
         { Converter::ArkValue<Ark_Number>(0xffffffff), 0xffffffff }, // Test max value
-        { Converter::ArkValue<Ark_Number>(0x00000000), 0x00000000 }  // Test min value
+        { Converter::ArkValue<Ark_Number>(0x00000000), 0xff000000 }  // Test min value
     };
     Ark_ColorMetrics resultPeer;
     for (auto [inputValue, expectedValue]: testPlan) {
@@ -62,23 +62,24 @@ HWTEST_F(ColorMetricsAccessorTest, RgbaTestValidValues, TestSize.Level1)
     ASSERT_NE(accessor_->rgba, nullptr);
     using OneTestStep = std::tuple<Ark_Number, Ark_Number, Ark_Number, Ark_Number, uint32_t>;
     static const std::vector<OneTestStep> testPlan = {
-        { Converter::ArkValue<Ark_Number>(0xaa), Converter::ArkValue<Ark_Number>(0x00),
+        { Converter::ArkValue<Ark_Number>(0.67f), Converter::ArkValue<Ark_Number>(0x00),
             Converter::ArkValue<Ark_Number>(0x00), Converter::ArkValue<Ark_Number>(0x11), 0xaa000011 },
-        { Converter::ArkValue<Ark_Number>(0xbb), Converter::ArkValue<Ark_Number>(0x00),
-            Converter::ArkValue<Ark_Number>(0x11), Converter::ArkValue<Ark_Number>(0x00), 0xbb001100 },
-        { Converter::ArkValue<Ark_Number>(0xcc), Converter::ArkValue<Ark_Number>(0x11),
-            Converter::ArkValue<Ark_Number>(0x00), Converter::ArkValue<Ark_Number>(0x00), 0xcc110000 },
-        { Converter::ArkValue<Ark_Number>(0xdd), Converter::ArkValue<Ark_Number>(0x11),
-            Converter::ArkValue<Ark_Number>(0x22), Converter::ArkValue<Ark_Number>(0x33), 0xdd112233 },
-        { Converter::ArkValue<Ark_Number>(0xff), Converter::ArkValue<Ark_Number>(0xff),
+        { Converter::ArkValue<Ark_Number>(0.5f), Converter::ArkValue<Ark_Number>(0x00),
+            Converter::ArkValue<Ark_Number>(0x11), Converter::ArkValue<Ark_Number>(0x00), 0x7f001100 },
+        { Converter::ArkValue<Ark_Number>(0.75f), Converter::ArkValue<Ark_Number>(0x11),
+            Converter::ArkValue<Ark_Number>(0x00), Converter::ArkValue<Ark_Number>(0x00), 0xbf110000 },
+        { Converter::ArkValue<Ark_Number>(0.25f), Converter::ArkValue<Ark_Number>(0x11),
+            Converter::ArkValue<Ark_Number>(0x22), Converter::ArkValue<Ark_Number>(0x33), 0x3f112233 },
+        { Converter::ArkValue<Ark_Number>(1.f), Converter::ArkValue<Ark_Number>(0xff),
             Converter::ArkValue<Ark_Number>(0xff), Converter::ArkValue<Ark_Number>(0xff), 0xffffffff },
-        { Converter::ArkValue<Ark_Number>(0x00), Converter::ArkValue<Ark_Number>(0x00),
+        { Converter::ArkValue<Ark_Number>(0.f), Converter::ArkValue<Ark_Number>(0x00),
             Converter::ArkValue<Ark_Number>(0x00), Converter::ArkValue<Ark_Number>(0x00), 0x00000000 },
     };
     Ark_ColorMetrics resultPeer;
     for (auto [inputAlpha, inputRed, inputGreen, inputBlue, expectedValue]: testPlan) {
         resultPeer = accessor_->rgba(&inputRed, &inputGreen, &inputBlue, &inputAlpha);
-        EXPECT_EQ(resultPeer->colorValue.value, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_EQ(resultPeer->colorValue.value, expectedValue) <<
+            std::hex << "Result: " << resultPeer->colorValue.value << ", Expected: " << expectedValue;
     }
 }
 

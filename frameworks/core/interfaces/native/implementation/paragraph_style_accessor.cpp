@@ -92,7 +92,7 @@ Opt_Number GetTextIndentImpl(Ark_ParagraphStyle peer)
     CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
     if (style.textIndent) {
-        return Converter::ArkValue<Opt_Number>(style.textIndent->ConvertToPx());
+        return Converter::ArkValue<Opt_Number>(style.textIndent.value().ConvertToVp());
     }
     return invalid;
 }
@@ -127,7 +127,7 @@ Opt_Union_Number_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyl
     CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
     return Converter::ArkUnion<Opt_Union_Number_LeadingMarginPlaceholder,
-        Ark_LeadingMarginPlaceholder>(style.leadingMargin, Converter::FC);
+        Ark_Number>(style.leadingMargin);
 }
 Opt_Number GetParagraphSpacingImpl(Ark_ParagraphStyle peer)
 {

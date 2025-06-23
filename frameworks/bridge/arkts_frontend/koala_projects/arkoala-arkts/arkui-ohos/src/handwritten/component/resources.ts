@@ -1,4 +1,4 @@
-import { Resource } from "global/resource";
+import { Resource } from "global.resource";
 import { int32 } from "@koalaui/common";
 import { ArkUIGeneratedNativeModule } from "#components";
 import { Serializer } from "./peers/Serializer";
@@ -23,18 +23,27 @@ enum ResourceType {
 class ArkResource implements Resource {
     bundleName: string = "";
     moduleName: string = "";
-    params?: Array<Object> | undefined;
+    params?: Array<Object | undefined> | undefined;
     type?: number | undefined;
     _id: number = -1;
+
+    castParams(params: Object[]): Array<Object | undefined> {
+        let result: Array<Object | undefined> = new Array<Object | undefined>();
+        for (let param of params) {
+            result.push(param);
+        }
+        return result;
+    }
+
     constructor(resourceName: string | null, bundleName: string, moduleName: string, ...params: Object[]) {
         this.bundleName = bundleName;
         this.moduleName = moduleName;
         if (resourceName !== null) {
-            let param1 = new Array<Object>();
+            let param1 = new Array<Object | undefined>();
             param1.push(resourceName);
-            this.params = param1.concat(asArray(params));
+            this.params = param1.concat(this.castParams(params));
         } else {
-            this.params = asArray(params);
+            this.params = this.castParams(params);
         }
         this._id = -1;
         if (this.params!.length > 0) {
@@ -47,7 +56,7 @@ class ArkResource implements Resource {
     constructor(id: number, type: number, bundleName: string, moduleName: string, ...params: Object[]) {
         this._id = id;
         this.type = type;
-        this.params = asArray(params);
+        this.params = this.castParams(params);
         this.bundleName = bundleName;
         this.moduleName = moduleName;
     }

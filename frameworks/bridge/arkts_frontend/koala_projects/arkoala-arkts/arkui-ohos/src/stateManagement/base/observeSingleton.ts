@@ -23,7 +23,7 @@ import { GlobalStateManager } from '@koalaui/runtime';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
 export class ObserveSingleton implements IObserve {
-    public static readonly instance: ObserveSingleton = new ObserveSingleton;
+    public static readonly instance: ObserveSingleton = new ObserveSingleton();
     public static readonly InvalidRenderId: RenderIdType | undefined = undefined;
     public static readonly RenderingComponent: number = 0;
     public static readonly RenderingComponentV1: number = 1;
@@ -45,18 +45,16 @@ export class ObserveSingleton implements IObserve {
     set renderingId(value: RenderIdType | undefined) {
         this._renderingId = value;
     }
-    public _renderingId: RenderIdType|undefined = ObserveSingleton.InvalidRenderId;
+    public _renderingId: RenderIdType | undefined = ObserveSingleton.InvalidRenderId;
 
     private id2BindingSource = new Map<RenderIdType, Set<IBindingSource>>();
 
-    constructor() {
-
-    }
+    constructor() {}
 
     public castToIObservedObject<T>(obj: T): IObservedObject | undefined {
-        return (obj && typeof obj === 'object' && StateMgmtTool.isIObservedObject(obj as Object))
+        return obj && typeof obj === 'object' && StateMgmtTool.isIObservedObject(obj as Object)
             ? (obj as Object as IObservedObject)
-            : undefined
+            : undefined;
     }
 
     public setV1RenderId(value: NullableObject): void {
@@ -86,14 +84,13 @@ export class ObserveSingleton implements IObserve {
             return false;
         }
         const handler = StateMgmtTool.tryGetHandler(value as Object);
-        return (handler !== undefined && StateMgmtTool.isInterfaceProxyHandler(handler));
+        return handler !== undefined && StateMgmtTool.isInterfaceProxyHandler(handler);
     }
 
     public shouldAddRef(iObjectsRenderId: RenderIdType): boolean {
         return (
             this.renderingComponent >= ObserveSingleton.RenderingComponentV2 ||
-            (this.renderingComponent === ObserveSingleton.RenderingComponentV1 &&
-            iObjectsRenderId === this.renderingId)
+            (this.renderingComponent === ObserveSingleton.RenderingComponentV1 && iObjectsRenderId === this.renderingId)
         );
     }
 
@@ -104,5 +101,4 @@ export class ObserveSingleton implements IObserve {
         });
         this.id2BindingSource.delete(id);
     }
-
 }

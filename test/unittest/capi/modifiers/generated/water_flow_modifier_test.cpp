@@ -261,13 +261,13 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMinWi
 
     // Initial setup
     WriteTo(initValueItemConstraintSize).minWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).maxWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).minHeight =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).maxHeight =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
     auto checkValue = [this, &initValueItemConstraintSize](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -284,13 +284,13 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMinWi
             "Input value is: " << input << ", method: setItemConstraintSize, attribute: itemConstraintSize.minWidth";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumAnyValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResAnyValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureLengthAnyValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_String>(value));
     }
 }
@@ -306,13 +306,13 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMinWi
 
     // Initial setup
     WriteTo(initValueItemConstraintSize).minWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).maxWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).minHeight =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).maxHeight =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
     auto checkValue = [this, &initValueItemConstraintSize](const std::string& input, const Opt_Length& value) {
         Opt_ConstraintSizeOptions inputValueItemConstraintSize = initValueItemConstraintSize;
@@ -329,15 +329,6 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMinWi
             "Input value is: " << input << ", method: setItemConstraintSize, attribute: itemConstraintSize.minWidth";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));
-    }
-    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
-    }
-    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
-    }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
     // Check empty optional
@@ -355,13 +346,13 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxWi
 
     // Initial setup
     WriteTo(initValueItemConstraintSize).minWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).maxWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).minHeight =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).maxHeight =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
     auto checkValue = [this, &initValueItemConstraintSize](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -378,13 +369,13 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxWi
             "Input value is: " << input << ", method: setItemConstraintSize, attribute: itemConstraintSize.maxWidth";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumAnyValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResAnyValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureLengthAnyValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_String>(value));
     }
 }
@@ -400,13 +391,13 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxWi
 
     // Initial setup
     WriteTo(initValueItemConstraintSize).minWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).maxWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).minHeight =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).maxHeight =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
     auto checkValue = [this, &initValueItemConstraintSize](const std::string& input, const Opt_Length& value) {
         Opt_ConstraintSizeOptions inputValueItemConstraintSize = initValueItemConstraintSize;
@@ -423,15 +414,6 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxWi
             "Input value is: " << input << ", method: setItemConstraintSize, attribute: itemConstraintSize.maxWidth";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));
-    }
-    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
-    }
-    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
-    }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
     // Check empty optional
@@ -449,13 +431,13 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMinHe
 
     // Initial setup
     WriteTo(initValueItemConstraintSize).minWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).maxWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).minHeight =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).maxHeight =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
     auto checkValue = [this, &initValueItemConstraintSize](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -472,13 +454,13 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMinHe
                                           ", method: setItemConstraintSize, attribute: itemConstraintSize.minHeight";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumAnyValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResAnyValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureLengthAnyValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_String>(value));
     }
 }
@@ -494,13 +476,13 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMinHe
 
     // Initial setup
     WriteTo(initValueItemConstraintSize).minWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).maxWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).minHeight =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).maxHeight =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
     auto checkValue = [this, &initValueItemConstraintSize](const std::string& input, const Opt_Length& value) {
         Opt_ConstraintSizeOptions inputValueItemConstraintSize = initValueItemConstraintSize;
@@ -518,15 +500,6 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMinHe
             << ", method: setItemConstraintSize, attribute: itemConstraintSize.minHeight";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));
-    }
-    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
-    }
-    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
-    }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
     // Check empty optional
@@ -544,13 +517,13 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxHe
 
     // Initial setup
     WriteTo(initValueItemConstraintSize).minWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).maxWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).minHeight =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).maxHeight =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
     auto checkValue = [this, &initValueItemConstraintSize](
                           const std::string& input, const std::string& expectedStr, const Opt_Length& value) {
@@ -567,13 +540,13 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxHe
                                           ", method: setItemConstraintSize, attribute: itemConstraintSize.maxHeight";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumAnyValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Number>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegNonPctValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResAnyValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_Resource>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureLengthNonNegNonPctValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureLengthAnyValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Length, Ark_String>(value));
     }
 }
@@ -589,13 +562,13 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxHe
 
     // Initial setup
     WriteTo(initValueItemConstraintSize).minWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).maxWidth =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).minHeight =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
     WriteTo(initValueItemConstraintSize).maxHeight =
-        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
+        ArkUnion<Opt_Length, Ark_Number>(std::get<1>(Fixtures::testFixtureDimensionsNumAnyValidValues[0]));
 
     auto checkValue = [this, &initValueItemConstraintSize](const std::string& input, const Opt_Length& value) {
         Opt_ConstraintSizeOptions inputValueItemConstraintSize = initValueItemConstraintSize;
@@ -613,15 +586,6 @@ HWTEST_F(WaterFlowModifierTest, setItemConstraintSizeTestItemConstraintSizeMaxHe
             << ", method: setItemConstraintSize, attribute: itemConstraintSize.maxHeight";
     };
 
-    for (auto& [input, value] : Fixtures::testFixtureLengthNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_String>(value));
-    }
-    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegNonPctInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Resource>(value));
-    }
-    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
-        checkValue(input, ArkUnion<Opt_Length, Ark_Number>(value));
-    }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Length, Ark_Empty>(nullptr));
     // Check empty optional

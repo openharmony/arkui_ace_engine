@@ -272,6 +272,7 @@ void AssignCast(std::optional<ImageFit>& dst, const Ark_ImageFit& src)
         case ARK_IMAGE_FIT_BOTTOM_START: dst = ImageFit::BOTTOM_START; break;
         case ARK_IMAGE_FIT_BOTTOM: dst = ImageFit::BOTTOM; break;
         case ARK_IMAGE_FIT_BOTTOM_END: dst = ImageFit::BOTTOM_END; break;
+        case ARK_IMAGE_FIT_MATRIX: dst = ImageFit::MATRIX; break;
         default: LOGE("Unexpected enum value in Ark_ImageFit: %{public}d", src);
     }
 }
@@ -1347,6 +1348,39 @@ void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_Symbo
         default: LOGE("Unexpected enum value in Ark_SymbolEffectStrategy: %{public}d", src);
     }
 }
+
+#ifdef WRONG_GEN
+template<>
+void AssignCast(std::optional<OverScrollMode>& dst, const Ark_OverScrollMode& src)
+{
+    switch (src) {
+        case ARK_OVER_SCROLL_MODE_NEVER: dst = OverScrollMode::NEVER; break;
+        case ARK_OVER_SCROLL_MODE_ALWAYS: dst = OverScrollMode::ALWAYS; break;
+        default: LOGE("Unexpected enum value in Ark_OverScrollMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<BlurOnKeyboardHideMode>& dst, const Ark_BlurOnKeyboardHideMode& src)
+{
+    switch (src) {
+        case ARK_BLUR_ON_KEYBOARD_HIDE_MODE_SILENT: dst = BlurOnKeyboardHideMode::SILENT; break;
+        case ARK_BLUR_ON_KEYBOARD_HIDE_MODE_BLUR: dst = BlurOnKeyboardHideMode::BLUR; break;
+        default: LOGE("Unexpected enum value in Ark_BlurOnKeyboardHideMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<PanelMode>& dst, const Ark_PanelMode& src)
+{
+    switch (src) {
+        case ARK_PANEL_MODE_MINI: dst = PanelMode::MINI; break;
+        case ARK_PANEL_MODE_HALF: dst = PanelMode::HALF; break;
+        case ARK_PANEL_MODE_FULL: dst = PanelMode::FULL; break;
+        default: LOGE("Unexpected enum value in Ark_PanelMode: %{public}d", src);
+    }
+}
+#endif
 
 template<>
 void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src)

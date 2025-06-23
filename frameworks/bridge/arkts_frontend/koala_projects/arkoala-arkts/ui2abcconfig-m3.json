@@ -62,9 +62,6 @@
             "@ohos/mediaquery": [
                 "@ohos.mediaquery.ets"
             ],
-            "global/resource": [
-                "global/resource/resource.ets"
-            ],
             "@ohos/router": [
                 "@ohos.router.ets"
             ],
@@ -117,7 +114,6 @@
         "./arkui-ui2abc-processed/arkui/index-test.d.ets"
     ],
     "dependencies": {
-        "@koalaui/arkui-common": ["../arkoala/arkui-common/ui2abcconfig.json"],
         "@koalaui/runtime": ["../incremental/runtime/ui2abcconfig.json"]
     }
 }

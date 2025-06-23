@@ -422,7 +422,7 @@ void ControlSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SelectModelNG::SetControlSize(frameNode, Converter::OptConvert<ControlSize>(*value));
+    SelectModelStatic::SetControlSize(frameNode, Converter::OptConvert<ControlSize>(*value));
 }
 void MenuItemContentModifierImpl(Ark_NativePointer node,
                                  const Opt_ContentModifier* value)

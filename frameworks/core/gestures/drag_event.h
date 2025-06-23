@@ -350,13 +350,15 @@ public:
     {
         return requestId_;
     }
-
+    
+    // only use for ArkTs1.2 begin
     RefPtr<PixelMap> GetDragDropInfoPixelMap() const;
     void* GetDragDropInfoCustomNode() const;
     std::string GetDragDropInfoExtraInfo() const;
     void SetDragDropInfoPixelMap(RefPtr<PixelMap> pixelMap);
     void SetDragDropInfoCustomNode(void* customNode);
     void SetDragDropInfoExtraInfo(std::string& extraInfo);
+    // only use for ArkTs1.2 end
 
 private:
     RefPtr<PasteData> pasteData_;

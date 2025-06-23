@@ -25,14 +25,12 @@
         "compile:deps": "npm run compile:libarkts && npm run compile && npm run compile:deps:harness && npm run runtime:prepare",
 
         "compile:annotate": "npm run compile --prefix ../annotate",
-        "executable:light": "npm run test:arkts:memo-plugin:light --prefix ../tests-memo",
-        "executable": "npm run test:arkts:memo-plugin --prefix ../tests-memo",
         "diagnostics": "mocha --config mocharc.diagnostics.json",
         "test:diagnostics": "npm run compile && npm run diagnostics",
         "test:all:light": "npm run test:light && npm run diagnostics && npm run executable:light",
         "test:all": "npm run test && npm run diagnostics && npm run executable"
     },
     "devDependencies": {
-        "@koalaui/harness": "1.7.3+devel"
+        "@koalaui/libarkts": "file:../libarkts"
     }
 }

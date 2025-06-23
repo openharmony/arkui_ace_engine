@@ -118,9 +118,12 @@
                 "egl",
                 "request",
                 "qrcodegen",
-                "sdk"
+                "sdk",
+                "glfw"
             ],
-            "third_party": []
+            "third_party": [
+                "ffmpeg"
+            ]
         },
         "build": {
             "group_type": {
@@ -230,6 +233,15 @@
                 },
                 {
                     "header": {
+                        "header_base": "//foundation/arkui/ace_engine/",
+                        "header_files": [
+                            "adapter/preview/entrance/sample/event_adapter.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/build:libevent_adapter"
+                },
+                {
+                    "header": {
                         "header_base": "//foundation/arkui/ace_engine/frameworks/core/common/",
                         "header_files": [
                             "container_scope.h"
@@ -258,6 +270,15 @@
                 },
                 {
                     "name": "//foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/koala_projects/inner_api:copy_arkui_ets"
+                },
+                {
+                    "header": {
+                        "header_base": "//foundation/arkui/ace_engine/interfaces/inner_api/drawable",
+                        "header_files": [
+                            "drawable_descriptor_ani.h"
+                        ]
+                    },
+                    "name": "//foundation/arkui/ace_engine/interfaces/inner_api/drawable:drawable_inner_ani"
                 }
             ],
             "test": [

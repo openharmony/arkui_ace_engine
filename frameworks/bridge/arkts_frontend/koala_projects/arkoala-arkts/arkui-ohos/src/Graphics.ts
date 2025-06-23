@@ -17,17 +17,19 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 // import { LengthUnit } from "./component/ArkArkuiExternalInterfaces"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, pointer } from "@koalaui/interop"
 import { unsafeCast, int32, float32 } from "@koalaui/common"
-import { Serializer } from "./component"
+import { Serializer, LengthMetricsCustom } from './component';
 import { ResourceColor } from "./component/units"
 import { Color, BorderStyle } from "./component/enums"
 import { DrawingCanvas } from "./component/arkui-drawing"
 import { Dimension } from "./component/units"
 import { common2D } from "@ohos/graphics/common2D"
 import { drawing } from "@ohos/graphics/drawing"
+import { Deserializer } from './component/peers/Deserializer';
+import { BusinessError } from '#external';
 export interface Size {
     width: number;
     height: number;
@@ -117,8 +119,25 @@ export class LengthMetrics implements MaterializedBase {
         return new LengthMetrics(value, LengthUnit.LPX);
     }
     static resource(res: Resource) {
-        //   let length:Array<number> = getUINativeModule().nativeUtils.resoureToLengthMetrics(res);
-        return new LengthMetrics(0, LengthUnit.PX);
+        const thisSerializer : Serializer = Serializer.hold();
+        thisSerializer.writeResource(res);
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._SystemOps_resourceToLengthMetrics(thisSerializer.asBuffer(), thisSerializer.length()) as FixedArray<byte>;
+        thisSerializer.release();
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>;
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]));
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const returnResult : LengthMetricsCustom = retvalDeserializer.readLengthMetricsCustom();
+        let unit = returnResult.unit as int32;
+        let lengthUnit: LengthUnit = LengthUnit.PX;
+        if (unit >= LengthUnit.PX || unit <= LengthUnit.LPX) {
+            lengthUnit = unit as LengthUnit;
+        }
+        return new LengthMetrics((returnResult.value as number), lengthUnit);
     }
     private setUnit(unit: LengthUnit): void {
         const unit_casted = unit as (LengthUnit)
@@ -138,6 +157,10 @@ export class LengthMetrics implements MaterializedBase {
     }
   }
 
+const MAX_CHANNEL_VALUE = 0xFF;
+const MAX_ALPHA_VALUE = 1;
+const ERROR_CODE_RESOURCE_GET_FAILED = 180003;
+const ERROR_CODE_COLOR_PARAMETER_INCORRECT = 401;
 export class ColorMetricsInternal {
     public static fromPtr(ptr: KPointer): ColorMetrics {
         const obj: ColorMetrics = new ColorMetrics()
@@ -146,24 +169,44 @@ export class ColorMetricsInternal {
     }
 }
 export class ColorMetrics implements MaterializedBase {
+    private red_: number | undefined = undefined;
+    private green_: number | undefined = undefined;
+    private blue_: number | undefined = undefined;
+    private alpha_: number | undefined = undefined;
+    private resourceId_: number = -1;
     peer?: Finalizable | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
     get color(): string {
-        return this.getColor()
+        return `rgba(${this.red}, ${this.green}, ${this.blue}, ${this.alpha / MAX_CHANNEL_VALUE})`;
     }
     get red(): number {
-        return this.getRed()
+        if (!this.red_) {
+            this.red_ = this.getRed();
+        }
+        return this.red_!;
     }
     get green(): number {
-        return this.getGreen()
+        if (!this.green_) {
+            this.green_ = this.getGreen();
+        }
+        return this.green_!;
     }
     get blue(): number {
-        return this.getBlue()
+        if (!this.blue_) {
+            this.blue_ = this.getBlue();
+        }
+        return this.blue_!;
     }
     get alpha(): number {
-        return this.getAlpha()
+        if (!this.alpha_) {
+            this.alpha_ = this.getAlpha();
+        }
+        return this.alpha_!;
+    }
+    private static clamp(value: number): number {
+        return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
     }
     static ctor_colormetrics(): KPointer {
         const retval = ArkUIGeneratedNativeModule._ColorMetrics_ctor()
@@ -188,11 +231,101 @@ export class ColorMetrics implements MaterializedBase {
         const green_casted = green as (number)
         const blue_casted = blue as (number)
         const alpha_casted = alpha as (number | undefined)
-        return ColorMetrics.rgba_serialize(red_casted, green_casted, blue_casted, alpha_casted)
+        let result = ColorMetrics.rgba_serialize(red_casted, green_casted, blue_casted, alpha_casted);
+        if (alpha !== undefined) {
+            result.alpha_ = alpha * MAX_ALPHA_VALUE;
+        }
+        return result;
+    }
+    private static rgbOrRGBA(format: string): ColorMetrics {
+        const rgbPattern = new RegExp('^rgb\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)$', 'i');
+        const rgbaPattern = new RegExp('^rgba\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+(\\.\\d+)?)\\s*\\)$', 'i');
+
+        const rgbMatch = rgbPattern.exec(format);
+        const rgbaMatch = rgbaPattern.exec(format);
+        if (rgbMatch) {
+            const r = ColorMetrics.clamp(Number.parseInt(rgbMatch[1], 10));
+            const g = ColorMetrics.clamp(Number.parseInt(rgbMatch[2], 10));
+            const b = ColorMetrics.clamp(Number.parseInt(rgbMatch[3], 10));
+            return ColorMetrics.rgba(r, g, b);
+        }
+        else if (rgbaMatch) {
+            const r = ColorMetrics.clamp(Number.parseInt(rgbaMatch[1], 10));
+            const g = ColorMetrics.clamp(Number.parseInt(rgbaMatch[2], 10));
+            const b = ColorMetrics.clamp(Number.parseInt(rgbaMatch[3], 10));
+            const a = ColorMetrics.clamp(Number.parseFloat(rgbaMatch[4]));
+            return ColorMetrics.rgba(r, g, b, a);
+        }
+        else {
+            const error = new Error('Parameter error. The format of the input color string is not RGB or RGBA.');
+            throw new BusinessError(ERROR_CODE_COLOR_PARAMETER_INCORRECT, error);
+        }
     }
     public static resourceColor(color: ResourceColor): ColorMetrics {
-        const color_casted = color as (ResourceColor)
-        return ColorMetrics.resourceColor_serialize(color_casted)
+        if (color === undefined || color === null) {
+            const error = new Error('Parameter error. The type of the input color parameter is not ResourceColor.');
+            throw new BusinessError(ERROR_CODE_COLOR_PARAMETER_INCORRECT, error);
+        }
+        let chanels: Array<number> = [];
+        if (typeof color === 'object') {
+            const color_casted = (color as Object) as (Resource);
+            chanels = ColorMetrics.colorMetricsResourceColor_serialize(color_casted);
+            if (chanels === undefined) {
+                const error = new Error('Failed to obtain the color resource.');
+                throw new BusinessError(ERROR_CODE_RESOURCE_GET_FAILED, error);
+            }
+            const red = chanels[0];
+            const green = chanels[1];
+            const blue = chanels[2];
+            const alpha = chanels[3];
+            const resourceId = chanels[4];
+            const colorMetrics = ColorMetrics.rgba(red, green, blue, alpha);
+            colorMetrics.setResourceId(resourceId);
+            return colorMetrics;
+        } else if (typeof color === 'number') {
+            return ColorMetrics.numeric(color as number);
+        } else if (typeof color === 'string') {
+            let colorValue = color as string;
+            if (ColorMetrics.isHexFormat(colorValue)) {
+                return ColorMetrics.hex(colorValue);
+            } else {
+                return ColorMetrics.rgbOrRGBA(colorValue);
+            }
+        } else {
+            const error = new Error('Parameter error. The type of the input color parameter is not ResourceColor.');
+            throw new BusinessError(ERROR_CODE_COLOR_PARAMETER_INCORRECT, error);
+        }
+    }
+    private static isHexFormat(format: string): boolean {
+        const rgbPattern = new RegExp('#(([0-9A-Fa-f]{3})|([0-9A-Fa-f]{6})|([0-9A-Fa-f]{4})|([0-9A-Fa-f]{8}))');
+        return rgbPattern.test(format);
+    }
+    private static hex(hexFormat: string): ColorMetrics {
+        let r: number = 0;
+        let g: number = 0;
+        let b: number = 0;
+        let a: number = 255;
+        if (hexFormat.length === 4) {
+            r = parseInt(hexFormat.slice(1, 2).repeat(2), 16);
+            g = parseInt(hexFormat.slice(2, 3).repeat(2), 16);
+            b = parseInt(hexFormat.slice(3).repeat(2), 16);
+        } else if (hexFormat.length === 7) {
+            r = parseInt(hexFormat.slice(1, 3), 16);
+            g = parseInt(hexFormat.slice(3, 5), 16);
+            b = parseInt(hexFormat.slice(5), 16);
+        } else if (hexFormat.length === 5) {
+            a = parseInt(hexFormat.slice(1, 2).repeat(2), 16);
+            r = parseInt(hexFormat.slice(2, 3).repeat(2), 16);
+            g = parseInt(hexFormat.slice(3, 4).repeat(2), 16);
+            b = parseInt(hexFormat.slice(4).repeat(2), 16);
+        } else if (hexFormat.length === 9) {
+            a = parseInt(hexFormat.slice(1, 3), 16);
+            r = parseInt(hexFormat.slice(3, 5), 16);
+            g = parseInt(hexFormat.slice(5, 7), 16);
+            b = parseInt(hexFormat.slice(7), 16);
+        }
+
+        return ColorMetrics.rgba(r, g, b, a);
     }
     public blendColor(overlayColor: ColorMetrics): ColorMetrics {
         const overlayColor_casted = overlayColor as (ColorMetrics)
@@ -285,6 +418,33 @@ export class ColorMetrics implements MaterializedBase {
     private getAlpha_serialize(): number {
         const retval = ArkUIGeneratedNativeModule._ColorMetrics_getAlpha(this.peer!.ptr)
         return retval
+    }
+    setResourceId(resourceId: number): void {
+        this.resourceId_ = resourceId;
+    }
+    getResourceId(): number {
+        return this.resourceId_;
+    }
+    private static colorMetricsResourceColor_serialize(color: Resource): Array<number> {
+        const thisSerializer : Serializer = Serializer.hold();
+        thisSerializer.writeResource(color);
+        // @ts-ignore
+        const retval = ArkUIGeneratedNativeModule._SystemOps_colorMetricsResourceColor(thisSerializer.asBuffer(), thisSerializer.length()) as FixedArray<byte>;
+        thisSerializer.release();
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>;
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]));
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32);
+        const buffer_length : int32 = retvalDeserializer.readInt32();
+        let buffer : Array<number> = new Array<number>(buffer_length);
+        for (let buffer_i = 0; buffer_i < buffer_length; buffer_i++) {
+            buffer[buffer_i] = (retvalDeserializer.readNumber() as number);
+        }
+        const returnResult : Array<number> = buffer;
+        return returnResult;
     }
 }
 export class ShapeMask {

@@ -33,19 +33,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float SCALE_LIMIT = 1.f;
 
-void resetNegative(std::optional<OHOS::Ace::Dimension> &dim)
-{
-    if (dim && dim->IsNegative()) {
-        dim.value().Reset();
-    }
-}
-
-void resetPercent(std::optional<OHOS::Ace::Dimension> &dim)
-{
-    if (dim && dim->Unit() == OHOS::Ace::DimensionUnit::PERCENT) {
-        dim.reset();
-    }
-}
 struct SearchButtonOptions {
     std::optional< OHOS::Ace::Dimension> width;
     std::optional<Color> color;
@@ -108,8 +95,8 @@ NG::IconOptions Convert(const Ark_IconOptions& src)
     if (iconColor) {
         options.UpdateColor(iconColor.value());
     }
-    resetNegative(iconSize);
-    resetPercent(iconSize);
+    Validator::ValidateNonNegative(iconSize);
+    Validator::ValidateNonPercent(iconSize);
     if (iconSize) {
         options.UpdateSize(iconSize.value());
     }
@@ -245,8 +232,8 @@ void CaretStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto caretStyle = Converter::OptConvert<Converter::CaretStyle>(*value).value_or(Converter::CaretStyle{});
     SearchModelStatic::SetCaretColor(frameNode, caretStyle.color);
-    resetNegative(caretStyle.width);
-    resetPercent(caretStyle.width);
+    Validator::ValidateNonNegative(caretStyle.width);
+    Validator::ValidateNonPercent(caretStyle.width);
     SearchModelStatic::SetCaretWidth(frameNode, caretStyle.width);
 }
 void PlaceholderColorImpl(Ark_NativePointer node,
@@ -262,8 +249,7 @@ void PlaceholderFontImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto fontValue = Converter::OptConvert<Font>(*value);
+    auto fontValue = Converter::OptConvertPtr<Font>(value);
     SearchModelStatic::SetPlaceholderFont(frameNode, fontValue);
 }
 void TextFontImpl(Ark_NativePointer node,
@@ -494,8 +480,8 @@ void MinFontSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::OptConvert<Dimension>(*value);
-    resetNegative(optValue);
-    resetPercent(optValue);
+    Validator::ValidateNonNegative(optValue);
+    Validator::ValidateNonPercent(optValue);
     SearchModelStatic::SetAdaptMinFontSize(frameNode, optValue);
 }
 void MaxFontSizeImpl(Ark_NativePointer node,
@@ -504,8 +490,8 @@ void MaxFontSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::OptConvert<Dimension>(*value);
-    resetNegative(optValue);
-    resetPercent(optValue);
+    Validator::ValidateNonNegative(optValue);
+    Validator::ValidateNonPercent(optValue);
     SearchModelStatic::SetAdaptMaxFontSize(frameNode, optValue);
 }
 void MinFontScaleImpl(Ark_NativePointer node,
@@ -545,8 +531,8 @@ void LetterSpacingImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto spacing = Converter::OptConvert<Dimension>(*value);
-    resetNegative(spacing);
-    resetPercent(spacing);
+    Validator::ValidateNonNegative(spacing);
+    Validator::ValidateNonPercent(spacing);
     SearchModelStatic::SetLetterSpacing(frameNode, spacing);
 }
 void LineHeightImpl(Ark_NativePointer node,
@@ -555,7 +541,7 @@ void LineHeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::OptConvert<Dimension>(*value);
-    resetNegative(optValue);
+    Validator::ValidateNonNegative(optValue);
     SearchModelStatic::SetLineHeight(frameNode, optValue);
 }
 void TypeImpl(Ark_NativePointer node,
@@ -739,17 +725,13 @@ void OnWillChangeImpl(Ark_NativePointer node,
         Converter::ConvContext ctx;
         Ark_EditableTextChangeValue changeValue = {
             .content = Converter::ArkValue<Ark_String>(value.value, &ctx),
-            .previewText = {
-                .tag = INTEROP_TAG_OBJECT,
-                .value = Converter::ArkValue<Ark_PreviewText>(value.previewText, &ctx),
-            },
-            .options = {
-                .tag = INTEROP_TAG_OBJECT,
-                .value.rangeBefore = Converter::ArkValue<Ark_TextRange>(value.rangeBefore),
-                .value.rangeAfter = Converter::ArkValue<Ark_TextRange>(value.rangeAfter),
-                .value.oldContent = Converter::ArkValue<Ark_String>(value.oldContent, &ctx),
-                .value.oldPreviewText = Converter::ArkValue<Ark_PreviewText>(value.oldPreviewText, &ctx),
-            }
+            .previewText = Converter::ArkValue<Opt_PreviewText>(value.previewText, &ctx),
+            .options = Converter::ArkValue<Opt_TextChangeOptions>(Ark_TextChangeOptions{
+                .rangeBefore = Converter::ArkValue<Ark_TextRange>(value.rangeBefore),
+                .rangeAfter = Converter::ArkValue<Ark_TextRange>(value.rangeAfter),
+                .oldContent = Converter::ArkValue<Ark_String>(value.oldContent, &ctx),
+                .oldPreviewText = Converter::ArkValue<Ark_PreviewText>(value.oldPreviewText, &ctx),
+            }),
         };
         return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(changeValue)
             .value_or(true);
@@ -775,8 +757,8 @@ void SearchButtonImpl(Ark_NativePointer node,
     std::optional<SearchButtonOptions> buttonOptions =
         Converter::OptConvert<SearchButtonOptions>(*option).value_or(SearchButtonOptions());
     SearchModelStatic::SetSearchButtonFontColor(frameNode, buttonOptions->color);
-    resetNegative(buttonOptions->width);
-    resetPercent(buttonOptions->width);
+    Validator::ValidateNonNegative(buttonOptions->width);
+    Validator::ValidateNonPercent(buttonOptions->width);
     SearchModelStatic::SetSearchButtonFontSize(frameNode, buttonOptions->width);
     SearchModelStatic::SetSearchButtonAutoDisable(frameNode, buttonOptions->autoDisable);
 }

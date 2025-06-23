@@ -154,6 +154,7 @@ RefPtr<PixelMap> PixelMap::Create(std::unique_ptr<Media::PixelMap>&& pixmap)
     return AceType::MakeRefPtr<PixelMapOhos>(std::move(pixmap));
 }
 
+// only for 1.2
 RefPtr<PixelMap> PixelMap::Create(const InitializationOptions& opts)
 {
     Media::InitializationOptions options;
@@ -170,6 +171,11 @@ RefPtr<PixelMap> PixelMap::Create(const InitializationOptions& opts)
     options.useDMA = opts.useDMA;
     std::unique_ptr<Media::PixelMap> pixmap = Media::PixelMap::Create(options);
     return AceType::MakeRefPtr<PixelMapOhos>(std::move(pixmap));
+}
+
+RefPtr<PixelMap> PixelMap::Create(const std::shared_ptr<Media::PixelMap>& pixmap)
+{
+    return AceType::MakeRefPtr<PixelMapOhos>(pixmap);
 }
 
 RefPtr<PixelMap> PixelMap::CreatePixelMap(void* rawPtr)
