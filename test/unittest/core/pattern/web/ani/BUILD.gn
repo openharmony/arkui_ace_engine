@@ -13,26 +13,13 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ohos_unittest("web_pattern_unit_test_ohos") {
+ohos_unittest("web_pattern_static_unit_test_ohos") {
   module_out_path = pattern_test_output_path
   testonly = true
   sources = []
   defines = [ "OHOS_STANDARD_SYSTEM" ]
   defines += [ "ENABLE_DRAG_FRAMEWORK" ]
   defines += [ "WEB_SUPPORTED" ]
-
-  include_dirs = [
-    "//commonlibrary/c_utils/base/include",
-    "//foundation/window/window_manager/interfaces/innerkits/wm",
-    "//foundation/communication/ipc/interfaces/innerkits/ipc_core/include",
-    "//foundation/graphic/graphic_2d/utils/buffer_handle/export",
-    "//foundation/multimedia/image_framework/interfaces/innerkits/include",
-    "//foundation/window/window_manager/interfaces/innerkits",
-    "//foundation/multimodalinput/input/interfaces/native/innerkits/event/include",
-    "$ace_root/interfaces/inner_api/ui_session",
-    "$ace_root/adapter/ohos/capability/html",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include/common/rs_common_def.h",
-  ]
 
   # pattern_ng
   sources += [
@@ -667,36 +654,12 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/web/ani/web_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/ani/web_pattern_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_select_overlay.cpp",
-    "mock_rosen_render_surface.cpp",
-    "mock_web_delegate.cpp",
-    "richtext_model_test_ng.cpp",
-    "touch_event_listener_test.cpp",
-    "web_accessibility_property_test.cpp",
-    "web_accessibility_property_test_ng.cpp",
-    "web_content_modifier_test.cpp",
-    "web_context_select_overlay_test.cpp",
-    "web_layout_algorithm_test.cpp",
-    "web_model_test_ng.cpp",
-    "web_paint_method_test.cpp",
-    "web_pattern_add_test_ng.cpp",
-    "web_pattern_event_test.cpp",
-    "web_pattern_focus_test_ng.cpp",
-    "web_pattern_keyboard_test_ng.cpp",
-    "web_pattern_method_test_ng.cpp",
-    "web_pattern_nbranch_test.cpp",
-    "web_pattern_new_branch_test.cpp",
-    "web_pattern_part_one_test.cpp",
-    "web_pattern_part_two_test.cpp",
-    "web_pattern_select_test_ng.cpp",
-    "web_pattern_test.cpp",
-    "web_pattern_test_handle_ng.cpp",
-    "web_pattern_test_ng.cpp",
-    "web_pattern_test_ng_supplement.cpp",
-    "web_pattern_touch_test_ng.cpp",
-    "web_pattern_web_test_ng.cpp",
-    "web_pattern_window_test_ng.cpp",
-    "web_select_overlay_test.cpp",
+    "../mock_rosen_render_surface.cpp",
+    "../mock_web_delegate.cpp",
+    "web_model_static_test.cpp",
+    "richtext_model_static_test.cpp"
   ]
 
   deps = [
@@ -714,7 +677,6 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "$ace_root/test/unittest:ace_components_syntax",
     "$ace_root/test/unittest:ace_core_animation",
     "$ace_root/test/unittest:ace_core_extra",
-    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:librender_service_client",
   ]
 
   sources += [
@@ -762,7 +724,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
 
-group("web_pattern_unit_test") {
+group("web_pattern_static_unit_test") {
   testonly = true
-  deps = [ ":web_pattern_unit_test_ohos" ]
+  deps = [ ":web_pattern_static_unit_test_ohos" ]
 }

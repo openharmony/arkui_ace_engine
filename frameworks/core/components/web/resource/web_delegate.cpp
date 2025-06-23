@@ -1854,9 +1854,8 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
 
     state_ = State::CREATING;
     // obtain hap data path
-    auto container = Container::CurrentSafely();
+    auto container = Container::Current();
     if (container == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "get container failed.");
         return false;
     }
     const std::string& bundlePath = container->GetBundlePath();
@@ -1864,7 +1863,6 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
     std::string baseDir = "base";
     std::size_t baseIndex = filesDataPath.find(baseDir);
     if (baseIndex == std::string::npos) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "get filesDataPath failed.");
         return false;
     }
     std::string dataPath = filesDataPath.substr(0, baseIndex + baseDir.length());
@@ -2664,12 +2662,7 @@ void WebDelegate::InitWebViewWithWindow()
             findListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->PutFindCallback(findListenerImpl);
 
-            auto upgradeContext = delegate->context_.Upgrade();
-            CHECK_NULL_VOID(upgradeContext);
-            auto pipelineContext = DynamicCast<NG::PipelineContext>(upgradeContext);
-            CHECK_NULL_VOID(pipelineContext);
-            auto instanceId = pipelineContext->GetInstanceId();
-            auto spanstringConvertHtmlImpl = std::make_shared<SpanstringConvertHtmlImpl>(instanceId);
+            auto spanstringConvertHtmlImpl = std::make_shared<SpanstringConvertHtmlImpl>(Container::CurrentId());
             spanstringConvertHtmlImpl->SetWebDelegate(weak);
             delegate->nweb_->PutSpanstringConvertHtmlCallback(spanstringConvertHtmlImpl);
 
@@ -3151,11 +3144,6 @@ void WebDelegate::InitWebViewWithSurface()
                 delegate->JavaScriptOnHeadReadyByOrder();
 #endif
             }
-            auto upgradeContext = delegate->context_.Upgrade();
-            CHECK_NULL_VOID(upgradeContext);
-            auto pipelineContext = DynamicCast<NG::PipelineContext>(upgradeContext);
-            CHECK_NULL_VOID(pipelineContext);
-            auto instanceId = pipelineContext->GetInstanceId();
             CHECK_NULL_VOID(delegate->nweb_);
             delegate->cookieManager_ = OHOS::NWeb::NWebHelper::Instance().GetCookieManager();
             CHECK_NULL_VOID(delegate->cookieManager_);
@@ -3167,7 +3155,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->PutDownloadCallback(downloadListenerImpl);
 #ifdef OHOS_STANDARD_SYSTEM
             auto screenLockCallback = std::make_shared<NWebScreenLockCallbackImpl>(context);
-            delegate->nweb_->RegisterScreenLockFunction(instanceId, screenLockCallback);
+            delegate->nweb_->RegisterScreenLockFunction(Container::CurrentId(), screenLockCallback);
             auto autoFillCallback = std::make_shared<NWebAutoFillCallbackImpl>(weak);
             delegate->nweb_->SetAutofillCallback(autoFillCallback);
 #endif
@@ -3181,6 +3169,8 @@ void WebDelegate::InitWebViewWithSurface()
             releaseSurfaceListenerImpl->SetSurfaceDelegate(delegate->GetSurfaceDelegateClient());
             releaseSurfaceListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->PutReleaseSurfaceCallback(releaseSurfaceListenerImpl);
+            auto upgradeContext = context.Upgrade();
+            CHECK_NULL_VOID(upgradeContext);
             auto window_id = upgradeContext->GetWindowId();
             delegate->nweb_->SetWindowId(window_id);
             delegate->SetToken();
@@ -3188,7 +3178,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->SetDrawMode(renderMode);
             delegate->nweb_->SetFitContentMode(layoutMode);
             delegate->RegisterConfigObserver();
-            auto spanstringConvertHtmlImpl = std::make_shared<SpanstringConvertHtmlImpl>(instanceId);
+            auto spanstringConvertHtmlImpl = std::make_shared<SpanstringConvertHtmlImpl>(Container::CurrentId());
             spanstringConvertHtmlImpl->SetWebDelegate(weak);
             delegate->nweb_->PutSpanstringConvertHtmlCallback(spanstringConvertHtmlImpl);
         },
@@ -4227,7 +4217,7 @@ void WebDelegate::UpdateScrollBarColor(const std::string& colorValue)
         return;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline == nullptr) {
         return;
     }
@@ -6028,7 +6018,7 @@ void WebDelegate::OnAudioStateChanged(bool audible)
 
 void WebDelegate::OnGetTouchHandleHotZone(std::shared_ptr<OHOS::NWeb::NWebTouchHandleHotZone> hotZone)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
@@ -6546,7 +6536,7 @@ Offset WebDelegate::GetWebRenderGlobalPos()
 
 Size WebDelegate::GetEnhanceSurfaceSize(const Size& drawSize)
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, Size());
     double dipScale = pipeline->GetDipScale();
     if (NearZero(dipScale)) {
@@ -7021,7 +7011,7 @@ void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNati
 
 void WebDelegate::SetToken()
 {
-    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::CurrentSafely());
+    auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
     CHECK_NULL_VOID(container);
     int32_t instanceId = container->GetInstanceId();
     auto window = Platform::AceContainer::GetUIWindow(instanceId);
