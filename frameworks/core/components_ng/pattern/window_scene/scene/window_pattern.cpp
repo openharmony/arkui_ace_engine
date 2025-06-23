@@ -153,6 +153,13 @@ public:
         windowPattern->OnUpdateSnapshotWindow();
     }
 
+    void OnPreLoadStartingWindowFinished() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnPreLoadStartingWindowFinished();
+    }
+
 private:
     WeakPtr<WindowPattern> windowPattern_;
 };
@@ -511,7 +518,6 @@ void WindowPattern::CreateStartingWindow()
         return;
     }
 #endif
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
@@ -533,11 +539,17 @@ void WindowPattern::CreateStartingWindow()
     auto imageLayoutProperty = startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     startingWindow_->SetHitTestMode(HitTestMode::HTMNONE);
-
     auto sourceInfo = ImageSourceInfo(
         startingWindowInfo.iconPathEarlyVersion_, sessionInfo.bundleName_, sessionInfo.moduleName_);
     auto color = Color(startingWindowInfo.backgroundColorEarlyVersion_);
     UpdateStartingWindowProperty(sessionInfo, color, sourceInfo);
+    auto preLoadPixelMap = Rosen::SceneSessionManager::GetInstance().GetPreLoadStartingWindow(sessionInfo);
+    if (preLoadPixelMap != nullptr) {
+        auto pixelMap = PixelMap::CreatePixelMap(&preLoadPixelMap);
+        sourceInfo = ImageSourceInfo(pixelMap);
+        Rosen::SceneSessionManager::GetInstance().RemovePreLoadStartingWindowFromMap(sessionInfo);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "use preload pixelMap id:%{public}d", session_->GetPersistentId());
+    }
     imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
     startingWindow_->GetRenderContext()->UpdateBackgroundColor(color);
     imageLayoutProperty->UpdateImageFit(ImageFit::NONE);
