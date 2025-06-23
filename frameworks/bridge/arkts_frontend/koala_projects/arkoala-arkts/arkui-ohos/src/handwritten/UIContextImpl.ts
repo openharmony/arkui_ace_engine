@@ -59,6 +59,7 @@ import { Serializer } from "arkui/component/peers/Serializer"
 import { KBuffer } from "@koalaui/interop"
 import { deserializeAndCallCallback } from "arkui/component/peers/CallbackDeserializeCall"
 import { InteropNativeModule } from "@koalaui/interop"
+import { Router as RouterExt } from 'arkui/handwritten';
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -551,6 +552,13 @@ export class UIContextImpl extends UIContext {
             this.router_ = new RouterImpl()
         }
         return this.router_
+    }
+
+    public setRouter(router: RouterExt) {
+        if (this.router_ === undefined) {
+            this.router_ = new RouterImpl()
+        }
+        this.router_.setRouter(router);
     }
 
     public animateTo(param: AnimateParam, event: (() => void)): void {
