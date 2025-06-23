@@ -260,6 +260,7 @@ private:
     static int64_t calTime_;
     static int32_t calFrameRate_;
     static std::unordered_map<int64_t, int32_t> formEventTimerMap_;
+    static std::mutex formEventTimerMutex_;
 };
 
 } // namespace OHOS::Ace

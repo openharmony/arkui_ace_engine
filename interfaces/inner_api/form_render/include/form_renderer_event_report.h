@@ -18,6 +18,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <mutex>
 
 #include "hisysevent.h"
 
@@ -34,6 +35,7 @@ public:
 
 private:
     static std::unordered_map<int64_t, int32_t> waitSurfaceNodeTimerMap_;
+    static std::mutex timerMutex_;
 };
 
 } // namespace OHOS::Ace

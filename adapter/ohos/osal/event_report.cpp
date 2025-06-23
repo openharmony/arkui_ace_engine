@@ -32,6 +32,7 @@ namespace OHOS::Ace {
     int64_t EventReport::calTime_ = 0;
     int32_t EventReport::calFrameRate_ = 0;
     std::unordered_map<int64_t, int32_t> EventReport::formEventTimerMap_ = {};
+    std::mutex EventReport::formEventTimerMutex_;
 namespace {
 
 constexpr char EVENT_KEY_ERROR_TYPE[] = "ERROR_TYPE";
@@ -683,12 +684,14 @@ void EventReport::StartFormModifyTimeoutReportTimer(int64_t formId, const std::s
     EventReport::StopFormModifyTimeoutReportTimer(formId);
     int32_t timerId = OHOS::HiviewDFX::XCollie::GetInstance().SetTimer(
         taskName, WAIT_MODIFY_TIMEOUT, timeoutCallback, nullptr, HiviewDFX::XCOLLIE_FLAG_NOOP);
+    std::lock_guard<std::mutex> lock(EventReport::formEventTimerMutex_);
     EventReport::formEventTimerMap_[formId] = timerId;
     LOGI("StartFormModifyTimeoutReportTimer, cardId: %{public}" PRId64 ", timerId: %{public}d", formId, timerId);
 }
 
 void EventReport::StopFormModifyTimeoutReportTimer(int64_t formId)
 {
+    std::lock_guard<std::mutex> lock(EventReport::formEventTimerMutex_);
     auto iter = EventReport::formEventTimerMap_.find(formId);
     if (iter == EventReport::formEventTimerMap_.end()) {
         return;
