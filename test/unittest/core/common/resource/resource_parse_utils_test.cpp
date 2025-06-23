@@ -163,4 +163,82 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest003, TestSize.Level1)
     CalcDimension caclDimension;
     EXPECT_FALSE(ResourceParseUtils::ParseResResource(resObjWithParams, caclDimension));
 }
+
+/**
+ * @tc.name: ResourceParseUtilsTest004
+ * @tc.desc: Test resourceParseUtils.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ParseResColor with not object.
+     * @tc.expect: ParseResColor return true.
+     */
+    auto resourceAdapter = ResourceAdapter::Create();
+    ResourceManager::GetInstance().AddResourceAdapter("com.example.test", "entry", 100000, resourceAdapter);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    Color color = Color::WHITE;
+    resObj->SetColor(color);
+    resObj->SetIsResource(false);
+    EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObj, color));
+
+    /**
+     * @tc.steps: step2. ParseResColor with isReloading_ true.
+     * @tc.expect: ParseResColor return true.
+     */
+    ResourceParseUtils::SetIsReloading(true);
+    EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObj, color));
+
+    /**
+     * @tc.steps: step3. ParseResColor with resId is -1.
+     * @tc.expect: ParseResColor return true.
+     */
+    ResourceObjectParams params { .value = "test", .type = ResourceObjectParamType::STRING };
+    std::vector<ResourceObjectParams> resObjParamsList;
+    resObjParamsList.push_back(params);
+    RefPtr<ResourceObject> resObjWithName = AceType::MakeRefPtr<ResourceObject>(-1, -1,
+        resObjParamsList, "com.example.test", "entry", 100000);
+    resObjWithName->SetColor(color);
+    resObjWithName->SetIsResource(false);
+    EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObjWithName, color));
+    ResourceParseUtils::SetIsReloading(false);
+    EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObjWithName, color));
+
+    /**
+     * @tc.steps: step4. ParseResColor with string type.
+     * @tc.expect: ParseResColor return false.
+     */
+    RefPtr<ResourceObject> resObjWithStr = AceType::MakeRefPtr<ResourceObject>(1, 10003,
+        resObjParamsList, "com.example.test", "entry", 100000);
+    resObjWithStr->SetColor(color);
+    ResourceParseUtils::SetIsReloading(true);
+    EXPECT_FALSE(ResourceParseUtils::ParseResColor(resObjWithStr, color));
+    ResourceParseUtils::SetIsReloading(false);
+    EXPECT_FALSE(ResourceParseUtils::ParseResColor(resObjWithStr, color));
+
+    /**
+     * @tc.steps: step5. ParseResColor with integer type.
+     * @tc.expect: ParseResColor return true.
+     */
+    RefPtr<ResourceObject> resObjWithInt = AceType::MakeRefPtr<ResourceObject>(1, 10007,
+        resObjParamsList, "com.example.test", "entry", 100000);
+    resObjWithInt->SetColor(color);
+    ResourceParseUtils::SetIsReloading(true);
+    EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObjWithInt, color));
+    ResourceParseUtils::SetIsReloading(false);
+    EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObjWithInt, color));
+
+    /**
+     * @tc.steps: step6. ParseResColor with string type.
+     * @tc.expect: ParseResColor return true.
+     */
+    RefPtr<ResourceObject> resObjWithColor = AceType::MakeRefPtr<ResourceObject>(1, 10001,
+        resObjParamsList, "com.example.test", "entry", 100000);
+    resObjWithColor->SetColor(color);
+    ResourceParseUtils::SetIsReloading(true);
+    EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObjWithColor, color));
+    ResourceParseUtils::SetIsReloading(false);
+    EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObjWithColor, color));
+}
 } // namespace OHOS::Ace

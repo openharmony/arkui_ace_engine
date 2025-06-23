@@ -6776,6 +6776,22 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
     return false;
 }
 
+void JSViewAbstract::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
+    const Color& color, bool state)
+{
+    if (!state || !SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (!resObj) {
+        resObj = AceType::MakeRefPtr<ResourceObject>();
+        resObj->SetIsResource(false);
+        resObj->SetInstanceId(Container::CurrentIdSafely());
+    }
+    auto node = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+    resObj->SetColor(color);
+    resObj->SetNodeTag(node ? node->GetTag() : "");
+}
+
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
 {
     RefPtr<ResourceObject> resObj;
@@ -6785,20 +6801,27 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
     RefPtr<ResourceObject>& resObj)
 {
+    bool state = false;
     if (jsValue->IsNumber()) {
         result = Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>()));
+        CompleteResourceObjectFromColor(resObj, result, true);
         return true;
     }
     if (jsValue->IsString()) {
-        return Color::ParseColorString(jsValue->ToString(), result);
+        state = Color::ParseColorString(jsValue->ToString(), result);
+        CompleteResourceObjectFromColor(resObj, result, state);
+        return state;
     }
     if (jsValue->IsObject()) {
         if (ParseColorMetricsToColor(jsValue, result)) {
+            CompleteResourceObjectFromColor(resObj, result, true);
             return true;
         }
-        return ParseJsColorFromResource(jsValue, result, resObj);
+        state = ParseJsColorFromResource(jsValue, result, resObj);
+        CompleteResourceObjectFromColor(resObj, result, state);
+        return state;
     }
-    return false;
+    return state;
 }
 
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result, const Color& defaultColor)
@@ -6810,17 +6833,23 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result, co
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
     const Color& defaultColor, RefPtr<ResourceObject>& resObj)
 {
+    bool state = false;
     if (jsValue->IsNumber()) {
         result = Color(ColorAlphaAdapt(jsValue->ToNumber<uint32_t>()));
+        CompleteResourceObjectFromColor(resObj, result, true);
         return true;
     }
     if (jsValue->IsString()) {
-        return Color::ParseColorString(jsValue->ToString(), result, defaultColor);
+        state = Color::ParseColorString(jsValue->ToString(), result, defaultColor);
+        CompleteResourceObjectFromColor(resObj, result, state);
+        return state;
     }
     if (!jsValue->IsObject()) {
-        return false;
+        return state;
     }
-    return ParseJsColorFromResource(jsValue, result, resObj);
+    state = ParseJsColorFromResource(jsValue, result, resObj);
+    CompleteResourceObjectFromColor(resObj, result, state);
+    return state;
 }
 
 bool JSViewAbstract::ParseJsColorStrategy(const JSRef<JSVal>& jsValue, ForegroundColorStrategy& strategy)

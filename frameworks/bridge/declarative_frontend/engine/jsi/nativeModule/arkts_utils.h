@@ -357,6 +357,10 @@ public:
         return panda::JSValueRef::Undefined(vm);
     }
     static Local<panda::ArrayRef> ChoosePointToJSValue(const EcmaVM* vm, std::vector<int> input);
+
+private:
+    static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
+        const Color& color, bool state);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H
