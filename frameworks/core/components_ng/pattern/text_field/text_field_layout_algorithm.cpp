@@ -1273,21 +1273,6 @@ bool TextFieldLayoutAlgorithm::IsAdaptExceedLimit(const SizeF& maxSize)
            GreatNotEqual(paragraph->GetHeight(), maxSize.Height());
 }
 
-void TextFieldLayoutAlgorithm::UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* layoutWrapper, OptionalSizeF& frameSize)
-{
-    auto layoutPolicy = layoutWrapper->GetLayoutProperty()->GetLayoutPolicyProperty();
-    if (layoutPolicy.has_value()) {
-        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_;
-        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_;
-        const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
-        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(layoutConstraint.value(),
-            widthLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH),
-            heightLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH), Axis::HORIZONTAL)
-                                    .ConvertToSizeT();
-        frameSize.UpdateSizeWithCheck(layoutPolicySize);
-    }
-}
-
 void TextFieldLayoutAlgorithm::UpdateTextAreaMaxLines(
     TextStyle& textStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty)
 {

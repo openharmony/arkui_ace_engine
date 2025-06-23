@@ -150,7 +150,6 @@ protected:
 
     LayoutConstraintF CalculateFrameSizeConstraint(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
-    void UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* layoutWrapper, OptionalSizeF& frameSize);
 
     RefPtr<Paragraph> paragraph_;
     RefPtr<Paragraph> inlineParagraph_;

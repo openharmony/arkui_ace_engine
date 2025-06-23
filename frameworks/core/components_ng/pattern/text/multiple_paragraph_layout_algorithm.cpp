@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/font_collection.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -228,6 +229,7 @@ void MultipleParagraphLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // child constraint has already been calculated by the UpdateParagraphBySpan method when triggering MeasureContent
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
     MeasureWithFixAtIdealSize(layoutWrapper);
+    MeasureWithMatchParent(layoutWrapper);
     auto baselineDistance = 0.0f;
     auto paragraph = GetSingleParagraph();
     if (paragraph) {
@@ -984,5 +986,36 @@ void MultipleParagraphLayoutAlgorithm::MeasureWithFixAtIdealSize(LayoutWrapper* 
         measureSize.SetHeight(fixSize.Height());
     }
     geometryNode->SetFrameSize(measureSize);
+}
+
+void MultipleParagraphLayoutAlgorithm::MeasureWithMatchParent(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicyProperty = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicyProperty);
+    auto widthLayoutPolicy = layoutPolicyProperty.value().widthLayoutPolicy_;
+    auto heightLayoutPolicy = layoutPolicyProperty.value().heightLayoutPolicy_;
+    if (widthLayoutPolicy != LayoutCalPolicy::MATCH_PARENT && heightLayoutPolicy != LayoutCalPolicy::MATCH_PARENT) {
+        return;
+    }
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_VOID(layoutConstraint);
+    auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(layoutConstraint.value(),
+        widthLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH), heightLayoutPolicy.value_or(LayoutCalPolicy::NO_MATCH),
+        Axis::HORIZONTAL);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    OptionalSizeF frameSize(geometryNode->GetFrameSize());
+    frameSize.UpdateSizeWithCheck(layoutPolicySize.ConvertToSizeT());
+    auto constraintSize = UpdateOptionSizeByCalcLayoutConstraint(
+        frameSize, layoutProperty->GetCalcLayoutConstraint(), layoutConstraint->percentReference);
+    if (widthLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
+        layoutWrapper->GetGeometryNode()->SetFrameWidth(constraintSize.ConvertToSizeT().Width());
+    }
+    if (heightLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
+        layoutWrapper->GetGeometryNode()->SetFrameHeight(constraintSize.ConvertToSizeT().Height());
+    }
 }
 } // namespace OHOS::Ace::NG
