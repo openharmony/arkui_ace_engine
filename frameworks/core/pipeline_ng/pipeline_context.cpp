@@ -47,6 +47,7 @@
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/text_field_manager.h"
@@ -5962,10 +5963,12 @@ void PipelineContext::NotifyColorModeChange(uint32_t colorMode)
             auto rootNode = weak.Upgrade();
             CHECK_NULL_VOID(rootNode);
             ContainerScope scope(instanceId);
+            ResourceParseUtils::SetIsReloading(true);
             pipeline->SetIsReloading(true);
             rootNode->SetDarkMode(rootColorMode == ColorMode::DARK);
             rootNode->NotifyColorModeChange(colorMode);
             pipeline->SetIsReloading(false);
+            ResourceParseUtils::SetIsReloading(false);
             pipeline->FlushUITasks();
         },
         [weak = WeakClaim(this), instanceId = instanceId_]() {

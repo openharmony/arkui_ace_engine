@@ -28,7 +28,6 @@ ace_unittest("color_inverter_test") {
   type = "new"
   module_out_path = frameworks_test_output_path
   sources = [
-    "$ace_root/frameworks/core/common/color_inverter.cpp",
     "color_inverter_test.cpp",
   ]
 

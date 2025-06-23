@@ -853,6 +853,8 @@ public:
         NG::BorderRadiusProperty& dimension);
 
 private:
+    static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
+        const Color& color, bool state);
     static bool ParseJsStrArrayInternal(const JSRef<JSArray>& jsArray, std::vector<std::string>& result,
         std::vector<RefPtr<ResourceObject>>& resObjArray);
     static bool ParseJsIntegerArrayInternal(const JSRef<JSArray>& jsArray, std::vector<uint32_t>& result,
