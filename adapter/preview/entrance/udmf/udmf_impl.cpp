@@ -34,6 +34,11 @@ RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataForNative(void* rawData)
     return nullptr;
 }
 
+RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataFromANI(void* rawData)
+{
+    return nullptr;
+}
+
 void* UdmfClientImpl::TransformUnifiedDataPtr(RefPtr<UnifiedData>& unifiedData)
 {
     return nullptr;
@@ -53,6 +58,9 @@ napi_value UdmfClientImpl::TransformSummary(std::map<std::string, int64_t>& summ
 {
     return nullptr;
 }
+
+void UdmfClientImpl::TransformSummaryANI(std::map<std::string, int64_t>& summary, void* summaryPtr)
+{}
 
 RefPtr<UnifiedData> UdmfClientImpl::CreateUnifiedData()
 {

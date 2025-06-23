@@ -3970,28 +3970,19 @@ void DragPreview0Impl(Ark_NativePointer node,
         },
         [node, frameNode](const Ark_DragItemInfo& value) {
             auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
-            DragDropInfo dragDropInfo {
-                .pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr),
-                .extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string())
-            };
             if (builder) {
-                CallbackHelper(builder.value()).BuildAsync([frameNode, dragDropInfo = std::move(dragDropInfo)](
+                CallbackHelper(builder.value()).BuildAsync([frameNode](
                     const RefPtr<UINode>& uiNode) {
                     DragDropInfo info;
                     info.customNode = uiNode;
-                    info.pixelMap = dragDropInfo.pixelMap;
-                    info.extraInfo = dragDropInfo.extraInfo;
-                     ViewAbstract::SetDragPreview(frameNode, info);
+                    ViewAbstract::SetDragPreview(frameNode, info);
                     }, node);
             } else {
-                ViewAbstract::SetDragPreview(frameNode, DragDropInfo {
-                    .pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr),
-                    .extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string()) });
+                ViewAbstract::SetDragPreview(frameNode, DragDropInfo {});
             }
         },
         [frameNode]() {
-            std::optional<DragDropInfo> empty = std::nullopt;
-            ViewAbstractModelStatic::SetDragPreview(frameNode, empty);
+            ViewAbstract::SetDragPreview(frameNode, DragDropInfo {});
         });
 }
 void DragPreview1Impl(Ark_NativePointer node,
@@ -4000,9 +3991,44 @@ void DragPreview1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(preview);
-    //auto convValue = Converter::OptConvert<type>(preview); // for enums
-    //CommonMethodModelNG::SetDragPreview1(frameNode, convValue);
+    auto optValue = Converter::GetOptPtr(config);
+    bool onlyForLifting = optValue ? Converter::OptConvert<bool>(optValue->onlyForLifting).value_or(false) : false;
+    bool delayCreating = optValue ? Converter::OptConvert<bool>(optValue->delayCreating).value_or(false) : false;
+    Converter::VisitUnionPtr(preview,
+        [frameNode, onlyForLifting, delayCreating](const Ark_String& val) {
+            ViewAbstract::SetDragPreview(frameNode,
+                DragDropInfo { .inspectorId = Converter::Convert<std::string>(val),
+                               .onlyForLifting = onlyForLifting, .delayCreating = delayCreating });
+        },
+        [node, frameNode, onlyForLifting, delayCreating](const CustomNodeBuilder& val) {
+            CallbackHelper(val).BuildAsync([frameNode, onlyForLifting, delayCreating](const RefPtr<UINode>& uiNode) {
+                ViewAbstract::SetDragPreview(frameNode, DragDropInfo { .customNode = uiNode,
+                                                                       .onlyForLifting = onlyForLifting,
+                                                                       .delayCreating = delayCreating  });
+                }, node);
+        },
+        [node, frameNode, onlyForLifting, delayCreating](const Ark_DragItemInfo& value) {
+            auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
+            DragDropInfo dragDropInfo {
+                .extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string()),
+                .onlyForLifting = onlyForLifting, .delayCreating = delayCreating };
+            if (builder) {
+                CallbackHelper(builder.value()).BuildAsync([frameNode, dragDropInfo = std::move(dragDropInfo)](
+                    const RefPtr<UINode>& uiNode) {
+                    DragDropInfo info;
+                    info.customNode = uiNode;
+                    info.onlyForLifting = dragDropInfo.onlyForLifting;
+                    info.delayCreating = dragDropInfo.delayCreating;
+                    ViewAbstract::SetDragPreview(frameNode, info);
+                    }, node);
+            } else {
+                ViewAbstract::SetDragPreview(frameNode, DragDropInfo {
+                    .onlyForLifting = onlyForLifting, .delayCreating = delayCreating });
+            }
+        },
+        [frameNode]() {
+            ViewAbstract::SetDragPreview(frameNode, DragDropInfo {});
+        });
 }
 void OnPreDragImpl(Ark_NativePointer node,
                    const Opt_Callback_PreDragStatus_Void* value)
@@ -5182,21 +5208,15 @@ void OverlayImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    OverlayOptions overlay { .align = Alignment::TOP_LEFT };
+    OverlayOptions overlay { .align = Alignment::TOP_LEFT};
     overlay = Converter::OptConvertPtr<OverlayOptions>(options).value_or(overlay);
-    Converter::VisitUnionPtr(value,
-        [frameNode, &overlay](const Ark_String& src) {
+    Converter::VisitUnionPtr(value, [frameNode, &overlay](const Ark_String& src) {
             overlay.content = Converter::Convert<std::string>(src);
             ViewAbstract::SetOverlay(frameNode, overlay);
         },
         [node, frameNode, overlay](const CustomNodeBuilder& builder) {
             CallbackHelper(builder).BuildAsync([overlay, frameNode](const RefPtr<UINode>& uiNode) {
-                auto builderFunc = [frameNode, uiNode]() {
-                    PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-                    ViewStackProcessor::GetInstance()->Push(uiNode);
-                };
-                ViewAbstract::SetOverlayBuilder(
-                    std::move(builderFunc), overlay.align, overlay.x, overlay.y);
+                ViewAbstract::SetOverlayBuilder(frameNode, uiNode, overlay.align, overlay.x, overlay.y);
                 }, node);
         },
         [](const Ark_ComponentContent& src) {
@@ -5204,8 +5224,7 @@ void OverlayImpl(Ark_NativePointer node,
         },
         []() {
             LOGE("OverlayImpl(): Invalid union argument");
-        }
-    );
+        });
 }
 
 void BlendMode0Impl(Ark_NativePointer node,

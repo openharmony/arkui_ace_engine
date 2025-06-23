@@ -101,6 +101,16 @@ RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataForNative(void* rawData)
     return udData;
 }
 
+RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataFromANI(void* rawData)
+{
+    CHECK_NULL_RETURN(rawData, nullptr);
+    auto unifiedDataPtr = reinterpret_cast<UDMF::UnifiedData*>(rawData);
+    std::shared_ptr<UDMF::UnifiedData> unifiedData(unifiedDataPtr);
+    auto udData = AceType::MakeRefPtr<UnifiedDataImpl>();
+    udData->SetUnifiedData(unifiedData);
+    return udData;
+}
+
 napi_value UdmfClientImpl::TransformSummary(std::map<std::string, int64_t>& summary)
 {
     auto engine = EngineHelper::GetCurrentEngine();
@@ -118,6 +128,17 @@ napi_value UdmfClientImpl::TransformSummary(std::map<std::string, int64_t>& summ
     UDMF::SummaryNapi::NewInstance(env, udmfSummary, dataVal);
     CHECK_NULL_RETURN(dataVal, nullptr);
     return dataVal;
+}
+
+void UdmfClientImpl::TransformSummaryANI(std::map<std::string, int64_t>& summary, void* summaryPtr)
+{
+    auto udmfSummary = reinterpret_cast<UDMF::Summary*>(summaryPtr);
+    CHECK_NULL_VOID(udmfSummary);
+    udmfSummary->totalSize = 0;
+    for (auto element : summary) {
+        udmfSummary->totalSize += element.second;
+    }
+    udmfSummary->summary = std::move(summary);
 }
 
 int32_t UdmfClientImpl::SetData(const RefPtr<UnifiedData>& unifiedData, std::string& key)

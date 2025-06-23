@@ -118,7 +118,6 @@ import { TextClockController, TextClockOptions } from "./../textClock"
 import { TextTimerController, TextTimerOptions } from "./../textTimer"
 import { TimePickerFormat, TimePickerResult, TimePickerOptions, TimePickerDialogOptions, Callback_TimePickerResult_Void } from "./../timePicker"
 import { ToggleType, ToggleOptions, SwitchStyle } from "./../toggle"
-import { UniformDataType } from "./../arkui-uniformtypedescriptor"
 import { WaterFlowAttribute, WaterFlowLayoutMode, SectionOptions, WaterFlowSections, WaterFlowOptions, GetItemMainSizeByIndex } from "./../waterFlow"
 import { WindowSceneAttribute } from "./../windowScene"
 import { WithThemeAttribute, WithThemeOptions } from "./../withTheme"
@@ -158,7 +157,7 @@ import { MenuItemOptions } from "./../menuItem"
 import { OnHoverCallback } from "./../sdk-stubs"
 import { TerminationInfo } from "./../embeddedComponent"
 import { TextBackgroundStyle } from "./../span"
-import { PointerStyle } from '#external'
+import { PointerStyle, UniformDataType} from '#external'
 import promptAction from "@ohos/promptAction"
 
 export class TypeChecker {

@@ -18,7 +18,7 @@
 #include "base/log/log.h"
 #include "core/components_ng/base/frame_node.h"
 #ifdef WEB_SUPPORTED
-#include "core/components_ng/pattern/web/web_model_static.h"
+#include "core/components_ng/pattern/web/ani/web_model_static.h"
 #endif
 
 namespace OHOS::Ace::NG {

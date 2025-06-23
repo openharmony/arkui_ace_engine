@@ -32,9 +32,11 @@ public:
     RefPtr<UnifiedData> CreateUnifiedData() override;
     RefPtr<UnifiedData> TransformUnifiedData(napi_value napiValue) override;
     RefPtr<UnifiedData> TransformUnifiedDataForNative(void* rawData) override;
+    RefPtr<UnifiedData> TransformUnifiedDataFromANI(void* rawData) override;
     void* TransformUnifiedDataPtr(RefPtr<UnifiedData>& unifiedData) override;
     napi_value TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData) override;
     napi_value TransformSummary(std::map<std::string, int64_t>& summary) override;
+    void TransformSummaryANI(std::map<std::string, int64_t>& summary, void* summaryPtr) override;
     int32_t SetData(const RefPtr<UnifiedData>& unifiedData, std::string& key) override;
     int32_t GetData(const RefPtr<UnifiedData>& unifiedData, const std::string& key) override;
     int32_t GetSummary(std::string& key, std::map<std::string, int64_t>& summaryMap) override;

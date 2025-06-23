@@ -38,7 +38,6 @@ import { ResizableOptions } from "./image"
 import { VisualEffect, Filter, BrightnessBlender } from "./arkui-uieffect"
 import { FocusBoxStyle, FocusPriority } from "./focus"
 import { TransformationMatrix } from "./arkui-common"
-import { UniformDataType } from "./arkui-uniformtypedescriptor"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup } from "./gesture"
 import { BlendMode } from "./arkui-drawing"
 import { StyledString } from "./styledString"
@@ -59,9 +58,9 @@ import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 import { hookStateStyleImpl } from "../handwritten/ArkStateStyle"
 import { rememberMutableState } from '@koalaui/runtime'
 import { hookDrawModifierInvalidateImpl, hookDrawModifierAttributeImpl } from "../handwritten/ArkDrawModifierImpl"
-import { hookRegisterOnDragStartImpl } from "../handwritten/ArkDragDrop"
+import { hookDragPreview, hookAllowDropAttribute, hookRegisterOnDragStartImpl } from "../handwritten/ArkDragDrop"
 import { ArkUIAniModule } from "arkui.ani"
-import { PointerStyle, UnifiedData, Summary, PixelMap } from "#external"
+import { PointerStyle, UnifiedData, Summary, PixelMap, UniformDataType } from "#external"
 import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookCommonMethodParallelGestureImpl, hookCommonMethodPriorityGestureImpl } from "../handwritten/CommonHandWritten"
 export interface ICurve {
     interpolate(fraction: number): number
@@ -806,11 +805,11 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         return
     }
     public getData(): UnifiedData {
-        const data = ArkUIAniModule._DragEvent_Get_Data(this.peer!.ptr)
+        const data = ArkUIAniModule._DragEvent_Get_Data(this.peer!.ptr) as UnifiedData
         return data
     }
     public getSummary(): Summary {
-        const summary = ArkUIAniModule._DragEvent_Get_Summary(this.peer!.ptr)
+        const summary = ArkUIAniModule._DragEvent_Get_Summary(this.peer!.ptr) as (Summary)
         return summary
     }
     public setResult(dragResult: DragResult): void {
@@ -3439,6 +3438,10 @@ export class ArkCommonMethodPeer extends PeerNode {
         }
         ArkUIGeneratedNativeModule._CommonMethod_animation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+    }
+    SetOrCreateAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        ArkUIAniModule._Animation_SetOrCreateAnimatableProperty(this.peer.ptr, functionName, value, callback);
     }
     transition0Attribute(value: TransitionOptions | TransitionEffect | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
@@ -7051,6 +7054,10 @@ export interface ProvideOptions {
     allowOverride?: string;
 }
 export interface AnimatableArithmetic<T> {
+    plus(rhs:AnimatableArithmetic<T>): AnimatableArithmetic<T>;
+    subtract(rhs:AnimatableArithmetic<T>): AnimatableArithmetic<T>;
+    multiply(scale:number): AnimatableArithmetic<T>;
+    equals(rhs:AnimatableArithmetic<T>): boolean;
 }
 export type ReuseIdCallback = () => string;
 export interface ReuseOptions {
@@ -7608,6 +7615,7 @@ export interface DataSyncOptions {
     _DataSyncOptionsStub: string;
 }
 export enum DragResult {
+    UNKNOWN = -1,
     DRAG_SUCCESSFUL = 0,
     DRAG_FAILED = 1,
     DRAG_CANCELED = 2,
@@ -8096,6 +8104,8 @@ export interface CommonMethod {
     focusBox(value: FocusBoxStyle | undefined): this
     animationStart(value: AnimateParam | undefined): this
     animationStop(value: AnimateParam | undefined):this
+    __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void
     transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this
     motionBlur(value: MotionBlurOptions | undefined): this
     brightness(value: number | undefined): this
@@ -8144,7 +8154,7 @@ export interface CommonMethod {
     onDragLeave(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
     onDrop(eventCallback: ((event: DragEvent,extraParams?: string) => void) | undefined | OnDragEventCallback | undefined, dropOptions?: DropOptions): this
     onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    allowDrop(value: Array<UniformDataType> | undefined): this
+    allowDrop(value: Array<UniformDataType> | null | undefined): this
     draggable(value: boolean | undefined): this
     dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this
     onPreDrag(value: ((parameter: PreDragStatus) => void) | undefined): this
@@ -8336,7 +8346,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onDragLeave_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
     onDrop_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
     onDragEnd_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
-    allowDrop_value?: Array<UniformDataType> | undefined
+    allowDrop_value?: Array<UniformDataType> | null | undefined
     draggable_value?: boolean | undefined
     dragPreview_value?: CustomBuilder | DragItemInfo | string | undefined
     onPreDrag_value?: ((parameter: PreDragStatus) => void) | undefined
@@ -8576,6 +8586,8 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public animationStop(value: AnimateParam | undefined): this {
         return this
     }
+    public __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {}
     public animation(value: AnimateParam | undefined): this {
         return this
     }
@@ -8723,7 +8735,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
         return this
     }
-    public allowDrop(value: Array<UniformDataType> | undefined): this {
+    public allowDrop(value: Array<UniformDataType> | null | undefined): this {
         return this
     }
     public draggable(value: boolean | undefined): this {
@@ -8963,6 +8975,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
 }
 export type CommonAttribute = CommonMethod
 export type CustomBuilder = 
+/** @memo */
 () => void;
 export interface OverlayOptions {
     align?: Alignment;
@@ -9943,6 +9956,15 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    public __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        const function_type = runtimeType(callback)
+        if (RuntimeType.FUNCTION === function_type) {
+            this.getPeer()?.SetOrCreateAnimatableProperty(functionName, value, callback);
+        } else {
+            throw new Error('__createOrSetAnimatableProperty format error')
+        }
+    }
     public transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {
         if (this.checkPriority("transition")) {
             const effect_type = runtimeType(effect)
@@ -10471,9 +10493,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
         if (this.checkPriority("onDragStart")) {
-            const value_casted = value as (((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined)
-            hookRegisterOnDragStartImpl(this.getPeer(), value_casted)
-            return this
+            hookRegisterOnDragStartImpl(this, value)
         }
         return this
     }
@@ -10528,11 +10548,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public allowDrop(value: Array<UniformDataType> | undefined): this {
+    public allowDrop(value: Array<UniformDataType> | null | undefined): this {
         if (this.checkPriority("allowDrop")) {
-            const value_casted = value as (Array<UniformDataType> | undefined)
-            this.getPeer()?.allowDropAttribute(value_casted)
-            return this
+            hookAllowDropAttribute(this, value)
         }
         return this
     }
@@ -10546,20 +10564,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {
         if (this.checkPriority("dragPreview")) {
-            const preview_type = runtimeType(preview)
-            const config_type = runtimeType(config)
-            if ((RuntimeType.FUNCTION == preview_type) || (RuntimeType.OBJECT == preview_type) || (RuntimeType.STRING == preview_type) || (RuntimeType.UNDEFINED == preview_type)) {
-                const value_casted = preview as (CustomBuilder | DragItemInfo | string | undefined)
-                this.getPeer()?.dragPreview0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.FUNCTION == preview_type) || (RuntimeType.OBJECT == preview_type) || (RuntimeType.STRING == preview_type) || (RuntimeType.UNDEFINED == preview_type)) {
-                const preview_casted = preview as (CustomBuilder | DragItemInfo | string | undefined)
-                const config_casted = config as (PreviewConfiguration)
-                this.getPeer()?.dragPreview1Attribute(preview_casted, config_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            hookDragPreview(this, preview, config)
         }
         return this
     }
