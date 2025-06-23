@@ -192,8 +192,9 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "skia:skia_canvaskit",
     "window_manager:libwm",
   ]
+  defines = [ "ACE_NON_VIRTUAL=virtual" ]
   if (defined(use_rosen_drawing) && use_rosen_drawing) {
-    defines = [ "USE_ROSEN_DRAWING" ]
+    defines += [ "USE_ROSEN_DRAWING" ]
   }
 }
 
