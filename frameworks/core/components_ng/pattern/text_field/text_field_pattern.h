@@ -298,6 +298,8 @@ public:
 
     bool CheckBlurReason();
 
+    bool NeedSetScrollRect();
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -2213,6 +2215,8 @@ private:
     bool cancelButtonTouched_ = false;
     KeyboardGradientMode imeGradientMode_ = KeyboardGradientMode::NONE;
     KeyboardFluidLightMode imeFluidLightMode_ = KeyboardFluidLightMode::NONE;
+    OverflowMode lastOverflowMode_ = OverflowMode::SCROLL;
+    TextOverflow lastTextOverflow_ = TextOverflow::ELLIPSIS;
 };
 } // namespace OHOS::Ace::NG
 
