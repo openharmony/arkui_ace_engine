@@ -16,6 +16,8 @@
 import { pointer, KSerializerBuffer, nullptr } from './InteropTypes'
 import { int32, int64 } from '@koalaui/common'
 import { InteropNativeModule } from "./InteropNativeModule"
+import { Disposable } from "./ResourceManager"
+import { unsafeMemory } from "std/core"
 
 // stub wrapper for KInteropBuffer
 export final class NativeBuffer {
@@ -33,12 +35,12 @@ export final class NativeBuffer {
         this.release = release
     }
 
-    public readByte(index:int32): int32 {
-        return InteropNativeModule._ReadByte(this.data, index, this.length)
+    public readByte(index:int64): int32 {
+        return unsafeMemory.readInt8(this.data + index)
     }
 
-    public writeByte(index:int32, value: int32): void {
-        InteropNativeModule._WriteByte(this.data, index, this.length, value)
+    public writeByte(index:int64, value: int32): void {
+        unsafeMemory.writeInt8(this.data + index, value as byte)
     }
 
     static wrap(data:pointer, length: int64, resourceId: int32, hold:pointer, release: pointer): NativeBuffer {
@@ -46,7 +48,7 @@ export final class NativeBuffer {
     }
 }
 
-export class KBuffer {
+export class KBuffer implements Disposable {
     private _buffer: KSerializerBuffer
     private readonly _length: int64
     private readonly _owned: boolean
@@ -77,9 +79,9 @@ export class KBuffer {
     }
 
     public get(index: int64): byte {
-        return InteropNativeModule._ReadByte(this._buffer, index, this._length) as byte
+        return unsafeMemory.readInt8(this._buffer + index)
     }
     public set(index: int64, value: byte): void {
-        InteropNativeModule._WriteByte(this._buffer, index, this._length, value)
+        unsafeMemory.writeInt8(this._buffer + index, value)
     }
 }
