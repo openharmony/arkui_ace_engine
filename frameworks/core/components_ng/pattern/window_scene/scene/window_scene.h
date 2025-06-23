@@ -57,6 +57,7 @@ protected:
     void OnRemoveSnapshot() override;
     void OnAppRemoveStartingWindow() override;
     void OnUpdateSnapshotWindow() override;
+    void OnPreLoadStartingWindowFinished() override;
 
 private:
     std::shared_ptr<Rosen::RSSurfaceNode> CreateLeashWindowNode();

@@ -420,6 +420,30 @@ HWTEST_F(WindowSceneTest, OnAppRemoveStartingWindow04, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnPreLoadStartingWindowFinished
+ * @tc.desc: preload starting window finished
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, OnPreLoadStartingWindowFinished, TestSize.Level1)
+{
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
+    ASSERT_NE(windowScene, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+
+    windowScene->OnPreLoadStartingWindowFinished();
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_NE(windowScene->startingWindow_, nullptr);
+}
+
+/**
  * @tc.name: OnUpdateSnapshotWindow
  * @tc.desc: update snapshot window
  * @tc.type: FUNC
