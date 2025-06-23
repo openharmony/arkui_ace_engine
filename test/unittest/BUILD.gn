@@ -261,6 +261,7 @@ ohos_source_set("ace_components_base") {
     "$ace_root/frameworks/core/components_ng/base/distributed_ui.cpp",
     "$ace_root/frameworks/core/components_ng/base/extension_handler.cpp",
     "$ace_root/frameworks/core/components_ng/base/frame_node.cpp",
+    "$ace_root/frameworks/core/components_ng/base/frame_node_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/base/geometry_node.cpp",
     "$ace_root/frameworks/core/components_ng/base/inspector.cpp",
     "$ace_root/frameworks/core/components_ng/base/inspector_filter.cpp",
@@ -510,6 +511,7 @@ ohos_source_set("ace_components_render") {
     "$ace_root/frameworks/core/components_ng/render/polygon_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/rect_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/render_context.cpp",
+    "$ace_root/frameworks/core/components_ng/render/render_context_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/render/render_property.cpp",
     "$ace_root/frameworks/core/components_ng/render/shape_painter.cpp",
   ]
@@ -658,6 +660,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/gestures/drag_event.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
+    "$ace_root/frameworks/core/pipeline/base/element_register_multi_thread.cpp",
     "$ace_root/frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
     "$ace_root/frameworks/core/text/text_emoji_processor.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/properties/property.cpp",
