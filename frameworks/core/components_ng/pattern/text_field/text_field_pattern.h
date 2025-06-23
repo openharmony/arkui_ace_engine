@@ -1995,6 +1995,7 @@ private:
     void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
     void FireOnWillAttachIME();
+    Offset GetCaretClickLocalOffset(const Offset& offset);
 
     RectF frameRect_;
     RectF textRect_;

@@ -2797,14 +2797,14 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     auto lastCaretIndex = selectController_->GetCaretIndex();
+    auto clickLocalOffset = GetCaretClickLocalOffset(info.GetLocalLocation());
     if (mouseStatus_ != MouseStatus::MOVE) {
-        UpdateCaretByClick(info.GetLocalLocation());
+        UpdateCaretByClick(clickLocalOffset);
     }
     StartTwinkling();
     SetIsSingleHandle(true);
     bool needCloseOverlay = true;
-    bool isRepeatClickCaret =
-        RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex) && !firstGetFocus;
+    bool isRepeatClickCaret = RepeatClickCaret(clickLocalOffset, lastCaretIndex) && !firstGetFocus;
     bool isInlineSelectAllOrEmpty = inlineSelectAllFlag_ || contentController_->IsEmpty();
     auto clickBlank = contentController_->IsEmpty() || selectController_->IsTouchAtLineEnd(info.GetLocalLocation());
     auto closeHandleAtBlank =
@@ -4477,7 +4477,7 @@ void TextFieldPattern::FocusAndUpdateCaretByMouse(MouseInfo& info)
         StopTwinkling();
         return;
     }
-    UpdateCaretByClick(info.GetLocalLocation());
+    UpdateCaretByClick(GetCaretClickLocalOffset(info.GetLocalLocation()));
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -11889,5 +11889,20 @@ void TextFieldPattern::UpdateMarginResource()
     userMargin.right = margin->right.has_value() ? margin->right :
         (isRTL ? margin->start : margin->end);
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin);
+}
+
+Offset TextFieldPattern::GetCaretClickLocalOffset(const Offset& offset)
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, offset);
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto localOffset = offset;
+    if (GreatNotEqual(localOffset.GetY(), textRect_.Bottom())) {
+        localOffset.SetX(isRTL ? textRect_.Left() : textRect_.Right());
+    } else if (GreatNotEqual(localOffset.GetY(), contentRect_.Bottom())) {
+        localOffset.SetX(isRTL ? contentRect_.Left() : contentRect_.Right());
+        localOffset.SetY(contentRect_.Bottom() - PreferredLineHeight() / 2.0f);
+    }
+    return localOffset;
 }
 } // namespace OHOS::Ace::NG
