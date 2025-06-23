@@ -35,6 +35,7 @@ import { uiObserver } from "@ohos/arkui/observer"
 import { mediaquery } from '@ohos/mediaquery'
 import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions }from "arkui/component/alertDialog"
+import { ActionSheet, ActionSheetOptions} from "arkui/component/actionSheet"
 import inspector from "@ohos/arkui/inspector"
 import router from '@ohos/router'
 import promptAction from '@ohos/promptAction';
@@ -323,6 +324,9 @@ export class UIContext {
         throw Error("showAlertDialog not implemented in UIContext!")
     }
 
+    public showActionSheet(options: ActionSheetOptions): void {
+        throw Error("showActionSheet not implemented in UIContext!")
+    }
     // @ts-ignore
     public freezeUINode(id: number, isFrozen: boolean): void {
         throw Error("freezeUINode not implemented in UIContext!")
