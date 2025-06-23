@@ -832,8 +832,7 @@ public:
     bool BeforeAddImage(RichEditorChangeValue& changeValue, const ImageSpanOptions& options, int32_t insertIndex);
     bool BeforeSpansChange(const UndoRedoRecord& record, bool isUndo);
     void AfterSpansChange(const UndoRedoRecord& record, bool isUndo);
-    RefPtr<SpanString> ToStyledString(int32_t start, int32_t end,
-        std::optional<std::list<RefPtr<SpanItem>>> spans = std::nullopt);
+    RefPtr<SpanString> ToStyledString(int32_t start, int32_t end);
     SelectionInfo FromStyledString(const RefPtr<SpanString>& spanString);
     bool BeforeAddSymbol(RichEditorChangeValue& changeValue, const SymbolSpanOptions& options);
     void AfterContentChange(RichEditorChangeValue& changeValue);
@@ -1703,9 +1702,9 @@ private:
     void UpdateGestureHotZone(const RefPtr<LayoutWrapper>& dirty);
     void ClearOnFocusTextField(FrameNode* node);
     void ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result,
-        const std::list<RefPtr<SpanItem>> spans);
+        const std::list<RefPtr<SpanItem>>& spans);
     RefPtr<SpanString> GetSpanStringByResultObject(const ResultObject& result,
-        const std::list<RefPtr<SpanItem>> spans);
+        const std::list<RefPtr<SpanItem>>& spans);
     bool InitPreviewText(const std::u16string& previewTextValue, const PreviewRange& range);
     bool ReplaceText(const std::u16string& previewTextValue, const PreviewRange& range);
     bool UpdatePreviewText(const std::u16string& previewTextValue, const PreviewRange& range);
@@ -1719,6 +1718,7 @@ private:
     bool NeedShowPlaceholder() const;
     bool IsSelectAll() override;
     std::pair<int32_t, int32_t> GetSpanRangeByResultObject(const ResultObject& result);
+    std::list<RefPtr<SpanItem>> CopySpansForClipboard();
 #ifdef CROSS_PLATFORM
     bool UnableStandardInputCrossPlatform(TextInputConfiguration& config, bool isFocusViewChanged);
 #endif

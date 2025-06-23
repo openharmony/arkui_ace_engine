@@ -4462,8 +4462,7 @@ void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     IF_PRESENT(host, MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF));
 }
 
-RefPtr<SpanString> RichEditorPattern::ToStyledString(int32_t start, int32_t end,
-    std::optional<std::list<RefPtr<SpanItem>>> spans)
+RefPtr<SpanString> RichEditorPattern::ToStyledString(int32_t start, int32_t end)
 {
     auto length = GetTextContentLength();
     int32_t realStart = (start == -1) ? 0 : std::clamp(start, 0, length);
@@ -4475,8 +4474,7 @@ RefPtr<SpanString> RichEditorPattern::ToStyledString(int32_t start, int32_t end,
     if (aiWriteAdapter_->GetAIWrite()) {
         SetSubSpansWithAIWrite(spanString, realStart, realEnd);
     } else {
-        auto& spansNew = spans.has_value() ? spans.value() : spans_;
-        SetSubSpans(spanString, realStart, realEnd, spansNew);
+        SetSubSpans(spanString, realStart, realEnd, spans_);
     }
     SetSubMap(spanString);
     return spanString;
@@ -8455,6 +8453,23 @@ void RichEditorPattern::HandleOnCopyStyledString()
 #endif
 }
 
+std::list<RefPtr<SpanItem>> RichEditorPattern::CopySpansForClipboard()
+{
+    std::list<RefPtr<SpanItem>> copySpans;
+    for (const auto& spanItem : spans_) {
+        // only make normal/image spanItem, because copy or cut only for normal/image spanItem
+        auto newSpanItem = GetSameSpanItem(spanItem);
+        CHECK_NULL_CONTINUE(newSpanItem);
+        newSpanItem->position = spanItem->position;
+        newSpanItem->rangeStart = spanItem->rangeStart;
+        newSpanItem->paragraphIndex = spanItem->paragraphIndex;
+        newSpanItem->content = spanItem->content;
+        newSpanItem->description = spanItem->description;
+        copySpans.emplace_back(newSpanItem);
+    }
+    return copySpans;
+}
+
 void RichEditorPattern::OnCopyOperation(bool isUsingExternalKeyboard)
 {
     if (isSpanStringMode_) {
@@ -8471,15 +8486,16 @@ void RichEditorPattern::OnCopyOperation(bool isUsingExternalKeyboard)
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
     auto copyResultObjects = textSelectInfo.GetSelection().resultObjects;
     CHECK_NULL_VOID(!copyResultObjects.empty());
+    std::list<RefPtr<SpanItem>> copySpans = CopySpansForClipboard();
     ACE_SCOPED_TRACE("RichEditorOnCopyOperation");
     taskExecutor->PostTask(
-        [weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor)), copyResultObjects, spans = spans_]() {
+        [weak = WeakClaim(this), task = WeakClaim(RawPtr(taskExecutor)), copyResultObjects, copySpans]() {
             auto richEditor = weak.Upgrade();
             CHECK_NULL_VOID(richEditor);
             ACE_SCOPED_TRACE("RichEditorAsyncHandleOnCopy");
             RefPtr<PasteDataMix> pasteData = richEditor->clipboard_->CreatePasteDataMix();
             for (auto resultObj = copyResultObjects.rbegin(); resultObj != copyResultObjects.rend(); ++resultObj) {
-                richEditor->ProcessResultObject(pasteData, *resultObj, spans);
+                richEditor->ProcessResultObject(pasteData, *resultObj, copySpans);
             }
             auto uiTaskExecutor = task.Upgrade();
             CHECK_NULL_VOID(uiTaskExecutor);
@@ -8492,7 +8508,7 @@ void RichEditorPattern::OnCopyOperation(bool isUsingExternalKeyboard)
 }
 
 void RichEditorPattern::ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result,
-    const std::list<RefPtr<SpanItem>> spans)
+    const std::list<RefPtr<SpanItem>>& spans)
 {
     CHECK_NULL_VOID(pasteData);
     auto multiTypeRecordImpl = AceType::MakeRefPtr<MultiTypeRecordImpl>();
@@ -8543,10 +8559,13 @@ std::pair<int32_t, int32_t> RichEditorPattern::GetSpanRangeByResultObject(const 
 }
 
 RefPtr<SpanString> RichEditorPattern::GetSpanStringByResultObject(const ResultObject& result,
-    const std::list<RefPtr<SpanItem>> spans)
+    const std::list<RefPtr<SpanItem>>& spans)
 {
     auto [selectStart, selectEnd] = GetSpanRangeByResultObject(result);
-    return ToStyledString(selectStart, selectEnd, spans);
+    RefPtr<SpanString> spanString = MakeRefPtr<SpanString>(u"");
+    SetSubSpans(spanString, selectStart, selectEnd, spans);
+    SetSubMap(spanString);
+    return spanString;
 }
 
 void RichEditorPattern::HandleOnCopy(bool isUsingExternalKeyboard)
