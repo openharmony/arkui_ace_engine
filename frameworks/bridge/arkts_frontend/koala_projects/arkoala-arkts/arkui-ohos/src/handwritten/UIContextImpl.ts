@@ -32,6 +32,7 @@ import { GlobalScope_ohos_font } from "arkui/component/arkui-external"
 import router from '@ohos/router'
 import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions }from "arkui/component/alertDialog"
+import { ActionSheet, ActionSheetOptions } from "arkui/component/actionSheet"
 import inspector from "@ohos/arkui/inspector"
 import promptAction from '@ohos/promptAction'
 import { ContextMenu } from 'arkui/component/contextMenu'
@@ -584,6 +585,12 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
+    public showActionSheet(options: ActionSheetOptions): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        ActionSheet.show(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+    
     // @ts-ignore
     public freezeUINode(id: number, isFrozen: boolean): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
