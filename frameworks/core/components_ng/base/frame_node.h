@@ -1357,10 +1357,6 @@ public:
         layoutProperty_->SetNeedLazyLayout(value);
     }
 
-    void AddVisibilityDumpInfo(const std::pair<uint64_t, std::pair<VisibleType, bool>>& dumpInfo);
-
-    std::string PrintVisibilityDumpInfo() const;
-
     bool HasMultipleChild();
 
 protected:
@@ -1659,7 +1655,6 @@ private:
     friend class Pattern;
     mutable std::shared_mutex fontSizeCallbackMutex_;
     mutable std::shared_mutex colorModeCallbackMutex_;
-    std::deque<std::pair<uint64_t, std::pair<VisibleType, bool>>> visibilityDumpInfos_;
 
     RefPtr<Kit::FrameNode> kitNode_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);

@@ -910,12 +910,6 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
 
     // update visibility value.
     propVisibility_ = visible;
-    auto pipeline = host->GetContext();
-    uint64_t vsyncTime = 0;
-    if (pipeline) {
-        vsyncTime = pipeline->GetVsyncTime();
-    }
-    host->AddVisibilityDumpInfo({ vsyncTime, { visible, isUserSet } });
 
     host->NotifyVisibleChange(preVisibility.value_or(VisibleType::VISIBLE), visible);
     if (allowTransition && preVisibility) {
