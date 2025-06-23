@@ -121,6 +121,7 @@ public:
 
     void HideSubMenu();
     void ShowSubMenuDisappearAnimation(const RefPtr<FrameNode>& host, const RefPtr<UINode>& subMenu);
+    void HideSubMenuByDepth(const RefPtr<FrameNode>& menuItem);
     void HideStackExpandMenu(const RefPtr<UINode>& subMenu);
     void GetExpandingMode(const RefPtr<UINode>& subMenu, SubMenuExpandingMode& expandingMode, bool& hasAnimation);
     RefPtr<FrameNode> GetMenu() const

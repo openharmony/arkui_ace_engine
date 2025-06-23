@@ -657,8 +657,7 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     auto outterMenuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(outterMenuLayoutProps);
     param.isShowInSubWindow = outterMenuLayoutProps->GetShowInSubWindowValue(false);
-    auto focusMenuRenderContext = menuNode->GetRenderContext();
-    if (!ParseMenuBlurStyleEffect(param, focusMenuRenderContext)) {
+    if (!ParseMenuBlurStyleEffect(param, menuNode->GetRenderContext())) {
         return;
     }
     param.type = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
@@ -669,6 +668,9 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     menuPattern->SetShowedSubMenu(subMenu);
     auto subMenuPattern = subMenu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(subMenuPattern);
+    if (expandingMode_ == SubMenuExpandingMode::SIDE) {
+        subMenuPattern->SetSubMenuDepth(menuPattern->GetSubMenuDepth() + 1);
+    }
     if (type == ShowSubMenuType::KEY_DPAD_RIGHT) {
         subMenuPattern->SetIsViewRootScopeFocused(false);
     }
@@ -1443,6 +1445,13 @@ void MenuItemPattern::OnHover(bool isHover)
         SetBgBlendColor(isHover || isSubMenuShowed_ ? theme->GetHoverColor() : Color::TRANSPARENT);
         props->UpdateHover(isHover || isSubMenuShowed_);
         UpdateDividerHoverStatus(isHover || isSubMenuShowed_);
+        if (isHover && (expandingMode_ == SubMenuExpandingMode::SIDE)) {
+            auto menuWrapper = GetMenuWrapper();
+            CHECK_NULL_VOID(menuWrapper);
+            auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+            CHECK_NULL_VOID(menuWrapperPattern);
+            menuWrapperPattern->HideSubMenuByDepth(host);
+        }
         PostHoverSubMenuTask();
         menuPattern->OnItemPressed(parent, index_, isHover || isSubMenuShowed_, true);
         PlayBgColorAnimation();
