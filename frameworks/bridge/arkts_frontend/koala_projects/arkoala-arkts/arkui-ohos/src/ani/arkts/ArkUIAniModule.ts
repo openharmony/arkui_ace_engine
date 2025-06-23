@@ -19,7 +19,7 @@ import webview from "@ohos.web.webview"
 import common from "@ohos.app.ability.common"
 import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
 import { DrawContext } from "arkui/Graphics"
-import { DrawModifier, AsyncCallback } from "arkui/component"
+import { AnimatableArithmetic, AsyncCallback, DrawModifier } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
 import { WaterFlowOptions,WaterFlowSections } from "arkui/component"
 import { HookDragInfo } from "arkui/handwritten"
@@ -71,4 +71,6 @@ export class ArkUIAniModule {
         callback: AsyncCallback<image.PixelMap>, delay?: number, checkImageStatus?: boolean): void
     native static _ComponentSnapshot_createFromBuilderWithPromise(ptr: KPointer, destroyCallback: () => void,
             delay?: number, checkImageStatus?: boolean): Promise<image.PixelMap>
+    native static _Animation_SetOrCreateAnimatableProperty<T>(ptr: KPointer, propertyName: string, property: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void
 }

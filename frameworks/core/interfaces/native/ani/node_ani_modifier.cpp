@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "animation_ani_modifier.h"
 #include "common_ani_modifier.h"
 #include "component_snapshot_ani_modifier.h"
 #include "content_slot_ani_modifier.h"
@@ -36,6 +37,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getArkUIAniDrawModifier = OHOS::Ace::NG::GetArkUIAniDrawModifier,
         .getArkUIAniWaterFlowModifier = OHOS::Ace::NG::GetArkUIAniWaterFlowModifier,
         .getComponentSnapshotAniModifier = OHOS::Ace::NG::GetComponentSnapshotAniModifier,
+        .getAnimationAniModifier = OHOS::Ace::NG::GetAnimationAniModifier,
     };
     return &impl;
 }
