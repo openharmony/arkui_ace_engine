@@ -82,11 +82,10 @@ void SetScrollOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(scroller);
     RefPtr<ScrollControllerBase> positionController = ScrollModelStatic::GetOrCreateController(frameNode);
     RefPtr<ScrollProxy> scrollBarProxy = ScrollModelStatic::GetOrCreateScrollBarProxy(frameNode);
 
-    auto abstPeerPtrOpt = Converter::OptConvert<Ark_Scroller>(*scroller);
+    auto abstPeerPtrOpt = Converter::OptConvertPtr<Ark_Scroller>(scroller);
     CHECK_NULL_VOID(abstPeerPtrOpt);
     auto peerImplPtr = abstPeerPtrOpt.value();
     CHECK_NULL_VOID(peerImplPtr);
@@ -119,7 +118,7 @@ void ScrollableImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto direction = Converter::OptConvert<Axis>(*value);
+    auto direction = Converter::OptConvertPtr<Axis>(value);
     ScrollModelStatic::SetAxis(frameNode, direction);
 }
 void OnWillScrollImpl(Ark_NativePointer node,
@@ -222,7 +221,7 @@ void ScrollBarImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto displayMode = Converter::OptConvert<DisplayMode>(*value);
+    auto displayMode = Converter::OptConvertPtr<DisplayMode>(value);
     ScrollModelStatic::SetScrollBar(frameNode, displayMode);
 }
 void ScrollBarColorImpl(Ark_NativePointer node,
@@ -230,7 +229,7 @@ void ScrollBarColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto colorVal = Converter::OptConvert<Color>(*value);
+    auto colorVal = Converter::OptConvertPtr<Color>(value);
     ScrollModelStatic::SetScrollBarColor(frameNode, colorVal);
 }
 void ScrollBarWidthImpl(Ark_NativePointer node,
@@ -238,7 +237,7 @@ void ScrollBarWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto width = Converter::OptConvert<Dimension>(*value);
+    auto width = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(width);
     Validator::ValidateNonPercent(width);
     ScrollModelStatic::SetScrollBarWidth(frameNode, width);
@@ -285,7 +284,7 @@ void EnableScrollInteractionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -297,7 +296,7 @@ void FrictionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto frictionVal = Converter::OptConvert<float>(*value);
+    auto frictionVal = Converter::OptConvertPtr<float>(value);
     ScrollModelStatic::SetFriction(frameNode, frictionVal);
 }
 void ScrollSnapImpl(Ark_NativePointer node,
@@ -339,7 +338,7 @@ void EnablePagingImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -364,8 +363,8 @@ void EdgeEffectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto effect = Converter::OptConvert<EdgeEffect>(*edgeEffect);
-    auto always = Converter::OptConvert<bool>(*options);
+    auto effect = Converter::OptConvertPtr<EdgeEffect>(edgeEffect);
+    auto always = Converter::OptConvertPtr<bool>(options);
     ScrollModelStatic::SetEdgeEffect(frameNode, effect, always);
 }
 } // ScrollAttributeModifier

@@ -100,7 +100,7 @@ void FontImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontOpt = Converter::OptConvert<Font>(*value);
+    auto fontOpt = Converter::OptConvertPtr<Font>(value);
     if (fontOpt.has_value()) {
         // TODO: Reset value
         MenuModelStatic::SetFontSize(frameNode, fontOpt.value().fontSize);
@@ -114,14 +114,14 @@ void FontColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    MenuModelStatic::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
+    MenuModelStatic::SetFontColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void RadiusImpl(Ark_NativePointer node,
                 const Opt_Union_Dimension_BorderRadiuses* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto radiusesOpt = Converter::OptConvert<BorderRadiusesType>(*value);
+    auto radiusesOpt = Converter::OptConvertPtr<BorderRadiusesType>(value);
     if (radiusesOpt) {
         // TODO: Reset value
         if (auto radiusPtr = std::get_if<std::optional<Dimension>>(&(*radiusesOpt)); radiusPtr) {
@@ -144,8 +144,7 @@ void MenuItemDividerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
+    auto divider = Converter::OptConvertPtr<V2::ItemDivider>(value);
     MenuModelStatic::SetItemDivider(frameNode, divider, std::nullopt);
 }
 void MenuItemGroupDividerImpl(Ark_NativePointer node,
@@ -153,8 +152,7 @@ void MenuItemGroupDividerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
+    auto divider = Converter::OptConvertPtr<V2::ItemDivider>(value);
     MenuModelStatic::SetItemGroupDivider(frameNode, divider, std::nullopt);
 }
 void SubMenuExpandingModeImpl(Ark_NativePointer node,
@@ -162,7 +160,7 @@ void SubMenuExpandingModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    MenuModelStatic::SetExpandingMode(frameNode, Converter::OptConvert<SubMenuExpandingMode>(*value));
+    MenuModelStatic::SetExpandingMode(frameNode, Converter::OptConvertPtr<SubMenuExpandingMode>(value));
 }
 } // MenuAttributeModifier
 const GENERATED_ArkUIMenuModifier* GetMenuModifier()

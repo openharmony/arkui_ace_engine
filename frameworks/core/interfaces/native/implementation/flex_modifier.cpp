@@ -130,8 +130,7 @@ void SetFlexOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto options = Converter::OptConvert<FlexOptions>(*value);
+    auto options = Converter::OptConvertPtr<FlexOptions>(value);
     CHECK_NULL_VOID(options);
 
     if (!options->wrap.has_value() || options->wrap.value() == FlexWrap::NO_WRAP) {
@@ -173,7 +172,7 @@ void PointLightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 #ifdef POINT_LIGHT_ENABLE
-    auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
+    auto pointLightStyle = Converter::OptConvertPtr<Converter::PointLightStyle>(value);
     auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
     auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
     CHECK_NULL_VOID(themeConstants);

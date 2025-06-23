@@ -68,8 +68,7 @@ void NavBarWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto result = Converter::OptConvert<Dimension>(*value);
+    auto result = Converter::OptConvertPtr<Dimension>(value);
     NavigationModelStatic::SetNavBarWidth(frameNode, result.value());
 }
 
@@ -119,7 +118,7 @@ void MinContentWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<CalcDimension>(*value);
+    auto convValue = Converter::OptConvertPtr<CalcDimension>(value);
     if (!convValue) {
         NavigationModelStatic::SetMinContentWidth(frameNode, DEFAULT_MIN_CONTENT_WIDTH);
         return;
@@ -264,8 +263,7 @@ void HideNavBarImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto isHide = Converter::OptConvert<bool>(*value).value_or(false);
+    auto isHide = Converter::OptConvertPtr<bool>(value).value_or(false);
     NavigationModelStatic::SetHideNavBar(frameNode, isHide);
 }
 void HideTitleBar0Impl(Ark_NativePointer node,
@@ -273,11 +271,7 @@ void HideTitleBar0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto hide = false;
-    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        hide = Converter::OptConvert<bool>(*value).value_or(false);
-    }
+    auto hide = Converter::OptConvertPtr<bool>(value).value_or(false);
     NavigationModelStatic::SetHideTitleBar(frameNode, hide, false);
 }
 
@@ -287,16 +281,8 @@ void HideTitleBar1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(hide);
-    CHECK_NULL_VOID(animated);
-    auto isHide = false;
-    if (hide->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        isHide = Converter::OptConvert<bool>(*hide).value_or(false);
-    }
-    bool isAnimated = false;
-    if (animated->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        isAnimated = Converter::OptConvert<bool>(*animated).value_or(false);
-    }
+    auto isHide = Converter::OptConvertPtr<bool>(hide).value_or(false);
+    auto isAnimated = Converter::OptConvertPtr<bool>(animated).value_or(false);
     NavigationModelStatic::SetHideTitleBar(frameNode, isHide, isAnimated);
 }
 
@@ -304,11 +290,7 @@ void HideBackButtonImpl(Ark_NativePointer node, const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto isHide = false;
-    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        isHide = Converter::OptConvert<bool>(*value).value_or(false);
-    }
+    auto isHide = Converter::OptConvertPtr<bool>(value).value_or(false);
     NavigationModelStatic::SetHideBackButton(frameNode, isHide);
 }
 
@@ -378,11 +360,7 @@ void HideToolBar0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto isHide = false;
-    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        isHide = Converter::OptConvert<bool>(*value).value_or(false);
-    }
+    auto isHide = Converter::OptConvertPtr<bool>(value).value_or(false);
     NavigationModelStatic::SetHideToolBar(frameNode, isHide, false);
 }
 
@@ -390,16 +368,8 @@ void HideToolBar1Impl(Ark_NativePointer node, const Opt_Boolean* hide, const Opt
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(hide);
-    CHECK_NULL_VOID(animated);
-    auto isHide = false;
-    if (hide->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        isHide = Converter::OptConvert<bool>(*hide).value_or(false);
-    }
-    bool isAnimated = false;
-    if (animated->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        isAnimated = Converter::OptConvert<bool>(*animated).value_or(false);
-    }
+    auto isHide = Converter::OptConvertPtr<bool>(hide).value_or(false);
+    auto isAnimated = Converter::OptConvertPtr<bool>(animated).value_or(false);
     NavigationModelStatic::SetHideToolBar(frameNode, isHide, isAnimated);
 }
 
@@ -408,8 +378,7 @@ void EnableToolBarAdaptationImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    NavigationModelStatic::SetEnableToolBarAdaptation(frameNode, Converter::OptConvert<bool>(*value).value_or(true));
+    NavigationModelStatic::SetEnableToolBarAdaptation(frameNode, Converter::OptConvertPtr<bool>(value).value_or(true));
 }
 
 void OnTitleModeChangeImpl(Ark_NativePointer node,
@@ -417,15 +386,16 @@ void OnTitleModeChangeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
         return;
     }
-    auto titleChange = [titleCallback = CallbackHelper(value->value)](NavigationTitleMode titleMode) {
+    auto titleChange = [titleCallback = CallbackHelper(*optValue)](NavigationTitleMode titleMode) {
         Ark_NavigationTitleMode mode = static_cast<Ark_NavigationTitleMode>(titleMode);
         titleCallback.Invoke(mode);
     };
-    auto eventChange = [eventChange = CallbackHelper(value->value)](const BaseEventInfo* info) {
+    auto eventChange = [eventChange = CallbackHelper(*optValue)](const BaseEventInfo* info) {
         auto eventInfo = TypeInfoHelper::DynamicCast<NavigationTitleModeChangeEvent>(info);
         if (!eventInfo) {
             return;
@@ -445,11 +415,12 @@ void OnNavBarStateChangeImpl(Ark_NativePointer node, const Opt_Callback_Boolean_
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
         return;
     }
-    auto stateCallback = [changeCallback = CallbackHelper(value->value)](bool isVisible) {
+    auto stateCallback = [changeCallback = CallbackHelper(*optValue)](bool isVisible) {
         auto visible = Converter::ArkValue<Ark_Boolean>(isVisible);
         changeCallback.Invoke(visible);
     };
@@ -463,11 +434,12 @@ void OnNavigationModeChangeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
         return;
     }
-    auto modeCallback = [changeCallback = CallbackHelper(value->value)](NavigationMode mode) {
+    auto modeCallback = [changeCallback = CallbackHelper(*optValue)](NavigationMode mode) {
         auto navigationMode = Converter::ArkValue<Ark_NavigationMode>(mode);
         changeCallback.Invoke(navigationMode);
     };
@@ -484,12 +456,12 @@ void CustomNavContentTransitionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        NavigationModelStatic::SetIsCustomAnimation(frameNode, false);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // TODO: Reset value
         return;
     }
-    auto onNavigationAnimation = [callback = CallbackHelper(value->value)](RefPtr<NG::NavDestinationContext> from,
+    auto onNavigationAnimation = [callback = CallbackHelper(*optValue)](RefPtr<NG::NavDestinationContext> from,
         RefPtr<NG::NavDestinationContext> to, NG::NavigationOperation operation) -> NG::NavigationTransition {
         NG::NavigationTransition transition;
         transition.isValid = false;
@@ -507,12 +479,13 @@ void SystemBarStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+    auto optValue = Converter::GetOptPtr(value);
+    auto contentColor = optValue ? Converter::OptConvert<Color>(optValue->statusBarContentColor): std::nullopt;
+    if (!contentColor) {
+        // TODO: Reset value
         return;
     }
-    auto contentColor = Converter::Convert<Color>(value->value.statusBarContentColor.value);
-    NavigationModelStatic::SetSystemBarStyle(frameNode, contentColor);
+    NavigationModelStatic::SetSystemBarStyle(frameNode, *contentColor);
 }
 void RecoverableImpl(Ark_NativePointer node,
                      const Opt_Boolean* value)

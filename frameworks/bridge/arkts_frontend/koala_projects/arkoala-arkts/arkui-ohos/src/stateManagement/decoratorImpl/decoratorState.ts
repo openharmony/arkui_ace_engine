@@ -31,15 +31,12 @@ export interface __MkPropReturnType<T> {
     watchId: WatchIdType;
 }
 
-/** 
-* implementation of V1 @State
-* 
-* Must have local value, can be init form parent
-* does not update from parent
-*
-*/
-export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements IStateDecoratedVariable<T> {
+/**
+ * implementation of V1 @State
+ * Must have local value, can be init form parent
+ * does not update from parent
+ */
+export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IStateDecoratedVariable<T> {
     public readonly backing_: IBackingValue<T>;
     // @state can init from parent @Component
     // initValue is either value provided by parent or localInit value
@@ -63,11 +60,11 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     }
 
     public set(newValue: T): void {
-        const value = this.backing_.get(false)
+        const value = this.backing_.get(false);
         if (value === newValue) {
             return;
         }
-        if (this.backing_.set(UIUtils.makeObserved(newValue as Object) as T)) {
+        if (this.backing_.set(UIUtils.makeObserved(newValue) as T)) {
             // @Watch
             // if new value is object, register so that property changes trigger
             // Watch function exec
@@ -77,40 +74,44 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T>
             // TODO unregister Watch from old value object, add to new value object
             this.execWatchFuncs();
         }
-
     }
 
-    /** 
-     * create a LinkDecoratedVariable variable that sync's with this object 
+    /**
+     * create a LinkDecoratedVariable variable that sync's with this object
      * used by LocalStorage
      */
     public mkLink(varName: string): LinkDecoratedVariable<T> {
-        const link = new LinkDecoratedVariable<T>(null, varName, ()=>this.get(), (newValue: T)=>this.set(newValue));
+        const link = new LinkDecoratedVariable<T>(
+            null,
+            varName,
+            () => this.get(),
+            (newValue: T) => this.set(newValue)
+        );
         this.registerWatchToSource(link);
         return link;
     }
 
-    /** 
-    * create a LinkDecoratedVariable variable that sync's with this object 
-    * used by LocalStorage
-    */
+    /**
+     * create a LinkDecoratedVariable variable that sync's with this object
+     * used by LocalStorage
+     */
     public mkProp(varName: string): __MkPropReturnType<T> {
         const prop = new PropDecoratedVariable<T>(null, varName, this.get());
         // the WatchFunc must not hold a strong reference on prop
         const weakProp = new WeakRef<PropDecoratedVariable<T>>(prop);
         // when this StateDecoratedVariable changes, the watchFunc is called,
         // it updates the prop
-        const watchThis = new WatchFunc((_: string) => { });
+        const watchThis = new WatchFunc((_: string) => {});
         const watchFunc: WatchFuncType = (_: string) => {
             if (weakProp.deref()) {
                 weakProp.deref()!.updateForStorage(this.get());
             } else {
-                // the prop no longer exists 
-                // note: StorageLink.prop also deleted the WatchFunc in 
+                // the prop no longer exists
+                // note: StorageLink.prop also deleted the WatchFunc in
                 // finalizer for prop
                 this._watchFuncs.delete(watchThis.id());
             }
-        }
+        };
         watchThis.setFunc(watchFunc);
         this._watchFuncs.set(watchThis.id(), watchThis);
         return { prop: prop, watchId: watchThis.id() };

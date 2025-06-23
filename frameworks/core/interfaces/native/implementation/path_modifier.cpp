@@ -61,8 +61,7 @@ void SetPathOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto opt = Converter::OptConvert<PathOptions>(*options);
+    auto opt = Converter::OptConvertPtr<PathOptions>(options);
     if (opt && opt->width) {
         ShapeAbstractModelNG::SetWidth(frameNode, *(opt->width));
     }
@@ -80,8 +79,7 @@ void CommandsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto convValue = Converter::OptConvert<std::string>(*value);
+    auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
         // TODO: Reset value
         return;

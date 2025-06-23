@@ -43,8 +43,7 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto arkOptions = Converter::OptConvert<Ark_ListItemGroupOptions>(*options);
+    auto arkOptions = Converter::OptConvertPtr<Ark_ListItemGroupOptions>(options);
     CHECK_NULL_VOID(arkOptions);
     auto space = Converter::OptConvert<Dimension>(arkOptions.value().space);
     ListItemGroupModelStatic::SetSpace(frameNode, space);
@@ -76,8 +75,7 @@ void DividerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
+    auto divider = Converter::OptConvertPtr<V2::ItemDivider>(value);
     ListItemGroupModelStatic::SetDivider(frameNode, divider);
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,

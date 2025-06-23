@@ -25,7 +25,7 @@ import { CallbackTransformer } from "./CallbackTransformer"
 import { AccessibilityCallback, AccessibilityFocusCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DataSyncOptions, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, DrawModifierInternal, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, PopupButton, OnWillScrollCallback, ScrollResult, PopupMaskType, SelectedCallback, IndexCallback, IndexerSelectedCallback, RefreshingCallback } from "./../common"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions } from "./../button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../animationExtender"
-import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, BuilderNodeOps, BuilderNodeOpsInternal, BuilderNodeOptions, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme, Callback_CreateItem } from "./../arkui-custom"
+import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, BuilderNodeOps, BuilderNodeOpsInternal, BuilderNodeOptions, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme, Callback_CreateItem, LengthMetricsCustom } from "./../arkui-custom"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { ContentDidScrollCallback, ContentWillScrollCallback, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, SwiperAnimationEvent, SwiperAnimationMode, SwiperAttribute, DotIndicator, DigitIndicator, SwiperDisplayMode, SwiperNestedScrollMode, SwiperContentAnimatedTransition, SwiperContentWillScrollResult, AutoPlayOptions, ArrowStyle, SwiperAutoFill, SwiperContentTransitionProxy, SwiperContentTransitionProxyInternal, SwiperController, SwiperControllerInternal, Callback_SwiperContentTransitionProxy_Void, Indicator } from "./../swiper"
 import { CustomNodeBuilder } from "./../customBuilder"
@@ -86,8 +86,7 @@ import { VoidCallback, ResourceColor, Font, Position, Length, SizeOptions, Offse
 import { WithThemeInterface, WithThemeAttribute, WithThemeOptions } from "./../withTheme"
 import { AccessibilityHoverType, Alignment, Color, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, ColoringStrategy, CopyOptions, CrownAction, CrownSensitivity, Curve, DialogButtonStyle, Direction, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FocusDrawLevel, FoldStatus, FontStyle, FontWeight, FunctionKey, GradientDirection, HeightBreakpoint, HitTestMode, HorizontalAlign, HoverEffect, IlluminatedType, ImageFit, ImageRepeat, ImageSize, ImageSpanAlignment, InteractionHand, ItemAlign, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, ModifierKey, MouseAction, MouseButton, NestedScrollMode, ObscuredReasons, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PlayMode, RelateType, RenderFit, ResponseType, ScrollSource, TextAlign, SharedTransitionEffectType, TextOverflow, TextContentStyle, TextHeightAdaptivePolicy, WordBreak, TextCase, TextSelectableMode, TextDecorationStyle, TextDecorationType, TitleHeight, TouchType, TransitionType, VerticalAlign, Visibility, Week, WidthBreakpoint, XComponentType } from "./../enums"
 import { Affinity, LineMetrics, TextBox, RunMetrics, TextDirection } from "./../arkui-graphics-text"
-import { Resource } from "global/resource"
-import { AnimatedDrawableDescriptor, AnimatedDrawableDescriptorInternal, DrawableDescriptor, DrawableDescriptorInternal, AnimationOptions, LayeredDrawableDescriptor, LayeredDrawableDescriptorInternal, PixelMapDrawableDescriptor, PixelMapDrawableDescriptorInternal } from "./../arkui-drawabledescriptor"
+import { Resource } from "global.resource"
 import { PixelMap } from "#external"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, GuideLinePosition, GuideLineStyle, LocalizedBarrierStyle } from "./../relativeContainer"
@@ -194,7 +193,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (isHover: boolean, event: AccessibilityHoverEvent):void => { 
+        return (isHover: boolean, event: AccessibilityHoverEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -209,7 +208,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (isFocus: boolean):void => { 
+        return (isFocus: boolean):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -221,11 +220,6 @@ export class Deserializer extends DeserializerBase {
     }
     readAlphabetIndexerAttribute(): AlphabetIndexerAttribute {
         throw new Error("Interface with functions is not supported")
-    }
-    readAnimatedDrawableDescriptor(): AnimatedDrawableDescriptor {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return AnimatedDrawableDescriptorInternal.fromPtr(ptr)
     }
     readBaseShape(): BaseShape {
         let valueDeserializer : Deserializer = this
@@ -321,11 +315,6 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return DragEventInternal.fromPtr(ptr)
-    }
-    readDrawableDescriptor(): DrawableDescriptor {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return DrawableDescriptorInternal.fromPtr(ptr)
     }
     readDrawingCanvas(): drawing.Canvas {
         let valueDeserializer : Deserializer = this
@@ -455,11 +444,6 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return JsResultInternal.fromPtr(ptr)
-    }
-    readLayeredDrawableDescriptor(): LayeredDrawableDescriptor {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return LayeredDrawableDescriptorInternal.fromPtr(ptr)
     }
     readLayoutManager(): LayoutManager {
         let valueDeserializer : Deserializer = this
@@ -693,11 +677,6 @@ export class Deserializer extends DeserializerBase {
     }
     readPixelMap(): PixelMap {
         throw new Error("Interface with functions is not supported")
-    }
-    readPixelMapDrawableDescriptor(): PixelMapDrawableDescriptor {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return PixelMapDrawableDescriptorInternal.fromPtr(ptr)
     }
     readPixelMapMock(): PixelMapMock {
         let valueDeserializer : Deserializer = this
@@ -1312,7 +1291,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (menuItems: Array<TextMenuItem>):Array<TextMenuItem> => { 
+        return (menuItems: Array<TextMenuItem>):Array<TextMenuItem> => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1333,7 +1312,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (result: PixelMap):void => { 
+        return (result: PixelMap):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1347,7 +1326,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (menuItem: TextMenuItem, range: TextRange):boolean => { 
+        return (menuItem: TextMenuItem, range: TextRange):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1365,7 +1344,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (xPos: number, yPos: number):void => { 
+        return (xPos: number, yPos: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1380,7 +1359,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (info: object):void => { 
+        return (info: object):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1394,7 +1373,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (oldValue: Area, newValue: Area):void => { 
+        return (oldValue: Area, newValue: Area):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1409,7 +1388,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (input: Array<number>):void => { 
+        return (input: Array<number>):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1427,7 +1406,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: Array<string>):void => { 
+        return (value: Array<string>):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1445,7 +1424,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: Array<TextMenuItem>):void => { 
+        return (value: Array<TextMenuItem>):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1463,7 +1442,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: Array<TouchTestInfo>):TouchResult => { 
+        return (value: Array<TouchTestInfo>):TouchResult => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1484,7 +1463,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: AxisEvent):void => { 
+        return (parameter: AxisEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1498,7 +1477,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return ():boolean => { 
+        return ():boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1514,7 +1493,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (isHover: boolean, event: HoverEvent):void => { 
+        return (isHover: boolean, event: HoverEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1529,7 +1508,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (isVisible: boolean):void => { 
+        return (isVisible: boolean):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1543,7 +1522,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: NativeBuffer):void => { 
+        return (value: NativeBuffer):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1557,7 +1536,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: CalendarRequestedData):void => { 
+        return (event: CalendarRequestedData):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1571,7 +1550,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: CalendarSelectedDate):void => { 
+        return (event: CalendarSelectedDate):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1585,7 +1564,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: ClickEvent):void => { 
+        return (event: ClickEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1599,7 +1578,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: ComputedBarAttribute):void => { 
+        return (value: ComputedBarAttribute):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1613,7 +1592,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: CopyEvent):void => { 
+        return (parameter: CopyEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1627,7 +1606,7 @@ export class Deserializer extends DeserializerBase {
         const _resource: CallbackResource = this.readCallbackResource()
         const _call: KPointer = this.readPointer()
         const _callSync: KPointer = this.readPointer()
-        return (index: int32): KPointer => { 
+        return (index: int32): KPointer => {
     const _argsSerializer: Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1644,7 +1623,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: CrownEvent):void => { 
+        return (parameter: CrownEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1658,7 +1637,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: CustomBuilder):void => { 
+        return (value: CustomBuilder):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1672,7 +1651,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: CutEvent):void => { 
+        return (parameter: CutEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1686,7 +1665,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: Date):void => { 
+        return (parameter: Date):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1700,7 +1679,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: DatePickerResult):void => { 
+        return (value: DatePickerResult):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1714,7 +1693,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: DeleteValue):boolean => { 
+        return (parameter: DeleteValue):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1731,7 +1710,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: DeleteValue):void => { 
+        return (parameter: DeleteValue):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1745,7 +1724,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: DismissContentCoverAction):void => { 
+        return (parameter: DismissContentCoverAction):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1759,7 +1738,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: DismissDialogAction):void => { 
+        return (parameter: DismissDialogAction):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1773,7 +1752,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: DismissPopupAction):void => { 
+        return (parameter: DismissPopupAction):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1787,7 +1766,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: DismissSheetAction):void => { 
+        return (parameter: DismissSheetAction):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1801,7 +1780,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: DragEvent, extraParams?: string | undefined):CustomBuilder | DragItemInfo => { 
+        return (event: DragEvent, extraParams?: string | undefined):CustomBuilder | DragItemInfo => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1825,7 +1804,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: DragEvent, extraParams?: string | undefined):void => { 
+        return (event: DragEvent, extraParams?: string | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1846,7 +1825,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: EditableTextChangeValue):boolean => { 
+        return (parameter: EditableTextChangeValue):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1863,7 +1842,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (enterKey: EnterKeyType):void => { 
+        return (enterKey: EnterKeyType):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1877,7 +1856,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return ():void => { 
+        return ():void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1890,7 +1869,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: float32):void => { 
+        return (value: float32):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1904,7 +1883,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: FocusAxisEvent):void => { 
+        return (parameter: FocusAxisEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1918,7 +1897,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: FormCallbackInfo):void => { 
+        return (parameter: FormCallbackInfo):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1932,7 +1911,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: FullscreenInfo):void => { 
+        return (parameter: FullscreenInfo):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1946,7 +1925,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: GestureEvent):void => { 
+        return (event: GestureEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1960,7 +1939,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (gestureInfo: GestureInfo, event: BaseGestureEvent):GestureJudgeResult => { 
+        return (gestureInfo: GestureInfo, event: BaseGestureEvent):GestureJudgeResult => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1978,7 +1957,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: GestureJudgeResult):void => { 
+        return (value: GestureJudgeResult):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -1992,7 +1971,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: GestureRecognizer):void => { 
+        return (value: GestureRecognizer):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2006,7 +1985,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: HitTestMode):void => { 
+        return (value: HitTestMode):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2020,7 +1999,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: HoverEvent):void => { 
+        return (parameter: HoverEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2034,7 +2013,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: InsertValue):boolean => { 
+        return (parameter: InsertValue):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2051,7 +2030,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: InsertValue):void => { 
+        return (parameter: InsertValue):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2065,7 +2044,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean):void => { 
+        return (event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2082,7 +2061,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: ItemDragInfo, itemIndex: number, insertIndex: number):void => { 
+        return (event: ItemDragInfo, itemIndex: number, insertIndex: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2098,7 +2077,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: ItemDragInfo, itemIndex: number):void => { 
+        return (event: ItemDragInfo, itemIndex: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2113,7 +2092,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: ItemDragInfo):void => { 
+        return (event: ItemDragInfo):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2127,7 +2106,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: KeyEvent):boolean => { 
+        return (parameter: KeyEvent):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2144,7 +2123,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: KeyEvent):void => { 
+        return (event: KeyEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2158,7 +2137,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: Literal_Boolean_isVisible):void => { 
+        return (event: Literal_Boolean_isVisible):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2173,7 +2152,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event?: Literal_Function_handler_Object_error | undefined):void => { 
+        return (event?: Literal_Function_handler_Object_error | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2196,7 +2175,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: Literal_Number_code__want):void => { 
+        return (parameter: Literal_Number_code__want):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2219,7 +2198,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (info: Literal_Number_errcode_String_msg):void => { 
+        return (info: Literal_Number_errcode_String_msg):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2236,7 +2215,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: Literal_Number_offsetRemain):void => { 
+        return (value: Literal_Number_offsetRemain):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2251,7 +2230,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event?: Literal_Object_detail | undefined):boolean => { 
+        return (event?: Literal_Object_detail | undefined):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2275,7 +2254,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (selectedText: Literal_String_plainText):void => { 
+        return (selectedText: Literal_String_plainText):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2290,7 +2269,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: Map<string, Object>):void => { 
+        return (parameter: Map<string, Object>):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2310,7 +2289,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: MarqueeState):void => { 
+        return (parameter: MarqueeState):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2324,7 +2303,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: MouseEvent):void => { 
+        return (event: MouseEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2338,7 +2317,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: NativeEmbedDataInfo):void => { 
+        return (event: NativeEmbedDataInfo):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2352,7 +2331,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: NativeEmbedTouchInfo):void => { 
+        return (event: NativeEmbedTouchInfo):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2366,7 +2345,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: NavDestinationActiveReason):void => { 
+        return (parameter: NavDestinationActiveReason):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2380,7 +2359,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: NavDestinationContext):void => { 
+        return (parameter: NavDestinationContext):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2394,7 +2373,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (mode: NavigationMode):void => { 
+        return (mode: NavigationMode):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2408,7 +2387,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (titleMode: NavigationTitleMode):void => { 
+        return (titleMode: NavigationTitleMode):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2422,7 +2401,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (transitionProxy: NavigationTransitionProxy):void => { 
+        return (transitionProxy: NavigationTransitionProxy):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2436,7 +2415,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number):boolean => { 
+        return (index: number):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2453,7 +2432,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (from: number, to: number):boolean => { 
+        return (from: number, to: number):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2471,7 +2450,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number, offset: number):ComputedBarAttribute => { 
+        return (index: number, offset: number):ComputedBarAttribute => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2489,7 +2468,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (start: number, end: number, center: number):void => { 
+        return (start: number, end: number, center: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2505,7 +2484,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (width: number, height: number, mode: PanelMode):void => { 
+        return (width: number, height: number, mode: PanelMode):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2521,7 +2500,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (first: number, last: number):void => { 
+        return (first: number, last: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2536,7 +2515,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (offset: number, state: ScrollState):Literal_Number_offsetRemain => { 
+        return (offset: number, state: ScrollState):Literal_Number_offsetRemain => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2554,7 +2533,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: number, mode: SliderChangeMode):void => { 
+        return (value: number, mode: SliderChangeMode):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2569,7 +2548,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number, value: string):void => { 
+        return (index: number, value: string):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2584,7 +2563,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number):[ number, number ] => { 
+        return (index: number):[ number, number ] => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2601,7 +2580,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number):[ number, number, number, number ] => { 
+        return (index: number):[ number, number, number, number ] => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2618,7 +2597,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number):void => { 
+        return (index: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2632,7 +2611,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: Object):void => { 
+        return (parameter: Object):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2646,7 +2625,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: OffsetResult):void => { 
+        return (value: OffsetResult):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2673,7 +2652,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnAlertEvent):boolean => { 
+        return (parameter: OnAlertEvent):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2690,7 +2669,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnAudioStateChangedEvent):void => { 
+        return (parameter: OnAudioStateChangedEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2704,7 +2683,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnBeforeUnloadEvent):boolean => { 
+        return (parameter: OnBeforeUnloadEvent):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2721,7 +2700,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnClientAuthenticationEvent):void => { 
+        return (parameter: OnClientAuthenticationEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2735,7 +2714,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnConfirmEvent):boolean => { 
+        return (parameter: OnConfirmEvent):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2752,7 +2731,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnConsoleEvent):boolean => { 
+        return (parameter: OnConsoleEvent):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2769,7 +2748,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnContextMenuShowEvent):boolean => { 
+        return (parameter: OnContextMenuShowEvent):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2786,7 +2765,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnDataResubmittedEvent):void => { 
+        return (parameter: OnDataResubmittedEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2800,7 +2779,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnDownloadStartEvent):void => { 
+        return (parameter: OnDownloadStartEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2814,7 +2793,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnErrorReceiveEvent):void => { 
+        return (parameter: OnErrorReceiveEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2828,7 +2807,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnFaviconReceivedEvent):void => { 
+        return (parameter: OnFaviconReceivedEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2842,7 +2821,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnFirstContentfulPaintEvent):void => { 
+        return (parameter: OnFirstContentfulPaintEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2856,7 +2835,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnGeolocationShowEvent):void => { 
+        return (parameter: OnGeolocationShowEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2870,7 +2849,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnHttpAuthRequestEvent):boolean => { 
+        return (parameter: OnHttpAuthRequestEvent):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2887,7 +2866,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnHttpErrorReceiveEvent):void => { 
+        return (parameter: OnHttpErrorReceiveEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2901,7 +2880,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnInterceptRequestEvent):WebResourceResponse => { 
+        return (parameter: OnInterceptRequestEvent):WebResourceResponse => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2918,7 +2897,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnLoadInterceptEvent):boolean => { 
+        return (parameter: OnLoadInterceptEvent):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2935,7 +2914,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnOverScrollEvent):void => { 
+        return (parameter: OnOverScrollEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2949,7 +2928,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnPageBeginEvent):void => { 
+        return (parameter: OnPageBeginEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2963,7 +2942,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnPageEndEvent):void => { 
+        return (parameter: OnPageEndEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2977,7 +2956,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnPageVisibleEvent):void => { 
+        return (parameter: OnPageVisibleEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -2991,7 +2970,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnPermissionRequestEvent):void => { 
+        return (parameter: OnPermissionRequestEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3005,7 +2984,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnProgressChangeEvent):void => { 
+        return (parameter: OnProgressChangeEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3019,7 +2998,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnPromptEvent):boolean => { 
+        return (parameter: OnPromptEvent):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3036,7 +3015,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnRefreshAccessedHistoryEvent):void => { 
+        return (parameter: OnRefreshAccessedHistoryEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3050,7 +3029,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnRenderExitedEvent):void => { 
+        return (parameter: OnRenderExitedEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3064,7 +3043,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnResourceLoadEvent):void => { 
+        return (parameter: OnResourceLoadEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3078,7 +3057,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnScaleChangeEvent):void => { 
+        return (parameter: OnScaleChangeEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3092,7 +3071,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnScreenCaptureRequestEvent):void => { 
+        return (parameter: OnScreenCaptureRequestEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3106,7 +3085,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnScrollEvent):void => { 
+        return (parameter: OnScrollEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3120,7 +3099,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: OnScrollFrameBeginHandlerResult):void => { 
+        return (value: OnScrollFrameBeginHandlerResult):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3134,7 +3113,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnSearchResultReceiveEvent):void => { 
+        return (parameter: OnSearchResultReceiveEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3148,7 +3127,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnShowFileSelectorEvent):boolean => { 
+        return (parameter: OnShowFileSelectorEvent):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3165,7 +3144,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnSslErrorEventReceiveEvent):void => { 
+        return (parameter: OnSslErrorEventReceiveEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3179,7 +3158,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnTitleReceiveEvent):void => { 
+        return (parameter: OnTitleReceiveEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3193,7 +3172,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnTouchIconUrlReceivedEvent):void => { 
+        return (parameter: OnTouchIconUrlReceivedEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3207,7 +3186,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: OnWindowNewEvent):void => { 
+        return (parameter: OnWindowNewEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3221,7 +3200,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value?: Array<NavDestinationTransition> | undefined):void => { 
+        return (value?: Array<NavDestinationTransition> | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3245,7 +3224,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (error?: Array<string> | undefined):void => { 
+        return (error?: Array<string> | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3269,7 +3248,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (select?: boolean | undefined):void => { 
+        return (select?: boolean | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3289,7 +3268,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value?: NavigationAnimatedTransition | undefined):void => { 
+        return (value?: NavigationAnimatedTransition | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3309,7 +3288,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (selected?: number | undefined):void => { 
+        return (selected?: number | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3329,7 +3308,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (mode?: PanelMode | undefined):void => { 
+        return (mode?: PanelMode | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3349,7 +3328,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value?: ResourceStr | undefined):void => { 
+        return (value?: ResourceStr | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3380,7 +3359,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value?: StyledString | undefined, error?: Array<string> | undefined):void => { 
+        return (value?: StyledString | undefined, error?: Array<string> | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3411,7 +3390,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value?: TabContentAnimatedTransition | undefined):void => { 
+        return (value?: TabContentAnimatedTransition | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3431,7 +3410,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (selected?: number | Resource | undefined):void => { 
+        return (selected?: number | Resource | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3462,7 +3441,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: PlaybackInfo):void => { 
+        return (parameter: PlaybackInfo):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3476,7 +3455,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: KPointer):void => { 
+        return (value: KPointer):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3490,7 +3469,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: PopInfo):void => { 
+        return (parameter: PopInfo):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3504,7 +3483,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: PreDragStatus):void => { 
+        return (parameter: PreDragStatus):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3518,7 +3497,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: PreparedInfo):void => { 
+        return (parameter: PreparedInfo):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3532,7 +3511,7 @@ export class Deserializer extends DeserializerBase {
         const _resource: CallbackResource = this.readCallbackResource()
         const _call: KPointer = this.readPointer()
         const _callSync: KPointer = this.readPointer()
-        return (start: int32, end: int32): void => { 
+        return (start: int32, end: int32): void => {
     const _argsSerializer: Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3547,7 +3526,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (state: RefreshStatus):void => { 
+        return (state: RefreshStatus):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3561,7 +3540,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (text: ResourceStr):void => { 
+        return (text: ResourceStr):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3586,7 +3565,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: RichEditorChangeValue):boolean => { 
+        return (parameter: RichEditorChangeValue):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3603,7 +3582,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: RichEditorDeleteValue):boolean => { 
+        return (parameter: RichEditorDeleteValue):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3620,7 +3599,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: RichEditorInsertValue):boolean => { 
+        return (parameter: RichEditorInsertValue):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3637,7 +3616,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: RichEditorRange):void => { 
+        return (parameter: RichEditorRange):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3651,7 +3630,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: RichEditorSelection):void => { 
+        return (parameter: RichEditorSelection):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3665,7 +3644,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: RichEditorTextSpanResult):void => { 
+        return (parameter: RichEditorTextSpanResult):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3679,7 +3658,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (sheetDismiss: SheetDismiss):void => { 
+        return (sheetDismiss: SheetDismiss):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3693,7 +3672,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: SheetType):void => { 
+        return (parameter: SheetType):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3707,7 +3686,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: SpringBackAction):void => { 
+        return (parameter: SpringBackAction):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3721,7 +3700,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: string, index: number):void => { 
+        return (value: string, index: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3736,7 +3715,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (name: string, param?: Object | undefined):void => { 
+        return (name: string, param?: Object | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3757,7 +3736,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: string, event: PasteEvent):void => { 
+        return (value: string, event: PasteEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3772,7 +3751,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (breakpoints: string):void => { 
+        return (breakpoints: string):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3786,7 +3765,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: StyledStringChangeValue):boolean => { 
+        return (parameter: StyledStringChangeValue):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3803,7 +3782,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: UserDataSpan):void => { 
+        return (value: UserDataSpan):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3817,7 +3796,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (state: SwipeActionState):void => { 
+        return (state: SwipeActionState):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3831,7 +3810,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: SwiperContentTransitionProxy):void => { 
+        return (parameter: SwiperContentTransitionProxy):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3845,7 +3824,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: TabContentTransitionProxy):void => { 
+        return (parameter: TabContentTransitionProxy):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3859,7 +3838,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: TerminationInfo):void => { 
+        return (parameter: TerminationInfo):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3873,7 +3852,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: TextPickerResult):void => { 
+        return (value: TextPickerResult):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3887,7 +3866,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: TextRange):void => { 
+        return (parameter: TextRange):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3901,7 +3880,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: TimePickerResult):void => { 
+        return (value: TimePickerResult):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3915,7 +3894,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: TouchEvent):HitTestMode => { 
+        return (parameter: TouchEvent):HitTestMode => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3932,7 +3911,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: TouchEvent):void => { 
+        return (event: TouchEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3946,7 +3925,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: TouchResult):void => { 
+        return (value: TouchResult):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3960,7 +3939,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: [ number, number, number, number ]):void => { 
+        return (value: [ number, number, number, number ]):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3981,7 +3960,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: [ number, number ]):void => { 
+        return (value: [ number, number ]):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -3998,7 +3977,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event?: Type_ImageAttribute_onComplete_callback_event | undefined):void => { 
+        return (event?: Type_ImageAttribute_onComplete_callback_event | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4035,7 +4014,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parameter: UIExtensionProxy):void => { 
+        return (parameter: UIExtensionProxy):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4049,7 +4028,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: CustomBuilder | DragItemInfo):void => { 
+        return (value: CustomBuilder | DragItemInfo):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4074,7 +4053,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (selected: number | Array<number>):void => { 
+        return (selected: number | Array<number>):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4103,7 +4082,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: string | Array<string>):void => { 
+        return (value: string | Array<string>):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4132,7 +4111,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return ():void => { 
+        return ():void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4145,7 +4124,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: WebKeyboardOptions):void => { 
+        return (value: WebKeyboardOptions):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4159,7 +4138,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: WebResourceResponse):void => { 
+        return (value: WebResourceResponse):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4173,7 +4152,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: WithThemeAttribute):void => { 
+        return (value: WithThemeAttribute):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4187,7 +4166,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (args: CommonConfiguration):void => { 
+        return (args: CommonConfiguration):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4201,7 +4180,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (selectedIndex: number, index: number, position: number, mainAxisLength: number):void => { 
+        return (selectedIndex: number, index: number, position: number, mainAxisLength: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4218,7 +4197,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (result: SwiperContentWillScrollResult):boolean => { 
+        return (result: SwiperContentWillScrollResult):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4235,7 +4214,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (result: string):void => { 
+        return (result: string):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4249,7 +4228,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (parentNode: KPointer):KPointer => { 
+        return (parentNode: KPointer):KPointer => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4281,7 +4260,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: string, previewText?: PreviewText | undefined, options?: TextChangeOptions | undefined):void => { 
+        return (value: string, previewText?: PreviewText | undefined, options?: TextChangeOptions | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4309,7 +4288,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (err: BusinessError):void => { 
+        return (err: BusinessError):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4323,7 +4302,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>):GestureJudgeResult => { 
+        return (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>):GestureJudgeResult => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4346,7 +4325,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number):number => { 
+        return (index: number):number => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4363,7 +4342,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: ItemDragInfo, itemIndex: number) => { 
+        return (event: ItemDragInfo, itemIndex: number) => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4381,7 +4360,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (isHover: boolean, event: HoverEvent):void => { 
+        return (isHover: boolean, event: HoverEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4396,7 +4375,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (result: ImageLoadResult):void => { 
+        return (result: ImageLoadResult):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4410,7 +4389,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (error: ImageError):void => { 
+        return (error: ImageError):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4424,7 +4403,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: number):void => { 
+        return (value: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4438,7 +4417,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number):void => { 
+        return (index: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4452,7 +4431,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (mode: NavigationMode):void => { 
+        return (mode: NavigationMode):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4466,7 +4445,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (from: NavDestinationContext | NavBar, to: NavDestinationContext | NavBar, operation: NavigationOperation, isAnimated: boolean):void => { 
+        return (from: NavDestinationContext | NavBar, to: NavDestinationContext | NavBar, operation: NavigationOperation, isAnimated: boolean):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4505,7 +4484,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: ItemDragInfo, itemIndex: number) => { 
+        return (event: ItemDragInfo, itemIndex: number) => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4523,7 +4502,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: ClickEvent, result: LocationButtonOnClickResult, error?: BusinessError<void> | undefined):void => { 
+        return (event: ClickEvent, result: LocationButtonOnClickResult, error?: BusinessError<void> | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4545,7 +4524,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (start: number, end: number):void => { 
+        return (start: number, end: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4560,7 +4539,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (start: number, end: number):void => { 
+        return (start: number, end: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4575,7 +4554,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (navBarWidth: Length):void => { 
+        return (navBarWidth: Length):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4584,12 +4563,12 @@ export class Deserializer extends DeserializerBase {
     (isSync) ? (InteropNativeModule._CallCallbackSync(-324352939, _argsSerializer.asBuffer(), _argsSerializer.length())) : (InteropNativeModule._CallCallback(-324352939, _argsSerializer.asBuffer(), _argsSerializer.length()));
     _argsSerializer.release();
     return; }
-    }   
+    }
     readNavDestinationTransitionDelegate(isSync: boolean = false): NavDestinationTransitionDelegate {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (operation: NavigationOperation, isEnter: boolean):Array<NavDestinationTransition> | undefined => { 
+        return (operation: NavigationOperation, isEnter: boolean):Array<NavDestinationTransition> | undefined => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4607,7 +4586,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return ():void => { 
+        return ():void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4620,7 +4599,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (size: Size):void => { 
+        return (size: Size):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4634,7 +4613,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (details: AdsBlockedDetails):void => { 
+        return (details: AdsBlockedDetails):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4648,7 +4627,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number):void => { 
+        return (index: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4662,7 +4641,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number):Array<string> => { 
+        return (index: number):Array<string> => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4679,7 +4658,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number):void => { 
+        return (index: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4693,7 +4672,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: boolean):void => { 
+        return (value: boolean):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4707,7 +4686,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: CheckboxGroupResult):void => { 
+        return (value: CheckboxGroupResult):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4721,7 +4700,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (totalOffsetX: number, totalOffsetY: number):void => { 
+        return (totalOffsetX: number, totalOffsetY: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4736,7 +4715,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return ():void => { 
+        return ():void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4749,7 +4728,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (rangeBefore: TextRange, rangeAfter: TextRange):void => { 
+        return (rangeBefore: TextRange, rangeAfter: TextRange):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4764,7 +4743,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: DragEvent, extraParams?: string | undefined):void => { 
+        return (event: DragEvent, extraParams?: string | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4785,7 +4764,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (firstMeaningfulPaint: FirstMeaningfulPaint):void => { 
+        return (firstMeaningfulPaint: FirstMeaningfulPaint):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4799,7 +4778,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: OnFoldStatusChangeInfo):void => { 
+        return (event: OnFoldStatusChangeInfo):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4813,7 +4792,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: FullScreenEnterEvent):void => { 
+        return (event: FullScreenEnterEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4827,7 +4806,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return ():void => { 
+        return ():void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4840,7 +4819,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (param: HoverEventParam):void => { 
+        return (param: HoverEventParam):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4854,7 +4833,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (details: IntelligentTrackingPreventionDetails):void => { 
+        return (details: IntelligentTrackingPreventionDetails):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4868,7 +4847,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (largestContentfulPaint: LargestContentfulPaint):void => { 
+        return (largestContentfulPaint: LargestContentfulPaint):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4882,7 +4861,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number, progress: number):void => { 
+        return (index: number, progress: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4897,7 +4876,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (from: number, to: number):void => { 
+        return (from: number, to: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4912,7 +4891,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (nativeEmbedVisibilityInfo: NativeEmbedVisibilityInfo):void => { 
+        return (nativeEmbedVisibilityInfo: NativeEmbedVisibilityInfo):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4926,7 +4905,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event?: Object | undefined):void => { 
+        return (event?: Object | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4946,7 +4925,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (loadCommittedDetails: LoadCommittedDetails):void => { 
+        return (loadCommittedDetails: LoadCommittedDetails):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4960,7 +4939,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (webResourceRequest: WebResourceRequest):boolean => { 
+        return (webResourceRequest: WebResourceRequest):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4977,7 +4956,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (content: string, event: PasteEvent):void => { 
+        return (content: string, event: PasteEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -4992,7 +4971,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (isChecked: boolean):void => { 
+        return (isChecked: boolean):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5006,7 +4985,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (rating: number):void => { 
+        return (rating: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5020,7 +4999,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (data: RenderProcessNotRespondingData):void => { 
+        return (data: RenderProcessNotRespondingData):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5034,7 +5013,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return ():void => { 
+        return ():void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5047,7 +5026,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (threatType: ThreatType):void => { 
+        return (threatType: ThreatType):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5061,7 +5040,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (scrollOffset: number, scrollState: ScrollState):void => { 
+        return (scrollOffset: number, scrollState: ScrollState):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5076,7 +5055,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (side: Edge):void => { 
+        return (side: Edge):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5090,7 +5069,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (offset: number, state: ScrollState):OnScrollFrameBeginHandlerResult => { 
+        return (offset: number, state: ScrollState):OnScrollFrameBeginHandlerResult => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5108,7 +5087,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (start: VisibleListContentInfo, end: VisibleListContentInfo):void => { 
+        return (start: VisibleListContentInfo, end: VisibleListContentInfo):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5123,7 +5102,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number, selectStr: string):void => { 
+        return (index: number, selectStr: string):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5138,7 +5117,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (sslErrorEvent: SslErrorEvent):void => { 
+        return (sslErrorEvent: SslErrorEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5152,7 +5131,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (enterKey: EnterKeyType, event: SubmitEvent):void => { 
+        return (enterKey: EnterKeyType, event: SubmitEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5167,7 +5146,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number, extraInfo: SwiperAnimationEvent):void => { 
+        return (index: number, extraInfo: SwiperAnimationEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5182,7 +5161,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number, targetIndex: number, extraInfo: SwiperAnimationEvent):void => { 
+        return (index: number, targetIndex: number, extraInfo: SwiperAnimationEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5198,7 +5177,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number, extraInfo: SwiperAnimationEvent):void => { 
+        return (index: number, extraInfo: SwiperAnimationEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5213,7 +5192,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number, extraInfo: TabsAnimationEvent):void => { 
+        return (index: number, extraInfo: TabsAnimationEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5228,7 +5207,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number, targetIndex: number, extraInfo: TabsAnimationEvent):void => { 
+        return (index: number, targetIndex: number, extraInfo: TabsAnimationEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5244,7 +5223,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (currentIndex: number, comingIndex: number):boolean => { 
+        return (currentIndex: number, comingIndex: number):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5262,7 +5241,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (index: number, extraInfo: TabsAnimationEvent):void => { 
+        return (index: number, extraInfo: TabsAnimationEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5277,7 +5256,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (selectItem: string | Array<string>, index: number | Array<number>):void => { 
+        return (selectItem: string | Array<string>, index: number | Array<number>):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5322,7 +5301,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (selectionStart: number, selectionEnd: number):void => { 
+        return (selectionStart: number, selectionEnd: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5337,7 +5316,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (result: TimePickerResult):void => { 
+        return (result: TimePickerResult):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5351,7 +5330,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (viewportFit: ViewportFit):void => { 
+        return (viewportFit: ViewportFit):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5365,7 +5344,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (type: RouteType, progress: number):void => { 
+        return (type: RouteType, progress: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5380,7 +5359,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: ClickEvent, result: PasteButtonOnClickResult, error?: BusinessError<void> | undefined):void => { 
+        return (event: ClickEvent, result: PasteButtonOnClickResult, error?: BusinessError<void> | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5402,7 +5381,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event?: PasteEvent | undefined):void => { 
+        return (event?: PasteEvent | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5422,7 +5401,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (info: PluginErrorData):void => { 
+        return (info: PluginErrorData):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5436,7 +5415,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: PopupStateChangeParam):void => { 
+        return (event: PopupStateChangeParam):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5450,7 +5429,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (info: string):void => { 
+        return (info: string):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5464,7 +5443,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (data: Map<string, Object>):void => { 
+        return (data: Map<string, Object>):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5484,7 +5463,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (refreshing: boolean):void => { 
+        return (refreshing: boolean):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5498,7 +5477,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (ev: ErrorEvent):void => { 
+        return (ev: ErrorEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5512,7 +5491,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (code: number):void => { 
+        return (code: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5526,7 +5505,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: MessageEvents):void => { 
+        return (event: MessageEvents):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5540,7 +5519,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return ():string => { 
+        return ():string => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5556,7 +5535,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event: ClickEvent, result: SaveButtonOnClickResult, error?: BusinessError<void> | undefined):void => { 
+        return (event: ClickEvent, result: SaveButtonOnClickResult, error?: BusinessError<void> | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5578,7 +5557,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (xOffset: number, yOffset: number, scrollState: ScrollState):void => { 
+        return (xOffset: number, yOffset: number, scrollState: ScrollState):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5594,7 +5573,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (xOffset: number, yOffset: number, scrollState: ScrollState, scrollSource: ScrollSource):OffsetResult => { 
+        return (xOffset: number, yOffset: number, scrollState: ScrollState, scrollSource: ScrollSource):OffsetResult => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5614,7 +5593,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (searchContent: string, event?: SubmitEvent | undefined):void => { 
+        return (searchContent: string, event?: SubmitEvent | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5635,7 +5614,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (checked: boolean):void => { 
+        return (checked: boolean):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5649,7 +5628,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (isOn: boolean):void => { 
+        return (isOn: boolean):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5663,7 +5642,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (selected: boolean):void => { 
+        return (selected: boolean):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5677,7 +5656,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (rating: number):void => { 
+        return (rating: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5691,7 +5670,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (selectAll: boolean):void => { 
+        return (selectAll: boolean):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5705,7 +5684,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (select: boolean):void => { 
+        return (select: boolean):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5719,7 +5698,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (selected: number | Resource):void => { 
+        return (selected: number | Resource):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5744,7 +5723,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: ResourceStr):void => { 
+        return (value: ResourceStr):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5769,7 +5748,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: number):void => { 
+        return (value: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5783,7 +5762,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (selected: boolean):void => { 
+        return (selected: boolean):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5816,7 +5795,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: string):void => { 
+        return (value: string):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5830,7 +5809,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (current: GestureRecognizer, others: Array<GestureRecognizer>):GestureRecognizer => { 
+        return (current: GestureRecognizer, others: Array<GestureRecognizer>):GestureRecognizer => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5852,7 +5831,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (showSideBar: boolean):void => { 
+        return (showSideBar: boolean):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5866,7 +5845,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (sideBarWidth: number):void => { 
+        return (sideBarWidth: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5880,7 +5859,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (oldValue: SizeOptions, newValue: SizeOptions):void => { 
+        return (oldValue: SizeOptions, newValue: SizeOptions):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5895,7 +5874,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: number, mode: SliderChangeMode):void => { 
+        return (value: number, mode: SliderChangeMode):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5910,7 +5889,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (stepperIndex: number):void => { 
+        return (stepperIndex: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5924,7 +5903,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (marshallableVal: UserDataSpan):NativeBuffer => { 
+        return (marshallableVal: UserDataSpan):NativeBuffer => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5941,7 +5920,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (buf: NativeBuffer):UserDataSpan => { 
+        return (buf: NativeBuffer):UserDataSpan => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5958,7 +5937,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (enterKey: EnterKeyType, event: SubmitEvent):void => { 
+        return (enterKey: EnterKeyType, event: SubmitEvent):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5973,7 +5952,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (from: number, to: number):TabContentAnimatedTransition | undefined => { 
+        return (from: number, to: number):TabContentAnimatedTransition | undefined => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -5991,7 +5970,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (enterKeyType: EnterKeyType, event?: SubmitEvent | undefined):void => { 
+        return (enterKeyType: EnterKeyType, event?: SubmitEvent | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -6012,7 +5991,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: ResourceStr):void => { 
+        return (value: ResourceStr):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -6037,7 +6016,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: string | Array<string>, index: number | Array<number>):void => { 
+        return (value: string | Array<string>, index: number | Array<number>):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -6082,7 +6061,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: string | Array<string>, index: number | Array<number>):void => { 
+        return (value: string | Array<string>, index: number | Array<number>):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -6127,7 +6106,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (utc: int64, elapsedTime: int64):void => { 
+        return (utc: int64, elapsedTime: int64):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -6142,7 +6121,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (transitionIn: boolean):void => { 
+        return (transitionIn: boolean):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -6156,7 +6135,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (from: NavContentInfo, to: NavContentInfo, operation: NavigationOperation):NavigationAnimatedTransition | undefined => { 
+        return (from: NavContentInfo, to: NavContentInfo, operation: NavigationOperation):NavigationAnimatedTransition | undefined => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -6175,7 +6154,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (value: string | Array<string>, index: number | Array<number>):void => { 
+        return (value: string | Array<string>, index: number | Array<number>):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -6220,7 +6199,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event?: Literal_Function_callback__Object_fileSelector | undefined):void => { 
+        return (event?: Literal_Function_callback__Object_fileSelector | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -6243,7 +6222,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event?: Literal_Union_String_WebResourceRequest_data | undefined):boolean => { 
+        return (event?: Literal_Union_String_WebResourceRequest_data | undefined):boolean => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -6278,7 +6257,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (isExpanding: boolean, currentRatio: number):void => { 
+        return (isExpanding: boolean, currentRatio: number):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -6293,7 +6272,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return ():void => { 
+        return ():void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -6306,7 +6285,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (keyboardCallbackInfo: WebKeyboardCallbackInfo):WebKeyboardOptions => { 
+        return (keyboardCallbackInfo: WebKeyboardCallbackInfo):WebKeyboardOptions => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -6323,7 +6302,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (options: WithThemeOptions):WithThemeAttribute => { 
+        return (options: WithThemeOptions):WithThemeAttribute => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);
@@ -6370,25 +6349,6 @@ export class Deserializer extends DeserializerBase {
         const arrayValue_result : Array<string> = arrayValue_buf
         const selected_result : number = (valueDeserializer.readNumber() as number)
         let value : AlphabetIndexerOptions = ({arrayValue: arrayValue_result, selected: selected_result} as AlphabetIndexerOptions)
-        return value
-    }
-    readAnimationOptions(): AnimationOptions {
-        let valueDeserializer : Deserializer = this
-        const duration_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let duration_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (duration_buf_runtimeType))
-        {
-            duration_buf = (valueDeserializer.readNumber() as number)
-        }
-        const duration_result : number | undefined = duration_buf
-        const iterations_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let iterations_buf : number | undefined
-        if ((RuntimeType.UNDEFINED) != (iterations_buf_runtimeType))
-        {
-            iterations_buf = (valueDeserializer.readNumber() as number)
-        }
-        const iterations_result : number | undefined = iterations_buf
-        let value : AnimationOptions = ({duration: duration_result, iterations: iterations_result} as AnimationOptions)
         return value
     }
     readAppearSymbolEffect(): AppearSymbolEffect {
@@ -7407,13 +7367,13 @@ export class Deserializer extends DeserializerBase {
         let value : DeleteValue = ({deleteOffset: deleteOffset_result, direction: direction_result, deleteValue: deleteValue_result} as DeleteValue)
         return value
     }
-    readDirectionalEdgesT(): DirectionalEdgesT {
+    readDirectionalEdgesT(): DirectionalEdgesT<number> {
         let valueDeserializer : Deserializer = this
         const start_result : number = (valueDeserializer.readNumber() as number)
         const end_result : number = (valueDeserializer.readNumber() as number)
         const top_result : number = (valueDeserializer.readNumber() as number)
         const bottom_result : number = (valueDeserializer.readNumber() as number)
-        let value : DirectionalEdgesT = ({start: start_result, end: end_result, top: top_result, bottom: bottom_result} as DirectionalEdgesT)
+        let value : DirectionalEdgesT<number> = ({start: start_result, end: end_result, top: top_result, bottom: bottom_result} as DirectionalEdgesT<number>)
         return value
     }
     readDisappearSymbolEffect(): DisappearSymbolEffect {
@@ -8691,6 +8651,13 @@ export class Deserializer extends DeserializerBase {
             return new LengthMetrics(0, unit_result)
         }
         return new LengthMetrics(value_result!, unit_result)
+    }
+    readLengthMetricsCustom(): LengthMetricsCustom {
+        let valueDeserializer : Deserializer = this;
+        const unit_result : number = (valueDeserializer.readNumber() as number);
+        const value_result : number = (valueDeserializer.readNumber() as number);
+        let value : LengthMetricsCustom = ({unit: unit_result, value: value_result} as LengthMetricsCustom);
+        return value;
     }
     readLetterSpacingStyle(): LetterSpacingStyle {
         let valueDeserializer : Deserializer = this
@@ -10460,17 +10427,17 @@ export class Deserializer extends DeserializerBase {
         const moduleName_result : string = (valueDeserializer.readString() as string)
         const id_result : number = (valueDeserializer.readNumber() as number)
         const params_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let params_buf : Array<Object> | undefined
+        let params_buf : Array<Object | undefined> | undefined
         if ((RuntimeType.UNDEFINED) != (params_buf_runtimeType))
         {
             const params_buf__length : int32 = valueDeserializer.readInt32()
-            let params_buf_ : Array<Object> = new Array<Object>(params_buf__length)
+            let params_buf_ : Array<Object | undefined> = new Array<Object | undefined>(params_buf__length)
             for (let params_buf__i = 0; params_buf__i < params_buf__length; params_buf__i++) {
                 params_buf_[params_buf__i] = (valueDeserializer.readString() as string)
             }
             params_buf = params_buf_
         }
-        const params_result : Array<Object> | undefined = params_buf
+        const params_result : Array<Object | undefined> | undefined = params_buf
         const type_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
         let type_buf : number | undefined
         if ((RuntimeType.UNDEFINED) != (type_buf_runtimeType))
@@ -11470,7 +11437,7 @@ export class Deserializer extends DeserializerBase {
         let value : StarStyleOptions = ({backgroundUri: backgroundUri_result, foregroundUri: foregroundUri_result, secondaryUri: secondaryUri_result} as StarStyleOptions)
         return value
     }
-    
+
     readStyledStringChangedListener(): StyledStringChangedListener {
         let valueDeserializer : Deserializer = this
         const onWillChange_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
@@ -18339,7 +18306,7 @@ export class Deserializer extends DeserializerBase {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (selected: boolean):void => { 
+        return (selected: boolean):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);

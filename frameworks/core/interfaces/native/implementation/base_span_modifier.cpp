@@ -37,7 +37,7 @@ void TextBackgroundStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<TextBackgroundStyle>(*value);
+    auto convValue = Converter::OptConvertPtr<TextBackgroundStyle>(value);
     if (!convValue) {
         // TODO: Reset value
         TextBackgroundStyle textBackgroundStyle;
@@ -55,7 +55,7 @@ void BaselineOffsetImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Dimension>(*value);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonPercent(convValue);
     if (AceType::TypeId(frameNode) == SpanNode::TypeId()) {
         SpanModelStatic::SetBaselineOffset(frameNode, convValue);

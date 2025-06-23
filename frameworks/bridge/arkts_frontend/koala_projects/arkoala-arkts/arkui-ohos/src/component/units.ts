@@ -24,7 +24,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { LengthMetrics, ColorMetrics } from "../Graphics"
 import { OutlineStyle } from "./common"
 import { Color, FontWeight, FontStyle, BorderStyle, DividerMode } from "./enums"
@@ -225,11 +225,11 @@ export interface TouchPoint {
     x: Dimension;
     y: Dimension;
 }
-export interface DirectionalEdgesT {
-    start: number;
-    end: number;
-    top: number;
-    bottom: number;
+export interface DirectionalEdgesT<T> {
+    start: T;
+    end: T;
+    top: T;
+    bottom: T;
 }
 export interface DividerStyleOptions {
     strokeWidth?: LengthMetrics;

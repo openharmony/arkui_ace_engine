@@ -67,7 +67,7 @@ void ScrollBarImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<DisplayMode>(*value);
+    auto convValue = Converter::OptConvertPtr<DisplayMode>(value);
     ScrollableModelStatic::SetScrollBarMode(frameNode, convValue);
 }
 void ScrollBarColorImpl(Ark_NativePointer node,
@@ -75,7 +75,7 @@ void ScrollBarColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Color>(*value);
+    auto convValue = Converter::OptConvertPtr<Color>(value);
     ScrollableModelStatic::SetScrollBarColor(frameNode, convValue);
 }
 void ScrollBarWidthImpl(Ark_NativePointer node,
@@ -83,7 +83,7 @@ void ScrollBarWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Dimension>(*value);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
     ScrollableModelStatic::SetScrollBarWidth(frameNode, convValue);
@@ -107,7 +107,7 @@ void EnableScrollInteractionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -131,7 +131,7 @@ void FrictionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = Converter::OptConvertPtr<float>(value);
     ScrollableModelStatic::SetFriction(frameNode, convValue);
 }
 void OnReachStartImpl(Ark_NativePointer node,
@@ -199,7 +199,7 @@ void FlingSpeedLimitImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<double>(*value);
+    auto convValue = Converter::OptConvertPtr<double>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -234,7 +234,7 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node,
 #ifdef SUPPORT_DIGITAL_CROWN
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<CrownSensitivity>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<CrownSensitivity>(value);
     ScrollableModelStatic::SetDigitalCrownSensitivity(frameNode, convValue);
 #endif
 }
@@ -243,7 +243,7 @@ void BackToTopImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -256,8 +256,8 @@ void EdgeEffectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convEdgeEffect = Converter::OptConvert<EdgeEffect>(*edgeEffect);
-    std::optional<bool> convOptions = options ? Converter::OptConvert<bool>(*options) : std::nullopt;
+    auto convEdgeEffect = Converter::OptConvertPtr<EdgeEffect>(edgeEffect);
+    auto convOptions = Converter::OptConvertPtr<bool>(options);
     ScrollableModelStatic::SetEdgeEffect(frameNode, convEdgeEffect, convOptions);
 }
 void FadingEdgeImpl(Ark_NativePointer node,
@@ -266,14 +266,8 @@ void FadingEdgeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<bool> fadingEdge;
-    if (enabled) {
-        fadingEdge = Converter::OptConvert<bool>(*enabled);
-    }
-    std::optional<Dimension> fadingEdgeLength;
-    if (options) {
-        fadingEdgeLength = Converter::OptConvert<Dimension>(*options);
-    }
+    auto fadingEdge = Converter::OptConvertPtr<bool>(enabled);
+    auto fadingEdgeLength = Converter::OptConvertPtr<Dimension>(options);
     Validator::ValidateNonNegative(fadingEdgeLength);
     ScrollableModelStatic::SetFadingEdge(frameNode, fadingEdge, fadingEdgeLength);
 }

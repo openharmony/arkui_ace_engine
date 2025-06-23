@@ -58,11 +58,9 @@ Ark_Matrix2D RotateImpl(Ark_Matrix2D peer,
 {
     CHECK_NULL_RETURN(peer, {});
     CHECK_NULL_RETURN(degree, {});
-    CHECK_NULL_RETURN(rx, {});
-    CHECK_NULL_RETURN(ry, {});
     auto angle = static_cast<double>(Converter::Convert<float>(*degree));
-    auto optX = Converter::OptConvert<float>(*rx);
-    auto optY = Converter::OptConvert<float>(*ry);
+    auto optX = Converter::OptConvertPtr<float>(rx);
+    auto optY = Converter::OptConvertPtr<float>(ry);
     peer->Rotate(angle, optX, optY);
     return peer;
 }
@@ -71,10 +69,8 @@ Ark_Matrix2D TranslateImpl(Ark_Matrix2D peer,
                            const Opt_Number* ty)
 {
     CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(tx, {});
-    CHECK_NULL_RETURN(ty, {});
-    auto optX = Converter::OptConvert<float>(*tx);
-    auto optY = Converter::OptConvert<float>(*ty);
+    auto optX = Converter::OptConvertPtr<float>(tx);
+    auto optY = Converter::OptConvertPtr<float>(ty);
     peer->Translate(optX, optY);
     return peer;
 }
@@ -83,10 +79,8 @@ Ark_Matrix2D ScaleImpl(Ark_Matrix2D peer,
                        const Opt_Number* sy)
 {
     CHECK_NULL_RETURN(peer, {});
-    CHECK_NULL_RETURN(sx, {});
-    CHECK_NULL_RETURN(sy, {});
-    auto optX = Converter::OptConvert<float>(*sx);
-    auto optY = Converter::OptConvert<float>(*sy);
+    auto optX = Converter::OptConvertPtr<float>(sx);
+    auto optY = Converter::OptConvertPtr<float>(sy);
     peer->Scale(optX, optY);
     return peer;
 }
@@ -99,8 +93,7 @@ void SetScaleXImpl(Ark_Matrix2D peer,
                    const Opt_Number* scaleX)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(scaleX);
-    auto sx = Converter::OptConvert<double>(*scaleX);
+    auto sx = Converter::OptConvertPtr<double>(scaleX);
     CHECK_NULL_VOID(sx);
     peer->SetScaleX(*sx);
 }
@@ -113,8 +106,7 @@ void SetRotateYImpl(Ark_Matrix2D peer,
                     const Opt_Number* rotateY)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(rotateY);
-    auto ry = Converter::OptConvert<double>(*rotateY);
+    auto ry = Converter::OptConvertPtr<double>(rotateY);
     CHECK_NULL_VOID(ry);
     peer->SetRotateY(*ry);
 }
@@ -127,8 +119,7 @@ void SetRotateXImpl(Ark_Matrix2D peer,
                     const Opt_Number* rotateX)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(rotateX);
-    auto rx = Converter::OptConvert<double>(*rotateX);
+    auto rx = Converter::OptConvertPtr<double>(rotateX);
     CHECK_NULL_VOID(rx);
     peer->SetRotateX(*rx);
 }
@@ -141,8 +132,7 @@ void SetScaleYImpl(Ark_Matrix2D peer,
                    const Opt_Number* scaleY)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(scaleY);
-    auto sy = Converter::OptConvert<double>(*scaleY);
+    auto sy = Converter::OptConvertPtr<double>(scaleY);
     CHECK_NULL_VOID(sy);
     peer->SetScaleY(*sy);
 }
@@ -155,8 +145,7 @@ void SetTranslateXImpl(Ark_Matrix2D peer,
                        const Opt_Number* translateX)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(translateX);
-    auto tx = Converter::OptConvert<double>(*translateX);
+    auto tx = Converter::OptConvertPtr<double>(translateX);
     CHECK_NULL_VOID(tx);
     peer->SetTranslateX(*tx);
 }
@@ -169,8 +158,7 @@ void SetTranslateYImpl(Ark_Matrix2D peer,
                        const Opt_Number* translateY)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(translateY);
-    auto ty = Converter::OptConvert<double>(*translateY);
+    auto ty = Converter::OptConvertPtr<double>(translateY);
     CHECK_NULL_VOID(ty);
     peer->SetTranslateY(*ty);
 }

@@ -34,7 +34,7 @@ Ark_TextStyle CtorImpl(const Opt_TextStyleInterface* value)
     auto peer = PeerUtils::CreatePeer<TextStylePeer>();
     Font font {};
 
-    auto options = value ? Converter::OptConvert<Ark_TextStyleInterface>(*value) : std::nullopt;
+    auto options = Converter::OptConvertPtr<Ark_TextStyleInterface>(value);
     if (options) {
         auto context = PipelineBase::GetCurrentContextSafely();
         CHECK_NULL_RETURN(context, nullptr);

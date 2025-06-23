@@ -30,7 +30,7 @@ import { ResourceColor, Length, ResourceStr } from "./units"
 import { FontStyle, FontWeight, Color } from "./enums"
 import { TextTimerAttribute_onTimer_event_type } from "./type-replacements"
 import { ContentModifier, CommonConfiguration } from "./arkui-wrapper-builder"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
 export class TextTimerControllerInternal {

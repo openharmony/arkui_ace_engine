@@ -67,9 +67,8 @@ void DestroyPeerImpl(Ark_ParagraphStyle peer)
 Ark_ParagraphStyle CtorImpl(const Opt_ParagraphStyleInterface* value)
 {
     auto peer = PeerUtils::CreatePeer<ParagraphStylePeer>();
-    CHECK_NULL_RETURN(value, peer);
 
-    SpanParagraphStyle paragraph = Converter::OptConvert<SpanParagraphStyle>(*value).value_or(SpanParagraphStyle());
+    SpanParagraphStyle paragraph = Converter::OptConvertPtr<SpanParagraphStyle>(value).value_or(SpanParagraphStyle());
     peer->span = AceType::MakeRefPtr<ParagraphStyleSpan>(paragraph);
 
     return peer;
@@ -92,7 +91,7 @@ Opt_Number GetTextIndentImpl(Ark_ParagraphStyle peer)
     CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
     if (style.textIndent) {
-        return Converter::ArkValue<Opt_Number>(style.textIndent->ConvertToPx());
+        return Converter::ArkValue<Opt_Number>(style.textIndent.value().ConvertToVp());
     }
     return invalid;
 }
@@ -127,7 +126,7 @@ Opt_Union_Number_LeadingMarginPlaceholder GetLeadingMarginImpl(Ark_ParagraphStyl
     CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
     return Converter::ArkUnion<Opt_Union_Number_LeadingMarginPlaceholder,
-        Ark_LeadingMarginPlaceholder>(style.leadingMargin, Converter::FC);
+        Ark_Number>(style.leadingMargin);
 }
 Opt_Number GetParagraphSpacingImpl(Ark_ParagraphStyle peer)
 {

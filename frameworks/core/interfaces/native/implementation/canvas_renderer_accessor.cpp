@@ -183,8 +183,7 @@ void Clip0Impl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(fillRule);
-    auto ruleStr = Converter::OptConvert<std::string>(*fillRule);
+    auto ruleStr = Converter::OptConvertPtr<std::string>(fillRule);
     peerImpl->Clip(ruleStr);
 }
 void Clip1Impl(Ark_CanvasRenderer peer,
@@ -195,10 +194,9 @@ void Clip1Impl(Ark_CanvasRenderer peer,
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(path);
-    CHECK_NULL_VOID(fillRule);
     auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path);
     CHECK_NULL_VOID(pathImpl);
-    auto ruleStr = Converter::OptConvert<std::string>(*fillRule);
+    auto ruleStr = Converter::OptConvertPtr<std::string>(fillRule);
     peerImpl->Clip(ruleStr, pathImpl->GetCanvasPath2d());
 }
 void Fill0Impl(Ark_CanvasRenderer peer,
@@ -207,8 +205,7 @@ void Fill0Impl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(fillRule);
-    auto ruleStr = Converter::OptConvert<std::string>(*fillRule);
+    auto ruleStr = Converter::OptConvertPtr<std::string>(fillRule);
     peerImpl->Fill(ruleStr);
 }
 void Fill1Impl(Ark_CanvasRenderer peer,
@@ -219,10 +216,9 @@ void Fill1Impl(Ark_CanvasRenderer peer,
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(path);
-    CHECK_NULL_VOID(fillRule);
     auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path);
     CHECK_NULL_VOID(pathImpl);
-    auto ruleStr = Converter::OptConvert<std::string>(*fillRule);
+    auto ruleStr = Converter::OptConvertPtr<std::string>(fillRule);
     peerImpl->Fill(ruleStr, pathImpl->GetCanvasPath2d());
 }
 void StrokeImpl(Ark_CanvasRenderer peer,
@@ -270,8 +266,7 @@ Opt_CanvasPattern CreatePatternImpl(Ark_CanvasRenderer peer,
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, invalid);
     CHECK_NULL_RETURN(image, invalid);
-    CHECK_NULL_RETURN(repetition, invalid);
-    auto repeat = Converter::OptConvert<std::string>(*repetition);
+    auto repeat = Converter::OptConvertPtr<std::string>(repetition);
     auto pattern = GetCanvasPatternAccessor()->ctor();
     peerImpl->CreatePattern(image, pattern, repeat);
     return Converter::ArkValue<Opt_CanvasPattern>(pattern);
@@ -577,13 +572,12 @@ void FillTextImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(text);
     CHECK_NULL_VOID(x);
     CHECK_NULL_VOID(y);
-    CHECK_NULL_VOID(maxWidth);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     auto valueText = Converter::Convert<std::string>(*text);
     auto valueX = static_cast<double>(Converter::Convert<float>(*x));
     auto valueY = static_cast<double>(Converter::Convert<float>(*y));
-    auto optMaxWidth = Converter::OptConvert<float>(*maxWidth);
+    auto optMaxWidth = Converter::OptConvertPtr<float>(maxWidth);
     peerImpl->FillText(valueText, valueX, valueY, optMaxWidth);
 }
 Ark_TextMetrics MeasureTextImpl(Ark_CanvasRenderer peer,
@@ -608,13 +602,12 @@ void StrokeTextImpl(Ark_CanvasRenderer peer,
     CHECK_NULL_VOID(text);
     CHECK_NULL_VOID(x);
     CHECK_NULL_VOID(y);
-    CHECK_NULL_VOID(maxWidth);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     auto valueText = Converter::Convert<std::string>(*text);
     auto valueX = static_cast<double>(Converter::Convert<float>(*x));
     auto valueY = static_cast<double>(Converter::Convert<float>(*y));
-    auto optMaxWidth = Converter::OptConvert<float>(*maxWidth);
+    auto optMaxWidth = Converter::OptConvertPtr<float>(maxWidth);
     peerImpl->StrokeText(valueText, valueX, valueY, optMaxWidth);
 }
 Ark_Matrix2D GetTransformImpl(Ark_CanvasRenderer peer)
@@ -686,8 +679,8 @@ void SetTransform1Impl(Ark_CanvasRenderer peer,
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl && transform);
-    auto optMatrix = Converter::OptConvert<Ark_Matrix2D>(*transform);
+    CHECK_NULL_VOID(peerImpl);
+    auto optMatrix = Converter::OptConvertPtr<Ark_Matrix2D>(transform);
     peerImpl->SetTransform(optMatrix);
 }
 void TransformImpl(Ark_CanvasRenderer peer,
@@ -734,10 +727,9 @@ void SetPixelMapImpl(Ark_CanvasRenderer peer,
 {
 #ifdef PIXEL_MAP_SUPPORTED
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(value);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto opt = Converter::OptConvert<Ark_image_PixelMap>(*value);
+    auto opt = Converter::OptConvertPtr<Ark_image_PixelMap>(value);
     CHECK_NULL_VOID(opt);
     auto pixelMapPeer = opt.value();
     CHECK_NULL_VOID(pixelMapPeer);

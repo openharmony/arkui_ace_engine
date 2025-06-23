@@ -104,8 +104,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void ShowImpl(const Opt_CalendarDialogOptions* options)
 {
-    CHECK_NULL_VOID(options);
-    auto arkOptionsOpt = Converter::OptConvert<Ark_CalendarDialogOptions>(*options);
+    auto arkOptionsOpt = Converter::OptConvertPtr<Ark_CalendarDialogOptions>(options);
     if (!arkOptionsOpt.has_value()) { return; }
 
     Ark_CalendarDialogOptions arkOptions = *arkOptionsOpt;

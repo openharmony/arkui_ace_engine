@@ -262,8 +262,7 @@ DialogTextEvent BuildTextEvent(Callback_TextPickerResult_Void callback)
 }
 void ShowImpl(const Opt_TextPickerDialogOptions* options)
 {
-    CHECK_NULL_VOID(options);
-    auto arkOptionsOpt = Converter::OptConvert<Ark_TextPickerDialogOptions>(*options);
+    auto arkOptionsOpt = Converter::OptConvertPtr<Ark_TextPickerDialogOptions>(options);
     if (!arkOptionsOpt.has_value()) { return; }
 
     Ark_TextPickerDialogOptions arkOptions = arkOptionsOpt.value();

@@ -28,14 +28,8 @@ void DestroyPeerImpl(Ark_BounceSymbolEffect peer)
 Ark_BounceSymbolEffect CtorImpl(const Opt_EffectScope* scope,
                                 const Opt_EffectDirection* direction)
 {
-    std::optional<OHOS::Ace::ScopeType> optScope;
-    std::optional<OHOS::Ace::CommonSubType> optDirection;
-    if (scope) {
-        optScope = Converter::OptConvert<OHOS::Ace::ScopeType>(*scope);
-    }
-    if (direction) {
-        optDirection = Converter::OptConvert<OHOS::Ace::CommonSubType>(*direction);
-    }
+    auto optScope = Converter::OptConvertPtr<OHOS::Ace::ScopeType>(scope);
+    auto optDirection = Converter::OptConvertPtr<OHOS::Ace::CommonSubType>(direction);
     return PeerUtils::CreatePeer<BounceSymbolEffectPeer>(optScope, optDirection);
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -52,7 +46,7 @@ void SetScopeImpl(Ark_BounceSymbolEffect peer,
                   const Opt_EffectScope* scope)
 {
     CHECK_NULL_VOID(peer);
-    peer->scope = Converter::OptConvert<OHOS::Ace::ScopeType>(*scope);
+    peer->scope = Converter::OptConvertPtr<OHOS::Ace::ScopeType>(scope);
 }
 Opt_EffectDirection GetDirectionImpl(Ark_BounceSymbolEffect peer)
 {
@@ -64,7 +58,7 @@ void SetDirectionImpl(Ark_BounceSymbolEffect peer,
                       const Opt_EffectDirection* direction)
 {
     CHECK_NULL_VOID(peer);
-    peer->direction = Converter::OptConvert<OHOS::Ace::CommonSubType>(*direction);
+    peer->direction = Converter::OptConvertPtr<OHOS::Ace::CommonSubType>(direction);
 }
 } // BounceSymbolEffectAccessor
 const GENERATED_ArkUIBounceSymbolEffectAccessor* GetBounceSymbolEffectAccessor()

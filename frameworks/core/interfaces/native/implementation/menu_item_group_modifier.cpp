@@ -36,7 +36,7 @@ void SetMenuItemGroupOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto arkOptions = Converter::OptConvert<Ark_MenuItemGroupOptions>(*value);
+    auto arkOptions = Converter::OptConvertPtr<Ark_MenuItemGroupOptions>(value);
     CHECK_NULL_VOID(arkOptions);
     Converter::VisitUnion(arkOptions.value().header,
         [frameNode, node](const Ark_ResourceStr& value) {

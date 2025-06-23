@@ -168,7 +168,7 @@ void ValueImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = Converter::OptConvertPtr<float>(value);
     if (!convValue) {
         return;
     }
@@ -179,7 +179,7 @@ void StartAngleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = Converter::OptConvertPtr<float>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -191,7 +191,7 @@ void EndAngleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = Converter::OptConvertPtr<float>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -275,7 +275,7 @@ void TrackShadowImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<GaugeShadowOptions>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<GaugeShadowOptions>(value);
     auto shadow = convValue.value_or(GaugeShadowOptions { .isShadowVisible = false });
     GaugeModelNG::SetShadowOptions(frameNode, shadow);
 }
@@ -284,7 +284,7 @@ void IndicatorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto indicator = Converter::OptConvert<Converter::GaugeIndicatorOptions>(*value);
+    auto indicator = Converter::OptConvertPtr<Converter::GaugeIndicatorOptions>(value);
     if (indicator) {
         GaugeModelNG::SetIsShowIndicator(frameNode, true);
         if (indicator->icon) {
@@ -313,7 +313,7 @@ void ContentModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = Converter::OptConvertPtr<type>(value);
     //GaugeModelNG::SetContentModifier(frameNode, convValue);
 }
 } // GaugeAttributeModifier

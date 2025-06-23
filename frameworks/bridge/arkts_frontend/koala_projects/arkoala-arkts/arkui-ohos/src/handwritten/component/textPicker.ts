@@ -17,7 +17,7 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { runtimeType, RuntimeType } from "@koalaui/interop"
 import { int32 } from "@koalaui/common"
 import { Serializer } from "./peers/Serializer"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { LengthMetrics } from "../Graphics"
 
 class CheckTextPickerOptions {

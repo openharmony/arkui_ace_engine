@@ -109,7 +109,7 @@ void FontColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Color>(*value);
+    auto convValue = Converter::OptConvertPtr<Color>(value);
     MarqueeModelNG::SetTextColor(frameNode, convValue);
 }
 void FontSizeImpl(Ark_NativePointer node,
@@ -117,7 +117,7 @@ void FontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Dimension>(*value);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
     MarqueeModelNG::SetFontSize(frameNode, convValue);
@@ -127,7 +127,7 @@ void AllowScaleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -139,7 +139,7 @@ void FontWeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Ace::FontWeight>(*value);
+    auto convValue = Converter::OptConvertPtr<Ace::FontWeight>(value);
     MarqueeModelNG::SetFontWeight(frameNode, convValue);
 }
 void FontFamilyImpl(Ark_NativePointer node,
@@ -148,7 +148,7 @@ void FontFamilyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<StringArray> families;
-    if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value); fontfamiliesOpt) {
+    if (auto fontfamiliesOpt = Converter::OptConvertPtr<Converter::FontFamilies>(value); fontfamiliesOpt) {
         families = fontfamiliesOpt->families;
     }
     MarqueeModelNG::SetFontFamily(frameNode, families);
@@ -158,7 +158,7 @@ void MarqueeUpdateStrategyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<MarqueeUpdateStrategy>(*value);
+    auto convValue = Converter::OptConvertPtr<MarqueeUpdateStrategy>(value);
     MarqueeModelNG::SetMarqueeUpdateStrategy(frameNode, convValue);
 }
 void OnStartImpl(Ark_NativePointer node,

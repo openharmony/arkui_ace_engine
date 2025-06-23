@@ -23,7 +23,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, PointLightStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { PixelMap } from "#external"
 import { ResourceColor, ColorFilter, ResourceStr, EdgeWidths } from "./units"
 import { ImageFit, ImageRepeat, CopyOptions, Color } from "./enums"
@@ -31,7 +31,7 @@ import { Matrix4Transit } from "./arkui-matrix4"
 import { DrawingColorFilter, DrawingLattice } from "./arkui-drawing"
 import { ImageAnalyzerConfig, ImageAIOptions } from "./imageCommon"
 import { ResolutionQuality } from "./arkui-external"
-import { DrawableDescriptor } from "./arkui-drawabledescriptor"
+import { DrawableDescriptor } from "#external"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -77,11 +77,6 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeResource(src_1_1)
             }
         }
-        else if (TypeChecker.isDrawableDescriptor(src)) {
-            thisSerializer.writeInt8(2 as int32)
-            const src_2  = src as DrawableDescriptor
-            thisSerializer.writeDrawableDescriptor(src_2)
-        }
         ArkUIGeneratedNativeModule._ImageInterface_setImageOptions0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -109,11 +104,6 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
                 const src_1_1  = src_1 as Resource
                 thisSerializer.writeResource(src_1_1)
             }
-        }
-        else if (TypeChecker.isDrawableDescriptor(src)) {
-            thisSerializer.writeInt8(2 as int32)
-            const src_2  = src as DrawableDescriptor
-            thisSerializer.writeDrawableDescriptor(src_2)
         }
         else if (TypeChecker.isImageContent(src)) {
             thisSerializer.writeInt8(3 as int32)
@@ -147,11 +137,6 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
                 const src_1_1  = src_1 as Resource
                 thisSerializer.writeResource(src_1_1)
             }
-        }
-        else if (TypeChecker.isDrawableDescriptor(src)) {
-            thisSerializer.writeInt8(2 as int32)
-            const src_2  = src as DrawableDescriptor
-            thisSerializer.writeDrawableDescriptor(src_2)
         }
         thisSerializer.writeImageAIOptions(imageAIOptions)
         ArkUIGeneratedNativeModule._ImageInterface_setImageOptions2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())

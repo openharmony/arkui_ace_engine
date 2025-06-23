@@ -18,6 +18,7 @@ namespace OHOS::Ace::NG {
 constexpr int32_t EFFECT_EDGE_ZERO = 0;
 constexpr int32_t EFFECT_EDGE_ONE = 1;
 constexpr int32_t EFFECT_EDGE_TWO = 2;
+constexpr double DETENT_SELECTION_EDGE = 0.0f;
 using namespace OHOS::Ace::NG::Converter;
 
 std::pair<std::optional<OHOS::Ace::Dimension>, std::optional<OHOS::Ace::Dimension>> OffsetConvert(

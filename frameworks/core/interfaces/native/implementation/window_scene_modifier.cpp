@@ -61,7 +61,7 @@ void AttractionEffectImpl(Ark_NativePointer node,
     auto x = optDestination ? Converter::OptConvert<Dimension>(optDestination->x) : std::nullopt;
     auto y = optDestination ? Converter::OptConvert<Dimension>(optDestination->y) : std::nullopt;
     AttractionEffect effect{};
-    effect.fraction = Converter::OptConvert<float>(*fraction).value_or(effect.fraction);
+    effect.fraction = Converter::OptConvertPtr<float>(fraction).value_or(effect.fraction);
     effect.destinationX = x.value_or(effect.destinationX);
     effect.destinationY = y.value_or(effect.destinationY);
 #if defined(WINDOW_SCENE_SUPPORTED) || defined(ARKUI_CAPI_UNITTEST)

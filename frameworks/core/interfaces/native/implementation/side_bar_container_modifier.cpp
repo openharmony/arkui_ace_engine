@@ -149,9 +149,8 @@ void SetSideBarContainerOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(type);
     SideBarContainerModelStatic::SetSideBarContainerType(
-        frameNode, Converter::OptConvert<SideBarContainerType>(*type).value_or(SideBarContainerType::EMBED));
+        frameNode, Converter::OptConvertPtr<SideBarContainerType>(type).value_or(SideBarContainerType::EMBED));
 }
 } // SideBarContainerInterfaceModifier
 namespace SideBarContainerAttributeModifier {
@@ -160,15 +159,14 @@ void ShowSideBarImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    SideBarContainerModelStatic::SetShowSideBar(frameNode, Converter::OptConvert<bool>(*value).value_or(true));
+    SideBarContainerModelStatic::SetShowSideBar(frameNode, Converter::OptConvertPtr<bool>(value).value_or(true));
 }
 void ControlButtonImpl(Ark_NativePointer node,
                        const Opt_ButtonStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<LocalControlButtonStyle>(*value);
+    auto convValue = Converter::OptConvertPtr<LocalControlButtonStyle>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -199,8 +197,7 @@ void ShowControlButtonImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    SideBarContainerModelStatic::SetShowControlButton(frameNode, Converter::OptConvert<bool>(*value).value_or(true));
+    SideBarContainerModelStatic::SetShowControlButton(frameNode, Converter::OptConvertPtr<bool>(value).value_or(true));
 }
 void OnChangeImpl(Ark_NativePointer node,
                   const Opt_Callback_Boolean_Void* value)
@@ -223,7 +220,7 @@ void SideBarWidth0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto width = Converter::OptConvert<Dimension>(*value);
+    auto width = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(width);
     SideBarContainerModelStatic::SetSideBarWidth(frameNode, width);
 }
@@ -232,7 +229,7 @@ void SideBarWidth1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto width = Converter::OptConvert<Dimension>(*value);
+    auto width = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(width);
     SideBarContainerModelStatic::SetSideBarWidth(frameNode, width);
 }
@@ -293,7 +290,7 @@ void AutoHideImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -305,9 +302,8 @@ void SideBarPositionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
     SideBarContainerModelStatic::SetSideBarPosition(
-        frameNode, Converter::OptConvert<SideBarPosition>(*value).value_or(SideBarPosition::START));
+        frameNode, Converter::OptConvertPtr<SideBarPosition>(value).value_or(SideBarPosition::START));
 }
 void DividerImpl(Ark_NativePointer node,
                  const Opt_DividerStyle* value)
@@ -340,13 +336,7 @@ void MinContentWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
-        Dimension def(DEFAULT_MIN_CONTENT_LENGTH, DimensionUnit::VP);
-        SideBarContainerModelStatic::SetMinContentWidth(frameNode, def);
-        return;
-    }
-    auto width = Converter::OptConvert<Dimension>(*value);
+    auto width = Converter::OptConvertPtr<Dimension>(value);
     if (width.has_value() && width->IsNegative()) {
         width->SetValue(DEFAULT_MIN_CONTENT_LENGTH);
     }

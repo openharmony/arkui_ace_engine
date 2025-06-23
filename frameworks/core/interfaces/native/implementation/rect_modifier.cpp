@@ -126,8 +126,7 @@ void SetRectOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto opt = Converter::OptConvert<RectOptions>(*options);
+    auto opt = Converter::OptConvertPtr<RectOptions>(options);
     CHECK_NULL_VOID(opt);
     if (opt->width) {
         ShapeAbstractModelNG::SetWidth(frameNode, opt->width.value());
@@ -159,7 +158,7 @@ void RadiusWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto radiusWidth = Converter::OptConvert<Dimension>(*value);
+    auto radiusWidth = Converter::OptConvertPtr<Dimension>(value);
     CHECK_NULL_VOID(radiusWidth);
     RectModelNG::SetRadiusWidth(frameNode, radiusWidth.value());
 }
@@ -168,7 +167,7 @@ void RadiusHeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto radiusHeight = Converter::OptConvert<Dimension>(*value);
+    auto radiusHeight = Converter::OptConvertPtr<Dimension>(value);
     CHECK_NULL_VOID(radiusHeight);
     RectModelNG::SetRadiusHeight(frameNode, radiusHeight.value());
 }
@@ -177,7 +176,7 @@ void RadiusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto radius = Converter::OptConvert<RectRadius>(*value);
+    auto radius = Converter::OptConvertPtr<RectRadius>(value);
     CHECK_NULL_VOID(radius);
     CHECK_NULL_VOID(radius->radiusHeight);
     CHECK_NULL_VOID(radius->radiusWidth);

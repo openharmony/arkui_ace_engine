@@ -81,72 +81,71 @@ void ColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelStatic::SetColor(frameNode, Converter::OptConvert<Color>(*value));
+    IndexerModelStatic::SetColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void SelectedColorImpl(Ark_NativePointer node,
                        const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelStatic::SetSelectedColor(frameNode, Converter::OptConvert<Color>(*value));
+    IndexerModelStatic::SetSelectedColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void PopupColorImpl(Ark_NativePointer node,
                     const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelStatic::SetPopupColor(frameNode, Converter::OptConvert<Color>(*value));
+    IndexerModelStatic::SetPopupColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void SelectedBackgroundColorImpl(Ark_NativePointer node,
                                  const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelStatic::SetSelectedBackgroundColor(frameNode, Converter::OptConvert<Color>(*value));
+    IndexerModelStatic::SetSelectedBackgroundColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void PopupBackgroundImpl(Ark_NativePointer node,
                          const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelStatic::SetPopupBackground(frameNode, Converter::OptConvert<Color>(*value));
+    IndexerModelStatic::SetPopupBackground(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void PopupSelectedColorImpl(Ark_NativePointer node,
                             const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelStatic::SetPopupSelectedColor(frameNode, Converter::OptConvert<Color>(*value));
+    IndexerModelStatic::SetPopupSelectedColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void PopupUnselectedColorImpl(Ark_NativePointer node,
                               const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelStatic::SetPopupUnselectedColor(frameNode, Converter::OptConvert<Color>(*value));
+    IndexerModelStatic::SetPopupUnselectedColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void PopupItemBackgroundColorImpl(Ark_NativePointer node,
                                   const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelStatic::SetPopupItemBackground(frameNode, Converter::OptConvert<Color>(*value));
+    IndexerModelStatic::SetPopupItemBackground(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void UsingPopupImpl(Ark_NativePointer node,
                     const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
-    IndexerModelStatic::SetUsingPopup(frameNode, *convValue);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    IndexerModelStatic::SetUsingPopup(frameNode, convValue);
 }
 void SelectedFontImpl(Ark_NativePointer node,
                       const Opt_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontOpt = Converter::OptConvert<Font>(*value);
-    // TODO: Reset value
+    auto fontOpt = Converter::OptConvertPtr<Font>(value);
     if (fontOpt.has_value()) {
         IndexerModelStatic::SetSelectedFont(frameNode, fontOpt.value().fontSize, fontOpt.value().fontWeight,
             fontOpt.value().fontFamilies, fontOpt.value().fontStyle);
@@ -159,8 +158,7 @@ void PopupFontImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontOpt = Converter::OptConvert<Font>(*value);
-    // TODO: Reset value
+    auto fontOpt = Converter::OptConvertPtr<Font>(value);
     if (fontOpt.has_value()) {
         IndexerModelStatic::SetPopupFont(frameNode, fontOpt.value().fontSize, fontOpt.value().fontWeight,
             fontOpt.value().fontFamilies, fontOpt.value().fontStyle);
@@ -173,7 +171,7 @@ void PopupItemFontImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontOpt = Converter::OptConvert<Font>(*value);
+    auto fontOpt = Converter::OptConvertPtr<Font>(value);
     // TODO: Reset value
     if (fontOpt.has_value()) {
         IndexerModelStatic::SetFontSize(frameNode, fontOpt.value().fontSize.value_or(0.0_px));
@@ -188,7 +186,7 @@ void ItemSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto size = Converter::OptConvert<Dimension>(*value);
+    auto size = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(size);
     Validator::ValidateNonPercent(size);
     IndexerModelStatic::SetItemSize(frameNode, size.value_or(DEFAULT_ITEM_SIZE));
@@ -199,8 +197,7 @@ void FontImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontOpt = Converter::OptConvert<Font>(*value);
-    // TODO: Reset value
+    auto fontOpt = Converter::OptConvertPtr<Font>(value);
     if (fontOpt.has_value()) {
         IndexerModelStatic::SetFont(frameNode, fontOpt.value().fontSize, fontOpt.value().fontWeight,
             fontOpt.value().fontFamilies, fontOpt.value().fontStyle);
@@ -264,7 +261,7 @@ void SelectedImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<int32_t>(*value);
+    auto convValue = Converter::OptConvertPtr<int32_t>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -287,15 +284,15 @@ void AutoCollapseImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
-    IndexerModelStatic::SetAutoCollapse(frameNode, *convValue);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    IndexerModelStatic::SetAutoCollapse(frameNode, convValue);
 }
 void PopupItemBorderRadiusImpl(Ark_NativePointer node,
                                const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto radius = Converter::OptConvert<Dimension>(*value);
+    auto radius = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(radius);
     if (!radius) {
         radius = Dimension(POPUP_ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
@@ -310,7 +307,7 @@ void ItemBorderRadiusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto radius = Converter::OptConvert<Dimension>(*value);
+    auto radius = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(radius);
     if (!radius) {
         radius = Dimension(ITEM_DEFAULT_RADIUS, DimensionUnit::VP);
@@ -326,7 +323,7 @@ void PopupBackgroundBlurStyleImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption option;
-    auto blurStyle = Converter::OptConvert<BlurStyle>(*value);
+    auto blurStyle = Converter::OptConvertPtr<BlurStyle>(value);
     option.blurStyle = blurStyle ? blurStyle.value() : BlurStyle::COMPONENT_REGULAR;
     IndexerModelStatic::SetPopupBackgroundBlurStyle(frameNode, option);
 }
@@ -335,7 +332,7 @@ void PopupTitleBackgroundImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    IndexerModelStatic::SetPopupTitleBackground(frameNode, Converter::OptConvert<Color>(*value));
+    IndexerModelStatic::SetPopupTitleBackground(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 
 void EnableHapticFeedbackImpl(Ark_NativePointer node,
@@ -343,8 +340,8 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
-    IndexerModelStatic::SetEnableHapticFeedback(frameNode, *convValue);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    IndexerModelStatic::SetEnableHapticFeedback(frameNode, convValue);
 }
 
 void AlignStyleImpl(Ark_NativePointer node,
@@ -353,9 +350,9 @@ void AlignStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<AlignStyle>(*value);
+    auto convValue = Converter::OptConvertPtr<AlignStyle>(value);
     IndexerModelStatic::SetAlignStyle(frameNode, convValue);
-    auto offsetDimension = offset ? Converter::OptConvert<Dimension>(*offset) : std::nullopt;
+    auto offsetDimension = Converter::OptConvertPtr<Dimension>(offset);
     IndexerModelStatic::SetPopupHorizontalSpace(frameNode, offsetDimension);
 }
 #ifdef WRONG_GEN

@@ -494,7 +494,7 @@ void CopyOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto options = Converter::OptConvert<CopyOptions>(*value);
+    auto options = Converter::OptConvertPtr<CopyOptions>(value);
     if (options) {
         RichEditorModelNG::SetCopyOption(frameNode, options.value());
     }
@@ -526,7 +526,7 @@ void EnableDataDetectorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -538,7 +538,7 @@ void EnablePreviewTextImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -550,7 +550,7 @@ void DataDetectorConfigImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<TextDetectConfig>(*value);
+    auto convValue = Converter::OptConvertPtr<TextDetectConfig>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -562,7 +562,7 @@ void CaretColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Color>(*value);
+    auto convValue = Converter::OptConvertPtr<Color>(value);
     RichEditorModelStatic::SetCaretColor(frameNode, convValue);
 }
 void SelectedBackgroundColorImpl(Ark_NativePointer node,
@@ -570,7 +570,7 @@ void SelectedBackgroundColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Color>(*value);
+    auto convValue = Converter::OptConvertPtr<Color>(value);
     RichEditorModelStatic::SetSelectedBackgroundColor(frameNode, convValue);
 }
 void OnEditingChangeImpl(Ark_NativePointer node,
@@ -594,7 +594,7 @@ void EnterKeyTypeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<TextInputAction>(*value);
+    auto convValue = Converter::OptConvertPtr<TextInputAction>(value);
     RichEditorModelStatic::SetEnterKeyType(frameNode, convValue);
 }
 void OnSubmitImpl(Ark_NativePointer node,
@@ -730,7 +730,7 @@ void EnableKeyboardOnFocusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -742,7 +742,7 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -754,7 +754,7 @@ void BarStateImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<DisplayMode>(*value);
+    auto convValue = Converter::OptConvertPtr<DisplayMode>(value);
     RichEditorModelNG::SetBarState(frameNode, convValue);
 }
 void MaxLengthImpl(Ark_NativePointer node,
@@ -762,7 +762,7 @@ void MaxLengthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<int32_t>(value);
     auto validValue = convValue && convValue.value() >= 0 ? convValue : std::nullopt;
     RichEditorModelNG::SetMaxLength(frameNode, validValue);
 }
@@ -771,7 +771,7 @@ void MaxLinesImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<uint32_t>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<uint32_t>(value);
     RichEditorModelNG::SetMaxLines(frameNode, convValue.value_or(UINT_MAX));
 }
 void KeyboardAppearanceImpl(Ark_NativePointer node,
@@ -779,7 +779,7 @@ void KeyboardAppearanceImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<KeyboardAppearance>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<KeyboardAppearance>(value);
     RichEditorModelNG::SetKeyboardAppearance(frameNode, convValue.value_or(KeyboardAppearance::NONE_IMMERSIVE));
 }
 void StopBackPressImpl(Ark_NativePointer node,
@@ -787,7 +787,7 @@ void StopBackPressImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     RichEditorModelNG::SetStopBackPress(frameNode, convValue.value_or(false));
 }
 void BindSelectionMenuImpl(Ark_NativePointer node,
@@ -798,11 +798,11 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto aceSpanType = Converter::OptConvert<TextSpanType>(*spanType);
-    auto aceResponseType = Converter::OptConvert<TextResponseType>(*responseType);
+    auto aceSpanType = Converter::OptConvertPtr<TextSpanType>(spanType);
+    auto aceResponseType = Converter::OptConvertPtr<TextResponseType>(responseType);
     auto response = aceResponseType.value_or(TextResponseType::NONE);
     auto span = aceSpanType.value_or(TextSpanType::NONE);
-    auto convMenuParam = Converter::OptConvert<SelectMenuParam>(*options);
+    auto convMenuParam = Converter::OptConvertPtr<SelectMenuParam>(options);
     // TODO: Reset value
     CHECK_NULL_VOID(convMenuParam);
     auto optContent = Converter::GetOptPtr(content);
@@ -824,7 +824,7 @@ void CustomKeyboardImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Ark_KeyboardOptions>(*options);
+    auto convValue = Converter::OptConvertPtr<Ark_KeyboardOptions>(options);
     std::optional<bool> supportAvoidance;
     if (convValue) {
         supportAvoidance = Converter::OptConvert<bool>(convValue->supportAvoidance);
@@ -847,13 +847,11 @@ void PlaceholderImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    CHECK_NULL_VOID(style);
     PlaceholderOptions options;
-    if (auto value = Converter::OptConvert<PlaceholderOptions>(*style); value) {
+    if (auto value = Converter::OptConvertPtr<PlaceholderOptions>(style); value) {
         options = *value;
     }
-    options.value = Converter::OptConvert<std::u16string>(*value);
+    options.value = Converter::OptConvertPtr<std::u16string>(value);
     RichEditorModelNG::SetPlaceholder(frameNode, options);
 }
 } // RichEditorAttributeModifier

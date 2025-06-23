@@ -153,7 +153,7 @@ void SetDataPanelOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    auto panelOptions = Converter::OptConvert<Converter::DataPanelOptions>(*options);
+    auto panelOptions = Converter::OptConvertPtr<Converter::DataPanelOptions>(options);
     if (panelOptions.has_value()) {
         DataPanelModelStatic::SetValues(frameNode, panelOptions.value().values);
         DataPanelModelStatic::SetMax(frameNode, panelOptions.value().max);
@@ -171,7 +171,7 @@ void CloseEffectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -200,7 +200,7 @@ void TrackBackgroundColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto color = value ? Converter::OptConvert<Color>(*value) : std::nullopt;
+    auto color = Converter::OptConvertPtr<Color>(value);
     DataPanelModelStatic::SetTrackBackground(frameNode, color);
 }
 void StrokeWidthImpl(Ark_NativePointer node,
@@ -208,7 +208,7 @@ void StrokeWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto width = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
+    auto width = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(width);
     Validator::ValidateNonPercent(width);
     DataPanelModelStatic::SetStrokeWidth(frameNode, width);
@@ -218,7 +218,7 @@ void TrackShadowImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<DataPanelShadow>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<DataPanelShadow>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -230,7 +230,7 @@ void ContentModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = Converter::OptConvertPtr<type>(value);
     //DataPanelModelNG::SetContentModifier(frameNode, convValue);
     LOGE("DataPanel::ContentModifierImpl isn't implemented. Ark_CustomObject isn't supported.");
 }

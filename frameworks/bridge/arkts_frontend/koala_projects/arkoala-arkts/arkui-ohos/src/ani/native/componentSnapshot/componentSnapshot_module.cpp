@@ -15,7 +15,7 @@
 #include "componentSnapshot_module.h"
 
 #include "load.h"
-#include "log.h"
+#include "log/log.h"
 #include "base/error/error_code.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_engine.h"
@@ -90,7 +90,7 @@ static bool GetAniIntValue(ani_env* env, ani_object object, int32_t& value)
         return false;
     }
     ani_int aniValue;
-    if (ANI_OK != env->Object_CallMethodByName_Int(object, "intValue", nullptr, &aniValue)) {
+    if (ANI_OK != env->Object_CallMethodByName_Int(object, "unboxed", nullptr, &aniValue)) {
         return false;
     }
     value = static_cast<int32_t>(aniValue);

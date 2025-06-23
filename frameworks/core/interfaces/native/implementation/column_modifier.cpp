@@ -81,14 +81,14 @@ void AlignItemsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ColumnModelNGStatic::SetAlignItems(frameNode, Converter::OptConvert<FlexAlign>(*value));
+    ColumnModelNGStatic::SetAlignItems(frameNode, Converter::OptConvertPtr<FlexAlign>(value));
 }
 void JustifyContentImpl(Ark_NativePointer node,
                         const Opt_FlexAlign* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ColumnModelNGStatic::SetJustifyContent(frameNode, Converter::OptConvert<FlexAlign>(*value));
+    ColumnModelNGStatic::SetJustifyContent(frameNode, Converter::OptConvertPtr<FlexAlign>(value));
 }
 void PointLightImpl(Ark_NativePointer node,
                     const Opt_PointLightStyle* value)
@@ -96,7 +96,7 @@ void PointLightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 #ifdef POINT_LIGHT_ENABLE
-    auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
+    auto pointLightStyle = Converter::OptConvertPtr<Converter::PointLightStyle>(value);
     auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
     auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
     CHECK_NULL_VOID(themeConstants);
@@ -131,12 +131,9 @@ void ReverseImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    if (value) {
-        // TODO: Reset value
-        if (auto reversed = Converter::OptConvert<bool>(*value); reversed) {
-            ColumnModelNG::SetIsReverse(frameNode, *reversed);
-        }
+    // TODO: Reset value
+    if (auto reversed = Converter::OptConvertPtr<bool>(value); reversed) {
+        ColumnModelNG::SetIsReverse(frameNode, *reversed);
     }
 }
 } // ColumnAttributeModifier

@@ -42,7 +42,7 @@ void SetSelectionImpl(Ark_TextBaseController peer,
     CHECK_NULL_VOID(peer && selectionStart && selectionEnd);
     auto selectionStartConv = Converter::Convert<int32_t>(*selectionStart);
     auto selectionEndConv = Converter::Convert<int32_t>(*selectionEnd);
-    auto optionsConv = options ? Converter::OptConvert<SelectionOptions>(*options) : std::nullopt;
+    auto optionsConv = Converter::OptConvertPtr<SelectionOptions>(options);
     peer->SetSelection(selectionStartConv, selectionEndConv, optionsConv);
 }
 void CloseSelectionMenuImpl(Ark_TextBaseController peer)

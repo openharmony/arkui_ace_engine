@@ -59,7 +59,7 @@ void ArcImpl(Ark_CanvasPath peer,
         .radius = static_cast<double>(Converter::Convert<float>(*radius)),
         .startAngle = static_cast<double>(Converter::Convert<float>(*startAngle)),
         .endAngle = static_cast<double>(Converter::Convert<float>(*endAngle)),
-        .anticlockwise = Converter::OptConvert<bool>(*counterclockwise),
+        .anticlockwise = Converter::OptConvertPtr<bool>(counterclockwise),
     };
     peerImpl->Path2DArc(params);
 }
@@ -141,7 +141,6 @@ void EllipseImpl(Ark_CanvasPath peer,
     CHECK_NULL_VOID(rotation);
     CHECK_NULL_VOID(startAngle);
     CHECK_NULL_VOID(endAngle);
-    CHECK_NULL_VOID(counterclockwise);
     CanvasPathPeerImpl::EllipseParam params = {
         .x = static_cast<double>(Converter::Convert<float>(*x)),
         .y = static_cast<double>(Converter::Convert<float>(*y)),
@@ -150,7 +149,7 @@ void EllipseImpl(Ark_CanvasPath peer,
         .rotation = static_cast<double>(Converter::Convert<float>(*rotation)),
         .startAngle = static_cast<double>(Converter::Convert<float>(*startAngle)),
         .endAngle = static_cast<double>(Converter::Convert<float>(*endAngle)),
-        .anticlockwise = Converter::OptConvert<bool>(*counterclockwise),
+        .anticlockwise = Converter::OptConvertPtr<bool>(counterclockwise),
     };
     peerImpl->Path2DEllipse(params);
 }

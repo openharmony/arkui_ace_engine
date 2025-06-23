@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/utility/converter.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
-#include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/divider/divider_model_ng_static.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/validators.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DividerModifier {
@@ -43,7 +43,7 @@ void VerticalImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -56,7 +56,7 @@ void ColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    DividerModelNGStatic::SetDividerColor(frameNode, Converter::OptConvert<Color>(*value));
+    DividerModelNGStatic::SetDividerColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 
 void StrokeWidthImpl(Ark_NativePointer node,
@@ -64,10 +64,8 @@ void StrokeWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::OptConvert<Dimension>(*value);
-    if (optValue && (optValue.value().Unit() == DimensionUnit::PERCENT)) {
-        optValue.reset();
-    }
+    auto optValue = Converter::OptConvertPtr<Dimension>(value);
+    Validator::ValidateNonPercent(optValue);
     DividerModelNGStatic::StrokeWidth(frameNode, optValue);
 }
 
@@ -76,7 +74,7 @@ void LineCapImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    DividerModelNGStatic::LineCap(frameNode, Converter::OptConvert<LineCap>(*value));
+    DividerModelNGStatic::LineCap(frameNode, Converter::OptConvertPtr<LineCap>(value));
 }
 
 } // DividerAttributeModifier

@@ -118,7 +118,7 @@ void IconSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto valueOpt = Converter::OptConvert<Dimension>(*value);
+    auto valueOpt = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(valueOpt);
     SecurityComponentModelNG::SetIconSize(frameNode, valueOpt);
 }
@@ -127,7 +127,7 @@ void LayoutDirectionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto layoutDirection = Converter::OptConvert<SecurityComponentLayoutDirection>(*value);
+    auto layoutDirection = Converter::OptConvertPtr<SecurityComponentLayoutDirection>(value);
     SecurityComponentModelNG::SetTextIconLayoutDirection(frameNode, layoutDirection);
 }
 void PositionImpl(Ark_NativePointer node,
@@ -159,7 +159,7 @@ void FontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontSize = Converter::OptConvert<Dimension>(*value);
+    auto fontSize = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidatePositive(fontSize);
     Validator::ValidateNonPercent(fontSize);
     SecurityComponentModelNG::SetFontSize(frameNode, fontSize);
@@ -169,14 +169,14 @@ void FontStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SecurityComponentModelNG::SetFontStyle(frameNode, Converter::OptConvert<Ace::FontStyle>(*value));
+    SecurityComponentModelNG::SetFontStyle(frameNode, Converter::OptConvertPtr<Ace::FontStyle>(value));
 }
 void FontWeightImpl(Ark_NativePointer node,
                     const Opt_Union_I32_FontWeight_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SecurityComponentModelNG::SetFontWeight(frameNode, Converter::OptConvert<FontWeight>(*value));
+    SecurityComponentModelNG::SetFontWeight(frameNode, Converter::OptConvertPtr<FontWeight>(value));
 }
 void FontFamilyImpl(Ark_NativePointer node,
                     const Opt_Union_String_Resource* value)
@@ -184,7 +184,7 @@ void FontFamilyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<StringArray> families;
-    if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value); fontfamiliesOpt) {
+    if (auto fontfamiliesOpt = Converter::OptConvertPtr<Converter::FontFamilies>(value); fontfamiliesOpt) {
         families = fontfamiliesOpt->families;
     }
     Validator::ValidateNonEmpty(families);
@@ -195,7 +195,7 @@ void FontColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontColor = Converter::OptConvert<Color>(*value);
+    auto fontColor = Converter::OptConvertPtr<Color>(value);
     SecurityComponentModelNG::SetFontColor(frameNode, fontColor);
 }
 void IconColorImpl(Ark_NativePointer node,
@@ -203,7 +203,7 @@ void IconColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto iconColor = Converter::OptConvert<Color>(*value);
+    auto iconColor = Converter::OptConvertPtr<Color>(value);
     SecurityComponentModelNG::SetIconColor(frameNode, iconColor);
 }
 void BackgroundColorImpl(Ark_NativePointer node,
@@ -211,7 +211,7 @@ void BackgroundColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto сolor = Converter::OptConvert<Color>(*value);
+    auto сolor = Converter::OptConvertPtr<Color>(value);
     SecurityComponentModelNG::SetBackgroundColor(frameNode, сolor);
 }
 void BorderStyleImpl(Ark_NativePointer node,
@@ -219,7 +219,7 @@ void BorderStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::OptConvert<BorderStyle>(*value);
+    auto optValue = Converter::OptConvertPtr<BorderStyle>(value);
     SecurityComponentModelNG::SetBackgroundBorderStyle(frameNode, optValue);
 }
 void BorderWidthImpl(Ark_NativePointer node,
@@ -227,7 +227,7 @@ void BorderWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Dimension>(*value);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(convValue);
     SecurityComponentModelNG::SetBackgroundBorderWidth(frameNode, convValue);
 }
@@ -236,7 +236,7 @@ void BorderColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto color = Converter::OptConvert<Color>(*value);
+    auto color = Converter::OptConvertPtr<Color>(value);
     SecurityComponentModelNG::SetBackgroundBorderColor(frameNode, color);
 }
 void BorderRadiusImpl(Ark_NativePointer node,
@@ -244,7 +244,7 @@ void BorderRadiusImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Dimension>(*value);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(convValue);
     SecurityComponentModelNG::SetBackgroundBorderRadius(frameNode, convValue);
 }
@@ -267,7 +267,7 @@ void TextIconSpaceImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto valueOpt = Converter::OptConvert<Dimension>(*value);
+    auto valueOpt = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(valueOpt);
     SecurityComponentModelNG::SetTextIconSpace(frameNode, valueOpt);
 }
@@ -276,7 +276,7 @@ void KeyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<std::string>(*value);
+    auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -288,14 +288,14 @@ void WidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CommonMethodModifier::SetWidth(frameNode, Converter::OptConvert<CalcDimension>(*value));
+    CommonMethodModifier::SetWidth(frameNode, Converter::OptConvertPtr<CalcDimension>(value));
 }
 void HeightImpl(Ark_NativePointer node,
                 const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CommonMethodModifier::SetHeight(frameNode, Converter::OptConvert<CalcDimension>(*value));
+    CommonMethodModifier::SetHeight(frameNode, Converter::OptConvertPtr<CalcDimension>(value));
 }
 void SizeImpl(Ark_NativePointer node,
               const Opt_SizeOptions* value)
@@ -312,7 +312,7 @@ void AlignImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Alignment>(*value);
+    auto convValue = Converter::OptConvertPtr<Alignment>(value);
     SecurityComponentModelNG::SetAlign(frameNode, convValue);
 }
 void AlignRules0Impl(Ark_NativePointer node,
@@ -341,7 +341,7 @@ void MinFontScaleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto minFontScale = Converter::OptConvert<float>(*value);
+    auto minFontScale = Converter::OptConvertPtr<float>(value);
     Validator::ValidatePositive(minFontScale);
     const auto maxValue = 1.f;
     Validator::ValidateLessOrEqual(minFontScale, maxValue);
@@ -352,7 +352,7 @@ void MaxFontScaleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto maxFontScale = Converter::OptConvert<float>(*value);
+    auto maxFontScale = Converter::OptConvertPtr<float>(value);
     const auto minValue = 1.f;
     Validator::ValidateGreatOrEqual(maxFontScale, minValue);
     SecurityComponentModelNG::SetMaxFontScale(frameNode, maxFontScale);
@@ -362,7 +362,7 @@ void MaxLinesImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto maxLines = Converter::OptConvert<int32_t>(*value);
+    auto maxLines = Converter::OptConvertPtr<int32_t>(value);
     Validator::ValidateNonNegative(maxLines);
     SecurityComponentModelNG::SetMaxLines(frameNode, maxLines);
 }
@@ -371,7 +371,7 @@ void MinFontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontSize = Converter::OptConvert<Dimension>(*value);
+    auto fontSize = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(fontSize);
     Validator::ValidateNonPercent(fontSize);
     SecurityComponentModelNG::SetAdaptMinFontSize(frameNode, fontSize);
@@ -381,7 +381,7 @@ void MaxFontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontSize = Converter::OptConvert<Dimension>(*value);
+    auto fontSize = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(fontSize);
     Validator::ValidateNonPercent(fontSize);
     SecurityComponentModelNG::SetAdaptMaxFontSize(frameNode, fontSize);
@@ -391,7 +391,7 @@ void HeightAdaptivePolicyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<TextHeightAdaptivePolicy>(*value);
+    auto convValue = Converter::OptConvertPtr<TextHeightAdaptivePolicy>(value);
     SecurityComponentModelNG::SetHeightAdaptivePolicy(frameNode, convValue);
 }
 void EnabledImpl(Ark_NativePointer node,

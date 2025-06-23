@@ -66,7 +66,7 @@ Ark_NavPathInfo CtorImpl(const Ark_String* name,
     auto peer = new NavPathInfoPeer();
     CHECK_NULL_RETURN(peer, nullptr);
     peer->data.name_ = Convert<std::string>(*name);
-    peer->data.isEntry_ = Converter::OptConvert<bool>(*isEntry).value_or(peer->data.isEntry_);
+    peer->data.isEntry_ = Converter::OptConvertPtr<bool>(isEntry).value_or(peer->data.isEntry_);
     return peer;
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -122,7 +122,7 @@ void SetIsEntryImpl(Ark_NavPathInfo peer,
                     const Opt_Boolean* isEntry)
 {
     CHECK_NULL_VOID(peer);
-    auto convValue = Converter::OptConvert<bool>(*isEntry);
+    auto convValue = Converter::OptConvertPtr<bool>(isEntry);
     CHECK_NULL_VOID(convValue);
     peer->data.isEntry_ = *convValue;
 }
@@ -136,8 +136,7 @@ void SetNavDestinationIdImpl(Ark_NavPathInfo peer,
                              const Opt_String* navDestinationId)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(navDestinationId);
-    auto id = Converter::OptConvert<std::string>(*navDestinationId);
+    auto id = Converter::OptConvertPtr<std::string>(navDestinationId);
     CHECK_NULL_VOID(id);
     peer->data.navDestinationId_ = *id;
 }

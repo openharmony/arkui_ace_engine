@@ -155,8 +155,7 @@ void SetTabsOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto tabsOptionsOpt = Converter::OptConvert<TabsOptions>(*options);
+    auto tabsOptionsOpt = Converter::OptConvertPtr<TabsOptions>(options);
     CHECK_NULL_VOID(tabsOptionsOpt);
     TabsModelStatic::SetTabBarPosition(frameNode, tabsOptionsOpt->barPosOpt);
     TabsModelStatic::InitIndex(frameNode, tabsOptionsOpt->indexOpt);
@@ -178,7 +177,7 @@ void VerticalImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         TabsModelStatic::SetIsVertical(frameNode, false);
         return;
@@ -190,14 +189,14 @@ void BarPositionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TabsModelStatic::SetTabBarPosition(frameNode, Converter::OptConvert<BarPosition>(*value));
+    TabsModelStatic::SetTabBarPosition(frameNode, Converter::OptConvertPtr<BarPosition>(value));
 }
 void ScrollableImpl(Ark_NativePointer node,
                     const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         TabsModelStatic::SetScrollable(frameNode, true);
         return;
@@ -209,7 +208,7 @@ void BarWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto valueOpt = Converter::OptConvert<Dimension>(*value);
+    auto valueOpt = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(valueOpt);
     TabsModelStatic::SetTabBarWidth(frameNode, valueOpt);
 }
@@ -218,7 +217,7 @@ void BarHeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto valueOpt = Converter::OptConvert<Dimension>(*value);
+    auto valueOpt = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(valueOpt);
     TabsModelStatic::SetTabBarHeight(frameNode, valueOpt);
 }
@@ -227,7 +226,7 @@ void AnimationDurationImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = Converter::OptConvertPtr<float>(value);
     if (!convValue) {
         TabsModelStatic::SetAnimationDuration(frameNode, -1);
         return;
@@ -239,16 +238,14 @@ void AnimationModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    TabsModelStatic::SetAnimateMode(frameNode, Converter::OptConvert<TabAnimateMode>(*value));
+    TabsModelStatic::SetAnimateMode(frameNode, Converter::OptConvertPtr<TabAnimateMode>(value));
 }
 void EdgeEffectImpl(Ark_NativePointer node,
                     const Opt_EdgeEffect* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto edgeEffectOpt = Converter::OptConvert<EdgeEffect>(*value);
+    auto edgeEffectOpt = Converter::OptConvertPtr<EdgeEffect>(value);
     TabsModelStatic::SetEdgeEffect(frameNode, OHOS::Ace::NG::EnumToInt(edgeEffectOpt));
 }
 void OnChangeImpl(Ark_NativePointer node,
@@ -406,7 +403,7 @@ void FadingEdgeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         TabsModelStatic::SetFadingEdge(frameNode, true);
         return;
@@ -418,8 +415,7 @@ void DividerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto divider = Converter::OptConvert<TabsItemDivider>(*value);
+    auto divider = Converter::OptConvertPtr<TabsItemDivider>(value);
     TabsModelStatic::SetDivider(frameNode, divider);
     TabsModelStatic::InitDivider(frameNode);
 }
@@ -428,7 +424,7 @@ void BarOverlapImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         TabsModelStatic::SetBarOverlap(frameNode, false);
         return;
@@ -440,7 +436,7 @@ void BarBackgroundColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TabsModelStatic::SetBarBackgroundColor(frameNode,  Converter::OptConvert<Color>(*value));
+    TabsModelStatic::SetBarBackgroundColor(frameNode,  Converter::OptConvertPtr<Color>(value));
 }
 void BarGridAlignImpl(Ark_NativePointer node,
                       const Opt_BarGridColumnOptions* value)
@@ -448,7 +444,7 @@ void BarGridAlignImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     BarGridColumnOptions columnOption;
-    auto convValue = Converter::OptConvert<BarGridColumnOptions>(*value);
+    auto convValue = Converter::OptConvertPtr<BarGridColumnOptions>(value);
     if (convValue) {
         columnOption = convValue.value();
     }
@@ -512,7 +508,7 @@ void BarBackgroundBlurStyle0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption option;
-    auto blurStyle = Converter::OptConvert<BlurStyle>(*value);
+    auto blurStyle = Converter::OptConvertPtr<BlurStyle>(value);
     if (blurStyle) {
         option.blurStyle = blurStyle.value();
     }
@@ -525,8 +521,8 @@ void BarBackgroundBlurStyle1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     BlurStyleOption option;
-    auto blurStyle = Converter::OptConvert<BlurStyle>(*style);
-    auto bluroption = Converter::OptConvert<BlurStyleOption>(*options);
+    auto blurStyle = Converter::OptConvertPtr<BlurStyle>(style);
+    auto bluroption = Converter::OptConvertPtr<BlurStyleOption>(options);
     if (bluroption) {
         option = bluroption.value();
     }
@@ -541,7 +537,7 @@ void BarBackgroundEffectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     EffectOption option;
-    auto convValue = Converter::OptConvert<EffectOption>(*value);
+    auto convValue = Converter::OptConvertPtr<EffectOption>(value);
     if (convValue) {
         option = convValue.value();
     }
@@ -552,7 +548,7 @@ void PageFlipModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<int32_t>(value);
     int32_t defaultValue = static_cast<int32_t>(PageFlipMode::CONTINUOUS);
     TabsModelStatic::SetPageFlipMode(frameNode, convValue.value_or(defaultValue));
 }
@@ -582,19 +578,17 @@ void BarModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto mode = Converter::OptConvert<TabBarMode>(*value);
+    auto mode = Converter::OptConvertPtr<TabBarMode>(value);
     if (mode && *mode == TabBarMode::SCROLLABLE) {
         ScrollableBarModeOptions barModeOptions;
         auto defaultMargin = barModeOptions.margin;
-        if (options) {
-            auto optionsOpt = Converter::OptConvert<Ark_ScrollableBarModeOptions>(*options);
-            if (optionsOpt) {
-                auto marginOpt = Converter::OptConvert<Dimension>(optionsOpt.value().margin);
-                Validator::ValidateNonPercent(marginOpt);
-                auto styleOpt = Converter::OptConvert<LayoutStyle>(optionsOpt.value().nonScrollableLayoutStyle);
-                barModeOptions.margin = marginOpt.value_or(defaultMargin);
-                barModeOptions.nonScrollableLayoutStyle = styleOpt;
-            }
+        auto optionsOpt = Converter::OptConvertPtr<Ark_ScrollableBarModeOptions>(options);
+        if (optionsOpt) {
+            auto marginOpt = Converter::OptConvert<Dimension>(optionsOpt.value().margin);
+            Validator::ValidateNonPercent(marginOpt);
+            auto styleOpt = Converter::OptConvert<LayoutStyle>(optionsOpt.value().nonScrollableLayoutStyle);
+            barModeOptions.margin = marginOpt.value_or(defaultMargin);
+            barModeOptions.nonScrollableLayoutStyle = styleOpt;
         }
         TabsModelStatic::SetScrollableBarModeOptions(frameNode, barModeOptions);
     }
@@ -606,8 +600,8 @@ void CachedMaxCountImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto countValue = count ? Converter::OptConvert<int32_t>(*count) : std::nullopt;
-    auto modeValue = Converter::OptConvert<TabsCacheMode>(*mode);
+    auto countValue = Converter::OptConvertPtr<int32_t>(count);
+    auto modeValue = Converter::OptConvertPtr<TabsCacheMode>(mode);
     TabsModelStatic::SetCachedMaxCount(frameNode, countValue, modeValue);
 }
 #ifdef WRONG_GEN

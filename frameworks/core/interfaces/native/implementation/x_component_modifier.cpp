@@ -122,7 +122,7 @@ void EnableAnalyzerImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 #ifdef XCOMPONENT_SUPPORTED
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         return;
     }
@@ -135,7 +135,7 @@ void EnableSecureImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 #ifdef XCOMPONENT_SUPPORTED
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         return;
     }
@@ -148,7 +148,7 @@ void HdrBrightnessImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     #ifdef XCOMPONENT_SUPPORTED
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = Converter::OptConvertPtr<float>(value);
     if (!convValue) {
         XComponentModelNG::HdrBrightness(frameNode, 1.0f);
         return;
@@ -162,7 +162,7 @@ void EnableTransparentLayerImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     #ifdef XCOMPONENT_SUPPORTED
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         return;
     }

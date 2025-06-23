@@ -23,12 +23,18 @@ import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
 
-export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements IProvideDecoratedVariable<T> {
+export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IProvideDecoratedVariable<T> {
     private readonly provideAlias_: string;
-    private readonly backing_: IBackingValue<T>
+    private readonly backing_: IBackingValue<T>;
     private readonly allowOverride_: boolean;
-    constructor(owningView: ExtendableComponent, varName: string, provideAliasName: string, initValue: T, allowOverride: boolean, watchFunc?: WatchFuncType) {
+    constructor(
+        owningView: ExtendableComponent,
+        varName: string,
+        provideAliasName: string,
+        initValue: T,
+        allowOverride: boolean,
+        watchFunc?: WatchFuncType
+    ) {
         super('Provide', owningView, varName, watchFunc);
         this.provideAlias_ = provideAliasName;
         this.allowOverride_ = allowOverride ? allowOverride : false;
@@ -49,7 +55,7 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T>
         if (value === newValue) {
             return;
         }
-        if (this.backing_.set(UIUtils.makeObserved(newValue as Object) as T)) {
+        if (this.backing_.set(UIUtils.makeObserved(newValue) as T)) {
             this.unregisterWatchFromObservedObjectChanges(value);
             this.registerWatchForObservedObjectChanges(newValue);
             this.execWatchFuncs();

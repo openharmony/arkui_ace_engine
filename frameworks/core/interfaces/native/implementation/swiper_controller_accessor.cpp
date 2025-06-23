@@ -75,7 +75,7 @@ void ChangeIndexImpl(Ark_SwiperController peer,
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(index);
     auto aceIdx = Converter::Convert<int32_t>(*index);
-    auto mode = animationMode ? Converter::OptConvert<SwiperAnimationMode>(*animationMode) : std::nullopt;
+    auto mode = Converter::OptConvertPtr<SwiperAnimationMode>(animationMode);
     peerImpl->TriggerChangeIndex(aceIdx, mode.value_or(SwiperAnimationMode::NO_ANIMATION));
 }
 void FinishAnimationImpl(Ark_SwiperController peer,
@@ -83,7 +83,7 @@ void FinishAnimationImpl(Ark_SwiperController peer,
 {
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto arkCallbackOpt = callback_ ? Converter::OptConvert<VoidCallback>(*callback_) : std::nullopt;
+    auto arkCallbackOpt = Converter::GetOptPtr(callback_);
     if (arkCallbackOpt) {
         auto onFinish = [arkCallback = CallbackHelper(*arkCallbackOpt)]() -> void {
             arkCallback.Invoke();

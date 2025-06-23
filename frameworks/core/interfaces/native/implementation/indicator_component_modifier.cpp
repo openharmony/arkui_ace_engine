@@ -59,11 +59,10 @@ void SetIndicatorComponentOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(controller);
 
     // obtain the peer of external IndicatorController
     Ark_IndicatorComponentController peerImplPtr{};
-    if (auto opt = Converter::OptConvert<Ark_IndicatorComponentController>(*controller); opt) {
+    if (auto opt = Converter::OptConvertPtr<Ark_IndicatorComponentController>(controller); opt) {
         peerImplPtr = *opt;
     }
     CHECK_NULL_VOID(peerImplPtr);
@@ -82,8 +81,7 @@ void InitialIndexImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto aceVal = Converter::OptConvert<int32_t>(*value);
+    auto aceVal = Converter::OptConvertPtr<int32_t>(value);
     Validator::ValidateNonNegative(aceVal);
     IndicatorModelStatic::SetInitialIndex(frameNode, aceVal);
 }
@@ -92,8 +90,7 @@ void CountImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto aceVal = Converter::OptConvert<int32_t>(*value);
+    auto aceVal = Converter::OptConvertPtr<int32_t>(value);
     Validator::ValidateNonNegative(aceVal);
     IndicatorModelStatic::SetCount(frameNode, aceVal);
 }

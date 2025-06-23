@@ -53,13 +53,13 @@ void SpliceImpl(Ark_ChildrenMainSize peer,
     if (convStart < 0) {
         return; // throw an exception by TS
     }
-    auto convDeleteCount = deleteCount ? Converter::OptConvert<int32_t>(*deleteCount) : std::nullopt;
+    auto convDeleteCount = Converter::OptConvertPtr<int32_t>(deleteCount);
     if (convDeleteCount.has_value() && convDeleteCount.value() < 0) {
         convDeleteCount = 0;
     }
     auto delCount = convDeleteCount.value_or(-1); // -1 update all from 'start'
 
-    auto convFloatArray = childrenSize ? Converter::OptConvert<std::vector<float>>(*childrenSize) : std::nullopt;
+    auto convFloatArray = Converter::OptConvertPtr<std::vector<float>>(childrenSize);
     auto floatArray = convFloatArray.value_or(std::vector<float>());
     std::for_each(floatArray.begin(), floatArray.end(), [](float& size) {
         if (size < 0.0f) {

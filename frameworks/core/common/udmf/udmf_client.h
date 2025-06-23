@@ -42,9 +42,11 @@ public:
     static UdmfClient* GetInstance();
     virtual RefPtr<UnifiedData> TransformUnifiedData(napi_value napiValue) = 0;
     virtual RefPtr<UnifiedData> TransformUnifiedDataForNative(void* rawData) = 0;
+    virtual RefPtr<UnifiedData> TransformUnifiedDataFromANI(void* rawData) = 0;
     virtual void* TransformUnifiedDataPtr(RefPtr<UnifiedData>& unifiedData) = 0;
     virtual napi_value TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData) = 0;
     virtual napi_value TransformSummary(std::map<std::string, int64_t>& summary) = 0;
+    virtual void TransformSummaryANI(std::map<std::string, int64_t>& summary, void* summaryPtr) = 0;
     virtual RefPtr<UnifiedData> CreateUnifiedData() = 0;
     virtual int32_t SetData(const RefPtr<UnifiedData>& unifiedData, std::string& key) = 0;
     virtual int32_t GetData(const RefPtr<UnifiedData>& unifiedData, const std::string& key) = 0;

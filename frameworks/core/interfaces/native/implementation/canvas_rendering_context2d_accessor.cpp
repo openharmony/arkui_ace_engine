@@ -40,7 +40,7 @@ Ark_CanvasRenderingContext2D CtorImpl(const Opt_RenderingContextSettings* settin
     CHECK_NULL_RETURN(settings, {});
     auto peerImpl = Referenced::MakeRefPtr<CanvasRenderingContext2DPeerImpl>();
     peerImpl->IncRefCount();
-    auto optSettings = Converter::OptConvert<Ark_RenderingContextSettings>(*settings);
+    auto optSettings = Converter::OptConvertPtr<Ark_RenderingContextSettings>(settings);
     peerImpl->SetOptions(optSettings);
     return reinterpret_cast<CanvasRenderingContext2DPeer*>(Referenced::RawPtr(peerImpl));
 }
@@ -55,10 +55,8 @@ Ark_String ToDataURLImpl(Ark_CanvasRenderingContext2D peer,
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, {});
-    CHECK_NULL_RETURN(type, {});
-    CHECK_NULL_RETURN(quality, {});
-    auto optType = Converter::OptConvert<std::string>(*type);
-    auto optQuality = Converter::OptConvert<float>(*quality);
+    auto optType = Converter::OptConvertPtr<std::string>(type);
+    auto optQuality = Converter::OptConvertPtr<float>(quality);
     auto result = peerImpl->ToDataURL(optType, optQuality);
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }
@@ -94,7 +92,7 @@ void OffOnAttachImpl(Ark_VMContext vmContext,
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto optCallback = callback_ ? Converter::OptConvert<Callback_Void>(*callback_) : std::nullopt;
+    auto optCallback = Converter::OptConvertPtr<Callback_Void>(callback_);
     auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<Callback_Void>();
     peerImpl->Off(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
 }
@@ -112,7 +110,7 @@ void OffOnDetachImpl(Ark_CanvasRenderingContext2D peer,
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto optCallback = callback_ ? Converter::OptConvert<Callback_Void>(*callback_) : std::nullopt;
+    auto optCallback = Converter::OptConvertPtr<Callback_Void>(callback_);
     auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<Callback_Void>();
     peerImpl->Off(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_DETACH);
 }

@@ -85,7 +85,7 @@ void StatusImpl(Ark_NativePointer node,
             frameNode, StepperItemModelStatic::ITEM_STATE.at(StepperItemModelStatic::ItemState::NORMAL));
         return;
     }
-    auto convValue = value ? Converter::OptConvert<StepperItemModelStatic::ItemState>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<StepperItemModelStatic::ItemState>(value);
     if (convValue.has_value()) {
         StepperItemModelStatic::SetStatus(frameNode, StepperItemModelStatic::ITEM_STATE.at(convValue.value()));
     } else {

@@ -15,8 +15,8 @@
 
 import { FrameNode, FrameNodeInternal, FrameNodeUtils } from "arkui/FrameNode"
 import { ArkUIGeneratedNativeModule } from "#components"
-import { int32 } from "@koalaui/common"
-import { nullptr } from "@koalaui/interop"
+import { int32, int64 } from "@koalaui/common"
+import { nullptr, KPointer, KSerializerBuffer } from "@koalaui/interop"
 import { _animateTo } from "arkui/handwritten/ArkAnimation"
 import { AnimateParam } from 'arkui/component'
 import { AnimatorResult , AnimatorOptions, Animator} from "@ohos/animator"
@@ -54,6 +54,11 @@ import { mediaquery } from '@ohos/mediaquery'
 import { AsyncCallback, CustomBuilder, ArkComponentRootPeer } from 'arkui/component'
 import { createUiDetachedRoot, destroyUiDetachedRoot } from "arkui/ArkUIEntry"
 import { PeerNode } from 'arkui/PeerNode'
+import { Deserializer } from "arkui/component/peers/Deserializer"
+import { Serializer } from "arkui/component/peers/Serializer"
+import { KBuffer } from "@koalaui/interop"
+import { deserializeAndCallCallback } from "arkui/component/peers/CallbackDeserializeCall"
+import { InteropNativeModule } from "@koalaui/interop"
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -380,6 +385,11 @@ export class UIContextImpl extends UIContext {
     measureUtils_: MeasureUtilsImpl;
     textMenuController_: TextMenuControllerImpl;
 
+    bufferSize = 4096
+    buffer: KBuffer = new KBuffer(this.bufferSize)
+    position: int64 = 0
+    deserializer: Deserializer = new Deserializer(this.buffer.buffer, this.bufferSize)
+
     constructor(instanceId: int32) {
         super()
         this.instanceId_ = instanceId;
@@ -393,6 +403,33 @@ export class UIContextImpl extends UIContext {
         this.measureUtils_ = new MeasureUtilsImpl(instanceId);
         this.textMenuController_ = new TextMenuControllerImpl(instanceId);
     }
+
+    dispatchCallback(buffer: KSerializerBuffer, length: int32): void {
+        if (length <= 0) {
+            return
+        }
+
+        if (this.position + length > this.bufferSize) {
+            throw Error("Callback buffer of UIContextImpl is full!")
+        }
+
+        InteropNativeModule._CopyBuffer(this.buffer.buffer + this.position, length, buffer)
+        this.position += length
+    }
+
+    callCallbacks(): void {
+        if (this.position === 0) {
+            return
+        }
+        this.deserializer.resetCurrentPosition()
+        this.runScopedTask(() => {
+            while (this.deserializer.currentPosition() < this.position) {
+                deserializeAndCallCallback(this.deserializer)
+            }
+        })
+        this.position = 0;
+    }
+
     public getFont() : Font {
         return this.font_;
     }
@@ -477,7 +514,7 @@ export class UIContextImpl extends UIContext {
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext();
     }
-    
+
     public getAtomicServiceBar(): Nullable<AtomicServiceBar> {
         return this.atomicServiceBar_;
     }

@@ -39,8 +39,7 @@ void SetFolderStackOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto arkOpts = Converter::OptConvert<Ark_FolderStackOptions>(*options);
+    auto arkOpts = Converter::OptConvertPtr<Ark_FolderStackOptions>(options);
     if (arkOpts) {
         auto list = Converter::OptConvert<std::vector<std::string>>(arkOpts->upperItems);
         if (list) {
@@ -55,7 +54,7 @@ void AlignContentImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    FolderStackModelNGStatic::SetAlignment(frameNode, Converter::OptConvert<Alignment>(*value));
+    FolderStackModelNGStatic::SetAlignment(frameNode, Converter::OptConvertPtr<Alignment>(value));
 }
 void OnFolderStateChangeImpl(Ark_NativePointer node,
                              const Opt_OnFoldStatusChangeCallback* value)
@@ -96,7 +95,7 @@ void EnableAnimationImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -108,7 +107,7 @@ void AutoHalfFoldImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;

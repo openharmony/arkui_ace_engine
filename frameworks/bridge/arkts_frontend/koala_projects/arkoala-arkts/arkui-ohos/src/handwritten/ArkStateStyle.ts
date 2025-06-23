@@ -23,37 +23,33 @@ import { InteropNativeModule } from "@koalaui/interop"
 import { ArkCommonAttributeSet } from "./modifiers/ArkCommonModifier";
 
 export function hookStateStyleImpl(node: ArkCommonMethodPeer, stateStyle: StateStyles | undefined): void {
+    let currentState = node.getOrCreateStateStyleMutable()
+    if (currentState === undefined) {
+        return;
+    }
+    const UI_STATE_NORMAL = 0;
+    const UI_STATE_PRESSED = 1;
+    const UI_STATE_FOCUSED = 1 << 1;
+    const UI_STATE_DISABLED = 1 << 2;
+    const UI_STATE_SELECTED = 1 << 3;
 
-    // let currentState = rememberMutableState<int32>(0)
-    // remember(() => {
-    //     StateStylesOps.onStateStyleChange(node.getPeerPtr(), (state: int32) => {
-    //         currentState.value = state
-    //     })
-    // })
+    let cm = new ArkCommonAttributeSet();
 
-    // const UI_STATE_NORMAL = 0;
-    // const UI_STATE_PRESSED = 1;
-    // const UI_STATE_FOCUSED = 1 << 1;
-    // const UI_STATE_DISABLED = 1 << 2;
-    // const UI_STATE_SELECTED = 1 << 3;
-
-    // let cm = new ArkCommonAttributeSet();
-
-    // if (currentState.value === UI_STATE_NORMAL) {
-    //     stateStyle?.normal?.(cm)
-    // }
-    // if (currentState.value & UI_STATE_PRESSED) {
-    //     stateStyle?.clicked?.(cm)
-    //     stateStyle?.pressed?.(cm)
-    // }
-    // if (currentState.value & UI_STATE_FOCUSED) {
-    //     stateStyle?.focused?.(cm)
-    // }
-    // if (currentState.value & UI_STATE_DISABLED) {
-    //     stateStyle?.disabled?.(cm)
-    // }
-    // if (currentState.value & UI_STATE_SELECTED) {
-    //     stateStyle?.selected?.(cm)
-    // }
-    // cm.applyModifierPatch(node)
+    if (currentState.value === UI_STATE_NORMAL) {
+        stateStyle?.normal?.(cm)
+    }
+    if (currentState.value & UI_STATE_PRESSED) {
+        stateStyle?.clicked?.(cm)
+        stateStyle?.pressed?.(cm)
+    }
+    if (currentState.value & UI_STATE_FOCUSED) {
+        stateStyle?.focused?.(cm)
+    }
+    if (currentState.value & UI_STATE_DISABLED) {
+        stateStyle?.disabled?.(cm)
+    }
+    if (currentState.value & UI_STATE_SELECTED) {
+        stateStyle?.selected?.(cm)
+    }
+    cm.applyModifierPatch(node)
 }

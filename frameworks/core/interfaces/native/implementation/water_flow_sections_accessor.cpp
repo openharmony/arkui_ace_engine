@@ -88,9 +88,9 @@ Ark_Boolean SpliceImpl(Ark_WaterFlowSections peer,
     CHECK_NULL_RETURN(peer, false);
     CHECK_NULL_RETURN(peer->GetController(), false);
     CHECK_NULL_RETURN(start, false);
-    auto deleteCountOpt = Converter::OptConvert<int32_t>(*deleteCount);
+    auto deleteCountOpt = Converter::OptConvertPtr<int32_t>(deleteCount);
     auto delCnt = deleteCountOpt ? deleteCountOpt.value() : 0;
-    auto sectionsOpt = sections ? Converter::OptConvert<Array_SectionOptions>(*sections) : std::nullopt;
+    auto sectionsOpt = Converter::OptConvertPtr<Array_SectionOptions>(sections);
     if (sectionsOpt) {
         auto sections = Converter::OptConvert<std::vector<WaterFlowSections::Section>>(*sectionsOpt);
         peer->GetController()->ChangeData(Converter::Convert<int32_t>(*start), delCnt, sections.value());

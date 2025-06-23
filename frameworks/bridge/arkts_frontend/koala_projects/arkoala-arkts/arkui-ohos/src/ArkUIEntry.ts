@@ -171,6 +171,7 @@ function registerSyncCallbackProcessor() {
 
 export class Application {
     private manager: StateManager | undefined = undefined
+    private uiContext: UIContextImpl | undefined = undefined
     private timer: MutableState<int64> | undefined = undefined
     private currentCrash: Object | undefined = undefined
     private enableDumpTree = false
@@ -226,6 +227,7 @@ export class Application {
             uiContext.stateMgr = this.manager
             let uiData = new ContextRecord();
             uiData.uiContext = uiContext;
+            this.uiContext = uiContext;
             this.manager!.contextData = uiData;
             this.timer = getAnimationTimer() ?? createAnimationTimer(this.manager!)
             /** @memo */
@@ -268,6 +270,14 @@ export class Application {
     private checkEvents(what: int32) {
         // NativeModule._NativeLog("ARKTS: checkEvents")
         checkEvents()
+    }
+
+    private checkUIContextCallbacks(): void {
+        const uiContext = this.uiContext
+        if (uiContext) {
+            if (this.withLog) InteropNativeModule._NativeLog("ARKTS: checkUIContextCallbacks")
+            uiContext.callCallbacks()
+        }
     }
 
     private updateState() {
@@ -408,6 +418,7 @@ export class Application {
     checkCallbacks(): void {
         if (this.withLog) InteropNativeModule._NativeLog("ARKTS: checkCallbacks")
         checkEvents()
+        this.checkUIContextCallbacks()
     }
 
     // TODO: make [emitEvent] suitable to get string argument

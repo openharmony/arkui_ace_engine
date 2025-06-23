@@ -14,7 +14,7 @@
  */
 
 import { int32 } from '@koalaui/common';
-import { MutableState, mutableState } from '@koalaui/runtime';
+import { MutableState, mutableState, GlobalStateManager } from '@koalaui/runtime';
 import { IMutableStateMeta, IMutableKeyedStateMeta } from '../decorator';
 import { RenderIdType } from '../decorator';
 import { ObserveSingleton } from './observeSingleton';
@@ -32,20 +32,20 @@ export interface IBindingSource {
     clearBinding(id: RenderIdType): void;
 }
 /**
-* manage one meta MutableState
-* 
-* V2 equivalent: sym_ref entry for particular property called 'propName'
-* addRef(obj, propName) records dependency, 
-* fireChange(obj, propName) marks all dependencies for this prop need update
-*/
+ * manage one meta MutableState
+ * V2 equivalent: sym_ref entry for particular property called 'propName'
+ * addRef(obj, propName) records dependency,
+ * fireChange(obj, propName) marks all dependencies for this prop need update
+ */
 export class MutableStateMeta extends MutableStateMetaBase implements IMutableStateMeta, IBindingSource {
     // meta MutableState to record dependencies in addRef
     // and mutate in fireChange
-    protected __metaDependency: MutableState<int32> = mutableState<int32>(0);
+    protected __metaDependency: MutableState<int32>;
     private bindings_?: Set<RenderIdType>;
 
-    constructor(info: string) {
+    constructor(info: string, metaDependency?: MutableState<int32>) {
         super(info);
+        this.__metaDependency = metaDependency ?? mutableState<int32>(0);
     }
 
     public addRef(): void {
@@ -68,9 +68,7 @@ export class MutableStateMeta extends MutableStateMetaBase implements IMutableSt
     }
 }
 
-export class MutableKeyedStateMeta extends MutableStateMetaBase
-    implements IMutableKeyedStateMeta {
-
+export class MutableKeyedStateMeta extends MutableStateMetaBase implements IMutableKeyedStateMeta {
     protected readonly __metaDependencies = new Map<string, MutableStateMeta>();
 
     constructor(info: string = '') {
@@ -80,7 +78,8 @@ export class MutableKeyedStateMeta extends MutableStateMetaBase
     public addRef(key: string): void {
         let metaDependency: MutableStateMeta | undefined = this.__metaDependencies.get(key);
         if (!metaDependency) {
-            metaDependency = new MutableStateMeta(key); // incremental engine does not allow create mutableState while building tree
+            // incremental engine does not allow create mutableState while building tree
+            metaDependency = new MutableStateMeta(key, GlobalStateManager.instance.mutableState<int32>(0, true));
             this.__metaDependencies.set(key, metaDependency);
         }
         metaDependency.addRef();

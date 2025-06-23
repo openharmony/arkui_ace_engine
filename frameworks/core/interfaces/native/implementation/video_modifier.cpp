@@ -124,7 +124,7 @@ void MutedImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         VideoModelNG::SetMuted(frameNode, false);
         return;
@@ -136,7 +136,7 @@ void AutoPlayImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         VideoModelNG::SetAutoPlay(frameNode, false);
         return;
@@ -148,7 +148,7 @@ void ControlsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         VideoModelNG::SetControls(frameNode, true);
         return;
@@ -160,7 +160,7 @@ void LoopImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         VideoModelNG::SetLoop(frameNode, false);
         return;
@@ -172,8 +172,7 @@ void ObjectFitImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    VideoModelStatic::SetObjectFit(frameNode, Converter::OptConvert<ImageFit>(*value));
+    VideoModelStatic::SetObjectFit(frameNode, Converter::OptConvertPtr<ImageFit>(value));
 }
 void OnStartImpl(Ark_NativePointer node,
                  const Opt_VoidCallback* value)
@@ -355,7 +354,7 @@ void EnableAnalyzerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         VideoModelStatic::EnableAnalyzer(frameNode, false);
         return;
@@ -367,7 +366,7 @@ void AnalyzerConfigImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = Converter::OptConvertPtr<type>(value);
     //VideoModelNG::SetAnalyzerConfig(frameNode, convValue);
     LOGE("ARKOALA VideoInterface::AnalyzerConfigImpl -> method is not implemented.");
 }
@@ -384,7 +383,7 @@ void EnableShortcutKeyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         VideoModelNG::SetShortcutKeyEnabled(frameNode, false);
         return;

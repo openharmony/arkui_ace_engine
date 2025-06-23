@@ -311,7 +311,7 @@ void SetSingleRange(FrameNode* frameNode, const Opt_Union_Number_Array_Number* v
 {
     std::vector<OHOS::Ace::NG::RangeContent> rangeResult;
     TextPickerModelStatic::GetSingleRange(frameNode, rangeResult);
-    auto indexOpt = Converter::OptConvert<uint32_t>(*value);
+    auto indexOpt = Converter::OptConvertPtr<uint32_t>(value);
     uint32_t index = indexOpt.value_or(0);
     if (GreatOrEqual(index, static_cast<int32_t>(rangeResult.size())) || LessNotEqual(index, 0)) {
         index = 0;
@@ -354,9 +354,8 @@ void SetTextPickerOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
 
-    auto textPickerOptionsOpt = Converter::OptConvert<TextPickerOptions>(*options);
+    auto textPickerOptionsOpt = Converter::OptConvertPtr<TextPickerOptions>(options);
     if (textPickerOptionsOpt.has_value()) {
         auto textPickerOptions = textPickerOptionsOpt.value();
         if (!textPickerOptions.range.empty()) {
@@ -388,7 +387,7 @@ void DefaultPickerItemHeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto height = Converter::OptConvert<Dimension>(*value);
+    auto height = Converter::OptConvertPtr<Dimension>(value);
     TextPickerModelStatic::SetDefaultPickerItemHeight(frameNode, height);
 }
 void CanLoopImpl(Ark_NativePointer node,
@@ -396,7 +395,7 @@ void CanLoopImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -412,7 +411,7 @@ void DisappearTextStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
-    auto convValue = Converter::OptConvert<PickerTextStyle>(*value);
+    auto convValue = Converter::OptConvertPtr<PickerTextStyle>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -428,7 +427,7 @@ void TextStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
-    auto convValue = Converter::OptConvert<PickerTextStyle>(*value);
+    auto convValue = Converter::OptConvertPtr<PickerTextStyle>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -444,7 +443,7 @@ void SelectedTextStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
-    auto convValue = Converter::OptConvert<PickerTextStyle>(*value);
+    auto convValue = Converter::OptConvertPtr<PickerTextStyle>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -456,7 +455,7 @@ void DisableTextStyleAnimationImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -468,7 +467,7 @@ void DefaultTextStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<PickerTextStyle>(*value);
+    auto convValue = Converter::OptConvertPtr<PickerTextStyle>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -567,7 +566,7 @@ void DividerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto dividerParams = Converter::OptConvert<ItemDivider>(*value);
+    auto dividerParams = Converter::OptConvertPtr<ItemDivider>(value);
 
     ItemDivider divider;
     auto context = frameNode->GetContext();
@@ -599,7 +598,7 @@ void GradientHeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto heightDimension = Converter::OptConvert<Dimension>(*value);
+    auto heightDimension = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(heightDimension);
     if (heightDimension && heightDimension->ConvertToVp() > 1.0f) {
         heightDimension.reset();
@@ -611,7 +610,7 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     TextPickerModelStatic::SetEnableHapticFeedback(frameNode, convValue);
 }
 void DigitalCrownSensitivityImpl(Ark_NativePointer node,
@@ -619,7 +618,7 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<int32_t>(value);
     TextPickerModelStatic::SetDigitalCrownSensitivity(frameNode, convValue);
 }
 #ifdef WRONG_GEN

@@ -175,10 +175,9 @@ void SetSelectionImpl(Ark_RichEditorBaseController peer,
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(selectionStart);
     CHECK_NULL_VOID(selectionEnd);
-    CHECK_NULL_VOID(options);
     int32_t start = Converter::Convert<int32_t>(*selectionStart);
     int32_t end = Converter::Convert<int32_t>(*selectionEnd);
-    auto optOptions = Converter::OptConvert<SelectionOptions>(*options);
+    auto optOptions = Converter::OptConvertPtr<SelectionOptions>(options);
     peer->SetSelection(start, end, optOptions, start < end);
 }
 Ark_Boolean IsEditingImpl(Ark_RichEditorBaseController peer)

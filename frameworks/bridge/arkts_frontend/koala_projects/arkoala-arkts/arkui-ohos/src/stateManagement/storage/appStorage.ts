@@ -24,40 +24,40 @@ import { PropDecoratedVariable } from '../decoratorImpl/decoratorProp';
 export class AppStorage extends LocalStorage {
     public static createSingleton(/*initializingPropersties?: Object */): void {
         if (!AppStorage.instance_) {
-            AppStorage.instance_ = new AppStorage( /* initializingPropersties */);
+            AppStorage.instance_ = new AppStorage(/* initializingPropersties */);
         } else {
         }
     }
 
-    public static ref<T>(propName: string): AbstractProperty<T> | undefined  {
+    public static ref<T>(propName: string): AbstractProperty<T> | undefined {
         return AppStorage.getOrCreate().ref<T>(propName);
     }
 
-    public static setAndRef<T>(propName: string, defaultValue: T) : AbstractProperty<T>  {
+    public static setAndRef<T>(propName: string, defaultValue: T): AbstractProperty<T> {
         return AppStorage.getOrCreate().setAndRef<T>(propName, defaultValue);
     }
 
-    public static link<T>(propName: string): SubscribedAbstractProperty<T> | undefined  {
+    public static link<T>(propName: string): SubscribedAbstractProperty<T> | undefined {
         return AppStorage.getOrCreate().link<T>(propName);
     }
 
-    public static setAndLink<T>(propName: string, defaultValue: T) : SubscribedAbstractProperty<T>  {
+    public static setAndLink<T>(propName: string, defaultValue: T): SubscribedAbstractProperty<T> {
         return AppStorage.getOrCreate().setAndLink<T>(propName, defaultValue);
     }
 
-    public static createLink<T>(propName: string, defaultValue: T) : LinkDecoratedVariable<NullableObject> {
+    public static createLink<T>(propName: string, defaultValue: T): LinkDecoratedVariable<NullableObject> {
         return AppStorage.getOrCreate().createLink<T>(propName, defaultValue);
     }
 
-    public static prop<T>(propName: string) : SubscribedAbstractProperty<T> | undefined {
+    public static prop<T>(propName: string): SubscribedAbstractProperty<T> | undefined {
         return AppStorage.getOrCreate().prop<T>(propName);
     }
 
-    public static setAndProp<T>(propName: string, defaultValue: T) : SubscribedAbstractProperty<T> {
+    public static setAndProp<T>(propName: string, defaultValue: T): SubscribedAbstractProperty<T> {
         return AppStorage.getOrCreate().setAndProp<T>(propName, defaultValue);
     }
 
-    public static createProp<T>(propName: string, defaultValue: T) : PropDecoratedVariable<NullableObject> {
+    public static createProp<T>(propName: string, defaultValue: T): PropDecoratedVariable<NullableObject> {
         return AppStorage.getOrCreate().createProp<T>(propName, defaultValue);
     }
 
@@ -103,6 +103,6 @@ export class AppStorage extends LocalStorage {
     }
 
     protected constructor(/* initializingProperties: Object */) {
-        super( /* initializingProperties */);
+        super(/* initializingProperties */);
     }
 }

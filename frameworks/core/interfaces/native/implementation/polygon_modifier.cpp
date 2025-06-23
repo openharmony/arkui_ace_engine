@@ -60,8 +60,7 @@ void SetPolygonOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto opt = Converter::OptConvert<PolygonOptions>(*options);
+    auto opt = Converter::OptConvertPtr<PolygonOptions>(options);
     CHECK_NULL_VOID(opt);
     Validator::ValidateNonNegative(opt->width);
     ShapeAbstractModelStatic::SetWidth(frameNode, opt->width);
@@ -75,7 +74,7 @@ void PointsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto points = Converter::OptConvert<ShapePoints>(*value);
+    auto points = Converter::OptConvertPtr<ShapePoints>(value);
     if (points && points->size() < POINTS_NUMBER_MIN) {
         points.reset();
     }

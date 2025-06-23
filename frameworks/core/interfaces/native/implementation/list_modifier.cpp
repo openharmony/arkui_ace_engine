@@ -148,9 +148,8 @@ void SetListOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
 
-    auto optionsOpt = Converter::OptConvert<Converter::ListOptions>(*options);
+    auto optionsOpt = Converter::OptConvertPtr<Converter::ListOptions>(options);
     if (!optionsOpt.has_value()) {
         return;
     }
@@ -176,14 +175,14 @@ void AlignListItemImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelStatic::SetListItemAlign(frameNode, Converter::OptConvert<V2::ListItemAlign>(*value));
+    ListModelStatic::SetListItemAlign(frameNode, Converter::OptConvertPtr<V2::ListItemAlign>(value));
 }
 void ListDirectionImpl(Ark_NativePointer node,
                        const Opt_Axis* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<Axis> direction = Converter::OptConvert<Axis>(*value);
+    std::optional<Axis> direction = Converter::OptConvertPtr<Axis>(value);
     ListModelStatic::SetListDirection(frameNode, EnumToInt(direction));
 }
 void ContentStartOffsetImpl(Ark_NativePointer node,
@@ -191,7 +190,7 @@ void ContentStartOffsetImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = Converter::OptConvertPtr<float>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -203,7 +202,7 @@ void ContentEndOffsetImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = Converter::OptConvertPtr<float>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -215,8 +214,7 @@ void DividerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto divider = Converter::OptConvert<V2::ItemDivider>(*value);
+    auto divider = Converter::OptConvertPtr<V2::ItemDivider>(value);
     ListModelStatic::SetDivider(frameNode, divider);
 }
 void MultiSelectableImpl(Ark_NativePointer node,
@@ -224,7 +222,7 @@ void MultiSelectableImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -236,7 +234,7 @@ void CachedCount0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<int>(*value);
+    auto convValue = Converter::OptConvertPtr<int>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -255,7 +253,7 @@ void ChainAnimationImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -267,7 +265,7 @@ void ChainAnimationOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<ChainAnimationOptions>(*value);
+    auto convValue = Converter::OptConvertPtr<ChainAnimationOptions>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -279,7 +277,7 @@ void StickyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    std::optional<V2::StickyStyle> style = Converter::OptConvert<V2::StickyStyle>(*value);
+    auto style = Converter::OptConvertPtr<V2::StickyStyle>(value);
     ListModelStatic::SetSticky(frameNode, EnumToInt(style));
 }
 void ScrollSnapAlignImpl(Ark_NativePointer node,
@@ -287,7 +285,7 @@ void ScrollSnapAlignImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelStatic::SetScrollSnapAlign(frameNode, Converter::OptConvert<ScrollSnapAlign>(*value));
+    ListModelStatic::SetScrollSnapAlign(frameNode, Converter::OptConvertPtr<ScrollSnapAlign>(value));
 }
 void ChildrenMainSizeImpl(Ark_NativePointer node,
                           const Opt_ChildrenMainSize* value)
@@ -309,7 +307,7 @@ void MaintainVisibleContentPositionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -501,7 +499,7 @@ void OnWillScrollImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = Converter::OptConvertPtr<type>(value);
     //ListModelNG::SetOnWillScroll(frameNode, convValue);
 }
 void OnDidScrollImpl(Ark_NativePointer node,
@@ -509,7 +507,7 @@ void OnDidScrollImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = Converter::OptConvertPtr<type>(value);
     //ListModelNG::SetOnDidScroll(frameNode, convValue);
 }
 void LanesImpl(Ark_NativePointer node,
@@ -519,27 +517,22 @@ void LanesImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 
-    if (value != nullptr) {
-        auto lanes = Converter::OptConvert<ListLanesType>(*value);
-        if (lanes) {
-            if (lanes.value().index() == 0) {
-                int lane = std::get<0>(lanes.value());
-                ListModelStatic::SetLanes(frameNode, lane);
-                ListModelStatic::SetLaneConstrain(frameNode, Dimension(), Dimension());
-            } else {
-                auto dimensions = std::get<1>(lanes.value());
-                ListModelStatic::SetLanes(frameNode, 1);
-                ListModelStatic::SetLaneConstrain(frameNode, std::get<0>(dimensions), std::get<1>(dimensions));
-            }
+    auto lanes = Converter::OptConvertPtr<ListLanesType>(value);
+    if (lanes) {
+        if (lanes.value().index() == 0) {
+            int lane = std::get<0>(lanes.value());
+            ListModelStatic::SetLanes(frameNode, lane);
+            ListModelStatic::SetLaneConstrain(frameNode, Dimension(), Dimension());
+        } else {
+            auto dimensions = std::get<1>(lanes.value());
+            ListModelStatic::SetLanes(frameNode, 1);
+            ListModelStatic::SetLaneConstrain(frameNode, std::get<0>(dimensions), std::get<1>(dimensions));
         }
     }
 
-    if (gutter != nullptr) {
-        std::optional<Dimension> gutterOpt;
-        Converter::AssignOptionalTo(gutterOpt, *gutter);
-        if (gutterOpt.has_value()) {
-            ListModelStatic::SetLaneGutter(frameNode, gutterOpt);
-        }
+    auto gutterOpt = Converter::OptConvertPtr<Dimension>(gutter);
+    if (gutterOpt.has_value()) {
+        ListModelStatic::SetLaneGutter(frameNode, gutterOpt);
     }
 }
 } // ListAttributeModifier

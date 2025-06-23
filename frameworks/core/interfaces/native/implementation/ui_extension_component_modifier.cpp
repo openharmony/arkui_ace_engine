@@ -98,7 +98,7 @@ void SetUIExtensionComponentOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(want);
     bool isTransferringCaller = false;
     bool densityDpi = false;
-    auto extensionOptionOpt = Converter::OptConvert<Ark_UIExtensionOptions>(*options);
+    auto extensionOptionOpt = Converter::OptConvertPtr<Ark_UIExtensionOptions>(options);
     if (extensionOptionOpt) {
         auto extensionOption = extensionOptionOpt.value();
         LOGE("UIExtensionComponentInterfaceModifier::SetUIExtensionComponentOptionsImpl - "

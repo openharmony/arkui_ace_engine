@@ -1978,6 +1978,8 @@ typedef struct Opt_LeadingMarginPlaceholder Opt_LeadingMarginPlaceholder;
 typedef struct LengthMetricsPeer LengthMetricsPeer;
 typedef struct LengthMetricsPeer* Ark_LengthMetrics;
 typedef struct Opt_LengthMetrics Opt_LengthMetrics;
+typedef struct Ark_LengthMetricsCustom Ark_LengthMetricsCustom;
+typedef struct Opt_LengthMetricsCustom Opt_LengthMetricsCustom;
 typedef struct LetterSpacingStylePeer LetterSpacingStylePeer;
 typedef struct LetterSpacingStylePeer* Ark_LetterSpacingStyle;
 typedef struct Opt_LetterSpacingStyle Opt_LetterSpacingStyle;
@@ -4064,6 +4066,7 @@ typedef struct Opt_DragPreviewMode {
     Ark_DragPreviewMode value;
 } Opt_DragPreviewMode;
 typedef enum Ark_DragResult {
+    ARK_DRAG_RESULT_UNKNOWN = -1,
     ARK_DRAG_RESULT_DRAG_SUCCESSFUL = 0,
     ARK_DRAG_RESULT_DRAG_FAILED = 1,
     ARK_DRAG_RESULT_DRAG_CANCELED = 2,
@@ -13119,6 +13122,14 @@ typedef struct Opt_LengthMetrics {
     Ark_Tag tag;
     Ark_LengthMetrics value;
 } Opt_LengthMetrics;
+typedef struct Ark_LengthMetricsCustom {
+    Ark_Number unit;
+    Ark_Number value;
+} Ark_LengthMetricsCustom;
+typedef struct Opt_LengthMetricsCustom {
+    Ark_Tag tag;
+    Ark_LengthMetricsCustom value;
+} Opt_LengthMetricsCustom;
 typedef struct Opt_LetterSpacingStyle {
     Ark_Tag tag;
     Ark_LetterSpacingStyle value;
@@ -23745,6 +23756,8 @@ typedef struct GENERATED_ArkUISystemOpsAccessor {
     void (*setFrameCallback)(const Callback_Number_Void* onFrameCallback,
                              const Callback_Number_Void* onIdleCallback,
                              const Ark_Number* delayTime);
+    Ark_LengthMetricsCustom (*resourceToLengthMetrics)(const Ark_Resource* res);
+    Array_Number (*colorMetricsResourceColor)(const Ark_Resource* color);
 } GENERATED_ArkUISystemOpsAccessor;
 
 typedef struct GENERATED_ArkUIGestureOpsAccessor {

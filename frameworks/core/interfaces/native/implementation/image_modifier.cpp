@@ -130,8 +130,7 @@ void AltImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto info = Converter::OptConvert<ImageSourceInfo>(*value);
+    auto info = Converter::OptConvertPtr<ImageSourceInfo>(value);
     if (!info.has_value() || ImageSourceInfo::ResolveURIType(info->GetSrc()) == SrcType::NETWORK) {
         ImageModelStatic::SetAlt(frameNode, std::nullopt);
         return;
@@ -143,7 +142,7 @@ void MatchTextDirectionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -155,7 +154,7 @@ void FitOriginalSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -174,7 +173,7 @@ void ObjectFitImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fit = Converter::OptConvert<ImageFit>(*value);
+    auto fit = Converter::OptConvertPtr<ImageFit>(value);
     ImageModelStatic::SetImageFit(frameNode, fit);
 }
 void ImageMatrixImpl(Ark_NativePointer node,
@@ -196,14 +195,14 @@ void ObjectRepeatImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelStatic::SetImageRepeat(frameNode, Converter::OptConvert<ImageRepeat>(*value));
+    ImageModelStatic::SetImageRepeat(frameNode, Converter::OptConvertPtr<ImageRepeat>(value));
 }
 void AutoResizeImpl(Ark_NativePointer node,
                     const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -215,21 +214,21 @@ void RenderModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelStatic::SetImageRenderMode(frameNode, Converter::OptConvert<ImageRenderMode>(*value));
+    ImageModelStatic::SetImageRenderMode(frameNode, Converter::OptConvertPtr<ImageRenderMode>(value));
 }
 void DynamicRangeModeImpl(Ark_NativePointer node,
                           const Opt_DynamicRangeMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelStatic::SetDynamicRangeMode(frameNode, Converter::OptConvert<DynamicRangeMode>(*value));
+    ImageModelStatic::SetDynamicRangeMode(frameNode, Converter::OptConvertPtr<DynamicRangeMode>(value));
 }
 void InterpolationImpl(Ark_NativePointer node,
                        const Opt_ImageInterpolation* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelStatic::SetImageInterpolation(frameNode, Converter::OptConvert<ImageInterpolation>(*value));
+    ImageModelStatic::SetImageInterpolation(frameNode, Converter::OptConvertPtr<ImageInterpolation>(value));
 }
 void SourceSizeImpl(Ark_NativePointer node,
                     const Opt_ImageSourceSize* value)
@@ -244,7 +243,7 @@ void SyncLoadImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -261,14 +260,14 @@ void CopyOptionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelStatic::SetCopyOption(frameNode, Converter::OptConvert<CopyOptions>(*value));
+    ImageModelStatic::SetCopyOption(frameNode, Converter::OptConvertPtr<CopyOptions>(value));
 }
 void DraggableImpl(Ark_NativePointer node,
                    const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -281,7 +280,7 @@ void PointLightImpl(Ark_NativePointer node,
 #ifdef POINT_LIGHT_ENABLE
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
+    auto pointLightStyle = Converter::OptConvertPtr<Converter::PointLightStyle>(value);
     auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
     auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
     CHECK_NULL_VOID(themeConstants);
@@ -316,7 +315,7 @@ void EdgeAntialiasingImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = Converter::OptConvertPtr<float>(value);
     Validator::ValidateByRange(convValue, FLOOR_SMOOTHEDGE_VALUE, CEIL_SMOOTHEDGE_VALUE);
     ImageModelStatic::SetSmoothEdge(frameNode, convValue);
 }
@@ -382,7 +381,7 @@ void EnableAnalyzerImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -434,7 +433,7 @@ void EnhancedImageQualityImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = Converter::OptConvertPtr<type>(value);
     //ImageModelNG::SetEnhancedImageQuality(frameNode, convValue);
 }
 void OrientationImpl(Ark_NativePointer node,
@@ -442,7 +441,7 @@ void OrientationImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<ImageRotateOrientation>(*value);
+    auto convValue = Converter::OptConvertPtr<ImageRotateOrientation>(value);
     ImageModelStatic::SetOrientation(frameNode, convValue);
 }
 } // ImageAttributeModifier

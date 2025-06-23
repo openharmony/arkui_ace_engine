@@ -25,38 +25,35 @@ import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { UIUtils } from '../utils';
-/** 
+/**
 * implementation of V1 @Prop
 *
 * @Prop has no local inot
-* inits and updates from source 
-* Two scenarios for source 
+* inits and updates from source
+* Two scenarios for source
 * 1. the source is decorated variable of same type
 * @State state : number = 8;
 * @Prop prop : number;
 * sync state to prop
-* 
 * 2. the source is value of same type
 * @State state : Array<number> = [8, 9];
 * @Prop prop : number;
 * sync item value arr[index] to prop
-* 
 * @State state : ClassA() = new ClassA({ a: 8})
 * @Prop prop : number;
-* sync property value state.a to prop 
+* sync property value state.a to prop
 
 */
 
 // TODO UiUtils.deepCopy
 function deepCopy<T>(value: T): T {
     // if T is @Observed + @Track obect need generate addRef for each
-    // @Track property otherwise there will be no parent to child upddate 
+    // @Track property otherwise there will be no parent to child upddate
     // when object property
     return propDeepCopy<T>(value) as T;
 }
 
-export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements IPropDecoratedVariable<T> {
+export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IPropDecoratedVariable<T> {
     private __soruceValue: IBackingValue<T>;
     private __localValue: IBackingValue<T>;
     // initValue is the init value either from parent @Component or local initialized value
@@ -64,7 +61,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     constructor(owningView: ExtendableComponent | null, varName: string, initValue: T, watchFunc?: WatchFuncType) {
         super('@Prop', owningView, varName, watchFunc);
         const deepCopyValue = deepCopy<T>(initValue);
-        this.__localValue = new DecoratorBackingValue<T>(varName, deepCopyValue)
+        this.__localValue = new DecoratorBackingValue<T>(varName, deepCopyValue);
         // if initValue not from parent, this __sourceValue should never changed
         this.__soruceValue = new DecoratorBackingValue<T>(varName, initValue);
         this.registerWatchForObservedObjectChanges(initValue);
@@ -92,7 +89,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
             this.unregisterWatchFromObservedObjectChanges(value);
             this.registerWatchForObservedObjectChanges(newValue);
 
-            if (this.__localValue.set(UIUtils.makeObserved(newValue as Object) as T)) {
+            if (this.__localValue.set(UIUtils.makeObserved(newValue) as T)) {
                 this.execWatchFuncs();
             }
         }
@@ -108,7 +105,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
 
             this.__soruceValue.setSilently(newValue);
             StateUpdateLoop.add(() => {
-                if (this.__localValue.set(UIUtils.makeObserved(deepCopy<T>(newValue) as Object) as T)) {
+                if (this.__localValue.set(UIUtils.makeObserved(deepCopy<T>(newValue)) as T)) {
                     this.execWatchFuncs();
                 }
             });
@@ -121,7 +118,7 @@ export class PropDecoratedVariable<T> extends DecoratedV1VariableBase<T>
             this.unregisterWatchFromObservedObjectChanges(sourceValue);
             this.registerWatchForObservedObjectChanges(newValue);
             this.__soruceValue.setSilently(newValue);
-            this.__localValue.set(UIUtils.makeObserved(deepCopy<T>(newValue) as Object) as T);
+            this.__localValue.set(UIUtils.makeObserved(deepCopy<T>(newValue)) as T);
             this.execWatchFuncs();
         }
     }

@@ -163,15 +163,13 @@ void ScrollerPeerImpl::TriggerScrollEdge(Ark_Edge value, const Opt_ScrollEdgeOpt
         return;
     }
     ContainerScope scope(instanceId_);
-    if (options) {
-        std::optional<ScrollEdgeOptions> edgeOptions = Converter::OptConvert<ScrollEdgeOptions>(*options);
-        if (edgeOptions && edgeOptions.value().velocity) {
-            float velocity = edgeOptions.value().velocity.value();
-            if (velocity > 0) {
-                velocity = Dimension(velocity, DimensionUnit::VP).ConvertToPx();
-                scrollController->ScrollToEdge(edgeType.value(), velocity);
-                return;
-            }
+    auto edgeOptions = Converter::OptConvertPtr<ScrollEdgeOptions>(options);
+    if (edgeOptions && edgeOptions.value().velocity) {
+        float velocity = edgeOptions.value().velocity.value();
+        if (velocity > 0) {
+            velocity = Dimension(velocity, DimensionUnit::VP).ConvertToPx();
+            scrollController->ScrollToEdge(edgeType.value(), velocity);
+            return;
         }
     }
     scrollController->ScrollToEdge(edgeType.value(), true);
@@ -249,24 +247,10 @@ void ScrollerPeerImpl::TriggerScrollToIndex(const Ark_Number* value, const Opt_B
         return;
     }
 
-    bool smooth = false;
-    if (smoothValue) {
-        smooth = Converter::OptConvert<bool>(*smoothValue).value_or(smooth);
-    }
-
-    ScrollAlign align = ScrollAlign::NONE;
-    if (alignValue) {
-        align = Converter::OptConvert<ScrollAlign>(*alignValue).value_or(align);
-    }
-
-    std::optional<float> extraOffset = std::nullopt;
-    if (options) {
-        std::optional<ScrollToIndexOptions> scrollToIndexOptions =
-            Converter::OptConvert<ScrollToIndexOptions>(*options);
-        if (scrollToIndexOptions) {
-            extraOffset = scrollToIndexOptions.value().extraOffset;
-        }
-    }
+    auto smooth = Converter::OptConvertPtr<bool>(smoothValue).value_or(false);
+    auto align = Converter::OptConvertPtr<ScrollAlign>(alignValue).value_or(ScrollAlign::NONE);
+    auto scrollToIndexOptions = Converter::OptConvertPtr<ScrollToIndexOptions>(options);
+    auto extraOffset = scrollToIndexOptions ? scrollToIndexOptions->extraOffset : std::nullopt;
 
     ContainerScope scope(instanceId_);
     scrollController->ScrollToIndex(index, smooth, align, extraOffset);

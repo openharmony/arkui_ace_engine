@@ -79,7 +79,7 @@ void UseMilitaryTimeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -91,7 +91,7 @@ void LoopImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -107,7 +107,7 @@ void DisappearTextStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
-    auto convValue = Converter::OptConvert<PickerTextStyle>(*value);
+    auto convValue = Converter::OptConvertPtr<PickerTextStyle>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -123,7 +123,7 @@ void TextStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
-    auto convValue = Converter::OptConvert<PickerTextStyle>(*value);
+    auto convValue = Converter::OptConvertPtr<PickerTextStyle>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -135,12 +135,12 @@ void SelectedTextStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pickerStyle = Converter::OptConvert<PickerTextStyle>(*value);
+    auto pickerStyle = Converter::OptConvertPtr<PickerTextStyle>(value);
     auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
-    auto convValue = Converter::OptConvert<PickerTextStyle>(*value);
+    auto convValue = Converter::OptConvertPtr<PickerTextStyle>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -152,7 +152,7 @@ void DateTimeOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto dateTimeOptions = Converter::OptConvert<DateTimeType>(*value);
+    auto dateTimeOptions = Converter::OptConvertPtr<DateTimeType>(value);
     // TODO: Reset value
     if (dateTimeOptions) {
         TimePickerModelNG::SetDateTimeOptions(frameNode, dateTimeOptions->hourType,
@@ -204,7 +204,7 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -216,7 +216,7 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = EnumToInt(value ? Converter::OptConvert<CrownSensitivity>(*value) : std::nullopt);
+    auto convValue = EnumToInt(Converter::OptConvertPtr<CrownSensitivity>(value));
     TimePickerModelStatic::SetDigitalCrownSensitivity(frameNode, convValue);
 }
 void EnableCascadeImpl(Ark_NativePointer node,
@@ -224,7 +224,7 @@ void EnableCascadeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;

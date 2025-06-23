@@ -33,7 +33,7 @@ import { EditableTextOnChangeCallback, PreviewText, TextChangeOptions, CaretStyl
 import { Callback_String_Void } from "./gridRow"
 import { PasteEvent, KeyboardOptions } from "./richEditor"
 import { CancelButtonOptions, CancelButtonSymbolOptions, Callback_InsertValue_Boolean, Callback_InsertValue_Void, Callback_DeleteValue_Boolean, Callback_DeleteValue_Void, Callback_EditableTextChangeValue_Boolean } from "./search"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { Callback_ResourceStr_Void } from "./textArea"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { TextFieldOpsHandWritten } from "./../handwritten"

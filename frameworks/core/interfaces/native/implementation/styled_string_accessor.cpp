@@ -223,7 +223,7 @@ Array_SpanStyle GetStylesImpl(Ark_StyledString peer,
         return {};
     }
     std::vector<RefPtr<SpanBase>> spans;
-    auto spanType = styledKey ? Converter::OptConvert<Ace::SpanType>(*styledKey) : std::nullopt;
+    auto spanType = Converter::OptConvertPtr<Ace::SpanType>(styledKey);
     if (spanType.has_value()) {
         spans = peer->spanString->GetSpans(spanStart, spanLength, spanType.value());
     } else {
@@ -250,7 +250,7 @@ Ark_StyledString SubStyledStringImpl(Ark_StyledString peer,
     CHECK_NULL_RETURN(start, ret);
     auto startSpan = Converter::Convert<int32_t>(*start);
     auto lengthSpan = peer->spanString->GetLength() - startSpan;
-    auto lengthOpt = length ? Converter::OptConvert<int32_t>(*length) : std::nullopt;
+    auto lengthOpt = Converter::OptConvertPtr<int32_t>(length);
     if (lengthOpt) {
         lengthSpan = std::min(lengthSpan, lengthOpt.value());
     }

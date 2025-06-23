@@ -273,6 +273,12 @@ void AssignArkValue(Ark_LeadingMarginPlaceholder& dst, const LeadingMargin& src,
     }
 }
 
+void AssignArkValue(Ark_Number& dst, const LeadingMargin& src)
+{
+    auto leadingMargin = Dimension(src.size.Width()).ConvertToVp();
+    dst = ArkValue<Ark_Number>(leadingMargin);
+}
+
 void AssignArkValue(Ark_String& dst, const Dimension& src, ConvContext *ctx)
 {
     dst = ArkValue<Ark_String>(src.ToString(), ctx);
@@ -505,6 +511,14 @@ void AssignArkValue(Ark_Position& dst, const OffsetF& src, ConvContext *ctx)
     dst.x = Converter::ArkValue<Opt_Length>(src.GetX(), ctx);
     dst.y = Converter::ArkValue<Opt_Length>(src.GetY(), ctx);
 }
+
+#ifdef WRONG_GEN
+void AssignArkValue(Ark_LengthMetricsCustom& dst, const CalcDimension& src)
+{
+    dst.value = Converter::ArkValue<Ark_Number>(static_cast<float>(src.Value()));
+    dst.unit = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(src.Unit()));
+}
+#endif
 
 void AssignArkValue(Ark_OffsetResult& dst, const Offset& src, ConvContext *ctx)
 {

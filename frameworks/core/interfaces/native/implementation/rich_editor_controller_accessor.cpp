@@ -556,7 +556,7 @@ Ark_Number AddTextSpanImpl(Ark_RichEditorController peer,
     CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
     CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Number>(0));
     TextSpanOptions locOptions;
-    auto optionsOpt = options ? Converter::OptConvert<TextSpanOptions>(*options) : std::nullopt;
+    auto optionsOpt = Converter::OptConvertPtr<TextSpanOptions>(options);
     if (optionsOpt) {
         locOptions = optionsOpt.value();
     }
@@ -571,7 +571,7 @@ Ark_Number AddImageSpanImpl(Ark_RichEditorController peer,
     CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
     CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Number>(0));
     ImageSpanOptions locOptions;
-    auto optionsOpt = options ? Converter::OptConvert<ImageSpanOptions>(*options) : std::nullopt;
+    auto optionsOpt = Converter::OptConvertPtr<ImageSpanOptions>(options);
     if (optionsOpt) {
         locOptions = optionsOpt.value();
     }
@@ -593,7 +593,7 @@ Ark_Number AddBuilderSpanImpl(Ark_RichEditorController peer,
     CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
     CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Number>(0));
     SpanOptionBase locOptions;
-    auto optionsOpt = options ? Converter::OptConvert<SpanOptionBase>(*options) : std::nullopt;
+    auto optionsOpt = Converter::OptConvertPtr<SpanOptionBase>(options);
     if (optionsOpt) {
         locOptions = optionsOpt.value();
     }
@@ -610,7 +610,7 @@ Ark_Number AddSymbolSpanImpl(Ark_RichEditorController peer,
     CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Ark_Number>(0));
     CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Number>(0));
     SymbolSpanOptions locOptions;
-    auto optionsOpt = options ? Converter::OptConvert<SymbolSpanOptions>(*options) : std::nullopt;
+    auto optionsOpt = Converter::OptConvertPtr<SymbolSpanOptions>(options);
     if (optionsOpt) {
         locOptions = optionsOpt.value();
     }
@@ -647,8 +647,7 @@ void DeleteSpansImpl(Ark_RichEditorController peer,
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
-    CHECK_NULL_VOID(value);
-    auto options = Converter::OptConvert<RangeOptions>(*value);
+    auto options = Converter::OptConvertPtr<RangeOptions>(value);
     if (options) {
         peerImpl->DeleteSpansImpl(options.value());
     }
@@ -658,8 +657,7 @@ Array_Union_RichEditorImageSpanResult_RichEditorTextSpanResult GetSpansImpl(Ark_
 {
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
     CHECK_NULL_RETURN(peerImpl, {});
-    CHECK_NULL_RETURN(value, {});
-    auto options = Converter::OptConvert<RangeOptions>(*value);
+    auto options = Converter::OptConvertPtr<RangeOptions>(value);
     if (!options) {
         return {};
     }
@@ -677,8 +675,7 @@ Array_RichEditorParagraphResult GetParagraphsImpl(Ark_RichEditorController peer,
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
     std::vector<ParagraphInfo> results = {};
     CHECK_NULL_RETURN(peerImpl, Converter::ArkValue<Array_RichEditorParagraphResult>(results, Converter::FC));
-    CHECK_NULL_RETURN(value, Converter::ArkValue<Array_RichEditorParagraphResult>(results, Converter::FC));
-    auto options = Converter::OptConvert<RangeOptions>(*value);
+    auto options = Converter::OptConvertPtr<RangeOptions>(value);
     if (options) {
         results = peerImpl->GetParagraphsImpl(options.value());
     }

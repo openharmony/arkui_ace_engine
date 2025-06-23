@@ -19,7 +19,7 @@
 import { CommonConfiguration, ContentModifier } from "./arkui-wrapper-builder"
 import { ResourceStr, Font, ResourceColor, Length, Dimension, DividerStyleOptions, Offset, PX, VP, FP, LPX, Percentage, EdgeOutlineWidths, EdgeColors } from "./units"
 import { SymbolGlyphModifier, TextModifier } from "./arkui-external"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"

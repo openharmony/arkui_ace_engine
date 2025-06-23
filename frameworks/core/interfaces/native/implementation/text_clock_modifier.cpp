@@ -64,8 +64,7 @@ void SetTextClockOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto textClockOptionsOpt = Converter::OptConvert<TextClockOptions>(*options);
+    auto textClockOptionsOpt = Converter::OptConvertPtr<TextClockOptions>(options);
     if (textClockOptionsOpt.has_value()) {
         TextClockModelStatic::SetHoursWest(frameNode, textClockOptionsOpt.value().timeZoneOffset);
 
@@ -83,7 +82,7 @@ void FormatImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<std::string>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<std::string>(value);
     TextClockModelStatic::SetFormat(frameNode, convValue);
 }
 void OnDateChangeImpl(Ark_NativePointer node,
@@ -106,7 +105,7 @@ void FontColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<Color>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<Color>(value);
     TextClockModelStatic::SetFontColor(frameNode, convValue);
 }
 void FontSizeImpl(Ark_NativePointer node,
@@ -114,7 +113,7 @@ void FontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
     TextClockModelStatic::SetFontSize(frameNode, convValue);
@@ -124,7 +123,7 @@ void FontStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<Ace::FontStyle>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<Ace::FontStyle>(value);
     TextClockModelStatic::SetFontStyle(frameNode, convValue);
 }
 void FontWeightImpl(Ark_NativePointer node,
@@ -132,7 +131,7 @@ void FontWeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<Ace::FontWeight>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<Ace::FontWeight>(value);
     TextClockModelStatic::SetFontWeight(frameNode, convValue);
 }
 void FontFamilyImpl(Ark_NativePointer node,
@@ -141,7 +140,7 @@ void FontFamilyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     StringArray families;
-    if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value); fontfamiliesOpt) {
+    if (auto fontfamiliesOpt = Converter::OptConvertPtr<Converter::FontFamilies>(value); fontfamiliesOpt) {
         families = fontfamiliesOpt->families;
     }
     TextClockModelNG::SetFontFamily(frameNode, families);
@@ -163,7 +162,7 @@ void FontFeatureImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<std::string>(*value);
+    auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -175,7 +174,7 @@ void ContentModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = Converter::OptConvertPtr<type>(value);
     //TextClockModelNG::SetContentModifier(frameNode, convValue);
 }
 void DateTimeOptionsImpl(Ark_NativePointer node,
@@ -183,8 +182,7 @@ void DateTimeOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto dateTimeOptions = Converter::OptConvert<DateTimeType>(*value);
+    auto dateTimeOptions = Converter::OptConvertPtr<DateTimeType>(value);
     std::optional<ZeroPrefixType> hourType;
     if (dateTimeOptions) {
         hourType = dateTimeOptions->hourType;

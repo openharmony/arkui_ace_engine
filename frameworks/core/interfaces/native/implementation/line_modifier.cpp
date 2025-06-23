@@ -76,8 +76,7 @@ void SetLineOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto opt = Converter::OptConvert<LineOptions>(*options);
+    auto opt = Converter::OptConvertPtr<LineOptions>(options);
     CHECK_NULL_VOID(opt);
     if (opt->width) {
         ShapeAbstractModelStatic::SetWidth(frameNode, opt->width);
@@ -93,7 +92,7 @@ void StartPointImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<ShapePoint>(*value);
+    auto convValue = Converter::OptConvertPtr<ShapePoint>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -105,7 +104,7 @@ void EndPointImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<ShapePoint>(*value);
+    auto convValue = Converter::OptConvertPtr<ShapePoint>(value);
     if (!convValue) {
         // TODO: Reset value
         return;

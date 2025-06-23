@@ -28,8 +28,7 @@ Ark_PathShape CtorImpl(const Opt_PathShapeOptions* options)
 {
     auto peer = new PathShapePeer();
     peer->shape = OHOS::Ace::AceType::MakeRefPtr<Path>();
-    CHECK_NULL_RETURN(options, peer);
-    auto optOptions = Converter::OptConvert<PathShapeOptions>(*options);
+    auto optOptions = Converter::OptConvertPtr<PathShapeOptions>(options);
     CHECK_EQUAL_RETURN(optOptions.has_value(), false, peer);
     CHECK_EQUAL_RETURN(optOptions.value().commands.has_value(), false, peer);
     peer->shape->SetValue(optOptions.value().commands.value());

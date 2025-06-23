@@ -16,12 +16,6 @@
             "@koalaui/compat": [
                 "../../incremental/compat/src/arkts"
             ],
-            "@koalaui/arkui-common": [
-                "../../arkoala/arkui-common/src"
-            ],
-            "#arkcompat/*": [
-                "../../arkoala/arkui-common/src/*"
-            ],
             "@ohos/arkui": [
                 "arkui/component"
             ],
@@ -60,9 +54,6 @@
             ],
             "@ohos/font/font": [
                 "./@ohos.font.ts"
-            ],
-            "global/resource": [
-                "./global/resource/resource.ts"
             ],
             "@ohos.router": [
                 "./@ohos.router.ts"
@@ -127,7 +118,6 @@
         "arkui/index-test.d.ts"
     ],
     "dependencies": {
-        "@koalaui/arkui-common": ["../../arkoala/arkui-common/ui2abcconfig.json"],
         "@koalaui/runtime": ["../../incremental/runtime/ui2abcconfig.json"]
     }
 }

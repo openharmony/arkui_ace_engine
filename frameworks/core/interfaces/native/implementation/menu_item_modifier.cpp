@@ -130,7 +130,7 @@ void SelectedImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     MenuItemModelStatic::SetSelected(frameNode, convValue);
 }
 void SelectIconImpl(Ark_NativePointer node,
@@ -138,7 +138,7 @@ void SelectIconImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto iconOpt = Converter::OptConvert<SelectIconType>(*value);
+    auto iconOpt = Converter::OptConvertPtr<SelectIconType>(value);
     if (iconOpt.has_value()) {
         // TODO: Reset value
         if (auto iconPtr = std::get_if<bool>(&(*iconOpt)); iconPtr) {
@@ -171,7 +171,7 @@ void ContentFontImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontOpt = Converter::OptConvert<Font>(*value);
+    auto fontOpt = Converter::OptConvertPtr<Font>(value);
     if (fontOpt.has_value()) {
         MenuItemModelStatic::SetFontSize(frameNode, fontOpt.value().fontSize);
         MenuItemModelStatic::SetFontWeight(frameNode, fontOpt.value().fontWeight);
@@ -189,14 +189,14 @@ void ContentFontColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    MenuItemModelStatic::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
+    MenuItemModelStatic::SetFontColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void LabelFontImpl(Ark_NativePointer node,
                    const Opt_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontOpt = Converter::OptConvert<Font>(*value);
+    auto fontOpt = Converter::OptConvertPtr<Font>(value);
     if (fontOpt.has_value()) {
         MenuItemModelStatic::SetLabelFontSize(frameNode, fontOpt.value().fontSize);
         MenuItemModelStatic::SetLabelFontWeight(frameNode, fontOpt.value().fontWeight);
@@ -214,7 +214,7 @@ void LabelFontColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    MenuItemModelStatic::SetLabelFontColor(frameNode, Converter::OptConvert<Color>(*value));
+    MenuItemModelStatic::SetLabelFontColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 #ifdef WRONG_GEN
 void _onChangeEvent_selectedImpl(Ark_NativePointer node,

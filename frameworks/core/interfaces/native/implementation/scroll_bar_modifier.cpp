@@ -52,8 +52,7 @@ void EnableNestedScrollImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     ScrollBarModelStatic::SetEnableNestedScroll(frameNode, convValue);
 }
 } // ScrollBarAttributeModifier

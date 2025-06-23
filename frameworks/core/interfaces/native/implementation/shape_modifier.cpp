@@ -90,7 +90,7 @@ void ViewPortImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto options = Converter::OptConvert<ShapeOptions>(*value);
+    auto options = Converter::OptConvertPtr<ShapeOptions>(value);
     CHECK_NULL_VOID(options);
     ShapeModelStatic::SetViewPort(frameNode, options->x, options->y, options->width, options->height);
 }
@@ -99,14 +99,14 @@ void StrokeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ShapeModelStatic::SetStroke(frameNode, Converter::OptConvert<Color>(*value));
+    ShapeModelStatic::SetStroke(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void FillImpl(Ark_NativePointer node,
               const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ShapeModelStatic::SetFill(frameNode, Converter::OptConvert<Color>(*value));
+    ShapeModelStatic::SetFill(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 
 void StrokeDashOffsetImpl(Ark_NativePointer node,
@@ -114,7 +114,7 @@ void StrokeDashOffsetImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto strokeDashOffset = Converter::OptConvert<Dimension>(*value);
+    auto strokeDashOffset = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidatePositive(strokeDashOffset);
     Validator::ValidateNonPercent(strokeDashOffset);
     ShapeModelStatic::SetStrokeDashOffset(frameNode, strokeDashOffset);
@@ -145,7 +145,7 @@ void StrokeLineCapImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto enumLineCapStyle = Converter::OptConvert<LineCapStyle>(*value);
+    auto enumLineCapStyle = Converter::OptConvertPtr<LineCapStyle>(value);
     auto intLineCapStyle = EnumToInt(enumLineCapStyle);
     ShapeModelStatic::SetStrokeLineCap(frameNode, intLineCapStyle);
 }
@@ -154,7 +154,7 @@ void StrokeLineJoinImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto enumLineJoinStyle = Converter::OptConvert<LineJoinStyle>(*value);
+    auto enumLineJoinStyle = Converter::OptConvertPtr<LineJoinStyle>(value);
     auto intLineJoinStyle = EnumToInt(enumLineJoinStyle);
     ShapeModelStatic::SetStrokeLineJoin(frameNode, intLineJoinStyle);
 }
@@ -163,7 +163,7 @@ void StrokeMiterLimitImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto limit = Converter::OptConvert<float>(*value);
+    auto limit = Converter::OptConvertPtr<float>(value);
     if (limit && limit.value() < STROKE_MITER_LIMIT_MIN_VALUE) {
         limit = 1.0;
     }
@@ -174,7 +174,7 @@ void StrokeOpacityImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto strokeOpacity = Converter::OptConvert<float>(*value);
+    auto strokeOpacity = Converter::OptConvertPtr<float>(value);
     Validator::ValidateOpacity(strokeOpacity);
     ShapeModelStatic::SetStrokeOpacity(frameNode, strokeOpacity);
 }
@@ -183,7 +183,7 @@ void FillOpacityImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto strokeOpacity = Converter::OptConvert<float>(*value);
+    auto strokeOpacity = Converter::OptConvertPtr<float>(value);
     Validator::ValidateOpacity(strokeOpacity);
     ShapeModelStatic::SetFillOpacity(frameNode, strokeOpacity);
 }
@@ -192,7 +192,7 @@ void StrokeWidthImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto strokeWidth = Converter::OptConvert<Dimension>(*value);
+    auto strokeWidth = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidatePositive(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
     ShapeModelStatic::SetStrokeWidth(frameNode, strokeWidth);
@@ -202,7 +202,7 @@ void AntiAliasImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -216,13 +216,10 @@ void MeshImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    CHECK_NULL_VOID(column);
-    CHECK_NULL_VOID(row);
-    auto mesh = Converter::OptConvert<std::vector<float>>(*value);
+    auto mesh = Converter::OptConvertPtr<std::vector<float>>(value);
     CHECK_NULL_VOID(mesh);
-    auto columnValue = Converter::OptConvert<int32_t>(*column).value_or(0);
-    auto rowValue = Converter::OptConvert<int32_t>(*row).value_or(0);
+    auto columnValue = Converter::OptConvertPtr<int32_t>(column).value_or(0);
+    auto rowValue = Converter::OptConvertPtr<int32_t>(row).value_or(0);
     auto meshSize = mesh->size();
     auto tempMeshSize = static_cast<int64_t>(columnValue + 1) * (rowValue + 1) * 2;
     if (tempMeshSize != meshSize) {

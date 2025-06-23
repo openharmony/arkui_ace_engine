@@ -25,7 +25,7 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { PanDirection, SwipeDirection, GestureMode, Callback_GestureEvent_Void, GestureEvent, GestureEventInternal, GestureMask } from "./gesture"
 import { ResourceStr, Font, ResourceColor } from "./units"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { SourceTool, AnimateParam, SheetOptions, KeyEvent } from "./common"
 import { TextPickerDialogOptions } from "./textPicker"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -1096,6 +1096,10 @@ export type Context_getGroupDir_Callback = (result: string) => void;
 
 export type Callback_RangeUpdate = (start: int32, end: int32) => void;
 export type Callback_CreateItem = (index: int32) => KPointer;
+export interface LengthMetricsCustom {
+    unit: number;
+    value: number;
+}
 export interface CustomColors {
     brand?: ResourceColor;
     warning?: ResourceColor;

@@ -214,7 +214,7 @@ void SetGridRowOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = option ? Converter::OptConvert<Ark_GridRowOptions>(*option) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<Ark_GridRowOptions>(option);
     auto nullGutter = Referenced::MakeRefPtr<V2::Gutter>();
     auto nullBreakPoints = Referenced::MakeRefPtr<V2::BreakPoints>();
     auto nullGridContainerSize = Referenced::MakeRefPtr<V2::GridContainerSize>();
@@ -226,8 +226,7 @@ void SetGridRowOptionsImpl(Ark_NativePointer node,
         auto gutter = optGutter.has_value() ? AceType::MakeRefPtr<V2::Gutter>(optGutter.value()) : nullGutter;
         GridRowModelNG::SetGutter(frameNode, gutter);
 
-        auto optDirection = Converter::OptConvert<V2::GridRowDirection>(arkOptions.direction);
-        auto direction = optDirection.has_value() ? optDirection : std::nullopt;
+        auto direction = Converter::OptConvert<V2::GridRowDirection>(arkOptions.direction);
         GridRowModelNGStatic::SetDirection(frameNode, direction);
 
         auto optBreakPoints = Converter::OptConvert<V2::BreakPoints>(arkOptions.breakpoints);
@@ -269,7 +268,7 @@ void AlignItemsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<FlexAlign>(*value);
+    auto convValue = Converter::OptConvertPtr<FlexAlign>(value);
     GridRowModelNGStatic::SetAlignItems(frameNode, convValue);
 }
 } // GridRowAttributeModifier

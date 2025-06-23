@@ -42,6 +42,11 @@ typedef _ArkUINode* ArkUINodeHandle;
 typedef int ArkUI_Int32;
 typedef _ArkUIContentSlot* ArkUIContentSlot;
 typedef _ArkUINodeContent* ArkUINodeContent;
+struct ArkUIDragInfo {
+    void* pixelMap;
+    bool onlyForLifting = false;
+    bool delayCreating = false;
+};
 
 struct ArkUIAniImageModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
@@ -53,9 +58,15 @@ struct ArkUIAniWebModifier {
         std::function<void(const std::string&)>&& onHapPath);
 };
 struct ArkUIAniDragModifier {
+    void (*setDragData)(ani_ref event, ani_ref data);
+    ani_ref (*getDragData)(ani_ref event);
+    void (*getDragSummary)(ani_ref event, ani_ref summaryPtr);
     void (*setDragDropInfoPixelMap)(ani_ref event, ani_ref pixelMap);
     void (*setDragDropInfoCustomNode)(ani_ref event, ArkUINodeHandle node);
-    void (*setDragDropInfoExtraInfo)(ani_ref event, std::string& extraInfo);
+    void (*setDragDropInfoExtraInfo)(ani_ref event, const char* ptr);
+    void (*setDragAllowDropNull)(ArkUINodeHandle node);
+    void (*setDragAllowDrop)(ArkUINodeHandle node, const char** allowDrops, ArkUI_Int32 length);
+    void (*setDragPreview)(ArkUINodeHandle node, ArkUIDragInfo dragInfo);
 };
 struct ArkUIAniCommonModifier {
     ani_ref* (*getHostContext)();

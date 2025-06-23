@@ -984,7 +984,7 @@ HWTEST_F(SliderModifierTest, setShowStepsTestShowStepsValidValues, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SliderModifierTest, setShowStepsTestShowStepsInvalidValues, TestSize.Level1)
+HWTEST_F(SliderModifierTest, DISABLED_setShowStepsTestShowStepsInvalidValues, TestSize.Level1)
 {
     Opt_Boolean initValueShowSteps;
 

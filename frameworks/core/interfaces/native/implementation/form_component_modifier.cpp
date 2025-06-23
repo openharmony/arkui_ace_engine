@@ -163,7 +163,7 @@ void SizeImpl(Ark_NativePointer node,
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto dimension = Converter::OptConvert<LiteralDimension>(*value);
+    auto dimension = Converter::OptConvertPtr<LiteralDimension>(value);
     if (!dimension) {
         // TODO: Reset value
         return;
@@ -177,7 +177,7 @@ void ModuleNameImpl(Ark_NativePointer node,
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<std::string>(*value);
+    auto convValue = Converter::OptConvertPtr<std::string>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -191,7 +191,7 @@ void DimensionImpl(Ark_NativePointer node,
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto opt = Converter::OptConvert<int32_t>(*value);
+    auto opt = Converter::OptConvertPtr<int32_t>(value);
     // TODO: Reset value
     CHECK_NULL_VOID(opt);
     FormModelNG::SetDimension(frameNode, *opt);
@@ -203,7 +203,7 @@ void AllowUpdateImpl(Ark_NativePointer node,
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -217,7 +217,7 @@ void VisibilityImpl(Ark_NativePointer node,
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto opt = Converter::OptConvert<VisibleType>(*value);
+    auto opt = Converter::OptConvertPtr<VisibleType>(value);
     CHECK_NULL_VOID(opt);
     FormModelNG::SetVisibility(frameNode, *opt);
 #endif // FORM_SUPPORTED

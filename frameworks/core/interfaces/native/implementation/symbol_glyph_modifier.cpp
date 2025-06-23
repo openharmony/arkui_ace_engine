@@ -103,8 +103,7 @@ void SetSymbolGlyphOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto convValue = Converter::OptConvert<Converter::SymbolData>(*value);
+    auto convValue = Converter::OptConvertPtr<Converter::SymbolData>(value);
     if (convValue.has_value() && convValue->symbol.has_value()) {
         SymbolModelNG::InitialSymbol(frameNode, convValue->symbol.value());
     }
@@ -116,7 +115,7 @@ void FontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Dimension>(*value);
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
     SymbolModelStatic::SetFontSize(frameNode, convValue);
@@ -141,7 +140,7 @@ void FontWeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<TextFontWeight>(*value);
+    auto convValue = Converter::OptConvertPtr<TextFontWeight>(value);
     std::optional<Ace::FontWeight> fontWeightValue;
     if (convValue.has_value()) {
         fontWeightValue = static_cast<Ace::FontWeight>(convValue.value());
@@ -153,7 +152,7 @@ void EffectStrategyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<SymbolEffectType>(*value);
+    auto convValue = Converter::OptConvertPtr<SymbolEffectType>(value);
     SymbolModelStatic::SetSymbolEffect(frameNode, EnumToInt(convValue));
 }
 void RenderingStrategyImpl(Ark_NativePointer node,
@@ -161,7 +160,7 @@ void RenderingStrategyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Converter::RenderingStrategy>(*value);
+    auto convValue = Converter::OptConvertPtr<Converter::RenderingStrategy>(value);
     SymbolModelStatic::SetRenderingStrategy(frameNode, EnumToInt(convValue));
 }
 void MinFontScaleImpl(Ark_NativePointer node,
@@ -169,7 +168,7 @@ void MinFontScaleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<float>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<float>(value);
     Validator::ValidatePositive(convValue);
     Validator::ValidateLessOrEqual(convValue, SCALE_LIMIT);
     SymbolModelStatic::SetMinFontScale(frameNode, convValue);
@@ -179,7 +178,7 @@ void MaxFontScaleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<float>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<float>(value);
     Validator::ValidatePositive(convValue);
     Validator::ValidateGreatOrEqual(convValue, SCALE_LIMIT);
     SymbolModelStatic::SetMaxFontScale(frameNode, convValue);

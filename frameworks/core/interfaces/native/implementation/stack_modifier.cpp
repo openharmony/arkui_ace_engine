@@ -56,7 +56,7 @@ void SetStackOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto opts = Converter::OptConvert<StackOptions>(*options);
+    auto opts = Converter::OptConvertPtr<StackOptions>(options);
     auto align = opts ? opts->alignContent : std::nullopt;
     // TODO: Reset value
     StackModelNG::SetAlignment(frameNode, align.value_or(Alignment::CENTER));
@@ -77,7 +77,7 @@ void PointLightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
 #ifdef POINT_LIGHT_ENABLE
-    auto pointLightStyle = Converter::OptConvert<Converter::PointLightStyle>(*value);
+    auto pointLightStyle = Converter::OptConvertPtr<Converter::PointLightStyle>(value);
     auto uiNode = reinterpret_cast<Ark_NodeHandle>(node);
     auto themeConstants = Converter::GetThemeConstants(uiNode, "", "");
     CHECK_NULL_VOID(themeConstants);

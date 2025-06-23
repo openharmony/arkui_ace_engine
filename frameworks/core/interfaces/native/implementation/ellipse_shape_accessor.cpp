@@ -29,7 +29,7 @@ Ark_EllipseShape CtorImpl(const Opt_ShapeSize* options)
 {
     auto peer = new EllipseShapePeer();
     peer->shape = AceType::MakeRefPtr<Ellipse>();
-    std::optional<Ark_ShapeSize> shapeSize = options ? Converter::OptConvert<Ark_ShapeSize>(*options) : std::nullopt;
+    auto shapeSize = Converter::OptConvertPtr<Ark_ShapeSize>(options);
     if (shapeSize) {
         auto width = Converter::OptConvert<CalcDimension>(shapeSize->width);
         Validator::ValidateNonNegative(width);

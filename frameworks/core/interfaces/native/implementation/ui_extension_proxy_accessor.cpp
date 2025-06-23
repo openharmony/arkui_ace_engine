@@ -101,8 +101,7 @@ void OffAsyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(callback_);
-    auto cb = Converter::OptConvert<Callback_UIExtensionProxy_Void>(*callback_);
+    auto cb = Converter::GetOptPtr(callback_);
     std::lock_guard<std::mutex> lock(peer->callbackListLock_);
     if (cb) {
         peer->DeleteAsyncCallbackFromList(cb.value().resource.resourceId);
@@ -120,8 +119,7 @@ void OffSyncReceiverRegisterImpl(Ark_UIExtensionProxy peer,
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(callback_);
-    auto cb = Converter::OptConvert<Callback_UIExtensionProxy_Void>(*callback_);
+    auto cb = Converter::GetOptPtr(callback_);
     std::lock_guard<std::mutex> lock(peer->callbackListLock_);
     if (cb) {
         peer->DeleteSyncCallbackFromList(cb.value().resource.resourceId);

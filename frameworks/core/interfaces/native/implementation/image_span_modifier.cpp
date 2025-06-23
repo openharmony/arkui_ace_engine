@@ -51,7 +51,7 @@ void VerticalAlignImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<VerticalAlign>(*value);
+    auto convValue = Converter::OptConvertPtr<VerticalAlign>(value);
     ImageSpanViewStatic::SetVerticalAlign(frameNode, convValue);
 }
 void ObjectFitImpl(Ark_NativePointer node,
@@ -59,7 +59,7 @@ void ObjectFitImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<ImageFit>(*value);
+    auto convValue = Converter::OptConvertPtr<ImageFit>(value);
     ImageSpanViewStatic::SetObjectFit(frameNode, convValue);
 }
 void OnCompleteImpl(Ark_NativePointer node,

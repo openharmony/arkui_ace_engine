@@ -15,3 +15,4 @@
 
 export type UnifiedData = undefined
 export type Summary = undefined
+export type UniformDataType = undefined

@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-
-
 import { DecoratedV1VariableBase } from './decoratorBase';
 import { StateUpdateLoop } from '../base/stateUpdateLoop';
 import { ExtendableComponent } from '../../component/extendableComponent';
@@ -25,24 +23,24 @@ import { ObserveSingleton } from '../base/observeSingleton';
 import { WatchFuncType } from '../decorator';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
-/** 
-* implementation of V1 @ObjectLink
-*
-* @ObjectLink has no local inot
-* inits and updates from source 
-* @ObjectLink supports only object typ ein ArkTS 1.1
-* for ArkTS 1.2 we also support simple types
-* This enables migration of apps that use @Prop in their ArkTS 1.1  
-* to use @ObjectLink is ArkTS 1.2 when the copy of value is not required 
-* Copy is not needed e.g. if @Prop value is only read
-* 
-* Hence, @ObjectLink is like V2 @Param but has one level of chnage observation and
-* supports @Watch
-*/
+/**
+ * implementation of V1 @ObjectLink
+ * @ObjectLink has no local inot
+ * inits and updates from source
+ * @ObjectLink supports only object typ ein ArkTS 1.1
+ * for ArkTS 1.2 we also support simple types
+ * This enables migration of apps that use @Prop in their ArkTS 1.1
+ * to use @ObjectLink is ArkTS 1.2 when the copy of value is not required
+ * Copy is not needed e.g. if @Prop value is only read
+ * Hence, @ObjectLink is like V2 @Param but has one level of chnage observation and
+ * supports @Watch
+ */
 
-export class ObjectLinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
-    implements IObjectLinkDecoratedVariable<T> {
-    private readonly backing_: IBackingValue<T>
+export class ObjectLinkDecoratedVariable<T>
+    extends DecoratedV1VariableBase<T>
+    implements IObjectLinkDecoratedVariable<T>
+{
+    private readonly backing_: IBackingValue<T>;
     // parentInitValue is the init value of parent @Component
     // constructor takes a copy of it
     constructor(owningView: ExtendableComponent, varName: string, parentInitValue: T, watchFunc?: WatchFuncType) {
@@ -63,7 +61,6 @@ export class ObjectLinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
     }
 
     // @ObjectLink is immutable, no set
-
     // @ObjectLink updates from parent
     public update(newValue: T): void {
         const value = this.backing_.get(false);
@@ -71,7 +68,7 @@ export class ObjectLinkDecoratedVariable<T> extends DecoratedV1VariableBase<T>
             return;
         }
         StateUpdateLoop.add(() => {
-            if (this.backing_.set(UIUtils.makeObserved(newValue as Object) as T)) {
+            if (this.backing_.set(UIUtils.makeObserved(newValue) as T)) {
                 this.unregisterWatchFromObservedObjectChanges(value);
                 this.registerWatchForObservedObjectChanges(newValue);
                 this.execWatchFuncs();

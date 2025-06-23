@@ -51,7 +51,7 @@ void FontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::OptConvert<Dimension>(*value);
+    auto optValue = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(optValue);
     Validator::ValidateNonPercent(optValue);
     SymbolSpanModelStatic::SetFontSize(frameNode, optValue);
@@ -79,7 +79,7 @@ void FontWeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Ace::FontWeight>(*value);
+    auto convValue = Converter::OptConvertPtr<Ace::FontWeight>(value);
     SymbolSpanModelStatic::SetFontWeight(frameNode, convValue);
 }
 void EffectStrategyImpl(Ark_NativePointer node,
@@ -87,7 +87,7 @@ void EffectStrategyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<SymbolEffectType>(*value);
+    auto convValue = Converter::OptConvertPtr<SymbolEffectType>(value);
     SymbolSpanModelStatic::SetSymbolEffect(frameNode, EnumToInt(convValue));
 }
 void RenderingStrategyImpl(Ark_NativePointer node,
@@ -95,7 +95,7 @@ void RenderingStrategyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Converter::RenderingStrategy>(*value);
+    auto convValue = Converter::OptConvertPtr<Converter::RenderingStrategy>(value);
     SymbolSpanModelStatic::SetSymbolRenderingStrategy(frameNode, EnumToInt(convValue));
 }
 } // SymbolSpanAttributeModifier

@@ -48,7 +48,7 @@ void SetTextSelectionImpl(Ark_SearchController peer,
                           const Opt_SelectionOptions* options)
 {
     CHECK_NULL_VOID(peer && selectionStart && selectionEnd && peer->controller_);
-    auto selectionOptions = options ? Converter::OptConvert<SelectionOptions>(*options) : std::nullopt;
+    auto selectionOptions = Converter::OptConvertPtr<SelectionOptions>(options);
     peer->controller_->SetTextSelection(
         Converter::Convert<int32_t>(*selectionStart),
         Converter::Convert<int32_t>(*selectionEnd),

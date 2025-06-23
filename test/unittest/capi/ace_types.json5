@@ -4175,6 +4175,7 @@
                 "setShowTipsTestShowTipsInvalidValues", // Bug
                 "setSelectedColorTestSelectedColorInvalidValues", // Bug
                 "setEnableHapticFeedbackTestEnableHapticFeedbackValidValues", // Bug in NG model, need to switch to static model
+                "setShowStepsTestShowStepsInvalidValues", // Bug
             ],
             "ignoreAttributes": [
                 "blockStyle", // Wrong JSON format
@@ -4968,19 +4969,23 @@
                     "attributes": [
                         {
                             "name": "minWidth",
-                            "default": "0.00vp"
+                            "default": "0.00vp",
+                            "type": "DimensionAny",
                         },
                         {
                             "name": "maxWidth",
-                            "default": "0.00vp"
+                            "default": "0.00vp",
+                            "type": "DimensionAny",
                         },
                         {
                             "name": "minHeight",
-                            "default": "0.00vp"
+                            "default": "0.00vp",
+                            "type": "DimensionAny",
                         },
                         {
                             "name": "maxHeight",
-                            "default": "0.00vp"
+                            "default": "0.00vp",
+                            "type": "DimensionAny",
                         }
                     ]
                 },

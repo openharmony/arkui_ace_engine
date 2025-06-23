@@ -43,7 +43,7 @@ void IndicatorStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = Converter::OptConvertPtr<type>(value);
     //LinearIndicatorModelNG::SetIndicatorStyle(frameNode, convValue);
 }
 void IndicatorLoopImpl(Ark_NativePointer node,
@@ -51,7 +51,7 @@ void IndicatorLoopImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = Converter::OptConvertPtr<type>(value);
     //LinearIndicatorModelNG::SetIndicatorLoop(frameNode, convValue);
 }
 void OnChangeImpl(Ark_NativePointer node,
@@ -59,7 +59,7 @@ void OnChangeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = Converter::OptConvertPtr<type>(value);
     //LinearIndicatorModelNG::SetOnChange(frameNode, convValue);
 }
 } // LinearIndicatorAttributeModifier

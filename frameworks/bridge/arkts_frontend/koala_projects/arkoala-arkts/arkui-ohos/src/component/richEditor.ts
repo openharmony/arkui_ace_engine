@@ -31,7 +31,7 @@ import { CopyOptions, BarState, ResponseType, Color, FontStyle, FontWeight, Text
 import { ResourceColor, ResourceStr, Length, Dimension, Padding, BorderRadiuses, Font } from "./units"
 import { Callback_Boolean_Void, Tuple_Dimension_Dimension } from "./navigation"
 import { EnterKeyType, SubmitEvent } from "./textInput"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Tuple_Number_Number } from "./arkui-synthetics"
 import { DecorationStyleInterface, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal } from "./styledString"

@@ -77,9 +77,9 @@ namespace {
     const auto FAMILY_BY_NUMBER = "second";
 
     const std::vector<ButtonLabelResourceTest> BUTTON_LABEL_RESOURCES_TEST_PLAN = {
+        { CreateResourceUnion<Ark_ResourceStr>(INVALID_ID_STRING), "" },
         { CreateResourceUnion<Ark_ResourceStr>(RES_NAME), RESOURCE_BY_STRING },
         { CreateResourceUnion<Ark_ResourceStr>(RES_ID), RESOURCE_BY_NUMBER },
-        { CreateResourceUnion<Ark_ResourceStr>(INVALID_ID_STRING), "" },
     };
 } // namespace
 

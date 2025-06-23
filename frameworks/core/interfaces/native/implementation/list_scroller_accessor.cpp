@@ -83,8 +83,8 @@ void ScrollToItemInGroupImpl(Ark_ListScroller peer,
 
     int32_t indexValue = Converter::Convert<int32_t>(*index);
     int32_t indexInGroupValue = Converter::Convert<int32_t>(*indexInGroup);
-    auto smoothValue = smooth ? Converter::OptConvert<bool>(*smooth) : std::nullopt;
-    auto alignValue = align ? Converter::OptConvert<ScrollAlign>(*align) : std::nullopt;
+    auto smoothValue = Converter::OptConvertPtr<bool>(smooth);
+    auto alignValue = Converter::OptConvertPtr<ScrollAlign>(align);
     scrollController->JumpToItemInGroup(indexValue, indexInGroupValue,
         smoothValue.value_or(false), alignValue.value_or(ScrollAlign::NONE));
 }
@@ -98,7 +98,7 @@ void CloseAllSwipeActionsImpl(Ark_ListScroller peer,
         return;
     }
 
-    auto funcOpt = options ? Converter::OptConvert<Callback_Void>(*options) : std::nullopt;
+    auto funcOpt = Converter::OptConvertPtr<Callback_Void>(options);
     if (funcOpt.has_value()) {
         auto func =  [arkCallback = CallbackHelper(funcOpt.value())]() { arkCallback.Invoke(); };
         scrollController->CloseAllSwipeActions(std::move(func));

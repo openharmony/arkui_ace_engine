@@ -116,7 +116,7 @@ void StateImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto stateOpt = Converter::OptConvert<int32_t>(*value);
+    auto stateOpt = Converter::OptConvertPtr<int32_t>(value);
     ImageAnimatorModelStatic::SetState(frameNode, stateOpt);
 }
 void DurationImpl(Ark_NativePointer node,
@@ -124,7 +124,7 @@ void DurationImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto durationOpt = Converter::OptConvert<int32_t>(*value);
+    auto durationOpt = Converter::OptConvertPtr<int32_t>(value);
     Validator::ValidateNonNegative(durationOpt);
     ImageAnimatorModelStatic::SetDuration(frameNode, durationOpt);
 }
@@ -133,7 +133,7 @@ void ReverseImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -145,7 +145,7 @@ void FixedSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -157,7 +157,7 @@ void FillModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fillModeOpt = Converter::OptConvert<int32_t>(*value);
+    auto fillModeOpt = Converter::OptConvertPtr<int32_t>(value);
     ImageAnimatorModelStatic::SetFillMode(frameNode, fillModeOpt);
 }
 void IterationsImpl(Ark_NativePointer node,
@@ -165,7 +165,7 @@ void IterationsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto iterationOpt = Converter::OptConvert<int32_t>(*value);
+    auto iterationOpt = Converter::OptConvertPtr<int32_t>(value);
     Validator::ValidateGreatOrEqual(iterationOpt, -1);
     ImageAnimatorModelStatic::SetIteration(frameNode, iterationOpt);
 }
@@ -174,8 +174,9 @@ void MonitorInvisibleAreaImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
+        // TODO: Reset value
         return;
     }
     ImageAnimatorModelNG::SetAutoMonitorInvisibleArea(frameNode, *convValue);

@@ -16,32 +16,16 @@
 #include <array>
 
 #include "ani.h"
+#include "common/common_module.h"
+#include "componentSnapshot/componentSnapshot_module.h"
+#include "content_slot/content_slot_module.h"
+#include "custom_node/custom_node_module.h"
+#include "drag_and_drop/native_drag_drop_global.h"
 #include "load.h"
-#include "log.h"
-
-#include "common_module.h"
-#include "content_slot_module.h"
+#include "log/log.h"
 #include "utils/convert_utils.h"
-#include "web_module_methods.h"
-#include "custom_node_module.h"
-#include "waterFlowSection_module.h"
-#include "native_drag_drop_global.h"
-#include "componentSnapshot_module.h"
-
-namespace OHOS::Ace::Ani {
-
-void TransferPixelMap([[maybe_unused]] ani_env* env, ani_object aniClass, ani_object node, ani_object pixelMap)
-{
-    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
-    const auto* modifier = GetNodeAniModifier();
-    if (!modifier) {
-        return;
-    }
-    modifier->getImageAniModifier()->setPixelMap(arkNode, nullptr);
-}
-
-} // namespace OHOS::Ace::Ani
-
+#include "water_flow/waterFlowSection_module.h"
+#include "web/web_module_methods.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -57,11 +41,6 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     }
 
     std::array methods = {
-        ani_native_function {
-            "_Image_Transfer_PixelMap",
-            "JL@ohos/multimedia/image/image/PixelMap;:V",
-            reinterpret_cast<void*>(OHOS::Ace::Ani::TransferPixelMap)
-        },
         ani_native_function {
             "_Web_SetWebOptions",
             "JL@ohos/web/webview/webview/WebviewController;:V",
@@ -168,6 +147,26 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventSetCustomNode)
         },
         ani_native_function {
+            "_Drag_Set_AllowDrop_Null",
+            "J:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragSetAllowDropNull)
+        },
+        ani_native_function {
+            "_Drag_Set_AllowDrop",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragSetAllowDrop)
+        },
+        ani_native_function {
+            "_Drag_Set_DragPreview",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragSetDragPreview)
+        },
+        ani_native_function {
+            "_DragEvent_ConvertFromPixelMapToAniPointer",
+            "L@ohos/multimedia/image/image/PixelMap;:J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ConvertFromPixelMapToAniPointer)
+        },
+        ani_native_function {
             "_ComponentSnapshot_createFromBuilderWithCallback",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::CreateFromBuilderWithCallback)
@@ -181,7 +180,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 
     auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());
     if (bindRst != ANI_OK) {
-        HILOGE("Bund native methonds failed, bindRst:%{public}d", bindRst);
+        HILOGE("Bind native methonds failed, bindRst:%{public}d", bindRst);
         return bindRst;
     }
     *result = ANI_VERSION_1;

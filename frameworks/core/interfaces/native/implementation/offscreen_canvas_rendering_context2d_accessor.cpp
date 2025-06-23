@@ -55,10 +55,8 @@ Ark_String ToDataURLImpl(Ark_OffscreenCanvasRenderingContext2D peer,
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<OffscreenCanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, {});
-    CHECK_NULL_RETURN(type, {});
-    CHECK_NULL_RETURN(quality, {});
-    auto optType = Converter::OptConvert<std::string>(*type);
-    auto optQuality = Converter::OptConvert<float>(*quality);
+    auto optType = Converter::OptConvertPtr<std::string>(type);
+    auto optQuality = Converter::OptConvertPtr<float>(quality);
     auto result = peerImpl->ToDataURL(optType, optQuality);
     return Converter::ArkValue<Ark_String>(result, Converter::FC);
 }

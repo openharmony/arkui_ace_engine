@@ -114,13 +114,13 @@ void SetButtonOptions2Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(label);
-    if (options != nullptr) {
-        if (auto buttonOptions = Converter::OptConvert<Ark_ButtonOptions>(*options); buttonOptions) {
-            SetButtonOptions1Impl(node, &buttonOptions.value());
-        }
+    if (auto buttonOptions = Converter::OptConvertPtr<Ark_ButtonOptions>(options); buttonOptions) {
+        SetButtonOptions1Impl(node, &buttonOptions.value());
     }
     auto labelString = Converter::OptConvert<std::string>(*label);
-    ButtonModelStatic::SetLabel(frameNode, labelString.value_or("").c_str());
+    if (labelString) {
+        ButtonModelStatic::SetLabel(frameNode, labelString->c_str());
+    }
 }
 } // ButtonInterfaceModifier
 namespace ButtonAttributeModifier {
@@ -129,7 +129,7 @@ void TypeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto typeInt = EnumToInt(Converter::OptConvert<ButtonType>(*value));
+    auto typeInt = EnumToInt(Converter::OptConvertPtr<ButtonType>(value));
     ButtonModelStatic::SetType(frameNode, typeInt);
 }
 void StateEffectImpl(Ark_NativePointer node,
@@ -137,7 +137,7 @@ void StateEffectImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     ButtonModelStatic::SetStateEffect(frameNode, convValue);
 }
 void ButtonStyleImpl(Ark_NativePointer node,
@@ -145,35 +145,35 @@ void ButtonStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelStatic::SetButtonStyle(frameNode, Converter::OptConvert<ButtonStyleMode>(*value));
+    ButtonModelStatic::SetButtonStyle(frameNode, Converter::OptConvertPtr<ButtonStyleMode>(value));
 }
 void ControlSizeImpl(Ark_NativePointer node,
                      const Opt_ControlSize* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelStatic::SetControlSize(frameNode, Converter::OptConvert<ControlSize>(*value));
+    ButtonModelStatic::SetControlSize(frameNode, Converter::OptConvertPtr<ControlSize>(value));
 }
 void RoleImpl(Ark_NativePointer node,
               const Opt_ButtonRole* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelStatic::SetRole(frameNode, Converter::OptConvert<ButtonRole>(*value));
+    ButtonModelStatic::SetRole(frameNode, Converter::OptConvertPtr<ButtonRole>(value));
 }
 void FontColorImpl(Ark_NativePointer node,
                    const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelStatic::SetFontColor(frameNode, Converter::OptConvert<Color>(*value));
+    ButtonModelStatic::SetFontColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void FontSizeImpl(Ark_NativePointer node,
                   const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto fontSize = Converter::OptConvert<Dimension>(*value);
+    auto fontSize = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidatePositive(fontSize);
     Validator::ValidateNonPercent(fontSize);
     ButtonModelStatic::SetFontSize(frameNode, fontSize);
@@ -183,14 +183,14 @@ void FontWeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelStatic::SetFontWeight(frameNode, Converter::OptConvert<Ace::FontWeight>(*value));
+    ButtonModelStatic::SetFontWeight(frameNode, Converter::OptConvertPtr<Ace::FontWeight>(value));
 }
 void FontStyleImpl(Ark_NativePointer node,
                    const Opt_FontStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelStatic::SetFontStyle(frameNode, Converter::OptConvert<Ace::FontStyle>(*value));
+    ButtonModelStatic::SetFontStyle(frameNode, Converter::OptConvertPtr<Ace::FontStyle>(value));
 }
 void FontFamilyImpl(Ark_NativePointer node,
                     const Opt_Union_String_Resource* value)
@@ -198,7 +198,7 @@ void FontFamilyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<StringArray> families;
-    if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(*value); fontfamiliesOpt) {
+    if (auto fontfamiliesOpt = Converter::OptConvertPtr<Converter::FontFamilies>(value); fontfamiliesOpt) {
         families = fontfamiliesOpt->families;
     }
     ButtonModelStatic::SetFontFamily(frameNode, families);
@@ -216,7 +216,7 @@ void LabelStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto parameters = Converter::OptConvert<ButtonParameters>(*value);
+    auto parameters = Converter::OptConvertPtr<ButtonParameters>(value);
     ButtonModelStatic::SetLabelStyle(frameNode, parameters);
 }
 void MinFontScaleImpl(Ark_NativePointer node,
@@ -224,7 +224,7 @@ void MinFontScaleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = Converter::OptConvertPtr<float>(value);
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateLessOrEqual(convValue, SCALE_LIMIT);
     ButtonModelStatic::SetMinFontScale(frameNode, convValue);
@@ -234,7 +234,7 @@ void MaxFontScaleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<float>(*value);
+    auto convValue = Converter::OptConvertPtr<float>(value);
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateGreatOrEqual(convValue, SCALE_LIMIT);
     ButtonModelStatic::SetMaxFontScale(frameNode, convValue);

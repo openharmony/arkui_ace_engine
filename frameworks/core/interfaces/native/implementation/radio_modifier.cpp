@@ -79,7 +79,7 @@ void CheckedImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto isChecked = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    auto isChecked = Converter::OptConvertPtr<bool>(value);
     RadioModelStatic::SetChecked(frameNode, isChecked);
 }
 void OnChangeImpl(Ark_NativePointer node,
@@ -102,7 +102,7 @@ void RadioStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto style = value ? Converter::OptConvert<Converter::RadioStyle>(*value) : std::nullopt;
+    auto style = Converter::OptConvertPtr<Converter::RadioStyle>(value);
     if (style) {
         RadioModelStatic::SetCheckedBackgroundColor(frameNode, style->checkedBackgroundColor);
         RadioModelStatic::SetUncheckedBorderColor(frameNode, style->uncheckedBorderColor);
@@ -119,7 +119,7 @@ void ContentModifierImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     LOGE("ARKOALA RadioAttributeModifier::ContentModifierImpl -> Method is not implemented.");
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = Converter::OptConvertPtr<type>(value);
     //RadioModelNG::SetContentModifier(frameNode, convValue);
 }
 #ifdef WRONG_GEN

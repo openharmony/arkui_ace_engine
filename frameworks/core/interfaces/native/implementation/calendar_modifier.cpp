@@ -205,7 +205,7 @@ void ShowLunarImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -217,7 +217,7 @@ void ShowHolidayImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -229,7 +229,7 @@ void NeedSlideImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -241,7 +241,7 @@ void StartOfWeekImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<int32_t>(*value);
+    auto convValue = Converter::OptConvertPtr<int32_t>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -253,11 +253,8 @@ void OffDaysImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<int32_t>(*value) : std::nullopt;
-    Validator::ValidateNonNegative(convValue);
-    auto offDays = convValue
-        ? std::optional<std::string>(GetDaysIndexes(static_cast<uint32_t>(*convValue)))
-        : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<uint32_t>(value);
+    auto offDays = convValue ? std::make_optional(GetDaysIndexes(*convValue)) : std::nullopt;
     CalendarModelNG::SetOffDays(frameNode, offDays);
 }
 void DirectionImpl(Ark_NativePointer node,
@@ -265,7 +262,7 @@ void DirectionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Axis>(*value);
+    auto convValue = Converter::OptConvertPtr<Axis>(value);
     CalendarModelNG::SetDirection(frameNode, convValue);
 }
 void CurrentDayStyleImpl(Ark_NativePointer node,
@@ -273,7 +270,7 @@ void CurrentDayStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<CurrentDayStyleData>(*value);
+    auto convValue = Converter::OptConvertPtr<CurrentDayStyleData>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -285,7 +282,7 @@ void NonCurrentDayStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<NonCurrentDayStyleData>(*value);
+    auto convValue = Converter::OptConvertPtr<NonCurrentDayStyleData>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -297,7 +294,7 @@ void TodayStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<TodayStyleData>(*value);
+    auto convValue = Converter::OptConvertPtr<TodayStyleData>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -309,7 +306,7 @@ void WeekStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<WeekStyleData>(*value);
+    auto convValue = Converter::OptConvertPtr<WeekStyleData>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -321,7 +318,7 @@ void WorkStateStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<WorkStateStyleData>(*value);
+    auto convValue = Converter::OptConvertPtr<WorkStateStyleData>(value);
     if (!convValue) {
         // TODO: Reset value
         return;

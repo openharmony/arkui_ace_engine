@@ -27,7 +27,7 @@ void DestroyPeerImpl(Ark_RenderingContextSettings peer)
 }
 Ark_RenderingContextSettings CtorImpl(const Opt_Boolean* antialias)
 {
-    auto value = antialias ? Converter::OptConvert<bool>(*antialias) : std::nullopt;
+    auto value = Converter::OptConvertPtr<bool>(antialias);
     return RenderingContextSettingsPeer::Create(value);
 }
 Ark_NativePointer GetFinalizerImpl()
@@ -44,7 +44,7 @@ void SetAntialiasImpl(Ark_RenderingContextSettings peer,
                       const Opt_Boolean* antialias)
 {
     CHECK_NULL_VOID(peer);
-    auto value = Converter::OptConvert<bool>(*antialias);
+    auto value = Converter::OptConvertPtr<bool>(antialias);
     peer->antialias = value;
 }
 } // RenderingContextSettingsAccessor

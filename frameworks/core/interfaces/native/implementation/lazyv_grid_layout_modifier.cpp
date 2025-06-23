@@ -41,7 +41,7 @@ void ColumnsTemplateImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = Converter::OptConvertPtr<type>(value);
     //LazyVGridLayoutModelNG::SetColumnsTemplate(frameNode, convValue);
 }
 } // LazyVGridLayoutAttributeModifier

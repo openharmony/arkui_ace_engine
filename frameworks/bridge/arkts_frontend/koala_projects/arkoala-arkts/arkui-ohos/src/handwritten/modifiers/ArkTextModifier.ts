@@ -21,7 +21,7 @@ import { AttributeModifier, CopyOptions, CustomBuilder, DecorationStyleInterface
 import { ArkCommonMethodPeer } from "../../component";
 import { ArkTextPeer } from "../../component";
 import { LengthMetrics } from "../../Graphics";
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 class TextAlignModifier extends ModifierWithKey<int32> {
     static identity: string = 'textAlign';
 

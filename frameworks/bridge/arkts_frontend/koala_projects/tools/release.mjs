@@ -50,11 +50,9 @@ class Package {
         "@koalaui/build-common",
         "@koalaui/compat",
         "@koalaui/common",
-        "@koalaui/harness",
         "@koalaui/runtime",
         "@koalaui/compiler-plugin",
         "@koalaui/ets-plugin",
-        "@koalaui/arkui-common",
         "@koalaui/arkoala-arkui",
         "@koalaui/arkui",
         "@koalaui/interop",
@@ -76,7 +74,6 @@ const all_packages = [
 ]
 
 const exclude_packages = [
-    "@koalaui/arkui-common",
     "@koalaui/arkoala-arkui",
 ]
 

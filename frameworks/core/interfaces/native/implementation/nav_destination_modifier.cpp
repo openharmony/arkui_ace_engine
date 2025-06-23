@@ -58,25 +58,21 @@ void HideTitleBar0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    NavDestinationModelStatic::SetHideTitleBar(frameNode, Converter::OptConvert<bool>(*value).value_or(false));
+    NavDestinationModelStatic::SetHideTitleBar(frameNode, Converter::OptConvertPtr<bool>(value).value_or(false));
 }
 void HideTitleBar1Impl(Ark_NativePointer node, const Opt_Boolean* hide, const Opt_Boolean* animated)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(hide);
-    CHECK_NULL_VOID(animated);
-    NavDestinationModelStatic::SetHideTitleBar(frameNode, Converter::OptConvert<bool>(*hide).value_or(false),
-        Converter::OptConvert<bool>(*animated).value_or(false));
+    NavDestinationModelStatic::SetHideTitleBar(frameNode, Converter::OptConvertPtr<bool>(hide).value_or(false),
+        Converter::OptConvertPtr<bool>(animated).value_or(false));
 }
 void HideBackButtonImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    NavDestinationModelStatic::SetHideBackButton(frameNode, Converter::OptConvert<bool>(*value).value_or(false));
+    NavDestinationModelStatic::SetHideBackButton(frameNode, Converter::OptConvertPtr<bool>(value).value_or(false));
 }
 void OnShownImpl(Ark_NativePointer node,
                  const Opt_Callback_Void* value)
@@ -126,7 +122,7 @@ void ModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto mode = Converter::OptConvert<NavDestinationMode>(*value).value_or(NavDestinationMode::STANDARD);
+    auto mode = Converter::OptConvertPtr<NavDestinationMode>(value).value_or(NavDestinationMode::STANDARD);
     NavDestinationModelStatic::SetNavDestinationMode(frameNode, mode);
 }
 void BackButtonIcon0Impl(Ark_NativePointer node,
@@ -366,7 +362,7 @@ void SystemBarStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // auto convValue = Converter::OptConvertPtr<type>(value);
     // NavDestinationModelNG::SetSystemBarStyle(frameNode, convValue);
     LOGE("ARKOALA NavDestination.SystemBarStyleImpl -> Method is not implemented, Opt_CustomObject is not supported!");
 }
@@ -375,7 +371,7 @@ void RecoverableImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     NavDestinationModelStatic::SetRecoverable(frameNode, convValue);
 }
 
@@ -433,7 +429,7 @@ void BindToScrollableImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // auto convValue = Converter::OptConvertPtr<type>(value);
     // NavDestinationModelNG::SetBindToScrollable(frameNode, convValue);
 }
 void BindToNestedScrollableImpl(Ark_NativePointer node,
@@ -441,7 +437,7 @@ void BindToNestedScrollableImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // auto convValue = Converter::OptConvertPtr<type>(value);
     // NavDestinationModelNG::SetBindToNestedScrollable(frameNode, convValue);
 }
 void OnActiveImpl(Ark_NativePointer node,
@@ -483,7 +479,7 @@ void CustomTransitionImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // auto convValue = Converter::OptConvertPtr<type>(value);
     // NavDestinationModelNG::SetCustomTransition(frameNode, convValue);
 }
 void OnNewParamImpl(Ark_NativePointer node,
@@ -491,7 +487,7 @@ void OnNewParamImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // auto convValue = Converter::OptConvertPtr<type>(value);
     // NavDestinationModelNG::SetOnNewParam(frameNode, convValue);
 }
 void PreferredOrientationImpl(Ark_NativePointer node,
@@ -499,7 +495,7 @@ void PreferredOrientationImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // auto convValue = Converter::OptConvertPtr<type>(value);
     // NavDestinationModelNG::SetPreferredOrientation(frameNode, convValue);
 }
 void EnableNavigationIndicatorImpl(Ark_NativePointer node,
@@ -507,7 +503,7 @@ void EnableNavigationIndicatorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    // auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    // auto convValue = Converter::OptConvertPtr<type>(value);
     // NavDestinationModelNG::SetEnableNavigationIndicator(frameNode, convValue);
 }
 void TitleImpl(Ark_NativePointer node,
@@ -643,16 +639,8 @@ void HideToolBarImpl(Ark_NativePointer node, const Opt_Boolean* hide, const Opt_
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(hide);
-    CHECK_NULL_VOID(animated);
-    auto isHide = false;
-    if (hide->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        isHide = Converter::OptConvert<bool>(*hide).value_or(false);
-    }
-    bool isAnimated = false;
-    if (animated->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        isAnimated = Converter::OptConvert<bool>(*animated).value_or(false);
-    }
+    auto isHide = Converter::OptConvertPtr<bool>(hide).value_or(false);
+    auto isAnimated = Converter::OptConvertPtr<bool>(animated).value_or(false);
     NavDestinationModelStatic::SetHideToolBar(frameNode, isHide, isAnimated);
 }
 void IgnoreLayoutSafeAreaImpl(
@@ -662,7 +650,7 @@ void IgnoreLayoutSafeAreaImpl(
     CHECK_NULL_VOID(frameNode);
 
     NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_SYSTEM, .edges = NG::SAFE_AREA_EDGE_ALL };
-    auto typesOpt = types ? Converter::OptConvert<Array_LayoutSafeAreaType>(*types) : std::nullopt;
+    auto typesOpt = Converter::OptConvertPtr<Array_LayoutSafeAreaType>(types);
     uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
     if (typesOpt) {
         for (int i = 0; i < typesOpt->length; ++i) {
@@ -675,7 +663,7 @@ void IgnoreLayoutSafeAreaImpl(
         opts.type = safeAreaType;
     }
 
-    auto edgesOpt = types ? Converter::OptConvert<Array_LayoutSafeAreaEdge>(*edges) : std::nullopt;
+    auto edgesOpt = Converter::OptConvertPtr<Array_LayoutSafeAreaEdge>(edges);
     uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
     if (edgesOpt) {
         for (int i = 0; i < edgesOpt->length; ++i) {

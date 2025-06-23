@@ -57,12 +57,11 @@ Ark_PanGestureOptions CtorImpl(const Opt_PanGestureHandlerOptions* value)
 {
     auto peer = new PanGestureOptionsPeer();
     peer->handler = Referenced::MakeRefPtr<PanGestureOption>();
-    CHECK_NULL_RETURN(value, peer);
     auto fingers = DEFAULT_PAN_FINGERS;
     auto distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
     auto direction = DEFAULT_PAN_DIRECTION;
     auto isFingerCountLimited = false;
-    auto info = Converter::OptConvert<PanGestureOptionsInfo>(*value);
+    auto info = Converter::OptConvertPtr<PanGestureOptionsInfo>(value);
     if (info) {
         direction = info.value().direction.value_or(DEFAULT_PAN_DIRECTION);
         if (info.value().distance) {

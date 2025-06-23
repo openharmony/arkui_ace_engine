@@ -104,7 +104,7 @@ void ContentModifierImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = Converter::OptConvertPtr<type>(value);
     //ToggleModelNG::SetContentModifier(frameNode, convValue);
     LOGE("ToggleModifier::ContentModifierImpl is not implemented, Ark_CustomObject is not supported!");
 }
@@ -113,7 +113,7 @@ void SelectedColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Color>(*value);
+    auto convValue = Converter::OptConvertPtr<Color>(value);
     ToggleModelNG::SetSelectedColor(frameNode, convValue);
 }
 void SwitchPointColorImpl(Ark_NativePointer node,
@@ -121,7 +121,7 @@ void SwitchPointColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Color>(*value);
+    auto convValue = Converter::OptConvertPtr<Color>(value);
     ToggleModelNG::SetSwitchPointColor(frameNode, convValue);
 }
 void SwitchStyleImpl(Ark_NativePointer node,
@@ -129,7 +129,7 @@ void SwitchStyleImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Converter::SwitchStyle>(*value).value_or(Converter::SwitchStyle{});
+    auto convValue = Converter::OptConvertPtr<Converter::SwitchStyle>(value).value_or(Converter::SwitchStyle{});
     Validator::ValidateNonNegative(convValue.pointRadius);
     Validator::ValidateNonPercent(convValue.pointRadius);
     ToggleModelStatic::SetPointRadius(frameNode, convValue.pointRadius);

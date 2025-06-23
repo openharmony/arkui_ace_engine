@@ -57,22 +57,21 @@ void SelectAllImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxGroupModelStatic::SetSelectAll(frameNode, value ? Converter::OptConvert<bool>(*value) : std::nullopt);
+    CheckBoxGroupModelStatic::SetSelectAll(frameNode, Converter::OptConvertPtr<bool>(value));
 }
 void SelectedColorImpl(Ark_NativePointer node,
                        const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxGroupModelStatic::SetSelectedColor(frameNode, value ? Converter::OptConvert<Color>(*value) : std::nullopt);
+    CheckBoxGroupModelStatic::SetSelectedColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void UnselectedColorImpl(Ark_NativePointer node,
                          const Opt_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxGroupModelStatic::SetUnSelectedColor(
-        frameNode, value ? Converter::OptConvert<Color>(*value) : std::nullopt);
+    CheckBoxGroupModelStatic::SetUnSelectedColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void MarkImpl(Ark_NativePointer node,
               const Opt_MarkStyle* value)
@@ -121,8 +120,7 @@ void CheckboxShapeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CheckBoxGroupModelStatic::SetCheckboxGroupStyle(frameNode,
-        value ? Converter::OptConvert<OHOS::Ace::CheckBoxStyle>(*value) : std::nullopt);
+    CheckBoxGroupModelStatic::SetCheckboxGroupStyle(frameNode, Converter::OptConvertPtr<Ace::CheckBoxStyle>(value));
 }
 #ifdef WRONG_GEN
 void _onChangeEvent_selectAllImpl(Ark_NativePointer node,

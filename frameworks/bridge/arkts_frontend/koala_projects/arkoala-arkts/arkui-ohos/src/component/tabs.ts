@@ -29,7 +29,7 @@ import { PeerNode } from "./../PeerNode"
 import { Length, ResourceColor, Dimension } from "./units"
 import { EdgeEffect, PageFlipMode, Color } from "./enums"
 import { Callback_Number_Void } from "./alphabetIndexer"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { TabsOpsHandWritten } from "./../handwritten"
 

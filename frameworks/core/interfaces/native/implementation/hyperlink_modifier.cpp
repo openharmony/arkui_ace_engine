@@ -39,7 +39,7 @@ void SetHyperlinkOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(address);
     auto convAddress = Converter::OptConvert<std::string>(*address);
-    auto convContent = Converter::OptConvert<std::string>(*content);
+    auto convContent = Converter::OptConvertPtr<std::string>(content);
     if (convAddress.has_value()) {
         HyperlinkModelStatic::SetTextStyle(frameNode, convAddress.value(), convContent);
     }
@@ -51,7 +51,7 @@ void ColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Color>(*value);
+    auto convValue = Converter::OptConvertPtr<Color>(value);
     HyperlinkModelStatic::SetColor(frameNode, convValue);
 }
 } // HyperlinkAttributeModifier

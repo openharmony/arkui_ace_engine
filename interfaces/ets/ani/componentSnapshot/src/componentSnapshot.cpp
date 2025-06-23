@@ -263,7 +263,7 @@ static bool GetOptionsScale(ani_env* env, ani_object options, float& value)
     }
     ani_double aniValue;
     if (ANI_OK !=
-        env->Object_CallMethodByName_Double(static_cast<ani_object>(propertyRef), "doubleValue", nullptr, &aniValue)) {
+        env->Object_CallMethodByName_Double(static_cast<ani_object>(propertyRef), "unboxed", nullptr, &aniValue)) {
         return false;
     }
     value = static_cast<double>(aniValue);
@@ -325,7 +325,7 @@ static bool ParseRegionProperty(ani_env* env, ani_object regionObject, const cha
     }
 
     if (ANI_OK !=
-        env->Object_CallMethodByName_Double(static_cast<ani_object>(propertyRef), "doubleValue", nullptr, &aniValue)) {
+        env->Object_CallMethodByName_Double(static_cast<ani_object>(propertyRef), "unboxed", nullptr, &aniValue)) {
         return false;
     }
     return true;
@@ -452,7 +452,7 @@ static bool GetAniIntValue(ani_env* env, ani_object object, int32_t& value)
         return false;
     }
     ani_int aniValue;
-    if (ANI_OK != env->Object_CallMethodByName_Int(object, "intValue", nullptr, &aniValue)) {
+    if (ANI_OK != env->Object_CallMethodByName_Int(object, "unboxed", nullptr, &aniValue)) {
         return false;
     }
     value = static_cast<int32_t>(aniValue);

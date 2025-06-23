@@ -52,8 +52,7 @@ void SetCircleOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto circleOptions = Converter::OptConvert<Converter::CircleOptions>(*value);
+    auto circleOptions = Converter::OptConvertPtr<Converter::CircleOptions>(value);
     if (circleOptions && circleOptions.value().width) {
         ShapeAbstractModelNG::SetWidth(frameNode, circleOptions.value().width.value());
     }

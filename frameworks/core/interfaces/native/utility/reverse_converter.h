@@ -260,6 +260,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src);
     void AssignArkValue(Ark_NestedScrollOptions& dst, const NestedScrollOptions& src);
     void AssignArkValue(Ark_Number& dst, const Dimension& src);
+    void AssignArkValue(Ark_Number& dst, const LeadingMargin& src);
     void AssignArkValue(Ark_Number& dst, const double& src);
     void AssignArkValue(Ark_Number& dst, const float& src);
     void AssignArkValue(Ark_Number& dst, const int32_t& src);

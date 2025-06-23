@@ -31,7 +31,7 @@ void RowsGapImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = Converter::OptConvertPtr<type>(value);
     //LazyGridLayoutModelNG::SetRowsGap(frameNode, convValue);
 }
 void ColumnsGapImpl(Ark_NativePointer node,
@@ -39,7 +39,7 @@ void ColumnsGapImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = Converter::OptConvertPtr<type>(value);
     //LazyGridLayoutModelNG::SetColumnsGap(frameNode, convValue);
 }
 } // LazyGridLayoutAttributeModifier

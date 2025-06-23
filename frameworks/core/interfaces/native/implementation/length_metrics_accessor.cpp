@@ -68,7 +68,7 @@ Ark_LengthMetrics LpxImpl(const Ark_Number* value)
 }
 Ark_LengthMetrics ResourceImpl(const Ark_Resource* value)
 {
-    std::optional<Dimension> convValue = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
+    auto convValue = Converter::OptConvertPtr<Dimension>(value);
     return LengthMetricsPeer::Create(convValue.value_or(Dimension()));
 }
 Ark_LengthUnit GetUnitImpl(Ark_LengthMetrics peer)

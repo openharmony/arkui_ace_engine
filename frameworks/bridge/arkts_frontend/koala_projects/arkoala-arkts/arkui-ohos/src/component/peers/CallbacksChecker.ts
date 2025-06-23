@@ -17,11 +17,16 @@ import { KBuffer } from "@koalaui/interop"
 import { Deserializer } from "./Deserializer";
 import { deserializeAndCallCallback } from "./CallbackDeserializeCall"
 import { ResourceHolder, InteropNativeModule } from "@koalaui/interop"
+import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
+import { UIContextImpl } from "arkui/handwritten/UIContextImpl"
+import { UIContext } from "@ohos/arkui/UIContext"
+import { int32, int64 } from "@koalaui/common"
 
 enum CallbackEventKind {
     Event_CallCallback = 0,
     Event_HoldManagedResource = 1,
     Event_ReleaseManagedResource = 2,
+    Event_CallCallback_Customize = 3,
 }
 
 const bufferSize = 4096
@@ -38,7 +43,20 @@ export function checkArkoalaCallbacks() {
             case CallbackEventKind.Event_CallCallback: {
                 deserializeAndCallCallback(deserializer)
                 break;
-            } 
+            }
+            case CallbackEventKind.Event_CallCallback_Customize: {
+                const instanceId = deserializer.readInt32()
+                const length: int32 = deserializer.readInt32()
+                let uiContext: UIContext | undefined = UIContextUtil.getUIContextById(instanceId)
+                if (uiContext) {
+                    const uiContextImpl: UIContextImpl = uiContext as UIContextImpl
+                    const offset: int64 = 12 // * bytes for Event_CallCallback_Customize, instanceId and datalength.
+                    uiContextImpl.dispatchCallback(buffer.buffer + offset, length)
+                } else {
+                    deserializeAndCallCallback(deserializer)
+                }
+                break
+            }
             case CallbackEventKind.Event_HoldManagedResource: {
                 const resourceId = deserializer.readInt32()
                 ResourceHolder.instance().hold(resourceId)

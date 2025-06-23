@@ -25,12 +25,12 @@ import { Deserializer } from "./peers/Deserializer"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { DrawContext } from "./../Graphics"
 import { LengthMetrics } from "../Graphics"
-import { ComponentContent, Context, ContextInternal, GestureOps, StateStylesOps } from "./arkui-custom"
+import { ComponentContent, Context, ContextInternal, StateStylesOps } from "./arkui-custom"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { IntentionCode, CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, GradientDirection, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, TouchType, InteractionHand, CrownAction, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, IlluminatedType, MouseButton, MouseAction, AccessibilityHoverType, AxisAction, AxisModel, ScrollSource } from "./enums"
 import { ResourceColor, ConstraintSizeOptions, DirectionalEdgesT, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Bias, Font, EdgeStyles, Edges } from "./units"
-import { Resource } from "global/resource"
+import { Resource } from "global.resource"
 import { TextRange } from "./textCommon"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -38,8 +38,7 @@ import { ResizableOptions } from "./image"
 import { VisualEffect, Filter, BrightnessBlender } from "./arkui-uieffect"
 import { FocusBoxStyle, FocusPriority } from "./focus"
 import { TransformationMatrix } from "./arkui-common"
-import { UniformDataType } from "./arkui-uniformtypedescriptor"
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup, GestureGroupHandler } from "./gesture"
+import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup } from "./gesture"
 import { BlendMode } from "./arkui-drawing"
 import { StyledString } from "./styledString"
 import { Callback_Number_Number_Void } from "./grid"
@@ -59,9 +58,10 @@ import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 import { hookStateStyleImpl } from "../handwritten/ArkStateStyle"
 import { rememberMutableState } from '@koalaui/runtime'
 import { hookDrawModifierInvalidateImpl, hookDrawModifierAttributeImpl } from "../handwritten/ArkDrawModifierImpl"
-import { hookRegisterOnDragStartImpl } from "../handwritten/ArkDragDrop"
+import { hookDragPreview, hookAllowDropAttribute, hookRegisterOnDragStartImpl } from "../handwritten/ArkDragDrop"
 import { ArkUIAniModule } from "arkui.ani"
-import { PointerStyle, UnifiedData, Summary, PixelMap } from "#external"
+import { PointerStyle, UnifiedData, Summary, PixelMap, UniformDataType } from "#external"
+import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookCommonMethodParallelGestureImpl, hookCommonMethodPriorityGestureImpl } from "../handwritten/CommonHandWritten"
 export interface ICurve {
     interpolate(fraction: number): number
 }
@@ -805,11 +805,11 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         return
     }
     public getData(): UnifiedData {
-        const data = ArkUIAniModule._DragEvent_Get_Data(this.peer!.ptr)
+        const data = ArkUIAniModule._DragEvent_Get_Data(this.peer!.ptr) as UnifiedData
         return data
     }
     public getSummary(): Summary {
-        const summary = ArkUIAniModule._DragEvent_Get_Summary(this.peer!.ptr)
+        const summary = ArkUIAniModule._DragEvent_Get_Summary(this.peer!.ptr) as (Summary)
         return summary
     }
     public setResult(dragResult: DragResult): void {
@@ -1341,9 +1341,9 @@ export class ProgressMask implements MaterializedBase {
 export interface Measurable {
     uniqueId?: number | undefined
     measure(constraint: ConstraintSizeOptions): MeasureResult
-    getMargin(): DirectionalEdgesT
-    getPadding(): DirectionalEdgesT
-    getBorderWidth(): DirectionalEdgesT
+    getMargin(): DirectionalEdgesT<number>
+    getPadding(): DirectionalEdgesT<number>
+    getBorderWidth(): DirectionalEdgesT<number>
 }
 export class MeasurableInternal implements MaterializedBase,Measurable {
     peer?: Finalizable | undefined = undefined
@@ -1372,13 +1372,13 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
         const constraint_casted = constraint as (ConstraintSizeOptions)
         return this.measure_serialize(constraint_casted)
     }
-    public getMargin(): DirectionalEdgesT {
+    public getMargin(): DirectionalEdgesT<number> {
         return this.getMargin_serialize()
     }
-    public getPadding(): DirectionalEdgesT {
+    public getPadding(): DirectionalEdgesT<number> {
         return this.getPadding_serialize()
     }
-    public getBorderWidth(): DirectionalEdgesT {
+    public getBorderWidth(): DirectionalEdgesT<number> {
         return this.getBorderWidth_serialize()
     }
     private getUniqueId(): number | undefined {
@@ -1398,22 +1398,22 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
         const returnResult : MeasureResult = retvalDeserializer.readMeasureResult()
         return returnResult
     }
-    private getMargin_serialize(): DirectionalEdgesT {
+    private getMargin_serialize(): DirectionalEdgesT<number> {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getMargin(this.peer!.ptr)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
+        const returnResult : DirectionalEdgesT<number> = retvalDeserializer.readDirectionalEdgesT()
         return returnResult
     }
-    private getPadding_serialize(): DirectionalEdgesT {
+    private getPadding_serialize(): DirectionalEdgesT<number> {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getPadding(this.peer!.ptr)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
+        const returnResult : DirectionalEdgesT<number> = retvalDeserializer.readDirectionalEdgesT()
         return returnResult
     }
-    private getBorderWidth_serialize(): DirectionalEdgesT {
+    private getBorderWidth_serialize(): DirectionalEdgesT<number> {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getBorderWidth(this.peer!.ptr)
         let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
-        const returnResult : DirectionalEdgesT = retvalDeserializer.readDirectionalEdgesT()
+        const returnResult : DirectionalEdgesT<number> = retvalDeserializer.readDirectionalEdgesT()
         return returnResult
     }
     private getUniqueId_serialize(): number | undefined {
@@ -7607,6 +7607,7 @@ export interface DataSyncOptions {
     _DataSyncOptionsStub: string;
 }
 export enum DragResult {
+    UNKNOWN = -1,
     DRAG_SUCCESSFUL = 0,
     DRAG_FAILED = 1,
     DRAG_CANCELED = 2,
@@ -8143,7 +8144,7 @@ export interface CommonMethod {
     onDragLeave(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
     onDrop(eventCallback: ((event: DragEvent,extraParams?: string) => void) | undefined | OnDragEventCallback | undefined, dropOptions?: DropOptions): this
     onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this
-    allowDrop(value: Array<UniformDataType> | undefined): this
+    allowDrop(value: Array<UniformDataType> | null | undefined): this
     draggable(value: boolean | undefined): this
     dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this
     onPreDrag(value: ((parameter: PreDragStatus) => void) | undefined): this
@@ -8335,7 +8336,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     onDragLeave_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
     onDrop_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
     onDragEnd_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
-    allowDrop_value?: Array<UniformDataType> | undefined
+    allowDrop_value?: Array<UniformDataType> | null | undefined
     draggable_value?: boolean | undefined
     dragPreview_value?: CustomBuilder | DragItemInfo | string | undefined
     onPreDrag_value?: ((parameter: PreDragStatus) => void) | undefined
@@ -8722,7 +8723,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public onDragEnd(value: ((event: DragEvent,extraParams?: string) => void) | undefined): this {
         return this
     }
-    public allowDrop(value: Array<UniformDataType> | undefined): this {
+    public allowDrop(value: Array<UniformDataType> | null | undefined): this {
         return this
     }
     public draggable(value: boolean | undefined): this {
@@ -8962,6 +8963,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
 }
 export type CommonAttribute = CommonMethod
 export type CustomBuilder = 
+/** @memo */
 () => void;
 export interface OverlayOptions {
     align?: Alignment;
@@ -9253,40 +9255,6 @@ export type SelectedCallback = (selected: boolean) => void;
 export type IndexCallback = (value: number) => void;
 export type IndexerSelectedCallback = (index: number) => void;
 export type RefreshingCallback = (refreshing: boolean) => void;
-export class UIGestureEvent {
-    private peer?: PeerNode
-    setPeer(peer?: PeerNode) {
-        this.peer = peer
-    }
-    addGesture(gesture: GestureHandler, priority?: GesturePriority, mask?: GestureMask): void {
-        if (gesture instanceof GestureGroupHandler) {
-            let gestureGroup = gesture as GestureGroupHandler;
-            gestureGroup.addGestureGroupToNode(priority ?? GesturePriority.NORMAL, this.peer, mask)
-        } else if (gesture instanceof GestureHandler) {
-            gesture.setGesture(priority ?? GesturePriority.NORMAL, this.peer, mask);
-        }
-    }
-    addParallelGesture(gesture: GestureHandler, mask?: GestureMask): void {
-        if (gesture instanceof GestureGroupHandler) {
-            let gestureGroup = gesture as GestureGroupHandler;
-            gestureGroup.addGestureGroupToNode(2, this.peer, mask)
-        } else if (gesture instanceof GestureHandler) {
-            gesture.setGesture(2, this.peer, mask);
-        }
-    }
-    removeGestureByTag(tag: string): void {
-        if (this.peer) {
-            let peerNode = this.peer as PeerNode;
-            GestureOps.removeGestureByTag(peerNode.peer.ptr, tag);
-        }
-    }
-    clearGestures(): void {
-        if (this.peer) {
-            let peerNode = this.peer as PeerNode;
-            GestureOps.clearGestures(peerNode.peer.ptr);
-        }
-    }
-}
 export interface SelectionOptions {
     menuPolicy?: MenuPolicy;
 }
@@ -10504,9 +10472,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
         if (this.checkPriority("onDragStart")) {
-            const value_casted = value as (((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined)
-            hookRegisterOnDragStartImpl(this.getPeer(), value_casted)
-            return this
+            hookRegisterOnDragStartImpl(this, value)
         }
         return this
     }
@@ -10561,11 +10527,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public allowDrop(value: Array<UniformDataType> | undefined): this {
+    public allowDrop(value: Array<UniformDataType> | null | undefined): this {
         if (this.checkPriority("allowDrop")) {
-            const value_casted = value as (Array<UniformDataType> | undefined)
-            this.getPeer()?.allowDropAttribute(value_casted)
-            return this
+            hookAllowDropAttribute(this, value)
         }
         return this
     }
@@ -10579,20 +10543,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {
         if (this.checkPriority("dragPreview")) {
-            const preview_type = runtimeType(preview)
-            const config_type = runtimeType(config)
-            if ((RuntimeType.FUNCTION == preview_type) || (RuntimeType.OBJECT == preview_type) || (RuntimeType.STRING == preview_type) || (RuntimeType.UNDEFINED == preview_type)) {
-                const value_casted = preview as (CustomBuilder | DragItemInfo | string | undefined)
-                this.getPeer()?.dragPreview0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.FUNCTION == preview_type) || (RuntimeType.OBJECT == preview_type) || (RuntimeType.STRING == preview_type) || (RuntimeType.UNDEFINED == preview_type)) {
-                const preview_casted = preview as (CustomBuilder | DragItemInfo | string | undefined)
-                const config_casted = config as (PreviewConfiguration)
-                this.getPeer()?.dragPreview1Attribute(preview_casted, config_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            hookDragPreview(this, preview, config)
         }
         return this
     }
@@ -11044,14 +10995,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public gestureModifier(value: GestureModifier | undefined): this {
         if (this.checkPriority("gestureModifier")) {
-            if (value === undefined) {
-                return this;
-            }
-            const value_casted = value as GestureModifier
-            let gestureEvent = this.getOrCreateGestureEvent();
-            gestureEvent.clearGestures();
-            value_casted.applyGesture(gestureEvent);
-            return this
+            hookCommonMethodGestureModifierImpl(this, value);
         }
         return this
     }
@@ -11250,43 +11194,19 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public gesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         if (this.checkPriority("gesture")) {
-            if (gesture instanceof Gesture) {
-                let singleGesture = gesture as Gesture;
-                singleGesture.setGesture(0, this.getPeer(), mask);
-                return this;
-            } else {
-                let gestureGroup = gesture as GestureGroup;
-                gestureGroup.addGestureGroupToNode(0, this.getPeer(), mask)
-            }
-            return this
+            hookCommonMethodGestureImpl(this, gesture, mask)
         }
         return this
     }
     public priorityGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         if (this.checkPriority("priorityGesture")) {
-            if (gesture instanceof Gesture) {
-                let singleGesture = gesture as Gesture;
-                singleGesture.setGesture(1, this.getPeer(), mask);
-                return this;
-            } else {
-                let gestureGroup = gesture as GestureGroup;
-                gestureGroup.addGestureGroupToNode(1, this.getPeer(), mask)
-            }
-            return this
+            hookCommonMethodPriorityGestureImpl(this, gesture, mask)
         }
         return this
     }
     public parallelGesture(gesture: GestureType | undefined, mask?: GestureMask): this {
         if (this.checkPriority("parallelGesture")) {
-            if (gesture instanceof Gesture) {
-                let singleGesture = gesture as Gesture;
-                singleGesture.setGesture(2, this.getPeer(), mask);
-                return this;
-            } else {
-                let gestureGroup = gesture as GestureGroup;
-                gestureGroup.addGestureGroupToNode(2, this.getPeer(), mask)
-            }
-            return this
+            hookCommonMethodParallelGestureImpl(this, gesture, mask)
         }
         return this
     }
@@ -12084,8 +12004,21 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         ArkUIGeneratedNativeModule._ClickEvent_setY(this.peer!.ptr, y)
     }
     private getHand_serialize(): InteractionHand | undefined {
-        const retval  = ArkUIGeneratedNativeModule._ClickEvent_getHand(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._ClickEvent_getHand(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const hand_buf_runtimeType = (retvalDeserializer.readInt8() as int32)
+        let hand_buf : InteractionHand | undefined
+        if ((RuntimeType.UNDEFINED) != (hand_buf_runtimeType)) {
+            hand_buf = TypeChecker.InteractionHand_FromNumeric(retvalDeserializer.readInt32())
+        }
+        return hand_buf;
     }
     private setHand_serialize(hand: InteractionHand): void {
         ArkUIGeneratedNativeModule._ClickEvent_setHand(this.peer!.ptr, TypeChecker.InteractionHand_ToNumeric(hand))

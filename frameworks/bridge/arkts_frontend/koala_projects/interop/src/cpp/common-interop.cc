@@ -367,6 +367,11 @@ void impl_CopyArray(KNativePointer data, KLong length, KByte* array) {
 }
 KOALA_INTEROP_V3(CopyArray, KNativePointer, KLong, KByte*)
 
+void impl_CopyBuffer(KNativePointer data, KLong length, KNativePointer source) {
+    memcpy(data, source, length);
+}
+KOALA_INTEROP_V3(CopyBuffer, KNativePointer, KLong, KNativePointer)
+
 static Callback_Caller_t g_callbackCaller = nullptr;
 void setCallbackCaller(Callback_Caller_t callbackCaller) {
     g_callbackCaller = callbackCaller;

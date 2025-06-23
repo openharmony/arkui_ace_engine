@@ -83,8 +83,7 @@ void SetDatePickerOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto opt = Converter::OptConvert<DatePickerOptions>(*options);
+    auto opt = Converter::OptConvertPtr<DatePickerOptions>(options);
     CHECK_NULL_VOID(opt);
 
     auto context = frameNode->GetContext();
@@ -117,7 +116,7 @@ void LunarImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<bool>(*value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -134,7 +133,7 @@ void DisappearTextStyleImpl(Ark_NativePointer node,
     auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
 
-    auto convValue = Converter::OptConvert<PickerTextStyle>(*value);
+    auto convValue = Converter::OptConvertPtr<PickerTextStyle>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -151,7 +150,7 @@ void TextStyleImpl(Ark_NativePointer node,
     auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
 
-    auto convValue = Converter::OptConvert<PickerTextStyle>(*value);
+    auto convValue = Converter::OptConvertPtr<PickerTextStyle>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -168,7 +167,7 @@ void SelectedTextStyleImpl(Ark_NativePointer node,
     auto theme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
 
-    auto convValue = Converter::OptConvert<PickerTextStyle>(*value);
+    auto convValue = Converter::OptConvertPtr<PickerTextStyle>(value);
     if (!convValue) {
         // TODO: Reset value
         return;
@@ -201,8 +200,7 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node,
 #ifdef SUPPORT_DIGITAL_CROWN
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    auto sensitivity = Converter::OptConvert<CrownSensitivity>(*value).value_or(DIGITAL_CROWN_SENSITIVITY_DEFAULT);
+    auto sensitivity = Converter::OptConvertPtr<CrownSensitivity>(value).value_or(DIGITAL_CROWN_SENSITIVITY_DEFAULT);
     DatePickerModelNG::SetDigitalCrownSensitivity(frameNode, static_cast<int32_t>(sensitivity));
 #endif
 }
@@ -211,7 +209,7 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //auto convValue = Converter::OptConvertPtr<type>(value);
     //DatePickerModelNG::SetEnableHapticFeedback(frameNode, convValue);
 }
 #ifdef WRONG_GEN
