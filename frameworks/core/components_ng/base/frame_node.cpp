@@ -4995,8 +4995,14 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config);
     needRerender =
         needRerender || pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config.skipMeasure, config.skipLayout);
-    if (needRerender || (extensionHandler_ && extensionHandler_->NeedRender()) ||
-        CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        auto skippedMeasure = config.skipMeasure || SkipMeasureContent();
+        needRerender = needRerender || (extensionHandler_ &&
+            (extensionHandler_->NeedRender() || (extensionHandler_->HasDrawModifier() && !skippedMeasure)));
+    } else {
+        needRerender = needRerender || (extensionHandler_ && extensionHandler_->NeedRender());
+    }
+    if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     layoutAlgorithm_.Reset();
