@@ -220,7 +220,6 @@ private:
     Dimension loadingProgressSizeTheme_ = 32.0_vp;
     Dimension triggerLoadingDistanceTheme_ = 16.0_vp;
     bool isHigherVersion_ = true;
-    RefPtr<RefreshThemeNG> refreshTheme_;
 };
 } // namespace OHOS::Ace::NG
 

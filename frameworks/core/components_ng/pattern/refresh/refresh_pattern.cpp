@@ -77,10 +77,9 @@ void RefreshPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToBounds(true);
     host->GetRenderContext()->UpdateClipEdge(true);
-    isHigherVersion_ = Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    refreshTheme_ = context->GetTheme<RefreshThemeNG>();
+    isHigherVersion_ =  context->GetMinPlatformVersion() >= static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN);
 }
 
 bool RefreshPattern::OnDirtyLayoutWrapperSwap(
@@ -230,10 +229,14 @@ void RefreshPattern::InitProgressNode()
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateLoadingProgressOwner(LoadingProgressOwner::REFRESH);
 
-    if (refreshTheme_) {
-        loadingProgressSizeTheme_ = refreshTheme_->GetProgressDiameter();
-        triggerLoadingDistanceTheme_ = refreshTheme_->GetLoadingDistance();
-        progressPaintProperty->UpdateColor(refreshTheme_->GetProgressColor());
+    auto context = host->GetContext();
+    if (context) {
+        auto refreshTheme = context->GetTheme<RefreshThemeNG>();
+        if (refreshTheme) {
+            loadingProgressSizeTheme_ = refreshTheme->GetProgressDiameter();
+            triggerLoadingDistanceTheme_ = refreshTheme->GetLoadingDistance();
+            progressPaintProperty->UpdateColor(refreshTheme->GetProgressColor());
+        }
     }
     auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
@@ -274,9 +277,14 @@ void RefreshPattern::InitProgressColumn()
     loadingTextLayoutProperty->UpdateMaxLines(1);
     loadingTextLayoutProperty->UpdateMaxFontScale(2.0f);
     loadingTextLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    CHECK_NULL_VOID(refreshTheme_);
-    loadingTextLayoutProperty->UpdateTextColor(refreshTheme_->GetTextStyle().GetTextColor());
-    loadingTextLayoutProperty->UpdateFontSize(refreshTheme_->GetTextStyle().GetFontSize());
+    auto context = host->GetContext();
+    if (context) {
+        auto refreshTheme = context->GetTheme<RefreshThemeNG>();
+        if (refreshTheme) {
+            loadingTextLayoutProperty->UpdateTextColor(refreshTheme->GetTextStyle().GetTextColor());
+            loadingTextLayoutProperty->UpdateFontSize(refreshTheme->GetTextStyle().GetFontSize());
+        }
+    }
 
     PaddingProperty textpadding;
     textpadding.top = CalcLength(loadingProgressSizeTheme_.ConvertToPx());
@@ -296,19 +304,19 @@ void RefreshPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(progressChild_);
     auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    refreshTheme_ = pipelineContext->GetTheme<RefreshThemeNG>();
-    CHECK_NULL_VOID(refreshTheme_);
+    auto refreshTheme = pipelineContext->GetTheme<RefreshThemeNG>();
+    CHECK_NULL_VOID(refreshTheme);
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
-    progressPaintProperty->UpdateColor(refreshTheme_->GetProgressColor());
+    progressPaintProperty->UpdateColor(refreshTheme->GetProgressColor());
     if (hasLoadingText_) {
         CHECK_NULL_VOID(loadingTextNode_);
         auto textLayoutProperty = loadingTextNode_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateFontSize(refreshTheme_->GetTextStyle().GetFontSize());
-        textLayoutProperty->UpdateTextColor(refreshTheme_->GetTextStyle().GetTextColor());
+        textLayoutProperty->UpdateFontSize(refreshTheme->GetTextStyle().GetFontSize());
+        textLayoutProperty->UpdateTextColor(refreshTheme->GetTextStyle().GetTextColor());
     }
 }
 
@@ -503,8 +511,11 @@ float RefreshPattern::CalculatePullDownRatio()
         return 1.0f;
     }
     if (!ratio_.has_value()) {
-        CHECK_NULL_RETURN(refreshTheme_, 1.0f);
-        ratio_ = refreshTheme_->GetRatio();
+        auto context = host->GetContext();
+        CHECK_NULL_RETURN(context, 1.0f);
+        auto refreshTheme = context->GetTheme<RefreshThemeNG>();
+        CHECK_NULL_RETURN(refreshTheme, 1.0f);
+        ratio_ = refreshTheme->GetRatio();
     }
     auto gamma = scrollOffset_ / contentHeight;
     if (GreatOrEqual(gamma, 1.0)) {
