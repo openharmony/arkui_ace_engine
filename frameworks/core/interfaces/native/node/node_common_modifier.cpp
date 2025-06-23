@@ -2677,7 +2677,7 @@ void SetBorder(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 va
         SetOptionalBorderColor(borderColors.rightColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
         if (SystemProperties::ConfigChangePerform() && rawPtr) {
             auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
-            ParseBorderColor(borderColors, objs[NUM_10], objs[NUM_8], objs[NUM_11], objs[NUM_9]);
+            ParseBorderColor(borderColors, objs[NUM_10], objs[NUM_9], objs[NUM_11], objs[NUM_8]);
         }
     }
     SetOptionalBorderColor(borderColors.topColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
@@ -3450,7 +3450,7 @@ void SetOffsetEdges(ArkUINodeHandle node, ArkUI_Bool useEdges, const ArkUIString
         }
         if (SystemProperties::ConfigChangePerform() && rawPtr) {
             auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
-            ViewAbstract::SetOffset(frameNode, x.value(), y.value(), objs[0], objs[1]);
+            ViewAbstract::SetOffset(frameNode, offset, objs[0], objs[1]);
         } else {
             ViewAbstract::SetOffset(frameNode, offset);
         }

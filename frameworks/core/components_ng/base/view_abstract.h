@@ -205,6 +205,15 @@ public:
     static void SetSphericalEffect(double radio);
     static void SetPixelStretchEffect(PixStretchEffectOption &option);
     static void SetLightUpEffect(double radio);
+    static void CheckLocalizedPadding(PaddingProperty& value, const TextDirection& direction);
+    static void CheckLocalizedMargin(MarginProperty& value, const TextDirection& direction);
+    static void CheckLocalizedSafeAreaPadding(PaddingProperty& value, const TextDirection& direction);
+    static void CheckPositionLocalizedEdges(EdgesParam& value, TextDirection layoutDirection);
+    static void CheckOffsetLocalizedEdges(EdgesParam& value, TextDirection layoutDirection);
+    static void CheckLocalizedEdgeWidths(BorderWidthProperty& value, const TextDirection& direction);
+    static void CheckLocalizedBorderRadiuses(BorderRadiusProperty& value, const TextDirection& direction);
+    static void CheckLocalizedOuterBorderColor(NG::BorderColorProperty& value, const TextDirection& direction);
+
     static void SetPadding(const CalcLength &value);
     static void SetPadding(const PaddingProperty &value);
     static void SetPadding(const RefPtr<ResourceObject>& resObj);
@@ -744,7 +753,7 @@ public:
     static void SetDefaultFocus(FrameNode* frameNode, bool isSet);
     static void SetDisplayIndex(FrameNode* frameNode, int32_t value);
     static void SetOffset(FrameNode* frameNode, const OffsetT<Dimension>& value);
-    static void SetOffset(FrameNode* frameNode, const Dimension& x, const Dimension& y,
+    static void SetOffset(FrameNode* frameNode, OffsetT<Dimension>& value,
         const RefPtr<ResourceObject>& xresObj, const RefPtr<ResourceObject>& yresObj);
     static void SetOffsetX(FrameNode* frameNode, OffsetT<Dimension>& value, const RefPtr<ResourceObject>& xresObj);
     static void SetOffsetY(FrameNode* frameNode, OffsetT<Dimension>& value, const RefPtr<ResourceObject>& yresObj);
