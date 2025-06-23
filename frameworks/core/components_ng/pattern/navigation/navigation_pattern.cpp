@@ -1929,7 +1929,7 @@ void NavigationPattern::StartDefaultAnimation(const RefPtr<NavDestinationGroupNo
         return;
     }
     // navBar or HomeDestination push navDestination
-    if (newTopNavDestination) {
+    if (newTopNavDestination && navigationMode_ == NavigationMode::STACK) {
         navigationNode->TransitionWithPush(navBarOrHomeDestNode, newTopNavDestination, true);
         return;
     }
