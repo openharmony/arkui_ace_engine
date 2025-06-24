@@ -171,7 +171,6 @@ class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         }
     }
 
-    /** @memo */
     protected __updateStruct(
         initializers?: T_Options
     ): void {
@@ -210,7 +209,6 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         content?: () => void
     ): void {}
 
-    /** @memo */
     __updateStruct(
         initializers?: T_Options
     ): void {}
