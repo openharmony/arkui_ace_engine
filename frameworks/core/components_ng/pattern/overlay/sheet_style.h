@@ -23,6 +23,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/placement.h"
+#include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
 
 namespace OHOS::Ace::NG {
@@ -46,6 +47,7 @@ enum SheetType {
     SHEET_CENTER,
     SHEET_POPUP,
     SHEET_SIDE = 3,
+    SHEET_CONTENT_COVER = 4,
     SHEET_BOTTOMLANDSPACE,
     SHEET_BOTTOM_FREE_WINDOW,
     SHEET_BOTTOM_OFFSET,
@@ -197,6 +199,7 @@ struct SheetStyle {
     std::optional<Placement> placement;
     std::optional<bool> placementOnTarget;
     std::optional<bool> showInSubWindow;
+    std::optional<ModalTransition> modalTransition;
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
@@ -216,7 +219,7 @@ struct SheetStyle {
                 hoverModeArea == sheetStyle.hoverModeArea && radius == sheetStyle.radius &&
                 detentSelection == sheetStyle.detentSelection && sheetEffectEdge == sheetStyle.sheetEffectEdge &&
                 placement == sheetStyle.placement && placementOnTarget == sheetStyle.placementOnTarget &&
-                showInSubWindow == sheetStyle.showInSubWindow);
+                showInSubWindow == sheetStyle.showInSubWindow && modalTransition == sheetStyle.modalTransition);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)

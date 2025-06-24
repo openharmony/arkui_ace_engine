@@ -1903,6 +1903,7 @@ let SheetType;
   SheetType[SheetType.CENTER = 1] = 'CENTER';
   SheetType[SheetType.POPUP = 2] = 'POPUP';
   SheetType[SheetType.SIDE = 3] = 'SIDE';
+  SheetType[SheetType.CONTENT_COVER = 4] = 'CONTENT_COVER';
 })(SheetType || (SheetType = {}));
 
 let SheetMode;
