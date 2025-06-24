@@ -10441,7 +10441,7 @@ void TextFieldPattern::AdjustSelectedBlankLineWidth(RectF& rect)
     auto textAlign = TextBase::CheckTextAlignByDirection(paragraphStyle.align, paragraphStyle.direction);
     const float blankWidth = TextBase::GetSelectedBlankLineWidth();
     auto contentWidth = GetTextContentRect().Width();
-    TextBase::UpdateSelectedBlankLineRect(rect, blankWidth, textAlign, contentWidth);
+    TextBase::UpdateSelectedBlankLineRect(rect, blankWidth, textAlign, contentWidth + GetTextContentRect().Left());
 }
 
 std::optional<TouchLocationInfo> TextFieldPattern::GetAcceptedTouchLocationInfo(const TouchEventInfo& info)

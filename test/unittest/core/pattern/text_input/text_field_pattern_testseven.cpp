@@ -150,6 +150,29 @@ HWTEST_F(TextFieldPatternTestSeven, AdjustSelectedBlankLineWidth001, TestSize.Le
 }
 
 /**
+ * @tc.name: AdjustSelectedBlankLineWidth002
+ * @tc.desc: Test TextFieldPattern AdjustSelectedBlankLineWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestSeven, AdjustSelectedBlankLineWidth002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create frameNode
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
+
+    RectF rect;
+    pattern->AdjustSelectedBlankLineWidth(rect);
+    ASSERT_EQ(NearZero(rect.Width()), false);
+}
+
+/**
  * @tc.name: GetGlyphPositionAtCoordinate001
  * @tc.desc: Test TextFieldPattern GetGlyphPositionAtCoordinate
  * @tc.type: FUNC
