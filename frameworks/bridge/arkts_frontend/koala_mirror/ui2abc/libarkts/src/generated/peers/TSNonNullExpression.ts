@@ -49,6 +49,7 @@ export class TSNonNullExpression extends Expression {
         global.generatedEs2panda._TSNonNullExpressionSetExpr(global.context, this.peer, passNode(expr))
         return this
     }
+    protected readonly brandTSNonNullExpression: undefined
 }
 export function isTSNonNullExpression(node: object | undefined): node is TSNonNullExpression {
     return node instanceof TSNonNullExpression

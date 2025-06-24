@@ -32,4 +32,5 @@ export class DiagnosticInfo extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandDiagnosticInfo: undefined
 }

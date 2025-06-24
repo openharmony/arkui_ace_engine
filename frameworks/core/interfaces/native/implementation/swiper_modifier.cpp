@@ -825,8 +825,13 @@ void PrevMarginImpl(Ark_NativePointer node,
     if (!optMargin) {
         margin.SetValue(0.0);
     }
-    auto optIgnore = ignoreBlank ? Converter::OptConvert<bool>(*ignoreBlank) : std::nullopt;
-    SwiperModelStatic::SetPreviousMargin(frameNode, margin, optIgnore);
+    bool ignoreResult = false;
+    if (ignoreBlank->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        SwiperModelStatic::SetPreviousMargin(frameNode, margin, false);
+        return;
+    }
+    ignoreResult = Converter::Convert<bool>(ignoreBlank->value);
+    SwiperModelStatic::SetPreviousMargin(frameNode, margin, ignoreResult);
 }
 void NextMarginImpl(Ark_NativePointer node,
                     const Opt_Length* value,
@@ -840,8 +845,12 @@ void NextMarginImpl(Ark_NativePointer node,
     if (!optMargin) {
         margin.SetValue(0.0);
     }
-    auto optIgnore = ignoreBlank ? Converter::OptConvert<bool>(*ignoreBlank) : std::nullopt;
-    SwiperModelStatic::SetNextMargin(frameNode, margin, optIgnore);
+    bool ignoreResult = false;
+    if (ignoreBlank->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        SwiperModelStatic::SetPreviousMargin(frameNode, margin, false);
+        return;
+    }
+    SwiperModelStatic::SetNextMargin(frameNode, margin, ignoreResult);
 }
 void _onChangeEvent_indexImpl(Ark_NativePointer node,
                               const Callback_Opt_Number_Void* callback)

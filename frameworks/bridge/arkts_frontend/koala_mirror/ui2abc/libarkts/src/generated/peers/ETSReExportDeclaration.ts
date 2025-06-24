@@ -42,6 +42,7 @@ export class ETSReExportDeclaration extends Statement {
     get programPath(): string {
         return unpackString(global.generatedEs2panda._ETSReExportDeclarationGetProgramPathConst(global.context, this.peer))
     }
+    protected readonly brandETSReExportDeclaration: undefined
 }
 export function isETSReExportDeclaration(node: object | undefined): node is ETSReExportDeclaration {
     return node instanceof ETSReExportDeclaration

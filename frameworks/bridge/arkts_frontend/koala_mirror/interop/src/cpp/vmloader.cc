@@ -153,6 +153,7 @@ struct VMEntry {
     void* restartWith;
     void* loadView;
     ForeignVMContext foreignVMContext;
+    std::string userFilesAbcPaths;
 };
 
 VMEntry g_vmEntry = {};
@@ -240,7 +241,7 @@ static std::string makeClasspath(const std::vector<std::string>& files)
     return stream.str();
 }
 
-static std::pair<std::string, std::string> GetBootAndAppPandaFiles(const VMLibInfo* thisVM, const char* appClassPath)
+static std::pair<std::string, std::string> GetBootAndAppPandaFiles(const VMLibInfo* thisVM, const char* bootFilesPath, const char* userFilesPath)
 {
     std::vector<std::string> bootFiles;
 #if USE_SYSTEM_ARKVM
@@ -256,12 +257,18 @@ static std::pair<std::string, std::string> GetBootAndAppPandaFiles(const VMLibIn
         "etsstdlib_bootabc"
     });
 #endif
+
+    std::vector<std::string> userFiles;
+    traverseDir(userFilesPath, userFiles, ".abc");
+    std::sort(userFiles.begin(), userFiles.end());
+
+    traverseDir(bootFilesPath, bootFiles, ".abc");
     std::sort(bootFiles.begin(), bootFiles.end());
 
-    std::vector<std::string> files;
-    traverseDir(std::string(appClassPath), files, ".abc");
-    std::sort(files.begin(), files.end());
-    return { makeClasspath(bootFiles), makeClasspath(files) };
+    if (bootFiles.empty() || userFiles.empty())
+        return {"",""};
+
+    return { makeClasspath(bootFiles), makeClasspath(userFiles) };
 }
 
 static std::string GetAOTFiles(const char* appClassPath)
@@ -282,12 +289,13 @@ static bool ResetErrorIfExists(ani_env *env)
     }
     return false;
 }
+
 #endif
 
-extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* appClassPath, const char* appLibPath, const ForeignVMContext* foreignVMContext)
+extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* bootFilesDir, const char* userFilesDir, const char* appLibPath, const ForeignVMContext* foreignVMContext)
 {
     if (vmKind == ES2PANDA_KIND) {
-        return loadES2Panda(appClassPath, appLibPath);
+        return loadES2Panda(bootFilesDir, appLibPath);
     }
 
     const VMLibInfo* thisVM =
@@ -304,7 +312,7 @@ extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* appClassP
         return -1;
     }
 
-    LOGI("Starting VM %" LOG_PUBLIC "d with classpath=%" LOG_PUBLIC "s native=%" LOG_PUBLIC "s", vmKind, appClassPath, appLibPath);
+    LOGI("Starting VM %" LOG_PUBLIC "d with bootFilesDir=%" LOG_PUBLIC "s bootFilesDir=%" LOG_PUBLIC "s native=%" LOG_PUBLIC "s", vmKind, bootFilesDir, userFilesDir, appLibPath);
 
     std::string libPath =
 #if USE_SYSTEM_ARKVM
@@ -340,7 +348,7 @@ extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* appClassP
         javaVMArgs.ignoreUnrecognized = false;
         std::vector<JavaVMOption> javaVMOptions;
         javaVMOptions = {
-            {(char*)strdup((std::string("-Djava.class.path=") + appClassPath).c_str())},
+            {(char*)strdup((std::string("-Djava.class.path=") + bootFilesDir).c_str())},
             {(char*)strdup((std::string("-Djava.library.path=") + appLibPath).c_str())},
         };
         javaVMArgs.nOptions = javaVMOptions.size();
@@ -364,17 +372,15 @@ extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* appClassP
         if (nVMs == 0 && result == 0) {
             std::vector<ani_option> pandaVMOptions;
 
-            auto [bootFiles, appFiles] = GetBootAndAppPandaFiles(thisVM, appClassPath);
-            LOGI("Using ANI: classpath \"%" LOG_PUBLIC "s\" from %" LOG_PUBLIC "s", appFiles.c_str(), appClassPath);
-            std::string delimiter = "";
-            if (!bootFiles.empty() && !appFiles.empty()) {
-                delimiter = ":";
-            }
-            std::string bootPandaFiles = "--ext:--boot-panda-files=" + bootFiles + delimiter + appFiles;
-            LOGI("ANI boot-panda-files option: \"%" LOG_PUBLIC "s\"", bootPandaFiles.c_str());
-            pandaVMOptions.push_back({bootPandaFiles.c_str(), nullptr});
+            auto [bootFiles, userFiles] = GetBootAndAppPandaFiles(thisVM, bootFilesDir, userFilesDir);
+            LOGI("ANI: user abc-files \"%" LOG_PUBLIC "s\" from %" LOG_PUBLIC "s", userFiles.c_str(), userFilesDir);
+            g_vmEntry.userFilesAbcPaths = std::move(userFiles);
 
-            auto aotFiles = GetAOTFiles(appClassPath);
+            bootFiles = "--ext:--boot-panda-files=" + bootFiles;
+            LOGI("ANI boot-panda-files option: \"%" LOG_PUBLIC "s\"", bootFiles.c_str());
+            pandaVMOptions.push_back({bootFiles.c_str(), nullptr});
+
+            auto aotFiles = GetAOTFiles(bootFilesDir);
             if (!aotFiles.empty()) {
                 LOGI("ANI AOT files: \"%" LOG_PUBLIC "s\"", aotFiles.c_str());
                 aotFiles = "--ext:--aot-files=" + aotFiles;
@@ -410,10 +416,10 @@ extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* appClassP
         pandaVMArgs.version = ETS_NAPI_VERSION_1_0;
         std::vector<EtsVMOption> etsVMOptions;
         std::vector<std::string> files;
-        traverseDir(std::string(appClassPath), files, ".abc");
+        traverseDir(std::string(bootFilesDir), files, ".abc");
         std::sort(files.begin(), files.end());
         std::vector<std::string> files_aot;
-        traverseDir(std::string(appClassPath), files_aot, ".an");
+        traverseDir(std::string(bootFilesDir), files_aot, ".an");
         std::sort(files_aot.begin(), files_aot.end());
         etsVMOptions = {
 #if USE_SYSTEM_ARKVM
@@ -431,21 +437,20 @@ extern "C" DLL_EXPORT KInt LoadVirtualMachine(KInt vmKind, const char* appClassP
             if (all_files.size() > 0) all_files.append(":");
             all_files.append(path);
         }
-        LOGI("Using ETSNAPI: classpath \"%" LOG_PUBLIC "s\" from %" LOG_PUBLIC "s", all_files.c_str(), appClassPath);
+        LOGI("Using ETSNAPI: classpath \"%" LOG_PUBLIC "s\" from %" LOG_PUBLIC "s", all_files.c_str(), bootFilesDir);
         std::string all_files_aot;
         for (const std::string& path : files_aot) {
             etsVMOptions.push_back({EtsOptionType::ETS_AOT_FILE, (char*)strdup(path.c_str())});
             if (all_files_aot.size() > 0) all_files_aot.append(":");
             all_files_aot.append(path);
         }
-        LOGI("ETSNAPI classpath (aot) \"%" LOG_PUBLIC "s\" from %" LOG_PUBLIC "s", all_files_aot.c_str(), appClassPath);
+        LOGI("ETSNAPI classpath (aot) \"%" LOG_PUBLIC "s\" from %" LOG_PUBLIC "s", all_files_aot.c_str(), bootFilesDir);
         etsVMOptions.push_back({EtsOptionType::ETS_GC_TRIGGER_TYPE, "heap-trigger"});
         etsVMOptions.push_back({EtsOptionType::ETS_NATIVE_LIBRARY_PATH, (char*)strdup(std::string(appLibPath).c_str())});
         etsVMOptions.push_back({EtsOptionType::ETS_VERIFICATION_MODE, "on-the-fly"});
         etsVMOptions.push_back({EtsOptionType::ETS_JIT, nullptr});
         etsVMOptions.push_back({EtsOptionType::ETS_MOBILE_LOG, (void*)ArkMobileLog});
         etsVMOptions.push_back({EtsOptionType::ETS_AOT, nullptr});
-        // etsVMOptions.push_back({EtsOptionType::ETS_LOG_LEVEL, "info"});
         pandaVMArgs.nOptions = etsVMOptions.size();
         pandaVMArgs.options = etsVMOptions.data();
         g_vmEntry.vmKind = vmKind;
@@ -541,7 +546,7 @@ const AppInfo harnessAppInfo = {
 const AppInfo harnessAniAppInfo = {
     "L@koalaui/ets-harness/src/EtsHarnessApplication/EtsHarnessApplication;",
     "createApplication",
-    "Lstd/core/String;Lstd/core/String;ZI:L@koalaui/ets-harness/src/EtsHarnessApplication/EtsHarnessApplication;",
+    "Lstd/core/String;Lstd/core/String;Lstd/core/String;ZI:L@koalaui/ets-harness/src/EtsHarnessApplication/EtsHarnessApplication;",
     "start",
     "J:J",
     "enter",
@@ -556,7 +561,7 @@ const AppInfo harnessAniAppInfo = {
 const AppInfo aniAppInfo = {
     "L@ohos/arkui/Application/Application;",
     "createApplication",
-    "Lstd/core/String;Lstd/core/String;ZI:L@ohos/arkui/Application/Application;",
+    "Lstd/core/String;Lstd/core/String;Lstd/core/String;ZI:L@ohos/arkui/Application/Application;",
     "start",
     "J:J",
     "enter",
@@ -728,6 +733,14 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
             ResetErrorIfExists(env);
             return nullptr;
         }
+
+        ani_string userPandaFilesPathString {};
+        status = env->String_NewUTF8(g_vmEntry.userFilesAbcPaths.c_str(), g_vmEntry.userFilesAbcPaths.size(), &userPandaFilesPathString);
+        if (status != ANI_OK) {
+            ResetErrorIfExists(env);
+            return nullptr;
+        }
+
         ani_string appParamsString {};
         status = env->String_NewUTF8(appParams, strlen(appParams), &appParamsString);
         if (status != ANI_OK) {
@@ -736,7 +749,7 @@ extern "C" DLL_EXPORT KNativePointer StartApplication(const char* appUrl, const 
         }
 
         ani_ref appInstance {};
-        status = env->Class_CallStaticMethod_Ref(appClass, create, &appInstance, appUrlString, appParamsString,
+        status = env->Class_CallStaticMethod_Ref(appClass, create, &appInstance, appUrlString, userPandaFilesPathString, appParamsString,
             useNativeLog, static_cast<ani_int>(g_vmEntry.vmKind));
         if (status != ANI_OK) {
             LOGE("createApplication returned null");

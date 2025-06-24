@@ -19,11 +19,9 @@
                 "transform": "@koalaui/memo-plugin",
                 "stage": "checked",
                 "contextImport": "../internals",
-                "name": "memo",
-                "manuallyDisableInsertingImport": true
+                "name": "memo"
             }
         ]
     },
-    "include": ["ets/**/*.ts"],
-    "exclude": ["ets/index.ts", "ets/internals.ts"]
+    "include": ["ets/**/*.ts"]
 }

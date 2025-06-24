@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef CONVERTORS_WASM_H
+#define CONVERTORS_WASM_H
 
 #include "koala-types.h"
 
-#include <assert.h>
 #include <emscripten.h>
 #define KOALA_INTEROP_EXPORT EMSCRIPTEN_KEEPALIVE extern "C"
+
+#include "interop-logging.h"
 
 template<class T>
 struct InteropTypeConverter {
@@ -816,12 +818,14 @@ KOALA_INTEROP_EXPORT void name(                                            \
 
 #define KOALA_INTEROP_THROW(vmContext, object, ...) \
    do { \
-     assert(false); /* TODO: implement*/ \
+     ASSERT(false); /* TODO: implement*/ \
      return __VA_ARGS__; \
    } while (0)
 
 #define KOALA_INTEROP_THROW_STRING(vmContext, message, ...) \
    do { \
-      assert(false); /* TODO: implement*/ \
+      ASSERT(false); /* TODO: implement*/ \
      return __VA_ARGS__; \
    } while (0)
+
+#endif // CONVERTORS_WASM_H

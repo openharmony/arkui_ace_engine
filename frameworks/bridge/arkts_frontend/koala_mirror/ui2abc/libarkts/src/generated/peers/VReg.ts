@@ -32,4 +32,5 @@ export class VReg extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandVReg: undefined
 }

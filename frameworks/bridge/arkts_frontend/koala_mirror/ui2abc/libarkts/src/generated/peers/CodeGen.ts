@@ -32,4 +32,5 @@ export class CodeGen extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandCodeGen: undefined
 }

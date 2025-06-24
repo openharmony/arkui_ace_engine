@@ -66,7 +66,11 @@ ohos_shared_library("arcalphabetindexer") {
   ]
 
   if (!(use_mingw_win || use_mac || use_linux)) {
-    external_deps += [ "ets_runtime:libark_jsruntime" ]
+    if (defined(ark_hybrid) && ark_hybrid) {
+      external_deps += [ "runtime_core:libarkruntime" ]
+    } else {
+      external_deps += [ "ets_runtime:libark_jsruntime" ]
+    }
   }
 
   if (!use_mac) {

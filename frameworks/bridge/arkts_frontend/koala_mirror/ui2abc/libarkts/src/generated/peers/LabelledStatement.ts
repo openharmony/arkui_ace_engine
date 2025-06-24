@@ -51,6 +51,7 @@ export class LabelledStatement extends Statement {
     get referencedStatement(): AstNode | undefined {
         return unpackNode(global.generatedEs2panda._LabelledStatementGetReferencedStatementConst(global.context, this.peer))
     }
+    protected readonly brandLabelledStatement: undefined
 }
 export function isLabelledStatement(node: object | undefined): node is LabelledStatement {
     return node instanceof LabelledStatement

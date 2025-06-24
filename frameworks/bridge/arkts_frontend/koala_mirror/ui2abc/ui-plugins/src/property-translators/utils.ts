@@ -36,6 +36,7 @@ export enum DecoratorNames {
     CUSTOM_DIALOG = "CustomDialog",
     LOCAL_STORAGE_PROP = "LocalStorageProp",
     LOCAL_STORAGE_LINK = "LocalStorageLink",
+    LOCAL_BUILDER = "LocalBuilder",
 }
 
 export enum DecoratorParameters {
@@ -55,6 +56,10 @@ export function hasDecorator(property: arkts.ClassProperty | arkts.ClassDefiniti
         return property.decorators.some((anno) => arkts.isIdentifier(anno.expr) && anno.expr.name === decoratorName)
     }
     return property.annotations.some((anno) => isDecoratorAnnotation(anno, decoratorName));
+}
+
+export function hasBuilderDecorator(property: arkts.ClassProperty | arkts.ClassDefinition | arkts.ClassDeclaration | arkts.MethodDefinition | arkts.FunctionDeclaration): boolean {
+    return hasDecorator(property, DecoratorNames.BUILDER) || hasDecorator(property, DecoratorNames.LOCAL_BUILDER)
 }
 
 export function getStageManagmentType(node: arkts.ClassProperty): string {
@@ -147,7 +152,7 @@ export function createSetter(
 export function createSetter2(
     name: string,
     type: arkts.TypeNode | undefined,
-    statement: arkts.AstNode
+    statement: arkts.Statement
 ): arkts.MethodDefinition {
     const body = arkts.factory.createBlockStatement([statement]);
     const param: arkts.ETSParameterExpression = arkts.factory.createETSParameterExpression(

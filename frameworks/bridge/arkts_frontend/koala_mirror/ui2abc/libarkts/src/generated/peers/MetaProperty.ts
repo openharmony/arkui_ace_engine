@@ -45,6 +45,7 @@ export class MetaProperty extends Expression {
     get kind(): Es2pandaMetaPropertyKind {
         return global.generatedEs2panda._MetaPropertyKindConst(global.context, this.peer)
     }
+    protected readonly brandMetaProperty: undefined
 }
 export function isMetaProperty(node: object | undefined): node is MetaProperty {
     return node instanceof MetaProperty

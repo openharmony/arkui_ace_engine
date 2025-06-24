@@ -45,22 +45,19 @@ type MemoType = @memo () => void
 	arg5?.(arg1)
 }
 
-// Disabled for now it breaks recheck
+@memo function call_with_receiver(obj: A, @memo v: (this: A) => int): int {
+	const x = obj.v()
+	const y = v(obj)
+	return x + y
+}
 
-// @memo function call_with_receiver(obj: A, @memo v: (this: A) => int): int {
-// 	const x = obj.v()
-// 	const y = v(obj)
-// 	return x + y
-// }
-
-// @memo function test_call_with_receiver() {
-// 	const a = new A()
-// 	const f = @memo (this: A): int => {
-// 		return 11
-// 	}
-// 	call_with_receiver(a, f)
-// }
-
+@memo function test_call_with_receiver() {
+	const a = new A()
+	const f = @memo (this: A): int => {
+		return 11
+	}
+	call_with_receiver(a, f)
+}
 class A {
 	x: int
 	y: int

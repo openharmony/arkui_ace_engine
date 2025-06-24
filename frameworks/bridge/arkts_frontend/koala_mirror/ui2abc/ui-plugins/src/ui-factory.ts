@@ -96,36 +96,37 @@ export class factory {
     /**
      * create `initializers: <optionsName> | undefined` as parameter
      */
-    static createInitializersOptionsParameter(optionsName: string): arkts.ETSParameterExpression {
+    static createInitializersOptionsParameter(optionsName: string, isOptional: boolean = false): arkts.ETSParameterExpression {
         return arkts.factory.createETSParameterExpression(
             factory.createInitializerOptionsIdentifier(
                 optionsName
             ),
-            false
+            isOptional
         )
     }
 
     /**
      * create `content: (() => void) | undefined` as identifier
      */
-    static createContentIdentifier(): arkts.Identifier {
+    static createContentIdentifier(isOptional: boolean): arkts.Identifier {
         return arkts.factory.createIdentifier(
-            BuilderLambdaNames.CONTENT_PARAM_NAME,
-            arkts.factory.createETSUnionType([
-                factory.createLambdaFunctionType(),
-                arkts.factory.createETSUndefinedType()
-            ])
-        );
+                BuilderLambdaNames.CONTENT_PARAM_NAME,
+                isOptional ? factory.createLambdaFunctionType() :
+                arkts.factory.createETSUnionType([
+                    factory.createLambdaFunctionType(),
+                    arkts.factory.createETSUndefinedType()
+                ])
+            )
     }
 
     /**
      * create `@memo() content: (() => void) | undefined` as parameter
      */
-    static createContentParameter(): arkts.ETSParameterExpression {
-        const contentParam: arkts.Identifier = factory.createContentIdentifier();
-        const param = arkts.factory.createETSParameterExpression(contentParam, false);
-        param.setAnnotations([annotation(InternalAnnotations.MEMO)]);
-        return param;
+    static createContentParameter(isOptional: boolean = false): arkts.ETSParameterExpression {
+        const contentParam: arkts.Identifier = factory.createContentIdentifier(isOptional)
+        const param = arkts.factory.createETSParameterExpression(contentParam, isOptional)
+        param.setAnnotations([annotation(InternalAnnotations.MEMO)])
+        return param
     }
 
     /**

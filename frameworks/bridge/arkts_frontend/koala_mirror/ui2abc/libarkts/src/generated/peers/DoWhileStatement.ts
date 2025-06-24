@@ -49,6 +49,7 @@ export class DoWhileStatement extends LoopStatement {
     get test(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._DoWhileStatementTest(global.context, this.peer))
     }
+    protected readonly brandDoWhileStatement: undefined
 }
 export function isDoWhileStatement(node: object | undefined): node is DoWhileStatement {
     return node instanceof DoWhileStatement

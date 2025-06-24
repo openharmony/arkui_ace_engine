@@ -52,6 +52,14 @@ std::unique_ptr<AssetMapping> HapAssetProviderImpl::GetAsMapping(const std::stri
             continue;
         }
         std::ostringstream osStream;
+        auto mapper = runtimeExtractor_->GetSafeData(fileName);
+        if (!mapper) {
+            continue;
+        }
+        if (mapper->GetDataLen()) {
+            osStream.write((char*)mapper->GetDataPtr(), mapper->GetDataLen());
+            return std::make_unique<HapAssetImplMapping>(osStream);
+        }
         hasFile = runtimeExtractor_->GetFileBuffer(fileName, osStream);
         if (!hasFile) {
             continue;

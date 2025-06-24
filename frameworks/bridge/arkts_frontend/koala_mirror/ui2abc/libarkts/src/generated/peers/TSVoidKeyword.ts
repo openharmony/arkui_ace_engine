@@ -41,6 +41,7 @@ export class TSVoidKeyword extends TypeNode {
     static updateTSVoidKeyword(original?: TSVoidKeyword): TSVoidKeyword {
         return new TSVoidKeyword(global.generatedEs2panda._UpdateTSVoidKeyword(global.context, passNode(original)))
     }
+    protected readonly brandTSVoidKeyword: undefined
 }
 export function isTSVoidKeyword(node: object | undefined): node is TSVoidKeyword {
     return node instanceof TSVoidKeyword

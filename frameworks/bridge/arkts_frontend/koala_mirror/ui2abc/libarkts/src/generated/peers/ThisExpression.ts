@@ -41,6 +41,7 @@ export class ThisExpression extends Expression {
     static updateThisExpression(original?: ThisExpression): ThisExpression {
         return new ThisExpression(global.generatedEs2panda._UpdateThisExpression(global.context, passNode(original)))
     }
+    protected readonly brandThisExpression: undefined
 }
 export function isThisExpression(node: object | undefined): node is ThisExpression {
     return node instanceof ThisExpression

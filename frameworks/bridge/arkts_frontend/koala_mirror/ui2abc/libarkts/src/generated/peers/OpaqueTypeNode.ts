@@ -41,6 +41,7 @@ export class OpaqueTypeNode extends TypeNode {
     static update1OpaqueTypeNode(original?: OpaqueTypeNode): OpaqueTypeNode {
         return new OpaqueTypeNode(global.generatedEs2panda._UpdateOpaqueTypeNode1(global.context, passNode(original)))
     }
+    protected readonly brandOpaqueTypeNode: undefined
 }
 export function isOpaqueTypeNode(node: object | undefined): node is OpaqueTypeNode {
     return node instanceof OpaqueTypeNode

@@ -41,6 +41,7 @@ export class SuperExpression extends Expression {
     static updateSuperExpression(original?: SuperExpression): SuperExpression {
         return new SuperExpression(global.generatedEs2panda._UpdateSuperExpression(global.context, passNode(original)))
     }
+    protected readonly brandSuperExpression: undefined
 }
 export function isSuperExpression(node: object | undefined): node is SuperExpression {
     return node instanceof SuperExpression

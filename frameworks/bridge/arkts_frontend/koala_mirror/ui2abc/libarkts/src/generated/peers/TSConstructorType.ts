@@ -56,6 +56,7 @@ export class TSConstructorType extends TypeNode {
     get abstract(): boolean {
         return global.generatedEs2panda._TSConstructorTypeAbstractConst(global.context, this.peer)
     }
+    protected readonly brandTSConstructorType: undefined
 }
 export function isTSConstructorType(node: object | undefined): node is TSConstructorType {
     return node instanceof TSConstructorType

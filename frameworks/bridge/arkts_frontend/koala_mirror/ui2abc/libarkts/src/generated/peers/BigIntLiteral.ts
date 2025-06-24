@@ -44,6 +44,7 @@ export class BigIntLiteral extends Literal {
     get str(): string {
         return unpackString(global.generatedEs2panda._BigIntLiteralStrConst(global.context, this.peer))
     }
+    protected readonly brandBigIntLiteral: undefined
 }
 export function isBigIntLiteral(node: object | undefined): node is BigIntLiteral {
     return node instanceof BigIntLiteral

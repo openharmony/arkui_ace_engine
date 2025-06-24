@@ -92,6 +92,9 @@
             "@ohos/arkui/componentSnapshot": [
                 "@ohos.arkui.componentSnapshot.ets"
             ],
+            "@ohos.multimodalInput.intentionCode": [
+                "@ohos.multimodalInput.intentionCode.ets"
+            ],
             "#stateMgmtTool": [
                 "./arkui/stateManagement/tools/arkts"
             ]

@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef CONVERTORS_CJ_H
+#define CONVERTORS_CJ_H
 
 #include <cmath>
-#include <assert.h>
 #include <memory>
 #include <vector>
 #include <string>
 
 #include "koala-types.h"
+#include "interop-logging.h"
 
 #define KOALA_INTEROP_EXPORT extern "C"
 
@@ -929,12 +930,14 @@ KOALA_INTEROP_EXPORT void name(InteropTypeConverter<P0>::InteropType _p0,  \
 
 #define KOALA_INTEROP_THROW(vmContext, object, ...) \
    do { \
-     /* TODO: implement*/  assert(false); \
+     /* TODO: implement*/  ASSERT(false); \
      return __VA_ARGS__; \
    } while (0)
 
 #define KOALA_INTEROP_THROW_STRING(vmContext, message, ...) \
    do { \
-     /* TODO: implement*/  assert(false); \
+     /* TODO: implement*/  ASSERT(false); \
      return __VA_ARGS__; \
    } while (0)
+
+#endif // CONVERTORS_CJ_H

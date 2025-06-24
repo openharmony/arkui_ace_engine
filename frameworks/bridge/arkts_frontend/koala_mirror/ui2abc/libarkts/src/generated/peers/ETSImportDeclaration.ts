@@ -62,12 +62,18 @@ export class ETSImportDeclaration extends ImportDeclaration {
     get isPureDynamic(): boolean {
         return global.generatedEs2panda._ETSImportDeclarationIsPureDynamicConst(global.context, this.peer)
     }
+    /** @deprecated */
+    setAssemblerName(assemblerName: string): this {
+        global.generatedEs2panda._ETSImportDeclarationSetAssemblerName(global.context, this.peer, assemblerName)
+        return this
+    }
     get assemblerName(): string {
-        return unpackString(global.generatedEs2panda._ETSImportDeclarationAssemblerName(global.context, this.peer))
+        return unpackString(global.generatedEs2panda._ETSImportDeclarationAssemblerNameConst(global.context, this.peer))
     }
     get resolvedSource(): string {
         return unpackString(global.generatedEs2panda._ETSImportDeclarationResolvedSourceConst(global.context, this.peer))
     }
+    protected readonly brandETSImportDeclaration: undefined
 }
 export function isETSImportDeclaration(node: object | undefined): node is ETSImportDeclaration {
     return node instanceof ETSImportDeclaration

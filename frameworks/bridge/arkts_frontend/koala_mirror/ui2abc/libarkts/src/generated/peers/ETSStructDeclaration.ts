@@ -42,6 +42,7 @@ export class ETSStructDeclaration extends ClassDeclaration {
     static updateETSStructDeclaration(original?: ETSStructDeclaration, def?: ClassDefinition): ETSStructDeclaration {
         return new ETSStructDeclaration(global.generatedEs2panda._UpdateETSStructDeclaration(global.context, passNode(original), passNode(def)))
     }
+    protected readonly brandETSStructDeclaration: undefined
 }
 export function isETSStructDeclaration(node: object | undefined): node is ETSStructDeclaration {
     return node instanceof ETSStructDeclaration

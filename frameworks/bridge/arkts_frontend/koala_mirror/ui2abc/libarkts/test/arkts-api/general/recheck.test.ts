@@ -122,11 +122,11 @@ console.log("test");
         const importStorage = new arkts.ImportStorage(arkts.arktsGlobal.compilerContext.program, true)
         const module = arkts.createETSModuleFromContext()
 
-        arkts.arktsGlobal.compilerContext.program.externalSources.forEach(it => {
+        arkts.programGetExternalSources(arkts.arktsGlobal.compilerContext.program).forEach(it => {
             if (!it.getName().includes("library")) return
             it.programs.forEach(program => {
-                new RenameTestFunction().visitor(program.astNode)
-                arkts.arktsGlobal.es2panda._AstNodeUpdateAll(program.astNode.peer, module.peer)
+                new RenameTestFunction().visitor(program.ast)
+                arkts.arktsGlobal.es2panda._AstNodeUpdateAll(program.ast.peer, module.peer)
             })
         })
 

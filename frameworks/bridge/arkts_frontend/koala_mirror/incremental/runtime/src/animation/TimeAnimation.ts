@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { float64, int32, int64, isFiniteNumber, uint32 } from "@koalaui/common"
+import { float64, float64ToLong, int32, int64, isFiniteNumber, uint32 } from "@koalaui/common"
 import { AnimationRange, NumberAnimationRange } from "./AnimationRange"
 import { Easing, EasingCurve } from "./Easing"
 import { scheduleCallback } from "../states/GlobalStateManager"
@@ -322,7 +322,7 @@ class PeriodicAnimationImpl<Value> implements TimeAnimation<Value> {
         let result = this.state
         let passedTime = currentTime - startTime
         if (passedTime > this.period) {
-            result += Math.floor(passedTime / this.period) as int64
+            result += float64ToLong(Math.floor(passedTime / this.period))
             passedTime = passedTime % this.period
             // tune start time for long animations
             this.startTime = currentTime - passedTime

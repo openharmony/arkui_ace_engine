@@ -55,6 +55,7 @@ export class TSImportType extends TypeNode {
     get isTypeof(): boolean {
         return global.generatedEs2panda._TSImportTypeIsTypeofConst(global.context, this.peer)
     }
+    protected readonly brandTSImportType: undefined
 }
 export function isTSImportType(node: object | undefined): node is TSImportType {
     return node instanceof TSImportType

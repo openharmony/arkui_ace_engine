@@ -75,6 +75,7 @@ export class ETSFunctionType extends TypeNode {
     get isExtensionFunction(): boolean {
         return global.generatedEs2panda._ETSFunctionTypeIsExtensionFunctionConst(global.context, this.peer)
     }
+    protected readonly brandETSFunctionType: undefined
 }
 export function isETSFunctionType(node: object | undefined): node is ETSFunctionType {
     return node instanceof ETSFunctionType

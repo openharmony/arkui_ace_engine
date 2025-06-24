@@ -58,6 +58,11 @@ export class Identifier extends AnnotatedExpression {
         global.generatedEs2panda._IdentifierSetName(global.context, this.peer, newName)
         return this
     }
+    /** @deprecated */
+    setValueDecorators(source: Decorator | undefined, index: number): this {
+        global.generatedEs2panda._IdentifierSetValueDecorators(global.context, this.peer, passNode(source), index)
+        return this
+    }
     get decorators(): readonly Decorator[] {
         return unpackNodeArray(global.generatedEs2panda._IdentifierDecoratorsConst(global.context, this.peer))
     }
@@ -145,6 +150,7 @@ export class Identifier extends AnnotatedExpression {
         global.generatedEs2panda._IdentifierSetTsTypeAnnotation(global.context, this.peer, passNode(typeAnnotation))
         return this
     }
+    protected readonly brandIdentifier: undefined
 }
 export function isIdentifier(node: object | undefined): node is Identifier {
     return node instanceof Identifier

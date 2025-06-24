@@ -42,6 +42,7 @@ export class ETSPackageDeclaration extends Statement {
     static updateETSPackageDeclaration(original?: ETSPackageDeclaration, name?: Expression): ETSPackageDeclaration {
         return new ETSPackageDeclaration(global.generatedEs2panda._UpdateETSPackageDeclaration(global.context, passNode(original), passNode(name)))
     }
+    protected readonly brandETSPackageDeclaration: undefined
 }
 export function isETSPackageDeclaration(node: object | undefined): node is ETSPackageDeclaration {
     return node instanceof ETSPackageDeclaration

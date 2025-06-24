@@ -20,7 +20,6 @@
                 "transform": "@koalaui/memo-plugin",
                 "stage": "checked",
                 "name": "memo"
-                "manuallyDisableInsertingImport": true
             }
         ]
     },

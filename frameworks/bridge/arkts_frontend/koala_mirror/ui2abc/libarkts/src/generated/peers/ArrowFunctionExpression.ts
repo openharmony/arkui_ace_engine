@@ -53,14 +53,43 @@ export class ArrowFunctionExpression extends Expression {
     get createTypeAnnotation(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._ArrowFunctionExpressionCreateTypeAnnotation(global.context, this.peer))
     }
+    /** @deprecated */
+    emplaceAnnotations(source?: AnnotationUsage): this {
+        global.generatedEs2panda._ArrowFunctionExpressionEmplaceAnnotations(global.context, this.peer, passNode(source))
+        return this
+    }
+    /** @deprecated */
+    clearAnnotations(): this {
+        global.generatedEs2panda._ArrowFunctionExpressionClearAnnotations(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setValueAnnotations(source: AnnotationUsage | undefined, index: number): this {
+        global.generatedEs2panda._ArrowFunctionExpressionSetValueAnnotations(global.context, this.peer, passNode(source), index)
+        return this
+    }
+    get annotationsForUpdate(): readonly AnnotationUsage[] {
+        return unpackNodeArray(global.generatedEs2panda._ArrowFunctionExpressionAnnotationsForUpdate(global.context, this.peer))
+    }
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._ArrowFunctionExpressionAnnotations(global.context, this.peer))
     }
     /** @deprecated */
-    setAnnotations(annotations: readonly AnnotationUsage[]): this {
-        global.generatedEs2panda._ArrowFunctionExpressionSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+    setAnnotations(annotationList: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._ArrowFunctionExpressionSetAnnotations(global.context, this.peer, passNodeArray(annotationList), annotationList.length)
         return this
     }
+    /** @deprecated */
+    setAnnotations1(annotationList: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._ArrowFunctionExpressionSetAnnotations1(global.context, this.peer, passNodeArray(annotationList), annotationList.length)
+        return this
+    }
+    /** @deprecated */
+    addAnnotations(annotations?: AnnotationUsage): this {
+        global.generatedEs2panda._ArrowFunctionExpressionAddAnnotations(global.context, this.peer, passNode(annotations))
+        return this
+    }
+    protected readonly brandArrowFunctionExpression: undefined
 }
 export function isArrowFunctionExpression(node: object | undefined): node is ArrowFunctionExpression {
     return node instanceof ArrowFunctionExpression

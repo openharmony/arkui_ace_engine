@@ -33,6 +33,7 @@ export class LoopStatement extends Statement {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandLoopStatement: undefined
 }
 export function isLoopStatement(node: object | undefined): node is LoopStatement {
     return node instanceof LoopStatement

@@ -57,6 +57,7 @@ export class TSEnumMember extends Statement {
     get name(): string {
         return unpackString(global.generatedEs2panda._TSEnumMemberNameConst(global.context, this.peer))
     }
+    protected readonly brandTSEnumMember: undefined
 }
 export function isTSEnumMember(node: object | undefined): node is TSEnumMember {
     return node instanceof TSEnumMember

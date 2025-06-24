@@ -61,6 +61,9 @@ export class AnnotationDeclaration extends Statement {
     get properties(): readonly AstNode[] {
         return unpackNodeArray(global.generatedEs2panda._AnnotationDeclarationProperties(global.context, this.peer))
     }
+    get propertiesForUpdate(): readonly AstNode[] {
+        return unpackNodeArray(global.generatedEs2panda._AnnotationDeclarationPropertiesForUpdate(global.context, this.peer))
+    }
     /** @deprecated */
     addProperties(properties: readonly AstNode[]): this {
         global.generatedEs2panda._AnnotationDeclarationAddProperties(global.context, this.peer, passNodeArray(properties), properties.length)
@@ -93,14 +96,58 @@ export class AnnotationDeclaration extends Statement {
     get baseName(): Identifier | undefined {
         return unpackNode(global.generatedEs2panda._AnnotationDeclarationGetBaseNameConst(global.context, this.peer))
     }
+    /** @deprecated */
+    emplaceProperties(properties?: AstNode): this {
+        global.generatedEs2panda._AnnotationDeclarationEmplaceProperties(global.context, this.peer, passNode(properties))
+        return this
+    }
+    /** @deprecated */
+    clearProperties(): this {
+        global.generatedEs2panda._AnnotationDeclarationClearProperties(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setValueProperties(properties: AstNode | undefined, index: number): this {
+        global.generatedEs2panda._AnnotationDeclarationSetValueProperties(global.context, this.peer, passNode(properties), index)
+        return this
+    }
+    /** @deprecated */
+    emplaceAnnotations(source?: AnnotationUsage): this {
+        global.generatedEs2panda._AnnotationDeclarationEmplaceAnnotations(global.context, this.peer, passNode(source))
+        return this
+    }
+    /** @deprecated */
+    clearAnnotations(): this {
+        global.generatedEs2panda._AnnotationDeclarationClearAnnotations(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setValueAnnotations(source: AnnotationUsage | undefined, index: number): this {
+        global.generatedEs2panda._AnnotationDeclarationSetValueAnnotations(global.context, this.peer, passNode(source), index)
+        return this
+    }
+    get annotationsForUpdate(): readonly AnnotationUsage[] {
+        return unpackNodeArray(global.generatedEs2panda._AnnotationDeclarationAnnotationsForUpdate(global.context, this.peer))
+    }
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._AnnotationDeclarationAnnotations(global.context, this.peer))
     }
     /** @deprecated */
-    setAnnotations(annotations: readonly AnnotationUsage[]): this {
-        global.generatedEs2panda._AnnotationDeclarationSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+    setAnnotations(annotationList: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._AnnotationDeclarationSetAnnotations(global.context, this.peer, passNodeArray(annotationList), annotationList.length)
         return this
     }
+    /** @deprecated */
+    setAnnotations1(annotationList: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._AnnotationDeclarationSetAnnotations1(global.context, this.peer, passNodeArray(annotationList), annotationList.length)
+        return this
+    }
+    /** @deprecated */
+    addAnnotations(annotations?: AnnotationUsage): this {
+        global.generatedEs2panda._AnnotationDeclarationAddAnnotations(global.context, this.peer, passNode(annotations))
+        return this
+    }
+    protected readonly brandAnnotationDeclaration: undefined
 }
 export function isAnnotationDeclaration(node: object | undefined): node is AnnotationDeclaration {
     return node instanceof AnnotationDeclaration
