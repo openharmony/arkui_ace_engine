@@ -1524,4 +1524,23 @@ HWTEST_F(MenuViewTestNg, UpdateMenuProperties002, TestSize.Level1)
     ASSERT_NE(menuProperty, nullptr);
     EXPECT_EQ(menuProperty->HasAnchorPosition(), true);
 }
+
+/**
+ * @tc.name: UpdateMenuPositionLeft
+ * @tc.desc: Verify UpdateMenuProperties function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuPositionLeft, TestSize.Level1)
+{
+    MarginProperty menuNodeMargin;
+    std::map<AlignDirection, AlignRule> menuNodeAlignRules;
+    std::map<std::string, AlignRule> alignMap = { { "top", { .anchor = "__stack__", .vertical = VerticalAlign::TOP } },
+        { "center", { .anchor = "__stack__", .vertical = VerticalAlign::CENTER } },
+        { "bottom", { .anchor = "__stack__", .vertical = VerticalAlign::BOTTOM } },
+        { "start", { .anchor = "__stack__", .horizontal = HorizontalAlign::START } },
+        { "middle", { .anchor = "__stack__", .horizontal = HorizontalAlign::CENTER } },
+        { "end", { .anchor = "__stack__", .horizontal = HorizontalAlign::END } } };
+    MenuView::UpdateMenuPositionLeft(menuNodeMargin, menuNodeAlignRules, alignMap["start"], 0, 0);
+    EXPECT_EQ(menuNodeAlignRules[AlignDirection::LEFT].horizontal, HorizontalAlign::START);
+}
 } // namespace OHOS::Ace::NG

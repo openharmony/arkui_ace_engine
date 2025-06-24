@@ -2223,6 +2223,11 @@ void MenuView::UpdateMenuNodePosition(const PreparedInfoForDrag& data)
         { "start", { .anchor = "__stack__", .horizontal = HorizontalAlign::START } },
         { "middle", { .anchor = "__stack__", .horizontal = HorizontalAlign::CENTER } },
         { "end", { .anchor = "__stack__", .horizontal = HorizontalAlign::END } } };
+    auto layoutDirection = menuNodeLayoutProperty->GetNonAutoLayoutDirection();
+    if (layoutDirection == TextDirection::RTL) {
+        alignMap["start"] = { .anchor = "__stack__", .horizontal = HorizontalAlign::END };
+        alignMap["end"] = { .anchor = "__stack__", .horizontal = HorizontalAlign::START };
+    }
     if (data.menuPosition == Placement::TOP_LEFT || data.menuPosition == Placement::BOTTOM_LEFT ||
         data.menuPosition == Placement::TOP || data.menuPosition == Placement::BOTTOM ||
         data.menuPosition == Placement::TOP_RIGHT || data.menuPosition == Placement::BOTTOM_RIGHT) {
