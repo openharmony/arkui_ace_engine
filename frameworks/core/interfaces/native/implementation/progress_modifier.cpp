@@ -199,8 +199,18 @@ void SetProgressOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     auto convValue = Converter::Convert<ProgressOptions>(*options);
-    ProgressModelNG::SetTotal(frameNode, convValue.total);
-    ProgressModelNG::SetValue(frameNode, convValue.value);
+    auto value = convValue.value;
+    auto total = convValue.total;
+    if (LessOrEqual(total, 0)) {
+        total = PROGRESS_MAX_VALUE;
+    }
+    if (GreatNotEqual(value, total)) {
+        value = total;
+    } else if (LessOrEqual(value, 0)) {
+        value = 0;
+    }
+    ProgressModelNG::SetTotal(frameNode, total);
+    ProgressModelNG::SetValue(frameNode, value);
     ProgressModelNG::SetType(frameNode, convValue.type);
 }
 } // ProgressInterfaceModifier
