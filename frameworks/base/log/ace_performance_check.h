@@ -79,12 +79,14 @@ private:
     static bool CheckIsRuleContainsPage(const std::string& ruleType, const std::string& pagePath);
     static void RecordPageNodeCountAndDepth(int32_t pageNodeCount, int32_t pageDepth,
         std::vector<PerformanceCheckNode>& pageNodeList, const CodeInfo& info, const std::string& pageRoute);
-    static void RecordForEachItemsCount(int32_t count,
-        std::unordered_map<int32_t, PerformanceCheckNode>& foreachNodeMap, const CodeInfo& info, const std::string& pageRoute);
+    static void RecordForEachItemsCount(
+    int32_t count, std::unordered_map<int32_t, PerformanceCheckNode>& foreachNodeMap,
+    const CodeInfo& info, const std::string& pageRoute);
     static void RecordFlexLayoutsCount(
         const std::vector<PerformanceCheckNode>& nodeList, const CodeInfo& info, const std::string& pageRoute);
     static void RecordVsyncTimeout(
-        const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout, const CodeInfo& info, const std::string& pageRoute);
+    const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout,
+    const CodeInfo& info, const std::string& pageRoute);
     static bool CheckPage(const CodeInfo& codeInfo, const std::string& rule);
     static void RecordFunctionTimeout();
     static RefPtr<Framework::RevSourceMap> GetCurrentSourceMap();
