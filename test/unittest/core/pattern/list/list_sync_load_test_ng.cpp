@@ -155,4 +155,74 @@ HWTEST_F(ListSyncLoadTestNg, SyncLoad004, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_.size(), 4);
     EXPECT_FALSE(pattern_->prevMeasureBreak_);
 }
+
+/**
+ * @tc.name: SyncLoad005
+ * @tc.desc: Test List async load with inactive
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSyncLoadTestNg, SyncLoad005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List
+     * @tc.expected: List async load
+     */
+    ListModelNG model = CreateList();
+    model.SetSyncLoad(false);
+    CreateListItems(10);
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    EXPECT_FALSE(frameNode_->IsActive());
+
+    /**
+     * @tc.steps: step2. Layout List
+     * @tc.expected: List async load, item2 inactive
+     */
+    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    frameNode_->SetLayoutDirtyMarked(true);
+    frameNode_->CreateLayoutTask();
+    IsExistAndActive(frameNode_, 1);
+    IsExistAndInActive(frameNode_, 2);
+    EXPECT_FALSE(frameNode_->IsActive());
+    frameNode_->SetLayoutDirtyMarked(true);
+
+    /**
+     * @tc.steps: step3. Layout List 2th frame
+     * @tc.expected: List async load, item3 is active
+     */
+    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    frameNode_->CreateLayoutTask();
+    IsExistAndActive(frameNode_, 3);
+    EXPECT_FALSE(frameNode_->IsActive());
+}
+
+/**
+ * @tc.name: GroupSyncLoad001
+ * @tc.desc: Test ListItemGroup sync load
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSyncLoadTestNg, GroupSyncLoad001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List
+     * @tc.expected: ListItemGroup load 2 item in first frame
+     */
+    ListModelNG model = CreateList();
+    model.SetSyncLoad(false);
+    CreateListItemGroup(V2::ListItemGroupStyle::NONE);
+    CreateListItems(10);
+    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    CreateDone();
+    EXPECT_EQ(itemGroupPatters_[0]->itemPosition_.size(), 2);
+    EXPECT_TRUE(pattern_->prevMeasureBreak_);
+
+    /**
+     * @tc.steps: step2. Flush next frame
+     * @tc.expected: ListItemGroup load 2 item in 2th frame
+     */
+    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(itemGroupPatters_[0]->itemPosition_.size(), 4);
+    EXPECT_FALSE(pattern_->prevMeasureBreak_);
+}
 }

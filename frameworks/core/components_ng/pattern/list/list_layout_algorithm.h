@@ -466,7 +466,7 @@ public:
         isRoundingMode_ = true;
     }
 
-    bool MeasureInNextFrame() const
+    bool MeasureInNextFrame() const override
     {
         return measureInNextFrame_;
     }

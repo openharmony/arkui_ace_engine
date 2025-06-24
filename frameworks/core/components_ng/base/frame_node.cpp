@@ -4858,14 +4858,15 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     isLayoutComplete_ = true;
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
     bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
-    if (!isActive_ && !hasTransition) {
+    if ((!isActive_ && !hasTransition) ||
+        (needSkipSyncGeometryNode_ && (!geometryTransition || !geometryTransition->IsNodeInAndActive(Claim(this))))) {
+        ACE_SCOPED_TRACE("OnLayoutFinish[%s][self:%d] isActive:%d, hasTransition:%d, needSkipSyncGeometryNode:%d",
+            GetTag().c_str(), GetId(), isActive_, hasTransition, needSkipSyncGeometryNode_);
+        if (context && layoutAlgorithm_ && layoutAlgorithm_->MeasureInNextFrame()) {
+            isLayoutDirtyMarked_ = true;
+            context->AddDirtyLayoutNode(Claim(this));
+        }
         layoutAlgorithm_.Reset();
-        ACE_SCOPED_TRACE("OnLayoutFinish[%s][self:%d] !isActive && !hasTransition", GetTag().c_str(), GetId());
-        return false;
-    }
-    if (needSkipSyncGeometryNode_ && (!geometryTransition || !geometryTransition->IsNodeInAndActive(Claim(this)))) {
-        layoutAlgorithm_.Reset();
-        ACE_SCOPED_TRACE("OnLayoutFinish[%s][self:%d] needSkipSyncGeometryNode", GetTag().c_str(), GetId());
         return false;
     }
     // update layout size.

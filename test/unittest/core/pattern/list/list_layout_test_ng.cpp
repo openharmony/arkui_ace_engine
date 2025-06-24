@@ -2178,6 +2178,62 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListRepeatCacheCount004
+ * @tc.desc: List cacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount004, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     * @tc.expected: ListItem 4 is cached
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 5);
+    auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT);
+
+    /**
+     * @tc.steps: step2. Update item4 size
+     * @tc.expected: Not force sync geometry.
+     */
+    bool sizeChanged = false;
+    cachedItem->SetOnSizeChangeCallback(
+        [ &sizeChanged ](const RectF& oldRect, const RectF& rect){ sizeChanged = true; });
+    cachedItem->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(150)));
+    cachedItem->SetLayoutDirtyMarked(true);
+    cachedItem->CreateLayoutTask();
+    EXPECT_EQ(cachedItem->GetGeometryNode()->GetFrameSize().Height(), 150);
+    EXPECT_NE(cachedItem->oldGeometryNode_, nullptr);
+    FlushUITasks(frameNode_);
+    EXPECT_FALSE(sizeChanged);
+    EXPECT_NE(cachedItem->oldGeometryNode_, nullptr);
+
+    /**
+     * @tc.steps: step3. FlushIdleTask
+     * @tc.expected: call onSizeChanged.
+     */
+    FlushIdleTask(listPattern);
+    EXPECT_TRUE(sizeChanged);
+    EXPECT_EQ(cachedItem->oldGeometryNode_, nullptr);
+}
+
+/**
  * @tc.name: GetRepeatCountInfo001
  * @tc.desc: Test the GetRepeatCountInfo when the child of List is Repeat.
  * @tc.type: FUNC
