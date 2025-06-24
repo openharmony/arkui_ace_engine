@@ -802,7 +802,7 @@ public:
     virtual void FireOnNodeDestroyCallback()
     {
         CHECK_NULL_VOID(destroyCallback_);
-        destroyCallback_(GetId());
+        destroyCallback_(nodeId_);
     }
 
     bool IsAllowAddChildBelowModalUec() const
@@ -1172,6 +1172,17 @@ protected:
      */
     int32_t CalcAbsPosition(int32_t changeIdx, int64_t id) const;
     const static std::set<std::string> layoutTags_;
+
+    std::string tag_ = "UINode";
+    int32_t depth_ = Infinity<int32_t>();
+    int32_t hostRootId_ = 0;
+    int32_t hostPageId_ = 0;
+    int32_t nodeId_ = 0;
+    int64_t accessibilityId_ = -1;
+    int32_t layoutPriority_ = 0;
+    int32_t rootNodeId_ = 0; // host is Page or NavDestination
+    int32_t themeScopeId_ = 0;
+
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
@@ -1205,15 +1216,6 @@ private:
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_; // maybe wrong when not on the tree
     WeakPtr<UINode> ancestor_; // always correct parent ptr, used to remove duplicates when inserting child nodes
-    std::string tag_ = "UINode";
-    int32_t depth_ = Infinity<int32_t>();
-    int32_t hostRootId_ = 0;
-    int32_t hostPageId_ = 0;
-    int32_t nodeId_ = 0;
-    int64_t accessibilityId_ = -1;
-    int32_t layoutPriority_ = 0;
-    int32_t rootNodeId_ = 0; // host is Page or NavDestination
-    int32_t themeScopeId_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool isFreeNode_ = false;

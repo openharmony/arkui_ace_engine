@@ -154,7 +154,7 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
         if (!canAddChild) {
             LOGW("Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d), "
                 "Current modalUiextension count is : %{public}d",
-                GetId(), child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
+                nodeId_, child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
             return;
         } else {
             LOGI("Child(tag %{public}s, id: %{public}d) must under modalUec, which count is: %{public}d",
@@ -255,22 +255,22 @@ void UINode::TraversingCheck(RefPtr<UINode> node, bool withAbort)
         if (node) {
             LOGF_ABORT("Try to remove the child([%{public}s][%{public}d]) of "
                 "node [%{public}s][%{public}d] when its children is traversing",
-                node->GetTag().c_str(), node->GetId(), GetTag().c_str(), GetId());
+                node->GetTag().c_str(), node->GetId(), tag_.c_str(), nodeId_);
         } else {
             LOGF_ABORT("Try to remove all the children of "
                 "node [%{public}s][%{public}d] when its children is traversing",
-                GetTag().c_str(), GetId());
+                tag_.c_str(), nodeId_);
         }
     }
 
     if (node) {
         LOGE("Try to remove the child([%{public}s][%{public}d]) of "
             "node [%{public}s][%{public}d] when its children is traversing",
-            node->GetTag().c_str(), node->GetId(), GetTag().c_str(), GetId());
+            node->GetTag().c_str(), node->GetId(), tag_.c_str(), nodeId_);
     } else {
         LOGE("Try to remove all the children of "
             "node [%{public}s][%{public}d] when its children is traversing",
-            GetTag().c_str(), GetId());
+            tag_.c_str(), nodeId_);
     }
     LogBacktrace();
 }
@@ -592,7 +592,7 @@ void UINode::DoAddChild(
     if (child->IsAllowUseParentTheme() && child->GetThemeScopeId() != themeScopeId) {
         child->UpdateThemeScopeId(themeScopeId);
     }
-    child->SetDepth(GetDepth() + 1);
+    child->SetDepth(depth_ + 1);
     if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
         child->UpdateNodeStatus(nodeStatus_);
     }
@@ -871,7 +871,7 @@ void UINode::DetachFromMainTree(bool recursive, bool isRoot)
         if (isRoot && !IsFreeNodeTree()) {
             // Remind developers that it is unsafe to operate node trees containing not free nodes on non UI threads
             TAG_LOGW(AceLogTag::ACE_NATIVE_NODE,
-                "CheckIsFreeNodeSubTree failed. free node: %{public}d contains not free node children", GetId());
+                "CheckIsFreeNodeSubTree failed. free node: %{public}d contains not free node children", nodeId_);
         }
     }
     isTraversing_ = false;
@@ -1090,7 +1090,7 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
         std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
         children->Put("childSize", static_cast<int32_t>(GetChildren().size()));
         children->Put("ID", nodeId_);
-        children->Put("Depth", GetDepth());
+        children->Put("Depth", depth_);
         children->Put("InstanceId", instanceId_);
         children->Put("AccessibilityId", accessibilityId_);
         if (IsDisappearing()) {
@@ -1105,7 +1105,7 @@ void UINode::DumpTree(int32_t depth, bool hasJson)
     } else {
         if (DumpLog::GetInstance().GetDumpFile()) {
             DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
-            DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
+            DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(depth_)));
             DumpLog::GetInstance().AddDesc("InstanceId: " + std::to_string(instanceId_));
             DumpLog::GetInstance().AddDesc("AccessibilityId: " + std::to_string(accessibilityId_));
             if (IsDisappearing()) {
@@ -1138,7 +1138,7 @@ void UINode::DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json)
     auto children = GetChildren();
     currentNode->Put("childSize", static_cast<int32_t>(children.size()));
     currentNode->Put("ID", nodeId_);
-    currentNode->Put("Depth", GetDepth());
+    currentNode->Put("Depth", depth_);
     currentNode->Put("InstanceId", instanceId_);
     currentNode->Put("AccessibilityId", accessibilityId_);
     if (IsDisappearing()) {
@@ -1202,7 +1202,7 @@ bool UINode::DumpTreeById(int32_t depth, const std::string& id, bool hasJson)
             std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
             children->Put("childSize", static_cast<int32_t>(GetChildren().size()));
             children->Put("ID", nodeId_);
-            children->Put("Depth", GetDepth());
+            children->Put("Depth", depth_);
             children->Put("IsDisappearing", IsDisappearing());
             DumpAdvanceInfo(children);
             json->Put(tag_.c_str(), children);
@@ -1213,7 +1213,7 @@ bool UINode::DumpTreeById(int32_t depth, const std::string& id, bool hasJson)
         if (DumpLog::GetInstance().GetDumpFile() &&
             (id == propInspectorId_.value_or("") || id == std::to_string(nodeId_))) {
             DumpLog::GetInstance().AddDesc("ID: " + std::to_string(nodeId_));
-            DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(GetDepth())));
+            DumpLog::GetInstance().AddDesc(std::string("Depth: ").append(std::to_string(depth_)));
             DumpLog::GetInstance().AddDesc(std::string("IsDisappearing: ").append(std::to_string(IsDisappearing())));
             DumpAdvanceInfo();
             DumpLog::GetInstance().Print(depth, tag_, static_cast<int32_t>(GetChildren().size()));
@@ -1472,7 +1472,7 @@ bool UINode::RenderCustomChild(int64_t deadline)
 
 void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
-    ACE_LAYOUT_TRACE_BEGIN("Build[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
+    ACE_LAYOUT_TRACE_BEGIN("Build[%s][self:%d][parent:%d][key:%s]", tag_.c_str(), nodeId_,
         GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
     std::vector<RefPtr<UINode>> children;
     children.reserve(GetChildren().size());
@@ -1560,7 +1560,7 @@ void UINode::NotifyColorModeChange(uint32_t colorMode)
         if (customNode) {
             ContainerScope scope(instanceId_);
             ACE_LAYOUT_TRACE_BEGIN("UINode %d %s is customnode %d",
-                GetId(), GetTag().c_str(), customNode ? true : false);
+                nodeId_, tag_.c_str(), customNode ? true : false);
             customNode->FireClearAllRecycleFunc();
             SetShouldClearCache(false);
             ACE_LAYOUT_TRACE_END()
@@ -1586,7 +1586,7 @@ void UINode::OnReuse()
 
 std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
 {
-    if (GetId() == id) {
+    if (nodeId_ == id) {
         return { true, 0 };
     }
 
@@ -1595,7 +1595,7 @@ std::pair<bool, int32_t> UINode::GetChildFlatIndex(int32_t id)
         return { false, 0 };
     }
 
-    if (node && (node->GetTag() == GetTag())) {
+    if (node && (node->GetTag() == tag_)) {
         return { false, 1 };
     }
 
@@ -1724,7 +1724,7 @@ void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
     nodeInfo_->pageDepth = depth_;
     nodeInfo_->childrenSize = children.size();
     if (isBuildByJS_) {
-        nodeMap.insert({ GetId(), *(nodeInfo_) });
+        nodeMap.insert({ nodeId_, *(nodeInfo_) });
     }
     for (const auto& child : children) {
         // Recursively traverse the child nodes of each node
@@ -1919,8 +1919,8 @@ void UINode::CollectCleanedChildren(const std::list<RefPtr<UINode>>& children, s
 
 void UINode::CollectReservedChildren(std::list<int32_t>& reservedElmtId)
 {
-    reservedElmtId.emplace_back(GetId());
-    if (GetTag() == V2::JS_VIEW_ETS_TAG) {
+    reservedElmtId.emplace_back(nodeId_);
+    if (tag_ == V2::JS_VIEW_ETS_TAG) {
         SetJSViewActive(false);
     } else {
         for (auto const& child : GetChildren()) {
@@ -2062,7 +2062,7 @@ int32_t UINode::CalcAbsPosition(int32_t changeIdx, int64_t id) const
 void UINode::NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType)
 {
     int32_t updateFrom = CalcAbsPosition(changeIdx, id);
-    auto accessibilityId = GetAccessibilityId();
+    auto accessibilityId = accessibilityId_;
     auto parent = GetParent();
     if (parent) {
         parent->NotifyChange(updateFrom, count, accessibilityId, notificationType);
