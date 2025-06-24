@@ -225,6 +225,8 @@ HWTEST_F(PreviewMenuControllerTest, CreateContactErrorNodeTest001, TestSize.Leve
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     PreviewMenuController::CreateContactErrorNode(frameNode, "Test", nullptr);
+    auto avatarNode = frameNode->GetChildByIndex(0);
+    EXPECT_NE(avatarNode, nullptr);
     auto textNode = frameNode->GetChildByIndex(1);
     EXPECT_NE(textNode, nullptr);
 }

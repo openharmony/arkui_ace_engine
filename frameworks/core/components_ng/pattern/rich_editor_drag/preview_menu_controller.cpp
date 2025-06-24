@@ -54,7 +54,7 @@ constexpr Dimension MARGIN_SIZE = 16.0_vp;
 constexpr Dimension PREVIEW_MIN_HEIGHT = 64.0_vp;
 constexpr Dimension FAILED_TEXT_LINE_SPACING = 8.0_vp;
 constexpr float MAX_HEIGHT_PROPORTIONS = 0.65;
-#if !defined(ACE_UNITTEST) && !defined(PREVIEW)
+#if !defined(ACE_UNITTEST) && !defined(PREVIEW) && defined(OHOS_STANDARD_SYSTEM)
 constexpr float PERCENT_FULL = 100.0;
 #endif
 } // namespace
@@ -178,7 +178,7 @@ void PreviewMenuController::CreatePreviewMenu(
     flexRenderContext->UpdateBackgroundColor(bgColor);
     auto previewNode = CreatePreview(type);
     CHECK_NULL_VOID(previewNode);
-#if !defined(ACE_UNITTEST) && !defined(PREVIEW)
+#if !defined(ACE_UNITTEST) && !defined(PREVIEW) && defined(OHOS_STANDARD_SYSTEM)
     const auto& extensionAdapter = PreviewUIExtensionAdapter::GetInstance();
     CHECK_NULL_VOID(extensionAdapter);
     UIExtensionConfig config;
