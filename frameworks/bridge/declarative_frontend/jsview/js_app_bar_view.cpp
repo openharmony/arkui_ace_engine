@@ -176,6 +176,7 @@ void JSAppBar::CallNative(const JSCallbackInfo& info)
         { EVENT_NAME_CUSTOM_APP_BAR_DID_BUILD, JSAppBar::OnDidBuild },
         { EVENT_NAME_CUSTOM_APP_BAR_CREATE_SERVICE_PANEL, JSAppBar::OnCreateServicePanel },
         { EVENT_NAME_APP_BAR_ON_BACK_PRESSED, JSAppBar::RequestAtomicServiceTerminate },
+        { EVENT_NAME_APP_BAR_ON_BACK_PRESSED_CONSUMED, JSAppBar::SetOnBackPressedConsumed },
     };
 
     if (info.Length() < 1) {
