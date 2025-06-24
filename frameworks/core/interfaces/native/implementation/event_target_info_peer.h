@@ -25,4 +25,5 @@ public:
     virtual ~EventTargetInfoPeer() = default;
 
     std::string id;
+    bool isScrollableComponent_ = true;
 };

@@ -34,6 +34,12 @@
 #include "core/components/image/image_event.h"
 #include "core/components/picker/picker_base_component.h"
 #include "core/components/web/web_event.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
+#include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
+#include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
+#include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -212,6 +218,12 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src);
     void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src);
     void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src);
+    void AssignArkValue(Ark_TapRecognizer &dst, const RefPtr<NG::ClickRecognizer>& src);
+    void AssignArkValue(Ark_LongPressRecognizer &dst, const RefPtr<NG::LongPressRecognizer>& src);
+    void AssignArkValue(Ark_PanRecognizer &dst, const RefPtr<NG::PanRecognizer>& src);
+    void AssignArkValue(Ark_PinchRecognizer &dst, const RefPtr<NG::PinchRecognizer>& src);
+    void AssignArkValue(Ark_SwipeRecognizer &dst, const RefPtr<NG::SwipeRecognizer>& src);
+    void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecognizer>& src);
     void AssignArkValue(Ark_GestureRecognizerState &dst, const NG::RefereeState& src);
     void AssignArkValue(Ark_Header& dst, const Header& src, ConvContext *ctx);
     void AssignArkValue(Ark_HistoricalPoint& dst, const OHOS::Ace::TouchLocationInfo& src);

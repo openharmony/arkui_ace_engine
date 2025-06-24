@@ -5903,6 +5903,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _EventTargetInfo_getId(ptr: KPointer): string
     @ani.unsafe.Direct
+    native static _EventTargetInfo_isScrollableComponent(ptr: KPointer): boolean
+    @ani.unsafe.Direct
     native static _GestureRecognizer_ctor(): KPointer
     @ani.unsafe.Direct
     native static _GestureRecognizer_getFinalizer(): KPointer

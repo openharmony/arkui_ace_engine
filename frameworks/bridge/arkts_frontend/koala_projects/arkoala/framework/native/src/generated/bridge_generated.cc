@@ -40357,6 +40357,11 @@ Ark_String impl_EventTargetInfo_getId(Ark_NativePointer thisPtr) {
         return GetAccessors()->getEventTargetInfoAccessor()->getId(self);
 }
 KOALA_INTEROP_1(EventTargetInfo_getId, KStringPtr, Ark_NativePointer)
+Ark_Boolean impl_EventTargetInfo_isScrollableComponent(Ark_NativePointer thisPtr) {
+        Ark_EventTargetInfo self = reinterpret_cast<Ark_EventTargetInfo>(thisPtr);
+        return GetAccessors()->getEventTargetInfoAccessor()->isScrollableComponent(self);
+}
+KOALA_INTEROP_DIRECT_1(EventTargetInfo_isScrollableComponent, Ark_Boolean, Ark_NativePointer)
 Ark_NativePointer impl_GestureRecognizer_ctor() {
         return GetAccessors()->getGestureRecognizerAccessor()->ctor();
 }

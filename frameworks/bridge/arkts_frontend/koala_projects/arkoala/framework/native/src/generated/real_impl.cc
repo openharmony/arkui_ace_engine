@@ -17881,6 +17881,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Ark_Boolean IsScrollableComponentImpl(Ark_EventTargetInfo peer)
+    {
+        return {};
+    }
     } // EventTargetInfoAccessor
     namespace GestureRecognizerAccessor {
     void DestroyPeerImpl(Ark_GestureRecognizer peer)
@@ -23490,6 +23494,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             EventTargetInfoAccessor::CtorImpl,
             EventTargetInfoAccessor::GetFinalizerImpl,
             EventTargetInfoAccessor::GetIdImpl,
+            EventTargetInfoAccessor::IsScrollableComponentImpl,
         };
         return &EventTargetInfoAccessorImpl;
     }
