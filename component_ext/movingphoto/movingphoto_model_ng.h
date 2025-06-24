@@ -39,6 +39,7 @@ public:
     void SetOnPause(MovingPhotoEventFunc&& onPause);
     void SetOnFinish(MovingPhotoEventFunc&& onFinish);
     void SetOnError(MovingPhotoEventFunc&& onError);
+    void SetOnPrepared(MovingPhotoEventFunc&& onPrepared);
     void AutoPlayPeriod(int64_t startTime, int64_t endTime);
     void AutoPlay(bool isAutoPlay);
     void RepeatPlay(bool isRepeatPlay);

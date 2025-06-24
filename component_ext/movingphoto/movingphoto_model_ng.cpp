@@ -172,6 +172,15 @@ void MovingPhotoModelNG::SetOnError(MovingPhotoEventFunc&& onError)
     eventHub->SetOnError(std::move(onError));
 }
 
+void MovingPhotoModelNG::SetOnPrepared(MovingPhotoEventFunc&& onPrepared)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPrepared(std::move(onPrepared));
+}
+
 void MovingPhotoModelNG::AutoPlayPeriod(int64_t startTime, int64_t endTime)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

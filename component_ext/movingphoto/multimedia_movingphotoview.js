@@ -70,6 +70,10 @@ class MovingPhotoView extends JSViewAbstract {
     static onError(value) {
         __MovingPhotoView__.onError(value);
     }
+    
+    static onPrepared(value) {
+        __MovingPhotoView__.onPrepared(value);
+    }
 
     static onClick(value) {
         __Common__.onClick(value);
