@@ -34,6 +34,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t HUNDRED = 100;
 constexpr int32_t TWENTY = 20;
+constexpr float DEFAULT_STROKE_WIDTH = 0.0f;
 
 uint32_t GetAdaptedMaxLines(const TextStyle& textStyle, const LayoutConstraintF& contentConstraint)
 {
@@ -176,7 +177,8 @@ void TextLayoutAlgorithm::UpdateRelayoutShaderStyle(LayoutWrapper* layoutWrapper
     CHECK_NULL_VOID(pattern);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);
-    if (textStyle_.GetGradient().has_value() && !pattern->GetExternalParagraph()) {
+    if (textStyle_.GetGradient().has_value() && !pattern->GetExternalParagraph() &&
+        textStyle_.GetStrokeWidth().Value() >= DEFAULT_STROKE_WIDTH) {
         RelayoutShaderStyle(textLayoutProperty);
     }
 }

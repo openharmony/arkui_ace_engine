@@ -77,7 +77,6 @@ constexpr int NUM_9 = 9;
 constexpr int NUM_10 = 10;
 constexpr float DEFAULT_ANGLE = 180.0f;
 constexpr double PERCENT_100 = 100.0;
-constexpr float MAX_ANGLE = 360.0f;
 
 std::map<TextHeightAdaptivePolicy, int> TEXT_HEIGHT_ADAPTIVE_POLICY_MAP = {
     { TextHeightAdaptivePolicy::MAX_LINES_FIRST, 0 },
@@ -1464,17 +1463,6 @@ void ResetEnableAutoSpacing(ArkUINodeHandle node)
     TextModelNG::SetEnableAutoSpacing(frameNode, false);
 }
 
-ArkUI_Float32 CheckAngle(const ArkUI_Float32 angle)
-{
-    if (LessNotEqual(angle, 0.0f)) {
-        return 0.0f;
-    }
-    if (GreatNotEqual(angle, MAX_ANGLE)) {
-        return MAX_ANGLE;
-    }
-    return angle;
-}
-
 void SetLinearGradientDirectionTo(std::shared_ptr<LinearGradient>& linearGradient, const GradientDirection direction)
 {
     switch (direction) {
@@ -1607,7 +1595,7 @@ void SetRadialGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* 
     }
     if (static_cast<bool>(radiusHasValue)) {
         auto unit = static_cast<DimensionUnit>(radiusUnit);
-        auto value = CheckAngle(radiusValue);
+        auto value = static_cast<float>(radiusValue);
         gradient.GetRadialGradient()->radialVerticalSize = CalcDimension(value, unit);
         gradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(value, unit);
     }
@@ -1754,6 +1742,13 @@ ArkUI_Int32 GetTextRadialGradient(ArkUINodeHandle node, ArkUI_Float32 (*values)[
         index++;
     }
     return index;
+}
+
+void SetColorShaderColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetColorShaderStyle(frameNode, Color(color));
 }
 
 void SetTextVerticalAlign(ArkUINodeHandle node, ArkUI_Uint32 textVerticalAlign)
@@ -1943,7 +1938,8 @@ const ArkUITextModifier* GetTextModifier()
         .resetTextVerticalAlign = ResetTextVerticalAlign,
         .getTextVerticalAlign = GetTextVerticalAlign,
         .setTextContentTransition = SetTextContentTransition,
-        .resetTextContentTransition = ResetTextContentTransition
+        .resetTextContentTransition = ResetTextContentTransition,
+        .setColorShaderColor = SetColorShaderColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

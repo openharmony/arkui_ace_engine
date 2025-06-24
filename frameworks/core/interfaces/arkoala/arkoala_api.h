@@ -2953,6 +2953,7 @@ struct ArkUITextModifier {
     ArkUI_Uint32 (*getTextVerticalAlign)(ArkUINodeHandle node);
     void (*setTextContentTransition)(ArkUINodeHandle node, ArkUI_Int32 flipDirection, ArkUI_Bool enableBlur);
     void (*resetTextContentTransition)(ArkUINodeHandle node);
+    void (*setColorShaderColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
 };
 
 struct ArkUIButtonModifier {
