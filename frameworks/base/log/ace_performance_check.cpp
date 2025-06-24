@@ -299,7 +299,7 @@ void AceScopedPerformanceCheck::RecordVsyncTimeout(
 }
 
 void AceScopedPerformanceCheck::RecordForEachItemsCount(int32_t count,
-    std::unordered_map<int32_t, PerformanceCheckNode>& foreachNodeMap, 
+    std::unordered_map<int32_t, PerformanceCheckNode>& foreachNodeMap,
     const CodeInfo& codeInfo, const std::string& pageRoute)
 {
     if (count == 0 || count < AceChecker::GetForeachItems() || CheckPage(codeInfo, "9904")) {
