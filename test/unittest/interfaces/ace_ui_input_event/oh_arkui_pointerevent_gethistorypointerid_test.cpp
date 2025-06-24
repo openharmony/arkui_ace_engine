@@ -110,9 +110,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryPointerId_003, TestSi
     events[1].touchPointes = pointes;
     emptyEvents[0].touchPointSize = POINT_SIZE;
     emptyEvents[1].touchPointSize = POINT_SIZE;
-
     ArkUINodeEvent nodeEvent;
-
     std::vector<std::pair<HistoryTestInputType, float>> testCases = {
         { HistoryTestInputType(ArkUI_UIInputEvent { ARKUI_UIINPUTEVENT_TYPE_UNKNOWN, C_TOUCH_EVENT_ID, nullptr }, 0, 0),
             0 }, // test when touchEvent is nullptr
