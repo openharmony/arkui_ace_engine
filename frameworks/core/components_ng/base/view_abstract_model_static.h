@@ -12,13 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+ 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_STATIC_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_STATIC_H
-
+ 
 #include <optional>
 #include <utility>
-
+ 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/offset.h"
@@ -42,12 +42,36 @@
 #include "core/components_ng/property/property.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
+ 
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT ViewAbstractModelStatic {
 public:
     static void SetClipEdge(FrameNode* frameNode, std::optional<bool> isClip);
+    void BindContextMenu(const RefPtr<FrameNode>& targetNode, ResponseType type, std::function<void()>& buildFunc,
+        const NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc);
+    static void BindContextMenuStatic(const RefPtr<FrameNode>& targetNode, ResponseType type,
+        std::function<void()>&& buildFunc, const NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
+    void BindDragWithContextMenuParams(FrameNode* targetNode, const NG::MenuParam& menuParam);
+    static void SetAccessibilityVirtualNode(FrameNode* frameNode, std::function<RefPtr<NG::UINode>()>&& buildFunc);
+    static void BindPopup(FrameNode* targetNode, const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode)
+    {
+        CHECK_NULL_VOID(targetNode);
+        ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
+    }
+    static void BindMenu(FrameNode* frameNode, std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
+        const MenuParam& menuParam);
+    static void BindMenuGesture(FrameNode* frameNode, std::vector<NG::OptionParam>&& params,
+        std::function<void()>&& buildFunc, const MenuParam& menuParam);
+    static void BindDragWithContextMenuParamsStatic(FrameNode* targetNode, const NG::MenuParam& menuParam);
+private:
+    static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
+    static void BindContextMenuSingle(FrameNode* targetNode, std::function<void()>&& buildFunc,
+        const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
+    static void RegisterContextMenuKeyEvent(
+        const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
+    static void CreateCustomMenuWithPreview(FrameNode* targetNode, std::function<void()>&& buildFunc,
+        const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
 };
 } // namespace OHOS::Ace::NG
-
+ 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_VIEW_ABSTRACT_MODEL_STATIC_H
