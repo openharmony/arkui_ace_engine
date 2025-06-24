@@ -88,6 +88,9 @@ declare_args() {
 
   # Enable long press gesture extra handling
   ace_engine_feature_enable_long_press_gesture_extra_handling = false
+
+  # Enable skia upgrade
+  ace_engine_feature_enable_upgrade_skia = false
 }
 
 enable_dump_drawcmd = false

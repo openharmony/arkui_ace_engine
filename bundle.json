@@ -37,7 +37,8 @@
             "ace_engine_feature_form_menu_enable",
             "ace_engine_feature_enable_event_extra_handling",
             "ace_engine_enable_circle_feature",
-            "ace_engine_feature_enable_long_press_gesture_extra_handling"
+            "ace_engine_feature_enable_long_press_gesture_extra_handling",
+            "ace_engine_feature_enable_upgrade_skia"
         ],
         "adapted_system_type": [
             "standard"

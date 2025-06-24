@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos_var.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_unittest("web_pattern_unit_test_ohos") {
@@ -21,7 +20,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
   defines = [ "OHOS_STANDARD_SYSTEM" ]
   defines += [ "ENABLE_DRAG_FRAMEWORK" ]
   defines += [ "WEB_SUPPORTED" ]
-  if (use_new_skia) {
+  if (ace_engine_feature_enable_upgrade_skia) {
     defines += [ "USE_NEW_SKIA" ]
   }
 
