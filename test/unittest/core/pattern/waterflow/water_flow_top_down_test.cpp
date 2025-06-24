@@ -672,6 +672,7 @@ HWTEST_F(WaterFlowTestNg, Cache002, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, Refresh002, TestSize.Level1)
 {
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     MockAnimationManager::GetInstance().SetTicks(1);
     MockAnimationManager::GetInstance().Reset();
     RefreshModelNG refreshModel;
