@@ -925,8 +925,6 @@ void WebClientImpl::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t 
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnFirstContentfulPaint(navigationStartTick, firstContentfulPaintMs);
-    int delayTime = 650; // 650为根据LCP和FCP时差估算的经验值
-    delegate->RemoveSnapshotFrameNode(delayTime);
 }
 
 void WebClientImpl::OnFirstMeaningfulPaint(
@@ -1452,5 +1450,20 @@ void WebClientImpl::OnPageTitleV2(const std::string &title, bool isRealTitle)
     }
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnReceivedTitle(title, isRealTitle);
+}
+
+void WebClientImpl::OnInsertBlanklessFrame(const std::string& pathToFrame)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    // pass directly without any judgment, CreateSnapshotFrameNode will check the parameter
+    delegate->CreateSnapshotFrameNode(pathToFrame);
+}
+
+void WebClientImpl::OnRemoveBlanklessFrame(int delayTime)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->RemoveSnapshotFrameNode(delayTime);
 }
 } // namespace OHOS::Ace

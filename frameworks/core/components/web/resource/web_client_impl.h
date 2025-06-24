@@ -318,6 +318,9 @@ public:
     void HideMagnifier() override;
 
     void OnPageTitleV2(const std::string &title, bool isRealTitle) override;
+
+    void OnInsertBlanklessFrame(const std::string& pathToFrame) override;
+    void OnRemoveBlanklessFrame(int delayTime) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

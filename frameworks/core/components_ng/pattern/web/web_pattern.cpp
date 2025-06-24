@@ -5959,6 +5959,11 @@ void WebPattern::OnVisibleAreaChange(bool isVisible)
         "WebPattern::OnVisibleAreaChange webId:%{public}d, isVisible:%{public}d, old_isVisible:%{public}d, "
         "isVisibleActiveEnable:%{public}d, isDialogNested:%{public}d, isFocus:%{public}d",
         GetWebId(), isVisible, isVisible_, isVisibleActiveEnable_, isDialogNested, isFocus_);
+    // pass isVisible value to arkweb directly without any judgment
+    if (delegate_) {
+        delegate_->SetVisibility(isVisible);
+    }
+
     if (isVisible_ == isVisible) {
         return;
     }

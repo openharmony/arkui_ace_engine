@@ -108,7 +108,6 @@ constexpr uint32_t DELAY_MILLISECONDS_1000 = 1000;
 constexpr uint32_t NO_NATIVE_FINGER_TYPE = 100;
 constexpr uint32_t ACCESSIBILITY_PAGE_CHANGE_DELAY_MILLISECONDS = 100;
 const std::string DEFAULT_NATIVE_EMBED_ID = "0";
-constexpr uint32_t BLANKLESS_REMOVE_SNAPSHOT_DELAY_TIME = 2000;
 
 const std::vector<std::string> CANONICALENCODINGNAMES = {
     "Big5",         "EUC-JP",       "EUC-KR",       "GB18030",
@@ -5984,6 +5983,32 @@ void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime)
         TaskExecutor::TaskType::UI, removeDelayTime, "ArkUIWebSnapshotRemove");
 }
 
+void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath)
+{
+    if (snapshotPath.empty()) {
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::CreateSnapshotFrameNode");
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID(context->GetTaskExecutor());
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), snapshotPath]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto webPattern = delegate->webPattern_.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->CreateSnapshotImageFrameNode(snapshotPath);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIWebLoadSnapshot");
+}
+
+void WebDelegate::SetVisibility(bool isVisible)
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->SetVisibility(isVisible);
+}
+
 bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
 {
     CHECK_NULL_RETURN(taskExecutor_, false);
@@ -6015,15 +6040,10 @@ bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlRe
         [weak = WeakClaim(this), request]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
-            std::string snapshotPath = OHOS::NWeb::NWebHelper::Instance().CheckBlankOptEnable(
-                request->Url(), delegate->nweb_->GetWebId());
-            if (!snapshotPath.empty() && request->IsAboutMainFrame()) {
-                TAG_LOGD(AceLogTag::ACE_WEB, "blankless OnHandleInterceptLoading, snapshot Path:%{public}s",
-                         snapshotPath.c_str());
-                auto webPattern = delegate->webPattern_.Upgrade();
-                CHECK_NULL_VOID(webPattern);
-                webPattern->CreateSnapshotImageFrameNode(snapshotPath);
-                delegate->RemoveSnapshotFrameNode(BLANKLESS_REMOVE_SNAPSHOT_DELAY_TIME);
+            CHECK_NULL_VOID(delegate->nweb_);
+            if (request->IsAboutMainFrame()) {
+                bool ret = delegate->nweb_->TriggerBlanklessForUrl(request->Url());
+                TAG_LOGD(AceLogTag::ACE_WEB, "TriggerBlanklessForUrl ret %{public}d", ret);
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebloadSnapshot");
