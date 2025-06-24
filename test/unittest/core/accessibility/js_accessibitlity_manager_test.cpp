@@ -2826,6 +2826,55 @@ HWTEST_F(JsAccessibilityManagerTest, IsTagInEmbedComponent003, TestSize.Level1)
     EXPECT_FALSE(result);
 }
 
+/**
+ * @tc.name: InitializeCallback001
+ * @tc.desc: Test InitializeCallback with register false
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, InitializeCallback001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    context->SetWindowId(1);
+    jsAccessibilityManager->SetPipelineContext(context);
+    
+    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
+
+    /**
+     * @tc.steps: step2. test InitializeCallback with register false;
+     */
+    jsAccessibilityManager->Register(false);
+    jsAccessibilityManager->InitializeCallback();
+    EXPECT_EQ(jsAccessibilityManager->windowId_, 1);
+}
+
+/**
+ * @tc.name: InitializeCallback002
+ * @tc.desc: Test InitializeCallback with register true
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, InitializeCallback002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    context->SetWindowId(1);
+    jsAccessibilityManager->SetPipelineContext(context);
+    
+    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
+
+    /**
+     * @tc.steps: step2. test InitializeCallback with register true;
+     */
+    jsAccessibilityManager->Register(true);
+    jsAccessibilityManager->InitializeCallback();
+    EXPECT_EQ(jsAccessibilityManager->windowId_, 0);
+}
 
 /**
  * @tc.name: SearchElementInfoBySurfaceId002
