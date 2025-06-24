@@ -22,7 +22,7 @@ import { int32 } from "@koalaui/common"
  */
 export class GlobalStateManager {
     // @ts-ignore
-    private static localManagerMap = new ConcurrentHashMap<int32, StateManager>()
+    private static localManagerMap = new containers.ConcurrentHashMap<int32, StateManager>()
     private static current: StateManager | undefined = undefined
 
     /**
