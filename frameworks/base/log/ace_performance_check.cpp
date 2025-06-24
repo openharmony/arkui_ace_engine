@@ -260,7 +260,8 @@ void AceScopedPerformanceCheck::RecordFunctionTimeout()
 }
 
 void AceScopedPerformanceCheck::RecordVsyncTimeout(
-    const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout, const CodeInfo& codeInfo, const std::string& pageRoute)
+    const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout,
+    const CodeInfo& codeInfo, const std::string& pageRoute)
 {
     if (vsyncTimeout < AceChecker::GetVsyncTimeout() || CheckPage(codeInfo, "9903")) {
         return;
@@ -298,7 +299,8 @@ void AceScopedPerformanceCheck::RecordVsyncTimeout(
 }
 
 void AceScopedPerformanceCheck::RecordForEachItemsCount(int32_t count,
-    std::unordered_map<int32_t, PerformanceCheckNode>& foreachNodeMap, const CodeInfo& codeInfo, const std::string& pageRoute)
+    std::unordered_map<int32_t, PerformanceCheckNode>& foreachNodeMap, 
+    const CodeInfo& codeInfo, const std::string& pageRoute)
 {
     if (count == 0 || count < AceChecker::GetForeachItems() || CheckPage(codeInfo, "9904")) {
         return;
