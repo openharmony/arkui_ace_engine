@@ -235,7 +235,8 @@ static void BindContextMenuWithLongPress(const RefPtr<FrameNode>& targetNode, st
                     StartVibratorStatic(menuParam, false, menuTheme->GetMenuHapticFeedback());
                 }
                 NG::ViewAbstract::BindMenuWithCustomNode(std::move(builder), targetNode,
-                    UpdateMenuPostionStatic(menuPosition, menuParam, targetNode), menuParam, std::move(previewBuildFunc));
+                    UpdateMenuPostionStatic(menuPosition, menuParam, targetNode), menuParam,
+                    std::move(previewBuildFunc));
             },
             TaskExecutor::TaskType::PLATFORM, "ArkUILongPressCreateCustomMenu");
     };
@@ -498,7 +499,7 @@ void ViewAbstractModelStatic::BindDragWithContextMenuParams(FrameNode* targetNod
 }
  
 void ViewAbstractModelStatic::SetAccessibilityVirtualNode(FrameNode* frameNode,
-                                                      std::function<RefPtr<NG::UINode>()>&& buildFunc)
+    std::function<RefPtr<NG::UINode>()>&& buildFunc)
 {
     CHECK_NULL_VOID(frameNode);
     auto virtualNode = buildFunc();

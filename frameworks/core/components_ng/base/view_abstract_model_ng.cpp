@@ -613,7 +613,8 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
                         [builder = builderF, weakTarget, menuParam, info]() mutable {
                             auto targetNode = weakTarget.Upgrade();
                             CHECK_NULL_VOID(targetNode);
-                            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
+                            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX()
+                                + menuParam.positionOffset.GetX(),
                                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
                             std::function<void()> previewBuildFunc;
                             TAG_LOGI(AceLogTag::ACE_MENU, "Execute rightClick task for menu");
