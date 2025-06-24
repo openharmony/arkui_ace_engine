@@ -214,7 +214,7 @@
       OHOS::Ace::DrawableDescriptor::*;
       OHOS::Ace::PixelMapDrawableDescriptor::*;
       OHOS::Ace::LayeredDrawableDescriptor::*;
-      OHOS::Ace::DrawableDescriptorProcessor::*;
+      OHOS::Ace::AnimatedDrawableDescriptor::*;
 
       OHOS::Ace::Framework::JsAcePage::*;
       OHOS::Ace::TextPickerModel::*;
@@ -402,6 +402,7 @@
       VTT?for?OHOS::Ace::DrawableDescriptor;
       VTT?for?OHOS::Ace::LayeredDrawableDescriptor;
       VTT?for?OHOS::Ace::PixelMapDrawableDescriptor;
+      VTT?for?OHOS::Ace::AnimatedDrawableDescriptor;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
@@ -533,6 +534,7 @@
       vtable?for?OHOS::Ace::DrawableDescriptor;
       vtable?for?OHOS::Ace::LayeredDrawableDescriptor;
       vtable?for?OHOS::Ace::PixelMapDrawableDescriptor;
+      vtable?for?OHOS::Ace::AnimatedDrawableDescriptor;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
