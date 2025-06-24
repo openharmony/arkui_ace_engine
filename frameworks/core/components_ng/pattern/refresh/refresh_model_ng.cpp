@@ -45,7 +45,7 @@ void RefreshModelNG::Create()
         V2::REFRESH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RefreshPattern>(); });
     CHECK_NULL_VOID(frameNode);
     stack->Push(frameNode);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto pattern = frameNode->GetPattern<RefreshPattern>();
         CHECK_NULL_VOID(pattern);
         pattern->UpdateNestedModeForChildren(NestedScrollOptions({
@@ -62,7 +62,7 @@ RefPtr<FrameNode> RefreshModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::REFRESH_ETS_TAG, nodeId, AceType::MakeRefPtr<RefreshPattern>());
     CHECK_NULL_RETURN(frameNode, frameNode);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto pattern = frameNode->GetPattern<RefreshPattern>();
         CHECK_NULL_RETURN(pattern, frameNode);
         pattern->UpdateNestedModeForChildren(NestedScrollOptions({

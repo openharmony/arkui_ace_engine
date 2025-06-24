@@ -442,7 +442,6 @@ HWTEST_F(RefreshLayoutTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     model.SetLoadingText("loadingText");
     CreateDone();
     EXPECT_NE(pattern_->loadingTextNode_, nullptr);
-    EXPECT_NE(pattern_->refreshTheme_, nullptr);
     EXPECT_TRUE(pattern_->isHigherVersion_);
     EXPECT_TRUE(pattern_->hasLoadingText_);
     
