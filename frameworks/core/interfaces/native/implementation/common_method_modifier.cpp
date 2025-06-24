@@ -4362,7 +4362,7 @@ void BindPopupImpl(Ark_NativePointer node,
         });
     CHECK_NULL_VOID(popupParam);
     popupParam->SetIsShow(Converter::Convert<bool>(show));
-    ViewAbstractModelNG::BindPopup(frameNode, popupParam, customNode);
+    ViewAbstractModelStatic::BindPopup(frameNode, popupParam, customNode);
 }
 void BindMenuBase(Ark_NativePointer node,
     Ark_Boolean isShow,
