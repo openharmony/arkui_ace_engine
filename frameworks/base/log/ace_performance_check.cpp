@@ -199,7 +199,7 @@ void AceScopedPerformanceCheck::RecordPerformanceCheckData(const PerformanceChec
 }
 
 void AceScopedPerformanceCheck::RecordPageNodeCountAndDepth(int32_t pageNodeCount, int32_t pageDepth,
-    std::vector<PerformanceCheckNode>& pageNodeList, const CodeInfo& codeInfo, std::string pageRoute)
+    std::vector<PerformanceCheckNode>& pageNodeList, const CodeInfo& codeInfo, const std::string& pageRoute)
 {
     if ((pageNodeCount < AceChecker::GetPageNodes() && pageDepth < AceChecker::GetPageDepth()) ||
         CheckPage(codeInfo, "9901")) {
@@ -260,7 +260,7 @@ void AceScopedPerformanceCheck::RecordFunctionTimeout()
 }
 
 void AceScopedPerformanceCheck::RecordVsyncTimeout(
-    const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout, const CodeInfo& codeInfo, std::string pageRoute)
+    const PerformanceCheckNodeMap& nodeMap, int64_t vsyncTimeout, const CodeInfo& codeInfo, const std::string& pageRoute)
 {
     if (vsyncTimeout < AceChecker::GetVsyncTimeout() || CheckPage(codeInfo, "9903")) {
         return;
@@ -298,7 +298,7 @@ void AceScopedPerformanceCheck::RecordVsyncTimeout(
 }
 
 void AceScopedPerformanceCheck::RecordForEachItemsCount(int32_t count,
-    std::unordered_map<int32_t, PerformanceCheckNode>& foreachNodeMap, const CodeInfo& codeInfo, std::string pageRoute)
+    std::unordered_map<int32_t, PerformanceCheckNode>& foreachNodeMap, const CodeInfo& codeInfo, const std::string& pageRoute)
 {
     if (count == 0 || count < AceChecker::GetForeachItems() || CheckPage(codeInfo, "9904")) {
         return;
@@ -331,7 +331,7 @@ void AceScopedPerformanceCheck::RecordForEachItemsCount(int32_t count,
 }
 
 void AceScopedPerformanceCheck::RecordFlexLayoutsCount(
-    const std::vector<PerformanceCheckNode>& flexNodeList, const CodeInfo& codeInfo, std::string pageRoute)
+    const std::vector<PerformanceCheckNode>& flexNodeList, const CodeInfo& codeInfo, const std::string& pageRoute)
 {
     if (flexNodeList.empty() || CheckPage(codeInfo, "9905")) {
         return;

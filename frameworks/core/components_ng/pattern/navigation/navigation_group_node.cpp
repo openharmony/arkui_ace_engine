@@ -1124,10 +1124,10 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     CHECK_NULL_VOID(curNavDestination);
     auto preNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
     std::string fromPath = "";
-    if (preNavDestination) {
-        fromPath = preNavDestination->GetNavDestinationPathInfo();
-    }
     if (AceChecker::IsPerformanceCheckEnabled()) {
+        if (preNavDestination) {
+        fromPath = preNavDestination->GetNavDestinationPathInfo();
+        }
         int64_t startTime = GetSysTimestamp();
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(GetContextWithCheck());
         CHECK_NULL_VOID(pipeline);
