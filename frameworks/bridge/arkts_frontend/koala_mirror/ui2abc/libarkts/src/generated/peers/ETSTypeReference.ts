@@ -34,7 +34,7 @@ import { Identifier } from "./Identifier"
 import { TypeNode } from "./TypeNode"
 export class ETSTypeReference extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 72)
+        assertValidPeer(pointer, 73)
         super(pointer)
     }
     static createETSTypeReference(part?: ETSTypeReferencePart): ETSTypeReference {

@@ -34,7 +34,7 @@ import { Expression } from "./Expression"
 import { TypedStatement } from "./TypedStatement"
 export class VariableDeclarator extends TypedStatement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 151)
+        assertValidPeer(pointer, 152)
         super(pointer)
     }
     static create1VariableDeclarator(flag: Es2pandaVariableDeclaratorFlag, ident?: Expression, init?: Expression): VariableDeclarator {

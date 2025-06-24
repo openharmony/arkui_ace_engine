@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 export class TSLiteralType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 109)
+        assertValidPeer(pointer, 110)
         super(pointer)
     }
     static createTSLiteralType(literal?: Expression): TSLiteralType {

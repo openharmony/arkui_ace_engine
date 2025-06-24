@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 export class TemplateElement extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 142)
+        assertValidPeer(pointer, 143)
         super(pointer)
     }
     static create1TemplateElement(raw: string, cooked: string): TemplateElement {

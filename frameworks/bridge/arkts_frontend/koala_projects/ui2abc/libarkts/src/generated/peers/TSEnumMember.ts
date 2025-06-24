@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 export class TSEnumMember extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 88)
+        assertValidPeer(pointer, 89)
         super(pointer)
     }
     static create1TSEnumMember(key: Expression | undefined, init: Expression | undefined, isGenerated: boolean): TSEnumMember {

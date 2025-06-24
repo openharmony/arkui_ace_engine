@@ -34,7 +34,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Identifier } from "./Identifier"
 export class ETSModule extends BlockStatement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 82)
+        assertValidPeer(pointer, 83)
         super(pointer)
     }
     get ident(): Identifier | undefined {
