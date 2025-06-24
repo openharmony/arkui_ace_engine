@@ -67,7 +67,7 @@ public:
     }
 
     static void LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int32_t start, int32_t end);
-    bool MeasureInNextFrame() const
+    bool MeasureInNextFrame() const override
     {
         return measureInNextFrame_;
     }

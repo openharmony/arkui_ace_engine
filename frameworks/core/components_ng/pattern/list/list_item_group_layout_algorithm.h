@@ -378,7 +378,7 @@ public:
         prevMeasureBreak_ = value;
     }
 
-    bool MeasureInNextFrame() const
+    bool GroupMeasureInNextFrame() const
     {
         return measureInNextFrame_;
     }
