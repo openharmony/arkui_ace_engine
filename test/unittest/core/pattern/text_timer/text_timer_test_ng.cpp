@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 
+#define protected public
 #define private public
 
 #include "test/mock/base/mock_system_properties.h"
