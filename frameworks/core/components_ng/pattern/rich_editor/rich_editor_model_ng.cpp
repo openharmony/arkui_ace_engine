@@ -208,8 +208,8 @@ void RichEditorModelNG::SetCustomKeyboard(std::function<void()>&& func, bool sup
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     if (pattern) {
-        pattern->SetCustomKeyboard(std::move(func));
         pattern->SetCustomKeyboardOption(supportAvoidance);
+        pattern->SetCustomKeyboard(std::move(func));
     }
 }
 
