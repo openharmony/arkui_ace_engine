@@ -66,6 +66,7 @@ class ListCommonTestNg : public ListTestNg {
 public:
     void CreateFocusableListItems(int32_t itemNumber, int32_t count = 0);
     void CreateFocusableListItemGroups(int32_t groupNumber, int32_t groupItemNum = GROUP_ITEM_NUMBER);
+    void CreateFocusableAndUnFocusableListItemGroups(int32_t groupNumber, int32_t groupItemNum = GROUP_ITEM_NUMBER);
     void MouseSelect(Offset start, Offset end);
     AssertionResult IsEqualNextFocusNode(FocusStep step, int32_t currentIndex, int32_t expectNextIndex);
     AssertionResult IsEqualNextFocusNodeHOMEEND(FocusStep step, int32_t currentIndex, std::string id);
@@ -169,6 +170,24 @@ void ListCommonTestNg::CreateFocusableListItemGroups(int32_t groupNumber, int32_
     for (int32_t index = 0; index < groupNumber; index++) {
         CreateListItemGroup();
         CreateFocusableListItems(groupItemNum);
+        ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
+void ListCommonTestNg::CreateFocusableAndUnFocusableListItemGroups(int32_t groupNumber, int32_t groupItemNum)
+{
+    for (int32_t index = 0; index < groupNumber; index++) {
+        CreateListItemGroup();
+        for (int32_t itemIndex = 0; itemIndex < groupItemNum; itemIndex++) {
+            if (itemIndex % EVEN_NUMBER_MOD == 0) {
+                CreateListItems(1);
+            } else {
+                CreateFocusableListItems(1);
+            }
+        }
+
         ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
@@ -1248,6 +1267,20 @@ HWTEST_F(ListCommonTestNg, FocusWrapMode013, TestSize.Level1)
      * @tc.expected: focus should not move (returns NULL_VALUE) because the focusWrapMode is default.
      */
     EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::UP, 1, NULL_VALUE, 0, 4));
+}
+
+HWTEST_F(ListCommonTestNg, FocusWrapMode014, TestSize.Level1)
+{
+    ListModelNG list = CreateList();
+    list.SetLanes(2);
+    CreateFocusableAndUnFocusableListItemGroups(1, 8);
+    list.SetFocusWrapMode(FocusWrapMode::DEFAULT);
+    CreateDone();
+    /**
+     * @tc.steps: step1. Call GetNextFocusNode from fifth item.
+     * @tc.expected: focus should not move (returns NULL_VALUE) because the fifth item is non-focusable.
+     */
+    EXPECT_TRUE(IsEqualNextFocusNodeInGroup(FocusStep::LEFT, 5, NULL_VALUE, 0, 8));
 }
 
 /**
