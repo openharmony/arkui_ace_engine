@@ -349,7 +349,12 @@ RectF TextFieldSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
         }
         res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
         if (NearZero(res.Width())) {
-            pattern->AdjustSelectedBlankLineWidth(res);
+            auto tempRes = res;
+            // need to convert to local coordinates before AdjustSelectedBlankLineWidth
+            tempRes -= textPaintOffset;
+            pattern->AdjustSelectedBlankLineWidth(tempRes);
+            res.SetLeft(tempRes.Left() + textPaintOffset.GetX());
+            res.SetWidth(tempRes.Width());
         }
     }
     auto globalContentRect = GetVisibleContentRect(true);
