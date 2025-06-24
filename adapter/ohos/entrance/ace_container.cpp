@@ -18,10 +18,14 @@
 #include <ani.h>
 
 #include "auto_fill_manager.h"
+#include "bundlemgr/bundle_mgr_proxy.h"
+#include "if_system_ability_manager.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "iservice_registry.h"
 #include "scene_board_judgement.h"
 #include "ui/rs_surface_node.h"
 #include "ui_extension_context.h"
+#include "system_ability_definition.h"
 #include "wm_common.h"
 
 #include "adapter/ohos/entrance/ace_view_ohos.h"
@@ -41,6 +45,7 @@
 #include "base/i18n/localization.h"
 #include "base/log/event_report.h"
 #include "base/log/jank_frame_report.h"
+#include "base/memory/referenced.h"
 #include "base/thread/background_task_executor.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "bridge/card_frontend/card_frontend.h"
@@ -239,6 +244,18 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     } else if (abilityInfo) {
         bundleName = abilityInfo->bundleName;
         moduleName = abilityInfo->moduleName;
+    } else {
+        auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        CHECK_NULL_VOID(systemAbilityMgr);
+        auto bundleObj = systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+        CHECK_NULL_VOID(bundleObj);
+        auto bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(bundleObj);
+        CHECK_NULL_VOID(bundleMgrProxy);
+        AppExecFwk::BundleInfo bundleInfo;
+        bundleMgrProxy->GetBundleInfoForSelf(
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo);
+        bundleName = bundleInfo.name;
+        moduleName = bundleInfo.entryModuleName;                
     }
     int32_t instanceId = pipelineContext->GetInstanceId();
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
