@@ -1321,6 +1321,61 @@ HWTEST_F(GridCommonTestNg, FocusWrapMode007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FocusWrapMode008
+ * @tc.desc: Test the tab key focusing rule of GetNextFocusNode func in horizontal layout RTL mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, FocusWrapMode008, TestSize.Level1)
+{
+    /**
+     * 0: [9], [6], [3], [0]
+     * 1:      [7], [4], [1]
+     * 2:      [8], [5], [2]
+     */
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 1fr 1fr");
+    model.SetIsRTL(TextDirection::RTL);
+    CreateFocusableGridItems(10, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Press the tab key from the node with index 1
+     */
+    int32_t currentIndex = 1;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 2));
+
+    /**
+     * @tc.steps: step2. Press the tab key from the node with index 2
+     */
+    currentIndex = 2;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, currentIndex, 3));
+
+    /**
+     * @tc.steps: step3. Press the shift+tab key from the node with index 3
+     */
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, currentIndex, 2));
+
+    /**
+     * @tc.steps: step4. Press the up key from the node with index 3
+     */
+    currentIndex = 3;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, NULL_VALUE));
+
+    /**
+     * @tc.steps: step5. Press the up key from the node with index 2
+     */
+    currentIndex = 2;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, currentIndex, 1));
+
+    /**
+     * @tc.steps: step6. Press the down key from the node with index 2
+     */
+    currentIndex = 2;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, currentIndex, NULL_VALUE));
+}
+
+/**
  * @tc.name: Focus001
  * @tc.desc: Test Foucus
  * @tc.type: FUNC
