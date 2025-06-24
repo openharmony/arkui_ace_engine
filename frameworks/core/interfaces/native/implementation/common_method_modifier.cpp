@@ -33,6 +33,7 @@
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_node.h"
+#include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
@@ -2203,6 +2204,10 @@ void BorderRadiusImpl(Ark_NativePointer node,
         // TODO: Reset value
         if (frameNode->GetTag() == V2::BUTTON_ETS_TAG) {
             ButtonModelNG::SetBorderRadius(frameNode, radiuses.value().radiusTopLeft, radiuses.value().radiusTopRight,
+                radiuses.value().radiusBottomLeft, radiuses.value().radiusBottomRight);
+        }
+        if (frameNode->GetTag() == V2::IMAGE_ETS_TAG) {
+            ImageModelNG::SetBorderRadius(frameNode, radiuses.value().radiusTopLeft, radiuses.value().radiusTopRight,
                 radiuses.value().radiusBottomLeft, radiuses.value().radiusBottomRight);
         }
         ViewAbstractModelStatic::SetBorderRadius(frameNode, radiuses.value());
