@@ -36,6 +36,7 @@ namespace OHOS::Ace::NG {
 constexpr int32_t TOTAL_ITEM_NUMBER = CONTENT_MAIN_SIZE / ITEM_MAIN_SIZE;
 constexpr int32_t GROUP_NUMBER = 4;
 constexpr int32_t GROUP_ITEM_NUMBER = 2;
+constexpr int32_t EVEN_NUMBER_MOD = 2;
 constexpr float GROUP_HEADER_LEN = 50.f;
 constexpr Dimension GROUP_MARGIN = 12.0_vp;
 constexpr float DEFAULT_STIFFNESS = 228;

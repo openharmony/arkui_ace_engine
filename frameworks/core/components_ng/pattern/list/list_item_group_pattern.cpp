@@ -968,6 +968,33 @@ void ListItemGroupPattern::AdjustFocusStepForRtl(FocusStep& step, bool isVertica
     }
 }
 
+const ListItemGroupInfo* ListItemGroupPattern::GetPosition(int32_t index) const
+{
+    // Only for GetCrossAxisNextIndex
+    auto it = itemPosition_.find(index);
+    if (it != itemPosition_.end()) {
+        return &it->second;
+    }
+    auto cachedIt = cachedItemPosition_.find(index);
+    return (cachedIt != cachedItemPosition_.end()) ? &cachedIt->second : nullptr;
+}
+
+bool ListItemGroupPattern::NextPositionBlocksMove(
+    const ListItemGroupInfo* curPos, const ListItemGroupInfo* nextPos, bool isVertical) const
+{
+    // Only for GetCrossAxisNextIndex, determine if the next position blocks movement.
+
+    if (!nextPos) {
+        // No position information, allow movement (or handle externally).
+        return false;
+    }
+    // Check if the current and next positions are in the same column.
+    // If the endPos and startPos of two items are the same, it indicates they are in the same row or column, allowing
+    // focus movement; otherwise, it is considered to have reached the first column (row) or the last column (row),
+    // disallowing focus movement.
+    return curPos && (!NearEqual(curPos->endPos, nextPos->endPos) && !NearEqual(curPos->startPos, nextPos->startPos));
+}
+
 void ListItemGroupPattern::HandleForwardStep(
     const RefPtr<FrameNode>& curFrame, int32_t curIndexInGroup, int32_t& moveStep, int32_t& nextIndex)
 {
@@ -1160,11 +1187,11 @@ WeakPtr<FocusHub> ListItemGroupPattern::GetNextFocusNode(FocusStep step, const W
         }
     }
     int32_t curGroupIndexInList = GetIndexInList();
-    return FindNextValidFocus(moveStep, curIndexInGroup, curGroupIndexInList, nextIndex, currentFocusNode);
+    return FindNextValidFocus(moveStep, curIndexInGroup, curGroupIndexInList, nextIndex, currentFocusNode, step);
 }
 
 WeakPtr<FocusHub> ListItemGroupPattern::FindNextValidFocus(int32_t moveStep, int32_t curIndexInGroup,
-    int32_t curGroupIndexInList, int32_t nextIndexInGroup, const WeakPtr<FocusHub>& currentFocusNode)
+    int32_t curGroupIndexInList, int32_t nextIndexInGroup, const WeakPtr<FocusHub>& currentFocusNode, FocusStep step)
 {
     auto curFocus = currentFocusNode.Upgrade();
     CHECK_NULL_RETURN(curFocus, nullptr);
@@ -1172,6 +1199,9 @@ WeakPtr<FocusHub> ListItemGroupPattern::FindNextValidFocus(int32_t moveStep, int
     CHECK_NULL_RETURN(parentList, nullptr);
     auto listPattern = parentList->GetPattern<ListPattern>();
     CHECK_NULL_RETURN(listPattern, nullptr);
+    auto listProperty = parentList->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_RETURN(listProperty, nullptr);
+    auto isVertical = listProperty->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL;
 
     ListItemGroupPara listItemGroupPara = { GetLanesInGroup(), GetEndIndexInGroup(), GetDisplayStartIndexInGroup(),
         GetDisplayEndIndexInGroup(), IsHasHeader(), IsHasFooter() };
@@ -1183,6 +1213,14 @@ WeakPtr<FocusHub> ListItemGroupPattern::FindNextValidFocus(int32_t moveStep, int
             curGroupIndexInList, nextIndexInGroup, curIndexInGroup, listItemGroupPara, itemTotalCount_);
         auto nextFocusNode = GetChildFocusNodeByIndex(nextIndexInGroup);
         if (nextFocusNode.Upgrade()) {
+            auto isDefault = listPattern->GetFocusWrapMode() == FocusWrapMode::DEFAULT;
+            const ListItemGroupInfo* curPos = GetPosition(curIndexInGroup);
+            const ListItemGroupInfo* nextPos = GetPosition(nextIndexInGroup);
+            const bool isForward = (isVertical && step == FocusStep::RIGHT) || (!isVertical && step == FocusStep::DOWN);
+            const bool isBackward = (isVertical && step == FocusStep::LEFT) || (!isVertical && step == FocusStep::UP);
+            if ((isForward || isBackward) && NextPositionBlocksMove(curPos, nextPos, isVertical) && isDefault) {
+                return nullptr;
+            }
             return nextFocusNode;
         }
         nextIndexInGroup += moveStep;
