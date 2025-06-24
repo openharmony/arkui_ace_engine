@@ -5335,6 +5335,7 @@ void TextPattern::SetResponseRegion(const SizeF& frameSize, const SizeF& boundsS
         Dimension(std::max(frameSize.Height(), boundsSize.Height()))));
     hotZoneRegions.emplace_back(hotZoneRegion);
     gestureHub->SetResponseRegion(hotZoneRegions);
+    host->UpdateAccessibilityNodeRect();
 }
 
 void TextPattern::CreateModifier()

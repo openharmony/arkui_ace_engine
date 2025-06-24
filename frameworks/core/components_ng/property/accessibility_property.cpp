@@ -308,7 +308,7 @@ bool AccessibilityProperty::IsMatchAccessibilityResponseRegion(bool isAccessibil
     }
     auto& rect = responseRegionList.back();
     if (rect == origRect) {
-        return false;
+        return true;
     }
     if (!IsAccessibilityCompInResponseRegion(rect, origRect)) {
         return false;
