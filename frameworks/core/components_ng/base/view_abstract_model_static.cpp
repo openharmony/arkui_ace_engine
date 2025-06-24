@@ -12,7 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
+#include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
  
 #include "core/common/ace_engine.h"
