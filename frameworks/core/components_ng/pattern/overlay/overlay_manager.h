@@ -850,8 +850,10 @@ private:
     void ShowMenuClearAnimation(const RefPtr<FrameNode>& menuWrapper, AnimationOption& option,
         bool showPreviewAnimation, bool startDrag);
     bool IsContextMenuBindedOnOrigNode();
-    void OpenDialogAnimationInner(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
-    void OpenDialogAnimation(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps);
+    void OpenDialogAnimationInner(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
+        bool isReadFirstNode = true);
+    void OpenDialogAnimation(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
+        bool isReadFirstNode = true);
     void CloseDialogAnimation(const RefPtr<FrameNode>& node);
     void UpdateChildVisible(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& childNode);
     void SetTransitionCallbacks(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& contentNode,

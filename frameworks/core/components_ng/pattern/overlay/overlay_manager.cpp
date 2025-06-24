@@ -872,7 +872,8 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     DeleteDialogHotAreas(node);
 }
 
-void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps)
+void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
+    bool isReadFirstNode)
 {
     auto pipeline = GetPipelineContext();
     CHECK_NULL_VOID(pipeline);
@@ -924,12 +925,13 @@ void OverlayManager::OpenDialogAnimationInner(const RefPtr<FrameNode>& node, con
                            ? dialogPattern->GetOpenAnimation().value().GetDuration()
                            : theme->GetAnimationDurationIn());
     ctx->ScaleAnimation(option, theme->GetScaleStart(), theme->GetScaleEnd());
-    if (isTopOrder) {
+    if (isTopOrder && isReadFirstNode) {
         SendDialogAccessibilityEvent(node, AccessibilityEventType::PAGE_OPEN);
     }
 }
 
-void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps)
+void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node, const DialogProperties& dialogProps,
+    bool isReadFirstNode)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "open dialog animation");
     CHECK_NULL_VOID(node);
@@ -946,7 +948,7 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node, const Di
     MountToParentWithService(root, node, levelOrder);
     root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     BlurLowerNode(node);
-    OpenDialogAnimationInner(node, dialogProps);
+    OpenDialogAnimationInner(node, dialogProps, isReadFirstNode);
 }
 
 void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
@@ -3778,7 +3780,7 @@ void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, con
         buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
-    OpenDialogAnimation(dialogNode, dialogProps);
+    OpenDialogAnimation(dialogNode, dialogProps, false);
 #endif
 }
 
