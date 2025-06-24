@@ -18,17 +18,21 @@ import { PeerNode } from "../../PeerNode"
 import { CustomBuilder } from "../common"
 import { CustomNodeBuilder } from "../customBuilder"
 import { ArkComponentRootPeer } from "../staticComponents"
+import { int32 } from '@koalaui/common'
+import { UIContextUtil } from 'arkui/handwritten/UIContextUtil'
 
 // TODO need invert dependency: createUiDetachedRoot should be imported from @koalaui/arkoala same as in TS
 export type UIDetachedRootCreator = (
     peerFactory: () => PeerNode,
     /** @memo */
-    builder: () => void
+    builder: () => void,
+    instanceId: int32
 ) => PeerNode
 function createUiDetachedRootStub(
     factory: () => PeerNode,
     /** @memo */
-    builder: () => void
+    builder: () => void,
+    instanceId: int32
 ): PeerNode {
     throw new Error("Not implemented")
 }
@@ -45,8 +49,9 @@ function componentRootPeerFactory(): PeerNode {
 
 export class CallbackTransformer {
     static transformFromCustomBuilder(value: CustomBuilder): CustomNodeBuilder {
+        let instanceId = UIContextUtil.getCurrentInstanceId();
         return (parentNodeId: KPointer): KPointer => {
-            const peer = createUiDetachedRoot(componentRootPeerFactory, value)
+            const peer = createUiDetachedRoot(componentRootPeerFactory, value, instanceId)
             return peer.peer.ptr
         }
     }

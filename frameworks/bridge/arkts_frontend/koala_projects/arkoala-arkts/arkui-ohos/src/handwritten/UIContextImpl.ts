@@ -24,7 +24,7 @@ import { UIContext, MeasureUtils, Font, TextMenuController, FocusController, Con
     FrameCallback, UIInspector, UIObserver, PromptAction, AtomicServiceBar, Router, CursorController, MediaQuery,
     ComponentSnapshot }
     from "@ohos/arkui/UIContext"
-import { StateManager } from "@koalaui/runtime"
+import { StateManager, ComputableState } from "@koalaui/runtime"
 import { Context, PointerStyle, PixelMap } from "#external"
 import { Nullable } from "arkui/component/enums"
 import { KeyEvent } from "arkui/component/common"
@@ -246,7 +246,7 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
         }, builder);
         let rootNode = peerNode.peer.ptr;
         const destroyCallback = (): void => {
-            destroyUiDetachedRoot(peerNode);
+            destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
         }
         ArkUIAniModule._ComponentSnapshot_createFromBuilderWithCallback(
             rootNode, destroyCallback, callback, delay, checkImageStatus);
@@ -262,7 +262,7 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
         }, builder);
         let rootNode = peerNode.peer.ptr;
         const destroyCallback = (): void => {
-            destroyUiDetachedRoot(peerNode);
+            destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
         }
         let pixmap = ArkUIAniModule._ComponentSnapshot_createFromBuilderWithPromise(
             rootNode, destroyCallback, delay, checkImageStatus);
@@ -368,6 +368,19 @@ export class CursorControllerImpl extends CursorController {
     }
 }
 
+export class DetachedRootEntryManager {
+    instanceId_: int32;
+    detachedRoots_: Map<KPointer, ComputableState<PeerNode>>;
+    constructor(instanceId: int32) {
+        this.detachedRoots_ = new Map<KPointer, ComputableState<PeerNode>>();
+        this.instanceId_ = instanceId;
+    }
+
+    public getDetachedRoots() : Map<KPointer, ComputableState<PeerNode>> {
+        return this.detachedRoots_;
+    }
+}
+
 export class UIContextImpl extends UIContext {
     instanceId_: int32 = -1;
     stateMgr: StateManager | undefined = undefined;
@@ -384,6 +397,7 @@ export class UIContextImpl extends UIContext {
     font_: FontImpl;
     measureUtils_: MeasureUtilsImpl;
     textMenuController_: TextMenuControllerImpl;
+    detachedRootEntryManager_: DetachedRootEntryManager;
 
     bufferSize = 4096
     buffer: KBuffer = new KBuffer(this.bufferSize)
@@ -402,8 +416,14 @@ export class UIContextImpl extends UIContext {
         this.font_ = new FontImpl(instanceId);
         this.measureUtils_ = new MeasureUtilsImpl(instanceId);
         this.textMenuController_ = new TextMenuControllerImpl(instanceId);
+        this.detachedRootEntryManager_ = new DetachedRootEntryManager(instanceId);
     }
-
+    public getInstanceId() : int32 {
+        return this.instanceId_;
+    }
+    public getDetachedRootEntryManager() : DetachedRootEntryManager {
+        return this.detachedRootEntryManager_;
+    }
     dispatchCallback(buffer: KSerializerBuffer, length: int32): void {
         if (length <= 0) {
             return
