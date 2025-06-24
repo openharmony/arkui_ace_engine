@@ -501,7 +501,7 @@ class ArkThemeScopeManager {
         this.defaultTheme?.unbindFromScope(0);
         this.defaultTheme = ArkThemeScopeManager.SystemTheme;
         const cloneTheme = ArkThemeScopeManager.cloneCustomThemeWithExpand(customTheme);
-        this.defaultTheme = this.makeTheme(customTheme, ThemeColorMode.SYSTEM);
+        this.defaultTheme = this.makeTheme(cloneTheme, ThemeColorMode.SYSTEM);
         // bind new default theme to 0 theme scope
         this.defaultTheme.bindToScope(0);
 
