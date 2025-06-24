@@ -4310,7 +4310,7 @@ void AceContainer::UpdateResourceDensity(double density, bool isUpdateResConfig)
     auto resConfig = GetResourceConfiguration();
     resConfig.SetDensity(density);
     SetResourceConfiguration(resConfig);
-    if (SystemProperties::GetResourceDecoupling() && isUpdateResConfig) {
+    if (SystemProperties::GetResourceDecoupling() && (isUpdateResConfig || !IsSceneBoardWindow())) {
         ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
     }
 }
