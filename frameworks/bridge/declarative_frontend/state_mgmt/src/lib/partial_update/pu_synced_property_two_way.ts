@@ -25,9 +25,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
 
   private source_: ObservedPropertyObjectAbstract<C>;
   
-  private fakeSourceBackUp_: ObservedPropertyObjectAbstract<C>;
-  private reconnectedToProvide_: boolean = false;
-
+  private fakeSourceBackup_: ObservedPropertyObjectAbstract<C>;
 
   constructor(source: ObservedPropertyObjectAbstract<C>,
     owningChildView: IPropertySubscriber,
@@ -56,28 +54,13 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
       // unregister from the ObservedObject
       ObservedObject.removeOwningProperty(this.source_.getUnmonitored(), this);
       this.source_.__isFake_ObservedPropertyAbstract_Internal() && this.source_.aboutToBeDeleted();
+      this.fakeSourceBackup_ && this.fakeSourceBackup_.aboutToBeDeleted();
     }
     super.aboutToBeDeleted();
   }
 
   private isStorageLinkProp(): boolean {
     return (this.source_ && this.source_ instanceof ObservedPropertyAbstract && (!(this.source_ instanceof ObservedPropertyAbstractPU)));
-  }
-
-  public get fakeSourceBackUp() : ObservedPropertyObjectAbstract<C> {
-    return this.fakeSourceBackUp_;
-  }
-
-  public set fakeSourceBackUp(val: ObservedPropertyObjectAbstract<C>) {
-    this.fakeSourceBackUp_ = val;
-  }
-
-  public get reconnectedToProvide() : boolean {
-    return this.reconnectedToProvide_;
-  }
-
-  public set reconnectedToProvide(val: boolean) {
-    this.reconnectedToProvide_ = val;
   }
 
   private setObject(newValue: C): void {
@@ -107,11 +90,11 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
    * that peer can be in either ancestor or descendant component if 'this' is used for a @Consume
    * @param eventSource 
    */
-  public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>): void {
+  public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>, isSync: boolean = false): void {
     stateMgmtProfiler.begin('SynchedPropertyTwoWayPU.syncPeerHasChanged');
     if (!this.changeNotificationIsOngoing_) {
       stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerHasChanged: from peer '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}' .`)
-      this.notifyPropertyHasChangedPU();
+      this.notifyPropertyHasChangedPU(isSync);
     }
     stateMgmtProfiler.end();
   }
@@ -187,21 +170,68 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     stateMgmtProfiler.end();
   }
 
-  public resetSource(newSource: ObservedPropertyObjectAbstract<C>) {
-    this.fakeSourceBackUp_ = this.source_;
+  /**
+  * Reset the source for the SynchedPropertyTwoWayPU. Only used when build node attached to the main tree
+  * the consume used the default value need find its provide.
+  * step1: save the fake source which created when initializeConsume used default value
+  * step2: add new source, which is provide as the new source and add subscribe for new source
+  * step3: SynchedPropertyTwoWayPU which change source, needs to sync all peers. also for the track property.
+  * step4: need to update the dependent elements synchronously.
+  * @param newSource new source need to reset. For consume, it is provide.  
+  */
+  public resetSource(newSource: ObservedPropertyObjectAbstract<C>): void {
+    let newRaw = ObservedObject.GetRawObject(newSource.getUnmonitored());
+    let fakeRaw = ObservedObject.GetRawObject(this.source_.getUnmonitored());
+    // if the new source value type is not same with the old one, cannot connect
+    if (typeof newRaw  !== typeof fakeRaw) {
+      stateMgmtConsole.applicationError(`connect ${(newSource as ObservedPropertyObjectPU<any>).debugInfo()} to ${this.debugInfo()}.The types are not same.`)
+      return;
+    }
+    this.fakeSourceBackup_ = this.source_;
     this.source_ = newSource;
+    // register two-way sync to the new source
     this.source_.addSubscriber(this);
-    this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.source_.getUnmonitored());
+    this.syncFromSource();
   }
 
-  public resetFakeSource() {
-    if (!this.fakeSourceBackUp_) {
+  public resetFakeSource(): void {
+    if (!this.fakeSourceBackup_) {
       stateMgmtConsole.warn(`${this.debugInfo()} does not have the fake source backup, need to check the build node does not amount to parent ever`)
       return;
     }
-    this.source_ = this.fakeSourceBackUp_;
-    this.source_.addSubscriber(this);
-    this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.source_.getUnmonitored());
+
+    this.source_.removeSubscriber(this);
+    this.source_ = this.fakeSourceBackup_;
+    this.syncFromSource();
+  }
+
+  private syncFromSource(): void {
+    this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.source_);
+    this.syncPeerHasChanged(this.source_ as ObservedPropertyAbstractPU<any>);
+    let raw = ObservedObject.GetRawObject(this.source_.getUnmonitored());
+    if (this.shouldInstallTrackedObjectReadCb) {
+      Object.keys(raw)
+        .forEach(propName => {
+          // Collect only @Track'ed changed properties
+          if (Reflect.has(raw as undefined as object, `${TrackedObject.___TRACKED_PREFIX}${propName}`)) {
+            // if the source is track property, need to notify the property update
+            this.syncPeerTrackedPropertyHasChanged(this.source_ as ObservedPropertyAbstractPU<any>, propName);
+          }
+        });
+    }
+
+    // sort the view according to the view id
+    const dirtyView = Array.from(SyncedViewRegistry.dirtyNodesList)
+      .map((weak) => weak.deref())
+      .filter((view): view is ViewPU => view instanceof ViewPU)
+      .sort((view1, view2) => view1.id__() - view2.id__());
+
+    dirtyView.forEach((view: ViewPU) => {
+      view.dirtyElementIdsNeedsUpdateSynchronously_.forEach((elementId: number) => {
+        view.UpdateElement(elementId);
+      })
+    })
+    SyncedViewRegistry.dirtyNodesList.clear();
   }
 }
 

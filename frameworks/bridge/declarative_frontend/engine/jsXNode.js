@@ -188,6 +188,14 @@ class JSBuilderNode extends BaseNode {
         });
         this.updateEnd();
     }
+
+    findProvidePU__(providePropName) {
+        if (this.__parentViewBuildNode) {
+            return this.__parentViewBuildNode.findProvidePU__(providePropName);
+        }
+        return undefined;
+    }
+
     recycle() {
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();

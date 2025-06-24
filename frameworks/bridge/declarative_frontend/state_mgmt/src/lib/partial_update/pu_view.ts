@@ -38,6 +38,21 @@ function Reusable<T extends Constructor>(BaseClass: T): T {
   return BaseClass;
 }
 
+class SyncedViewRegistry {
+  public static dirtyNodesList: Set<WeakRef<ViewPU>> = new Set<WeakRef<ViewPU>>();
+  
+  // map viewPU -> weakref<ViewPU>
+  private static wmap_ = new WeakMap();
+  
+  public static addSyncedUpdateDirtyNodes(view: ViewPU): void {
+    let weakRef = this.wmap_.get(view)
+    if (weakRef) {
+      SyncedViewRegistry.wmap_.set(view, weakRef = new WeakRef(view));
+    }
+    SyncedViewRegistry.dirtyNodesList.add(weakRef);
+  }
+}
+
 abstract class ViewPU extends PUV2ViewBase
   implements IViewPropertiesChangeSubscriber, IView {
 
@@ -71,6 +86,9 @@ abstract class ViewPU extends PUV2ViewBase
 
   // @Provide'd variables by this class and its ancestors
   protected providedVars_: Map<string, ObservedPropertyAbstractPU<any>> = new Map<string, ObservedPropertyAbstractPU<any>>();
+
+  // Set of elmtIds that need re-render
+  public dirtyElementIdsNeedsUpdateSynchronously_: Set<number> = new Set<number>();
 
   // my LocalStorage instance, shared with ancestor Views.
   // create a default instance on demand if none is initialized
@@ -461,6 +479,21 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtProfiler.end();
   }
 
+  // collect elements need to update synchronously and its owning view
+  public collectElementsNeedToUpdateSynchronously(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
+    stateMgmtConsole.debug(`collectElementsNeedToUpdateSynchronously ${this.debugInfo__()} change ${varName} dependent elements ${dependentElmtIds}`);
+    if (dependentElmtIds.size && !this.isFirstRender()) {
+      for (const elmtId of dependentElmtIds) {
+        if (this.hasRecycleManager()) {
+          this.dirtyElementIdsNeedsUpdateSynchronously_.add(this.recycleManager_.proxyNodeId(elmtId));
+        } else {
+          this.dirtyElementIdsNeedsUpdateSynchronously_.add(elmtId);
+        }
+      }
+    }
+    SyncedViewRegistry.addSyncedUpdateDirtyNodes(this);
+  }
+
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
     stateMgmtProfiler.begin('ViewPU.viewPropertyHasChanged');
@@ -615,7 +648,7 @@ abstract class ViewPU extends PUV2ViewBase
    * @param store the backing store object for this variable (not the get/set variable!)
    */
   protected addProvidedVar<T>(providedPropName: string, store: ObservedPropertyAbstractPU<T>, allowOverride: boolean = false) {
-    if (!allowOverride && this.findProvidePU(providedPropName)) {
+    if (!allowOverride && this.findProvidePU__(providedPropName)) {
       throw new ReferenceError(`${this.constructor.name}: duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Views already. @Provide override not allowed.`);
     }
     store.setDecoratorInfo('@Provide');
@@ -623,13 +656,13 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   /*
-    findProvidePU finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
+    findProvidePU__ finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
     if 'this' ViewPU has a @Provide('providedPropName') return it, otherwise ask from its parent ViewPU.
   */
-  public findProvidePU(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
-    return this.providedVars_.get(providedPropName) || (this.parent_ && 
-      (this.parent_ instanceof ViewPU && this.parent_ instanceof JSBuilderNode) &&
-      this.parent_.findProvidePU(providedPropName));
+  public findProvidePU__(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
+    return this.providedVars_.get(providedPropName) ||
+    (this.parent_ && this.parent_.findProvidePU__(providedPropName)) ||
+    (this.__parentViewBuildNode__ && this.__parentViewBuildNode__.findProvidePU__(providedPropName));
   }
 
   /**
@@ -645,11 +678,11 @@ abstract class ViewPU extends PUV2ViewBase
    */
   protected initializeConsume<T>(providedPropName: string,
     consumeVarName: string, defaultValue?: any): ObservedPropertyAbstractPU<T> {
-    let providedVarStore: ObservedPropertyAbstractPU<any> = this.findProvidePU(providedPropName);
+    let providedVarStore: ObservedPropertyAbstractPU<any> = this.findProvidePU__(providedPropName);
     // '3' means that developer has initialized the @Consume decorated variable
     if (!providedVarStore) {
       if (arguments.length === 3) {
-        providedVarStore = new ObservedPropertySimplePU(defaultValue, this, consumeVarName);
+        providedVarStore = new ObservedPropertyPU(defaultValue, this, consumeVarName);
         providedVarStore.__setIsFake_ObservedPropertyAbstract_Internal(true);
       } else {
         throw new ReferenceError(`${this.debugInfo__()} missing @Provide property with name ${providedPropName}.
@@ -672,7 +705,7 @@ abstract class ViewPU extends PUV2ViewBase
 
   public reconnectToConsume(): void {
     this.defaultConsume_.forEach((value: SynchedPropertyObjectTwoWayPU<any>, providedPropName: string) => {
-      let providedVarStore: ObservedPropertyAbstractPU<any> = this.findProvidePU(providedPropName);
+      let providedVarStore: ObservedPropertyAbstractPU<any> = this.findProvidePU__(providedPropName);
       if (providedVarStore) {
         stateMgmtConsole.debug(`${value.debugInfo} connected to the provide ${providedVarStore.debugInfo()}`);
         // store the consume reconnect to provide
@@ -689,7 +722,7 @@ abstract class ViewPU extends PUV2ViewBase
     for (const [key, value] of this.reconnectConsume_) {
       // try to findProvide again
       // need to set Parent undefine first
-      const provide = this.findProvidePU(key);
+      const provide = this.findProvidePU__(key);
       // if provide is undefined, the provide and consume connection is broken
       // reset consume to default value.
       if (!provide) {
@@ -706,34 +739,6 @@ abstract class ViewPU extends PUV2ViewBase
         return;
       }
       child.disconnectedConsume();
-    })
-  }
-
-  /**
-   * Method invoked by buildNodes, when buildNode attach to buildNode, and buildNode will find if it is under
-   * view, which mean if it is in main tree.
-   * If so, the buildNode will invoke the view its buildNodes children update
-   * @param providedPropName children buildNodes which have new nodes attached
-   */
-  public notifyBuildNodesUpdateAttached(buildNodes: Array<ViewBuildNodeBase>) {
-    buildNodes.forEach((buildNode: ViewBuildNodeBase) => {
-      if (buildNode && buildNode instanceof ViewBuildNodeBase) {
-        buildNode.propagateToChildrenToConnected();
-      }
-    })
-  }
-
-  /**
-   * Method invoked by buildNodes, when buildNode detach from buildNode, and buildNode will find if it is under
-   * view, which mean if it is in main tree.
-   * If so, the buildNode will invoke the view its buildNodes children update
-   * @param providedPropName children buildNodes which have nodes detached
-   */
-  public notifyBuildNodesUpdateDetach(buildNodes: Array<ViewBuildNodeBase>) {
-    buildNodes.forEach((buildNode: ViewBuildNodeBase) => {
-      if (buildNode && buildNode instanceof ViewBuildNodeBase) {
-        buildNode.propagateToChildrenToDisconnected();
-      }
     })
   }
 
