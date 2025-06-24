@@ -40,6 +40,7 @@ import inspector from "@ohos/arkui/inspector"
 import router from '@ohos/router'
 import promptAction from '@ohos/promptAction';
 import { AsyncCallback, CustomBuilder } from 'arkui/component'
+import { Router as RouterExt } from 'arkui/handwritten';
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver {
@@ -81,6 +82,13 @@ export class TextMenuController {
 }
 
 export class Router {
+    router_: RouterExt | undefined = undefined;
+    public setRouter(router: RouterExt) {
+        this.router_ = router;
+    }
+    public getRouter(): RouterExt {
+        return this.router_!;
+    }
     public pushUrl(options: router.RouterOptions): Promise<void> {
         throw Error("pushUrl not implemented in Router!")
     }
