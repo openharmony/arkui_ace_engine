@@ -2274,4 +2274,111 @@ HWTEST_F(DragDropManagerTestNg, HandleOnDragEnd004, TestSize.Level1)
     dragDropManager->ResetDragEndOption(notifyMessage, dragEvent, 0);
     EXPECT_FALSE(dragEvent->isRemoteDev_);
 }
+
+/**
+ * @tc.name: DragDropManagerCheckIsNewDragTest001
+ * @tc.desc: Verify CheckIsNewDrag and RequireSummaryAndDragBundleInfoIfNecessary handle pullId correctly.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerCheckIsNewDragTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragDropManager instance.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Check when pullId is -1 (invalid).
+     * @tc.expected: Returns false.
+     */
+    DragPointerEvent pointerEvent;
+    pointerEvent.pullId = INVALID_PULL_ID;
+    EXPECT_FALSE(dragDropManager->CheckIsNewDrag(pointerEvent));
+
+    /**
+     * @tc.steps: step3. Check when pullId is equal to currentPullId_.
+     * @tc.expected: Returns false.
+     */
+    dragDropManager->currentPullId_ = CURRENT_PULL_ID;
+    pointerEvent.pullId = CURRENT_PULL_ID;
+    EXPECT_FALSE(dragDropManager->CheckIsNewDrag(pointerEvent));
+
+    /**
+     * @tc.steps: step4. Check when pullId is different from currentPullId_.
+     * @tc.expected: Returns true.
+     */
+    pointerEvent.pullId = NEW_PULL_ID;
+    EXPECT_TRUE(dragDropManager->CheckIsNewDrag(pointerEvent));
+
+    /**
+     * @tc.steps: step5. Call RequireSummaryAndDragBundleInfoIfNecessary and verify currentPullId_ update.
+     * @tc.expected: currentPullId_ should be updated to new value.
+     */
+    dragDropManager->RequireSummaryAndDragBundleInfoIfNecessary(pointerEvent);
+    EXPECT_EQ(dragDropManager->currentPullId_, NEW_PULL_ID);
+}
+
+/**
+ * @tc.name: DragDropManagerResetPullIdTest001
+ * @tc.desc: Verify ResetPullId clears summaryMap, parentHitNodes and resets currentPullId_.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerResetPullIdTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragDropManager and simulate internal state.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    dragDropManager->summaryMap_.insert({ "data", 1 });
+    dragDropManager->parentHitNodes_.insert(PARENT_NODE_ID);
+    dragDropManager->currentPullId_ = CURRENT_PULL_ID;
+
+    /**
+     * @tc.steps: step2. Call ResetPullId.
+     * @tc.expected: All fields reset to default state.
+     */
+    dragDropManager->ResetPullId();
+
+    EXPECT_TRUE(dragDropManager->summaryMap_.empty());
+    EXPECT_TRUE(dragDropManager->parentHitNodes_.empty());
+    EXPECT_EQ(dragDropManager->currentPullId_, INVALID_PULL_ID);
+}
+
+/**
+ * @tc.name: ResetDragDropClearTest001
+ * @tc.desc: Test ResetDragDrop should clear velocity info
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropManagerTestNg, ResetDragDropClearTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create an instance of DragDropManager
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Manually add fake data to velocityTracker_
+     * @tc.expected: The isFirstPoint_ of velocityTracker_ should become false (indicating data exists)
+     */
+    Point startPoint(POINT_X1, POINT_Y1);
+    dragDropManager->UpdateVelocityTrackerPoint(startPoint, true);
+    EXPECT_FALSE(dragDropManager->velocityTracker_.isFirstPoint_);
+
+    /**
+     * @tc.steps: step3. Call ResetDragDrop to simulate a drag failure
+     */
+    int32_t windowId = WINDOW_ID;
+    Point dropPoint(POINT_X2, POINT_Y2);
+    dragDropManager->ResetDragDrop(windowId, dropPoint);
+
+    /**
+     * @tc.steps: step4. Check if velocityTracker_ has been cleared
+     * @tc.expected: velocityTracker_ is successfully reset
+     */
+    EXPECT_TRUE(dragDropManager->velocityTracker_.isFirstPoint_);
+}
 } // namespace OHOS::Ace::NG

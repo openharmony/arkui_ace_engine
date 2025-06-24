@@ -67,6 +67,20 @@ const PanDirection DRAG_DIRECTION = { PanDirection::LEFT };
 constexpr int32_t FINGERS_NUMBER = 2;
 constexpr int32_t parallelIndex_1 = 2;
 constexpr int32_t parallelIndex_2 = 0;
+constexpr float PREVIEW_DOWN_SCALE = 0.8f;
+constexpr float PREVIEW_UP_SCALE = 1.2f;
+constexpr float EXPECT_SCALE = 1.0f;
+constexpr float PREVIEW_NEGA_SCALE = -1.0f;
+constexpr int32_t PIXELMAP_WIDTH_LARGE = 200;
+constexpr int32_t PIXELMAP_HEIGHT = 200;
+constexpr float SIZE_X = 100.0f;
+constexpr float SIZE_Y = 100.0f;
+constexpr float INIT_MOVE_X = 50.0f;
+constexpr float INIT_MOVE_Y = 50.0f;
+constexpr float LAST_MOVE_X = 30.0f;
+constexpr float LAST_MOVE_Y = 30.0f;
+constexpr float TOTAL_MOVE_X = 20.0f;
+constexpr float TOTAL_MOVE_Y = 20.0f;
 } // namespace
 
 class GestureEventHubTestNg : public testing::Test {

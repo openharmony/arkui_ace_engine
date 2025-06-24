@@ -2298,4 +2298,270 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubSetPanEvent004, TestSize.Level1)
     ASSERT_NE(panEventActuator, nullptr);
     EXPECT_EQ(panEventActuator->userCallback_, newPanEvent);
 }
+
+/**
+ * @tc.name: GetDefaultPixelMapScaleTest001
+ * @tc.desc: Test GetDefaultPixelMapScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetDefaultPixelMapScaleTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub and test data
+     * @tc.expected: Return default scale when pixelMap is null
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    GestureEventHub gestureHub(eventHub);
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+
+    float result = gestureHub.GetDefaultPixelMapScale(nullptr, info, false, nullptr);
+    EXPECT_FLOAT_EQ(result, DEFALUT_DRAG_PPIXELMAP_SCALE);
+}
+
+/**
+ * @tc.name: GetDefaultPixelMapScaleTest002
+ * @tc.desc: Test GetDefaultPixelMapScale with mouse event
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetDefaultPixelMapScaleTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub and test data
+     * @tc.expected: Return 1.0 for mouse event regardless of other conditions
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(frameNode, nullptr);
+    GestureEventHub gestureHub(eventHub);
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::MOUSE_BUTTON);
+
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_CALL(*pixelMap, GetWidth()).WillRepeatedly(Return(PIXELMAP_WIDTH_LARGE));
+    EXPECT_NE(pixelMap, nullptr);
+    float result = gestureHub.GetDefaultPixelMapScale(frameNode, info, false, pixelMap);
+    EXPECT_FLOAT_EQ(result, EXPECT_SCALE);
+}
+
+/**
+ * @tc.name: GetDefaultPixelMapScaleTest003
+ * @tc.desc: Test GetDefaultPixelMapScale with menu show and valid preview scale
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetDefaultPixelMapScaleTest003, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    GestureEventHub gestureHub(eventHub);
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto dragPreview = frameNode->GetDragPreview();
+    dragPreview.onlyForLifting = false;
+    frameNode->SetDragPreview(dragPreview);
+
+    gestureHub.menuPreviewScale_ = PREVIEW_DOWN_SCALE;
+
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_CALL(*pixelMap, GetWidth()).WillRepeatedly(Return(PIXELMAP_WIDTH_LARGE));
+
+    float result = gestureHub.GetDefaultPixelMapScale(frameNode, info, true, pixelMap);
+    EXPECT_FLOAT_EQ(result, PREVIEW_DOWN_SCALE);
+}
+
+/**
+ * @tc.name: GetDefaultPixelMapScaleTest004
+ * @tc.desc: Test GetDefaultPixelMapScale with menu show and adjusted scale
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetDefaultPixelMapScaleTest004, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    GestureEventHub gestureHub(eventHub);
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto dragPreview = frameNode->GetDragPreview();
+    dragPreview.onlyForLifting = false;
+    frameNode->SetDragPreview(dragPreview);
+
+    gestureHub.frameNodeSize_ = SizeF(SIZE_X, SIZE_Y);
+    gestureHub.menuPreviewScale_ = PREVIEW_UP_SCALE;
+
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_CALL(*pixelMap, GetWidth()).WillRepeatedly(Return(PIXELMAP_WIDTH_LARGE));
+    EXPECT_CALL(*pixelMap, GetHeight()).WillRepeatedly(Return(PIXELMAP_HEIGHT));
+
+    float result = gestureHub.GetDefaultPixelMapScale(frameNode, info, true, pixelMap);
+    EXPECT_FLOAT_EQ(result, PIXELMAP_DEFALUT_LIMIT_SCALE);
+}
+
+/**
+ * @tc.name: GetDefaultPixelMapScaleTest005
+ * @tc.desc: Test GetDefaultPixelMapScale with menu not show
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetDefaultPixelMapScaleTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub and test data
+     * @tc.expected: Return default scale when menu not show
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    GestureEventHub gestureHub(eventHub);
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto dragPreview = frameNode->GetDragPreview();
+    dragPreview.onlyForLifting = false;
+    frameNode->SetDragPreview(dragPreview);
+    gestureHub.frameNodeSize_ = SizeF(SIZE_X, SIZE_Y);
+    gestureHub.menuPreviewScale_ = PREVIEW_DOWN_SCALE;
+
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_NE(pixelMap, nullptr);
+    EXPECT_CALL(*pixelMap, GetWidth()).WillRepeatedly(Return(PIXELMAP_WIDTH_LARGE));
+
+    float result = gestureHub.GetDefaultPixelMapScale(frameNode, info, false, pixelMap);
+    EXPECT_FLOAT_EQ(result, DEFALUT_DRAG_PPIXELMAP_SCALE);
+}
+
+/**
+ * @tc.name: GetDefaultPixelMapScaleTest006
+ * @tc.desc: Test GetDefaultPixelMapScale with onlyForLifting true
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetDefaultPixelMapScaleTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub and test data
+     * @tc.expected: Return default scale when onlyForLifting is true
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    GestureEventHub gestureHub(eventHub);
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto dragPreview = frameNode->GetDragPreview();
+    dragPreview.onlyForLifting = true;
+    frameNode->SetDragPreview(dragPreview);
+    gestureHub.frameNodeSize_ = SizeF(SIZE_X, SIZE_Y);
+    gestureHub.menuPreviewScale_ = PREVIEW_DOWN_SCALE;
+
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_NE(pixelMap, nullptr);
+    EXPECT_CALL(*pixelMap, GetWidth()).WillRepeatedly(Return(PIXELMAP_WIDTH_LARGE));
+
+    float result = gestureHub.GetDefaultPixelMapScale(frameNode, info, true, pixelMap);
+    EXPECT_FLOAT_EQ(result, DEFALUT_DRAG_PPIXELMAP_SCALE);
+}
+
+/**
+ * @tc.name: GetDefaultPixelMapScaleTest007
+ * @tc.desc: Test GetDefaultPixelMapScale with invalid menuPreviewScale_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetDefaultPixelMapScaleTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub and test data
+     * @tc.expected: Return default scale when menuPreviewScale_ is invalid
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    GestureEventHub gestureHub(eventHub);
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+
+    auto frameNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto dragPreview = frameNode->GetDragPreview();
+    dragPreview.onlyForLifting = false;
+    frameNode->SetDragPreview(dragPreview);
+    gestureHub.frameNodeSize_ = SizeF(SIZE_X, SIZE_Y);
+    gestureHub.menuPreviewScale_ = PREVIEW_NEGA_SCALE;
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    EXPECT_NE(pixelMap, nullptr);
+    EXPECT_CALL(*pixelMap, GetWidth()).WillRepeatedly(Return(PIXELMAP_WIDTH_LARGE));
+
+    /**
+     * @tc.steps: step2. Call the function under test
+     */
+    float result = gestureHub.GetDefaultPixelMapScale(frameNode, info, true, pixelMap);
+
+    /**
+     * @tc.steps: step3. Verify the return value
+     * @tc.expected: Return the default DEFALUT_DRAG_PPIXELMAP_SCALE value
+     */
+    EXPECT_FLOAT_EQ(result, DEFALUT_DRAG_PPIXELMAP_SCALE);
+
+    /**
+     * @tc.steps: step4. Verify menuPreviewScale_ is not modified
+     * @tc.expected: menuPreviewScale_ remains the original invalid value
+     */
+    EXPECT_FLOAT_EQ(gestureHub.menuPreviewScale_, PREVIEW_NEGA_SCALE);
+}
+
+/**
+ * @tc.name: GestureEventOnDragStartTest001
+ * @tc.desc: Test OnDragStart resets drag position-related values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventOnDragStartTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode, EventHub, GestureEventHub and DragEventActuator.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Prepare pipeline and set non-zero drag position values in dragDropManager.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    dragDropManager->dragMovePosition_ = OffsetF(INIT_MOVE_X, INIT_MOVE_Y);
+    dragDropManager->lastDragMovePosition_ = OffsetF(LAST_MOVE_X, LAST_MOVE_Y);
+    dragDropManager->dragTotalMovePosition_ = OffsetF(TOTAL_MOVE_X, TOTAL_MOVE_Y);
+
+    /**
+     * @tc.steps: step3. Call OnDragStart with a valid GestureEvent and DragDropInfo containing a pixelMap.
+     * @tc.expected: All position values in dragDropManager are reset to OffsetF().
+     */
+    auto pixelMap = PixelMap::CreatePixelMap(static_cast<void*>(new char[0]));
+    ASSERT_NE(pixelMap, nullptr);
+    DragDropInfo dragDropInfo;
+    dragDropInfo.pixelMap = pixelMap;
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+
+    GestureEvent gestureEvent;
+    gestureEvent.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    gestureEventHub->OnDragStart(gestureEvent, pipeline, frameNode, dragDropInfo, dragEvent);
+
+    EXPECT_EQ(dragDropManager->dragMovePosition_, OffsetF());
+    EXPECT_EQ(dragDropManager->lastDragMovePosition_, OffsetF());
+    EXPECT_EQ(dragDropManager->dragTotalMovePosition_, OffsetF());
+}
 } // namespace OHOS::Ace::NG
