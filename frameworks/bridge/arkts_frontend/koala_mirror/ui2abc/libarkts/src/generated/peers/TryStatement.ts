@@ -70,6 +70,7 @@ export class TryStatement extends Statement {
         global.generatedEs2panda._TryStatementSetFinallyCanCompleteNormally(global.context, this.peer, finallyCanCompleteNormally)
         return this
     }
+    protected readonly brandTryStatement: undefined
 }
 export function isTryStatement(node: object | undefined): node is TryStatement {
     return node instanceof TryStatement

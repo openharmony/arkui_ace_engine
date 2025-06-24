@@ -45,6 +45,7 @@ export class TSInferType extends TypeNode {
     get typeParam(): TSTypeParameter | undefined {
         return unpackNode(global.generatedEs2panda._TSInferTypeTypeParamConst(global.context, this.peer))
     }
+    protected readonly brandTSInferType: undefined
 }
 export function isTSInferType(node: object | undefined): node is TSInferType {
     return node instanceof TSInferType

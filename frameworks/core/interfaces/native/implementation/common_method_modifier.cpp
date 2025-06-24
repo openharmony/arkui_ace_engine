@@ -2117,17 +2117,13 @@ void Opacity0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto result = Converter::OptConvertPtr<float>(value);
-    if (result) {
-        // TODO: Reset value
-        ViewAbstract::SetOpacity(frameNode, result.value());
-    }
+    auto result = value ? Converter::OptConvert<float>(*value) : std::nullopt;
+    ViewAbstractModelStatic::SetOpacity(frameNode, result);
 }
 void Opacity1Impl(Ark_NativePointer node,
                   const Opt_Union_Number_Resource* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    Opacity0Impl(node, value);
 }
 void BorderImpl(Ark_NativePointer node,
                 const Opt_BorderOptions* value)
@@ -3295,8 +3291,7 @@ void Scale0Impl(Ark_NativePointer node,
 void Scale1Impl(Ark_NativePointer node,
                 const Opt_ScaleOptions* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
+    Scale0Impl(node, value);
 }
 void GridSpanImpl(Ark_NativePointer node,
                   const Opt_Number* value)
@@ -5703,8 +5698,8 @@ void KeyboardShortcutImpl(Ark_NativePointer node,
         return;
     }
     auto strValue = Converter::OptConvertPtr<std::string>(value);
-    if (!strValue.has_value() || strValue.value().size() != 1) {
-        // ViewAbstract::SetKeyboardShortcut(frameNode, {}, {}, nullptr);
+    if (value->value.selector == 0 && (!strValue.has_value() || strValue.value().size() != 1)) {
+        ViewAbstractModelStatic::SetKeyboardShortcut(frameNode, {}, {}, nullptr);
         return;
     }
     auto keysOptVect = Converter::OptConvertPtr<std::vector<std::optional<ModifierKey>>>(keys);

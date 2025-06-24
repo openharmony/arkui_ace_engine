@@ -51,6 +51,7 @@ export class TSClassImplements extends Expression {
     get typeParameters(): TSTypeParameterInstantiation | undefined {
         return unpackNode(global.generatedEs2panda._TSClassImplementsTypeParametersConst(global.context, this.peer))
     }
+    protected readonly brandTSClassImplements: undefined
 }
 export function isTSClassImplements(node: object | undefined): node is TSClassImplements {
     return node instanceof TSClassImplements

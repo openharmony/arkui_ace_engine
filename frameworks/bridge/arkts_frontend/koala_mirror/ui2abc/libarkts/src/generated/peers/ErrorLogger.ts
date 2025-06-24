@@ -32,4 +32,5 @@ export class ErrorLogger extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandErrorLogger: undefined
 }

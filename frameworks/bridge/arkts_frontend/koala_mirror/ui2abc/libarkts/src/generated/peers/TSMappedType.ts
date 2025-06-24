@@ -55,6 +55,7 @@ export class TSMappedType extends TypeNode {
     get optional(): Es2pandaMappedOption {
         return global.generatedEs2panda._TSMappedTypeOptional(global.context, this.peer)
     }
+    protected readonly brandTSMappedType: undefined
 }
 export function isTSMappedType(node: object | undefined): node is TSMappedType {
     return node instanceof TSMappedType

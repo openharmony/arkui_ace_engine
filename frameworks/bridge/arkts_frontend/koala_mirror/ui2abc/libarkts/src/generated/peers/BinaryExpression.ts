@@ -93,6 +93,7 @@ export class BinaryExpression extends Expression {
         global.generatedEs2panda._BinaryExpressionCompileOperandsConst(global.context, this.peer, passNode(etsg), passNode(lhs))
         return this
     }
+    protected readonly brandBinaryExpression: undefined
 }
 export function isBinaryExpression(node: object | undefined): node is BinaryExpression {
     return node instanceof BinaryExpression

@@ -32,4 +32,5 @@ export class SignatureInfo extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandSignatureInfo: undefined
 }

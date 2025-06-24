@@ -60,6 +60,7 @@ export class ETSNewClassInstanceExpression extends Expression {
         global.generatedEs2panda._ETSNewClassInstanceExpressionAddToArgumentsFront(global.context, this.peer, passNode(expr))
         return this
     }
+    protected readonly brandETSNewClassInstanceExpression: undefined
 }
 export function isETSNewClassInstanceExpression(node: object | undefined): node is ETSNewClassInstanceExpression {
     return node instanceof ETSNewClassInstanceExpression

@@ -41,6 +41,7 @@ export class NullLiteral extends Literal {
     static updateNullLiteral(original?: NullLiteral): NullLiteral {
         return new NullLiteral(global.generatedEs2panda._UpdateNullLiteral(global.context, passNode(original)))
     }
+    protected readonly brandNullLiteral: undefined
 }
 export function isNullLiteral(node: object | undefined): node is NullLiteral {
     return node instanceof NullLiteral

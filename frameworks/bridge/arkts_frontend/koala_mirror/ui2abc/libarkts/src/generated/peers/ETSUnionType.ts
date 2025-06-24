@@ -44,6 +44,12 @@ export class ETSUnionType extends TypeNode {
     get types(): readonly TypeNode[] {
         return unpackNodeArray(global.generatedEs2panda._ETSUnionTypeTypesConst(global.context, this.peer))
     }
+    /** @deprecated */
+    setValueTypes(type: TypeNode | undefined, index: number): this {
+        global.generatedEs2panda._ETSUnionTypeSetValueTypesConst(global.context, this.peer, passNode(type), index)
+        return this
+    }
+    protected readonly brandETSUnionType: undefined
 }
 export function isETSUnionType(node: object | undefined): node is ETSUnionType {
     return node instanceof ETSUnionType

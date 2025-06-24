@@ -47,6 +47,7 @@ export class TSIndexedAccessType extends TypeNode {
     get indexType(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._TSIndexedAccessTypeIndexTypeConst(global.context, this.peer))
     }
+    protected readonly brandTSIndexedAccessType: undefined
 }
 export function isTSIndexedAccessType(node: object | undefined): node is TSIndexedAccessType {
     return node instanceof TSIndexedAccessType

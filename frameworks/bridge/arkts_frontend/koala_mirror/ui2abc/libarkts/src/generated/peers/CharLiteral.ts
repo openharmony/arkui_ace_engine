@@ -41,6 +41,7 @@ export class CharLiteral extends Literal {
     static updateCharLiteral(original?: CharLiteral): CharLiteral {
         return new CharLiteral(global.generatedEs2panda._UpdateCharLiteral(global.context, passNode(original)))
     }
+    protected readonly brandCharLiteral: undefined
 }
 export function isCharLiteral(node: object | undefined): node is CharLiteral {
     return node instanceof CharLiteral

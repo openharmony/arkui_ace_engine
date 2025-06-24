@@ -41,6 +41,7 @@ export class DebuggerStatement extends Statement {
     static updateDebuggerStatement(original?: DebuggerStatement): DebuggerStatement {
         return new DebuggerStatement(global.generatedEs2panda._UpdateDebuggerStatement(global.context, passNode(original)))
     }
+    protected readonly brandDebuggerStatement: undefined
 }
 export function isDebuggerStatement(node: object | undefined): node is DebuggerStatement {
     return node instanceof DebuggerStatement

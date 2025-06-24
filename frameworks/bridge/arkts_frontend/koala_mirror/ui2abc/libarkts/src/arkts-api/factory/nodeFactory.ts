@@ -15,17 +15,15 @@
 
 import {
     ClassDefinition,
-    ClassProperty,
+    ETSImportDeclaration,
     ETSStructDeclaration,
+    ETSTuple,
     ETSTypeReferencePart,
     MemberExpression,
+    ObjectExpression,
     TryStatement,
-    TSInterfaceDeclaration,
     TSTypeParameter,
     VariableDeclarator,
-    ObjectExpression,
-    ETSTuple,
-    ETSImportDeclaration,
 } from "../../generated"
 import { factory as generatedFactory } from "../../generated/factory"
 import { createScriptFunction, updateScriptFunction } from "../node-utilities/ScriptFunction"
@@ -52,6 +50,7 @@ import { updateETSTuple } from "../node-utilities/ETSTuple"
 import { createArrayExpression, updateArrayExpression } from "../node-utilities/ArrayExpression"
 import { createTSTypeAliasDeclaration, updateTSTypeAliasDeclaration } from "../node-utilities/TSTypeAliasDeclaration"
 import { createClassDeclaration, updateClassDeclaration } from "../node-utilities/ClassDeclaration"
+import { createBlockStatement, updateBlockStatement } from "../node-utilities/BlockStatement"
 
 export const factory = {
     ...generatedFactory,
@@ -127,4 +126,7 @@ export const factory = {
 
     createTSTypeAliasDeclaration,
     updateTSTypeAliasDeclaration,
+
+    createBlockStatement,
+    updateBlockStatement,
 }

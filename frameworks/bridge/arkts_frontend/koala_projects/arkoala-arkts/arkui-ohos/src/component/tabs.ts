@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { TranslateOptions, ArkCommonMethodPeer, CommonMethod, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable } from "./common"
+import { TranslateOptions, ArkCommonMethodPeer, CommonMethod, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable, DividerStyle } from "./common"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -652,12 +652,6 @@ export interface TabsOptions {
     barModifier?: CommonModifier;
 }
 export type TabsInterface = (options?: TabsOptions) => TabsAttribute;
-export interface DividerStyle {
-    strokeWidth: Length;
-    color?: ResourceColor;
-    startMargin?: Length;
-    endMargin?: Length;
-}
 export interface TabsAnimationEvent {
     currentOffset: number;
     targetOffset: number;
@@ -697,7 +691,7 @@ export interface TabsAttribute extends CommonMethod {
     onAnimationEnd(value: OnTabsAnimationEndCallback | undefined): this
     onGestureSwipe(value: OnTabsGestureSwipeCallback | undefined): this
     fadingEdge(value: boolean | undefined): this
-    divider(value: DividerStyle | undefined): this
+    divider(value: DividerStyle | null | undefined): this
     barOverlap(value: boolean | undefined): this
     barBackgroundColor(value: ResourceColor | undefined): this
     barGridAlign(value: BarGridColumnOptions | undefined): this
@@ -788,7 +782,7 @@ export class ArkTabsStyle extends ArkCommonMethodStyle implements TabsAttribute 
     public fadingEdge(value: boolean | undefined): this {
         return this
     }
-    public divider(value: DividerStyle | undefined): this {
+    public divider(value: DividerStyle | null | undefined): this {
         return this
     }
     public barOverlap(value: boolean | undefined): this {
@@ -990,7 +984,7 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
         }
         return this
     }
-    public divider(value: DividerStyle | undefined): this {
+    public divider(value: DividerStyle | null | undefined): this {
         if (this.checkPriority("divider")) {
             const value_casted = value as (DividerStyle | undefined)
             this.getPeer()?.dividerAttribute(value_casted)

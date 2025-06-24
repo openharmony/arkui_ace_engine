@@ -45,6 +45,7 @@ export class Decorator extends Statement {
     get expr(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._DecoratorExprConst(global.context, this.peer))
     }
+    protected readonly brandDecorator: undefined
 }
 export function isDecorator(node: object | undefined): node is Decorator {
     return node instanceof Decorator

@@ -22,7 +22,7 @@ import { int32 } from "@koalaui/compat"
 const DEBUG_WITH_NODE_STATS = false
 
 export class KoalaProfiler {
-    private static readonly map = DEBUG_WITH_NODE_STATS
+    private static readonly map: Map<int32, Set<Object> > | undefined = DEBUG_WITH_NODE_STATS
         ? new Map<int32, Set<Object>>()
         : undefined
 

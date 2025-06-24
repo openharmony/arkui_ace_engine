@@ -8018,6 +8018,12 @@ export interface InvertOptions {
     threshold: number;
     thresholdRange: number;
 }
+export interface DividerStyle {
+    strokeWidth: Length;
+    color?: ResourceColor;
+    startMargin?: Length;
+    endMargin?: Length;
+}
 export type TipsMessageType = ResourceStr | StyledString;
 export interface BackgroundImageOptions {
     syncLoad?: boolean;

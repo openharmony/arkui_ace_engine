@@ -51,6 +51,7 @@ export class UpdateExpression extends Expression {
     get isPrefix(): boolean {
         return global.generatedEs2panda._UpdateExpressionIsPrefixConst(global.context, this.peer)
     }
+    protected readonly brandUpdateExpression: undefined
 }
 export function isUpdateExpression(node: object | undefined): node is UpdateExpression {
     return node instanceof UpdateExpression

@@ -1,5 +1,5 @@
 
-function main() {}
+function main(): void {}
 
 
 

@@ -32,4 +32,39 @@ export class ArkTsConfig extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    /** @deprecated */
+    resolveAllDependenciesInArkTsConfig(): this {
+        global.generatedEs2panda._ArkTsConfigResolveAllDependenciesInArkTsConfig(global.context, this.peer)
+        return this
+    }
+    get configPath(): string {
+        return unpackString(global.generatedEs2panda._ArkTsConfigConfigPathConst(global.context, this.peer))
+    }
+    get package(): string {
+        return unpackString(global.generatedEs2panda._ArkTsConfigPackageConst(global.context, this.peer))
+    }
+    get baseUrl(): string {
+        return unpackString(global.generatedEs2panda._ArkTsConfigBaseUrlConst(global.context, this.peer))
+    }
+    get rootDir(): string {
+        return unpackString(global.generatedEs2panda._ArkTsConfigRootDirConst(global.context, this.peer))
+    }
+    get outDir(): string {
+        return unpackString(global.generatedEs2panda._ArkTsConfigOutDirConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    resetDependencies(): this {
+        global.generatedEs2panda._ArkTsConfigResetDependencies(global.context, this.peer)
+        return this
+    }
+    get entry(): string {
+        return unpackString(global.generatedEs2panda._ArkTsConfigEntryConst(global.context, this.peer))
+    }
+    get useUrl(): boolean {
+        return global.generatedEs2panda._ArkTsConfigUseUrlConst(global.context, this.peer)
+    }
+    protected readonly brandArkTsConfig: undefined
+}
+export function isArkTsConfig(node: object | undefined): node is ArkTsConfig {
+    return node instanceof ArkTsConfig
 }

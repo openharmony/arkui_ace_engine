@@ -53,6 +53,7 @@ export class NumberLiteral extends Literal {
     get str(): string {
         return unpackString(global.generatedEs2panda._NumberLiteralStrConst(global.context, this.peer))
     }
+    protected readonly brandNumberLiteral: undefined
 }
 export function isNumberLiteral(node: object | undefined): node is NumberLiteral {
     return node instanceof NumberLiteral

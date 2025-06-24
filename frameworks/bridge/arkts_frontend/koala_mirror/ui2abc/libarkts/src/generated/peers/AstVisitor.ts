@@ -32,4 +32,5 @@ export class AstVisitor extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandAstVisitor: undefined
 }

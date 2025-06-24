@@ -46,6 +46,7 @@ export class ETSWildcardType extends TypeNode {
     get typeReference(): ETSTypeReference | undefined {
         return unpackNode(global.generatedEs2panda._ETSWildcardTypeTypeReference(global.context, this.peer))
     }
+    protected readonly brandETSWildcardType: undefined
 }
 export function isETSWildcardType(node: object | undefined): node is ETSWildcardType {
     return node instanceof ETSWildcardType

@@ -14,7 +14,7 @@
  */
 
 import { global } from "../static/global"
-import { isNumber, throwError } from "../../utils"
+import { isNumber, throwError, withWarning } from "../../utils"
 import { KNativePointer, nullptr } from "@koalaui/interop"
 import { passNode, passNodeArray, unpackNodeArray, unpackNonNullableNode } from "./private"
 import { Es2pandaContextState, Es2pandaModifierFlags } from "../../generated/Es2pandaEnums"
@@ -23,7 +23,6 @@ import {
     type AnnotationUsage,
     ClassDefinition,
     ClassProperty,
-    ETSImportDeclaration,
     ETSModule,
     isClassDefinition,
     isFunctionDeclaration,
@@ -35,13 +34,19 @@ import {
 import { Config } from "../peers/Config"
 import { Context } from "../peers/Context"
 import { NodeCache } from "../node-cache"
+import { listPrograms } from "../plugins"
 
 export function createETSModuleFromContext(): ETSModule {
     let program = global.es2panda._ContextProgram(global.context)
     if (program == nullptr) {
         throw new Error(`Program is null for context ${global.context.toString(16)}`)
     }
-    return new ETSModule(global.es2panda._ProgramAst(global.context, program))
+    const ast = global.es2panda._ProgramAst(global.context, program)
+    if (ast == nullptr) {
+        throw new Error(`AST is null for program ${program.toString(16)}`)
+
+    }
+    return new ETSModule(ast)
 }
 
 export function createETSModuleFromSource(
@@ -57,6 +62,11 @@ export function createETSModuleFromSource(
     if (program == nullptr)
         throw new Error(`Program is null for ${source} 0x${global.compilerContext.peer.toString(16)}`)
     return new ETSModule(global.es2panda._ProgramAst(global.context, program))
+}
+
+export function metaDatabase(fileName: string): string {
+    if (fileName.endsWith(".meta.json")) throw new Error(`Must pass source, not database: ${fileName}`)
+    return `${fileName}.meta.json`
 }
 
 export function updateETSModuleByStatements(
@@ -83,7 +93,7 @@ export function proceedToState(state: Es2pandaContextState): void {
     const before = Date.now()
     global.es2panda._ProceedToState(global.context, state)
     const after = Date.now()
-    global.profiler.proceedTime += after-before
+    global.profiler.proceededToState(after-before)
     NodeCache.clear()
     checkErrors()
 }
@@ -99,6 +109,19 @@ export function recheckSubtree(node: AstNode): void {
 
 export function rebindSubtree(node: AstNode): void {
     global.es2panda._AstNodeRebind(global.context, node.peer)
+    checkErrors()
+}
+
+export function recheckContext(context: KNativePointer): void {
+    global.es2panda._AstNodeRecheck(
+        context,
+        global.es2panda._ProgramAst(
+            context,
+            global.es2panda._ContextProgram(
+                context
+            )
+        )
+    )
     checkErrors()
 }
 
@@ -137,14 +160,6 @@ export function getOriginalNode(node: AstNode): AstNode {
 
 export function getFileName(): string {
     return global.filePath
-}
-
-export function getPackageName(): string {
-    return global.packageName
-}
-
-export function getFilePathFromPackageRoot(): string {
-    return global.filePathFromPackageRoot
 }
 
 // TODO: It seems like Definition overrides AstNode  modifiers
@@ -196,4 +211,27 @@ export function nameIfETSModule(node: AstNode): string {
 
 export function asString(node: AstNode|undefined): string {
     return `${node?.constructor.name} ${node ? nameIfIdentifier(node) : undefined}`
+}
+
+const defaultPandaSdk = "../../../incremental/tools/panda/node_modules/@panda/sdk"
+
+
+export function findStdlib(): string {
+    const sdk = process.env.PANDA_SDK_PATH ?? withWarning(
+        defaultPandaSdk,
+        `PANDA_SDK_PATH not set, assuming ${defaultPandaSdk}`
+    )
+    return `${sdk}/ets/stdlib`
+}
+
+export function collectDependencies(files: string[], configPath: string): string[] {
+    const result = new Set<string>()
+    for (let file of files) {
+        const context = Context.createFromFile(file, configPath, findStdlib(), "/tmp/foo.abc")!
+        global.compilerContext = context
+        proceedToState(Es2pandaContextState.ES2PANDA_STATE_PARSED)
+        listPrograms(context.program).forEach(it => result.add(it.absoluteName))
+        context.destroy()
+    }
+    return Array.from(result)
 }

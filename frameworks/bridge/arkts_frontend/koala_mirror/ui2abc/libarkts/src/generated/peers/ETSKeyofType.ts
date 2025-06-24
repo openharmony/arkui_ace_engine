@@ -44,6 +44,7 @@ export class ETSKeyofType extends TypeNode {
     get typeRef(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._ETSKeyofTypeGetTypeRefConst(global.context, this.peer))
     }
+    protected readonly brandETSKeyofType: undefined
 }
 export function isETSKeyofType(node: object | undefined): node is ETSKeyofType {
     return node instanceof ETSKeyofType

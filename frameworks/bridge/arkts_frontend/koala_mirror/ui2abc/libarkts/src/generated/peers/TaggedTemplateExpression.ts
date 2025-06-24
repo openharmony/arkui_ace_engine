@@ -52,6 +52,7 @@ export class TaggedTemplateExpression extends Expression {
     get typeParams(): TSTypeParameterInstantiation | undefined {
         return unpackNode(global.generatedEs2panda._TaggedTemplateExpressionTypeParamsConst(global.context, this.peer))
     }
+    protected readonly brandTaggedTemplateExpression: undefined
 }
 export function isTaggedTemplateExpression(node: object | undefined): node is TaggedTemplateExpression {
     return node instanceof TaggedTemplateExpression

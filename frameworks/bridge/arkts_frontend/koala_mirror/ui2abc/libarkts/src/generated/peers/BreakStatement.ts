@@ -59,6 +59,7 @@ export class BreakStatement extends Statement {
         global.generatedEs2panda._BreakStatementSetTarget(global.context, this.peer, passNode(target))
         return this
     }
+    protected readonly brandBreakStatement: undefined
 }
 export function isBreakStatement(node: object | undefined): node is BreakStatement {
     return node instanceof BreakStatement

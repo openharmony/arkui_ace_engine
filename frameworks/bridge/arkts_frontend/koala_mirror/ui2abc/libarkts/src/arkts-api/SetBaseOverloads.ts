@@ -14,38 +14,31 @@
  */
 
 import { factory } from "./factory/nodeFactory"
-import { ETSModule, isMethodDefinition, MethodDefinition } from "../generated"
+import { isMethodDefinition } from "../generated"
 import { AbstractVisitor } from "./AbstractVisitor"
 import { AstNode } from "./peers/AstNode"
 
 export class SetBaseOverloads extends AbstractVisitor {
-    visitor(node: MethodDefinition, baseOverloadMethod?: MethodDefinition): MethodDefinition
-    visitor(node: AstNode, baseOverloadMethod?: MethodDefinition): AstNode
-    visitor(node: AstNode, baseOverloadMethod?: MethodDefinition): AstNode {
+    visitor(node: AstNode): AstNode {
         if (isMethodDefinition(node)) {
-            const result = factory.updateMethodDefinition(
+            const baseOverloadMethod = node
+            return factory.updateMethodDefinition(
                 node,
                 node.kind,
                 node.key,
                 node.value,
                 node.modifierFlags,
                 node.isComputed,
-                node.overloads.map((it) => this.visitor(it, node)),
+                node.overloads.map((it) => {
+                    it.setBaseOverloadMethod(baseOverloadMethod)
+                    return it
+                })
             )
-            if (baseOverloadMethod) {
-                result.setBaseOverloadMethod(baseOverloadMethod)
-            }
-            return result
         }
         return this.visitEachChild(node)
     }
-
-    static instance?: SetBaseOverloads
 }
 
-export function setBaseOverloads(node: ETSModule) {
-    if (!SetBaseOverloads.instance) {
-        SetBaseOverloads.instance = new SetBaseOverloads()
-    }
-    SetBaseOverloads.instance.visitor(node)
+export function setBaseOverloads(node: AstNode) {
+    new SetBaseOverloads().visitor(node)
 }

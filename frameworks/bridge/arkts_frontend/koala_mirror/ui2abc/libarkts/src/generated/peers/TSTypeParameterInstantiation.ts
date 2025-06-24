@@ -45,6 +45,7 @@ export class TSTypeParameterInstantiation extends Expression {
     get params(): readonly TypeNode[] {
         return unpackNodeArray(global.generatedEs2panda._TSTypeParameterInstantiationParamsConst(global.context, this.peer))
     }
+    protected readonly brandTSTypeParameterInstantiation: undefined
 }
 export function isTSTypeParameterInstantiation(node: object | undefined): node is TSTypeParameterInstantiation {
     return node instanceof TSTypeParameterInstantiation
