@@ -93,7 +93,7 @@ public:
 
     bool ProcessFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
-    bool ProcessDigitalCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    void ProcessDigitalCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         bool isInjected = false);
 
     bool ProcessRotationEvent(float rotationValue);

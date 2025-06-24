@@ -1301,14 +1301,7 @@ void AceContainer::InitializeCallback()
                 RES_TYPE_CROWN_ROTATION_STATUS, static_cast<int32_t>(event.action), mapPayload);
         }
         ContainerScope scope(id);
-        bool result = false;
-        auto crownTask = [context, event, &result, markProcess, id]() {
-            ContainerScope scope(id);
-            result = context->OnNonPointerEvent(event);
-            CHECK_NULL_VOID(markProcess);
-            markProcess();
-        };
-        auto asyncCrownTask = [context, event, markProcess, id]() {
+        auto crownTask = [context, event, markProcess, id]() {
             ContainerScope scope(id);
             context->OnNonPointerEvent(event);
             CHECK_NULL_VOID(markProcess);
@@ -1317,11 +1310,10 @@ void AceContainer::InitializeCallback()
         auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
             crownTask();
-            return result;
+            return;
         }
         context->GetTaskExecutor()->PostTask(
-            asyncCrownTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent", PriorityType::VIP);
-        return result;
+            crownTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent", PriorityType::VIP);
     };
     aceView_->RegisterCrownEventCallback(crownEventCallback);
 
