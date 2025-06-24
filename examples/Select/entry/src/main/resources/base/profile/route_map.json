@@ -1,0 +1,24 @@
+{
+  "routerMap": [
+    {
+      "name": "NavIndex",
+      "pageSourceFile": "src/main/ets/pages/navigationPage.ets",
+      "buildFunction": "NavIndexBuilder"
+    },
+    {
+      "name": "SelectIndex",
+      "pageSourceFile": "src/main/ets/pages/components/select/Index.ets",
+      "buildFunction": "SelectIndexBuilder"
+    },
+    {
+      "name": "SelectDivider",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectDivider.ets",
+      "buildFunction": "SelectDividerBuilder"
+    },
+    {
+      "name": "SelectOption",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectOption.ets",
+      "buildFunction": "SelectOptionBuilder"
+    }
+  ]
+}
