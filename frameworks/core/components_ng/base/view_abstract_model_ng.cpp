@@ -624,7 +624,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
                             CHECK_NULL_VOID(menuTheme);
                             StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
                             NG::ViewAbstract::BindMenuWithCustomNode(std::move(builder), targetNode,
-                                GetMenuPostion(menuPosition, menuParam), menuParam, std::move(previewBuildFunc));
+                                GetMenuPosition(menuPosition, menuParam), menuParam, std::move(previewBuildFunc));
                         },
                         TaskExecutor::TaskType::PLATFORM, "ArkUIRightClickCreateCustomMenu");
                 }
