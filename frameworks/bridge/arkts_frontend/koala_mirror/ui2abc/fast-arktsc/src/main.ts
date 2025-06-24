@@ -31,6 +31,7 @@ export const options = program
     .option('--compiler <path>', 'Path to compiler')
     .option('--link-name <path>', 'Path to final linked file', "all")
 
+    .option('--group-by <size>', 'Group files by groups before passing them to compiler')
     .option('--restart-stages', 'Compilation with plugins and compiler restarting')
 
     .option('--output-dir <path>', 'Path to output dir (only used by AOT compilation)')
@@ -55,6 +56,26 @@ function findMatching(base: string, include: string[], exclude: string[]): strin
         .filter(it => !exclude.some(value => minimatch(it, path.join(base, value), {matchBase: true})))
 }
 
+function getFileGroup(
+    files: string[],
+    groupBy: number,
+    fileIndex: number
+) {
+    const firstId = fileIndex - fileIndex % groupBy
+    const selectedFiles = files.slice(firstId, firstId + groupBy)
+    return selectedFiles
+}
+
+function getFileGroupAsString(
+    files: string[],
+    groupBy: number,
+    fileIndex: number,
+    separator: string,
+    prefix: string,
+) {
+    return `${prefix}${getFileGroup(files, groupBy, fileIndex).join(separator)}`
+}
+
 function produceNinjafile(
     compiler: string,
     files: string[],
@@ -62,22 +83,22 @@ function produceNinjafile(
     linkPath: string,
     baseUrl: string,
     intermediateOutDirs: string[],
+    groupBy: number,
 ): string {
     // We have no Panda SDK for macOS.
     const tools_prefix =  process.platform == "darwin" ? "echo " : ""
     let result: string[] = []
-    let all: string[][] = []
     let basename = path.basename(compiler)
     let linker = compiler.replace(basename, 'arklink')
     const stages = intermediateOutDirs.length
 
-    for (var i = 0; i < stages; i++) {
-        all.push([])
+    const buildCommand = (stage: number, _in: string, _out: string) => {
+        return `${tools_prefix}${compiler} --ets-module --arktsconfig ${path.resolve(config)} --output ${_out} ${options.restartStages ? `--restart-stages` : ``} ${stages > 1 ? `--stage ${stage}` : ``} ${_in}`
     }
 
     let compilerPrefix = [...Array(stages).keys()].map((i) => `
 rule arkts_compiler_stage${i}
-    command = ${tools_prefix}${compiler} --ets-module --arktsconfig ${path.resolve(config)} --output $out ${options.restartStages ? `--restart-stages` : ``} ${stages > 1 ? `--stage ${i}` : ``} $in
+    command = ${buildCommand(i, '$in', '$out')}
     description = "Compiling ARKTS ${stages > 1 ? `(stage ${i})` : ``} $in"
 `).join('')
 
@@ -87,26 +108,40 @@ rule arkts_linker
     description = "Linking ARKTS $out"
 `
 
-    files.forEach(it => {
-        for (var i = 0; i < stages; i++) {
-            let output = path.resolve(intermediateOutDirs[i], relativeOrDot(baseUrl, it))
-            if (i + 1 == stages) {
+    const getTargets = (stage: number) => {
+        return files.map((it) => {
+            let output = path.resolve(intermediateOutDirs[stage], relativeOrDot(baseUrl, it))
+            if (stage + 1 == stages) {
                 output = `${path.dirname(output)}/${path.basename(output, path.extname(output))}.abc`
             }
-            result.push(
-`
-build ${output}: arkts_compiler_stage${i} ${it} ${i > 0 ? `|| stage${i - 1}` : ``}
-`
-            )
-            all[i].push(output)
-        }
-    })
-
-    for (var i = 0; i < stages; i++) {
-        result.push(`build stage${i}: phony ${i > 0 ? `stage${i - 1} ` : ``}${all[i].join(' ')}\n`)
+            return output
+        })
     }
 
-    result.push(`build ${linkPath}: arkts_linker ${all[stages - 1].join(' ')}\n`)
+    const targets: string[][] = []
+    for (var i = 0; i < stages; i++) {
+        targets.push(getTargets(i))
+    }
+    
+    for (var i = 0; i < stages; i++) {
+        for (var j = 0; j < targets[i].length; j += groupBy) {
+            const synthetic_rule = getFileGroupAsString(targets[i], groupBy, j, ':', 'synthetic_rule_').replaceAll('/', '_').replaceAll(':', '_')
+            result.push(
+`
+rule ${synthetic_rule}
+    command = ${buildCommand(i, getFileGroupAsString(files, groupBy, j, ':', ''), getFileGroupAsString(targets[i], groupBy, j, ':', ''))}
+
+build ${getFileGroupAsString(targets[i], groupBy, j, ' ', '')}: ${synthetic_rule} | ${getFileGroupAsString(files, groupBy, j, ' ', '')}${i > 0 ? ` || stage${i - 1}` : ``}
+`
+            )
+        }
+    }
+
+    for (var i = 0; i < stages; i++) {
+        result.push(`build stage${i}: phony ${i > 0 ? `stage${i - 1} ` : ``}${targets[i].join(' ')}\n`)
+    }
+
+    result.push(`build ${linkPath}: arkts_linker ${targets[stages - 1].join(' ')}\n`)
     result.push(`build link: phony ${linkPath}\n`)
     result.push(`build all: phony link\n`)
     result.push("default all\n")
@@ -132,7 +167,7 @@ function main(configPath: string, linkName: string) {
         throw new Error(`No files matching include "${include.join(",")}" exclude "${exclude.join(",")}"`)
     }
 
-    let ninja = produceNinjafile(path.resolve(options.compiler), files, firstConfigPath, linkPath, baseUrl, intermediateOutDirs)
+    let ninja = produceNinjafile(path.resolve(options.compiler), files, firstConfigPath, linkPath, baseUrl, intermediateOutDirs, Number(options.groupBy ?? 1))
     fs.writeFileSync(`${outDir}/build.ninja`, ninja)
 }
 

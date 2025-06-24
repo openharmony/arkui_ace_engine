@@ -45,6 +45,7 @@ export class TSInterfaceHeritage extends Expression {
     get expr(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._TSInterfaceHeritageExpr(global.context, this.peer))
     }
+    protected readonly brandTSInterfaceHeritage: undefined
 }
 export function isTSInterfaceHeritage(node: object | undefined): node is TSInterfaceHeritage {
     return node instanceof TSInterfaceHeritage

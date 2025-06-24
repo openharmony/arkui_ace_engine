@@ -45,6 +45,7 @@ export class TSIntersectionType extends TypeNode {
     get types(): readonly Expression[] {
         return unpackNodeArray(global.generatedEs2panda._TSIntersectionTypeTypesConst(global.context, this.peer))
     }
+    protected readonly brandTSIntersectionType: undefined
 }
 export function isTSIntersectionType(node: object | undefined): node is TSIntersectionType {
     return node instanceof TSIntersectionType

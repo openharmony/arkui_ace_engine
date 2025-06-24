@@ -22,20 +22,16 @@ interface PluginContext {
 }
 
 export function init() {
-    const pluginContext = new arkts.PluginContextImpl()
+    let pluginContext = new arkts.PluginContextImpl()
     return {
         name: "memo",
         parsed(this: PluginContext) {
             console.log("[memo-plugin] Run parsed stage plugin")
             const transform = parsedTransformer()
-            const prog = this.getArkTSProgram()
-            const options: arkts.CompilationOptions = {
-                isMainProgram: true,
-                name: "memo",
-                stage: arkts.Es2pandaContextState.ES2PANDA_STATE_PARSED
-            }
+            const prog = arkts.arktsGlobal.compilerContext.program
+            const state = arkts.Es2pandaContextState.ES2PANDA_STATE_PARSED
             try {
-                transform(prog, options, pluginContext)
+                arkts.runTransformer(prog, state, false, transform, pluginContext)
             } catch(e) {
                 console.trace(e)
                 throw e
@@ -43,15 +39,12 @@ export function init() {
         },
         checked(this: PluginContext) {
             console.log("[memo-plugin] Run checked stage plugin")
-            const transform = checkedTransformer({ trace: !0 })
-            const prog = this.getArkTSProgram()
-            const options: arkts.CompilationOptions = {
-                isMainProgram: true,
-                name: "memo",
-                stage: arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED
-            }
+            const transform = checkedTransformer()
+            const prog = arkts.arktsGlobal.compilerContext.program
+            const state = arkts.Es2pandaContextState.ES2PANDA_STATE_CHECKED
             try {
-                transform(prog, options, pluginContext)
+                arkts.runTransformer(prog, state, false, transform, pluginContext)
+                arkts.recheckSubtree(prog.ast)
             } catch(e) {
                 console.trace(e)
                 throw e
@@ -59,6 +52,7 @@ export function init() {
         },
         clean() {
             console.log("[memo-plugin] Clean")
+            pluginContext = new arkts.PluginContextImpl()
         }
     }
 }

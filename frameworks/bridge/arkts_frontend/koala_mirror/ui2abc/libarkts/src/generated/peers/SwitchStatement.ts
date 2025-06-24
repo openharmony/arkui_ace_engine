@@ -54,6 +54,7 @@ export class SwitchStatement extends Statement {
     get cases(): readonly SwitchCaseStatement[] {
         return unpackNodeArray(global.generatedEs2panda._SwitchStatementCases(global.context, this.peer))
     }
+    protected readonly brandSwitchStatement: undefined
 }
 export function isSwitchStatement(node: object | undefined): node is SwitchStatement {
     return node instanceof SwitchStatement

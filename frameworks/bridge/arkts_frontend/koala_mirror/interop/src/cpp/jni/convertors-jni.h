@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef CONVERTORS_JNI_H
+#define CONVERTORS_JNI_H
 
 #ifdef KOALA_JNI
 
 #include <jni.h>
-#include <assert.h>
 
 #include <cmath>
 #include <unordered_map>
@@ -147,9 +147,14 @@ struct SlowInteropTypeConverter<KInteropBuffer> {
         return result;
     }
     static InteropType convertTo(JNIEnv* env, KInteropBuffer value) {
-      jarray result = env->NewByteArray(value.length);
+      int bufferLength = value.length;
+      jarray result = env->NewByteArray(bufferLength);
       void* data = env->GetPrimitiveArrayCritical(result, nullptr);
-      memcpy(data, value.data, value.length);
+      #ifdef __STDC_LIB_EXT1__
+        memcpy_s(data, bufferLength, value.data, bufferLength);
+      #else
+        memcpy(data, value.data, bufferLength);
+      #endif
       env->ReleasePrimitiveArrayCritical(result, data, 0);
       return result;
     }
@@ -163,11 +168,16 @@ struct SlowInteropTypeConverter<KInteropReturnBuffer> {
     using InteropType = jarray;
     static inline KInteropReturnBuffer convertFrom(JNIEnv* env, InteropType value) = delete;
     static InteropType convertTo(JNIEnv* env, KInteropReturnBuffer value) {
-      jarray result = env->NewByteArray(value.length);
+      int bufferLength = value.length;
+      jarray result = env->NewByteArray(bufferLength);
       void* data = env->GetPrimitiveArrayCritical(result, nullptr);
-      memcpy(data, value.data, value.length);
+      #ifdef __STDC_LIB_EXT1__
+        memcpy_s(data, bufferLength, value.data, bufferLength);
+      #else
+        memcpy(data, value.data, bufferLength);
+      #endif
       env->ReleasePrimitiveArrayCritical(result, data, 0);
-      value.dispose(value.data, value.length);
+      value.dispose(value.data, bufferLength);
       return result;
     }
     static inline void release(JNIEnv* env, InteropType value, const KInteropReturnBuffer& converted) = delete;
@@ -1538,3 +1548,5 @@ void getKoalaJniCallbackDispatcher(jclass* clazz, jmethodID* method);
   } while (0)
 
 #endif  // KOALA_JNI_CALL
+
+#endif // CONVERTORS_JNI_H

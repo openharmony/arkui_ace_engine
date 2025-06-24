@@ -67,6 +67,7 @@ export class TSAsExpression extends AnnotatedExpression {
         global.generatedEs2panda._TSAsExpressionSetTsTypeAnnotation(global.context, this.peer, passNode(typeAnnotation))
         return this
     }
+    protected readonly brandTSAsExpression: undefined
 }
 export function isTSAsExpression(node: object | undefined): node is TSAsExpression {
     return node instanceof TSAsExpression

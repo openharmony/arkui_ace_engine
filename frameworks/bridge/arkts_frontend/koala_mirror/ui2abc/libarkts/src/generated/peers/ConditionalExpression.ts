@@ -65,6 +65,7 @@ export class ConditionalExpression extends Expression {
         global.generatedEs2panda._ConditionalExpressionSetAlternate(global.context, this.peer, passNode(expr))
         return this
     }
+    protected readonly brandConditionalExpression: undefined
 }
 export function isConditionalExpression(node: object | undefined): node is ConditionalExpression {
     return node instanceof ConditionalExpression

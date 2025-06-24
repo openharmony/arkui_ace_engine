@@ -92,6 +92,7 @@ export class AssignmentExpression extends Expression {
         global.generatedEs2panda._AssignmentExpressionCompilePatternConst(global.context, this.peer, passNode(pg))
         return this
     }
+    protected readonly brandAssignmentExpression: undefined
 }
 export function isAssignmentExpression(node: object | undefined): node is AssignmentExpression {
     return node instanceof AssignmentExpression

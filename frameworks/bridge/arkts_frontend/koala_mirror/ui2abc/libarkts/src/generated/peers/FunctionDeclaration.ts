@@ -29,6 +29,7 @@ import {
 } from "../../reexport-for-generated"
 
 import { AnnotationUsage } from "./AnnotationUsage"
+import { Decorator } from "./Decorator"
 import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { ScriptFunction } from "./ScriptFunction"
 import { Statement } from "./Statement"
@@ -52,14 +53,46 @@ export class FunctionDeclaration extends Statement {
     get isAnonymous(): boolean {
         return global.generatedEs2panda._FunctionDeclarationIsAnonymousConst(global.context, this.peer)
     }
+    get decorators(): readonly Decorator[] {
+        return unpackNodeArray(global.generatedEs2panda._FunctionDeclarationDecoratorsConst(global.context, this.peer))
+    }
+    /** @deprecated */
+    emplaceAnnotations(source?: AnnotationUsage): this {
+        global.generatedEs2panda._FunctionDeclarationEmplaceAnnotations(global.context, this.peer, passNode(source))
+        return this
+    }
+    /** @deprecated */
+    clearAnnotations(): this {
+        global.generatedEs2panda._FunctionDeclarationClearAnnotations(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setValueAnnotations(source: AnnotationUsage | undefined, index: number): this {
+        global.generatedEs2panda._FunctionDeclarationSetValueAnnotations(global.context, this.peer, passNode(source), index)
+        return this
+    }
+    get annotationsForUpdate(): readonly AnnotationUsage[] {
+        return unpackNodeArray(global.generatedEs2panda._FunctionDeclarationAnnotationsForUpdate(global.context, this.peer))
+    }
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._FunctionDeclarationAnnotations(global.context, this.peer))
     }
     /** @deprecated */
-    setAnnotations(annotations: readonly AnnotationUsage[]): this {
-        global.generatedEs2panda._FunctionDeclarationSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+    setAnnotations(annotationList: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._FunctionDeclarationSetAnnotations(global.context, this.peer, passNodeArray(annotationList), annotationList.length)
         return this
     }
+    /** @deprecated */
+    setAnnotations1(annotationList: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._FunctionDeclarationSetAnnotations1(global.context, this.peer, passNodeArray(annotationList), annotationList.length)
+        return this
+    }
+    /** @deprecated */
+    addAnnotations(annotations?: AnnotationUsage): this {
+        global.generatedEs2panda._FunctionDeclarationAddAnnotations(global.context, this.peer, passNode(annotations))
+        return this
+    }
+    protected readonly brandFunctionDeclaration: undefined
 }
 export function isFunctionDeclaration(node: object | undefined): node is FunctionDeclaration {
     return node instanceof FunctionDeclaration

@@ -41,6 +41,7 @@ export class ETSUndefinedType extends TypeNode {
     static updateETSUndefinedType(original?: ETSUndefinedType): ETSUndefinedType {
         return new ETSUndefinedType(global.generatedEs2panda._UpdateETSUndefinedType(global.context, passNode(original)))
     }
+    protected readonly brandETSUndefinedType: undefined
 }
 export function isETSUndefinedType(node: object | undefined): node is ETSUndefinedType {
     return node instanceof ETSUndefinedType

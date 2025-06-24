@@ -14,10 +14,11 @@
  */
 
 import { ArktsObject } from "./ArktsObject"
-import { Program } from "./Program"
+import { Program } from "../../generated"
 import { global } from "../static/global"
-import { passString } from "../utilities/private"
-import { KNativePointer } from "@koalaui/interop"
+import { passString, passStringArray } from "../utilities/private"
+import { KNativePointer, nullptr } from "@koalaui/interop"
+import { Config } from "./Config"
 
 export class Context extends ArktsObject {
     constructor(peer: KNativePointer) {
@@ -39,7 +40,73 @@ export class Context extends ArktsObject {
         )
     }
 
+    static createFromFile(filePath: string, configPath: string, stdlibPath: string, outputPath: string): Context | undefined {
+        const config = Config.create([
+            "",
+            "--arktsconfig",
+            configPath,
+            '--extension',
+            'ets',
+            '--stdlib',
+            stdlibPath,
+            filePath,
+            '--output',
+            outputPath,
+        ])
+        return new Context(
+            global.es2panda._CreateContextFromFile(
+                config.peer,
+                passString(filePath)
+            )
+        )
+    }
+
+    static createCacheFromFile(filePath: string, config: Config, globalContext: GlobalContext, isExternal: boolean) {
+        return new Context(
+            global.es2panda._CreateCacheContextFromFile(
+                config.peer,
+                passString(filePath),
+                globalContext.peer,
+                isExternal
+            )
+        )
+    }
+
+
+    destroy() {
+        if (this.peer != nullptr) {
+            global.es2panda._DestroyContext(this.peer)
+            this.peer = nullptr
+        }
+    }
+
     get program(): Program {
         return new Program(global.es2panda._ContextProgram(this.peer));
+    }
+}
+
+export class GlobalContext extends ArktsObject {
+    static create(
+        config: Config, externalFileList: string[]
+    ): GlobalContext {
+        return new GlobalContext(
+            global.es2panda._CreateGlobalContext(
+                config.peer,
+                passStringArray(externalFileList),
+                externalFileList.length,
+                false
+            )
+        )
+    }
+
+    constructor(peer: KNativePointer) {
+        super(peer)
+    }
+
+    destroy() {
+        if (this.peer != nullptr) {
+            global.es2panda._DestroyGlobalContext(this.peer)
+            this.peer = nullptr
+        }
     }
 }

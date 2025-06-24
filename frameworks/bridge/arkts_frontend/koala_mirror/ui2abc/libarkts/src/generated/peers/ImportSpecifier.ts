@@ -56,6 +56,7 @@ export class ImportSpecifier extends Statement {
         global.generatedEs2panda._ImportSpecifierSetRemovable(global.context, this.peer, isRemovable)
         return this
     }
+    protected readonly brandImportSpecifier: undefined
 }
 export function isImportSpecifier(node: object | undefined): node is ImportSpecifier {
     return node instanceof ImportSpecifier

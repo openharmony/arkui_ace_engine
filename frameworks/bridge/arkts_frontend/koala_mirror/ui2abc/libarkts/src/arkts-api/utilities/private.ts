@@ -26,7 +26,7 @@ import {
 import { NativePtrDecoder } from "./nativePtrDecoder"
 import { Es2pandaAstNodeType, Es2pandaModifierFlags, Es2pandaScriptFunctionFlags } from "../../generated/Es2pandaEnums"
 import { classByPeer } from "../class-by-peer"
-import { AstNode } from "../peers/AstNode"
+import type { AstNode } from "../peers/AstNode"
 import { ArktsObject } from "../peers/ArktsObject"
 
 export const arrayOfNullptr = new BigUint64Array([nullptr])
@@ -121,12 +121,8 @@ export function unpackString(peer: KNativePointer): string {
 
 // TODO: use direct string arguments instead.
 export function passString(str: string | undefined): string {
-    if (str === undefined) {
-        return ""
-    }
-    return withString(str, (it: string) => it)
+    return str ?? ""
 }
-
 
 // TODO: use direct string arguments instead.
 export function passStringArray(strings: readonly string[]): string[] {
@@ -147,9 +143,7 @@ export function updateNodeByNode<T extends ArktsObject>(node: T, original: T): T
     if (original.peer === nullptr) {
         throwError('update called on NULLPTR')
     }
-    if (original instanceof AstNode) {
-        global.generatedEs2panda._AstNodeSetOriginalNode(global.context, node.peer, original.originalPeer)
-    }
+    original.onUpdate(node)
     global.generatedEs2panda._AstNodeSetParent(global.context, node.peer, global.generatedEs2panda._AstNodeParent(global.context, original.peer))
     global.es2panda._AstNodeUpdateChildren(global.context, node.peer)
     return node

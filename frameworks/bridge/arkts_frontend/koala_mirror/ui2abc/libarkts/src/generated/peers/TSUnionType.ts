@@ -44,6 +44,7 @@ export class TSUnionType extends TypeNode {
     get types(): readonly TypeNode[] {
         return unpackNodeArray(global.generatedEs2panda._TSUnionTypeTypesConst(global.context, this.peer))
     }
+    protected readonly brandTSUnionType: undefined
 }
 export function isTSUnionType(node: object | undefined): node is TSUnionType {
     return node instanceof TSUnionType

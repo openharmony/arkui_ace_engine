@@ -32,4 +32,5 @@ export class VerifierMessage extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandVerifierMessage: undefined
 }

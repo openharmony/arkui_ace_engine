@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { float64, int32, timeNow, numberToFixed } from "@koalaui/compat"
+import { float64, int32, timeNow, numberToFixed, float64ToInt } from "@koalaui/compat"
 
 /**
  * A probe to measure performance.
@@ -312,7 +312,7 @@ class MainPerfProbeImpl extends PerfProbeImpl implements MainPerfProbe {
 
     push(probe: PerfProbeImpl) {
         probe.parent = this.currentProbe
-        probe.index = probe.parent ? probe.parent!.children.length as int32 : 0
+        probe.index = probe.parent ? float64ToInt(probe.parent!.children.length) : 0
         if (probe.parent) probe.parent!.children.push(probe)
         this.currentProbe = probe
     }

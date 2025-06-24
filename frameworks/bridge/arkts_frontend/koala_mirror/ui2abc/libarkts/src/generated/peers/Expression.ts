@@ -68,6 +68,7 @@ export class Expression extends TypedAstNode {
     get toString(): string {
         return unpackString(global.generatedEs2panda._ExpressionToStringConst(global.context, this.peer))
     }
+    protected readonly brandExpression: undefined
 }
 export function isExpression(node: object | undefined): node is Expression {
     return node instanceof Expression

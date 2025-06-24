@@ -206,7 +206,7 @@ export class SHA1Hash {
         offset = ((offset ??  0) | 0) as int32
 
         while (i < inputWords) {
-            W[i++] = swap32(data[offset++] as int32)
+            W[i++] = swap32(data[offset!++] as int32)
         }
 
         for (i = inputWords; i < workWords; i++) {

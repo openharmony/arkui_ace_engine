@@ -32,4 +32,5 @@ export class Declaration extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandDeclaration: undefined
 }

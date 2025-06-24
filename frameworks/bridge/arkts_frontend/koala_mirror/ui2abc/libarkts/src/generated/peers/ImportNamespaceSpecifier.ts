@@ -45,6 +45,7 @@ export class ImportNamespaceSpecifier extends Statement {
     get local(): Identifier | undefined {
         return unpackNode(global.generatedEs2panda._ImportNamespaceSpecifierLocal(global.context, this.peer))
     }
+    protected readonly brandImportNamespaceSpecifier: undefined
 }
 export function isImportNamespaceSpecifier(node: object | undefined): node is ImportNamespaceSpecifier {
     return node instanceof ImportNamespaceSpecifier

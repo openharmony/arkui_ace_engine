@@ -33,6 +33,7 @@ export class InterfaceDecl extends TSInterfaceDeclaration {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandInterfaceDecl: undefined
 }
 export function isInterfaceDecl(node: object | undefined): node is InterfaceDecl {
     return node instanceof InterfaceDecl

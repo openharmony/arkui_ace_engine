@@ -41,6 +41,7 @@ export class MaybeOptionalExpression extends Expression {
         global.generatedEs2panda._MaybeOptionalExpressionClearOptional(global.context, this.peer)
         return this
     }
+    protected readonly brandMaybeOptionalExpression: undefined
 }
 export function isMaybeOptionalExpression(node: object | undefined): node is MaybeOptionalExpression {
     return node instanceof MaybeOptionalExpression
