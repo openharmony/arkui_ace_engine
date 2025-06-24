@@ -791,7 +791,7 @@ namespace OHOS::Ace::NG::Converter {
             }
         }
 
-        Ark_Type ArkValue() const
+        Ark_Type ArkValue() const &
         {
             return peer_;
         }
