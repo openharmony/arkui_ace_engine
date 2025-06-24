@@ -155,6 +155,9 @@ std::vector<std::string> TLVUtil::ReadFontFamily(std::vector<uint8_t>& buff, int
         return fontFamilies;
     }
     int32_t fontFamilySize = ReadInt32(buff, cursor);
+    if (fontFamilySize < 0) {
+        return fontFamilies;
+    }
     for (auto i = 0; i < fontFamilySize; i++) {
         auto fontFamily = ReadString(buff, cursor);
         fontFamilies.emplace_back(fontFamily);
@@ -209,7 +212,10 @@ std::vector<Shadow> TLVUtil::ReadTextShadows(std::vector<uint8_t>& buff, int32_t
         return shadows;
     }
     int32_t shadowSize = ReadInt32(buff, cursor);
-    for (auto i = 0; i < shadowSize; i ++) {
+    if (shadowSize < 0) {
+        return shadows;
+    }
+    for (auto i = 0; i < shadowSize; i++) {
         shadows.emplace_back(ReadTextShadow(buff, cursor));
     }
     return shadows;
@@ -229,7 +235,10 @@ std::vector<TextDecoration> TLVUtil::ReadTextDecorations(std::vector<uint8_t>& b
     std::vector<TextDecoration> textDecorations;
     int32_t size = ReadInt32(buff, cursor);
     std::cout << "ReadTextDecorations size:" << size << std::endl;
-    for (auto i = 0; i < size; i ++) {
+    if (size < 0) {
+        return textDecorations;
+    }
+    for (auto i = 0; i < size; i++) {
         int32_t value = ReadInt32(buff, cursor);
         textDecorations.emplace_back(static_cast<TextDecoration>(value));
     }
@@ -254,6 +263,9 @@ std::list<std::pair<std::string, int32_t>> TLVUtil::ReadFontFeature(std::vector<
         return fontFeatureList;
     }
     int32_t len = ReadInt32(buff, cursor);
+    if (len < 0) {
+        return fontFeatureList;
+    }
     for (auto i = 0; i < len; i++) {
         std::string first = ReadString(buff, cursor);
         int32_t second = ReadInt32(buff, cursor);
