@@ -36,6 +36,10 @@ RefPtr<FrameNode> LazyComposeAdapter::GetChild(uint32_t index)
 
 void LazyComposeAdapter::SetActiveRange(int32_t start, int32_t end)
 {
+    if (GetTotalCount() == 0) { // container cannot relayout when totalCount=0
+        start = -1;
+        end = -1;
+    }
     if (updateRange_) {
         updateRange_(start, end);
     }

@@ -39,24 +39,18 @@ export interface TemplateOptions {
     cachedCount?: number;
 }
 
-export interface UIRepeatAttribute<T> {
-    /** @memo */
-    each(itemGenerator: RepeatItemBuilder<T>): UIRepeatAttribute<T>;
-    /** @memo */
-    key(keyGenerator: (item: T, index: number) => string): UIRepeatAttribute<T>;
-    /** @memo */
-    virtualScroll(options?: VirtualScrollOptions): UIRepeatAttribute<T>;
-    /** @memo */
-    template(
-        type: string, itemBuilder: RepeatItemBuilder<T>, templateOptions?: TemplateOptions): UIRepeatAttribute<T>;
-    /** @memo */
-    templateId(typedFunc: TemplateTypedFunc<T>): UIRepeatAttribute<T>;
+export interface RepeatAttribute<T> {
+    each(itemGenerator: RepeatItemBuilder<T>): RepeatAttribute<T>;
+    key(keyGenerator: (item: T, index: number) => string): RepeatAttribute<T>;
+    virtualScroll(options?: VirtualScrollOptions): RepeatAttribute<T>;
+    template(type: string, itemBuilder: RepeatItemBuilder<T>, templateOptions?: TemplateOptions): RepeatAttribute<T>;
+    templateId(typedFunc: TemplateTypedFunc<T>): RepeatAttribute<T>;
 }
 
 /** @memo */
 export function Repeat<T>(
     /** @memo */
-    style: ((attributes: UIRepeatAttribute<T>) => void) | undefined,
+    style: ((attributes: RepeatAttribute<T>) => void) | undefined,
     arr: RepeatArray<T>
 ): void {
     RepeatImpl<T>(style, arr);
