@@ -792,6 +792,8 @@ private:
     void ShowStackMainMenuOpacityAnimation(const RefPtr<FrameNode>& mainMenu);
     void ShowStackSubMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode,
         const RefPtr<FrameNode>& subMenuNode) const;
+    void ShowStackMainMenuDisappearOpacityAnimation(const RefPtr<FrameNode>& menuNode,
+        AnimationOption& option) const;
     void ShowStackMainMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode,
         const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const;
 

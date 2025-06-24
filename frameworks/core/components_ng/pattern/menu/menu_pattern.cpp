@@ -1583,7 +1583,7 @@ void MenuPattern::ShowStackSubMenuAnimation(const RefPtr<FrameNode>& mainMenu, c
     AnimationOption translateOption = AnimationOption();
     translateOption.SetCurve(STACK_SUB_MENU_ANIMATION_CURVE);
     translateOption.SetDuration(STACK_MENU_APPEAR_DURATION);
-    AnimationUtils::Animate(translateOption, [weak = WeakClaim(subMenuContext), menuPosition = endOffset]() {
+    AnimationUtils::Animate(translateOption, [weak = WeakClaim(RawPtr(subMenuContext)), menuPosition = endOffset]() {
         auto subMenuContextUpgrade = weak.Upgrade();
         CHECK_NULL_VOID(subMenuContextUpgrade);
         subMenuContextUpgrade->UpdatePosition(
@@ -1592,7 +1592,7 @@ void MenuPattern::ShowStackSubMenuAnimation(const RefPtr<FrameNode>& mainMenu, c
     AnimationOption opacityOption = AnimationOption();
     opacityOption.SetCurve(Curves::FRICTION);
     opacityOption.SetDuration(STACK_MENU_APPEAR_DURATION);
-    AnimationUtils::Animate(opacityOption, [weak = WeakClaim(subMenuContext)]() {
+    AnimationUtils::Animate(opacityOption, [weak = WeakClaim(RawPtr(subMenuContext))]() {
         auto subMenuContextUpgrade = weak.Upgrade();
         CHECK_NULL_VOID(subMenuContextUpgrade);
         subMenuContextUpgrade->UpdateOpacity(1.0f);
@@ -2007,6 +2007,12 @@ void MenuPattern::ShowStackMainMenuDisappearAnimation(const RefPtr<FrameNode>& m
         }
     });
 
+    ShowStackMainMenuDisappearOpacityAnimation(menuNode, option);
+}
+
+void MenuPattern::ShowStackMainMenuDisappearOpacityAnimation(const RefPtr<FrameNode>& menuNode,
+    AnimationOption& option) const
+{
     option.SetCurve(Curves::FRICTION);
     option.SetDelay(STACK_MAIN_MENU_DISAPPEAR_DELAY);
     option.SetDuration(STACK_MENU_DISAPPEAR_DURATION);
