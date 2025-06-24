@@ -1171,6 +1171,23 @@ shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetUIContextFunc(
     return retVal;
 }
 
+shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallViewFunc(const shared_ptr<JsRuntime>& runtime,
+    const shared_ptr<JsValue> functionName, const std::vector<shared_ptr<JsValue>>& argv)
+{
+    shared_ptr<JsValue> global = runtime->GetGlobal();
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(functionName);
+    auto name = arkJSValue->ToString(runtime);
+    shared_ptr<JsValue> func = global->GetProperty(runtime, name);
+    if (!func->IsFunction(runtime)) {
+        return nullptr;
+    }
+    shared_ptr<JsValue> retVal = func->Call(runtime, global, argv, argv.size());
+    if (!retVal) {
+        return nullptr;
+    }
+    return retVal;
+}
+
 shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetFrameNodeByNodeIdFunc(
     const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv)
 {
@@ -1277,6 +1294,24 @@ void JsiDeclarativeEngineInstance::RegisterFaPlugin()
     }
     std::vector<shared_ptr<JsValue>> argv = { runtime_->NewString("FeatureAbility") };
     requireNapiFunc->Call(runtime_, global, argv, argv.size());
+}
+
+bool JsiDeclarativeEngineInstance::BuilderNodeFunc(std::string functionName, const std::vector<int32_t>& nodeIds)
+{
+    CHECK_EQUAL_RETURN(nodeIds.size(), 0, false);
+    auto runtime = GetJsRuntime();
+    std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(nodeIds[0]) };
+    if (nodeIds.size() > 1) {
+        auto array = runtime->NewArray();
+        for (auto i = 1; i < nodeIds.size(); i++) {
+            array->SetProperty(runtime, runtime->NewInt32(i-1), runtime->NewNumber(nodeIds[i]));
+        }
+        argv.push_back(array);
+    }
+    shared_ptr<JsValue> retVal = CallViewFunc(runtime, runtime->NewString(functionName), argv);
+    CHECK_NULL_RETURN(retVal, false);
+    auto arkJSValue = std::static_pointer_cast<ArkJSValue>(retVal);
+    return arkJSValue->ToBoolean(runtime);
 }
 
 napi_value JsiDeclarativeEngineInstance::GetContextValue()

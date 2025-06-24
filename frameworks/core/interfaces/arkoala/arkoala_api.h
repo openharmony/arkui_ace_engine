@@ -6594,9 +6594,12 @@ struct ArkUIStateModifier {
 };
 
 struct ArkUIRenderNodeModifier {
+    void (*addBuilderNode)(ArkUINodeHandle node, ArkUINodeHandle child);
     void (*appendChild)(ArkUINodeHandle node, ArkUINodeHandle child);
     void (*insertChildAfter)(ArkUINodeHandle node, ArkUINodeHandle child, ArkUINodeHandle sibling);
+    void (*removeBuilderNode)(ArkUINodeHandle node, ArkUINodeHandle child);
     void (*removeChild)(ArkUINodeHandle node, ArkUINodeHandle child);
+    void (*clearBuilderNode)(ArkUINodeHandle node);
     void (*clearChildren)(ArkUINodeHandle node);
     void (*setClipToFrame)(ArkUINodeHandle node, ArkUI_Bool useClip);
     void (*setRotation)(ArkUINodeHandle node, ArkUI_Float32 rotationX, ArkUI_Float32 rotationY, ArkUI_Float32 rotationZ,
@@ -6653,9 +6656,12 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Bool (*isModifiable)(ArkUINodeHandle node);
     ArkUINodeHandle (*createFrameNode)();
     void (*invalidate)(ArkUINodeHandle node);
+    void (*addBuilderNode)(ArkUINodeHandle node, ArkUINodeHandle child);
     ArkUI_Bool (*appendChild)(ArkUINodeHandle node, ArkUINodeHandle child);
     ArkUI_Bool (*insertChildAfter)(ArkUINodeHandle node, ArkUINodeHandle child, ArkUINodeHandle sibling);
+    void (*removeBuilderNode)(ArkUINodeHandle node, ArkUINodeHandle child);
     void (*removeChild)(ArkUINodeHandle node, ArkUINodeHandle child);
+    void (*clearBuilderNode)(ArkUINodeHandle node);
     void (*clearChildren)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getChildrenCount)(ArkUINodeHandle node, ArkUI_Bool isExpanded);
     ArkUINodeHandle (*getChild)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Uint32 expandMode);

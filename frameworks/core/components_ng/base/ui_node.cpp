@@ -17,6 +17,7 @@
 #include "base/log/ace_checker.h"
 #include "base/log/dump_log.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "core/common/builder_util.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
@@ -850,6 +851,12 @@ void UINode::DetachFromMainTree(bool recursive, bool isRoot)
     isRemoving_ = true;
     auto context = context_;
     DetachContext(false);
+    if (isNodeAdapter_) {
+        std::list<RefPtr<UINode>> nodes;
+        RefPtr<UINode> uiNode = AceType::Claim<UINode>(this);
+        BuilderUtils::GetBuilderNodes(uiNode, nodes);
+        BuilderUtils::RemoveBuilderFromParent(uiNode, nodes);
+    }
     OnDetachFromMainTree(recursive, context);
     // if recursive = false, recursively call DetachFromMainTree(false), until we reach the first FrameNode.
     bool isRecursive = recursive || AceType::InstanceOf<FrameNode>(this);
@@ -1012,6 +1019,12 @@ void UINode::OnDetachFromMainTree(bool, PipelineContext*) {}
 void UINode::OnAttachToMainTree(bool)
 {
     useOffscreenProcess_ = false;
+    if (isNodeAdapter_) {
+        std::list<RefPtr<UINode>> nodes;
+        RefPtr<UINode> uiNode = AceType::Claim<UINode>(this);
+        BuilderUtils::GetBuilderNodes(uiNode, nodes);
+        BuilderUtils::AddBuilderToParent(uiNode, nodes);
+    }
 }
 
 void UINode::UpdateGeometryTransition()

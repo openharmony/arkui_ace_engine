@@ -163,6 +163,9 @@ class BuilderNode extends Disposable {
     onRecycleWithBindObject() {
         this._JSBuilderNode.onRecycleWithBindObject();
     }
+    inheritFreezeOptions(enable) {   
+        this._JSBuilderNode.inheritFreezeOptions(enable);
+    }
 }
 class JSBuilderNode extends BaseNode {
     constructor(uiContext, options) {
@@ -171,6 +174,10 @@ class JSBuilderNode extends BaseNode {
         this.updateFuncByElmtId = new UpdateFuncsByElmtId();
         this._supportNestingBuilder = false;
         this.disposable_ = new Disposable();
+        this.inheritFreeze = false;
+        this.allowFreezeWhenInactive = false;
+        this.parentallowFreeze = false;
+        this.isFreeze = false;
     }
     reuse(param) {
         this.updateStart();
@@ -211,6 +218,32 @@ class JSBuilderNode extends BaseNode {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         super.onRecycleWithBindObject();
         __JSScopeUtil__.restoreInstanceId();
+    }
+    inheritFreezeOptions(enable) {
+        this.inheritFreeze = enable;
+        if (enable) {
+            this.setAllowFreezeWhenInactive(this.getParentAllowFreeze());
+        } else {
+            this.setAllowFreezeWhenInactive(false);
+        }
+    }
+    getInheritFreeze() {
+        return this.inheritFreeze;
+    }
+    setAllowFreezeWhenInactive(enable) {
+        this.allowFreezeWhenInactive = enable;
+    }
+    getAllowFreezeWhenInactive() {
+        return this.allowFreezeWhenInactive;
+    }
+    setParentAllowFreeze(enable) {
+        this.parentallowFreeze = enable;
+    }
+    getParentAllowFreeze() {
+        return this.parentallowFreeze;
+    }
+    getIsFreeze() {
+        return this.isFreeze;
     }
     getCardId() {
         return -1;
@@ -263,9 +296,16 @@ class JSBuilderNode extends BaseNode {
         this.frameNode_.setNodePtr(this._nativeRef, this.nodePtr_);
         this.frameNode_.setRenderNode(this._nativeRef);
         this.frameNode_.setBaseNode(this);
+        this.frameNode_.setBuilderNode(this);
+        this.id_ = this.frameNode_.getUniqueId();
+        FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.set(this.frameNode_.getUniqueId(), new WeakRef(this.frameNode_));
         __JSScopeUtil__.restoreInstanceId();
     }
     update(param) {
+        if (this.isFreeze) {
+            this.params_ = param;
+            return;
+        }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.updateStart();
         this.purgeDeletedElmtIds();
@@ -301,6 +341,22 @@ class JSBuilderNode extends BaseNode {
             updateFunc(elmtId, /* isFirstRender */ false);
             this.finishUpdateFunc();
         }
+    }
+    setActiveInternal(active, isReuse = false) {
+        stateMgmtProfiler.begin('BuilderNode.setActive');
+        if (!isReuse) {
+            if (active && this.isFreeze) {
+                this.isFreeze = false;
+                this.update(this.params_);
+            } else if (!active) {
+                this.isFreeze = this.allowFreezeWhenInactive;
+            }
+        }
+        if (this.inheritFreeze) {
+            this.propagateToChildren(this.childrenWeakrefMap_, active, isReuse);
+            this.propagateToChildren(this.builderNodeWeakrefMap_, active, isReuse);
+        }
+        stateMgmtProfiler.end();
     }
     purgeDeleteElmtId(rmElmtId) {
         const result = this.updateFuncByElmtId.delete(rmElmtId);
@@ -709,6 +765,7 @@ class FrameNodeFinalizationRegisterProxy {
     constructor() {
         this.finalizationRegistry_ = new FinalizationRegistry((heldValue) => {
             FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(heldValue);
+            FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.delete(heldValue);
         });
     }
     static register(target, heldValue) {
@@ -718,6 +775,7 @@ class FrameNodeFinalizationRegisterProxy {
 FrameNodeFinalizationRegisterProxy.instance_ = new FrameNodeFinalizationRegisterProxy();
 FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_ = new Map();
 FrameNodeFinalizationRegisterProxy.FrameNodeInMainTree_ = new Map();
+FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_ = new Map();
 class NodeControllerRegisterProxy {
 }
 NodeControllerRegisterProxy.instance_ = new NodeControllerRegisterProxy();
@@ -894,6 +952,12 @@ class FrameNode extends Disposable {
         this.baseNode_ = baseNode;
         this.renderNode_?.setBaseNode(baseNode);
     }
+    setBuilderNode(builderNode) {
+        this.builderNode_ = builderNode;
+    }
+    getBuilderNode() {
+        return this.builderNode_ || null;
+    }
     setAdapterRef(adapter) {
         this.nodeAdapterRef_ = adapter;
     }
@@ -981,6 +1045,7 @@ class FrameNode extends Disposable {
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, node.nodePtr_);
+        getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, node.nodePtr_);
         __JSScopeUtil__.restoreInstanceId();
         if (!flag) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
@@ -996,6 +1061,7 @@ class FrameNode extends Disposable {
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodeWithoutProxy());
+        getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, content.getNodePtr());
         __JSScopeUtil__.restoreInstanceId();
         if (!flag) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
@@ -1009,6 +1075,7 @@ class FrameNode extends Disposable {
             return;
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().frameNode.removeBuilderNode(this.nodePtr_, content.getNodePtr());
         getUINativeModule().frameNode.removeChild(this.nodePtr_, content.getNodePtr());
         content.setAttachedParent(undefined);
         __JSScopeUtil__.restoreInstanceId();
@@ -1028,6 +1095,7 @@ class FrameNode extends Disposable {
         else {
             flag = getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, sibling.getNodePtr());
         }
+        getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, child.nodePtr_);
         __JSScopeUtil__.restoreInstanceId();
         if (!flag) {
             throw { message: 'The FrameNode is not modifiable.', code: 100021 };
@@ -1039,12 +1107,14 @@ class FrameNode extends Disposable {
             return;
         }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().frameNode.removeBuilderNode(this.nodePtr_, node.nodePtr_);
         getUINativeModule().frameNode.removeChild(this.nodePtr_, node.nodePtr_);
         __JSScopeUtil__.restoreInstanceId();
         this._childList.delete(node._nodeId);
     }
     clearChildren() {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        getUINativeModule().frameNode.clearBuilderNode(this.nodePtr_);
         getUINativeModule().frameNode.clearChildren(this.nodePtr_);
         __JSScopeUtil__.restoreInstanceId();
         this._childList.clear();
@@ -2706,6 +2776,7 @@ class RenderNode extends Disposable {
         this.childrenList.push(node);
         node.parentRenderNode = new WeakRef(this);
         getUINativeModule().renderNode.appendChild(this.nodePtr, node.nodePtr);
+        getUINativeModule().renderNode.addBuilderNode(this.nodePtr, node.nodePtr);
     }
     insertChildAfter(child, sibling) {
         if (child === undefined || child === null) {
@@ -2728,6 +2799,7 @@ class RenderNode extends Disposable {
             this.childrenList.splice(indexOfSibling + 1, 0, child);
             getUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, sibling.nodePtr);
         }
+        getUINativeModule().renderNode.addBuilderNode(this.nodePtr, child.nodePtr);
     }
     removeChild(node) {
         if (node === undefined || node === null) {
@@ -2740,9 +2812,11 @@ class RenderNode extends Disposable {
         const child = this.childrenList[index];
         child.parentRenderNode = null;
         this.childrenList.splice(index, 1);
+        getUINativeModule().renderNode.removeBuilderNode(this.nodePtr, node.nodePtr);
         getUINativeModule().renderNode.removeChild(this.nodePtr, node.nodePtr);
     }
     clearChildren() {
+        getUINativeModule().renderNode.clearBuilderNode(this.nodePtr);
         this.childrenList = new Array();
         getUINativeModule().renderNode.clearChildren(this.nodePtr);
     }
@@ -3098,6 +3172,9 @@ class ComponentContent extends Content {
     updateConfiguration() {
         this.builderNode_.updateConfiguration();
     }
+    inheritFreezeOptions(enable) {
+        this.builderNode_.inheritFreezeOptions(enable);
+    }
 }
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
@@ -3125,6 +3202,7 @@ class NodeContent extends Content {
             return;
         }
         if (getUINativeModule().frameNode.addFrameNodeToNodeContent(node.getNodePtr(), this.nativePtr_)) {
+            getUINativeModule().frameNode.addBuilderNode(this.nativePtr_, node.getNodePtr());
             this.nodeArray_.push(node);
         }
     }
@@ -3132,6 +3210,7 @@ class NodeContent extends Content {
         if (!this.nodeArray_.includes(node)) {
             return;
         }
+        getUINativeModule().frameNode.removeBuilderNode(this.nativePtr_, node.getNodePtr());
         if (getUINativeModule().frameNode.removeFrameNodeFromNodeContent(node.getNodePtr(), this.nativePtr_)) {
             let index = this.nodeArray_.indexOf(node);
             if (index > -1) {
@@ -3147,3 +3226,149 @@ export default {
     edgeColors, edgeWidths, borderStyles, borderRadiuses, Content, ComponentContent, NodeContent,
     typeNode, NodeAdapter, ExpandMode, UIState
 };
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Check if the node has parent View.
+ * @param nodeId id of node, obtained on the c++ side.
+ * @returns true if the node has parent View.
+ */
+globalThis.__hasParentView__ = function __hasParentView__(nodeId) {
+    let view = UINodeRegisterProxy.GetView(nodeId);
+    if (view) {
+      return true;
+    }
+    return false;
+}
+
+globalThis.__addBuilderNode__ = function __addBuilderNode__(id, builderIds) {
+    let view = UINodeRegisterProxy.GetView(id);
+    if (!view) {
+        return false;
+    }
+    let allow = view.isCompFreezeAllowed();
+    builderIds.forEach((builderId, indx) => {
+        let builderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(builderId);
+        let builderNode = builderNodePtr?.deref()?.getBuilderNode();
+        if (!builderNode) {
+            return false;
+        }
+        builderNode.setParentAllowFreeze(allow);
+        if (builderNode.getInheritFreeze()) {
+            builderNode.setAllowFreezeWhenInactive(allow);
+        }
+        view.addChildBuilderNode(builderNode);
+    });
+    return true;
+}
+
+globalThis.__deleteBuilderNode__ = function __deleteBuilderNode__(id, builderIds) {
+    let view = UINodeRegisterProxy.GetView(id);
+    if (!view) {
+        return false;
+    }
+    builderIds.forEach((builderId, indx) => {
+        let builderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(builderId);
+        let builderNode = builderNodePtr?.deref()?.getBuilderNode();
+        if (!builderNode) {
+            return false;
+        }
+        builderNode.setParentAllowFreeze(false);
+        builderNode.setAllowFreezeWhenInactive(false);
+        if (builderNode.getIsFreeze()) {
+            builderNode.setActiveInternal(true);
+        }
+        view.removeChildBuilderNode(builderId);
+    });
+    return true;
+}
+
+globalThis.__addBuilderNodeToBuilder__ = function __addBuilderNodeToBuilder__(id, builderIds) {
+    let builderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(id);
+    let builderNode = builderNodePtr?.deref()?.getBuilderNode();
+    if (!builderNode) {
+        return false;
+    }
+    let allow = builderNode.getAllowFreezeWhenInactive();
+    builderIds.forEach((builderId, indx) => {
+        let childBuilderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(builderId);
+        let childBuilderNode = childBuilderNodePtr?.deref()?.getBuilderNode();
+        if (!childBuilderNode) {
+            return false;
+        }
+        childBuilderNode.setParentAllowFreeze(allow);
+        if (childBuilderNode.getInheritFreeze()) {
+            childBuilderNode.setAllowFreezeWhenInactive(allow);
+        }
+        builderNode.addChildBuilderNode(childBuilderNode);
+    });
+    return true;
+}
+
+globalThis.__deleteBuilderNodeFromBuilder__ = function __deleteBuilderNodeFromBuilder__(id, builderIds) {
+    let builderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(id);
+    let builderNode = builderNodePtr?.deref()?.getBuilderNode();
+    if (!builderNode) {
+        return false;
+    }
+    builderIds.forEach((builderId, indx) => {
+        let childBuilderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(builderId);
+        let childBuilderNode = childBuilderNodePtr?.deref()?.getBuilderNode();
+        if (!childBuilderNode) {
+            return false;
+        }
+        childBuilderNode.setParentAllowFreeze(false);
+        childBuilderNode.setAllowFreezeWhenInactive(false);
+        if (builderNode.getIsFreeze()) {
+            builderNode.setActiveInternal(true);
+        }
+        builderNode.removeChildBuilderNode(childBuilderNode.id__());
+    });
+    return true;
+}
+
+globalThis.__clearBuilderNodes__ = function __clearBuilderNodes__(id) {
+    let view = UINodeRegisterProxy.GetView(id);
+    if (view) {
+        for (const child of view.builderNodeWeakrefMap_.values()) {
+            child.deref()?.setParentAllowFreeze(false);
+            child.deref()?.setAllowFreezeWhenInactive(false);
+            if (child?.deref()?.getIsFreeze()) {
+                child?.deref()?.setActiveInternal(true);
+            }
+        }
+        view.clearChildBuilderNode();
+        return true;
+    }
+    return false;
+}
+
+globalThis.__clearFromBuilder__ = function clearFromBuilder(id) {
+    let builderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(id);
+    let builderNode = builderNodePtr?.deref()?.getBuilderNode();
+    if (!builderNode) {
+        return false;
+    }
+    for (const child of builderNode.builderNodeWeakrefMap_.values()) {
+        child.deref()?.setParentAllowFreeze(false);
+        child.deref()?.setAllowFreezeWhenInactive(false);
+        if (child?.deref()?.getIsFreeze()) {
+            child?.deref()?.setActiveInternal(true);
+        }
+    }
+    builderNode.clearChildBuilderNode();
+    return true;
+}

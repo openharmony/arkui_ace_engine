@@ -189,6 +189,15 @@ void RegisterRenderNodeCommonAttributes(Local<panda::ObjectRef> renderNode, Ecma
     renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNodeType"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::GetNodeType));
 }
+void RegisterRenderNodeBuilderNodeAttributes(Local<panda::ObjectRef> renderNode, EcmaVM* vm)
+{
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "addBuilderNode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::AddBuilderNode));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeBuilderNode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::RemoveBuilderNode));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "clearBuilderNode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::ClearBuilderNode));
+}
 void RegisterRenderNodeBorderAndMaskAttributes(Local<panda::ObjectRef> renderNode, EcmaVM* vm)
 {
     renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderStyle"),
@@ -4373,6 +4382,7 @@ void ArkUINativeModule::RegisterRenderNodeAttributes(Local<panda::ObjectRef> obj
 {
     auto renderNode = panda::ObjectRef::New(vm);
     RegisterRenderNodeCommonAttributes(renderNode, vm);
+    RegisterRenderNodeBuilderNodeAttributes(renderNode, vm);
     RegisterRenderNodeBorderAndMaskAttributes(renderNode, vm);
     RegisterRenderNodeShapeClipAttributes(renderNode, vm);
     renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "fireArkUIObjectLifecycleCallback"),
@@ -4391,12 +4401,18 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::CreateTypedFrameNode));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "invalidate"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::Invalidate));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "addBuilderNode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::AddBuilderNode));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "appendChild"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::AppendChild));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "insertChildAfter"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::InsertChildAfter));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeBuilderNode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::RemoveBuilderNode));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeChild"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::RemoveChild));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "clearBuilderNode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::ClearBuilderNode));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "clearChildren"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::ClearChildren));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getChildrenCount"),

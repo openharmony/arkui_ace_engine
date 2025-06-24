@@ -518,6 +518,12 @@ napi_value DeclarativeFrontendNG::GetContextValue()
     return jsEngine_->GetContextValue();
 }
 
+bool DeclarativeFrontendNG::BuilderNodeFunc(std::string functionName, const std::vector<int32_t>& nodeIds)
+{
+    CHECK_NULL_RETURN(jsEngine_, false);
+    return jsEngine_->BuilderNodeFunc(functionName, nodeIds);
+}
+
 napi_value DeclarativeFrontendNG::GetFrameNodeValueByNodeId(int32_t nodeId)
 {
     return jsEngine_->GetFrameNodeValueByNodeId(nodeId);

@@ -53,6 +53,7 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
   protected _nativeRef: NativeStrongRef | NativeWeakRef;
   protected renderNode_: RenderNode;
   protected baseNode_: BaseNode;
+  protected builderNode_: JSBuilderNode;
   protected uiContext_: UIContext | undefined | null;
   protected nodePtr_: NodePtr;
   protected instanceId_?: number;
@@ -146,6 +147,12 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
   setBaseNode(baseNode: BaseNode | null): void {
     this.baseNode_ = baseNode;
     this.renderNode_?.setBaseNode(baseNode);
+  }
+  setBuilderNode(builderNode: JSBuilderNode | null): void {
+    this.builderNode_ = builderNode;
+  }
+  getBuilderNode(): JSBuilderNode | null {
+    return this.builderNode_ || null;
   }
   setAdapterRef(adapter: NodeAdapter | undefined): void {
     this.nodeAdapterRef_ = adapter;
@@ -241,6 +248,7 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, node.nodePtr_);
+    getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, node.nodePtr_);
     __JSScopeUtil__.restoreInstanceId();
     if (!flag) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
@@ -257,6 +265,7 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodeWithoutProxy());
+    getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, content.getNodePtr());
     __JSScopeUtil__.restoreInstanceId();
     if (!flag) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
@@ -270,6 +279,7 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
       return;
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    getUINativeModule().frameNode.removeBuilderNode(this.nodePtr_, content.getNodePtr());
     getUINativeModule().frameNode.removeChild(this.nodePtr_, content.getNodePtr());
     content.setAttachedParent(undefined);
     __JSScopeUtil__.restoreInstanceId();
@@ -289,6 +299,7 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
     } else {
       flag = getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, sibling.getNodePtr());
     }
+    getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, child.nodePtr_);
     __JSScopeUtil__.restoreInstanceId();
     if (!flag) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
@@ -301,6 +312,7 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
       return;
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    getUINativeModule().frameNode.removeBuilderNode(this.nodePtr_, node.nodePtr_);
     getUINativeModule().frameNode.removeChild(this.nodePtr_, node.nodePtr_);
     __JSScopeUtil__.restoreInstanceId();
     this._childList.delete(node._nodeId);
@@ -308,6 +320,7 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
 
   clearChildren(): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    getUINativeModule().frameNode.clearBuilderNode(this.nodePtr_);
     getUINativeModule().frameNode.clearChildren(this.nodePtr_);
     __JSScopeUtil__.restoreInstanceId();
     this._childList.clear();

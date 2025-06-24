@@ -68,6 +68,7 @@ public:
     void DestroyAllRootViewHandle();
     void FlushReload();
     napi_value GetContextValue();
+    bool BuilderNodeFunc(std::string functionName, const std::vector<int32_t>& nodeIds);
     napi_value GetFrameNodeValueByNodeId(int32_t nodeId);
 
     static std::unique_ptr<JsonValue> GetI18nStringResource(
@@ -232,6 +233,8 @@ private:
     static shared_ptr<JsRuntime> InnerGetCurrentRuntime();
     shared_ptr<JsValue> CallGetUIContextFunc(
         const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv);
+    shared_ptr<JsValue> CallViewFunc(const shared_ptr<JsRuntime>& runtime,
+        const shared_ptr<JsValue> functionName, const std::vector<shared_ptr<JsValue>>& argv);
     shared_ptr<JsValue> CallGetFrameNodeByNodeIdFunc(
         const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv);
     std::unordered_map<int32_t, panda::Global<panda::ObjectRef>> rootViewMap_;
@@ -440,6 +443,11 @@ public:
     napi_value GetContextValue() override
     {
         return engineInstance_->GetContextValue();
+    }
+
+    bool BuilderNodeFunc(std::string functionName, const std::vector<int32_t>& nodeIds) override
+    {
+        return engineInstance_->BuilderNodeFunc(functionName, nodeIds);
     }
 
     napi_value GetFrameNodeValueByNodeId(int32_t nodeId) override

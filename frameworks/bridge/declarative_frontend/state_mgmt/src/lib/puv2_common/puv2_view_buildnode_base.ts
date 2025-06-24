@@ -105,6 +105,12 @@ abstract class ViewBuildNodeBase {
         }
         this.builderNodeWeakrefMap_.delete(elmtId);
     }
+    /**
+     * Clears a child BuilderNode from this view
+     */
+    public clearChildBuilderNode(): void {
+        this.builderNodeWeakrefMap_.clear();
+    }
 
     protected purgeDeletedElmtIds(): void {
         stateMgmtConsole.debug(`purgeDeletedElmtIds ViewBuildNodeBase '${this.constructor.name}' (id: ${this.id__()}) start ...`);

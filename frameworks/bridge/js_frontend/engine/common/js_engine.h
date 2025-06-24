@@ -538,6 +538,11 @@ public:
         return value;
     }
 
+    virtual bool BuilderNodeFunc(std::string functionName, const std::vector<int32_t>& nodeIds)
+    {
+        return false;
+    }
+
     virtual napi_value GetFrameNodeValueByNodeId(int32_t nodeId)
     {
         return nullptr;

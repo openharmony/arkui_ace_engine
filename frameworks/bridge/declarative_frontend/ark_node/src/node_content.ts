@@ -35,6 +35,7 @@ class NodeContent extends Content {
             return;
         }
         if (getUINativeModule().frameNode.addFrameNodeToNodeContent(node.getNodePtr(), this.nativePtr_)) {
+            getUINativeModule().frameNode.addBuilderNode(this.nativePtr_, node.getNodePtr());
             this.nodeArray_.push(node);
         }
     }
@@ -43,6 +44,7 @@ class NodeContent extends Content {
         if (!this.nodeArray_.includes(node)) {
             return;
         }
+        getUINativeModule().frameNode.removeBuilderNode(this.nativePtr_, node.getNodePtr());
         if (getUINativeModule().frameNode.removeFrameNodeFromNodeContent(node.getNodePtr(), this.nativePtr_)) {
             let index = this.nodeArray_.indexOf(node);
             if (index > -1) {
