@@ -114,7 +114,10 @@ void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo, bool cli
     bool nextIsPressed = false;
     for (const auto& child : itemPosition_) {
         auto nextId = child.first - lanes;
-        nextIsPressed = nextId < 0 || lastIsItemGroup || child.second.isGroup ? false : itemPosition_[nextId].isPressed;
+        auto nextItem = itemPosition_.find(nextId);
+        nextIsPressed = nextId < 0 || lastIsItemGroup || child.second.isGroup || nextItem == itemPosition_.end()
+                            ? false
+                            : nextItem->second.isPressed;
         if (!isFirstItem && !(child.second.isPressed || nextIsPressed)) {
             dividerMap[child.second.id] = HandleDividerList(child.first, lastIsItemGroup, laneIdx, dividerInfo);
         }
