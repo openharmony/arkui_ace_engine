@@ -804,8 +804,13 @@ void PrevMarginImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto optMargin = Converter::OptConvert<Dimension>(*value);
     CHECK_NULL_VOID(optMargin);
-    auto optIgnore = ignoreBlank ? Converter::OptConvert<bool>(*ignoreBlank) : std::nullopt;
-    SwiperModelStatic::SetPreviousMargin(frameNode, *optMargin, optIgnore);
+    bool ignoreResult = false;
+    if (ignoreBlank->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        SwiperModelStatic::SetPreviousMargin(frameNode, *optMargin, false);
+        return;
+    }
+    ignoreResult = Converter::Convert<bool>(ignoreBlank->value);
+    SwiperModelStatic::SetPreviousMargin(frameNode, *optMargin, ignoreResult);
 }
 void NextMarginImpl(Ark_NativePointer node,
                     const Opt_Length* value,
@@ -816,8 +821,12 @@ void NextMarginImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto optMargin = Converter::OptConvert<Dimension>(*value);
     CHECK_NULL_VOID(optMargin);
-    auto optIgnore = ignoreBlank ? Converter::OptConvert<bool>(*ignoreBlank) : std::nullopt;
-    SwiperModelStatic::SetNextMargin(frameNode, *optMargin, optIgnore);
+    bool ignoreResult = false;
+    if (ignoreBlank->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        SwiperModelStatic::SetPreviousMargin(frameNode, *optMargin, false);
+        return;
+    }
+    SwiperModelStatic::SetNextMargin(frameNode, *optMargin, ignoreResult);
 }
 void _onChangeEvent_indexImpl(Ark_NativePointer node,
                               const Callback_Opt_Number_Void* callback)
