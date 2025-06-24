@@ -216,6 +216,9 @@ export class DragController {
         dragInfo: dragController.DragInfo): dragController.DragAction {
         throw Error("createDragAction not implemented in DragController!")
     }
+    public getDragPreview(): dragController.DragPreview {
+        throw Error("getDragPreview not implemented in DragController!")
+    }
     public setDragEventStrictReportingEnabled(enable: boolean): void {
         throw Error("setDragEventStrictReportingEnabled not implemented in DragController!")
     }

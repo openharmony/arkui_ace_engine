@@ -42,7 +42,7 @@ import { ArkUIAniModule } from "arkui.ani"
 import { FontOptions, FontInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
 import { GlobalScope_ohos_measure_utils } from "arkui/component/arkui-external"
-import { SizeOptions } from "arkui/component/units"
+import { SizeOptions, ResourceColor } from "arkui/component/units"
 import { Frame } from "arkui/Graphics"
 import { TextMenuOptions } from "arkui/component/textCommon"
 import { focusController } from "@ohos/arkui/focusController"
@@ -465,6 +465,13 @@ export class DragControllerImpl extends DragController {
             ArkUIAniModule._Common_Restore_InstanceId();
             return dragAction;
         }
+    }
+
+    public getDragPreview(): dragController.DragPreview {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let dragPreview = ArkUIAniModule._DragController_getDragPreview();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return dragPreview;
     }
 
     public setDragEventStrictReportingEnabled(enable: boolean): void {

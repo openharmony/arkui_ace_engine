@@ -21,7 +21,7 @@ import common from "@ohos.app.ability.common"
 import unifiedDataChannel from "@ohos.data.unifiedDataChannel"
 import { LocalStorage } from '@ohos.arkui.stateManagement';
 import { DrawContext } from "arkui/Graphics"
-import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo } from "arkui/component"
+import { AnimatableArithmetic, DrawModifier, AsyncCallback, Callback, DragItemInfo, ResourceColor } from "arkui/component"
 import { ArkCustomComponent } from "arkui/ArkCustomComponent"
 import { WaterFlowOptions,WaterFlowSections, XComponentControllerCallbackInternal } from "arkui/component"
 import { HookDragInfo } from "arkui/handwritten"
@@ -111,6 +111,13 @@ export class ArkUIAniModule {
 
     native static _DragController_notifyDragStartReques(requestStatus: dragController.DragStartRequestStatus): void
 
+    native static _DragController_getDragPreview(): dragController.DragPreview
+
+    native static _DragController_setForegroundColor(color: ResourceColor, dragPreviewPtr: KPointer): void
+
+    native static _DragController_animate(options: dragController.AnimationOptions, handler: () =>void,
+        dragPreviewPtr: KPointer): void
+
     native static _Animation_SetOrCreateAnimatableProperty<T>(ptr: KPointer, propertyName: string, property: number | AnimatableArithmetic<T>,
         callback: (value: number | AnimatableArithmetic<T>) => void): void
 
@@ -119,6 +126,7 @@ export class ArkUIAniModule {
     native static _PopViewStackProcessor(): KPointer
 
     native static _DeleteViewStackProcessor(ptr: KPointer): void
+    
     native static _BackgroundImage_PixelMap(ptr: KPointer, pixelmap: image.PixelMap, repeat: KInt): void
     // for ImageSpan
     native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
