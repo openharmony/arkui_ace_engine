@@ -36,7 +36,7 @@ import { UIContext } from "@ohos/arkui/UIContext"
 import { createStateManager } from "@koalaui/runtime"
 import { UIContextImpl, ContextRecord, DetachedRootEntryManager } from "arkui/handwritten/UIContextImpl"
 import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
-import { FlushBuilderRootNode } from "./BuilderNode"
+import { flushBuilderRootNode } from "./BuilderNode"
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -334,7 +334,7 @@ export class Application {
         for (const detachedRoot of detachedRoots.values())
             detachedRoot.value
         updateLazyItems()
-        FlushBuilderRootNode()
+        flushBuilderRootNode()
         if (partialUpdates.length > 0) {
             // If there are pending partial updates - we apply them one by one and provide update context.
             for (let update of partialUpdates) {

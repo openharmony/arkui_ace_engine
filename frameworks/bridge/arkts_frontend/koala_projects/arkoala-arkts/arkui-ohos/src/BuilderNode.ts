@@ -80,7 +80,7 @@ function createUiDetachedBuilderRoot(
     return node
 }
 
-export function FlushBuilderRootNode() {
+export function flushBuilderRootNode(): void {
     // updateState in BuilderNode
     let deletedMap: Array<WeakRef<StateManager>> = new Array<WeakRef<StateManager>>()
     for (const mgt of detachedStatMgt) {
@@ -120,12 +120,12 @@ class BuilderNodeFinalizationRegisterCleanerThunk<T> implements Thunk {
 }
 
 class BuilderNodeFinalizationRegisterProxy {
-    public static removeJSBuilderNode<T>(builderNode: JSBuilderNode<T>) {
+    public static removeJSBuilderNode<T>(builderNode: JSBuilderNode<T>): void {
         if (builderNode) {
             builderNode.dispose();
         }
     }
-    public static register<T>(target: object) {
+    public static register<T>(target: object): void {
         let builderNode = target as BuilderNode<T>
         let trunk = new BuilderNodeFinalizationRegisterCleanerThunk<T>(BuilderNodeFinalizationRegisterProxy.removeJSBuilderNode, builderNode._JSBuilderNode)
         finalizerRegister(builderNode, trunk)
@@ -152,10 +152,10 @@ export class BuilderNode<T = undefined>{
         this._JSBuilderNode.buildT(builder, params);
     }
     //@ts-ignore
-    public build(builder: WrappedBuilder<voidBuilderFunc>) {
+    public build(builder: WrappedBuilder<voidBuilderFunc>): void {
         this._JSBuilderNode.build0(builder);
     }
-    public update(params: T) {
+    public update(params: T): void {
         this._JSBuilderNode.update(params);
     }
     public getNodePtr(): KPointer | undefined {
@@ -199,7 +199,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     private __frameNode: BuilderRootFrameNode<T> | null;
     private __uiContext?: UIContext;
 
-    private reset() {
+    private reset(): void {
         this.__root = undefined;
         this.__builderProxyNode = undefined;
         this.__builderRootNode = undefined;
@@ -233,7 +233,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__frameNode = null;
     }
 
-    public buildFunc() {
+    public buildFunc(): void {
         this.__rootStage = createUiDetachedBuilderRoot(() => {
             if (this.__root == null) {
                 this.__root = new BuilderRootNode();
