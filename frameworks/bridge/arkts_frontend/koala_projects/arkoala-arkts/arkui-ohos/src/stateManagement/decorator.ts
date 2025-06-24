@@ -67,7 +67,9 @@ export interface IStoragePropRefDecoratedVariable<T> extends IDecoratedMutableVa
 
 export interface IStoragePropDecoratedVariable<T> extends IDecoratedMutableVariable<T>, IDecoratedV1Variable<T> {}
 
-export type LinkSourceType<T> = IDecoratedV1Variable<T>;
+export type LinkSourceType<T> = IStateDecoratedVariable<T> | ILinkDecoratedVariable<T> | IObjectLinkDecoratedVariable<T> |
+    IPropDecoratedVariable<T> | IStorageLinkDecoratedVariable<T> | ILocalStorageLinkDecoratedVariable<T> |
+    IStoragePropRefDecoratedVariable<T> | IProvideDecoratedVariable<T> | IConsumeDecoratedVariable<T>;
 
 export interface IMutableStateMeta {
     addRef(): void;

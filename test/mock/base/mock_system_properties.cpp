@@ -86,6 +86,7 @@ int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
 bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
 bool SystemProperties::pageTransitionFrzEnabled_ = false;
+bool SystemProperties::debugThreadSafeNodeEnable_ = false;
 
 bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;

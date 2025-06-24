@@ -615,7 +615,22 @@ HWTEST_F(PluginPatternTestNg, GetDrawDelegate, TestSize.Level1)
     drawRSFrame->DrawRSFrame(rsNode, Rect(100.0, 100.0, 100.0, 100.0));
 }
 
-/**s
+/**
+ * @tc.name: PluginCodeLanguageTestNg
+ * @tc.desc: Test funcions in Plugin Pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PluginPatternTestNg, PluginCodeLanguageTestNg, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreatePluginParagraph();
+    auto pattern = frameNode->GetPattern<PluginPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto info = pattern->GetPluginRequestInfo();
+    auto codeLanguage = pattern->GetPackageCodeLanguage(info);
+    EXPECT_EQ(codeLanguage, "");
+}
+
+/**
  * @tc.name: PluginLayoutPropertyTestNg
  * @tc.desc: Test funcions in PluginLayoutProperty.
  * @tc.type: FUNC

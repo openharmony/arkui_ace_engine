@@ -32,6 +32,7 @@ import { GlobalScope_ohos_font } from "arkui/component/arkui-external"
 import router from '@ohos/router'
 import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions }from "arkui/component/alertDialog"
+import { ActionSheet, ActionSheetOptions } from "arkui/component/actionSheet"
 import inspector from "@ohos/arkui/inspector"
 import promptAction from '@ohos/promptAction'
 import { ContextMenu } from 'arkui/component/contextMenu'
@@ -60,6 +61,7 @@ import { KBuffer } from "@koalaui/interop"
 import { deserializeAndCallCallback } from "arkui/component/peers/CallbackDeserializeCall"
 import { InteropNativeModule } from "@koalaui/interop"
 import { LocalStorage } from '../stateManagement/storage/localStorage';
+import { Router as RouterExt } from 'arkui/handwritten';
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -557,6 +559,13 @@ export class UIContextImpl extends UIContext {
         return this.router_
     }
 
+    public setRouter(router: RouterExt) {
+        if (this.router_ === undefined) {
+            this.router_ = new RouterImpl()
+        }
+        this.router_.setRouter(router);
+    }
+
     public animateTo(param: AnimateParam, event: (() => void)): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
         _animateTo(param, event);
@@ -638,6 +647,12 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
+    public showActionSheet(options: ActionSheetOptions): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        ActionSheet.show(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+    
     // @ts-ignore
     public freezeUINode(id: number, isFrozen: boolean): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)

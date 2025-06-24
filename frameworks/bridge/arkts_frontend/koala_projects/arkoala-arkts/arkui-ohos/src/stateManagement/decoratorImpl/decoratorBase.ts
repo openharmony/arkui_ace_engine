@@ -13,14 +13,11 @@
  * limitations under the License.
  */
 import { WatchFunc } from './decoratorWatch';
-import { TypeChecker } from '#components';
-import { IObservedObject } from '../decorator';
-import { IDecoratedMutableVariable, IDecoratedV1Variable } from '../decorator';
+import { IDecoratedV1Variable } from '../decorator';
 import { WatchFuncType, ISubscribedWatches, WatchIdType } from '../decorator';
 import { ExtendableComponent } from '../../component/extendableComponent';
-import { IObserve, OBSERVE } from '../decorator';
+import { OBSERVE } from '../decorator';
 import { StateMgmtTool } from '#stateMgmtTool';
-import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
 /**
 It is useful to have separate class implement each variable decoratore,  e.g. for DFX, not use `MutableState` as currently done.
@@ -142,7 +139,7 @@ export abstract class DecoratedV1VariableBase<T>
             });
         } else {
             const handler = StateMgmtTool.tryGetHandler(value as Object);
-            if (handler && StateMgmtTool.isISubscribedWatches(handler as Object)) {
+            if (handler && (StateMgmtTool.isISubscribedWatches(handler as Object))) {
                 const iSubscribedWatches = handler as Object as ISubscribedWatches;
                 this._watchFuncs.forEach((watchFunc) => {
                     watchFunc.registerMeTo(iSubscribedWatches);
@@ -164,7 +161,7 @@ export abstract class DecoratedV1VariableBase<T>
         } else {
             // check if value is observed / proxied interface
             const handler = StateMgmtTool.tryGetHandler(value as Object);
-            if (handler && StateMgmtTool.isISubscribedWatches(handler as Object)) {
+            if (handler && (StateMgmtTool.isISubscribedWatches(handler as Object))) {
                 const iSubscribedWatches = handler as ISubscribedWatches;
                 this._watchFuncs.forEach((watchFunc) => {
                     watchFunc.unregisterMeFrom(iSubscribedWatches);
@@ -175,7 +172,7 @@ export abstract class DecoratedV1VariableBase<T>
 
     /* compiler BUG: change to protcted */
     public execWatchFuncs(): void {
-        this._watchFuncs.forEach((watchFunc) => {
+        this._watchFuncs.forEach((watchFunc, id) => {
             watchFunc.execute(this.varName);
         });
     }

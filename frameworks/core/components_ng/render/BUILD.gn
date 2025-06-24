@@ -49,6 +49,7 @@ build_component_ng("render_ng") {
     "polygon_painter.cpp",
     "rect_painter.cpp",
     "render_context.cpp",
+    "render_context_multi_thread.cpp",
     "render_property.cpp",
     "render_surface_creator.cpp",
     "shape_painter.cpp",

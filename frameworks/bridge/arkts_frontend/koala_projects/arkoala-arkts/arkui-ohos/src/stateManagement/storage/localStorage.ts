@@ -12,16 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AbstractProperty, SubscribedAbstractProperty } from './abstractProperty';
+import { AbstractProperty, SubscribedAbstractProperty, IStorageProperties } from './storageProperty';
 import { StorageBase, StorageProperty } from './storageBase';
 import { WatchFuncType } from '../decorator';
 import { StorageLinkDecoratedVariable } from '../decoratorImpl/decoratorStorageLink';
 import { ExtendableComponent } from '../../component/extendableComponent';
-
-interface IStorageProperties {
-    value: NullishType,
-    ttype: Type
-}
 
 /**
  * LocalStorage
@@ -62,7 +57,6 @@ export class LocalStorage {
             }
         }
     }
-
 
     /**
      * case A: if ttype is not specified:
@@ -187,7 +181,6 @@ export class LocalStorage {
         return this.store_.ref<T>(key, ttype);
     }
 
-
     /**
      * case A: if property with given name does not exists in storage, yet:
      * if given defaultValue is assignable to given type, then
@@ -263,7 +256,6 @@ export class LocalStorage {
         // TODO chk this works
         return this.setAndRef<T>(propName, defaultValue, ttype) as (SubscribedAbstractProperty<T> | undefined);
     }
-
 
     /**
      * Delete property from StorageBase

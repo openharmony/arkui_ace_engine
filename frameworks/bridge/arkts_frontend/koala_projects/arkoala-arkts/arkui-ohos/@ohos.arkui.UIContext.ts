@@ -35,11 +35,13 @@ import { uiObserver } from "@ohos/arkui/observer"
 import { mediaquery } from '@ohos/mediaquery'
 import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions }from "arkui/component/alertDialog"
+import { ActionSheet, ActionSheetOptions} from "arkui/component/actionSheet"
 import inspector from "@ohos/arkui/inspector"
 import router from '@ohos/router'
 import promptAction from '@ohos/promptAction';
-import { AsyncCallback, CustomBuilder } from 'arkui/component';
 import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
+import { AsyncCallback, CustomBuilder } from 'arkui/component'
+import { Router as RouterExt } from 'arkui/handwritten';
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver {
@@ -81,6 +83,13 @@ export class TextMenuController {
 }
 
 export class Router {
+    router_: RouterExt | undefined = undefined;
+    public setRouter(router: RouterExt) {
+        this.router_ = router;
+    }
+    public getRouter(): RouterExt {
+        return this.router_!;
+    }
     public pushUrl(options: router.RouterOptions): Promise<void> {
         throw Error("pushUrl not implemented in Router!")
     }
@@ -327,6 +336,9 @@ export class UIContext {
         throw Error("showAlertDialog not implemented in UIContext!")
     }
 
+    public showActionSheet(options: ActionSheetOptions): void {
+        throw Error("showActionSheet not implemented in UIContext!")
+    }
     // @ts-ignore
     public freezeUINode(id: number, isFrozen: boolean): void {
         throw Error("freezeUINode not implemented in UIContext!")

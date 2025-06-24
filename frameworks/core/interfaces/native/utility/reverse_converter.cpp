@@ -79,7 +79,7 @@ void ConvContext::Clear()
 
 void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src, ConvContext *ctx)
 {
-    CHECK_NULL_VOID(src.empty());
+    CHECK_NULL_VOID(src.size());
     JsonValue jsonValue;
     for (const auto& it : src) {
         jsonValue.Put((it.first.c_str()), it.second);
@@ -277,9 +277,7 @@ void AssignArkValue(Ark_LeadingMarginPlaceholder& dst, const LeadingMargin& src)
 {
     std::pair<const Dimension, const Dimension> pair = {src.size.Width(), src.size.Height()};
     dst.size = Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(pair);
-    if (src.pixmap) {
-        dst.pixelMap = PixelMapPeer::Create(src.pixmap);
-    }
+    dst.pixelMap = PixelMapPeer::Create(src.pixmap);
 }
 
 void AssignArkValue(Ark_Number& dst, const LeadingMargin& src)
@@ -742,12 +740,24 @@ void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src)
     dst.contentOffsetY = Converter::ArkValue<Ark_Number>(src.GetContentOffsetY());
 }
 
-void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src)
+void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src, ConvContext *ctx)
 {
     dst.fontSize = Converter::ArkUnion<Opt_Union_Number_String_Resource, Ark_Number>(src.fontSize);
     dst.fontWeight = Converter::ArkUnion<Opt_Union_Number_FontWeight_String, Ark_Number>(src.fontWeight);
     dst.effectStrategy.value = static_cast<Ark_SymbolEffectStrategy>(src.effectStrategy);
     dst.renderingStrategy.value = static_cast<Ark_SymbolRenderingStrategy>(src.renderingStrategy);
+    if (src.symbolColor.size()) {
+        std::vector<Ark_ResourceColor> colors;
+        std::stringstream symbolColors(src.symbolColor);
+        std::string color;
+        while (std::getline(symbolColors, color, ',')) {
+            colors.push_back(ArkUnion<Ark_ResourceColor, Ark_String>(Color::FromString(color), ctx));
+        }
+        auto fontColor = Converter::ArkValue<Array_ResourceColor>(colors, ctx);
+        dst.fontColor = Converter::ArkValue<Opt_Array_ResourceColor>(fontColor, ctx);
+    } else {
+        dst.fontColor = Converter::ArkValue<Opt_Array_ResourceColor>(Ark_Empty(), ctx);
+    }
 }
 
 void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *ctx)

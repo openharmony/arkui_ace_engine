@@ -351,7 +351,7 @@ HWTEST_F(NativeNodeNapiTest, OH_ArkUI_PostAsyncUITaskAPITest001, TestSize.Level1
 {
     ArkUI_ContextHandle uiContext = new ArkUI_Context({.id=10000});
     auto ret = OH_ArkUI_PostAsyncUITask(uiContext, nullptr, [](void* asyncUITaskData){}, [](void* asyncUITaskData){});
-    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(ret, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 /**

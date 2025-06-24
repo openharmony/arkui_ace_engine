@@ -43,7 +43,6 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
     aboutToRecycle(): void {}
 
     // Can be overridden as an effect of @Prop, @Watch etc
-    /** @memo */
     protected __updateStruct(initializers?: T_Options): void { }
 
     /** @memo */

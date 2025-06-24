@@ -19,7 +19,12 @@ import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 
 type GetType<T> = () => T;
 type SetType<T> = (newVal: T) => void;
-export type OnChangeType<T> = (key: string, newValue: T) => void;
+export type OnChangeType<T> = (propName: string, newValue: T) => void;
+
+export interface IStorageProperties {
+    value: NullishType;
+    ttype: Type;
+}
 
 export class AbstractProperty<T> extends DecoratedV1VariableBase<T>
     implements IStorageProperty {
@@ -57,19 +62,26 @@ export class AbstractProperty<T> extends DecoratedV1VariableBase<T>
     }
 
     public get(): T {
-        return this.get_()
+        return this.get_();
     }
 
     public set(newValue: T): void {
         this.set_(newValue);
     }
 
-    public onChange(onChangeCbFunc: OnChangeType<T>): void {
-        const watchFunc = (propName: string) => {
-            onChangeCbFunc(propName, this.get())
-        };
-        const watchFuncObj = new WatchFunc(watchFunc);
-        this._watchFuncs.set(watchFuncObj.id(), watchFuncObj);
+    public onChange(onChangeCbFunc: OnChangeType<T> | undefined): void {
+        if (onChangeCbFunc === undefined) {
+            // clear all register callbacks
+            this._watchFuncs.clear();
+        }
+        if (typeof onChangeCbFunc === 'function') {
+            const watchFunc = (propName: string) => {
+                (onChangeCbFunc as OnChangeType<T>)(propName, this.get());
+            };
+            const watchFuncObj = new WatchFunc(watchFunc);
+            this._watchFuncs.set(watchFuncObj.id(), watchFuncObj);
+        }
+
     }
 }
 
@@ -81,4 +93,6 @@ export class SubscribedAbstractProperty<T> extends AbstractProperty<T> {
     constructor(key: string, ttype: Type, get: GetType<T>, set: SetType<T>) {
         super(key, ttype, get, set);
     }
+
+    public aboutTODeleted() {};
 }

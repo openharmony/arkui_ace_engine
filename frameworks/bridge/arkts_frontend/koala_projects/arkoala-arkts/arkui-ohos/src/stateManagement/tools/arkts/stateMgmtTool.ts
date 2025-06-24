@@ -21,7 +21,8 @@ import {
     IProvideDecoratedVariable,
     IConsumeDecoratedVariable,
     IStorageLinkDecoratedVariable,
-    IStoragePropDecoratedVariable,
+    ILocalStorageLinkDecoratedVariable,
+    IStoragePropRefDecoratedVariable,
 } from '../../decorator';
 import { NullableObject } from '../../base/types';
 import { InterfaceProxyHandler } from './observeInterfaceProxy';
@@ -49,11 +50,14 @@ export class StateMgmtTool {
     static isIConsumeDecoratedVariable(value: NullableObject): boolean {
         return value instanceof IConsumeDecoratedVariable;
     }
+    static isILocalStorageLinkDecoratedVariable(value: NullableObject): boolean {
+        return value instanceof ILocalStorageLinkDecoratedVariable;
+    }
     static isIStorageLinkDecoratedVariable(value: NullableObject): boolean {
         return value instanceof IStorageLinkDecoratedVariable;
     }
-    static isIStoragePropDecoratedVariable(value: NullableObject): boolean {
-        return value instanceof IStoragePropDecoratedVariable;
+    static isIStoragePropRefDecoratedVariable(value: NullableObject): boolean {
+        return value instanceof IStoragePropRefDecoratedVariable;
     }
     static isDecoratedV1VariableBase(value: NullableObject): boolean {
         return value instanceof DecoratedV1VariableBase;

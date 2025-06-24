@@ -34,6 +34,8 @@ void AddChild(void* parentNode, void* childNode);
 
 void RemoveChild(void* parentNode, void* childNode);
 
+void RemoveChildMultiThread(void* parentNode, void* childNode);
+
 void InsertChildAt(void* parentNode, void* childNode, int32_t position);
 
 void InsertChildAfter(void* parentNode, void* childNode, void* siblingNode);
