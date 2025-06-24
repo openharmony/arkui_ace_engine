@@ -1491,7 +1491,6 @@ export class WebController implements MaterializedBase {
     }
 }
 export class ArkWebPeer extends ArkCommonMethodPeer {
-    private webviewController?: WebviewController
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -1504,21 +1503,16 @@ export class ArkWebPeer extends ArkCommonMethodPeer {
     }
     setWebOptionsAttribute(value: WebOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
-        if (TypeChecker.isWebController(value.controller) || TypeChecker.isWebviewController(value.controller)) {
-            thisSerializer.writeWebOptions(value)
-            ArkUIGeneratedNativeModule._WebInterface_setWebOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        } else if (TypeChecker.isWebviewControllerAni(value.controller)) {
-            this.webviewController = new WebviewController()
+        if (TypeChecker.isWebviewControllerAni(value.controller)) {
             const value_casted = {
                 src: value.src,
-                controller: (this.webviewController as WebviewController),
                 renderMode: value.renderMode,
                 incognitoMode: value.incognitoMode,
                 sharedRenderProcessToken: value.sharedRenderProcessToken
-            } as (WebOptions)
+            } as (WebOptionsSerializer)
             thisSerializer.writeWebOptions(value_casted)
             ArkUIGeneratedNativeModule._WebInterface_setWebOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-            ArkUIAniModule._Web_SetWebOptions(this.peer.ptr, (value.controller as WebviewControllerAni))
+            ArkUIAniModule._Web_SetWebOptions(this.peer.ptr, value.controller)
         }
         thisSerializer.release()
     }
@@ -3370,7 +3364,13 @@ export interface Literal_Object_object__String_name_Array_String_methodList {
 }
 export interface WebOptions {
     src: string | Resource;
-    controller: WebController | WebviewController | WebviewControllerAni;
+    controller: WebviewControllerAni;
+    renderMode?: RenderMode;
+    incognitoMode?: boolean;
+    sharedRenderProcessToken?: string;
+}
+export interface WebOptionsSerializer {
+    src: string | Resource;
     renderMode?: RenderMode;
     incognitoMode?: boolean;
     sharedRenderProcessToken?: string;

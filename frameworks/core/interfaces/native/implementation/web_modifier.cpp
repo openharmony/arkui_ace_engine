@@ -206,17 +206,6 @@ void SetWebOptionsImpl(Ark_NativePointer node,
     WebModelStatic::SetIncognitoMode(frameNode, incognitoMode);
     auto sharedRenderProcessToken = Converter::OptConvert<std::string>(value->sharedRenderProcessToken);
     WebModelStatic::SetSharedRenderProcessToken(frameNode, sharedRenderProcessToken);
-    Converter::VisitUnion(value->controller,
-        [frameNode](const Ark_WebController& controller) {
-            auto peerImplPtr = controller;
-            CHECK_NULL_VOID(peerImplPtr);
-            WebModelStatic::SetWebController(frameNode, peerImplPtr->GetController());
-        },
-        [frameNode](const Ark_WebviewController& controller) {
-            (void)controller;
-        },
-        []() {}
-    );
 #endif // WEB_SUPPORTED
 }
 } // WebInterfaceModifier
