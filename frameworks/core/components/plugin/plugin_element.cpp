@@ -249,7 +249,7 @@ void PluginElement::RunPluginContainer()
     PluginManager::GetInstance().AddPluginParentContainer(pluginSubContainerId_, parentContainerId);
     pluginSubContainer_->SetInstanceId(pluginSubContainerId_);
     pluginSubContainer_->SetPluginWindowId(GetElementId());
-    pluginSubContainer_->Initialize();
+    pluginSubContainer_->Initialize(GetPackageCodeLanguage(pluginInfo_));
     pluginSubContainer_->SetPluginComponent(component_);
 
     auto weak = WeakClaim(this);
@@ -311,6 +311,33 @@ std::string PluginElement::GetPackagePathByAbsolutePath(
         info.abilityName = "/";
     }
     return packagePathStr;
+}
+
+std::string PluginElement::GetPackageCodeLanguage(const RequestPluginInfo& info) const
+{
+    std::string codeLanguage;
+
+    std::vector<std::string> strList;
+    SplitString(info.bundleName, '/', strList);
+    if (strList.empty()) {
+        return codeLanguage;
+    }
+
+    std::vector<int32_t> userIds;
+    GetActiveAccountIds(userIds);
+
+    auto bms = PluginComponentManager::GetInstance()->GetBundleManager();
+    if (!bms) {
+        return codeLanguage;
+    }
+
+    AppExecFwk::BundleInfo bundleInfo;
+    bool ret = bms->GetBundleInfo(strList[0], AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo,
+        userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID);
+    if (!ret) {
+        return codeLanguage;
+    }
+    return bundleInfo.applicationInfo.codeLanguage;
 }
 
 std::string PluginElement::GetPackagePathByWant(const WeakPtr<PluginElement>& weak, RequestPluginInfo& info) const
@@ -427,7 +454,7 @@ std::string PluginElement::GetPackagePathByBms(const WeakPtr<PluginElement>& wea
     return packagePathStr;
 }
 
-void PluginElement::SplitString(const std::string& str, char tag, std::vector<std::string>& strList)
+void PluginElement::SplitString(const std::string& str, char tag, std::vector<std::string>& strList) const
 {
     std::string subStr;
     for (size_t i = 0; i < str.length(); i++) {

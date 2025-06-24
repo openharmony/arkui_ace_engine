@@ -418,12 +418,22 @@ void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const TextStyleResult& s
     dst.fontStyle = ArkValue<Ark_FontStyle>(static_cast<OHOS::Ace::FontStyle>(src.fontStyle));
     dst.fontWeight = ArkValue<Ark_Number>(src.fontWeight);
     dst.fontFamily = ArkValue<Ark_String>(src.fontFamily, ctx);
-    dst.decoration = ArkValue<Ark_DecorationStyleResult>(src);
-    dst.textShadow = ArkValue<Opt_Array_ShadowOptions>(src.textShadows, ctx);
+    dst.decoration = ArkValue<Ark_DecorationStyleResult>(src, ctx);
+    if (src.textShadows.size() > 0) {
+        dst.textShadow = ArkValue<Opt_Array_ShadowOptions>(src.textShadows, ctx);
+    } else {
+        dst.textShadow = ArkValue<Opt_Array_ShadowOptions>(Ark_Empty(), ctx);
+    }
+
     dst.letterSpacing = ArkValue<Opt_Number>(src.letterSpacing);
     dst.lineHeight = ArkValue<Opt_Number>(src.lineHeight);
     dst.halfLeading = ArkValue<Opt_Boolean>(src.halfLeading);
-    dst.fontFeature = ArkValue<Opt_String>(src.fontFeature, ctx);
+    if (src.fontFeature.size() > 0) {
+        dst.fontFeature = ArkValue<Opt_String>(src.fontFeature, ctx);
+    } else {
+        dst.fontFeature = ArkValue<Opt_String>(Ark_Empty(), ctx);
+    }
+
     dst.textBackgroundStyle = ArkValue<Opt_TextBackgroundStyle>(src.textBackgroundStyle, ctx);
 }
 
@@ -451,7 +461,8 @@ void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const ResultObject& src, 
 
     dst.previewText = ArkValue<Opt_String>(src.previewText, ctx);
     LOGW("RichEditorController accessor :: urlStyle conversion is not implemented yet.");
-    dst.urlStyle = ArkValue<Opt_RichEditorUrlStyle>(src.urlAddress, ctx); // urlAddress?
+    dst.urlStyle = ArkValue<Opt_RichEditorUrlStyle>(
+        ArkValue<Ark_RichEditorUrlStyle>(src.urlAddress, ctx), ctx); // urlAddress?
 
     LeadingMargin leadingMargin {
         .size = LeadingMarginSize(

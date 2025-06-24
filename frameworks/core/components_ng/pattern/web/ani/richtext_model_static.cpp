@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/web/richtext_model_static.h"
+#include "core/components_ng/pattern/web/ani/richtext_model_static.h"
 
 #include "core/components_ng/base/node_flag.h"
 

@@ -93,6 +93,10 @@ public:
         return ViewAbstract::GetWindowHeightBreakpoint();
     }
     
+    static void SetOpacity(FrameNode* frameNode, const std::optional<double>& opacity)
+    {
+        ViewAbstract::SetOpacity(frameNode, opacity.value_or(0));
+    }
     static void BindMenuTouch(FrameNode* targetNode, const RefPtr<GestureEventHub>& gestrueHub);
 
     static RefPtr<PipelineContext> GetSheetContext(NG::SheetStyle& sheetStyle);
