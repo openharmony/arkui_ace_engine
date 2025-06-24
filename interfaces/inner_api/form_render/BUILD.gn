@@ -60,6 +60,7 @@ ohos_shared_library("ace_form_render") {
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:runtime",
+    "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "form_fwk:form_manager",

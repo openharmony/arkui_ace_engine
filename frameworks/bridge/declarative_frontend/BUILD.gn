@@ -607,6 +607,7 @@ template("declarative_js_engine") {
       ]
 
       external_deps += [
+        "bundle_framework:appexecfwk_base",
         "input:libmmi-client",
         "window_manager:scene_session",
       ]
@@ -1073,6 +1074,7 @@ template("declarative_js_engine_ng") {
       ]
 
       external_deps += [
+        "bundle_framework:appexecfwk_base",
         "input:libmmi-client",
         "window_manager:scene_session",
       ]
