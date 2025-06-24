@@ -40,15 +40,15 @@ class CallbackRegistry {
     }
 
     public static Integer wrap(CallbackType callback) {
-        Integer id = CallbackRegistry.id++;
-        CallbackRegistry.callbacks.put(id, new CallbackRecord(callback, true));
-        return id;
+        Integer callbackId = CallbackRegistry.id++;
+        CallbackRegistry.callbacks.put(callbackId, new CallbackRecord(callback, true));
+        return callbackId;
     }
 
     public static Integer wrap(CallbackType callback, boolean autoDisposable) {
-        Integer id = CallbackRegistry.id++;
-        CallbackRegistry.callbacks.put(id, new CallbackRecord(callback, autoDisposable));
-        return id;
+        Integer callbackId = CallbackRegistry.id++;
+        CallbackRegistry.callbacks.put(callbackId, new CallbackRecord(callback, autoDisposable));
+        return callbackId;
     }
 
     public static int call(Integer id, byte[] args, int length) {

@@ -65,6 +65,7 @@ export class ExportSpecifier extends Statement {
     get constantExpression(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._ExportSpecifierGetConstantExpressionConst(global.context, this.peer))
     }
+    protected readonly brandExportSpecifier: undefined
 }
 export function isExportSpecifier(node: object | undefined): node is ExportSpecifier {
     return node instanceof ExportSpecifier

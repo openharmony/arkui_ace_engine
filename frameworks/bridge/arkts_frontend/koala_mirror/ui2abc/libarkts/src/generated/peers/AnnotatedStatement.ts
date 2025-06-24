@@ -33,6 +33,7 @@ export class AnnotatedStatement extends Statement {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandAnnotatedStatement: undefined
 }
 export function isAnnotatedStatement(node: object | undefined): node is AnnotatedStatement {
     return node instanceof AnnotatedStatement

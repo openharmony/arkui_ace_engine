@@ -32,4 +32,5 @@ export class LabelPair extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandLabelPair: undefined
 }

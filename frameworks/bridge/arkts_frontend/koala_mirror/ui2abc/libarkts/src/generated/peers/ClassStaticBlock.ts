@@ -49,6 +49,7 @@ export class ClassStaticBlock extends ClassElement {
     get name(): string {
         return unpackString(global.generatedEs2panda._ClassStaticBlockNameConst(global.context, this.peer))
     }
+    protected readonly brandClassStaticBlock: undefined
 }
 export function isClassStaticBlock(node: object | undefined): node is ClassStaticBlock {
     return node instanceof ClassStaticBlock

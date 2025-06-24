@@ -16,6 +16,22 @@
 import * as arkts from "@koalaui/libarkts"
 import { factory } from "./MemoFactory"
 
+const ignore = [
+    "@koalaui/compat",
+    "@koalaui/common",
+    "@koalaui/runtime/annotations",
+
+    "@koalaui/runtime.internals",
+    "@koalaui/runtime.index",
+
+    "@koalaui/runtime.states.State",
+    "@koalaui/runtime.tree.ReadonlyTreeNode",
+    "@koalaui/runtime.tree.IncrementalNode",
+    "@koalaui/runtime.states.Disposable",
+    "@koalaui/runtime.states.Dependency",
+    "@koalaui/runtime.states.Journal",
+]
+
 export interface TransformerOptions {
     contextImport?: string,
     stableForTests?: boolean
@@ -25,16 +41,22 @@ export default function memoParserTransformer(
     userPluginOptions?: TransformerOptions
 ) {
     return (program: arkts.Program, options: arkts.CompilationOptions, context: arkts.PluginContext) => {
-        if (userPluginOptions?.contextImport && options) {
-            /* Some files should not be processed by plugin actually */
-            if (options.name.startsWith('@koalaui/common') || options.name.startsWith('@koalaui/compat')) return
-            if (options.name.startsWith('@koalaui/runtime.internals') || options.name.startsWith('@koalaui/runtime/annotations')) return
+        const restart = options.restart
+        if (restart) {
+            console.log("Parser transformer of memo plugin does nothing with restart mode enabled")
+            return
         }
+
+        if (ignore.some(it => program.moduleName.startsWith(it)) || program.moduleName == "") {
+            /* Some files should not be processed by plugin actually */
+            return
+        }
+
         return arkts.updateETSModuleByStatements(
-            program.astNode,
+            program.ast as arkts.ETSModule,
             [
                 factory.createContextTypesImportDeclaration(userPluginOptions?.stableForTests ?? false, userPluginOptions?.contextImport),
-                ...program.astNode.statements,
+                ...program.ast.statements,
             ]
         )
     }

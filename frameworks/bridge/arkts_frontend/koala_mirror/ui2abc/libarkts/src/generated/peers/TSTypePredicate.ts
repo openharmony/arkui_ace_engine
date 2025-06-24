@@ -51,6 +51,7 @@ export class TSTypePredicate extends TypeNode {
     get asserts(): boolean {
         return global.generatedEs2panda._TSTypePredicateAssertsConst(global.context, this.peer)
     }
+    protected readonly brandTSTypePredicate: undefined
 }
 export function isTSTypePredicate(node: object | undefined): node is TSTypePredicate {
     return node instanceof TSTypePredicate

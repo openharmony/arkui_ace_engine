@@ -52,7 +52,7 @@ export class InteropNativeModule {
     native static _CallCallbackSync(callbackKind: int32, args: KSerializerBuffer, argsSize: int32): void
     native static _CallCallbackResourceHolder(holder: KPointer, resourceId: int32): void
     native static _CallCallbackResourceReleaser(releaser: KPointer, resourceId: int32): void
-    native static _LoadVirtualMachine(arg0: int32, arg1: string, arg2: string): int32
+    native static _LoadVirtualMachine(arg0: int32, arg1: string, arg2: string, arg3: string): int32
     native static _RunApplication(arg0: int32, arg1: int32): boolean
     native static _StartApplication(appUrl: string, appParams: string): KPointer
     native static _EmitEvent(eventType: int32, target: int32, arg0: int32, arg1: int32): string

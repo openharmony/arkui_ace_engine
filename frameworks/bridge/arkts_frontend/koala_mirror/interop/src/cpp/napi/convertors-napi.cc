@@ -113,7 +113,7 @@ KStringPtr getString(napi_env env, napi_value value) {
   return result;
 }
 
-KNativePointer getPointer(napi_env env, napi_value value) {
+KNativePointer getPointerSlow(napi_env env, napi_value value) {
     napi_valuetype valueType = getValueTypeChecked(env, value);
     if (valueType == napi_valuetype::napi_external) {
         KNativePointer result = nullptr;

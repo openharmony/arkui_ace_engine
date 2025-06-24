@@ -39,4 +39,5 @@ export class ValidationInfo extends ArktsObject {
     get fail(): boolean {
         return global.generatedEs2panda._ValidationInfoFailConst(global.context, this.peer)
     }
+    protected readonly brandValidationInfo: undefined
 }

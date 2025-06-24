@@ -44,6 +44,7 @@ export class TSArrayType extends TypeNode {
     get elementType(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._TSArrayTypeElementTypeConst(global.context, this.peer))
     }
+    protected readonly brandTSArrayType: undefined
 }
 export function isTSArrayType(node: object | undefined): node is TSArrayType {
     return node instanceof TSArrayType

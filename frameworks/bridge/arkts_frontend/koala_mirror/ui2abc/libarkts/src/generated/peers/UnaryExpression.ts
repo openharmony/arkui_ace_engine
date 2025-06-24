@@ -48,6 +48,12 @@ export class UnaryExpression extends Expression {
     get argument(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._UnaryExpressionArgument(global.context, this.peer))
     }
+    /** @deprecated */
+    setArgument(arg?: Expression): this {
+        global.generatedEs2panda._UnaryExpressionSetArgument(global.context, this.peer, passNode(arg))
+        return this
+    }
+    protected readonly brandUnaryExpression: undefined
 }
 export function isUnaryExpression(node: object | undefined): node is UnaryExpression {
     return node instanceof UnaryExpression

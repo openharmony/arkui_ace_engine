@@ -13,8 +13,14 @@
  * limitations under the License.
  */
 
-#include "stdio.h"
-#include <cstring>
+#ifdef __cplusplus
+  #include <cstdio>
+  #include <cstring>
+#else
+  #include <stdio.h>
+  #include <string.h>
+#endif
+
 #include <vector>
 
 #include "signatures.h"
@@ -22,15 +28,15 @@
 
 // For types with the same name on ets and jni
 #define KOALA_INTEROP_TYPEDEF(func, lang, CPP_TYPE, SIG_TYPE, CODE_TYPE) \
-  if (std::strcmp(func, "sigType") == 0) if (type == CPP_TYPE) return SIG_TYPE; \
-  if (std::strcmp(func, "codeType") == 0) if (type == CPP_TYPE) return CODE_TYPE;
+  if (std::strcmp(func, "sigType") == 0) if (type == (CPP_TYPE)) return SIG_TYPE; \
+  if (std::strcmp(func, "codeType") == 0) if (type == (CPP_TYPE)) return CODE_TYPE;
 
 // For types with distinct names on ets and jni
 #define KOALA_INTEROP_TYPEDEF_LS(func, lang, CPP_TYPE, ETS_SIG_TYPE, ETS_CODE_TYPE, JNI_SIG_TYPE, JNI_CODE_TYPE) \
-  if (std::strcmp(func, "sigType") == 0 && std::strcmp(lang, "ets") == 0) if (type == CPP_TYPE) return ETS_SIG_TYPE; \
-  if (std::strcmp(func, "codeType") == 0 && std::strcmp(lang, "ets") == 0) if (type == CPP_TYPE) return ETS_CODE_TYPE; \
-  if (std::strcmp(func, "sigType") == 0 && std::strcmp(lang, "jni") == 0) if (type == CPP_TYPE) return JNI_SIG_TYPE; \
-  if (std::strcmp(func, "codeType") == 0 && std::strcmp(lang, "jni") == 0) if (type == CPP_TYPE) return JNI_CODE_TYPE;
+  if (std::strcmp(func, "sigType") == 0 && std::strcmp(lang, "ets") == 0) if (type == (CPP_TYPE)) return ETS_SIG_TYPE; \
+  if (std::strcmp(func, "codeType") == 0 && std::strcmp(lang, "ets") == 0) if (type == (CPP_TYPE)) return ETS_CODE_TYPE; \
+  if (std::strcmp(func, "sigType") == 0 && std::strcmp(lang, "jni") == 0) if (type == (CPP_TYPE)) return JNI_SIG_TYPE; \
+  if (std::strcmp(func, "codeType") == 0 && std::strcmp(lang, "jni") == 0) if (type == (CPP_TYPE)) return JNI_CODE_TYPE;
 
 #define KOALA_INTEROP_TYPEDEFS(func, lang) \
   KOALA_INTEROP_TYPEDEF(func, lang, "void", "V", "void") \
@@ -109,7 +115,7 @@ std::string convertType(const char* name, const char* koalaType) {
 
 #if KOALA_USE_PANDA_VM
 
-    for (int i = 1; i < (int)tokens.size(); i++)
+    for (int i = 1; i < static_cast<int>(tokens.size()); i++)
     {
         result.append(sigType(tokens[i]));
     }
@@ -119,7 +125,7 @@ std::string convertType(const char* name, const char* koalaType) {
 #elif KOALA_USE_JAVA_VM
 
     result.append("(");
-    for (int i = 1; i < (int)tokens.size(); i++)
+    for (int i = 1; i < static_cast<int>(tokens.size()); i++)
     {
         result.append(sigType(tokens[i]));
     }
@@ -131,24 +137,24 @@ std::string convertType(const char* name, const char* koalaType) {
 #ifdef KOALA_BUILD_FOR_SIGNATURES
     #ifdef KOALA_USE_PANDA_VM
         std::string params;
-        for (int i = 1; i < (int)tokens.size(); i++)
+        for (int i = 1; i < static_cast<int>(tokens.size()); i++)
         {
             params.append("arg");
             params.append(std::to_string(i));
             params.append(": ");
             params.append(codeType(tokens[i]));
-            if (i < (int)(tokens.size() - 1))
+            if (i < static_cast<int>(tokens.size() - 1))
                 params.append(", ");
         }
         fprintf(stderr, "  static native %s(%s): %s;\n", name, params.c_str(), codeType(tokens[0]).c_str());
     #elif KOALA_USE_JAVA_VM
         std::string params;
-        for (int i = 1; i < (int)tokens.size(); i++)
+        for (int i = 1; i < static_cast<int>(tokens.size()); i++)
         {
             params.append(codeType(tokens[i]));
             params.append(" arg");
             params.append(std::to_string(i));
-            if (i < (int)(tokens.size() - 1))
+            if (i < static_cast<int>(tokens.size() - 1))
                 params.append(", ");
         }
         fprintf(stderr, "  public static native %s %s(%s);\n", codeType(tokens[0]).c_str(), name, params.c_str());

@@ -32,4 +32,5 @@ export class IndexInfo extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandIndexInfo: undefined
 }

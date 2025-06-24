@@ -54,6 +54,7 @@ export class TSConditionalType extends TypeNode {
     get falseType(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._TSConditionalTypeFalseTypeConst(global.context, this.peer))
     }
+    protected readonly brandTSConditionalType: undefined
 }
 export function isTSConditionalType(node: object | undefined): node is TSConditionalType {
     return node instanceof TSConditionalType

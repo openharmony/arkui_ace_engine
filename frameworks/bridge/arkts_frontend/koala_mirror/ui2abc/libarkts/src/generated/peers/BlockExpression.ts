@@ -55,6 +55,7 @@ export class BlockExpression extends Expression {
         global.generatedEs2panda._BlockExpressionAddStatement(global.context, this.peer, passNode(statement))
         return this
     }
+    protected readonly brandBlockExpression: undefined
 }
 export function isBlockExpression(node: object | undefined): node is BlockExpression {
     return node instanceof BlockExpression

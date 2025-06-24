@@ -32,6 +32,7 @@ export class AnnotatedAstNode extends AstNode {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandAnnotatedAstNode: undefined
 }
 export function isAnnotatedAstNode(node: object | undefined): node is AnnotatedAstNode {
     return node instanceof AnnotatedAstNode

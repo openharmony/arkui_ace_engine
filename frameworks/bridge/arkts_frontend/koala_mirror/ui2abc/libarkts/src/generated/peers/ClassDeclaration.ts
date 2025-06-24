@@ -46,9 +46,33 @@ export class ClassDeclaration extends Statement {
     get definition(): ClassDefinition | undefined {
         return unpackNode(global.generatedEs2panda._ClassDeclarationDefinition(global.context, this.peer))
     }
-    get decorators(): readonly Decorator[] {
-        return unpackNodeArray(global.generatedEs2panda._ClassDeclarationDecoratorsConst(global.context, this.peer))
+    /** @deprecated */
+    emplaceDecorators(decorators?: Decorator): this {
+        global.generatedEs2panda._ClassDeclarationEmplaceDecorators(global.context, this.peer, passNode(decorators))
+        return this
     }
+    /** @deprecated */
+    clearDecorators(): this {
+        global.generatedEs2panda._ClassDeclarationClearDecorators(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setValueDecorators(decorators: Decorator | undefined, index: number): this {
+        global.generatedEs2panda._ClassDeclarationSetValueDecorators(global.context, this.peer, passNode(decorators), index)
+        return this
+    }
+    get decorators(): readonly Decorator[] {
+        return unpackNodeArray(global.generatedEs2panda._ClassDeclarationDecorators(global.context, this.peer))
+    }
+    get decoratorsForUpdate(): readonly Decorator[] {
+        return unpackNodeArray(global.generatedEs2panda._ClassDeclarationDecoratorsForUpdate(global.context, this.peer))
+    }
+    /** @deprecated */
+    setDefinition(def?: ClassDefinition): this {
+        global.generatedEs2panda._ClassDeclarationSetDefinition(global.context, this.peer, passNode(def))
+        return this
+    }
+    protected readonly brandClassDeclaration: undefined
 }
 export function isClassDeclaration(node: object | undefined): node is ClassDeclaration {
     return node instanceof ClassDeclaration

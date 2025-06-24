@@ -51,6 +51,7 @@ export class TemplateLiteral extends Expression {
     get multilineString(): string {
         return unpackString(global.generatedEs2panda._TemplateLiteralGetMultilineStringConst(global.context, this.peer))
     }
+    protected readonly brandTemplateLiteral: undefined
 }
 export function isTemplateLiteral(node: object | undefined): node is TemplateLiteral {
     return node instanceof TemplateLiteral

@@ -44,6 +44,7 @@ export class ImportExpression extends Expression {
     get source(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._ImportExpressionSource(global.context, this.peer))
     }
+    protected readonly brandImportExpression: undefined
 }
 export function isImportExpression(node: object | undefined): node is ImportExpression {
     return node instanceof ImportExpression

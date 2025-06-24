@@ -145,7 +145,13 @@ KOALA_INTEROP_1(StringLength, KInt, KNativePointer)
 
 void impl_StringData(KNativePointer ptr, KByte* bytes, KUInt size) {
     string* s = reinterpret_cast<string*>(ptr);
-    if (s) memcpy(bytes, s->c_str(), size);
+    if (s) {
+        #ifdef __STDC_LIB_EXT1__
+            memcpy_s(bytes, size, s->c_str(), size);
+        #else
+            memcpy(bytes, s->c_str(), size);
+        #endif
+    }
 }
 KOALA_INTEROP_V3(StringData, KNativePointer, KByte*, KUInt)
 
@@ -246,7 +252,7 @@ struct ForeignVMContext {
     KVMContext vmContext;
     int32_t (*callSync)(KVMContext vmContext, int32_t callback, uint8_t* data, int32_t length);
 };
-typedef KInt (*LoadVirtualMachine_t)(KInt vmKind, const char* classPath, const char* libraryPath, const struct ForeignVMContext* foreignVM);
+typedef KInt (*LoadVirtualMachine_t)(KInt vmKind, const char* bootFiles, const char* userFiles, const char* libraryPath, const struct ForeignVMContext* foreignVM);
 typedef KNativePointer (*StartApplication_t)(const char* appUrl, const char* appParams);
 typedef KBoolean (*RunApplication_t)(const KInt arg0, const KInt arg1);
 typedef const char* (*EmitEvent_t)(const KInt type, const KInt target, const KInt arg0, const KInt arg1);
@@ -269,12 +275,12 @@ void* getImpl(const char* path, const char* name) {
     return findSymbol(lib, name);
 }
 
-KInt impl_LoadVirtualMachine(KVMContext vmContext, KInt vmKind, const KStringPtr& classPath, const KStringPtr& libraryPath) {
+KInt impl_LoadVirtualMachine(KVMContext vmContext, KInt vmKind, const KStringPtr& bootFiles, const KStringPtr& userFiles, const KStringPtr& libraryPath) {
     const char* envClassPath = std::getenv("PANDA_CLASS_PATH");
     if (envClassPath) {
         LOGI("CLASS PATH updated from env var PANDA_CLASS_PATH, %" LOG_PUBLIC "s", envClassPath);
     }
-    const char* appClassPath = envClassPath ? envClassPath : classPath.c_str();
+    const char* bootFilesPath = envClassPath ? envClassPath : bootFiles.c_str();
     const char* nativeLibPath = envClassPath ? envClassPath : libraryPath.c_str();
 
     static LoadVirtualMachine_t impl = nullptr;
@@ -283,9 +289,9 @@ KInt impl_LoadVirtualMachine(KVMContext vmContext, KInt vmKind, const KStringPtr
     const ForeignVMContext foreignVM = {
         vmContext, &callCallback
     };
-    return impl(vmKind, appClassPath, nativeLibPath, &foreignVM);
+    return impl(vmKind, bootFilesPath, userFiles.c_str(), nativeLibPath, &foreignVM);
 }
-KOALA_INTEROP_CTX_3(LoadVirtualMachine, KInt, KInt, KStringPtr, KStringPtr)
+KOALA_INTEROP_CTX_4(LoadVirtualMachine, KInt, KInt, KStringPtr, KStringPtr, KStringPtr)
 
 KNativePointer impl_StartApplication(const KStringPtr& appUrl, const KStringPtr& appParams) {
     static StartApplication_t impl = nullptr;
@@ -353,7 +359,6 @@ void impl_Free(KNativePointer data) {
 KOALA_INTEROP_DIRECT_V1(Free, KNativePointer)
 
 KInt impl_ReadByte(KNativePointer data, KLong index, KLong length) {
-    if (index >= length) INTEROP_FATAL("impl_ReadByte: index %lld is equal or greater than length %lld", (long long)index, (long long) length);
     uint8_t* ptr = reinterpret_cast<uint8_t*>(data);
     return ptr[index];
 }
@@ -367,7 +372,11 @@ void impl_WriteByte(KNativePointer data, KInt index, KLong length, KInt value) {
 KOALA_INTEROP_DIRECT_V4(WriteByte, KNativePointer, KLong, KLong, KInt)
 
 void impl_CopyArray(KNativePointer data, KLong length, KByte* array) {
-    memcpy(data, array, length);
+    #ifdef __STDC_LIB_EXT1__
+        memcpy_s(data, length, array, length);
+    #else
+        memcpy(data, array, length);
+    #endif
 }
 KOALA_INTEROP_V3(CopyArray, KNativePointer, KLong, KByte*)
 
@@ -434,7 +443,10 @@ void impl_SetForeignVMContext(KNativePointer foreignVMContextRaw) {
 }
 KOALA_INTEROP_V1(SetForeignVMContext, KNativePointer)
 
-#define __QUOTE(x) #x
+#ifndef __QUOTE
+    #define __QUOTE(x) #x
+#endif
+
 #define QUOTE(x) __QUOTE(x)
 
 void impl_NativeLog(const KStringPtr& str) {
@@ -451,13 +463,19 @@ void resolveDeferred(KVMDeferred* deferred, uint8_t* argsData, int32_t argsLengt
 #ifdef KOALA_NAPI
     auto status = napi_call_threadsafe_function((napi_threadsafe_function)deferred->handler, deferred, napi_tsfn_nonblocking);
     if (status != napi_ok) LOGE("cannot call thread-safe function; status=%d", status);
-    napi_release_threadsafe_function((napi_threadsafe_function)deferred->handler, napi_tsfn_release);
+    if (deferred->handler) {
+        napi_release_threadsafe_function((napi_threadsafe_function)deferred->handler, napi_tsfn_release);
+        deferred->handler = nullptr;
+    }
 #endif
 }
 
 void rejectDeferred(KVMDeferred* deferred, const char* message) {
 #ifdef KOALA_NAPI
-    napi_release_threadsafe_function((napi_threadsafe_function)deferred->handler, napi_tsfn_release);
+    if (deferred->handler) {
+        napi_release_threadsafe_function((napi_threadsafe_function)deferred->handler, napi_tsfn_release);
+        deferred->handler = nullptr;
+    }
 #endif
 }
 
@@ -670,7 +688,11 @@ KOALA_INTEROP_CTX_1(StdStringToString, KStringPtr, KNativePointer)
 
 KInteropReturnBuffer impl_RawReturnData(KVMContext vmContext, KInt v1, KInt v2) {
     void* data = new int8_t[v1];
-    memset(data, v2, v1);
+    #ifdef __STDC_LIB_EXT1__
+        memset_s(data, v1, v2, v1);
+    #else
+        memset(data, v2, v1);
+    #endif
     KInteropReturnBuffer buffer = { v1, data, [](KNativePointer ptr, KInt) { delete[] (int8_t*)ptr; }};
     return buffer;
 }

@@ -44,6 +44,7 @@ export class TSModuleBlock extends Statement {
     get statements(): readonly Statement[] {
         return unpackNodeArray(global.generatedEs2panda._TSModuleBlockStatementsConst(global.context, this.peer))
     }
+    protected readonly brandTSModuleBlock: undefined
 }
 export function isTSModuleBlock(node: object | undefined): node is TSModuleBlock {
     return node instanceof TSModuleBlock

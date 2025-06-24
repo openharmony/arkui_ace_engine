@@ -33,6 +33,7 @@ export class FunctionDecl extends ScriptFunction {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandFunctionDecl: undefined
 }
 export function isFunctionDecl(node: object | undefined): node is FunctionDecl {
     return node instanceof FunctionDecl

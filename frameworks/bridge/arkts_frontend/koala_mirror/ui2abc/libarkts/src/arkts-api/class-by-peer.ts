@@ -18,8 +18,6 @@ import { throwError } from "../utils"
 import { global } from "./static/global"
 import { KNativePointer, nullptr } from "@koalaui/interop"
 import { AstNode } from "./peers/AstNode"
-import { factory } from "@koalaui/ets-tsc"
-import { unpackString } from "./utilities/private"
 
 export const nodeByType = new Map<Es2pandaAstNodeType, (peer: KNativePointer) => AstNode>([])
 

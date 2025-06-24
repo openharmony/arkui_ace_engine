@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,10 @@ export {
     float32, float64,
     asArray,
     asFloat64,
+    charToInt,
     float32FromBits,
+    float64ToInt,
+    float64ToLong,
     int32BitsFromFloat,
     Array_from_set,
     AtomicRef,
@@ -37,6 +40,7 @@ export {
     propDeepCopy,
     refEqual,
     int8Array,
+    errorAsString,
     unsafeCast,
     scheduleCoroutine,
     memoryStats,

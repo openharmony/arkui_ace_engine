@@ -48,6 +48,7 @@ export class PrefixAssertionExpression extends Expression {
     get type(): TypeNode | undefined {
         return unpackNode(global.generatedEs2panda._PrefixAssertionExpressionTypeConst(global.context, this.peer))
     }
+    protected readonly brandPrefixAssertionExpression: undefined
 }
 export function isPrefixAssertionExpression(node: object | undefined): node is PrefixAssertionExpression {
     return node instanceof PrefixAssertionExpression

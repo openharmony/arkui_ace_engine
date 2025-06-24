@@ -58,6 +58,7 @@ export class TSSignatureDeclaration extends TypedAstNode {
     get kind(): Es2pandaTSSignatureDeclarationKind {
         return global.generatedEs2panda._TSSignatureDeclarationKindConst(global.context, this.peer)
     }
+    protected readonly brandTSSignatureDeclaration: undefined
 }
 export function isTSSignatureDeclaration(node: object | undefined): node is TSSignatureDeclaration {
     return node instanceof TSSignatureDeclaration

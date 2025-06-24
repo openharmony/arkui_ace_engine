@@ -14,12 +14,16 @@
  */
 
 import { Es2pandaContextState } from "../generated/Es2pandaEnums"
-import { ExternalSource, Program } from "./peers/Program"
+import { Program } from "../generated"
+import { ExternalSource } from "./peers/ExternalSource"
+import { programGetExternalSources } from "./node-utilities/Program"
+import { KNativePointer } from "@koalaui/interop"
+import { global } from "./static/global"
 
 export interface CompilationOptions {
     readonly isMainProgram: boolean,
-    readonly name: string,
     readonly stage: Es2pandaContextState,
+    readonly restart: boolean,
 }
 
 export interface PluginContext {
@@ -45,17 +49,12 @@ export function defaultFilter(name: string) {
     return true
 }
 
-export interface ProgramWithName {
-    program: Program,
-    name: string
-}
-
-export function listPrograms(program: Program, filter: (name: string) => boolean = defaultFilter): ProgramWithName[] {
+export function listPrograms(program: Program, filter: (name: string) => boolean = defaultFilter, context: KNativePointer = global.context): Program[] {
     return [
-        { program, name: "" },
-        ...program.externalSources.flatMap((it: ExternalSource) => {
+        program,
+        ...programGetExternalSources(program, context).flatMap((it: ExternalSource) => {
             if (filter(it.getName())) {
-                return it.programs.map(program => ({ program, name: it.getName() } as ProgramWithName))
+                return it.programs
             }
             return []
         })

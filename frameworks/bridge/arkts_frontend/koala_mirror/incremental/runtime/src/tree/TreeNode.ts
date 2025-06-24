@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { className, float64, int32, KoalaProfiler, uint32 } from "@koalaui/common"
+import { className, float64, float64ToInt, int32, KoalaProfiler, uint32 } from "@koalaui/common"
 import { Disposable } from "../states/Disposable"
 import { ReadonlyTreeNode } from "./ReadonlyTreeNode"
 
@@ -76,7 +76,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
      * Returns the number of children of this node.
      */
     get childrenCount(): uint32 {
-        return this.myChildren.length as uint32
+        return float64ToInt(this.myChildren.length)
     }
 
     /**
@@ -223,7 +223,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
      */
     removeChild(node: TreeNode): boolean {
         if (node.myParent !== this) return false // not in hierarchy
-        const index: int32 = this.myIndicesValid ? node.index : this.myChildren.indexOf(node) as int32
+        const index: int32 = this.myIndicesValid ? node.index : float64ToInt(this.myChildren.indexOf(node))
         return undefined !== this.removeChildAt(index)
     }
 
@@ -284,7 +284,7 @@ export class TreeNode implements Disposable, ReadonlyTreeNode {
     }
 
     collectParentsTo(array: Array<TreeNode>): void {
-        const index = array.length as int32
+        const index = float64ToInt(array.length)
         let parent = this.myParent
         while (parent !== undefined) {
             array.splice(index, 0, parent!)

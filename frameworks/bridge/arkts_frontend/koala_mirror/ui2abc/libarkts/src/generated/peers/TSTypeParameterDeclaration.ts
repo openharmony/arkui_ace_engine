@@ -50,9 +50,15 @@ export class TSTypeParameterDeclaration extends Expression {
         global.generatedEs2panda._TSTypeParameterDeclarationAddParam(global.context, this.peer, passNode(param))
         return this
     }
+    /** @deprecated */
+    setValueParams(source: TSTypeParameter | undefined, index: number): this {
+        global.generatedEs2panda._TSTypeParameterDeclarationSetValueParams(global.context, this.peer, passNode(source), index)
+        return this
+    }
     get requiredParams(): number {
         return global.generatedEs2panda._TSTypeParameterDeclarationRequiredParamsConst(global.context, this.peer)
     }
+    protected readonly brandTSTypeParameterDeclaration: undefined
 }
 export function isTSTypeParameterDeclaration(node: object | undefined): node is TSTypeParameterDeclaration {
     return node instanceof TSTypeParameterDeclaration

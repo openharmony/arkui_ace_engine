@@ -41,6 +41,7 @@ export class TSUnknownKeyword extends TypeNode {
     static updateTSUnknownKeyword(original?: TSUnknownKeyword): TSUnknownKeyword {
         return new TSUnknownKeyword(global.generatedEs2panda._UpdateTSUnknownKeyword(global.context, passNode(original)))
     }
+    protected readonly brandTSUnknownKeyword: undefined
 }
 export function isTSUnknownKeyword(node: object | undefined): node is TSUnknownKeyword {
     return node instanceof TSUnknownKeyword

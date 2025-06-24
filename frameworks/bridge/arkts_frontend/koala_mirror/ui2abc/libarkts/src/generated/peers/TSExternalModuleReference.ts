@@ -44,6 +44,7 @@ export class TSExternalModuleReference extends Expression {
     get expr(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._TSExternalModuleReferenceExprConst(global.context, this.peer))
     }
+    protected readonly brandTSExternalModuleReference: undefined
 }
 export function isTSExternalModuleReference(node: object | undefined): node is TSExternalModuleReference {
     return node instanceof TSExternalModuleReference
