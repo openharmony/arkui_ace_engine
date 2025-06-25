@@ -76,14 +76,7 @@ ToastInfo Convert(const Ark_ShowToastOptions& options)
         }
     }
     NG::ToastInfo toastInfo;
-    Converter::VisitUnion(options.message,
-        [&toastInfo](const Ark_String& val) {
-            toastInfo.message = Converter::Convert<std::string>(val);
-        },
-        [&toastInfo](const Ark_Resource& val) {
-            auto msgResourceStr = Converter::OptConvert<std::string>(val).value_or("");
-        }, []() {}
-    );
+    toastInfo.message = Converter::OptConvert<std::string>(options.message).value_or("");
     toastInfo.duration = std::clamp(Converter::OptConvert<int32_t>(options.duration).value_or(-1),
         TOAST_TIME_DEFAULT, TOAST_TIME_MAX);
     Converter::VisitUnion(options.bottom,

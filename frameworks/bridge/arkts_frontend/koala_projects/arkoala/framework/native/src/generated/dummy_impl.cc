@@ -35139,6 +35139,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOwnerViewImpl(Ark_CustomDialogController peer, Ark_NodeHandle node)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("setOwnerView(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // CustomDialogControllerAccessor
     namespace LinearGradientAccessor {
     void DestroyPeerImpl(Ark_LinearGradient peer)
@@ -45548,6 +45556,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CustomDialogControllerAccessor::GetFinalizerImpl,
             CustomDialogControllerAccessor::OpenImpl,
             CustomDialogControllerAccessor::CloseImpl,
+            CustomDialogControllerAccessor::SetOwnerViewImpl,
         };
         return &CustomDialogControllerAccessorImpl;
     }

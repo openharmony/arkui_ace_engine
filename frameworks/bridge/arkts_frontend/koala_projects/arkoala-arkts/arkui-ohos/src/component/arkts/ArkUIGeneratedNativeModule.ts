@@ -5665,6 +5665,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CustomDialogController_close(ptr: KPointer): undefined
     @ani.unsafe.Direct
+    native static _CustomDialogController_setOwnerView(ptr: KPointer, node: KPointer): undefined
+    @ani.unsafe.Direct
     native static _LinearGradient_ctor(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _LinearGradient_getFinalizer(): KPointer
