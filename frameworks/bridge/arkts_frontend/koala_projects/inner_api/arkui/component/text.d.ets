@@ -21,13 +21,10 @@ import {
 } from 'arkui/component/common';
 import { ShadowOptions, AttributeModifier } from 'arkui.component.common';
 import { CustomBuilder } from 'arkui.component.builder';
-import { int32 } from '@koalaui/compat';
-import { KPointer } from '@koalaui/interop';
 import { ComponentBase } from 'arkui.ComponentBase';
 import { ResourceColor, Length, Font } from 'arkui.component.units';
 import {
     MarqueeState,
-    TextAttribute,
     TextOverflowOptions,
     TextMarqueeOptions,
     TextSpanType,
@@ -52,8 +49,13 @@ import { LengthMetrics } from 'arkui.Graphics';
 import { SelectionMenuOptions } from 'arkui.component.richEditor';
 import { DecorationStyleInterface } from 'arkui.component.styledString';
 
+type KPointer = long
+type int32 = int
+
 export declare class ArkTextPeer extends ArkCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name?: string, flags?: int32);
+    constructor(peerPtr: KPointer, id: int32, name: string);
+    constructor(peerPtr: KPointer, id: int32);
+    protected constructor(peerPtr: KPointer, id: int32, name: string, flags: int32);
     public static create(component: ComponentBase | undefined, flags?: int32): ArkTextPeer;
     public setTextOptionsAttribute(content?: string | Resource, value?: TextOptions): void;
     public font0Attribute(value: Font | undefined): void;
