@@ -482,6 +482,11 @@ void WebDataDetectorAdapter::ProcessClick(const std::string& jsonStr)
     auto content = msg->GetString("content");
     auto outerHTML = msg->GetString("outerHTML");
     auto entityType = msg->GetString("entityType");
+    if (auto touchTest = msg->GetBool("touchTest")) {
+        SetPreviewMenuAttr(ConvertTypeFromString(entityType), content);
+        return;
+    }
+    SetPreviewMenuAttr();
     auto rectJson = msg->GetObject("rect");
     if (!rectJson || !rectJson->IsObject()) {
         return;
@@ -790,12 +795,10 @@ void WebDataDetectorAdapter::OnDetectSelectedTextDone(const TextDataDetectResult
 void WebDataDetectorAdapter::UpdateAISelectMenu(const std::string& entityType, const std::string& content)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::UpdateAISelectMenu type: %{public}s", entityType.c_str());
-    auto it = std::find(TEXT_DETECT_LIST.begin(), TEXT_DETECT_LIST.end(), entityType);
-    if (it == TEXT_DETECT_LIST.end()) {
+    TextDataDetectType type = ConvertTypeFromString(entityType);
+    if (type == TextDataDetectType::INVALID) {
         return;
     }
-    auto index = std::distance(TEXT_DETECT_LIST.begin(), it);
-    TextDataDetectType type = static_cast<TextDataDetectType>(index);
     auto pattern = DynamicCast<WebPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
     auto selectOverlay = pattern->webSelectOverlay_;
@@ -844,25 +847,26 @@ bool WebDataDetectorAdapter::SetPreviewMenuLink(const std::string& link)
     if (!GetDataDetectorEnable()) {
         return false;
     }
-    previewMenuType_ = TextDataDetectType::URL;
+    auto linkType = TextDataDetectType::URL;
+    auto linkContent = link;
     for (size_t i = 0; i < TEXT_DETECT_LIST.size(); ++i) {
-        if (i == static_cast<int32_t>(TextDataDetectType::URL)) {
+        if (static_cast<int32_t>(i) == static_cast<int32_t>(TextDataDetectType::URL)) {
             continue;
         }
         auto entityType = TEXT_DETECT_LIST[i];
         auto prefix = TEXT_DETECT_MAP_TO_HREF.at(entityType);
         if (link.compare(0, prefix.length(), prefix) == 0) {
-            previewMenuType_ = static_cast<TextDataDetectType>(i);
-            previewMenuContent_ = link.substr(prefix.length());
+            linkType = static_cast<TextDataDetectType>(i);
+            linkContent = link.substr(prefix.length());
             break;
         }
     }
     TAG_LOGI(AceLogTag::ACE_WEB, "WebDataDetectorAdapter::SetPreviewMenuLink type: %{public}d",
-        static_cast<int32_t>(previewMenuType_));
-    if (previewMenuType_ == TextDataDetectType::URL) {
-        previewMenuContent_ = link;
+        static_cast<int32_t>(linkType));
+    if (linkType == previewMenuType_) {
+        return true;
     }
-    previewMenuContent_ = UrlDecode(previewMenuContent_);
+    SetPreviewMenuAttr(linkType, UrlDecode(linkContent));
     return true;
 }
 
@@ -893,8 +897,7 @@ bool WebDataDetectorAdapter::GetPreviewMenuBuilder(
         // arkui create preview menu static func
         PreviewMenuController::CreatePreviewMenu(menuType, menuContent, nullptr);
     };
-    previewMenuType_ = TextDataDetectType::INVALID;
-    previewMenuContent_ = "";
+    SetPreviewMenuAttr();
     return true;
 }
 
@@ -904,6 +907,18 @@ std::string WebDataDetectorAdapter::GetLinkOuterHTML(const std::string& entityTy
            R"(; text-decoration: )" + ReplaceARGBToRGBA(config_.textDecorationStyle) + R"(;">)" + content + R"(</a>)";
 }
 
+std::function<void()> WebDataDetectorAdapter::GetPreviewMenuOptionCallback(
+    TextDataDetectType type, const std::string& content)
+{
+    return [type, content, instanceId = Container::CurrentIdSafelyWithCheck()] () {
+        ContainerScope scope(instanceId);
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto fontManager = pipeline->GetFontManager();
+        CHECK_NULL_VOID(fontManager);
+        fontManager->OnPreviewMenuOptionClick(type, content);
+    };
+}
 RefPtr<FrameNode> WebDataDetectorAdapter::GetPreviewMenuNode(const AIMenuInfo& info)
 {
     std::vector<std::pair<std::string, std::function<void()>>> menuOptions;
@@ -920,9 +935,25 @@ RefPtr<FrameNode> WebDataDetectorAdapter::GetPreviewMenuNode(const AIMenuInfo& i
         if (!menuOptions.empty() && !name.empty()) {
             auto& option = menuOptions.front();
             option.first = name;
+            option.second = GetPreviewMenuOptionCallback(previewMenuType_, previewMenuContent_);
         }
     }
     return overlayManager->BuildAIEntityMenu(menuOptions);
+}
+
+void WebDataDetectorAdapter::SetPreviewMenuAttr(TextDataDetectType type, const std::string& content)
+{
+    previewMenuType_ = type;
+    previewMenuContent_ = (type != TextDataDetectType::INVALID) ? content : "";
+}
+
+TextDataDetectType WebDataDetectorAdapter::ConvertTypeFromString(const std::string& type)
+{
+    auto it = std::find(TEXT_DETECT_LIST.begin(), TEXT_DETECT_LIST.end(), type);
+    if (it == TEXT_DETECT_LIST.end()) {
+        return TextDataDetectType::INVALID;
+    }
+    return static_cast<TextDataDetectType>(std::distance(TEXT_DETECT_LIST.begin(), it));
 }
 
 void WebDataDetectorAdapter::CloseAIMenu()

@@ -188,7 +188,12 @@ public:
     bool SetPreviewMenuLink(const std::string& link);
     bool GetPreviewMenuBuilder(std::function<void()>& menuBuilder, std::function<void()>& previewBuilder);
     std::string GetLinkOuterHTML(const std::string& entityType, const std::string& content);
+    std::function<void()> GetPreviewMenuOptionCallback(TextDataDetectType type, const std::string& content);
     RefPtr<FrameNode> GetPreviewMenuNode(const AIMenuInfo& info);
+
+    void SetPreviewMenuAttr(TextDataDetectType type = TextDataDetectType::INVALID, const std::string& content = "");
+
+    static TextDataDetectType ConvertTypeFromString(const std::string& type);
 
     void CloseAIMenu();
     void CloseOtherMenu();
