@@ -242,13 +242,13 @@ static const std::vector<TestVector> VALID_0_TEST2_PLAN = {
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(BadgeModifierTest, DISABLED_setBadgeOptions0TestValidValues, TestSize.Level1)
+HWTEST_F(BadgeModifierTest, setBadgeOptions0TestValidValues, TestSize.Level1)
 {
     Ark_BadgeParamWithNumber inputValueOptions;
     InitNumberOptions(inputValueOptions);
     Ark_Position position;
-    position.x = Converter::ArkValue<Opt_Length>(12);
-    position.y = Converter::ArkValue<Opt_Length>(14);
+    position.x = Converter::ArkValue<Opt_Length>("12.0px");
+    position.y = Converter::ArkValue<Opt_Length>("14.0px");
 
     inputValueOptions.position = Converter::ArkUnion<Opt_Union_BadgePosition_Position, Ark_Position>(position);
     inputValueOptions.style = {

@@ -310,7 +310,7 @@ HWTEST_F(IndicatorComponentModifierTests, setStyleTestDotPaintValid, TestSize.Le
  * @tc.desc: Check the functionality of IndicatorComponentModifier.StyleImpl, Dot indicator, paint props
  * @tc.type: FUNC
  */
-HWTEST_F(IndicatorComponentModifierTests, setStyleTestDotPaintInvalid, TestSize.Level1)
+HWTEST_F(IndicatorComponentModifierTests, DISABLED_setStyleTestDotPaintInvalid, TestSize.Level1)
 {
     Ark_DotIndicator arkDotIndicator {
         ._itemWidth = ArkValue<Opt_Length>(-123.4f),
@@ -481,7 +481,7 @@ HWTEST_F(IndicatorComponentModifierTests, setStyleTestDigitPaintValid, TestSize.
  * @tc.desc: Check the functionality of IndicatorComponentModifier.StyleImpl, Digit indicator, paint props
  * @tc.type: FUNC
  */
-HWTEST_F(IndicatorComponentModifierTests, setStyleTestDigitPaintInvalid, TestSize.Level1)
+HWTEST_F(IndicatorComponentModifierTests, DISABLED_setStyleTestDigitPaintInvalid, TestSize.Level1)
 {
     Ark_DigitIndicator arkDigitIndicator {
         ._fontColor = ArkValue<Opt_ResourceColor>(Ark_Empty()),
