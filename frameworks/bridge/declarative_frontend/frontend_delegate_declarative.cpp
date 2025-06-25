@@ -2215,10 +2215,6 @@ void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogA
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show action menu enter with attr");
     DialogProperties dialogProperties = {
-        .onDidAppear = dialogAttr.onDidAppear,
-        .onDidDisappear = dialogAttr.onDidDisappear,
-        .onWillAppear = dialogAttr.onWillAppear,
-        .onWillDisappear = dialogAttr.onWillDisappear,
         .title = dialogAttr.title,
         .autoCancel = true,
         .isMenu = true,
@@ -2226,6 +2222,10 @@ void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogA
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
         .maskRect = dialogAttr.maskRect,
+        .onDidAppear = dialogAttr.onDidAppear,
+        .onDidDisappear = dialogAttr.onDidDisappear,
+        .onWillAppear = dialogAttr.onWillAppear,
+        .onWillDisappear = dialogAttr.onWillDisappear,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
