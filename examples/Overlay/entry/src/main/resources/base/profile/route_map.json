@@ -1,0 +1,89 @@
+{
+  "routerMap": [
+    {
+      "name": "NavIndex",
+      "pageSourceFile": "src/main/ets/pages/navigationPage.ets",
+      "buildFunction": "NavIndexBuilder"
+    },
+    {
+      "name": "DialogIndex",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/Index.ets",
+      "buildFunction": "DialogIndexBuilder"
+    },
+    {
+      "name": "AlertDialog",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/alertDialog.ets",
+      "buildFunction": "AlertDialogBuilder"
+    },
+    {
+      "name": "ActionSheet",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/actionSheet.ets",
+      "buildFunction": "ActionSheetBuilder"
+    },
+    {
+      "name": "CustomDialog",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/customDialog.ets",
+      "buildFunction": "CustomDialogBuilder"
+    },
+    {
+      "name": "PromptAction",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/promptAction.ets",
+      "buildFunction": "PromptActionBuilder"
+    },
+    {
+      "name": "DialogController",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/dialogController.ets",
+      "buildFunction": "DialogControllerBuilder"
+    },
+    {
+      "name": "DialogLevelOrder",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/dialogLevelOrder.ets",
+      "buildFunction": "DialogLevelOrderBuilder"
+    },
+    {
+      "name": "DialogFocusable",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/dialogFocusable.ets",
+      "buildFunction": "DialogFocusableBuilder"
+    },
+    {
+      "name": "EmbeddedDialogPageOne",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/embeddedDialogPageOne.ets",
+      "buildFunction": "EmbeddedDialogPageOneBuilder"
+    },
+    {
+      "name": "OverlayIndex",
+      "pageSourceFile": "src/main/ets/pages/components/overlay/Index.ets",
+      "buildFunction": "OverlayIndexBuilder"
+    },
+    {
+      "name": "OverlayLevelOrder",
+      "pageSourceFile": "src/main/ets/pages/components/overlay/overlayLevelOrder.ets",
+      "buildFunction": "OverlayLevelOrderBuilder"
+    },
+    {
+      "name": "OverlayManagerHitTest",
+      "pageSourceFile": "src/main/ets/pages/components/overlay/overlayManagerHitTest.ets",
+      "buildFunction": "OverlayManagerHitBuilder"
+    },
+    {
+      "name": "ToastIndex",
+      "pageSourceFile": "src/main/ets/pages/components/toast/Index.ets",
+      "buildFunction": "ToastIndexBuilder"
+    },
+    {
+      "name": "Toast",
+      "pageSourceFile": "src/main/ets/pages/components/toast/toast.ets",
+      "buildFunction": "ToastBuilder"
+    },
+    {
+      "name": "showToastTest",
+      "pageSourceFile": "src/main/ets/pages/components/toast/showToastTest.ets",
+      "buildFunction": "ShowToastBuilder"
+    },
+    {
+      "name": "toastPositionTest",
+      "pageSourceFile": "src/main/ets/pages/components/toast/toastPositionTest.ets",
+      "buildFunction": "ToastPositionBuilder"
+    }
+  ]
+}
