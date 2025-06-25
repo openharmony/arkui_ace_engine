@@ -21,8 +21,8 @@ import { _animateTo } from "arkui/handwritten/ArkAnimation"
 import { AnimateParam } from 'arkui/component'
 import { AnimatorResult , AnimatorOptions, Animator} from "@ohos/animator"
 import { UIContext, MeasureUtils, Font, TextMenuController, FocusController, ContextMenuController, ComponentUtils,
-    FrameCallback, UIInspector, UIObserver, PromptAction, AtomicServiceBar, Router, CursorController, MediaQuery,
-    ComponentSnapshot, DragController }
+    FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
+    MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController }
     from "@ohos/arkui/UIContext"
 import { StateManager, ComputableState } from "@koalaui/runtime"
 import { Context, PointerStyle, PixelMap } from "#external"
@@ -34,6 +34,8 @@ import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions }from "arkui/component/alertDialog"
 import { ActionSheet, ActionSheetOptions } from "arkui/component/actionSheet"
 import inspector from "@ohos/arkui/inspector"
+import { ComponentContent } from 'arkui/ComponentContent'
+import overlayManager from '@ohos/overlayManager'
 import promptAction from '@ohos/promptAction'
 import { ContextMenu } from 'arkui/component/contextMenu'
 import { ArkUIAniModule } from "arkui.ani"
@@ -512,6 +514,98 @@ export class UIInspectorImpl extends UIInspector {
     }
 }
 
+export class OverlayManagerImpl extends OverlayManager {
+    instanceId_: int32 = -1;
+    constructor(instanceId: int32) {
+        super()
+        this.instanceId_ = instanceId;
+    }
+
+    setOverlayManagerOptions(options: OverlayManagerOptions): boolean {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const retval = overlayManager.setOverlayManagerOptions(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return retval;
+    }
+
+    getOverlayManagerOptions(): OverlayManagerOptions {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const retval = overlayManager.getOverlayManagerOptions();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return retval;
+    }
+
+    addComponentContent(content: ComponentContent, index?: number): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let ptr: KPointer = 0
+        if (content.getNodePtr() !== undefined) {
+            ptr = content.getNodePtr() as (KPointer)
+        }
+        let idx: number = -1
+        if (index !== undefined) {
+            idx = index
+        }
+        overlayManager.addComponentContent(ptr, idx);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    addComponentContentWithOrder(content: ComponentContent, levelOrder?: number): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let ptr: KPointer = 0
+        if (content.getNodePtr() !== undefined) {
+            ptr = content.getNodePtr() as (KPointer)
+        }
+        let order: number = 0
+        if (levelOrder !== undefined) {
+            order = levelOrder
+        }
+        overlayManager.addComponentContentWithOrder(ptr, order);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    removeComponentContent(content: ComponentContent): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let ptr: KPointer = 0
+        if (content.getNodePtr() !== undefined) {
+            ptr = content.getNodePtr() as (KPointer)
+        }
+        overlayManager.removeComponentContent(ptr);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    showComponentContent(content: ComponentContent): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let ptr: KPointer = 0
+        if (content.getNodePtr() !== undefined) {
+            ptr = content.getNodePtr() as (KPointer)
+        }
+        overlayManager.showComponentContent(ptr);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    hideComponentContent(content: ComponentContent): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let ptr: KPointer = 0
+        if (content.getNodePtr() !== undefined) {
+            ptr = content.getNodePtr() as (KPointer)
+        }
+        overlayManager.hideComponentContent(ptr);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    showAllComponentContents(): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        overlayManager.showAllComponentContents();
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    hideAllComponentContents(): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        overlayManager.hideAllComponentContents();
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+}
+
 export class PromptActionImpl extends PromptAction {
     instanceId_: int32 = -1;
     constructor(instanceId: int32) {
@@ -584,6 +678,7 @@ export class UIContextImpl extends UIContext {
     atomicServiceBar_: AtomicServiceBarInternal;
     uiInspector_: UIInspectorImpl | null = null;
     contextMenuController_: ContextMenuControllerImpl;
+    overlayManager_: OverlayManagerImpl | null = null;
     promptAction_: PromptActionImpl | null = null;
     cursorController_: CursorControllerImpl;
     font_: FontImpl;
@@ -906,6 +1001,37 @@ export class UIContextImpl extends UIContext {
             this.observer_ = new UIObserver(this.instanceId_);
         }
         return this.observer_ as UIObserver;
+    }
+
+    public getOverlayManager(): OverlayManager {
+        if (!this.overlayManager_) {
+            this.overlayManager_ = new OverlayManagerImpl(this.instanceId_);
+        }
+        if (this.overlayManager_) {
+            const options: OverlayManagerOptions = { renderRootOverlay: true, enableBackPressedEvent: false };
+            this.overlayManager_!.setOverlayManagerOptions(options);
+        }
+        return this.overlayManager_ as OverlayManager;
+    }
+
+    public setOverlayManagerOptions(options: OverlayManagerOptions): boolean {
+        if (!this.overlayManager_) {
+            this.overlayManager_ = new OverlayManagerImpl(this.instanceId_);
+        }
+        if (this.overlayManager_) {
+            return this.overlayManager_!.setOverlayManagerOptions(options);
+        }
+        return false;
+    }
+
+    public getOverlayManagerOptions(): OverlayManagerOptions {
+        if (!this.overlayManager_) {
+            this.overlayManager_ = new OverlayManagerImpl(this.instanceId_);
+        }
+        if (this.overlayManager_) {
+            return this.overlayManager_!.getOverlayManagerOptions();
+        }
+        return {};
     }
 
     public getPromptAction(): PromptAction {

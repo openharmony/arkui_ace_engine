@@ -21,6 +21,11 @@ import { Serializer } from "arkui/component/peers/Serializer"
 import { ArkUIGeneratedNativeModule } from "#components"
 import { BusinessError } from "#external"
 
+export declare class LevelOrder {
+    static clamp(order: number): LevelOrder;
+    getOrder(): number;
+}
+
 namespace promptAction {
     export interface ShowToastOptions {
         message: string | Resource;
