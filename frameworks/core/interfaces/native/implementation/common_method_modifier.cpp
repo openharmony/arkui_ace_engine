@@ -2290,6 +2290,14 @@ void BorderImageImpl(Ark_NativePointer node,
                 return;
         }
     });
+    if (optValue->slice.tag == INTEROP_TAG_UNDEFINED) {
+        Dimension dimension;
+        borderImage->SetEdgeSlice(BorderImageDirection::LEFT, dimension);
+        borderImage->SetEdgeSlice(BorderImageDirection::RIGHT, dimension);
+        borderImage->SetEdgeSlice(BorderImageDirection::TOP, dimension);
+        borderImage->SetEdgeSlice(BorderImageDirection::BOTTOM, dimension);
+        bitSet |= BorderImage::SLICE_BIT;
+    }
     Converter::WithOptional(optValue->slice, [&borderImage, &bitSet](const auto& src) {
         switch (src.selector) {
             case CASE_0: {
