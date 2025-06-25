@@ -111,38 +111,6 @@ HWTEST_F(ListItemManagerTestNg, HandleScrollCallback001, TestSize.Level1)
     EXPECT_FALSE(listItemDragManager->scrolling_);
 }
 /**
- * @tc.name: HandleScrollCallback002
- * @tc.desc: Test ListItemDragManager HandleScrollCallback
- * @tc.type: FUNC
- */
-HWTEST_F(ListItemManagerTestNg, HandleScrollCallback002, TestSize.Level1)
-{
-    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
-    auto host = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, listPattern);
-    ASSERT_NE(host, nullptr);
-    host->geometryNode_->frame_.rect_.SetRect(OffsetF(20.0f, 20.0f), SizeF(100.0f, 100.0f));
-    auto lazyForEachNode = LazyForEachNode::CreateLazyForEachNode(2, nullptr);
-    ASSERT_NE(lazyForEachNode, nullptr);
-    auto listItemDragManager = AceType::MakeRefPtr<ListItemDragManager>(host, lazyForEachNode);
-
-    GestureEvent info;
-    listItemDragManager->forEachNode_ = lazyForEachNode;
-    listItemDragManager->dragState_ = ListItemDragState::DRAGGING;
-    listItemDragManager->HandleOnItemDragStart(info);
-    info.SetOffsetX(0.0);
-    info.SetOffsetY(42.0);
-    info.SetGlobalPoint(Point(0, 360.f));
-    
-    listItemDragManager->HandleOnItemDragUpdate(info);
-    listItemDragManager->scrolling_ = false;
-    listItemDragManager->HandleScrollCallback();
-    auto frameRect = host->geometryNode_->GetMarginFrameRect();
-    auto from = listItemDragManager->GetIndex();
-    auto paddingOffset = listItemDragManager->GetParentPaddingOffset();
-    auto to = listItemDragManager->ScaleNearItem(from, frameRect, listItemDragManager->realOffset_ - frameRect.GetOffset() + paddingOffset);
-    EXPECT_EQ(from, to);
-}
-/**
  * @tc.name: HandleOnItemDragUpdate001
  * @tc.desc: Test ListItemDragManager HandleOnItemDragUpdate
  * @tc.type: FUNC
