@@ -78,6 +78,16 @@ public:
         }
     }
 
+    void TriggerChangeIndex(int32_t index, const SwiperAnimationMode& animationMode)
+    {
+        index = index < 0 ? 0 : index;
+        for (auto &handler: handlers_) {
+            if (auto controller = handler.Upgrade(); controller) {
+                controller->ChangeIndex(index, animationMode);
+            }
+        }
+    }
+
     void TriggerPreloadItems(const std::set<int32_t>& indexSet) const
     {
         for (auto &handler: handlers_) {
