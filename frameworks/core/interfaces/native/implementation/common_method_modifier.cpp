@@ -4737,12 +4737,6 @@ void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
         auto arkValOthers = holderOthers.ArkValue();
         auto resultOpt = callback.InvokeWithOptConvertResult<GestureJudgeResult, Ark_GestureJudgeResult,
             Callback_GestureJudgeResult_Void>(arkGestEvent, arkValCurrent, arkValOthers);
-        if (auto accessor = GetGestureRecognizerAccessor(); accessor) {
-            accessor->destroyPeer(arkValCurrent);
-            holderOthers.Release([accessor](Ark_GestureRecognizer& item) {
-                accessor->destroyPeer(item);
-            });
-        }
         return resultOpt.value_or(defVal);
     };
     auto convValue = Converter::OptConvertPtr<bool>(exposeInnerGesture);
@@ -4775,12 +4769,6 @@ void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
         auto arkValOthers = holderOthers.ArkValue();
         auto resultOpt = callback.InvokeWithOptConvertResult<RefPtr<NG::NGGestureRecognizer>, Ark_GestureRecognizer,
             Callback_GestureRecognizer_Void>(arkValCurrent, arkValOthers);
-        if (auto accessor = GetGestureRecognizerAccessor(); accessor) {
-            accessor->destroyPeer(arkValCurrent);
-            holderOthers.Release([accessor](Ark_GestureRecognizer& item) {
-                accessor->destroyPeer(item);
-            });
-        }
         return resultOpt.value_or(nullptr);
     };
     ViewAbstract::SetShouldBuiltInRecognizerParallelWith(frameNode, std::move(shouldBuiltInRecognizerParallelWithFunc));
