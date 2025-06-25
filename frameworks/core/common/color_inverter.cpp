@@ -66,9 +66,15 @@ void ColorInverter::EnableColorInvert(int32_t instanceId, const std::string& nod
     }
 }
 
-void ColorInverter::DisableColorInvert(int32_t instanceId)
+void ColorInverter::DisableColorInvert(int32_t instanceId, const std::string& nodeTag)
 {
-    colorInvertFuncManagerMap_.erase(instanceId);
+    if (nodeTag == V2::UNDEFINED_NODE_ETS_TAG) {
+        colorInvertFuncManagerMap_.erase(instanceId);
+    } else {
+        auto manager = GetManager(instanceId);
+        CHECK_NULL_VOID(manager);
+        manager->DeleteInvertFunc(nodeTag);
+    }
 }
 
 ColorInvertFunc ColorInverter::GetInvertFunc(int32_t instanceId, const std::string& nodeTag) const

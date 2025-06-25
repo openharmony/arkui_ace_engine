@@ -56,7 +56,7 @@ public:
     static uint32_t DefaultInverter(uint32_t color);
 
     void EnableColorInvert(int32_t instanceId, const std::string& nodeTag, ColorInvertFunc&& func);
-    void DisableColorInvert(int32_t instanceId);
+    void DisableColorInvert(int32_t instanceId, const std::string& nodeTag);
     ColorInvertFunc GetInvertFunc(int32_t instanceId, const std::string& nodeTag) const;
     static Color Invert(Color color, int32_t instanceId, const std::string& nodeTag);
     RefPtr<ColorInvertFuncManager> GetManager(int32_t instanceId) const; // for user

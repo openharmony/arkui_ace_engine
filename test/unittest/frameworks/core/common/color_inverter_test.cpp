@@ -209,7 +209,7 @@ HWTEST_F(ColorInverterTest, ColorInverterTest007, TestSize.Level1)
      * @tc.steps: step2. Call DisableColorInvert
      * @tc.expected: DisableColorInvert Success
      */
-    ColorInverter::GetInstance().DisableColorInvert(PROCESS_LEVEL_ID);
+    ColorInverter::GetInstance().DisableColorInvert(PROCESS_LEVEL_ID, "");
     auto managerMapNew = ColorInverter::GetInstance().colorInvertFuncManagerMap_;
     EXPECT_EQ(managerMapNew.size(), 0);
 }
