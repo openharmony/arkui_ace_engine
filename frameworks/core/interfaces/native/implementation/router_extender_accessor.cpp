@@ -71,7 +71,7 @@ Ark_NativePointer ReplaceImpl(const Ark_String* url, const Opt_Callback_Void* fi
         return nullptr;
     }
     std::function<void()> callback;
-    if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED){
+    if (finishCallback->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         callback = [finish = CallbackHelper(finishCallback->value)]() {
             finish.Invoke();
         };
@@ -89,7 +89,7 @@ void MoveCommonUnderPageNode(Ark_NativePointer commonNode, Ark_NativePointer pag
     if (stageNode->GetTag() != V2::STAGE_ETS_TAG) {
         return;
     }
-    stageNode->RemoveChild(AceType::Claim(common));
+    stageNode->RemoveChildSilently(AceType::Claim(common));
     
     auto page = reinterpret_cast<FrameNode*>(pageNode);
     CHECK_NULL_VOID(page);

@@ -45,6 +45,9 @@ import inspector from "@ohos/arkui/inspector"
 import router from '@ohos/router'
 import promptAction from '@ohos/promptAction';
 import { ContextMenu } from 'arkui/component/contextMenu';
+import { Router as RouterExt } from 'arkui/handwritten';
+import { ComputableState } from '@koalaui/runtime'
+import { PeerNode } from 'arkui/PeerNode'
 
 export class UIInspector {
     instanceId_: int32 = -1;
@@ -103,43 +106,116 @@ export class MeasureUtils {
 }
 
 export class Router {
+    instanceId_: int32 = 100000;
+    router_: RouterExt | undefined = undefined;
+    constructor(instanceId: int32) {
+        this.instanceId_ = instanceId;
+    }
+    public setRouter(router: RouterExt) {
+        this.router_ = router;
+    }
+    public getRouter(): RouterExt {
+        return this.router_!;
+    }
     public pushUrl(options: router.RouterOptions): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            router.pushUrl(options)
-        })
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = new Promise<void>((resolve, reject) => {
+            this.router_!.push(options);
+        });
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
     }
 
     public replaceUrl(options: router.RouterOptions): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            router.replaceUrl(options)
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = new Promise<void>((resolve, reject) => {
+            this.router_!.replace(options);
         });
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
     }
 
     public back(options?:router.RouterOptions): void {
-        router.back(options)
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.back(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
 
     public clear(): void {
-        router.clear()
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        this.router_!.clear();
+        ArkUIAniModule._Common_Restore_InstanceId();
     }
     public getLength(): string {
-        return router.getLength();
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.getLength();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
     }
 
     public getParams(): Object {
-        return router.getParams();
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.getParams();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
     }
 
     public getState(): router.RouterState {
-        return router.getState();
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.getState();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
     }
 
     public getStateByIndex(index: number): router.RouterState | undefined {
-        return router.getStateByIndex(index);
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.getStateByIndex(index);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
     }
 
     public getStateByUrl(url: string): Array<router.RouterState> {
-        return router.getStateByUrl(url);
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.getStateByUrl(url);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+
+    public getStateRoot(): Array<ComputableState<PeerNode>> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = this.router_!.getEntryRootValue();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
     }
 }
 
@@ -239,7 +315,7 @@ export class PromptAction {
 export class UIContext {
     instanceId_: int32 = 100000;
     observer_ :UIObserver |null = null;
-    router_: Router = new Router()
+    router_: Router;
     focusController_: FocusController;
     componentUtils_: ComponentUtils;
     atomicServiceBar_: AtomicServiceBarInternal;
@@ -253,6 +329,7 @@ export class UIContext {
         this.componentUtils_ = new ComponentUtils(instanceId);
         this.atomicServiceBar_ = new AtomicServiceBarInternal(instanceId);
         this.contextMenuController_ = new ContextMenuController(instanceId);
+        this.router_ = new Router(instanceId);
     }
     public getFont() : Font {
         let font : Font = new Font(this.instanceId_);
@@ -348,9 +425,13 @@ export class UIContext {
 
     public getRouter(): Router {
         if (this.router_ === undefined) {
-            this.router_ = new Router()
+            this.router_ = new Router(this.instanceId_);
         }
-        return this.router_
+        return this.router_;
+    }
+
+    public setRouter(router: RouterExt): void {
+        this.router_.setRouter(router);
     }
 
     public animateTo(param: AnimateParam, event: (() => void)): void {

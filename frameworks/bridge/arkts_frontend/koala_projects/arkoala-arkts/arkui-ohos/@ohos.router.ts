@@ -1,8 +1,8 @@
 import { InteropNativeModule } from "@koalaui/interop/InteropNativeModule"
 import { Router } from "arkui/handwritten"
 import { PeerNode } from "arkui/PeerNode"
-import { UserViewBuilder } from "./src/UserView"
-import { ComputableState, State } from "@koalaui/runtime"
+import { UserViewBuilder } from "arkui/UserView"
+import { ComputableState } from "@koalaui/runtime"
 
 namespace router {
     export interface RouterOptions {
@@ -57,7 +57,7 @@ namespace router {
         return globalRouterImp!.getStateByIndex(index);
     }
 
-    export function getStateByUrl(url: string): Array<router.RouterState> {
+    export function getStateByUrl(url: string): Array<RouterState> {
         return globalRouterImp!.getStateByUrl(url);
     }
 

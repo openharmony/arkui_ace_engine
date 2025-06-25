@@ -277,7 +277,8 @@ RefPtr<FrameNode> PageRouterManager::PushExtender(const RouterPageInfo& target)
     return pageNode;
 }
 
-RefPtr<FrameNode> PageRouterManager::ReplaceExtender(const RouterPageInfo& target, std::function<void()>&& finishCallback)
+RefPtr<FrameNode> PageRouterManager::ReplaceExtender(
+    const RouterPageInfo& target, std::function<void()>&& finishCallback)
 {
     CHECK_RUN_ON(JS);
     if (inRouterOpt_) {

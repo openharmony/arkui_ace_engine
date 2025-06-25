@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import router from "../../ohos.router";
+import router from "@ohos/router";
 import { ArkUIGeneratedNativeModule } from "#components"
 import { InteropNativeModule } from "@koalaui/interop/InteropNativeModule";
 import { KPointer } from "@koalaui/interop/InteropTypes";

@@ -22,6 +22,7 @@
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "bridge/arkts_frontend/ani_context_module.h"
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -211,13 +212,9 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     ani_class appClass;
     EntryLoader entryLoader(url, env_);
 
-<<<<<<< HEAD
-    if (env_->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
-=======
     pageRouterManager_ = NG::PageRouterManagerFactory::CreateManager();
 
-    if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
->>>>>>> 3569656fdcc (add router new support)
+    if (env_->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
         LOGE("Cannot load main class %{public}s", KOALA_APP_INFO.className);
         return UIContentErrorCode::INVALID_URL;
     }
@@ -231,15 +228,9 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
     }
 
     ani_string aniUrl;
-<<<<<<< HEAD
-    env_->String_NewUTF8(appUrl.c_str(), appUrl.size(), &aniUrl);
-    ani_string aniParams;
-    env_->String_NewUTF8(appParams.c_str(), appParams.size(), &aniParams);
-=======
     env_->String_NewUTF8(url.c_str(), url.size(), &aniUrl);
     ani_string aniParams;
     env_->String_NewUTF8(params.c_str(), params.size(), &aniParams);
->>>>>>> 3569656fdcc (add router new support)
 
     ani_ref appLocal;
     ani_ref optionalEntry;
@@ -288,6 +279,39 @@ void ArktsFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
         accessibilityManager_->SetPipelineContext(context);
         accessibilityManager_->InitializeCallback();
     }
+}
+
+bool ArktsFrontend::OnBackPressed()
+{
+    CHECK_NULL_RETURN(pageRouterManager_, false);
+    auto pageNode = pageRouterManager_->GetCurrentPageNode();
+    CHECK_NULL_RETURN(pageNode, false);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_RETURN(pagePattern, false);
+    if (pagePattern->OnBackPressed()) {
+        return true;
+    }
+    return pageRouterManager_->Pop();
+}
+
+void ArktsFrontend::OnShow()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    auto pageNode = pageRouterManager_->GetCurrentPageNode();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->OnShow();
+}
+
+void ArktsFrontend::OnHide()
+{
+    CHECK_NULL_VOID(pageRouterManager_);
+    auto pageNode = pageRouterManager_->GetCurrentPageNode();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->OnHide();
 }
 
 void* ArktsFrontend::GetShared(int32_t id)

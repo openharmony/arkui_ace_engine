@@ -31,7 +31,7 @@ import { Deserializer } from "./component/peers/Deserializer"
 import { StateUpdateLoop } from "./stateManagement"
 import { Routed } from "./handwritten/Router"
 import { updateLazyItems } from "./handwritten/LazyForEachImpl"
-import router from "../ohos.router"
+import router from "@ohos/router"
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -245,15 +245,14 @@ export class Application {
         // NativeModule._NativeLog("ARKTS: updateState")
         let rootArray = router.getStateRoot();
         let rootState = rootArray[rootArray.length - 1]
-        this.updateStates(this.manager!, rootState)
+        this.updateStates(this.manager!, rootState!)
         while (StateUpdateLoop.len) {
             StateUpdateLoop.consume();
-            this.updateStates(this.manager!, rootState)
+            this.updateStates(this.manager!, rootState!)
         }
         // Here we request to draw a frame and call custom components callbacks.
         rootArray.forEach((element, index) => {
             let root = element.value
-            // router.UpdateVisiblePagePeerNode(root, index)
             ArkUINativeModule._MeasureLayoutAndDraw(root.peer.ptr)
             callScheduledCallbacks()
         });
