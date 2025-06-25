@@ -2401,6 +2401,47 @@ HWTEST_F(ListCommonTestNg, ForEachDrag013, TestSize.Level1)
 }
 
 /**
+* @tc.name: ForEachDrag014
+* @tc.desc: List drag sort without hight, EdgeEffect is alwaysEnable.
+* @tc.type: FUNC
+*/
+HWTEST_F(ListCommonTestNg, ForEachDrag014, TestSize.Level1)
+{
+    auto onMoveEvent = [](int32_t, int32_t) {};
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateForEach(3, onMoveEvent, false);
+    CreateDone();
+
+    /**
+    * @tc.steps: step1. Clear List Height
+    * @tc.expected: List height is 300
+    */
+    frameNode_->layoutProperty_->ClearUserDefinedIdealSize(false, true);
+    FlushUITasks();
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Height(), 300);
+
+    /**
+     * @tc.steps: step2. Drag down delta > ITEM_MAIN_SIZE/2
+     * @tc.expected: List size not change and item position correct.
+     */
+    auto dragManager = GetForEachItemDragManager(1);
+    GestureEvent info;
+    dragManager->HandleOnItemDragStart(info);
+    EXPECT_EQ(dragManager->fromIndex_, 1);
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(-51.f);
+    info.SetGlobalPoint(Point(0, 10.f));
+    dragManager->HandleOnItemDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(VerifyForEachItemsOrder({ "1", "0", "2" }));
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Height(), 300);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_EQ(GetChildY(frameNode_, 1), 100);
+    EXPECT_EQ(GetChildY(frameNode_, 2), 200);
+}
+
+/**
  * @tc.name: LazyForEachDrag001
  * @tc.desc: Drag big delta to change order
  * @tc.type: FUNC

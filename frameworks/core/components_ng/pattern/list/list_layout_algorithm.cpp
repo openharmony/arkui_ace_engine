@@ -1005,7 +1005,8 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
             endIndex = needLayoutBackward ? res.first : endIndex;
             endPos = needLayoutBackward ? res.second : endPos;
         }
-        needLayoutBackward = needLayoutBackward || (draggingIndex_ >= 0 && revertIndex(draggingIndex_) <= startIndex);
+        needLayoutBackward = needLayoutBackward || (draggingIndex_ >= 0 &&
+            revertIndex(draggingIndex_) <= startIndex && NearEqual(prevContentMainSize_, contentMainSize_));
         OffScreenLayoutDirection(layoutWrapper);
         itemPosition_.clear();
     }
@@ -1048,8 +1049,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
         jumpIndexInGroup_.reset();
         bool overScrollTop =
             startIndex == 0 && GreatNotEqual(startPos + GetChainOffset(0), startMainPos_ + contentStartOffset_);
-        bool overScrollBottom =
-            (endIndex == totalItemCount_ - 1) &&
+        bool overScrollBottom = (endIndex == totalItemCount_ - 1) &&
             LessNotEqual(endPos + GetChainOffset(totalItemCount_ - 1), prevContentMainSize_ - prevContentEndOffset_);
         float midItemHeight = 0.0f;
         if (IsScrollSnapAlignCenter(layoutWrapper) && draggingIndex_ < 0) {
