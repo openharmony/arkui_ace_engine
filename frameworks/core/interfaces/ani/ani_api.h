@@ -102,6 +102,9 @@ struct ArkUIAniComponentSnapshotModifier {
     void (*createFromBuilder)(ArkUINodeHandle node,
     std::function<void(std::shared_ptr<OHOS::Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
     OHOS::Ace::NG::SnapshotParam param);
+    void (*createFromComponent)(ArkUINodeHandle node,
+    std::function<void(std::shared_ptr<OHOS::Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    OHOS::Ace::NG::SnapshotParam param);
 };
 struct ArkUIAniAnimationModifier {
     bool (*hasAnimatableProperty)(ani_env* env, ArkUINodeHandle node, ani_string name);

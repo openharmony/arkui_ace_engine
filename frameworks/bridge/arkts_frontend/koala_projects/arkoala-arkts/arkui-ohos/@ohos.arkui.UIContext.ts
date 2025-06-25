@@ -42,6 +42,7 @@ import router from '@ohos/router'
 import promptAction from '@ohos/promptAction';
 import { AsyncCallback, CustomBuilder, DragItemInfo } from 'arkui/component'
 import { Router as RouterExt } from 'arkui/handwritten';
+import { ComponentContent } from "arkui/ComponentContent"
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver {
@@ -189,6 +190,10 @@ export class ComponentSnapshot {
     }
 
     public getSyncWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): PixelMap {
+        throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
+    }
+
+    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number, checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
         throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
     }
 }

@@ -24,6 +24,7 @@ import { ArkCustomComponent } from "arkui/ArkCustomComponent"
 import { WaterFlowOptions,WaterFlowSections } from "arkui/component"
 import { HookDragInfo } from "arkui/handwritten"
 import { dragController } from "@ohos/arkui/dragController"
+import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
 
 export class ArkUIAniModule {
     static {
@@ -72,6 +73,8 @@ export class ArkUIAniModule {
         callback: AsyncCallback<image.PixelMap>, delay?: number, checkImageStatus?: boolean): void
     native static _ComponentSnapshot_createFromBuilderWithPromise(ptr: KPointer, destroyCallback: () => void,
         delay?: number, checkImageStatus?: boolean): Promise<image.PixelMap>
+    native static _ComponentSnapshot_createFromComponentWithPromise(ptr: KPointer, destroyCallback: () => void,
+        delay?: number, checkImageStatus?: boolean, options: componentSnapshot.SnapshotOptions): Promise<image.PixelMap>
 
     // for dragController
     native static _DragController_executeDragWithCallback(custom: DragItemInfo, builder: KPointer,

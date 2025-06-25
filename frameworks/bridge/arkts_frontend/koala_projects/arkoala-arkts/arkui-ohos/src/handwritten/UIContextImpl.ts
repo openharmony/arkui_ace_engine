@@ -16,7 +16,7 @@
 import { FrameNode, FrameNodeInternal, FrameNodeUtils } from "arkui/FrameNode"
 import { ArkUIGeneratedNativeModule } from "#components"
 import { int32, int64 } from "@koalaui/common"
-import { nullptr, KPointer, KSerializerBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KSerializerBuffer, toPeerPtr } from "@koalaui/interop"
 import { _animateTo } from "arkui/handwritten/ArkAnimation"
 import { AnimateParam } from 'arkui/component'
 import { AnimatorResult , AnimatorOptions, Animator} from "@ohos/animator"
@@ -62,6 +62,7 @@ import { KBuffer } from "@koalaui/interop"
 import { deserializeAndCallCallback } from "arkui/component/peers/CallbackDeserializeCall"
 import { InteropNativeModule } from "@koalaui/interop"
 import { Router as RouterExt } from 'arkui/handwritten';
+import { ComponentContent } from "arkui/ComponentContent"
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -289,6 +290,20 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
     public getSyncWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): PixelMap {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let pixmap = componentSnapshot.getSyncWithUniqueId(uniqueId, options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return pixmap;
+    }
+
+    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number, checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let node = content.getFrameNode();
+        if (node === undefined || node === null) {
+            throw Error("The type of parameters is incorrect.");
+        }
+        let frameNode = node as FrameNode
+        const destroyCallback = (): void => {}
+        let pixmap = ArkUIAniModule._ComponentSnapshot_createFromComponentWithPromise(
+            toPeerPtr(frameNode), destroyCallback, delay, checkImageStatus, options);
         ArkUIAniModule._Common_Restore_InstanceId();
         return pixmap;
     }
