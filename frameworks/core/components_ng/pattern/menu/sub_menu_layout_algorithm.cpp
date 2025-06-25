@@ -18,7 +18,7 @@
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 namespace OHOS::Ace::NG {
-
+constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
 void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -222,6 +222,20 @@ float SubMenuLayoutAlgorithm::CalcStackSubMenuPositionYHalfScreenWithPreview(
     }
 }
 
+float SubMenuLayoutAlgorithm::NormalizePositionY(const RefPtr<FrameNode>& frameNode, float menuTopPositionY,
+    float positionY)
+{
+    CHECK_NULL_RETURN(frameNode, positionY);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, positionY);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, positionY);
+    // only 2in1 device need fix position
+    auto expandDisplay = theme->GetExpandDisplay();
+    CHECK_NULL_RETURN(expandDisplay, positionY);
+    return menuTopPositionY + (positionY - menuTopPositionY) * MOUNT_MENU_FINAL_SCALE;
+}
+
 float SubMenuLayoutAlgorithm::CalcStackSubMenuPositionYHalfScreen(
     const SizeF& size, const RefPtr<FrameNode>& parentMenu, const RefPtr<FrameNode>& parentMenuItem
 )
@@ -233,6 +247,9 @@ float SubMenuLayoutAlgorithm::CalcStackSubMenuPositionYHalfScreen(
     float lastMenuItemPositionY = GetLastItemTopPositionY(parentMenu);
     auto containerModalOffsetY = GetContainerModalOffsetY(parentMenu);
     auto parentMenuPositionY = parentMenu->GetPaintRectOffset(false, true).GetY();
+    firstItemBottomPositionY = NormalizePositionY(parentMenu, parentMenuPositionY, firstItemBottomPositionY);
+    parentMenuBottomY = NormalizePositionY(parentMenu, parentMenuPositionY, parentMenuBottomY);
+    lastMenuItemPositionY = NormalizePositionY(parentMenu, parentMenuPositionY, lastMenuItemPositionY);
     //correct position when window modal is containerModal
     if (isContainerModal(parentMenu)) {
         firstItemBottomPositionY -= containerModalOffsetY;
@@ -245,7 +262,7 @@ float SubMenuLayoutAlgorithm::CalcStackSubMenuPositionYHalfScreen(
             parentPlacement == Placement::TOP_RIGHT) {
         bottomSpace = parentMenuBottomY - position_.GetY();
         if (bottomSpace >= size.Height()) {
-            return position_.GetY();
+            return NormalizePositionY(parentMenu, parentMenuPositionY, position_.GetY());
         }
         bottomSpace = lastMenuItemPositionY - wrapperRect_.Top() - param_.topSecurity;
         if (bottomSpace >= size.Height()) {
@@ -255,7 +272,7 @@ float SubMenuLayoutAlgorithm::CalcStackSubMenuPositionYHalfScreen(
     }
     bottomSpace = wrapperRect_.Bottom() - param_.bottomSecurity - position_.GetY();
     if (bottomSpace >= size.Height()) {
-        return position_.GetY();
+        return NormalizePositionY(parentMenu, parentMenuPositionY, position_.GetY());
     }
     if (size.Height() < wrapperRect_.Height()) {
         bottomSpace = wrapperRect_.Bottom() - param_.bottomSecurity - firstItemBottomPositionY;

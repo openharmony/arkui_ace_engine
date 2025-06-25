@@ -765,11 +765,9 @@ private:
         bool isNeedRestoreNodeId) const;
     MenuItemInfo GetMenuItemInfo(const RefPtr<UINode>& child, const RefPtr<FrameNode>& subMenu,
         bool isNeedRestoreNodeId) const;
-    void ShowStackMenuAppearOpacityAndBlurAnimation(const RefPtr<RenderContext>& mainMenuContext) const;
-    void ShowStackMenuDisappearOpacityAndBlurAnimation(const RefPtr<FrameNode>& menuNode,
-        const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const;
     std::vector<RefPtr<RenderContext>> GetOtherMenuItemContext(const RefPtr<FrameNode>& subMenuNode) const;
     void ShowArrowRotateAnimation() const;
+    void ShowArrowReverseRotateAnimation() const;
     RefPtr<FrameNode> GetArrowNode(const RefPtr<FrameNode>& host) const; // arrowNode in subMenu
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -787,6 +785,17 @@ private:
     RefPtr<FrameNode> BuildContentModifierNode(int index);
     bool IsMenuScrollable() const;
     void UpdateClipPath(const RefPtr<LayoutWrapper>& dirty);
+    RefPtr<FrameNode> GetTitleContentNode(const RefPtr<FrameNode>& subMenuNode) const;
+    void ShowStackSubMenuAnimation(const RefPtr<FrameNode>& mainMenu, const RefPtr<FrameNode>& subMenuNode);
+    void ShowStackMainMenuAnimation(const RefPtr<FrameNode>& mainMenu, const RefPtr<FrameNode>& subMenuNode,
+        const RefPtr<FrameNode>& menuWrapper);
+    void ShowStackMainMenuOpacityAnimation(const RefPtr<FrameNode>& mainMenu);
+    void ShowStackSubMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode,
+        const RefPtr<FrameNode>& subMenuNode) const;
+    void ShowStackMainMenuDisappearOpacityAnimation(const RefPtr<FrameNode>& menuNode,
+        AnimationOption& option) const;
+    void ShowStackMainMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode,
+        const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const;
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
