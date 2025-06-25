@@ -227,6 +227,7 @@ struct FontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(GradientShaderStyle, Gradient);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SymbolShadow, SymbolShadow);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ShaderStyle, std::vector<SymbolGradient>);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ColorShaderStyle, Color);
     
     void UpdateColorByResourceId();
 

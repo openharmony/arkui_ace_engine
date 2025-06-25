@@ -1428,18 +1428,39 @@ bool TextModelNG::GetEnableAutoSpacing(FrameNode* frameNode)
 
 void TextModelNG::SetGradientShaderStyle(NG::Gradient& gradient)
 {
+    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, ColorShaderStyle);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle, gradient);
+}
+
+void TextModelNG::SetColorShaderStyle(const Color& value)
+{
+    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, ColorShaderStyle, value);
 }
 
 void TextModelNG::ResetGradientShaderStyle()
 {
-    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, GradientShaderStyle, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextLayoutProperty, ColorShaderStyle, PROPERTY_UPDATE_MEASURE_SELF);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
 }
 
 void TextModelNG::SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ColorShaderStyle, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle, gradient, frameNode);
+}
+
+void TextModelNG::SetColorShaderStyle(FrameNode* frameNode, const Color& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, GradientShaderStyle, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ColorShaderStyle, value, frameNode);
 }
 
 NG::Gradient TextModelNG::GetGradientStyle(FrameNode* frameNode)
@@ -1455,10 +1476,13 @@ NG::Gradient TextModelNG::GetGradientStyle(FrameNode* frameNode)
 void TextModelNG::ResetTextGradient(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    if (textLayoutProperty) {
-        textLayoutProperty->ResetGradientShaderStyle();
-    }
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        TextLayoutProperty, GradientShaderStyle, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(
+        TextLayoutProperty, ColorShaderStyle, PROPERTY_UPDATE_MEASURE_SELF, frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
 }
 
 void TextModelNG::SetTextVerticalAlign(TextVerticalAlign verticalAlign)

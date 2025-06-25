@@ -94,6 +94,7 @@ public:
     void SetEnableAutoSpacing(bool enabled) override;
     void SetLineThicknessScale(float value) override;
     void SetGradientShaderStyle(NG::Gradient& gradient) override;
+    void SetColorShaderStyle(const Color& value) override;
     void SetTextVerticalAlign(TextVerticalAlign verticalAlign) override;
     void ResetGradientShaderStyle() override;
 
@@ -203,6 +204,7 @@ public:
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
     static void SetLineThicknessScale(FrameNode* frameNode, float value);
     static void SetGradientStyle(FrameNode* frameNode, NG::Gradient& gradient);
+    static void SetColorShaderStyle(FrameNode* frameNode, const Color& value);
     static NG::Gradient GetGradientStyle(FrameNode* frameNode);
     static void ResetTextGradient(FrameNode* frameNode);
     static void SetTextVerticalAlign(FrameNode* frameNode, TextVerticalAlign verticalAlign);

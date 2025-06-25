@@ -1674,9 +1674,10 @@ ArkUINativeModuleValue TextBridge::SetShaderStyle(ArkUIRuntimeCallInfo* runtimeC
     auto directionArg = runtimeCallInfo->GetCallArgRef(NUM_4);
     auto repeatingArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     auto colorsArg = runtimeCallInfo->GetCallArgRef(NUM_6);
+    auto colorArg = runtimeCallInfo->GetCallArgRef(NUM_7);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    if (centerArg->BooleaValue(vm) && radiusArg->IsNumber()) {
+    if (centerArg->BooleaValue(vm) && (radiusArg->IsNumber() || radiusArg->BooleaValue(vm))) {
         std::vector<ArkUIInt32orFloat32> values;
         ArkTSUtils::ParseGradientCenter(vm, centerArg, values);
         CalcDimension radius;
@@ -1703,6 +1704,10 @@ ArkUINativeModuleValue TextBridge::SetShaderStyle(ArkUIRuntimeCallInfo* runtimeC
         values.push_back({ .i32 = static_cast<ArkUI_Int32>(repeating) });
         GetArkUINodeModifiers()->getTextModifier()->setLinearGradient(
             nativeNode, values.data(), values.size(), colors.data(), colors.size());
+    } else if (colorArg->BooleaValue(vm)) {
+        Color color;
+        ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color);
+        GetArkUINodeModifiers()->getTextModifier()->setColorShaderColor(nativeNode, color.GetValue());
     } else {
         GetArkUINodeModifiers()->getTextModifier()->resetTextGradient(nativeNode);
     }
