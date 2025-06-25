@@ -83,7 +83,6 @@ ohos_shared_library("arcscrollbar") {
 
   if (use_mingw_win || use_linux) {
     cflags_cc += [ "-std=c++17" ]
-    defines += [ "_USE_MATH_DEFINES" ]
   }
 
   relative_install_dir = "module/arkui"

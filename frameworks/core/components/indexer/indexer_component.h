@@ -22,6 +22,7 @@
 #include "core/components/indexer/indexer_item_component.h"
 #include "core/components/list/list_component.h"
 #include "core/pipeline/base/component_group.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 
@@ -64,7 +65,7 @@ inline constexpr double INDEXER_CIRCLE_ITEM_TEXT_SIZE = 13.0;     // circle, mod
 inline constexpr double INDEXER_CIRCLE_ITEM_SHADOW_RADIUS = 27.0; // circle mode, shadow radius (VP)
 inline constexpr double INDEXER_ANGLE_TO_RADIAN = 180.0;
 inline constexpr double INDEXER_ARC_BEGIN = -0.4488; // default angle
-inline constexpr double INDEXER_ARC_LENGTH = 2.0 * M_PI;
+inline const double INDEXER_ARC_LENGTH = 2.0 * ACE_PI;
 inline constexpr double BUBBLE_BOX_SIZE_CIRCLE = 46.0;
 inline constexpr double BUBBLE_FONT_SIZE_CIRCLE = 19.0;
 inline constexpr uint32_t BUBBLE_BG_COLOR_CIRCLE = 0xFF404040;

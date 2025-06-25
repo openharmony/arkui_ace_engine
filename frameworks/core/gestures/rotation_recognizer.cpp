@@ -14,6 +14,7 @@
 */
 
 #include "core/gestures/rotation_recognizer.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 
@@ -132,7 +133,7 @@ double RotationRecognizer::ComputeAngle()
     double fy = touchPoints_[0].y;
     double sx = touchPoints_[1].x;
     double sy = touchPoints_[1].y;
-    double angle = atan2(fy - sy, fx - sx) * 180.0 / M_PI;
+    double angle = atan2(fy - sy, fx - sx) * 180.0 / ACE_PI;
     return angle;
 }
 

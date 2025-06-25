@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/text/text_model.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1537,7 +1538,7 @@ float ArcIndexerPattern::GetPositionAngle(const Offset& position)
 {
     float deltaY = position.GetY() - arcCenter_.GetY();
     float deltaX = position.GetX() - arcCenter_.GetX();
-    float posAngle = atan2f(deltaY, deltaX) * HALF_CIRCLE_ANGLE / M_PI;
+    float posAngle = atan2f(deltaY, deltaX) * HALF_CIRCLE_ANGLE / ACE_PI;
     if (deltaY < 0) {
         posAngle += FULL_CIRCLE_ANGLE;
     }

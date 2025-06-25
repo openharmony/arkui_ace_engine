@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline/pipeline_base.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -154,8 +155,8 @@ void GaugeLayoutAlgorithm::MeasureLimitValueTextWidth(LayoutWrapper* layoutWrapp
 
     startAngle -= QUARTER_CIRCLE;
     endAngle -= QUARTER_CIRCLE;
-    auto startDegree = startAngle * M_PI / HALF_CIRCLE;
-    auto endDegree = endAngle * M_PI / HALF_CIRCLE;
+    auto startDegree = startAngle * ACE_PI / HALF_CIRCLE;
+    auto endDegree = endAngle * ACE_PI / HALF_CIRCLE;
     startAngleOffsetX_ = center.GetX() + (radius - strokeWidthValue) * std::cos(startDegree);
     endAngleOffsetX_ = center.GetX() + (radius - strokeWidthValue) * std::cos(endDegree);
     auto diameter = radius * 2.0f;

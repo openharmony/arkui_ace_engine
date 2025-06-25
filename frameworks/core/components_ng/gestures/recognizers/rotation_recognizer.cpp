@@ -21,6 +21,7 @@
 #include "core/components_ng/manager/event/json_report.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -331,7 +332,7 @@ double RotationRecognizer::ComputeAngle()
     double fy = touchPoints_[*fId].y;
     double sx = touchPoints_[*sId].x;
     double sy = touchPoints_[*sId].y;
-    double angle = atan2(fy - sy, fx - sx) * 180.0 / M_PI;
+    double angle = atan2(fy - sy, fx - sx) * 180.0 / ACE_PI;
     return angle;
 }
 

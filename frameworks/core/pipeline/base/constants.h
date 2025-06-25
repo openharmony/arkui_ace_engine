@@ -19,8 +19,12 @@
 #include <cstdint>
 
 #include "frameworks/base/utils/macros.h"
+#include "foundation/arkui/ace_engine/interfaces/inner_api/ace_kit/include/ui/base/macros.h"
 
 namespace OHOS::Ace {
+
+ACE_FORCE_EXPORT extern const double ACE_PI;
+ACE_FORCE_EXPORT extern const double ACE_E;
 
 // base constants
 extern const char CLASS_NAME[];
