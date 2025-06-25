@@ -93,10 +93,15 @@ void TextTimerModelNG::SetTextColorByUser(FrameNode* frameNode, bool isSetByUser
 
 void TextTimerModelNG::SetTextShadow(const std::vector<Shadow>& value)
 {
+    std::string key = "textTimer.shadow";
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
+    if (value.empty()) {
+        return;
+    }
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
     auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
         auto frameNode = weak.Upgrade();
@@ -111,8 +116,7 @@ void TextTimerModelNG::SetTextShadow(const std::vector<Shadow>& value)
     };
     ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextShadow, value);
     if (SystemProperties::ConfigChangePerform()) {
-        updateFunc(resObj);
-        pattern->AddResObj("textTimer.shadow", resObj, std::move(updateFunc));
+        pattern->AddResObj(key, resObj, std::move(updateFunc));
     }
 }
 
@@ -222,6 +226,10 @@ void TextTimerModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Sha
 {
     CHECK_NULL_VOID(frameNode);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "textTimer.shadow";
+    pattern->RemoveResObj(key);
     auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
         auto frameNode = weak.Upgrade();
         if (!frameNode) {
@@ -235,10 +243,7 @@ void TextTimerModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Sha
     };
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextShadow, value, frameNode);
     if (SystemProperties::ConfigChangePerform()) {
-        auto pattern = frameNode->GetPattern<TextTimerPattern>();
-        CHECK_NULL_VOID(pattern);
-        updateFunc(resObj);
-        pattern->AddResObj("textTimer.shadow", resObj, std::move(updateFunc));
+        pattern->AddResObj(key, resObj, std::move(updateFunc));
     }
 }
 
@@ -273,7 +278,10 @@ void TextTimerModelNG::HandleTextColor(FrameNode* frameNode, const RefPtr<Resour
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         Color result;
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
             auto pipeline = PipelineBase::GetCurrentContext();
@@ -294,7 +302,10 @@ void TextTimerModelNG::HandleFontWeight(FrameNode* frameNode, const RefPtr<Resou
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         std::string fontWeightStr;
         ResourceParseUtils::ParseResString(resObj, fontWeightStr);
         pattern->UpdateFontWeight(ConvertStrToFontWeight(fontWeightStr), isFirstLoad);
@@ -309,7 +320,10 @@ void TextTimerModelNG::HandleFontSize(FrameNode* frameNode, const RefPtr<Resourc
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         CalcDimension fontSize;
         if (!ResourceParseUtils::ParseResDimensionFp(resObj, fontSize) || fontSize.IsNegative() ||
             fontSize.Unit() == DimensionUnit::PERCENT) {
@@ -332,7 +346,10 @@ void TextTimerModelNG::HandleFontFamily(FrameNode* frameNode, const RefPtr<Resou
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         std::vector<std::string> fontFamilies;
         if (!ResourceParseUtils::ParseResFontFamilies(resObj, fontFamilies)) {
             return;

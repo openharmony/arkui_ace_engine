@@ -906,10 +906,13 @@ void ProgressModelNG::SetProgressColor(FrameNode* frameNode, const RefPtr<Resour
     std::string key = "progress.color";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key, weak = AceType::WeakClaim(frameNode)](
+    auto&& updateFunc = [patternWeak = AceType::WeakClaim(AceType::RawPtr(pattern)), key,
+                            weak = AceType::WeakClaim(frameNode)](
                             const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
+        auto pattern = patternWeak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         Color result;
         NG::Gradient gradient;
         Color endColor;
@@ -954,7 +957,10 @@ void ProgressModelNG::SetLSStrokeWidth(FrameNode* frameNode, const RefPtr<Resour
     std::string key = "progress.strokeWidth";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
         auto pipeline = PipelineBase::GetCurrentContext();
@@ -984,7 +990,10 @@ void ProgressModelNG::SetLSSweepingEffect(FrameNode* frameNode, const RefPtr<Res
     std::string key = "progress.sweepingEffect";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resourceObj, bool isFirstLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resourceObj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto hostNode = pattern->GetHost();
         CHECK_NULL_VOID(hostNode);
         bool value = false;
@@ -1004,7 +1013,10 @@ void ProgressModelNG::SetLSStrokeRadius(FrameNode* frameNode, const RefPtr<Resou
     std::string key = "progress.strokeRadius";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto hostNode = pattern->GetHost();
         CHECK_NULL_VOID(hostNode);
         CalcDimension radius;
@@ -1027,7 +1039,10 @@ void ProgressModelNG::SetSmoothResEffect(FrameNode* frameNode, const RefPtr<Reso
     std::string key = "progress.smoothEffect";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resourceObject);
-    auto updateFunction = [pattern, key](const RefPtr<ResourceObject>& resourceObject, bool isFirstLoad = false) {
+    auto updateFunction = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                              const RefPtr<ResourceObject>& resourceObject, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto hostNode = pattern->GetHost();
         CHECK_NULL_VOID(hostNode);
         bool smoothEffectEnabled = true;
@@ -1048,7 +1063,10 @@ void ProgressModelNG::SetRingStrokeWidth(FrameNode* frameNode, const RefPtr<Reso
     const std::string key = "progress.ring.strokeWidth";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& resourceObj, bool isFirstLoad = false) {
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                          const RefPtr<ResourceObject>& resourceObj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
         auto pipeline = PipelineBase::GetCurrentContext();
@@ -1080,7 +1098,10 @@ void ProgressModelNG::SetRingShadow(FrameNode* frameNode, const RefPtr<ResourceO
     const std::string key = "progress.ring.shadow";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                          const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
         bool shadow = false;
@@ -1101,7 +1122,10 @@ void ProgressModelNG::SetRingStatus(FrameNode* frameNode, const RefPtr<ResourceO
     const std::string key = "progress.ring.status";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                          const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
         std::string statusStr;
@@ -1124,7 +1148,10 @@ void ProgressModelNG::SetRingSweepingEffect(FrameNode* frameNode, const RefPtr<R
     const std::string key = "progress.ring.sweepingEffect";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                          const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
         bool enable = false;
@@ -1144,7 +1171,10 @@ void ProgressModelNG::SetCapsuleBorderWidth(FrameNode* frameNode, const RefPtr<R
     const std::string key = "progress.capsule.borderWidth";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                          const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
         auto pipeline = PipelineBase::GetCurrentContext();
@@ -1171,8 +1201,10 @@ void ProgressModelNG::SetCapsuleBorderColor(FrameNode* frameNode, const RefPtr<R
     const std::string resourceKey = "progress.capsule.borderColor";
     pattern->RemoveResObj(resourceKey);
     CHECK_NULL_VOID(resObj);
-    auto updateResourceFunction = [pattern, resourceKey](
+    auto updateResourceFunction = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), resourceKey](
                                       const RefPtr<ResourceObject>& resourceObject, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto hostNode = pattern->GetHost();
         CHECK_NULL_VOID(hostNode);
         auto pipelineContext = PipelineBase::GetCurrentContext();
@@ -1198,7 +1230,10 @@ void ProgressModelNG::SetCapsuleSweepingEffect(FrameNode* frameNode, const RefPt
     const std::string key = "progress.capsule.sweepingEffect";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                          const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
         bool enableScanEffect = false;
@@ -1218,7 +1253,10 @@ void ProgressModelNG::SetShowDefaultPercentage(FrameNode* frameNode, const RefPt
     const std::string key = "progress.capsule.showDefaultPercentage";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                          const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
         bool show = false;
@@ -1238,7 +1276,10 @@ void ProgressModelNG::SetFontColorResource(FrameNode* frameNode, const RefPtr<Re
     const std::string key = "progress.fontColor";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                          const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
         Color color;
@@ -1263,7 +1304,10 @@ void ProgressModelNG::SetBackgroundColorResource(FrameNode* frameNode, const Ref
     const std::string key = "progress.backgroundColor";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                          const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
         Color color;
@@ -1295,7 +1339,10 @@ void ProgressModelNG::SetFontWeightResource(FrameNode* frameNode, const RefPtr<R
     const std::string key = "progress.fontWeight";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                          const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
         std::string weightStr;
@@ -1320,7 +1367,10 @@ void ProgressModelNG::SetRSStrokeWidth(FrameNode* frameNode, const RefPtr<Resour
     std::string key = "progress.style.strokeWidth";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
         auto pipeline = PipelineBase::GetCurrentContext();
@@ -1350,7 +1400,10 @@ void ProgressModelNG::SetRSScaleWidth(FrameNode* frameNode, const RefPtr<Resourc
     std::string key = "progress.style.scaleWidth";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+    auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                            const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
         auto pipeline = PipelineBase::GetCurrentContext();
@@ -1385,7 +1438,10 @@ void ProgressModelNG::SetTextResource(FrameNode* frameNode, const RefPtr<Resourc
     const std::string key = "progress.text";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                          const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
         std::string text;
@@ -1406,7 +1462,10 @@ void ProgressModelNG::SetFontSizeResource(FrameNode* frameNode, const RefPtr<Res
     const std::string key = "progress.fontSize";
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
-    auto updateFunc = [pattern, key](const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+    auto updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), key](
+                          const RefPtr<ResourceObject>& obj, bool isFirstLoad = false) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto node = pattern->GetHost();
         CHECK_NULL_VOID(node);
         CalcDimension fontSize;
