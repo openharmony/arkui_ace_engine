@@ -1850,9 +1850,9 @@ void NavigationGroupNode::DialogTransitionPopAnimation(const RefPtr<FrameNode>& 
             navigation->ResetTransitionAnimationNodeState(preNode, curNode);
             for (auto iter: preNavList) {
                 auto preNode = iter.Upgrade();
-                CHECK_NULL_VOID(preNode);
+                CHECK_NULL_CONTINUE(preNode);
                 auto parent = preNode->GetParent();
-                CHECK_NULL_VOID(parent);
+                CHECK_NULL_CONTINUE(parent);
                 
                 auto pattern = navigation->GetPattern<NavigationPattern>();
                 bool isIncurStack = pattern->FindInCurStack(preNode);
