@@ -1548,7 +1548,14 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset002, TestSize.Level1)
      * @tc.steps: step1. set up bind sheet and theme.
      */
     SetOnBindSheet();
-    SystemProperties::SetDeviceType(DeviceType::TWO_IN_ONE);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto manager = pipelineContext->GetWindowManager();
+    ASSERT_NE(manager, nullptr);
+    auto isPcOrPadFreeMultiWindow = []() {
+        return true;
+    };
+    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -1677,7 +1684,12 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset004, TestSize.Level1)
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     auto sheetType = sheetPattern->GetSheetType();
     EXPECT_NE(sheetType, SheetType::SHEET_BOTTOM_OFFSET);
-    SystemProperties::SetDeviceType(DeviceType::TWO_IN_ONE);
+    auto manager = pipelineContext->GetWindowManager();
+    ASSERT_NE(manager, nullptr);
+    auto isPcOrPadFreeMultiWindow = []() {
+        return true;
+    };
+    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
     auto sheetType1 = sheetPattern->GetSheetType();
     EXPECT_EQ(sheetType1, SheetType::SHEET_BOTTOM_OFFSET);
 
@@ -1763,7 +1775,12 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset006, TestSize.Level1)
     PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     pipelineContext->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
-    SystemProperties::SetDeviceType(DeviceType::TWO_IN_ONE);
+    auto manager = pipelineContext->GetWindowManager();
+    ASSERT_NE(manager, nullptr);
+    auto isPcOrPadFreeMultiWindow = []() {
+        return true;
+    };
+    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
     auto sheetType = sheetPattern->GetSheetType();
 
     /**

@@ -1905,11 +1905,10 @@ SheetType SheetPresentationPattern::GetSheetType() const
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     TAG_LOGD(AceLogTag::ACE_SHEET, "GetSheetType displayWindowRect info is : %{public}s",
         windowGlobalRect.ToString().c_str());
-    DeviceType deviceType = SystemProperties::GetDeviceType();
     // only bottom when width is less than 600vp
     if ((windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) ||
         (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM)) {
-        return sheetStyle.bottomOffset.has_value() && deviceType == DeviceType::TWO_IN_ONE ?
+        return sheetStyle.bottomOffset.has_value() && IsPcOrPadFreeMultiWindowMode() ?
             SheetType::SHEET_BOTTOM_OFFSET : SheetType::SHEET_BOTTOM;
     }
     if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_SIDE) {
@@ -3905,5 +3904,17 @@ void SheetPresentationPattern::ResetScrollUserDefinedIdealSize(
 void SheetPresentationPattern::OnLanguageConfigurationUpdate()
 {
     sheetObject_->OnLanguageConfigurationUpdate();
+}
+
+bool SheetPresentationPattern::IsPcOrPadFreeMultiWindowMode() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto windowManager = pipelineContext->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, false);
+    TAG_LOGI(AceLogTag::ACE_SHEET, "FreeMultiWindowMode: %{public}d", windowManager->IsPcOrPadFreeMultiWindowMode());
+    return windowManager->IsPcOrPadFreeMultiWindowMode();
 }
 } // namespace OHOS::Ace::NG
