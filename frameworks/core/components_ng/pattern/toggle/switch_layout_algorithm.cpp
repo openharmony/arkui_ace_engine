@@ -142,10 +142,14 @@ void SwitchLayoutAlgorithm::LayoutPolicyIsMatchParent(const LayoutConstraintF& c
     std::optional<NG::LayoutPolicyProperty> layoutPolicy, float& frameWidth, float& frameHeight)
 {
     if (layoutPolicy->IsWidthMatch()) {
-        frameWidth = contentConstraint.parentIdealSize.Width().value();
+        if (contentConstraint.parentIdealSize.Width().has_value()) {
+            frameWidth = contentConstraint.parentIdealSize.Width().value();
+        }
     }
     if (layoutPolicy->IsHeightMatch()) {
-        frameHeight = contentConstraint.parentIdealSize.Height().value();
+        if (contentConstraint.parentIdealSize.Height().has_value()) {
+            frameHeight = contentConstraint.parentIdealSize.Height().value();
+        }
     }
 }
 } // namespace OHOS::Ace::NG

@@ -138,6 +138,11 @@ public:
         return false;
     }
 
+    virtual bool IsContentNoEnabledFixed()
+    {
+        return false;
+    }
+
     virtual bool isEqualWidthAndHeight()
     {
         return false;

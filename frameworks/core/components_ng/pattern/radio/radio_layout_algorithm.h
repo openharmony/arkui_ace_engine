@@ -50,6 +50,7 @@ private:
 
     std::optional<SizeF> LayoutPolicyIsMatchParent(const LayoutConstraintF& contentConstraint,
         std::optional<NG::LayoutPolicyProperty> layoutPolicy, LayoutWrapper* layoutWrapper);
+    std::optional<NG::LayoutPolicyProperty> GetLayoutPolicy(LayoutWrapper* layoutWrapper);
 };
 } // namespace OHOS::Ace::NG
 

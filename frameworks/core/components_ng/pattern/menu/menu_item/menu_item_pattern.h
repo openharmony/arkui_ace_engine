@@ -92,6 +92,11 @@ public:
         return true;
     }
 
+    bool IsContentNoEnabledFixed() override
+    {
+        return true;
+    }
+
     inline RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<MenuItemEventHub>();
