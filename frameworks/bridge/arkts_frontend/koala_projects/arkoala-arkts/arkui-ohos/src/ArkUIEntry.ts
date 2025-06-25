@@ -36,6 +36,7 @@ import { UIContext } from "@ohos/arkui/UIContext"
 import { createStateManager } from "@koalaui/runtime"
 import { UIContextImpl, ContextRecord, DetachedRootEntryManager } from "arkui/handwritten/UIContextImpl"
 import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
+import { flushBuilderRootNode } from "./BuilderNode"
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -95,9 +96,6 @@ function getDetachedRootsByInstanceId(instanceId: int32): Map<KPointer, Computab
     return context.getDetachedRootEntryManager().getDetachedRoots();
 }
 
-// mark the tree create by BuilderNode
-let detachedStatMgt: Map<WeakRef<StateManager>, WeakRef<ComputableState<PeerNode>>> = new Map<WeakRef<StateManager>, WeakRef<ComputableState<PeerNode>>>()
-
 export function createUiDetachedRoot(
     peerFactory: () => PeerNode,
     /** @memo */
@@ -116,26 +114,6 @@ export function createUiDetachedRoot(
     return node.value
 }
 setUIDetachedRootCreator(createUiDetachedRoot)
-
-//used By BuilderNode
-export function createUiDetachedBuilderRoot(
-    peerFactory: () => PeerNode,
-    /** @memo */
-    builder: () => void,
-    manager: StateManager,
-    instanceId: int32 = _undefinedInstanceId
-): ComputableState<PeerNode> {
-    const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
-        const frozen = manager.frozen
-        manager.frozen = true
-        memoEntry<void>(context, 0, builder)
-        manager.frozen = frozen
-    })
-    let detachedRoots = getDetachedRootsByInstanceId(instanceId);
-    detachedRoots.set(node.value.peer.ptr, node)
-    detachedStatMgt.set(new WeakRef<StateManager>(manager), new WeakRef<ComputableState<PeerNode>>(node))
-    return node
-}
 
 export function destroyUiDetachedRoot(ptr: KPointer, instanceId: int32): boolean {
     if (instanceId < 0) {
@@ -335,24 +313,6 @@ export class Application {
         }
         // Here we request to draw a frame and call custom components callbacks.
         let root = rootState.value;
-        // updateState in BuilderNode
-        let deletedMap: Array<WeakRef<StateManager>> = new Array<WeakRef<StateManager>>()
-        for (const mgt of detachedStatMgt) {
-            let stateMgt = mgt[0]?.deref()
-            if (stateMgt !== undefined && mgt[1]?.deref() !== undefined) {
-                const old = GlobalStateManager.GetLocalManager();
-                GlobalStateManager.SetLocalManager(stateMgt);
-                this.updateStates(stateMgt!, mgt[1]!.deref()!);
-                mgt[1]!.deref()!.value;
-                GlobalStateManager.SetLocalManager(old);
-            } else {
-                deletedMap.push(mgt[0]);
-            }
-        }
-        // delete stateManager used by BuilderNode
-        for (const mgt of deletedMap) {
-            detachedStatMgt.delete(mgt);
-        }
         if (root.peer.ptr) {
             ArkUINativeModule._MeasureLayoutAndDraw(root.peer.ptr);
             // Call callbacks and sync
@@ -374,7 +334,7 @@ export class Application {
         for (const detachedRoot of detachedRoots.values())
             detachedRoot.value
         updateLazyItems()
-
+        flushBuilderRootNode()
         if (partialUpdates.length > 0) {
             // If there are pending partial updates - we apply them one by one and provide update context.
             for (let update of partialUpdates) {
