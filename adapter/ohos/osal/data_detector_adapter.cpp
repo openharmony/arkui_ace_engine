@@ -470,7 +470,7 @@ void DataDetectorAdapter::ParseAIJson(
         }
         int32_t start = startPos + charOffset;
         auto iter = aiSpanMap_.find(start);
-        if (iter != aiSpanMap_.end() && iter->second.content.length() >= oriText.length()) {
+        if (iter != aiSpanMap_.end() && iter->second.content.length() > oriText.length()) {
             // both entities start at the same position, leaving the longer one
             continue;
         }
