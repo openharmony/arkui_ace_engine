@@ -2379,7 +2379,6 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag003, TestSize.Level1)
     RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
     auto host = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listPattern);
     ASSERT_NE(host, nullptr);
-    //host->geometryNode_->frame_.rect_.SetRect(OffsetF(100.0f, 100.0f), SizeF(100.0f, 100.0f));
     host->geometryNode_->padding_ = std::make_unique<PaddingPropertyF>();
     host->geometryNode_->padding_->top = 200.0f;
     host->geometryNode_->padding_->bottom = 500.0f;
