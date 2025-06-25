@@ -17,11 +17,6 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 group("arkts_frontend_native_package") {
 #  deps = [ "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:ace_ani_native_package" ]
 }
-#group("arkoala_ui2abc") {
-#  deps = [
-#    "koala_mirror/arkoala-arkts:arkoala"
-#  ]
-#}
 template("arkts_frontend") {
   forward_variables_from(invoker, "*")
 
@@ -36,7 +31,6 @@ template("arkts_frontend") {
         ]
     } else {    
         deps = [
-#          "arkoala:arkoala_prebuild",
           "koala_mirror/ui2abc:ui2abc_panda_sdk",    
           "koala_mirror/ui2abc:ui2abc",
           "koala_mirror/arkoala-arkts:arkoala"
@@ -179,19 +173,7 @@ if (use_linux) {
       "napi:ace_napi",
     ]
 
-    subsystem_name = ace_engine_subsystem
-    part_name = ace_engine_part
-  }
-
-  ohos_shared_library("ArkoalaNative_ets") {
-    include_dirs = native_include_dirs + [ "koala_projects/interop/src/cpp/ets" ]
-    defines = native_defines + [ "KOALA_ETS_NAPI" ]
-    sources = native_sources + [ "koala_projects/interop/src/cpp/ets/convertors-ets.cc" ]
-
-    external_deps = [
-      "hilog:hilog_ndk",
-      "napi:ace_napi",
-    ]
+   configs = [ ":arkoala_native_config" ]
 
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part

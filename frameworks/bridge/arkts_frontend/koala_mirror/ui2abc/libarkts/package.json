@@ -4,12 +4,8 @@
     "bin": "./lib/es2panda",
     "typesVersions": {
         "*": {
-            "./compat/*": [
-                "./build/wrapper-compat/index.d.ts"
-            ],
-            "*": [
-                "./build/index.d.ts"
-            ]
+            "./compat/*": ["./build/wrapper-compat/index.d.ts"],
+            "*": ["./build/index.d.ts"]
         }
     },
     "exports": {
@@ -29,22 +25,21 @@
         "panda_sdk_version": "next"
     },
     "dependencies": {
-        "@koalaui/build-common": "1.7.4+devel",
-        "@koalaui/common": "1.7.4+devel",
-        "@koalaui/compat": "1.7.4+devel",
         "@koalaui/ets-tsc": "4.9.5-r5",
+        "@koalaui/build-common": "1.7.4+devel",
+        "@koalaui/compat": "1.7.4+devel",
+        "@koalaui/common": "1.7.4+devel",
         "@koalaui/interop": "1.7.4+devel",
-        "commander": "10.0.1",
         "node-addon-api": "8.0.0",
         "node-api-headers": "0.0.5",
-        "rimraf": "^6.0.1"
+        "commander": "10.0.1"
     },
     "devDependencies": {
+        "rollup": "^4.13.0",
         "@rollup/plugin-commonjs": "^26.0.1",
         "@rollup/plugin-node-resolve": "^15.3.0",
         "@rollup/plugin-terser": "^0.4.4",
-        "@rollup/plugin-typescript": "^11.1.6",
-        "rollup": "^4.13.0"
+        "@rollup/plugin-typescript": "^11.1.6"
     },
     "scripts": {
         "clean": "rimraf build native/build* ./.rollup.cache tsconfig.tsbuildinfo lib",
