@@ -795,7 +795,7 @@ HWTEST_F(IndexerModifierTest, setSelectedFontTest2, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.SelectedFontImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, setSelectedFontTest3, TestSize.Level1) // ???
+HWTEST_F(IndexerModifierTest, setSelectedFontTest3, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSelectedFont, nullptr);
     Ark_Font font = {
@@ -1258,7 +1258,7 @@ HWTEST_F(IndexerModifierTest, setFontTest4, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.AlignStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, DISABLED_setAlignStyle, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, setAlignStyle, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAlignStyle, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, PROP_NAME_ALIGN_STYLE);
