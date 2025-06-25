@@ -37,6 +37,23 @@ export class UserView {
     getBuilder(): UserViewBuilder {
         throw new Error("User must override this method");
     }
+
+    // TODO: these native functions are here temporary.
+    static startNativeLog(group: int32) {
+        NativeLog.Default.startNativeLog(group)
+    }
+
+    static stopNativeLog(group: int32) {
+        NativeLog.Default.stopNativeLog(group)
+    }
+
+    static getNativeLog(group: int32): string {
+        return NativeLog.Default.getNativeLog(group)
+    }
+
+    static printNativeLog(group: int32) {
+        return NativeLog.Default.printNativeLog(group)
+    }
 }
 
 export function UserMemoWrapper(
@@ -46,4 +63,11 @@ export function UserMemoWrapper(
     @memo
     const wrapper = () => { page_() }
     return wrapper
+}
+
+export class EntryPoint {
+    constructor() {}
+    @memo
+    entry(): void {
+    }
 }
