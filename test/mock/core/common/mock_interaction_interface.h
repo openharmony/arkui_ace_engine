@@ -81,6 +81,7 @@ public:
 
     MOCK_METHOD(int32_t, EnableInternalDropAnimation, (const std::string& animationInfo), (override));
 
+    MOCK_METHOD(bool, IsDragStart, (), (const override));
 private:
     std::function<void()> gDragOutCallback = nullptr;
     int gStartDrag = 0;

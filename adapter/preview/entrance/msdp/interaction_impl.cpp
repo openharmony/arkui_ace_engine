@@ -131,4 +131,9 @@ int32_t InteractionImpl::EnableInternalDropAnimation(const std::string& animatio
 {
     return -1;
 }
+
+bool InteractionImpl::IsDragStart() const
+{
+    return false;
+}
 } // namespace OHOS::Ace

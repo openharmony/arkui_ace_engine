@@ -2176,9 +2176,7 @@ void DragDropManager::ClearExtraInfo()
 bool DragDropManager::IsMSDPDragging() const
 {
     ACE_SCOPED_TRACE("drag: get drag state from msdp");
-    DragState dragState;
-    InteractionInterface::GetInstance()->GetDragState(dragState);
-    return dragState == DragState::START;
+    return InteractionInterface::GetInstance()->IsDragStart();
 }
 
 void DragDropManager::ClearVelocityInfo()
