@@ -1109,6 +1109,61 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTabFocus, TestSize.L
     EXPECT_EQ(pattern->GetForceProcessOnKeyEventInternal(), false);
 #endif
 }
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern HandleTouch
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentHandleTouch, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct UIExtensionNode
+    */
+    auto uiextensionNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, 1,
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiextensionNode, nullptr);
+    auto pattern = uiextensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+    * @tc.steps: step2. attach PipelineContext and FocusHub
+    */
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(uiextensionNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    uiextensionNode->focusHub_ = focusHub;
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->SetEventManager(AceType::MakeRefPtr<EventManager>());
+    EXPECT_NE(context->GetEventManager(), nullptr);
+    uiextensionNode->context_ = AceType::RawPtr(context);
+    /**
+    * @tc.steps: step3. Test HandleTouchEvent
+    */
+    TouchEventInfo touchEventInfo("onTouch");
+    touchEventInfo.SetSourceDevice(SourceType::MOUSE);
+    pattern->HandleTouchEvent(touchEventInfo);
+    touchEventInfo.SetSourceDevice(SourceType::TOUCH);
+    context->onFocus_ = false;
+    pattern->HandleTouchEvent(touchEventInfo);
+    EXPECT_EQ(pattern->canFocusSendToUIExtension_, true);
+    context->onFocus_ = true;
+    focusHub->currentFocus_ = true;
+    pattern->HandleTouchEvent(touchEventInfo);
+    EXPECT_EQ(pattern->canFocusSendToUIExtension_, true);
+    focusHub->currentFocus_ = false;
+    pattern->HandleTouchEvent(touchEventInfo);
+    EXPECT_EQ(pattern->canFocusSendToUIExtension_, true);
+    touchEventInfo.SetPointerEvent(nullptr);
+    pattern->HandleTouchEvent(touchEventInfo);
+    std::shared_ptr<MMI::PointerEvent> pointerEvent = std::make_shared<MMI::PointerEvent>(1);
+    pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_UP);
+    touchEventInfo.SetPointerEvent(pointerEvent);
+    pattern->needReSendFocusToUIExtension_ = true;
+    pattern->HandleTouchEvent(touchEventInfo);
+    EXPECT_EQ(pattern->needReSendFocusToUIExtension_, false);
+}
+
 /**
  * @tc.name: UIExtensionComponentTestTwoNg
  * @tc.desc: Test the method of pattern HandleOcclusionScene

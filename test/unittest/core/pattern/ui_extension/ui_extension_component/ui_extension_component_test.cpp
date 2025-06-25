@@ -385,8 +385,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternValidSessionTest, TestSiz
     ASSERT_NE(pattern, nullptr);
     pattern->AttachToFrameNode(uiExtNode);
 
-    pattern->OnVisibleChange(true);
-    pattern->OnVisibleChange(false);
+    pattern->OnVisibleChangeInner(true);
+    pattern->OnVisibleChangeInner(false);
     pattern->isVisible_ = true;
     pattern->SetDensityDpi(true);
     EXPECT_EQ(pattern->GetDensityDpi(), true);
@@ -425,8 +425,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternInValidSessionTest, TestS
     ASSERT_NE(pattern, nullptr);
     pattern->AttachToFrameNode(uiExtNode);
     InValidSessionWrapper(pattern);
-    pattern->OnVisibleChange(true);
-    pattern->OnVisibleChange(false);
+    pattern->OnVisibleChangeInner(true);
+    pattern->OnVisibleChangeInner(false);
     pattern->isVisible_ = true;
     pattern->SetDensityDpi(true);
     EXPECT_EQ(pattern->GetDensityDpi(), true);

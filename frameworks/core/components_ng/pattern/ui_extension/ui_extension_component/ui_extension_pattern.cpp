@@ -1568,7 +1568,7 @@ bool UIExtensionPattern::GetDensityDpi()
     return densityDpi_;
 }
 
-void UIExtensionPattern::OnVisibleChange(bool visible)
+void UIExtensionPattern::OnVisibleChangeInner(bool visible)
 {
     UIEXT_LOGI("The component is changing from '%{public}s' to '%{public}s'.", isVisible_ ? "visible" : "invisible",
         visible ? "visible" : "invisible");
@@ -1740,7 +1740,7 @@ void UIExtensionPattern::HandleVisibleAreaChange(bool visible, double ratio)
     bool curVisible = !NearEqual(ratio, SHOW_START);
     if (curVisible_ != curVisible) {
         curVisible_ = curVisible;
-        OnVisibleChange(curVisible_);
+        OnVisibleChangeInner(curVisible_);
     }
 
     if (needCheckDisplayArea) {
