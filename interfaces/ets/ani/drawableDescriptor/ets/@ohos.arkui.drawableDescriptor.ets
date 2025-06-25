@@ -105,10 +105,14 @@ export interface AnimationOptions {
   iterations?: number;
 }
 
-export class AnimatedDrawableDescriptor {
+export class AnimatedDrawableDescriptor extends DrawableDescriptor {
   private pixelMaps: Array<image.PixelMap>
   private options: AnimationOptions | undefined = undefined
   constructor(pixelMaps: Array<image.PixelMap>, options?: AnimationOptions) {
+    super()
+    if (pixelMaps.length > 0) {
+      this.pixelMap = pixelMaps[0]
+    }
     this.pixelMaps = pixelMaps
     this.options = options
     DrawableDescriptorInner.createAnimatedDrawable(this, pixelMaps, options)
@@ -126,8 +130,8 @@ export class DrawableDescriptorInner {
     background?: image.PixelMap,
     mask?: image.PixelMap): void;
   native static createAnimatedDrawable(
-    value: AnimatedDrawableDescriptor, 
-    pixelMaps: Array<image.PixelMap>, 
+    value: AnimatedDrawableDescriptor,
+    pixelMaps: Array<image.PixelMap>,
     options?: AnimationOptions): void;
   native static createPixelMap(value: PixelMapDrawableDescriptor): void
   native static composePixelMap(value: LayeredDrawableDescriptor): void;

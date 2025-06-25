@@ -57,6 +57,16 @@ public:
         return iterations_;
     }
 
+    void SetTotalDuration(const int32_t totalDuration)
+    {
+        totalDuration_ = totalDuration;
+    }
+
+    void SetIterations(const int32_t iterations)
+    {
+        iterations_ = iterations;
+    }
+
 private:
     int32_t totalDuration_ = -1;
     int32_t iterations_ = 1;
