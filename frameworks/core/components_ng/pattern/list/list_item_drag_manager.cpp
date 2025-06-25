@@ -449,7 +449,8 @@ void ListItemDragManager::HandleScrollCallback()
         pattern->SetHotZoneScrollCallback(nullptr);
         scrolling_ = false;
     }
-    int32_t to = ScaleNearItem(from, frameRect, realOffset_ - frameRect.GetOffset());
+    auto paddingOffset = GetParentPaddingOffset();
+    int32_t to = ScaleNearItem(from, frameRect, realOffset_ - frameRect.GetOffset() + paddingOffset);
     if (to == from) {
         return;
     }
