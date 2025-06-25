@@ -5069,8 +5069,8 @@ typedef struct Opt_MouseAction {
 typedef enum Ark_MouseButton {
     ARK_MOUSE_BUTTON_LEFT = 1,
     ARK_MOUSE_BUTTON_RIGHT = 2,
-    ARK_MOUSE_BUTTON_MIDDLE = 3,
-    ARK_MOUSE_BUTTON_BACK = 4,
+    ARK_MOUSE_BUTTON_MIDDLE = 4,
+    ARK_MOUSE_BUTTON_BACK = 8,
     ARK_MOUSE_BUTTON_FORWARD = 16,
     ARK_MOUSE_BUTTON_NONE = 0,
 } Ark_MouseButton;
@@ -26124,6 +26124,7 @@ typedef struct GENERATED_ArkUIEventTargetInfoAccessor {
     Ark_EventTargetInfo (*ctor)();
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getId)(Ark_EventTargetInfo peer);
+    Ark_Boolean (*isScrollableComponent)(Ark_EventTargetInfo peer);
 } GENERATED_ArkUIEventTargetInfoAccessor;
 
 typedef struct GENERATED_ArkUIGestureRecognizerAccessor {

@@ -885,8 +885,13 @@ export class GestureRecognizer implements MaterializedBase {
     }
     private getEventTargetInfo_serialize(): EventTargetInfo {
         const retval  = ArkUIGeneratedNativeModule._GestureRecognizer_getEventTargetInfo(this.peer!.ptr)
-        const obj : EventTargetInfo = EventTargetInfoInternal.fromPtr(retval)
-        return obj
+        const eventTargetInfoObj : EventTargetInfo = EventTargetInfoInternal.fromPtr(retval)
+        const isScorllableComponent = ArkUIGeneratedNativeModule._EventTargetInfo_isScrollableComponent(retval)
+        if (isScorllableComponent) {
+            const scrollableTargetInfoObj : ScrollableTargetInfo = ScrollableTargetInfoInternal.fromPtr(retval)
+            return scrollableTargetInfoObj
+        }
+        return eventTargetInfoObj
     }
     private isValid_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._GestureRecognizer_isValid(this.peer!.ptr)
