@@ -2895,6 +2895,7 @@ void WebPattern::OnPinchSmoothModeEnabledUpdate(bool value)
 
 void WebPattern::OnBackgroundColorUpdate(int32_t value)
 {
+    needSetDefaultBackgroundColor_ = false;
     UpdateBackgroundColorRightNow(value);
     if (delegate_) {
         delegate_->UpdateBackgroundColor(value);
@@ -3250,8 +3251,8 @@ void WebPattern::OnModifyDone()
         delegate_->SetEnhanceSurfaceFlag(isEnhanceSurface_);
         delegate_->SetPopup(isPopup_);
         delegate_->SetParentNWebId(parentNWebId_);
-        delegate_->SetBackgroundColor(GetBackgroundColorValue(
-            static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
+        delegate_->SetBackgroundColor(GetBackgroundColorValue(static_cast<int32_t>(
+            renderContext->GetBackgroundColor().value_or(GetDefaultBackgroundColor()).GetValue())));
         if (isEnhanceSurface_) {
             auto drawSize = Size(1, 1);
             delegate_->SetDrawSize(drawSize);
@@ -3312,8 +3313,8 @@ void WebPattern::OnModifyDone()
 
         bool isApiGteTwelve =
             AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
-        delegate_->UpdateBackgroundColor(GetBackgroundColorValue(
-            static_cast<int32_t>(renderContext->GetBackgroundColor().value_or(Color::WHITE).GetValue())));
+        delegate_->UpdateBackgroundColor(GetBackgroundColorValue(static_cast<int32_t>(
+            renderContext->GetBackgroundColor().value_or(GetDefaultBackgroundColor()).GetValue())));
         delegate_->UpdateJavaScriptEnabled(GetJsEnabledValue(true));
         delegate_->UpdateBlockNetworkImage(!GetOnLineImageAccessEnabledValue(true));
         delegate_->UpdateLoadsImagesAutomatically(GetImageAccessEnabledValue(true));
@@ -3396,8 +3397,10 @@ void WebPattern::OnModifyDone()
         }
     }
 
-    if (!GetBackgroundColor()) {
-        UpdateBackgroundColorRightNow(GetDefaultBackgroundColor().GetValue());
+    // Set the default background color when the component did not set backgroundColor()
+    // or needSetDefaultBackgroundColor_ is true.
+    if (!renderContext->GetBackgroundColor() || needSetDefaultBackgroundColor_) {
+        OnBackgroundColorUpdate(GetDefaultBackgroundColor().GetValue());
     }
 
     // Initialize events such as keyboard, focus, etc.
@@ -7347,5 +7350,10 @@ void WebPattern::RegisterSurfaceDensityCallback()
             webPattern->SetSurfaceDensity(density);
         });
     }
+}
+
+void WebPattern::SetDefaultBackgroundColor()
+{
+    needSetDefaultBackgroundColor_ = true;
 }
 } // namespace OHOS::Ace::NG

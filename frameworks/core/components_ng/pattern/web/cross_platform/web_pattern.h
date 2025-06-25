@@ -499,7 +499,7 @@ public:
         const ScriptItemsByOrder& scriptItemsByOrder);
 
     void OnWebMediaAVSessionEnabledUpdate(bool enable);
-
+    void SetDefaultBackgroundColor();
 private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
@@ -683,6 +683,7 @@ private:
     int32_t rootLayerHeight_ = 0;
     bool richTextInit_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
+    bool needSetDefaultBackgroundColor_ = false;
 };
 } // namespace OHOS::Ace::NG
 
