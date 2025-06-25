@@ -352,16 +352,10 @@ void NavigationLayoutUtil::UpdateConstraintWhenFixOrWrap(
     bool isAutoHeight = NavigationLayoutAlgorithm::IsAutoHeight(layoutProperty);
     if (!isWidthWrapOrFix) {
         constraint.selfIdealSize.SetWidth(size.Width());
-    } else {
-        constraint.maxSize.SetWidth(size.Width());
-        constraint.percentReference.SetWidth(size.Width());
     }
 
     if (!isHeightWrapOrFix && !isAutoHeight) {
         constraint.selfIdealSize.SetHeight(size.Height());
-    } else {
-        constraint.maxSize.SetHeight(size.Height());
-        constraint.percentReference.SetHeight(size.Height());
     }
 }
 std::pair<bool, bool> NavigationLayoutUtil::CheckVerticalExtend(

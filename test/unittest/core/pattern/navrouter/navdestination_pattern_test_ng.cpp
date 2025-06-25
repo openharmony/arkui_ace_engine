@@ -1706,4 +1706,39 @@ HWTEST_F(NavDestinationPatternTestNg, GetSerializedParamTest001, TestSize.Level1
     ASSERT_EQ(navDestinationPattern->GetSerializedParam(), param);
     NavDestinationPatternTestNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: OnModifyDone
+ * @tc.desc: Branch: if (layoutPolicy.has_value()) true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationPatternTestNg, OnModifyDone, TestSize.Level1)
+{
+    NavDestinationPatternTestNg::SetUpTestCase();
+    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    auto layoutProperty = navDestinationNode->GetLayoutProperty<NavDestinationLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    auto navDestinationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(navDestinationContentNode, nullptr);
+    navDestinationNode->AddChild(navDestinationContentNode);
+    navDestinationNode->SetContentNode(navDestinationContentNode);
+    
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    
+    navDestinationPattern->OnModifyDone();
+    
+    auto contentLayoutProperty = navDestinationNode->GetLayoutProperty();
+    ASSERT_NE(contentLayoutProperty, nullptr);
+    auto layoutPolicy = contentLayoutProperty->GetLayoutPolicyProperty();
+    ASSERT_EQ(layoutPolicy.has_value(), true);
+    EXPECT_EQ(layoutPolicy->IsWidthWrap(), true);
+    EXPECT_EQ(layoutPolicy->IsHeightMatch(), true);
+}
 } // namespace OHOS::Ace::NG
