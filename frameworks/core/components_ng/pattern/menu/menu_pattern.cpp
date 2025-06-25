@@ -982,8 +982,12 @@ void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position, const HideMenuT
     if (targetTag_ == V2::SELECT_ETS_TAG && expandDisplay && layoutProperty->GetShowInSubWindowValue(false)) {
         auto subWindowManager = SubwindowManager::GetInstance();
         CHECK_NULL_VOID(subWindowManager);
-        subWindowManager->ClearMenuNG(Container::CurrentId(), targetId_);
-        return;
+        auto containerId = Container::CurrentId();
+        auto subwindow = subWindowManager->GetSubwindowByType(containerId, SubwindowType::TYPE_MENU);
+        if (subWindowManager->IsSubwindowExist(subwindow)) {
+            subWindowManager->ClearMenuNG(containerId, targetId_);
+            return;
+        }
     }
 
     if (HideStackExpandMenu(position)) {
