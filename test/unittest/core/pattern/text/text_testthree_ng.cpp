@@ -1840,6 +1840,30 @@ HWTEST_F(TextTestThreeNg, SetTextDetectTypes001, TestSize.Level1)
     pattern->dataDetectorAdapter_->InitTextDetect(0, "orange");
 }
 
+
+/**
+ * @tc.name: SetTextDetectTypes002
+ * @tc.desc: test test_pattern.h SetTextDetectTypes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, SetTextDetectTypes002, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create frameNode and pattern with child span node.
+    */
+    TextModelNG textModelNG;
+    textModelNG.Create(u"");
+    TextDetectConfig textDetectConfig;
+    textModelNG.SetTextDetectConfig(textDetectConfig);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    /**
+     * @tc.steps: step2. call InitTextDetect.
+     */
+    pattern->dataDetectorAdapter_->InitTextDetect(0, "2023年12月30日 5点半 十二月三十日");
+    EXPECT_EQ(pattern->dataDetectorAdapter_->aiDetectInitialized_, false);
+}
+
 /**
  * @tc.name: CreateNodePaintMethod001
  * @tc.desc: test text_pattern.h CreateNodePaintMethod function
