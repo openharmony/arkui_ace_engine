@@ -594,8 +594,6 @@ export interface ImageSourceSize {
     width: number;
     height: number;
 }
-export interface ColorContent {
-}
 export interface Type_ImageAttribute_onComplete_callback_event {
     width: number;
     height: number;
@@ -820,18 +818,7 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
     }
     public fillColor(value: ResourceColor | undefined | ResourceColor | ColorContent | undefined): this {
         if (this.checkPriority("fillColor")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ResourceColor | undefined)
-                this.getPeer()?.fillColor0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ResourceColor | ColorContent | undefined)
-                this.getPeer()?.fillColor1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            hookSetImageFillColor(this.getPeer().getPeerPtr(), value)
         }
         return this
     }
