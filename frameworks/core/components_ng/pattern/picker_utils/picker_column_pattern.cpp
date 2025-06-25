@@ -231,10 +231,10 @@ RefPtr<TouchEventImpl> PickerColumnPattern::CreateItemTouchEventListener()
 void PickerColumnPattern::HandleMouseEvent(bool isHover)
 {
     if (isHover) {
-        hoverd_ = true;
+        hovered_ = true;
         PlayHoverAnimation(GetButtonHoverColor());
     } else {
-        hoverd_ = false;
+        hovered_ = false;
         PlayHoverAnimation(GetButtonBgColor());
     }
 }
@@ -247,7 +247,7 @@ void PickerColumnPattern::OnTouchDown()
 
 void PickerColumnPattern::OnTouchUp()
 {
-    if (hoverd_) {
+    if (hovered_) {
         PlayPressAnimation(GetButtonHoverColor());
     } else {
         PlayPressAnimation(GetButtonBgColor());
