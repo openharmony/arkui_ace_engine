@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "base/utils/string_utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
 #include "core/components_ng/pattern/video/video_model_static.h"
@@ -40,7 +42,7 @@ const float SPEED_1_00_X = 1.0f;
 const float SPEED_1_25_X = 1.25f;
 const float SPEED_1_75_X = 1.75f;
 const float SPEED_2_00_X = 2.0f;
-float ConvertVideoPorgressRateNumber(float rate)
+float ConvertVideoPorgressRateNumber(const Ark_PlaybackSpeed& rate)
 {
     switch (static_cast<int32_t>(rate)) {
         case ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_75_X: return SPEED_0_75_X;
@@ -82,8 +84,23 @@ VideoOptions Convert(const Ark_VideoOptions& src)
     }
 
     // currentProgressRate
-    options.currentProgressRate = static_cast<double>(
-        ConvertVideoPorgressRateNumber(Converter::OptConvert<float>(src.currentProgressRate).value_or(1.0f)));
+    options.currentProgressRate = 1.0;
+
+    if (src.currentProgressRate.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        Converter::VisitUnion(
+            src.currentProgressRate.value,
+            [&options](const Ark_Number& value) {
+                options.currentProgressRate = Converter::Convert<float>(value);
+            },
+            [&options](const Ark_String& value) {
+                auto rateString = Converter::Convert<std::string>(value);
+                options.currentProgressRate = StringUtils::StringToDouble(rateString);
+            },
+            [&options](const Ark_PlaybackSpeed& value) {
+                options.currentProgressRate = ConvertVideoPorgressRateNumber(value);
+            },
+            []() {});
+    }
 
     // previewUri
     options.previewSourceInfo = Converter::OptConvert<ImageSourceInfo>(src.previewUri)
@@ -94,6 +111,7 @@ VideoOptions Convert(const Ark_VideoOptions& src)
     CHECK_NULL_RETURN(abstPeerPtrOpt, options);
     auto peerImplPtr = abstPeerPtrOpt.value();
     CHECK_NULL_RETURN(peerImplPtr, options);
+    peerImplPtr->SetInstanceId(OHOS::Ace::Container::CurrentId());
     options.videoController = peerImplPtr->GetController();
 
     // posterOptions
