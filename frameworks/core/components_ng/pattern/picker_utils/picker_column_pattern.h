@@ -341,7 +341,7 @@ protected:
     double jumpInterval_ = 0.0;
     double deltaSize_ = 0.0;
     bool stopHaptic_ = false;
-    bool hoverd_ = false;
+    bool hovered_ = false;
     bool useButtonFocusArea_ = false;
     bool isFocusColumn_ = false;
     bool isTossStatus_ = false;
