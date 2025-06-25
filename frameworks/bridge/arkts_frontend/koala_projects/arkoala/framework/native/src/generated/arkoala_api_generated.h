@@ -186,6 +186,7 @@ typedef struct InteropObject {
 #define GENERATED_ARKUI_EXTENDED_NODE_API_VERSION 8
 #define GENERATED_ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define GENERATED_ARKUI_NODE_MODIFIERS_API_VERSION 6
+#define GENERATED_ARKUI_INTEROP_NODE_API_VERSION 1
 
 #define GENERATED_ARKUI_AUTO_GENERATE_NODE_ID (-2)
 
@@ -237,7 +238,8 @@ enum GENERATED_Ark_APIVariantKind {
     GENERATED_FULL = 11,
     GENERATED_GRAPHICS = 12,
     GENERATED_EXTENDED = 13,
-    GENERATED_COUNT = GENERATED_EXTENDED + 1
+    GENERATED_INTEROP = 15,
+    GENERATED_COUNT = GENERATED_INTEROP + 1,
 };
 
 enum Ark_APINodeFlags {
@@ -27978,6 +27980,14 @@ typedef struct GENERATED_ArkUIFullNodeAPI {
     const GENERATED_ArkUIAccessors* (*getAccessors)();
     const GENERATED_ArkUIGraphicsAPI* (*getGraphicsAPI)();
 } GENERATED_ArkUIFullNodeAPI;
+
+typedef struct GENERATED_ArkUIInteropNodeAPI {
+    Ark_Int32 version;
+    Ark_NodeHandle (*createViewStackProcessor)();
+    Ark_NodeHandle (*popViewStackProcessor)();
+    void (*deleteViewStackProcessor)(Ark_NodeHandle ptr);
+} GENERATED_ArkUIInteropNodeAPI;
+
 
 #ifndef GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_GENERIC_SERVICE_API_H
 #define GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_GENERIC_SERVICE_API_H
