@@ -1242,6 +1242,8 @@ public:
     int GetHitTestResult();
 
     void RemoveSnapshotFrameNode(int removeDelayTime);
+    void CreateSnapshotFrameNode(const std::string& snapshotPath);
+    void SetVisibility(bool isVisible);
 
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id,  int width, int height);
     void SetPipNativeWindow(int delegate_id, int child_id, int frame_routing_id, void* window);
