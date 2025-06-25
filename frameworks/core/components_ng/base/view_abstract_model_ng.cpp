@@ -68,15 +68,6 @@ void StartVibrator(const MenuParam& menuParam, bool isMenu, const std::string& m
     }
 }
 
-NG::OffsetF GetMenuPosition(const NG::OffsetF& menuPosition, const MenuParam& menuParam)
-{
-    if (menuParam.isAnchorPosition) {
-        return { menuParam.anchorPosition.GetX() + menuParam.positionOffset.GetX(),
-            menuParam.anchorPosition.GetY() + menuParam.positionOffset.GetY() };
-    }
-    return menuPosition;
-}
-
 NG::OffsetF UpdateMenuPostion(const NG::OffsetF& menuPosition, const MenuParam& menuParam,
     const RefPtr<FrameNode>& targetNode)
 {
@@ -624,7 +615,8 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
                             CHECK_NULL_VOID(menuTheme);
                             StartVibrator(menuParam, false, menuTheme->GetMenuHapticFeedback());
                             NG::ViewAbstract::BindMenuWithCustomNode(std::move(builder), targetNode,
-                                GetMenuPosition(menuPosition, menuParam), menuParam, std::move(previewBuildFunc));
+                                UpdateMenuPostion(menuPosition, menuParam, targetNode), menuParam,
+                                std::move(previewBuildFunc));
                         },
                         TaskExecutor::TaskType::PLATFORM, "ArkUIRightClickCreateCustomMenu");
                 }
