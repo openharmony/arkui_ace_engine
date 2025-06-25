@@ -26,7 +26,7 @@ import { UIContext, MeasureUtils, Font, TextMenuController, FocusController, Con
     from "@ohos/arkui/UIContext"
 import { StateManager, ComputableState } from "@koalaui/runtime"
 import { Context, PointerStyle, PixelMap } from "#external"
-import { Nullable } from "arkui/component/enums"
+import { Nullable,  WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
 import { KeyEvent } from "arkui/component/common"
 import { GlobalScope_ohos_font } from "arkui/component/arkui-external"
 import router from '@ohos/router'
@@ -601,6 +601,70 @@ export class UIContextImpl extends UIContext {
         const delayTime_casted = delayTime as (number)
         this.setFrameCallback_serialize(onFrameCallback_casted, onIdleCallback_casted, delayTime_casted)
         return
+    }
+      public getWindowName(): string | undefined {
+        return  this.getWindowName_serialize();
+       
+    }
+    public getWindowWidthBreakpoint(): WidthBreakpoint {
+       
+        return this.getWindowWidthBreakpoint_serialize() as WidthBreakpoint;
+     
+    }
+    public getWindowHeightBreakpoint(): HeightBreakpoint {
+      return this.getWindowHeightBreakpoint_serialize() as HeightBreakpoint;
+       
+    }
+    public vp2px(value: number): number {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = GlobalScope.vp2px(value);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+    public px2vp(value: number): number {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = GlobalScope.px2vp(value);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+    public fp2px(value: number): number {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = GlobalScope.fp2px(value);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+    public px2fp(value: number): number {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = GlobalScope.px2fp(value);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+    public lpx2px(value: number): number {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = GlobalScope.lpx2px(value);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+    public px2lpx(value: number): number {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let result = GlobalScope.px2lpx(value);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return result;
+    }
+  
+    private getWindowName_serialize(): string | undefined {
+        return ArkUIGeneratedNativeModule._UIContext_getWindowName(this.instanceId_);
+    }
+    private getWindowWidthBreakpoint_serialize(): WidthBreakpoint {
+        const widthBreakpoint = ArkUIGeneratedNativeModule._UIContext_getWindowWidthBreakpoint(this.instanceId_);
+        let widthBreakpointEnum = widthBreakpoint  as int32 as WidthBreakpoint;
+        return widthBreakpointEnum;
+   
+    }
+    private getWindowHeightBreakpoint_serialize(): HeightBreakpoint {
+        const heightBreakpoint = ArkUIGeneratedNativeModule._UIContext_getWindowHeightBreakpoint(this.instanceId_);
+        let heightBreakpointEnum = heightBreakpoint as int32 as HeightBreakpoint;
+        return heightBreakpointEnum;
     }
     private setFrameCallback_serialize(onFrameCallback: ((index: number) => void),
                                                          onIdleCallback: ((index: number) => void),

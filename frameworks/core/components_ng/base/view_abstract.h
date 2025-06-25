@@ -902,6 +902,8 @@ public:
     static void RemoveCustomProperty(UINode* frameNode, const std::string& key);
     static void RegisterOEMVisualEffect(OEMVisualEffectFunc func);
     static void SetPrivacySensitive(FrameNode* frameNode, bool flag);
+    static int32_t GetWindowWidthBreakpoint();
+    static int32_t GetWindowHeightBreakpoint();
 
 private:
     static void AddDragFrameNodeToManager();

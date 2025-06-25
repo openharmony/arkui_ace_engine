@@ -29,7 +29,7 @@ import { focusController } from "@ohos/arkui/focusController"
 import { Frame } from "arkui/Graphics"
 import { KeyEvent } from "arkui/component/common"
 import { TextMenuOptions } from "arkui/component/textCommon"
-import { Nullable } from "arkui/component/enums"
+import { Nullable, WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
 import { KeyProcessingMode } from "arkui/component/focus"
 import { uiObserver } from "@ohos/arkui/observer"
 import { mediaquery } from '@ohos/mediaquery'
@@ -343,6 +343,34 @@ export class UIContext {
     // @ts-ignore
     public freezeUINode(id: string, isFrozen: boolean): void {
         throw Error("freezeUINode not implemented in UIContext!")
+    }
+
+    public getWindowName(): string | undefined {
+        throw Error("getWindowName not implemented in UIContext!")
+    }
+    public getWindowWidthBreakpoint(): WidthBreakpoint {
+        throw Error("getWindowWidthBreakpoint not implemented in UIContext!")
+    }
+    public getWindowHeightBreakpoint(): HeightBreakpoint {
+        throw Error("getWindowHeightBreakpoint not implemented in UIContext!")
+    }
+    public vp2px(value: number): number {
+        throw Error("vp2px not implemented in UIContext!")
+    }
+    public px2vp(value: number): number {
+        throw Error("px2vp not implemented in UIContext!")
+    }
+    public fp2px(value: number): number {
+        throw Error("fp2px not implemented in UIContext!")
+    }
+    public px2fp(value: number): number {
+        throw Error("px2fp not implemented in UIContext!")
+    }
+    public lpx2px(value: number): number {
+        throw Error("lpx2px not implemented in UIContext!")
+    }
+    public px2lpx(value: number): number {
+        throw Error("px2lpx not implemented in UIContext!")
     }
 }
 export abstract class FrameCallback {
