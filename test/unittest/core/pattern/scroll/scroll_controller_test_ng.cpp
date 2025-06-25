@@ -296,12 +296,14 @@ HWTEST_F(ScrollControllerTestNg, ScrollToEdge001, TestSize.Level1)
      * @tc.steps: step2. SCROLL_TOP
      * @tc.expected: Scroll to top with animation
      */
+    pattern_->SetAnimateCanOverScroll(true);
     pattern_->SetIsOverScroll(true);
     pattern_->SetCanStayOverScroll(true);
     ScrollToEdge(ScrollEdgeType::SCROLL_TOP, 200.f);
     EXPECT_TRUE(Position(0));
     EXPECT_FALSE(pattern_->GetIsOverScroll());
     EXPECT_FALSE(pattern_->GetCanStayOverScroll());
+    EXPECT_FALSE(pattern_->animateCanOverScroll_);
 }
 
 /**

@@ -109,6 +109,7 @@ void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, float vel
     CHECK_NULL_VOID(pattern);
     pattern->SetIsOverScroll(false);
     pattern->SetCanStayOverScroll(false);
+    pattern->SetAnimateCanOverScroll(false);
     if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
         pattern->ScrollAtFixedVelocity(velocity);
     } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
