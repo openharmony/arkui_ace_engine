@@ -19,6 +19,7 @@
 #include <functional>
 
 #include "ui/base/ace_type.h"
+#include "ui/base/geometry/ng/offset_t.h"
 #include "ui/base/utils/system_param.h"
 #include "ui/view/frame_node.h"
 #include "ui/view/overlay/overlay_manager.h"
@@ -58,6 +59,7 @@ public:
     virtual bool GreatOrEqualTargetAPIVersion(int32_t version) = 0;
     virtual int32_t GetContainerModalTitleHeight() = 0;
     virtual int32_t GetContainerModalButtonsWidth() = 0;
+    virtual NG::OffsetF GetContainerModalButtonsOffset() = 0;
     virtual void RegisterArkUIObjectLifecycleCallback(ArkUIObjectLifecycleCallback&& callback) = 0;
     virtual void UnregisterArkUIObjectLifecycleCallback() = 0;
 };

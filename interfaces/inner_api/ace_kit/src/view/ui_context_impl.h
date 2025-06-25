@@ -51,6 +51,7 @@ public:
     bool GreatOrEqualTargetAPIVersion(int32_t version) override;
     int32_t GetContainerModalTitleHeight() override;
     int32_t GetContainerModalButtonsWidth() override;
+    NG::OffsetF GetContainerModalButtonsOffset() override;
     void RegisterArkUIObjectLifecycleCallback(ArkUIObjectLifecycleCallback&& callback) override;
     void UnregisterArkUIObjectLifecycleCallback() override;
 private:
