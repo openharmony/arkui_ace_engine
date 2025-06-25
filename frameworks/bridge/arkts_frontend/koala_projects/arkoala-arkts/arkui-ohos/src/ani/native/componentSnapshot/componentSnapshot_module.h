@@ -23,6 +23,8 @@ void CreateFromBuilderWithCallback(ani_env* env, [[maybe_unused]] ani_object ani
     ani_object destroyCallbackObj, ani_object callbackObj, ani_object delay, ani_object checkImageStatus);
 ani_object CreateFromBuilderWithPromise(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long builderPtr,
     ani_object destroyCallbackObj, ani_object delay, ani_object checkImageStatus);
+ani_object CreateFromComponentWithPromise(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long builderPtr,
+    ani_object destroyCallbackObj, ani_object delay, ani_object checkImageStatus, ani_object option);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMPONENT_SNAP_SHOT
