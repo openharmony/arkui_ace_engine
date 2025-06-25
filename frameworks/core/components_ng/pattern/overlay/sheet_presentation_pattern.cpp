@@ -2230,7 +2230,7 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
             option.GetOnFinishEvent());
         SetBottomStyleHotAreaInSubwindow();
     } else {
-        AnimationUtils::StopAnimation(animation_);
+        StopModifySheetTransition();
         animation_ = AnimationUtils::StartAnimation(
             option,
             sheetObject_->GetSheetAnimationEvent(isTransitionIn, offset),
@@ -2994,6 +2994,13 @@ void SheetPresentationPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("IsShouldDismiss", shouldDismiss_ ? "true" : "false");
 }
 
+void SheetPresentationPattern::StopModifySheetTransition()
+{
+    if (isAnimationProcess_ && animation_) {
+        AnimationUtils::StopAnimation(animation_);
+    }
+}
+
 void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
 {
     auto host = GetHost();
@@ -3018,7 +3025,7 @@ void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
             "The sheet will disappear, so there's no need to handle canceling keyboard avoidance here.");
         return;
     }
-
+    StopModifySheetTransition();
     // 1.handle non upward logic: avoidKeyboardMode::RESIZE_ONLY
     if (AvoidKeyboardBeforeTranslate()) {
         return;
