@@ -33,8 +33,15 @@ public:
     using CreateItemCb = std::function<RefPtr<FrameNode>(int32_t)>;
     using UpdateRangeCb = std::function<void(int32_t, int32_t)>;
 
-    void SetTotalCount(int32_t value);
-    int32_t GetTotalCount() const;
+    void SetTotalCount(int32_t value)
+    {
+        totalCount_ = value;
+    }
+
+    int32_t GetTotalCount() const
+    {
+        return totalCount_;
+    }
 
     void SetCallbacks(CreateItemCb create, UpdateRangeCb update);
 

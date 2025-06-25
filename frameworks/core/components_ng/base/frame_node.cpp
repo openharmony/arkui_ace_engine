@@ -52,11 +52,9 @@
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #endif
-#include "core/components_ng/base/scroll_window_adapter.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
-#include "core/components_ng/pattern/scrollable/lazy_compose_adapter.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -4834,11 +4832,8 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
-    auto* lazyItemAdapter = pattern_->GetArkoalaLazyAdapter();
-    if (lazyItemAdapter) {
-        auto node = lazyItemAdapter->GetOrCreateChild(index);
-        AddChild(node);
-        return node;
+    if (arkoalaLazyAdapter_) {
+        return ArkoalaGetOrCreateChild(index);
     }
     auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
     if (child) {
@@ -4852,9 +4847,8 @@ RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool ad
 
 RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index, bool isCache)
 {
-    auto* lazyItemAdapter = pattern_->GetArkoalaLazyAdapter();
-    if (lazyItemAdapter) {
-        return lazyItemAdapter->GetChild(index);
+    if (arkoalaLazyAdapter_) {
+        return arkoalaLazyAdapter_->GetChild(index);
     }
     return frameProxy_->GetFrameNodeByIndex(index, false, isCache, false);
 }
@@ -4905,32 +4899,67 @@ void FrameNode::RemoveAllChildInRenderTree()
 
 void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
 {
-    auto* adapter = pattern_->GetArkoalaLazyAdapter();
-    if (adapter) {
-        int32_t startIndex = showCached ? std::max(0, start - cacheStart) : start;
-        int32_t endIndex = showCached ? std::min(GetTotalChildCount() - 1, end + cacheEnd) : end;
-        std::vector<RefPtr<UINode>> toRemove;
-        for (const auto& child : GetChildren()) {
-            const int32_t index = static_cast<int32_t>(adapter->GetIndexOfChild(DynamicCast<FrameNode>(child)));
-            if (index >= startIndex && index <= endIndex) {
-                child->SetActive(true);
-            } else {
-                toRemove.push_back(child);
-            }
-        }
-        for (auto&& node : toRemove) {
-            RemoveChild(node);
-        }
-        adapter->SetActiveRange(startIndex - cacheStart, endIndex + cacheEnd);
-        return;
+    if (arkoalaLazyAdapter_) {
+        return ArkoalaUpdateActiveRange(start, end, cacheStart, cacheEnd, showCached);
     }
-    if (showCached) {
-        frameProxy_->SetActiveChildRange(
-            std::max(0, start - cacheStart), std::min(GetTotalChildCount() - 1, end + cacheEnd), 0, 0);
-    } else {
-        frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd);
-    }
+    frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd, showCached);
 }
+
+/* ============================== Arkoala LazyForEach adapter section START ==============================*/
+void FrameNode::ArkoalaSynchronize(
+    LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount)
+{
+    if (!arkoalaLazyAdapter_) {
+        arkoalaLazyAdapter_ = std::make_unique<LazyComposeAdapter>();
+    }
+    arkoalaLazyAdapter_->SetCallbacks(std::move(creator), std::move(updater));
+    arkoalaLazyAdapter_->SetTotalCount(totalCount);
+}
+
+void FrameNode::ArkoalaRemoveItemsOnChange(int32_t changeIndex)
+{
+    CHECK_NULL_VOID(arkoalaLazyAdapter_);
+    std::vector<RefPtr<UINode>> toRemove;
+    for (const auto& child : GetChildren()) {
+        const int32_t index = static_cast<int32_t>(arkoalaLazyAdapter_->GetIndexOfChild(DynamicCast<FrameNode>(child)));
+        if (index >= changeIndex) {
+            toRemove.push_back(child);
+        }
+    }
+    for (auto&& node : toRemove) {
+        RemoveChild(node);
+    }
+    arkoalaLazyAdapter_->OnDataChange(changeIndex);
+}
+
+void FrameNode::ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
+{
+    CHECK_NULL_VOID(arkoalaLazyAdapter_);
+    int32_t startIndex = showCached ? std::max(0, start - cacheStart) : start;
+    int32_t endIndex = showCached ? std::min(GetTotalChildCount() - 1, end + cacheEnd) : end;
+    std::vector<RefPtr<UINode>> toRemove;
+    for (const auto& child : GetChildren()) {
+        const int32_t index = static_cast<int32_t>(arkoalaLazyAdapter_->GetIndexOfChild(DynamicCast<FrameNode>(child)));
+        if (index >= startIndex && index <= endIndex) {
+            child->SetActive(true);
+        } else {
+            toRemove.push_back(child);
+        }
+    }
+    for (auto&& node : toRemove) {
+        RemoveChild(node);
+    }
+    arkoalaLazyAdapter_->SetActiveRange(startIndex - cacheStart, endIndex + cacheEnd);
+}
+
+RefPtr<LayoutWrapper> FrameNode::ArkoalaGetOrCreateChild(uint32_t index)
+{
+    CHECK_NULL_RETURN(arkoalaLazyAdapter_, nullptr);
+    auto node = arkoalaLazyAdapter_->GetOrCreateChild(index);
+    AddChild(node);
+    return node;
+}
+/* ============================== Arkoala LazyForEach adapter section END ================================*/
 
 void FrameNode::SetActiveChildRange(
     const std::optional<ActiveChildSets>& activeChildSets, const std::optional<ActiveChildRange>& activeChildRange)
@@ -6660,16 +6689,6 @@ const char* FrameNode::GetPaintPropertyTypeName() const
 const RefPtr<Kit::FrameNode>& FrameNode::GetKitNode() const
 {
     return kitNode_;
-}
-
-ScrollWindowAdapter* FrameNode::GetScrollWindowAdapter() const
-{
-    return nullptr;
-}
-
-ScrollWindowAdapter* FrameNode::GetOrCreateScrollWindowAdapter()
-{
-    return nullptr;
 }
 
 bool FrameNode::IsDrawFocusOnTop() const

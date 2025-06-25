@@ -39,16 +39,6 @@ const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 const int32_t MAX_NUM_SIZE = 4;
 } // namespace
 
-void GridPattern::OnAttachToFrameNode()
-{
-    ScrollablePattern::OnAttachToFrameNode();
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetFrontendType() == FrontendType::ARK_TS) {
-        irregular_ = true; // GridScrollLayoutAlgorithm deprecated in ArkTS
-    }
-}
-
 RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 {
     prevRange_ = std::pair(info_.startIndex_, info_.endIndex_);
@@ -482,7 +472,6 @@ void GridPattern::UpdateOffsetHelper(float offset)
 {
     auto userOffset = FireOnWillScroll(-offset);
     info_.currentOffset_ -= userOffset;
-    UpdateOffset(-userOffset);
     auto host = GetHost();
     if (host) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -539,7 +528,6 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckScrollable();
     MarkSelectedItems();
 
-    OnLayoutFinished(info_.axis_, !isInitialized_);
     isInitialized_ = true;
     if (AceType::InstanceOf<GridScrollLayoutAlgorithm>(gridLayoutAlgorithm)) {
         CheckGridItemRange(DynamicCast<GridScrollLayoutAlgorithm>(gridLayoutAlgorithm)->GetItemAdapterRange());
@@ -782,7 +770,6 @@ bool GridPattern::UpdateStartIndex(int32_t index)
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     info_.jumpIndex_ = index;
-    RequestJump(index, info_.scrollAlign_, -info_.extraOffset_.value_or(0.0f));
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     // AccessibilityEventType::SCROLL_END
     SetScrollSource(SCROLL_FROM_JUMP);
@@ -1383,7 +1370,6 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             targetIndex_ = index;
             scrollAlign_ = align;
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            RequestFillToTarget(index, align, extraOffset.value_or(0.0f));
         } else {
             UpdateStartIndex(index, align);
         }
@@ -1690,24 +1676,5 @@ ScopeFocusAlgorithm GridPattern::GetScopeFocusAlgorithm()
 void GridPattern::HandleOnItemFocus(int32_t index)
 {
     focusHandler_.SetFocusIndex(index);
-}
-
-RefPtr<FillAlgorithm> GridPattern::CreateFillAlgorithm()
-{
-    auto props = GetLayoutProperty<GridLayoutProperty>();
-    if (!props->IsConfiguredScrollable()) {
-        return nullptr;
-    }
-    return MakeRefPtr<GridFillAlgorithm>(*props, info_);
-}
-int32_t GridPattern::ConvertLargeDelta(float delta)
-{
-    auto converter = GridLargeDeltaConverter(info_, GetHost().GetRawPtr());
-    int32_t res = converter.Convert(delta);
-
-    if (res == info_.childrenCount_ - 1) {
-        res = res - (info_.endIndex_ - info_.startIndex_); // estimate first item in the viewport
-    }
-    return res;
 }
 } // namespace OHOS::Ace::NG

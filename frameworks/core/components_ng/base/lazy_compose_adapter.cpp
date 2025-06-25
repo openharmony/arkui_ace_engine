@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/components_ng/pattern/scrollable/lazy_compose_adapter.h"
+#include "core/components_ng/base/lazy_compose_adapter.h"
 
 #include "core/components_ng/base/frame_node.h"
 namespace OHOS::Ace::NG {
@@ -56,14 +56,7 @@ void LazyComposeAdapter::SetCallbacks(CreateItemCb create, UpdateRangeCb update)
     createItem_ = std::move(create);
     updateRange_ = std::move(update);
 }
-int32_t LazyComposeAdapter::GetTotalCount() const
-{
-    return totalCount_;
-}
-void LazyComposeAdapter::SetTotalCount(int32_t value)
-{
-    totalCount_ = value;
-}
+
 uint32_t LazyComposeAdapter::GetIndexOfChild(const RefPtr<FrameNode>& child)
 {
     return items_.GetKey(child).value_or(0);

@@ -168,38 +168,6 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
     ACE_BUILD_TRACE_END();
 }
 
-UINode* UINode::GetChildAfter(UINode* node)
-{
-    const auto& children = GetChildren(true);
-    auto iter = children.rbegin();
-    UINode* targetNode = nullptr;
-    while (iter != children_.rend()) {
-        auto* point = iter->GetRawPtr();
-        if (point == node) {
-            break;
-        }
-        targetNode = point;
-        iter++;
-    }
-    return targetNode;
-}
-
-UINode* UINode::GetChildBefore(UINode* node)
-{
-    const auto& children = GetChildren(true);
-    auto iter = children.begin();
-    UINode* targetNode = nullptr;
-    while (iter != children_.end()) {
-        auto* point = iter->GetRawPtr();
-        if (point == node) {
-            break;
-        }
-        targetNode = point;
-        iter++;
-    }
-    return targetNode;
-}
-
 bool UINode::CanAddChildWhenTopNodeIsModalUec(std::list<RefPtr<UINode>>::iterator& curIter)
 {
     if (children_.empty()) {

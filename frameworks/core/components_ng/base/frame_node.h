@@ -47,6 +47,7 @@
 #include "core/components_ng/event/target_component.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/base/lazy_compose_adapter.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
@@ -72,7 +73,6 @@ class Pattern;
 class StateModifyTask;
 class UITask;
 struct DirtySwapConfig;
-class ScrollWindowAdapter;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
@@ -1211,6 +1211,22 @@ public:
 
     void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType) override;
 
+    /* ============================== Arkoala LazyForEach adapter section START ==============================*/
+    void ArkoalaSynchronize(
+        LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount);
+
+    void ArkoalaRemoveItemsOnChange(int32_t changeIndex);
+
+private:
+    RefPtr<LayoutWrapper> ArkoalaGetOrCreateChild(uint32_t index);
+    void ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached);
+
+    /* temporary adapter to provide LazyForEach feature in Arkoala */
+    std::unique_ptr<LazyComposeAdapter> arkoalaLazyAdapter_;
+
+public:
+    /* ============================== Arkoala LazyForEach adapter section END ================================*/
+
     void ChildrenUpdatedFrom(int32_t index);
     int32_t GetChildrenUpdated() const
     {
@@ -1344,9 +1360,6 @@ public:
     void AddVisibilityDumpInfo(const std::pair<uint64_t, std::pair<VisibleType, bool>>& dumpInfo);
 
     std::string PrintVisibilityDumpInfo() const;
-
-    ScrollWindowAdapter* GetScrollWindowAdapter() const;
-    ScrollWindowAdapter* GetOrCreateScrollWindowAdapter();
 
     bool HasMultipleChild();
 
