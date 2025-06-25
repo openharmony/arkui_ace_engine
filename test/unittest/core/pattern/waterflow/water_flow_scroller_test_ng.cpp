@@ -517,6 +517,7 @@ HWTEST_F(WaterFlowScrollerTestNg, SpringAnimation001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowScrollerTestNg, Refresh001, TestSize.Level1)
 {
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     RefreshModelNG refreshModel;
     refreshModel.Create();
     auto refreshNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
