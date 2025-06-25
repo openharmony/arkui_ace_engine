@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_WEBVIEW_FUNCTION_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_WEBVIEW_FUNCTION_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_COMMON_EVENT_FUNCTION_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_COMMON_EVENT_FUNCTION_H
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 
 namespace OHOS::Ace::Framework {
-class JsWebViewFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsWebViewFunction, JsFunction)
+
+template<class T, int32_t ARGC = 0>
+class ACE_EXPORT JsCommonEventFunction : public JsFunction {
+    DECLARE_ACE_TYPE(JsCommonEventFunction, JsFunction);
 
 public:
-    explicit JsWebViewFunction(const JSRef<JSFunc>& jsFunction)
+    JsCommonEventFunction() = delete;
+    JsCommonEventFunction(const JSRef<JSFunc>& jsFunction)
         : JsFunction(JSRef<JSObject>(), jsFunction) {}
-    ~JsWebViewFunction() override = default;
-    void Execute()
+    ~JsCommonEventFunction() override = default;
+
+    void Execute(JSRef<JSVal>* argv)
     {
-        ExecuteJS();
+        JsFunction::ExecuteJS(ARGC, argv);
     }
-    void Execute(const std::string& result);
 };
+
 } // namespace OHOS::Ace::Framework
 
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_WEBVIEW_FUNCTION_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_COMMON_EVENT_FUNCTION_H

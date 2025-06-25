@@ -134,7 +134,7 @@ void JSPlugin::JsOnComplete(const JSCallbackInfo& info)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Plugin.OnComplete");
             PipelineContext::SetCallBackNode(node);
-            func->ExecuteJSWithContext(0, nullptr, execCtx);
+            func->Execute();
         };
         PluginModel::GetInstance()->SetOnComplete(std::move(OnComplete));
     }
@@ -153,7 +153,7 @@ void JSPlugin::JsOnError(const JSCallbackInfo& info)
             ACE_SCORING_EVENT("Plugin.OnComplete");
             std::vector<std::string> keys = { "errcode", "msg" };
             PipelineContext::SetCallBackNode(node);
-            func->ExecuteWithContext(keys, param, execCtx);
+            func->Execute(keys, param);
         };
         PluginModel::GetInstance()->SetOnError(std::move(onError));
     }

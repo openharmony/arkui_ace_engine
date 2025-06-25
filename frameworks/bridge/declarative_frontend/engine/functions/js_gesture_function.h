@@ -16,19 +16,20 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_GESTURE_FUNCTION_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_GESTURE_FUNCTION_H
 
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_common_gesture_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
 
-class JsGestureFunction : public JsFunction {
-    DECLARE_ACE_TYPE(JsGestureFunction, JsFunction)
+class JsGestureFunction : public JsCommonGestureFunction {
+    DECLARE_ACE_TYPE(JsGestureFunction, JsCommonGestureFunction)
 
 public:
-    explicit JsGestureFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
+    explicit JsGestureFunction(const JSRef<JSFunc>& jsFunction)
+        : JsCommonGestureFunction(jsFunction) {}
 
     ~JsGestureFunction() override {};
-    void Execute() override;
+    void Execute();
     void Execute(const GestureEvent& info);
 
 private:

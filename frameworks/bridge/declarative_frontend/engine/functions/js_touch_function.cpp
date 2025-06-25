@@ -17,10 +17,12 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 #include "base/log/log.h"
+#include "bridge/declarative_frontend/engine/functions/js_common_utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 
 namespace OHOS::Ace::Framework {
+using namespace OHOS::Ace::Framework::CommonUtils;
 
 JSRef<JSObject> JsTouchFunction::CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventInfo& info)
 {

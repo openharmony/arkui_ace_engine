@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_checkboxgroup.h"
 
+#include "bridge/declarative_frontend/engine/functions/js_event_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/checkboxgroup_model_impl.h"

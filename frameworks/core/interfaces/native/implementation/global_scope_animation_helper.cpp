@@ -235,7 +235,7 @@ void AnimateToInner(const Ark_AnimateParam* value,
     auto traceStreamPtr = std::make_shared<std::stringstream>();
     auto onFinish = Converter::OptConvert<Callback_Void>(value->onFinish);
     if (onFinish.has_value()) {
-        count = GetAnimationFinshCount();
+        count = GetAnimationFinishCount();
         onFinishEvent = [arkCallback = CallbackHelper(*onFinish),
                             id = Container::CurrentIdSafely(), traceStreamPtr, count]() mutable {
             ContainerScope scope(id);

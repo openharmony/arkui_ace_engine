@@ -32,7 +32,7 @@ public:
 
     ~JsNavigationFunction() override {};
 
-    void Execute() override
+    void Execute()
     {
         ExecuteJS();
     }

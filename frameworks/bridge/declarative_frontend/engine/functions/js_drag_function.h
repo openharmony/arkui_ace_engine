@@ -29,7 +29,7 @@ public:
     static void JSBind(BindingTarget globalObj);
 
     ~JsDragFunction() override {};
-    void Execute() override;
+    void Execute();
     JSRef<JSVal> Execute(const RefPtr<DragEvent>& info);
     JSRef<JSVal> ItemDragStartExecute(const ItemDragInfo& info, int32_t itemIndex);
     void ItemDragEnterExecute(const ItemDragInfo& info);

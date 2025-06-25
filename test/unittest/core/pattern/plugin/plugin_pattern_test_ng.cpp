@@ -645,4 +645,44 @@ HWTEST_F(PluginPatternTestNg, PluginLayoutTestNg, TestSize.Level1)
     layout->Clone();
     layout.Reset();
 }
+
+/**
+ * @tc.name: JSPluginOnCompleteTest
+ * @tc.desc: Test funcions in JSPlugin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PluginPatternTestNg, JSPluginOnCompleteTest, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreatePluginParagraph();
+    auto pattern = frameNode->GetPattern<PluginPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = AceType::DynamicCast<PluginEventHub>(pattern->CreateEventHub());
+    EXPECT_NE(eventHub, nullptr);
+    auto onComplete = [](const std::string& param) { EXPECT_EQ(param, "OnComplete"); };
+
+    pluginModel.SetOnComplete(onComplete);
+    eventHub->FireOnComplete("OnComplete");
+    auto allowUpdate = pattern->ISAllowUpdate();
+    EXPECT_TRUE(allowUpdate);
+}
+
+/**
+ * @tc.name: JSPluginOnErrorTest
+ * @tc.desc: Test funcions in JSPlugin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PluginPatternTestNg, JSPluginOnErrorTest, TestSize.Level1)
+{
+    RefPtr<FrameNode> frameNode = CreatePluginParagraph();
+    auto pattern = frameNode->GetPattern<PluginPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = AceType::DynamicCast<PluginEventHub>(pattern->CreateEventHub());
+    EXPECT_NE(eventHub, nullptr);
+    auto onError = [](const std::string& param) { EXPECT_EQ(param, "OnError"); };
+
+    pluginModel.SetOnError(onError);
+    eventHub->FireOnError("OnError");
+    auto allowUpdate = pattern->ISAllowUpdate();
+    EXPECT_TRUE(allowUpdate);
+}
 } // namespace OHOS::Ace::NG

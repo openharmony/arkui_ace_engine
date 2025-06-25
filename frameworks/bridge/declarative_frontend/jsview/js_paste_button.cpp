@@ -19,6 +19,7 @@
 #endif
 
 #include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_common_utils.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -29,6 +30,7 @@ using OHOS::Ace::NG::PasteButtonModelNG;
 using OHOS::Ace::NG::SecurityComponentTheme;
 
 namespace OHOS::Ace::Framework {
+using namespace OHOS::Ace::Framework::CommonUtils;
 bool JSPasteButton::ParseComponentStyle(const JSCallbackInfo& info,
     PasteButtonPasteDescription& text, PasteButtonIconStyle& icon, int32_t& bg)
 {

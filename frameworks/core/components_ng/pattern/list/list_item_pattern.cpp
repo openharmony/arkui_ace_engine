@@ -674,7 +674,7 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity, 
         }
         listItem->MarkDirtyNode();
         if (trigOnFinishEvent) {
-            listItem->FireOnFinshEvent();
+            listItem->FireOnFinishEvent();
         }
     });
 }
