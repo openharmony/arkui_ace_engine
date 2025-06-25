@@ -15,13 +15,14 @@
 
 #ifndef FOUNDATION_ACE_INTERFACE_UI_CONTENT_PROXY_H
 #define FOUNDATION_ACE_INTERFACE_UI_CONTENT_PROXY_H
-
+#include <functional>
 #include "interfaces/inner_api/ui_session/ui_translate_manager.h"
 
 #include "frameworks/core/components_ng/base/frame_node.h"
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UiTranslateManagerImpl : public UiTranslateManager {
 public:
+    explicit UiTranslateManagerImpl(const RefPtr<TaskExecutor>& taskExecutor) : taskExecutor_(taskExecutor) {};
     void AddTranslateListener(const WeakPtr<NG::FrameNode> node);
     void RemoveTranslateListener(int32_t nodeId);
     void GetWebViewCurrentLanguage() override;
@@ -35,11 +36,13 @@ public:
     void TravelFindPixelMap(RefPtr<NG::UINode> currentNode);
     void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap);
     void FindTopNavDestination(RefPtr<NG::UINode> currentNode, RefPtr<NG::FrameNode>& result);
+    void PostToUI(const std::function<void()>& task) override;
 
 private:
     std::map<int32_t, WeakPtr<NG::FrameNode>> listenerMap_;
     std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> pixelMap_;
     const static std::set<std::string> layoutTags_;
+    RefPtr<TaskExecutor> taskExecutor_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_PROXY_H
