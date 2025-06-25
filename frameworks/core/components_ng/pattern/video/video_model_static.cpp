@@ -192,4 +192,10 @@ void VideoModelStatic::SetOnStop(FrameNode* frameNode, VideoEventFunc&& onStop)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnStop(std::move(onStop));
 }
+
+void VideoModelStatic::SetPosterSourceByPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap)
+{
+    ImageSourceInfo posterSourceInfo(pixMap);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(VideoLayoutProperty, PosterImageInfo, posterSourceInfo, frameNode);
+}
 } // namespace OHOS::Ace::NG

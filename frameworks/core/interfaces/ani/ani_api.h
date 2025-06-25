@@ -138,6 +138,12 @@ struct ArkUIAniImageSpanModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
     void (*setAltPixelMap)(ArkUINodeHandle node, void* pixelmap);
 };
+struct ArkUIAniVideoModifier {
+    void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);
+};
+struct ArkUIAniShapeModifier {
+    void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);
+};
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -152,6 +158,8 @@ struct ArkUIAniModifiers {
     const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();
     const ArkUIAniDragControllerModifier* (*getDragControllerAniModifier)();
     const ArkUIAniImageSpanModifier* (*getImageSpanAniModifier)();
+    const ArkUIAniVideoModifier* (*getArkUIAniVideoModifier)();
+    const ArkUIAniShapeModifier* (*getArkUIAniShapeModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

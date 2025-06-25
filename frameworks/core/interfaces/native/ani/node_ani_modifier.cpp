@@ -24,6 +24,8 @@
 #include "waterflow_ani_modifier.h"
 #include "drag_ani_modifier.h"
 #include "drag_controller_ani_modifier.h"
+#include "video_ani_modifier.h"
+#include "shape_ani_modifier.h"
 
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
@@ -42,6 +44,8 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getAnimationAniModifier = OHOS::Ace::NG::GetAnimationAniModifier,
         .getDragControllerAniModifier = OHOS::Ace::NG::GetDragControllerAniModifier,
         .getImageSpanAniModifier = OHOS::Ace::NG::GetImageSpanAniModifier,
+        .getArkUIAniVideoModifier = OHOS::Ace::NG::GetVideoAniModifier,
+        .getArkUIAniShapeModifier = OHOS::Ace::NG::GetShapeAniModifier,
     };
     return &impl;
 }
