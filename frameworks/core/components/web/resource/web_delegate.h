@@ -953,6 +953,9 @@ public:
     void OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response);
     RefPtr<WebResponse> OnInterceptRequest(const std::shared_ptr<BaseEventInfo>& info);
+    std::string OnOverrideErrorPage(
+        std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> webResourceRequest,
+        std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
     bool IsEmptyOnInterceptRequest();
     void ReportDynamicFrameLossEvent(const std::string& sceneId, bool isStart);
     void RecordWebEvent(Recorder::EventType eventType, const std::string& param) const;

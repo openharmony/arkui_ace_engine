@@ -137,6 +137,7 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnAllSslErrorRequest, bool);
     ACE_WEB_EVENT_PROPERTY(OnSslSelectCertRequest, bool);
     ACE_WEB_EVENT_PROPERTY(OnInterceptRequest, RefPtr<WebResponse>);
+    ACE_WEB_EVENT_PROPERTY(OnOverrideErrorPage, std::string);
     ACE_WEB_EVENT_PROPERTY(OnUrlLoadIntercept, bool);
     ACE_WEB_EVENT_PROPERTY(OnLoadIntercept, bool);
     ACE_WEB_EVENT_PROPERTY(OnOverrideUrlLoading, bool);

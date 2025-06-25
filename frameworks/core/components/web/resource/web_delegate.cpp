@@ -5673,6 +5673,44 @@ RefPtr<WebResponse> WebDelegate::OnInterceptRequest(const std::shared_ptr<BaseEv
     return result;
 }
 
+std::string WebDelegate::OnOverrideErrorPage(
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> webResourceRequest,
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error)
+{
+    auto context = context_.Upgrade();
+    CHECK_NULL_RETURN(context, "");
+    CHECK_NULL_RETURN(webResourceRequest, "");
+    CHECK_NULL_RETURN(error, "");
+    std::string result = "";
+    auto info = std::make_shared<OnOverrideErrorPageEvent>(
+        AceType::MakeRefPtr<WebRequest>(webResourceRequest->RequestHeaders(),
+        webResourceRequest->Method(), webResourceRequest->Url(),
+        webResourceRequest->FromGesture(), webResourceRequest->IsAboutMainFrame(),
+        webResourceRequest->IsRequestRedirect()),
+        AceType::MakeRefPtr<WebError>(error->ErrorInfo(), error->ErrorCode()));
+    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
+    jsTaskExecutor.PostSyncTask(
+        [weak = WeakClaim(this), info, &result]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnOverrideErrorPageEvent = webEventHub->GetOnOverrideErrorPageEvent();
+                CHECK_NULL_VOID(propOnOverrideErrorPageEvent);
+                result = propOnOverrideErrorPageEvent(info);
+                return;
+            }
+            auto webCom = delegate->webComponent_.Upgrade();
+            CHECK_NULL_VOID(webCom);
+            result = webCom->OnOverrideErrorPage(info.get());
+        },
+        "ArkUIWebOverrideErrorPage");
+    return result;
+}
+
 void WebDelegate::OnTooltip(const std::string& tooltip)
 {
     auto context = context_.Upgrade();

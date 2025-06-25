@@ -752,6 +752,36 @@ HWTEST_F(WebModelTestNg, SetOnInterceptRequest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetOnOverrideErrorPage001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnOverrideErrorPage001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    bool callbackCalled = false;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    WebModelNG webModelNG;
+    webModelNG.SetOnOverrideErrorPage([&callbackCalled](const BaseEventInfo* info) {
+        callbackCalled = true;
+        return "";
+    });
+
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnOverrideErrorPageEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
  * @tc.name: SetOnFileSelectorShow001
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC

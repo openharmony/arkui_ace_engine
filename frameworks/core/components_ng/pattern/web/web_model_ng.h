@@ -86,6 +86,7 @@ public:
     void SetOnErrorReceive(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnHttpErrorReceive(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnInterceptRequest(std::function<RefPtr<WebResponse>(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetOnOverrideErrorPage(std::function<std::string(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnUrlLoadIntercept(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnLoadIntercept(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;

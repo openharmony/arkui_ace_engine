@@ -1516,6 +1516,10 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
     onInterceptRequest(callback: (event?: {
         request: WebResourceRequest;
     } | undefined) => WebResourceResponse): this;
+    onOverrideErrorPage(callback: (event?: {
+        webResourceRequest: WebResourceRequest;
+        error: WebResourceError;
+    } | undefined) => string): this;
     onPermissionRequest(callback: (event?: {
         request: PermissionRequest;
     } | undefined) => void): this;
