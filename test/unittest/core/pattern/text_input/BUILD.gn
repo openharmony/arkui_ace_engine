@@ -22,6 +22,7 @@ ace_unittest("TextInputTest") {
     "text_area_test.cpp",
     "text_area_test_two.cpp",
     "text_field_algorithm_test.cpp",
+    "text_field_auto_fill_controller_test.cpp",
     "text_field_content_modifier_test.cpp",
     "text_field_controller_test.cpp",
     "text_field_keyevent_test.cpp",
