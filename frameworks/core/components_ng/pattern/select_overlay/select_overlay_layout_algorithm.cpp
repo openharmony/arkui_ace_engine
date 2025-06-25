@@ -66,7 +66,9 @@ void SelectOverlayLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
-    auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
+    auto keyboardInsert = safeAreaManager->GetKeyboardInset();
+    keyboardInsert = safeAreaManager->GetKeyboardWebInset().Combine(keyboardInsert);
+    auto keyboardHeight = keyboardInsert.Length();
     auto safeAreaInsets = safeAreaManager->GetSafeAreaWithoutProcess();
     auto top = safeAreaInsets.top_.Length();
     auto bottom = GreatNotEqual(keyboardHeight, 0.0) ? 0.0 : safeAreaInsets.bottom_.Length();
@@ -165,6 +167,7 @@ OffsetF SelectOverlayLayoutAlgorithm::CalculateCustomMenuByMouseOffset(LayoutWra
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, menuOffset);
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
+    keyboardInsert = safeAreaManager->GetKeyboardWebInset().Combine(keyboardInsert);
     auto keyboardY = maxHeight - keyboardInsert.Length();
     uint32_t top = safeAreaManager->GetSystemSafeArea().top_.Length();
     if (GreatNotEqual(menuOffset.GetY() + menuSize.Height(), keyboardY)) {
@@ -521,8 +524,7 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffset(
     auto safeAreaBottom = safeAreaManager->GetSafeAreaWithoutProcess().bottom_.start;
     safeAreaBottom = GreatNotEqual(safeAreaBottom, 0.0f) ? safeAreaBottom : pipeline->GetRootRect().Bottom();
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
-    keyboardInsert =
-        GreatNotEqual(keyboardInsert.Length(), 0.0f) ? keyboardInsert : safeAreaManager->GetKeyboardWebInset();
+    keyboardInsert = safeAreaManager->GetKeyboardWebInset().Combine(keyboardInsert);
     auto avoidKeyboardPosition = keyboardInsert.start - defaultPositionY - menuRect.Height();
     avoidKeyboardPosition = GreatNotEqual(avoidKeyboardPosition, 0.0f) ? avoidKeyboardPosition : 0.0f;
     auto shouldAvoidKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f) &&
@@ -573,6 +575,7 @@ void SelectOverlayLayoutAlgorithm::AdjustMenuOffsetAtSingleHandleBottom(const Re
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
+    keyboardInsert = safeAreaManager->GetKeyboardWebInset().Combine(keyboardInsert);
     auto shouldAvoidKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f) &&
                                GreatNotEqual(menuOffset.GetY() + menuRect.Height(), keyboardInsert.start);
     if (shouldAvoidKeyboard) {
@@ -597,6 +600,7 @@ OffsetF SelectOverlayLayoutAlgorithm::AdjustSelectMenuOffsetWhenHandlesUnshown(c
         return menuOffset;
     }
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
+    keyboardInsert = safeAreaManager->GetKeyboardWebInset().Combine(keyboardInsert);
     auto shouldAvoidKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f) &&
         GreatNotEqual(menuRect.Bottom(), keyboardInsert.start);
     auto isBottomTouchKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f) &&
@@ -668,6 +672,7 @@ OffsetF SelectOverlayLayoutAlgorithm::ComputeExtensionMenuPosition(LayoutWrapper
         auto safeAreaManager = pipeline->GetSafeAreaManager();
         CHECK_NULL_RETURN(safeAreaManager, false);
         auto keyboardInsert = safeAreaManager->GetKeyboardInset();
+        keyboardInsert = safeAreaManager->GetKeyboardWebInset().Combine(keyboardInsert);
         return GreatNotEqual(keyboardInsert.Length(), 0.0f) && GreatNotEqual(extensionBottom, keyboardInsert.start);
     };
     if (GreatNotEqual(extensionBottom, extensionLayoutConstraintMaxSize.Height()) || isCoveredBySoftKeyBoard()) {
@@ -700,6 +705,7 @@ OffsetF SelectOverlayLayoutAlgorithm::NewMenuAvoidStrategy(
     CHECK_NULL_RETURN(safeAreaManager, OffsetF());
     auto topArea = safeAreaManager->GetSystemSafeArea().top_.Length();
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
+    keyboardInsert = safeAreaManager->GetKeyboardWebInset().Combine(keyboardInsert);
     float positionX = (selectArea.Left() + selectArea.Right() - menuWidth) / 2.0f;
     auto hasKeyboard = GreatNotEqual(keyboardInsert.Length(), 0.0f);
     auto downHandle = info_->handleReverse ? info_->firstHandle : info_->secondHandle;
