@@ -30,7 +30,7 @@ import { QRCodeBootcamp } from './QRCodeBootcamp';
 import { TextClockBootcamp } from './TextClockBootcamp';
 import { TextTimerBootcamp } from './TextTimerBootcamp';
 import { ToastBootcamp } from './ToastBootcamp';
-
+import { MarqueeBootcamp } from './MarqueeBootcamp';
 
 export const informationDisplayRoute: RouteGroup = {
   name: 'InformationDisplay',
@@ -51,8 +51,8 @@ export const informationDisplayRoute: RouteGroup = {
     { name: 'TextClock', label: '文本时钟/TextClock' },
     { name: 'TextTimer', label: '文本计时器/TextTimer' },
     { name: 'AdvancedCounter', label: '计数器/AdvancedCounter' },
-    { name: 'Toast', label: '即时反馈/Toast' }
-
+    { name: 'Toast', label: '即时反馈/Toast' },
+    { name: 'Marquee', label: '跑马灯/Marquee' }
   ]
 };
 
@@ -90,6 +90,8 @@ export function informationDisplayDestination(name: string, route: Route) {
     AdvancedCounterBootcamp({ title: route.label })
   } else if (name === 'InformationDisplay/Toast') {
     ToastBootcamp({ title: route.label })
+  } else if (name === 'InformationDisplay/Marquee') {
+    MarqueeBootcamp({ title: route.label })
   }
 
 }
