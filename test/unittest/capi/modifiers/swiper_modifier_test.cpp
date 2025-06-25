@@ -20,6 +20,7 @@
 
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"
