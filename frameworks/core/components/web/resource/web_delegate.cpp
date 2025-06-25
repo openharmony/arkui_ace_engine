@@ -6040,6 +6040,9 @@ void WebDelegate::OnResourceLoad(const std::string& url)
 void WebDelegate::OnScaleChange(float oldScaleFactor, float newScaleFactor)
 {
     CHECK_NULL_VOID(taskExecutor_);
+    if (oldScaleFactor != newScaleFactor) {
+        SetViewportScaleState();
+    }
     taskExecutor_->PostTask(
         [weak = WeakClaim(this), oldScaleFactor, newScaleFactor]() {
             auto delegate = weak.Upgrade();
@@ -8530,6 +8533,12 @@ void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double bord
     CHECK_NULL_VOID(nweb_);
     nweb_->SetBorderRadiusFromWeb(
         borderRadiusTopLeft, borderRadiusTopRight, borderRadiusBottomLeft, borderRadiusBottomRight);
+}
+
+void WebDelegate::SetViewportScaleState()
+{
+    CHECK_NULL_VOID(nweb_);
+    nweb_->SetViewportScaleState();
 }
 
 } // namespace OHOS::Ace
