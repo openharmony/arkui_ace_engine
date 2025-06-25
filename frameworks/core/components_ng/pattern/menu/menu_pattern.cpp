@@ -1767,7 +1767,8 @@ MenuItemInfo MenuPattern::GetMenuItemInfo(const RefPtr<UINode>& child, const Ref
                 offset -= OffsetF(0.0f, static_cast<float>(pipeline->GetCustomTitleHeight().ConvertToPx()));
             }
             menuItemInfo.originOffset = offset - OffsetF(PADDING.ConvertToPx(), PADDING.ConvertToPx());
-            menuItemInfo.endOffset = subMenu->GetPaintRectOffset(false, true);
+            menuItemInfo.endOffset = OffsetF(menuItemInfo.originOffset.GetX(),
+                subMenu->GetPaintRectOffset(false, true).GetY());
             if (isContainerModal) {
                 menuItemInfo.endOffset -= OffsetF(0.0f,
                     static_cast<float>(pipeline->GetCustomTitleHeight().ConvertToPx())
