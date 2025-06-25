@@ -435,7 +435,7 @@ class __RepeatVirtualScroll2Impl<T> {
     // called from __Repeat.render
     public render(config: __RepeatConfig<T>, isInitialRender: boolean): void {
 
-        if (this.arr_ && this.arr_ !== config.arr) {
+        if (this.arr_ && this.arr_ !== config.arr && this.arr_[__RepeatVirtualScroll2Impl.REF_META] !== undefined) {
             // unsubscribe from the old source array
             this.arr_[__RepeatVirtualScroll2Impl.REF_META].delete(this.selfPtr_);
         }
@@ -449,7 +449,9 @@ class __RepeatVirtualScroll2Impl<T> {
         }
         
         // subscribe to the new source array
-        this.arr_[__RepeatVirtualScroll2Impl.REF_META].add(this.selfPtr_);
+        if (this.arr_[__RepeatVirtualScroll2Impl.REF_META] !== undefined) {
+            this.arr_[__RepeatVirtualScroll2Impl.REF_META].add(this.selfPtr_);
+        }
 
         // totalCount can be function, number or undefined
         this.totalCount_ = config.totalCount;
