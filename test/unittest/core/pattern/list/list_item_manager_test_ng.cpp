@@ -110,6 +110,7 @@ HWTEST_F(ListItemManagerTestNg, HandleScrollCallback001, TestSize.Level1)
     listItemDragManager->HandleScrollCallback();
     EXPECT_FALSE(listItemDragManager->scrolling_);
 }
+
 /**
  * @tc.name: HandleOnItemDragUpdate001
  * @tc.desc: Test ListItemDragManager HandleOnItemDragUpdate
