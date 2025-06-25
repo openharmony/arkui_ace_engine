@@ -298,11 +298,14 @@ public:
     bool IsScrollable() const;
     void AvoidAiBar();
 
+    void BeforeCreateLayoutWrapper() override;
     void AvoidSafeArea(bool forceAvoid = false);
+    void AvoidKeyboard(bool forceAvoid);
     void CheckBuilderChange();
     float GetSheetHeightChange();
     void ScrollTo(float height);
     bool AdditionalScrollTo(const RefPtr<FrameNode>& scroll, float height);
+    void SetColumnMinSize(bool reset = false);
     float InitialSingleGearHeight(NG::SheetStyle& sheetStyle);
     float GetSheetTopSafeArea();
     float UpdateSheetTransitionOffset();
@@ -575,6 +578,16 @@ public:
         sheetOffsetY_ = offsetY;
     }
 
+    bool IsWindowRotate() const
+    {
+        return windowRotate_;
+    }
+
+    void SetWindowRotate(bool windowRotate)
+    {
+        windowRotate_ = windowRotate;
+    }
+
     void SetWindowChanged(bool change)
     {
         windowChanged_ = change;
@@ -603,6 +616,11 @@ public:
     void SetIsScrolling(bool value)
     {
        isScrolling_ = value;
+    }
+
+    SheetKeyboardAvoidMode GetKeyboardAvoidMode() const
+    {
+        return keyboardAvoidMode_;
     }
 
     float GetScrollHeightNoProcess() const
@@ -1021,6 +1039,7 @@ public:
         return windowSize_;
     }
 
+    void TranslateTo(float height);
     void GetArrowOffsetByPlacement(const RefPtr<SheetPresentationLayoutAlgorithm>& layoutAlgorithm);
     void DismissSheetShadow(const RefPtr<RenderContext>& context);
     void ResetClipShape();
@@ -1058,8 +1077,6 @@ private:
 
     void RegisterHoverModeChangeCallback();
     void InitPageHeight();
-    void TranslateTo(float height);
-    void SetColumnMinSize(bool reset = false);
     void UpdateCloseIconStatus();
     void UpdateTitlePadding();
     RefPtr<FrameNode> GetTitleNode();
@@ -1140,7 +1157,7 @@ private:
     float wrapperHeight_ = 0.0f; // sheetWrapper frameSize Height
     float wrapperWidth_ = 0.0f; // sheetWrapper frameSize Width
     float pageHeight_ = 0.0f; // root Height, = maxSize.Height()
-    float scrollHeight_ = 0.0f;
+    float scrollHeight_ = 0.0f; // not scroll frameHeight, it is scroll Height after ScrollTo.
     float preWidth_ = 0.0f;
     int32_t preType_ = -1;
     float sheetTopSafeArea_ = .0f;
