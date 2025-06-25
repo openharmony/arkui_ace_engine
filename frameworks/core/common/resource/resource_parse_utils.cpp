@@ -376,6 +376,8 @@ bool ResourceParseUtils::ParseResColor(const RefPtr<ResourceObject>& resObj, Col
         if (isReloading_) {
             result = ColorInverter::Invert(resObj->GetColor(), resObj->GetInstanceId(), resObj->GetNodeTag());
             resObj->SetColor(result);
+        } else {
+            result = resObj->GetColor();
         }
         return true;
     }

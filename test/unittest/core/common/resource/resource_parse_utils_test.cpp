@@ -241,4 +241,25 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest004, TestSize.Level1)
     ResourceParseUtils::SetIsReloading(false);
     EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObjWithColor, color));
 }
+
+/**
+ * @tc.name: ResourceParseUtilsTest003
+ * @tc.desc: Test resourceParseUtils.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ParseResColor with Color::WHITE.
+     * @tc.expect: ParseResColor return Color::WHITE.
+     */
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    Color color = Color::WHITE;
+    resObj->SetColor(color);
+    resObj->SetIsResource(false);
+    ResourceParseUtils::SetIsReloading(false);
+    Color result;
+    ResourceParseUtils::ParseResColor(resObj, result);
+    EXPECT_EQ(color, result);
+}
 } // namespace OHOS::Ace
