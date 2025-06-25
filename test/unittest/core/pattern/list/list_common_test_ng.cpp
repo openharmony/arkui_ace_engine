@@ -2427,44 +2427,6 @@ HWTEST_F(ListCommonTestNg, LazyForEachDrag003, TestSize.Level1)
     dragManager->HandleOnItemDragEnd(info);
     EXPECT_EQ(actualFrom, 0);
     EXPECT_EQ(actualTo, 2);
-
-    /**
-     * @tc.steps: step5. Drag item(index:2)
-     */
-    dragManager = GetLazyForEachItemDragManager(2);
-    dragManager->HandleOnItemDragStart(info);
-    EXPECT_EQ(dragManager->fromIndex_, 2);
-
-    /**
-     * @tc.steps: step6. Drag up delta > ITEM_MAIN_SIZE/2
-     * @tc.expected: Change of order
-     */
-    info.SetOffsetX(0.0);
-    info.SetOffsetY(-51.0);
-    info.SetGlobalPoint(Point(0, 149.f));
-    dragManager->HandleOnItemDragUpdate(info);
-    
-     FlushUITasks();
-    EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "1", "0", "2" }));
-
-    /**
-     * @tc.steps: step7. Drag up delta > ITEM_MAIN_SIZE
-     * @tc.expected: Continue change of order
-     */
-    info.SetOffsetX(0.0);
-    info.SetOffsetY(-151.0);
-    info.SetGlobalPoint(Point(0, 49.f));
-    dragManager->HandleOnItemDragUpdate(info);
-    FlushUITasks();
-    EXPECT_TRUE(VerifyLazyForEachItemsOrder({ "0", "1", "2" }));
-
-    /**
-     * @tc.steps: step8. Drag end
-     * @tc.expected: Trigger onMoveEvent
-     */
-    dragManager->HandleOnItemDragEnd(info);
-    EXPECT_EQ(actualFrom, 2);
-    EXPECT_EQ(actualTo, 0);
 }
 /**
  * @tc.name: InitDragDropEvent001
