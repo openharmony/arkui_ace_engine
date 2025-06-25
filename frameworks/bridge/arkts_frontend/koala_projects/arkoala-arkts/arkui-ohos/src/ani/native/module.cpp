@@ -24,7 +24,7 @@
 #include "drag_and_drop/native_drag_drop_global.h"
 #include "dragController/drag_controller_module.h"
 #include "image_span/image_span_module.h"
-#include "image/native_image.h"
+#include "image/image_module.h"
 #include "load.h"
 #include "log/log.h"
 #include "utils/convert_utils.h"
@@ -53,6 +53,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Image_ResizableOptions",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ImageResizableOptions)
+        },
+        ani_native_function {
+            "_Image_Consturct_PixelMap",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ImageConstructPixelMap)
+        },
+        ani_native_function {
+            "_Image_Consturct_DrawableDescriptor",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ImageConstructDrawableDescriptor)
         },
         ani_native_function {
             "_Web_SetWebOptions",

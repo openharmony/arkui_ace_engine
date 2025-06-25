@@ -19,7 +19,7 @@
 #include "core/components/common/layout/constants.h"
 
 namespace OHOS::Ace {
-RefPtr<DrawableDescriptor> DrawableDescriptor::CreateDrawable(void* sptrAddr)
+RefPtr<AceDrawableDescriptor> AceDrawableDescriptor::CreateDrawable(void* sptrAddr)
 {
     auto* drawable = reinterpret_cast<Drawable::DrawableDescriptor*>(sptrAddr);
     if (drawable == nullptr) {

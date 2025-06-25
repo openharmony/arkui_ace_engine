@@ -19,47 +19,49 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "testing_image_info.h"
 #include "testing_rect.h"
 
 namespace OHOS::Ace::Testing {
-class TestingImageInfo;
 typedef uint32_t ColorQuad;
-
-enum ColorType {
-    COLORTYPE_UNKNOWN = 0,
-    COLORTYPE_ALPHA_8,
-    COLORTYPE_RGB_565,
-    COLORTYPE_ARGB_4444,
-    COLORTYPE_RGBA_8888,
-    COLORTYPE_BGRA_8888,
-};
-
-enum AlphaType {
-    ALPHATYPE_UNKNOWN = 0,
-    ALPHATYPE_OPAQUE,
-    ALPHATYPE_PREMUL,
-    ALPHATYPE_UNPREMUL,
-};
-
-struct BitmapFormat {
-    ColorType colorType;
-    AlphaType alphaType;
-};
-
 class TestingBitmap {
 public:
     TestingBitmap() = default;
-    ~TestingBitmap() = default;
+    virtual ~TestingBitmap() = default;
 
-    virtual void* GetPixels()
+    bool Build(const Testing::TestingImageInfo& imageInfo, int32_t stride = 0)
     {
-        return nullptr;
+        return true;
     }
 
-    void SetPixels(void* pixel) {}
+    virtual void* GetPixels() const
+    {
+        return pixels_;
+    }
+
+    void SetPixels(void* pixel)
+    {
+        pixels_ = pixel;
+    }
 
     void ClearWithColor(const ColorQuad& color) const {}
+
     size_t ComputeByteSize() const
+    {
+        return 0;
+    }
+
+    int GetWidth() const
+    {
+        return 100;
+    }
+
+    int GetHeight() const
+    {
+        return 100;
+    }
+
+    int GetRowBytes() const
     {
         return 0;
     }
@@ -81,6 +83,9 @@ public:
     {
         return false;
     }
+
+private:
+    void* pixels_;
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_BITMAP_H
