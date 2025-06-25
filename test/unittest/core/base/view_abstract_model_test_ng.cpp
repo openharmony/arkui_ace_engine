@@ -1928,7 +1928,8 @@ HWTEST_F(ViewAbstractModelTestNg, BindDragWithContextMenuParamsTest001, TestSize
      * @tc.steps: step2. Bind menu param and verify gesture hub internal state.
      * @tc.expected: isBindCustomMenu = true, previewMode and isShow are set correctly.
      */
-    viewAbstractModelNG.BindDragWithContextMenuParams(&frameNode, param);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    viewAbstractModelNG.BindDragWithContextMenuParams(param);
 
     auto gestureHub = frameNode.GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
@@ -1964,7 +1965,8 @@ HWTEST_F(ViewAbstractModelTestNg, BindDragWithContextMenuParamsTest002, TestSize
      * @tc.steps: step2. Bind menu param and verify gesture hub internal state.
      * @tc.expected: isBindLongPressMenu = true, longPressPreviewMode set to CUSTOM, menuPreviewScale defaulted.
      */
-    viewAbstractModelNG.BindDragWithContextMenuParams(&frameNode, param);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    viewAbstractModelNG.BindDragWithContextMenuParams(param);
 
     auto gestureHub = frameNode.GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
