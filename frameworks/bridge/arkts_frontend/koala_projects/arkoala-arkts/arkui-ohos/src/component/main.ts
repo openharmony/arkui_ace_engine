@@ -23,7 +23,7 @@ import { BlurOptions, SheetTitleOptions, CustomBuilder } from "@arkoala/arkui/co
 import { ResourceColor, ResourceStr, Font } from "@arkoala/arkui/units"
 
 import { Resource } from "global.resource"
-import { Literal_Alignment_align } from './'
+import { BackgroundOptions } from './'
 
 import { Alignment, TextOverflow, TextHeightAdaptivePolicy } from "@arkoala/arkui/enums"
 
@@ -269,7 +269,7 @@ function checkButton() {
     checkResult("height", () => peer.height0Attribute(44),
         "height({.type=1, .value=44, .unit=1, .resource=0})")
     const builder: CustomBuilder = (): void => { }
-    const options: Literal_Alignment_align = { align: Alignment.Center }
+    const options: BackgroundOptions = { align: Alignment.Center }
     checkResult("background", () => peer.backgroundAttribute(builder, options),
         "background({.resource={.resourceId=104, .hold=0, .release=0}, .call=0}, {.tag=INTEROP_TAG_OBJECT, .value={.align={.tag=INTEROP_TAG_OBJECT, .value=Ark_Alignment(4)}}})")
     checkResult("type", () => peer.typeAttribute(ButtonType.Circle), "type(Ark_ButtonType(1))")
