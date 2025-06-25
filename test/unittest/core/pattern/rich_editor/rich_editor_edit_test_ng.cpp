@@ -1295,6 +1295,30 @@ HWTEST_F(RichEditorEditTestNg, InsertValueOperation001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InsertValueOperation002
+ * @tc.desc: test InsertValueOperation
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestNg, InsertValueOperation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init and call function.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+
+    AddSpan(INIT_VALUE_1);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
+    richEditorPattern->textSelector_.Update(0, 6);
+    EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
+    richEditorPattern->InsertValueOperation(INIT_VALUE_1, nullptr, OperationType::DEFAULT, false);
+}
+
+/**
  * @tc.name: ProcessInsertValue001
  * @tc.desc: test ProcessInsertValue
  * @tc.type: FUNC
