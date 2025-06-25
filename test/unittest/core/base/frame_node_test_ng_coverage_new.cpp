@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -679,7 +679,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest005, TestSize.Level1)
     ASSERT_NE(gestureHub, nullptr);
     gestureHub->hitTestMode_ = HitTestMode::HTMBLOCK;
     auto result = frameNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
-    EXPECT_EQ(result, HitTestResult::BUBBLING);
+    EXPECT_EQ(result, HitTestResult::STOP_BUBBLING);
 }
 
 /**
@@ -790,6 +790,228 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest007, TestSize.Level1)
     auto result = frameNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
     EXPECT_EQ(result, HitTestResult::BUBBLING);
 }
+
+/**
+ * @tc.name: FrameNodeAxisTest008
+ * @tc.desc: Test frameNode AxisTest & hitTestBehavior when parent is HTMBLOCK_HIERARCHY and child is default and
+ * consumed event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct AxisTest parameters.
+     */
+    TouchRestrict touchRestrict;
+    AxisTestResult result;
+
+    /**
+     * @tc.steps: step2. create parent node and set HTMBLOCK_HIERARCHY.
+     */
+    FRAME_NODE_PARENT->isActive_ = true;
+    auto parentEventHub = FRAME_NODE_PARENT->GetOrCreateEventHub<EventHub>();
+    parentEventHub->SetEnabled(true);
+    auto parentGestureEventHub = FRAME_NODE_PARENT->GetOrCreateGestureEventHub();
+    parentGestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK_HIERARCHY);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContext->rect_ = RectF(0, 0, 100, 100);
+    mockRenderContext->paintRect_ = RectF(0, 0, 100, 100);
+    FRAME_NODE_PARENT->renderContext_ = mockRenderContext;
+    auto localPoint = PointF(10, 10);
+    EXPECT_CALL(*mockRenderContext, GetPointWithTransform(_)).WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+
+    /**
+     * @tc.steps: step3. create childnode.
+     */
+    auto childNode = FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    childNode->SetExclusiveEventForChild(true);
+    auto mockRenderContextforChild = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContextforChild->rect_ = RectF(50, 50, 50, 50);
+    EXPECT_CALL(*mockRenderContextforChild, GetPointWithTransform(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+    childNode->renderContext_ = mockRenderContextforChild;
+    childNode->SetActive(true);
+
+    /**
+     * @tc.steps: step4. add childnode to the framenode.
+     * @tc.expected: expect The function return value is BLOCK_HIERARCHY.
+     */
+    std::list<RefPtr<FrameNode>> children;
+    children.push_back(childNode);
+    FRAME_NODE_PARENT->frameChildren_ = { children.begin(), children.end() };
+    auto test = FRAME_NODE_PARENT->AxisTest(localPoint, localPoint, localPoint, touchRestrict, result);
+    EXPECT_EQ(test, HitTestResult::BLOCK_HIERARCHY);
+}
+
+/**
+ * @tc.name: FrameNodeAxisTest009
+ * @tc.desc: Test frameNode AxisTest & hitTestBehavior when parent is HTMBLOCK_HIERARCHY and child is default and
+ * not consumed event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct AxisTest parameters.
+     */
+    TouchRestrict touchRestrict;
+    AxisTestResult result;
+
+    /**
+     * @tc.steps: step2. create parent node and set HTMBLOCK_HIERARCHY.
+     */
+    FRAME_NODE_PARENT->isActive_ = true;
+    auto parentEventHub = FRAME_NODE_PARENT->GetOrCreateEventHub<EventHub>();
+    parentEventHub->SetEnabled(true);
+    auto parentGestureEventHub = FRAME_NODE_PARENT->GetOrCreateGestureEventHub();
+    parentGestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK_HIERARCHY);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContext->rect_ = RectF(0, 0, 100, 100);
+    mockRenderContext->paintRect_ = RectF(0, 0, 100, 100);
+    FRAME_NODE_PARENT->renderContext_ = mockRenderContext;
+    auto localPoint = PointF(10, 10);
+    EXPECT_CALL(*mockRenderContext, GetPointWithTransform(_)).WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+
+    /**
+     * @tc.steps: step3. create childnode.
+     */
+    auto childNode = FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    childNode->SetExclusiveEventForChild(true);
+    auto mockRenderContextforChild = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContextforChild->rect_ = RectF(0, 0, 50, 50);
+    mockRenderContextforChild->paintRect_ = RectF(0, 0, 50, 50);
+    EXPECT_CALL(*mockRenderContextforChild, GetPointWithTransform(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+    childNode->renderContext_ = mockRenderContextforChild;
+    childNode->SetActive(true);
+
+    /**
+     * @tc.steps: step4. add childnode to the framenode.
+     * @tc.expected: expect The function return value is BLOCK_HIERARCHY.
+     */
+    std::list<RefPtr<FrameNode>> children;
+    children.push_back(childNode);
+    FRAME_NODE_PARENT->frameChildren_ = { children.begin(), children.end() };
+    auto test = FRAME_NODE_PARENT->AxisTest(localPoint, localPoint, localPoint, touchRestrict, result);
+    EXPECT_EQ(test, HitTestResult::BLOCK_HIERARCHY);
+}
+
+/**
+ * @tc.name: FrameNodeAxisTest010
+ * @tc.desc: Test frameNode AxisTest & hitTestBehavior when parent is HTMBLOCK_DESCENDANTS and child is default and
+ * not consumed event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct AxisTest parameters.
+     */
+    TouchRestrict touchRestrict;
+    AxisTestResult result;
+
+    /**
+     * @tc.steps: step2. create parent node and set HTMBLOCK_HIERARCHY.
+     */
+    FRAME_NODE_PARENT->isActive_ = true;
+    auto parentEventHub = FRAME_NODE_PARENT->GetOrCreateEventHub<EventHub>();
+    parentEventHub->SetEnabled(true);
+    auto parentGestureEventHub = FRAME_NODE_PARENT->GetOrCreateGestureEventHub();
+    parentGestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK_DESCENDANTS);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContext->rect_ = RectF(0, 0, 100, 100);
+    mockRenderContext->paintRect_ = RectF(0, 0, 100, 100);
+    FRAME_NODE_PARENT->renderContext_ = mockRenderContext;
+    auto localPoint = PointF(10, 10);
+    EXPECT_CALL(*mockRenderContext, GetPointWithTransform(_)).WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+    TouchEventFunc touchEventFunc = [](TouchEventInfo& info) {};
+    parentGestureEventHub->SetOnTouchEvent(std::move(touchEventFunc));
+    EXPECT_NE(parentGestureEventHub->touchEventActuator_, nullptr);
+
+    /**
+     * @tc.steps: step3. create childnode.
+     */
+    auto childNode = FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    childNode->SetExclusiveEventForChild(true);
+    auto mockRenderContextforChild = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContextforChild->rect_ = RectF(0, 0, 50, 50);
+    mockRenderContextforChild->paintRect_ = RectF(0, 0, 50, 50);
+    EXPECT_CALL(*mockRenderContextforChild, GetPointWithTransform(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+    childNode->renderContext_ = mockRenderContextforChild;
+    childNode->SetActive(true);
+
+    /**
+     * @tc.steps: step4. add childnode to the framenode.
+     * @tc.expected: expect The function return value is STOP_BUBBLING.
+     */
+    std::list<RefPtr<FrameNode>> children;
+    children.push_back(childNode);
+    FRAME_NODE_PARENT->frameChildren_ = { children.begin(), children.end() };
+    auto test = FRAME_NODE_PARENT->AxisTest(localPoint, localPoint, localPoint, touchRestrict, result);
+    EXPECT_EQ(test, HitTestResult::BUBBLING);
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: FrameNodeAxisTest011
+ * @tc.desc: Test frameNode AxisTest & hitTestBehavior when parent is default and child is HTMBLOCK_HIERARCHY
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct AxisTest parameters.
+     */
+    TouchRestrict touchRestrict;
+    AxisTestResult result;
+
+    /**
+     * @tc.steps: step2. create parent node and set HTMBLOCK_HIERARCHY.
+     */
+    FRAME_NODE_PARENT->isActive_ = true;
+    auto parentEventHub = FRAME_NODE_PARENT->GetOrCreateEventHub<EventHub>();
+    parentEventHub->SetEnabled(true);
+    auto parentGestureEventHub = FRAME_NODE_PARENT->GetOrCreateGestureEventHub();
+    parentGestureEventHub->SetHitTestMode(HitTestMode::HTMDEFAULT);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContext->rect_ = RectF(0, 0, 100, 100);
+    mockRenderContext->paintRect_ = RectF(0, 0, 100, 100);
+    FRAME_NODE_PARENT->renderContext_ = mockRenderContext;
+    auto localPoint = PointF(10, 10);
+    EXPECT_CALL(*mockRenderContext, GetPointWithTransform(_)).WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+    const auto& inputEventHub = parentEventHub->GetOrCreateInputEventHub();
+    inputEventHub->SetAxisEvent([](AxisInfo& info) {});
+
+    /**
+     * @tc.steps: step3. create childnode.
+     */
+    auto childNode = FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    childNode->SetExclusiveEventForChild(true);
+    auto mockRenderContextforChild = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContextforChild->rect_ = RectF(0, 0, 50, 50);
+    mockRenderContextforChild->paintRect_ = RectF(0, 0, 50, 50);
+    EXPECT_CALL(*mockRenderContextforChild, GetPointWithTransform(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+    childNode->renderContext_ = mockRenderContextforChild;
+    childNode->SetActive(true);
+    auto childGestureEventHub = childNode->GetOrCreateGestureEventHub();
+    childGestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK_HIERARCHY);
+    const auto& childInputEventHub = childNode->GetOrCreateEventHub<EventHub>()->GetOrCreateInputEventHub();
+    childInputEventHub->SetAxisEvent([](AxisInfo& info) {});
+
+    /**
+     * @tc.steps: step4. add childnode to the framenode.
+     * @tc.expected: expect The function return value is BLOCK_HIERARCHY.
+     */
+    std::list<RefPtr<FrameNode>> children;
+    children.push_back(childNode);
+    FRAME_NODE_PARENT->frameChildren_ = { children.begin(), children.end() };
+    auto test = FRAME_NODE_PARENT->AxisTest(localPoint, localPoint, localPoint, touchRestrict, result);
+    EXPECT_EQ(test, HitTestResult::BLOCK_HIERARCHY);
+    EXPECT_EQ(result.size(), 1);
+}
+
 /**
  * @tc.name: FrameNodeTestNg_CheckResponseRegionForStylus001
  * @tc.desc: Test frame node method
@@ -846,7 +1068,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback04, TestSize.Level
     EXPECT_EQ(frameNode->lastFrameNodeRect_, nullptr);
 }
 
-
 /**
  * @tc.name: FrameNodeNotifyColorModeChange01
  * @tc.desc: Test the function NotifyColorModeChange
@@ -868,5 +1089,324 @@ HWTEST_F(FrameNodeTestNg, FrameNodeNotifyColorModeChange01, TestSize.Level1)
      */
     childNode->NotifyColorModeChange(1);
     EXPECT_TRUE(childNode->GetRerenderable());
+}
+
+/**
+ * @tc.name: FrameNodeHitTestMode001
+ * @tc.desc: Test frameNode TouchTest & hitTestBehavior when parent is HTMBLOCK_HIERARCHY and child is default and
+ * consumed event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeHitTestMode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct TouchTest parameters.
+     */
+    TouchRestrict touchRestrict;
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+
+    /**
+     * @tc.steps: step2. create parent node and set HTMBLOCK_HIERARCHY.
+     */
+    FRAME_NODE_PARENT->isActive_ = true;
+    auto parentEventHub = FRAME_NODE_PARENT->GetOrCreateEventHub<EventHub>();
+    parentEventHub->SetEnabled(true);
+    auto parentGestureEventHub = FRAME_NODE_PARENT->GetOrCreateGestureEventHub();
+    parentGestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK_HIERARCHY);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContext->rect_ = RectF(0, 0, 100, 100);
+    mockRenderContext->paintRect_ = RectF(0, 0, 100, 100);
+    FRAME_NODE_PARENT->renderContext_ = mockRenderContext;
+    auto localPoint = PointF(10, 10);
+    EXPECT_CALL(*mockRenderContext, GetPointWithTransform(_)).WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+
+    /**
+     * @tc.steps: step3. create childnode.
+     */
+    auto childNode = FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    childNode->SetExclusiveEventForChild(true);
+    auto mockRenderContextforChild = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContextforChild->rect_ = RectF(50, 50, 50, 50);
+    EXPECT_CALL(*mockRenderContextforChild, GetPointWithTransform(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+    childNode->renderContext_ = mockRenderContextforChild;
+    childNode->SetActive(true);
+
+    /**
+     * @tc.steps: step4. add childnode to the framenode.
+     * @tc.expected: expect The function return value is STOP_BUBBLING.
+     */
+    std::list<RefPtr<FrameNode>> children;
+    children.push_back(childNode);
+    FRAME_NODE_PARENT->frameChildren_ = { children.begin(), children.end() };
+    auto test =
+        FRAME_NODE_PARENT->TouchTest(localPoint, localPoint, localPoint, touchRestrict, result, 1, responseLinkResult);
+    EXPECT_EQ(test, HitTestResult::BLOCK_HIERARCHY);
+}
+
+/**
+ * @tc.name: FrameNodeHitTestMode002
+ * @tc.desc: Test frameNode TouchTest & hitTestBehavior when parent is HTMBLOCK_HIERARCHY and child is default and
+ * not consumed event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeHitTestMode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct TouchTest parameters.
+     */
+    TouchRestrict touchRestrict;
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+
+    /**
+     * @tc.steps: step2. create parent node and set HTMBLOCK_HIERARCHY.
+     */
+    FRAME_NODE_PARENT->isActive_ = true;
+    auto parentEventHub = FRAME_NODE_PARENT->GetOrCreateEventHub<EventHub>();
+    parentEventHub->SetEnabled(true);
+    auto parentGestureEventHub = FRAME_NODE_PARENT->GetOrCreateGestureEventHub();
+    parentGestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK_HIERARCHY);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContext->rect_ = RectF(0, 0, 100, 100);
+    mockRenderContext->paintRect_ = RectF(0, 0, 100, 100);
+    FRAME_NODE_PARENT->renderContext_ = mockRenderContext;
+    auto localPoint = PointF(10, 10);
+    EXPECT_CALL(*mockRenderContext, GetPointWithTransform(_)).WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+
+    /**
+     * @tc.steps: step3. create childnode.
+     */
+    auto childNode = FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    childNode->SetExclusiveEventForChild(true);
+    auto mockRenderContextforChild = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContextforChild->rect_ = RectF(0, 0, 50, 50);
+    mockRenderContextforChild->paintRect_ = RectF(0, 0, 50, 50);
+    EXPECT_CALL(*mockRenderContextforChild, GetPointWithTransform(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+    childNode->renderContext_ = mockRenderContextforChild;
+    childNode->SetActive(true);
+
+    /**
+     * @tc.steps: step4. add childnode to the framenode.
+     * @tc.expected: expect The function return value is STOP_BUBBLING.
+     */
+    std::list<RefPtr<FrameNode>> children;
+    children.push_back(childNode);
+    FRAME_NODE_PARENT->frameChildren_ = { children.begin(), children.end() };
+    auto test =
+        FRAME_NODE_PARENT->TouchTest(localPoint, localPoint, localPoint, touchRestrict, result, 1, responseLinkResult);
+    EXPECT_EQ(test, HitTestResult::BLOCK_HIERARCHY);
+}
+
+/**
+ * @tc.name: FrameNodeHitTestMode003
+ * @tc.desc: Test frameNode TouchTest & hitTestBehavior when parent is HTMBLOCK_DESCENDANTS and child is default and
+ * not consumed event
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeHitTestMode003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct TouchTest parameters.
+     */
+    TouchRestrict touchRestrict;
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+
+    /**
+     * @tc.steps: step2. create parent node and set HTMBLOCK_HIERARCHY.
+     */
+    FRAME_NODE_PARENT->isActive_ = true;
+    auto parentEventHub = FRAME_NODE_PARENT->GetOrCreateEventHub<EventHub>();
+    parentEventHub->SetEnabled(true);
+    auto parentGestureEventHub = FRAME_NODE_PARENT->GetOrCreateGestureEventHub();
+    parentGestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK_DESCENDANTS);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContext->rect_ = RectF(0, 0, 100, 100);
+    mockRenderContext->paintRect_ = RectF(0, 0, 100, 100);
+    FRAME_NODE_PARENT->renderContext_ = mockRenderContext;
+    auto localPoint = PointF(10, 10);
+    EXPECT_CALL(*mockRenderContext, GetPointWithTransform(_)).WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+    TouchEventFunc touchEventFunc = [](TouchEventInfo& info) {};
+    parentGestureEventHub->SetOnTouchEvent(std::move(touchEventFunc));
+    EXPECT_NE(parentGestureEventHub->touchEventActuator_, nullptr);
+
+    /**
+     * @tc.steps: step3. create childnode.
+     */
+    auto childNode = FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    childNode->SetExclusiveEventForChild(true);
+    auto mockRenderContextforChild = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContextforChild->rect_ = RectF(0, 0, 50, 50);
+    mockRenderContextforChild->paintRect_ = RectF(0, 0, 50, 50);
+    EXPECT_CALL(*mockRenderContextforChild, GetPointWithTransform(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+    childNode->renderContext_ = mockRenderContextforChild;
+    childNode->SetActive(true);
+
+    /**
+     * @tc.steps: step4. add childnode to the framenode.
+     * @tc.expected: expect The function return value is STOP_BUBBLING.
+     */
+    std::list<RefPtr<FrameNode>> children;
+    children.push_back(childNode);
+    FRAME_NODE_PARENT->frameChildren_ = { children.begin(), children.end() };
+    auto test =
+        FRAME_NODE_PARENT->TouchTest(localPoint, localPoint, localPoint, touchRestrict, result, 1, responseLinkResult);
+    EXPECT_EQ(test, HitTestResult::BUBBLING);
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: FrameNodeHitTestMode004
+ * @tc.desc: Test frameNode TouchTest & hitTestBehavior when parent is default and child is HTMBLOCK_HIERARCHY
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeHitTestMode004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct TouchTest parameters.
+     */
+    TouchRestrict touchRestrict;
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+
+    /**
+     * @tc.steps: step2. create parent node and set HTMBLOCK_HIERARCHY.
+     */
+    FRAME_NODE_PARENT->isActive_ = true;
+    auto parentEventHub = FRAME_NODE_PARENT->GetOrCreateEventHub<EventHub>();
+    parentEventHub->SetEnabled(true);
+    auto parentGestureEventHub = FRAME_NODE_PARENT->GetOrCreateGestureEventHub();
+    parentGestureEventHub->SetHitTestMode(HitTestMode::HTMDEFAULT);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContext->rect_ = RectF(0, 0, 100, 100);
+    mockRenderContext->paintRect_ = RectF(0, 0, 100, 100);
+    FRAME_NODE_PARENT->renderContext_ = mockRenderContext;
+    auto localPoint = PointF(10, 10);
+    EXPECT_CALL(*mockRenderContext, GetPointWithTransform(_)).WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+    TouchEventFunc touchEventFunc = [](TouchEventInfo& info) {};
+    parentGestureEventHub->SetOnTouchEvent(std::move(touchEventFunc));
+    EXPECT_NE(parentGestureEventHub->touchEventActuator_, nullptr);
+
+    /**
+     * @tc.steps: step3. create childnode.
+     */
+    auto childNode = FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    childNode->SetExclusiveEventForChild(true);
+    auto mockRenderContextforChild = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContextforChild->rect_ = RectF(0, 0, 50, 50);
+    mockRenderContextforChild->paintRect_ = RectF(0, 0, 50, 50);
+    EXPECT_CALL(*mockRenderContextforChild, GetPointWithTransform(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+    childNode->renderContext_ = mockRenderContextforChild;
+    childNode->SetActive(true);
+    auto childGestureEventHub = childNode->GetOrCreateGestureEventHub();
+    childGestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK_HIERARCHY);
+    TouchEventFunc childTouchEventFunc = [](TouchEventInfo& info) {};
+    childGestureEventHub->SetOnTouchEvent(std::move(childTouchEventFunc));
+    EXPECT_NE(childGestureEventHub->touchEventActuator_, nullptr);
+
+    /**
+     * @tc.steps: step4. add childnode to the framenode.
+     * @tc.expected: expect The function return value is STOP_BUBBLING.
+     */
+    std::list<RefPtr<FrameNode>> children;
+    children.push_back(childNode);
+    FRAME_NODE_PARENT->frameChildren_ = { children.begin(), children.end() };
+    auto test =
+        FRAME_NODE_PARENT->TouchTest(localPoint, localPoint, localPoint, touchRestrict, result, 1, responseLinkResult);
+    EXPECT_EQ(test, HitTestResult::BLOCK_HIERARCHY);
+    EXPECT_EQ(result.size(), 1);
+}
+
+/**
+ * @tc.name: FrameNodeHitTestMode005
+ * @tc.desc: Test frameNode TouchTest & hitTestBehavior when parent is default and child is HTMBLOCK_HIERARCHY
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeHitTestMode005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct TouchTest parameters.
+     */
+    TouchRestrict touchRestrict;
+    TouchTestResult result;
+    ResponseLinkResult responseLinkResult;
+
+    /**
+     * @tc.steps: step2. create parent node and set onTouchIntercept and onChildTouchTestFunc.
+     */
+    FRAME_NODE_PARENT->isActive_ = true;
+    auto parentEventHub = FRAME_NODE_PARENT->GetOrCreateEventHub<EventHub>();
+    parentEventHub->SetEnabled(true);
+    auto parentGestureEventHub = FRAME_NODE_PARENT->GetOrCreateGestureEventHub();
+    parentGestureEventHub->SetHitTestMode(HitTestMode::HTMDEFAULT);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContext->rect_ = RectF(0, 0, 100, 100);
+    mockRenderContext->paintRect_ = RectF(0, 0, 100, 100);
+    FRAME_NODE_PARENT->renderContext_ = mockRenderContext;
+    auto localPoint = PointF(10, 10);
+    EXPECT_CALL(*mockRenderContext, GetPointWithTransform(_)).WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+    TouchEventFunc touchEventFunc = [](TouchEventInfo& info) {};
+    parentGestureEventHub->SetOnTouchEvent(std::move(touchEventFunc));
+    EXPECT_NE(parentGestureEventHub->touchEventActuator_, nullptr);
+    TouchInterceptFunc touchInterceptFunc = [](TouchEventInfo& touchEventInfo) {
+        return HitTestMode::HTMBLOCK_DESCENDANTS;
+    };
+    parentGestureEventHub->SetOnTouchIntercept(std::move(touchInterceptFunc));
+    bool onChildTouchTestTriggerd = false;
+    OnChildTouchTestFunc callback = [&onChildTouchTestTriggerd](const std::vector<TouchTestInfo>& touchInfo) {
+        TouchResult res;
+        res.strategy = TouchTestStrategy::DEFAULT;
+        onChildTouchTestTriggerd = true;
+        return res;
+    };
+    parentGestureEventHub->SetOnTouchTestFunc(std::move(callback));
+
+    /**
+     * @tc.steps: step3. create childnode.
+     */
+    auto childNode = FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), true);
+    childNode->SetExclusiveEventForChild(true);
+    auto mockRenderContextforChild = AceType::MakeRefPtr<MockRenderContext>();
+    mockRenderContextforChild->rect_ = RectF(0, 0, 50, 50);
+    mockRenderContextforChild->paintRect_ = RectF(0, 0, 50, 50);
+    EXPECT_CALL(*mockRenderContextforChild, GetPointWithTransform(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(localPoint)));
+    childNode->renderContext_ = mockRenderContextforChild;
+    childNode->SetActive(true);
+    auto childGestureEventHub = childNode->GetOrCreateGestureEventHub();
+    childGestureEventHub->SetHitTestMode(HitTestMode::HTMDEFAULT);
+    TouchEventFunc childTouchEventFunc = [](TouchEventInfo& info) {};
+    childGestureEventHub->SetOnTouchEvent(std::move(childTouchEventFunc));
+    EXPECT_NE(childGestureEventHub->touchEventActuator_, nullptr);
+
+    /**
+     * @tc.steps: step4. add childnode to the framenode.
+     * @tc.expected: expect The function return value is STOP_BUBBLING and onChildTouchTestTriggerd is false.
+     */
+    std::list<RefPtr<FrameNode>> children;
+    children.push_back(childNode);
+    FRAME_NODE_PARENT->frameChildren_ = { children.begin(), children.end() };
+    auto test =
+        FRAME_NODE_PARENT->TouchTest(localPoint, localPoint, localPoint, touchRestrict, result, 1, responseLinkResult);
+    EXPECT_EQ(test, HitTestResult::BUBBLING);
+    EXPECT_EQ(result.size(), 0);
+    EXPECT_FALSE(onChildTouchTestTriggerd);
+    result.clear();
+    /**
+     * @tc.steps: step4. change onTouchIntercept func.
+     * @tc.expected: expect The function return value is BUBBLING and onChildTouchTestTriggerd is true.
+     */
+    TouchInterceptFunc touchInterceptFuncNew = [](TouchEventInfo& touchEventInfo) { return HitTestMode::HTMDEFAULT; };
+    parentGestureEventHub->SetOnTouchIntercept(std::move(touchInterceptFuncNew));
+    test =
+        FRAME_NODE_PARENT->TouchTest(localPoint, localPoint, localPoint, touchRestrict, result, 1, responseLinkResult);
+    EXPECT_EQ(test, HitTestResult::BUBBLING);
+    EXPECT_EQ(result.size(), 2);
+    EXPECT_TRUE(onChildTouchTestTriggerd);
 }
 } // namespace OHOS::Ace::NG

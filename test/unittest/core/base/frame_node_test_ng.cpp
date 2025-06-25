@@ -1006,7 +1006,8 @@ public:
 
     MOCK_METHOD(bool, IsOutOfTouchTestRegion, (const PointF&, const TouchEvent&, std::vector<RectF>*));
     MOCK_METHOD(void, CollectSelfAxisResult,
-        (const PointF&, const PointF&, bool&, const PointF&, AxisTestResult&, bool&, HitTestResult&, TouchRestrict&));
+        (const PointF&, const PointF&, bool&, const PointF&, AxisTestResult&, bool&, HitTestResult&, TouchRestrict&,
+            bool));
 };
 
 using NiceMockFrameNode = NiceMock<MockFrameNode>;
@@ -1033,14 +1034,15 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest0027, TestSize.Level1)
     std::vector<RefPtr<MockFrameNode>> nodes = { stackNode, node1, node2 };
     for (auto& item : nodes) {
         item->isActive_ = true;
-        const auto& inputEventHub = item->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
+        const auto& inputEventHub = item->GetOrCreateEventHub<EventHub>()->GetOrCreateInputEventHub();
         inputEventHub->SetAxisEvent([&item](AxisInfo& info) {});
         ON_CALL((*item), CollectSelfAxisResult(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_,
-                             testing::_, testing::_))
-            .WillByDefault(testing::Invoke([&inputEventHub](const PointF&, const PointF&, bool&, const PointF&,
-                                               AxisTestResult& axisResult, bool&, HitTestResult&, TouchRestrict&) {
-                axisResult.emplace_back(inputEventHub->axisEventActuator_->axisEventTarget_);
-            }));
+                             testing::_, testing::_, testing::_))
+            .WillByDefault(
+                testing::Invoke([&inputEventHub](const PointF&, const PointF&, bool&, const PointF&,
+                                    AxisTestResult& axisResult, bool&, HitTestResult&, TouchRestrict&, bool) {
+                    axisResult.emplace_back(inputEventHub->axisEventActuator_->axisEventTarget_);
+                }));
         ON_CALL((*item), IsOutOfTouchTestRegion(testing::_, testing::_, testing::_))
             .WillByDefault(
                 testing::Invoke([](const PointF&, const TouchEvent&, std::vector<RectF>*) { return false; }));

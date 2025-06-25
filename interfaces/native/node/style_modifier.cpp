@@ -2233,7 +2233,7 @@ int32_t SetHitTestBehavior(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
         return ERROR_CODE_PARAM_INVALID;
     }
     if (item->value[0].i32 < ArkUI_HitTestMode::ARKUI_HIT_TEST_MODE_DEFAULT ||
-        item->value[0].i32 > ArkUI_HitTestMode::ARKUI_HIT_TEST_MODE_NONE) {
+        item->value[0].i32 > ArkUI_HitTestMode::ARKUI_HIT_TEST_MODE_BLOCK_DESCENDANTS) {
         return ERROR_CODE_PARAM_INVALID;
     }
     // already check in entry point.

@@ -446,10 +446,12 @@ public:
 
     HitTestResult AxisTest(const PointF &globalPoint, const PointF &parentLocalPoint, const PointF &parentRevertPoint,
         TouchRestrict &touchRestrict, AxisTestResult &axisResult) override;
-
     ACE_NON_VIRTUAL void CollectSelfAxisResult(const PointF& globalPoint, const PointF& localPoint, bool& consumed,
         const PointF& parentRevertPoint, AxisTestResult& axisResult, bool& preventBubbling, HitTestResult& testResult,
-        TouchRestrict& touchRestrict);
+        TouchRestrict& touchRestrict, bool blockHierarchy);
+    void HitTestChildren(const PointF& globalPoint, const PointF& localPoint, const PointF& subRevertPoint,
+        TouchRestrict& touchRestrict, AxisTestResult& newComingTargets, bool& preventBubbling, bool& consumed,
+        bool& blockHierarchy);
 
     void AnimateHoverEffect(bool isHovered) const;
 

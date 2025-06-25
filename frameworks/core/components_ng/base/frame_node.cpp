@@ -16,6 +16,7 @@
 #include "core/components_ng/base/frame_node.h"
 
 #include "core/components_ng/base/node_render_status_monitor.h"
+#include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "core/pipeline/base/element_register.h"
@@ -3043,6 +3044,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 
     HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
+    bool blockHierarchy = false;
     // Child nodes are repackaged into gesture groups (parallel gesture groups, exclusive gesture groups, etc.)
     // based on the gesture attributes set by the current parent node (high and low priority, parallel gestures,
     // etc.), the newComingTargets is the template object to collect child nodes gesture and used by gestureHub to
@@ -3065,7 +3067,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         onTouchInterceptresult = TriggerOnTouchIntercept(touchRestrict.touchEvent);
     }
     TouchResult touchRes;
-    if (onTouchInterceptresult != HitTestMode::HTMBLOCK) {
+    if (onTouchInterceptresult != HitTestMode::HTMBLOCK &&
+        onTouchInterceptresult != HitTestMode::HTMBLOCK_DESCENDANTS) {
         std::vector<TouchTestInfo> touchInfos;
         CollectTouchInfos(globalPoint, subRevertPoint, touchInfos);
         touchRes = GetOnChildTouchTestRet(touchInfos);
@@ -3096,12 +3099,12 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             }
         }
     }
-
     for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
-        if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
+        if (GetHitTestMode() == HitTestMode::HTMBLOCK || GetHitTestMode() == HitTestMode::HTMBLOCK_DESCENDANTS) {
             break;
         }
-        if (onTouchInterceptresult != HitTestMode::HTMBLOCK) {
+        if (onTouchInterceptresult != HitTestMode::HTMBLOCK &&
+            onTouchInterceptresult != HitTestMode::HTMBLOCK_DESCENDANTS) {
             if (touchRes.strategy == TouchTestStrategy::FORWARD) {
                 break;
             }
@@ -3111,7 +3114,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         if (!child) {
             continue;
         }
-        if (onTouchInterceptresult != HitTestMode::HTMBLOCK) {
+        if (onTouchInterceptresult != HitTestMode::HTMBLOCK &&
+            onTouchInterceptresult != HitTestMode::HTMBLOCK_DESCENDANTS) {
             std::string id;
             if (child->GetInspectorId().has_value()) {
                 id = child->GetInspectorId().value();
@@ -3134,11 +3138,19 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             }
         }
 
+        if (childHitResult == HitTestResult::BLOCK_HIERARCHY) {
+            blockHierarchy = true;
+            consumed = true;
+            break;
+        }
+
         // In normal process, the node block the brother node.
         if (childHitResult == HitTestResult::BUBBLING &&
             ((child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
                 (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ||
-                ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) && IsExclusiveEventForChild()))) {
+                ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT &&
+                    child->GetHitTestMode() != HitTestMode::HTMBLOCK_DESCENDANTS) &&
+                    IsExclusiveEventForChild()))) {
             consumed = true;
             break;
         }
@@ -3149,13 +3161,30 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 
     // first update HitTestResult by children status.
     if (consumed) {
-        testResult = preventBubbling ? HitTestResult::STOP_BUBBLING : HitTestResult::BUBBLING;
+        if (GetHitTestMode() == HitTestMode::HTMBLOCK_HIERARCHY) {
+            testResult = HitTestResult::BLOCK_HIERARCHY;
+        } else {
+            if (blockHierarchy) {
+                testResult = HitTestResult::BLOCK_HIERARCHY;
+            } else {
+                testResult = preventBubbling ? HitTestResult::STOP_BUBBLING : HitTestResult::BUBBLING;
+            }
+        }
         consumed = false;
-    } else if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
-        testResult = HitTestResult::STOP_BUBBLING;
+    } else {
+        if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
+            testResult = HitTestResult::STOP_BUBBLING;
+        }
+        if (GetHitTestMode() == HitTestMode::HTMBLOCK_HIERARCHY) {
+            testResult = HitTestResult::BLOCK_HIERARCHY;
+        }
+        if (GetHitTestMode() == HitTestMode::HTMBLOCK_DESCENDANTS) {
+            testResult = HitTestResult::BUBBLING;
+        }
     }
 
-    if (!preventBubbling && (GetHitTestMode() != HitTestMode::HTMNONE) &&
+    if (!preventBubbling && !blockHierarchy && (GetHitTestMode() != HitTestMode::HTMNONE) &&
+        (GetHitTestMode() != HitTestMode::HTMBLOCK_DESCENDANTS) &&
         (isDispatch || (InResponseRegionList(revertPoint, responseRegionList)))) {
         pattern_->OnTouchTestHit(touchRestrict.hitTestType);
         consumed = true;
@@ -3408,7 +3437,7 @@ HitTestResult FrameNode::MouseTest(const PointF& globalPoint, const PointF& pare
 }
 
 bool CheckChildHitTestResult(HitTestResult childHitResult, const RefPtr<OHOS::Ace::NG::FrameNode>& child,
-    bool& preventBubbling, bool& consumed, bool isExclusiveEventForChild)
+    bool& preventBubbling, bool& consumed, bool isExclusiveEventForChild, bool& blockHierarchy)
 {
     consumed = false;
     if (childHitResult == HitTestResult::STOP_BUBBLING) {
@@ -3418,15 +3447,43 @@ bool CheckChildHitTestResult(HitTestResult childHitResult, const RefPtr<OHOS::Ac
                 (child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
                 (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ||
                 ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) && isExclusiveEventForChild));
-    } else if (childHitResult == HitTestResult::BUBBLING) {
+    }
+    if (childHitResult == HitTestResult::BLOCK_HIERARCHY) {
+        blockHierarchy = true;
+        consumed = true;
+        return true;
+    }
+    if (childHitResult == HitTestResult::BUBBLING) {
         consumed = true;
         return ((child->GetHitTestMode() == HitTestMode::HTMDEFAULT) ||
                 (child->GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ||
-                ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT) && isExclusiveEventForChild));
+                ((child->GetHitTestMode() != HitTestMode::HTMTRANSPARENT &&
+                    child->GetHitTestMode() != HitTestMode::HTMBLOCK_DESCENDANTS) &&
+                    isExclusiveEventForChild));
     }
     return false;
 }
 
+void FrameNode::HitTestChildren(const PointF& globalPoint, const PointF& localPoint,
+    const PointF& subRevertPoint, TouchRestrict& touchRestrict, AxisTestResult& newComingTargets, bool& preventBubbling,
+    bool& consumed, bool& blockHierarchy)
+{
+    if (GetHitTestMode() == HitTestMode::HTMBLOCK || GetHitTestMode() == HitTestMode::HTMBLOCK_DESCENDANTS) {
+        return;
+    }
+
+    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
+        const auto& child = iter->Upgrade();
+        if (!child) {
+            continue;
+        }
+        auto childHitResult = child->AxisTest(globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets);
+        if (CheckChildHitTestResult(
+            childHitResult, child, preventBubbling, consumed, IsExclusiveEventForChild(), blockHierarchy)) {
+            return;
+        }
+    }
+}
 
 HitTestResult FrameNode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, AxisTestResult& axisResult)
@@ -3444,6 +3501,7 @@ HitTestResult FrameNode::AxisTest(const PointF& globalPoint, const PointF& paren
     }
     HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
+    bool blockHierarchy = false;
     AxisTestResult newComingTargets;
     auto localPoint = parentLocalPoint - renderContext_->GetPaintRectWithTransform().GetOffset();
     renderContext_->GetPointWithTransform(localPoint);
@@ -3451,29 +3509,20 @@ HitTestResult FrameNode::AxisTest(const PointF& globalPoint, const PointF& paren
     MapPointTo(revertPoint, GetOrRefreshMatrixFromCache().revertMatrix);
     auto subRevertPoint = revertPoint - renderContext_->GetPaintRectWithoutTransform().GetOffset();
     bool consumed = false;
-    for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
-        if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
-            break;
-        }
-        const auto& child = iter->Upgrade();
-        if (!child) {
-            continue;
-        }
-        auto childHitResult = child->AxisTest(globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets);
-        if (CheckChildHitTestResult(childHitResult, child, preventBubbling, consumed, IsExclusiveEventForChild())) {
-            break;
-        }
-    }
-    CollectSelfAxisResult(
-        globalPoint, localPoint, consumed, revertPoint, newComingTargets, preventBubbling, testResult, touchRestrict);
+    HitTestChildren(globalPoint, localPoint, subRevertPoint, touchRestrict, newComingTargets, preventBubbling,
+        consumed, blockHierarchy);
+    CollectSelfAxisResult(globalPoint, localPoint, consumed, revertPoint, newComingTargets, preventBubbling, testResult,
+        touchRestrict, blockHierarchy);
 
     axisResult.splice(axisResult.end(), std::move(newComingTargets));
     if (!consumed) {
         return testResult;
     }
-    if (testResult == HitTestResult::OUT_OF_REGION && preventBubbling) {
-        return HitTestResult::STOP_BUBBLING;
-    } else {
+    if (testResult == HitTestResult::OUT_OF_REGION) {
+        // consume only by self.
+        if (preventBubbling) {
+            return HitTestResult::STOP_BUBBLING;
+        }
         return (GetHitTestMode() == HitTestMode::HTMTRANSPARENT_SELF) ? HitTestResult::SELF_TRANSPARENT
                                                                       : HitTestResult::BUBBLING;
     }
@@ -3482,13 +3531,29 @@ HitTestResult FrameNode::AxisTest(const PointF& globalPoint, const PointF& paren
 
 void FrameNode::CollectSelfAxisResult(const PointF& globalPoint, const PointF& localPoint, bool& consumed,
     const PointF& parentRevertPoint, AxisTestResult& axisResult, bool& preventBubbling, HitTestResult& testResult,
-    TouchRestrict& touchRestrict)
+    TouchRestrict& touchRestrict, bool blockHierarchy)
 {
     if (consumed) {
-        testResult = preventBubbling ? HitTestResult::STOP_BUBBLING : HitTestResult::BUBBLING;
+        if (GetHitTestMode() == HitTestMode::HTMBLOCK_HIERARCHY) {
+            testResult = HitTestResult::BLOCK_HIERARCHY;
+        } else {
+            if (blockHierarchy) {
+                testResult = HitTestResult::BLOCK_HIERARCHY;
+            } else {
+                testResult = preventBubbling ? HitTestResult::STOP_BUBBLING : HitTestResult::BUBBLING;
+            }
+        }
         consumed = false;
-    } else if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
-        testResult = HitTestResult::STOP_BUBBLING;
+    } else {
+        if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
+            testResult = HitTestResult::STOP_BUBBLING;
+        }
+        if (GetHitTestMode() == HitTestMode::HTMBLOCK_HIERARCHY) {
+            testResult = HitTestResult::BLOCK_HIERARCHY;
+        }
+        if (GetHitTestMode() == HitTestMode::HTMBLOCK_DESCENDANTS) {
+            testResult = HitTestResult::BUBBLING;
+        }
     }
     auto origRect = renderContext_->GetPaintRectWithoutTransform();
     auto resRegionList = GetResponseRegionList(origRect, static_cast<int32_t>(touchRestrict.touchEvent.sourceType));
@@ -3500,10 +3565,10 @@ void FrameNode::CollectSelfAxisResult(const PointF& globalPoint, const PointF& l
                 rect.ToString().c_str(), parentRevertPoint.ToString().c_str());
         }
     }
-    if (preventBubbling) {
+    if (preventBubbling || blockHierarchy) {
         return;
     }
-    if (GetHitTestMode() == HitTestMode::HTMNONE) {
+    if (GetHitTestMode() == HitTestMode::HTMNONE || GetHitTestMode() == HitTestMode::HTMBLOCK_DESCENDANTS) {
         return;
     }
     if (InResponseRegionList(parentRevertPoint, resRegionList)) {

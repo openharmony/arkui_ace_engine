@@ -1800,6 +1800,8 @@ let HitTestMode;
   HitTestMode[HitTestMode.Block = 1] = 'Block';
   HitTestMode[HitTestMode.Transparent = 2] = 'Transparent';
   HitTestMode[HitTestMode.None = 3] = 'None';
+  HitTestMode[HitTestMode.BLOCK_HIERARCHY = 4] = 'BLOCK_HIERARCHY';
+  HitTestMode[HitTestMode.BLOCK_DESCENDANTS = 5] = 'BLOCK_DESCENDANTS';
 })(HitTestMode || (HitTestMode = {}));
 
 let GridDirection;
