@@ -172,7 +172,6 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPropertyTest002, TestSize.Level1)
     MovingPhotoModelNG movingphoto;
     auto movingPhotoController = AceType::MakeRefPtr<MovingPhotoController>();
     movingphoto.Create(movingPhotoController);
-
     auto frameNodeTemp = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNodeTemp);
     auto movingPhotoPatternTemp = AceType::DynamicCast<MovingPhotoPattern>(frameNodeTemp->GetPattern());
