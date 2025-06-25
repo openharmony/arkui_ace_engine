@@ -96,6 +96,15 @@ public:
             }
         }
     }
+
+    void TriggerSetPreloadFinishCallback(PreloadItemsFinishFunc&& preloadFinishCallback) const
+    {
+        for (auto &handler: handlers_) {
+            if (auto controller = handler.Upgrade(); controller) {
+                controller->SetPreloadFinishCallback(preloadFinishCallback);
+            }
+        }
+    }
 private:
     std::vector<Ace::WeakPtr<SwiperController>> handlers_;
 };

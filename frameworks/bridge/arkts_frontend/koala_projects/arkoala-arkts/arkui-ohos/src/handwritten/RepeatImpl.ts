@@ -18,7 +18,7 @@
 
 import { int32, hashCodeFromString, KoalaCallsiteKey } from '@koalaui/common';
 import { __context, __id, RepeatByArray, remember, NodeAttach, contextNode, scheduleCallback } from '@koalaui/runtime';
-import { RepeatItem, UIRepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from '../component/repeat';
+import { RepeatItem, RepeatAttribute, RepeatArray, RepeatItemBuilder, TemplateTypedFunc, VirtualScrollOptions, TemplateOptions } from '../component/repeat';
 import { IDataSource, DataChangeListener } from '../component/lazyForEach';
 import { LazyForEachImpl } from './LazyForEachImpl';
 import { ArkColumnPeer } from '../component/column';
@@ -28,11 +28,11 @@ import { PeerNode } from '../PeerNode';
 /** @memo:intrinsic */
 export function RepeatImpl<T>(
     /** @memo */
-    style: ((attributes: UIRepeatAttribute<T>) => void) | undefined,
+    style: ((attributes: RepeatAttribute<T>) => void) | undefined,
     arr: RepeatArray<T>
 ): void {
     const repeat = remember(() => {
-        return new UIRepeatAttributeImpl<T>();
+        return new RepeatAttributeImpl<T>();
     });
     repeat.updateDataLength(arr.length);
     style?.(repeat);
@@ -135,7 +135,7 @@ class RepeatDataSource<T> implements IDataSource<T> {
 // should be empty string, don't change it
 const RepeatEachFuncType: string = '';
 
-export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
+export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
     itemGenFuncs_: Map<string, RepeatItemBuilder<T>> = new Map<string, RepeatItemBuilder<T>>();
     keyGenFunc_?: (item: T, index: number) => string;
     dataLength_: number = 0;
@@ -149,8 +149,7 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
         this.dataLength_ = value;
     }
 
-    /** @memo */
-    each(itemGenerator: RepeatItemBuilder<T>): UIRepeatAttributeImpl<T> {
+    each(itemGenerator: RepeatItemBuilder<T>): RepeatAttributeImpl<T> {
         if (itemGenerator === undefined || typeof itemGenerator !== 'function') {
             throw new Error('item generator function missing. Application error!');
         }
@@ -159,14 +158,12 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
         return this;
     }
 
-    /** @memo */
-    key(keyGenerator: (item: T, index: number) => string): UIRepeatAttributeImpl<T> {
+    key(keyGenerator: (item: T, index: number) => string): RepeatAttributeImpl<T> {
         this.keyGenFunc_ = keyGenerator;
         return this;
     }
 
-    /** @memo */
-    virtualScroll(options?: VirtualScrollOptions): UIRepeatAttributeImpl<T> {
+    virtualScroll(options?: VirtualScrollOptions): RepeatAttributeImpl<T> {
         this.totalCount_ = options?.onTotalCount?.() ?? options?.totalCount ?? this.dataLength_;
         this.reusable_ = options?.reusable !== false;
 
@@ -174,9 +171,8 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
         return this;
     }
 
-    /** @memo */
     template(
-        type: string, itemBuilder: RepeatItemBuilder<T>, templateOptions?: TemplateOptions): UIRepeatAttributeImpl<T> {
+        type: string, itemBuilder: RepeatItemBuilder<T>, templateOptions?: TemplateOptions): RepeatAttributeImpl<T> {
         if (itemBuilder === undefined || typeof itemBuilder !== 'function') {
             throw new Error('template generator function missing. Application error!');
         }
@@ -185,8 +181,7 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
         return this;
     }
 
-    /** @memo */
-    templateId(typedFunc: TemplateTypedFunc<T>): UIRepeatAttributeImpl<T> {
+    templateId(typedFunc: TemplateTypedFunc<T>): RepeatAttributeImpl<T> {
         if (typedFunc === undefined || typeof typedFunc !== 'function') {
             throw new Error('templateId generator function missing. Application error!');
         }
@@ -198,7 +193,7 @@ export class UIRepeatAttributeImpl<T> implements UIRepeatAttribute<T> {
 /** @memo:intrinsic */
 function virtualRender<T>(
     arr: RepeatArray<T>,
-    attributes: UIRepeatAttributeImpl<T>,
+    attributes: RepeatAttributeImpl<T>,
     repeatId: KoalaCallsiteKey,
 ): void {
     let dataSource = remember(() => new RepeatDataSource<T>(arr));
@@ -231,7 +226,8 @@ function virtualRender<T>(
 function nonVirtualRender<T>(arr: RepeatArray<T>,
     /** @memo */
     itemGenerator: RepeatItemBuilder<T>,
-    keyGenerator?: (element: T, index: number) => string): void {
+    keyGenerator?: (element: T, index: number) => string
+): void {
     if (keyGenerator && typeof keyGenerator !== 'function') {
         throw new Error('key generator is not a function. Application error!');
     }

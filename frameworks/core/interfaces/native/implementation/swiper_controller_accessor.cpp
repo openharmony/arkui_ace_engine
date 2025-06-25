@@ -17,6 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/promise_helper.h"
 
 namespace OHOS::Ace::NG {
 using SwiperAnimationModeVariantType = std::variant<SwiperAnimationMode, bool>;
@@ -139,13 +140,26 @@ void PreloadItemsImpl(Ark_VMContext vmContext,
     CHECK_NULL_VOID(asyncWorker);
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
+
     auto indexVectOpt = !indices ? std::nullopt : Converter::OptConvert<std::vector<int32_t>>(*indices);
-    if (indexVectOpt) {
-        std::set<int32_t> indexSet(indexVectOpt->begin(), indexVectOpt->end());
-        peerImpl->TriggerPreloadItems(indexSet);
-    } else {
-        peerImpl->TriggerPreloadItems({});
-    }
+    auto execFunc = [peerImpl, indexVectOpt = std::move(indexVectOpt)]() {
+        if (indexVectOpt) {
+            std::set<int32_t> indexSet(indexVectOpt->begin(), indexVectOpt->end());
+            peerImpl->TriggerPreloadItems(indexSet);
+        } else {
+            peerImpl->TriggerPreloadItems({});
+        }
+    };
+    PromiseHelper promise(outputArgumentForReturningPromise, vmContext, *asyncWorker, std::move(execFunc));
+
+    auto finishFunc = [promise = std::move(promise)](const int32_t errCode, const std::string errStr) {
+        if (errCode == ERROR_CODE_NO_ERROR) {
+            promise.Resolve();
+        } else {
+            promise.Reject({std::to_string(errCode), errStr});
+        }
+    };
+    peerImpl->TriggerSetPreloadFinishCallback(finishFunc);
 }
 } // SwiperControllerAccessor
 const GENERATED_ArkUISwiperControllerAccessor* GetSwiperControllerAccessor()

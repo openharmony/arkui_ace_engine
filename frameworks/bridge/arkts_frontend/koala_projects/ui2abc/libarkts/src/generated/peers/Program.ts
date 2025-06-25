@@ -170,11 +170,6 @@ export class Program extends ArktsObject {
         global.generatedEs2panda._ProgramDumpSilentConst(global.context, this.peer)
         return this
     }
-    /** @deprecated */
-    addDeclGenExportNode(declGenExportStr: string, node?: AstNode): this {
-        global.generatedEs2panda._ProgramAddDeclGenExportNode(global.context, this.peer, declGenExportStr, passNode(node))
-        return this
-    }
     get isDied(): boolean {
         return global.generatedEs2panda._ProgramIsDiedConst(global.context, this.peer)
     }
