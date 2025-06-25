@@ -296,6 +296,7 @@ private:
         const SizeF& childSize, OffsetF& arrowPosition, OffsetF& resultPosition, SizeF& resultSize, bool canCompress);
     void RecordMaxSpace(const float maxAreaSpace, const OffsetF& position, const float maxWidth, const float maxHeight,
         const OffsetF& arrowPosition);
+    void BottomAndTopPosition(OffsetF& bottomPosition, OffsetF& topPosition, const SizeF& childSize);
     Rect GetBottomRect();
     Rect GetTopRect();
     Rect GetRightRect();
