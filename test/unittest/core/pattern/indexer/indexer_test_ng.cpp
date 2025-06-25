@@ -234,6 +234,79 @@ HWTEST_F(IndexerTestNg, RemoveResourceObjTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ChangeFlagForSetByUser001
+ * @tc.desc: Test property ChangeFlagForSetByUser
+ * @tc.type: FUNC
+ */
+HWTEST_F(IndexerTestNg, ChangeFlagForSetByUser001, TestSize.Level1)
+{
+    IndexerModelNG model = CreateIndexer(GetLongArrayValue(), 2);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    model.SetColorByUser(true);
+    model.SetSelectedColorByUser(true);
+    model.SetPopupColorByUser(true);
+    model.SetSelectedBGColorByUser(true);
+    model.SetPopupUnselectedColorByUser(true);
+    model.SetPopupTitleBackgroundByUser(true);
+    model.SetPopupSelectedColorByUser(true);
+    model.SetPopupItemBackgroundColorByUser(true);
+    model.SetPopupBackgroundColorByUser(true);
+    pattern_->OnModifyDone();
+    auto indexerLayoutProperty = pattern_->GetLayoutProperty<IndexerLayoutProperty>();
+    ASSERT_NE(indexerLayoutProperty, nullptr);
+    EXPECT_TRUE(indexerLayoutProperty->GetSetColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetSelectedColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetPopupColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetSelectedBGColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetPopupUnselectedColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetPopupTitleBackgroundByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetPopupSelectedColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetPopupItemBackgroundColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetPopupBackgroundColorByUser().value_or(false));
+
+    model.ChangeFlagForSetByUser(frameNode, "Color", false);
+    model.ChangeFlagForSetByUser(frameNode, "PopupColor", false);
+    model.ChangeFlagForSetByUser(frameNode, "SelectedBackgroundColor", false);
+    model.ChangeFlagForSetByUser(frameNode, "PopupUnselectedColor", false);
+    model.ChangeFlagForSetByUser(frameNode, "PopupTitleBackground", false);
+    model.ChangeFlagForSetByUser(frameNode, "PopupSelectedColor", false);
+    model.ChangeFlagForSetByUser(frameNode, "PopupItemBackground", false);
+    model.ChangeFlagForSetByUser(frameNode, "PopupBackground", false);
+    model.ChangeFlagForSetByUser(frameNode, "SelectedColor", false);
+    EXPECT_FALSE(indexerLayoutProperty->GetSetColorByUser().value_or(true));
+    EXPECT_FALSE(indexerLayoutProperty->GetSetSelectedColorByUser().value_or(true));
+    EXPECT_FALSE(indexerLayoutProperty->GetSetPopupColorByUser().value_or(true));
+    EXPECT_FALSE(indexerLayoutProperty->GetSetSelectedBGColorByUser().value_or(true));
+    EXPECT_FALSE(indexerLayoutProperty->GetSetPopupUnselectedColorByUser().value_or(true));
+    EXPECT_FALSE(indexerLayoutProperty->GetSetPopupTitleBackgroundByUser().value_or(true));
+    EXPECT_FALSE(indexerLayoutProperty->GetSetPopupSelectedColorByUser().value_or(true));
+    EXPECT_FALSE(indexerLayoutProperty->GetSetPopupItemBackgroundColorByUser().value_or(true));
+    EXPECT_FALSE(indexerLayoutProperty->GetSetPopupBackgroundColorByUser().value_or(true));
+
+    model.ChangeFlagForSetByUser(frameNode, "Color", true);
+    model.ChangeFlagForSetByUser(frameNode, "PopupColor", true);
+    model.ChangeFlagForSetByUser(frameNode, "SelectedBackgroundColor", true);
+    model.ChangeFlagForSetByUser(frameNode, "PopupUnselectedColor", true);
+    model.ChangeFlagForSetByUser(frameNode, "PopupTitleBackground", true);
+    model.ChangeFlagForSetByUser(frameNode, "PopupSelectedColor", true);
+    model.ChangeFlagForSetByUser(frameNode, "PopupItemBackground", true);
+    model.ChangeFlagForSetByUser(frameNode, "PopupBackground", true);
+    model.ChangeFlagForSetByUser(frameNode, "SelectedColor", true);
+    EXPECT_TRUE(indexerLayoutProperty->GetSetColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetSelectedColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetPopupColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetSelectedBGColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetPopupUnselectedColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetPopupTitleBackgroundByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetPopupSelectedColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetPopupItemBackgroundColorByUser().value_or(false));
+    EXPECT_TRUE(indexerLayoutProperty->GetSetPopupBackgroundColorByUser().value_or(false));
+    CreateDone();
+}
+
+/**
  * @tc.name: IndexerSetColorByUser001
  * @tc.desc: Test property SetColorByUser UpdateThemeColor
  * @tc.type: FUNC

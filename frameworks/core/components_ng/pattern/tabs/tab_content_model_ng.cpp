@@ -559,7 +559,17 @@ template<typename T>
 bool ParseType(const RefPtr<ResourceObject>& resObj, const std::string& name, T& result)
 {
     if constexpr (std::is_same_v<T, Color>) {
-        return ResourceParseUtils::ParseResColor(resObj, result);
+        if (!ResourceParseUtils::ParseResColor(resObj, result)) {
+            auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            CHECK_NULL_RETURN(frameNode, false);
+            auto pipelineContext = frameNode->GetContext();
+            CHECK_NULL_RETURN(pipelineContext, false);
+            auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+            CHECK_NULL_RETURN(tabTheme, false);
+            result = tabTheme->GetActiveIndicatorColor();
+            return false;
+        }
+        return true;
     } else if constexpr (std::is_same_v<T, std::optional<Color>>) {
         if (name == "selectedColor" || name == "unselectedColor") {
             Color color;
@@ -661,9 +671,9 @@ void TabContentModelNG::CreateWithResourceObj(TabContentJsType jsType, const Ref
         REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
             TabContentJsType::LABEL_UNSELECT_COLOR, LabelStyle, unselectedColor, resObj, std::optional<Color>);
         REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
-            TabContentJsType::ICON_SELECT_COLOR, IconStyle, selectedColor, resObj, Color);
+            TabContentJsType::ICON_SELECT_COLOR, IconStyle, selectedColor, resObj, std::optional<Color>);
         REGISTER_RESOURCE_UPDATE_ATTR_FUNC(
-            TabContentJsType::ICON_UNSELECT_COLOR, IconStyle, unselectedColor, resObj, Color);
+            TabContentJsType::ICON_UNSELECT_COLOR, IconStyle, unselectedColor, resObj, std::optional<Color>);
         default:
             CreateMoreWithResourceObj(jsType, frameNode, resObj);
             break;
@@ -965,7 +975,7 @@ bool TabContentModelNG::CreateBoardStyleBorderRadiusWithResourceObj(FrameNode* f
         auto pattern = frameNode->GetPattern<TabContentPattern>();
         CHECK_NULL_VOID(pattern);
         CalcDimension result;
-        auto attrs = pattern->GetIndicatorStyle();
+        auto attrs = pattern->GetBoardStyle();
         if (!ParseType(resObj, "borderRadius", result) || result.Value() < 0.0f ||
             result.Unit() == DimensionUnit::PERCENT) {
             auto pipelineContext = frameNode->GetContext();
@@ -976,7 +986,7 @@ bool TabContentModelNG::CreateBoardStyleBorderRadiusWithResourceObj(FrameNode* f
         } else {
             attrs.borderRadius = result;
         }
-        pattern->SetIndicatorStyle(attrs);
+        pattern->SetBoardStyle(attrs);
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
     return true;

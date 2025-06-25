@@ -604,7 +604,7 @@ void SetSwiperNextMarginRAw(ArkUINodeHandle node, ArkUI_Float32 nextMarginValue,
     if (SystemProperties::ConfigChangePerform()) {
         auto* nextMargin = reinterpret_cast<ResourceObject*>(nextMarginRawPtr);
         auto nextMarginResObj = AceType::Claim(nextMargin);
-        SwiperModel::GetInstance()->ProcessNextMarginwithResourceObj(nextMarginResObj);
+        SwiperModel::GetInstance()->ProcessNextMarginWithResourceObj(nextMarginResObj);
     }
 }
 
@@ -616,7 +616,7 @@ void ResetSwiperNextMargin(ArkUINodeHandle node)
     SwiperModelNG::SetNextMargin(frameNode, value);
     if (SystemProperties::ConfigChangePerform()) {
         auto nextMarginResObj = AceType::MakeRefPtr<ResourceObject>();
-        SwiperModel::GetInstance()->ProcessNextMarginwithResourceObj(nextMarginResObj);
+        SwiperModel::GetInstance()->ProcessNextMarginWithResourceObj(nextMarginResObj);
     }
 }
 
@@ -654,7 +654,7 @@ void SetSwiperPrevMarginRaw(ArkUINodeHandle node, ArkUI_Float32 prevMarginValue,
     if (SystemProperties::ConfigChangePerform()) {
         auto* prevMargin = reinterpret_cast<ResourceObject*>(prevMarginRawPtr);
         auto prevMarginResObj = AceType::Claim(prevMargin);
-        SwiperModel::GetInstance()->ProcessPreviousMarginwithResourceObj(prevMarginResObj);
+        SwiperModel::GetInstance()->ProcessPreviousMarginWithResourceObj(prevMarginResObj);
     }
 }
 
@@ -666,7 +666,7 @@ void ResetSwiperPrevMargin(ArkUINodeHandle node)
     SwiperModelNG::SetPreviousMargin(frameNode, value);
     if (SystemProperties::ConfigChangePerform()) {
         auto prevMarginResObj = AceType::MakeRefPtr<ResourceObject>();
-        SwiperModel::GetInstance()->ProcessPreviousMarginwithResourceObj(prevMarginResObj);
+        SwiperModel::GetInstance()->ProcessPreviousMarginWithResourceObj(prevMarginResObj);
     }
 }
 
