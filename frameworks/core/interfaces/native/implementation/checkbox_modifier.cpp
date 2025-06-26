@@ -23,6 +23,17 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace {
+void SetBuilder(Ark_NativePointer node, FrameNode* frameNode, CustomNodeBuilder& customNodeBuilder)
+{
+    CallbackHelper(customNodeBuilder).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) mutable {
+        auto builder = [uiNode]() {
+            ViewStackProcessor::GetInstance()->Push(uiNode);
+        };
+        CheckBoxModelStatic::SetBuilder(frameNode, std::move(builder));
+        }, node);
+}
+}
 namespace CheckboxModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
@@ -56,14 +67,7 @@ void SetCheckboxOptionsImpl(Ark_NativePointer node,
 
         auto arkIndicatorBuilder = Converter::OptConvert<CustomNodeBuilder>(options.indicatorBuilder);
         if (arkIndicatorBuilder) {
-            WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-            auto customBuilder = [callback = CallbackHelper(arkIndicatorBuilder.value()), node,
-                weakNode]() {
-                PipelineContext::SetCallBackNode(weakNode);
-                auto uiNode = callback.BuildSync(node);
-                ViewStackProcessor::GetInstance()->Push(uiNode);
-            };
-            CheckBoxModelStatic::SetBuilder(frameNode, std::move(customBuilder));
+            SetBuilder(node, frameNode, arkIndicatorBuilder.value());
         }
     });
 }
