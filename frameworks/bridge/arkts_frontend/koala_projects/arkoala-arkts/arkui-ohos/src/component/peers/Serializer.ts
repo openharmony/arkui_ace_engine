@@ -11011,7 +11011,12 @@ export class Serializer extends SerializerBase {
                 const value_colors_value_element : ResourceColor | LinearGradient = value_colors_value[i]
                 let value_colors_value_element_type : int32 = RuntimeType.UNDEFINED
                 value_colors_value_element_type = runtimeType(value_colors_value_element)
-                if ((TypeChecker.isColor(value_colors_value_element)) || (RuntimeType.NUMBER == value_colors_value_element_type) || (RuntimeType.STRING == value_colors_value_element_type) || (RuntimeType.OBJECT == value_colors_value_element_type)) {
+                if (TypeChecker.isLinearGradient(value_colors_value_element)) {
+                    valueSerializer.writeInt8(1 as int32)
+                    const value_colors_value_element_1  = value_colors_value_element as LinearGradient
+                    valueSerializer.writeLinearGradient(value_colors_value_element_1)
+                }
+                else if ((TypeChecker.isColor(value_colors_value_element)) || (RuntimeType.NUMBER == value_colors_value_element_type) || (RuntimeType.STRING == value_colors_value_element_type) || (RuntimeType.OBJECT == value_colors_value_element_type)) {
                     valueSerializer.writeInt8(0 as int32)
                     const value_colors_value_element_0  = value_colors_value_element as ResourceColor
                     let value_colors_value_element_0_type : int32 = RuntimeType.UNDEFINED
@@ -11036,11 +11041,6 @@ export class Serializer extends SerializerBase {
                         const value_colors_value_element_0_3  = value_colors_value_element_0 as Resource
                         valueSerializer.writeResource(value_colors_value_element_0_3)
                     }
-                }
-                else if (TypeChecker.isLinearGradient(value_colors_value_element)) {
-                    valueSerializer.writeInt8(1 as int32)
-                    const value_colors_value_element_1  = value_colors_value_element as LinearGradient
-                    valueSerializer.writeLinearGradient(value_colors_value_element_1)
                 }
             }
         }
