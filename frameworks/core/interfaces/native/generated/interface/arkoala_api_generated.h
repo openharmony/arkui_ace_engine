@@ -4750,8 +4750,8 @@ typedef struct Opt_KeyProcessingMode {
 } Opt_KeyProcessingMode;
 typedef enum Ark_KeySource {
     ARK_KEY_SOURCE_UNKNOWN = 0,
-    ARK_KEY_SOURCE_KEYBOARD = 1,
-    ARK_KEY_SOURCE_JOYSTICK = 2,
+    ARK_KEY_SOURCE_KEYBOARD = 4,
+    ARK_KEY_SOURCE_JOYSTICK = 5,
 } Ark_KeySource;
 typedef struct Opt_KeySource {
     Ark_Tag tag;
