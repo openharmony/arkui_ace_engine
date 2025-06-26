@@ -1761,10 +1761,8 @@ RefPtr<Curve> Convert(const Ark_ICurve& src)
     return src ? src->handler : nullptr;
 }
 
-template<>
-DragPreviewOption Convert(const Ark_DragPreviewOptions &src)
+void ParseDragPreviewMode(DragPreviewOption& previewOption, const Ark_DragPreviewOptions &src)
 {
-    DragPreviewOption previewOption;
     auto previewModeHandler = [&previewOption](DragPreviewMode mode) -> bool {
         switch (mode) {
             case DragPreviewMode::AUTO: previewOption.ResetDragPreviewMode(); return true;
@@ -1792,6 +1790,13 @@ DragPreviewOption Convert(const Ark_DragPreviewOptions &src)
             }
         },
         []() {});
+}
+
+template<>
+DragPreviewOption Convert(const Ark_DragPreviewOptions &src)
+{
+    DragPreviewOption previewOption;
+    ParseDragPreviewMode(previewOption, src);
     Converter::VisitUnion(src.numberBadge,
         [&previewOption](const Ark_Number& value) {
             previewOption.isNumber = true;
@@ -1805,6 +1810,12 @@ DragPreviewOption Convert(const Ark_DragPreviewOptions &src)
             previewOption.isNumber = false;
             previewOption.isShowBadge = true;
         });
+    if (src.sizeChangeEffect.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto sizeChangeEffect = Converter::OptConvert<DraggingSizeChangeEffect>(src.sizeChangeEffect.value);
+        if (sizeChangeEffect) {
+            previewOption.sizeChangeEffect = sizeChangeEffect.value();
+        }
+    }
     return previewOption;
 }
 
