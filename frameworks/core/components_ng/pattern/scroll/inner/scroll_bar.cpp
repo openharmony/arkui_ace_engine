@@ -268,12 +268,13 @@ void ScrollBar::SetRectTrickRegion(const Offset& offset, const Size& size, const
     } else {
         offsetScale_ = (barRegionSize_ - activeSize) / (estimatedHeight - mainSize);
     }
-    // Avoid crossing the top or bottom boundary.
-    double activeMainOffset = std::min(offsetScale_ * lastMainOffset, barRegionSize_ - activeSize) +
-        NormalizeToPx(startReservedHeight_, context) + scrollBarMarginStart;
-    activeMainOffset = !isReverse_ ? activeMainOffset : barRegionSize_ - activeSize - activeMainOffset +
-                                                        NormalizeToPx(startReservedHeight_, context) +
-                                                        NormalizeToPx(endReservedHeight_, context);
+    // Calculate relative offset first
+    double relativeOffset = std::min(offsetScale_ * lastMainOffset, barRegionSize_ - activeSize);
+    if (isReverse_) {
+        relativeOffset = barRegionSize_ - activeSize - relativeOffset;
+    }
+    // Convert to absolute position
+    double activeMainOffset = relativeOffset + NormalizeToPx(startReservedHeight_) + scrollBarMarginStart;
     bool canUseAnimation = NearZero(outBoundary_) && !positionModeUpdate_ && scrollSource != SCROLL_FROM_JUMP;
     double inactiveSize = 0.0;
     double inactiveMainOffset = 0.0;
