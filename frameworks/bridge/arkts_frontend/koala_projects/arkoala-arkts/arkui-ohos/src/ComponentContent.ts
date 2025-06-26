@@ -20,11 +20,12 @@ import { FrameNode, BuilderRootFrameNode, FrameNodeUtils } from "./FrameNode"
 import { BuilderNode, BuildOptions, voidBuilderFunc, TBuilderFunc } from "./BuilderNode"
 
 import { Content } from "./Content"
-import { KPointer } from "@koalaui/interop"
+import { KPointer, pointer } from "@koalaui/interop"
 
 export class ComponentContent<T = undefined> implements Content {
     private builderNode_: BuilderNode<T>;
     private parentWeak_?: WeakRef<FrameNode>;
+    private attachedNodeRef_?:pointer;
     //@ts-ignore
     constructor(uiContext: UIContext, builder: WrappedBuilder<TBuilderFunc<T>>, params: T, options?: BuildOptions) {
         let builderNode = new BuilderNode<T>(uiContext, {});

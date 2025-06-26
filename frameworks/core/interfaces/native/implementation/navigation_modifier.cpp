@@ -31,6 +31,8 @@ constexpr uint32_t SAFE_AREA_EDGE_LIMIT = 4;
 constexpr uint32_t SAFE_AREA_EDGE_SYSTEM = 0;
 constexpr uint32_t SAFE_AREA_EDGE_TOP = 0;
 constexpr uint32_t SAFE_AREA_EDGE_BOTTOM = 1;
+constexpr uint32_t INVALID_VALUE = 0;
+constexpr uint32_t DEFAULT_NAV_BAR_WIDTH = 240;
 } // namespace
 
 namespace NavigationModifier {
@@ -69,8 +71,17 @@ void NavBarWidthImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto result = Converter::OptConvert<Dimension>(*value);
-    NavigationModelStatic::SetNavBarWidth(frameNode, result.value());
+    Dimension def(DEFAULT_NAV_BAR_WIDTH, DimensionUnit::VP);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    auto result = Converter::Convert<Dimension>(value->value);
+    auto resultVal = result.Value();
+    if (resultVal <= INVALID_VALUE) {
+        NavigationModelStatic::SetNavBarWidth(frameNode, def);
+        return;
+    }
+    NavigationModelStatic::SetNavBarWidth(frameNode, result);
 }
 
 void NavBarPositionImpl(Ark_NativePointer node,

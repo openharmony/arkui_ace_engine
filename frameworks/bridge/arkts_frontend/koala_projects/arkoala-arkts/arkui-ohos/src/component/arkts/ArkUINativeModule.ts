@@ -108,4 +108,10 @@ export class ArkUINativeModule {
     native static _LoadUserView(userClass: string, params: string): Object
     @ani.unsafe.Direct
     native static _Hook_onClick0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _CreateViewStackProcessor(): KPointer
+    @ani.unsafe.Direct
+    native static _PopViewStackProcessor(): KPointer
+    @ani.unsafe.Direct
+    native static _DeleteViewStackProcessor(ptr: KPointer): void
 }

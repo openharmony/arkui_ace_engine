@@ -22,7 +22,7 @@
                 "stage": "checked",
                 "keepTransformed": "../test/out",
                 "stableForTests": true,
-                "manuallyDisableInsertingImport": true
+                "trackContentParam": false
             }
         ]
     },

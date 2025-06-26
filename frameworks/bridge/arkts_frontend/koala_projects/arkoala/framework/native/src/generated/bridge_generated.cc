@@ -32717,23 +32717,6 @@ void impl_UIContext_setDynamicDimming(Ark_NativePointer thisPtr, const KStringPt
         GetAccessors()->getUIContextAccessor()->setDynamicDimming(self, (const Ark_String*) (&id), (const Ark_Number*) (&value));
 }
 KOALA_INTEROP_V3(UIContext_setDynamicDimming, Ark_NativePointer, KStringPtr, KInteropNumber)
-KInteropReturnBuffer impl_UIContext_getWindowName(Ark_NativePointer thisPtr) {
-        Ark_UIContext self = reinterpret_cast<Ark_UIContext>(thisPtr);
-        const auto &retValue = GetAccessors()->getUIContextAccessor()->getWindowName(self);
-        Serializer _retSerializer {};
-        Ark_Int32 retValue_type = INTEROP_RUNTIME_UNDEFINED;
-        retValue_type = retValue.selector;
-        if (retValue_type == 0) {
-            _retSerializer.writeInt8(0);
-            const auto retValue_0 = retValue.value0;
-            _retSerializer.writeString(retValue_0);
-        }
-        else if (retValue_type == 1) {
-            _retSerializer.writeInt8(1);
-        }
-        return _retSerializer.toReturnBuffer();
-}
-KOALA_INTEROP_1(UIContext_getWindowName, KInteropReturnBuffer, Ark_NativePointer)
 void impl_UIContext_openBindSheet(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_NativePointer bindSheetContent, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_UIContext self = reinterpret_cast<Ark_UIContext>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
@@ -32834,6 +32817,18 @@ Ark_NativePointer impl_DrawableDescriptor_ctor() {
         return GetAccessors()->getDrawableDescriptorAccessor()->ctor();
 }
 KOALA_INTEROP_DIRECT_0(DrawableDescriptor_ctor, Ark_NativePointer)
+Ark_String impl_UIContext_getWindowName(const KInteropNumber instanceId) {
+         return GetAccessors()->getUIContextAccessor()->getWindowName((const Ark_Number*)(&instanceId));
+ }
+ KOALA_INTEROP_1(UIContext_getWindowName, KStringPtr, KInteropNumber)
+Ark_Number impl_UIContext_getWindowWidthBreakpoint(const KInteropNumber instanceId) {
+        return GetAccessors()->getUIContextAccessor()->getWindowWidthBreakpoint((const Ark_Number*)(&instanceId));
+}
+KOALA_INTEROP_1(UIContext_getWindowWidthBreakpoint, KInteropNumber, KInteropNumber)
+Ark_Number impl_UIContext_getWindowHeightBreakpoint(const KInteropNumber instanceId) {
+        return GetAccessors()->getUIContextAccessor()->getWindowHeightBreakpoint((const Ark_Number*)(&instanceId));
+}
+KOALA_INTEROP_1(UIContext_getWindowHeightBreakpoint, KInteropNumber, KInteropNumber)
 Ark_NativePointer impl_DrawableDescriptor_getFinalizer() {
         return GetAccessors()->getDrawableDescriptorAccessor()->getFinalizer();
 }
@@ -33960,6 +33955,11 @@ Ark_NativePointer impl_FrameNode_getFrameNodeByKey(const KStringPtr& name) {
         return GetAccessors()->getFrameNodeAccessor()->getFrameNodeByKey((const Ark_String*) (&name));
 }
 KOALA_INTEROP_1(FrameNode_getFrameNodeByKey, Ark_NativePointer, KStringPtr)
+Ark_NativePointer impl_FrameNode_getCommonEvent(Ark_NativePointer thisPtr) {
+    Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+    return GetAccessors()->getFrameNodeAccessor()->getCommonEvent(self);
+}
+KOALA_INTEROP_DIRECT_1(FrameNode_getCommonEvent, Ark_NativePointer, Ark_NativePointer)
 Ark_String impl_FrameNode_getId(Ark_NativePointer thisPtr) {
         Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
         return GetAccessors()->getFrameNodeAccessor()->getId(self);
@@ -40357,6 +40357,11 @@ Ark_String impl_EventTargetInfo_getId(Ark_NativePointer thisPtr) {
         return GetAccessors()->getEventTargetInfoAccessor()->getId(self);
 }
 KOALA_INTEROP_1(EventTargetInfo_getId, KStringPtr, Ark_NativePointer)
+Ark_Boolean impl_EventTargetInfo_isScrollableComponent(Ark_NativePointer thisPtr) {
+        Ark_EventTargetInfo self = reinterpret_cast<Ark_EventTargetInfo>(thisPtr);
+        return GetAccessors()->getEventTargetInfoAccessor()->isScrollableComponent(self);
+}
+KOALA_INTEROP_DIRECT_1(EventTargetInfo_isScrollableComponent, Ark_Boolean, Ark_NativePointer)
 Ark_NativePointer impl_GestureRecognizer_ctor() {
         return GetAccessors()->getGestureRecognizerAccessor()->ctor();
 }

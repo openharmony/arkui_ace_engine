@@ -41,6 +41,7 @@ export class TSNullKeyword extends TypeNode {
     static updateTSNullKeyword(original?: TSNullKeyword): TSNullKeyword {
         return new TSNullKeyword(global.generatedEs2panda._UpdateTSNullKeyword(global.context, passNode(original)))
     }
+    protected readonly brandTSNullKeyword: undefined
 }
 export function isTSNullKeyword(node: object | undefined): node is TSNullKeyword {
     return node instanceof TSNullKeyword

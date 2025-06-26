@@ -32,4 +32,5 @@ export class VerificationContext extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandVerificationContext: undefined
 }

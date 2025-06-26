@@ -73,6 +73,9 @@ namespace GeneratedApiImpl {
     void SetChildTotalCount(Ark_NodeHandle node, Ark_Int32 totalCount);
     void ShowCrash(Ark_CharPtr message);
     void SetCallbackMethod(GENERATED_Ark_APICallbackMethod* method);
+    Ark_NodeHandle CreateViewStackProcessor();
+    Ark_NodeHandle PopViewStackProcessor();
+    void DeleteViewStackProcessor(Ark_NodeHandle ptr);
 } // namespace OHOS::Ace::NG::GeneratedApiImpl
 
 namespace GeneratedBridge {
@@ -853,6 +856,17 @@ const GENERATED_ArkUIExtendedNodeAPI* GENERATED_GetExtendedAPI()
     return &extendedNodeAPIImpl;
 }
 
+const GENERATED_ArkUIInteropNodeAPI* GENERATED_GetINTEROPAPI()
+{
+    static const GENERATED_ArkUIInteropNodeAPI interopAPIImpl = {
+        GENERATED_ARKUI_INTEROP_NODE_API_VERSION, // version
+        OHOS::Ace::NG::GeneratedApiImpl::CreateViewStackProcessor,
+        OHOS::Ace::NG::GeneratedApiImpl::PopViewStackProcessor,
+        OHOS::Ace::NG::GeneratedApiImpl::DeleteViewStackProcessor
+    };
+    return &interopAPIImpl;
+}
+
 // TODO: remove me!
 const GENERATED_ArkUIFullNodeAPI* GENERATED_GetFullAPI()
 {
@@ -899,6 +913,11 @@ EXTERN_C IDLIZE_API_EXPORT const OH_AnyAPI* GENERATED_GetArkAnyAPI(
         case GENERIC_SERVICE_API_KIND:
             if (version == GENERIC_SERVICE_API_VERSION)   {
                 return reinterpret_cast<const OH_AnyAPI*>(GetServiceAPI());
+            }
+            break;
+        case GENERATED_INTEROP:
+            if (version == GENERATED_ARKUI_INTEROP_NODE_API_VERSION)   {
+                return reinterpret_cast<const OH_AnyAPI*>(GENERATED_GetINTEROPAPI());
             }
             break;
         default:

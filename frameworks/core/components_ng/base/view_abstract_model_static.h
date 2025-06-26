@@ -82,6 +82,17 @@ public:
             ViewAbstract::SetMinHeight(frameNode, NG::CalcLength(minHeight));
         }
     }
+
+    static int32_t GetWindowWidthBreakpoint()
+    {
+        return ViewAbstract::GetWindowWidthBreakpoint();
+    }
+
+    static int32_t GetWindowHeightBreakpoint()
+    {
+        return ViewAbstract::GetWindowHeightBreakpoint();
+    }
+    
     static void SetOpacity(FrameNode* frameNode, const std::optional<double>& opacity)
     {
         ViewAbstract::SetOpacity(frameNode, opacity.value_or(0));

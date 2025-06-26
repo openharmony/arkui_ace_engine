@@ -15,7 +15,6 @@
 
 #ifdef KOALA_ANI
 
-#include <assert.h>
 #include <memory>
 #include <vector>
 #include <string>
@@ -27,12 +26,13 @@
 #include "koala-types.h"
 #include "interop-logging.h"
 
-#define CHECK_ANI_FATAL(result)                                         \
-do {                                                                    \
-  if ((result) != ANI_OK) {                                             \
-    INTEROP_FATAL("ANI function failed at " __FILE__ ": %d", __LINE__); \
-  }                                                                     \
-}                                                                       \
+#define CHECK_ANI_FATAL(result)                                                            \
+do {                                                                                       \
+  ani_status res = (result);                                                               \
+  if (res != ANI_OK) {                                                                     \
+    INTEROP_FATAL("ANI function failed (status: %d) at " __FILE__ ": %d", res,  __LINE__); \
+  }                                                                                        \
+}                                                                                          \
 while (0)
 
 template<class T>

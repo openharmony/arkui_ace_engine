@@ -50,6 +50,7 @@ export class ExpressionStatement extends Statement {
         global.generatedEs2panda._ExpressionStatementSetExpression(global.context, this.peer, passNode(expr))
         return this
     }
+    protected readonly brandExpressionStatement: undefined
 }
 export function isExpressionStatement(node: object | undefined): node is ExpressionStatement {
     return node instanceof ExpressionStatement

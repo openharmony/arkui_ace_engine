@@ -12,8 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <stdio.h>
-#include <cstdlib>
+
+#ifdef __cplusplus
+  #include <cstdio>
+  #include <cstdlib>
+#else
+  #include <stdio.h>
+  #include <stdlib.h>
+#endif
+
 #include <windows.h>
 #include "node_api.h"
 

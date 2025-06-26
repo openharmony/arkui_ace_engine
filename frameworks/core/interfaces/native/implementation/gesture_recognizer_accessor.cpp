@@ -108,6 +108,7 @@ Ark_EventTargetInfo GetEventTargetInfoImpl(Ark_GestureRecognizer peer)
     } else {
         auto eventTargetInfoPeer = GetEventTargetInfoAccessor()->ctor();
         eventTargetInfoPeer->id = attachNode->GetInspectorIdValue("");
+        eventTargetInfoPeer->isScrollableComponent_ = false;
         result = eventTargetInfoPeer;
     }
     return result;

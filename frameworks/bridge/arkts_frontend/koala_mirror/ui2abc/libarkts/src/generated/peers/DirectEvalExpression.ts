@@ -43,6 +43,7 @@ export class DirectEvalExpression extends CallExpression {
     static updateDirectEvalExpression(original: DirectEvalExpression | undefined, callee: Expression | undefined, _arguments: readonly Expression[], typeParams: TSTypeParameterInstantiation | undefined, optional_arg: boolean, parserStatus: number): DirectEvalExpression {
         return new DirectEvalExpression(global.generatedEs2panda._UpdateDirectEvalExpression(global.context, passNode(original), passNode(callee), passNodeArray(_arguments), _arguments.length, passNode(typeParams), optional_arg, parserStatus))
     }
+    protected readonly brandDirectEvalExpression: undefined
 }
 export function isDirectEvalExpression(node: object | undefined): node is DirectEvalExpression {
     return node instanceof DirectEvalExpression

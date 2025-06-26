@@ -13,22 +13,33 @@
  * limitations under the License.
  */
 
+import {
+    __memo_context_type as __memo_context_type,
+    __memo_id_type as __memo_id_type,
+} from 'arkui.stateManagement.runtime';
 import { PeerNode } from 'arkui.PeerNode';
-// import { AnimateParam, UIGestureEvent } from "arkui.component"
-
+// import { AnimateParam, UIGestureEvent } from "./component";
 export declare class ComponentBase {
-    protected peer?: PeerNode;
+    protected peer?: PeerNode | undefined;
     protected isFirstBuild: boolean;
-    /** @memo */
-    public __applyStyle<T extends ComponentBase, A>(
-        /** @memo */
-        func: (instance: T, arg: A) => T, // should be ...args: A[], but that doesn't currently compile
+    // protected gestureEvent: UIGestureEvent | undefined;
+    setPeer(peer: PeerNode): void;
+    // setGestureEvent(gestureEvent: UIGestureEvent): void;
+    protected checkPriority(name: string): boolean;
+    applyAttributesFinish(): void;
+    applyAttributes(attrs: Object): void;
+    // animationStart(param: AnimateParam): this;
+    animationEnd(): this;
+    __applyStyle<T extends ComponentBase, A>(
+        __memo_context: __memo_context_type,
+        __memo_id: __memo_id_type,
+        func: (__memo_context: __memo_context_type, __memo_id: __memo_id_type, instance: T, arg: A) => T,
         arg: A
     ): T;
-    /** @memo */
-    public __applyAnimatableExtend<T extends ComponentBase, A>(
-        /** @memo */
-        func: (instance: T, arg: A) => T,
+    __applyAnimatableExtend<T extends ComponentBase, A>(
+        __memo_context: __memo_context_type,
+        __memo_id: __memo_id_type,
+        func: (__memo_context: __memo_context_type, __memo_id: __memo_id_type, instance: T, arg: A) => T,
         arg: A
     ): T;
 }

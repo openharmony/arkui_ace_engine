@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <variant>
+#include "arkoala_api_generated.h"
 
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
@@ -33,6 +34,7 @@
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_node.h"
+#include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
@@ -47,12 +49,18 @@
 #include "core/interfaces/native/implementation/gesture_group_interface_peer.h"
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
 #include "core/interfaces/native/implementation/long_press_gesture_interface_peer.h"
+#include "core/interfaces/native/implementation/long_press_recognizer_peer.h"
 #include "core/interfaces/native/implementation/pan_gesture_interface_peer.h"
+#include "core/interfaces/native/implementation/pan_recognizer_peer.h"
 #include "core/interfaces/native/implementation/pinch_gesture_interface_peer.h"
+#include "core/interfaces/native/implementation/pinch_recognizer_peer.h"
 #include "core/interfaces/native/implementation/progress_mask_peer.h"
 #include "core/interfaces/native/implementation/rotation_gesture_interface_peer.h"
+#include "core/interfaces/native/implementation/rotation_recognizer_peer.h"
 #include "core/interfaces/native/implementation/swipe_gesture_interface_peer.h"
+#include "core/interfaces/native/implementation/swipe_recognizer_peer.h"
 #include "core/interfaces/native/implementation/tap_gesture_interface_peer.h"
+#include "core/interfaces/native/implementation/tap_recognizer_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
 #include "base/log/log_wrapper.h"
@@ -86,6 +94,37 @@ const uint32_t FOCUS_PRIORITY_PREVIOUS = 3000;
 }
 
 namespace OHOS::Ace::NG {
+namespace {
+Ark_GestureRecognizer CreateArkGestureRecognizer(const RefPtr<NGGestureRecognizer>& recognizer)
+{
+    auto tapRecognizer = AceType::DynamicCast<ClickRecognizer>(recognizer);
+    if (tapRecognizer) {
+        return reinterpret_cast<Ark_GestureRecognizer>(Converter::ArkValue<Ark_TapRecognizer>(tapRecognizer));
+    }
+    auto longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(recognizer);
+    if (longPressRecognizer) {
+        return reinterpret_cast<Ark_GestureRecognizer>(
+            Converter::ArkValue<Ark_LongPressRecognizer>(longPressRecognizer));
+    }
+    auto panRecognizer = AceType::DynamicCast<PanRecognizer>(recognizer);
+    if (panRecognizer) {
+        return reinterpret_cast<Ark_GestureRecognizer>(Converter::ArkValue<Ark_PanRecognizer>(panRecognizer));
+    }
+    auto pinchRecognizer = AceType::DynamicCast<PinchRecognizer>(recognizer);
+    if (pinchRecognizer) {
+        return reinterpret_cast<Ark_GestureRecognizer>(Converter::ArkValue<Ark_PinchRecognizer>(pinchRecognizer));
+    }
+    auto swipeRecognizer = AceType::DynamicCast<SwipeRecognizer>(recognizer);
+    if (swipeRecognizer) {
+        return reinterpret_cast<Ark_GestureRecognizer>(Converter::ArkValue<Ark_SwipeRecognizer>(swipeRecognizer));
+    }
+    auto rotationRecognizer = AceType::DynamicCast<RotationRecognizer>(recognizer);
+    if (rotationRecognizer) {
+        return reinterpret_cast<Ark_GestureRecognizer>(Converter::ArkValue<Ark_RotationRecognizer>(rotationRecognizer));
+    }
+    return Converter::ArkValue<Ark_GestureRecognizer>(recognizer);
+}
+}
 struct EdgesParamOptions {
     EdgesParam value;
     bool isLocalized;
@@ -423,6 +462,12 @@ Dimension ClampAngleDimension(const std::optional<Dimension>& angle, float minAn
 
 namespace GeneratedModifier {
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
+const GENERATED_ArkUITapRecognizerAccessor* GetTapRecognizerAccessor();
+const GENERATED_ArkUILongPressRecognizerAccessor* GetLongPressRecognizerAccessor();
+const GENERATED_ArkUIPanRecognizerAccessor* GetPanRecognizerAccessor();
+const GENERATED_ArkUIPinchRecognizerAccessor* GetPinchRecognizerAccessor();
+const GENERATED_ArkUISwipeRecognizerAccessor* GetSwipeRecognizerAccessor();
+const GENERATED_ArkUIRotationRecognizerAccessor* GetRotationRecognizerAccessor();
 
 namespace CommonMethodModifier {
 void BackgroundEffect1Impl(
@@ -1616,6 +1661,66 @@ void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecogn
         dst->Update(src);
     }
 }
+// this creates the peer for Materialized object. DO NOT FORGET TO RELEASE IT
+void AssignArkValue(Ark_TapRecognizer &dst, const RefPtr<NG::ClickRecognizer>& src)
+{
+    auto accessor = GeneratedModifier::GetTapRecognizerAccessor();
+    CHECK_NULL_VOID(accessor);
+    dst = accessor->ctor();
+    if (dst) {
+        dst->Update(src);
+    }
+}
+// this creates the peer for Materialized object. DO NOT FORGET TO RELEASE IT
+void AssignArkValue(Ark_LongPressRecognizer &dst, const RefPtr<NG::LongPressRecognizer>& src)
+{
+    auto accessor = GeneratedModifier::GetLongPressRecognizerAccessor();
+    CHECK_NULL_VOID(accessor);
+    dst = accessor->ctor();
+    if (dst) {
+        dst->Update(src);
+    }
+}
+// this creates the peer for Materialized object. DO NOT FORGET TO RELEASE IT
+void AssignArkValue(Ark_PanRecognizer &dst, const RefPtr<NG::PanRecognizer>& src)
+{
+    auto accessor = GeneratedModifier::GetPanRecognizerAccessor();
+    CHECK_NULL_VOID(accessor);
+    dst = accessor->ctor();
+    if (dst) {
+        dst->Update(src);
+    }
+}
+// this creates the peer for Materialized object. DO NOT FORGET TO RELEASE IT
+void AssignArkValue(Ark_PinchRecognizer &dst, const RefPtr<NG::PinchRecognizer>& src)
+{
+    auto accessor = GeneratedModifier::GetPinchRecognizerAccessor();
+    CHECK_NULL_VOID(accessor);
+    dst = accessor->ctor();
+    if (dst) {
+        dst->Update(src);
+    }
+}
+// this creates the peer for Materialized object. DO NOT FORGET TO RELEASE IT
+void AssignArkValue(Ark_SwipeRecognizer &dst, const RefPtr<NG::SwipeRecognizer>& src)
+{
+    auto accessor = GeneratedModifier::GetSwipeRecognizerAccessor();
+    CHECK_NULL_VOID(accessor);
+    dst = accessor->ctor();
+    if (dst) {
+        dst->Update(src);
+    }
+}
+// this creates the peer for Materialized object. DO NOT FORGET TO RELEASE IT
+void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecognizer>& src)
+{
+    auto accessor = GeneratedModifier::GetRotationRecognizerAccessor();
+    CHECK_NULL_VOID(accessor);
+    dst = accessor->ctor();
+    if (dst) {
+        dst->Update(src);
+    }
+}
 void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src)
 {
     auto tagOpt = src.GetTag();
@@ -1658,6 +1763,15 @@ ArkArrayHolder<Array_FingerInfo>::ArkArrayHolder(const std::list<FingerInfo>& da
 {
     std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const FingerInfo& src) {
         return OHOS::Ace::NG::Converter::ArkValue<Ark_FingerInfo>(src);
+    });
+}
+
+template<>
+template<>
+ArkArrayHolder<Array_GestureRecognizer>::ArkArrayHolder(const std::list<RefPtr<NG::NGGestureRecognizer>>& data)
+{
+    std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const RefPtr<NG::NGGestureRecognizer>& src) {
+        return OHOS::Ace::NG::CreateArkGestureRecognizer(src);
     });
 }
 } // namespace Converter
@@ -2205,6 +2319,10 @@ void BorderRadiusImpl(Ark_NativePointer node,
             ButtonModelNG::SetBorderRadius(frameNode, radiuses.value().radiusTopLeft, radiuses.value().radiusTopRight,
                 radiuses.value().radiusBottomLeft, radiuses.value().radiusBottomRight);
         }
+        if (frameNode->GetTag() == V2::IMAGE_ETS_TAG) {
+            ImageModelNG::SetBorderRadius(frameNode, radiuses.value().radiusTopLeft, radiuses.value().radiusTopRight,
+                radiuses.value().radiusBottomLeft, radiuses.value().radiusBottomRight);
+        }
         ViewAbstractModelStatic::SetBorderRadius(frameNode, radiuses.value());
     }
 }
@@ -2285,6 +2403,14 @@ void BorderImageImpl(Ark_NativePointer node,
                 return;
         }
     });
+    if (optValue->slice.tag == INTEROP_TAG_UNDEFINED) {
+        Dimension dimension;
+        borderImage->SetEdgeSlice(BorderImageDirection::LEFT, dimension);
+        borderImage->SetEdgeSlice(BorderImageDirection::RIGHT, dimension);
+        borderImage->SetEdgeSlice(BorderImageDirection::TOP, dimension);
+        borderImage->SetEdgeSlice(BorderImageDirection::BOTTOM, dimension);
+        bitSet |= BorderImage::SLICE_BIT;
+    }
     Converter::WithOptional(optValue->slice, [&borderImage, &bitSet](const auto& src) {
         switch (src.selector) {
             case CASE_0: {
@@ -4727,7 +4853,7 @@ void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
         PipelineContext::SetCallBackNode(node);
 
         auto arkGestEvent = Converter::ArkValue<Ark_BaseGestureEvent>(info);
-        auto arkValCurrent = Converter::ArkValue<Ark_GestureRecognizer>(current);
+        auto arkValCurrent = CreateArkGestureRecognizer(current);
         Converter::ArkArrayHolder<Array_GestureRecognizer> holderOthers(others);
         auto arkValOthers = holderOthers.ArkValue();
         auto resultOpt = callback.InvokeWithOptConvertResult<GestureJudgeResult, Ark_GestureJudgeResult,
@@ -5698,8 +5824,8 @@ void KeyboardShortcutImpl(Ark_NativePointer node,
         return;
     }
     auto strValue = Converter::OptConvertPtr<std::string>(value);
-    if (!strValue.has_value() || strValue.value().size() != 1) {
-        // ViewAbstract::SetKeyboardShortcut(frameNode, {}, {}, nullptr);
+    if (value->value.selector == 0 && (!strValue.has_value() || strValue.value().size() != 1)) {
+        ViewAbstractModelStatic::SetKeyboardShortcut(frameNode, {}, {}, nullptr);
         return;
     }
     auto keysOptVect = Converter::OptConvertPtr<std::vector<std::optional<ModifierKey>>>(keys);

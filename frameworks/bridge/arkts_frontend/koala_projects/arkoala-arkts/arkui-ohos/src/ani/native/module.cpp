@@ -22,6 +22,7 @@
 #include "content_slot/content_slot_module.h"
 #include "custom_node/custom_node_module.h"
 #include "drag_and_drop/native_drag_drop_global.h"
+#include "dragController/drag_controller_module.h"
 #include "load.h"
 #include "log/log.h"
 #include "utils/convert_utils.h"
@@ -183,9 +184,59 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::GetSharedLocalStorage)
         },
         ani_native_function {
+            "_ComponentSnapshot_createFromComponentWithPromise",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateFromComponentWithPromise)
+        },
+        ani_native_function {
             "_Animation_SetOrCreateAnimatableProperty",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetOrCreateAnimatableProperty)
+        },
+        ani_native_function {
+            "_DragController_executeDragWithCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANIExecuteDragWithCallback)
+        },
+        ani_native_function {
+            "_DragController_executeDragWithPromise",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANIExecuteDragWithPromise)
+        },
+        ani_native_function {
+            "_DragController_createDragAction",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANICreateDragAction)
+        },
+        ani_native_function {
+            "_DragController_startDrag",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionStartDrag)
+        },
+        ani_native_function {
+            "_DragController_on",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionOn)
+        },
+        ani_native_function {
+            "_DragController_off",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionOff)
+        },
+        ani_native_function {
+            "_DragController_setDragEventStrictReportingEnabled",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionSetDragEventStrictReportingEnabled)
+        },
+        ani_native_function {
+            "_DragController_cancelDataLoading",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionCancelDataLoading)
+        },
+        ani_native_function {
+            "_DragController_notifyDragStartReques",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionNotifyDragStartReques)
         },
     };
 

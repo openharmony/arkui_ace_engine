@@ -46,6 +46,9 @@
             "@ohos/arkui/componentSnapshot": [
                 "../@ohos.arkui.componentSnapshot.ts"
             ],
+            "@ohos/arkui/dragController": [
+                "../@ohos.arkui.dragController.ts"
+            ],
             "@ohos/arkui/inspector": [
                 "../@ohos.arkui.inspector.ts"
             ],
@@ -110,7 +113,8 @@
         "build/unmemoized/@ohos.graphics.drawing.ts",
         "build/unmemoized/@ohos.arkui.graphics.ts",
         "build/unmemoized/@ohos.promptAction.ts",
-        "build/unmemoized/@ohos.arkui.componentSnapshot.ts"
+        "build/unmemoized/@ohos.arkui.componentSnapshot.ts",
+        "build/unmemoized/@ohos.arkui.dragController.ts"
     ],
     "exclude": [
         "**/index.ts",

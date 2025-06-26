@@ -3,7 +3,7 @@ import { AnimatedState as AnimatedState, one as one } from "./library";
 
 let x: AnimatedState<number> | undefined;
 
-function main() {}
+function main(): void {}
 
 if (x) {
   x!.paused = true

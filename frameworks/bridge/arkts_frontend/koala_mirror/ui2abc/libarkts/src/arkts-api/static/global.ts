@@ -20,12 +20,12 @@ import { Es2pandaNativeModule as GeneratedEs2pandaNativeModule } from "../../gen
 import { initInterop, InteropNativeModule } from "../../InteropNativeModule"
 import { Context } from "../peers/Context"
 import { Profiler } from "./profiler"
-import { Program } from "../peers/Program"
+import { ArkTsConfig } from "../../generated"
 
 export class global {
     public static filePath: string = "./plugins/input/main.ets"
-    public static packageName: string = ""
-    public static filePathFromPackageRoot: string = global.filePath
+
+    public static arktsconfig?: ArkTsConfig
 
     private static _config?: KNativePointer
     public static set config(config: KNativePointer) {
@@ -37,10 +37,13 @@ export class global {
     public static configIsInitialized(): boolean {
         return global._config !== undefined && global._config !== nullptr
     }
+    public static resetConfig(): void {
+        global._config = undefined
+    }
 
     // TODO: rename to contextPeer
     public static get context(): KNativePointer {
-        return global.compilerContext.peer ?? throwError('Global.context not initialized')
+        return global.compilerContext?.peer ?? throwError('Global.context not initialized')
     }
 
     // TODO: rename to context when the pointer valued one is eliminated

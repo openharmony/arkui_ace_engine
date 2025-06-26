@@ -23,9 +23,9 @@ build_component_ng("base_ng") {
     "geometry_node.cpp",
     "inspector.cpp",
     "inspector_filter.cpp",
+    "lazy_compose_adapter.cpp",
     "modifier.cpp",
     "observer_handler.cpp",
-    "scroll_window_adapter.cpp",
     "transparent_node_detector.cpp",
     "ui_node.cpp",
     "view_abstract.cpp",
@@ -34,6 +34,7 @@ build_component_ng("base_ng") {
     "view_full_update_model_ng.cpp",
     "view_partial_update_model_ng.cpp",
     "view_stack_processor.cpp",
+    "interop/view_stack_processor_interop.cpp",
   ]
   if (ace_engine_feature_enable_split_mode &&
       defined(vendor_configs.ace_engine_advanced_split_mode)) {

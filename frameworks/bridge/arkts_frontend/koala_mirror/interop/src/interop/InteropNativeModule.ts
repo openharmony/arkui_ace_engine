@@ -48,7 +48,7 @@ export class InteropNativeModule {
     public static _MaterializeBuffer(data: KPointer, length: bigint, resourceId: int32, hold: KPointer, release: KPointer): ArrayBuffer { throw "method not loaded" }
     public static _GetNativeBufferPointer(data: ArrayBuffer): KPointer { throw "method not loaded" }
 
-    public static _LoadVirtualMachine(arg0: int32, arg1: string, arg2: string): int32 { throw "method not loaded" }
+    public static _LoadVirtualMachine(arg0: int32, arg1: string, arg2: string, arg3: string): int32 { throw "method not loaded" }
     public static _RunApplication(arg0: int32, arg1: int32): number { throw "method not loaded" }
     public static _StartApplication(appUrl: string, appParams: string): KPointer { throw "method not loaded" }
     public static _EmitEvent(eventType: int32, target: int32, arg0: int32, arg1: int32): string { throw "method not loaded" }

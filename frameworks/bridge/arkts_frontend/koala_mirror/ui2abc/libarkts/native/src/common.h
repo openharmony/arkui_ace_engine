@@ -41,13 +41,37 @@
 
 using std::string, std::cout, std::endl, std::vector;
 
-es2panda_Impl *GetImpl();
+extern es2panda_Impl *es2pandaImplementation;
+
+es2panda_Impl *GetImplSlow();
+inline es2panda_Impl *GetImpl() {
+    if (es2pandaImplementation) {
+        return es2pandaImplementation;
+    }
+    return GetImplSlow();
+}
 
 string getString(KStringPtr ptr);
 
 char* getStringCopy(KStringPtr& ptr);
 
-inline KUInt unpackUInt(const KByte* bytes);
+inline KUInt unpackUInt(const KByte* bytes)
+{
+    const KUInt BYTE_0 = 0;
+    const KUInt BYTE_1 = 1;
+    const KUInt BYTE_2 = 2;
+    const KUInt BYTE_3 = 3;
+
+    const KUInt BYTE_1_SHIFT = 8;
+    const KUInt BYTE_2_SHIFT = 16;
+    const KUInt BYTE_3_SHIFT = 24;
+    return (
+        bytes[BYTE_0]
+        | (bytes[BYTE_1] << BYTE_1_SHIFT)
+        | (bytes[BYTE_2] << BYTE_2_SHIFT)
+        | (bytes[BYTE_3] << BYTE_3_SHIFT)
+    );
+}
 
 es2panda_ContextState intToState(KInt state);
 

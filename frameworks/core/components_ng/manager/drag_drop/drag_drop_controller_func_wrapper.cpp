@@ -116,6 +116,21 @@ OffsetF DragControllerFuncWrapper::GetPixelMapScaledOffset(const OffsetF& pointP
     return frameOffset;
 }
 
+std::shared_ptr<ScaleDataInfo> DragControllerFuncWrapper::GetScaleInfo(int32_t containerId, float width, float height)
+{
+    auto container = AceEngine::Get().GetContainer(containerId);
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, nullptr);
+    auto scaleData = dragDropManager->GetScaleInfo(width, height, false);
+    CHECK_NULL_RETURN(scaleData, nullptr);
+    return scaleData;
+}
+
 OffsetF DragControllerFuncWrapper::GetTouchPointOffset(
     PreparedInfoForDrag& data, PreparedAsyncCtxForAnimate& asyncCtxData)
 {
@@ -553,11 +568,14 @@ bool DragControllerFuncWrapper::GetDragPreviewInfo(const RefPtr<OverlayManager>&
     CHECK_NULL_RETURN(container, false);
     auto pipeline = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipeline, false);
-    double maxWidth = DragDropManager::GetMaxWidthBaseOnGridSystem(pipeline);
     auto width = imageNode->GetGeometryNode()->GetFrameRect().Width();
+    auto height = imageNode->GetGeometryNode()->GetFrameRect().Height();
+    auto scaleData = dragDropManager->GetScaleInfo(width, height, false);
+    CHECK_NULL_RETURN(scaleData, false);
     auto previewOption = imageNode->GetDragPreviewOption();
-    if (imageNode->GetTag() != V2::WEB_ETS_TAG && width != 0 && width > maxWidth && previewOption.isScaleEnabled) {
-        dragPreviewInfo.scale = maxWidth / width;
+    if (imageNode->GetTag() != V2::WEB_ETS_TAG && width != 0 && scaleData->isNeedScale &&
+        previewOption.isScaleEnabled) {
+        dragPreviewInfo.scale = scaleData->scale;
     } else {
         dragPreviewInfo.scale = 1.0f;
     }
@@ -566,7 +584,7 @@ bool DragControllerFuncWrapper::GetDragPreviewInfo(const RefPtr<OverlayManager>&
         dragPreviewInfo.scale = TOUCH_DRAG_PIXELMAP_SCALE;
     }
     // set menu preview scale only for no scale menu preview.
-    if (dragDropManager->IsDragWithContextMenu() && (!previewOption.isScaleEnabled || width < maxWidth)) {
+    if (dragDropManager->IsDragWithContextMenu() && (!previewOption.isScaleEnabled || !scaleData->isNeedScale)) {
         auto imageGestureEventHub = imageNode->GetOrCreateGestureEventHub();
         if (imageGestureEventHub) {
             auto menuPreviewScale = imageGestureEventHub->GetMenuPreviewScale();
@@ -576,7 +594,6 @@ bool DragControllerFuncWrapper::GetDragPreviewInfo(const RefPtr<OverlayManager>&
     }
     dragPreviewInfo.height = imageNode->GetGeometryNode()->GetFrameRect().Height();
     dragPreviewInfo.width = static_cast<double>(width);
-    dragPreviewInfo.maxWidth = maxWidth;
     dragPreviewInfo.imageNode = imageNode;
     dragPreviewInfo.originOffset = imageNode->GetPositionToWindowWithTransform();
     dragPreviewInfo.originScale = imageNode->GetTransformScale();

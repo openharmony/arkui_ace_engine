@@ -20,7 +20,6 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/scroll_window_adapter.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -38,16 +37,16 @@ void NotifyChangeImpl(Ark_NativePointer node, int32_t startIdx, int32_t endIdx, 
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-        auto pattern = frameNode->GetPattern<LazyContainer>();
-        CHECK_NULL_VOID(pattern);
     if (startIdx >= 0) {
         frameNode->ChildrenUpdatedFrom(startIdx);
     }
     if (endIdx >= 0) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
         pattern->NotifyDataChange(endIdx, changeCnt);
     }
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    pattern->RemoveItemsOnChange(startIdx);
+    frameNode->ArkoalaRemoveItemsOnChange(startIdx);
 }
 
 void SyncImpl(Ark_NativePointer node, Ark_Int32 totalCount, const Callback_CreateItem* creator,
@@ -55,9 +54,7 @@ void SyncImpl(Ark_NativePointer node, Ark_Int32 totalCount, const Callback_Creat
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode && creator && updater);
-    auto lazyComponent = frameNode->GetPattern<LazyContainer>();
-    CHECK_NULL_VOID(lazyComponent);
-    lazyComponent->Synchronize(
+    frameNode->ArkoalaSynchronize(
         [callback = CallbackHelper(*creator)](
             int32_t index) { return AceType::DynamicCast<FrameNode>(callback.BuildSync(index)); },
         [cb = CallbackHelper(*updater)](int32_t start, int32_t end) { cb.InvokeSync(start, end); }, totalCount);

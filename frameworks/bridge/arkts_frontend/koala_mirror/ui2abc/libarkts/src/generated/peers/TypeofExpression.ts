@@ -44,6 +44,7 @@ export class TypeofExpression extends Expression {
     get argument(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._TypeofExpressionArgumentConst(global.context, this.peer))
     }
+    protected readonly brandTypeofExpression: undefined
 }
 export function isTypeofExpression(node: object | undefined): node is TypeofExpression {
     return node instanceof TypeofExpression

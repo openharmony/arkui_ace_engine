@@ -67,6 +67,7 @@ export class NamedType extends TypeNode {
         global.generatedEs2panda._NamedTypeSetTypeParams(global.context, this.peer, passNode(typeParams))
         return this
     }
+    protected readonly brandNamedType: undefined
 }
 export function isNamedType(node: object | undefined): node is NamedType {
     return node instanceof NamedType

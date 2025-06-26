@@ -51,6 +51,7 @@ export class ChainExpression extends Expression {
         global.generatedEs2panda._ChainExpressionCompileToRegConst(global.context, this.peer, passNode(pg), passNode(objReg))
         return this
     }
+    protected readonly brandChainExpression: undefined
 }
 export function isChainExpression(node: object | undefined): node is ChainExpression {
     return node instanceof ChainExpression

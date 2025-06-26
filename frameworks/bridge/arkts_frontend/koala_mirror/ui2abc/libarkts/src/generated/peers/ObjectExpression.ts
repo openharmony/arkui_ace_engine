@@ -81,6 +81,7 @@ export class ObjectExpression extends AnnotatedExpression {
         global.generatedEs2panda._ObjectExpressionSetTsTypeAnnotation(global.context, this.peer, passNode(typeAnnotation))
         return this
     }
+    protected readonly brandObjectExpression: undefined
 }
 export function isObjectExpression(node: object | undefined): node is ObjectExpression {
     return node instanceof ObjectExpression

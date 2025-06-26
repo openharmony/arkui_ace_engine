@@ -31,13 +31,16 @@ import { RenderNode, RenderNodeInternal } from "./RenderNode"
 import { CommonAttribute, ArkCommonMethodPeer, CommonMethod, UIGestureEvent, UICommonEvent, UICommonEventInternal } from './component/common'
 import { ArkBaseNode } from './handwritten/modifiers/ArkBaseNode'
 import { ArkListNode } from './handwritten/modifiers/ArkListNode'
+import { ArkTextNode } from './handwritten/modifiers/ArkTextNode'
 import { ModifierType } from './handwritten/modifiers/ArkCommonModifier'
 import { ListOptions, ListAttribute, ArkListPeer } from './component/list'
+import { TextOptions, TextAttribute, ArkTextPeer } from './component/text'
 import { Deserializer } from "./component/peers/Deserializer";
 import { ComponentContent } from './ComponentContent';
 import { DrawContext } from './Graphics';
 import { JSBuilderNode } from "./BuilderNode"
 import { BusinessError } from '#external';
+import { Resource } from 'global.resource';
 
 export interface CrossLanguageOptions {
     attributeSetting?: boolean;
@@ -891,4 +894,27 @@ export namespace typeNode {
             return arknode;
         });
     }
+}
+
+export namespace typeNode {
+    class TextFrameNode extends TypedFrameNode<ArkTextNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(content?: string | Resource, value?: TextOptions): TextAttribute {
+            let arkTextNode = this.attribute as ArkTextNode;
+            return arkTextNode!.initialize(content, value);
+        }
+    }
+
+//    // @ts-ignore
+//    function createTextNode(context: UIContext, type: 'Text'): TextFrameNode {
+//        return new TextFrameNode(context, 'Text', (node: FrameNode, type: ModifierType): ArkTextNode => {
+//            let arknode = new ArkTextNode();
+//            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+//            const peer = new ArkTextPeer(retval, node._nodeId as int32, "Text", 0);
+//            arknode.setPeer(peer);
+//            return arknode;
+//        });
+//    }
 }

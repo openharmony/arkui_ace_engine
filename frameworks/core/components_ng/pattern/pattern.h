@@ -44,7 +44,6 @@ class AccessibilityEventInfo;
 namespace OHOS::Ace::NG {
 class AccessibilitySessionAdapter;
 class InspectorFilter;
-class LazyComposeAdapter;
 
 class ScrollingListener : public AceType {
     DECLARE_ACE_TYPE(ScrollingListener, AceType);
@@ -661,19 +660,6 @@ public:
 
     virtual void AddInnerOnGestureRecognizerJudgeBegin(
         GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) {};
-
-    virtual ScrollWindowAdapter* GetScrollWindowAdapter()
-    {
-        return nullptr;
-    }
-    virtual ScrollWindowAdapter* GetOrCreateScrollWindowAdapter()
-    {
-        return nullptr;
-    }
-    virtual LazyComposeAdapter* GetArkoalaLazyAdapter()
-    {
-        return nullptr;
-    }
 
     virtual void RecoverInnerOnGestureRecognizerJudgeBegin() {};
 

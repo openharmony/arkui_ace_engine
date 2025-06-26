@@ -13,5 +13,5 @@ export declare class Animator {
     static create(options: AnimatorOptions): AnimatorResult;
 }
 
-export interface AnimatorResult {
+export declare class AnimatorResult {
 }

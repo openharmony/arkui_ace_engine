@@ -16,10 +16,11 @@
 #include "drawable_descriptor_ani.h"
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <dlfcn.h>
 #include <string>
 #include <unordered_set>
-#include <string>
-#include <dlfcn.h>
 
 #include "ani.h"
 #include "cJSON.h"
@@ -29,108 +30,99 @@ namespace OHOS::Ace::Ani {
 namespace {
 constexpr char PIXEL_MAP_DRAWABLE[] = "L@ohos/arkui/drawableDescriptor/PixelMapDrawableDescriptor;";
 constexpr char LAYERED_DRAWABLE[] = "L@ohos/arkui/drawableDescriptor/LayeredDrawableDescriptor;";
-constexpr char PIXEL_MAP_CONSTRUCTOR[] = "L@ohos/multimedia/image/image/PixelMap;:";
-constexpr char LAYERD_CONSTRUCTOR[] =
-    "L@ohos/arkui/drawableDescriptor/DrawableDescriptor;L@ohos/arkui/drawableDescriptor/DrawableDescriptor;L@ohos/"
-    "arkui/drawableDescriptor/DrawableDescriptor;";
 constexpr char BACKGROUND_KEY[] = "background";
 constexpr char FOREGROUND_KEY[] = "foreground";
 constexpr char DEFAULT_MASK[] = "ohos_icon_mask";
-constexpr char PIXELMAP_SET_RAW_DATA[] = "OH_ACE_PixelMapDrawableDescriptor_SetRawData";
-constexpr char LAYERED_SET_FOREGROUND_DATA[] = "OH_ACE_LayeredDrawableDescriptor_SetForegroundData";
-constexpr char LAYERED_SET_BACKGROUND_DATA[] = "OH_ACE_LayeredDrawableDescriptor_SetBackgroundData";
-constexpr char LAYERED_SET_MASK_DATA[] = "OH_ACE_LayeredDrawableDescriptor_SetMaskData";
-constexpr char LAYERED_SET_MASK_PATH[] = "OH_ACE_LayeredDrawableDescriptor_SetMaskPath";
+constexpr char PIXELMAP_SET_RAW_DATA[] = "OHOS_ACE_PixelMapDrawableDescriptor_SetRawData";
+constexpr char LAYERED_SET_FOREGROUND_DATA[] = "OHOS_ACE_LayeredDrawableDescriptor_SetForegroundData";
+constexpr char LAYERED_SET_BACKGROUND_DATA[] = "OHOS_ACE_LayeredDrawableDescriptor_SetBackgroundData";
+constexpr char LAYERED_SET_MASK_DATA[] = "OHOS_ACE_LayeredDrawableDescriptor_SetMaskData";
+constexpr char LAYERED_SET_MASK_PATH[] = "OHOS_ACE_LayeredDrawableDescriptor_SetMaskPath";
 constexpr char LIBACE_MODULE[] = "libace_compatible.z.so";
 
 constexpr int32_t DECIMAL_BASE = 10;
 constexpr size_t BUFFER_NUMBER = 2;
 
-using PixelMapDrawableSetRawDataFunc = int32_t (*)(void*, uint8_t*, size_t);
-using LayeredDrawableSetForegoundDataFunc = int32_t (*)(void*, uint8_t*, size_t);
-using LayeredDrawableSetBackgroundDataFunc = int32_t (*)(void*, uint8_t*, size_t);
-using LayeredDrawableSetMaskDataFunc = int32_t (*)(void*, uint8_t*, size_t);
-using LayeredDrawableSetMaskPathFunc = int32_t (*)(void*, const char*);
+using PixelMapDrawableSetRawDataFunc = void (*)(void*, uint8_t*, size_t);
+using LayeredDrawableSetForegoundDataFunc = void (*)(void*, uint8_t*, size_t);
+using LayeredDrawableSetBackgroundDataFunc = void (*)(void*, uint8_t*, size_t);
+using LayeredDrawableSetMaskDataFunc = void (*)(void*, uint8_t*, size_t);
+using LayeredDrawableSetMaskPathFunc = void (*)(void*, const char*);
 } // namespace
 
-int32_t PixelMapDrawableSetRawDataC(void* drawable, uint8_t* data, size_t len)
+void PixelMapDrawableSetRawDataC(void* drawable, uint8_t* data, size_t len)
 {
     void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
     if (handle == nullptr) {
-        return -1;
+        return;
     }
     auto entry = reinterpret_cast<PixelMapDrawableSetRawDataFunc>(dlsym(handle, PIXELMAP_SET_RAW_DATA));
     if (entry == nullptr) {
         dlclose(handle);
-        return -1;
+        return;
     }
-    auto result = entry(drawable, data, len);
-    return result;
+    entry(drawable, data, len);
 }
 
-int32_t LayeredDrawableSetForegoundDataC(void* drawable, uint8_t* data, size_t len)
+void LayeredDrawableSetForegoundDataC(void* drawable, uint8_t* data, size_t len)
 {
     void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
     if (handle == nullptr) {
-        return -1;
+        return;
     }
     auto entry = reinterpret_cast<LayeredDrawableSetForegoundDataFunc>(dlsym(handle, LAYERED_SET_FOREGROUND_DATA));
     if (entry == nullptr) {
         dlclose(handle);
-        return -1;
+        return;
     }
-    auto result = entry(drawable, data, len);
-    return result;
+    entry(drawable, data, len);
 }
 
-int32_t LayeredDrawableSetBackgroundDataC(void* drawable, uint8_t* data, size_t len)
+void LayeredDrawableSetBackgroundDataC(void* drawable, uint8_t* data, size_t len)
 {
     void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
     if (handle == nullptr) {
-        return -1;
+        return;
     }
     auto entry = reinterpret_cast<LayeredDrawableSetBackgroundDataFunc>(dlsym(handle, LAYERED_SET_BACKGROUND_DATA));
     if (entry == nullptr) {
         dlclose(handle);
-        return -1;
+        return;
     }
-    auto result = entry(drawable, data, len);
-    return result;
+    entry(drawable, data, len);
 }
 
-int32_t LayeredDrawableSetMaskDataC(void* drawable, uint8_t* data, size_t len)
+void LayeredDrawableSetMaskDataC(void* drawable, uint8_t* data, size_t len)
 {
     void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
     if (handle == nullptr) {
-        return -1;
+        return;
     }
     auto entry = reinterpret_cast<LayeredDrawableSetMaskDataFunc>(dlsym(handle, LAYERED_SET_MASK_DATA));
     if (entry == nullptr) {
         dlclose(handle);
-        return -1;
+        return;
     }
-    auto result = entry(drawable, data, len);
-    return result;
+    entry(drawable, data, len);
 }
 
-int32_t LayeredDrawableSetMaskPathC(void* drawable, const char* path)
+void LayeredDrawableSetMaskPathC(void* drawable, const char* path)
 {
     void* handle = dlopen(LIBACE_MODULE, RTLD_LAZY | RTLD_LOCAL);
     if (handle == nullptr) {
-        return -1;
+        return;
     }
     auto entry = reinterpret_cast<LayeredDrawableSetMaskPathFunc>(dlsym(handle, LAYERED_SET_MASK_PATH));
     if (entry == nullptr) {
         dlclose(handle);
-        return -1;
+        return;
     }
-    auto result = entry(drawable, path);
-    return result;
+    entry(drawable, path);
 }
 
 bool CheckResourceType(const std::string& type)
 {
-    static const std::unordered_set<std::string> types = {"png", "jpg", "bmp", "svg", "gif", "webp", "astc", "sut"};
+    static const std::unordered_set<std::string> types = { "png", "jpg", "bmp", "svg", "gif", "webp", "astc", "sut" };
     return types.count(type);
 }
 
@@ -199,7 +191,7 @@ ani_object CreatePixelMapDrawable(ani_env* env, const MediaData& mediaData)
         return obj;
     }
     ani_method ctor;
-    env->Class_FindMethod(cls, "<ctor>", PIXEL_MAP_CONSTRUCTOR, &ctor);
+    env->Class_FindMethod(cls, "<ctor>", ":", &ctor);
     env->Object_New(cls, ctor, &obj);
     // no media data
     if (mediaData.len <= 0) {
@@ -226,7 +218,7 @@ ani_object CreateLayeredDrawableByJsonBuffer(ani_env* env, const DrawableInfo& i
         return obj;
     }
     ani_method ctor;
-    env->Class_FindMethod(cls, "<ctor>", LAYERD_CONSTRUCTOR, &ctor);
+    env->Class_FindMethod(cls, "<ctor>", ":", &ctor);
     env->Object_New(cls, ctor, &obj);
     ani_long nativeObj = 0;
     env->Object_GetPropertyByName_Long(obj, "nativeObj", &nativeObj);
@@ -248,7 +240,7 @@ ani_object CreateLayeredDrawableByJsonBuffer(ani_env* env, const DrawableInfo& i
         std::unique_ptr<uint8_t[]> data;
         auto state = resMgr->GetDrawableInfoById(id, dinfo, data, 0, info.density);
         if (state == Global::Resource::SUCCESS) {
-            datas.push_back({data.get(), std::get<1>(dinfo)});
+            datas.push_back({ data.get(), std::get<1>(dinfo) });
         }
     }
     if (datas.size() < BUFFER_NUMBER) {
@@ -275,7 +267,7 @@ ani_object CreateLayerdDrawableByTwoBuffer(ani_env* env, const DrawableInfo& inf
         return obj;
     }
     ani_method ctor;
-    env->Class_FindMethod(cls, "<ctor>", LAYERD_CONSTRUCTOR, &ctor);
+    env->Class_FindMethod(cls, "<ctor>", ":", &ctor);
     env->Object_New(cls, ctor, &obj);
     ani_long nativeObj = 0;
     env->Object_GetPropertyByName_Long(obj, "nativeObj", &nativeObj);

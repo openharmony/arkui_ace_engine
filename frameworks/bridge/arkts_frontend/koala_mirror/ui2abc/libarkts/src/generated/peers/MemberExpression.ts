@@ -102,6 +102,7 @@ export class MemberExpression extends MaybeOptionalExpression {
         global.generatedEs2panda._MemberExpressionCompileToRegsConst(global.context, this.peer, passNode(pg), passNode(object_arg), passNode(property))
         return this
     }
+    protected readonly brandMemberExpression: undefined
 }
 export function isMemberExpression(node: object | undefined): node is MemberExpression {
     return node instanceof MemberExpression

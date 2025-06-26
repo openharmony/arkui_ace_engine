@@ -408,13 +408,14 @@ void NavigationModelStatic::SetNavBarPosition(FrameNode* frameNode, const std::o
 void NavigationModelStatic::SetMinContentWidth(FrameNode* frameNode, const Dimension& value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto minContentWidth = value.IsNonPositive() ? DEFAULT_MIN_CONTENT_WIDTH : value;
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
     navigationPattern->SetIfNeedInit(true);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, MinContentWidth, minContentWidth, frameNode);
+    auto layoutProp = frameNode->GetLayoutPropertyPtr<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    layoutProp->UpdateMinContentWidth(value);
 }
 
 void NavigationModelStatic::SetSystemBarStyle(FrameNode* frameNode, const Color& contentColor)

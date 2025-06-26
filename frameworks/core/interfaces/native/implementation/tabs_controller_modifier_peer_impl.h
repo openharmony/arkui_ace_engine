@@ -67,6 +67,12 @@ public:
         controller->SetTabBarOpacity(std::clamp(opacity, 0.0, 1.0));
     }
 
+    void TriggerSetPreloadFinishCallback(PreloadItemsFinishFunc&& preloadFinishCallback) const
+    {
+        auto controller = controllerWeakPtr_.Upgrade();
+        CHECK_NULL_VOID(controller);
+        controller->SetPreloadFinishCallback(preloadFinishCallback);
+    }
 private:
     Ace::WeakPtr<TabsControllerNG> controllerWeakPtr_;
 };
