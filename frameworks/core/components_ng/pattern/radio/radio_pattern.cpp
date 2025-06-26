@@ -51,14 +51,19 @@ void RadioPattern::OnAttachToFrameNode()
 
 void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto host = GetHost();
-    THREAD_SAFE_NODE_CHECK(host, OnDetachFromFrameNode);
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
     CHECK_NULL_VOID(frameNode);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
     auto radioEventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(radioEventHub);
     groupManager->RemoveRadioFromGroup(radioEventHub->GetGroup(), frameNode->GetId());
+}
+
+void RadioPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
 }
 
 void RadioPattern::SetBuilderState()

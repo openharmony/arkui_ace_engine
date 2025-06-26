@@ -41,7 +41,16 @@ void SliderPattern::OnAttachToFrameNodeMultiThread()
     InitHapticController();
 }
 
+void SliderPattern::OnAttachToMainTreeMultiThread()
+{
+    RegisterVisibleAreaChange();
+}
+
 void SliderPattern::OnDetachFromFrameNodeMultiThread()
+{
+}
+
+void SliderPattern::OnDetachFromMainTreeMultiThread()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -57,6 +66,6 @@ void SliderPattern::OnDetachFromFrameNodeMultiThread()
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->DeregisterAccessibilitySAObserverCallback(frameNode->GetAccessibilityId());
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "Slider OnDetachFromFrameNode OK");
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "Slider OnDetachFromMainTree OK");
 }
 } // namespace OHOS::Ace::NG

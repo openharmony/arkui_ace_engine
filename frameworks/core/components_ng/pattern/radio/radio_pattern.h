@@ -187,6 +187,8 @@ private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromFrameNodeMultiThread();
+    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread();
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void InitClickEvent();

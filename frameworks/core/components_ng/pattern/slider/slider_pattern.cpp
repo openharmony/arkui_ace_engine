@@ -1936,6 +1936,12 @@ void SliderPattern::OnAttachToFrameNode()
     InitHapticController();
 }
 
+void SliderPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+}
+
 void SliderPattern::StartAnimation()
 {
     CHECK_NULL_VOID(sliderContentModifier_);
@@ -2114,8 +2120,7 @@ RefPtr<FrameNode> SliderPattern::BuildContentModifierNode()
 
 void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto host = GetHost();
-    THREAD_SAFE_NODE_CHECK(host, OnDetachFromFrameNode);
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
@@ -2127,6 +2132,12 @@ void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->DeregisterAccessibilitySAObserverCallback(frameNode->GetAccessibilityId());
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "Slider OnDetachFromFrameNode OK");
+}
+
+void SliderPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
 }
 
 void SliderPattern::InitOrRefreshSlipFactor()

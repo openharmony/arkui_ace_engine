@@ -20,6 +20,10 @@
 namespace OHOS::Ace::NG {
 void CheckBoxPattern::OnDetachFromFrameNodeMultiThread()
 {
+}
+
+void CheckBoxPattern::OnDetachFromMainTreeMultiThread()
+{
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto frameNode = host.GetRawPtr();
