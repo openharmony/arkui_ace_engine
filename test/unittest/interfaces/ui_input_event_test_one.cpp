@@ -1659,6 +1659,35 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetGlobalDisplayX002, TestSize.
 }
 
 /**
+ * @tc.name: OH_ArkUI_PointerEvent_GetGlobalDisplayX003
+ * @tc.desc: Test OH_ArkUI_PointerEvent_GetGlobalDisplayX
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetGlobalDisplayX003, TestSize.Level1)
+{
+    ArkUI_UIInputEvent event;
+    event.eventTypeId = C_CLICK_EVENT_ID;
+    ArkUIClickEvent clickEvent;
+    clickEvent.globalDisplayX = 300.3f;
+    event.inputEvent = nullptr;
+    auto ret = OH_ArkUI_PointerEvent_GetGlobalDisplayX(&event);
+    EXPECT_EQ(ret, 0.0f);
+    event.inputEvent = &clickEvent;
+    ret = OH_ArkUI_PointerEvent_GetGlobalDisplayX(&event);
+    EXPECT_EQ(ret, 300.3f);
+
+    event.eventTypeId = C_HOVER_EVENT_ID;
+    ArkUIHoverEvent hoverEvent;
+    hoverEvent.globalDisplayX = 400.4f;
+    event.inputEvent = nullptr;
+    ret = OH_ArkUI_PointerEvent_GetGlobalDisplayX(&event);
+    EXPECT_EQ(ret, 0.0f);
+    event.inputEvent = &hoverEvent;
+    ret = OH_ArkUI_PointerEvent_GetGlobalDisplayX(&event);
+    EXPECT_EQ(ret, 400.4f);
+}
+
+/**
  * @tc.name: OH_ArkUI_PointerEvent_GetGlobalDisplayY001
  * @tc.desc: Test OH_ArkUI_PointerEvent_GetGlobalDisplayY
  * @tc.type: FUNC
@@ -1731,6 +1760,35 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetGlobalDisplayY002, TestSize.
     event.inputEvent = &aceAxisEvent;
     ret = OH_ArkUI_PointerEvent_GetGlobalDisplayY(&event);
     EXPECT_EQ(ret, 500.5f);
+}
+
+/**
+ * @tc.name: OH_ArkUI_PointerEvent_GetGlobalDisplayY003
+ * @tc.desc: Test OH_ArkUI_PointerEvent_GetGlobalDisplayY
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetGlobalDisplayY003, TestSize.Level1)
+{
+    ArkUI_UIInputEvent event;
+    event.eventTypeId = C_CLICK_EVENT_ID;
+    ArkUIClickEvent clickEvent;
+    clickEvent.globalDisplayY = 300.3f;
+    event.inputEvent = nullptr;
+    auto ret = OH_ArkUI_PointerEvent_GetGlobalDisplayY(&event);
+    EXPECT_EQ(ret, 0.0f);
+    event.inputEvent = &clickEvent;
+    ret = OH_ArkUI_PointerEvent_GetGlobalDisplayY(&event);
+    EXPECT_EQ(ret, 300.3f);
+
+    event.eventTypeId = C_HOVER_EVENT_ID;
+    ArkUIHoverEvent hoverEvent;
+    hoverEvent.globalDisplayY = 400.4f;
+    event.inputEvent = nullptr;
+    ret = OH_ArkUI_PointerEvent_GetGlobalDisplayY(&event);
+    EXPECT_EQ(ret, 0.0f);
+    event.inputEvent = &hoverEvent;
+    ret = OH_ArkUI_PointerEvent_GetGlobalDisplayY(&event);
+    EXPECT_EQ(ret, 400.4f);
 }
 
 /**
