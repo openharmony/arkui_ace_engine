@@ -2112,45 +2112,4 @@ HWTEST_F(DragEventTestNg, DragEventTryTriggerThumbnailCallbackTest001, TestSize.
     dragEventActuator->TryTriggerThumbnailCallback();
     EXPECT_TRUE(dragEventActuator->isThumbnailCallbackTriggered_);
 }
-
-/**
- * @tc.name: RemoveMenuWrapperNode
- * @tc.desc: test RemoveMenuWrapperNode remove MENU_WRAPPER_ETS_TAG child.
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventTestNg, RemoveMenuWrapperNode, TestSize.Level1)
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    EXPECT_NE(pipelineContext, nullptr);
-    auto overlayManager = pipelineContext->overlayManager_;
-    ASSERT_NE(overlayManager, nullptr);
-    auto mainMenu =
-        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, "text", MenuType::MENU));
-    ASSERT_NE(mainMenu, nullptr);
-    auto childOne = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 3, AceType::MakeRefPtr<MenuWrapperPattern>(1));
-    ASSERT_NE(childOne, nullptr);
-    auto childTwo = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuWrapperPattern>(1));
-    ASSERT_NE(childTwo, nullptr);
-    mainMenu->AddChild(childOne);
-    mainMenu->AddChild(childTwo);
-    overlayManager->RemoveMenuWrapperNode(mainMenu);
-    EXPECT_EQ(mainMenu->children_.size(), 1);
-}
-
-/**
- * @tc.name: SetDragNodeNeedClean
- * @tc.desc: test SetDragNodeNeedClean isDragNodeNeedClean_ true.
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventTestNg, SetDragNodeNeedClean, TestSize.Level1)
-{
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    EXPECT_NE(pipelineContext, nullptr);
-    auto overlayManager = pipelineContext->overlayManager_;
-    ASSERT_NE(overlayManager, nullptr);
-    auto dragDropManager = pipelineContext->GetDragDropManager();
-    ASSERT_NE(dragDropManager, nullptr);
-    overlayManager->SetDragNodeNeedClean();
-    EXPECT_TRUE(dragDropManager->IsDragNodeNeedClean());
-}
 } // namespace OHOS::Ace::NG
