@@ -784,7 +784,33 @@ public:
     {
         return false;
     }
-
+    virtual bool ChildPreMeasureHelperEnabled()
+    {
+        return false;
+    }
+    virtual bool ChildPreMeasureHelperCustomized()
+    {
+        return false;
+    }
+    virtual bool ChildPreMeasureHelper(
+        LayoutWrapper* layoutWrapper, const std::optional<LayoutConstraintF>& parentConstraint)
+    {
+        return false;
+    }
+    virtual bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
+        LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM)
+    {
+        return false;
+    }
+    virtual bool PostponedTaskForIgnoreEnabled()
+    {
+        return false;
+    }
+    virtual bool PostponedTaskForIgnoreCustomized()
+    {
+        return false;
+    }
+    virtual void PostponedTaskForIgnore() {}
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

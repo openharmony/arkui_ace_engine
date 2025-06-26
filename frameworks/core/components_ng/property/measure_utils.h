@@ -20,6 +20,7 @@
 
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/property/border_property.h"
@@ -80,6 +81,8 @@ ACE_FORCE_EXPORT void MinusPaddingToNonNegativeSize(const PaddingPropertyF& padd
 void AddPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
 
 void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
+
+PaddingPropertyF AdjacentExpandToRect(RectF& adjustingRect, PaddingPropertyF& frameExpand, RectF& frameRect);
 
 float GetCrossAxisSize(const SizeF& size, Axis axis);
 
