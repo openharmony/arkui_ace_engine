@@ -38,6 +38,21 @@ function Reusable<T extends Constructor>(BaseClass: T): T {
   return BaseClass;
 }
 
+class SyncedViewRegistry {
+  public static dirtyNodesList: Set<WeakRef<ViewPU>> = new Set<WeakRef<ViewPU>>();
+  
+  // map viewPU -> weakref<ViewPU>
+  private static wmap_ = new WeakMap();
+  
+  public static addSyncedUpdateDirtyNodes(view: ViewPU): void {
+    let weakRef = this.wmap_.get(view)
+    if (weakRef) {
+      SyncedViewRegistry.wmap_.set(view, weakRef = new WeakRef(view));
+    }
+    SyncedViewRegistry.dirtyNodesList.add(weakRef);
+  }
+}
+
 abstract class ViewPU extends PUV2ViewBase
   implements IViewPropertiesChangeSubscriber, IView {
 
@@ -63,8 +78,17 @@ abstract class ViewPU extends PUV2ViewBase
 
   private delayRecycleNodeRerenderDeep: boolean = false;
 
+  // store the current key -> consume, which has the default value
+  public defaultConsume_: Map<string, SynchedPropertyTwoWayPU<any>> = new Map<string, SynchedPropertyTwoWayPU<any>>();
+
+  // store the current key -> consume, which has reconnect to the provide
+  public reconnectConsume_: Map<string, SynchedPropertyTwoWayPU<any>> = new Map<string, SynchedPropertyTwoWayPU<any>>();
+
   // @Provide'd variables by this class and its ancestors
   protected providedVars_: Map<string, ObservedPropertyAbstractPU<any>> = new Map<string, ObservedPropertyAbstractPU<any>>();
+
+  // Set of elmtIds that need re-render
+  public dirtyElementIdsNeedsUpdateSynchronously_: Set<number> = new Set<number>();
 
   // my LocalStorage instance, shared with ancestor Views.
   // create a default instance on demand if none is initialized
@@ -462,6 +486,21 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtProfiler.end();
   }
 
+  // collect elements need to update synchronously and its owning view
+  public collectElementsNeedToUpdateSynchronously(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
+    stateMgmtConsole.debug(`collectElementsNeedToUpdateSynchronously ${this.debugInfo__()} change ${varName} dependent elements ${dependentElmtIds}`);
+    if (dependentElmtIds.size && !this.isFirstRender()) {
+      for (const elmtId of dependentElmtIds) {
+        if (this.hasRecycleManager()) {
+          this.dirtyElementIdsNeedsUpdateSynchronously_.add(this.recycleManager_.proxyNodeId(elmtId));
+        } else {
+          this.dirtyElementIdsNeedsUpdateSynchronously_.add(elmtId);
+        }
+      }
+    }
+    SyncedViewRegistry.addSyncedUpdateDirtyNodes(this);
+  }
+
   // implements IMultiPropertiesChangeSubscriber
   viewPropertyHasChanged(varName: PropertyInfo, dependentElmtIds: Set<number>): void {
     stateMgmtProfiler.begin('ViewPU.viewPropertyHasChanged');
@@ -616,7 +655,7 @@ abstract class ViewPU extends PUV2ViewBase
    * @param store the backing store object for this variable (not the get/set variable!)
    */
   protected addProvidedVar<T>(providedPropName: string, store: ObservedPropertyAbstractPU<T>, allowOverride: boolean = false) {
-    if (!allowOverride && this.findProvidePU(providedPropName)) {
+    if (!allowOverride && this.findProvidePU__(providedPropName)) {
       throw new ReferenceError(`${this.constructor.name}: duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Views already. @Provide override not allowed.`);
     }
     store.setDecoratorInfo('@Provide');
@@ -624,11 +663,13 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   /*
-    findProvidePU finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
+    findProvidePU__ finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
     if 'this' ViewPU has a @Provide('providedPropName') return it, otherwise ask from its parent ViewPU.
   */
-  public findProvidePU(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
-    return this.providedVars_.get(providedPropName) || (this.parent_ && this.parent_.findProvidePU(providedPropName));
+  public findProvidePU__(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
+    return this.providedVars_.get(providedPropName) ||
+    (this.parent_ && this.parent_.findProvidePU__(providedPropName)) ||
+    (this.__parentViewBuildNode__ && this.__parentViewBuildNode__.findProvidePU__(providedPropName));
   }
 
   /**
@@ -644,11 +685,11 @@ abstract class ViewPU extends PUV2ViewBase
    */
   protected initializeConsume<T>(providedPropName: string,
     consumeVarName: string, defaultValue?: any): ObservedPropertyAbstractPU<T> {
-    let providedVarStore: ObservedPropertyAbstractPU<any> = this.findProvidePU(providedPropName);
+    let providedVarStore: ObservedPropertyAbstractPU<any> = this.findProvidePU__(providedPropName);
     // '3' means that developer has initialized the @Consume decorated variable
     if (!providedVarStore) {
       if (arguments.length === 3) {
-        providedVarStore = new ObservedPropertySimplePU(defaultValue, this, consumeVarName);
+        providedVarStore = new ObservedPropertyPU(defaultValue, this, consumeVarName);
         providedVarStore.__setIsFake_ObservedPropertyAbstract_Internal(true);
       } else {
         throw new ReferenceError(`${this.debugInfo__()} missing @Provide property with name ${providedPropName} or default value.
@@ -662,9 +703,51 @@ abstract class ViewPU extends PUV2ViewBase
       stateMgmtConsole.debug(`The @Consume is instance of ${result.constructor.name}`);
       return result;
     };
-    return providedVarStore.createSync(factory) as ObservedPropertyAbstractPU<T>;
+    let consumeVal = providedVarStore.createSync(factory) as SynchedPropertyTwoWayPU<T>;
+    if (providedVarStore.__isFake_ObservedPropertyAbstract_Internal()) {
+      this.defaultConsume_.set(providedPropName, consumeVal);
+    }
+    return consumeVal;
   }
 
+  public reconnectToConsume(): void {
+    this.defaultConsume_.forEach((value: SynchedPropertyObjectTwoWayPU<any>, providedPropName: string) => {
+      let providedVarStore: ObservedPropertyAbstractPU<any> = this.findProvidePU__(providedPropName);
+      if (providedVarStore) {
+        stateMgmtConsole.debug(`${value.debugInfo} connected to the provide ${providedVarStore.debugInfo()}`);
+        // store the consume reconnect to provide
+        this.reconnectConsume_.set(providedPropName, value);
+        value.resetSource(providedVarStore);
+        value.getDependencies().forEach((id: number) => {
+          this.UpdateElement(id);
+        })
+      }
+    })
+  }
+
+  public disconnectedConsume(): void {
+    for (const [key, value] of this.reconnectConsume_) {
+      // try to findProvide again
+      // need to set Parent undefine first
+      const provide = this.findProvidePU__(key);
+      // if provide is undefined, the provide and consume connection is broken
+      // reset consume to default value.
+      if (!provide) {
+        value.resetFakeSource();
+        value.getDependencies().forEach((id: number) => {
+          this.UpdateElement(id);
+        })
+        this.reconnectConsume_.delete(key);
+      }
+    }
+    this.childrenWeakrefMap_.forEach((weakRefChild) => {
+      const child = weakRefChild.deref();
+      if (!(child instanceof ViewPU) || child.reconnectConsume_.size === 0) {
+        return;
+      }
+      child.disconnectedConsume();
+    })
+  }
 
   /**
    * given the elmtId of a child or child of child within this custom component

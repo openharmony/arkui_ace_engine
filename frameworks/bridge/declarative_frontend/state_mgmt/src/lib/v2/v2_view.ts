@@ -690,12 +690,13 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     }
 
     /*
-      findProvidePU finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
+      findProvidePU__ finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
       if 'this' ViewPU has a @Provide('providedPropName') return it, otherwise ask from its parent ViewPU.
       function needed for mixed @Component and @ComponentV2 parent child hierarchies.
     */
-    public findProvidePU(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
-        return this.getParent()?.findProvidePU(providedPropName);
+    public findProvidePU__(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
+        return this.getParent()?.findProvidePU__(providedPropName) ||
+          (this.__parentViewBuildNode__ && this.__parentViewBuildNode__.findProvidePU__(providedPropName));
     }
 
     get localStorage_(): LocalStorage {
