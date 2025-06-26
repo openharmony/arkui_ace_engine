@@ -18,6 +18,7 @@
 #include "component_snapshot_ani_modifier.h"
 #include "content_slot_ani_modifier.h"
 #include "image_ani_modifier.h"
+#include "image_span_ani_modifier.h"
 #include "web_ani_modifier.h"
 #include "custom_node_ani_modifier.h"
 #include "waterflow_ani_modifier.h"
@@ -40,6 +41,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getComponentSnapshotAniModifier = OHOS::Ace::NG::GetComponentSnapshotAniModifier,
         .getAnimationAniModifier = OHOS::Ace::NG::GetAnimationAniModifier,
         .getDragControllerAniModifier = OHOS::Ace::NG::GetDragControllerAniModifier,
+        .getImageSpanAniModifier = OHOS::Ace::NG::GetImageSpanAniModifier,
     };
     return &impl;
 }

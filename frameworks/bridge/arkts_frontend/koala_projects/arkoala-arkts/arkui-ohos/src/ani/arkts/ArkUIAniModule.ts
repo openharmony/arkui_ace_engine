@@ -103,4 +103,8 @@ export class ArkUIAniModule {
 
     native static _Animation_SetOrCreateAnimatableProperty<T>(ptr: KPointer, propertyName: string, property: number | AnimatableArithmetic<T>,
         callback: (value: number | AnimatableArithmetic<T>) => void): void
+
+    // for ImageSpan
+    native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
+    native static _ImageSpan_SetAlt_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
 }
