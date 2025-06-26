@@ -533,12 +533,49 @@ HWTEST_F(BubbleTipsTestNg, GetPositionWithPlacementLeftTopTest001, TestSize.Leve
     auto position =
         layoutAlgorithm->GetPositionWithPlacementLeftTop(MAX_SIZE, topPosition, bottomPosition, arrowPosition);
     EXPECT_EQ(position.GetX(), DEVICE_WIDTH - MAX_SIZE.Width());
-    EXPECT_EQ(position.GetY(), DEVICE_HEIGHT - layoutAlgorithm->marginBottom_ - MAX_SIZE.Height());
+    EXPECT_EQ(position.GetY(), DEVICE_HEIGHT * HALF);
 
     layoutAlgorithm->isHalfFoldHover_ = true;
     position = layoutAlgorithm->GetPositionWithPlacementLeftTop(MAX_SIZE, topPosition, bottomPosition, arrowPosition);
     EXPECT_EQ(position.GetX(), DEVICE_WIDTH - MAX_SIZE.Width());
-    EXPECT_EQ(position.GetY(), layoutAlgorithm->wrapperRect_.Bottom() - MAX_SIZE.Height());
+    EXPECT_EQ(position.GetY(), DEVICE_HEIGHT * HALF);
+}
+
+/**
+ * @tc.name: GetPositionWithPlacementLeftTopTest002
+ * @tc.desc: Test GetPositionWithPlacementLeftTop function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, GetPositionWithPlacementLeftTopTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto tipsNode = CreateTipsNode(CreateTipsParamForCursor(), TIPS_MSG_1);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(tipsNode->layoutAlgorithm_->GetLayoutAlgorithm());
+    layoutAlgorithm->wrapperRect_ = { 0, 0, DEVICE_WIDTH, DEVICE_HEIGHT };
+    layoutAlgorithm->wrapperSize_ = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    layoutAlgorithm->targetSize_ = SizeF(MOUSE_WIDTH.ConvertToPx(), MOUSE_HEIGHT.ConvertToPx());
+    layoutAlgorithm->targetOffset_ = { DEVICE_WIDTH, DEVICE_HEIGHT * HALF };
+    layoutAlgorithm->targetSpace_ = Dimension();
+    layoutAlgorithm->resetTipsSize_ = true;
+    /**
+     * @tc.steps: step2. test GetPositionWithPlacementLeftTop.
+     */
+    OffsetF topPosition;
+    OffsetF bottomPosition;
+    OffsetF arrowPosition;
+    const SizeF childSize { 480.0, DEVICE_HEIGHT * HALF };
+    auto position =
+        layoutAlgorithm->GetPositionWithPlacementLeftTop(childSize, topPosition, bottomPosition, arrowPosition);
+    EXPECT_EQ(position.GetX(), DEVICE_WIDTH - childSize.Width());
+    EXPECT_EQ(position.GetY(), DEVICE_HEIGHT - layoutAlgorithm->marginBottom_ - childSize.Height());
+
+    layoutAlgorithm->isHalfFoldHover_ = true;
+    position = layoutAlgorithm->GetPositionWithPlacementLeftTop(childSize, topPosition, bottomPosition, arrowPosition);
+    EXPECT_EQ(position.GetX(), DEVICE_WIDTH - childSize.Width());
+    EXPECT_EQ(position.GetY(), layoutAlgorithm->wrapperRect_.Bottom() - childSize.Height());
 }
 
 /**
@@ -569,12 +606,48 @@ HWTEST_F(BubbleTipsTestNg, GetPositionWithPlacementRightTopTest001, TestSize.Lev
     auto position =
         layoutAlgorithm->GetPositionWithPlacementRightTop(MAX_SIZE, topPosition, bottomPosition, arrowPosition);
     EXPECT_EQ(position.GetX(), TIPS_MARGIN_SPACE.ConvertToPx() + MOUSE_WIDTH.ConvertToPx());
-    EXPECT_EQ(position.GetY(), DEVICE_HEIGHT - layoutAlgorithm->marginBottom_ - MAX_SIZE.Height());
+    EXPECT_EQ(position.GetY(), DEVICE_HEIGHT * HALF);
 
     layoutAlgorithm->isHalfFoldHover_ = true;
     position = layoutAlgorithm->GetPositionWithPlacementRightTop(MAX_SIZE, topPosition, bottomPosition, arrowPosition);
     EXPECT_EQ(position.GetX(), TIPS_MARGIN_SPACE.ConvertToPx() + MOUSE_WIDTH.ConvertToPx());
-    EXPECT_EQ(position.GetY(), layoutAlgorithm->wrapperRect_.Bottom() - MAX_SIZE.Height());
+    EXPECT_EQ(position.GetY(), DEVICE_HEIGHT * HALF);
+}
+/**
+ * @tc.name: GetPositionWithPlacementRightTopTest002
+ * @tc.desc: Test GetPositionWithPlacementRightTop function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, GetPositionWithPlacementRightTopTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto tipsNode = CreateTipsNode(CreateTipsParamForCursor(), TIPS_MSG_1);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(tipsNode->layoutAlgorithm_->GetLayoutAlgorithm());
+    layoutAlgorithm->wrapperRect_ = { 0, 0, DEVICE_WIDTH, DEVICE_HEIGHT };
+    layoutAlgorithm->wrapperSize_ = { DEVICE_WIDTH, DEVICE_HEIGHT };
+    layoutAlgorithm->targetSize_ = SizeF(MOUSE_WIDTH.ConvertToPx(), MOUSE_HEIGHT.ConvertToPx());
+    layoutAlgorithm->targetOffset_ = { TIPS_MARGIN_SPACE.ConvertToPx(), DEVICE_HEIGHT * HALF };
+    layoutAlgorithm->targetSpace_ = Dimension();
+    layoutAlgorithm->resetTipsSize_ = true;
+    /**
+     * @tc.steps: step2. test GetPositionWithPlacementRightTop.
+     */
+    OffsetF topPosition;
+    OffsetF bottomPosition;
+    OffsetF arrowPosition;
+    const SizeF childSize { 480.0, DEVICE_HEIGHT * HALF };
+    auto position =
+        layoutAlgorithm->GetPositionWithPlacementRightTop(childSize, topPosition, bottomPosition, arrowPosition);
+    EXPECT_EQ(position.GetX(), TIPS_MARGIN_SPACE.ConvertToPx() + MOUSE_WIDTH.ConvertToPx());
+    EXPECT_EQ(position.GetY(), DEVICE_HEIGHT - layoutAlgorithm->marginBottom_ - childSize.Height());
+
+    layoutAlgorithm->isHalfFoldHover_ = true;
+    position = layoutAlgorithm->GetPositionWithPlacementRightTop(childSize, topPosition, bottomPosition, arrowPosition);
+    EXPECT_EQ(position.GetX(), TIPS_MARGIN_SPACE.ConvertToPx() + MOUSE_WIDTH.ConvertToPx());
+    EXPECT_EQ(position.GetY(), layoutAlgorithm->wrapperRect_.Bottom() - childSize.Height());
 }
 
 /**

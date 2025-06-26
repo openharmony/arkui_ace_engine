@@ -128,7 +128,8 @@ constexpr Dimension TIPS_MOUSE_SPACE = 8.0_vp;
 constexpr Dimension MAX_TIP_WIDTH = 480.0_vp;
 
 const std::vector<Placement> FOLLOW_CURSOR_TIPS = { Placement::BOTTOM_LEFT, Placement::TOP_LEFT,
-    Placement::BOTTOM_RIGHT, Placement::TOP_RIGHT, Placement::BOTTOM, Placement::TOP, Placement::NONE };
+    Placement::BOTTOM_RIGHT, Placement::TOP_RIGHT, Placement::BOTTOM, Placement::TOP, Placement::RIGHT_TOP,
+    Placement::LEFT_TOP, Placement::NONE };
 
 static RefPtr<PopupTheme> GetPopupTheme(LayoutWrapper* layoutWrapper)
 {
@@ -2604,9 +2605,14 @@ OffsetF BubbleLayoutAlgorithm::GetPositionWithPlacementLeftTop(
     float arrowHalfWidth = BUBBLE_ARROW_WIDTH.ConvertToPx() / BUBBLE_ARROW_HALF;
     float radius = borderRadius_.ConvertToPx();
     if (resetTipsSize_) {
-        childPosition = OffsetF(
-            targetOffset_.GetX() - targetSpace_.ConvertToPx() - bubbleSpacing - childSize.Width() - marginRight,
-            (isHalfFoldHover_ ? wrapperRect_.Bottom() : (wrapperSize_.Height() - marginBottom_)) - childSize.Height());
+        float offsetY =
+            (isHalfFoldHover_ ? wrapperRect_.Bottom() : (wrapperSize_.Height() - marginBottom_)) - childSize.Height();
+        if (GreatNotEqual(offsetY, targetOffset_.GetY())) {
+            offsetY = targetOffset_.GetY();
+        }
+        childPosition =
+            OffsetF(targetOffset_.GetX() - targetSpace_.ConvertToPx() - bubbleSpacing - childSize.Width() - marginRight,
+                offsetY);
     } else {
         childPosition =
             OffsetF(targetOffset_.GetX() - targetSpace_.ConvertToPx() - bubbleSpacing - childSize.Width() - marginRight,
@@ -2657,9 +2663,14 @@ OffsetF BubbleLayoutAlgorithm::GetPositionWithPlacementRightTop(
     float arrowHalfWidth = BUBBLE_ARROW_WIDTH.ConvertToPx() / BUBBLE_ARROW_HALF;
     float radius = borderRadius_.ConvertToPx();
     if (resetTipsSize_) {
+        float offsetY =
+            (isHalfFoldHover_ ? wrapperRect_.Bottom() : (wrapperSize_.Height() - marginBottom_)) - childSize.Height();
+        if (GreatNotEqual(offsetY, targetOffset_.GetY())) {
+            offsetY = targetOffset_.GetY();
+        }
         childPosition = OffsetF(
             targetOffset_.GetX() + targetSize_.Width() + targetSpace_.ConvertToPx() + bubbleSpacing + marginLeft,
-            (isHalfFoldHover_ ? wrapperRect_.Bottom() : (wrapperSize_.Height() - marginBottom_)) - childSize.Height());
+            offsetY);
     } else {
         childPosition = OffsetF(
             targetOffset_.GetX() + targetSize_.Width() + targetSpace_.ConvertToPx() + bubbleSpacing + marginLeft,
