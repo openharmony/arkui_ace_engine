@@ -1428,7 +1428,8 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_FINISHED);
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    if (MenuView::GetMenuHoverScaleStatus(menuWrapperPattern->GetTargetId()) != MenuHoverScaleStatus::INTERRUPT) {
+    if (MenuView::GetMenuHoverScaleStatus(menuWrapperPattern->GetTargetId()) != MenuHoverScaleStatus::INTERRUPT &&
+        menuWrapperPattern->GetMenuStatus() != MenuStatus::HIDE) {
         menuWrapperPattern->CallMenuDisappearCallback();
         menuWrapperPattern->CallMenuOnDidDisappearCallback();
     }
@@ -1483,7 +1484,8 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
     CHECK_NULL_VOID(eventHub);
     eventHub->SetEnabledInternal(false);
 
-    if (MenuView::GetMenuHoverScaleStatus(wrapperPattern->GetTargetId()) != MenuHoverScaleStatus::INTERRUPT) {
+    if (MenuView::GetMenuHoverScaleStatus(wrapperPattern->GetTargetId()) != MenuHoverScaleStatus::INTERRUPT &&
+        wrapperPattern->GetMenuStatus() != MenuStatus::HIDE) {
         wrapperPattern->CallMenuAboutToDisappearCallback();
         wrapperPattern->CallMenuOnWillDisappearCallback();
     }
@@ -2601,9 +2603,7 @@ void OverlayManager::HideAllMenusWithoutAnimation(bool showInSubwindow)
         CHECK_NULL_CONTINUE(menuNode);
         auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
         CHECK_NULL_CONTINUE(menuWrapperPattern);
-        menuWrapperPattern->CallMenuAboutToDisappearCallback();
-        menuWrapperPattern->CallMenuDisappearCallback();
-        menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
+        CallMenuDisappearWithStatus(menuNode);
         menuWrapperPattern->SetOnMenuDisappear(false);
         menuWrapperPattern->CallMenuStateChangeCallback("false");
         auto containerId = menuWrapperPattern->GetContainerId();
@@ -2758,20 +2758,9 @@ void OverlayManager::ShowMenuInSubWindow(int32_t targetId, const NG::OffsetF& of
     }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-
-    std::vector<int32_t> idsNeedClean;
-    for (auto child: rootNode->GetChildren()) {
-        idsNeedClean.push_back(child->GetId());
-    }
-    auto pipeline = rootNode->GetContext();
+    auto pipeline = rootNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAfterLayoutTask([idsNeedClean, containerId = Container::CurrentId()] {
-        auto subwindowMgr = SubwindowManager::GetInstance();
-        for (auto child : idsNeedClean) {
-            subwindowMgr->DeleteHotAreas(containerId, child, SubwindowType::TYPE_MENU);
-        }
-    });
-    hasDragPixelMap_ ? RemoveMenuWrapperNode(rootNode) : rootNode->Clean();
+    RemoveMenuWrapperNode(rootNode, pipeline);
 
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
@@ -8573,16 +8562,73 @@ bool OverlayManager::IsRootExpansive() const
     return opts && opts->Expansive();
 }
 
-void OverlayManager::RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode)
+void OverlayManager::RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode, const RefPtr<PipelineContext>& pipeline)
 {
     CHECK_NULL_VOID(rootNode);
-    for (const auto& child : rootNode->GetChildren()) {
+    CHECK_NULL_VOID(pipeline);
+    std::vector<int32_t> idsNeedClean;
+    bool needCallOldLifeCycle = IsSceneBoardWindow();
+    auto children = rootNode->GetChildren();
+    for (const auto& child : children) {
         auto node = DynamicCast<FrameNode>(child);
-        if (node && node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
-            rootNode->RemoveChild(node);
-            return;
+        if (!node || node->GetTag() != V2::MENU_WRAPPER_ETS_TAG) {
+            continue;
         }
+        idsNeedClean.push_back(child->GetId());
+        if (needCallOldLifeCycle) {
+            CallMenuDisappearWithStatus(node);
+        } else {
+            CallMenuDisappearOnlyNewLifeCycle(node);
+        }
+        rootNode->RemoveChild(node);
     }
+    CHECK_EQUAL_VOID(idsNeedClean.empty(), true);
+    pipeline->AddAfterLayoutTask([idsNeedClean, containerId = pipeline->GetInstanceId()] {
+        auto subwindowMgr = SubwindowManager::GetInstance();
+        for (auto child : idsNeedClean) {
+            subwindowMgr->DeleteHotAreas(containerId, child, SubwindowType::TYPE_MENU);
+        }
+    });
+}
+
+void OverlayManager::CallMenuDisappearOnlyNewLifeCycle(const RefPtr<FrameNode>& menuWrapperNode)
+{
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (menuWrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
+        // When the menu is forcibly removed during the disappearing process, the onDidDisappear life cycle needs to be
+        // called back to the user.
+        menuWrapperPattern->CallMenuOnDidDisappearCallback();
+    } else if (menuWrapperPattern->IsShow()) {
+        // When the menu is forcibly removed during display, the life cycle of onWillDisappear and
+        // onDidDisappear needs to be called back to the user.
+        menuWrapperPattern->CallMenuOnWillDisappearCallback();
+        menuWrapperPattern->CallMenuOnDidDisappearCallback();
+    }
+    menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
+}
+
+void OverlayManager::CallMenuDisappearWithStatus(const RefPtr<FrameNode>& menuWrapperNode)
+{
+    CHECK_NULL_VOID(menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    
+    if (menuWrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
+        // When the menu is forcibly removed during the disappearing process, the onDisappear life cycle needs to be
+        // called back to the user.
+        menuWrapperPattern->CallMenuDisappearCallback();
+        menuWrapperPattern->CallMenuOnDidDisappearCallback();
+    } else if (menuWrapperPattern->IsShow()) {
+        // When the menu is forcibly removed during display, the life cycle of aboutToDisappear and
+        // onDisappear needs to be called back to the user.
+        menuWrapperPattern->CallMenuAboutToDisappearCallback();
+        menuWrapperPattern->CallMenuOnWillDisappearCallback();
+        menuWrapperPattern->CallMenuDisappearCallback();
+        menuWrapperPattern->CallMenuOnDidDisappearCallback();
+    }
+    menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
 }
 
 void OverlayManager::SetDragNodeNeedClean()
@@ -8832,5 +8878,24 @@ RefPtr<PipelineContext> OverlayManager::GetPipelineContext() const
     auto context = context_.Upgrade();
     CHECK_NULL_RETURN(context, PipelineContext::GetCurrentContextSafelyWithCheck());
     return context;
+}
+
+bool OverlayManager::IsSceneBoardWindow()
+{
+    auto containerId = Container::CurrentId();
+    auto container = AceEngine::Get().GetContainer(containerId);
+    if (!container) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "container is null");
+        return false;
+    }
+    if (container->IsSubContainer()) {
+        containerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
+        container = AceEngine::Get().GetContainer(containerId);
+        if (!container) {
+            TAG_LOGW(AceLogTag::ACE_OVERLAY, "parent container is null");
+            return false;
+        }
+    }
+    return container->IsSceneBoardWindow();
 }
 } // namespace OHOS::Ace::NG

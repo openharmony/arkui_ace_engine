@@ -136,7 +136,7 @@ HWTEST_F(OverlayManagerTestThreeNg, RemoveMenuWrapperNode001, TestSize.Level1)
     ASSERT_NE(childTwo, nullptr);
     mainMenu->children_.push_back(childOne);
     mainMenu->children_.push_back(childTwo);
-    overlayManager->RemoveMenuWrapperNode(mainMenu);
+    overlayManager->RemoveMenuWrapperNode(mainMenu, pipelineContext);
     EXPECT_EQ(mainMenu->children_.size(), 1);
 }
 
