@@ -1594,6 +1594,7 @@ void Scrollable::UpdateScrollSnapEndWithOffset(double offset)
         }
         updateSnapAnimationCount_++;
         endPos_ -= offset;
+        finalPosition_ = endPos_;
         snapOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
         AnimationUtils::StartAnimation(
             option,

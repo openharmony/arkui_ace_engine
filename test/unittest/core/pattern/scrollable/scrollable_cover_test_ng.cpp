@@ -1571,9 +1571,11 @@ HWTEST_F(ScrollableCoverTestNg, UpdateScrollSnapEndWithOffsetTest001, TestSize.L
     scrollable->state_ = Scrollable::AnimationState::SNAP;
     scrollable->updateSnapAnimationCount_ = 0;
     scrollable->endPos_ = 200.0;
+    scrollable->finalPosition_ = 0.0f;
     scrollable->UpdateScrollSnapEndWithOffset(100.0);
     ASSERT_NE(scrollable->snapOffsetProperty_, nullptr);
     EXPECT_EQ(scrollable->endPos_, 100.0);
+    EXPECT_EQ(scrollable->finalPosition_, 100.0);
     /**
      * @tc.steps: step2. Set isSnapScrollAnimationStop_ to false and snapOffsetProperty_ has value.
      */
@@ -1583,6 +1585,7 @@ HWTEST_F(ScrollableCoverTestNg, UpdateScrollSnapEndWithOffsetTest001, TestSize.L
         AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(snapPropertyCallback));
     scrollable->UpdateScrollSnapEndWithOffset(50.0);
     EXPECT_EQ(scrollable->endPos_, 50.0);
+    EXPECT_EQ(scrollable->finalPosition_, 50.0);
 }
 
 /**
