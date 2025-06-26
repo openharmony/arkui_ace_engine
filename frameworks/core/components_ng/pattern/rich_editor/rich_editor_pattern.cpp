@@ -8797,7 +8797,8 @@ void RichEditorPattern::InitAiSelection(const Offset& globalOffset)
     }
     start = aiSpanIter->second.start;
     end = aiSpanIter->second.end;
-    if (pos >= start && pos < end && InRangeRect(globalOffset, { start, end })) {
+    auto position = static_cast<int32_t>(pos);
+    if (position >= start && position < end && InRangeRect(globalOffset, { start, end })) {
         isAiSpan = true;
     }
     if (isAiSpan && start >= 0 && start < end) {
