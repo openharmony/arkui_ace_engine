@@ -30,8 +30,10 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #include "base/window/foldable_window.h"
+#include "core/common/ace_engine.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
@@ -71,6 +73,8 @@ const std::string MESSAGE = "hello world";
 const std::string BOTTOMSTRING = "test";
 const std::string LONGEST_CONTENT = "新建文件夹";
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
+constexpr int32_t EXPECT_CALL_TWICE_TIMES = 2;
+constexpr int32_t EXPECT_CALL_THREE_TIMES = 3;
 } // namespace
 
 class OverlayManagerMenuTestNg : public testing::Test {
@@ -885,5 +889,119 @@ HWTEST_F(OverlayManagerMenuTestNg, RemoveMenuFilter001, TestSize.Level1)
     EXPECT_FALSE(rootNode->GetChildren().empty());
     overlayManager->RemoveMenuFilter(menuWrapper, false);
     EXPECT_TRUE(rootNode->GetChildren().empty());
+}
+
+/**
+ * @tc.name: CallMenuDisappearWithStatus001
+ * @tc.desc: Test OverlayManager::CallMenuDisappearWithStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, CallMenuDisappearWithStatus001, TestSize.Level1)
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto menuWrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(rootNode->GetId()));
+    ASSERT_NE(menuWrapper, nullptr);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    auto column = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(column, nullptr);
+    column->MountToParent(rootNode);
+    menuWrapperPattern->SetFilterColumnNode(column);
+    auto callCount = 0;
+    auto aboutToDisapppearCallback = [&callCount]() {
+        callCount++;
+    };
+    auto disappearCallback = [&callCount]() {
+        callCount++;
+    };
+    menuWrapperPattern->RegisterMenuAboutToDisappearCallback(aboutToDisapppearCallback);
+    menuWrapperPattern->RegisterMenuDisappearCallback(disappearCallback);
+    menuWrapperPattern->menuStatus_ = MenuStatus::SHOW;
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CallMenuDisappearWithStatus(menuWrapper);
+    EXPECT_EQ(callCount, EXPECT_CALL_TWICE_TIMES);
+    menuWrapperPattern->menuStatus_ = MenuStatus::ON_HIDE_ANIMATION;
+    overlayManager->CallMenuDisappearWithStatus(menuWrapper);
+    EXPECT_EQ(callCount, EXPECT_CALL_THREE_TIMES);
+}
+
+/**
+ * @tc.name: CallMenuDisappearOnlyNewLifeCycle001
+ * @tc.desc: Test OverlayManager::CallMenuDisappearOnlyNewLifeCycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, CallMenuDisappearOnlyNewLifeCycle, TestSize.Level1)
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto menuWrapper = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(rootNode->GetId()));
+    ASSERT_NE(menuWrapper, nullptr);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    auto column = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(column, nullptr);
+    column->MountToParent(rootNode);
+    menuWrapperPattern->SetFilterColumnNode(column);
+    auto callCount = 0;
+    auto aboutToDisapppearCallback = [&callCount]() {
+        callCount++;
+    };
+    auto disappearCallback = [&callCount]() {
+        callCount++;
+    };
+    menuWrapperPattern->RegisterMenuOnWillDisappearCallback(aboutToDisapppearCallback);
+    menuWrapperPattern->RegisterMenuOnDidDisappearCallback(disappearCallback);
+    menuWrapperPattern->menuStatus_ = MenuStatus::SHOW;
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CallMenuDisappearWithStatus(menuWrapper);
+    EXPECT_EQ(callCount, EXPECT_CALL_TWICE_TIMES);
+    menuWrapperPattern->menuStatus_ = MenuStatus::ON_HIDE_ANIMATION;
+    overlayManager->CallMenuDisappearWithStatus(menuWrapper);
+    EXPECT_EQ(callCount, EXPECT_CALL_THREE_TIMES);
+}
+
+/**
+ * @tc.name: IsSceneBoardWindow001
+ * @tc.desc: Test OverlayManager::IsSceneBoardWindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, IsSceneBoardWindow001, TestSize.Level1)
+{
+    auto containerId = Container::CurrentId();
+    auto container = AceEngine::Get().GetContainer(containerId);
+    ASSERT_NE(container, nullptr);
+    auto mockContainer = AceType::DynamicCast<MockContainer>(container);
+    ASSERT_NE(mockContainer, nullptr);
+    mockContainer->SetIsSceneBoardWindow(true);
+    AceEngine::Get().RemoveContainer(container->GetInstanceId());
+    auto isSceneBoard = OverlayManager::IsSceneBoardWindow();
+    EXPECT_FALSE(isSceneBoard);
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
+    isSceneBoard = OverlayManager::IsSceneBoardWindow();
+    EXPECT_TRUE(isSceneBoard);
+    mockContainer->isSubContainer_ = true;
+    SubwindowManager::GetInstance()->RemoveParentContainerId(container->GetInstanceId());
+    isSceneBoard = OverlayManager::IsSceneBoardWindow();
+    EXPECT_FALSE(isSceneBoard);
+    SubwindowManager::GetInstance()->AddParentContainerId(container->GetInstanceId(), container->GetInstanceId());
+    isSceneBoard = OverlayManager::IsSceneBoardWindow();
+    EXPECT_TRUE(isSceneBoard);
+    mockContainer->isSubContainer_ = false;
+    mockContainer->SetIsSceneBoardWindow(false);
 }
 } // namespace OHOS::Ace::NG
