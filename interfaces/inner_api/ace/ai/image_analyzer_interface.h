@@ -19,7 +19,6 @@
 #include <functional>
 #include <string>
 
-#include "core/event/key_event.h"
 #include "image_analyzer.h"
 
 namespace OHOS::Ace {
