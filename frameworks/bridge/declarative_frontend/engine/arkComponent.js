@@ -492,8 +492,8 @@ class ShadowModifier extends ModifierWithKey {
       getUINativeModule().common.resetShadow(node);
     }
     else {
-      if (isNumber(this.value)) {
-        getUINativeModule().common.setShadow(node, this.value, undefined, undefined, undefined, undefined, undefined, undefined);
+      if (isNumber(this.value.shadowStyle)) {
+        getUINativeModule().common.setShadow(node, this.value.shadowStyle, undefined, undefined, undefined, undefined, undefined, undefined);
       }
       else {
         getUINativeModule().common.setShadow(node, undefined, this.value.radius,
@@ -503,6 +503,9 @@ class ShadowModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
+    if (isNumber(this.value.shadowStyle)) {
+      return true;
+    }
     return !(this.stageValue.radius === this.value.radius &&
       this.stageValue.type === this.value.type &&
       this.stageValue.color === this.value.color &&
@@ -1006,10 +1009,16 @@ class OutlineColorModifier extends ModifierWithKey {
   }
   checkObjectDiff() {
     if (!isResource(this.stageValue) && !isResource(this.value)) {
-      return !(this.stageValue.left === this.value.left &&
-        this.stageValue.right === this.value.right &&
-        this.stageValue.top === this.value.top &&
-        this.stageValue.bottom === this.value.bottom);
+      if ((isResource(this.stageValue.left) || isResource(this.stageValue.right) ||
+        isResource(this.stageValue.top) || isResource(this.stageValue.bottom)) &&
+        (isResource(this.value.left) || isResource(this.value.right) || isResource(this.value.top) || isResource(this.value.bottom))) {
+        return true;
+      } else {
+        return !(this.stageValue.left === this.value.left &&
+          this.stageValue.right === this.value.right &&
+          this.stageValue.top === this.value.top &&
+          this.stageValue.bottom === this.value.bottom);
+      }
     }
     else {
       return true;
@@ -1142,10 +1151,17 @@ class OutlineModifier extends ModifierWithKey {
           bottomColor = this.value.color;
         }
         else {
-          leftColor = this.value.color.left;
-          rightColor = this.value.color.right;
-          topColor = this.value.color.top;
-          bottomColor = this.value.color.bottom;
+          if (this.value.color.start || this.value.color.end) {
+            leftColor = this.value.color.start;
+            rightColor = this.value.color.end;
+            topColor = this.value.color.top;
+            bottomColor = this.value.color.bottom;
+          } else {
+            leftColor = this.value.color.left;
+            rightColor = this.value.color.right;
+            topColor = this.value.color.top;
+            bottomColor = this.value.color.bottom;
+          }
         }
       }
       let topLeft;
@@ -4957,7 +4973,13 @@ class ArkComponent {
     return this;
   }
   shadow(value) {
-    modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, value);
+    let arkShadowStyle = new ArkShadowStyle();
+    if (typeof value === 'object') {
+      modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, value);
+    } else if (typeof value === 'number') {
+      arkShadowStyle.shadowStyle = value;
+      modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, arkShadowStyle);
+    }
     return this;
   }
   mask(value) {
@@ -19806,6 +19828,12 @@ class ArkDragPreview {
       this.pixelMap === another.pixelMap &&
       this.extraInfo === another.extraInfo
     );
+  }
+}
+
+class ArkShadowStyle {
+  constructor() {
+    this.shadowStyle = undefined;
   }
 }
 

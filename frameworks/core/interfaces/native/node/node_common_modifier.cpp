@@ -6345,20 +6345,15 @@ void SetOutlineColor(ArkUINodeHandle node, const uint32_t* values, int32_t value
     ViewAbstractModelNG::RemoveResObj(frameNode, "outerBorderColor");
     int32_t colorOffset = NUM_0;
     NG::BorderColorProperty borderColors;
+    SetOptionalBorderColor(borderColors.leftColor, values, valuesSize, colorOffset);
+    SetOptionalBorderColor(borderColors.rightColor, values, valuesSize, colorOffset);
+    SetOptionalBorderColor(borderColors.topColor, values, valuesSize, colorOffset);
+    SetOptionalBorderColor(borderColors.bottomColor, values, valuesSize, colorOffset);
     if (SystemProperties::ConfigChangePerform() && resRawPtr) {
-        SetOptionalBorderColor(borderColors.leftColor, values, valuesSize, colorOffset);
-        SetOptionalBorderColor(borderColors.rightColor, values, valuesSize, colorOffset);
-        SetOptionalBorderColor(borderColors.topColor, values, valuesSize, colorOffset);
-        SetOptionalBorderColor(borderColors.bottomColor, values, valuesSize, colorOffset);
         auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(resRawPtr));
         if (objs.size() > NUM_3) {
             CheckOuterBorderColorResObj(borderColors, objs[NUM_0], objs[NUM_1], objs[NUM_2], objs[NUM_3]);
         }
-    } else {
-        SetOptionalBorderColor(borderColors.topColor, values, valuesSize, colorOffset);
-        SetOptionalBorderColor(borderColors.rightColor, values, valuesSize, colorOffset);
-        SetOptionalBorderColor(borderColors.bottomColor, values, valuesSize, colorOffset);
-        SetOptionalBorderColor(borderColors.leftColor, values, valuesSize, colorOffset);
     }
     borderColors.multiValued = true;
     ViewAbstract::SetOuterBorderColor(frameNode, borderColors);

@@ -3541,4 +3541,29 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTestNg0097, TestSize.Level1)
     auto renderContext = frameNode->GetRenderContext();
     EXPECT_EQ(renderContext->HasPositionEdges(), true);
 }
+
+/**
+ * @tc.name: SetLinearGradient
+ * @tc.desc: Test SetLinearGradient of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractResourceObjectTest001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    gradient.GetLinearGradient()->linearX = NG::GradientDirection::LEFT;
+    ViewAbstract::SetLinearGradient(frameNode, gradient);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_EQ(renderContext->GetLinearGradient().has_value(), true);
+    EXPECT_EQ(renderContext->GetLinearGradient()->GetLinearGradient()->linearX, NG::GradientDirection::LEFT);
+    pattern->OnColorModeChange((uint32_t)ColorMode::DARK);
+    g_isConfigChangePerform = false;
+}
+
 } // namespace OHOS::Ace::NG

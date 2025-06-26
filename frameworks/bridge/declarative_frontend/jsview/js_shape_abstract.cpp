@@ -404,6 +404,7 @@ void JSShapeAbstract::ObjectHeight(const JSRef<JSVal>& jsValue)
 
 void JSShapeAbstract::ObjectSize(const JSCallbackInfo& info)
 {
+    info.ReturnSelf();
     if (info.Length() < 1) {
         return;
     }
