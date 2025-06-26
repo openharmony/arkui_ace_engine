@@ -954,7 +954,6 @@ class TipsDialogContentLayout extends ViewPU {
         height += imageMeasureResult.height;
         if (this.title !== null || this.content !== null) {
             let textChild = children[this.textIndex];
-            this.updateTextAlign(sizeResult.width);
             let contentMaxHeight = Number(constraint.maxHeight) - imageMeasureResult.height - checkBoxHeight;
             let contentConstraint = {
                 maxWidth: constraint.maxWidth,
