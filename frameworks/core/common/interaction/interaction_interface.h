@@ -76,6 +76,8 @@ public:
     virtual void SetDraggableStateAsync(bool state, int64_t downTime) = 0;
 
     virtual int32_t EnableInternalDropAnimation(const std::string& animationInfo) = 0;
+
+    virtual bool IsDragStart() const = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_INTERACTION_INTERFACE_H

@@ -321,4 +321,8 @@ OHOS::Ace::DragBehavior TranslateDragBehavior(Msdp::DeviceStatus::DragBehavior d
     }
 }
 
+bool InteractionImpl::IsDragStart() const
+{
+    return InteractionManager::GetInstance()->IsDragStart();
+}
 } // namespace OHOS::Ace
