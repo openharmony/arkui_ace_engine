@@ -787,7 +787,6 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, false);
-    auto expandDisplay = theme->GetExpandDisplay();
     auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
     CHECK_NULL_RETURN(menuNode, false);
     auto menuPattern = AceType::DynamicCast<MenuPattern>(menuNode->GetPattern());
@@ -796,11 +795,7 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     isShowInSubWindow_ = layoutProperty->GetShowInSubWindowValue(true);
-    if (host->IsOnMainTree() &&
-        ((IsContextMenu() && !IsHide()) || (((expandDisplay || isOpenMenu_) && isShowInSubWindow_) && !IsHide()) ||
-            GetIsSelectOverlaySubWindowWrapper())) {
-        SetHotAreas(dirty);
-    }
+    SetHotAreas(dirty);
     MarkAllMenuNoDraggable();
     MarkWholeSubTreeNoDraggable(GetPreview());
     if (!GetHoverScaleInterruption()) {
@@ -818,13 +813,9 @@ bool MenuWrapperPattern::IsNeedSetHotAreas(const RefPtr<LayoutWrapper>& layoutWr
     CHECK_NULL_RETURN(pipeline, false);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, false);
-    bool menuNotNeedsHotAreas = (layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) &&
-                                !((theme->GetExpandDisplay() || isOpenMenu_) && isShowInSubWindow_);
-    if (menuNotNeedsHotAreas && !GetIsSelectOverlaySubWindowWrapper()) {
-        return false;
-    }
-
-    return true;
+    auto container = AceEngine::Get().GetContainer(pipeline->GetInstanceId());
+    CHECK_NULL_RETURN(container, false);
+    return host->IsOnMainTree() && !IsHide() && container->IsSubContainer();
 }
 
 void MenuWrapperPattern::AddTargetWindowHotArea(std::vector<Rect>& rects)
