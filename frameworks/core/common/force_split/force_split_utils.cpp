@@ -169,5 +169,44 @@ bool ForceSplitUtils::IsNavDestinationHomePage(const RefPtr<NavDestinationGroupN
     return false;
 }
 
+RefPtr<FrameNode> ForceSplitUtils::CreatePlaceHolderNode()
+{
+    int32_t phId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto phNode = FrameNode::GetOrCreateFrameNode(
+        V2::SPLIT_PLACEHOLDER_CONTENT_ETS_TAG, phId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    CHECK_NULL_RETURN(phNode, nullptr);
+    auto context = phNode->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto navManager = context->GetNavigationManager();
+    CHECK_NULL_RETURN(navManager, nullptr);
+    auto renderContext = phNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    Color bgColor;
+    if (navManager->GetSystemColor(BG_COLOR_SYS_RES_NAME, bgColor)) {
+        renderContext->UpdateBackgroundColor(bgColor);
+    }
+    auto property = phNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(property, nullptr);
+    property->UpdateVisibility(VisibleType::INVISIBLE);
+    property->UpdateAlignment(Alignment::TOP_LEFT);
+    SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
+        .edges = SAFE_AREA_EDGE_ALL };
+    property->UpdateSafeAreaExpandOpts(opts);
+    auto eventHub = phNode->GetEventHub<EventHub>();
+    if (eventHub) {
+        eventHub->SetEnabled(false);
+    }
+    auto focusHub = phNode->GetOrCreateFocusHub();
+    if (focusHub) {
+        focusHub->SetFocusable(false);
+    }
+    auto phContent = ForceSplitUtils::CreatePlaceHolderContent(context);
+    if (phContent) {
+        phContent->MountToParent(phNode);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "failed to create PlaceHolder content");
+    }
+    return phNode;
+}
 } // namespace OHOS::Ace::NG
 

@@ -63,6 +63,10 @@ private:
 
     void MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
         const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& contentSize_);
+    void MeasureForceSplitPlaceHolderNode(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, const SizeF& contentSize);
+    void LayoutForceSplitPlaceHolderNode(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNode>& hostNode,
+        const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty, float navBarWidth, float dividerWidth);
 
     void RangeCalculation(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);

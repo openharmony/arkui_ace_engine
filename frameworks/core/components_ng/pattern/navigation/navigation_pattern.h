@@ -718,6 +718,8 @@ private:
     void AdjustNodeForDestForceSplit(bool needTriggerLifecycle);
     void AdjustNodeForNonDestForceSplit(bool needTriggerLifecycle);
     void ClearSecondaryNodesIfNeeded(NavPathList&& preList);
+    void UpdateNavContentAndPlaceHolderVisibility(const RefPtr<FrameNode>& navContentNode,
+        const RefPtr<FrameNode>& phNode, const std::vector<RefPtr<NavDestinationGroupNode>>& stackNodes);
 
     bool IsTopPrimaryNode(const RefPtr<NavDestinationGroupNode>& node);
     
