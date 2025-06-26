@@ -2146,14 +2146,14 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     rect.SetSize(DimensionSize(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT)));
 
     PromptDialogAttr promptDialogAttr = {
-        .onDidAppear = std::move(lifeCycleAttr.onDidAppear),
-        .onDidDisappear = std::move(lifeCycleAttr.onDidDisappear),
-        .onWillAppear = std::move(lifeCycleAttr.onWillAppear),
-        .onWillDisappear = std::move(lifeCycleAttr.onWillDisappear),
         .title = asyncContext->titleString,
         .showInSubWindow = asyncContext->showInSubWindowBool,
         .isModal = asyncContext->isModalBool,
         .maskRect = rect,
+        .onDidAppear = std::move(lifeCycleAttr.onDidAppear),
+        .onDidDisappear = std::move(lifeCycleAttr.onDidDisappear),
+        .onWillAppear = std::move(lifeCycleAttr.onWillAppear),
+        .onWillDisappear = std::move(lifeCycleAttr.onWillDisappear),
         .dialogLevelMode = dialogLevelMode,
         .dialogLevelUniqueId = dialogLevelUniqueId,
         .dialogImmersiveMode = dialogImmersiveMode,
