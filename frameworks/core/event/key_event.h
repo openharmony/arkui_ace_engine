@@ -533,7 +533,7 @@ struct KeyEvent final : public NonPointerEvent {
     }
     bool IsShiftWith(KeyCode expectCodes) const
     {
-        return IsKey({ KeyCode::KEY_SHIFT_LEFT, expectCodes }) || IsKey({ KeyCode::KEY_SHIFT_RIGHT, expectCodes });
+        return (HasKey(KeyCode::KEY_SHIFT_LEFT) || HasKey(KeyCode::KEY_SHIFT_RIGHT)) && HasKey(expectCodes);
     }
     bool IsExactlyShiftWith(KeyCode expectCodes) const
     {
