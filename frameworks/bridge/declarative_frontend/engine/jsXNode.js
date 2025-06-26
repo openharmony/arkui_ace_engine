@@ -166,6 +166,9 @@ class BuilderNode extends Disposable {
     inheritFreezeOptions(enable) {   
         this._JSBuilderNode.inheritFreezeOptions(enable);
     }
+    enableConsume(){
+        this._JSBuilderNode.enableConsume();
+    }
 }
 class JSBuilderNode extends BaseNode {
     constructor(uiContext, options) {
@@ -178,6 +181,10 @@ class JSBuilderNode extends BaseNode {
         this.allowFreezeWhenInactive = false;
         this.parentallowFreeze = false;
         this.isFreeze = false;
+        this.__parentViewBuildNode = undefined;
+    }
+    enableConsume() {
+        this.__enableBuilderNodeConsume__ = true;
     }
     reuse(param) {
         this.updateStart();
@@ -305,7 +312,12 @@ class JSBuilderNode extends BaseNode {
         this.frameNode_.setRenderNode(this._nativeRef);
         this.frameNode_.setBaseNode(this);
         this.frameNode_.setBuilderNode(this);
-        this.id_ = this.frameNode_.getUniqueId();
+        let id = this.frameNode_.getUniqueId();
+        if (this.id_ && this.id_ != id) {
+            this.__parentViewBuildNode?.removeChildBuilderNode(this.id_);
+        }
+        this.id_ = id;
+        this.__parentViewBuildNode?.addChildBuilderNode(this);
         FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.set(this.frameNode_.getUniqueId(), new WeakRef(this.frameNode_));
         __JSScopeUtil__.restoreInstanceId();
     }
@@ -3278,6 +3290,7 @@ globalThis.__addBuilderNode__ = function __addBuilderNode__(id, builderIds) {
         if (builderNode.getInheritFreeze()) {
             builderNode.setAllowFreezeWhenInactive(allow);
         }
+        builderNode.__parentViewBuildNode = view;
         view.addChildBuilderNode(builderNode);
     });
     return true;
@@ -3299,6 +3312,7 @@ globalThis.__deleteBuilderNode__ = function __deleteBuilderNode__(id, builderIds
         if (builderNode.getIsFreeze()) {
             builderNode.setActiveInternal(true);
         }
+        builderNode.__parentViewBuildNode = undefined;
         view.removeChildBuilderNode(builderId);
     });
     return true;
@@ -3321,6 +3335,7 @@ globalThis.__addBuilderNodeToBuilder__ = function __addBuilderNodeToBuilder__(id
         if (childBuilderNode.getInheritFreeze()) {
             childBuilderNode.setAllowFreezeWhenInactive(allow);
         }
+        childBuilderNode.__parentViewBuildNode = builderNode;
         builderNode.addChildBuilderNode(childBuilderNode);
     });
     return true;
@@ -3343,6 +3358,7 @@ globalThis.__deleteBuilderNodeFromBuilder__ = function __deleteBuilderNodeFromBu
         if (builderNode.getIsFreeze()) {
             builderNode.setActiveInternal(true);
         }
+        childBuilderNode.__parentViewBuildNode = undefined;
         builderNode.removeChildBuilderNode(childBuilderNode.id__());
     });
     return true;
@@ -3356,6 +3372,10 @@ globalThis.__clearBuilderNodes__ = function __clearBuilderNodes__(id) {
             child.deref()?.setAllowFreezeWhenInactive(false);
             if (child?.deref()?.getIsFreeze()) {
                 child?.deref()?.setActiveInternal(true);
+            }
+            let builderNode = child.deref();
+            if (builderNode) {
+                builderNode.__parentViewBuildNode = undefined;
             }
         }
         view.clearChildBuilderNode();
@@ -3375,6 +3395,10 @@ globalThis.__clearFromBuilder__ = function clearFromBuilder(id) {
         child.deref()?.setAllowFreezeWhenInactive(false);
         if (child?.deref()?.getIsFreeze()) {
             child?.deref()?.setActiveInternal(true);
+        }
+        let childBuilderNode = child.deref();
+        if (childBuilderNode) {
+            builderNode.__parentViewBuildNode = undefined;
         }
     }
     builderNode.clearChildBuilderNode();
