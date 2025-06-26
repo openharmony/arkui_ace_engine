@@ -251,13 +251,13 @@ public:
         const RefPtr<FrameNode> &node);
     void FlushDragEvents();
     void FlushDragEvents(const RefPtr<DragDropManager>& manager,
-        std::string extraInfo,
+        const std::string& extraInfo,
         const RefPtr<FrameNode>& node,
         const std::list<DragPointerEvent>& pointEvent);
     void FlushDragEvents(const RefPtr<DragDropManager>& manager,
-        std::unordered_map<int32_t, DragPointerEvent> newIdPoints,
-        std::string& extraInfo,
-        std::unordered_map<int, DragPointerEvent> &idToPoints,
+        const std::unordered_map<int32_t, DragPointerEvent>& newIdPoints,
+        const std::string& extraInfo,
+        const std::unordered_map<int, DragPointerEvent>& idToPoints,
         const RefPtr<FrameNode>& node);
 
     // Called by view when axis event received.
