@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -50,6 +51,8 @@ void RadioPattern::OnAttachToFrameNode()
 
 void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromFrameNode);
     CHECK_NULL_VOID(frameNode);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);

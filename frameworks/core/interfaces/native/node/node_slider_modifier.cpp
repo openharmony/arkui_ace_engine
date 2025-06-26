@@ -51,7 +51,7 @@ const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
 namespace SliderModifier {
 
-std::string g_strValue;
+thread_local std::string g_strValue;
 
 void SetShowTips(ArkUINodeHandle node, ArkUI_Bool isShow, const char *value)
 {

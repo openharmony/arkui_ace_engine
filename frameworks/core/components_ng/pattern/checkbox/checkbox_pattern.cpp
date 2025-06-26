@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 
+#include "base/utils/multi_thread.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
@@ -502,6 +503,8 @@ void CheckBoxPattern::UpdateUIStatus(bool check)
 
 void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromFrameNode);
     CHECK_NULL_VOID(frameNode);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 
+#include "base/utils/multi_thread.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
@@ -1915,6 +1916,8 @@ void SliderPattern::SetSliderValue(double value, int32_t mode)
 
 void SliderPattern::UpdateValue(float value)
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, UpdateValue, value);
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider update value %{public}d %{public}f", panMoveFlag_, value_);
     if (!panMoveFlag_) {
         auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
@@ -1927,6 +1930,8 @@ void SliderPattern::UpdateValue(float value)
 
 void SliderPattern::OnAttachToFrameNode()
 {
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     RegisterVisibleAreaChange();
     InitHapticController();
 }
@@ -2109,6 +2114,8 @@ RefPtr<FrameNode> SliderPattern::BuildContentModifierNode()
 
 void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromFrameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
