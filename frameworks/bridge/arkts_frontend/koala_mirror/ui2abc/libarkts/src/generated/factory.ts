@@ -978,16 +978,6 @@ export const factory = {
         return updateNodeByNode(OpaqueTypeNode.create1OpaqueTypeNode(), original)
     }
     ,
-    createBlockStatement(statements: readonly Statement[]): BlockStatement {
-        return BlockStatement.createBlockStatement(statements)
-    }
-    ,
-    updateBlockStatement(original: BlockStatement, statements: readonly Statement[]): BlockStatement {
-        if (isSameNativeObject(statements, original.statements))
-            return original
-        return updateNodeByNode(BlockStatement.createBlockStatement(statements), original)
-    }
-    ,
     createTSTypeParameterDeclaration(params: readonly TSTypeParameter[], requiredParams: number): TSTypeParameterDeclaration {
         return TSTypeParameterDeclaration.createTSTypeParameterDeclaration(params, requiredParams)
     }

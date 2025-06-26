@@ -32,4 +32,5 @@ export class ImportSource extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandImportSource: undefined
 }

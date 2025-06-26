@@ -283,14 +283,16 @@ function fixNamespace(code: string) {
 
     we have only one such place, so fix manually
     */
-    code = code.replaceAll(/export (declare )?abstract class (Profiler|GestureControl|text|common2D) {/g, `export $1 namespace $2 {`)
+    code = code.replaceAll(/export (declare )?abstract class (Profiler|GestureControl|text|common2D|common|observer|unifiedDataChannel|uniformTypeDescriptor|drawing|uiEffect|intl|matrix4|image|pointer|promptAction|webview|window) {/g, `export $1 namespace $2 {`)
     code = code.replaceAll(`public static _$init$_() {}`, ``)
-    code = code.replaceAll(`public static _$initializerBlockInit$_() {}`, ``)
+    code = code.replaceAll(`public static _$init$_(): void {}`, ``)
+    code = code.replaceAll(/.*_\$initializerBlockInit\$_.*/g, ``)
     code = code.replaceAll(/public static ((?:un)?registerVsyncCallback)/g, "export function $1")
     code = code.replaceAll(/public static (setCursor)/g, "export function $1")
     code = code.replaceAll(/public static (restoreDefault)/g, "export function $1")
     code = code.replaceAll(/public static (requestFocus\(value)/g, "export function $1")
-
+    code = code.replaceAll(/public static (getSystemFontFullNamesByType|getFontDescriptorByFullName|matchFontDescriptors|createEffect|createBrightnessBlender)/g, "export function $1")
+    code = code.replaceAll('\n  type Blender =', '\n  export type Blender = ')
     return code
 }
 
@@ -361,4 +363,8 @@ export function filterSource(text: string): string {
     // console.error("====")
     // console.error(dumperUnwrappers.reduceRight((code, f) => f(code), text).split('\n').map((it, index) => `${`${index + 1}`.padStart(4)} |${it}`).join('\n'))
     return dumperUnwrappers.reduceRight((code, f) => f(code), text)
+}
+
+export function getEnumName(enumType: any, value: number): string | undefined {
+    return enumType[value];
 }

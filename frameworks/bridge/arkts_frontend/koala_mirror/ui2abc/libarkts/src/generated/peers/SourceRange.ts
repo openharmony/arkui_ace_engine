@@ -32,4 +32,5 @@ export class SourceRange extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandSourceRange: undefined
 }

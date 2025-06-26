@@ -33,6 +33,7 @@ export class TypedStatement extends Statement {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandTypedStatement: undefined
 }
 export function isTypedStatement(node: object | undefined): node is TypedStatement {
     return node instanceof TypedStatement

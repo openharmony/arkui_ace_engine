@@ -1,0 +1,33 @@
+{
+    "compilerOptions": {
+        "package": "@ohos.arkui",
+        "outDir": "build-m3",
+        "baseUrl": "./ets",
+        "paths": {
+            "#components": ["./generated/arkts"],
+            "@koalaui/arkui-common": ["../../arkui-common/src"],
+            "@koalaui/interop": ["../../../interop/src/arkts"],
+            "@koalaui/common": ["../../../incremental/common/src"],
+            "@koalaui/compat": ["../../../incremental/compat/src/arkts"],
+            "@koalaui/runtime": ["../../../incremental/runtime/ets"],
+            "@koalaui/runtime/annotations": ["../../../incremental/runtime/annotations"]
+        },
+        "plugins": [
+            {
+                "transform": "@koalaui/memo-plugin",
+                "stage": "checked",
+                "name": "memo"
+            }
+        ]
+    },
+    "include": [
+        "ets/**/*.ts", "ets/*.ts"
+    ],
+    "exclude": [
+        "ets/generated/ts/*.ts"
+    ],
+    "dependencies": {
+        "@koalaui/arkui-common": ["../arkui-common/ui2abcconfig.json"],
+        "@koalaui/runtime": ["../../incremental/runtime/ui2abcconfig.json"]
+    }
+}

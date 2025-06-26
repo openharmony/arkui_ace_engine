@@ -44,6 +44,7 @@ export class TSTypeLiteral extends TypeNode {
     get members(): readonly AstNode[] {
         return unpackNodeArray(global.generatedEs2panda._TSTypeLiteralMembersConst(global.context, this.peer))
     }
+    protected readonly brandTSTypeLiteral: undefined
 }
 export function isTSTypeLiteral(node: object | undefined): node is TSTypeLiteral {
     return node instanceof TSTypeLiteral

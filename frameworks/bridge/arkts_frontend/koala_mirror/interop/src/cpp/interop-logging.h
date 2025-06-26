@@ -15,8 +15,15 @@
 #ifndef _INTEROP_LGGING_H
 #define _INTEROP_LGGING_H
 
-#include <stdio.h>
-#include <stdint.h>
+#ifdef __cplusplus
+    #include <cstdio>
+    #include <cstdint>
+    #include <cassert>
+#else
+    #include <stdio.h>
+    #include <stdint.h>
+    #include <assert.h>
+#endif
 
 #if defined(KOALA_OHOS)
 #include "oh_sk_log.h"
@@ -35,6 +42,10 @@
 #define INTEROP_API_EXPORT __declspec(dllexport)
 #else
 #define INTEROP_API_EXPORT __attribute__((visibility("default")))
+#endif
+
+#ifndef ASSERT
+    #define ASSERT(expression) assert(expression)
 #endif
 
 // Grouped logs. Keep consistent with type in ServiceGroupLogger

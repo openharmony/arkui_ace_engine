@@ -32,4 +32,5 @@ export class BindingProps extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandBindingProps: undefined
 }

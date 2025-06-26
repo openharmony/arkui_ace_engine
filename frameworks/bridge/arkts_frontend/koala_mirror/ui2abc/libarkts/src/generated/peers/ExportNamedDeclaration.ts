@@ -69,6 +69,7 @@ export class ExportNamedDeclaration extends Statement {
         global.generatedEs2panda._ExportNamedDeclarationReplaceSpecifiers(global.context, this.peer, passNodeArray(specifiers), specifiers.length)
         return this
     }
+    protected readonly brandExportNamedDeclaration: undefined
 }
 export function isExportNamedDeclaration(node: object | undefined): node is ExportNamedDeclaration {
     return node instanceof ExportNamedDeclaration

@@ -41,6 +41,7 @@ export class TSNeverKeyword extends TypeNode {
     static updateTSNeverKeyword(original?: TSNeverKeyword): TSNeverKeyword {
         return new TSNeverKeyword(global.generatedEs2panda._UpdateTSNeverKeyword(global.context, passNode(original)))
     }
+    protected readonly brandTSNeverKeyword: undefined
 }
 export function isTSNeverKeyword(node: object | undefined): node is TSNeverKeyword {
     return node instanceof TSNeverKeyword

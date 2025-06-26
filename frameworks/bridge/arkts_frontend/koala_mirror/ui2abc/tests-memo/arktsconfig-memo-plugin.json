@@ -20,7 +20,7 @@
                 "transform": "../memo-plugin/lib/MemoTransformer",
                 "stage": "checked",
                 "name": "memo",
-                "manuallyDisableInsertingImport": true
+                "keepTransformed": "../../tests-memo/build/memo-plugin/memo-transformed"
             }
         ]
     },

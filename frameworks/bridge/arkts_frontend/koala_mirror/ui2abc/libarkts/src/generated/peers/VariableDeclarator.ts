@@ -60,6 +60,7 @@ export class VariableDeclarator extends TypedStatement {
     get flag(): Es2pandaVariableDeclaratorFlag {
         return global.generatedEs2panda._VariableDeclaratorFlag(global.context, this.peer)
     }
+    protected readonly brandVariableDeclarator: undefined
 }
 export function isVariableDeclarator(node: object | undefined): node is VariableDeclarator {
     return node instanceof VariableDeclarator

@@ -45,6 +45,7 @@ export class TSParenthesizedType extends TypeNode {
     get type(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._TSParenthesizedTypeTypeConst(global.context, this.peer))
     }
+    protected readonly brandTSParenthesizedType: undefined
 }
 export function isTSParenthesizedType(node: object | undefined): node is TSParenthesizedType {
     return node instanceof TSParenthesizedType

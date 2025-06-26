@@ -43,14 +43,15 @@ function createOptionalClassProperty(
     return result
 }
 
-function createWrapperType(name: string, type: arkts.TypeNode): arkts.ETSTypeReference {
-    return arkts.factory.createETSTypeReference(
+export function createWrapperType(name: string, type: arkts.TypeNode, useUnion: boolean = false): arkts.TypeNode {
+    const box = arkts.factory.createETSTypeReference(
         arkts.factory.createETSTypeReferencePart(
             arkts.factory.createIdentifier(name),
             arkts.factory.createTSTypeParameterInstantiation([type]),
             undefined
         )
     )
+    return useUnion ? arkts.factory.createETSUnionType([type, box]) : box
 }
 
 function backingFieldNameOf(property: arkts.ClassProperty): string {
@@ -370,16 +371,21 @@ export class LinkTransformer extends PropertyTransformerBase {
         super(DecoratorNames.LINK, "LinkDecoratorProperty")
     }
     applyOptions(property: arkts.ClassProperty, result: arkts.ClassElement[]): void {
-        result.push(arkts.factory.createClassProperty(
-            arkts.factory.createIdentifier(property.id?.name!),
-            undefined,
-            createWrapperType("SubscribedAbstractProperty", property.typeAnnotation!),
-            arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_OPTIONAL,
-            false
+       result.push(arkts.factory.createClassProperty(
+                    arkts.factory.createIdentifier(property.id?.name!),
+                    undefined,
+                    createWrapperType("SubscribedAbstractProperty", property.typeAnnotation!, true),
+                    arkts.Es2pandaModifierFlags.MODIFIER_FLAGS_OPTIONAL,
+                    false
         ))
+        //result.push(createOptionalClassProperty(property.id!.name, property))
     }
     applyInitializeStruct(localStorage: arkts.Expression | undefined, property: arkts.ClassProperty, result: arkts.Statement[]): void {
         result.push(thisPropertyMethodCall(property, "linkTo", [initializerOf(property)]))
+    }
+    collectImports(imports: Importer): void {
+        imports.add("SubscribedAbstractProperty", "@ohos.arkui")
+        imports.add("LinkDecoratorProperty", "@ohos.arkui")
     }
 }
 
@@ -472,7 +478,7 @@ export function fieldOf(base: arkts.Expression, name: string, optional: boolean 
         false,
         optional
     )
-    //if (optional) return arkts.factory.createChainExpression(result)
+    if (optional) return arkts.factory.createChainExpression(result)
     return result
 }
 

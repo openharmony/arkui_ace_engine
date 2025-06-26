@@ -30,15 +30,36 @@ import {
 
 import { AnnotationUsage } from "./AnnotationUsage"
 import { BlockStatement } from "./BlockStatement"
+import { ClassDefinition } from "./ClassDefinition"
 import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
+import { Es2pandaModuleFlag } from "./../Es2pandaEnums"
 import { Identifier } from "./Identifier"
+import { Program } from "./Program"
+import { Statement } from "./Statement"
 export class ETSModule extends BlockStatement {
     constructor(pointer: KNativePointer) {
         assertValidPeer(pointer, 82)
         super(pointer)
     }
+    static createETSModule(statementList: readonly Statement[], ident: Identifier | undefined, flag: Es2pandaModuleFlag, program?: Program): ETSModule {
+        return new ETSModule(global.generatedEs2panda._CreateETSModule(global.context, passNodeArray(statementList), statementList.length, passNode(ident), flag, passNode(program)))
+    }
+    static updateETSModule(original: ETSModule | undefined, statementList: readonly Statement[], ident: Identifier | undefined, flag: Es2pandaModuleFlag, program?: Program): ETSModule {
+        return new ETSModule(global.generatedEs2panda._UpdateETSModule(global.context, passNode(original), passNodeArray(statementList), statementList.length, passNode(ident), flag, passNode(program)))
+    }
     get ident(): Identifier | undefined {
         return unpackNode(global.generatedEs2panda._ETSModuleIdent(global.context, this.peer))
+    }
+    get program(): Program | undefined {
+        return new Program(global.generatedEs2panda._ETSModuleProgram(global.context, this.peer))
+    }
+    get globalClass(): ClassDefinition | undefined {
+        return unpackNode(global.generatedEs2panda._ETSModuleGlobalClass(global.context, this.peer))
+    }
+    /** @deprecated */
+    setGlobalClass(globalClass?: ClassDefinition): this {
+        global.generatedEs2panda._ETSModuleSetGlobalClass(global.context, this.peer, passNode(globalClass))
+        return this
     }
     get isETSScript(): boolean {
         return global.generatedEs2panda._ETSModuleIsETSScriptConst(global.context, this.peer)
@@ -54,14 +75,43 @@ export class ETSModule extends BlockStatement {
         global.generatedEs2panda._ETSModuleSetNamespaceChainLastNode(global.context, this.peer)
         return this
     }
+    /** @deprecated */
+    emplaceAnnotations(source?: AnnotationUsage): this {
+        global.generatedEs2panda._ETSModuleEmplaceAnnotations(global.context, this.peer, passNode(source))
+        return this
+    }
+    /** @deprecated */
+    clearAnnotations(): this {
+        global.generatedEs2panda._ETSModuleClearAnnotations(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setValueAnnotations(source: AnnotationUsage | undefined, index: number): this {
+        global.generatedEs2panda._ETSModuleSetValueAnnotations(global.context, this.peer, passNode(source), index)
+        return this
+    }
+    get annotationsForUpdate(): readonly AnnotationUsage[] {
+        return unpackNodeArray(global.generatedEs2panda._ETSModuleAnnotationsForUpdate(global.context, this.peer))
+    }
     get annotations(): readonly AnnotationUsage[] {
         return unpackNodeArray(global.generatedEs2panda._ETSModuleAnnotations(global.context, this.peer))
     }
     /** @deprecated */
-    setAnnotations(annotations: readonly AnnotationUsage[]): this {
-        global.generatedEs2panda._ETSModuleSetAnnotations(global.context, this.peer, passNodeArray(annotations), annotations.length)
+    setAnnotations(annotationList: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._ETSModuleSetAnnotations(global.context, this.peer, passNodeArray(annotationList), annotationList.length)
         return this
     }
+    /** @deprecated */
+    setAnnotations1(annotationList: readonly AnnotationUsage[]): this {
+        global.generatedEs2panda._ETSModuleSetAnnotations1(global.context, this.peer, passNodeArray(annotationList), annotationList.length)
+        return this
+    }
+    /** @deprecated */
+    addAnnotations(annotations?: AnnotationUsage): this {
+        global.generatedEs2panda._ETSModuleAddAnnotations(global.context, this.peer, passNode(annotations))
+        return this
+    }
+    protected readonly brandETSModule: undefined
 }
 export function isETSModule(node: object | undefined): node is ETSModule {
     return node instanceof ETSModule

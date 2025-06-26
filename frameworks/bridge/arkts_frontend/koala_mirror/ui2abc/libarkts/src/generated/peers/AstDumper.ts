@@ -38,4 +38,5 @@ export class AstDumper extends ArktsObject {
     get str(): string {
         return unpackString(global.generatedEs2panda._AstDumperStrConst(global.context, this.peer))
     }
+    protected readonly brandAstDumper: undefined
 }

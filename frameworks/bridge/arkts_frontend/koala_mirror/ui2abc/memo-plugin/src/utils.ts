@@ -17,7 +17,15 @@ import { UniqueId } from "@koalaui/common"
 import * as arkts from "@koalaui/libarkts"
 import * as fs from "node:fs"
 import * as path from "node:path"
-import { correctFunctionParamType, correctObjectExpression, MemoAnnotatable, MemoSkipAnnotatable, MemoStableAnnotatable } from "./api-utils"
+import {
+    correctFunctionParamType,
+    correctObjectExpression,
+    isMemo,
+    MemoAnnotatable,
+    MemoSkipAnnotatable,
+    MemoStableAnnotatable
+} from "./api-utils"
+import { getDecl } from "@koalaui/libarkts"
 
 export enum RuntimeNames {
     __CONTEXT = "__context",
@@ -55,10 +63,6 @@ export enum DebugNames {
     LOG = "log",
 }
 
-function baseName(path: string): string {
-    return path.replace(/^.*\/(.*)$/, "$1")
-}
-
 export class PositionalIdTracker {
     // Global for the whole program.
     static callCount: number = 0
@@ -88,13 +92,9 @@ export class PositionalIdTracker {
 
     id(callName: string = ""): arkts.Expression {
 
-        const fileName = this.stableForTests ?
-            baseName(this.filename) :
-            this.filename
-
         const positionId = (this.stableForTests) ?
-            this.stringId(callName, fileName) :
-            this.sha1Id(callName, fileName)
+            this.stringId(callName, this.filename) :
+            this.sha1Id(callName, this.filename)
 
 
         return this.stableForTests
@@ -168,19 +168,25 @@ export function isWrappable(type: arkts.TypeNode | undefined, arg: arkts.Express
     return (type && correctFunctionParamType(arg)) || correctObjectExpression(arg)
 }
 
-export function isTrackableParam(node: arkts.ETSParameterExpression, isLast: boolean) {
-    return !hasMemoSkipAnnotation(node) && !(isLast && node.ident?.name == RuntimeNames.CONTENT)
+export function isTrackableParam(node: arkts.ETSParameterExpression, isLast: boolean, trackContentParam: boolean) {
+    return !hasMemoSkipAnnotation(node) && !(!trackContentParam && isLast && node.ident?.name == RuntimeNames.CONTENT)
 }
 
-export function shouldWrap(param: arkts.ETSParameterExpression, isLastParam: boolean, arg: arkts.Expression) {
-    return isWrappable(param.typeAnnotation, arg) && isTrackableParam(param, isLastParam)
+export function shouldWrap(param: arkts.ETSParameterExpression, isLastParam: boolean, trackContentParam: boolean, arg: arkts.Expression) {
+    return isWrappable(param.typeAnnotation, arg) && isTrackableParam(param, isLastParam, trackContentParam)
 }
 
-export function dumpAstToFile(node: arkts.AstNode, keepTransformed: string) {
+function filterGensym(value: string): string {
+    return value.replaceAll(/gensym%%_[0-9]*/g, "gensym_XXX")
+}
+
+export function dumpAstToFile(node: arkts.AstNode, keepTransformed: string, stableForTests: boolean) {
+    const relativeFromRoot = path.relative(arkts.global.arktsconfig!.baseUrl, arkts.global.filePath)
     const fileName = path.isAbsolute(keepTransformed) ?
-        path.join(keepTransformed, arkts.getFilePathFromPackageRoot()) : path.join(__dirname, keepTransformed, arkts.getFilePathFromPackageRoot())
+        path.join(keepTransformed, relativeFromRoot) : path.join(__dirname, keepTransformed, relativeFromRoot)
     fs.mkdirSync(path.dirname(fileName), { recursive: true })
-    fs.writeFileSync(fileName, node.dumpSrc())
+    const astDump = node.dumpSrc()
+    fs.writeFileSync(fileName, stableForTests ? filterGensym(astDump) : astDump )
 }
 
 /**
@@ -276,4 +282,12 @@ export function moveToFront<T>(arr: T[], idx: number): T[] {
         throw new Error(`Invalid argument, size of array: ${arr.length}, idx: ${idx}`)
     }
     return [arr[idx], ...arr.slice(0, idx), ...arr.slice(idx + 1)]
+}
+
+export function isMemoCall(node: arkts.AstNode): boolean {
+    if (!arkts.isCallExpression(node)) return false
+    if (node.callee === undefined) return false
+    const decl = getDecl(node.callee)
+    if (!arkts.isMethodDefinition(decl)) return false
+    return isMemo(decl)
 }

@@ -41,6 +41,7 @@ export class UndefinedLiteral extends Literal {
     static updateUndefinedLiteral(original?: UndefinedLiteral): UndefinedLiteral {
         return new UndefinedLiteral(global.generatedEs2panda._UpdateUndefinedLiteral(global.context, passNode(original)))
     }
+    protected readonly brandUndefinedLiteral: undefined
 }
 export function isUndefinedLiteral(node: object | undefined): node is UndefinedLiteral {
     return node instanceof UndefinedLiteral

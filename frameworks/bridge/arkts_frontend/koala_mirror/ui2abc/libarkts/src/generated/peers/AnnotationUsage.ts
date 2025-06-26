@@ -65,6 +65,7 @@ export class AnnotationUsage extends Statement {
     get baseName(): Identifier | undefined {
         return unpackNode(global.generatedEs2panda._AnnotationUsageGetBaseNameConst(global.context, this.peer))
     }
+    protected readonly brandAnnotationUsage: undefined
 }
 export function isAnnotationUsage(node: object | undefined): node is AnnotationUsage {
     return node instanceof AnnotationUsage

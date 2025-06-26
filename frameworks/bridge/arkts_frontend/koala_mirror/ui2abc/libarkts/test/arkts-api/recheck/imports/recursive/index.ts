@@ -48,5 +48,5 @@ class InsertParameter extends arkts.AbstractVisitor {
 }
 
 export function insertParameter(program: arkts.Program) {
-    return (new InsertParameter()).visitor(program.astNode)
+    return new InsertParameter().visitor(program.ast as arkts.ETSModule)
 }

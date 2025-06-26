@@ -62,6 +62,7 @@ export class TSMethodSignature extends AstNode {
     get optional(): boolean {
         return global.generatedEs2panda._TSMethodSignatureOptionalConst(global.context, this.peer)
     }
+    protected readonly brandTSMethodSignature: undefined
 }
 export function isTSMethodSignature(node: object | undefined): node is TSMethodSignature {
     return node instanceof TSMethodSignature
