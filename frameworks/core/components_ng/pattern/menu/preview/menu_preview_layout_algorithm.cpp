@@ -89,13 +89,16 @@ void MenuPreviewLayoutAlgorithm::UpdateLayoutConstraintForPreview(LayoutWrapper*
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    auto menuWindowRect = menuPattern->GetMenuWindowRect();
-    auto maxWidth = menuWindowRect.Width();
-    auto maxHeight = menuWindowRect.Height();
-    auto targetSize = menuPattern->GetTargetSize();
     auto menuParam = menuWrapperPattern->GetMenuParam();
-    auto isOversize = GreatNotEqual(targetSize.Width(), maxWidth) || GreatNotEqual(targetSize.Height(), maxHeight);
-    if (menuParam.isPreviewContainScale && isOversize) {
+    if (menuParam.isPreviewContainScale) {
+        auto menuWindowRect = menuPattern->GetMenuWindowRect();
+        auto maxWidth = menuWindowRect.Width();
+        auto maxHeight = menuWindowRect.Height();
+        auto targetSize = menuPattern->GetTargetSize();
+        auto isOversize = GreatNotEqual(targetSize.Width(), maxWidth) || GreatNotEqual(targetSize.Height(), maxHeight);
+        if (!isOversize) {
+            return;
+        }
         auto widthDelta = targetSize.Width() - maxWidth;
         auto heightDelta = targetSize.Height() - maxHeight;
         if (GreatOrEqual(widthDelta, heightDelta)) {
@@ -111,9 +114,9 @@ void MenuPreviewLayoutAlgorithm::UpdateLayoutConstraintForPreview(LayoutWrapper*
         layoutConstraint.selfIdealSize.SetWidth(maxWidth);
         layoutConstraint.selfIdealSize.SetHeight(maxHeight);
         layoutProperty->UpdateLayoutConstraint(layoutConstraint);
+    } else {
+        CheckLayoutConstraint(layoutWrapper, menuParam, menuPattern);
     }
-
-    CheckLayoutConstraint(layoutWrapper, menuParam, menuPattern);
 }
 
 void MenuPreviewLayoutAlgorithm::CheckLayoutConstraint(

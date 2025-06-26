@@ -83,6 +83,12 @@ constexpr float FULL_SCREEN_WIDTH = 720.0f;
 constexpr float FULL_SCREEN_HEIGHT = 1136.0f;
 constexpr float TARGET_SIZE_WIDTH = 100.0f;
 constexpr float TARGET_SIZE_HEIGHT = 100.0f;
+constexpr float OFFSET_X = 50.0f;
+constexpr float OFFSET_Y = 100.0f;
+constexpr float ONE_FLOAT = 1.0f;
+constexpr float TWO_FLOAT = 2.0f;
+constexpr float FIVE_FLOAT = 5.0f;
+constexpr float TEN_FLOAT = 10.0f;
 constexpr double MENU_OFFSET_X = 10.0;
 constexpr double MENU_OFFSET_Y = 10.0;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
@@ -1007,5 +1013,240 @@ HWTEST_F(MenuLayoutPropertyTestNg, CheckPreviewConstraintForConstant001, TestSiz
     menuLayoutAlgorithm.CheckPreviewConstraint(frameNode, menuWindowRect);
     auto geometryNode = frameNode->GetGeometryNode();
     EXPECT_EQ(geometryNode->frame_.rect_.width_, 0);
+}
+
+/**
+ * @tc.name: LayoutNormalTopPreviewBottomMenuGreateThan001
+ * @tc.desc: Verify LayoutNormalTopPreviewBottomMenuGreateThan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutPropertyTestNg, LayoutNormalTopPreviewBottomMenuGreateThan001, TestSize.Level1)
+{
+    RefPtr<GeometryNode> previewGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<GeometryNode> menuGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    SizeF totalSize(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+    MenuLayoutAlgorithm menuLayoutAlgorithm;
+    menuLayoutAlgorithm.previewScaleMode_ = PreviewScaleMode::CONSTANT;
+    menuLayoutAlgorithm.targetOffset_ = OffsetF(OFFSET_X, OFFSET_Y);
+    menuLayoutAlgorithm.targetSize_ = SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+    menuLayoutAlgorithm.LayoutNormalTopPreviewBottomMenuGreateThan(previewGeometryNode, menuGeometryNode, totalSize);
+    menuLayoutAlgorithm.LayoutNormalBottomPreviewTopMenuGreateThan(previewGeometryNode, menuGeometryNode, totalSize);
+    menuLayoutAlgorithm.LayoutOtherDeviceLeftPreviewRightMenuGreateThan(
+        previewGeometryNode, menuGeometryNode, totalSize);
+    EXPECT_EQ(menuLayoutAlgorithm.targetCenterOffset_.x_, 100);
+}
+
+/**
+ * @tc.name: LayoutPreviewMenuGreateThanForConstant001
+ * @tc.desc: Verify LayoutPreviewMenuGreateThanForConstant.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutPropertyTestNg, LayoutPreviewMenuGreateThanForConstant001, TestSize.Level1)
+{
+    RefPtr<GeometryNode> previewGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<GeometryNode> menuGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    MenuLayoutAlgorithm menuLayoutAlgorithm;
+    menuLayoutAlgorithm.placement_ = Placement::BOTTOM_LEFT;
+    menuLayoutAlgorithm.LayoutPreviewMenuGreateThanForConstant(previewGeometryNode, menuGeometryNode);
+    menuLayoutAlgorithm.placement_ = Placement::BOTTOM;
+    menuLayoutAlgorithm.LayoutPreviewMenuGreateThanForConstant(previewGeometryNode, menuGeometryNode);
+    menuLayoutAlgorithm.placement_ = Placement::BOTTOM_RIGHT;
+    menuLayoutAlgorithm.LayoutPreviewMenuGreateThanForConstant(previewGeometryNode, menuGeometryNode);
+    menuLayoutAlgorithm.placement_ = Placement::TOP_LEFT;
+    menuLayoutAlgorithm.targetOffset_ = OffsetF(OFFSET_X, OFFSET_Y);
+    menuLayoutAlgorithm.wrapperRect_.SetRect(OFFSET_X, OFFSET_Y, TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT);
+    menuLayoutAlgorithm.LayoutPreviewMenuGreateThanForConstant(previewGeometryNode, menuGeometryNode);
+    menuLayoutAlgorithm.placement_ = Placement::TOP;
+    menuLayoutAlgorithm.LayoutPreviewMenuGreateThanForConstant(previewGeometryNode, menuGeometryNode);
+    menuLayoutAlgorithm.placement_ = Placement::TOP_RIGHT;
+    menuLayoutAlgorithm.LayoutPreviewMenuGreateThanForConstant(previewGeometryNode, menuGeometryNode);
+    menuLayoutAlgorithm.placement_ = Placement::LEFT;
+    menuGeometryNode->frame_.rect_.height_ = 200.0f;
+    menuLayoutAlgorithm.LayoutPreviewMenuGreateThanForConstant(previewGeometryNode, menuGeometryNode);
+    EXPECT_EQ(previewGeometryNode->frame_.rect_.x_, OFFSET_X);
+}
+
+/**
+ * @tc.name: UpdateLayoutConstraintForPreview001
+ * @tc.desc: Verify UpdateLayoutConstraintForPreview.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutPropertyTestNg, UpdateLayoutConstraintForPreview001, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, "test", MenuType::MENU));
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MountToParent(wrapperNode);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    RefPtr<FrameNode> node =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 3, AceType::MakeRefPtr<MenuPreviewPattern>());
+    ASSERT_NE(node, nullptr);
+    RefPtr<FrameNode> node1 =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 4, AceType::MakeRefPtr<MenuWrapperPattern>(2));
+    ASSERT_NE(node1, nullptr);
+    RefPtr<FrameNode> node2 =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 5, AceType::MakeRefPtr<MenuPattern>(1, "test", MenuType::MENU));
+    ASSERT_NE(node2, nullptr);
+    node2->MountToParent(node1);
+    node->MountToParent(node1);
+    layoutWrapper->hostNode_ = std::move(node);
+    MenuPreviewLayoutAlgorithm menuPreviewLayoutAlgorithm;
+    menuPreviewLayoutAlgorithm.UpdateLayoutConstraintForPreview(layoutWrapper);
+    EXPECT_EQ(layoutWrapper->GetLayoutProperty()->contentConstraint_, std::nullopt);
+}
+
+/**
+ * @tc.name: UpdateLayoutConstraintForPreview002
+ * @tc.desc: Verify UpdateLayoutConstraintForPreview.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutPropertyTestNg, UpdateLayoutConstraintForPreview002, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, "test", MenuType::MENU));
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MountToParent(wrapperNode);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    RefPtr<FrameNode> node =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 3, AceType::MakeRefPtr<MenuPreviewPattern>());
+    ASSERT_NE(node, nullptr);
+    RefPtr<FrameNode> node1 =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 4, AceType::MakeRefPtr<MenuWrapperPattern>(2));
+    ASSERT_NE(node1, nullptr);
+    RefPtr<FrameNode> node2 =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 5, AceType::MakeRefPtr<MenuPattern>(1, "test", MenuType::MENU));
+    ASSERT_NE(node2, nullptr);
+    auto menuPattern = node2->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->targetSize_ = SizeF(OFFSET_X, OFFSET_Y);
+    node2->MountToParent(node1);
+    node->MountToParent(node1);
+    auto menuWrapperPattern = node1->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->menuParam_.isPreviewContainScale = true;
+    layoutWrapper->hostNode_ = std::move(node);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { ONE_FLOAT, ONE_FLOAT },
+        .maxSize = { TEN_FLOAT, TEN_FLOAT },
+        .percentReference = { FIVE_FLOAT, FIVE_FLOAT },
+        .parentIdealSize = { TWO_FLOAT, TWO_FLOAT },
+    };
+    layoutProperty->contentConstraint_ = layoutConstraintF;
+    MenuPreviewLayoutAlgorithm menuPreviewLayoutAlgorithm;
+    menuPreviewLayoutAlgorithm.UpdateLayoutConstraintForPreview(layoutWrapper);
+    EXPECT_EQ(layoutProperty->contentConstraint_.value().maxSize.width_, TEN_FLOAT);
+}
+
+/**
+ * @tc.name: UpdateLayoutConstraintForPreview003
+ * @tc.desc: Verify UpdateLayoutConstraintForPreview.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutPropertyTestNg, UpdateLayoutConstraintForPreview003, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, "test", MenuType::MENU));
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MountToParent(wrapperNode);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    RefPtr<FrameNode> node =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 3, AceType::MakeRefPtr<MenuPreviewPattern>());
+    ASSERT_NE(node, nullptr);
+    RefPtr<FrameNode> node1 =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 4, AceType::MakeRefPtr<MenuWrapperPattern>(2));
+    ASSERT_NE(node1, nullptr);
+    RefPtr<FrameNode> node2 =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 5, AceType::MakeRefPtr<MenuPattern>(1, "test", MenuType::MENU));
+    ASSERT_NE(node2, nullptr);
+    node2->MountToParent(node1);
+    node->MountToParent(node1);
+    auto menuWrapperPattern = node1->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->menuParam_.isPreviewContainScale = true;
+    layoutWrapper->hostNode_ = std::move(node);
+    MenuPreviewLayoutAlgorithm menuPreviewLayoutAlgorithm;
+    menuPreviewLayoutAlgorithm.UpdateLayoutConstraintForPreview(layoutWrapper);
+    EXPECT_EQ(layoutWrapper->GetLayoutProperty()->contentConstraint_, std::nullopt);
+}
+
+/**
+ * @tc.name: CheckLayoutConstraint001
+ * @tc.desc: Verify CheckLayoutConstraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutPropertyTestNg, CheckLayoutConstraint001, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, "test", MenuType::MENU));
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MountToParent(wrapperNode);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(1, "test", MenuType::MENU);
+    MenuParam menuParam;
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { ONE_FLOAT, ONE_FLOAT },
+        .maxSize = { TEN_FLOAT, TEN_FLOAT },
+        .percentReference = { FIVE_FLOAT, FIVE_FLOAT },
+        .parentIdealSize = { TWO_FLOAT, TWO_FLOAT },
+    };
+    layoutProperty->contentConstraint_ = layoutConstraintF;
+    menuParam.availableLayoutAreaMode = static_cast<AvailableLayoutAreaMode>(999);
+    MenuPreviewLayoutAlgorithm menuPreviewLayoutAlgorithm;
+    menuPreviewLayoutAlgorithm.CheckLayoutConstraint(layoutWrapper, menuParam, menuPattern);
+    EXPECT_EQ(layoutProperty->contentConstraint_->percentReference.width_, FIVE_FLOAT);
+}
+
+/**
+ * @tc.name: CheckLayoutConstraint002
+ * @tc.desc: Verify CheckLayoutConstraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayoutPropertyTestNg, CheckLayoutConstraint002, TestSize.Level1)
+{
+    auto wrapperNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, "test", MenuType::MENU));
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MountToParent(wrapperNode);
+    auto refLayoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(refLayoutWrapper, nullptr);
+    LayoutWrapper* layoutWrapper = Referenced::RawPtr(refLayoutWrapper);
+    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(1, "test", MenuType::MENU);
+    MenuParam menuParam;
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { ONE_FLOAT, ONE_FLOAT },
+        .maxSize = { TEN_FLOAT, TEN_FLOAT },
+        .percentReference = { FIVE_FLOAT, FIVE_FLOAT },
+        .parentIdealSize = { TWO_FLOAT, TWO_FLOAT },
+    };
+    layoutProperty->contentConstraint_ = layoutConstraintF;
+    menuParam.availableLayoutAreaMode = AvailableLayoutAreaMode::SAFE_AREA;
+    menuParam.previewScaleMode = PreviewScaleMode::MAINTAIN;
+    MenuPreviewLayoutAlgorithm menuPreviewLayoutAlgorithm;
+    menuPreviewLayoutAlgorithm.CheckLayoutConstraint(layoutWrapper, menuParam, menuPattern);
+    EXPECT_EQ(layoutProperty->contentConstraint_->percentReference.width_, 0);
 }
 } // namespace OHOS::Ace::NG
