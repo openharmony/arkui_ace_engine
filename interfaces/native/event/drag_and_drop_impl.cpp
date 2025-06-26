@@ -71,7 +71,7 @@ ArkUI_ErrorCode OH_ArkUI_DragEvent_GetDragSource(ArkUI_DragEvent* event, char* b
 {
     auto dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
 
-    if (!event || !bundleName || !dragEvent || !dragEvent->bundleName ||
+    if (!event || !bundleName || !dragEvent ||
         static_cast<int32_t>(strlen(dragEvent->bundleName)) >= length) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }

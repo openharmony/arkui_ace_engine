@@ -400,7 +400,7 @@ struct ArkUIDragEvent {
     ArkUI_CharPtr key;
     ArkUI_Int32 requestId;
     bool isDragEndPending;
-    char* bundleName;
+    char bundleName[256];
     bool isRemoteDev;
     ArkUI_Int32 displayId;
     void* dataLoadParams;
