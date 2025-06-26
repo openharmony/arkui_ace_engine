@@ -17,6 +17,14 @@
 
 #include "core/event/touch_event.h"
 namespace OHOS::Ace::NG {
+namespace {
+constexpr float X = -3000;
+constexpr float Y = -3000;
+constexpr float CONTENT_W = 2000;
+constexpr float CONTENT_H = 2000;
+constexpr float SMALL_CONTENT_W = 100;
+constexpr float SMALL_CONTENT_H = 50;
+}
 
 class FreeScrollTest : public ScrollTestNg {
 public:
@@ -68,7 +76,7 @@ HWTEST_F(FreeScrollTest, FreeScroll001, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     model.SetAxis(Axis::FREE);
-    CreateFreeContent({ 2000, 2000 });
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
 
     TriggerFreeScroll({ -100, -100 });
@@ -88,7 +96,7 @@ HWTEST_F(FreeScrollTest, Properties001, TestSize.Level1)
     constexpr float contentWidth = 1000;
     ScrollModelNG model = CreateScroll();
     model.SetAxis(Axis::FREE);
-    CreateFreeContent({ contentWidth, 2000 });
+    CreateFreeContent({ contentWidth, CONTENT_H });
     CreateScrollDone();
 
     EXPECT_EQ(pattern_->scrollableDistance_, contentWidth - WIDTH);
@@ -105,7 +113,7 @@ HWTEST_F(FreeScrollTest, ModeChange001, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     model.SetAxis(Axis::FREE);
-    CreateFreeContent({ 2000, 2000 });
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
 
     TouchTestResult res;
@@ -137,7 +145,7 @@ HWTEST_F(FreeScrollTest, ModeChange002, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     model.SetAxis(Axis::FREE);
-    CreateFreeContent({ 2000, 2000 });
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
     ASSERT_TRUE(pattern_->offset_);
     pattern_->currentOffset_ = 20.0f;
@@ -146,5 +154,74 @@ HWTEST_F(FreeScrollTest, ModeChange002, TestSize.Level1)
     pattern_->OnModifyDone();
     ASSERT_FALSE(pattern_->offset_);
     ASSERT_EQ(pattern_->currentOffset_, 0);
+}
+
+/**
+ * @tc.name: OverScroll001
+ * @tc.desc: Test overScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(FreeScrollTest, OverScroll001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    ASSERT_TRUE(pattern_->offset_);
+    pattern_->offset_->Set(OffsetF{X, Y});
+    FlushUITasks(frameNode_);
+
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(X, Y));
+
+    ScrollModelNG::SetEdgeEffect(frameNode_.GetRawPtr(), EdgeEffect::NONE, true, EffectEdge::ALL);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(WIDTH - CONTENT_W, HEIGHT - CONTENT_H).ToString());
+
+    ScrollModelNG::SetEdgeEffect(frameNode_.GetRawPtr(), EdgeEffect::SPRING, true, EffectEdge::START);
+    pattern_->offset_->Set(OffsetF{X, Y});
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(WIDTH - CONTENT_W, HEIGHT - CONTENT_H).ToString());
+
+    ScrollModelNG::SetEdgeEffect(frameNode_.GetRawPtr(), EdgeEffect::SPRING, true, EffectEdge::END);
+    pattern_->offset_->Set(OffsetF{X, Y});
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(X, Y));
+}
+
+/**
+ * @tc.name: OverScroll002
+ * @tc.desc: Test overScroll when content is smaller than viewport
+ * @tc.type: FUNC
+ */
+HWTEST_F(FreeScrollTest, OverScroll002, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    CreateFreeContent({ SMALL_CONTENT_W, SMALL_CONTENT_H });
+    CreateScrollDone();
+    ASSERT_TRUE(pattern_->offset_);
+    pattern_->offset_->Set(OffsetF{X, Y});
+    FlushUITasks(frameNode_);
+
+    constexpr float alignX = (WIDTH - SMALL_CONTENT_W) / 2;
+    constexpr float alignY = (HEIGHT - SMALL_CONTENT_H) / 2;
+
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(X + alignX, Y + alignY).ToString());
+
+    ScrollModelNG::SetEdgeEffect(frameNode_.GetRawPtr(), EdgeEffect::FADE, true, EffectEdge::ALL);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(alignX, alignY).ToString());
+
+    ScrollModelNG::SetEdgeEffect(frameNode_.GetRawPtr(), EdgeEffect::SPRING, true, EffectEdge::START);
+    pattern_->offset_->Set(OffsetF{X, -Y});
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(alignX, alignY - Y).ToString());
+
+    ScrollModelNG::SetEdgeEffect(frameNode_.GetRawPtr(), EdgeEffect::SPRING, true, EffectEdge::END);
+    pattern_->offset_->Set(OffsetF{-X, -Y});
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(alignX, alignY).ToString());
 }
 } // namespace OHOS::Ace::NG

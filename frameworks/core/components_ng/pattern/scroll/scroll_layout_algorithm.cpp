@@ -137,7 +137,15 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     } else {
         scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(viewPort_, axis) + contentEndOffset;
     }
-    if (UnableOverScroll(layoutWrapper)) {
+    if (axis == Axis::FREE) {
+        auto scroll = DynamicCast<ScrollPattern>(scrollNode->GetPattern());
+        CHECK_NULL_VOID(scroll);
+        auto effect = scroll->GetEdgeEffect();
+        const auto edge = scroll->GetEffectEdge();
+        currentOffset_ = AdjustOffsetInFreeMode(currentOffset_, scrollableDistance_, effect, edge);
+        const float verticalSpace = childSize.Height() - viewPort_.Height();
+        crossOffset_ = AdjustOffsetInFreeMode(crossOffset_, verticalSpace, effect, edge);
+    } else if (UnableOverScroll(layoutWrapper)) {
         if (scrollableDistance_ > 0.0f) {
             currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
         } else {
@@ -228,6 +236,22 @@ void ScrollLayoutAlgorithm::UpdateScrollAlignment(Alignment& scrollAlignment)
     } else if (scrollAlignment == Alignment::CENTER_LEFT) {
         scrollAlignment = Alignment::CENTER_RIGHT;
     }
+}
+
+float ScrollLayoutAlgorithm::AdjustOffsetInFreeMode(
+    float offset, float scrollableDistance, EdgeEffect effect, EffectEdge appliedEdge)
+{
+    const float minOffsetY = std::min(-scrollableDistance, 0.0f); // Max scroll to end
+    if (Positive(offset)) { // Overscroll at start
+        if (effect != EdgeEffect::SPRING || appliedEdge == EffectEdge::END) {
+            offset = 0.0f;
+        }
+    } else if (LessNotEqual(offset, minOffsetY)) { // Overscroll at end
+        if (effect != EdgeEffect::SPRING || appliedEdge == EffectEdge::START) {
+            offset = minOffsetY;
+        }
+    }
+    return offset;
 }
 
 } // namespace OHOS::Ace::NG
