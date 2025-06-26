@@ -70,7 +70,7 @@ using CardViewPositionCallBack = std::function<void(int id, float offsetX, float
 using DragEventCallBack = std::function<void(const DragPointerEvent&, const DragEventAction&,
     const RefPtr<NG::FrameNode>&)>;
 using StopDragCallback = std::function<void()>;
-using CrownEventCallback = std::function<bool(const CrownEvent&, const std::function<void()>&)>;
+using CrownEventCallback = std::function<void(const CrownEvent&, const std::function<void()>&)>;
 
 class PipelineBase;
 

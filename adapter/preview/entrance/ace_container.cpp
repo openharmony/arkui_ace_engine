@@ -389,7 +389,7 @@ void AceContainer::InitializeCallback()
         ContainerScope scope(id);
         auto context = weak.Upgrade();
         if (context == nullptr) {
-            return false;
+            return;
         }
         context->GetTaskExecutor()->PostTask(
             [context, event, id]() {
@@ -397,7 +397,6 @@ void AceContainer::InitializeCallback()
                 context->OnNonPointerEvent(event);
             },
             TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent");
-        return true;
     };
     aceView_->RegisterCrownEventCallback(crownEventCallback);
 
