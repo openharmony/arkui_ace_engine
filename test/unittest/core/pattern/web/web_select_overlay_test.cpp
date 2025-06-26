@@ -5571,6 +5571,20 @@ HWTEST_F(WebSelectOverlayTest, OnMenuItemActionTestSelectAll, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSelectMenuOptionsTest002
+ * @tc.desc: Test function UpdateSelectMenuOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, UpdateSelectMenuOptionsTest002, TestSize.Level1)
+{
+    WeakPtr<TextBase> textBase = nullptr;
+    WebSelectOverlay overlay(textBase);
+    overlay.isSelectAll_ = true;
+    overlay.UpdateSelectMenuOptions();
+    EXPECT_FALSE(overlay.isSelectAll_);
+}
+
+/**
  * @tc.name: UpdateTouchHandleForOverlayTestSelectAll
  * @tc.desc: Test OnTouchSelectionChanged.
  * @tc.type: FUNC

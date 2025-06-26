@@ -929,6 +929,7 @@ void WebSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst
 void WebSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
 {
     HideMagnifier();
+    isSelectAll_ = false;
     selectOverlayDragging_ = false;
     webSelectInfo_.menuInfo.showCopyAll = true;
     UpdateSelectMenuOptions();
