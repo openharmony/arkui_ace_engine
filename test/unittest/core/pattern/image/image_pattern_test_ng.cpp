@@ -2642,4 +2642,31 @@ HWTEST_F(ImagePatternTestNg, TestImageJsonImageWidth_Height01, TestSize.Level0)
     auto imageHeight = StringUtils::StringToInt(json->GetString("imageHeight"));
     EXPECT_EQ(imageHeight, 200);
 }
+
+/**
+ * @tc.name: ClearReloadFlagsAfterLoad001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ClearReloadFlagsAfterLoad001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = CreatePixelMapAnimator();
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+     * @tc.steps: step2. call callbacks.
+     * @tc.expected:
+     */
+    imagePattern->isImageReloadNeeded_ = true;
+    imagePattern->isOrientationChange_ = true;
+    imagePattern->renderedImageInfo_.renderSuccess = true;
+    imagePattern->LoadImage(ImageSourceInfo(""), false);
+    EXPECT_FALSE(imagePattern->isImageReloadNeeded_);
+    EXPECT_FALSE(imagePattern->isOrientationChange_);
+    EXPECT_FALSE(imagePattern->renderedImageInfo_.renderSuccess);
+}
 } // namespace OHOS::Ace::NG

@@ -483,6 +483,7 @@ private:
     void OnIconConfigurationUpdate() override;
     ImageDfxConfig CreateImageDfxConfig(const ImageSourceInfo& src);
     void ReportPerfData(const RefPtr<NG::FrameNode>& host, int32_t state);
+    void ClearReloadFlagsAfterLoad();
     void LoadImage(const ImageSourceInfo& src, bool needLayout);
     void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 
