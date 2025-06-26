@@ -2456,6 +2456,24 @@ HWTEST_F(WebModelTestNg, SetMultiWindowAccessEnabled001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetNativeEmbedMouseEventId001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetNativeEmbedMouseEventId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    WebModelNG webModelNG;
+    auto NativeEmbedMouseEventId = [&callCount](const BaseEventInfo* info) { callCount++; };
+    webModelNG.SetNativeEmbedMouseEventId(NativeEmbedMouseEventId);
+    AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
+        ->propOnNativeEmbedMouseEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
  * @tc.name: SetKeyboardAvoidMode012
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC

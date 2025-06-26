@@ -866,6 +866,55 @@ private:
     RefPtr<GestureEventResult> eventResult_;
 };
 
+class JSNativeEmbedMouseRequest : public Referenced {
+public:
+    static void JSBind(BindingTarget globalObj)
+    {
+        JSClass<JSNativeEmbedMouseRequest>::Declare("NativeEmbedMouse");
+        JSClass<JSNativeEmbedMouseRequest>::CustomMethod(
+            "setMouseEventResult", &JSNativeEmbedMouseRequest::SetMouseEventResult);
+        JSClass<JSNativeEmbedMouseRequest>::Bind(
+            globalObj, &JSNativeEmbedMouseRequest::Constructor, &JSNativeEmbedMouseRequest::Destructor);
+    }
+
+    void SetResult(const RefPtr<MouseEventResult>& result)
+    {
+        eventResult_ = result;
+    }
+    
+    void SetMouseEventResult(const JSCallbackInfo& args)
+    {
+        if (eventResult_) {
+            bool result = true;
+            bool stopPropagation = true;
+            if (args.Length() == PARAM_ONE && args[PARAM_ZERO]->IsBoolean()) {
+                result = args[PARAM_ZERO]->ToBoolean();
+            } else if (args.Length() == PARAM_TWO && args[PARAM_ZERO]->IsBoolean() && args[PARAM_ONE]->IsBoolean()) {
+                result = args[PARAM_ZERO]->ToBoolean();
+                stopPropagation = args[PARAM_ONE]->ToBoolean();
+            }
+            eventResult_->SetMouseEventResult(result, stopPropagation);
+        }
+    }
+
+private:
+    static void Constructor(const JSCallbackInfo& args)
+    {
+        auto jSNativeEmbedMouseRequest = Referenced::MakeRefPtr<JSNativeEmbedMouseRequest>();
+        jSNativeEmbedMouseRequest->IncRefCount();
+        args.SetReturnValue(Referenced::RawPtr(jSNativeEmbedMouseRequest));
+    }
+
+    static void Destructor(JSNativeEmbedMouseRequest* jSNativeEmbedMouseRequest)
+    {
+        if (jSNativeEmbedMouseRequest != nullptr) {
+            jSNativeEmbedMouseRequest->DecRefCount();
+        }
+    }
+
+    RefPtr<MouseEventResult> eventResult_;
+};
+
 class JSWebWindowNewHandler : public Referenced {
 public:
     struct ChildWindowInfo {
@@ -2094,6 +2143,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSDataResubmitted::JSBind(globalObj);
     JSScreenCaptureRequest::JSBind(globalObj);
     JSNativeEmbedGestureRequest::JSBind(globalObj);
+    JSNativeEmbedMouseRequest::JSBind(globalObj);
     JSWebAppLinkCallback::JSBind(globalObj);
     JSWebKeyboardController::JSBind(globalObj);
 }
@@ -5396,6 +5446,44 @@ JSRef<JSVal> NativeEmbeadTouchToJSValue(const NativeEmbeadTouchInfo& eventInfo)
     return JSRef<JSVal>::Cast(obj);
 }
 
+JSRef<JSVal> NativeEmbeadMouseToJSValue(const NativeEmbeadMouseInfo& eventInfo)
+{
+    auto info = eventInfo.GetMouseEventInfo();
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    JSRef<JSObject> eventObj = objectTemplate->NewInstance();
+    eventObj->SetProperty("source", static_cast<int32_t>(info.GetSourceDevice()));
+    eventObj->SetProperty("timestamp", static_cast<double>(GetSysTimestamp()));
+    auto target = CreateEventTargetObject(info);
+    eventObj->SetPropertyObject("target", target);
+    eventObj->SetProperty("pressure", info.GetForce());
+    eventObj->SetProperty("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
+    eventObj->SetProperty("targetDisplayId", static_cast<int32_t>(info.GetTargetDisplayId()));
+    eventObj->SetProperty("deviceId", static_cast<int64_t>(info.GetDeviceId()));
+
+    eventObj->SetProperty<int32_t>("button", static_cast<int32_t>(info.GetButton()));
+    eventObj->SetProperty<int32_t>("action", static_cast<int32_t>(info.GetAction()));
+    Offset globalOffset = info.GetGlobalLocation();
+    Offset localOffset = info.GetLocalLocation();
+    Offset screenOffset = info.GetScreenLocation();
+    eventObj->SetProperty<double>("displayX", screenOffset.GetX());
+    eventObj->SetProperty<double>("displayY", screenOffset.GetY());
+    eventObj->SetProperty<double>("windowX", globalOffset.GetX());
+    eventObj->SetProperty<double>("windowY", globalOffset.GetY());
+    eventObj->SetProperty<double>("screenX", globalOffset.GetX());
+    eventObj->SetProperty<double>("screenY", globalOffset.GetY());
+    eventObj->SetProperty<double>("x", localOffset.GetX());
+    eventObj->SetProperty<double>("y", localOffset.GetY());
+
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("embedId", eventInfo.GetEmbedId());
+    obj->SetPropertyObject("mouseEvent", eventObj);
+    JSRef<JSObject> requestObj = JSClass<JSNativeEmbedMouseRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSNativeEmbedMouseRequest>());
+    requestEvent->SetResult(eventInfo.GetResult());
+    obj->SetPropertyObject("result", requestObj);
+    return JSRef<JSVal>::Cast(obj);
+}
+
 JSRef<JSVal> JSWeb::CreateNativeEmbedGestureHandler(const NativeEmbeadTouchInfo& eventInfo)
 {
     JSRef<JSObject> requestObj = JSClass<JSNativeEmbedGestureRequest>::NewInstance();
@@ -5424,6 +5512,25 @@ void JSWeb::OnNativeEmbedGestureEvent(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetNativeEmbedGestureEventId(jsCallback);
 }
 
+void JSWeb::OnNativeEmbedMouseEvent(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<NativeEmbeadMouseInfo, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), NativeEmbeadMouseToJSValue);
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                            const BaseEventInfo* info) {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_VOID(webNode);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbeadMouseInfo>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetNativeEmbedMouseEventId(jsCallback);
+}
 
 JSRef<JSVal> OverScrollEventToJSValue(const WebOnOverScrollEvent& eventInfo)
 {

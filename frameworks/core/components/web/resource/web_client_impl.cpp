@@ -1048,6 +1048,14 @@ void WebClientImpl::OnNativeEmbedGestureEvent(std::shared_ptr<NWeb::NWebNativeEm
     delegate->OnNativeEmbedGestureEvent(event);
 }
 
+void WebClientImpl::OnNativeEmbedMouseEvent(std::shared_ptr<NWeb::NWebNativeEmbedMouseEvent> event)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnNativeEmbedMouseEvent(event);
+}
+
 void WebClientImpl::OnRootLayerChanged(int width, int height)
 {
     auto delegate = webDelegate_.Upgrade();

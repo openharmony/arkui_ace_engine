@@ -20,6 +20,7 @@
 #include <iomanip>
 #include <optional>
 #include <sstream>
+#include <queue>
 #include <string>
 
 #include "event_handler.h"
@@ -785,17 +786,42 @@ void WebDelegateObserver::OnDetachContext()
 
 void GestureEventResultOhos::SetGestureEventResult(bool result)
 {
-    if (result_) {
+    if (!IsMouseToTouch()) {
+        if (!result_) {
+            return;
+        }
         result_->SetGestureEventResult(result);
-        SetSendTask();
-        eventResult_ = result;
+    } else {
+        if (!mouseResult_) {
+            return;
+        }
+        mouseResult_->SetMouseEventResult(result, true);
     }
+    SetSendTask();
+    eventResult_ = result;
 }
 
 void GestureEventResultOhos::SetGestureEventResult(bool result, bool stopPropagation)
 {
-    if (result_) {
+    if (!IsMouseToTouch()) {
+        if (!result_) {
+            return;
+        }
         result_->SetGestureEventResultV2(result, stopPropagation);
+    } else {
+        if (!mouseResult_) {
+            return;
+        }
+        mouseResult_->SetMouseEventResult(result, stopPropagation);
+    }
+    SetSendTask();
+    eventResult_ = result;
+}
+
+void MouseEventResultOhos::SetMouseEventResult(bool result, bool stopPropagation)
+{
+    if (result_) {
+        result_->SetMouseEventResult(result, stopPropagation);
         SetSendTask();
         eventResult_ = result;
     }
@@ -2108,6 +2134,8 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         OnNativeEmbedGestureEventV2_ = useNewPipe ? eventHub->GetOnNativeEmbedGestureEvent()
                                             : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                                 webCom->GetNativeEmbedGestureEventId(), oldContext);
+        OnNativeEmbedMouseEventV2_ = useNewPipe ? eventHub->GetOnNativeEmbedMouseEvent()
+                                            : nullptr;
         onIntelligentTrackingPreventionResultV2_ = useNewPipe ?
             eventHub->GetOnIntelligentTrackingPreventionResultEvent() : nullptr;
         onRenderProcessNotRespondingV2_ = useNewPipe
@@ -7280,6 +7308,86 @@ void WebDelegate::SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedT
     }
 }
 
+bool WebDelegate::SetTouchEventInfoFromMouse(const MouseInfo &mouseInfo, TouchEventInfo &touchEventInfo)
+{
+    TouchLocationInfo touchLocationInfo(0);
+    switch (mouseInfo.GetAction()) {
+        case MouseAction::PRESS:
+            touchLocationInfo.SetTouchType(TouchType::DOWN);
+            break;
+        case MouseAction::RELEASE:
+            touchLocationInfo.SetTouchType(TouchType::UP);
+            break;
+        case MouseAction::MOVE:
+            touchLocationInfo.SetTouchType(TouchType::MOVE);
+            break;
+        case MouseAction::CANCEL:
+            touchLocationInfo.SetTouchType(TouchType::CANCEL);
+            break;
+        default:
+            TAG_LOGW(AceLogTag::ACE_WEB, "mouse's action is not match, result is false");
+            return false;
+    }
+    touchLocationInfo.SetLocalLocation(Offset(mouseInfo.GetLocalLocation()));
+    touchLocationInfo.SetScreenLocation(Offset(mouseInfo.GetScreenLocation()));
+    touchLocationInfo.SetGlobalLocation(Offset(mouseInfo.GetScreenLocation()));
+    touchLocationInfo.SetTimeStamp(mouseInfo.GetTimeStamp());
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    touchEventInfo.SetSourceDevice(SourceType::TOUCH);
+
+    ACE_SCOPED_TRACE(
+        "WebDelegate::SetTouchEventInfoFromMouse touchLocationInfo, LocalLocation: %s, ScreenLocation: %s",
+        mouseInfo.GetLocalLocation().ToString().c_str(), mouseInfo.GetScreenLocation().ToString().c_str());
+    return true;
+}
+
+MouseInfo WebDelegate::TransToMouseInfo(const std::shared_ptr<OHOS::NWeb::NWebNativeEmbedMouseEvent>& mouseEvent)
+{
+    std::string embedId;
+    float x = 0;
+    float y = 0;
+    if (mouseEvent) {
+        embedId = mouseEvent->GetEmbedId();
+        x = mouseEvent->GetX();
+        y = mouseEvent->GetY();
+    } else {
+        embedId = DEFAULT_NATIVE_EMBED_ID;
+    }
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_RETURN(webPattern, MouseInfo());
+    CHECK_NULL_RETURN(webPattern->GetHost(), MouseInfo());
+    auto offset = webPattern->GetHost()->GetTransformRelativeOffset();
+    auto pos = GetPosition(embedId);
+
+    auto& mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    MouseInfo mouseInfo;
+    MouseInfo tmpMouseInfo = webPattern->GetMouseInfo();
+    auto mouseAction = static_cast<MouseAction>(mouseEvent->GetType());
+    if ((mouseAction == MouseAction::PRESS || mouseAction == MouseAction::RELEASE) && !mouseInfoQueue.empty()) {
+        tmpMouseInfo = mouseInfoQueue.front();
+        mouseInfoQueue.pop();
+    }
+    mouseInfo.SetLocalLocation(Offset(x, y));
+    mouseInfo.SetGlobalLocation(Offset(x, y));
+    mouseInfo.SetScreenLocation(Offset(x + offset.GetX() + pos.GetX(), y + offset.GetY() + pos.GetY()));
+    mouseInfo.SetAction(mouseAction);
+    mouseInfo.SetButton(static_cast<MouseButton>(mouseEvent->GetButton()));
+    mouseInfo.SetTimeStamp(tmpMouseInfo.GetTimeStamp());
+    mouseInfo.SetSourceDevice(tmpMouseInfo.GetSourceDevice());
+    mouseInfo.SetTarget(tmpMouseInfo.GetTarget());
+    mouseInfo.SetForce(tmpMouseInfo.GetForce());
+    mouseInfo.SetSourceTool(tmpMouseInfo.GetSourceTool());
+    mouseInfo.SetTargetDisplayId(tmpMouseInfo.GetTargetDisplayId());
+    mouseInfo.SetDeviceId(tmpMouseInfo.GetDeviceId());
+
+    ACE_SCOPED_TRACE("WebDelegate::TransToMouseInfo mouseInfo, LocalLocation: %s, ScreenLocation: %s,"
+                     "GlobalLocation: %s",
+        mouseInfo.GetLocalLocation().ToString().c_str(), mouseInfo.GetScreenLocation().ToString().c_str(),
+        mouseInfo.GetGlobalLocation().ToString().c_str());
+    return mouseInfo;
+}
+
 void WebDelegate::OnNativeEmbedAllDestory()
 {
     if (!isEmbedModeEnabled_) {
@@ -7464,6 +7572,77 @@ void WebDelegate::OnNativeEmbedGestureEvent(std::shared_ptr<OHOS::NWeb::NWebNati
             }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebNativeEmbedGestureEvent");
+}
+
+void WebDelegate::OnNativeEmbedMouseEvent(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedMouseEvent> event)
+{
+    if (!event->IsHitNativeArea()) {
+        auto webPattern = webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->RequestFocus();
+        return;
+    }
+    CHECK_NULL_VOID(taskExecutor_);
+    auto embedId = event ? event->GetEmbedId() : "";
+    TAG_LOGD(AceLogTag::ACE_WEB, "hit Emebed mouse event notify");
+    MouseInfo mouseInfo = TransToMouseInfo(event);
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this), embedId, mouseInfo, event]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto result = event->GetResult();
+            auto button = static_cast<MouseButton>(event->GetButton());
+            auto OnNativeEmbedMouseEventV2_ = delegate->OnNativeEmbedMouseEventV2_;
+            bool isSupportMouseToTouch = button == MouseButton::LEFT_BUTTON;
+            bool isSupportMouse = button == MouseButton::LEFT_BUTTON
+                || button == MouseButton::RIGHT_BUTTON || button == MouseButton::MIDDLE_BUTTON;
+            if (OnNativeEmbedMouseEventV2_ && isSupportMouse) {
+                delegate->HandleNativeMouseEvent(result, mouseInfo, embedId, delegate);
+            } else if (delegate->OnNativeEmbedGestureEventV2_ && isSupportMouseToTouch) {
+                delegate->HandleNativeMouseToTouch(result, mouseInfo, embedId, delegate);
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebNativeEmbedMouseEvent");
+}
+
+void WebDelegate::HandleNativeMouseEvent(
+    const std::shared_ptr<OHOS::NWeb::NWebMouseEventResult>& result,
+    const MouseInfo& mouseInfo, std::string embedId, const RefPtr<WebDelegate>& delegate)
+{
+    auto param = AceType::MakeRefPtr<MouseEventResultOhos>(result);
+    OnNativeEmbedMouseEventV2_(
+        std::make_shared<NativeEmbeadMouseInfo>(embedId, mouseInfo, param));
+    if (!param->HasSendTask()) {
+        param->SetMouseEventResult(true, true);
+    }
+    if (!param->GetEventResult() && mouseInfo.GetAction() == MouseAction::PRESS) {
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->RequestFocus();
+    }
+}
+
+void WebDelegate::HandleNativeMouseToTouch(
+    const std::shared_ptr<OHOS::NWeb::NWebMouseEventResult>& result,
+    const MouseInfo& mouseInfo, std::string embedId, const RefPtr<WebDelegate>& delegate)
+{
+    auto param = AceType::MakeRefPtr<GestureEventResultOhos>(result);
+    param->SetIsMouseToTouch(true);
+    TouchEventInfo touchEventInfo("touchEvent");
+    if (!delegate->SetTouchEventInfoFromMouse(mouseInfo, touchEventInfo)) {
+        return;
+    }
+    delegate->OnNativeEmbedGestureEventV2_(
+        std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo, param));
+    if (!param->HasSendTask()) {
+        param->SetGestureEventResult(true);
+    }
+
+    if (!param->GetEventResult() && mouseInfo.GetAction() == MouseAction::PRESS) {
+        auto webPattern = delegate->webPattern_.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        webPattern->RequestFocus();
+    }
 }
 
 void WebDelegate::SetToken()

@@ -1893,6 +1893,57 @@ HWTEST_F(WebPatternTestNg, HandleMouseEvent_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleMouseEvent_002
+ * @tc.desc: HandleMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, HandleMouseEvent_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    MouseInfo info;
+    auto mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    info.SetButton(MouseButton::RIGHT_BUTTON);
+    webPattern->HandleMouseEvent(info);
+    EXPECT_EQ(mouseInfoQueue.size(), 0);
+
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    webPattern->HandleMouseEvent(info);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 0);
+
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    webPattern->HandleMouseEvent(info);
+    mouseInfoQueue = WebPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 1);
+
+    MouseInfo info1;
+    info1.SetButton(MouseButton::LEFT_BUTTON);
+    info1.SetAction(MouseAction::RELEASE);
+    webPattern->HandleMouseEvent(info1);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 2);
+    for (int i = 0; i < 10; i++) {
+        webPattern->HandleMouseEvent(info1);
+    }
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 10);
+#endif
+}
+
+/**
  * @tc.name: WebOnMouseEvent_001
  * @tc.desc: WebOnMouseEvent.
  * @tc.type: FUNC

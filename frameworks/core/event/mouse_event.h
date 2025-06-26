@@ -720,6 +720,35 @@ private:
     WeakPtr<NG::FrameNode> hoverNode_;
 };
 
+class ACE_EXPORT MouseEventResult : public AceType {
+    DECLARE_ACE_TYPE(MouseEventResult, AceType);
+
+public:
+    MouseEventResult() = default;
+    ~MouseEventResult() = default;
+
+    virtual void SetMouseEventResult(bool result, bool stopPropagation) = 0;
+};
+
+class NativeEmbeadMouseInfo : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(NativeEmbeadMouseInfo, BaseEventInfo);
+
+public:
+    NativeEmbeadMouseInfo(
+        const std::string& embedId, const MouseInfo& mouseInfo, const RefPtr<MouseEventResult>& result)
+        : BaseEventInfo("NativeEmbeadMouseInfo"), embedId_(embedId), mouseEvent_(mouseInfo), result_(result)
+    {}
+    ~NativeEmbeadMouseInfo() override = default;
+    const std::string& GetEmbedId() const;
+    const MouseInfo& GetMouseEventInfo() const;
+    const RefPtr<MouseEventResult>& GetResult() const;
+
+private:
+    std::string embedId_;
+    MouseInfo mouseEvent_;
+    RefPtr<MouseEventResult> result_;
+};
+
 using MouseTestResult = std::list<RefPtr<MouseEventTarget>>;
 using HoverTestResult = std::list<RefPtr<HoverEventTarget>>;
 

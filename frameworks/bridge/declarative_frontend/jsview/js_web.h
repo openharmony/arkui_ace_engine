@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components/web/web_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#include "core/event/mouse_event.h"
 
 namespace OHOS::Ace::Framework {
 using JSwebEventCallback = std::function<void()>;
@@ -149,6 +150,7 @@ public:
     static void OnNativeEmbedLifecycleChange(const JSCallbackInfo& args);
     static void OnNativeEmbedVisibilityChange(const JSCallbackInfo& args);
     static void OnNativeEmbedGestureEvent(const JSCallbackInfo& args);
+    static void OnNativeEmbedMouseEvent(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentStart(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentEnd(const JSCallbackInfo& args);
     static void OptimizeParserBudgetEnabled(bool enable);
