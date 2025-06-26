@@ -21,6 +21,7 @@
 #include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/web/web_data_detector_adapter.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "test/mock/core/common/mock_container.h"
 
@@ -565,6 +566,7 @@ HWTEST_F(WebDataDetectorAdapterTest, ProcessClick_001, TestSize.Level0)
     adapter->ProcessClick("{}");
     adapter->ProcessClick(R"({"rect": 666})");
     adapter->ProcessClick(R"({"rect": {}})");
+    adapter->ProcessClick(R"({"rect": {}, "touchTest": true})");
     EXPECT_FALSE(adapter->hasInit_);
 #endif
 }
@@ -717,6 +719,18 @@ HWTEST_F(WebDataDetectorAdapterTest, GetPreviewMenuNode_001, TestSize.Level0)
     AIMenuInfo info2 { "location", "here", R"(<a href="geo:here">here</a>)", RectF(0, 0, 10, 10) };
     node = adapter->GetPreviewMenuNode(info2);
     EXPECT_NE(node, nullptr);
+    
+    // add mock theme manager
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<TextOverlayTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+
+    node = adapter->GetPreviewMenuNode(info);
+    EXPECT_NE(node, nullptr);
+
+    node = adapter->GetPreviewMenuNode(info2);
+    EXPECT_NE(node, nullptr);
 #endif
 }
 
@@ -740,6 +754,8 @@ HWTEST_F(WebDataDetectorAdapterTest, GetPreviewMenuBuilder_001, TestSize.Level0)
         { "copy", funcCopy }, { "selectText", funcSelectText } };
     adapter->textDetectResult_.menuOptionAndAction["location"] = { { "make location", funcLocation },
         { "copy", funcCopy }, { "selectText", funcSelectText } };
+    adapter->textDetectResult_.menuOptionAndAction["url"] = { { "load url", funcPhoneEmailURL },
+        { "copy", funcCopy }, { "selectText", funcSelectText } };
 
     std::function<void()> func1, func2;
 
@@ -757,9 +773,17 @@ HWTEST_F(WebDataDetectorAdapterTest, GetPreviewMenuBuilder_001, TestSize.Level0)
     EXPECT_EQ(adapter->previewMenuType_, TextDataDetectType::URL);
     EXPECT_EQ(adapter->previewMenuContent_, "www.example.com");
 
+    adapter->SetPreviewMenuAttr();
     EXPECT_TRUE(adapter->SetPreviewMenuLink("tel:12345678901"));
     EXPECT_EQ(adapter->previewMenuType_, TextDataDetectType::PHONE_NUMBER);
     EXPECT_EQ(adapter->previewMenuContent_, "12345678901");
+
+    EXPECT_TRUE(adapter->SetPreviewMenuLink("tel:12345678902"));
+    EXPECT_EQ(adapter->previewMenuContent_, "12345678901");
+
+    EXPECT_TRUE(adapter->SetPreviewMenuLink("www.example.com"));
+    EXPECT_EQ(adapter->previewMenuType_, TextDataDetectType::URL);
+    EXPECT_EQ(adapter->previewMenuContent_, "www.example.com");
 
     EXPECT_TRUE(adapter->GetPreviewMenuBuilder(func1, func2));
     EXPECT_EQ(adapter->previewMenuType_, TextDataDetectType::INVALID);
