@@ -32,4 +32,5 @@ export class DynamicImportData extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
+    protected readonly brandDynamicImportData: undefined
 }

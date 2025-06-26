@@ -55,6 +55,7 @@ export class ForOfStatement extends LoopStatement {
     get isAwait(): boolean {
         return global.generatedEs2panda._ForOfStatementIsAwaitConst(global.context, this.peer)
     }
+    protected readonly brandForOfStatement: undefined
 }
 export function isForOfStatement(node: object | undefined): node is ForOfStatement {
     return node instanceof ForOfStatement

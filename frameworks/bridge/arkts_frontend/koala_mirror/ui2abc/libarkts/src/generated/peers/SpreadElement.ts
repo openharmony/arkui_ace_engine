@@ -70,6 +70,7 @@ export class SpreadElement extends AnnotatedExpression {
         global.generatedEs2panda._SpreadElementSetTsTypeAnnotation(global.context, this.peer, passNode(typeAnnotation))
         return this
     }
+    protected readonly brandSpreadElement: undefined
 }
 export function isSpreadElement(node: object | undefined): node is SpreadElement {
     return node instanceof SpreadElement

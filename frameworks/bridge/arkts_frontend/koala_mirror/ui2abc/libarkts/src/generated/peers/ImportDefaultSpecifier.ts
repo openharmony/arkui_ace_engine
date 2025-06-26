@@ -45,6 +45,7 @@ export class ImportDefaultSpecifier extends Statement {
     get local(): Identifier | undefined {
         return unpackNode(global.generatedEs2panda._ImportDefaultSpecifierLocal(global.context, this.peer))
     }
+    protected readonly brandImportDefaultSpecifier: undefined
 }
 export function isImportDefaultSpecifier(node: object | undefined): node is ImportDefaultSpecifier {
     return node instanceof ImportDefaultSpecifier

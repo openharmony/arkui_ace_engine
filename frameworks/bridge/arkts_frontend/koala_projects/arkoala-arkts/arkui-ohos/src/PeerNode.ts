@@ -24,6 +24,7 @@ import { StateStylesOps } from './component/arkui-custom'
 export const PeerNodeType = 11
 export const RootPeerType = 33
 export const LazyItemNodeType = 17 // LazyItems are detached node trees that are stored privately in LazyForEach
+export const BuilderRootNodeType = 19 // BuilderRootNode are detached node trees that are stored privately in BuilderNode
 const INITIAL_ID = 10000000
 
 export class PeerNode extends IncrementalNode {
@@ -208,7 +209,7 @@ export class PeerNode extends IncrementalNode {
     }
 }
 
-function findPeerNode(node: IncrementalNode): PeerNode | undefined {
+export function findPeerNode(node: IncrementalNode): PeerNode | undefined {
     if (node.isKind(PeerNodeType)) return node as PeerNode
     for (let child = node.firstChild; child; child = child!.nextSibling) {
         let peer = findPeerNode(child!)

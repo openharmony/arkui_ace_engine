@@ -49,13 +49,22 @@ export class Finalizable {
     finalizer: pointer
     cleaner: NativeThunk|undefined = undefined
     managed: boolean
-    constructor(ptr: pointer, finalizer: pointer, managed: boolean = true) {
+
+    constructor(ptr: pointer, finalizer: pointer) {
+        this.init(ptr, finalizer, true)
+    }
+
+    constructor(ptr: pointer, finalizer: pointer, managed: boolean) {
+        this.init(ptr, finalizer, managed)
+    }
+
+    init(ptr: pointer, finalizer: pointer, managed: boolean) {
         this.ptr = ptr
         this.finalizer = finalizer
         this.managed = managed
         const handle = undefined
 
-        if (this.managed) {
+        if (managed) {
             if (this.ptr == nullptr) throw new Error("Can't have nullptr ptr ${}")
             if (this.finalizer == nullptr) throw new Error("Managed finalizer is 0")
 

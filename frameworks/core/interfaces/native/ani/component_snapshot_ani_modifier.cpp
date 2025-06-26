@@ -18,6 +18,7 @@
 #include "base/log/log.h"
 #include "core/common/ace_engine.h"
 #include "frameworks/core/components_ng/render/adapter/component_snapshot.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 
 namespace OHOS::Ace::NG {
 
@@ -46,12 +47,27 @@ void CreateFromBuilder(ArkUINodeHandle node,
 #endif
 }
 
+void CreateFromComponent(ArkUINodeHandle node,
+    std::function<void(std::shared_ptr<OHOS::Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    SnapshotParam param)
+{
+    if (!node || !callback) {
+        return;
+    }
+    auto uinode = FrameNodePeer::GetFrameNodeByPeer(reinterpret_cast<FrameNodePeer*>(node));
+    CHECK_NULL_VOID(uinode);
+#ifdef ENABLE_ROSEN_BACKEND
+    ComponentSnapshot::Create(uinode, std::move(callback), true, param);
+#endif
+}
+
 const ArkUIAniComponentSnapshotModifier* GetComponentSnapshotAniModifier()
 {
     static const ArkUIAniComponentSnapshotModifier impl = {
         .getCurrentIdSafely = OHOS::Ace::NG::GetCurrentIdSafely,
         .getContainer = OHOS::Ace::NG::GetContainer,
         .createFromBuilder = OHOS::Ace::NG::CreateFromBuilder,
+        .createFromComponent = OHOS::Ace::NG::CreateFromComponent,
     };
     return &impl;
 }

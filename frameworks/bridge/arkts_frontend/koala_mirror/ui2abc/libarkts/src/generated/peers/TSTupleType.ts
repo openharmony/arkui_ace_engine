@@ -44,6 +44,7 @@ export class TSTupleType extends TypeNode {
     get elementType(): readonly TypeNode[] {
         return unpackNodeArray(global.generatedEs2panda._TSTupleTypeElementTypeConst(global.context, this.peer))
     }
+    protected readonly brandTSTupleType: undefined
 }
 export function isTSTupleType(node: object | undefined): node is TSTupleType {
     return node instanceof TSTupleType

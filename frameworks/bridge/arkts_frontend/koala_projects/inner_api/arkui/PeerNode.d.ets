@@ -16,7 +16,10 @@
 import { int32, KoalaCallsiteKey } from '@koalaui/common';
 import { IncrementalNode } from '@koalaui.runtime.tree.IncrementalNode';
 import { Disposable } from '@koalaui.runtime.states.Disposable';
-import { pointer } from '@koalaui.interop';
+// import { pointer } from '@koalaui.interop';
+import { int64 } from '@koalaui/compat';
+
+type pointer = int64
 
 export const PeerNodeType = 11;
 export const RootPeerType = 33;

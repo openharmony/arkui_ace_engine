@@ -26,6 +26,10 @@ export class UIContextUtil {
         return UIContextUtil.getOrCreateUIContextById(id);
     }
 
+    static getCurrentInstanceId(): int32 {
+        return ArkUIAniModule._Common_Get_Current_InstanceId();
+    }
+
     static getOrCreateUIContextById(instanceId: int32): UIContext {
         let context = UIContextUtil.getUIContextById(instanceId);
         if (context === undefined) {

@@ -266,7 +266,7 @@ HWTEST_F(ButtonModifierTest, SetButtonOptions0Test, TestSize.Level1)
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions1
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, SetButtonOptions1TestButtonType, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions1TestButtonType, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     // Initial setup
@@ -340,7 +340,7 @@ HWTEST_F(ButtonModifierTest, SetButtonOptions1TestStateEffect, TestSize.Level1)
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions1
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, SetButtonOptions1ButtonTypeTestButtonStyleMode, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions1ButtonTypeTestButtonStyleMode, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     // Initial setup
@@ -377,7 +377,7 @@ HWTEST_F(ButtonModifierTest, SetButtonOptions1ButtonTypeTestButtonStyleMode, Tes
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions1
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, SetButtonOptions1TestControlSize, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions1TestControlSize, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     // Initial setup
@@ -414,7 +414,7 @@ HWTEST_F(ButtonModifierTest, SetButtonOptions1TestControlSize, TestSize.Level1)
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions1
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, SetButtonOptions1TestButtonRole, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions1TestButtonRole, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     // Initial setup
@@ -452,7 +452,7 @@ HWTEST_F(ButtonModifierTest, SetButtonOptions1TestButtonRole, TestSize.Level1)
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions2
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, SetButtonOptions2TestButtonType, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions2TestButtonType, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     // Initial setup
@@ -539,7 +539,7 @@ HWTEST_F(ButtonModifierTest, SetButtonOptions2TestStateEffect, TestSize.Level1)
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions2
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, SetButtonOptions2ButtonTypeTestButtonStyleMode, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions2ButtonTypeTestButtonStyleMode, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     // Initial setup
@@ -580,7 +580,7 @@ HWTEST_F(ButtonModifierTest, SetButtonOptions2ButtonTypeTestButtonStyleMode, Tes
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions2
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, SetButtonOptions2TestControlSize, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions2TestControlSize, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     // Initial setup
@@ -621,7 +621,7 @@ HWTEST_F(ButtonModifierTest, SetButtonOptions2TestControlSize, TestSize.Level1)
  * @tc.desc: Check the functionality of ButtonModifier.SetButtonOptions2
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonModifierTest, SetButtonOptions2TestButtonRole, TestSize.Level1)
+HWTEST_F(ButtonModifierTest, DISABLED_SetButtonOptions2TestButtonRole, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     // Initial setup

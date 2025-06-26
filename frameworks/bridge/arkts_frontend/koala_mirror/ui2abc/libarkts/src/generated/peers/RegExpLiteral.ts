@@ -48,6 +48,7 @@ export class RegExpLiteral extends Literal {
     get flags(): Es2pandaRegExpFlags {
         return global.generatedEs2panda._RegExpLiteralFlagsConst(global.context, this.peer)
     }
+    protected readonly brandRegExpLiteral: undefined
 }
 export function isRegExpLiteral(node: object | undefined): node is RegExpLiteral {
     return node instanceof RegExpLiteral

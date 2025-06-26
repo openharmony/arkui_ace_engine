@@ -4,10 +4,10 @@
         "rootDir": ".",
         "baseUrl": ".",
         "outDir": "./lib",
-        "module": "ESNext",
+        "module": "ESNext"
     },
     "include": [
-        "./src/**/*.ts",
+        "./src/**/*.ts"
     ],
     "references": [
         { "path": "../../incremental/compat" },

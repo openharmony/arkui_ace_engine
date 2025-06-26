@@ -14,6 +14,10 @@
  */
 
 import {
+    __memo_context_type as __memo_context_type,
+    __memo_id_type as __memo_id_type,
+} from 'arkui.stateManagement.runtime';
+import {
     ArkCommonMethodPeer,
     CommonMethod,
     ArkCommonMethodStyle,
@@ -51,7 +55,9 @@ type PixelMap = image.PixelMap;
 type SystemBarStyle = window.SystemBarStyle;
 
 export declare class ArkNavigationPeer extends ArkCommonMethodPeer {
-    protected constructor(peerPtr: KPointer, id: int32, name?: string, flags?: int32);
+    constructor(peerPtr: KPointer, id: int32, name: string);
+    constructor(peerPtr: KPointer, id: int32);
+    protected constructor(peerPtr: KPointer, id: int32, name: string, flags: int32);
     public static create(component: ComponentBase | undefined, flags?: int32): ArkNavigationPeer;
     public setNavigationOptions0Attribute(): void;
     public setNavigationOptions1Attribute(pathInfos: NavPathStack): void;
@@ -233,8 +239,12 @@ export declare class ArkNavigationStyle extends ArkCommonMethodStyle implements 
 }
 
 export declare class ArkNavigationComponent extends ArkCommonMethodComponent implements NavigationAttribute {
-    /** @memo */
-    public _navDestination: (name: string, param: Object | null | undefined) => void;
+    public _navDestination: (
+        __memo_context: __memo_context_type,
+        __memo_id: __memo_id_type,
+        name: string,
+        param: Object | null | undefined
+    ) => void;
     public _needSync: boolean;
     public getPeer(): ArkNavigationPeer;
     public setNavigationOptions(pathInfos?: NavPathStack): this;
@@ -260,9 +270,12 @@ export declare class ArkNavigationComponent extends ArkCommonMethodComponent imp
     public onNavBarStateChange(value: ((isVisible: boolean) => void) | undefined): this;
     public onNavigationModeChange(value: ((mode: NavigationMode) => void) | undefined): this;
     public navDestination(
-        /** @memo */
-        value: ((name: string, param: Object | null | undefined) => void) | undefined
-    ): this;
+        value: ((
+                  __memo_context: __memo_context_type,
+                  __memo_id: __memo_id_type,
+                  name: string,
+                  param: Object | null | undefined
+              ) => void) | undefined): this;
     public customNavContentTransition(
         value:
             ((

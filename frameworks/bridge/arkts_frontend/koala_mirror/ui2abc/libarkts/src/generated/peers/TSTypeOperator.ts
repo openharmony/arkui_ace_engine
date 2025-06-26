@@ -54,6 +54,7 @@ export class TSTypeOperator extends TypeNode {
     get isUnique(): boolean {
         return global.generatedEs2panda._TSTypeOperatorIsUniqueConst(global.context, this.peer)
     }
+    protected readonly brandTSTypeOperator: undefined
 }
 export function isTSTypeOperator(node: object | undefined): node is TSTypeOperator {
     return node instanceof TSTypeOperator

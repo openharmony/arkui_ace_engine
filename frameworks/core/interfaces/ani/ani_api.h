@@ -20,6 +20,8 @@
 #include <string>
 #include <cstdint>
 #include "core/common/ace_engine.h"
+#include "core/common/udmf/udmf_client.h"
+#include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/render/snapshot_param.h"
 
 #ifdef __cplusplus
@@ -38,8 +40,12 @@ typedef struct __ani_env ani_env;
 typedef int32_t ani_int;
 typedef int64_t ani_long;
 typedef class __ani_fn_object *ani_fn_object;
+typedef class __ani_string* ani_string;
+typedef class __ani_enum_item* ani_enum_item;
+typedef class __ani_error* ani_error;
 typedef _ArkUINode* ArkUINodeHandle;
 typedef int ArkUI_Int32;
+typedef size_t ani_size;
 typedef _ArkUIContentSlot* ArkUIContentSlot;
 typedef _ArkUINodeContent* ArkUINodeContent;
 struct ArkUIDragInfo {
@@ -96,6 +102,35 @@ struct ArkUIAniComponentSnapshotModifier {
     void (*createFromBuilder)(ArkUINodeHandle node,
     std::function<void(std::shared_ptr<OHOS::Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
     OHOS::Ace::NG::SnapshotParam param);
+    void (*createFromComponent)(ArkUINodeHandle node,
+    std::function<void(std::shared_ptr<OHOS::Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    OHOS::Ace::NG::SnapshotParam param);
+};
+struct ArkUIAniAnimationModifier {
+    bool (*hasAnimatableProperty)(ani_env* env, ArkUINodeHandle node, ani_string name);
+    void (*updateAnimatableProperty)(
+        ani_env* env, ArkUINodeHandle node, ani_string propertyName, ani_object property);
+    void (*createAnimatableProperty)(
+        ani_env* env, ArkUINodeHandle node, ani_string propertyName, ani_object property, ani_fn_object callback);
+};
+struct ArkUIAniDragControllerModifier {
+    ani_object (*aniExecuteDragWithCallback)(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object custom,
+        ani_long builderObj, ani_object destroyCallbackObj, ani_object dragInfo, ani_object callback);
+    ani_object (*aniCreateDragAction)([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,
+        ani_object customArray, ani_object builderArray, ani_object destroyCallbackObj,
+        [[maybe_unused]] ani_object dragInfoObj);
+    ani_object (*aniDragActionStartDrag)(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragActionPtr);
+    void (*aniDragActionOn)([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, const char* type,
+        ani_object callback, ani_long dragActionPtr);
+    void (*aniDragActionOff)([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, const char* type,
+        [[maybe_unused]] ani_object callback, ani_long dragActionPtr);
+    void (*aniDragActionSetDragEventStrictReportingEnabled)(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, bool enable);
+    void (*aniDragActionCancelDataLoading)(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_string key);
+    void (*aniDragActionNotifyDragStartReques)(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_enum_item requestStatus);
 };
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
@@ -108,6 +143,8 @@ struct ArkUIAniModifiers {
     const ArkUIAniDrawModifier* (*getArkUIAniDrawModifier)();
     const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();
     const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
+    const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();
+    const ArkUIAniDragControllerModifier* (*getDragControllerAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

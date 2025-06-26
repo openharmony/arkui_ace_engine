@@ -45,6 +45,7 @@ export class ClassExpression extends Expression {
     get definition(): ClassDefinition | undefined {
         return unpackNode(global.generatedEs2panda._ClassExpressionDefinitionConst(global.context, this.peer))
     }
+    protected readonly brandClassExpression: undefined
 }
 export function isClassExpression(node: object | undefined): node is ClassExpression {
     return node instanceof ClassExpression

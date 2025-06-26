@@ -28,7 +28,11 @@ inline void* loadLibrary(const std::string& libPath) {
 
 inline const char* libraryError() {
     static char error[256];
-    snprintf(error, sizeof error, "error %lu", GetLastError());
+    #ifdef __STDC_LIB_EXT1__ 
+        snprintf_s(error, sizeof error, "error %lu", GetLastError());
+    #else
+        snprintf(error, sizeof error, "error %lu", GetLastError());
+    #endif
     return error;
 }
 

@@ -41,6 +41,7 @@ export class ETSStringLiteralType extends TypeNode {
     static updateETSStringLiteralType(original: ETSStringLiteralType | undefined, value: string): ETSStringLiteralType {
         return new ETSStringLiteralType(global.generatedEs2panda._UpdateETSStringLiteralType(global.context, passNode(original), value))
     }
+    protected readonly brandETSStringLiteralType: undefined
 }
 export function isETSStringLiteralType(node: object | undefined): node is ETSStringLiteralType {
     return node instanceof ETSStringLiteralType

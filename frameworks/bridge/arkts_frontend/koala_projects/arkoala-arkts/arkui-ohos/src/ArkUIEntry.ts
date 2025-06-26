@@ -34,8 +34,9 @@ import { updateLazyItems } from "./handwritten/LazyForEachImpl"
 import router from "@ohos/router"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { createStateManager } from "@koalaui/runtime"
-import { UIContextImpl, ContextRecord } from "arkui/handwritten/UIContextImpl"
+import { UIContextImpl, ContextRecord, DetachedRootEntryManager } from "arkui/handwritten/UIContextImpl"
 import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
+import { flushBuilderRootNode } from "./BuilderNode"
 
 setCustomEventsChecker(checkArkoalaCallbacks)
 
@@ -59,6 +60,11 @@ class PartialUpdateRecord {
 
 let partialUpdates = new Array<PartialUpdateRecord>()
 let _currentPartialUpdateContext: Object | undefined = undefined
+let _undefinedInstanceId : int32 = -1000
+
+export enum MessageType {
+    DELETE_DETACHED_ROOT = 1,
+}
 
 /**
  * Provide partial update lambda and context.
@@ -79,16 +85,22 @@ export function currentPartialUpdateContext<T>(): T | undefined {
     return _currentPartialUpdateContext as (T | undefined)
 }
 
-// TODO: move to Application class.
-let detachedRoots: Map<KPointer, ComputableState<PeerNode>> = new Map<KPointer, ComputableState<PeerNode>>()
+function getDetachedRootsByInstanceId(instanceId: int32): Map<KPointer, ComputableState<PeerNode>> {
+    if (instanceId === _undefinedInstanceId) {
+        instanceId = UIContextUtil.getCurrentInstanceId();
+        InteropNativeModule._NativeLog(
+            `get DetachedRoots by current instanceId: ${instanceId}`);
+    }
 
-// mark the tree create by BuilderNode
-let detachedStatMgt: Map<WeakRef<StateManager>, WeakRef<ComputableState<PeerNode>>> = new Map<WeakRef<StateManager>, WeakRef<ComputableState<PeerNode>>>()
+    let context = UIContextUtil.getOrCreateUIContextById(instanceId) as UIContextImpl;
+    return context.getDetachedRootEntryManager().getDetachedRoots();
+}
 
 export function createUiDetachedRoot(
     peerFactory: () => PeerNode,
     /** @memo */
-    builder: () => void
+    builder: () => void,
+    instanceId: int32 = _undefinedInstanceId
 ): PeerNode {
     const manager = GlobalStateManager.instance
     const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
@@ -97,35 +109,28 @@ export function createUiDetachedRoot(
         memoEntry<void>(context, 0, builder)
         manager.frozen = frozen
     })
+    let detachedRoots = getDetachedRootsByInstanceId(instanceId);
     detachedRoots.set(node.value.peer.ptr, node)
     return node.value
 }
 setUIDetachedRootCreator(createUiDetachedRoot)
 
-//used By BuilderNode
-export function createUiDetachedBuilderRoot(
-    peerFactory: () => PeerNode,
-    /** @memo */
-    builder: () => void,
-    manager: StateManager
-): ComputableState<PeerNode> {
-    const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
-        const frozen = manager.frozen
-        manager.frozen = true
-        memoEntry<void>(context, 0, builder)
-        manager.frozen = frozen
-    })
-    detachedRoots.set(node.value.peer.ptr, node)
-    detachedStatMgt.set(new WeakRef<StateManager>(manager), new WeakRef<ComputableState<PeerNode>>(node))
-    return node
-}
+export function destroyUiDetachedRoot(ptr: KPointer, instanceId: int32): boolean {
+    if (instanceId < 0) {
+        InteropNativeModule._NativeLog(
+            `ArkTS destroyUiDetachedRoot failed due to instanceId: ${instanceId} is illegal`)
+        return false;
+    }
 
-export function destroyUiDetachedRoot(node: PeerNode): void {
-    if (!detachedRoots.has(node.peer.ptr))
-        throw new Error(`Root with id ${node.peer.ptr} is not registered`)
-    const root = detachedRoots.get(node.peer.ptr)!
-    detachedRoots.delete(node.peer.ptr)
-    root.dispose()
+    let detachedRoots = getDetachedRootsByInstanceId(instanceId);
+    if (!detachedRoots.has(ptr)) {
+        return false;
+    }
+
+    const root = detachedRoots.get(ptr)!
+    detachedRoots.delete(ptr)
+         root.dispose()
+    return true;
 }
 
 function dumpTree(node: IncrementalNode, indent: int32 = 0) {
@@ -181,6 +186,7 @@ export class Application {
     private moduleName: string
     private startUrl: string
     private startParam: string
+    private instanceId: int32 = -1
 
     private withLog = false
     private useNativeLog = true
@@ -224,6 +230,7 @@ export class Application {
         try {
             this.manager = GlobalStateManager.instance
             let uiContext: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
+            this.instanceId = uiContext.getInstanceId();
             uiContext.stateMgr = this.manager
             let uiData = new ContextRecord();
             uiData.uiContext = uiContext;
@@ -267,6 +274,22 @@ export class Application {
         return root!.peer.ptr
     }
 
+    handleMessage(ptr: KPointer, type: int32, param : string) : boolean {
+        let result : boolean = false
+        switch (type as MessageType) {
+            case MessageType.DELETE_DETACHED_ROOT: {
+                result = destroyUiDetachedRoot(ptr, this.instanceId);
+                break
+            }
+            default: {
+                InteropNativeModule._NativeLog(`ARKTS: [handleMessage] type = ${type} is unknown.`)
+                break
+            }
+        }
+        InteropNativeModule._NativeLog(`ARKTS: [handleMessage] ptr: ${ptr}, type: ${type}, param: ${param}`);
+        return result;
+    }
+
     private checkEvents(what: int32) {
         // NativeModule._NativeLog("ARKTS: checkEvents")
         checkEvents()
@@ -290,24 +313,6 @@ export class Application {
         }
         // Here we request to draw a frame and call custom components callbacks.
         let root = rootState.value;
-        // updateState in BuilderNode
-        let deletedMap: Array<WeakRef<StateManager>> = new Array<WeakRef<StateManager>>()
-        for (const mgt of detachedStatMgt) {
-            let stateMgt = mgt[0]?.deref()
-            if (stateMgt !== undefined && mgt[1]?.deref() !== undefined) {
-                const old = GlobalStateManager.GetLocalManager();
-                GlobalStateManager.SetLocalManager(stateMgt);
-                this.updateStates(stateMgt!, mgt[1]!.deref()!);
-                mgt[1]!.deref()!.value;
-                GlobalStateManager.SetLocalManager(old);
-            } else {
-                deletedMap.push(mgt[0]);
-            }
-        }
-        // delete stateManager used by BuilderNode
-        for (const mgt of deletedMap) {
-            detachedStatMgt.delete(mgt);
-        }
         if (root.peer.ptr) {
             ArkUINativeModule._MeasureLayoutAndDraw(root.peer.ptr);
             // Call callbacks and sync
@@ -316,14 +321,20 @@ export class Application {
     }
 
     updateStates(manager: StateManager, root: ComputableState<PeerNode>) {
+        if (this.instanceId < 0) {
+            InteropNativeModule._NativeLog(
+                `ArkTS updateStates failed due to instanceId: ${this.instanceId} is illegal`)
+            return;
+        }
         // Ensure all current state updates took effect.
         manager.syncChanges()
         manager.updateSnapshot()
         this.computeRoot()
+        let detachedRoots = getDetachedRootsByInstanceId(this.instanceId);
         for (const detachedRoot of detachedRoots.values())
             detachedRoot.value
         updateLazyItems()
-
+        flushBuilderRootNode()
         if (partialUpdates.length > 0) {
             // If there are pending partial updates - we apply them one by one and provide update context.
             for (let update of partialUpdates) {

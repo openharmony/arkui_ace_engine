@@ -55,6 +55,7 @@ export class CatchClause extends TypedStatement {
     get isDefaultCatchClause(): boolean {
         return global.generatedEs2panda._CatchClauseIsDefaultCatchClauseConst(global.context, this.peer)
     }
+    protected readonly brandCatchClause: undefined
 }
 export function isCatchClause(node: object | undefined): node is CatchClause {
     return node instanceof CatchClause

@@ -47,6 +47,7 @@ export class YieldExpression extends Expression {
     get argument(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._YieldExpressionArgumentConst(global.context, this.peer))
     }
+    protected readonly brandYieldExpression: undefined
 }
 export function isYieldExpression(node: object | undefined): node is YieldExpression {
     return node instanceof YieldExpression

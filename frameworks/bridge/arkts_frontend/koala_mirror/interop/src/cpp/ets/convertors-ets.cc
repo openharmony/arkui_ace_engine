@@ -38,7 +38,6 @@ static bool registerNatives(ets_env *env, const ets_class clazz, const std::vect
         if (registerByOne) {
             result &= env->RegisterNatives(clazz, &method, 1) >= 0;
             if (env->ErrorCheck()) {
-                //env->ErrorDescribe();
                 env->ErrorClear();
             }
         }

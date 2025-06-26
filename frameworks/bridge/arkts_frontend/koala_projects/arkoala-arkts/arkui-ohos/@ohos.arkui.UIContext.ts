@@ -25,20 +25,24 @@ import { AnimatorResult, AnimatorOptions, Animator} from "@ohos/animator"
 import { Context, PointerStyle, PixelMap } from "#external"
 import { componentUtils } from "@ohos/arkui/componentUtils"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
+import { dragController } from "@ohos/arkui/dragController"
 import { focusController } from "@ohos/arkui/focusController"
 import { Frame } from "arkui/Graphics"
 import { KeyEvent } from "arkui/component/common"
 import { TextMenuOptions } from "arkui/component/textCommon"
-import { Nullable } from "arkui/component/enums"
+import { Nullable, WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
 import { KeyProcessingMode } from "arkui/component/focus"
 import { uiObserver } from "@ohos/arkui/observer"
 import { mediaquery } from '@ohos/mediaquery'
 import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions }from "arkui/component/alertDialog"
+import { ActionSheet, ActionSheetOptions} from "arkui/component/actionSheet"
 import inspector from "@ohos/arkui/inspector"
 import router from '@ohos/router'
 import promptAction from '@ohos/promptAction';
-import { AsyncCallback, CustomBuilder } from 'arkui/component'
+import { AsyncCallback, CustomBuilder, DragItemInfo } from 'arkui/component'
+import { Router as RouterExt } from 'arkui/handwritten';
+import { ComponentContent } from "arkui/ComponentContent"
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver {
@@ -80,6 +84,13 @@ export class TextMenuController {
 }
 
 export class Router {
+    router_: RouterExt | undefined = undefined;
+    public setRouter(router: RouterExt) {
+        this.router_ = router;
+    }
+    public getRouter(): RouterExt {
+        return this.router_!;
+    }
     public pushUrl(options: router.RouterOptions): Promise<void> {
         throw Error("pushUrl not implemented in Router!")
     }
@@ -181,6 +192,36 @@ export class ComponentSnapshot {
     public getSyncWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): PixelMap {
         throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
     }
+
+    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number, checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+        throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
+    }
+}
+
+export class DragController {
+    //@ts-ignore
+    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo,
+        callback: AsyncCallback<dragController.DragEventParam>): void {
+        throw Error("executeDrag with callback not implemented in DragController!")
+    }
+    //@ts-ignore
+    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo):
+        Promise<dragController.DragEventParam> {
+        throw Error("executeDrag with promise not implemented in DragController!")
+    }
+    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo>,
+        dragInfo: dragController.DragInfo): dragController.DragAction {
+        throw Error("createDragAction not implemented in DragController!")
+    }
+    public setDragEventStrictReportingEnabled(enable: boolean): void {
+        throw Error("setDragEventStrictReportingEnabled not implemented in DragController!")
+    }
+    public cancelDataLoading(key: string): void {
+        throw Error("setDragEventStrictReportingEnabled not implemented in DragController!")
+    }
+    public notifyDragStartRequest(requestStatus: dragController.DragStartRequestStatus): void {
+        throw Error("setDragEventStrictReportingEnabled not implemented in DragController!")
+    }
 }
 
 export class ContextMenuController {
@@ -280,6 +321,10 @@ export class UIContext {
         throw Error("getComponentSnapshot not implemented in UIContext!")
     }
 
+    public getDragController(): DragController {
+        throw Error("getDragController not implemented in UIContext!")
+    }
+
     public getRouter(): Router {
         throw Error("getRouter not implemented in UIContext!")
     }
@@ -323,6 +368,9 @@ export class UIContext {
         throw Error("showAlertDialog not implemented in UIContext!")
     }
 
+    public showActionSheet(options: ActionSheetOptions): void {
+        throw Error("showActionSheet not implemented in UIContext!")
+    }
     // @ts-ignore
     public freezeUINode(id: number, isFrozen: boolean): void {
         throw Error("freezeUINode not implemented in UIContext!")
@@ -331,6 +379,34 @@ export class UIContext {
     // @ts-ignore
     public freezeUINode(id: string, isFrozen: boolean): void {
         throw Error("freezeUINode not implemented in UIContext!")
+    }
+
+    public getWindowName(): string | undefined {
+        throw Error("getWindowName not implemented in UIContext!")
+    }
+    public getWindowWidthBreakpoint(): WidthBreakpoint {
+        throw Error("getWindowWidthBreakpoint not implemented in UIContext!")
+    }
+    public getWindowHeightBreakpoint(): HeightBreakpoint {
+        throw Error("getWindowHeightBreakpoint not implemented in UIContext!")
+    }
+    public vp2px(value: number): number {
+        throw Error("vp2px not implemented in UIContext!")
+    }
+    public px2vp(value: number): number {
+        throw Error("px2vp not implemented in UIContext!")
+    }
+    public fp2px(value: number): number {
+        throw Error("fp2px not implemented in UIContext!")
+    }
+    public px2fp(value: number): number {
+        throw Error("px2fp not implemented in UIContext!")
+    }
+    public lpx2px(value: number): number {
+        throw Error("lpx2px not implemented in UIContext!")
+    }
+    public px2lpx(value: number): number {
+        throw Error("px2lpx not implemented in UIContext!")
     }
 }
 export abstract class FrameCallback {

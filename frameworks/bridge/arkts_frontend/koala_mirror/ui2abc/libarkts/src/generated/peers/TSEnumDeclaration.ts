@@ -62,8 +62,8 @@ export class TSEnumDeclaration extends TypedStatement {
         return unpackNode(global.generatedEs2panda._TSEnumDeclarationBoxedClassConst(global.context, this.peer))
     }
     /** @deprecated */
-    setBoxedClass(wrapperClass?: ClassDefinition): this {
-        global.generatedEs2panda._TSEnumDeclarationSetBoxedClass(global.context, this.peer, passNode(wrapperClass))
+    setBoxedClass(boxedClass?: ClassDefinition): this {
+        global.generatedEs2panda._TSEnumDeclarationSetBoxedClass(global.context, this.peer, passNode(boxedClass))
         return this
     }
     get isConst(): boolean {
@@ -72,6 +72,43 @@ export class TSEnumDeclaration extends TypedStatement {
     get decorators(): readonly Decorator[] {
         return unpackNodeArray(global.generatedEs2panda._TSEnumDeclarationDecoratorsConst(global.context, this.peer))
     }
+    /** @deprecated */
+    emplaceDecorators(source?: Decorator): this {
+        global.generatedEs2panda._TSEnumDeclarationEmplaceDecorators(global.context, this.peer, passNode(source))
+        return this
+    }
+    /** @deprecated */
+    clearDecorators(): this {
+        global.generatedEs2panda._TSEnumDeclarationClearDecorators(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setValueDecorators(source: Decorator | undefined, index: number): this {
+        global.generatedEs2panda._TSEnumDeclarationSetValueDecorators(global.context, this.peer, passNode(source), index)
+        return this
+    }
+    get decoratorsForUpdate(): readonly Decorator[] {
+        return unpackNodeArray(global.generatedEs2panda._TSEnumDeclarationDecoratorsForUpdate(global.context, this.peer))
+    }
+    /** @deprecated */
+    emplaceMembers(source?: AstNode): this {
+        global.generatedEs2panda._TSEnumDeclarationEmplaceMembers(global.context, this.peer, passNode(source))
+        return this
+    }
+    /** @deprecated */
+    clearMembers(): this {
+        global.generatedEs2panda._TSEnumDeclarationClearMembers(global.context, this.peer)
+        return this
+    }
+    /** @deprecated */
+    setValueMembers(source: AstNode | undefined, index: number): this {
+        global.generatedEs2panda._TSEnumDeclarationSetValueMembers(global.context, this.peer, passNode(source), index)
+        return this
+    }
+    get membersForUpdate(): readonly AstNode[] {
+        return unpackNodeArray(global.generatedEs2panda._TSEnumDeclarationMembersForUpdate(global.context, this.peer))
+    }
+    protected readonly brandTSEnumDeclaration: undefined
 }
 export function isTSEnumDeclaration(node: object | undefined): node is TSEnumDeclaration {
     return node instanceof TSEnumDeclaration

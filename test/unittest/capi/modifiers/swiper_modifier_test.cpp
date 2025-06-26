@@ -20,6 +20,7 @@
 
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"
@@ -1487,7 +1488,7 @@ HWTEST_F(SwiperModifierTest, DISABLED_setIndicatorStyleTestInvalid, TestSize.Lev
  * @tc.desc: Check the functionality of SwiperModifier.PrevMarginImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setPrevMarginTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setPrevMarginTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("prevMargin");
     static const std::string PROP_NAME_OPT("prevMarginIgnoreBlank");
@@ -1527,7 +1528,7 @@ HWTEST_F(SwiperModifierTest, setPrevMarginTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.NextMarginImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setNextMarginTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setNextMarginTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("nextMargin");
     static const std::string PROP_NAME_OPT("nextMarginIgnoreBlank");

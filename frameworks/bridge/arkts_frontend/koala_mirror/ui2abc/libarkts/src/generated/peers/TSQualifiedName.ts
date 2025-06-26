@@ -54,6 +54,7 @@ export class TSQualifiedName extends Expression {
     get resolveLeftMostQualifiedName(): TSQualifiedName | undefined {
         return unpackNode(global.generatedEs2panda._TSQualifiedNameResolveLeftMostQualifiedName(global.context, this.peer))
     }
+    protected readonly brandTSQualifiedName: undefined
 }
 export function isTSQualifiedName(node: object | undefined): node is TSQualifiedName {
     return node instanceof TSQualifiedName

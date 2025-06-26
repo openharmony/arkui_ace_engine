@@ -14,7 +14,7 @@
  */
 
 #ifdef WEB_SUPPORTED
-#include "core/components_ng/pattern/web/richtext_model_static.h"
+#include "core/components_ng/pattern/web/ani/richtext_model_static.h"
 #endif
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"

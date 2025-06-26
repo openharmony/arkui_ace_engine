@@ -41,6 +41,7 @@ export class ETSNullType extends TypeNode {
     static updateETSNullType(original?: ETSNullType): ETSNullType {
         return new ETSNullType(global.generatedEs2panda._UpdateETSNullType(global.context, passNode(original)))
     }
+    protected readonly brandETSNullType: undefined
 }
 export function isETSNullType(node: object | undefined): node is ETSNullType {
     return node instanceof ETSNullType

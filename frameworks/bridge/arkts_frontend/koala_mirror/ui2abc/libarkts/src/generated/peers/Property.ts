@@ -73,6 +73,7 @@ export class Property extends Expression {
     get validateExpression(): ValidationInfo | undefined {
         return new ValidationInfo(global.generatedEs2panda._PropertyValidateExpression(global.context, this.peer))
     }
+    protected readonly brandProperty: undefined
 }
 export function isProperty(node: object | undefined): node is Property {
     return node instanceof Property

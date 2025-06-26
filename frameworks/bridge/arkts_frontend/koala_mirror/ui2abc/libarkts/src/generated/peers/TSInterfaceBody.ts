@@ -44,6 +44,7 @@ export class TSInterfaceBody extends Expression {
     get body(): readonly AstNode[] {
         return unpackNodeArray(global.generatedEs2panda._TSInterfaceBodyBody(global.context, this.peer))
     }
+    protected readonly brandTSInterfaceBody: undefined
 }
 export function isTSInterfaceBody(node: object | undefined): node is TSInterfaceBody {
     return node instanceof TSInterfaceBody

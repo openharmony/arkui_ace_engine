@@ -58,6 +58,7 @@ export class TSFunctionType extends TypeNode {
         global.generatedEs2panda._TSFunctionTypeSetNullable(global.context, this.peer, nullable)
         return this
     }
+    protected readonly brandTSFunctionType: undefined
 }
 export function isTSFunctionType(node: object | undefined): node is TSFunctionType {
     return node instanceof TSFunctionType

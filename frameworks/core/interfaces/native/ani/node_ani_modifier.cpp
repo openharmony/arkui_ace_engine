@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "animation_ani_modifier.h"
 #include "common_ani_modifier.h"
 #include "component_snapshot_ani_modifier.h"
 #include "content_slot_ani_modifier.h"
@@ -21,6 +22,7 @@
 #include "custom_node_ani_modifier.h"
 #include "waterflow_ani_modifier.h"
 #include "drag_ani_modifier.h"
+#include "drag_controller_ani_modifier.h"
 
 extern "C" {
 const ArkUIAniModifiers* GetArkUIAniModifiers()
@@ -36,6 +38,8 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getArkUIAniDrawModifier = OHOS::Ace::NG::GetArkUIAniDrawModifier,
         .getArkUIAniWaterFlowModifier = OHOS::Ace::NG::GetArkUIAniWaterFlowModifier,
         .getComponentSnapshotAniModifier = OHOS::Ace::NG::GetComponentSnapshotAniModifier,
+        .getAnimationAniModifier = OHOS::Ace::NG::GetAnimationAniModifier,
+        .getDragControllerAniModifier = OHOS::Ace::NG::GetDragControllerAniModifier,
     };
     return &impl;
 }

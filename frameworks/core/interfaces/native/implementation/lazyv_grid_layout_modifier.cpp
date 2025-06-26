@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#include <string>
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model_static.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -22,7 +24,10 @@ namespace LazyVGridLayoutModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    return {};
+    auto frameNode = LazyGridLayoutModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 } // LazyVGridLayoutModifier
 namespace LazyVGridLayoutInterfaceModifier {
@@ -41,8 +46,8 @@ void ColumnsTemplateImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //LazyVGridLayoutModelNG::SetColumnsTemplate(frameNode, convValue);
+    auto convValue = Converter::OptConvert<std::string>(*value).value_or("");
+    LazyVGridLayoutModelStatic::SetColumnsTemplate(frameNode, convValue);
 }
 } // LazyVGridLayoutAttributeModifier
 const GENERATED_ArkUILazyVGridLayoutModifier* GetLazyVGridLayoutModifier()

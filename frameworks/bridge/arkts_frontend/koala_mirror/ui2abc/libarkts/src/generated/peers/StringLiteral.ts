@@ -47,6 +47,7 @@ export class StringLiteral extends Literal {
     get str(): string {
         return unpackString(global.generatedEs2panda._StringLiteralStrConst(global.context, this.peer))
     }
+    protected readonly brandStringLiteral: undefined
 }
 export function isStringLiteral(node: object | undefined): node is StringLiteral {
     return node instanceof StringLiteral

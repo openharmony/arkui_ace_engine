@@ -51,6 +51,7 @@ export class TSNamedTupleMember extends TypeNode {
     get isOptional(): boolean {
         return global.generatedEs2panda._TSNamedTupleMemberIsOptionalConst(global.context, this.peer)
     }
+    protected readonly brandTSNamedTupleMember: undefined
 }
 export function isTSNamedTupleMember(node: object | undefined): node is TSNamedTupleMember {
     return node instanceof TSNamedTupleMember

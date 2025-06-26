@@ -57,6 +57,7 @@ export class TSParameterProperty extends Expression {
     get parameter(): Expression | undefined {
         return unpackNode(global.generatedEs2panda._TSParameterPropertyParameterConst(global.context, this.peer))
     }
+    protected readonly brandTSParameterProperty: undefined
 }
 export function isTSParameterProperty(node: object | undefined): node is TSParameterProperty {
     return node instanceof TSParameterProperty

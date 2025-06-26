@@ -186,6 +186,7 @@ typedef struct InteropObject {
 #define GENERATED_ARKUI_EXTENDED_NODE_API_VERSION 8
 #define GENERATED_ARKUI_NODE_GRAPHICS_API_VERSION 5
 #define GENERATED_ARKUI_NODE_MODIFIERS_API_VERSION 6
+#define GENERATED_ARKUI_INTEROP_NODE_API_VERSION 1
 
 #define GENERATED_ARKUI_AUTO_GENERATE_NODE_ID (-2)
 
@@ -236,8 +237,9 @@ enum GENERATED_Ark_APIVariantKind {
     GENERATED_BASIC = 10,
     GENERATED_FULL = 11,
     GENERATED_GRAPHICS = 12,
-    GENERATED_EXTENDED = 13,
-    GENERATED_COUNT = GENERATED_EXTENDED + 1
+    GENERATED_EXTENDED = 13,    
+    GENERATED_INTEROP = 15,
+    GENERATED_COUNT = GENERATED_INTEROP + 1,
 };
 
 enum Ark_APINodeFlags {
@@ -5067,8 +5069,8 @@ typedef struct Opt_MouseAction {
 typedef enum Ark_MouseButton {
     ARK_MOUSE_BUTTON_LEFT = 1,
     ARK_MOUSE_BUTTON_RIGHT = 2,
-    ARK_MOUSE_BUTTON_MIDDLE = 3,
-    ARK_MOUSE_BUTTON_BACK = 4,
+    ARK_MOUSE_BUTTON_MIDDLE = 4,
+    ARK_MOUSE_BUTTON_BACK = 8,
     ARK_MOUSE_BUTTON_FORWARD = 16,
     ARK_MOUSE_BUTTON_NONE = 0,
 } Ark_MouseButton;
@@ -23944,7 +23946,6 @@ typedef struct GENERATED_ArkUIUIContextAccessor {
     void (*setDynamicDimming)(Ark_UIContext peer,
                               const Ark_String* id,
                               const Ark_Number* value);
-    Ark_Union_String_Undefined (*getWindowName)(Ark_UIContext peer);
     void (*openBindSheet)(Ark_VMContext vmContext,
                           Ark_UIContext peer,
                           Ark_ComponentContent bindSheetContent,
@@ -23962,6 +23963,9 @@ typedef struct GENERATED_ArkUIUIContextAccessor {
                                Ark_UIContext peer);
     Ark_Boolean (*isFollowingSystemFontScale)(Ark_UIContext peer);
     Ark_Number (*getMaxFontScale)(Ark_UIContext peer);
+    Ark_String (*getWindowName)( const Ark_Number* instanceId);
+    Ark_Number (*getWindowWidthBreakpoint)(const Ark_Number* instanceId);
+    Ark_Number (*getWindowHeightBreakpoint)(const Ark_Number* instanceId);
 } GENERATED_ArkUIUIContextAccessor;
 
 typedef struct GENERATED_ArkUIDragDropOpsAccessor {
@@ -26121,6 +26125,7 @@ typedef struct GENERATED_ArkUIEventTargetInfoAccessor {
     Ark_EventTargetInfo (*ctor)();
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getId)(Ark_EventTargetInfo peer);
+    Ark_Boolean (*isScrollableComponent)(Ark_EventTargetInfo peer);
 } GENERATED_ArkUIEventTargetInfoAccessor;
 
 typedef struct GENERATED_ArkUIGestureRecognizerAccessor {
@@ -27978,6 +27983,14 @@ typedef struct GENERATED_ArkUIFullNodeAPI {
     const GENERATED_ArkUIAccessors* (*getAccessors)();
     const GENERATED_ArkUIGraphicsAPI* (*getGraphicsAPI)();
 } GENERATED_ArkUIFullNodeAPI;
+
+typedef struct GENERATED_ArkUIInteropNodeAPI {
+    Ark_Int32 version;
+    Ark_NodeHandle (*createViewStackProcessor)();
+    Ark_NodeHandle (*popViewStackProcessor)();
+    void (*deleteViewStackProcessor)(Ark_NodeHandle ptr);
+} GENERATED_ArkUIInteropNodeAPI;
+
 
 #ifndef GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_GENERIC_SERVICE_API_H
 #define GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_GENERIC_SERVICE_API_H

@@ -46,6 +46,8 @@ struct AppInfo {
     const char* emitEventMethodSig;
     const char* checkCallbackMethodName;
     const char* checkCallbackEventMethodSig;
+    const char* handleMessageMethodName;
+    const char* handleMessageMethodSig;
 };
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 const AppInfo KOALA_APP_INFO = {
@@ -61,6 +63,8 @@ const AppInfo KOALA_APP_INFO = {
     "IIII:V",
     "checkCallbacks",
     ":V",
+    "handleMessage",
+    "JILstd/core/String;:Z",
 };
 
 // void TryEmitError(EtsEnv& env)
@@ -340,6 +344,7 @@ void ArktsFrontend::Destroy()
     CHECK_NULL_VOID(env);
     env->GlobalReference_Delete(app_);
     app_ = nullptr;
+    handleMessageMethod_ = nullptr;
 }
 
 ani_object ArktsFrontend::CallGetUIContextFunc()
@@ -414,6 +419,44 @@ void ArktsFrontend::ClearExtender()
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->Clear();
+}
+
+bool ArktsFrontend::HandleMessage(void *frameNode, int32_t type, const std::string& param)
+{
+    auto* env = ArktsAniUtils::GetAniEnv(vm_);
+    CHECK_NULL_RETURN(env, false);
+    CHECK_NULL_RETURN(app_, false);
+    CHECK_NULL_RETURN(frameNode, false);
+    ani_status status = ANI_ERROR;
+    if (handleMessageMethod_ == nullptr) {
+        ani_class appClass;
+        if ((status = env->FindClass(KOALA_APP_INFO.className, &appClass)) != ANI_OK) {
+            LOGE("Call handleMessage failed due to FindClass failed, status : %{public}d", status);
+            return false;
+        }
+
+        ani_method handleMessageMethod = nullptr;
+        if ((status = env->Class_FindMethod(appClass, KOALA_APP_INFO.handleMessageMethodName,
+            KOALA_APP_INFO.handleMessageMethodSig, &handleMessageMethod)) != ANI_OK) {
+            LOGE("Call handleMessage failed due to Class_FindMethod failed, status : %{public}d", status);
+            return false;
+        }
+
+        handleMessageMethod_ = handleMessageMethod;
+    }
+
+    ani_long ptrAni = reinterpret_cast<ani_long>(frameNode);
+    ani_int typeAni = type;
+    ani_string paramStr;
+    env->String_NewUTF8(param.c_str(), param.length(), &paramStr);
+    ani_boolean result;
+    if ((status = env->Object_CallMethod_Boolean(static_cast<ani_object>(app_),
+        handleMessageMethod_, &result, ptrAni, typeAni, paramStr)) != ANI_OK) {
+        LOGE("Call handleMessage failed, status: %{public}d", status);
+        return false;
+    }
+
+    return result == ANI_TRUE;
 }
 
 void ArktsFrontend::SetAniContext(int32_t instanceId, ani_ref* context)

@@ -54,6 +54,7 @@ export class TSModuleDeclaration extends Statement {
     get isExternalOrAmbient(): boolean {
         return global.generatedEs2panda._TSModuleDeclarationIsExternalOrAmbientConst(global.context, this.peer)
     }
+    protected readonly brandTSModuleDeclaration: undefined
 }
 export function isTSModuleDeclaration(node: object | undefined): node is TSModuleDeclaration {
     return node instanceof TSModuleDeclaration

@@ -19,9 +19,7 @@
 #include "base/error/error_code.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/ace_engine.h"
-#ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map_taihe_ani.h"
-#endif
 
 namespace OHOS::Ace::Ani {
 constexpr int32_t CALLBACK_PARAM_LENGTH = 2;
@@ -134,12 +132,10 @@ void TriggerJsCallback(SnapshotAsyncCtx* asyncCtx)
     ctx->env->GetUndefined(&resultRef[1]);
 
     if (ctx->errCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
-#ifdef PIXEL_MAP_SUPPORTED
         ani_object pixmapItem = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(ctx->env, ctx->pixmap);
         if (pixmapItem) {
             resultRef[1] = pixmapItem;
         }
-#endif
     }
     ani_status status = ANI_OK;
     resultRef[0] = CreateStsError(ctx->env, ctx->errCode, "");
@@ -254,6 +250,24 @@ ani_object CreateFromBuilderWithPromise(ani_env* env, [[maybe_unused]] ani_objec
 
     auto* arkNode = reinterpret_cast<ArkUINodeHandle>(builderPtr);
     modifier->getComponentSnapshotAniModifier()->createFromBuilder(arkNode, callback, param);
+    return result;
+}
+
+ani_object CreateFromComponentWithPromise(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long builderPtr,
+    ani_object destroyCallbackObj, ani_object delay, ani_object checkImageStatus, ani_object option)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getComponentSnapshotAniModifier() || !env) {
+        return nullptr;
+    }
+    OHOS::Ace::NG::SnapshotParam param;
+    GetAniIntValue(env, delay, param.delay);
+    GetCheckImageStatus(env, checkImageStatus, param.checkImageStatus);
+    ani_object result = {};
+    auto callback = CreateCallbackFunc(env, nullptr, destroyCallbackObj, result);
+
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(builderPtr);
+    modifier->getComponentSnapshotAniModifier()->createFromComponent(arkNode, callback, param);
     return result;
 }
 } // namespace OHOS::Ace::Ani

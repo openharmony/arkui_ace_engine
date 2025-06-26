@@ -47,6 +47,7 @@ export class EmptyStatement extends Statement {
     get isBrokenStatement(): boolean {
         return global.generatedEs2panda._EmptyStatementIsBrokenStatement(global.context, this.peer)
     }
+    protected readonly brandEmptyStatement: undefined
 }
 export function isEmptyStatement(node: object | undefined): node is EmptyStatement {
     return node instanceof EmptyStatement

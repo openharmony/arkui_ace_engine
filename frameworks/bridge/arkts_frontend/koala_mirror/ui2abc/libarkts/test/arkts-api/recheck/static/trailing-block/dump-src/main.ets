@@ -1,5 +1,5 @@
 
-function main() {}
+function main(): void {}
 
 
 
@@ -7,8 +7,8 @@ class C {
   public f(arg: (()=> void)): void {}
   
   public g(): void {
-    (this).f((() => {
-      const x = ((6) + (5));
+    this.f((() => {
+      const x = 11;
     }));
   }
   

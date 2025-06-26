@@ -29,7 +29,6 @@
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
-#include "core/components_ng/pattern/scrollable/lazy_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -62,8 +61,8 @@ struct ListScrollTarget {
     float targetOffset;
 };
 
-class ListPattern : public ScrollablePattern, public LinearLazyContainer {
-    DECLARE_ACE_TYPE(ListPattern, ScrollablePattern, LinearLazyContainer);
+class ListPattern : public ScrollablePattern {
+    DECLARE_ACE_TYPE(ListPattern, ScrollablePattern);
 
 public:
     ListPattern() : ScrollablePattern(EdgeEffect::SPRING, false) {}

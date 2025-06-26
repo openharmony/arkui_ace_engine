@@ -55,6 +55,7 @@ export class FunctionExpression extends Expression {
     get id(): Identifier | undefined {
         return unpackNode(global.generatedEs2panda._FunctionExpressionId(global.context, this.peer))
     }
+    protected readonly brandFunctionExpression: undefined
 }
 export function isFunctionExpression(node: object | undefined): node is FunctionExpression {
     return node instanceof FunctionExpression

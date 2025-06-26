@@ -35,7 +35,7 @@ Ark_XComponentController CtorImpl()
     auto peerImpl = Referenced::MakeRefPtr<XComponentControllerPeerImpl>();
     peerImpl->IncRefCount();
 #ifdef XCOMPONENT_SUPPORTED
-    peerImpl->controller = std::make_shared<OHOS::Ace::NG::XComponentControllerNG>();
+    peerImpl->controller = std::make_shared<XComponentControllerNG>();
 #endif //XCOMPONENT_SUPPORTED
     return reinterpret_cast<Ark_XComponentController>(Referenced::RawPtr(peerImpl));
 }
@@ -180,8 +180,7 @@ void StartImageAnalyzerImpl(Ark_VMContext vmContext,
 {
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
-    peerImpl->TriggerStartImageAnalyzer(config, outputArgumentForReturningPromise);
+    peer->TriggerStartImageAnalyzer(vmContext, asyncWorker, config, outputArgumentForReturningPromise);
 #endif //XCOMPONENT_SUPPORTED
 }
 void StopImageAnalyzerImpl(Ark_XComponentController peer)

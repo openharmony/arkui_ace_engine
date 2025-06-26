@@ -47,6 +47,7 @@
 #include "core/components_ng/event/target_component.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/accessibility_property.h"
+#include "core/components_ng/base/lazy_compose_adapter.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
@@ -72,7 +73,6 @@ class Pattern;
 class StateModifyTask;
 class UITask;
 struct DirtySwapConfig;
-class ScrollWindowAdapter;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
@@ -776,6 +776,9 @@ public:
     RefPtr<FrameNode> FindChildByPositionWithoutChildTransform(float x, float y);
 
     RefPtr<NodeAnimatablePropertyBase> GetAnimatablePropertyFloat(const std::string& propertyName) const;
+    // For ArkTS1.2 to determine whether there is already an animable property with corresponding name on the node
+    // due to differences in compilation implementation.
+    bool HasAnimatableProperty(const std::string& propertyName) const;
     static RefPtr<FrameNode> FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName);
     void CreateAnimatablePropertyFloat(const std::string& propertyName, float value,
         const std::function<void(float)>& onCallbackEvent, const PropertyUnit& propertyType = PropertyUnit::UNKNOWN);
@@ -1208,6 +1211,22 @@ public:
 
     void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType) override;
 
+    /* ============================== Arkoala LazyForEach adapter section START ==============================*/
+    void ArkoalaSynchronize(
+        LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount);
+
+    void ArkoalaRemoveItemsOnChange(int32_t changeIndex);
+
+private:
+    RefPtr<LayoutWrapper> ArkoalaGetOrCreateChild(uint32_t index);
+    void ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached);
+
+    /* temporary adapter to provide LazyForEach feature in Arkoala */
+    std::unique_ptr<LazyComposeAdapter> arkoalaLazyAdapter_;
+
+public:
+    /* ============================== Arkoala LazyForEach adapter section END ================================*/
+
     void ChildrenUpdatedFrom(int32_t index);
     int32_t GetChildrenUpdated() const
     {
@@ -1341,11 +1360,6 @@ public:
     void AddVisibilityDumpInfo(const std::pair<uint64_t, std::pair<VisibleType, bool>>& dumpInfo);
 
     std::string PrintVisibilityDumpInfo() const;
-
-    ScrollWindowAdapter* GetScrollWindowAdapter() const;
-    ScrollWindowAdapter* GetOrCreateScrollWindowAdapter();
-    void MarkModifyDoneUnsafely();
-    void MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag);
 
     bool HasMultipleChild();
 
@@ -1492,6 +1506,11 @@ private:
     const char* GetPatternTypeName() const;
     const char* GetLayoutPropertyTypeName() const;
     const char* GetPaintPropertyTypeName() const;
+
+    void MarkModifyDoneMultiThread();
+    void MarkDirtyNodeMultiThread(PropertyChangeFlag extraFlag);
+    void RebuildRenderContextTreeMultiThread();
+    void MarkNeedRenderMultiThread(bool isRenderBoundary);
 
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.

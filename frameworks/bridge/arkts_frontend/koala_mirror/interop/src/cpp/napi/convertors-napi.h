@@ -66,9 +66,18 @@ napi_value makeUInt64(napi_env env, uint64_t value);
 napi_value makeFloat32(napi_env env, float value);
 napi_value makePointer(napi_env env, void* value);
 napi_value makeVoid(napi_env env);
-// napi_value makeObject(napi_env env, napi_value object);
 
-void* getPointer(napi_env env, napi_value value);
+void* getPointerSlow(napi_env env, napi_value value);
+
+inline void* getPointer(napi_env env, napi_value value) {
+  bool isWithinRange = true;
+  uint64_t ptrU64 = 0;
+  napi_status status = napi_get_value_bigint_uint64(env, value, &ptrU64, &isWithinRange);
+  if (status != 0 || !isWithinRange)
+    return getPointerSlow(env, value);
+  else
+    return reinterpret_cast<void*>(ptrU64);
+}
 void* getSerializerBufferPointer(napi_env env, napi_value value);
 
 template<>
@@ -79,12 +88,12 @@ struct InteropTypeConverter<KInteropBuffer> {
       bool isArrayBuffer = false;
       napi_is_arraybuffer(env, value, &isArrayBuffer);
       if (isArrayBuffer) {
-        napi_get_arraybuffer_info(env, value, &result.data, (size_t*)&result.length);
+        napi_get_arraybuffer_info(env, value, &result.data, reinterpret_cast<size_t*>(&result.length));
       } else {
         bool isDataView = false;
         napi_is_dataview(env, value, &isDataView);
         if (isDataView) {
-          napi_get_dataview_info(env, value, (size_t*)&result.length, &result.data, nullptr, nullptr);
+          napi_get_dataview_info(env, value, reinterpret_cast<size_t*>(&result.length), &result.data, nullptr, nullptr);
         }
       }
       return result;
@@ -558,11 +567,6 @@ template <>
 inline KNativePointerArray getArgument<KNativePointerArray>(const CallbackInfo& info, int index) {
   return getPointerElements(info, index);
 }
-
-// template <>
-// inline napi_value getArgument<napi_value>(const CallbackInfo& info, int index) {
-//   return getObject(info, index);
-// }
 
 template <>
 inline uint8_t* getArgument<uint8_t*>(const CallbackInfo& info, int index) {

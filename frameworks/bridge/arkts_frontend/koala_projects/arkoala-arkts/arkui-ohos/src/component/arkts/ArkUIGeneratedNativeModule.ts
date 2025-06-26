@@ -3974,7 +3974,11 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _UIContext_setDynamicDimming(ptr: KPointer, id: KStringPtr, value: number): void
     @ani.unsafe.Quick
-    native static _UIContext_getWindowName(ptr: KPointer): KInteropReturnBuffer
+    native static _UIContext_getWindowName(instanceId: number): string
+    @ani.unsafe.Quick
+    native static _UIContext_getWindowWidthBreakpoint(instanceId: number): number
+    @ani.unsafe.Quick
+    native static _UIContext_getWindowHeightBreakpoint(instanceId: number): number
     native static _UIContext_openBindSheet(ptr: KPointer, bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _UIContext_updateBindSheet(ptr: KPointer, bindSheetContent: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _UIContext_closeBindSheet(ptr: KPointer, bindSheetContent: KPointer): void
@@ -5902,6 +5906,8 @@ export class ArkUIGeneratedNativeModule {
     native static _EventTargetInfo_getFinalizer(): KPointer
     @ani.unsafe.Quick
     native static _EventTargetInfo_getId(ptr: KPointer): string
+    @ani.unsafe.Direct
+    native static _EventTargetInfo_isScrollableComponent(ptr: KPointer): boolean
     @ani.unsafe.Direct
     native static _GestureRecognizer_ctor(): KPointer
     @ani.unsafe.Direct

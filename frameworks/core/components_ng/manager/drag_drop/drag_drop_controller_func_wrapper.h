@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "base/geometry/ng/vector.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 
 namespace OHOS::Ace::NG {
 class FrameNode;
@@ -33,6 +34,7 @@ public:
     static OffsetF GetOriginNodeOffset(PreparedInfoForDrag& data, PreparedAsyncCtxForAnimate& asyncCtxData);
     static OffsetF GetPixelMapScaledOffset(const OffsetF& pointPosition, PreparedInfoForDrag& data,
         PreparedAsyncCtxForAnimate& asyncCtxData);
+    static std::shared_ptr<ScaleDataInfo> GetScaleInfo(int32_t containerId, float width, float height);
     static OffsetF GetTouchPointOffset(PreparedInfoForDrag& data, PreparedAsyncCtxForAnimate& asyncCtxData);
     static void UpdatePreviewPositionAndScale(const RefPtr<FrameNode>& imageNode, const OffsetF& frameOffset,
         float scale);

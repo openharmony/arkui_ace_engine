@@ -32,8 +32,8 @@ export class SrcDumper extends ArktsObject {
     constructor(pointer: KNativePointer) {
         super(pointer)
     }
-    static create1SrcDumper(node: AstNode | undefined, isDeclgen: boolean, isIsolatedDeclgen: boolean): SrcDumper {
-        return new SrcDumper(global.generatedEs2panda._CreateSrcDumper1(global.context, passNode(node), isDeclgen, isIsolatedDeclgen))
+    static create1SrcDumper(node: AstNode | undefined, isDeclgen: boolean): SrcDumper {
+        return new SrcDumper(global.generatedEs2panda._CreateSrcDumper1(global.context, passNode(node), isDeclgen))
     }
     /** @deprecated */
     add(str: string): this {
@@ -46,18 +46,28 @@ export class SrcDumper extends ArktsObject {
         return this
     }
     /** @deprecated */
-    add2(l: number): this {
-        global.generatedEs2panda._SrcDumperAdd2(global.context, this.peer, l)
+    add2(i: number): this {
+        global.generatedEs2panda._SrcDumperAdd2(global.context, this.peer, i)
         return this
     }
     /** @deprecated */
-    add3(f: number): this {
-        global.generatedEs2panda._SrcDumperAdd3(global.context, this.peer, f)
+    add3(i: number): this {
+        global.generatedEs2panda._SrcDumperAdd3(global.context, this.peer, i)
         return this
     }
     /** @deprecated */
-    add4(d: number): this {
-        global.generatedEs2panda._SrcDumperAdd4(global.context, this.peer, d)
+    add4(l: number): this {
+        global.generatedEs2panda._SrcDumperAdd4(global.context, this.peer, l)
+        return this
+    }
+    /** @deprecated */
+    add5(f: number): this {
+        global.generatedEs2panda._SrcDumperAdd5(global.context, this.peer, f)
+        return this
+    }
+    /** @deprecated */
+    add6(d: number): this {
+        global.generatedEs2panda._SrcDumperAdd6(global.context, this.peer, d)
         return this
     }
     get str(): string {
@@ -81,9 +91,6 @@ export class SrcDumper extends ArktsObject {
     get isDeclgen(): boolean {
         return global.generatedEs2panda._SrcDumperIsDeclgenConst(global.context, this.peer)
     }
-    get isIsolatedDeclgen(): boolean {
-        return global.generatedEs2panda._SrcDumperIsIsolatedDeclgenConst(global.context, this.peer)
-    }
     /** @deprecated */
     dumpNode(key: string): this {
         global.generatedEs2panda._SrcDumperDumpNode(global.context, this.peer, key)
@@ -102,4 +109,5 @@ export class SrcDumper extends ArktsObject {
         global.generatedEs2panda._SrcDumperRun(global.context, this.peer)
         return this
     }
+    protected readonly brandSrcDumper: undefined
 }

@@ -127,8 +127,8 @@
 #include "core/components_ng/pattern/video/video_model_ng.h"
 #include "core/components_ng/pattern/video/video_model_static.h"
 #ifdef WEB_SUPPORTED
-#include "core/components_ng/pattern/web/richtext_model_static.h"
-#include "core/components_ng/pattern/web/web_model_static.h"
+#include "core/components_ng/pattern/web/ani/richtext_model_static.h"
+#include "core/components_ng/pattern/web/ani/web_model_static.h"
 #endif // WEB_SUPPORTED
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/root/root_scene_model.h"

@@ -431,14 +431,18 @@ std::optional<StringArray> ResourceConverter::ToFontFamilies()
 std::optional<Dimension> ResourceConverter::ToDimension()
 {
     CHECK_NULL_RETURN(themeConstants_, std::nullopt);
-    if (type_ == ResourceType::FLOAT) {
+    if (type_ == ResourceType::INTEGER) {
+        auto resource = ToInt();
+        if (!resource) return std::nullopt;
+        return Dimension(*resource, DimensionUnit::VP);
+    } else if (type_ == ResourceType::FLOAT) {
         if (id_ == -1 && !params_.empty()) {
             return themeConstants_->GetDimensionByName(params_.front());
-        }
-        if (id_ != -1) {
+        } else if (id_ != -1) {
             return themeConstants_->GetDimension(id_);
+        } else {
+            LOGE("ResourceConverter::ToDimension Unknown resource value");
         }
-        LOGE("ResourceConverter::ToDimension Unknown resource value");
     }
     return std::nullopt;
 }
@@ -1327,6 +1331,7 @@ void AssignCast(std::optional<TextSpanType>& dst, const Ark_TextSpanType& src)
         case ARK_TEXT_SPAN_TYPE_TEXT: dst = TextSpanType::TEXT; break;
         case ARK_TEXT_SPAN_TYPE_IMAGE: dst = TextSpanType::IMAGE; break;
         case ARK_TEXT_SPAN_TYPE_MIXED: dst = TextSpanType::MIXED; break;
+        case ARK_TEXT_SPAN_TYPE_DEFAULT: dst = TextSpanType::NONE; break;
         default:
             LOGE("Unexpected enum value in Ark_TextSpanType: %{public}d", src);
             dst = std::nullopt;
@@ -1340,6 +1345,7 @@ void AssignCast(std::optional<TextResponseType>& dst, const Ark_TextResponseType
         case ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK: dst = TextResponseType::RIGHT_CLICK; break;
         case ARK_TEXT_RESPONSE_TYPE_LONG_PRESS: dst = TextResponseType::LONG_PRESS; break;
         case ARK_TEXT_RESPONSE_TYPE_SELECT: dst = TextResponseType::SELECTED_BY_MOUSE; break;
+        case ARK_TEXT_RESPONSE_TYPE_DEFAULT: dst = TextResponseType::NONE; break;
         default:
             LOGE("Unexpected enum value in Ark_TextResponseType: %{public}d", src);
             dst = std::nullopt;

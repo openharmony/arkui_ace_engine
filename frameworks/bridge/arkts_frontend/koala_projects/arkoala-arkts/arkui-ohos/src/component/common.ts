@@ -27,7 +27,8 @@ import { DrawContext } from "./../Graphics"
 import { LengthMetrics } from "../Graphics"
 import { ComponentContent, Context, ContextInternal, StateStylesOps } from "./arkui-custom"
 import { UIContext } from "@ohos/arkui/UIContext"
-import { IntentionCode, CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
+import { IntentionCode } from '@ohos.multimodalInput.intentionCode'
+import { CircleShape, EllipseShape, PathShape, RectShape, SymbolGlyphModifier, ImageModifier } from "./arkui-external"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, Axis, ResponseType, FunctionKey, ModifierKey, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, Curve, PlayMode, SharedTransitionEffectType, GradientDirection, HorizontalAlign, VerticalAlign, TransitionType, FontWeight, FontStyle, TouchType, InteractionHand, CrownAction, Placement, ArrowPointPosition, ClickEffectLevel, NestedScrollMode, PixelRoundCalcPolicy, IlluminatedType, MouseButton, MouseAction, AccessibilityHoverType, AxisAction, AxisModel, ScrollSource } from "./enums"
 import { ResourceColor, ConstraintSizeOptions, DirectionalEdgesT, SizeOptions, Length, ChainWeightOptions, Padding, LocalizedPadding, Position, BorderOptions, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, Area, LocalizedEdges, LocalizedPosition, ResourceStr, AccessibilityOptions, PX, VP, FP, LPX, Percentage, Bias, Font, EdgeStyles, Edges } from "./units"
 import { Resource } from "global.resource"
@@ -1227,8 +1228,22 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         ArkUIGeneratedNativeModule._KeyEvent_setIntentionCode(this.peer!.ptr, TypeChecker.IntentionCode_ToNumeric(intentionCode))
     }
     private getUnicode_serialize(): number | undefined {
-        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getUnicode(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getUnicode(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        let returnResult : number | undefined
+        const returnResult_runtimeType = (retvalDeserializer.readInt8() as int32)
+        if ((RuntimeType.UNDEFINED) != (returnResult_runtimeType))
+        {
+            returnResult = (retvalDeserializer.readNumber() as number)
+        }
+        return returnResult
     }
     private setUnicode_serialize(unicode: number): void {
         ArkUIGeneratedNativeModule._KeyEvent_setUnicode(this.peer!.ptr, unicode)
@@ -3439,6 +3454,10 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_animation(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    SetOrCreateAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        ArkUIAniModule._Animation_SetOrCreateAnimatableProperty(this.peer.ptr, functionName, value, callback);
+    }
     transition0Attribute(value: TransitionOptions | TransitionEffect | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
@@ -5583,7 +5602,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_expandSafeArea(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    backgroundAttribute(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): void {
+    backgroundAttribute(builder: CustomBuilder | undefined, options?: BackgroundOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         let builder_type : int32 = RuntimeType.UNDEFINED
         builder_type = runtimeType(builder)
@@ -7050,6 +7069,10 @@ export interface ProvideOptions {
     allowOverride?: string;
 }
 export interface AnimatableArithmetic<T> {
+    plus(rhs:AnimatableArithmetic<T>): AnimatableArithmetic<T>;
+    subtract(rhs:AnimatableArithmetic<T>): AnimatableArithmetic<T>;
+    multiply(scale:number): AnimatableArithmetic<T>;
+    equals(rhs:AnimatableArithmetic<T>): boolean;
 }
 export type ReuseIdCallback = () => string;
 export interface ReuseOptions {
@@ -7996,6 +8019,12 @@ export interface InvertOptions {
     threshold: number;
     thresholdRange: number;
 }
+export interface DividerStyle {
+    strokeWidth: Length;
+    color?: ResourceColor;
+    startMargin?: Length;
+    endMargin?: Length;
+}
 export type TipsMessageType = ResourceStr | StyledString;
 export interface BackgroundImageOptions {
     syncLoad?: boolean;
@@ -8028,7 +8057,7 @@ export type Callback_DragEvent_String_Void = (event: DragEvent, extraParams?: st
 export type Callback_PreDragStatus_Void = (parameter: PreDragStatus) => void;
 export type Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult = (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult;
 export type Callback_TouchEvent_HitTestMode = (parameter: TouchEvent) => HitTestMode;
-export interface Literal_Alignment_align {
+export interface BackgroundOptions {
     align?: Alignment;
 }
 export interface CommonMethod {
@@ -8096,6 +8125,8 @@ export interface CommonMethod {
     focusBox(value: FocusBoxStyle | undefined): this
     animationStart(value: AnimateParam | undefined): this
     animationStop(value: AnimateParam | undefined):this
+    __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void
     transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this
     motionBlur(value: MotionBlurOptions | undefined): this
     brightness(value: number | undefined): this
@@ -8194,7 +8225,7 @@ export interface CommonMethod {
     accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this
     customProperty(name: string | undefined, value: Object | undefined): this
     expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this
-    background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this
+    background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this
     backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this
     backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
     foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
@@ -8576,6 +8607,8 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public animationStop(value: AnimateParam | undefined): this {
         return this
     }
+    public __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {}
     public animation(value: AnimateParam | undefined): this {
         return this
     }
@@ -8873,7 +8906,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {
         return this
     }
-    public background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this {
+    public background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         return this
     }
     public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
@@ -9943,6 +9976,15 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             return this
         }
         return this
+    }
+    public __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        const function_type = runtimeType(callback)
+        if (RuntimeType.FUNCTION === function_type) {
+            this.getPeer()?.SetOrCreateAnimatableProperty(functionName, value, callback);
+        } else {
+            throw new Error('__createOrSetAnimatableProperty format error')
+        }
     }
     public transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this {
         if (this.checkPriority("transition")) {
@@ -11101,10 +11143,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this {
+    public background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         if (this.checkPriority("background")) {
             const builder_casted = builder as (CustomBuilder | undefined)
-            const options_casted = options as (Literal_Alignment_align)
+            const options_casted = options as (BackgroundOptions)
             this.getPeer()?.backgroundAttribute(builder_casted, options_casted)
             return this
         }
