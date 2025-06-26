@@ -20,6 +20,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/force_split/force_split_utils.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/color.h"
@@ -255,6 +256,7 @@ void NavigationModelNG::Create(bool useHomeDestination)
         return;
     }
     if (!CreatePrimaryContentIfNeeded(navigationGroupNode) || // primaryContent node
+        !CreateForceSplitPlaceHolderIfNeeded(navigationGroupNode) || // forcesplit placeHolder node
         !CreateContentNodeIfNeeded(navigationGroupNode) || // content node
         !CreateDividerNodeIfNeeded(navigationGroupNode)) { // divider node
         return;
@@ -293,6 +295,26 @@ bool NavigationModelNG::CreatePrimaryContentIfNeeded(const RefPtr<NavigationGrou
         HitTestMode::HTMTRANSPARENT_SELF);
     navigationGroupNode->AddChild(contentNode);
     navigationGroupNode->SetPrimaryContentNode(contentNode);
+    return true;
+}
+
+bool NavigationModelNG::CreateForceSplitPlaceHolderIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode)
+{
+    CHECK_NULL_RETURN(navigationGroupNode, false);
+    auto context = navigationGroupNode->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto manager = context->GetNavigationManager();
+    CHECK_NULL_RETURN(manager, false);
+    if (!manager->IsForceSplitSupported()) {
+        return true;
+    }
+    if (navigationGroupNode->GetForceSplitPlaceHolderNode()) {
+        return true;
+    }
+    auto phNode = ForceSplitUtils::CreatePlaceHolderNode();
+    CHECK_NULL_RETURN(phNode, false);
+    navigationGroupNode->AddChild(phNode);
+    navigationGroupNode->SetForceSplitPlaceHolderNode(phNode);
     return true;
 }
 

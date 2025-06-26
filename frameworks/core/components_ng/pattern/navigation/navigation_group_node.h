@@ -76,6 +76,14 @@ public:
     {
         return primaryContentNode_;
     }
+    void SetForceSplitPlaceHolderNode(const RefPtr<UINode>& node)
+    {
+        forceSplitPlaceHolderNode_ = node;
+    }
+    const RefPtr<UINode>& GetForceSplitPlaceHolderNode() const
+    {
+        return forceSplitPlaceHolderNode_;
+    }
 
     void SetNavBarNode(const RefPtr<UINode>& navBarNode)
     {
@@ -406,7 +414,6 @@ private:
     std::optional<bool> useHomeDestination_;
     RefPtr<UINode> customHomeNode_;
     RefPtr<UINode> customHomeDestination_;
-    RefPtr<UINode> primaryContentNode_;
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> dividerNode_;
@@ -429,7 +436,12 @@ private:
     std::string navigationPathInfo_;
     std::string navigationModuleName_;
     int32_t preLastStandardIndex_ = -1;
+
+    //-------for force split------- begin------
     std::vector<RefPtr<NavDestinationGroupNode>> primaryNodesToBeRemoved_;
+    RefPtr<UINode> primaryContentNode_;
+    RefPtr<UINode> forceSplitPlaceHolderNode_;
+    //-------for force split------- end  ------
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_GROUP_NODE_H

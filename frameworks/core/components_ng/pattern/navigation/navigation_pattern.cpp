@@ -540,7 +540,8 @@ void NavigationPattern::OnModifyDone()
     }
 
     bool enableModeChangeAnimation = layoutProperty->GetEnableModeChangeAnimation().value_or(true);
-    if (enableModeChangeAnimation && GetNavigationMode() == NavigationMode::SPLIT && GetNavBarVisibilityChange()) {
+    if (enableModeChangeAnimation && GetNavigationMode() == NavigationMode::SPLIT && GetNavBarVisibilityChange() &&
+        !forceSplitSuccess_) { // there is no need for navBar animation in the forceSplit scenario.
         DoNavbarHideAnimation(hostNode);
     }
 
@@ -5237,8 +5238,12 @@ void NavigationPattern::AdjustNodeForDestForceSplit(bool needFireLifecycle)
     CHECK_NULL_VOID(navBar);
     auto navContentNode = AceType::DynamicCast<FrameNode>(host->GetContentNode());
     CHECK_NULL_VOID(navContentNode);
+    auto navContentProperty = navContentNode->GetLayoutProperty();
+    CHECK_NULL_VOID(navContentProperty);
     auto primaryContentNode = AceType::DynamicCast<FrameNode>(host->GetPrimaryContentNode());
     CHECK_NULL_VOID(primaryContentNode);
+    auto forceSplitPhNode = AceType::DynamicCast<FrameNode>(host->GetForceSplitPlaceHolderNode());
+    CHECK_NULL_VOID(forceSplitPhNode);
 
     auto prePrimaryNodes = primaryNodes_;
     primaryNodes_.clear();
@@ -5247,6 +5252,10 @@ void NavigationPattern::AdjustNodeForDestForceSplit(bool needFireLifecycle)
     std::vector<RefPtr<NavDestinationGroupNode>> destNodes;
     CalcNavDestinationNodeIndex(destNodes, homeNodeIndex, lastStandardIndex);
     if (destNodes.empty() || homeNodeIndex > lastStandardIndex) {
+        auto property = forceSplitPhNode->GetLayoutProperty();
+        CHECK_NULL_VOID(property);
+        property->UpdateVisibility(VisibleType::INVISIBLE);
+        navContentProperty->UpdateVisibility(VisibleType::VISIBLE);
         return;
     }
 
@@ -5265,6 +5274,29 @@ void NavigationPattern::AdjustNodeForDestForceSplit(bool needFireLifecycle)
     }
 
     UpdatePrimaryContentIfNeeded(primaryContentNode, prePrimaryNodes);
+    UpdateNavContentAndPlaceHolderVisibility(navContentNode, forceSplitPhNode, destNodes);
+}
+
+void NavigationPattern::UpdateNavContentAndPlaceHolderVisibility(const RefPtr<FrameNode>& navContentNode,
+    const RefPtr<FrameNode>& phNode, const std::vector<RefPtr<NavDestinationGroupNode>>& stackNodes)
+{
+    CHECK_NULL_VOID(navContentNode);
+    CHECK_NULL_VOID(phNode);
+    bool needSetPhVisible = true;
+    if (stackNodes.empty() || primaryNodes_.empty()) {
+        needSetPhVisible = false;
+    } else {
+        auto lastPrimaryNode = primaryNodes_.back().Upgrade();
+        if (lastPrimaryNode != stackNodes.back()) {
+            needSetPhVisible = false;
+        }
+    }
+    auto property = phNode->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    auto navContentProperty = navContentNode->GetLayoutProperty();
+    CHECK_NULL_VOID(navContentProperty);
+    property->UpdateVisibility(needSetPhVisible ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
+    navContentProperty->UpdateVisibility(needSetPhVisible ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
 }
 
 void NavigationPattern::AdjustPrimaryAndPlaceHolderPosition(
@@ -5348,6 +5380,8 @@ void NavigationPattern::AdjustNodeForNonDestForceSplit(bool needFireLifecycle)
     CHECK_NULL_VOID(navContentNode);
     auto primaryContentNode = AceType::DynamicCast<FrameNode>(host->GetPrimaryContentNode());
     CHECK_NULL_VOID(primaryContentNode);
+    auto phNode = AceType::DynamicCast<FrameNode>(host->GetForceSplitPlaceHolderNode());
+    CHECK_NULL_VOID(phNode);
 
     if (needFireLifecycle) {
         FirePrimaryNodesLifecycle(NavDestinationLifecycle::ON_HIDE);
@@ -5361,6 +5395,17 @@ void NavigationPattern::AdjustNodeForNonDestForceSplit(bool needFireLifecycle)
         RestoreNodeFromPlaceHolder(primaryContentNode, navContentNode, node);
     }
     host->AddChild(navBar);
+    auto property = phNode->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    auto navContentProperty = navContentNode->GetLayoutProperty();
+    CHECK_NULL_VOID(navContentProperty);
+    if (forceSplitSuccess_ && stackNodePairs.empty()) {
+        property->UpdateVisibility(VisibleType::VISIBLE);
+        navContentProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    } else {
+        property->UpdateVisibility(VisibleType::INVISIBLE);
+        navContentProperty->UpdateVisibility(VisibleType::VISIBLE);
+    }
 }
 
 bool NavigationPattern::IsDestinationNeedHideInPush(

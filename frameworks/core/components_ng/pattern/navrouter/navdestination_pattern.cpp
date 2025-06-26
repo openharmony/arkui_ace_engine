@@ -347,6 +347,13 @@ bool NavDestinationPattern::GetBackButtonState()
         navigationLayoutProperty->GetHideNavBarValue(false))) {
         showBackButton = false;
     }
+    /**
+     * When using navBar as home in forceSplit scenario, the first NavDestination on
+     * the right side need to hide it's backButton.
+     */
+    if (pattern->IsForceSplitSuccess() && pattern->IsForceSplitUseNavBar() && index == 0) {
+        showBackButton = false;
+    }
     auto isCustomTitle = hostNode->GetPrevTitleIsCustomValue(false);
     if (isCustomTitle) {
         return showBackButton;
