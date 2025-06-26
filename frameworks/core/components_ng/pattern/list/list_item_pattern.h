@@ -209,10 +209,7 @@ public:
         return listItemStyle_;
     }
 
-    void SetListItemStyle(V2::ListItemStyle style)
-    {
-        listItemStyle_ = style;
-    }
+    void SetListItemStyle(V2::ListItemStyle style);
 
     void SetOffsetChangeCallBack(OnOffsetChangeFunc&& offsetChangeCallback);
 
