@@ -20,6 +20,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "core/common/layout_inspector.h"
+#include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/log/event_report.h"
@@ -51,8 +52,6 @@ constexpr double FRICTION = 0.9;
 constexpr double VELOCITY_SCALE = 0.8;
 constexpr double ADJUSTABLE_VELOCITY = 0.0;
 #endif
-constexpr float FRICTION_SCALE = -4.2f;
-constexpr uint32_t CUSTOM_SPRING_ANIMATION_DURATION = 1000;
 constexpr uint64_t MILLOS_PER_NANO_SECONDS = 1000 * 1000 * 1000;
 constexpr uint64_t MIN_DIFF_VSYNC = 1000 * 1000; // min is 1ms
 constexpr float DEFAULT_THRESHOLD = 0.75f;

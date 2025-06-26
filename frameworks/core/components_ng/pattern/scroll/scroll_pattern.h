@@ -62,7 +62,10 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<ScrollLayoutAlgorithm>(currentOffset_, crossOffset_);
+        if (offset_) {
+            return MakeRefPtr<ScrollLayoutAlgorithm>(offset_->Get().GetX(), offset_->Get().GetY());
+        }
+        return MakeRefPtr<ScrollLayoutAlgorithm>(currentOffset_);
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override;
@@ -452,9 +455,13 @@ public:
 
 private:
     void InitFreeScroll();
+    void InitFreeTouch();
+    void TryBounceBack();
 
+    RefPtr<NodeAnimatablePropertyOffsetF> offset_;
     RefPtr<PanRecognizer> freePanGesture_; // all-direction pan recognizer for free scroll mode
-    float crossOffset_ = 0.0f; // offset on the vertical axis (currentOffset_ represents horizontal axis in Free Scroll mode)
+    RefPtr<TouchEventImpl> freeTouch_;
+    float friction_ = 0.0f;
     /* ============================================================================== */
 
     // scrollSnap

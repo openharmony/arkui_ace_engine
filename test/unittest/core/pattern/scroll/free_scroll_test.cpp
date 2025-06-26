@@ -139,13 +139,12 @@ HWTEST_F(FreeScrollTest, ModeChange002, TestSize.Level1)
     model.SetAxis(Axis::FREE);
     CreateFreeContent({ 2000, 2000 });
     CreateScrollDone();
-
-    pattern_->crossOffset_ = 50.0;
-    pattern_->currentOffset_ = 20.0;
+    ASSERT_TRUE(pattern_->offset_);
+    pattern_->currentOffset_ = 20.0f;
 
     layoutProperty_->UpdateAxis(Axis::VERTICAL);
     pattern_->OnModifyDone();
-    EXPECT_EQ(pattern_->crossOffset_, 0);
-    EXPECT_EQ(pattern_->currentOffset_, 0);
+    ASSERT_FALSE(pattern_->offset_);
+    ASSERT_EQ(pattern_->currentOffset_, 0);
 }
 } // namespace OHOS::Ace::NG

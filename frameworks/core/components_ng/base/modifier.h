@@ -440,7 +440,12 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(NodeAnimatableProperty);
 };
 
+// Explicit instantiation declarations
+extern template class NodeAnimatableProperty<float, AnimatablePropertyFloat>;
+extern template class NodeAnimatableProperty<OffsetF, AnimatablePropertyOffsetF>;
+
 using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
+using NodeAnimatablePropertyOffsetF = NodeAnimatableProperty<OffsetF, AnimatablePropertyOffsetF>;
 using NodeAnimatableArithmeticProperty =
     NodeAnimatableProperty<RefPtr<CustomAnimatableArithmetic>, AnimatableArithmeticProperty>;
 } // namespace OHOS::Ace::NG
