@@ -64,6 +64,8 @@
     "pages/Scroll/CustomSnap",
     "pages/Scroll/NestedScrollBar",
     "pages/Scroll/RecycleView/Index",
-    "pages/Scroll/ScrollNode"
+    "pages/Scroll/ScrollNode",
+    "pages/LazyVGridLayout/LazyVGridLayoutMainPage",
+    "pages/LazyVGridLayout/LazyVGridLayoutAttribute"
   ]
 }
