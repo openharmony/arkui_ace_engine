@@ -1837,10 +1837,8 @@ class CustomDialogContentComponent extends ViewV2 {
     this.titleIndex = 0;
     this.contentIndex = 1;
     this.buttonIndex = 2;
-    this.primaryTitleMaxFontSize = `${TITLE_S}fp`;
-    this.primaryTitleMinFontSize = `${BODY_L}fp`;
-    this.secondaryTitleMaxFontSize = `${SUBTITLE_S}fp`;
-    this.secondaryTitleMinFontSize = `${BODY_S}fp`;
+    this.primaryTitleFontSize = `${TITLE_S}fp`;
+    this.secondaryTitleFontSize = `${SUBTITLE_S}fp`;
     this.scroller = new Scroller();
     this.initParam('isHasDefaultFocus', (params && 'isHasDefaultFocus' in params) ? params.isHasDefaultFocus : false);
     this.initParam('isAllFocusFalse', (params && 'isAllFocusFalse' in params) ? params.isAllFocusFalse : false);
@@ -2155,8 +2153,7 @@ class CustomDialogContentComponent extends ViewV2 {
       Text.fontWeight(FontWeight.Bold);
       Text.fontColor(this.primaryTitleFontColorWithTheme);
       Text.textAlign(this.titleTextAlign);
-      Text.maxFontSize(this.primaryTitleMaxFontSize);
-      Text.minFontSize(this.primaryTitleMinFontSize);
+      Text.fontSize(this.primaryTitleFontSize);
       Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
       Text.maxLines(TITLE_MAX_LINES);
       Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST);
@@ -2191,8 +2188,7 @@ class CustomDialogContentComponent extends ViewV2 {
       Text.fontWeight(FontWeight.Regular);
       Text.fontColor(this.secondaryTitleFontColorWithTheme);
       Text.textAlign(this.titleTextAlign);
-      Text.maxFontSize(this.secondaryTitleMaxFontSize);
-      Text.minFontSize(this.secondaryTitleMinFontSize);
+      Text.fontSize(this.secondaryTitleFontSize);
       Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
       Text.maxLines(TITLE_MAX_LINES);
       Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST);
