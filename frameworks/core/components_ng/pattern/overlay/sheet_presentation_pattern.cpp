@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/stage/content_root_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -106,9 +107,10 @@ void SheetPresentationPattern::OnModifyDone()
     }
     InitPanEvent();
     InitPageHeight();
-    InitScrollProps();
     UpdateSheetType();
     UpdateSheetObject(sheetType_);
+    InitSheetMode();
+    InitScrollProps();
     InitFoldCreaseRegion();
 }
 
@@ -203,7 +205,6 @@ void SheetPresentationPattern::InitPageHeight()
     if (!NearEqual(currentTopSafeArea, sheetTopSafeArea_)) {
         topSafeAreaChanged_ = true;
     }
-    InitSheetMode();
 }
 
 void SheetPresentationPattern::InitScrollProps()
@@ -240,19 +241,9 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
     UpdateSheetTitle();
     ClipSheetNode();
 
-    auto sheetType = GetSheetType();
-    if (sheetType != SheetType::SHEET_POPUP && sheetType != SheetType::SHEET_SIDE) {
-        if (windowRotate_) {
-            // When rotating the screen,
-            // first switch the sheet to the position corresponding to the proportion before rotation
-            TranslateTo(pageHeight_ - height_);
-            windowRotate_ = false;
-        } else {
-            // After rotation, if need to avoid the keyboard, trigger the avoidance behavior
-            AvoidSafeArea();
-        }
-    }
-    if (GetSheetType() == SheetType::SHEET_POPUP) {
+    sheetObject_->AvoidKeyboardInDirtyLayoutProcess();
+    
+    if (sheetType_ == SheetType::SHEET_POPUP) {
         MarkSheetPageNeedRender();
     }
     return true;
@@ -897,7 +888,19 @@ float SheetPresentationPattern::InitialSingleGearHeight(NG::SheetStyle& sheetSty
     return sheetHeight;
 }
 
+void SheetPresentationPattern::BeforeCreateLayoutWrapper()
+{
+    ContentRootPattern::BeforeCreateLayoutWrapper();
+    CHECK_NULL_VOID(sheetObject_);
+    sheetObject_->BeforeCreateLayoutWrapper();
+}
+
 void SheetPresentationPattern::AvoidSafeArea(bool forceAvoid)
+{
+    sheetObject_->AvoidKeyboard(forceAvoid);
+}
+
+void SheetPresentationPattern::AvoidKeyboard(bool forceAvoid)
 {
     auto sheetType = GetSheetType();
     if (sheetType == SheetType::SHEET_POPUP || IsCurSheetNeedHalfFoldHover() ||
@@ -1930,7 +1933,7 @@ void SheetPresentationPattern::InitSheetMode()
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     scrollSizeMode_ = sheetStyle.scrollSizeMode.value_or(ScrollSizeMode::FOLLOW_DETENT);
-    keyboardAvoidMode_ = sheetStyle.sheetKeyboardAvoidMode.value_or(SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL);
+    keyboardAvoidMode_ = sheetStyle.sheetKeyboardAvoidMode.value_or(sheetObject_->GetAvoidKeyboardModeByDefault());
     sheetEffectEdge_ = sheetStyle.sheetEffectEdge.value_or(SheetEffectEdge::ALL);
 }
 
@@ -3875,6 +3878,7 @@ void SheetPresentationPattern::UpdateSheetObject(SheetType type)
     FireOnTypeDidChange();
     // start init new sheet data
     InitPanEvent();
+    InitSheetMode();
     isFirstInit_ = false;
     AvoidAiBar();
 }

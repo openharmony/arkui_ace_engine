@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
+#include "core/components_ng/pattern/sheet/side/sheet_side_object.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -128,6 +129,8 @@ void SheetPresentationSideLayoutAlgorithm::MeasureScrollNode(LayoutWrapper* layo
     CHECK_NULL_VOID(host);
     auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
+    auto sideObject = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    CHECK_NULL_VOID(sideObject);
     auto scrollNode = sheetPattern->GetSheetScrollNode();
     CHECK_NULL_VOID(scrollNode);
     auto index = host->GetChildIndexById(scrollNode->GetId());
@@ -147,7 +150,7 @@ void SheetPresentationSideLayoutAlgorithm::MeasureScrollNode(LayoutWrapper* layo
     childConstraint.maxSize.SetHeight(childHeight);
     childConstraint.parentIdealSize = OptionalSizeF(childWidth, childHeight);
     childConstraint.percentReference = SizeF(childWidth, childHeight);
-    childConstraint.selfIdealSize = OptionalSizeF(childWidth, childHeight);
+    childConstraint.selfIdealSize = OptionalSizeF(childWidth, childHeight - sideObject->GetResizeDecreasedHeight());
     scrollWrapper->Measure(childConstraint);
 }
 

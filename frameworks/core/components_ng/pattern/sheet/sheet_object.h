@@ -52,6 +52,10 @@ public:
     virtual void HandleDragEnd(float dragVelocity);
     virtual void ModifyFireSheetTransition(float dragVelocity);
     virtual void CreatePropertyCallback();
+    virtual void BeforeCreateLayoutWrapper() {};
+    virtual SheetKeyboardAvoidMode GetAvoidKeyboardModeByDefault() const;
+    virtual void AvoidKeyboardInDirtyLayoutProcess();
+    virtual void AvoidKeyboard(bool forceAvoid);
 
     virtual ScrollResult HandleScroll(float scrollOffset, int32_t source,
         NestedState state, float velocity = 0.f);

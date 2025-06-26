@@ -43,6 +43,10 @@ public:
     void HandleDragEnd(float dragVelocity) override;
     void ModifyFireSheetTransition(float dragVelocity) override;
     void CreatePropertyCallback() override;
+    void BeforeCreateLayoutWrapper() override;
+    SheetKeyboardAvoidMode GetAvoidKeyboardModeByDefault() const override;
+    void AvoidKeyboardInDirtyLayoutProcess() override {};
+    void AvoidKeyboard(bool forceAvoid) override;
 
     ScrollResult HandleScroll(float scrollOffset, int32_t source, NestedState state, float velocity = 0.f) override
     {
@@ -60,7 +64,10 @@ public:
         return PanDirection::HORIZONTAL;
     }
 
-    float GetSheetWidhtBeforeDragUpdate() const;
+    float GetResizeDecreasedHeight() const
+    {
+        return resizeDecreasedHeight_;
+    }
 
 private:
     void UpdateSidePosition();
@@ -71,6 +78,10 @@ private:
     void HandleDragUpdateForRTL(const GestureEvent& info);
     void TransformTranslateEnter();
     void TransformTranslateExit();
+    void DecreaseScrollHeightInSideSheet(uint32_t decreaseHeight);
+    float GetUpOffsetCaretNeed();
+
+    float resizeDecreasedHeight_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 
