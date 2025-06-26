@@ -1093,6 +1093,7 @@ private:
     void CheckAndSetWebNestedScrollExisted();
     void CalculateTooltipOffset(RefPtr<FrameNode>& tooltipNode, OffsetF& tooltipOfffset);
     void HandleShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
+    bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
     void ShowTooltip(const std::string& tooltip, int64_t tooltipTimestamp);
     void UpdateTooltipContentColor(const RefPtr<FrameNode>& textNode);
     void RegisterVisibleAreaChangeCallback(const RefPtr<PipelineContext> &context);
