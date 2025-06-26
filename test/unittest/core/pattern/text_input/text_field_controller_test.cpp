@@ -1447,6 +1447,14 @@ HWTEST_F(TextFieldControllerTest, GetSubParagraphByOffset, TestSize.Level1)
     controller->GetSubParagraphByOffset(pos, start, end);
     EXPECT_EQ(start, 0);
     EXPECT_EQ(end, 3);
+
+    pos = 100;
+    start = 2;
+    end = 2;
+    controller->contentController_->content_.resize(7, WIDE_NEWLINE[1]);
+    controller->GetSubParagraphByOffset(pos, start, end);
+    EXPECT_EQ(start, 101);
+    EXPECT_EQ(end, 100);
 }
 
 /**

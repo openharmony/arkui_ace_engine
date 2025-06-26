@@ -1153,6 +1153,10 @@ void JSText::SetShaderStyle(const JSCallbackInfo& info)
 void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient)
 {
     CalcDimension value;
+    if (info.Length() < 1 || (info.Length() > 0 && !info[0]->IsObject())) {
+        TextModel::GetInstance()->ResetGradientShaderStyle();
+        return;
+    }
     auto shaderStyleObj = JSRef<JSObject>::Cast(info[0]);
     if (shaderStyleObj->HasProperty("center") && shaderStyleObj->HasProperty("radius")) {
         NewJsRadialGradient(info, gradient);
