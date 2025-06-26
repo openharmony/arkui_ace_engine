@@ -24,7 +24,7 @@ constexpr float CONTENT_W = 2000;
 constexpr float CONTENT_H = 2000;
 constexpr float SMALL_CONTENT_W = 100;
 constexpr float SMALL_CONTENT_H = 50;
-}
+} // namespace
 
 class FreeScrollTest : public ScrollTestNg {
 public:
@@ -169,7 +169,7 @@ HWTEST_F(FreeScrollTest, OverScroll001, TestSize.Level1)
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
     ASSERT_TRUE(pattern_->offset_);
-    pattern_->offset_->Set(OffsetF{X, Y});
+    pattern_->offset_->Set(OffsetF { X, Y });
     FlushUITasks(frameNode_);
 
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(X, Y));
@@ -179,12 +179,12 @@ HWTEST_F(FreeScrollTest, OverScroll001, TestSize.Level1)
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(WIDTH - CONTENT_W, HEIGHT - CONTENT_H).ToString());
 
     ScrollModelNG::SetEdgeEffect(frameNode_.GetRawPtr(), EdgeEffect::SPRING, true, EffectEdge::START);
-    pattern_->offset_->Set(OffsetF{X, Y});
+    pattern_->offset_->Set(OffsetF { X, Y });
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(WIDTH - CONTENT_W, HEIGHT - CONTENT_H).ToString());
 
     ScrollModelNG::SetEdgeEffect(frameNode_.GetRawPtr(), EdgeEffect::SPRING, true, EffectEdge::END);
-    pattern_->offset_->Set(OffsetF{X, Y});
+    pattern_->offset_->Set(OffsetF { X, Y });
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(X, Y));
 }
@@ -202,7 +202,7 @@ HWTEST_F(FreeScrollTest, OverScroll002, TestSize.Level1)
     CreateFreeContent({ SMALL_CONTENT_W, SMALL_CONTENT_H });
     CreateScrollDone();
     ASSERT_TRUE(pattern_->offset_);
-    pattern_->offset_->Set(OffsetF{X, Y});
+    pattern_->offset_->Set(OffsetF { X, Y });
     FlushUITasks(frameNode_);
 
     constexpr float alignX = (WIDTH - SMALL_CONTENT_W) / 2;
@@ -215,12 +215,12 @@ HWTEST_F(FreeScrollTest, OverScroll002, TestSize.Level1)
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(alignX, alignY).ToString());
 
     ScrollModelNG::SetEdgeEffect(frameNode_.GetRawPtr(), EdgeEffect::SPRING, true, EffectEdge::START);
-    pattern_->offset_->Set(OffsetF{X, -Y});
+    pattern_->offset_->Set(OffsetF { X, -Y });
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(alignX, alignY - Y).ToString());
 
     ScrollModelNG::SetEdgeEffect(frameNode_.GetRawPtr(), EdgeEffect::SPRING, true, EffectEdge::END);
-    pattern_->offset_->Set(OffsetF{-X, -Y});
+    pattern_->offset_->Set(OffsetF { -X, -Y });
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(alignX, alignY).ToString());
 }
