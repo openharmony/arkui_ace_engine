@@ -616,7 +616,7 @@ public:
     explicit KeyEventInfo(const KeyEvent& event) : BaseEventInfo("keyEvent")
     {
         keyCode_ = event.code;
-        keyText_ = event.key.c_str();
+        keyText_ = event.key;
         keyType_ = event.action;
         keySource_ = event.sourceType;
         keyIntention_ = event.keyIntention;
@@ -642,7 +642,7 @@ public:
     }
     const char* GetKeyText() const
     {
-        return keyText_;
+        return keyText_.c_str();
     }
     int32_t GetMetaKey() const
     {
@@ -686,7 +686,7 @@ public:
 
 private:
     KeyCode keyCode_ = KeyCode::KEY_UNKNOWN;
-    const char* keyText_ = "";
+    std::string keyText_ = "";
     KeyAction keyType_ = KeyAction::UNKNOWN;
     int32_t metaKey_ = 0;
     SourceType keySource_ = SourceType::NONE;
