@@ -36,7 +36,6 @@ template("arkts_frontend") {
         ]
     } else {    
         deps = [
-          ":ArkoalaNative_ark",
 #          "arkoala:arkoala_prebuild",
           "koala_mirror/ui2abc:ui2abc_panda_sdk",    
           "koala_mirror/ui2abc:ui2abc",
@@ -91,48 +90,6 @@ config("arkoala_native_config") {
   ]
 }
 
-ohos_shared_library("ArkoalaNative_ark") {
-  defines = [
-    "KOALA_OHOS",
-    "__MUSL__",
-    "KOALA_ETS_NAPI",
-    "KOALA_USE_PANDA_VM",
-  ]
-
-  sources = [
-    "koala_mirror/arkoala-arkts/framework/native/src/events.cc",
-    "koala_mirror/arkoala-arkts/framework/native/src/generated/bridge_custom.cc",
-    "koala_mirror/arkoala-arkts/framework/native/src/generated/bridge_generated.cc",
-    "koala_mirror/arkoala-arkts/framework/native/src/generated/callback_deserialize_call.cc",
-    "koala_mirror/arkoala-arkts/framework/native/src/generated/callback_managed_caller.cc",
-    "koala_mirror/arkoala-arkts/framework/native/src/generated/library.cc",
-    "koala_mirror/arkoala-arkts/framework/native/src/vsync.cc",
-  ]
-
-  # interop source
-  sources += [
-    "koala_mirror/interop/src/cpp/callback-resource.cc",
-    "koala_mirror/interop/src/cpp/common-interop.cc",
-    "koala_mirror/interop/src/cpp/ets/convertors-ets.cc",
-    "koala_mirror/interop/src/cpp/interop-logging.cc",
-    "koala_mirror/interop/src/cpp/types/signatures.cc",
-  ]
-
-  deps = [
-#    "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:arkoala_native_ani",
-  ]
-
-  configs = [ ":arkoala_native_config" ]
-
-  external_deps = [
-    "hilog:hilog_ndk",
-    "hilog:libhilog",
-  ]
-
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
 if (use_linux) {
   loader_include_dirs = [
     "koala_projects/arkoala/framework/native/src",
@@ -180,25 +137,6 @@ if (use_linux) {
     part_name = ace_engine_part
   }
 
-  ohos_shared_library("vmloader") {
-    include_dirs = loader_include_dirs + [ "koala_projects/interop/src/cpp/ani" ]
-
-    defines = [
-      "KOALA_LINUX",
-      "KOALA_ANI",
-      "KOALA_ETS_NAPI",
-    ]
-
-    sources = [ "koala_projects/interop/src/cpp/vmloader.cc" ]
-
-    external_deps = [
-      "hilog:hilog_ndk",
-      "napi:ace_napi",
-    ]
-
-    subsystem_name = ace_engine_subsystem
-    part_name = ace_engine_part
-  }
 
   native_include_dirs = [
     "koala_projects/arkoala/framework/native/src",

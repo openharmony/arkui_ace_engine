@@ -241,18 +241,15 @@ export class Application {
             //this.manager!.contextData = uiData;
             // TODO: KOALA_MIRROR ADAPTATION
             this.timer = /*getAnimationTimer() ??*/ createAnimationTimer(this.manager!)
-            // TODO: KOALA_MIRROR ADAPTATION
-            // @memo
-            // let builder: UserViewBuilder
-            // if (this.entryPoint) {
-            //     builder = this.entryPoint!.entry
-            // } else if (this.userView) {
-            //     builder = this.userView!.getBuilder()
-            // } else {
-            //     throw new Error("Invalid EntryPoint")
-            // }
             @memo
-            let builder = this.userView!.getBuilder()
+            let builder: () => void
+            if (this.entryPoint) {
+                builder = this.entryPoint!.entry
+            } else if (this.userView) {
+                builder = this.userView!.getBuilder()
+            } else {
+                throw new Error("Invalid EntryPoint")
+            }
             // TODO: KOALA_MIRROR ADAPTATION
             this.rootState = Application.createMemoRootState(this.manager!, builder/*, this.moduleName, this.startUrl*/)
             InteropNativeModule._NativeLog("ArkTS Application.start before computeRoot")
