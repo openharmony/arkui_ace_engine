@@ -1555,6 +1555,11 @@ void ScrollPattern::InitFreeScroll()
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     });
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderCtx = host->GetRenderContext();
+    CHECK_NULL_VOID(renderCtx);
+    renderCtx->AttachNodeAnimatableProperty(offset_);
     PanDirection panDirection { .type = PanDirection::ALL };
     double distance = SystemProperties::GetScrollableDistance();
     PanDistanceMap distanceMap;
