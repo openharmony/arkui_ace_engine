@@ -453,7 +453,12 @@ void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
     globPosition.y = Converter::ArkValue<Opt_Length>(src.origin.GetY().ConvertToVp());
     area.globalPosition = Converter::ArkValue<Ark_Position>(globPosition);
     dst.area = area;
-    dst.id = Converter::ArkValue<Opt_String>(src.id);
+    if (!src.id.empty()) {
+        dst.id = Converter::ArkValue<Opt_String>(src.id);
+    } else {
+        Opt_String optId = { .tag = INTEROP_TAG_UNDEFINED, .value = {} };
+        dst.id = optId;
+    }
 }
 
 void AssignArkValue(Ark_Header& dst, const Header& src, ConvContext *ctx)
