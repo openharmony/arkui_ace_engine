@@ -20,6 +20,7 @@
 #include <regex>
 #include <shared_mutex>
 #include <string>
+#include <sys/types.h>
 #include <unistd.h>
 
 #include "dfx_jsnapi.h"
@@ -1303,7 +1304,7 @@ bool JsiDeclarativeEngineInstance::BuilderNodeFunc(std::string functionName, con
     std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(nodeIds[0]) };
     if (nodeIds.size() > 1) {
         auto array = runtime->NewArray();
-        for (auto i = 1; i < nodeIds.size(); i++) {
+        for (u_int i = 1; i < nodeIds.size(); i++) {
             array->SetProperty(runtime, runtime->NewInt32(i-1), runtime->NewNumber(nodeIds[i]));
         }
         argv.push_back(array);
