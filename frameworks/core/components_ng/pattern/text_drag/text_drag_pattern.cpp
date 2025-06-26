@@ -50,7 +50,12 @@ const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& content
 {
     bool hasResult = false;
     RectF result;
-    auto maxBottom = contentRect.GetY() + SystemProperties::GetDevicePhysicalHeight();
+    auto deviceHeight = SystemProperties::GetDevicePhysicalHeight();
+    auto container = Container::CurrentSafely();
+    if (container && container->GetDisplayInfo()) {
+        deviceHeight = container->GetDisplayInfo()->GetHeight();
+    }
+    auto maxBottom = contentRect.GetY() + deviceHeight;
     for (const auto& box : boxes) {
         auto caculateBottom = box.Bottom() + textStartY;
         bool isReachingBottom = (caculateBottom >= maxBottom) || (caculateBottom >= contentRect.Bottom());
