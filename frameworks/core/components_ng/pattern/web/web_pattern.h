@@ -193,6 +193,7 @@ public:
         POPUP,
         DELETABLE,
         FOCUS,
+        NODE_TAG,
     };
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -723,7 +724,7 @@ public:
     }
     std::shared_ptr<Rosen::RSNode> GetSurfaceRSNode() const;
 
-    void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId);
+    void GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId, bool needFilter = true);
     void OnAccessibilityHoverEvent(
         const NG::PointF& point, SourceType source, NG::AccessibilityHoverEventType eventType, TimeStamp time);
     std::string GetSurfaceIdByHtmlElementId(const std::string& htmlElementId);
@@ -1132,8 +1133,8 @@ private:
         WebAccessibilityType key, std::string value);
     void WebNodeInfoToJsonValue(std::shared_ptr<OHOS::Ace::JsonValue>& jsonNodeArray,
                                 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> webNodeInfo,
-                                std::string& nodeTag);
-    void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId);
+                                std::string& nodeTag, bool isArray = false);
+    void GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId, bool needFilter = true);
     std::string EnumTypeToString(WebAccessibilityType type);
     std::string VectorIntToString(std::vector<int64_t>&& vec);
     void InitMagnifier();
