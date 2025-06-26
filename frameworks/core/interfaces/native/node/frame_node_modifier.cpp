@@ -14,6 +14,7 @@
  */
 #include "core/interfaces/native/node/frame_node_modifier.h"
 #include <cstdlib>
+#include <unistd.h>
 #include <vector>
 
 #include "base/error/error_code.h"
@@ -1025,10 +1026,11 @@ void RemoveSupportedUIStates(ArkUINodeHandle node, int32_t state)
 ArkUI_Int32 SetForceDarkConfig(
     ArkUI_Int32 instanceId, bool forceDark, ArkUI_CharPtr nodeTag, uint32_t (*colorInvertFunc)(uint32_t color))
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
-    if (!pipeline || !pipeline->CheckThreadSafe()) {
-        LOGF_ABORT("SetForceDarkConfig doesn't run on UI");
+#ifdef OHOS_PLATFORM
+    if (getpid() != gettid()) {
+        LOGF_ABORT("SetForceDarkConfig doesn't run on UI thread");
     }
+#endif
     if (!forceDark && colorInvertFunc) {
         return ERROR_CODE_NATIVE_IMPL_FORCE_DARK_CONFIG_INVALID;
     }
@@ -1038,7 +1040,7 @@ ArkUI_Int32 SetForceDarkConfig(
         };
         ColorInverter::GetInstance().EnableColorInvert(instanceId, nodeTag, std::move(invertFunc));
     } else {
-        ColorInverter::GetInstance().DisableColorInvert(instanceId);
+        ColorInverter::GetInstance().DisableColorInvert(instanceId, nodeTag);
     }
     return ERROR_CODE_NO_ERROR;
 }

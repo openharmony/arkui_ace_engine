@@ -7301,6 +7301,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest_SetForceDarkConfig_001, TestSize.Level1)
         ARKUI_ERROR_CODE_FORCE_DARK_CONFIG_INVALID);
     EXPECT_EQ(OH_ArkUI_SetForceDarkConfig(uiContext, false, ARKUI_NODE_LIST, [](uint32_t color) { return color; }),
         ARKUI_ERROR_CODE_FORCE_DARK_CONFIG_INVALID);
+    EXPECT_EQ(OH_ArkUI_SetForceDarkConfig(uiContext, false, ARKUI_NODE_UNDEFINED, [](uint32_t color) { return color; }),
+        ARKUI_ERROR_CODE_FORCE_DARK_CONFIG_INVALID);
 }
 
 /**
