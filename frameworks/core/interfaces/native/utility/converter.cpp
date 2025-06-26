@@ -1771,6 +1771,11 @@ DragPreviewOption Convert(const Ark_DragPreviewOptions &src)
             case DragPreviewMode::DISABLE_SCALE: previewOption.isScaleEnabled = false; break;
             case DragPreviewMode::ENABLE_DEFAULT_SHADOW: previewOption.isDefaultShadowEnabled = true; break;
             case DragPreviewMode::ENABLE_DEFAULT_RADIUS: previewOption.isDefaultRadiusEnabled = true; break;
+            case DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT:
+                previewOption.isDefaultDragItemGrayEffectEnabled = true; break;
+            case DragPreviewMode::ENABLE_MULTI_TILE_EFFECT: previewOption.isMultiTiled = true; break;
+            case DragPreviewMode::ENABLE_TOUCH_POINT_CALCULATION_BASED_ON_FINAL_PREVIEW:
+                previewOption.isTouchPointCalculationBasedOnFinalPreviewEnable = true; break;
             default: break;
         }
         return false;

@@ -5319,6 +5319,21 @@ void DragPreviewOptionsImpl(Ark_NativePointer node,
         if (isMultiSelectionEnabled) {
             previewOption->isMultiSelectionEnabled = isMultiSelectionEnabled.value();
         }
+        auto enableEdgeAutoScroll = Converter::OptConvert<Ark_Boolean>(
+            optionsOpt.value().enableEdgeAutoScroll);
+        if (enableEdgeAutoScroll) {
+            previewOption->enableEdgeAutoScroll = enableEdgeAutoScroll.value();
+        }
+        auto enableHapticFeedback = Converter::OptConvert<Ark_Boolean>(
+            optionsOpt.value().enableHapticFeedback);
+        if (enableHapticFeedback) {
+            previewOption->enableHapticFeedback = enableHapticFeedback.value();
+        }
+        auto isLiftingDisabled = Converter::OptConvert<Ark_Boolean>(
+            optionsOpt.value().isLiftingDisabled);
+        if (isLiftingDisabled) {
+            previewOption->isLiftingDisabled = isLiftingDisabled.value();
+        }
     }
     LOGE("CommonMethodModifier::DragPreviewOptionsImpl Ark_ImageModifier is not supported yet.");
     ViewAbstract::SetDragPreviewOptions(frameNode, *previewOption);
