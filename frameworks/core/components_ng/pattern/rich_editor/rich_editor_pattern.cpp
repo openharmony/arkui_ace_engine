@@ -6010,7 +6010,7 @@ void RichEditorPattern::DeleteSelectionOrPreviewText(
     }
     if (isSelector) {
         DeleteByRange(record, textSelector_.GetTextStart(), textSelector_.GetTextEnd());
-        if (!shouldCommitInput) {
+        if (!shouldCommitInput && record) {
             previewInputRecord_.deleteText = record->deleteText;
             previewInputRecord_.beforeCaretPosition = rangeStart.start;
         }
