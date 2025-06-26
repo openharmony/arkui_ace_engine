@@ -2276,12 +2276,14 @@ bool JSViewAbstract::JsWidth(const JSRef<JSVal>& jsValue)
                     return true;
                 }
             }
+            ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
             return false;
         }
     } else if (!ParseJsDimensionVp(jsValue, value, valueResObj)) {
         return false;
     }
 
+    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
     if (!SystemProperties::ConfigChangePerform() ? LessNotEqual(value.Value(), 0.0) :
         (LessNotEqual(value.Value(), 0.0) && !valueResObj)) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -2354,12 +2356,14 @@ bool JSViewAbstract::JsHeight(const JSRef<JSVal>& jsValue)
                     return true;
                 }
             }
+            ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
             return false;
         }
     } else if (!ParseJsDimensionVp(jsValue, value, valueResObj)) {
         return false;
     }
 
+    ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
     if (!SystemProperties::ConfigChangePerform() ? LessNotEqual(value.Value(), 0.0) :
         (LessNotEqual(value.Value(), 0.0) && !valueResObj)) {
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
