@@ -4065,7 +4065,6 @@ struct ArkUIParallelInnerGestureEvent {
 };
 
 struct ArkUIGestureModifier {
-    ArkUI_Int32 (*setPreventBegin)(ArkUIGestureRecognizer* recognizer);
     ArkUIGesture* (*createTapGesture)(ArkUI_Int32 count, ArkUI_Int32 fingers, bool limitFingerCount, void* userData);
     ArkUIGesture* (*createTapGestureWithDistanceThreshold)(
         ArkUI_Int32 count, ArkUI_Int32 fingers, ArkUI_Float64 distanceThreshold, bool limitFingerCount,
@@ -4118,6 +4117,7 @@ struct ArkUIGestureModifier {
     ArkUI_Int32 (*getTapGestureDistanceThreshold)(ArkUIGestureRecognizer* recognizer, double* distanceThreshold);
     ArkUI_Int32 (*setDistanceMap)(ArkUIGesture* gesture, int size, int* toolTypeArray, double* distanceArray);
     ArkUI_Int32 (*getDistanceByToolType)(ArkUIGestureRecognizer* recognizer, int toolType, double* distance);
+    ArkUI_Int32 (*setPreventBegin)(ArkUIGestureRecognizer* recognizer);
     ArkUI_Bool (*isBuiltInGesture)(ArkUIGestureRecognizer* recognizer);
     ArkUI_Int32 (*getGestureTag)(
         ArkUIGestureRecognizer* recognizer, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* result);
