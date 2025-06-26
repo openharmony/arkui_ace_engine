@@ -2506,11 +2506,26 @@ void EventManager::DumpEventWithCount(const std::vector<std::string>& params, NG
     }
 }
 
-TouchDelegateHdl EventManager::RegisterTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate> delegater)
+TouchDelegateHdl EventManager::AddTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate> delegater)
 {
     touchDelegatesMap_[touchId].emplace_back(delegater);
     TouchDelegatesIter iter = std::prev(touchDelegatesMap_[touchId].end());
-    LOGD("RegisterTouchDelegate successful");
+    LOGD("AddTouchDelegate successful");
+    TouchDelegateHdl handler(touchId, iter);
+    return handler;
+}
+
+TouchDelegateHdl EventManager::ReplaceTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate> delegater)
+{
+    if (touchDelegatesMap_.find(touchId) == touchDelegatesMap_.end() || touchDelegatesMap_[touchId].empty()) {
+        touchDelegatesMap_[touchId].emplace_back(delegater);
+    } else {
+        LOGD("swap touchDelegatesMap %{public}d", touchId);
+        touchDelegatesMap_[touchId].clear();
+        touchDelegatesMap_[touchId].emplace_back(delegater);
+    }
+    TouchDelegatesIter iter = std::prev(touchDelegatesMap_[touchId].end());
+    LOGD("ReplaceTouchDelegate successful");
     TouchDelegateHdl handler(touchId, iter);
     return handler;
 }

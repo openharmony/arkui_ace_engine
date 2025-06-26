@@ -18,7 +18,14 @@
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
+constexpr int TOUCH_ID = 0;
 
+class TouchDelegateTest : public TouchDelegate {
+    void DelegateTouchEvent(const TouchEvent& point)
+    {
+        return;
+    };
+};
 /**
  * @tc.name: ExecuteTouchTestDoneCallbackTest001
  * @tc.desc: Test ExecuteTouchTestDoneCallbackTest function.
@@ -259,5 +266,60 @@ HWTEST_F(EventManagerTestNg, ExecuteTouchTestDoneCallbackTest008, TestSize.Level
     eventManager->onTouchTestDoneFrameNodeList_.emplace_back(WeakPtr<NG::FrameNode>(frameNode));
     eventManager->ExecuteTouchTestDoneCallback(axisEvent, responseLinkRecognizers);
     EXPECT_FALSE(eventManager->onTouchTestDoneFrameNodeList_.empty());
+}
+
+/**
+ * @tc.name: AddTouchDelegate001
+ * @tc.desc: Test AddTouchDelegate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, AddTouchDelegate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create eventManager, delegate.
+     * @tc.expected: recognizers is not null and axis direction is correct.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    auto delegate = AceType::MakeRefPtr<TouchDelegateTest>();
+    ASSERT_NE(delegate, nullptr);
+
+    /**
+     * @tc.steps: step2. Call AddTouchDelegate twice.
+     * @tc.expected: touchDelegatesMap_ is not empty and size is 2.
+     */
+    eventManager->AddTouchDelegate(TOUCH_ID, delegate);
+    eventManager->AddTouchDelegate(TOUCH_ID, delegate);
+    EXPECT_FALSE(eventManager->touchDelegatesMap_.empty());
+    EXPECT_EQ(eventManager->touchDelegatesMap_[TOUCH_ID].size(), 2);
+
+    /**
+     * @tc.steps: step3. Call ReplaceTouchDelegate.
+     * @tc.expected: touchDelegatesMap_ is not empty and size is 1.
+     */
+    eventManager->ReplaceTouchDelegate(TOUCH_ID, delegate);
+    EXPECT_FALSE(eventManager->touchDelegatesMap_.empty());
+    EXPECT_EQ(eventManager->touchDelegatesMap_[TOUCH_ID].size(), 1);
+
+    /**
+     * @tc.steps: step4. Call ReplaceTouchDelegate when eventManager->touchDelegatesMap_ is empty.
+     * @tc.expected: touchDelegatesMap_ is not empty and size is 1.
+     */
+    eventManager->UnregisterTouchDelegate(TOUCH_ID);
+    EXPECT_TRUE(eventManager->touchDelegatesMap_.empty());
+    eventManager->ReplaceTouchDelegate(TOUCH_ID, delegate);
+    EXPECT_FALSE(eventManager->touchDelegatesMap_.empty());
+    EXPECT_EQ(eventManager->touchDelegatesMap_[TOUCH_ID].size(), 1);
+
+    /**
+     * @tc.steps: step5. Call ReplaceTouchDelegate when eventManager->touchDelegatesMap_[TOUCH_ID] is empty.
+     * @tc.expected: touchDelegatesMap_ is not empty and size is 1.
+     */
+    eventManager->touchDelegatesMap_[TOUCH_ID].clear();
+    EXPECT_FALSE(eventManager->touchDelegatesMap_.empty());
+    EXPECT_TRUE(eventManager->touchDelegatesMap_[TOUCH_ID].empty());
+    eventManager->ReplaceTouchDelegate(TOUCH_ID, delegate);
+    EXPECT_FALSE(eventManager->touchDelegatesMap_.empty());
+    EXPECT_EQ(eventManager->touchDelegatesMap_[TOUCH_ID].size(), 1);
 }
 } // namespace OHOS::Ace::NG
