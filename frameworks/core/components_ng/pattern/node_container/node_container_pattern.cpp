@@ -51,9 +51,11 @@ void NodeContainerPattern::RemakeNode()
         return;
     }
     host->RemoveChildAtIndex(0);
+    BuilderUtils::RemoveBuilderFromParent(host, oldChild);
     if (newNode) {
         CHECK_NULL_VOID(CheckBeforeAddNode(host, newNode));
         host->AddChild(newNode, 0);
+        BuilderUtils::AddBuilderToParent(host, newNode);
         newNode->UpdateGeometryTransition();
     }
     OnAddBaseNode();
@@ -206,7 +208,7 @@ void NodeContainerPattern::OnAttachToMainTree()
             BuilderUtils::AddBuilderToContainer(parent, nodes);
             return;
         }
-        if (parent->GetIsRootBuilderNode()) {
+        if (BuilderUtils::IsBuilderRootNode(parent)) {
             BuilderUtils::AddBuilderToBuilder(parent, nodes);
             return;
         }

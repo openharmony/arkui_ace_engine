@@ -18,12 +18,15 @@
 #include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::BuilderUtils {
+    bool IsBuilderRootNode(const RefPtr<NG::UINode>& node);
     bool IsBuilderContainer(const RefPtr<NG::UINode>& node);
     bool HasParentView(const RefPtr<NG::UINode>& node);
-    void AddBuilderToParent(const RefPtr<NG::UINode>& node, std::list<RefPtr<NG::UINode>> nodes);
+    void AddBuilderToParent(const RefPtr<NG::UINode>& parentNode, std::list<RefPtr<NG::UINode>> nodes);
+    void AddBuilderToParent(const RefPtr<NG::UINode>& parentNode, const RefPtr<NG::UINode>& childNode);
     void AddBuilderToContainer(const RefPtr<NG::UINode>& node, const std::list<RefPtr<NG::UINode>>& nodes);
     void AddBuilderToBuilder(const RefPtr<NG::UINode>& node, const std::list<RefPtr<NG::UINode>>& nodes);
-    void RemoveBuilderFromParent(const RefPtr<NG::UINode>& node, std::list<RefPtr<NG::UINode>> nodes);
+    void RemoveBuilderFromParent(const RefPtr<NG::UINode>& parentNode, std::list<RefPtr<NG::UINode>> nodes);
+    void RemoveBuilderFromParent(const RefPtr<NG::UINode>& parentNode, const RefPtr<NG::UINode>& childNode);
     void RemoveBuilderFromContainer(const RefPtr<NG::UINode>& node, const std::list<RefPtr<NG::UINode>>& nodes);
     void RemoveBuilderFromBuilder(const RefPtr<NG::UINode>& node, const std::list<RefPtr<NG::UINode>>& nodes);
     void ClearBuilder(const RefPtr<NG::UINode>& node);
