@@ -36,7 +36,7 @@ void SliderPattern::UpdateValueMultiThread(float value)
     host->PostAfterAttachMainTreeTask(std::move(updateTask));
 }
 
-void SliderPattern::OnAttachFromFrameNodeMultiThread()
+void SliderPattern::OnAttachToFrameNodeMultiThread()
 {
     InitHapticController();
 }

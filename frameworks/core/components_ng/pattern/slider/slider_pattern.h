@@ -187,7 +187,7 @@ public:
 
 private:
     void OnAttachToFrameNode() override;
-    void OnAttachFromFrameNodeMultiThread();
+    void OnAttachToFrameNodeMultiThread();
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromFrameNodeMultiThread();
     void OnModifyDone() override;
