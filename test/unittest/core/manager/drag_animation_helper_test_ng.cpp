@@ -358,6 +358,88 @@ HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextPosition002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalcBadgeTextPosition003
+ * @tc.desc: Test CalcBadgeTextPosition when textNode->GetContext() is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextPosition003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(frameNode->GetId(), frameNode->GetTag(), MenuType::MENU);
+    ASSERT_NE(menuPattern, nullptr);
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, GetElmtId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto imageNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, GetElmtId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    textNode->context_ = nullptr;
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    overlayManager->MountGatherNodeToRootNode(textNode, {});
+    DragAnimationHelper::CalcBadgeTextPosition(menuPattern, overlayManager, imageNode, textNode);
+    auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto content = layoutProperty->GetContentValue();
+    EXPECT_NE(content.empty(), true);
+}
+
+/**
+ * @tc.name: CalcBadgeTextPosition004
+ * @tc.desc: Test CalcBadgeTextPosition when frameNode does not set badgeNumber
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextPosition004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create required dependency nodes imageNode and textNode.
+     */
+    auto imageNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, GetElmtId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, GetElmtId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(imageNode, nullptr);
+    ASSERT_NE(textNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Create frameNode and assign as MenuPattern target.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("menuTarget", GetElmtId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(frameNode->GetId(), frameNode->GetTag(), MenuType::MENU);
+    ASSERT_NE(menuPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Configure OverlayManager and insert 1 child node.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    std::vector<GatherNodeChildInfo> gatherInfos;
+    auto gatherImageNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, GetElmtId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    GatherNodeChildInfo info;
+    info.imageNode = AceType::WeakClaim(AceType::RawPtr(gatherImageNode));
+    gatherInfos.emplace_back(info);
+    overlayManager->MountGatherNodeToRootNode(textNode, gatherInfos);
+
+    /**
+     * @tc.steps: step4. Call the target function.
+     * @tc.expected: The text content of textNode should be childrenCount + 1, i.e., "2".
+     */
+    DragAnimationHelper::CalcBadgeTextPosition(menuPattern, overlayManager, imageNode, textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto content = textLayoutProperty->GetContentValue();
+    EXPECT_STREQ(StringUtils::Str16ToStr8(content).c_str(), "2");
+}
+
+/**
  * @tc.name: CreateImageNode
  * @tc.desc: test CreateImageNode func.
  * @tc.type: FUNC
