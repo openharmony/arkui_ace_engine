@@ -237,12 +237,12 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg100, TestSize.Level1)
     eventHub->SetGestureEventHub(gestureEventHub);
     frameNode->eventHub_ = eventHub;
     frameNode->CollectSelfAxisResult(globalPoint, localPoint, isConsumed, parentRevertPoint,
-            onAxisResult, isPreventBubbling, testResult, touchRestrict);
+            onAxisResult, isPreventBubbling, testResult, touchRestrict, false);
     EXPECT_EQ(testResult, HitTestResult::BUBBLING);
     gestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
     isConsumed = false;
     frameNode->CollectSelfAxisResult(globalPoint, localPoint, isConsumed, parentRevertPoint,
-            onAxisResult, isPreventBubbling, testResult, touchRestrict);
+            onAxisResult, isPreventBubbling, testResult, touchRestrict, false);
     EXPECT_EQ(testResult, HitTestResult::STOP_BUBBLING);
 }
 

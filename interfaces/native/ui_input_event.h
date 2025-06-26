@@ -146,6 +146,19 @@ typedef enum {
      *  during the hit test.
      */
     HTM_NONE,
+
+    /**
+     * Blocks all lower priority siblings and parents node from receiving the event.
+     * @since 20
+     */
+    HTMBLOCK_HIERARCHY,
+
+    /**
+     * Self not respond to the hit test for touch events,
+     * and all descebdants (children, grandchildren, etc.) not respond to the hit test for touch events too.
+     * @since 20
+     */
+    HTMBLOCK_DESCENDANTS,
 } HitTestMode;
 
 /**

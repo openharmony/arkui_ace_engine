@@ -59,6 +59,17 @@ enum class HitTestMode {
     HTMNONE,
 
     /**
+     * Blocks all lower priority siblings and parents node from receiving the event.
+     */
+    HTMBLOCK_HIERARCHY,
+
+    /**
+     * Self not respond to the hit test for touch events,
+     * and all descebdants (children, grandchildren, etc.) not respond to the hit test for touch events too.
+     */
+    HTMBLOCK_DESCENDANTS,
+
+    /**
      * Self and child respond to the hit test for touch events,
      * when self consumed allow hit test of other nodes which is masked by this node,
      * when child consumed block hit test of other nodes.
@@ -77,6 +88,8 @@ enum class HitTestResult {
     BUBBLING,
     // node process events and bubble;
     SELF_TRANSPARENT,
+    // Blocks all lower priority siblings and parents node.
+    BLOCK_HIERARCHY,
 };
 
 enum class DragFuncType {
