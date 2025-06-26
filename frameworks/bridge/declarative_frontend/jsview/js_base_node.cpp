@@ -167,7 +167,6 @@ void JSBaseNode::ProccessNode(bool isSupportExportTexture, bool isSupportLazyBui
     CHECK_NULL_VOID(viewNode_);
     CHECK_NULL_VOID(realNode_);
     viewNode_->SetIsRootBuilderNode(true);
-    viewNode_->SetJsBuilderNodeId(viewNode_->GetId());
     realNode_->SetJsBuilderNodeId(viewNode_->GetId());
     if (isSupportExportTexture) {
         viewNode_->CreateExportTextureInfoIfNeeded();

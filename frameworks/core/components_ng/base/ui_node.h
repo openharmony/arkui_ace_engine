@@ -1188,7 +1188,7 @@ protected:
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
-    int32_t jsBuilderNodeId_ = 0;
+    int32_t jsBuilderNodeId_ = -1;
     int64_t accessibilityId_ = -1;
     int32_t layoutPriority_ = 0;
     int32_t rootNodeId_ = 0; // host is Page or NavDestination
