@@ -16,7 +16,7 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { FrameNode, FrameNodeInternal } from "./generated/arkui.FrameNode"
+import { FrameNode, FrameNodeInternal } from "./generated/ark.FrameNode"
 import { GlobalScope_ohos_font } from "./generated"
 import { GlobalScope_ohos_measure_utils } from "./generated"
 import { FontOptions, FontInfo, MeasureOptions } from "./generated"

@@ -30,7 +30,7 @@ import { EdgeEffect, Color, PageFlipMode } from "./enums"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { BuilderLambda } from "@koalaui/builderLambda"
-import { CommonModifier, CommonModifier_serializer } from "./arkui.CommonModifier"
+import { CommonModifier, CommonModifier_serializer } from "./ark.CommonModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export interface TabContentTransitionProxy {
     from: number

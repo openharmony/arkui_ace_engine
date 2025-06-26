@@ -32,7 +32,7 @@ import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwrit
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { BuilderLambda } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { LengthMetrics, LengthMetrics_serializer } from "./arkui.Graphics"
+import { LengthMetrics, LengthMetrics_serializer } from "./ark.Graphics"
 export interface SwiperContentTransitionProxy {
     selectedIndex: number
     index: number

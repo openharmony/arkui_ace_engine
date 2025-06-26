@@ -38,7 +38,7 @@ import { TextBackgroundStyle, TextBackgroundStyle_serializer } from "./span"
 import { image, image_PixelMap_serializer } from "./ohos.multimedia.image"
 import { SymbolEffectStrategy, SymbolRenderingStrategy } from "./symbolglyph"
 import { GestureEvent, GestureEvent_serializer } from "./gesture"
-import { ColorMetrics, ColorMetrics_serializer } from "./arkui.Graphics"
+import { ColorMetrics, ColorMetrics_serializer } from "./ark.Graphics"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { CustomNodeBuilder } from "./custom_builder"
 export class RichEditorBaseControllerInternal {

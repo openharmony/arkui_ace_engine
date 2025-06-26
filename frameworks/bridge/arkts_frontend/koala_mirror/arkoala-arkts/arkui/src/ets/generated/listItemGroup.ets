@@ -29,7 +29,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { BuilderLambda } from "@koalaui/builderLambda"
 import { CustomBuilder } from "./builder"
-import { ComponentContent, ComponentContent_serializer } from "./arkui.ComponentContent"
+import { ComponentContent, ComponentContent_serializer } from "./ark.ComponentContent"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ArkListItemGroupPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {

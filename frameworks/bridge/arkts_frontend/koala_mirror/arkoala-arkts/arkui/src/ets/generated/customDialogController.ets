@@ -29,7 +29,7 @@ import { Offset, ResourceColor, Dimension, BorderRadiuses, EdgeWidths, EdgeColor
 import { Color, BorderStyle } from "./enums"
 import { Resource, Resource_serializer } from "./resource"
 import { Rectangle, AnimateParam, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, Rectangle_serializer, AnimateParam_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer } from "./common"
-import { LengthMetrics, LengthMetrics_serializer } from "./arkui.Graphics"
+import { LengthMetrics, LengthMetrics_serializer } from "./ark.Graphics"
 import { LevelMode, ImmersiveMode, LevelOrder, LevelOrder_serializer } from "./ohos.promptAction"
 export class CustomDialogControllerInternal {
     public static fromPtr(ptr: KPointer): CustomDialogController {

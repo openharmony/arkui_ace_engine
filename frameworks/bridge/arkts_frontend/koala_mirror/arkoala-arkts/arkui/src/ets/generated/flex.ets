@@ -28,7 +28,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { BuilderLambda } from "@koalaui/builderLambda"
 import { FlexDirection, FlexWrap, FlexAlign, ItemAlign } from "./enums"
-import { LengthMetrics, LengthMetrics_serializer } from "./arkui.Graphics"
+import { LengthMetrics, LengthMetrics_serializer } from "./ark.Graphics"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ArkFlexPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {

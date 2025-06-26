@@ -33,7 +33,7 @@ import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwrit
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { BuilderLambda } from "@koalaui/builderLambda"
 import { CustomBuilder } from "./builder"
-import { ComponentContent, ComponentContent_serializer } from "./arkui.ComponentContent"
+import { ComponentContent, ComponentContent_serializer } from "./ark.ComponentContent"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class WaterFlowSectionsInternal {
     public static fromPtr(ptr: KPointer): WaterFlowSections {

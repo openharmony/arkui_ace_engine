@@ -30,7 +30,7 @@ import { BuilderLambda } from "@koalaui/builderLambda"
 import { ResourceStr } from "./units"
 import { Resource, Resource_serializer } from "./resource"
 import { CustomBuilder } from "./builder"
-import { ComponentContent, ComponentContent_serializer } from "./arkui.ComponentContent"
+import { ComponentContent, ComponentContent_serializer } from "./ark.ComponentContent"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ArkRefreshPeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {

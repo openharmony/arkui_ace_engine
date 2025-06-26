@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, nullptr, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
-import { Size_serializer, Vector2_serializer, Frame_serializer, Vector3_serializer, Size, Vector2, Frame, Vector3, ShapeMask, ShapeMaskInternal, ShapeClip, ShapeClipInternal, LengthMetricsUnit, DrawContext, DrawContextInternal } from "./arkui.Graphics"
+import { Size_serializer, Vector2_serializer, Frame_serializer, Vector3_serializer, Size, Vector2, Frame, Vector3, ShapeMask, ShapeMaskInternal, ShapeClip, ShapeClipInternal, LengthMetricsUnit, DrawContext, DrawContextInternal } from "./ark.Graphics"
 import { EdgeStyles_serializer, Edges_serializer, EdgeStyles, Edges } from "./units"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"

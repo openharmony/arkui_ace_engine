@@ -18,7 +18,7 @@
 
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, Finalizable, registerCallback } from "@koalaui/interop"
 import { Resource_serializer, Resource } from "./resource"
-import { SymbolGlyphModifier_serializer, SymbolGlyphModifier } from "./arkui.SymbolGlyphModifier"
+import { SymbolGlyphModifier_serializer, SymbolGlyphModifier } from "./ark.SymbolGlyphModifier"
 import { CaretStyle_serializer, EditMenuOptions_serializer, CaretStyle, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, InsertValue, DeleteValue, EditMenuOptions, AutoCapitalizationMode, EditableTextChangeValue, KeyboardAppearance } from "./textCommon"
 import { Font_serializer, ResourceColor, Dimension, Font, ResourceStr, Length } from "./units"
 import { TextDecorationOptions_serializer, ArkCommonMethodPeer, CommonMethod, TextDecorationOptions, ArkCommonMethodComponent, ArkCommonMethodStyle, SelectionOptions_serializer, TextContentControllerBase, TextContentControllerBaseInternal, SelectionOptions } from "./common"

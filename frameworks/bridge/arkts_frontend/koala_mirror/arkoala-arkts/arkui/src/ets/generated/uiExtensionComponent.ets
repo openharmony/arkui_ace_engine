@@ -30,7 +30,7 @@ import { TerminationInfo } from "./embeddedComponent"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { BuilderLambda } from "@koalaui/builderLambda"
-import { ComponentContent, ComponentContent_serializer } from "./arkui.ComponentContent"
+import { ComponentContent, ComponentContent_serializer } from "./ark.ComponentContent"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export interface UIExtensionProxy {
     send(data: Map<string, Object>): void

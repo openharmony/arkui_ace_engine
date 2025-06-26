@@ -27,7 +27,7 @@ import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonM
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { BuilderLambda } from "@koalaui/builderLambda"
-import { LengthMetrics, ColorMetrics, LengthMetrics_serializer, ColorMetrics_serializer } from "./arkui.Graphics"
+import { LengthMetrics, ColorMetrics, LengthMetrics_serializer, ColorMetrics_serializer } from "./ark.Graphics"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class LinearIndicatorControllerInternal {
     public static fromPtr(ptr: KPointer): LinearIndicatorController {

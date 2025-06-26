@@ -16,13 +16,13 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { SymbolGlyphModifier_serializer, SymbolGlyphModifier } from "./arkui.SymbolGlyphModifier"
+import { SymbolGlyphModifier_serializer, SymbolGlyphModifier } from "./ark.SymbolGlyphModifier"
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { ComponentContent_serializer, ComponentContent } from "./arkui.ComponentContent"
+import { ComponentContent_serializer, ComponentContent } from "./ark.ComponentContent"
 import { Resource_serializer, Resource } from "./resource"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"

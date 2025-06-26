@@ -22,7 +22,7 @@ import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { Matrix2D_serializer, Matrix2D, Matrix2DInternal } from "./matrix2d"
-import { Size_serializer, Size, LengthMetricsUnit, LengthMetrics_serializer, LengthMetrics, LengthMetricsInternal } from "./arkui.Graphics"
+import { Size_serializer, Size, LengthMetricsUnit, LengthMetrics_serializer, LengthMetrics, LengthMetricsInternal } from "./ark.Graphics"
 import { image_PixelMap_serializer, image } from "./ohos.multimedia.image"
 import { ImageAIOptions_serializer, ImageAIOptions, ImageAnalyzerConfig_serializer, ImageAnalyzerConfig } from "./imageCommon"
 import { ComponentBase } from "./../ComponentBase"
@@ -33,7 +33,7 @@ import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwrit
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { BuilderLambda } from "@koalaui/builderLambda"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { FrameNode, FrameNodeInternal } from "./arkui.FrameNode"
+import { FrameNode, FrameNodeInternal } from "./ark.FrameNode"
 export class CanvasGradientInternal {
     public static fromPtr(ptr: KPointer): CanvasGradient {
         return new CanvasGradient(ptr)

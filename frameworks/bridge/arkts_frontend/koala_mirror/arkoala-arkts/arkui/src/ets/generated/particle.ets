@@ -24,7 +24,7 @@ import { VP, Dimension, ResourceStr, ResourceColor } from "./units"
 import { Resource } from "./resource"
 import { ImageFit, Color, Curve } from "./enums"
 import { ICurve } from "./common"
-import { Vector2T, LengthMetrics } from "./arkui.Graphics"
+import { Vector2T, LengthMetrics } from "./ark.Graphics"
 export interface VelocityOptions {
     speed: [ number, number ];
     angle: [ number, number ];

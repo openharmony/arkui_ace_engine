@@ -31,7 +31,7 @@ import { ScrollState, ScrollSnapAlign } from "./list"
 import { AttributeModifier, UICommonBase, AttributeUpdater } from "./../handwritten"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { BuilderLambda } from "@koalaui/builderLambda"
-import { LengthMetrics, LengthMetrics_serializer } from "./arkui.Graphics"
+import { LengthMetrics, LengthMetrics_serializer } from "./ark.Graphics"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ScrollerInternal {
     public static fromPtr(ptr: KPointer): Scroller {

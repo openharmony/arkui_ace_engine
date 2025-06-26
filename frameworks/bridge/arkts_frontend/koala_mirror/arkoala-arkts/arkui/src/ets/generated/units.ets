@@ -24,7 +24,7 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { BuilderLambda } from "@koalaui/builderLambda"
 import { Resource, Resource_serializer } from "./resource"
-import { LengthMetrics, LengthMetricsUnit, ColorMetrics, LengthMetrics_serializer } from "./arkui.Graphics"
+import { LengthMetrics, LengthMetricsUnit, ColorMetrics, LengthMetrics_serializer } from "./ark.Graphics"
 import { Color, BorderStyle, FontWeight, FontStyle, DividerMode } from "./enums"
 import { OutlineStyle } from "./common"
 export class ColorFilterInternal {
@@ -153,9 +153,9 @@ export interface LengthConstrain {
     maxLength: Length;
 }
 export type VoidCallback = () => void;
-export { LengthMetricsUnit } from "./arkui.Graphics"
-export { LengthMetrics } from "./arkui.Graphics"
-export { ColorMetrics } from "./arkui.Graphics"
+export { LengthMetricsUnit } from "./ark.Graphics"
+export { LengthMetrics } from "./ark.Graphics"
+export { ColorMetrics } from "./ark.Graphics"
 export interface Font {
     size?: Length;
     weight?: FontWeight | number | string;

@@ -18,7 +18,7 @@
 
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, wrapCallback, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer, Resource } from "./resource"
-import { SymbolGlyphModifier_serializer, SymbolGlyphModifier } from "./arkui.SymbolGlyphModifier"
+import { SymbolGlyphModifier_serializer, SymbolGlyphModifier } from "./ark.SymbolGlyphModifier"
 import { Font_serializer, ResourceStr, Font, ResourceColor } from "./units"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
