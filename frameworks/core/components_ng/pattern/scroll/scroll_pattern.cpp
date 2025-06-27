@@ -51,10 +51,9 @@ void ScrollPattern::OnModifyDone()
         SetAxis(axis);
         ResetPosition();
         if (axis == Axis::FREE) {
-            InitFreeScroll();
+            freeScroll_ = MakeRefPtr<FreeScrollController>(*this);
         } else {
-            freePanGesture_.Reset();
-            offset_.Reset();
+            freeScroll_.Reset();
         }
     }
     if (!GetScrollableEvent()) {
@@ -1543,96 +1542,5 @@ void ScrollPattern::TriggerScrollBarDisplay()
     CHECK_NULL_VOID(scrollBar);
     scrollBar->PlayScrollBarAppearAnimation();
     scrollBar->ScheduleDisappearDelayTask();
-}
-
-void ScrollPattern::InitFreeScroll()
-{
-    if (freePanGesture_) {
-        return;
-    }
-    offset_ = MakeRefPtr<NodeAnimatablePropertyOffsetF>(OffsetF {}, [this](const OffsetF& newOffset) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    });
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderCtx = host->GetRenderContext();
-    CHECK_NULL_VOID(renderCtx);
-    renderCtx->AttachNodeAnimatableProperty(offset_);
-    PanDirection panDirection { .type = PanDirection::ALL };
-    double distance = SystemProperties::GetScrollableDistance();
-    PanDistanceMap distanceMap;
-    if (Positive(distance)) {
-        distanceMap[SourceTool::UNKNOWN] = distance;
-    } else {
-        distanceMap[SourceTool::UNKNOWN] = DEFAULT_PAN_DISTANCE.ConvertToPx();
-        distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
-    }
-    freePanGesture_ = AceType::MakeRefPtr<NG::PanRecognizer>(DEFAULT_PAN_FINGER, panDirection, distanceMap);
-    freePanGesture_->SetOnActionUpdate([this](const GestureEvent& event) {
-        const auto& delta = event.GetDelta();
-        offset_->Set(offset_->Get() + OffsetF { delta.GetX(), delta.GetY() });
-        currentOffset_ += static_cast<float>(delta.GetX());
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    });
-    auto* ctx = GetContext();
-    CHECK_NULL_VOID(ctx);
-    auto theme = ctx->GetTheme<ScrollableTheme>();
-    CHECK_NULL_VOID(theme);
-    friction_ = theme->GetFriction() * -FRICTION_SCALE; // replace with const
-
-    freePanGesture_->SetOnActionEnd([this](const GestureEvent& event) {
-        OffsetF velocity { event.GetVelocity().GetVelocityX(), event.GetVelocity().GetVelocityY() };
-        AnimationOption option;
-        option.SetCurve(MakeRefPtr<ResponsiveSpringMotion>(fabs(2 * M_PI / friction_), 1.0f, 0.0f));
-        option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
-        option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
-        OffsetF finalPos = offset_->Get() + velocity / friction_;
-        offset_->AnimateWithVelocity(option, finalPos, velocity, nullptr);
-    });
-
-    InitFreeTouch();
-}
-
-void ScrollPattern::InitFreeTouch()
-{
-    if (freeTouch_) {
-        return;
-    }
-    auto touchTask = [this](const TouchEventInfo& info) {
-        switch (info.GetTouches().front().GetTouchType()) {
-            case TouchType::DOWN: {
-                // pause animation
-                AnimationOption option;
-                option.SetCurve(Curves::EASE);
-                option.SetDuration(0);
-                AnimationUtils::StartAnimation(
-                    option, [this]() { offset_->Set(offset_->Get()); }, nullptr);
-                break;
-            }
-            case TouchType::UP:
-            case TouchType::CANCEL:
-                // postTask: TryBounceBack();
-                break;
-            default:
-                break;
-        }
-    };
-    freeTouch_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
-    auto gestureHub = GetGestureHub();
-    CHECK_NULL_VOID(gestureHub);
-    gestureHub->AddTouchEvent(freeTouch_);
-}
-
-void ScrollPattern::TryBounceBack()
-{
-    CHECK_NULL_VOID(offset_);
-    const float x = offset_->Get().GetX();
-    const float y = offset_->Get().GetY();
-    if (Negative(x) || GreatNotEqual(x, scrollableDistance_) || Negative(y) || GreatNotEqual(y, scrollableDistance_)) {
-    }
 }
 } // namespace OHOS::Ace::NG

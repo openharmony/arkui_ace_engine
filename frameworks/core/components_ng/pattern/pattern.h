@@ -453,6 +453,13 @@ public:
         return DynamicCast<T>(host->GetOrCreateEventHub<T>());
     }
 
+    void MarkDirty(PropertyChangeFlag flag = PROPERTY_UPDATE_MEASURE_SELF)
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(flag);
+    }
+
     // Called after frameNode RebuildRenderContextTree.
     virtual void OnRebuildFrame() {}
     // Called before frameNode CreateLayoutWrapper.

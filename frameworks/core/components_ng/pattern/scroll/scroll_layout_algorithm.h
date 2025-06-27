@@ -86,9 +86,9 @@ private:
     float currentOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
     float viewPortLength_ = 0.0f;
-    SizeF viewPort_;
-    SizeF viewPortExtent_;
-    SizeF viewSize_;
+    SizeF viewPort_; // content area size (viewSize_ minus padding)
+    SizeF viewPortExtent_; // size of child (scrollable area)
+    SizeF viewSize_; // size of the Scroll component
     void UpdateScrollAlignment(Alignment& scrollAlignment);
 };
 

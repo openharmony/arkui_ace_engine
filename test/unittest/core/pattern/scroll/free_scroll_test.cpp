@@ -37,8 +37,10 @@ public:
         gesture.SetGlobalLocation({ 1, 1 });
         gesture.SetLocalLocation({ 1, 1 });
         gesture.SetDelta(delta);
-        ASSERT_TRUE(pattern_->freePanGesture_->onActionUpdate_);
-        auto&& func = *(pattern_->freePanGesture_->onActionUpdate_);
+        const auto& controller = pattern_->freeScroll_;
+        ASSERT_TRUE(controller);
+        ASSERT_TRUE(controller->freePanGesture_->onActionUpdate_);
+        auto&& func = *(controller->freePanGesture_->onActionUpdate_);
         func(gesture);
     }
 };
@@ -54,16 +56,19 @@ HWTEST_F(FreeScrollTest, RecognizerOverride001, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     model.SetAxis(Axis::FREE);
     CreateScrollDone();
-    ASSERT_TRUE(pattern_->freePanGesture_);
+    const auto& controller = pattern_->freeScroll_;
+    ASSERT_TRUE(controller);
+    ASSERT_TRUE(controller->freePanGesture_);
 
     TouchTestResult res;
     ResponseLinkResult link;
     auto scrollHandler = pattern_->GetScrollableEvent();
+    ASSERT_TRUE(scrollHandler);
     scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link);
     EXPECT_EQ(link.size(), 1);
-    EXPECT_EQ(*link.begin(), pattern_->freePanGesture_);
-    EXPECT_EQ(*res.begin(), pattern_->freePanGesture_);
-    ASSERT_TRUE(pattern_->freePanGesture_->onActionUpdate_);
+    EXPECT_EQ(*link.begin(), controller->freePanGesture_);
+    EXPECT_EQ(*res.begin(), controller->freePanGesture_);
+    ASSERT_TRUE(controller->freePanGesture_->onActionUpdate_);
 }
 
 /**
@@ -115,21 +120,24 @@ HWTEST_F(FreeScrollTest, ModeChange001, TestSize.Level1)
     model.SetAxis(Axis::FREE);
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
+    const auto& controller = pattern_->freeScroll_;
+    ASSERT_TRUE(controller);
 
     TouchTestResult res;
     ResponseLinkResult link;
     auto scrollHandler = pattern_->GetScrollableEvent();
     scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link);
     EXPECT_EQ(link.size(), 1);
-    EXPECT_EQ(*link.begin(), pattern_->freePanGesture_);
-    EXPECT_EQ(*res.begin(), pattern_->freePanGesture_);
-    ASSERT_TRUE(pattern_->freePanGesture_->onActionUpdate_);
+    EXPECT_EQ(*link.begin(), controller->freePanGesture_);
+    EXPECT_EQ(*res.begin(), controller->freePanGesture_);
+    ASSERT_TRUE(controller->freePanGesture_->onActionUpdate_);
 
     res.clear();
     link.clear();
+
     layoutProperty_->UpdateAxis(Axis::VERTICAL);
     pattern_->OnModifyDone();
-    ASSERT_FALSE(pattern_->freePanGesture_);
+    ASSERT_FALSE(controller);
     scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link);
     EXPECT_EQ(link.size(), 1);
     ASSERT_EQ(*link.begin(), scrollHandler->GetScrollable()->panRecognizerNG_);
@@ -147,12 +155,14 @@ HWTEST_F(FreeScrollTest, ModeChange002, TestSize.Level1)
     model.SetAxis(Axis::FREE);
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
-    ASSERT_TRUE(pattern_->offset_);
+    const auto& controller = pattern_->freeScroll_;
+    ASSERT_TRUE(controller);
+    ASSERT_TRUE(controller->offset_);
     pattern_->currentOffset_ = 20.0f;
 
     layoutProperty_->UpdateAxis(Axis::VERTICAL);
     pattern_->OnModifyDone();
-    ASSERT_FALSE(pattern_->offset_);
+    ASSERT_FALSE(controller);
     ASSERT_EQ(pattern_->currentOffset_, 0);
 }
 
@@ -168,8 +178,10 @@ HWTEST_F(FreeScrollTest, OverScroll001, TestSize.Level1)
     model.SetAxis(Axis::FREE);
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
-    ASSERT_TRUE(pattern_->offset_);
-    pattern_->offset_->Set(OffsetF { X, Y });
+    const auto& controller = pattern_->freeScroll_;
+    ASSERT_TRUE(controller);
+    ASSERT_TRUE(controller->offset_);
+    controller->offset_->Set(OffsetF { X, Y });
     FlushUITasks(frameNode_);
 
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(X, Y));
@@ -179,12 +191,12 @@ HWTEST_F(FreeScrollTest, OverScroll001, TestSize.Level1)
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(WIDTH - CONTENT_W, HEIGHT - CONTENT_H).ToString());
 
     ScrollModelNG::SetEdgeEffect(frameNode_.GetRawPtr(), EdgeEffect::SPRING, true, EffectEdge::START);
-    pattern_->offset_->Set(OffsetF { X, Y });
+    controller->offset_->Set(OffsetF { X, Y });
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(WIDTH - CONTENT_W, HEIGHT - CONTENT_H).ToString());
 
     ScrollModelNG::SetEdgeEffect(frameNode_.GetRawPtr(), EdgeEffect::SPRING, true, EffectEdge::END);
-    pattern_->offset_->Set(OffsetF { X, Y });
+    controller->offset_->Set(OffsetF { X, Y });
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(X, Y));
 }
@@ -201,8 +213,10 @@ HWTEST_F(FreeScrollTest, OverScroll002, TestSize.Level1)
     model.SetAxis(Axis::FREE);
     CreateFreeContent({ SMALL_CONTENT_W, SMALL_CONTENT_H });
     CreateScrollDone();
-    ASSERT_TRUE(pattern_->offset_);
-    pattern_->offset_->Set(OffsetF { X, Y });
+    const auto& controller = pattern_->freeScroll_;
+    ASSERT_TRUE(controller);
+    ASSERT_TRUE(controller->offset_);
+    controller->offset_->Set(OffsetF { X, Y });
     FlushUITasks(frameNode_);
 
     constexpr float alignX = (WIDTH - SMALL_CONTENT_W) / 2;
@@ -215,12 +229,12 @@ HWTEST_F(FreeScrollTest, OverScroll002, TestSize.Level1)
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(alignX, alignY).ToString());
 
     ScrollModelNG::SetEdgeEffect(frameNode_.GetRawPtr(), EdgeEffect::SPRING, true, EffectEdge::START);
-    pattern_->offset_->Set(OffsetF { X, -Y });
+    controller->offset_->Set(OffsetF { X, -Y });
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(alignX, alignY - Y).ToString());
 
     ScrollModelNG::SetEdgeEffect(frameNode_.GetRawPtr(), EdgeEffect::SPRING, true, EffectEdge::END);
-    pattern_->offset_->Set(OffsetF { -X, -Y });
+    controller->offset_->Set(OffsetF { -X, -Y });
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(alignX, alignY).ToString());
 }

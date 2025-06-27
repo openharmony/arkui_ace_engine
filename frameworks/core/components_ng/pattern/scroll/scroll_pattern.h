@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/components_ng/pattern/scroll/free_scroll_controller.h"
 #include "core/components_ng/pattern/scroll/scroll_accessibility_property.h"
 #include "core/components_ng/pattern/scroll/scroll_content_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
@@ -62,8 +63,8 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        if (offset_) {
-            return MakeRefPtr<ScrollLayoutAlgorithm>(offset_->Get().GetX(), offset_->Get().GetY());
+        if (freeScroll_) {
+            return MakeRefPtr<ScrollLayoutAlgorithm>(freeScroll_->GetOffset().GetX(), freeScroll_->GetOffset().GetY());
         }
         return MakeRefPtr<ScrollLayoutAlgorithm>(currentOffset_);
     }
@@ -450,18 +451,14 @@ public:
      */
     RefPtr<NGGestureRecognizer> GetOverrideRecognizer() const
     {
-        return freePanGesture_;
+        if (freeScroll_) {
+            return freeScroll_->GetFreePanGesture();
+        }
+        return nullptr;
     }
 
 private:
-    void InitFreeScroll();
-    void InitFreeTouch();
-    void TryBounceBack();
-
-    RefPtr<NodeAnimatablePropertyOffsetF> offset_;
-    RefPtr<PanRecognizer> freePanGesture_; // all-direction pan recognizer for free scroll mode
-    RefPtr<TouchEventImpl> freeTouch_;
-    float friction_ = 0.0f;
+    RefPtr<FreeScrollController> freeScroll_;
     /* ============================================================================== */
 
     // scrollSnap
