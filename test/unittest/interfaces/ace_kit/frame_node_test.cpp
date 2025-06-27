@@ -208,6 +208,6 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest007, TestSize.Level1)
 
     EXPECT_EQ(frameNode->GetParentHandle(), nullptr);
     frameNodeParent->AddChild(frameNode);
-    EXPECT_FALSE(frameNode->GetParentHandle() == nullptr);
+    EXPECT_NE(frameNode->GetParentHandle(), nullptr);
 }
 } // namespace OHOS::Ace
