@@ -1849,4 +1849,110 @@ HWTEST_F(InspectorTestNg, InspectorTestNg027, TestSize.Level1)
     hasInternalIds = HasInternalIds(children);
     ASSERT_TRUE(hasInternalIds);
 }
+
+/**
+ * @tc.name: GetOverlayNode_001
+ * @tc.desc: Test the operation of GetOverlayNode in stage  overlay
+ * column
+ *    |--stage
+ *       |--PageA
+ *         |--frameNode
+ *    |--overlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetOverlayNode_001, TestSize.Level1)
+{
+    // tc.steps: step1. build tree
+    auto context1 = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context1, nullptr);
+    auto id0 = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> columnNode = FrameNode::CreateFrameNode("Column", id0, AceType::MakeRefPtr<Pattern>(), false);
+
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode("stage", id, AceType::MakeRefPtr<Pattern>(), false);
+    context1->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    stageNode->children_.clear();
+    columnNode->AddChild(stageNode);
+
+    auto overlayNode = FrameNode::CreateFrameNode(
+        "overlayNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    columnNode->AddChild(overlayNode);
+    auto testNode = FrameNode::CreateFrameNode(
+        "testNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    overlayNode->AddChild(testNode);
+
+    // tc.steps: step2 GetOverlayNode in containermodal
+    auto id2 = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> pageA = FrameNode::CreateFrameNode("PageA", id2,
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageA);
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        "frameNode0", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    pageA->AddChild(frameNode);
+    NG::InspectorTreeMap treesInfos;
+    Inspector::GetInspectorTree(treesInfos);
+    auto it = treesInfos.find(testNode->GetId());
+    EXPECT_TRUE(it != treesInfos.end());
+
+    context1->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: GetOverlayNode_001
+ * @tc.desc: Test the operation of GetOverlayNode in containermodal  overlay
+ * column
+ *    |--ContainerModal
+ *       |--stage
+ *          |--PageA
+ *             |--frameNode
+ *    |--overlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, GetOverlayNode_002, TestSize.Level1)
+{
+    // tc.steps: step1. build tree
+    auto context1 = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context1, nullptr);
+
+    auto columnNode = FrameNode::CreateFrameNode(
+        "Column", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+
+    auto id0 = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> contianerNode
+        = FrameNode::CreateFrameNode(V2::CONTAINER_MODAL_ETS_TAG, id0, AceType::MakeRefPtr<Pattern>(), false);
+    columnNode->AddChild(contianerNode);
+
+    auto id = ElementRegister::GetInstance()->MakeUniqueId();
+    RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode("stage", id, AceType::MakeRefPtr<Pattern>(), false);
+    context1->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    stageNode->children_.clear();
+    contianerNode->AddChild(stageNode);
+
+    auto overlayNode = FrameNode::CreateFrameNode(
+        "overlayNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    columnNode->AddChild(overlayNode);
+
+    auto testNode = FrameNode::CreateFrameNode(
+        "testNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    overlayNode->AddChild(testNode);
+
+    // tc.steps: step2 GetOverlayNode in containermodal
+    auto id2 = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> pageA = FrameNode::CreateFrameNode("PageA", id2,
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    stageNode->AddChild(pageA);
+
+    auto frameNode = FrameNode::CreateFrameNode(
+        "frameNode0", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    pageA->AddChild(frameNode);
+
+    NG::InspectorTreeMap treesInfos;
+    Inspector::GetInspectorTree(treesInfos);
+
+    auto it = treesInfos.find(testNode->GetId());
+    EXPECT_TRUE(it != treesInfos.end());
+
+    context1->stageManager_ = nullptr;
+}
 } // namespace OHOS::Ace::NG
