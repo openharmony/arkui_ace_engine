@@ -87,6 +87,7 @@ void FreeScrollController::HandlePanUpdate(const GestureEvent& event)
 
 void FreeScrollController::HandlePanEndOrCancel(const GestureEvent& event)
 {
+    duringPan_ = false;
     const auto& src = event.GetVelocity();
     OffsetF velocity { static_cast<float>(src.GetVelocityX()), static_cast<float>(src.GetVelocityY()) };
     TryScrollAnimation(velocity);
@@ -94,9 +95,8 @@ void FreeScrollController::HandlePanEndOrCancel(const GestureEvent& event)
 
 void FreeScrollController::TryScrollAnimation(const OffsetF& velocity)
 {
-    AnimationOption option;
-    option.SetCurve(MakeRefPtr<ResponsiveSpringMotion>(fabs(2 * M_PI / friction_), 1.0f, 0.0f));
-    option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
+    const auto curve = MakeRefPtr<ResponsiveSpringMotion>(fabs(2 * M_PI / friction_), 1.0f, 0.0f);
+    AnimationOption option(curve, CUSTOM_SPRING_ANIMATION_DURATION);
     option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
 
     OffsetF finalPos = offset_->Get() + velocity / friction_;
