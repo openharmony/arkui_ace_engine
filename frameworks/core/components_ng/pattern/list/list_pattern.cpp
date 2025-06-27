@@ -385,9 +385,10 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     CHECK_NULL_RETURN(host, paint);
     const auto& geometryNode = host->GetGeometryNode();
     auto renderContext = host->GetRenderContext();
+    auto frameRect = renderContext->GetPaintRectWithoutTransform();
     if (!listContentModifier_) {
         CHECK_NULL_RETURN(renderContext, paint);
-        auto size = renderContext->GetPaintRectWithoutTransform().GetSize();
+        auto size = frameRect.GetSize();
         auto& padding = geometryNode->GetPadding();
         if (padding) {
             size.MinusPadding(*padding->left, *padding->right, *padding->top, *padding->bottom);
@@ -403,6 +404,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     paint->SetLaneIdx(laneIdx4Divider_);
     paint->SetContentModifier(listContentModifier_);
     paint->SetAdjustOffset(geometryNode->GetParentAdjust().GetOffset().GetY());
+    paint->UpdateBoundsRect(frameRect, clip);
     UpdateFadingEdge(paint);
     return paint;
 }

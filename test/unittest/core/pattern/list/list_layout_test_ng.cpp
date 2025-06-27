@@ -999,6 +999,52 @@ HWTEST_F(ListLayoutTestNg, PaintMethod006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PaintMethod007
+ * @tc.desc: Test List paint method about UpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, PaintMethod007, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetDivider(ITEM_DIVIDER);
+    model.SetCachedCount(2, true);
+    model.SetInitialIndex(2);
+    CreateListItems(TOTAL_ITEM_NUMBER);
+    CreateDone();
+    ScrollTo(50.0f);
+
+    /**
+     * @tc.steps: step1. Set clip to false
+     * @tc.expected: the bounds rect of list content modifier equals to list real layout size.
+     */
+    auto renderContext = frameNode_->GetRenderContext();
+    renderContext->UpdateClipEdge(false);
+    FlushUITasks();
+
+    auto paintMethod = UpdateContentModifier();
+    auto mainSize =
+        paintMethod->itemPosition_.rbegin()->second.endPos - paintMethod->itemPosition_.begin()->second.startPos;
+    auto boundsRect = pattern_->listContentModifier_->GetBoundsRect().value_or(RectF());
+    EXPECT_EQ(boundsRect.GetX(), 0.0f);
+    EXPECT_EQ(boundsRect.GetY(), std::min(0.0f, paintMethod->itemPosition_.begin()->second.startPos));
+    EXPECT_EQ(boundsRect.Width(), frameNode_->GetGeometryNode()->GetFrameSize().Width());
+    EXPECT_EQ(boundsRect.Height(), std::max(frameNode_->GetGeometryNode()->GetFrameSize().Height(), mainSize));
+
+    /**
+     * @tc.steps: step2. Set clip to true
+     * @tc.expected: the bounds rect of list content modifier equals to list size.
+     */
+    renderContext->UpdateClipEdge(true);
+    FlushUITasks();
+
+    boundsRect = pattern_->listContentModifier_->GetBoundsRect().value_or(RectF());
+    EXPECT_EQ(boundsRect.GetX(), 0.0f);
+    EXPECT_EQ(boundsRect.GetY(), 0.0f);
+    EXPECT_EQ(boundsRect.Width(), frameNode_->GetGeometryNode()->GetFrameSize().Width());
+    EXPECT_EQ(boundsRect.Height(), frameNode_->GetGeometryNode()->GetFrameSize().Height());
+}
+
+/**
  * @tc.name: OnModifyDone001
  * @tc.desc: Test list_pattern OnModifyDone
  * @tc.type: FUNC
