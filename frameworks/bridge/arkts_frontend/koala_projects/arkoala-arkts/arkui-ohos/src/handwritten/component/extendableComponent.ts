@@ -17,6 +17,7 @@ import { int32 } from "@koalaui/common"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { IProvideDecoratedVariable } from "../stateManagement/decorator";
 import { LocalStorage } from '@ohos.arkui.stateManagement';
+import { PeerNode } from "../PeerNode";
 
 export interface LifeCycle {
     aboutToAppear(): void {}
@@ -29,6 +30,7 @@ export interface LifeCycle {
 export interface IExtendableComponent {
     getUIContext(): UIContext;
     getUniqueId(): int32;
+    getPeerNode(): PeerNode | undefined;
 }
 
 export abstract class ExtendableComponent implements LifeCycle {
@@ -95,5 +97,9 @@ export abstract class ExtendableComponent implements LifeCycle {
 
     public set localStorage_(instance: LocalStorage) {
         this.localStoragebackStore_ = instance;
+    }
+    
+    getPeerNode(): PeerNode | undefined {
+        return this.delegate_!.getPeerNode();
     }
 }

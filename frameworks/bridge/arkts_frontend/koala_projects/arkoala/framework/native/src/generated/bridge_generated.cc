@@ -33943,6 +33943,39 @@ Ark_Number impl_FrameNode_getOpacity(Ark_NativePointer thisPtr) {
         return GetAccessors()->getFrameNodeAccessor()->getOpacity(self);
 }
 KOALA_INTEROP_DIRECT_1(FrameNode_getOpacity, KInteropNumber, Ark_NativePointer)
+void impl_FrameNode_setMeasuredSize(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_Size size_value = thisDeserializer.readSize();;
+        GetAccessors()->getFrameNodeAccessor()->setMeasuredSize(self, (const Ark_Size*)&size_value);
+}
+KOALA_INTEROP_DIRECT_V3(FrameNode_setMeasuredSize, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_FrameNode_setLayoutPosition(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_Position position_value = thisDeserializer.readPosition();;
+        GetAccessors()->getFrameNodeAccessor()->setLayoutPosition(self, (const Ark_Position*)&position_value);
+}
+KOALA_INTEROP_DIRECT_V3(FrameNode_setLayoutPosition, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_FrameNode_measure(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_LayoutConstraint constraint_value = thisDeserializer.readLayoutConstraint();;
+        GetAccessors()->getFrameNodeAccessor()->measure(self, (const Ark_LayoutConstraint*)&constraint_value);
+}
+KOALA_INTEROP_DIRECT_V3(FrameNode_measure, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_FrameNode_layout(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        Ark_Position position_value = thisDeserializer.readPosition();;
+        GetAccessors()->getFrameNodeAccessor()->layout(self, (const Ark_Position*)&position_value);
+}
+KOALA_INTEROP_DIRECT_V3(FrameNode_layout, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_FrameNode_setNeedsLayout(Ark_NativePointer thisPtr) {
+        Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
+        GetAccessors()->getFrameNodeAccessor()->setNeedsLayout(self);
+}
+KOALA_INTEROP_DIRECT_V1(FrameNode_setNeedsLayout, Ark_NativePointer)
 KInteropReturnBuffer impl_FrameNode_getPositionToWindowWithTransform(Ark_NativePointer thisPtr) {
         Ark_FrameNode self = reinterpret_cast<Ark_FrameNode>(thisPtr);
         const auto &retValue = GetAccessors()->getFrameNodeAccessor()->getPositionToWindowWithTransform(self);
@@ -39477,6 +39510,12 @@ void impl_CustomDialogController_close(Ark_NativePointer thisPtr) {
         GetAccessors()->getCustomDialogControllerAccessor()->close(self);
 }
 KOALA_INTEROP_DIRECT_V1(CustomDialogController_close, Ark_NativePointer)
+void impl_CustomDialogController_setOwnerView(Ark_NativePointer thisPtr, Ark_NativePointer nodePtr) {
+        Ark_CustomDialogController self = reinterpret_cast<Ark_CustomDialogController>(thisPtr);
+        Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(nodePtr);
+        GetAccessors()->getCustomDialogControllerAccessor()->setOwnerView(self, node);
+}
+KOALA_INTEROP_DIRECT_V2(CustomDialogController_setOwnerView, Ark_NativePointer, Ark_NativePointer)
 Ark_NativePointer impl_LinearGradient_ctor(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         const Ark_Int32 colorStops_value_buf_length = thisDeserializer.readInt32();

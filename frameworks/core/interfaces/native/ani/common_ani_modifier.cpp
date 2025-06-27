@@ -101,6 +101,11 @@ ani_ref GetSharedLocalStorage()
     return nullptr;
 }
 
+void SetCustomCallback(ani_env* env, ani_long ptr, ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout)
+{
+    Framework::AniGraphicsModule::SetCustomCallback(env, ptr, fnObjMeasure, fnObjLayout);
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -111,6 +116,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getCurrentInstanceId = OHOS::Ace::NG::GetCurrentInstanceId,
         .builderProxyNodeConstruct = OHOS::Ace::NG::BuilderProxyNodeConstruct,
         .getSharedLocalStorage = OHOS::Ace::NG::GetSharedLocalStorage,
+        .setCustomCallback = OHOS::Ace::NG::SetCustomCallback
     };
     return &impl;
 }

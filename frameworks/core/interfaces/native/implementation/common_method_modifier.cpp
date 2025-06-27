@@ -212,7 +212,7 @@ auto g_onWillDismissPopup = [](
                     .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
                 const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstract::DismissPopup));
                 parameter.dismiss = keeper.ArkValue();
-                arkCallback.Invoke(parameter);
+                arkCallback.InvokeSync(parameter);
             };
             popupParam->SetOnWillDismiss(std::move(callback));
             popupParam->SetInteractiveDismiss(true);
@@ -4948,13 +4948,13 @@ void OnSizeChangeImpl(Ark_NativePointer node,
         // TODO: Reset value
         return;
     }
-    auto onSizeChange = [callback = CallbackHelper(*optValue)](const RectF &oldRect, const RectF &newRect) {
+    auto onSizeChange = [callback = CallbackHelper(*optValue)](const RectF& oldRect, const RectF& newRect) {
         Ark_SizeOptions oldSize;
-        oldSize.width = Converter::ArkValue<Opt_Length>(oldRect.Width());
-        oldSize.height = Converter::ArkValue<Opt_Length>(oldRect.Height());
+        oldSize.width = Converter::ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(oldRect.Width()));
+        oldSize.height = Converter::ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(oldRect.Height()));
         Ark_SizeOptions newSize;
-        newSize.width = Converter::ArkValue<Opt_Length>(newRect.Width());
-        newSize.height = Converter::ArkValue<Opt_Length>(newRect.Height());
+        newSize.width = Converter::ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(newRect.Width()));
+        newSize.height = Converter::ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(newRect.Height()));
         callback.Invoke(oldSize, newSize);
     };
     ViewAbstract::SetOnSizeChanged(frameNode, std::move(onSizeChange));

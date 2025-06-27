@@ -32,7 +32,7 @@ void AddOnWillDismiss(DialogProperties& properties, Opt_Callback_DismissDialogAc
             .dismiss = keeper.ArkValue(),
             .reason = Converter::ArkValue<Ark_DismissReason>(dismissReason)
         };
-        callback.Invoke(action);
+        callback.InvokeSync(action);
     };
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier

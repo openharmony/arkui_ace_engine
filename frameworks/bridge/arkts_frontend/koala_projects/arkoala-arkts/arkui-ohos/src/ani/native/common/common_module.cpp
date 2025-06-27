@@ -115,4 +115,14 @@ ani_object GetSharedLocalStorage([[maybe_unused]] ani_env* env)
     }
     return nullptr;
 }
+
+void SetCustomCallback(ani_env* env, ani_object obj, ani_long ptr,
+    ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setCustomCallback(env, ptr, fnObjMeasure, fnObjLayout);
+}
 } // namespace OHOS::Ace::Ani

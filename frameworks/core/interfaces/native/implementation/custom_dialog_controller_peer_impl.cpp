@@ -18,7 +18,7 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
-#include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
+#include "core/components_ng/pattern/dialog/custom_dialog_controller_model_static.h"
 #include "core/components/theme/shadow_theme.h"
 
 namespace {
@@ -41,39 +41,60 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 void CustomDialogControllerPeerImpl::SetOwnerView(Ark_NativePointer node)
 {
     CHECK_NULL_VOID(node);
+    if (!ownerView_.Invalid()) {
+        return;
+    }
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     auto weakNode = AceType::WeakClaim(frameNode);
     CHECK_NULL_VOID(!weakNode.Invalid());
     ownerView_ = weakNode;
+    auto pipeline = frameNode->GetContext();
+    if (pipeline) {
+        SetInstanceId(pipeline->GetInstanceId());
+    }
 }
 
-void CustomDialogControllerPeerImpl::SetBuilder(CustomNodeBuilder builder, Ark_NativePointer node)
+void CustomDialogControllerPeerImpl::SetBuilder(
+    CustomNodeBuilder builder, const RefPtr<CustomDialogControllerPeer>& peer)
 {
-    CHECK_NULL_VOID(node);
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    builder_ = [callback = CallbackHelper(builder), frameNode]() -> RefPtr<UINode> {
-        auto refNode = AceType::Claim(frameNode);
-        CHECK_NULL_RETURN(refNode, nullptr);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, nullptr);
-        pipelineContext->UpdateCurrentActiveNode(refNode);
-        return callback.BuildSync(reinterpret_cast<Ark_NativePointer>(frameNode));
+    builder_ = [callback = CallbackHelper(builder), weakPeer = AceType::WeakClaim(AceType::RawPtr(peer))]() -> void {
+        auto controllerPeer = weakPeer.Upgrade();
+        CHECK_NULL_VOID(controllerPeer);
+        auto weakNode = controllerPeer->GetOwnerViewNode();
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pipelineContext = frameNode->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(frameNode);
+        callback.BuildAsync([weakPeer](const RefPtr<UINode>& uiNode) {
+            auto controller = weakPeer.Upgrade();
+            CHECK_NULL_VOID(controller);
+            auto builderFunc = [uiNode]() -> RefPtr<UINode> {
+                return uiNode;
+            };
+            CustomDialogControllerModelStatic::SetOpenDialog(
+                controller->dialogProperties_, controller->dialogs_, weakPeer, std::move(builderFunc));
+        }, reinterpret_cast<Ark_NativePointer>(AceType::RawPtr(frameNode)));
     };
 }
 
-void CustomDialogControllerPeerImpl::SetOnCancel(Opt_Callback_Void cancel, Ark_NativePointer node)
+void CustomDialogControllerPeerImpl::SetOnCancel(
+    Opt_Callback_Void cancel, const RefPtr<CustomDialogControllerPeer>& peer)
 {
-    CHECK_NULL_VOID(node);
     auto cancelOpt = Converter::OptConvert<Callback_Void>(cancel);
     CHECK_NULL_VOID(cancelOpt);
-    dialogProperties_.onCancel = [callback = CallbackHelper(cancelOpt.value()), node]() {
-        auto refNode = AceType::Claim(reinterpret_cast<FrameNode*>(node));
-        CHECK_NULL_VOID(refNode);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        pipelineContext->UpdateCurrentActiveNode(refNode);
-        callback.Invoke();
-    };
+    dialogProperties_.onCancel =
+        [callback = CallbackHelper(cancelOpt.value()), weakPeer = AceType::WeakClaim(AceType::RawPtr(peer))]() {
+            auto controllerPeer = weakPeer.Upgrade();
+            CHECK_NULL_VOID(controllerPeer);
+            auto weakNode = controllerPeer->GetOwnerViewNode();
+            auto frameNode = weakNode.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto pipelineContext = frameNode->GetContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(frameNode);
+            callback.InvokeSync();
+        };
 }
 
 void CustomDialogControllerPeerImpl::SetAutoCancel(Opt_Boolean autoCancel)
@@ -287,13 +308,13 @@ void CustomDialogControllerPeerImpl::OpenDialog()
         }
     }
     dialogProperties_.isSysBlurStyle = true;
-    CustomDialogControllerModelNG::SetOpenDialog(dialogProperties_, dialogs_, WeakClaim(this), std::move(builder_));
+    builder_();
 }
 
 void CustomDialogControllerPeerImpl::CloseDialog()
 {
     ContainerScope scope(instanceId_);
-    CustomDialogControllerModelNG::SetCloseDialog(dialogProperties_, dialogs_, WeakClaim(this));
+    CustomDialogControllerModelStatic::SetCloseDialog(dialogProperties_, dialogs_, WeakClaim(this));
 }
 
 RefPtr<UINode> CustomDialogControllerPeerImpl::GetWindowScene() const

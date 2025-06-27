@@ -8123,8 +8123,9 @@ export interface CommonMethod {
     groupDefaultFocus(value: boolean | undefined): this
     focusOnTouch(value: boolean | undefined): this
     focusBox(value: FocusBoxStyle | undefined): this
-    animationStart(value: AnimateParam | undefined): this
-    animationStop(value: AnimateParam | undefined):this
+    // when use buildSystem memo-plugin will insert animation declaration
+    // animationStart(value: AnimateParam | undefined): this
+    // animationStop(value: AnimateParam | undefined):this
     __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
         callback: (value: number | AnimatableArithmetic<T>) => void): void
     transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this

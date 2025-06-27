@@ -31,12 +31,8 @@ Ark_CustomDialogController CtorImpl(const Ark_CustomDialogControllerOptions* val
     peer->IncRefCount();
     CHECK_NULL_RETURN(value, AceType::RawPtr(peer));
 
-    LOGE("CustomDialogControllerAccessor::CtorImpl. There is no a frame node for SetOwnerView.");
-    peer->SetOwnerView(nullptr);
-    LOGE("CustomDialogControllerAccessor::CtorImpl. There is no a frame node for SetBuilder.");
-    // Call peer->SetBuilder with value->builder and frameNode if it possible.
-    LOGE("CustomDialogControllerAccessor::CtorImpl. There is no a frame node for SetOnCancel.");
-    peer->SetOnCancel(value->cancel, nullptr);
+    peer->SetBuilder(value->builder, peer);
+    peer->SetOnCancel(value->cancel, peer);
     peer->SetAutoCancel(value->autoCancel);
     peer->SetDialogAlignment(value->alignment);
     peer->SetOffset(value->offset);
@@ -78,6 +74,12 @@ void CloseImpl(Ark_CustomDialogController peer)
     CHECK_NULL_VOID(peer);
     peer->CloseDialog();
 }
+void SetOwnerViewImpl(Ark_CustomDialogController peer, Ark_NodeHandle node)
+{
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(node);
+    peer->SetOwnerView(node);
+}
 } // CustomDialogControllerAccessor
 const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAccessor()
 {
@@ -87,6 +89,7 @@ const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAc
         CustomDialogControllerAccessor::GetFinalizerImpl,
         CustomDialogControllerAccessor::OpenImpl,
         CustomDialogControllerAccessor::CloseImpl,
+        CustomDialogControllerAccessor::SetOwnerViewImpl,
     };
     return &CustomDialogControllerAccessorImpl;
 }

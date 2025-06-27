@@ -72,7 +72,7 @@ void MoveCommonUnderPageNode(Ark_NativePointer commonNode, Ark_NativePointer pag
     if (stageNode->GetTag() != V2::STAGE_ETS_TAG) {
         return;
     }
-    stageNode->RemoveChild(AceType::Claim(common));
+    stageNode->RemoveChildSilently(AceType::Claim(common));
     
     auto page = reinterpret_cast<FrameNode*>(pageNode);
     CHECK_NULL_VOID(page);

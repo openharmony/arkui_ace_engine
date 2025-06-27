@@ -4243,6 +4243,16 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNode_dispose(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _FrameNode_getOpacity(ptr: KPointer): number
+    @ani.unsafe.Direct
+    native static _FrameNode_setMeasuredSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _FrameNode_setLayoutPosition(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _FrameNode_measure(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _FrameNode_layout(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _FrameNode_setNeedsLayout(ptr: KPointer): void
     @ani.unsafe.Quick
     native static _FrameNode_getPositionToWindowWithTransform(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
@@ -5668,6 +5678,8 @@ export class ArkUIGeneratedNativeModule {
     native static _CustomDialogController_open(ptr: KPointer): undefined
     @ani.unsafe.Direct
     native static _CustomDialogController_close(ptr: KPointer): undefined
+    @ani.unsafe.Direct
+    native static _CustomDialogController_setOwnerView(ptr: KPointer, node: KPointer): undefined
     @ani.unsafe.Direct
     native static _LinearGradient_ctor(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct

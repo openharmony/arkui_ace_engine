@@ -23,6 +23,7 @@
 #include "custom_node/custom_node_module.h"
 #include "drag_and_drop/native_drag_drop_global.h"
 #include "dragController/drag_controller_module.h"
+#include "image_span/image_span_module.h"
 #include "load.h"
 #include "log/log.h"
 #include "utils/convert_utils.h"
@@ -237,6 +238,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_DragController_notifyDragStartReques",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionNotifyDragStartReques)
+        },
+        ani_native_function {
+            "_ImageSpan_Set_PixelMap",
+            "JL@ohos/multimedia/image/image/PixelMap;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetImageSpanPixelMap)
+        },
+        ani_native_function {
+            "_ImageSpan_SetAlt_PixelMap",
+            "JL@ohos/multimedia/image/image/PixelMap;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetImageSpanAltPixelMap)
+        },
+        ani_native_function {
+            "_SetCustomCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetCustomCallback)
         },
     };
 

@@ -1975,6 +1975,8 @@ typedef struct KeyEventPeer* Ark_KeyEvent;
 typedef struct Opt_KeyEvent Opt_KeyEvent;
 typedef struct Ark_LargestContentfulPaint Ark_LargestContentfulPaint;
 typedef struct Opt_LargestContentfulPaint Opt_LargestContentfulPaint;
+typedef struct Ark_LayoutConstraint Ark_LayoutConstraint;
+typedef struct Opt_LayoutConstraint Opt_LayoutConstraint;
 typedef struct Ark_LeadingMarginPlaceholder Ark_LeadingMarginPlaceholder;
 typedef struct Opt_LeadingMarginPlaceholder Opt_LeadingMarginPlaceholder;
 typedef struct LengthMetricsPeer LengthMetricsPeer;
@@ -4750,8 +4752,8 @@ typedef struct Opt_KeyProcessingMode {
 } Opt_KeyProcessingMode;
 typedef enum Ark_KeySource {
     ARK_KEY_SOURCE_UNKNOWN = 0,
-    ARK_KEY_SOURCE_KEYBOARD = 1,
-    ARK_KEY_SOURCE_JOYSTICK = 2,
+    ARK_KEY_SOURCE_KEYBOARD = 4,
+    ARK_KEY_SOURCE_JOYSTICK = 5,
 } Ark_KeySource;
 typedef struct Opt_KeySource {
     Ark_Tag tag;
@@ -13112,6 +13114,15 @@ typedef struct Opt_LargestContentfulPaint {
     Ark_Tag tag;
     Ark_LargestContentfulPaint value;
 } Opt_LargestContentfulPaint;
+typedef struct Ark_LayoutConstraint {
+    Ark_Size maxSize;
+    Ark_Size minSize;
+    Ark_Size percentReference;
+} Ark_LayoutConstraint;
+typedef struct Opt_LayoutConstraint {
+    Ark_Tag tag;
+    Ark_LayoutConstraint value;
+} Opt_LayoutConstraint;
 typedef struct Ark_LeadingMarginPlaceholder {
     Ark_PixelMap pixelMap;
     Ark_Tuple_Dimension_Dimension size;
@@ -24266,6 +24277,15 @@ typedef struct GENERATED_ArkUIFrameNodeAccessor {
     Ark_Int32 (*getChildrenCount)(Ark_FrameNode peer);
     void (*dispose)(Ark_FrameNode peer);
     Ark_Number (*getOpacity)(Ark_FrameNode peer);
+    void (*setMeasuredSize)(Ark_FrameNode peer,
+                            const Ark_Size* size);
+    void (*setLayoutPosition)(Ark_FrameNode peer,
+                              const Ark_Position* position);
+    void (*measure)(Ark_FrameNode peer,
+                    const Ark_LayoutConstraint* constraint);
+    void (*layout)(Ark_FrameNode peer,
+                   const Ark_Position* position);
+    void (*setNeedsLayout)(Ark_FrameNode peer);
     Ark_Position (*getPositionToWindowWithTransform)(Ark_FrameNode peer);
     Ark_FrameNode (*getFrameNodeByKey)(const Ark_String* name);
     Ark_Number (*getIdByFrameNode)(Ark_FrameNode peer,
@@ -25876,6 +25896,7 @@ typedef struct GENERATED_ArkUICustomDialogControllerAccessor {
     Ark_NativePointer (*getFinalizer)();
     void (*open)(Ark_CustomDialogController peer);
     void (*close)(Ark_CustomDialogController peer);
+    void (*setOwnerView)(Ark_CustomDialogController peer, Ark_NodeHandle node);
 } GENERATED_ArkUICustomDialogControllerAccessor;
 
 typedef struct GENERATED_ArkUILinearGradientAccessor {
