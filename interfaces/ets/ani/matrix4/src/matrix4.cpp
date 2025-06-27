@@ -48,7 +48,7 @@ static Matrix4_Obj* GetMatrixObj(ani_env* env, ani_object obj)
 
 static ani_object Matrix4_Identity([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object)
 {
-    static const char* className = "L@ohos/matrix4/matrix4/Matrix4TransitInner;";
+    static const char* className = "@ohos.matrix4.matrix4.Matrix4TransitInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         ani_object nullobj = nullptr;
@@ -124,7 +124,7 @@ Matrix4 ConvertToMatrixArray([[maybe_unused]] ani_env* env, [[maybe_unused]] ani
 static ani_object Matrix4_Init([[maybe_unused]] ani_env* env,
     [[maybe_unused]] ani_object option)
 {
-    static const char* className = "L@ohos/matrix4/matrix4/Matrix4TransitInner;";
+    static const char* className = "@ohos.matrix4.matrix4.Matrix4TransitInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         ani_object nullobj = nullptr;
@@ -149,7 +149,7 @@ static ani_object Matrix4_Init([[maybe_unused]] ani_env* env,
 
 static ani_object Matrix4_Copy([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object)
 {
-    static const char* className = "L@ohos/matrix4/matrix4/Matrix4TransitInner;";
+    static const char* className = "@ohos.matrix4.matrix4.Matrix4TransitInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         ani_object nullobj = nullptr;
@@ -202,15 +202,15 @@ bool ParseOption(ani_env* env, ani_object options, double& input, const char* pr
 static ani_object Matrix4_Scale([[maybe_unused]] ani_env* env, ani_object object, ani_object options)
 {
     double xValue = 1.0;
-    ParseOption(env, options, xValue, "x", "L@ohos/matrix4/matrix4/ScaleOption;");
+    ParseOption(env, options, xValue, "x", "@ohos.matrix4.matrix4.ScaleOption");
     double yValue = 1.0;
-    ParseOption(env, options, yValue, "y", "L@ohos/matrix4/matrix4/ScaleOption;");
+    ParseOption(env, options, yValue, "y", "@ohos.matrix4.matrix4.ScaleOption");
     double zValue = 1.0;
-    ParseOption(env, options, zValue, "z", "L@ohos/matrix4/matrix4/ScaleOption;");
+    ParseOption(env, options, zValue, "z", "@ohos.matrix4.matrix4.ScaleOption");
     double centerXValue = 0.0;
-    ParseOption(env, options, centerXValue, "centerX", "L@ohos/matrix4/matrix4/ScaleOption;");
+    ParseOption(env, options, centerXValue, "centerX", "@ohos.matrix4.matrix4.ScaleOption");
     double centerYValue = 0.0;
-    ParseOption(env, options, centerYValue, "centerY", "L@ohos/matrix4/matrix4/ScaleOption;");
+    ParseOption(env, options, centerYValue, "centerY", "@ohos.matrix4.matrix4.ScaleOption");
 
     auto scaleMatrix = Matrix4::CreateScale(xValue, yValue, zValue);
     if (!NearZero(centerXValue) || !NearZero(centerYValue)) {
@@ -231,17 +231,17 @@ static ani_object Matrix4_Scale([[maybe_unused]] ani_env* env, ani_object object
 static ani_object Matrix4_Rotate([[maybe_unused]] ani_env* env, ani_object object, ani_object options)
 {
     double dx = 0.0;
-    ParseOption(env, options, dx, "x", "L@ohos/matrix4/matrix4/RotateOption;");
+    ParseOption(env, options, dx, "x", "@ohos.matrix4.matrix4.RotateOption");
     double dy = 0.0;
-    ParseOption(env, options, dy, "y", "L@ohos/matrix4/matrix4/RotateOption;");
+    ParseOption(env, options, dy, "y", "@ohos.matrix4.matrix4.RotateOption");
     double dz = 0.0;
-    ParseOption(env, options, dz, "z", "L@ohos/matrix4/matrix4/RotateOption;");
+    ParseOption(env, options, dz, "z", "@ohos.matrix4.matrix4.RotateOption");
     double angle = 0.0;
-    ParseOption(env, options, angle, "angle", "L@ohos/matrix4/matrix4/RotateOption;");
+    ParseOption(env, options, angle, "angle", "@ohos.matrix4.matrix4.RotateOption");
     double centerX = 0.0;
-    ParseOption(env, options, centerX, "centerX", "L@ohos/matrix4/matrix4/RotateOption;");
+    ParseOption(env, options, centerX, "centerX", "@ohos.matrix4.matrix4.RotateOption");
     double centerY = 0.0;
-    ParseOption(env, options, centerY, "centerY", "L@ohos/matrix4/matrix4/RotateOption;");
+    ParseOption(env, options, centerY, "centerY", "@ohos.matrix4.matrix4.RotateOption");
 
     auto rotateMatrix = Matrix4::CreateRotate(angle, dx, dy, dz);
     if (!NearZero(centerX) || !NearZero(centerY)) {
@@ -287,7 +287,7 @@ void ParseArray([[maybe_unused]] ani_env* env, const char* property, ani_object 
         return;
     }
     ani_class arrayClass;
-    if (ANI_OK != env->FindClass("Lescompat/Array;", &arrayClass)) {
+    if (ANI_OK != env->FindClass("escompat.Array", &arrayClass)) {
         return;
     }
     ani_boolean isArray;
@@ -301,7 +301,7 @@ void ParseArray([[maybe_unused]] ani_env* env, const char* property, ani_object 
     for (int i = 0; i < static_cast<int32_t>(length); i++) {
         ani_ref pointRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(params_ref),
-            "$_get", "I:Lstd/core/Object;", &pointRef, (ani_int)i)) {
+            "$_get", "i:C{std.core.Object}", &pointRef, (ani_int)i)) {
             break;
         }
         ani_object pointObject = static_cast<ani_object>(pointRef);
@@ -322,11 +322,11 @@ void ParseArray([[maybe_unused]] ani_env* env, const char* property, ani_object 
 static ani_object Matrix4_SetPolyToPoly([[maybe_unused]] ani_env* env, ani_object object, ani_object options)
 {
     double srcIndexInput = 0.0;
-    ParseOption(env, options, srcIndexInput, "srcIndex", "L@ohos/matrix4/matrix4/PolyToPolyOptions;");
+    ParseOption(env, options, srcIndexInput, "srcIndex", "@ohos.matrix4.matrix4.PolyToPolyOptions");
     double dstIndexInput = 0.0;
-    ParseOption(env, options, dstIndexInput, "dstIndex", "L@ohos/matrix4/matrix4/PolyToPolyOptions;");
+    ParseOption(env, options, dstIndexInput, "dstIndex", "@ohos.matrix4.matrix4.PolyToPolyOptions");
     double pointCountInput = 0.0;
-    ParseOption(env, options, pointCountInput, "pointCount", "L@ohos/matrix4/matrix4/PolyToPolyOptions;");
+    ParseOption(env, options, pointCountInput, "pointCount", "@ohos.matrix4.matrix4.PolyToPolyOptions");
     int srcIndex = static_cast<int>(srcIndexInput);
     int dstIndex = static_cast<int>(dstIndexInput);
     int pointCount = static_cast<int>(pointCountInput);
@@ -405,11 +405,11 @@ static ani_tuple_value Matrix4_TransformPoint([[maybe_unused]] ani_env* env, ani
 static ani_object Matrix4_Translate([[maybe_unused]] ani_env* env, ani_object object, ani_object options)
 {
     double dx = 0.0;
-    ParseOption(env, options, dx, "x", "L@ohos/matrix4/matrix4/TranslateOption;");
+    ParseOption(env, options, dx, "x", "@ohos.matrix4.matrix4.TranslateOption");
     double dy = 0.0;
-    ParseOption(env, options, dy, "y", "L@ohos/matrix4/matrix4/TranslateOption;");
+    ParseOption(env, options, dy, "y", "@ohos.matrix4.matrix4.TranslateOption");
     double dz = 0.0;
-    ParseOption(env, options, dz, "z", "L@ohos/matrix4/matrix4/TranslateOption;");
+    ParseOption(env, options, dz, "z", "@ohos.matrix4.matrix4.TranslateOption");
 
     Matrix4_Obj* matrixObj = GetMatrixObj(env, object);
     if (matrixObj == nullptr) {
@@ -448,7 +448,7 @@ static ani_object Matrix4_Combine([[maybe_unused]] ani_env* env, ani_object obje
 
 ani_status BindMatrix(ani_env* env)
 {
-    static const char* className = "L@ohos/matrix4/matrix4;";
+    static const char* className = "@ohos.matrix4.matrix4";
     ani_namespace cls;
     if (ANI_OK != env->FindNamespace(className, &cls)) {
         return ANI_ERROR;
@@ -475,7 +475,7 @@ static ani_object MatrixTransferStatic(ani_env *env, ani_object obj, ani_object 
         return nullptr;
     }
 
-    static const char* className = "L@ohos/matrix4/matrix4/Matrix4TransitInner;";
+    static const char* className = "@ohos.matrix4.matrix4.Matrix4TransitInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return nullptr;
@@ -493,7 +493,7 @@ static ani_object MatrixTransferStatic(ani_env *env, ani_object obj, ani_object 
 
 ani_status BindMatrixTransit(ani_env* env)
 {
-    static const char* className = "L@ohos/matrix4/matrix4/Matrix4TransitInner;";
+    static const char* className = "@ohos.matrix4.matrix4.Matrix4TransitInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
         return ANI_ERROR;

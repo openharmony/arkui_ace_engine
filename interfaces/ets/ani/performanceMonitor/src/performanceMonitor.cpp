@@ -49,7 +49,7 @@ static void Begin([[maybe_unused]] ani_env *env, ani_string scene, ani_enum_item
     std::string noteStr = std::string(utf8Buffer2);
 
     ani_namespace ns;
-    if (ANI_OK != env->FindNamespace("L@ohos/arkui/performanceMonitor/performanceMonitor;", &ns)) {
+    if (ANI_OK != env->FindNamespace("@ohos.arkui.performanceMonitor.performanceMonitor", &ns)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, "[ANI] Failed performanceMonitor to create namespace");
         return;
     }
@@ -79,7 +79,7 @@ static void End([[maybe_unused]] ani_env *env, ani_string scene)
     std::string sceneId = std::string(utf8Buffer);
 
     ani_namespace ns;
-    if (ANI_OK != env->FindNamespace("L@ohos/arkui/performanceMonitor/performanceMonitor;", &ns)) {
+    if (ANI_OK != env->FindNamespace("@ohos.arkui.performanceMonitor.performanceMonitor", &ns)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, "[ANI] Failed performanceMonitor to create namespace");
         return;
     }
@@ -95,7 +95,7 @@ static void RecordInputEventTime([[maybe_unused]] ani_env* env,
     ani_enum_item type, ani_enum_item sourceType, ani_double time)
 {
     ani_namespace ns;
-    if (ANI_OK != env->FindNamespace("L@ohos/arkui/performanceMonitor/performanceMonitor;", &ns)) {
+    if (ANI_OK != env->FindNamespace("@ohos.arkui.performanceMonitor.performanceMonitor", &ns)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, "[ANI] Failed performanceMonitor to create namespace");
         return;
     }
@@ -128,7 +128,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     }
 
     ani_namespace ns;
-    if (ANI_OK != env->FindNamespace("L@ohos/arkui/performanceMonitor/performanceMonitor;", &ns)) {
+    if (ANI_OK != env->FindNamespace("@ohos.arkui.performanceMonitor.performanceMonitor", &ns)) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, "[ANI] Failed performanceMonitor to create namespace");
         return ANI_ERROR;
     }

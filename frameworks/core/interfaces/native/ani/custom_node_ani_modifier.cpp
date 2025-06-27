@@ -93,7 +93,7 @@ ani_object QueryNavigationInfo(ani_env* env, ani_long node)
     NavPathStackPeer* ptr = new NavPathStackPeer(stack);
 
     ani_object res = {};
-    static const char* className = "L@ohos/arkui/observer/uiObserver/NavigationInfoImpl;";
+    static const char* className = "@ohos.arkui.observer.uiObserver.NavigationInfoImpl";
     ani_class cls;
     env->FindClass(className, &cls);
     ani_method navInfoCtor;
@@ -108,7 +108,7 @@ ani_object QueryNavigationInfo(ani_env* env, ani_long node)
     
     // set pathStack
     ani_class interCls;
-    env->FindClass("Larkui/component/navigation/NavPathStackInternal;", &interCls);
+    env->FindClass("arkui.component.navigation.NavPathStackInternal", &interCls);
     ani_ref pathStack;
     env->Class_CallStaticMethodByName_Ref(interCls, "fromPtr", nullptr, &pathStack, reinterpret_cast<ani_ref>(ptr));
     env->Object_SetPropertyByName_Ref(res, "pathStack", static_cast<ani_object>(pathStack));
@@ -128,7 +128,7 @@ ani_object QueryRouterPageInfo(ani_env* env, ani_long node)
     auto pattern = pageNode->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pattern, res);
     auto pageInfo = pattern->GetPageInfo();
-    static const char* className = "L@ohos/arkui/observer/uiObserver/RouterPageInfo;";
+    static const char* className = "@ohos.arkui.observer.uiObserver.RouterPageInfo";
     ani_status status = ANI_OK;
     ani_class cls;
     env->FindClass(className, &cls);
@@ -153,7 +153,7 @@ ani_object QueryRouterPageInfo(ani_env* env, ani_long node)
     env->Object_SetPropertyByName_Ref(res, "pageId", aniPageId);
 
     ani_enum routerPgaeState;
-    env->FindEnum("L@ohos/arkui/observer/uiObserver/RouterPageState;", &routerPgaeState);
+    env->FindEnum("@ohos.arkui.observer.uiObserver.RouterPageState", &routerPgaeState);
     ani_enum_item enumItem;
     env->Enum_GetEnumItemByIndex(routerPgaeState, static_cast<ani_size>(pattern->GetPageState()), &enumItem);
     env->Object_SetPropertyByName_Ref(res, "state", enumItem);
@@ -183,7 +183,7 @@ void GetNavDestinationInfo(ani_env* env, ani_object& res, RefPtr<UINode> node)
         state = pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN;
     }
 
-    static const char* className = "L@ohos/arkui/observer/uiObserver/NavDestinationInfoImpl;";
+    static const char* className = "@ohos.arkui.observer.uiObserver.NavDestinationInfoImpl";
     ani_status status = ANI_OK;
     ani_class cls;
     env->FindClass(className, &cls);
@@ -208,13 +208,13 @@ void GetNavDestinationInfo(ani_env* env, ani_object& res, RefPtr<UINode> node)
     env->Object_SetPropertyByName_Ref(res, "navigationId", navigationId);
     
     ani_enum navDesState;
-    env->FindEnum("L@ohos/arkui/observer/uiObserver/NavDestinationState;", &navDesState);
+    env->FindEnum("@ohos.arkui.observer.uiObserver.NavDestinationState", &navDesState);
     ani_enum_item navDesStateItem;
     env->Enum_GetEnumItemByIndex(navDesState, static_cast<ani_size>(state), &navDesStateItem);
     env->Object_SetPropertyByName_Ref(res, "state", navDesStateItem);
     
     ani_enum navMode;
-    env->FindEnum("L/arkui/component/navDestination/NavDestinationMode;", &navMode);
+    env->FindEnum("@ohos.arkui.component.navDestination.NavDestinationMode", &navMode);
     ani_enum_item navModeItem;
     env->Enum_GetEnumItemByIndex(navMode, static_cast<ani_size>(mode), &navModeItem);
     env->Object_SetPropertyByName_Ref(res, "mode", navModeItem);

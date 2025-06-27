@@ -32,7 +32,7 @@
 namespace OHOS::Ace::Ani {
 namespace {
 constexpr char PIXEL_MAP_CONSTRUCTOR[] = "C{@ohos.multimedia.image.image.PixelMap}:";
-constexpr char PIXEL_MAP_DRAWABLE[] = "L@ohos/arkui/drawableDescriptor/PixelMapDrawableDescriptor;";
+constexpr char PIXEL_MAP_DRAWABLE[] = "@ohos.arkui.drawableDescriptor.PixelMapDrawableDescriptor";
 constexpr char ARRAY_GET[] = "i:C{std.core.Object}";
 
 ani_object CreatePixelMapDrawableByPixelMap(ani_env* env, const RefPtr<PixelMap>& pixelMap)
@@ -246,7 +246,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         return ANI_ERROR;
     }
     ani_class cls;
-    auto ani_status = env->FindClass("L@ohos/arkui/drawableDescriptor/DrawableDescriptorInner;", &cls);
+    auto ani_status = env->FindClass("@ohos.arkui.drawableDescriptor.DrawableDescriptorInner", &cls);
     if (ani_status != ANI_OK) {
         LOGI("find arkui drawable descriptor inner failed");
         return ANI_ERROR;

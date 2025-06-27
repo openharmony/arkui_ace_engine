@@ -44,13 +44,13 @@ ani_object EntryLoader::GetPageEntryObj()
             LOGE("EntryLoader Get getNearestNonBootRuntimeLinker failed, %{public}d", state);
             break;
         }
-        if ((state = env_->FindClass("Lstd/core/RuntimeLinker;", &cls)) != ANI_OK) {
+        if ((state = env_->FindClass("std.core.RuntimeLinker", &cls)) != ANI_OK) {
             LOGE("EntryLoader FindClass RuntimeLinker failed, %{public}d", state);
             break;
         }
 
         ani_method loadClassMethod;
-        if ((state = env_->Class_FindMethod(cls, "loadClass", "Lstd/core/String;Lstd/core/Boolean;:Lstd/core/Class;",
+        if ((state = env_->Class_FindMethod(cls, "loadClass", "C{std.core.String}C{std.core.Boolean}:C{std.core.Class}",
                  &loadClassMethod)) != ANI_OK) {
             LOGE("EntryLoader Class_FindMethod loadClass failed, %{public}d", state);
             break;
@@ -74,7 +74,7 @@ ani_object EntryLoader::GetPageEntryObj()
         entryClass = static_cast<ani_class>(entryClassRef);
 
         ani_method entryMethod = nullptr;
-        if (env_->Class_FindMethod(entryClass, "<ctor>", ":V", &entryMethod) != ANI_OK) {
+        if (env_->Class_FindMethod(entryClass, "<ctor>", ":", &entryMethod) != ANI_OK) {
             LOGE("EntryLoader Class_FindMethod ctor failed");
             break;
         }
@@ -105,16 +105,16 @@ EntryLoader::EntryLoader(ani_env* env, const std::string& abcModulePath): env_(e
     ANI_CALL(env, Array_New(1, abcModulePathStr, &refArray), return);
 
     ani_class cls;
-    ANI_CALL(env, FindClass("Lstd/core/AbcRuntimeLinker;", &cls), return);
+    ANI_CALL(env, FindClass("std.core.AbcRuntimeLinker", &cls), return);
 
     ani_method ctor;
     ANI_CALL(env, Class_FindMethod(
-        cls, "<ctor>", "Lstd/core/RuntimeLinker;Lescompat/Array;:V", &ctor), return);
+        cls, "<ctor>", "C{std.core.RuntimeLinker}C{escompat.Array}:", &ctor), return);
 
     ANI_CALL(env, Object_New(cls, ctor, &runtimeLinkerObj_, undefined, refArray), return);
 
     ANI_CALL(env, Class_FindMethod(
-        cls, "loadClass", "Lstd/core/String;Lstd/core/Boolean;:Lstd/core/Class;", &loadClass_), return);
+        cls, "loadClass", "C{std.core.String}C{std.core.Boolean}:C{std.core.Class}", &loadClass_), return);
 }
 
 EntryLoader::EntryLoader(ani_env* env, const std::vector<uint8_t>& abcContent): env_(env)
@@ -131,16 +131,16 @@ EntryLoader::EntryLoader(ani_env* env, const std::vector<uint8_t>& abcContent): 
     ANI_CALL(env, Array_New(1, byteArray, &refArray), return);
 
     ani_class cls;
-    ANI_CALL(env, FindClass("Lstd/core/MemoryRuntimeLinker;", &cls), return);
+    ANI_CALL(env, FindClass("std.core.MemoryRuntimeLinker", &cls), return);
 
     ani_method ctor;
     ANI_CALL(env, Class_FindMethod(
-        cls, "<ctor>", "Lstd/core/RuntimeLinker;Lescompat/Array;:V", &ctor), return);
+        cls, "<ctor>", "C{std.core.RuntimeLinker}C{escompat.Array}:", &ctor), return);
 
     ANI_CALL(env, Object_New(cls, ctor, &runtimeLinkerObj_, undefined, refArray), return);
 
     ANI_CALL(env, Class_FindMethod(
-        cls, "loadClass", "Lstd/core/String;Lstd/core/Boolean;:Lstd/core/Class;", &loadClass_), return);
+        cls, "loadClass", "C{std.core.String}C{std.core.Boolean}:C{std.core.Class}", &loadClass_), return);
 }
 
 ani_object EntryLoader::GetPageEntryObj(const std::string& entryPath) const
@@ -152,7 +152,7 @@ ani_object EntryLoader::GetPageEntryObj(const std::string& entryPath) const
     ANI_CALL(env_, Object_CallMethod_Ref(runtimeLinkerObj_, loadClass_, &entryClass, entryClassStr, false), return {});
 
     ani_method entryCtor;
-    ANI_CALL(env_, Class_FindMethod(static_cast<ani_class>(entryClass), "<ctor>", ":V", &entryCtor), return {});
+    ANI_CALL(env_, Class_FindMethod(static_cast<ani_class>(entryClass), "<ctor>", ":", &entryCtor), return {});
 
     ani_object entryObject = nullptr;
     ANI_CALL(env_, Object_New(static_cast<ani_class>(entryClass), entryCtor, &entryObject), return {});
