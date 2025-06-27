@@ -88,6 +88,7 @@
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/core/components_ng/base/ui_node.h"
 #include "oh_window_pip.h"
+#include "oh_window_comm.h"
 #include "web_accessibility_session_adapter.h"
 #include "web_pattern.h"
 #include "nweb_handler.h"
@@ -8278,6 +8279,13 @@ bool WebPattern::StartPip(uint32_t pipController)
     auto errCode = OH_PictureInPicture_StartPip(pipController);
     if (errCode != 0) {
         TAG_LOGE(AceLogTag::ACE_WEB, "OH_PictureInPicture_StartPip err: %{public}d", errCode);
+        if (errCode == WINDOW_MANAGER_ERRORCODE_PIP_CREATE_FAILED) {
+            std::lock_guard<std::mutex> lock(pipCallbackMapMutex_);
+            for (auto &it : pipCallbackMap_) {
+                auto pip = it.second;
+                SendPipEvent(pip.delegateId, pip.childId, pip.frameRoutingId, PIP_STATE_EXIT);
+            }
+        }
         return false;
     }
     {
