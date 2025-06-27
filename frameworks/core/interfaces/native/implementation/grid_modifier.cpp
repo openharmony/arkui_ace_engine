@@ -252,7 +252,9 @@ void OnScrollBarUpdateImpl(Ark_NativePointer node,
         auto arkOffset = ArkValue<Ark_Number>(offset);
         auto arkResult = callback.InvokeWithObtainResult<Ark_ComputedBarAttribute, Callback_ComputedBarAttribute_Void>(
             arkIndex, arkOffset);
-        return ResType(Convert<float>(arkResult.totalOffset), Convert<float>(arkResult.totalLength));
+        auto totalOffset = Convert<Dimension>(arkResult.totalOffset).ConvertToPx();
+        auto totalLength = Convert<Dimension>(arkResult.totalLength).ConvertToPx();
+        return ResType(totalOffset, totalLength);
     };
     GridModelStatic::SetOnScrollBarUpdate(frameNode, std::move(onScrollBarUpdate));
 }
