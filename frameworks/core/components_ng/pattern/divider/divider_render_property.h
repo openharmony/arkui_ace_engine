@@ -108,6 +108,9 @@ public:
 
     void UpdateDividerColor(const Color& value)
     {
+        if (SystemProperties::ConfigChangePerform()) {
+            UpdateDividerColorSetByUser(true);
+        }
         if (propDividerColor_.has_value()) {
             if (NearEqual(propDividerColor_.value(), value)) {
                 return;
@@ -119,9 +122,6 @@ public:
 
     void UpdateDividerColorByTheme(const Color& value)
     {
-        if (SystemProperties::ConfigChangePerform()) {
-            UpdateDividerColorSetByTheme(true);
-        }
         if (propDividerColor_.has_value()) {
             if (NearEqual(propDividerColor_.value(), value)) {
                 return;
@@ -131,7 +131,7 @@ public:
         UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DividerColorSetByTheme, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DividerColorSetByUser, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LineCap, LineCap, PROPERTY_UPDATE_RENDER);
     ACE_DISALLOW_COPY_AND_MOVE(DividerRenderProperty);
 

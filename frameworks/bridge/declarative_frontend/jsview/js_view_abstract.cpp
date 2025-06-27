@@ -4568,6 +4568,7 @@ void JSViewAbstract::ParseDashGap(const JSRef<JSVal>& args)
         if (ParseCommonEdgeWidthsForDashParams(obj, commonCalcDimension)) {
             ViewAbstractModel::GetInstance()->SetDashGap(commonCalcDimension.left,
                 commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
+            return;
         }
         if (SystemProperties::ConfigChangePerform()) {
             NG::BorderWidthProperty dashGap;
@@ -4597,6 +4598,7 @@ void JSViewAbstract::ParseDashWidth(const JSRef<JSVal>& args)
         if (ParseCommonEdgeWidthsForDashParams(obj, commonCalcDimension)) {
             ViewAbstractModel::GetInstance()->SetDashWidth(commonCalcDimension.left,
                 commonCalcDimension.right, commonCalcDimension.top, commonCalcDimension.bottom);
+            return;
         }
         if (SystemProperties::ConfigChangePerform()) {
             NG::BorderWidthProperty dashWidth;
