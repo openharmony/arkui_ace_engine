@@ -244,6 +244,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "JL@ohos/multimedia/image/image/PixelMap;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetImageSpanAltPixelMap)
         },
+        ani_native_function {
+            "_SetCustomCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetCustomCallback)
+        },
     };
 
     auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());

@@ -4243,6 +4243,16 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNode_dispose(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _FrameNode_getOpacity(ptr: KPointer): number
+    @ani.unsafe.Direct
+    native static _FrameNode_setMeasuredSize(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _FrameNode_setLayoutPosition(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _FrameNode_measure(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _FrameNode_layout(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _FrameNode_setNeedsLayout(ptr: KPointer): void
     @ani.unsafe.Quick
     native static _FrameNode_getPositionToWindowWithTransform(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick

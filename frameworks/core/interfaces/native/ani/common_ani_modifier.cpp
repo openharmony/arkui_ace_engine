@@ -74,6 +74,11 @@ ani_long BuilderProxyNodeConstruct(ArkUI_Int32 id)
     return reinterpret_cast<ani_long>(AceType::RawPtr(proxyNode));
 }
 
+void SetCustomCallback(ani_env* env, ani_long ptr, ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout)
+{
+    Framework::AniGraphicsModule::SetCustomCallback(env, ptr, fnObjMeasure, fnObjLayout);
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -82,7 +87,8 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .restoreInstanceId = OHOS::Ace::NG::RestoreInstanceId,
         .setDrawCallback = OHOS::Ace::NG::SetDrawCallback,
         .getCurrentInstanceId = OHOS::Ace::NG::GetCurrentInstanceId,
-        .builderProxyNodeConstruct = OHOS::Ace::NG::BuilderProxyNodeConstruct };
+        .builderProxyNodeConstruct = OHOS::Ace::NG::BuilderProxyNodeConstruct,
+        .setCustomCallback = OHOS::Ace::NG::SetCustomCallback };
     return &impl;
 }
 

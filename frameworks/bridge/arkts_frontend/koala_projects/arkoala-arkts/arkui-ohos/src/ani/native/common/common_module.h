@@ -27,6 +27,8 @@ void SetDrawCallback(ani_env* env, ani_object obj, ani_long ptr, ani_fn_object f
 void SetDrawModifier(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_object drawModifier);
 void Invalidate(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr);
 ani_long BuilderProxyNodeConstruct(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id);
+void SetCustomCallback(ani_env* env, ani_object obj, ani_long ptr,
+    ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE

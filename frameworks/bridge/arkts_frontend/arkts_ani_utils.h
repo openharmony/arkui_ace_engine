@@ -76,6 +76,14 @@ public:
      * Get ani env from ani vm.
      */
     static ani_env* GetAniEnv(ani_vm* vm);
+    /**
+     * Get std/core/Double.
+     */
+    static ani_object CreateDoubleObject(ani_env* env, double value);
+    /**
+     * Get std/core/Double by float.
+     */
+    static ani_object FloatToNumberObject(ani_env* env, const float& value);
 };
 } // namespace OHOS::Ace
 

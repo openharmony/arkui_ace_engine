@@ -39,6 +39,18 @@ enum class ExpandMode : uint32_t {
     EXPAND,
     LAZY_EXPAND,
 };
+// same as inner defines in property.h
+typedef enum {
+    ARKUI_DIRTY_FLAG_MEASURE = 0b1,
+    ARKUI_DIRTY_FLAG_LAYOUT = 0b10,
+    /** mark the node need to do attribute diff to drive update. */
+    ARKUI_DIRTY_FLAG_ATTRIBUTE_DIFF = 0b100,
+    ARKUI_DIRTY_FLAG_MEASURE_SELF = 0b1000,
+    ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_PARENT = 0b10000,
+    ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST = 0b100000,
+    ARKUI_DIRTY_FLAG_RENDER = 0b1000000,
+    ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_CHILD = 0b1000000000,
+} ArkUIDirtyFlag;
 }
 std::map<int32_t, FrameNodePeer> FrameNodePeer::peerMap_;
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -569,7 +581,7 @@ Ark_Boolean GetCrossLanguageOptionsImpl(Ark_FrameNode peer)
 Ark_Number GetIdByFrameNodeImpl(Ark_FrameNode peer, Ark_FrameNode node)
 {
     const auto errValue = Converter::ArkValue<Ark_Number>(-1);
-    auto currentNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    auto currentNode = FrameNodePeer::GetFrameNodeByPeer(node);
     CHECK_NULL_RETURN(currentNode, errValue);
     auto nodeId = currentNode->GetId();
     return Converter::ArkValue<Ark_Number>(nodeId);
@@ -812,6 +824,82 @@ Ark_SizeLengthMetrics GetUserConfigSizeImpl(Ark_FrameNode peer)
     };
     return retValue;
 }
+void SetMeasuredSizeImpl(Ark_FrameNode peer, const Ark_Size* size)
+{
+    CHECK_NULL_VOID(size);
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(peerNode);
+    auto widthValue = Converter::Convert<float>(size->width);
+    auto heightValue = Converter::Convert<float>(size->height);
+    peerNode->GetGeometryNode()->SetFrameWidth(widthValue);
+    peerNode->GetGeometryNode()->SetFrameHeight(heightValue);
+}
+void SetLayoutPositionImpl(Ark_FrameNode peer, const Ark_Position* position)
+{
+    CHECK_NULL_VOID(position);
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(peerNode);
+    auto xValue = Converter::Convert<Dimension>(position->x.value);
+    auto yValue = Converter::Convert<Dimension>(position->y.value);
+    peerNode->GetGeometryNode()->SetMarginFrameOffsetX(xValue.Value());
+    peerNode->GetGeometryNode()->SetMarginFrameOffsetY(yValue.Value());
+}
+void MeasureImpl(Ark_FrameNode peer, const Ark_LayoutConstraint* constraint)
+{
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(peerNode);
+    CHECK_NULL_VOID(constraint);
+    Ark_Size maxSize = constraint->maxSize;
+    Ark_Size minSize = constraint->minSize;
+    Ark_Size percentReference = constraint->percentReference;
+    auto minWidth = Converter::Convert<float>(constraint->minSize.width);
+    auto minHeight = Converter::Convert<float>(constraint->minSize.height);
+    auto maxWidth = Converter::Convert<float>(constraint->maxSize.width);
+    auto maxHeight = Converter::Convert<float>(constraint->maxSize.height);
+    auto percentReferenceWidth = Converter::Convert<float>(constraint->percentReference.width);
+    auto percentReferenceHeight = Converter::Convert<float>(constraint->percentReference.height);
+    std::optional<LayoutConstraintF> constraintF = std::make_optional<LayoutConstraintF>();
+    // minWidth
+    constraintF->minSize.SetWidth(minWidth);
+    // minHeight
+    constraintF->minSize.SetHeight(minHeight);
+    // maxWidth
+    constraintF->maxSize.SetWidth(maxWidth);
+    // maxHeight
+    constraintF->maxSize.SetHeight(maxHeight);
+    // minWidth == maxWidth
+    if (minWidth == maxWidth) {
+        constraintF->selfIdealSize.SetWidth(minWidth);
+    }
+    // minHeight == maxHeight
+    if (minHeight == maxHeight) {
+        constraintF->selfIdealSize.SetHeight(minHeight);
+    }
+    // percentReferenceWidth
+    constraintF->percentReference.SetWidth(percentReferenceWidth);
+    // percentReferenceHeight
+    constraintF->percentReference.SetHeight(percentReferenceHeight);
+    peerNode->SetActive(true);
+    peerNode->Measure(constraintF);
+}
+void LayoutImpl(Ark_FrameNode peer, const Ark_Position* position)
+{
+    CHECK_NULL_VOID(position);
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(peerNode);
+    auto xValue = Converter::Convert<Dimension>(position->x.value);
+    auto yValue = Converter::Convert<Dimension>(position->y.value);
+    peerNode->SetActive(true);
+    peerNode->GetGeometryNode()->SetMarginFrameOffsetX(xValue.Value());
+    peerNode->GetGeometryNode()->SetMarginFrameOffsetY(yValue.Value());
+    peerNode->Layout();
+}
+void SetNeedsLayoutImpl(Ark_FrameNode peer)
+{
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(peerNode);
+    peerNode->MarkDirtyNode(ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_PARENT);
+}
 } // FrameNodeAccessor
 const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
 {
@@ -824,6 +912,11 @@ const GENERATED_ArkUIFrameNodeAccessor* GetFrameNodeAccessor()
         FrameNodeAccessor::GetNextSiblingImpl, FrameNodeAccessor::GetPreviousSiblingImpl,
         FrameNodeAccessor::GetParentImpl, FrameNodeAccessor::GetChildrenCountImpl,
         FrameNodeAccessor::DisposeImpl, FrameNodeAccessor::GetOpacityImpl,
+        FrameNodeAccessor::SetMeasuredSizeImpl,
+        FrameNodeAccessor::SetLayoutPositionImpl,
+        FrameNodeAccessor::MeasureImpl,
+        FrameNodeAccessor::LayoutImpl,
+        FrameNodeAccessor::SetNeedsLayoutImpl,
         FrameNodeAccessor::GetPositionToWindowWithTransformImpl, FrameNodeAccessor::GetFrameNodeByKeyImpl,
         FrameNodeAccessor::GetIdByFrameNodeImpl, FrameNodeAccessor::MoveToImpl,
         FrameNodeAccessor::GetFirstChildIndexWithoutExpandImpl, FrameNodeAccessor::GetLastChildIndexWithoutExpandImpl,
