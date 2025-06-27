@@ -33,7 +33,7 @@ import { EditableTextOnChangeCallback, OnDidChangeCallback, AutoCapitalizationMo
 import { ErrorCallback } from "./../ohos.base"
 import { GetItemMainSizeByIndex, WaterFlowAttribute, WaterFlowLayoutMode, WaterFlowSections, WaterFlowSectionsInternal, SectionOptions, WaterFlowOptions } from "./../waterFlow"
 import { ImageCompleteCallback, ImageLoadResult } from "./../imageSpan"
-import { ImageErrorCallback, ColorContent, DynamicRangeMode, ImageContent, ImageInterpolation, ImageRenderMode, ImageRotateOrientation, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event, ImageError, ImageSourceSize, ResizableOptions } from "./../image"
+import { ImageErrorCallback, ColorContent, DynamicRangeMode, ImageContent, ImageInterpolation, ImageRenderMode, ImageRotateOrientation, ImageOnCompleteCallback, ImageCompleteEvent, ImageError, ImageSourceSize, ResizableOptions } from "./../image"
 import { InterceptionModeCallback, InterceptionShowCallback, BarStyle, LaunchMode, NavBarPosition, NavigationMenuItem, NavigationOperation, NavigationTitleOptions, NavigationMenuOptions, ToolbarItem, NavigationToolbarOptions, NavigationAttribute, Tuple_Dimension_Dimension, NavigationMode, NavigationTitleMode, Callback_NavigationTitleMode_Void, Callback_Boolean_Void, Callback_NavigationMode_Void, Callback_String_Opt_Object_Void, Type_NavigationAttribute_customNavContentTransition_delegate, NavContentInfo, NavigationAnimatedTransition, NavigationCommonTitle, NavigationCustomTitle, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions, Callback_PopInfo_Void, PopInfo, NavigationInterception, ToolbarItemStatus, Callback_NavigationTransitionProxy_Void, NavigationTransitionProxy, NavigationTransitionProxyInternal, NavBar, MoreButtonOptions } from "./../navigation"
 import { LocationButtonCallback, LocationButtonOnClickResult, LocationDescription, LocationIconStyle, LocationButtonOptions } from "./../locationButton"
 import { MenuCallback, MenuOnAppearCallback, PasteEventCallback, SubmitCallback, RichEditorAttribute, Callback_RichEditorSelection_Void, RichEditorSelection, Callback_RichEditorRange_Void, RichEditorRange, Callback_RichEditorInsertValue_Boolean, RichEditorInsertValue, Callback_RichEditorTextSpanResult_Void, RichEditorTextSpanResult, Callback_TextRange_Void, Callback_RichEditorDeleteValue_Boolean, RichEditorDeleteValue, PasteEvent, Callback_RichEditorChangeValue_Boolean, RichEditorChangeValue, Callback_CutEvent_Void, CutEvent, Callback_CopyEvent_Void, CopyEvent, RichEditorSpanType, RichEditorResponseType, SelectionMenuOptions, KeyboardOptions, PlaceholderStyle, RichEditorBaseController, RichEditorBaseControllerInternal, RichEditorTextStyle, RichEditorController, RichEditorControllerInternal, RichEditorTextSpanOptions, RichEditorImageSpanOptions, RichEditorBuilderSpanOptions, RichEditorSymbolSpanOptions, RichEditorUpdateTextSpanStyleOptions, RichEditorUpdateImageSpanStyleOptions, RichEditorUpdateSymbolSpanStyleOptions, RichEditorParagraphStyleOptions, RichEditorImageSpanResult, RichEditorParagraphResult, RichEditorSpan, RichEditorDeleteDirection, RichEditorOptions, RichEditorStyledStringController, RichEditorStyledStringControllerInternal, RichEditorStyledStringOptions, LeadingMarginPlaceholder, PreviewMenuOptions, RichEditorGesture, RichEditorSpanPosition, RichEditorLayoutStyle, RichEditorParagraphStyle, RichEditorSymbolSpanStyle, RichEditorSpanStyleOptions, RichEditorUrlStyle, RichEditorImageSpanStyle, RichEditorImageSpanStyleResult, RichEditorTextStyleResult } from "./../richEditor"
@@ -3993,11 +3993,11 @@ export class Deserializer extends DeserializerBase {
     _argsSerializer.release();
     return; }
     }
-    readCallback_Type_ImageAttribute_onComplete_callback_event_Void(isSync: boolean = false): ((event?: Type_ImageAttribute_onComplete_callback_event) => void) {
+    readCallback_Type_ImageAttribute_onComplete_callback_event_Void(isSync: boolean = false): ((event?: ImageCompleteEvent) => void) {
         const _resource : CallbackResource = this.readCallbackResource()
         const _call : KPointer = this.readPointer()
         const _callSync : KPointer = this.readPointer()
-        return (event?: Type_ImageAttribute_onComplete_callback_event | undefined):void => {
+        return (event?: ImageCompleteEvent | undefined):void => {
     const _argsSerializer : Serializer = Serializer.hold();
     _argsSerializer.writeInt32(_resource.resourceId);
     _argsSerializer.writePointer(_call);

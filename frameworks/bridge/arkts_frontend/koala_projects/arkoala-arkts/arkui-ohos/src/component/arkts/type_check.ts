@@ -46,7 +46,7 @@ import { CancelButtonStyle, SearchAttribute, IconOptions, CancelButtonOptions, C
 import { CanvasGradient, CanvasPath, CanvasPattern, OffscreenCanvas, ImageBitmap, RenderingContextSettings, OffscreenCanvasRenderingContext2D, Path2D, TextMetrics, DrawingRenderingContext, ImageData, CanvasRenderer, ImageSmoothingQuality, CanvasLineCap, CanvasLineJoin, CanvasDirection, CanvasTextAlign, CanvasTextBaseline, CanvasFillRule, CanvasRenderingContext2D } from "./../canvas"
 import { Matrix2D } from "./../matrix2d"
 import { ChainEdgeEffect, ScrollState, ListAttribute, ListItemAlign, ListDividerOptions, ChainAnimationOptions, StickyStyle, ScrollSnapAlign, Callback_Number_Number_Number_Void, OnScrollVisibleContentChangeCallback, VisibleListContentInfo, Callback_Number_Boolean, Callback_Number_Number_Boolean, ListItemGroupArea, ListScroller, CloseSwipeActionOptions, ListOptions } from "./../list"
-import { ColorContent, DynamicRangeMode, ImageContent, ImageInterpolation, ImageRenderMode, ImageRotateOrientation, Type_ImageAttribute_onComplete_callback_event, ImageError, ImageSourceSize, ResizableOptions } from "./../image"
+import { ColorContent, DynamicRangeMode, ImageContent, ImageInterpolation, ImageRenderMode, ImageRotateOrientation, ImageCompleteEvent, ImageError, ImageSourceSize, ResizableOptions } from "./../image"
 import { ColorMode, LayoutDirection } from "./../stateManagement"
 import { Component3DAttribute, ModelType, SceneOptions } from "./../component3d"
 import { BuilderNodeOps, BuilderNodeOptions, ComponentContent, UnifiedData, SystemBarStyle, Scene, Context, WorkerEventListener, Event, BaseContext, Context_getGroupDir_Callback, ErrorEvent, MessageEvents, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, CustomTheme } from "./../arkui-custom"
@@ -3281,7 +3281,7 @@ export class TypeChecker {
         return value instanceof Type_CalendarInterface_callable0_value
     }
     static isType_ImageAttribute_onComplete_callback_event(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean): boolean {
-        return value instanceof Type_ImageAttribute_onComplete_callback_event
+        return value instanceof ImageCompleteEvent
     }
     static isType_XComponentInterface_callable0_value(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof Type_XComponentInterface_callable0_value

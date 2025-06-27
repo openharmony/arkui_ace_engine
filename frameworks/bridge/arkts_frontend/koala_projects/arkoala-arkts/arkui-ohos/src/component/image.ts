@@ -450,7 +450,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ImageAttribute_edgeAntialiasing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onCompleteAttribute(value: ((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined): void {
+    onCompleteAttribute(value: ((event?: ImageCompleteEvent) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -596,7 +596,7 @@ export interface ImageSourceSize {
 }
 export interface ColorContent {
 }
-export interface Type_ImageAttribute_onComplete_callback_event {
+export interface ImageCompleteEvent {
     width: number;
     height: number;
     componentWidth: number;
@@ -607,7 +607,7 @@ export interface Type_ImageAttribute_onComplete_callback_event {
     contentOffsetX: number;
     contentOffsetY: number;
 }
-export type Callback_Type_ImageAttribute_onComplete_callback_event_Void = (event?: Type_ImageAttribute_onComplete_callback_event) => void;
+export type ImageOnCompleteCallback = (event?: ImageCompleteEvent) => void;
 export interface ImageAttribute extends CommonMethod {
     alt(value: string | Resource | PixelMap | undefined): this
     matchTextDirection(value: boolean | undefined): this
@@ -627,7 +627,7 @@ export interface ImageAttribute extends CommonMethod {
     draggable(value: boolean | undefined): this
     pointLight(value: PointLightStyle | undefined): this
     edgeAntialiasing(value: number | undefined): this
-    onComplete(value: ((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined): this
+    onComplete(value: ((event?: ImageCompleteEvent) => void) | undefined): this
     onError(value: ImageErrorCallback | undefined): this
     onFinish(value: (() => void) | undefined): this
     enableAnalyzer(value: boolean | undefined): this
@@ -656,7 +656,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     draggable_value?: boolean | undefined
     pointLight_value?: PointLightStyle | undefined
     edgeAntialiasing_value?: number | undefined
-    onComplete_value?: ((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined
+    onComplete_value?: ((event?: ImageCompleteEvent) => void) | undefined
     onError_value?: ImageErrorCallback | undefined
     onFinish_value?: (() => void) | undefined
     enableAnalyzer_value?: boolean | undefined
@@ -719,7 +719,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     public edgeAntialiasing(value: number | undefined): this {
         return this
     }
-    public onComplete(value: ((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined): this {
+    public onComplete(value: ((event?: ImageCompleteEvent) => void) | undefined): this {
         return this
     }
     public onError(value: ImageErrorCallback | undefined): this {
@@ -947,9 +947,9 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         }
         return this
     }
-    public onComplete(value: ((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined): this {
+    public onComplete(value: ((event?: ImageCompleteEvent) => void) | undefined): this {
         if (this.checkPriority("onComplete")) {
-            const value_casted = value as (((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined)
+            const value_casted = value as (((event?: ImageCompleteEvent) => void) | undefined)
             this.getPeer()?.onCompleteAttribute(value_casted)
             return this
         }
