@@ -82,6 +82,7 @@ struct ArkUIAniCommonModifier {
     ArkUI_Int32 (*getCurrentInstanceId)();
     ani_long (*builderProxyNodeConstruct)(ArkUI_Int32 id);
     void (*setCustomCallback)(ani_env* env, ani_long ptr, ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout);
+    ArkUI_Int32 (*requireArkoalaNodeId)(ArkUI_Int32 capacity);
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);

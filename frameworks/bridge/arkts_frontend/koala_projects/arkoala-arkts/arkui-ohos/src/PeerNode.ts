@@ -20,12 +20,15 @@ import { nullptr, pointer } from "@koalaui/interop"
 import { ArkRootPeer } from "./component"
 import { ReusablePool } from "./ReusablePool"
 import { StateStylesOps } from './component/arkui-custom'
+import { ArkUIAniModule } from "arkui.ani"
 
 export const PeerNodeType = 11
 export const RootPeerType = 33
 export const LazyItemNodeType = 17 // LazyItems are detached node trees that are stored privately in LazyForEach
 export const BuilderRootNodeType = 19 // BuilderRootNode are detached node trees that are stored privately in BuilderNode
-const INITIAL_ID = 10000000
+const INITIAL_ID = 0
+const ID_CAPACITY = 10000
+const UNINITIALIZE_CURSOR = -1
 
 export class PeerNode extends IncrementalNode {
     static generateRootPeer() {
@@ -33,7 +36,14 @@ export class PeerNode extends IncrementalNode {
     }
     peer: NativePeerNode
     protected static currentId: int32 = INITIAL_ID
-    static nextId(): int32 { return PeerNode.currentId++ }
+    protected static cursor: int32 = UNINITIALIZE_CURSOR
+    static nextId(): int32 {
+        if (PeerNode.cursor === UNINITIALIZE_CURSOR || PeerNode.currentId >= PeerNode.cursor + ID_CAPACITY) {
+            PeerNode.cursor = ArkUIAniModule._RequireArkoalaNodeId(ID_CAPACITY)
+            PeerNode.currentId = PeerNode.cursor
+        }
+        return PeerNode.currentId++;
+    }
     private id: int32
     private _reuseCb?: () => void
     private _recycleCb?: () => void
