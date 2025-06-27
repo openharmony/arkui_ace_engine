@@ -27,6 +27,16 @@ export struct SelectIndex {
   paths: NavListItem[] = [
     { name: 'SelectDivider', path: 'SelectDivider' },
     { name: 'SelectOption', path: 'SelectOption' },
+    { name: 'SelectSymbolModifier', path: 'SelectSymbolModifier' },
+    { name: 'SelectLanguagePadding', path: 'SelectLanguagePadding' },
+    { name: 'SelectOnSelect', path: 'SelectOnSelect' },
+    { name: 'SelectNormal', path: 'SelectOptionMenu' },
+    { name: 'SelectSymbol', path: 'SelectSymbol' },
+    { name: 'SelectCustom', path: 'SelectCustom' },
+    { name: 'SelectDividerNormal', path: 'SelectDividerOptions' },
+    { name: 'SelectDividerNull', path: 'SelectDividerNull' },
+    { name: 'SelectArrow', path: 'SelectArrow' },
+    { name: 'SelectModifier', path: 'SelectOptionTextModifier' },
   ]
 
   build() {

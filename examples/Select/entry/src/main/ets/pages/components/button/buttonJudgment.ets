@@ -13,34 +13,35 @@
  * limitations under the License.
  */
 
-import { NavList, NavListItem } from './utils/navigationList'
-
 @Builder
-export function NavIndexBuilder(name: string, param: Object) {
-  NavIndex()
+export function ButtonJudgmentBuilder(name: string, param: Object) {
+  ButtonJudgmentExample()
 }
 
 @Entry
 @Component
-struct NavIndex {
+struct ButtonJudgmentExample {
+  @State count: number = 0;
   pathStack: NavPathStack = new NavPathStack()
-  paths: NavListItem[] = [
-    { name: 'Select', path: 'SelectIndex' },
-    { name: 'Button', path: 'ButtonIndex' },
-  ]
 
   build() {
     NavDestination() {
-      NavList({
-        pages: this.paths,
-        onPathChange: (item: NavListItem) => {
-          this.pathStack.pushPath( { name: item.path } )
+      Column() {
+        Text(`${this.count}`)
+          .fontSize(30)
+          .onClick(() => {
+            this.count++;
+          })
+        if (this.count <= 0) {
+          Button('count is negative').fontSize(30).height(50)
+        } else if (this.count % 2 === 0) {
+          Button('count is even').fontSize(30).height(50)
+        } else {
+          Button('count is odd').fontSize(30).height(50)
         }
-      })
+      }.height('100%').width('100%').justifyContent(FlexAlign.Center)
     }
-    .title('表单')
-    .height('100%')
-    .width('100%')
+    .title('ButtonJudgment')
     .onBackPressed(() => {
       this.pathStack.pop()
       return true
