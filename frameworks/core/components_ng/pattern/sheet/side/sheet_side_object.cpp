@@ -587,7 +587,7 @@ void SheetSideObject::AvoidKeyboard(bool forceAvoid)
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetSafeAreaManager();
-    auto keyboradHeight = manager->GetKeyboardInset().Length();
+    auto keyboardHeight = manager->GetKeyboardInset().Length();
     if (sheetPattern->GetKeyboardHeight() == keyboradHeight && !forceAvoid) {
         return;
     }
@@ -637,7 +637,7 @@ float SheetSideObject::GetUpOffsetCaretNeed()
     auto manager = pipelineContext->GetSafeAreaManager();
     auto keyboardHeight = manager->GetKeyboardInset().Length();
     if (keyboardHeight == 0) {
-        return 0.f;
+        return 0.0f;
     }
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipelineContext->GetTextFieldManager());
     // inputH : Distance from input component's Caret to bottom of screen
@@ -645,7 +645,7 @@ float SheetSideObject::GetUpOffsetCaretNeed()
     if (textFieldManager && !textFieldManager->GetOptionalClickPosition().has_value() &&
         !pipelineContext->UsingCaretAvoidMode()) {
         TAG_LOGD(AceLogTag::ACE_SHEET, "illegal caret position, don't calc height this time");
-        return .0f;
+        return 0.0f;
     }
     float inputH = textFieldManager ? (pipelineContext->GetRootHeight() -
         textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight()) : 0.f;
@@ -656,7 +656,7 @@ float SheetSideObject::GetUpOffsetCaretNeed()
     if (inputH >= inputMinH) {
         // Caret needs not up
         TAG_LOGD(AceLogTag::ACE_SHEET, "Caret witch in Sheet needs not up");
-        return .0f;
+        return 0.0f;
     }
     // The expected height of the Caret to be lifted
     return inputMinH - inputH;

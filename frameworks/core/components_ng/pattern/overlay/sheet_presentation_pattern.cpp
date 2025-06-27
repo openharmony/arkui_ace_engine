@@ -43,7 +43,6 @@
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/stage/content_root_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -2944,7 +2943,7 @@ void SheetPresentationPattern::SetSheetOuterBorderWidth(
         BorderColorProperty outBorderColor;
         borderWidth.SetBorderWidth(0.0_vp);
         outBorderWidth.SetBorderWidth(0.0_vp);
-        if (sheetType != SheetType::SHEET_POPUP) {
+        if (sheetObject_->CheckIfNeedSetOuterBorderProp()) {
             borderColor.SetColor(sheetTheme->GetSheetInnerBorderColor());
             outBorderColor.SetColor(sheetTheme->GetSheetOuterBorderColor());
             renderContext->UpdateOuterBorderColor(outBorderColor);
