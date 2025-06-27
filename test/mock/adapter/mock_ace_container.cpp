@@ -91,4 +91,6 @@ void AceContainer::DispatchExtensionDataToHostWindow(
 void AceContainer::UpdateColorMode(uint32_t colorMode) {}
 
 void AceContainer::TriggerModuleSerializer() {}
+
+void AceContainer::SetIsFormRender(bool isFormRender) {}
 } // namespace OHOS::Ace::Platform
