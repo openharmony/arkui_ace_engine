@@ -44,7 +44,7 @@ private:
     void MeasureMenuItems(LayoutWrapper* layoutWrapper, float maxChildrenWidth, float& totalHeight);
     bool NeedHeaderPadding(const RefPtr<FrameNode>& host);
     bool NeedFooterPadding(const RefPtr<FrameNode>& host);
-    bool UpdateLayoutSizeBasedOnPolicy(LayoutWrapper* layoutWrapper, SizeF& menuItemGroupSize);
+    bool UpdateLayoutSizeBasedOnPolicy(LayoutWrapper* layoutWrapper, const SizeF& menuItemGroupSize);
 
     void LayoutHeader(LayoutWrapper* layoutWrapper);
     void LayoutFooter(LayoutWrapper* layoutWrapper);

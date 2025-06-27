@@ -125,6 +125,11 @@ public:
         return true;
     }
 
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
     RefPtr<InputEvent>& GetHoverListener()
     {
         return hoverListener_;

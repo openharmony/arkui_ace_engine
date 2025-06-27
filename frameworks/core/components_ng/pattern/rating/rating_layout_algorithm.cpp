@@ -120,15 +120,21 @@ std::optional<SizeF> RatingLayoutAlgorithm::LayoutPolicyIsMatchParent(const Layo
     float width = 0.0f;
     float height = 0.0f;
     if (layoutPolicy->IsWidthMatch()) {
-        width = contentConstraint.parentIdealSize.Width().value();
-        if (!layoutPolicy->IsHeightMatch()) {
+        width = contentConstraint.parentIdealSize.Width().value_or(0.0f);
+        if (!layoutPolicy->IsHeightMatch() && contentConstraint.selfIdealSize.Height()) {
+            height = contentConstraint.selfIdealSize.Height().value();
+        }
+        if (!layoutPolicy->IsHeightMatch() && !contentConstraint.selfIdealSize.Height()) {
             height = width / static_cast<float>(stars);
         }
     }
 
     if (layoutPolicy->IsHeightMatch()) {
-        height = contentConstraint.parentIdealSize.Height().value();
-        if (!layoutPolicy->IsWidthMatch()) {
+        height = contentConstraint.parentIdealSize.Height().value_or(0.0f);
+        if (!layoutPolicy->IsWidthMatch() && contentConstraint.selfIdealSize.Width()) {
+            width = contentConstraint.selfIdealSize.Width().value();
+        }
+        if (!layoutPolicy->IsWidthMatch() && !contentConstraint.selfIdealSize.Width()) {
             width = height * static_cast<float>(stars);
         }
     }

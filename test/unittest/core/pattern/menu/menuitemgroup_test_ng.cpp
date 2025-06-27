@@ -538,7 +538,7 @@ HWTEST_F(MenuItemGroupTestNg, MenuItemGroupLayoutAlgorithmTestNg007, TestSize.Le
     props->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
     SizeF frameSize(MENU_ITEM_SIZE_WIDTH, MENU_ITEM_SIZE_HEIGHT);
     auto isUpdate = algorithm->UpdateLayoutSizeBasedOnPolicy(layoutWrapper, frameSize);
-    EXPECT_NE(isUpdate, true);
+    EXPECT_TRUE(isUpdate);
     props->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
     props->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, false);
     isUpdate = algorithm->UpdateLayoutSizeBasedOnPolicy(layoutWrapper, frameSize);
