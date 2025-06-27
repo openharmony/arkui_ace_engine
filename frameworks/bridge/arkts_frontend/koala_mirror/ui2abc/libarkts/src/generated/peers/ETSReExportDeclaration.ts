@@ -33,7 +33,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Statement } from "./Statement"
 export class ETSReExportDeclaration extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 57)
+        assertValidPeer(pointer, 58)
         super(pointer)
     }
     get eTSImportDeclarations(): ETSImportDeclaration | undefined {

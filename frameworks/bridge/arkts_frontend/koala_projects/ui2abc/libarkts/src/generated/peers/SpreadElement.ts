@@ -36,7 +36,7 @@ import { TypeNode } from "./TypeNode"
 import { ValidationInfo } from "./ValidationInfo"
 export class SpreadElement extends AnnotatedExpression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 164)
+        assertValidPeer(pointer, 165)
         super(pointer)
     }
     static createSpreadElement(nodeType: Es2pandaAstNodeType, argument?: Expression): SpreadElement {

@@ -39,7 +39,7 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypeNode } from "./TypeNode"
 export class ScriptFunction extends AstNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 59)
+        assertValidPeer(pointer, 60)
         super(pointer)
     }
     static createScriptFunction(databody: AstNode | undefined, datasignature: FunctionSignature | undefined, datafuncFlags: number, dataflags: number): ScriptFunction {
