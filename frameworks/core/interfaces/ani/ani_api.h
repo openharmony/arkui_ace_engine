@@ -100,10 +100,10 @@ struct ArkUIAniComponentSnapshotModifier {
     int32_t (*getCurrentIdSafely)();
     OHOS::Ace::RefPtr<OHOS::Ace::Container> (*getContainer)(int32_t instanceId);
     void (*createFromBuilder)(ArkUINodeHandle node,
-    std::function<void(std::shared_ptr<OHOS::Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    OHOS::Ace::NG::ComponentSnapshot::JsCallback&& callback,
     OHOS::Ace::NG::SnapshotParam param);
     void (*createFromComponent)(ArkUINodeHandle node,
-    std::function<void(std::shared_ptr<OHOS::Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    OHOS::Ace::NG::ComponentSnapshot::JsCallback&& callback,
     OHOS::Ace::NG::SnapshotParam param);
 };
 struct ArkUIAniAnimationModifier {

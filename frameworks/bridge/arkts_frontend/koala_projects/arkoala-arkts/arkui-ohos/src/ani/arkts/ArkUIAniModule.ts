@@ -70,11 +70,14 @@ export class ArkUIAniModule {
 
     // for componentSnapshot
     native static _ComponentSnapshot_createFromBuilderWithCallback(ptr: KPointer, destroyCallback: () => void,
-        callback: AsyncCallback<image.PixelMap>, delay?: number, checkImageStatus?: boolean): void
+        callback: AsyncCallback<image.PixelMap>, delay?: number, checkImageStatus?: boolean,
+        options?: componentSnapshot.SnapshotOptions): void
     native static _ComponentSnapshot_createFromBuilderWithPromise(ptr: KPointer, destroyCallback: () => void,
-        delay?: number, checkImageStatus?: boolean): Promise<image.PixelMap>
+        delay?: number, checkImageStatus?: boolean,
+        options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap>
     native static _ComponentSnapshot_createFromComponentWithPromise(ptr: KPointer, destroyCallback: () => void,
-        delay?: number, checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap>
+        delay?: number, checkImageStatus?: boolean,
+        options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap>
 
     // for dragController
     native static _DragController_executeDragWithCallback(custom: DragItemInfo, builder: KPointer,
