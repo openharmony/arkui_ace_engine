@@ -338,9 +338,6 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
         selectInfo.menuInfo.showCopyAll = true;
     }
     bool detectFlag = !isSelectAll_;
-    if (isSelectAll_) {
-        selectInfo.menuInfo.showCopyAll = false;
-    }
 
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
@@ -819,7 +816,7 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
 {
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
-    if (id != OptionMenuActionId::SELECT_ALL && id != OptionMenuActionId::COPY) {
+    if (id == OptionMenuActionId::PASTE || id == OptionMenuActionId::CUT) {
         isSelectAll_ = false;
     }
     if (!quickMenuCallback_) {
@@ -932,6 +929,7 @@ void WebSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst
 void WebSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
 {
     HideMagnifier();
+    isSelectAll_ = false;
     selectOverlayDragging_ = false;
     webSelectInfo_.menuInfo.showCopyAll = true;
     UpdateSelectMenuOptions();
@@ -1125,7 +1123,6 @@ void WebSelectOverlay::UpdateSelectMenuOptions()
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
     if (isSelectAll_) {
-        webSelectInfo_.menuInfo.showCopyAll = true;
         isSelectAll_ = false;
     }
     if (!queryWord.empty()) {
@@ -1172,7 +1169,6 @@ void WebSelectOverlay::UpdateAISelectMenu(TextDataDetectType type, const std::st
 void WebSelectOverlay::UpdateIsSelectAll()
 {
     if (isSelectAll_) {
-        webSelectInfo_.menuInfo.showCopyAll = true;
         isSelectAll_ = false;
     }
 }
