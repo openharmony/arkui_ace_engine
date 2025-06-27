@@ -1010,7 +1010,7 @@ private:
             curRect.posX_ == lastRect_.posX_ && curRect.posY_ == lastRect_.posY_;
     }
     int32_t instanceId_ = -1;
-    OHOS::Rosen::Rect lastRect_;
+    OHOS::Rosen::Rect lastRect_ = {0, 0, 0, 0};
 };
 
 class DisplayIdChangeListener : public OHOS::Rosen::IDisplayIdChangeListener {
@@ -1026,11 +1026,8 @@ public:
         CHECK_NULL_VOID(container);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        bool isDisplayIdChanged = displayId != lastDisplayId_;
-        lastDisplayId_ = displayId;
         taskExecutor->PostTask(
-            [instanceId = instanceId_, isDisplayIdChanged] {
-                CHECK_EQUAL_VOID(isDisplayIdChanged, false);
+            [instanceId = instanceId_] {
                 ContainerScope scope(instanceId);
                 ClearAllMenuPopup(instanceId);
             },
@@ -1039,7 +1036,6 @@ public:
 
 private:
     int32_t instanceId_ = -1;
-    OHOS::Rosen::DisplayId lastDisplayId_;
 };
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, VMType vmType)

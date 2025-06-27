@@ -685,7 +685,7 @@ void DialogLayoutAlgorithm::AvoidScreen(
     }
     auto overScreen = LessNotEqual(availableRect.Width(), childSize.Width()) ||
                       LessNotEqual(availableRect.Height(), childSize.Height());
-    auto needAvoidScreen = DialogManager::GetInstance().IfNeedAvoidDock(dialogNode) && !overScreen;
+    auto needAvoidScreen = DialogManager::GetInstance().IsPcOrFreeMultiWindow(dialogNode) && !overScreen;
     if (!needAvoidScreen) {
         return;
     }

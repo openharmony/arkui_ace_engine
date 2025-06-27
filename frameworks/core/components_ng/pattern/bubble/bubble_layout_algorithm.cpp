@@ -822,7 +822,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     showArrow_ = false;
     minHeight_ = popupTheme->GetMinHeight();
     maxColumns_ = popupTheme->GetMaxColumns();
-    expandDisplay_ = DialogManager::GetInstance().IfNeedAvoidDock(layoutWrapper->GetHostNode());
+    expandDisplay_ = DialogManager::GetInstance().IsPcOrFreeMultiWindow(layoutWrapper->GetHostNode());
     InitWrapperRect(layoutWrapper, layoutProp);
     if (!useCustom_) {
         UpdateScrollHeight(layoutWrapper, showInSubWindow);

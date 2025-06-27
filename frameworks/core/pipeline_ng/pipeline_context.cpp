@@ -1414,7 +1414,7 @@ void PipelineContext::SetupRootElement()
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(
         DynamicCast<FrameNode>(installationFree_ ? atomicService->GetParent() : stageNode->GetParent()));
 
-    auto instanceId = container->GetInstanceId();
+    auto instanceId = container ? container->GetInstanceId() : Container::CurrentId();
     OnAreaChangedFunc onAreaChangedFunc = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager_)),
                                               instanceId](
                                               const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
