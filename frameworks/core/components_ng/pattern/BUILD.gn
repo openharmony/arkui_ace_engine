@@ -259,6 +259,7 @@ build_component_ng("pattern_ng") {
     "menu/menu_paint_method.cpp",
     "menu/menu_pattern.cpp",
     "menu/menu_view.cpp",
+    "menu/menu_view_static.cpp",
     "menu/multi_menu_layout_algorithm.cpp",
     "menu/preview/menu_preview_layout_algorithm.cpp",
     "menu/preview/menu_preview_pattern.cpp",

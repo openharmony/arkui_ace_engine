@@ -49,8 +49,6 @@ namespace {
     int32_t flag = 0;
     const std::string TEST_TEXT_HINT = "testTextHint";
     constexpr int32_t TEST_NODE_ID = 1;
-    constexpr double PREVIEW_SCALE_CUSTOM_TYPE = 1.2;
-    constexpr double PREVIEW_SCALE_NORMAL_TYPE = 0.0;
 }; // namespace
 
 class ViewAbstractModelTestNg : public testing::Test {
@@ -1903,76 +1901,6 @@ HWTEST_F(ViewAbstractModelTestNg, BindMenuTest, TestSize.Level1)
     params.push_back(OptionParam());
     viewAbstractModelNG.BindMenu(std::move(params), std::move(buildFunc), menuParam);
     EXPECT_NE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode(), nullptr);
-}
-
-/**
- * @tc.name: BindDragWithContextMenuParamsTest001
- * @tc.desc: Verify BindDragWithContextMenuParams handles CUSTOM_TYPE context menu registration correctly.
- * @tc.type: FUNC
- */
-HWTEST_F(ViewAbstractModelTestNg, BindDragWithContextMenuParamsTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create FrameNode and set MenuParam with CUSTOM_TYPE.
-     */
-    std::string tag = "uiNode1";
-    FrameNode frameNode(tag, TEST_NODE_ID, AceType::MakeRefPtr<Pattern>());
-    NG::MenuParam param;
-    param.contextMenuRegisterType = ContextMenuRegisterType::CUSTOM_TYPE;
-    param.isShow = true;
-    param.previewMode = MenuPreviewMode::IMAGE;
-    param.menuBindType = MenuBindingType::LONG_PRESS;
-    param.previewAnimationOptions.scaleTo = PREVIEW_SCALE_CUSTOM_TYPE;
-
-    /**
-     * @tc.steps: step2. Bind menu param and verify gesture hub internal state.
-     * @tc.expected: isBindCustomMenu = true, previewMode and isShow are set correctly.
-     */
-    viewAbstractModelNG.BindDragWithContextMenuParams(&frameNode, param);
-
-    auto gestureHub = frameNode.GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
-    auto bindStatus = gestureHub->GetBindMenuStatus();
-    EXPECT_TRUE(bindStatus.isBindCustomMenu);
-    EXPECT_EQ(bindStatus.isShow, true);
-    EXPECT_EQ(bindStatus.isShowPreviewMode, MenuPreviewMode::IMAGE);
-    EXPECT_EQ(gestureHub->GetPreviewMode(), MenuPreviewMode::IMAGE);
-    EXPECT_EQ(gestureHub->GetMenuBindingType(), MenuBindingType::LONG_PRESS);
-}
-
-/**
- * @tc.name: BindDragWithContextMenuParamsTest002
- * @tc.desc: Verify BindDragWithContextMenuParams handles NORMAL_TYPE context menu registration and LONG_PRESS bind type
- * correctly.
- * @tc.type: FUNC
- */
-HWTEST_F(ViewAbstractModelTestNg, BindDragWithContextMenuParamsTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create FrameNode and set MenuParam with NORMAL_TYPE and previewMode CUSTOM.
-     */
-    std::string tag = "uiNode2";
-    FrameNode frameNode(tag, TEST_NODE_ID, AceType::MakeRefPtr<Pattern>());
-    NG::MenuParam param;
-    param.contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
-    param.isShow = false;
-    param.previewMode = MenuPreviewMode::CUSTOM;
-    param.menuBindType = MenuBindingType::LONG_PRESS;
-    param.previewAnimationOptions.scaleTo = PREVIEW_SCALE_NORMAL_TYPE;
-
-    /**
-     * @tc.steps: step2. Bind menu param and verify gesture hub internal state.
-     * @tc.expected: isBindLongPressMenu = true, longPressPreviewMode set to CUSTOM, menuPreviewScale defaulted.
-     */
-    viewAbstractModelNG.BindDragWithContextMenuParams(&frameNode, param);
-
-    auto gestureHub = frameNode.GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
-    auto bindStatus = gestureHub->GetBindMenuStatus();
-    EXPECT_TRUE(bindStatus.isBindLongPressMenu);
-    EXPECT_EQ(bindStatus.longPressPreviewMode, MenuPreviewMode::CUSTOM);
-    EXPECT_EQ(gestureHub->GetPreviewMode(), MenuPreviewMode::CUSTOM);
-    EXPECT_EQ(gestureHub->GetMenuBindingType(), MenuBindingType::LONG_PRESS);
 }
 
 /**

@@ -1064,6 +1064,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/menu_view.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/menu/menu_view_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/multi_menu_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/preview/menu_preview_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/menu/preview/menu_preview_pattern.cpp",
