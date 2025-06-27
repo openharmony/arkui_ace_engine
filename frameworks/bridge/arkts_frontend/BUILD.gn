@@ -13,15 +13,35 @@
 
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("./link_abc.gni")
 
 group("arkts_frontend_native_package") {
   deps = [ "koala_projects/arkoala-arkts/arkui-ohos/src/ani/native:ace_ani_native_package" ]
 }
 group("arkoala_ui2abc") {
-  deps = [
-    "koala_projects/arkoala-arkts:arkoala"
-  ]
+  deps = [ "koala_projects/arkoala-arkts:arkoala" ]
 }
+
+link_abc_files("arkoala_abc") {
+  targets = [
+    "koala_projects/incremental/common:common_abc",
+    "koala_projects/incremental/compat:compat_abc",
+    "koala_projects/incremental/runtime:runtime_abc",
+    "koala_projects/interop:interop-arkts_abc",
+    "koala_projects/arkoala-arkts:components_abc"
+  ]
+
+  output_name = "arkoala"
+}
+
+ohos_prebuilt_etc("arkoala_abc_prebuild") {
+  source = "$target_out_dir/arkoala.abc"
+  deps = [ ":arkoala_abc" ]
+  module_install_dir = "framework"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 template("arkts_frontend") {
   forward_variables_from(invoker, "*")
 
@@ -31,11 +51,7 @@ template("arkts_frontend") {
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
     if (!build_ohos_sdk) {
-      deps = [
-        ":ArkoalaNative_ark",
-        # "arkoala:arkoala_prebuild",
-        ":arkoala_ui2abc"
-      ]
+      deps = [ ":ArkoalaNative_ark" ]
     }
 
     sources = [

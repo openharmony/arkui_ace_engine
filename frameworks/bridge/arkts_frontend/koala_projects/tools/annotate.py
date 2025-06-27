@@ -25,10 +25,11 @@ class Config:
         self.exclude = []
         self.baseUrl = "."
         self.fileExtension = None
+        self.memoTypeImport = None
 
 memoImport = "@koalaui/runtime/annotations"
 
-def convert_memo(text: str, memo_import: str) -> str:
+def convert_memo(text: str, memo_import: str, memo_type_import: str) -> str:
     replacements = {
         "/** @memo */": "@memo",
         "/** @memo:intrinsic */": "@memo_intrinsic",
@@ -41,6 +42,8 @@ def convert_memo(text: str, memo_import: str) -> str:
         result = result.replace(k, v)
     # if result == text:
     #     return result
+    if memo_type_import:
+        result = f'import {{ __memo_id_type, __memo_context_type }} from "{memo_type_import}"\n' + result
     return f'import {{ memo, memo_intrinsic, memo_entry, memo_stable, memo_skip }} from "{memo_import}"\n' + result
 
 def get_matching_files(patterns, root_dir):
@@ -81,7 +84,7 @@ def main(options: Config):
         if abs_path in include_files and abs_path not in exclude_files:
             with open(full_path, "r", encoding="utf-8") as f:
                 text = f.read()
-            new_text = convert_memo(text, memoImport)
+            new_text = convert_memo(text, memoImport, options.memoTypeImport)
 
             output_file = os.path.join(output_dir, rel_path)
             if options.fileExtension:
