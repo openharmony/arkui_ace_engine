@@ -101,7 +101,7 @@ import { EventTargetInfo, EventTargetInfoInternal, GestureControl, GestureGroupI
 import { Filter, FilterInternal, TileMode, WaterRippleMode, FlyMode, VisualEffect, VisualEffectInternal, BrightnessBlender } from "./../arkui-uieffect"
 import { FocusPriority, KeyProcessingMode, FocusBoxStyle } from "./../focus"
 import { FormDimension, FormRenderingMode, FormShape, Callback_Any_Void, Callback_FormCallbackInfo_Void, FormCallbackInfo, Callback_Literal_Number_errcode_String_msg_Void, Literal_Number_errcode_String_msg, FormInfo } from "./../formComponent"
-import { FrameNode, FrameNodeInternal } from "../../FrameNode"
+import { FrameNode, FrameNodeInternal, LayoutConstraint } from "../../FrameNode"
 import { FrictionMotion, FrictionMotionInternal, ScrollMotion, ScrollMotionInternal, SpringProp, SpringPropInternal, SpringMotion, SpringMotionInternal } from "./../animator"
 import { FullscreenInfo, PlaybackInfo, PlaybackSpeed, PreparedInfo, SeekMode, VideoController, VideoControllerInternal, Callback_FullscreenInfo_Void, Callback_PlaybackInfo_Void, Callback_PreparedInfo_Void, PosterOptions, VideoOptions } from "./../video"
 import { GridAttribute, Callback_Number_Number_ComputedBarAttribute, ComputedBarAttribute, Callback_Number_Number_Void, GridDirection, Callback_ItemDragInfo_Void, Callback_ItemDragInfo_Number_Number_Void, Callback_ItemDragInfo_Number_Void, Callback_ItemDragInfo_Number_Number_Boolean_Void, GridItemAlignment, Callback_Number_ScrollState_Literal_Number_offsetRemain, Literal_Number_offsetRemain, Callback_Number_Tuple_Number_Number, Callback_Number_Tuple_Number_Number_Number_Number, Tuple_Number_Number_Number_Number, GridLayoutOptions } from "./../grid"
@@ -3628,6 +3628,15 @@ export class Serializer extends SerializerBase {
             const value_largestImageLoadEndTime_value  = value_largestImageLoadEndTime!
             valueSerializer.writeNumber(value_largestImageLoadEndTime_value)
         }
+    }
+    writeLayoutConstraint(value: LayoutConstraint): void {
+        let valueSerializer : Serializer = this;
+        const value_maxSize  = value.maxSize;
+        valueSerializer.writeSize(value_maxSize);
+        const value_minSize  = value.minSize;
+        valueSerializer.writeSize(value_minSize);
+        const value_percentReference  = value.percentReference;
+        valueSerializer.writeSize(value_percentReference);
     }
     writeLeadingMarginPlaceholder(value: LeadingMarginPlaceholder): void {
         let valueSerializer : Serializer = this
