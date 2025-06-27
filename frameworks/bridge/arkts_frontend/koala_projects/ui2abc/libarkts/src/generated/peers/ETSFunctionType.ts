@@ -37,7 +37,7 @@ import { TSTypeParameterDeclaration } from "./TSTypeParameterDeclaration"
 import { TypeNode } from "./TypeNode"
 export class ETSFunctionType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 67)
+        assertValidPeer(pointer, 68)
         super(pointer)
     }
     static createETSFunctionType(signature: FunctionSignature | undefined, funcFlags: Es2pandaScriptFunctionFlags): ETSFunctionType {
