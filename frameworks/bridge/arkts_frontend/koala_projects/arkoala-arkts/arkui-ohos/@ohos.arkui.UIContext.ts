@@ -21,7 +21,7 @@ import { FontOptions, FontInfo } from "@ohos/font"
 import { MeasureOptions } from "@ohos/measure"
 import { SizeOptions } from "arkui/component/units"
 import { AnimateParam } from "arkui/component"
-import { AnimatorResult, AnimatorOptions, Animator} from "@ohos/animator"
+import { AnimatorResult, AnimatorOptions, Animator, SimpleAnimatorOptions} from "@ohos/animator"
 import { Context, PointerStyle, PixelMap } from "#external"
 import { componentUtils } from "@ohos/arkui/componentUtils"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
@@ -288,7 +288,7 @@ export class UIContext {
         throw Error("animateTo not implemented in UIContext!")
     }
 
-    public createAnimator(options: AnimatorOptions): AnimatorResult {
+    public createAnimator(options: AnimatorOptions | SimpleAnimatorOptions): AnimatorResult {
         throw Error("createAnimator not implemented in UIContext!")
     }
     public setFrameCallback(onFrameCallback: ((index: number) => void), onIdleCallback: ((index: number) => void),

@@ -30,7 +30,23 @@
 namespace OHOS::Ace::Ani {
 constexpr size_t INTERPOLATING_SPRING_PARAMS_SIZE = 4;
 constexpr char INTERPOLATING_SPRING[] = "interpolating-spring";
+constexpr int32_t ANIMATOR_DEFALUT_DURATION = 1000;
+const std::string ANIMATOR_DEFALUT_EASING = "ease";
+constexpr int32_t ANIMATOR_DEFALUT_DELAY = 0;
+const std::string ANIMATOR_FILLMODE_NONE = "none";
+const std::string ANIMATOR_FILLMODE_BACKWARDS = "backwards";
+const std::string ANIMATOR_FILLMODE_BOTH = "both";
+const std::string ANIMATOR_FILLMODE_FORWARDS = "forwards";
+const std::string ANIMATOR_DIRECTION_ALTERNATE = "alternate";
+const std::string ANIMATOR_DIRECTION_REVERSE = "reverse";
+const std::string ANIMATOR_DIRECTION_ALTERNATE_REVERSE = "alternate-reverse";
+const std::string ANIMATOR_DIRECTION_NORMAL = "normal";
+constexpr int32_t ANIMATOR_DEFALUT_ITERATIONS = 1;
 
+constexpr int32_t ANIMATION_DIRETION_NORMAL_NUM = 0;
+constexpr int32_t ANIMATION_DIRETION_REVERSE_NUM = 1;
+constexpr int32_t ANIMATION_DIRETION_ALTERNATE_NUM = 2;
+constexpr int32_t ANIMATION_DIRETION_ALTERNATE_REVERSE_NUM = 3;
 struct AnimatorOption {
     int32_t duration = 0;
     int32_t delay = 0;
@@ -173,6 +189,101 @@ private:
     ani_ref onrepeat_ = nullptr;
 };
 
+class JsSimpleAnimatorOption {
+public:
+    JsSimpleAnimatorOption() = default;
+    ~JsSimpleAnimatorOption() = default;
+    double GetBegin() const
+    {
+        return begin_;
+    }
+
+    void SetBegin(const double& begin)
+    {
+        begin_ = begin;
+    }
+
+    double GetEnd() const
+    {
+        return end_;
+    }
+
+    void SetEnd(const double& end)
+    {
+        end_ = end;
+    }
+
+    void SetDuration(const std::optional<int32_t>& duration)
+    {
+        duration_ = duration;
+    }
+
+    std::optional<int32_t> GetDuration() const
+    {
+        return duration_;
+    }
+
+    void SetEasing(const std::optional<std::string>& easing)
+    {
+        easing_ = easing;
+    }
+
+    std::optional<std::string> GetEasing() const
+    {
+        return easing_;
+    }
+
+    void SetDelay(const std::optional<int32_t>& delay)
+    {
+        delay_ = delay;
+    }
+
+    std::optional<int32_t> GetDelay() const
+    {
+        return delay_;
+    }
+
+    void SetFill(const std::optional<FillMode>& fill)
+    {
+        fill_ = fill;
+    }
+
+    std::optional<FillMode> GetFill() const
+    {
+        return fill_;
+    }
+
+    void SetDirection(const std::optional<AnimationDirection>& direction)
+    {
+        direction_ = direction;
+    }
+
+    std::optional<AnimationDirection> GetDirection() const
+    {
+        return direction_;
+    }
+
+    void SetIterations(const std::optional<int32_t>& iterations)
+    {
+        iterations_ = iterations;
+    }
+
+    std::optional<int32_t> GetIterations() const
+    {
+        return iterations_;
+    }
+
+private:
+    double begin_ = 0.0;
+    double end_ = 1.0;
+    std::optional<int32_t> duration_;
+    std::optional<int32_t> delay_;
+    std::optional<int32_t> iterations_;
+    std::optional<std::string> easing_;
+    std::optional<FillMode> fill_;
+    std::optional<AnimationDirection> direction_;
+};
+
 std::string ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str)
 {
     ani_size strSize;
@@ -196,6 +307,15 @@ static AnimatorResult *GetAnimatorResult(ani_env *env, ani_object obj)
         return nullptr;
     }
     return reinterpret_cast<AnimatorResult *>(animatorResultForAni);
+}
+
+static JsSimpleAnimatorOption *GetJsSimpleAnimatorOption(ani_env *env, ani_object obj)
+{
+    ani_long JsSimpleAnimatorOptionForAni;
+    if (ANI_OK != env->Object_GetFieldByName_Long(obj, "SimpleAnimatorOptionsResult", &JsSimpleAnimatorOptionForAni)) {
+        return nullptr;
+    }
+    return reinterpret_cast<JsSimpleAnimatorOption *>(JsSimpleAnimatorOptionForAni);
 }
 
 // ani
@@ -579,6 +699,45 @@ static void JSSetExpectedFrameRateRange(ani_env *env, ani_object obj, ani_object
     animator->SetExpectedFrameRateRange(frameRateRange);
 }
 
+bool IsInstanceOfCls(ani_env *env, [[maybe_unused]] ani_object object, const char* className)
+{
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        return false;
+    }
+    ani_boolean isInstance;
+    if (env->Object_InstanceOf(object, cls, &isInstance)) {
+        return false;
+    }
+    return (bool)isInstance;
+}
+
+std::string FillModeToString(const FillMode& fillMode)
+{
+    if (fillMode == FillMode::NONE) {
+        return ANIMATOR_FILLMODE_NONE;
+    } else if (fillMode == FillMode::BACKWARDS) {
+        return ANIMATOR_FILLMODE_BACKWARDS;
+    } else if (fillMode == FillMode::BOTH) {
+        return ANIMATOR_FILLMODE_BOTH;
+    } else {
+        return ANIMATOR_FILLMODE_FORWARDS;
+    }
+}
+
+std::string AnimationDirectionToString(const AnimationDirection& direction)
+{
+    if (direction == AnimationDirection::ALTERNATE) {
+        return ANIMATOR_DIRECTION_ALTERNATE;
+    } else if (direction == AnimationDirection::REVERSE) {
+        return ANIMATOR_DIRECTION_REVERSE;
+    } else if (direction == AnimationDirection::ALTERNATE_REVERSE) {
+        return ANIMATOR_DIRECTION_ALTERNATE_REVERSE;
+    } else {
+        return ANIMATOR_DIRECTION_NORMAL;
+    }
+}
+
 ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_unused]] ani_object aniOption)
 {
     ani_object animator_obj = {};
@@ -597,7 +756,28 @@ ani_object ANICreate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
 
     // create animatot and construct animatorResult
     auto option = std::make_shared<AnimatorOption>();
-    ParseAnimatorOption(env, aniOption, option);
+    if (IsInstanceOfCls(env, aniOption, "L@ohos/animator/SimpleAnimatorOptions;")) {
+        auto simpleAnimatorOption = GetJsSimpleAnimatorOption(env, aniOption);
+        if (simpleAnimatorOption == nullptr) {
+            return animator_obj;
+        }
+        option->begin = simpleAnimatorOption->GetBegin();
+        option->end = simpleAnimatorOption->GetEnd();
+        option->duration = simpleAnimatorOption->GetDuration().has_value() ?
+            simpleAnimatorOption->GetDuration().value() : ANIMATOR_DEFALUT_DURATION;
+        option->easing = simpleAnimatorOption->GetEasing().has_value() ?
+            simpleAnimatorOption->GetEasing().value() : ANIMATOR_DEFALUT_EASING;
+        option->delay = simpleAnimatorOption->GetDelay().has_value() ?
+            simpleAnimatorOption->GetDelay().value() : ANIMATOR_DEFALUT_DELAY;
+        option->fill = simpleAnimatorOption->GetFill().has_value() ?
+            FillModeToString(simpleAnimatorOption->GetFill().value()) : ANIMATOR_FILLMODE_FORWARDS;
+        option->direction = simpleAnimatorOption->GetDirection().has_value() ?
+            AnimationDirectionToString(simpleAnimatorOption->GetDirection().value()) : ANIMATOR_DIRECTION_NORMAL;
+        option->iterations = simpleAnimatorOption->GetIterations().has_value() ?
+            simpleAnimatorOption->GetIterations().value() : ANIMATOR_DEFALUT_ITERATIONS;
+    } else {
+        ParseAnimatorOption(env, aniOption, option);
+    }
     TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] option is %{public}s", option->ToString().c_str());
     auto animator = CREATE_ANIMATOR("ohos.animator");
     animator->AttachSchedulerOnContainer();
@@ -662,6 +842,137 @@ static void ANIUpdate(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_
     ANIReset(env, object, options);
 }
 
+bool GetIsUndefinedObject(ani_env *env, ani_ref object_ref)
+{
+    ani_boolean isUndefined;
+    if (ANI_OK != env->Reference_IsUndefined(object_ref, &isUndefined)) {
+        return false;
+    }
+    return (bool)isUndefined;
+}
+
+void ANICreateSimpleAnimatorOptionsWithParam(ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_double start,  [[maybe_unused]] ani_double end)
+{
+    JsSimpleAnimatorOption* simpleAnimatorOption = new JsSimpleAnimatorOption();
+    simpleAnimatorOption->SetBegin(static_cast<double>(start));
+    simpleAnimatorOption->SetEnd(static_cast<double>(end));
+    if (ANI_OK !=
+        env->Object_SetPropertyByName_Long(object, "SimpleAnimatorOptionsResult",
+            reinterpret_cast<ani_long>(simpleAnimatorOption))) {
+        return;
+    }
+}
+
+ani_object ANISetSimpleAnimatorDuration(ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_double duration)
+{
+    auto simpleAnimatorOption = GetJsSimpleAnimatorOption(env, object);
+    if (simpleAnimatorOption == nullptr) {
+        return object;
+    }
+    simpleAnimatorOption->SetDuration(static_cast<double>(duration));
+    return object;
+}
+
+ani_object ANISetSimpleAnimatorEasing(ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_string easing)
+{
+    auto simpleAnimatorOption = GetJsSimpleAnimatorOption(env, object);
+    if (simpleAnimatorOption == nullptr) {
+        return object;
+    }
+    auto easingStr = ANIUtils_ANIStringToStdString(env, easing);
+    simpleAnimatorOption->SetEasing(easingStr);
+    return object;
+}
+
+ani_object ANISetSimpleAnimatorDelay(ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_double delay)
+{
+    auto simpleAnimatorOption = GetJsSimpleAnimatorOption(env, object);
+    if (simpleAnimatorOption == nullptr) {
+        return object;
+    }
+    simpleAnimatorOption->SetDelay(static_cast<double>(delay));
+    return object;
+}
+
+ani_object ANISetSimpleAnimatorFill(ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_object fillMode)
+{
+    auto simpleAnimatorOption = GetJsSimpleAnimatorOption(env, object);
+    if (simpleAnimatorOption == nullptr) {
+        return object;
+    }
+    ani_enum fillModerEnum;
+    if (ANI_OK != env->FindEnum("Larkui/component/enums/FillMode;", &fillModerEnum)) {
+        return object;
+    }
+    ani_boolean isEnum;
+    if (ANI_OK != env->Object_InstanceOf(static_cast<ani_object>(fillMode), fillModerEnum, &isEnum)) {
+        return object;
+    }
+
+    ani_int fillModeInt;
+    if (ANI_OK != env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(fillMode), &fillModeInt)) {
+        return object;
+    }
+    simpleAnimatorOption->SetFill(static_cast<FillMode>(fillModeInt));
+    return object;
+}
+
+ani_object ANISetSimpleAnimatorDirection(ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_object playMode)
+{
+    auto simpleAnimatorOption = GetJsSimpleAnimatorOption(env, object);
+    if (simpleAnimatorOption == nullptr) {
+        return object;
+    }
+    ani_enum PlayModeEnum;
+    if (ANI_OK != env->FindEnum("Larkui/component/enums/PlayMode;", &PlayModeEnum)) {
+        return object;
+    }
+    ani_boolean isEnum;
+    if (ANI_OK != env->Object_InstanceOf(static_cast<ani_object>(playMode), PlayModeEnum, &isEnum)) {
+        return object;
+    }
+
+    ani_int playModInt;
+    if (ANI_OK != env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(playMode), &playModInt)) {
+        return object;
+    }
+    switch (playModInt) {
+        case ANIMATION_DIRETION_NORMAL_NUM:
+            simpleAnimatorOption->SetDirection(AnimationDirection::NORMAL);
+            break;
+        case ANIMATION_DIRETION_REVERSE_NUM:
+            simpleAnimatorOption->SetDirection(AnimationDirection::REVERSE);
+            break;
+        case ANIMATION_DIRETION_ALTERNATE_NUM:
+            simpleAnimatorOption->SetDirection(AnimationDirection::ALTERNATE);
+            break;
+        case ANIMATION_DIRETION_ALTERNATE_REVERSE_NUM:
+            simpleAnimatorOption->SetDirection(AnimationDirection::ALTERNATE_REVERSE);
+            break;
+        default:
+            simpleAnimatorOption->SetDirection(AnimationDirection::NORMAL);
+            break;
+    }
+    return object;
+}
+
+ani_object ANISetSimpleAnimatorIterations(ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_double iteration)
+{
+    auto simpleAnimatorOption = GetJsSimpleAnimatorOption(env, object);
+    if (simpleAnimatorOption == nullptr) {
+        return object;
+    }
+    simpleAnimatorOption->SetIterations(static_cast<double>(iteration));
+    return object;
+}
+
 ani_status BindAnimator(ani_env *env)
 {
     static const char *className = "L@ohos/animator/Animator;";
@@ -673,7 +984,7 @@ ani_status BindAnimator(ani_env *env)
 
     std::array methods = {
         ani_native_function{"create",
-            "L@ohos/animator/AnimatorOptions;:L@ohos/animator/AnimatorResult;",
+            nullptr,
             reinterpret_cast<void *>(ANICreate)},
     };
 
@@ -715,6 +1026,39 @@ ani_status BindAnimatorResult(ani_env *env)
     };
     return ANI_OK;
 }
+
+ani_status BindSimpleAnimatorOptions(ani_env *env)
+{
+    static const char *className = "L@ohos/animator/SimpleAnimatorOptions;";
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] bind SimpleAnimatorOptions result fail");
+        return ANI_ERROR;
+    }
+
+    std::array methods = {
+        ani_native_function {
+            "<ctor>", "DD:V", reinterpret_cast<void*>(ANICreateSimpleAnimatorOptionsWithParam) },
+        ani_native_function {
+            "duration", nullptr, reinterpret_cast<void*>(ANISetSimpleAnimatorDuration) },
+        ani_native_function {
+            "easing", nullptr, reinterpret_cast<void*>(ANISetSimpleAnimatorEasing) },
+        ani_native_function {
+            "delay", nullptr, reinterpret_cast<void*>(ANISetSimpleAnimatorDelay) },
+        ani_native_function {
+            "fill", nullptr, reinterpret_cast<void*>(ANISetSimpleAnimatorFill) },
+        ani_native_function {
+            "direction", nullptr, reinterpret_cast<void*>(ANISetSimpleAnimatorDirection) },
+        ani_native_function {
+            "iterations", nullptr, reinterpret_cast<void*>(ANISetSimpleAnimatorIterations) },
+        };
+
+    if (ANI_OK != env->Class_BindNativeMethods(cls, methods.data(), methods.size())) {
+        TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] bind SimpleAnimatorOptions native method fail");
+        return ANI_ERROR;
+    };
+    return ANI_OK;
+}
 }  // namespace OHOS::Ace::Ani
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
@@ -734,6 +1078,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)
     if (retBindResult != ANI_OK) {
         TAG_LOGI(OHOS::Ace::AceLogTag::ACE_ANIMATION, "[ANI] BindAnimatorResult fail");
         return retBindResult;
+    }
+    ani_status retBindSimpleAnimatorOptions = OHOS::Ace::Ani::BindSimpleAnimatorOptions(env);
+    if (retBindSimpleAnimatorOptions != ANI_OK) {
+        TAG_LOGI(OHOS::Ace::AceLogTag::ACE_ANIMATION, "[ANI] retBindSimpleAnimatorOptions fail");
+        return retBindAnimator;
     }
 
     *result = ANI_VERSION_1;
