@@ -1317,7 +1317,7 @@ HWTEST_F(UINodeTestNg, GetFilePath001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetFilePath001
+ * @tc.name: GetFilePath002
  * @tc.desc: Test ui node method GetCurrentCustomNodeInfo
  * @tc.type: FUNC
  */
