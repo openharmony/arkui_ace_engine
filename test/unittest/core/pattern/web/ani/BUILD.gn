@@ -532,6 +532,7 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
     "$ace_root/frameworks/core/components_ng/pattern/text/text_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/text_pattern_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_select_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_styles.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/typed_text.cpp",
