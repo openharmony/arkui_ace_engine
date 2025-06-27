@@ -39,8 +39,7 @@ import { ResizableOptions } from "./image"
 import { VisualEffect, Filter, BrightnessBlender } from "./arkui-uieffect"
 import { FocusBoxStyle, FocusPriority } from "./focus"
 import { TransformationMatrix } from "./arkui-common"
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup } from "./gesture"
-import { BlendMode } from "./arkui-drawing"
+import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup, GestureGroupHandler } from "./gesture"
 import { StyledString } from "./styledString"
 import { Callback_Number_Number_Void } from "./grid"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -7820,6 +7819,37 @@ export type Callback_Literal_Boolean_isVisible_Void = (event: Literal_Boolean_is
 export interface Literal_ResourceColor_color {
     color: ResourceColor;
 }
+export enum BlendMode {
+    CLEAR = 0,
+    SRC = 1,
+    DST = 2,
+    SRC_OVER = 3,
+    DST_OVER = 4,
+    SRC_IN = 5,
+    DST_IN = 6,
+    SRC_OUT = 7,
+    DST_OUT = 8,
+    SRC_ATOP = 9,
+    DST_ATOP = 10,
+    XOR = 11,
+    PLUS = 12,
+    MODULATE = 13,
+    SCREEN = 14,
+    OVERLAY = 15,
+    DARKEN = 16,
+    LIGHTEN = 17,
+    COLOR_DODGE = 18,
+    COLOR_BURN = 19,
+    HARD_LIGHT = 20,
+    SOFT_LIGHT = 21,
+    DIFFERENCE = 22,
+    EXCLUSION = 23,
+    MULTIPLY = 24,
+    HUE = 25,
+    SATURATION = 26,
+    COLOR = 27,
+    LUMINOSITY = 28
+}
 export interface PopupOptions {
     message: string;
     placement?: Placement;
@@ -11362,21 +11392,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
         if (this.checkPriority("blendMode")) {
-            const value_type = runtimeType(value)
-            const type_type = runtimeType(type)
-            if (((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) && ((RuntimeType.OBJECT == type_type) || (RuntimeType.OBJECT == type_type))) {
-                const value_casted = value as (BlendMode | undefined)
-                const type_casted = type as (BlendApplyType)
-                this.getPeer()?.blendMode0Attribute(value_casted, type_casted)
-                return this
-            }
-            if (((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) && ((RuntimeType.OBJECT == type_type) || (RuntimeType.OBJECT == type_type))) {
-                const mode_casted = value as (BlendMode | undefined)
-                const type_casted = type as (BlendApplyType)
-                this.getPeer()?.blendMode1Attribute(mode_casted, type_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (BlendMode | undefined)
+            const type_casted = type as (BlendApplyType)
+            this.getPeer()?.blendMode0Attribute(value_casted, type_casted)
+            return this
         }
         return this
     }
