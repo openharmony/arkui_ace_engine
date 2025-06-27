@@ -23,9 +23,7 @@
 namespace OHOS::Ace::NG {
 FreeScrollController::FreeScrollController(ScrollPattern& pattern) : pattern_(pattern)
 {
-    offset_ = MakeRefPtr<NodeAnimatablePropertyOffsetF>(OffsetF {}, [this](const OffsetF& _) {
-        pattern_.MarkDirty();
-    });
+    offset_ = MakeRefPtr<NodeAnimatablePropertyOffsetF>(OffsetF {}, [this](const OffsetF& _) { pattern_.MarkDirty(); });
     InitializePanRecognizer();
     InitializeTouchEvent();
 }
@@ -52,18 +50,26 @@ void FreeScrollController::InitializePanRecognizer()
     }
 
     freePanGesture_ = MakeRefPtr<PanRecognizer>(DEFAULT_PAN_FINGER, panDirection, distanceMap);
+    freePanGesture_->SetOnActionStart([weak = WeakClaim(this)](const GestureEvent& event) {
+        auto controller = weak.Upgrade();
+        if (controller) {
+            controller->duringPan_ = true;
+        }
+    });
     freePanGesture_->SetOnActionUpdate([weak = WeakClaim(this)](const GestureEvent& event) {
         auto controller = weak.Upgrade();
         if (controller) {
             controller->HandlePanUpdate(event);
         }
     });
-    freePanGesture_->SetOnActionEnd([weak = WeakClaim(this)](const GestureEvent& event) {
+    const auto endCallback = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto controller = weak.Upgrade();
         if (controller) {
-            controller->HandlePanEnd(event);
+            controller->HandlePanEndOrCancel(event);
         }
-    });
+    };
+    freePanGesture_->SetOnActionEnd(endCallback);
+    freePanGesture_->SetOnActionCancel(endCallback);
 
     auto* ctx = pattern_.GetContext();
     CHECK_NULL_VOID(ctx);
@@ -75,14 +81,19 @@ void FreeScrollController::InitializePanRecognizer()
 void FreeScrollController::HandlePanUpdate(const GestureEvent& event)
 {
     const auto& delta = event.GetDelta();
-    offset_->Set(offset_->Get() + OffsetF { delta.GetX(), delta.GetY() });
+    offset_->Set(offset_->Get() + OffsetF { static_cast<float>(delta.GetX()), static_cast<float>(delta.GetY()) });
     pattern_.MarkDirty();
 }
 
-void FreeScrollController::HandlePanEnd(const GestureEvent& event)
+void FreeScrollController::HandlePanEndOrCancel(const GestureEvent& event)
 {
-    OffsetF velocity(event.GetVelocity().GetVelocityX(), event.GetVelocity().GetVelocityY());
+    const auto& src = event.GetVelocity();
+    OffsetF velocity { static_cast<float>(src.GetVelocityX()), static_cast<float>(src.GetVelocityY()) };
+    TryScrollAnimation(velocity);
+}
 
+void FreeScrollController::TryScrollAnimation(const OffsetF& velocity)
+{
     AnimationOption option;
     option.SetCurve(MakeRefPtr<ResponsiveSpringMotion>(fabs(2 * M_PI / friction_), 1.0f, 0.0f));
     option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
@@ -91,6 +102,10 @@ void FreeScrollController::HandlePanEnd(const GestureEvent& event)
     OffsetF finalPos = offset_->Get() + velocity / friction_;
     ClampFinalPosition(finalPos);
 
+    if (finalPos == offset_->Get()) {
+        // No movement, no need to animate.
+        return;
+    }
     offset_->AnimateWithVelocity(option, finalPos, velocity, nullptr);
 }
 
@@ -106,8 +121,18 @@ void FreeScrollController::InitializeTouchEvent()
 {
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto controller = weak.Upgrade();
-        if (controller) {
-            controller->HandleTouchEvent(info);
+        CHECK_NULL_VOID(controller);
+
+        switch (info.GetTouches().front().GetTouchType()) {
+            case TouchType::DOWN:
+                controller->HandleTouchDown();
+                break;
+            case TouchType::UP:
+            case TouchType::CANCEL:
+                controller->HandleTouchUpOrCancel();
+                break;
+            default:
+                break;
         }
     };
 
@@ -117,25 +142,23 @@ void FreeScrollController::InitializeTouchEvent()
     hub->AddTouchEvent(freeTouch_);
 }
 
-void FreeScrollController::HandleTouchEvent(const TouchEventInfo& info)
+void FreeScrollController::HandleTouchDown()
 {
-    switch (info.GetTouches().front().GetTouchType()) {
-        case TouchType::DOWN: {
-            // pause animation
-            AnimationOption option;
-            option.SetCurve(Curves::EASE);
-            option.SetDuration(0);
-            AnimationUtils::StartAnimation(
-                option, [this]() { offset_->Set(offset_->Get()); }, nullptr);
-            break;
-        }
-        case TouchType::UP:
-        case TouchType::CANCEL:
-            // postTask: TryBounceBack();
-            break;
-        default:
-            break;
+    // pause animation
+    AnimationOption option;
+    option.SetCurve(Curves::EASE);
+    option.SetDuration(0);
+    AnimationUtils::StartAnimation(
+        option, [this]() { offset_->Set(offset_->Get()); }, nullptr);
+}
+
+void FreeScrollController::HandleTouchUpOrCancel()
+{
+    if (duringPan_) {
+        return;
     }
+    // animate if out of bounds
+    TryScrollAnimation({});
 }
 
 OffsetF FreeScrollController::GetOffset() const

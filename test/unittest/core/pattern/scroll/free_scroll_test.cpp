@@ -50,7 +50,7 @@ public:
  * @tc.desc: Test gesture recognizer override when axis == FREE
  * @tc.type: FUNC
  */
-HWTEST_F(FreeScrollTest, RecognizerOverride001, TestSize.Level1)
+TEST_F(FreeScrollTest, RecognizerOverride001)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
@@ -76,7 +76,7 @@ HWTEST_F(FreeScrollTest, RecognizerOverride001, TestSize.Level1)
  * @tc.desc: Test Scroll with Axis::FREE
  * @tc.type: FUNC
  */
-HWTEST_F(FreeScrollTest, FreeScroll001, TestSize.Level1)
+TEST_F(FreeScrollTest, FreeScroll001)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
@@ -96,7 +96,7 @@ HWTEST_F(FreeScrollTest, FreeScroll001, TestSize.Level1)
  * @tc.desc: check property values with Axis::Free (main axis should be horizontal)
  * @tc.type: FUNC
  */
-HWTEST_F(FreeScrollTest, Properties001, TestSize.Level1)
+TEST_F(FreeScrollTest, Properties001)
 {
     constexpr float contentWidth = 1000;
     ScrollModelNG model = CreateScroll();
@@ -113,7 +113,7 @@ HWTEST_F(FreeScrollTest, Properties001, TestSize.Level1)
  * @tc.desc: Test Scroll axis change
  * @tc.type: FUNC
  */
-HWTEST_F(FreeScrollTest, ModeChange001, TestSize.Level1)
+TEST_F(FreeScrollTest, ModeChange001)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
@@ -148,7 +148,7 @@ HWTEST_F(FreeScrollTest, ModeChange001, TestSize.Level1)
  * @tc.desc: Test offset reset
  * @tc.type: FUNC
  */
-HWTEST_F(FreeScrollTest, ModeChange002, TestSize.Level1)
+TEST_F(FreeScrollTest, ModeChange002)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
@@ -171,7 +171,7 @@ HWTEST_F(FreeScrollTest, ModeChange002, TestSize.Level1)
  * @tc.desc: Test overScroll
  * @tc.type: FUNC
  */
-HWTEST_F(FreeScrollTest, OverScroll001, TestSize.Level1)
+TEST_F(FreeScrollTest, OverScroll001)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
@@ -206,7 +206,7 @@ HWTEST_F(FreeScrollTest, OverScroll001, TestSize.Level1)
  * @tc.desc: Test overScroll when content is smaller than viewport
  * @tc.type: FUNC
  */
-HWTEST_F(FreeScrollTest, OverScroll002, TestSize.Level1)
+TEST_F(FreeScrollTest, OverScroll002)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);

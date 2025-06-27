@@ -21,9 +21,13 @@
 namespace OHOS::Ace::NG {
 class ScrollPattern;
 
+/**
+ * @brief Controller for free scrolling behavior. It manages related gestures and animations.
+ *
+ */
 class FreeScrollController final : public AceType {
     DECLARE_ACE_TYPE(FreeScrollController, AceType);
-
+    ACE_DISALLOW_COPY_AND_MOVE(FreeScrollController);
 public:
     explicit FreeScrollController(ScrollPattern& pattern);
     ~FreeScrollController() final;
@@ -35,14 +39,24 @@ public:
 
     OffsetF GetOffset() const;
 
-    void HandlePanUpdate(const GestureEvent& event);
-    void HandlePanEnd(const GestureEvent& event);
-    void HandleTouchEvent(const TouchEventInfo& info);
-
 private:
     void InitializePanRecognizer();
     void InitializeTouchEvent();
-    void ApplyFrictionAnimation(const OffsetF& velocity);
+
+    void HandlePanUpdate(const GestureEvent& event);
+    void HandlePanEndOrCancel(const GestureEvent& event);
+
+    void HandleTouchDown();
+    void HandleTouchUpOrCancel();
+
+    /**
+     * @brief Start the scroll animation if possible with the given velocity and offset_.
+     */
+    void TryScrollAnimation(const OffsetF& velocity);
+
+    /**
+     * @brief clamp position to be within the scrollable area.
+     */
     void ClampFinalPosition(OffsetF& finalPos) const;
 
     ScrollPattern& pattern_;
@@ -50,6 +64,7 @@ private:
     RefPtr<PanRecognizer> freePanGesture_;
     RefPtr<TouchEventImpl> freeTouch_;
     float friction_ = 0.0f;
+    bool duringPan_ = false;
 };
 
 } // namespace OHOS::Ace::NG
