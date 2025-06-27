@@ -4641,6 +4641,178 @@ HWTEST_F(WebPatternTestNg, SetDefaultBackgroundColor001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: DarkModeBackgroundColor001
+ * @tc.desc: Test DarkModeBackgroundColor001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, DarkModeBackgroundColor001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(
+            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    ASSERT_NE(webPattern->GetHost()->GetRenderContext(), nullptr);
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_FALSE(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor());
+
+    // Test that the default background color is based on darkMode() and forceDarkAccess()
+    // when not set backgroundColor().
+    webPattern->UpdateDarkMode(WebDarkMode::On);
+    webPattern->UpdateForceDarkAccess(true);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::BLACK);
+
+    webPattern->UpdateForceDarkAccess(false);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::WHITE);
+
+    webPattern->UpdateDarkMode(WebDarkMode::Off);
+    webPattern->UpdateForceDarkAccess(true);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::WHITE);
+
+    webPattern->UpdateBackgroundColor(Color::RED.GetValue());
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::RED);
+
+    webPattern->SetDefaultBackgroundColor();
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::WHITE);
+
+    webPattern->UpdateDarkMode(WebDarkMode::On);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::BLACK);
+
+    webPattern->UpdateBackgroundColor(Color::RED.GetValue());
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::RED);
+#endif
+}
+
+/**
+ * @tc.name: DarkModeBackgroundColor002
+ * @tc.desc: Test DarkModeBackgroundColor002.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, DarkModeBackgroundColor002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(
+            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    ASSERT_NE(webPattern->GetHost()->GetRenderContext(), nullptr);
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_FALSE(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor());
+
+    // Tests that when the backgroundColor is set to null or undefined,
+    // it resets the backgroundColor to the default color.
+    webPattern->SetDefaultBackgroundColor();
+    webPattern->UpdateDarkMode(WebDarkMode::On);
+    webPattern->UpdateForceDarkAccess(true);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::BLACK);
+
+    webPattern->UpdateBackgroundColor(Color::RED.GetValue());
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::RED);
+
+    webPattern->UpdateForceDarkAccess(false);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::RED);
+
+    webPattern->SetDefaultBackgroundColor();
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::WHITE);
+
+    webPattern->UpdateForceDarkAccess(true);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::BLACK);
+
+    webPattern->UpdateBackgroundColor(Color::BLUE.GetValue());
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::BLUE);
+#endif
+}
+
+/**
+ * @tc.name: DarkModeBackgroundColor003
+ * @tc.desc: Test DarkModeBackgroundColor003.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, DarkModeBackgroundColor003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(
+            V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    ASSERT_NE(webPattern->GetHost()->GetRenderContext(), nullptr);
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_FALSE(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor());
+
+    // In the case of richText, tests that when renderContext sets the backgroundColor, GetBackgroundColor() is null,
+    // the defaultBackgroundColor will not be set.
+    webPattern->GetHost()->GetRenderContext()->UpdateBackgroundColor(Color::BLUE);
+    webPattern->UpdateDarkMode(WebDarkMode::Off);
+    webPattern->UpdateForceDarkAccess(true);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::BLUE);
+
+    webPattern->OnBackgroundColorUpdate(Color::RED.GetValue());
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, false);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::RED);
+
+    webPattern->SetDefaultBackgroundColor();
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::WHITE);
+
+    webPattern->UpdateDarkMode(WebDarkMode::On);
+    webPattern->OnModifyDone();
+    EXPECT_EQ(webPattern->needSetDefaultBackgroundColor_, true);
+    EXPECT_EQ(webPattern->GetHost()->GetRenderContext()->GetBackgroundColor(), Color::BLACK);
+#endif
+}
+
+/**
  * @tc.name: CheckVisible_001
  * @tc.desc: CheckVisible.
  * @tc.type: FUNC
