@@ -298,6 +298,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "JLarkui/component/xcomponent/XComponentControllerCallbackInternal;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetXComponentControllerCallback)
         },
+        ani_native_function {
+            "_CheckIsUIThread",
+            "I:I",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CheckIsUIThread)
+        },
+        ani_native_function {
+            "_IsDebugMode",
+            "I:I",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::IsDebugMode)
+        }
     };
 
     auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());

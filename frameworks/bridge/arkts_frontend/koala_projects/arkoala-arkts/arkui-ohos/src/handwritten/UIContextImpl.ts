@@ -800,6 +800,7 @@ export class UIContextImpl extends UIContext {
     measureUtils_: MeasureUtilsImpl;
     textMenuController_: TextMenuControllerImpl;
     detachedRootEntryManager_: DetachedRootEntryManager;
+    isDebugMode_: boolean = false;
 
     bufferSize = 4096
     buffer: KBuffer = new KBuffer(this.bufferSize)
@@ -820,6 +821,7 @@ export class UIContextImpl extends UIContext {
         this.measureUtils_ = new MeasureUtilsImpl(instanceId);
         this.textMenuController_ = new TextMenuControllerImpl(instanceId);
         this.detachedRootEntryManager_ = new DetachedRootEntryManager(this);
+        this.isDebugMode_ = ArkUIAniModule._IsDebugMode(instanceId) !== 0;
     }
     public getInstanceId() : int32 {
         return this.instanceId_;
@@ -1184,5 +1186,17 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
         ArkUIGeneratedNativeModule._IUIContext_freezeUINode0(id, isFrozen ? 1 : 0);
         ArkUIAniModule._Common_Restore_InstanceId()
+    }
+
+    public setUIStates(callback: () => void): void {
+        if (this.checkThread(this.instanceId_)) {
+            callback();
+        } else {
+            this.stateMgr?.scheduleCallback(callback);
+        }
+    }
+
+    public checkThread(id: int32) : boolean {
+        return ArkUIAniModule._CheckIsUIThread(id) !== 0;
     }
 }

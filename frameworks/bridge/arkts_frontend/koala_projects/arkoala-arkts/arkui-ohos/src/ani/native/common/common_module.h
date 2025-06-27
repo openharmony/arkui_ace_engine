@@ -34,6 +34,8 @@ void SetBackgroundImagePixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] 
 void SetCustomCallback(ani_env* env, ani_object obj, ani_long ptr,
     ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout);
 ani_int RequireArkoalaNodeId(ani_env* env, ani_object obj, ani_int capacity);
+ani_int CheckIsUIThread(ani_env* env, ani_object obj, ani_int id);
+ani_int IsDebugMode(ani_env* env, ani_object obj, ani_int id);
 } // namespace OHOS::Ace::Ani
 
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_COMMON_MODULE

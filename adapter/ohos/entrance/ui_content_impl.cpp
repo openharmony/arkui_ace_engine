@@ -1261,6 +1261,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(
             AceApplicationInfo::GetInstance().SetProcessName(context->GetBundleName());
             AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
             AceApplicationInfo::GetInstance().SetDataFileDirPath(context->GetFilesDir());
+            AceApplicationInfo::GetInstance().SetDebugForParallel(context->GetApplicationInfo()->debug);
             AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
             AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
             CapabilityRegistry::Register();
@@ -1786,6 +1787,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         AceApplicationInfo::GetInstance().SetApiTargetVersion(context->GetApplicationInfo()->apiTargetVersion);
         AceApplicationInfo::GetInstance().SetAppVersionName(context->GetApplicationInfo()->versionName);
         AceApplicationInfo::GetInstance().SetAppVersionCode(context->GetApplicationInfo()->versionCode);
+        AceApplicationInfo::GetInstance().SetDebugForParallel(context->GetApplicationInfo()->debug);
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
         AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
         CapabilityRegistry::Register();

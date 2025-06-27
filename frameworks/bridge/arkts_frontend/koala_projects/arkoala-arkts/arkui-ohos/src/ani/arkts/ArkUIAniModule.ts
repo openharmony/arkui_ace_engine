@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { KPointer, KInt, KLong } from "@koalaui/interop"
+import { KPointer, KInt, KLong, KBoolean } from "@koalaui/interop"
 import { drawing } from "@ohos/graphics/drawing"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
@@ -131,4 +131,7 @@ export class ArkUIAniModule {
 
     // for XComponent
     native static _XComponent_SetSurfaceCallback(ptr: KPointer, callback: XComponentControllerCallbackInternal): void;
+
+    native static _CheckIsUIThread(id: KInt): KBoolean
+    native static _IsDebugMode(id: KInt): KBoolean
 }

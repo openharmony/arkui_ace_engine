@@ -18,6 +18,7 @@
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -136,6 +137,23 @@ ArkUI_Int32 RequireArkoalaNodeId(ArkUI_Int32 capacity)
     return cursor;
 }
 
+ani_boolean CheckIsUIThread(ArkUI_Int32 instanceId)
+{
+    SyncInstanceId(instanceId);
+    bool res = CheckThread(TaskExecutor::TaskType::UI);
+    RestoreInstanceId();
+    return res;
+}
+
+ani_boolean IsDebugMode(ArkUI_Int32 instanceId)
+{
+    SyncInstanceId(instanceId);
+    auto& aceApplicationInfo = AceApplicationInfo::GetInstance();
+    bool res = aceApplicationInfo.IsDebugForParallel();
+    RestoreInstanceId();
+    return res;
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -148,7 +166,9 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getSharedLocalStorage = OHOS::Ace::NG::GetSharedLocalStorage,
         .setBackgroundImagePixelMap = OHOS::Ace::NG::SetBackgroundImagePixelMap,
         .setCustomCallback = OHOS::Ace::NG::SetCustomCallback,
-        .requireArkoalaNodeId = OHOS::Ace::NG::RequireArkoalaNodeId };
+        .requireArkoalaNodeId = OHOS::Ace::NG::RequireArkoalaNodeId,
+        .checkIsUIThread = OHOS::Ace::NG::CheckIsUIThread,
+        .isDebugMode =  OHOS::Ace::NG::IsDebugMode };
     return &impl;
 }
 
