@@ -63,6 +63,7 @@
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/picker/picker_data.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components/web/web_property.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -504,6 +505,7 @@ constexpr double DEFAULT_AXIS_RATIO = -12.5;
 constexpr double DEFAULT_WEB_WIDTH = 100.0;
 constexpr double DEFAULT_WEB_HEIGHT = 80.0;
 constexpr Dimension TOOLTIP_BORDER_WIDTH = 1.0_vp;
+constexpr Dimension TOOLTIP_BORDER_RADIUS = 8.0_vp;
 constexpr Dimension TOOLTIP_FONT_SIZE = 14.0_vp;
 constexpr Dimension TOOLTIP_PADDING = 8.0_vp;
 constexpr float TOOLTIP_MAX_PORTION = 0.35f;
@@ -5303,12 +5305,38 @@ void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTi
     CalculateTooltipOffset(tooltipNode, tooltipOffset);
     textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(tooltipOffset.GetX()),
         Dimension(tooltipOffset.GetY())));
+ 
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(TOOLTIP_BORDER_RADIUS);
+    textRenderContext->SetBorderRadius(borderRadius);
+
+    Shadow shadow;
+    if (GetShadowFromTheme(ShadowStyle::OuterDefaultSM, shadow)) {
+        textRenderContext->UpdateBackShadow(shadow);
+    }
 
     BorderColorProperty borderColor;
     borderColor.SetColor(Color::BLACK);
     textRenderContext->UpdateBorderColor(borderColor);
     overlayManager->ShowIndexerPopup(tooltipId_, tooltipNode);
 }
+ 
+bool WebPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
+{
+    if (shadowStyle == ShadowStyle::None) {
+        return true;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto colorMode = pipelineContext->GetColorMode();
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, false);
+    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    return true;
+}
+
 
 void WebPattern::UpdateTooltipContentColor(const RefPtr<FrameNode>& textNode)
 {
