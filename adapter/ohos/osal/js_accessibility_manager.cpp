@@ -3750,7 +3750,7 @@ bool JsAccessibilityManager::IsInHoverTransparentCallbackList(const RefPtr<NG::F
 int64_t JsAccessibilityManager::CheckAndGetEmbedFrameNode(const RefPtr<NG::FrameNode>& node)
 {
     auto surfaceId = GetSurfaceIdByEmbedNode(node);
-    if (surfaceId.empty()) {
+    if (surfaceId == "0") {
         return INVALID_NODE_ID;
     }
 #ifdef WEB_SUPPORTED
