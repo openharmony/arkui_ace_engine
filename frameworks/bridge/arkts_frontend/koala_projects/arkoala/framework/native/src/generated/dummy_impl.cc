@@ -19142,21 +19142,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void OnRenderExited0Impl(Ark_NativePointer node,
+    void OnRenderExitedImpl(Ark_NativePointer node,
                              const Opt_Callback_OnRenderExitedEvent_Void* value)
     {
-        if (!needGroupedLog(1))
+        if (!needGroupedLog(1)) {
             return;
-        string out("onRenderExited(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void OnRenderExited1Impl(Ark_NativePointer node,
-                             const Opt_Callback_Literal_Object_detail_Boolean* value)
-    {
-        if (!needGroupedLog(1))
-            return;
+        }
         string out("onRenderExited(");
         WriteToString(&out, value);
         out.append(") \n");
@@ -23200,8 +23191,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             WebAttributeModifier::OnRefreshAccessedHistoryImpl,
             WebAttributeModifier::OnUrlLoadInterceptImpl,
             WebAttributeModifier::OnSslErrorReceiveImpl,
-            WebAttributeModifier::OnRenderExited0Impl,
-            WebAttributeModifier::OnRenderExited1Impl,
+            WebAttributeModifier::OnRenderExitedImpl,
             WebAttributeModifier::OnShowFileSelectorImpl,
             WebAttributeModifier::OnFileSelectorShowImpl,
             WebAttributeModifier::OnResourceLoadImpl,
