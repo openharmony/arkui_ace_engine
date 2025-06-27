@@ -1726,6 +1726,37 @@ HWTEST_F(SwiperEventTestNg, OnUnselected001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: onScrollStateChanged001
+ * @tc.desc: Test onScrollStateChanged event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, onScrollStateChanged001, TestSize.Level1)
+{
+    int32_t currentIndex = 0;
+    auto onScrollStateChanged = [&currentIndex](const BaseEventInfo* info) {
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        currentIndex = swiperInfo->GetIndex();
+    };
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnScrollStateChanged(std::move(onScrollStateChanged));
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+
+    GestureEvent info = CreateDragInfo(true);
+    info.SetMainVelocity(0);
+    info.SetGlobalLocation(Offset(0.f, 0.f));
+    info.SetMainDelta(-20.0f);
+    HandleDragStart(info);
+    HandleDragUpdate(info);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::SCROLL);
+
+    info.SetMainVelocity(-1000.0f);
+    info.SetMainDelta(0.0f);
+    HandleDragEnd(info);
+    EXPECT_EQ(pattern_->scrollState_, ScrollState::IDLE);
+}
+
+/**
  * @tc.name: MarginIgnoreBlankDragTest001
  * @tc.desc: Test Swiper IgnoreBlank with drag. When totalcount equal to displaycount, ignoreBlankOffset_ will be 0.f.
  * @tc.type: FUNC

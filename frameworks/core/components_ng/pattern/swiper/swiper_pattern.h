@@ -328,6 +328,13 @@ public:
         }
     }
 
+    void UpdateOnScrollStateChangedEvent(ChangeEvent&& event)
+    {
+        auto eventHub = GetOrCreateEventHub<SwiperEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->AddOnScrollStateChangedEvent(std::make_shared<ChangeEvent>(event));
+    }
+
     void SetSwiperParameters(const SwiperParameters& swiperParameters)
     {
         swiperParameters_ = std::make_shared<SwiperParameters>(swiperParameters);
@@ -990,6 +997,7 @@ private:
     void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info, bool isInterrupt = false) const;
     void FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
     void FireUnselectedEvent(int32_t currentIndex, int32_t targetIndex);
+    void FireScrollStateEvent(ScrollState scrollState);
     void FireSwiperCustomAnimationEvent();
     void FireContentDidScrollEvent();
     void HandleSwiperCustomAnimation(float offset);
@@ -1039,6 +1047,7 @@ private:
     void CheckAndSetArrowHoverState(const PointF& mousePoint);
     RectF GetArrowFrameRect(const int32_t index) const;
     void UpdateAnimationProperty(float velocity);
+    void NestedScrollToParent(float velocity);
     void TriggerAnimationEndOnForceStop(bool isInterrupt = false);
     void TriggerAnimationEndOnSwipeToLeft();
     void TriggerAnimationEndOnSwipeToRight();
@@ -1341,6 +1350,7 @@ private:
     int32_t currentFocusIndex_ = 0;
     int32_t selectedIndex_ = -1;
     int32_t unselectedIndex_ = -1;
+    ScrollState scrollState_ = ScrollState::IDLE;
 
     bool moveDirection_ = false;
     bool indicatorDoingAnimation_ = false;
@@ -1366,6 +1376,7 @@ private:
     ChangeEventPtr onIndexChangeEvent_;
     ChangeEventPtr selectedEvent_;
     ChangeEventPtr unselectedEvent_;
+    ChangeEventPtr scrollStateChangedEvent_;
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
 
