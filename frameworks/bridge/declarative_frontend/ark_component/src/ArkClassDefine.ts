@@ -1673,6 +1673,13 @@ class ArkDragPreview {
   }
 }
 
+class ArkShadowStyle {
+  shadowStyle: number;
+  constructor() {
+    this.shadowStyle = undefined;
+  }
+}
+
 class ArkOnDrop {
   event: (event?: DragEvent, extraParams?: string) => void;
   disableDataPrefetch: boolean | undefined;

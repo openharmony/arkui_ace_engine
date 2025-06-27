@@ -1907,7 +1907,7 @@ void LayoutProperty::CheckLocalizedOuterBorderColor(const TextDirection& directi
         borderColors.topColor = outerBorderColorProperty.topColor;
     }
     if (outerBorderColorProperty.bottomColor.has_value()) {
-        borderColors.topColor = outerBorderColorProperty.bottomColor;
+        borderColors.bottomColor = outerBorderColorProperty.bottomColor;
     }
     target->UpdateOuterBorderColor(borderColors);
 }
