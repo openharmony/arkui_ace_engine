@@ -212,7 +212,7 @@ auto g_onWillDismissPopup = [](
                     .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
                 const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstract::DismissPopup));
                 parameter.dismiss = keeper.ArkValue();
-                arkCallback.Invoke(parameter);
+                arkCallback.InvokeSync(parameter);
             };
             popupParam->SetOnWillDismiss(std::move(callback));
             popupParam->SetInteractiveDismiss(true);

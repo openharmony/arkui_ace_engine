@@ -39477,6 +39477,12 @@ void impl_CustomDialogController_close(Ark_NativePointer thisPtr) {
         GetAccessors()->getCustomDialogControllerAccessor()->close(self);
 }
 KOALA_INTEROP_DIRECT_V1(CustomDialogController_close, Ark_NativePointer)
+void impl_CustomDialogController_setOwnerView(Ark_NativePointer thisPtr, Ark_NativePointer nodePtr) {
+        Ark_CustomDialogController self = reinterpret_cast<Ark_CustomDialogController>(thisPtr);
+        Ark_NodeHandle node = reinterpret_cast<Ark_NodeHandle>(nodePtr);
+        GetAccessors()->getCustomDialogControllerAccessor()->setOwnerView(self, node);
+}
+KOALA_INTEROP_DIRECT_V2(CustomDialogController_setOwnerView, Ark_NativePointer, Ark_NativePointer)
 Ark_NativePointer impl_LinearGradient_ctor(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         const Ark_Int32 colorStops_value_buf_length = thisDeserializer.readInt32();
