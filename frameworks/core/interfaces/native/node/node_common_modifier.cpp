@@ -10557,6 +10557,7 @@ void SetOnAxisEvent(ArkUINodeHandle node, void* extraParam)
         event.axisEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
         event.axisEvent.actionTouchPoint.globalDisplayX = info.GetGlobalDisplayLocation().GetX() / density;
         event.axisEvent.actionTouchPoint.globalDisplayY = info.GetGlobalDisplayLocation().GetY() / density;
+        event.axisEvent.actionTouchPoint.toolType = static_cast<int32_t>(info.GetSourceTool());
         event.axisEvent.targetDisplayId = info.GetTargetDisplayId();
         event.apiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion() % API_TARGET_VERSION_MASK;
         event.axisEvent.deviceId = info.GetDeviceId();
