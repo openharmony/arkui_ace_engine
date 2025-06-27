@@ -2836,12 +2836,14 @@ HWTEST_F(JsAccessibilityManagerTest, InitializeCallback001, TestSize.Level1)
     /**
      * @tc.steps: step1. construct JsAccessibilityManager
      */
+    MockPipelineContext::SetUp();
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
-    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    auto context = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
     context->SetWindowId(1);
     jsAccessibilityManager->SetPipelineContext(context);
-    
-    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
 
     /**
      * @tc.steps: step2. test InitializeCallback with register false;
@@ -2849,6 +2851,7 @@ HWTEST_F(JsAccessibilityManagerTest, InitializeCallback001, TestSize.Level1)
     jsAccessibilityManager->Register(false);
     jsAccessibilityManager->InitializeCallback();
     EXPECT_EQ(jsAccessibilityManager->windowId_, 1);
+    MockPipelineContext::TearDown();
 }
 
 /**
@@ -2861,12 +2864,14 @@ HWTEST_F(JsAccessibilityManagerTest, InitializeCallback002, TestSize.Level1)
     /**
      * @tc.steps: step1. construct JsAccessibilityManager
      */
+    MockPipelineContext::SetUp();
     auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
-    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    auto context = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
     context->SetWindowId(1);
     jsAccessibilityManager->SetPipelineContext(context);
-    
-    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
 
     /**
      * @tc.steps: step2. test InitializeCallback with register true;
@@ -2874,6 +2879,7 @@ HWTEST_F(JsAccessibilityManagerTest, InitializeCallback002, TestSize.Level1)
     jsAccessibilityManager->Register(true);
     jsAccessibilityManager->InitializeCallback();
     EXPECT_EQ(jsAccessibilityManager->windowId_, 0);
+    MockPipelineContext::TearDown();
 }
 
 /**
