@@ -1024,8 +1024,8 @@ HWTEST_F(FlexNewTestNG, LayoutPolicyTest001, TestSize.Level1)
     /* corresponding ets code:
         Flex() {
           Flex()
-            .width(LayoutPolicy.MATCH_PARENT)
-            .height(LayoutPolicy.MATCH_PARENT)
+            .width(LayoutPolicy.matchParent)
+            .height(LayoutPolicy.matchParent)
         }
         .width("500px")
         .height("300px")
@@ -1073,8 +1073,8 @@ HWTEST_F(FlexNewTestNG, LayoutPolicyTest002, TestSize.Level1)
     /* corresponding ets code:
         Flex() {
           Flex()
-            .width(LayoutPolicy.MATCH_PARENT)
-            .height(LayoutPolicy.MATCH_PARENT)
+            .width(LayoutPolicy.matchParent)
+            .height(LayoutPolicy.matchParent)
         }
         .width("500px")
         .height("300px")
@@ -1125,8 +1125,8 @@ HWTEST_F(FlexNewTestNG, LayoutPolicyTest003, TestSize.Level1)
             .width("500px")
             .height("300px")
         }
-        .width(LayoutPolicy.WRAP_CONTENT)
-        .height(LayoutPolicy.WRAP_CONTENT)
+        .width(LayoutPolicy.wrapContent)
+        .height(LayoutPolicy.wrapContent)
     */
 
     // Expect flex's width is 500, height is 300 and offset is [0.0, 0.0].
@@ -1324,5 +1324,109 @@ HWTEST_F(FlexNewTestNG, LayoutPolicyTest006, TestSize.Level1)
     auto offsetInner = geometryNodeInner->GetFrameOffset();
     EXPECT_EQ(sizeInner, SizeF(300.0f, 400.0f));
     EXPECT_EQ(offsetInner, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest007
+ * @tc.desc: test the measure result when setting matchParent and constraintSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, LayoutPolicyTest007, TestSize.Level1)
+{
+    RefPtr<FrameNode> flexInner;
+    auto flex = CreateFlexRow([this, &flexInner](FlexModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        flexInner = CreateFlexRow([this](FlexModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+            ViewAbstract::SetMaxWidth(CalcLength(200.0f));
+            ViewAbstract::SetMaxHeight(CalcLength(200.0f));
+        });
+    });
+    ASSERT_NE(flex, nullptr);
+    ASSERT_EQ(flex->GetChildren().size(), 1);
+    CreateLayoutTask(flex);
+
+    /* corresponding ets code:
+        Flex() {
+          Flex()
+            .width(LayoutPolicy.matchParent)
+            .height(LayoutPolicy.matchParent)
+            .constraintSize({ maxWidth: "200px", maxHeight: "200px" })
+        }
+        .width("500px")
+        .height("300px")
+    */
+
+    // Expect flex's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode = flex->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect flexInner's width is 200, height is 200 and offset is [0.0, 0.0].
+    auto geometryNode1 = flexInner->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(200.0f, 200.0f));
+    EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest008
+ * @tc.desc: test the measure result when setting matchParent and constraintSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FlexNewTestNG, LayoutPolicyTest008, TestSize.Level1)
+{
+    RefPtr<FrameNode> flexInner;
+    auto flex = CreateFlexRow([this, &flexInner](FlexModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(100.0f));
+        ViewAbstract::SetHeight(CalcLength(100.0f));
+        flexInner = CreateFlexRow([this](FlexModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+            ViewAbstract::SetMinWidth(CalcLength(200.0f));
+            ViewAbstract::SetMinHeight(CalcLength(200.0f));
+            ViewAbstract::SetFlexShrink(0.0f);
+        });
+    });
+    ASSERT_NE(flex, nullptr);
+    ASSERT_EQ(flex->GetChildren().size(), 1);
+    CreateLayoutTask(flex);
+
+    /* corresponding ets code:
+        Flex() {
+          Flex()
+            .width(LayoutPolicy.matchParent)
+            .height(LayoutPolicy.matchParent)
+            .constraintSize({ minWidth: "200px", minHeight: "200px" })
+            .flexShrink(0)
+        }
+        .width("100px")
+        .height("100px")
+    */
+
+    // Expect flex's width is 100, height is 100 and offset is [0.0, 0.0].
+    auto geometryNode = flex->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(100.0f, 100.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect flexInner's width is 200, height is 200 and offset is [0.0, 0.0].
+    auto geometryNode1 = flexInner->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(200.0f, 200.0f));
+    EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
 }
 } // namespace OHOS::Ace::NG
