@@ -47,6 +47,7 @@ bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
     hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
     hoverInfo.SetPressedKeyCodes(event.pressedKeyCodes_);
     hoverInfo.SetMouseAction(event.action);
+    hoverInfo.SetTargetDisplayId(event.targetDisplayId);
     // onHoverEventCallback_ may be overwritten in its invoke so we copy it first
     auto onHoverEventCallback = onHoverEventCallback_;
     onHoverEventCallback(isHovered, hoverInfo);
@@ -82,6 +83,7 @@ bool HoverEventTarget::HandlePenHoverEvent(bool isHovered, const TouchEvent& eve
     hoverInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
     hoverInfo.SetGlobalDisplayLocation(Offset(event.globalDisplayX, event.globalDisplayY));
     hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
+    hoverInfo.SetTargetDisplayId(event.targetDisplayId);
     // onPenHoverEventCallback_ may be overwritten in its invoke so we copy it first
     auto onPenHoverEventCallback = onPenHoverEventCallback_;
     onPenHoverEventCallback(isHovered, hoverInfo);
@@ -117,6 +119,7 @@ bool HoverEventTarget::HandlePenHoverMoveEvent(const TouchEvent& event)
     hoverInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
     hoverInfo.SetGlobalDisplayLocation(Offset(event.globalDisplayX, event.globalDisplayY));
     hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
+    hoverInfo.SetTargetDisplayId(event.targetDisplayId);
     // onPenHoverMoveEventCallback_ may be overwritten in its invoke so we copy it first
     auto onPenHoverMoveEventCallback = onPenHoverMoveEventCallback_;
     onPenHoverMoveEventCallback(hoverInfo);
@@ -145,6 +148,7 @@ void HoverEventTarget::HandleAccessibilityHoverEvent(bool isHovered, const Touch
     hoverInfo.SetGlobalDisplayLocation(Offset(event.globalDisplayX, event.globalDisplayY));
     hoverInfo.SetActionType(ConvertAccessibilityHoverAction(event.type));
     hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
+    hoverInfo.SetTargetDisplayId(event.targetDisplayId);
     // onAccessibilityHoverCallback_ may be overwritten in its invoke so we copy it first
     auto onAccessibilityHoverCallback = onAccessibilityHoverCallback_;
     onAccessibilityHoverCallback(isHovered, hoverInfo);
