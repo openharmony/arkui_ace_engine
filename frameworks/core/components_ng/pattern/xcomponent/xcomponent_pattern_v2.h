@@ -59,6 +59,12 @@ private:
     void OnModifyDone() override;
     void DumpInfo() override;
 
+    void InitSurfaceMultiThread(const RefPtr<FrameNode>& host);
+    void OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& host);
+    void RegisterContextEventMultiThread(const RefPtr<FrameNode>& host);
+    void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& host);
+    void OnDetachFromFrameNodeMultiThread();
+
     void InitSurface();
     int32_t HandleSurfaceCreated();
     int32_t HandleSurfaceDestroyed();
