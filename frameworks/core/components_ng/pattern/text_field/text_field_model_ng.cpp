@@ -69,7 +69,6 @@ void TextFieldModelNG::CreateNode(
     }
     pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
     pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
-    pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     pattern->InitSurfaceChangedCallback();
     pattern->RegisterWindowSizeCallback();
     pattern->InitSurfacePositionChangedCallback();
@@ -104,14 +103,39 @@ void TextFieldModelNG::CreateNode(
     }
 }
 
-RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::optional<std::u16string>& placeholder,
-    const std::optional<std::u16string>& value, bool isTextArea)
+RefPtr<FrameNode> TextFieldModelNG::CreateTextInputNode(
+    int32_t nodeId, const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value)
 {
-    auto frameNode = FrameNode::CreateFrameNode(
-        isTextArea ? V2::TEXTAREA_ETS_TAG : V2::TEXTINPUT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXTINPUT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
+    textFieldLayoutProperty->UpdateMaxLines(1);
+    textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
+    pattern->SetTextInputFlag(true);
+    UpdateTextFieldPattern(frameNode, value);
+    return frameNode;
+}
+
+RefPtr<FrameNode> TextFieldModelNG::CreateTextAreaNode(
+    int32_t nodeId, const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXTAREA_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, nullptr);
+    textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
+    textFieldLayoutProperty->UpdatePlaceholderMaxLines(Infinity<uint32_t>());
+    UpdateTextFieldPattern(frameNode, value);
+    return frameNode;
+}
+
+void TextFieldModelNG::UpdateTextFieldPattern(
+    const RefPtr<FrameNode>& frameNode, const std::optional<std::u16string>& value)
+{
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
     pattern->SetModifyDoneStatus(false);
     auto textValue = pattern->GetTextUtf16Value();
     if (value.has_value() && value.value() != textValue) {
@@ -120,28 +144,16 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     if (!pattern->HasOperationRecords()) {
         pattern->UpdateEditingValueToRecord(); // record initial status
     }
-    textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
-    if (!isTextArea) {
-        textFieldLayoutProperty->UpdateMaxLines(1);
-        textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
-        pattern->SetTextInputFlag(true);
-    } else {
-        textFieldLayoutProperty->UpdatePlaceholderMaxLines(Infinity<uint32_t>());
-    }
-    pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
-    pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
-    pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
     pattern->InitSurfaceChangedCallback();
     pattern->InitSurfacePositionChangedCallback();
     pattern->RegisterWindowSizeCallback();
     pattern->InitTheme();
     auto pipeline = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
+    CHECK_NULL_VOID(pipeline);
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     }
     ProcessDefaultStyleAndBehaviors(frameNode);
-    return frameNode;
 }
 
 void TextFieldModelNG::SetDraggable(bool draggable)

@@ -1365,6 +1365,7 @@ void TextPattern::OnHandleTouchUp()
 
 void TextPattern::HandleClickEvent(GestureEvent& info)
 {
+    CreateMultipleClickRecognizer();
     ResetAISelected(AIResetSelectionReason::CLICK);
     if ((selectOverlay_->IsClickAtHandle(info) && !multipleClickRecognizer_->IsRunning()) ||
         selectOverlay_->GetIsHandleDragging()) {
@@ -1926,6 +1927,7 @@ void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     gestureHub->SetNodeClickDistance(distanceThreshold_);
     CHECK_NULL_VOID(!clickEventInitialized_);
+    CreateMultipleClickRecognizer();
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -2178,10 +2180,8 @@ bool TextPattern::HasSpanOnHoverEvent()
     CHECK_NULL_RETURN(!spans_.empty(), false);
     for (const auto& item : spans_) {
         if (item && item->onHover) {
-            std::cout << "HasSpanOnHoverEvent onHover" << std::endl;
             return true;
         }
-        std::cout << "HasSpanOnHoverEvent no onHover" << std::endl;
     }
     return false;
 }

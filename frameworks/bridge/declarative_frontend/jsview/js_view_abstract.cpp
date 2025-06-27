@@ -6953,7 +6953,8 @@ bool JSViewAbstract::ParseJsSymbolId(
     auto resourceObject = GetResourceObject(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
     symbolResourceObject = resourceObject;
-    if (CheckCustomSymbolId(resourceWrapper, resId, symbolId)) {
+    int32_t type = jsObj->GetPropertyValue<int32_t>(static_cast<int32_t>(ArkUIIndex::TYPE), UNKNOWN_RESOURCE_TYPE);
+    if (type == static_cast<int32_t>(ResourceType::STRING) && CheckCustomSymbolId(resourceWrapper, resId, symbolId)) {
         return true;
     }
     if (!CheckResource(resourceObject, resourceWrapper)) {
