@@ -2288,11 +2288,12 @@ const MAX_ALPHA_VALUE = 1;
 const ERROR_CODE_RESOURCE_GET_FAILED = 180003;
 const ERROR_CODE_COLOR_PARAMETER_INCORRECT = 401;
 class ColorMetrics {
-    constructor(red, green, blue, alpha = MAX_CHANNEL_VALUE) {
+    constructor(red, green, blue, alpha = MAX_CHANNEL_VALUE, res) {
         this.red_ = ColorMetrics.clamp(red);
         this.green_ = ColorMetrics.clamp(green);
         this.blue_ = ColorMetrics.clamp(blue);
         this.alpha_ = ColorMetrics.clamp(alpha);
+        this.res_ = res === undefined ? undefined : res;
     }
     static clamp(value) {
         return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
@@ -2360,7 +2361,7 @@ class ColorMetrics {
             const blue = chanels[2];
             const alpha = chanels[3];
             const resourceId = chanels[4];
-            const colorMetrics = new ColorMetrics(red, green, blue, alpha);
+            const colorMetrics = new ColorMetrics(red, green, blue, alpha, color);
             colorMetrics.setResourceId(resourceId);
             return colorMetrics;
         }

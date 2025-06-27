@@ -6511,12 +6511,25 @@ bool JSViewAbstract::ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimensi
 
 bool JSViewAbstract::ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result)
 {
+    RefPtr<ResourceObject> resObj;
+    return ParseColorMetricsToColor(jsValue, result, resObj);
+}
+
+bool JSViewAbstract::ParseColorMetricsToColor(
+    const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj)
+{
     if (!jsValue->IsObject()) {
         return false;
     }
     auto colorObj = JSRef<JSObject>::Cast(jsValue);
     auto toNumericProp = colorObj->GetProperty("toNumeric");
     auto colorSpaceProp = colorObj->GetProperty("getColorSpace");
+    auto jsRes = colorObj->GetProperty("res_");
+    if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() && !jsRes->IsNull() && jsRes->IsObject()) {
+        JSRef<JSObject> jsResObj = JSRef<JSObject>::Cast(jsRes);
+        JSViewAbstract::CompleteResourceObject(jsResObj);
+        resObj = JSViewAbstract::GetResourceObject(jsResObj);
+    }
     if (toNumericProp->IsFunction() && colorSpaceProp->IsFunction()) {
         auto colorVal = JSRef<JSFunc>::Cast(toNumericProp)->Call(colorObj, 0, nullptr);
         result.SetValue(colorVal->ToNumber<uint32_t>());
@@ -6820,7 +6833,7 @@ bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result,
         return state;
     }
     if (jsValue->IsObject()) {
-        if (ParseColorMetricsToColor(jsValue, result)) {
+        if (ParseColorMetricsToColor(jsValue, result, resObj)) {
             CompleteResourceObjectFromColor(resObj, result, true);
             return true;
         }
