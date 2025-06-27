@@ -1531,12 +1531,20 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
     return result;
 }
 
+void BubbleLayoutAlgorithm::BottomAndTopPosition(OffsetF& bottomPosition, OffsetF& topPosition, const SizeF& childSize)
+{
+    bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
+        targetOffset_.GetY() + targetSize_.Height() + targetSpace_.ConvertToPx() + arrowHeight_);
+    topPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
+        targetOffset_.GetY() - childSize.Height() - targetSpace_.ConvertToPx() - arrowHeight_);
+}
+
 OffsetF BubbleLayoutAlgorithm::CoverParent(const SizeF& childSize, Placement originPlacement)
 {
-    OffsetF bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
-        targetOffset_.GetY() + targetSize_.Height() + targetSpace_.ConvertToPx() + arrowHeight_);
-    OffsetF topPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
-        targetOffset_.GetY() - childSize.Height() - targetSpace_.ConvertToPx() - arrowHeight_);
+    // default popup position
+    OffsetF bottomPosition;
+    OffsetF topPosition;
+    BottomAndTopPosition(bottomPosition, topPosition, childSize);
     OffsetF defaultPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
         targetOffset_.GetY() + (targetSize_.Height() - childSize.Height()) / HALF);
     showArrow_ = false;
@@ -1562,6 +1570,7 @@ OffsetF BubbleLayoutAlgorithm::AvoidOrCoverParent(const SizeF& childSize,
     const RefPtr<BubbleLayoutProperty>& bubbleProp, const RefPtr<LayoutWrapper> child, Placement originPlacement,
     OffsetF& arrowOffset)
 {
+    // popup avoid parent or cover parent
     OffsetF position;
     bool canPlaceAround = canPlacement_.bottom || canPlacement_.top || canPlacement_.left || canPlacement_.right;
     bool canPlaceTopOrBottom = canPlacement_.bottom || canPlacement_.top;
@@ -1671,10 +1680,10 @@ Rect BubbleLayoutAlgorithm::GetLeftRect()
 OffsetF BubbleLayoutAlgorithm::AvoidToTopOrBottomByWidth(
     const SizeF& childSize, OffsetF& arrowPosition, SizeF& resultSize)
 {
-    OffsetF bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
-        targetOffset_.GetY() + targetSize_.Height() + targetSpace_.ConvertToPx() + arrowHeight_);
-    OffsetF topPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
-        targetOffset_.GetY() - childSize.Height() - targetSpace_.ConvertToPx() - arrowHeight_);
+    // popup avoid parent to top or bottom
+    OffsetF bottomPosition;
+    OffsetF topPosition;
+    BottomAndTopPosition(bottomPosition, topPosition, childSize);
     OffsetF resultPosition;
     auto topHeight = std::min<float>(
         targetOffset_.GetY() - userSetTargetSpace_.ConvertToPx() - marginTop_ - BUBBLE_ARROW_HEIGHT.ConvertToPx(),
@@ -1704,6 +1713,7 @@ OffsetF BubbleLayoutAlgorithm::AvoidToTopOrBottomByWidth(
 bool BubbleLayoutAlgorithm::AvoidToTargetPlacement(
     const SizeF& childSize, OffsetF& arrowPosition, OffsetF& resultPosition, SizeF& resultSize, bool canCompress)
 {
+    // popup avoid to target placement
     switch (placement_) {
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
@@ -1751,10 +1761,9 @@ bool BubbleLayoutAlgorithm::AvoidToTargetPlacement(
 bool BubbleLayoutAlgorithm::AvoidToTargetBottom(
     const SizeF& childSize, OffsetF& arrowPosition, OffsetF& resultPosition, SizeF& resultSize, bool canCompress)
 {
-    OffsetF bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
-        targetOffset_.GetY() + targetSize_.Height() + targetSpace_.ConvertToPx() + arrowHeight_);
-    OffsetF topPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
-        targetOffset_.GetY() - childSize.Height() - targetSpace_.ConvertToPx() - arrowHeight_);
+    OffsetF bottomPosition;
+    OffsetF topPosition;
+    BottomAndTopPosition(bottomPosition, topPosition, childSize);
     OffsetF beforePosition = GetPositionWithPlacementNew(childSize, topPosition, bottomPosition, arrowPosition);
     resultPosition = beforePosition;
     float maxHeight = 0.0f;
@@ -1791,10 +1800,9 @@ bool BubbleLayoutAlgorithm::AvoidToTargetBottom(
 bool BubbleLayoutAlgorithm::AvoidToTargetTop(
     const SizeF& childSize, OffsetF& arrowPosition, OffsetF& resultPosition, SizeF& resultSize, bool canCompress)
 {
-    OffsetF bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
-        targetOffset_.GetY() + targetSize_.Height() + targetSpace_.ConvertToPx() + arrowHeight_);
-    OffsetF topPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
-        targetOffset_.GetY() - childSize.Height() - targetSpace_.ConvertToPx() - arrowHeight_);
+    OffsetF bottomPosition;
+    OffsetF topPosition;
+    BottomAndTopPosition(bottomPosition, topPosition, childSize);
     float maxWidth = 0.0f;
     float bubbleSpacing = scaledBubbleSpacing_;
     float arrowHalfWidth = BUBBLE_ARROW_WIDTH.ConvertToPx() / BUBBLE_ARROW_HALF;
@@ -1837,10 +1845,9 @@ bool BubbleLayoutAlgorithm::AvoidToTargetTop(
 bool BubbleLayoutAlgorithm::AvoidToTargetTopMid(
     const SizeF& childSize, OffsetF& arrowPosition, OffsetF& resultPosition, SizeF& resultSize, bool canCompress)
 {
-    OffsetF bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
-        targetOffset_.GetY() + targetSize_.Height() + targetSpace_.ConvertToPx() + arrowHeight_);
-    OffsetF topPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
-        targetOffset_.GetY() - childSize.Height() - targetSpace_.ConvertToPx() - arrowHeight_);
+    OffsetF bottomPosition;
+    OffsetF topPosition;
+    BottomAndTopPosition(bottomPosition, topPosition, childSize);
     float maxWidth = 0.0f;
     float bubbleSpacing = scaledBubbleSpacing_;
     float arrowHalfWidth = BUBBLE_ARROW_WIDTH.ConvertToPx() / BUBBLE_ARROW_HALF;
@@ -1870,10 +1877,9 @@ bool BubbleLayoutAlgorithm::AvoidToTargetTopMid(
 bool BubbleLayoutAlgorithm::AvoidToTargetRight(
     const SizeF& childSize, OffsetF& arrowPosition, OffsetF& resultPosition, SizeF& resultSize, bool canCompress)
 {
-    OffsetF bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
-        targetOffset_.GetY() + targetSize_.Height() + targetSpace_.ConvertToPx() + arrowHeight_);
-    OffsetF topPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
-        targetOffset_.GetY() - childSize.Height() - targetSpace_.ConvertToPx() - arrowHeight_);
+    OffsetF bottomPosition;
+    OffsetF topPosition;
+    BottomAndTopPosition(bottomPosition, topPosition, childSize);
     OffsetF beforePosition = GetPositionWithPlacementNew(childSize, topPosition, bottomPosition, arrowPosition);
     resultPosition = beforePosition;
     float maxHeight = 0.0f;
@@ -1903,10 +1909,9 @@ bool BubbleLayoutAlgorithm::AvoidToTargetRight(
 bool BubbleLayoutAlgorithm::AvoidToTargetLeft(
     const SizeF& childSize, OffsetF& arrowPosition, OffsetF& resultPosition, SizeF& resultSize, bool canCompress)
 {
-    OffsetF bottomPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
-        targetOffset_.GetY() + targetSize_.Height() + targetSpace_.ConvertToPx() + arrowHeight_);
-    OffsetF topPosition = OffsetF(targetOffset_.GetX() + (targetSize_.Width() - childSize.Width()) / HALF,
-        targetOffset_.GetY() - childSize.Height() - targetSpace_.ConvertToPx() - arrowHeight_);
+    OffsetF bottomPosition;
+    OffsetF topPosition;
+    BottomAndTopPosition(bottomPosition, topPosition, childSize);
     OffsetF beforePosition = GetPositionWithPlacementNew(childSize, topPosition, bottomPosition, arrowPosition);
     resultPosition = beforePosition;
     float maxHeight = 0.0f;
@@ -2449,6 +2454,7 @@ bool BubbleLayoutAlgorithm::CheckPositionLeft(
 bool BubbleLayoutAlgorithm::CheckPosition(
     const OffsetF& position, const SizeF& childSize, size_t step, size_t& i, const OffsetF& arrowPosition)
 {
+    // check popup can place at targetPlacement or not, and record max area space
     Rect rect;
     switch (placement_) {
         case Placement::BOTTOM_LEFT:
