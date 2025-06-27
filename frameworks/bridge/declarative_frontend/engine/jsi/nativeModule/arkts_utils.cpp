@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
+#include "arkts_utils.h"
 #include "ecmascript/napi/include/jsnapi.h"
 #include "jsnapi_expo.h"
 
@@ -214,7 +215,7 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
         return state;
     }
     if (value->IsObject(vm)) {
-        if (ParseColorMetricsToColor(vm, value, result)) {
+        if (ParseColorMetricsToColor(vm, value, result, resourceObject)) {
             CompleteResourceObjectFromColor(resourceObject, result, true);
             return true;
         }
@@ -639,12 +640,26 @@ bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueR
 
 bool ArkTSUtils::ParseColorMetricsToColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result)
 {
+    RefPtr<ResourceObject> resourceObject;
+    return ParseColorMetricsToColor(vm, jsValue, result, resourceObject);
+}
+
+bool ArkTSUtils::ParseColorMetricsToColor(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result, RefPtr<ResourceObject>& resourceObject)
+{
     if (!jsValue->IsObject(vm)) {
         return false;
     }
     auto obj = jsValue->ToObject(vm);
     auto toNumericProp = obj->Get(vm, "toNumeric");
     auto colorSpaceProp = obj->Get(vm, "getColorSpace");
+    auto jsRes = obj->Get(vm, "res_");
+    if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
+        !jsRes->IsNull() && jsRes->IsObject(vm)) {
+        auto jsObjRes = jsRes->ToObject(vm);
+        CompleteResourceObject(vm, jsObjRes);
+        resourceObject = GetResourceObject(vm, jsObjRes);
+    }
     if (toNumericProp->IsFunction(vm) && colorSpaceProp->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = toNumericProp;
         auto colorVal = func->Call(vm, obj, nullptr, 0);
