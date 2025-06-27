@@ -41,13 +41,13 @@ struct HistoryTestInputType {
 };
 } // namespace
 
-HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryX_001, TestSize.Level0)
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryTiltX_001, TestSize.Level0)
 {
-    auto result = OH_ArkUI_PointerEvent_GetHistoryX(nullptr, 0, 0);
+    auto result = OH_ArkUI_PointerEvent_GetHistoryTiltX(nullptr, 0, 0);
     EXPECT_FLOAT_EQ(result, HISTORY_X_ERROR);
 }
 
-HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryX_002, TestSize.Level0)
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryTiltX_002, TestSize.Level0)
 {
     ArkUITouchEvent touchEvent;
     int32_t pointerIndex = 1;
@@ -91,19 +91,19 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryX_002, TestSize.Level
     for (auto testCase : testCases) {
         auto input = testCase.first;
         auto expect = testCase.second;
-        auto result = OH_ArkUI_PointerEvent_GetHistoryX(&input.event, input.pointerIndex, input.historyIndex);
+        auto result = OH_ArkUI_PointerEvent_GetHistoryTiltX(&input.event, input.pointerIndex, input.historyIndex);
         EXPECT_FLOAT_EQ(result, expect) << "index = " << count << ",result = " << result << ",expect = " << expect;
         count++;
     }
 }
 
-HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryX_003, TestSize.Level0)
+HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryTiltX_003, TestSize.Level0)
 {
     ArkUIHistoryTouchEvent events[EVENT_SIZE];
     ArkUIHistoryTouchEvent emptyEvents[EVENT_SIZE];
     ArkUITouchPoint pointes[POINT_SIZE];
-    pointes[0].nodeX = ARKUI_X;
-    pointes[1].nodeX = ARKUI_X;
+    pointes[0].tiltX = ARKUI_X;
+    pointes[1].tiltX = ARKUI_X;
     events[0].touchPointSize = POINT_SIZE;
     events[1].touchPointSize = POINT_SIZE;
     events[0].touchPointes = pointes;
@@ -203,7 +203,7 @@ HWTEST_F(UIInputEventTest, OH_ArkUI_PointerEvent_GetHistoryX_003, TestSize.Level
             touchEvent->historySize = input.historySize;
         }
         auto expect = testCase.second;
-        auto result = OH_ArkUI_PointerEvent_GetHistoryX(&input.event, input.pointerIndex, input.historyIndex);
+        auto result = OH_ArkUI_PointerEvent_GetHistoryTiltX(&input.event, input.pointerIndex, input.historyIndex);
         EXPECT_FLOAT_EQ(result, expect) << "index = " << count << ",result = " << result << ",expect = " << expect;
         count++;
     }
