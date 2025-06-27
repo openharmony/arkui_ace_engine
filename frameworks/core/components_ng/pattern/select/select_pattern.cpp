@@ -43,6 +43,7 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_divider/menu_divider_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_row_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
@@ -825,7 +826,7 @@ void SelectPattern::BuildChild()
     bool hasRowNode = HasRowNode();
     auto rowId = GetRowId();
     auto row = FrameNode::GetOrCreateFrameNode(
-        V2::ROW_ETS_TAG, rowId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+        V2::ROW_ETS_TAG, rowId, []() { return AceType::MakeRefPtr<MenuItemRowPattern>(); });
     CHECK_NULL_VOID(row);
     if (textApply_ && textId_.has_value()) {
         if (hasRowNode) {
