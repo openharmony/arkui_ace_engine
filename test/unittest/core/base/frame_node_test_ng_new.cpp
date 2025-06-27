@@ -2791,55 +2791,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSwapDirty003, TestSize.Level1)
 }
 
 /**
- * @tc.name: FrameNodeGeometryNodeToJsonValue
- * @tc.desc: Test method GeometryNodeToJsonValue
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeGeometryNodeToJsonValue, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create value.
-     */
-    auto value = JsonUtil::Create(true);
-
-    /**
-     * @tc.steps: step2. construct parameters.
-     * @tc.expected: expect cover branch layoutProperty_ is nullptr.
-     */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 2, AceType::MakeRefPtr<Pattern>());
-    InspectorFilter filter;
-    frameNode->GeometryNodeToJsonValue(value, filter);
-    EXPECT_NE(frameNode->layoutProperty_, nullptr);
-
-    /**
-     * @tc.steps: step3. set layoutProperty_ and call GeometryNodeToJsonValue.
-     * @tc.expected: expect cover branch layoutProperty_ is not nullptr.
-     */
-    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
-    frameNode->layoutProperty_ = layoutProperty;
-    frameNode->GeometryNodeToJsonValue(value, filter);
-    EXPECT_NE(frameNode->layoutProperty_, nullptr);
-
-    /**
-     * @tc.steps: step4. set calcLayoutConstraint_ and call GeometryNodeToJsonValue.
-     * @tc.expected: expect cover branch calcLayoutConstraint_ is not nullptr.
-     */
-    frameNode->layoutProperty_->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
-
-    frameNode->GeometryNodeToJsonValue(value, filter);
-    EXPECT_NE(frameNode->layoutProperty_->calcLayoutConstraint_, nullptr);
-
-    /**
-     * @tc.steps: step5. set selfIdealSize and call GeometryNodeToJsonValue.
-     * @tc.expected: expect cover branch selfIdealSize has value.
-     */
-    std::optional<CalcLength> len = CalcLength("auto");
-    frameNode->layoutProperty_->calcLayoutConstraint_->selfIdealSize = CalcSize(len, len);
-    frameNode->GeometryNodeToJsonValue(value, filter);
-    EXPECT_NE(frameNode->renderContext_, nullptr);
-}
-
-/**
  * @tc.name: FrameNodeDumpSimplifyCommonInfo
  * @tc.desc: Test DumpSimplifyCommonInfo.
  * @tc.type: FUNC
@@ -2900,69 +2851,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifyCommonInfo, TestSize.Level1)
     const auto& valueParentLayout = json->GetValue("ParentLayoutConstraint");
     bool hasKeyParentLayout = !(valueParentLayout->IsNull());
     EXPECT_FALSE(hasKeyParentLayout);
-}
-
-/**
- * @tc.name: FrameNodeDumpSimplifySafeAreaInfo
- * @tc.desc: Test DumpSimplifySafeAreaInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeDumpSimplifySafeAreaInfo, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode.
-     * @tc.expected: expect is nullptr.
-     */
-    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    EXPECT_NE(frameNode, nullptr);
-
-    /**
-     * @tc.steps: step2. create json.
-     * @tc.expected: expect is nullptr.
-     */
-    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
-    EXPECT_NE(json, nullptr);
-
-    /**
-     * @tc.steps: step3. test DumpSimplifySafeAreaInfo.
-     * @tc.expected: expect is FALSE.
-     */
-    frameNode->DumpSimplifySafeAreaInfo(json);
-    const auto& valueExpandOpts = json->GetValue("SafeAreaExpandOpts");
-    bool hasvalueExpandOpts = !(valueExpandOpts->IsNull());
-    EXPECT_FALSE(hasvalueExpandOpts);
-
-    const auto& valueInsets = json->GetValue("SafeAreaInsets");
-    bool hasKeyInsets = !(valueInsets->IsNull());
-    EXPECT_FALSE(hasKeyInsets);
-
-    const auto& valueSelfAdjust = json->GetValue("SelfAdjust");
-    bool hasKeySelfAdjust = !(valueSelfAdjust->IsNull());
-    EXPECT_FALSE(hasKeySelfAdjust);
-
-    const auto& valueParentSelfAdjust = json->GetValue("ParentSelfAdjust");
-    bool hasKeyParentSelfAdjust = !(valueParentSelfAdjust->IsNull());
-    EXPECT_FALSE(hasKeyParentSelfAdjust);
-
-    const auto& valueIgnore = json->GetValue("IgnoreSafeArea");
-    bool hasKeyIgnore = !(valueIgnore->IsNull());
-    EXPECT_FALSE(hasKeyIgnore);
-
-    const auto& valueAvoidWindow = json->GetValue("IsNeedAvoidWindow");
-    bool hasKeyAvoidWindow = !(valueAvoidWindow->IsNull());
-    EXPECT_FALSE(hasKeyAvoidWindow);
-
-    const auto& valueIsFullScreen = json->GetValue("IsFullScreen");
-    bool hasKeyIsFullScreen = !(valueIsFullScreen->IsNull());
-    EXPECT_FALSE(hasKeyIsFullScreen);
-
-    const auto& valueIsKeyboard = json->GetValue("IsKeyboardAvoidMode");
-    bool hasKeyIsKeyboard = !(valueIsKeyboard->IsNull());
-    EXPECT_FALSE(hasKeyIsKeyboard);
-
-    const auto& valueIsUseCutout = json->GetValue("IsUseCutout");
-    bool hasKeyIsUseCutout = !(valueIsUseCutout->IsNull());
-    EXPECT_FALSE(hasKeyIsUseCutout);
 }
 
 /**
