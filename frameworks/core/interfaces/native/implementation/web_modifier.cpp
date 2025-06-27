@@ -32,7 +32,6 @@ using ScriptItem = std::pair<std::string, std::vector<std::string>>;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG::Converter {
-#ifndef WEB_SUPPORTED
 template<>
 ScriptItem Convert(const Ark_ScriptItem& src)
 {
@@ -156,7 +155,6 @@ void AssignArkValue(Ark_ThreatType& dst, const ThreatType& src)
             LOGE("Unexpected enum value in ThreatType: %{public}d", src);
     }
 }
-#endif // WEB_SUPPORTED
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
