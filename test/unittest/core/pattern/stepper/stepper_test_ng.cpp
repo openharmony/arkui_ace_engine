@@ -1467,4 +1467,32 @@ HWTEST_F(StepperTestNg, StepperLayoutAlgorithmMeasure001, TestSize.Level1)
     layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF());
 }
+
+/**
+ * @tc.name: OnModifyDone
+ * @tc.desc: Branch: if (layoutPolicy.has_value()) true
+ * @tc.type: FUNC
+ */
+HWTEST_F(StepperTestNg, OnModifyDone, TestSize.Level1)
+{
+    InitStepperTestNg();
+    StepperItemModelNG().Create();
+    auto stepperItemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(stepperItemNode, nullptr);
+    swiperNode_->AddChild(stepperItemNode);
+    auto layoutProperty = frameNode_->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::WRAP_CONTENT, true);
+    layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    
+    stepperPattern_->OnModifyDone();
+    
+    auto swiperLayoutProperty = swiperNode_->GetLayoutProperty();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    auto layoutPolicy = swiperLayoutProperty->GetLayoutPolicyProperty();
+    ASSERT_EQ(layoutPolicy.has_value(), true);
+    EXPECT_EQ(layoutPolicy->IsWidthWrap(), true);
+    EXPECT_EQ(layoutPolicy->IsHeightMatch(), true);
+}
 } // namespace OHOS::Ace::NG

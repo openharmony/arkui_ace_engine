@@ -65,10 +65,12 @@ void StepperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto rightButtonHeight = CaluateButtonHeight(layoutWrapper, true);
         auto leftButtonHeight = CaluateButtonHeight(layoutWrapper, false);
         MeasureSwiper(layoutWrapper, childLayoutConstraint, rightButtonHeight, leftButtonHeight);
+        ReCalcStepperSize(layoutWrapper, rightButtonHeight, leftButtonHeight);
     } else {
         MeasureSwiper(layoutWrapper, childLayoutConstraint, 0, 0);
         MeasureLeftButton(layoutWrapper, childLayoutConstraint);
         MeasureRightButton(layoutWrapper, childLayoutConstraint);
+        ReCalcStepperSize(layoutWrapper, 0, 0);
     }
 }
 
@@ -96,10 +98,21 @@ void StepperLayoutAlgorithm::MeasureSwiper(LayoutWrapper* layoutWrapper, LayoutC
     }
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(swiperWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(swiperLayoutProperty);
-    swiperLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(swiperWidth), CalcLength(swiperHeight)));
-    swiperLayoutConstraint.maxSize.SetHeight(swiperHeight);
-    swiperLayoutConstraint.selfIdealSize.SetHeight(swiperHeight);
-    swiperLayoutConstraint.selfIdealSize.SetWidth(swiperWidth);
+    auto layoutPolicy = swiperLayoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        if (!layoutPolicy->IsHeightFix() && !layoutPolicy->IsHeightWrap()) {
+            swiperLayoutConstraint.selfIdealSize.SetHeight(swiperHeight);
+        }
+        if (!layoutPolicy->IsWidthFix() && !layoutPolicy->IsWidthWrap()) {
+            swiperLayoutConstraint.selfIdealSize.SetWidth(swiperWidth);
+        }
+    } else {
+        swiperLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(swiperWidth), CalcLength(swiperHeight)));
+        swiperLayoutConstraint.maxSize.SetHeight(swiperHeight);
+        swiperLayoutConstraint.selfIdealSize.SetHeight(swiperHeight);
+        swiperLayoutConstraint.selfIdealSize.SetWidth(swiperWidth);
+    }
+
     swiperWrapper->Measure(swiperLayoutConstraint);
 }
 void StepperLayoutAlgorithm::MeasureLeftButton(LayoutWrapper* layoutWrapper, LayoutConstraintF buttonLayoutConstraint)
@@ -217,6 +230,44 @@ void StepperLayoutAlgorithm::MeasureText(
     textLayoutConstraint.maxSize.SetWidth(textMaxWidth);
     textLayoutConstraint.selfIdealSize = OptionalSizeF(std::nullopt, std::nullopt);
     textWrapper->Measure(textLayoutConstraint);
+}
+
+void StepperLayoutAlgorithm::ReCalcStepperSize(
+    LayoutWrapper* layoutWrapper, float rightButtonHeight, float leftButtonHeight)
+{
+    auto stepperNode = AceType::DynamicCast<StepperNode>(layoutWrapper->GetHostNode());
+    CHECK_NULL_VOID(stepperNode);
+    auto index = stepperNode->GetChildIndexById(stepperNode->GetSwiperId());
+    auto stepperLayoutProperty = stepperNode->GetLayoutProperty();
+    CHECK_NULL_VOID(stepperLayoutProperty);
+    auto layoutPolicy = stepperLayoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy.has_value());
+    bool isMatchOrFixOrWrap = layoutPolicy->IsFix() || layoutPolicy->IsWrap() || layoutPolicy->IsAllMatch();
+    if (!isMatchOrFixOrWrap) {
+        return;
+    }
+
+    auto swiperWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(swiperWrapper);
+    auto swiperGeometryNode = swiperWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(swiperGeometryNode);
+    auto pipeline = stepperNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto stepperTheme = pipeline->GetTheme<StepperTheme>();
+    CHECK_NULL_VOID(stepperTheme);
+    auto controlHeight = static_cast<float>(stepperTheme->GetControlHeight().ConvertToPx());
+    auto maxButtonHeight = (rightButtonHeight > leftButtonHeight ? rightButtonHeight : leftButtonHeight) -
+                           (PADDING.ConvertToPx() * HEIGHT_DOUBLE_RATIO);
+    if (maxButtonHeight > controlHeight) {
+        controlHeight = maxButtonHeight;
+    }
+    auto totalSize = swiperGeometryNode->GetFrameSize();
+    totalSize.AddHeight(controlHeight);
+    const auto& padding = stepperLayoutProperty->CreatePaddingAndBorder();
+    AddPaddingToSize(padding, totalSize);
+
+    auto stepperGeometryNode = stepperNode->GetGeometryNode();
+    stepperGeometryNode->SetFrameSize(totalSize);
 }
 
 void StepperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
