@@ -292,7 +292,7 @@ TEST_F(FreeScrollTest, Animation001)
     EXPECT_FALSE(MockAnimationManager::GetInstance().AllFinished());
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
-    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(-50.0f, -50.0f));
+    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, 0)); // bounced back to boundary
 
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 }

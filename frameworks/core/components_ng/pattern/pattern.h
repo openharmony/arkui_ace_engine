@@ -415,6 +415,13 @@ public:
         return frameNode->GetContext();
     }
 
+    RenderContext* GetRenderContext() const
+    {
+        auto frameNode = GetHost();
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        return frameNode->GetRenderContext().GetRawPtr();
+    }
+
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}

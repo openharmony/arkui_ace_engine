@@ -24,11 +24,20 @@ namespace OHOS::Ace::NG {
 FreeScrollController::FreeScrollController(ScrollPattern& pattern) : pattern_(pattern)
 {
     offset_ = MakeRefPtr<NodeAnimatablePropertyOffsetF>(OffsetF {}, [this](const OffsetF& _) { pattern_.MarkDirty(); });
+    auto* renderCtx = pattern_.GetRenderContext();
+    CHECK_NULL_VOID(renderCtx);
+    renderCtx->AttachNodeAnimatableProperty(offset_);
+
     InitializePanRecognizer();
     InitializeTouchEvent();
 }
 FreeScrollController::~FreeScrollController()
 {
+    if (offset_) {
+        auto* renderCtx = pattern_.GetRenderContext();
+        CHECK_NULL_VOID(renderCtx);
+        renderCtx->DetachNodeAnimatableProperty(offset_);
+    }
     if (freeTouch_) {
         auto hub = pattern_.GetGestureHub();
         CHECK_NULL_VOID(hub);
