@@ -132,6 +132,10 @@ struct ArkUIAniDragControllerModifier {
     void (*aniDragActionNotifyDragStartReques)(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_enum_item requestStatus);
 };
+struct ArkUIAniImageSpanModifier {
+    void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
+    void (*setAltPixelMap)(ArkUINodeHandle node, void* pixelmap);
+};
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -145,6 +149,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
     const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();
     const ArkUIAniDragControllerModifier* (*getDragControllerAniModifier)();
+    const ArkUIAniImageSpanModifier* (*getImageSpanAniModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);
