@@ -210,4 +210,39 @@ HWTEST_F(FrameNodeTest, FrameNodeTestTest007, TestSize.Level1)
     frameNodeParent->AddChild(frameNode);
     EXPECT_FALSE(frameNode->GetParentHandle() == nullptr);
 }
+
+
+/**
+ * @tc.name: FrameNodeTestTest008
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest008, TestSize.Level1)
+{
+    const std::string tag = "TEST8";
+    const int32_t id = 8;
+    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
+    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
+    EXPECT_NE(frameNode, nullptr);
+
+    frameNode->ResetCompositingFilter();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: FrameNodeTestTest009
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTest, FrameNodeTestTest009, TestSize.Level1)
+{
+    const std::string tag = "TEST9";
+    const int32_t id = 9;
+    auto mockPattern = AceType::MakeRefPtr<MockAceKitPattern>();
+    auto frameNode = AbstractViewFactory::CreateFrameNode(tag, id, mockPattern);
+    EXPECT_NE(frameNode, nullptr);
+
+    frameNode->NeedAvoidContainerModal();
+    SUCCEED();
+}
 } // namespace OHOS::Ace
