@@ -49,7 +49,8 @@ export struct MenuIndex {
     { name: 'bindContextMenuBottom', path: 'bindContextMenuBottom' },
     { name: 'bindContextMenuTop', path: 'bindContextMenuTop' },
     { name: 'bindContextMenuRight', path: 'bindContextMenuRight' },
-    { name: 'bindContextMenuLeft', path: 'bindContextMenuLeft' }
+    { name: 'bindContextMenuLeft', path: 'bindContextMenuLeft' },
+    { name: 'bindContextMenuPreview', path: 'bindContextMenuPreview' }
   ]
 
   build() {
