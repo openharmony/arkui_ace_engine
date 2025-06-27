@@ -354,7 +354,6 @@ void TextPattern::ShowAIEntityMenuForCancel()
     HandleSelectionChange(start, end);
     textResponseType_ = TextResponseType::LONG_PRESS;
     UpdateSelectionSpanType(start, end);
-    parentGlobalOffset_ = GetParentGlobalOffset();
     CalculateHandleOffsetAndShowOverlay();
     ShowSelectOverlay({ .animation = true });
     TAG_LOGI(AceLogTag::ACE_TEXT,
@@ -556,7 +555,6 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     UpdateSelectionSpanType(std::min(textSelector_.baseOffset, textSelector_.destinationOffset),
         std::max(textSelector_.baseOffset, textSelector_.destinationOffset));
     oldSelectedType_ = selectedType_.value_or(TextSpanType::NONE);
-    parentGlobalOffset_ = GetParentGlobalOffset();
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay(true);
     if (GetOrCreateMagnifier() && HasContent()) {
@@ -1812,10 +1810,10 @@ RectF TextPattern::CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandl
     auto destinationOffset = textSelector_.destinationOffset;
     // calculate result
     textSelector_.Update(aiSpan.start, aiSpan.end);
-    parentGlobalOffset_ = GetParentGlobalOffset();
     if (calculateHandleFunc == nullptr) {
         CalculateHandleOffsetAndShowOverlay();
     } else {
+        parentGlobalOffset_ = GetParentGlobalOffset();
         calculateHandleFunc();
     }
     if (textSelector_.firstHandle.Top() != textSelector_.secondHandle.Top()) {
@@ -1903,7 +1901,6 @@ void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
     textResponseType_ = TextResponseType::NONE;
     UpdateSelectionSpanType(std::min(textSelector_.baseOffset, textSelector_.destinationOffset),
         std::max(textSelector_.baseOffset, textSelector_.destinationOffset));
-    parentGlobalOffset_ = GetParentGlobalOffset();
     CalculateHandleOffsetAndShowOverlay();
     if (!isMousePressed_) {
         ShowSelectOverlay({ .animation = true });
@@ -3324,15 +3321,7 @@ TextDragInfo TextPattern::CreateTextDragInfo()
     CHECK_NULL_RETURN(textLayoutProperty, info);
     info.handleColor = theme->GetCaretColor();
     info.selectedBackgroundColor = theme->GetSelectedColor();
-    auto selectOverlayInfo = selectOverlay_->GetSelectOverlayInfos();
-    if (selectOverlayInfo.has_value()) {
-        if (selectOverlayInfo->firstHandle.isShow) {
-            info.firstHandle = selectOverlayInfo->firstHandle.paintRect;
-        }
-        if (selectOverlayInfo->secondHandle.isShow) {
-            info.secondHandle =  selectOverlayInfo->secondHandle.paintRect;
-        }
-    }
+    selectOverlay_->GetVisibleDragViewHandles(info.firstHandle, info.secondHandle);
     if (IsAiSelected()) {
         info.isFirstHandleAnimation = false;
         info.isSecondHandleAnimation = false;
@@ -3623,7 +3612,7 @@ OffsetF TextPattern::GetParentGlobalOffset() const
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
-    return host->GetPaintRectOffset(false, true) - rootOffset;
+    return host->GetPaintRectOffsetNG(false, true) - rootOffset;
 }
 
 void TextPattern::CreateHandles()
@@ -4000,7 +3989,6 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
         return;
     }
     HandleSelectionChange(start, end);
-    parentGlobalOffset_ = GetParentGlobalOffset();
     CalculateHandleOffsetAndShowOverlay();
     showSelected_ = true;
     if (textSelector_.firstHandle == textSelector_.secondHandle && pManager_) {
@@ -4482,7 +4470,7 @@ void TextPattern::GetGlobalOffset(Offset& offset)
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto rootOffset = pipeline->GetRootRect().GetOffset();
-    auto globalOffset = host->GetPaintRectOffset(false, true) - rootOffset;
+    auto globalOffset = host->GetPaintRectOffsetNG(false, true) - rootOffset;
     offset = Offset(globalOffset.GetX(), globalOffset.GetY());
 }
 
@@ -6178,7 +6166,9 @@ void TextPattern::ChangeHandleHeight(const GestureEvent& event, bool isFirst, bo
     if (isChangeFirstHandle) {
         ChangeFirstHandleHeight(touchOffset, currentHandle);
     } else {
-        ChangeSecondHandleHeight(touchOffset, currentHandle);
+        if (!selectOverlay_->ChangeSecondHandleHeight(event, isOverlayMode)) {
+            ChangeSecondHandleHeight(touchOffset, currentHandle);
+        }
     }
 }
 
