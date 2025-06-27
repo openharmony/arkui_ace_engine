@@ -1260,6 +1260,8 @@ public:
     void SetBorderRadiusFromWeb(double borderRadiusTopLeft, double borderRadiusTopRight, double borderRadiusBottomLeft,
         double borderRadiusBottomRight);
 
+    void SetViewportScaleState();
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
