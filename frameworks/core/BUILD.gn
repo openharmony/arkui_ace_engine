@@ -526,7 +526,7 @@ template("ace_core_source_set") {
       defines += [ "ENABLE_OPENCL" ]
     }
 
-    if (use_new_skia) {
+    if (ace_engine_feature_enable_upgrade_skia) {
       defines += [ "USE_NEW_SKIA" ]
     }
 
@@ -1165,7 +1165,7 @@ template("ace_core_ng_source_set") {
       defines += [ "ENABLE_OPENCL" ]
     }
 
-    if (use_new_skia) {
+    if (ace_engine_feature_enable_upgrade_skia) {
       defines += [ "USE_NEW_SKIA" ]
     }
 

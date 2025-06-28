@@ -50,7 +50,7 @@ template("ace_core_interfaces_native") {
     if (ace_engine_feature_enable_point_light) {
       defines += [ "POINT_LIGHT_ENABLE" ]
     }
-    if (use_new_skia) {
+    if (ace_engine_feature_enable_upgrade_skia) {
       defines += [ "USE_NEW_SKIA" ]
     }
     # add common source file needed by all product platform here

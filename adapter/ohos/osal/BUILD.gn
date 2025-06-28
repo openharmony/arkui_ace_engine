@@ -28,7 +28,7 @@ template("ace_osal_ohos_source_set") {
         vendor_configs.use_ext_surface) {
       defines += [ "EXT_SURFACE_ENABLE" ]
     }
-    if (use_new_skia) {
+    if (ace_engine_feature_enable_upgrade_skia ) {
       defines += [ "USE_NEW_SKIA" ]
     }
     if (is_ohos_standard_system) {

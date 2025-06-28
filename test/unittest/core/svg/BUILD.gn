@@ -88,7 +88,7 @@ ohos_unittest("parse_test_ng") {
       "NEW_SKIA",
     ]
   }
-  if (use_new_skia) {
+  if (ace_engine_feature_enable_upgrade_skia) {
     defines += [ "USE_NEW_SKIA" ]
   }
 
@@ -287,7 +287,7 @@ ohos_unittest("svg_context_test_ng") {
 
   defines = [ "USE_ROSEN_DRAWING" ]
 
-  if (use_new_skia) {
+  if (ace_engine_feature_enable_upgrade_skia) {
     defines += [ "USE_NEW_SKIA" ]
   }
 
@@ -366,7 +366,7 @@ ohos_unittest("svg_node_test_ng") {
 
   defines = [ "USE_ROSEN_DRAWING" ]
 
-  if (use_new_skia) {
+  if (ace_engine_feature_enable_upgrade_skia) {
     defines += [ "USE_NEW_SKIA" ]
   }
 
