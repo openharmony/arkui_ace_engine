@@ -75,7 +75,6 @@ constexpr char WEB_EVENT_PAGEFINISH[] = "onPageFinished";
 constexpr char WEB_EVENT_DOWNLOADSTART[] = "onDownloadStart";
 constexpr char WEB_EVENT_LOADINTERCEPT[] = "onLoadIntercept";
 constexpr char WEB_EVENT_ONINTERCEPTREQUEST[] = "onInterceptRequest";
-constexpr char WEB_EVENT_ONOVERRIDEERRORPAGE[] = "onOverrideErrorPage";
 constexpr char WEB_EVENT_RUNJSCODE_RECVVALUE[] = "onRunJSRecvValue";
 constexpr char WEB_EVENT_SCROLL[] = "onScroll";
 constexpr char WEB_EVENT_SCALECHANGE[] = "onScaleChange";
@@ -941,15 +940,6 @@ void WebDelegateCross::RegisterWebObjectEvent()
             }
             return nullptr;
         });
-    WebObjectEventManager::GetInstance().RegisterObjectEventWithStringReturn(
-        MakeEventHash(WEB_EVENT_ONOVERRIDEERRORPAGE),
-        [weak = WeakClaim(this)](const std::string& param, void* object) -> std::string {
-            auto delegate = weak.Upgrade();
-            if (delegate) {
-                return delegate->OnOverrideErrorPage(object);
-            }
-            return "";
-        });
     WebObjectEventManager::GetInstance().RegisterObjectEvent(
         MakeEventHash(WEB_EVENT_REFRESH_HISTORY),
         [weak = WeakClaim(this)](const std::string& param, void* object) {
@@ -1479,49 +1469,6 @@ RefPtr<WebResponse> WebDelegateCross::OnInterceptRequest(void* object)
             }
         },
         "ArkUIWebInterceptRequest");
-    return result;
-}
-
-std::string WebDelegateCross::OnOverrideErrorPage(void* object)
-{
-    ContainerScope scope(instanceId_);
-    CHECK_NULL_RETURN(object, "");
-    auto context = context_.Upgrade();
-    CHECK_NULL_RETURN(context, "");
-    std::string result = "";
-    auto request = AceType::MakeRefPtr<WebResourceRequsetImpl>(object);
-    CHECK_NULL_RETURN(request, "");
-    auto webResourceError = AceType::MakeRefPtr<WebResourceErrorImpl>(object);
-    CHECK_NULL_RETURN(webResourceError, "");
-    auto requestHeader = request->GetRequestHeader();
-    auto method = request->GetMethod();
-    auto url = request->GetRequestUrl();
-    auto hasGesture = request->IsRequestGesture();
-    auto isMainFrame = request->IsMainFrame();
-    auto isRedirect = request->IsRedirect();
-    auto webResourceRequest = AceType::MakeRefPtr<WebRequest>(
-        requestHeader, method, url, hasGesture, isMainFrame, isRedirect);
-    auto errorInfo = webResourceError->GetErrorInfo();
-    auto errorCode = webResourceError->GetErrorCode();
-    auto error = AceType::MakeRefPtr<WebError>(errorInfo, errorCode);
-
-    auto jsTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::JS);
-    jsTaskExecutor.PostSyncTask(
-        [weak = WeakClaim(this), webResourceRequest, error, &result]() {
-            auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID(delegate);
-            if (Container::IsCurrentUseNewPipeline()) {
-                auto webPattern = delegate->webPattern_.Upgrade();
-                CHECK_NULL_VOID(webPattern);
-                auto webEventHub = webPattern->GetWebEventHub();
-                CHECK_NULL_VOID(webEventHub);
-                auto propOnOverrideErrorPageEvent = webEventHub->GetOnOverrideErrorPageEvent();
-                CHECK_NULL_VOID(propOnOverrideErrorPageEvent);
-                auto param = std::make_shared<OnOverrideErrorPageEvent>(webResourceRequest);
-                result = propOnOverrideErrorPageEvent(param);
-            }
-        },
-        "ArkUIWebOverrideErrorPage");
     return result;
 }
 
