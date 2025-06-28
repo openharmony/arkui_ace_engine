@@ -34,7 +34,7 @@ import { updateLazyItems } from "./handwritten/LazyForEachImpl"
 import router from "@ohos/router"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { createStateManager } from "@koalaui/runtime"
-import { UIContextImpl, ContextRecord, DetachedRootEntryManager } from "arkui/handwritten/UIContextImpl"
+import { UIContextImpl, ContextRecord, DetachedRootEntryManager, DetachedRootEntry } from "arkui/handwritten/UIContextImpl"
 import { UIContextUtil } from "arkui/handwritten/UIContextUtil"
 import { flushBuilderRootNode } from "./BuilderNode"
 
@@ -85,7 +85,7 @@ export function currentPartialUpdateContext<T>(): T | undefined {
     return _currentPartialUpdateContext as (T | undefined)
 }
 
-function getDetachedRootsByInstanceId(instanceId: int32): Map<KPointer, ComputableState<PeerNode>> {
+function getDetachedRootsByInstanceId(instanceId: int32): Map<KPointer, DetachedRootEntry> {
     if (instanceId === _undefinedInstanceId) {
         instanceId = UIContextUtil.getCurrentInstanceId();
         InteropNativeModule._NativeLog(
@@ -96,22 +96,23 @@ function getDetachedRootsByInstanceId(instanceId: int32): Map<KPointer, Computab
     return context.getDetachedRootEntryManager().getDetachedRoots();
 }
 
+function getUicontextByInstanceId(instanceId: int32): UIContextImpl {
+    let uicontext = UIContextUtil.getUIContextById(instanceId);
+    if (uicontext === undefined) {
+        uicontext = UIContextUtil.getOrCreateCurrentUIContext();
+    }
+
+    return uicontext as UIContextImpl;
+}
+
 export function createUiDetachedRoot(
     peerFactory: () => PeerNode,
     /** @memo */
     builder: () => void,
     instanceId: int32 = _undefinedInstanceId
 ): PeerNode {
-    const manager = GlobalStateManager.instance
-    const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
-        const frozen = manager.frozen
-        manager.frozen = true
-        memoEntry<void>(context, 0, builder)
-        manager.frozen = frozen
-    })
-    let detachedRoots = getDetachedRootsByInstanceId(instanceId);
-    detachedRoots.set(node.value.peer.ptr, node)
-    return node.value
+    let uicontext = getUicontextByInstanceId(instanceId);
+    return uicontext.getDetachedRootEntryManager().createUiDetachedRoot(peerFactory, builder);
 }
 setUIDetachedRootCreator(createUiDetachedRoot)
 
@@ -122,15 +123,8 @@ export function destroyUiDetachedRoot(ptr: KPointer, instanceId: int32): boolean
         return false;
     }
 
-    let detachedRoots = getDetachedRootsByInstanceId(instanceId);
-    if (!detachedRoots.has(ptr)) {
-        return false;
-    }
-
-    const root = detachedRoots.get(ptr)!
-    detachedRoots.delete(ptr)
-         root.dispose()
-    return true;
+    let uicontext = getUicontextByInstanceId(instanceId);
+    return uicontext.getDetachedRootEntryManager().destroyUiDetachedRoot(ptr);
 }
 
 function dumpTree(node: IncrementalNode, indent: int32 = 0) {
@@ -331,8 +325,9 @@ export class Application {
         manager.updateSnapshot()
         this.computeRoot()
         let detachedRoots = getDetachedRootsByInstanceId(this.instanceId);
-        for (const detachedRoot of detachedRoots.values())
-            detachedRoot.value
+        for (const detachedRoot of detachedRoots.values()) {
+            detachedRoot.entry.value
+        }
         updateLazyItems()
         flushBuilderRootNode()
         if (partialUpdates.length > 0) {
@@ -350,8 +345,9 @@ export class Application {
                 // Compute new tree state
                 try {
                     root.value
-                    for (const detachedRoot of detachedRoots.values())
-                        detachedRoot.value
+                    for (const detachedRoot of detachedRoots.values()) {
+                        detachedRoot.entry.value
+                    }
                 } catch (error) {
                     InteropNativeModule._NativeLog('has error in partialUpdates')
                 }

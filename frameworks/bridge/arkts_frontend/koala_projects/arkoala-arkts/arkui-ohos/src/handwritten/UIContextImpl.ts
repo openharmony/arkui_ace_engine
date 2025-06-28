@@ -24,7 +24,7 @@ import { UIContext, MeasureUtils, Font, TextMenuController, FocusController, Con
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
     MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController }
     from "@ohos/arkui/UIContext"
-import { StateManager, ComputableState } from "@koalaui/runtime"
+import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry } from '@koalaui/runtime'
 import { Context, PointerStyle, PixelMap } from "#external"
 import { Nullable,  WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
 import { KeyEvent } from "arkui/component/common"
@@ -249,7 +249,7 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         const peerNode = createUiDetachedRoot((): PeerNode => {
             return ArkComponentRootPeer.create(undefined);
-        }, builder);
+        }, builder, this.instanceId_);
         let rootNode = peerNode.peer.ptr;
         const destroyCallback = (): void => {
             destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
@@ -265,7 +265,7 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         const peerNode = createUiDetachedRoot((): PeerNode => {
             return ArkComponentRootPeer.create(undefined);
-        }, builder);
+        }, builder, this.instanceId_);
         let rootNode = peerNode.peer.ptr;
         const destroyCallback = (): void => {
             destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
@@ -654,16 +654,55 @@ export class CursorControllerImpl extends CursorController {
     }
 }
 
+export class DetachedRootEntry {
+    entry: ComputableState<PeerNode>;
+    constructor(entry: ComputableState<PeerNode>) {
+        this.entry = entry
+    }
+}
+
 export class DetachedRootEntryManager {
-    instanceId_: int32;
-    detachedRoots_: Map<KPointer, ComputableState<PeerNode>>;
-    constructor(instanceId: int32) {
-        this.detachedRoots_ = new Map<KPointer, ComputableState<PeerNode>>();
-        this.instanceId_ = instanceId;
+    uicontext_: UIContextImpl;
+    detachedRoots_: Map<KPointer, DetachedRootEntry>;
+    constructor(uicontext: UIContextImpl) {
+        this.detachedRoots_ = new Map<KPointer, DetachedRootEntry>();
+        this.uicontext_ = uicontext;
     }
 
-    public getDetachedRoots() : Map<KPointer, ComputableState<PeerNode>> {
-        return this.detachedRoots_;
+    public getDetachedRoots() : Map<KPointer, DetachedRootEntry> {
+         return this.detachedRoots_;
+     }
+
+    public createUiDetachedRoot(
+        peerFactory: () => PeerNode,
+        /** @memo */
+        builder: () => void
+    ): PeerNode {
+        let manager = this.uicontext_.stateMgr;
+        if (manager === undefined) {
+            manager = GlobalStateManager.instance;
+        }
+        const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
+            const frozen = manager.frozen
+            manager.frozen = true
+            ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
+            memoEntry<void>(context, 0, builder)
+            ArkUIAniModule._Common_Restore_InstanceId();
+            manager.frozen = frozen
+        })
+        this.detachedRoots_.set(node.value.peer.ptr, new DetachedRootEntry(node))
+        return node.value
+    }
+
+    public destroyUiDetachedRoot(ptr: KPointer): boolean {
+        if (!this.detachedRoots_.has(ptr)) {
+            return false;
+        }
+
+        const root = this.detachedRoots_.get(ptr)!
+        this.detachedRoots_.delete(ptr)
+        root.entry.dispose()
+        return true;
     }
 }
 
@@ -705,7 +744,7 @@ export class UIContextImpl extends UIContext {
         this.font_ = new FontImpl(instanceId);
         this.measureUtils_ = new MeasureUtilsImpl(instanceId);
         this.textMenuController_ = new TextMenuControllerImpl(instanceId);
-        this.detachedRootEntryManager_ = new DetachedRootEntryManager(instanceId);
+        this.detachedRootEntryManager_ = new DetachedRootEntryManager(this);
     }
     public getInstanceId() : int32 {
         return this.instanceId_;
