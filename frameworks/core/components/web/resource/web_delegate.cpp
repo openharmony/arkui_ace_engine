@@ -4969,6 +4969,16 @@ void WebDelegate::OnPageFinished(const std::string& param)
     AccessibilitySendPageChange();
 }
 
+void WebDelegate::SetPageFinishedState(const bool& state)
+{
+    isPageFinished_ = state;
+}
+
+bool WebDelegate::GetPageFinishedState()
+{
+    return isPageFinished_;
+}
+
 void WebDelegate::OnProgressChanged(int param)
 {
     CHECK_NULL_VOID(taskExecutor_);
@@ -5514,6 +5524,7 @@ void WebDelegate::OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequ
 
 void WebDelegate::AccessibilitySendPageChange()
 {
+    SetPageFinishedState(true);
     CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->PostDelayedTask(
         [weak = WeakClaim(this)]() {

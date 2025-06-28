@@ -958,6 +958,8 @@ public:
     void RecordWebEvent(Recorder::EventType eventType, const std::string& param) const;
     void OnPageStarted(const std::string& param);
     void OnPageFinished(const std::string& param);
+    void SetPageFinishedState(const bool& state);
+    bool GetPageFinishedState();
     void OnProgressChanged(int param);
     void OnReceivedTitle(const std::string& title, bool isRealTitle = false);
     void ExitFullScreen();
@@ -1370,6 +1372,7 @@ private:
     Method changePageUrlMethod_;
     Method isPagePathInvalidMethod_;
     State state_ { State::WAITINGFORSIZE };
+    bool isPageFinished_;
 #ifdef OHOS_STANDARD_SYSTEM
     std::shared_ptr<OHOS::NWeb::NWeb> nweb_;
     std::shared_ptr<OHOS::NWeb::NWebCookieManager> cookieManager_ = nullptr;
