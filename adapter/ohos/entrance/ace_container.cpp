@@ -3443,6 +3443,7 @@ void AceContainer::UpdateConfiguration(
     }
     themeManager->LoadResourceThemes();
     if (SystemProperties::ConfigChangePerform() && configurationChange.OnlyColorModeChange()) {
+        OnFrontUpdated(configurationChange, configuration);
         UpdateColorMode(static_cast<uint32_t>(resConfig.GetColorMode()));
         return;
     }
