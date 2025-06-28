@@ -1400,7 +1400,8 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth001, TestSize.Level1)
     sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
     SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
-
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
     EXPECT_EQ(renderContext->GetOuterBorderWidth().has_value(), true);
     BorderWidthProperty BorderWidth;
@@ -1441,7 +1442,8 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth002, TestSize.Level1)
     sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
     SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
-
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
     EXPECT_EQ(renderContext->GetOuterBorderWidth().has_value(), false);
     EXPECT_EQ(renderContext->GetBorderWidth().has_value(), false);
@@ -1480,7 +1482,8 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth003, TestSize.Level1)
     sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
     SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_CENTER);
-
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
     EXPECT_EQ(renderContext->GetOuterBorderWidth().has_value(), false);
     EXPECT_EQ(renderContext->GetBorderWidth().has_value(), false);
@@ -1517,7 +1520,8 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth004, TestSize.Level1)
     sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
     SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_BOTTOM);
-
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
     EXPECT_EQ(renderContext->GetOuterBorderWidth().has_value(), true);
     EXPECT_EQ(renderContext->GetBorderWidth().has_value(), true);
@@ -1554,7 +1558,8 @@ HWTEST_F(SheetPresentationTestNg, SetSheetOuterBorderWidth005, TestSize.Level1)
     sheetTheme->sheetInnerBorderWidth_ = Dimension(10.0);
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
     SheetPresentationTestNg::SetSheetType(sheetPattern, SheetType::SHEET_POPUP);
-
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
     sheetPattern->SetSheetOuterBorderWidth(sheetTheme, sheetStyle);
     EXPECT_EQ(renderContext->GetOuterBorderWidth().has_value(), true);
     EXPECT_EQ(renderContext->GetBorderWidth().has_value(), true);

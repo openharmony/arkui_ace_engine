@@ -588,17 +588,17 @@ void SheetSideObject::AvoidKeyboard(bool forceAvoid)
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetSafeAreaManager();
     auto keyboardHeight = manager->GetKeyboardInset().Length();
-    if (sheetPattern->GetKeyboardHeight() == keyboradHeight && !forceAvoid) {
+    if (sheetPattern->GetKeyboardHeight() == keyboardHeight && !forceAvoid) {
         return;
     }
-    sheetPattern->SetKeyboardHeight(keyboradHeight);
+    sheetPattern->SetKeyboardHeight(keyboardHeight);
     if (sheetPattern->GetDismissProcess()) {
         TAG_LOGD(AceLogTag::ACE_SHEET,
             "The sheet will disappear, so there's no need to handle canceling keyboard avoidance here.");
         return;
     }
     // 1.handle non upward logic: avoidKeyboardMode::RESIZE_ONLY or avoidKeyboardMode::TRANSLATE_AND_RESIZE
-    resizeDecreasedHeight_ = keyboradHeight;
+    resizeDecreasedHeight_ = keyboardHeight;
     auto heightUp = isCurrentFocus ? GetUpOffsetCaretNeed() : 0.0f;
     // 2.Side Sheet is not to handle upward logic
 

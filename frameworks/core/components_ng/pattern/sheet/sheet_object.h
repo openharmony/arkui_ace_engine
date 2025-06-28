@@ -75,6 +75,11 @@ public:
         return sheetType_ != SheetType::SHEET_POPUP;
     }
 
+    virtual bool CheckIfNeedShadowByDefault() const
+    {
+        return true;
+    }
+
     void BindPattern(const WeakPtr<SheetPresentationPattern>& pattern)
     {
         auto patternPtr = pattern.Upgrade();

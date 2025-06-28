@@ -69,6 +69,11 @@ public:
         return false;
     }
 
+    bool CheckIfNeedShadowByDefault() const override
+    {
+        return false;
+    }
+
     float GetResizeDecreasedHeight() const
     {
         return resizeDecreasedHeight_;
