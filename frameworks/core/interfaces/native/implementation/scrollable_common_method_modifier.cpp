@@ -304,8 +304,18 @@ void EdgeEffectImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convEdgeEffect = Converter::OptConvert<EdgeEffect>(*edgeEffect);
-    std::optional<bool> convOptions = options ? Converter::OptConvert<bool>(*options) : std::nullopt;
-    ScrollableModelStatic::SetEdgeEffect(frameNode, convEdgeEffect, convOptions);
+        
+    bool alwaysEnabled = true;
+    EffectEdge edge = EffectEdge::ALL;
+    auto edgeEffectOptions = options ? Converter::GetOpt(*options) : std::nullopt;
+    if (edgeEffectOptions) {
+        alwaysEnabled = Converter::Convert<bool>(edgeEffectOptions.value().alwaysEnabled);
+        auto value = Converter::OptConvert<int32_t>(edgeEffectOptions.value().effectEdge);
+        if (value.has_value()) {
+            edge = static_cast<EffectEdge>(value.value());
+        }
+    }
+    ScrollableModelStatic::SetEdgeEffect(frameNode, convEdgeEffect, alwaysEnabled, edge);
 }
 void FadingEdgeImpl(Ark_NativePointer node,
                     const Opt_Boolean* enabled,
