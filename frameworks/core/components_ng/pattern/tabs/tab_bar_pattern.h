@@ -566,6 +566,7 @@ public:
     void ChangeIndex(int32_t index);
 
     void ResetOnForceMeasure(int32_t index);
+    void OnColorModeChange(uint32_t colorMode) override;
 
 private:
     void OnModifyDone() override;

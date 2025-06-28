@@ -1127,7 +1127,7 @@ void JSSwiper::SetPreviousMargin(const JSCallbackInfo& info)
     }
     SwiperModel::GetInstance()->SetPreviousMargin(value, ignoreBlank);
     if (SystemProperties::ConfigChangePerform()) {
-        SwiperModel::GetInstance()->ProcessPreviousMarginwithResourceObj(resObj);
+        SwiperModel::GetInstance()->ProcessPreviousMarginWithResourceObj(resObj);
     }
 }
 
@@ -1149,7 +1149,7 @@ void JSSwiper::SetNextMargin(const JSCallbackInfo& info)
     }
     SwiperModel::GetInstance()->SetNextMargin(value, ignoreBlank);
     if (SystemProperties::ConfigChangePerform()) {
-        SwiperModel::GetInstance()->ProcessNextMarginwithResourceObj(resObj);
+        SwiperModel::GetInstance()->ProcessNextMarginWithResourceObj(resObj);
     }
 }
 

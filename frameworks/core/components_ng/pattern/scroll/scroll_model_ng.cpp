@@ -654,7 +654,7 @@ bool ScrollModelNG::CheckSnapPaginations(const std::vector<Dimension>& snapPagin
 
 bool ScrollModelNG::HasResObj(const std::vector<RefPtr<ResourceObject>>& resObjs)
 {
-    for (unsigned long i = 0; i < resObjs.size(); ++i) {
+    for (size_t i = 0; i < resObjs.size(); ++i) {
         CHECK_NULL_CONTINUE(resObjs[i]);
         return true;
     }
@@ -667,7 +667,7 @@ void ScrollModelNG::CreateWithResourceObjSnapPaginations(std::vector<RefPtr<Reso
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->RemoveResObj("ScrollIntervalSize");
+    pattern->RemoveResObj("ScrollSnapPaginations");
     CHECK_NULL_VOID (HasResObj(resObjs));
     auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), resObjs](
                             const RefPtr<ResourceObject>& resObj) {
@@ -675,7 +675,7 @@ void ScrollModelNG::CreateWithResourceObjSnapPaginations(std::vector<RefPtr<Reso
         CHECK_NULL_VOID(pattern);
         std::vector<Dimension> snapPaginations = pattern->GetKeepSnapPaginations();
         CHECK_NULL_VOID(snapPaginations.size() == resObjs.size());
-        for (unsigned long i = 0; i < resObjs.size(); ++i) {
+        for (size_t i = 0; i < resObjs.size(); ++i) {
             CHECK_NULL_CONTINUE(resObjs[i]);
             CalcDimension snapPagination;
             if (ResourceParseUtils::ParseResDimensionVp(resObjs[i], snapPagination)) {
@@ -691,7 +691,7 @@ void ScrollModelNG::CreateWithResourceObjSnapPaginations(std::vector<RefPtr<Reso
         pattern->SetSnapPaginations(snapPaginations);
     };
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-    pattern->AddResObj("ScrollIntervalSize", resObj, std::move(updateFunc));
+    pattern->AddResObj("ScrollSnapPaginations", resObj, std::move(updateFunc));
 }
 
 void ScrollModelNG::CreateWithResourceObjSnapPaginations(
@@ -700,7 +700,7 @@ void ScrollModelNG::CreateWithResourceObjSnapPaginations(
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->RemoveResObj("ScrollIntervalSize");
+    pattern->RemoveResObj("ScrollSnapPaginations");
     CHECK_NULL_VOID(HasResObj(resObjs));
     auto&& updateFunc = [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), resObjs](
         const RefPtr<ResourceObject>& resObj) {
@@ -708,7 +708,7 @@ void ScrollModelNG::CreateWithResourceObjSnapPaginations(
         CHECK_NULL_VOID(pattern);
         std::vector<Dimension> snapPaginations = pattern->GetKeepSnapPaginations();
         CHECK_NULL_VOID(snapPaginations.size() == resObjs.size());
-        for (unsigned long i = 0; i < resObjs.size(); ++i) {
+        for (size_t i = 0; i < resObjs.size(); ++i) {
             CHECK_NULL_CONTINUE(resObjs[i]);
             CalcDimension snapPagination;
             if (ResourceParseUtils::ParseResDimensionVp(resObjs[i], snapPagination)) {
@@ -724,7 +724,7 @@ void ScrollModelNG::CreateWithResourceObjSnapPaginations(
         pattern->SetSnapPaginations(snapPaginations);
     };
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-    pattern->AddResObj("ScrollIntervalSize", resObj, std::move(updateFunc));
+    pattern->AddResObj("ScrollSnapPaginations", resObj, std::move(updateFunc));
 }
 
 } // namespace OHOS::Ace::NG

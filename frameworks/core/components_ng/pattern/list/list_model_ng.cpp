@@ -1276,8 +1276,10 @@ void ListModelNG::ParseResObjDividerColor(const RefPtr<ResourceObject>& resObj)
             if (listTheme) {
                 divider.color = listTheme->GetDividerColor();
             }
+            ListModelNG::SetDividerColorByUser(AceType::RawPtr(frameNode), false);
         } else {
             divider.color = result;
+            ListModelNG::SetDividerColorByUser(AceType::RawPtr(frameNode), true);
         }
         divider.color = result;
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);
@@ -1387,8 +1389,10 @@ void ListModelNG::ParseResObjDividerColor(FrameNode* frameNode, const RefPtr<Res
             if (listTheme) {
                 divider.color = listTheme->GetDividerColor();
             }
+            ListModelNG::SetDividerColorByUser(AceType::RawPtr(frameNode), false);
         } else {
             divider.color = result;
+            ListModelNG::SetDividerColorByUser(AceType::RawPtr(frameNode), true);
         }
         divider.color = result;
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);

@@ -3749,4 +3749,15 @@ void TabBarPattern::ChangeIndex(int32_t index)
     }
     HandleClick(SourceType::NONE, index);
 }
+
+void TabBarPattern::OnColorModeChange(uint32_t colorMode)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    Pattern::OnColorModeChange(colorMode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    jumpIndex_ = layoutProperty->GetIndicatorValue(0);
+}
 } // namespace OHOS::Ace::NG
