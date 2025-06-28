@@ -400,6 +400,35 @@ void GenerateParameters(InspectorChildrenParameters& inspectorParameters,
     inspectorParameters.isLayoutInspector = isLayoutInspector;
 }
 
+RefPtr<NG::UINode> GetContainerModal(const RefPtr<NG::UINode>& pageNode)
+{
+    CHECK_NULL_RETURN(pageNode, nullptr);
+    auto parent = pageNode->GetParent();
+    while (parent) {
+        if (parent->GetTag() == V2::CONTAINER_MODAL_ETS_TAG) {
+            return parent;
+        }
+        parent = parent->GetParent();
+    }
+    return nullptr;
+}
+
+RefPtr<NG::UINode> GetOverlayNodeWithContainerModal(const RefPtr<NG::UINode>& pageNode)
+{
+    CHECK_NULL_RETURN(pageNode, nullptr);
+    auto containerNode = GetContainerModal(pageNode);
+    if (containerNode) {
+        auto containerParent = containerNode->GetParent();
+        if (containerParent) {
+            auto overlayNode = containerParent->GetChildren().back();
+            if (overlayNode->GetTag() != V2::CONTAINER_MODAL_ETS_TAG) {
+                return overlayNode;
+            }
+        }
+    }
+    return nullptr;
+}
+
 RefPtr<NG::UINode> GetOverlayNode(const RefPtr<NG::UINode>& pageNode)
 {
     CHECK_NULL_RETURN(pageNode, nullptr);
@@ -409,7 +438,8 @@ RefPtr<NG::UINode> GetOverlayNode(const RefPtr<NG::UINode>& pageNode)
     CHECK_NULL_RETURN(stageParent, nullptr);
     auto overlayNode = stageParent->GetChildren().back();
     if (overlayNode->GetTag() == "stage") {
-        return nullptr;
+        auto overlayNodeWithContainerModal = GetOverlayNodeWithContainerModal(pageNode);
+        return overlayNodeWithContainerModal ? overlayNodeWithContainerModal : nullptr;
     }
     return overlayNode;
 }
