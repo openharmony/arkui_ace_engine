@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { Statement } from "./Statement"
 export class SwitchCaseStatement extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 86)
+        assertValidPeer(pointer, 87)
         super(pointer)
     }
     static createSwitchCaseStatement(test: Expression | undefined, consequent: readonly Statement[]): SwitchCaseStatement {
