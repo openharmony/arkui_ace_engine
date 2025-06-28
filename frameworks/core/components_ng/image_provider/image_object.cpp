@@ -85,4 +85,19 @@ ImageRotateOrientation ImageObject::GetUserOrientation() const
 {
     return userOrientation_;
 }
+
+void ImageObject::SetImageFileSize(size_t fileSize)
+{
+    fileSize_ = fileSize;
+}
+
+size_t ImageObject::GetImageFileSize() const
+{
+    return fileSize_;
+}
+
+size_t ImageObject::GetImageDataSize() const
+{
+    return imageDataSize_;
+}
 } // namespace OHOS::Ace::NG
