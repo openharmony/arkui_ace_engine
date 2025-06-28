@@ -2664,7 +2664,8 @@ struct ArkUICommonModifier {
     void (*setNextFocusOneByOne)(ArkUINodeHandle node, FocusMove idx, ArkUINodeHandle focusNode);
     void (*resetNextFocus)(ArkUINodeHandle node);
     void (*setFocusBoxStyle)(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int32 marginUnit,
-        ArkUI_Float32 valueStrokeWidth, ArkUI_Int32 widthUnit, ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue);
+        ArkUI_Float32 valueStrokeWidth, ArkUI_Int32 widthUnit, ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue,
+        void* focusBoxResObjs);
     void (*resetFocusBoxStyle)(ArkUINodeHandle node);
     void (*setClickDistance)(ArkUINodeHandle node, ArkUI_Float32 valueMargin);
     void (*resetClickDistance)(ArkUINodeHandle node);

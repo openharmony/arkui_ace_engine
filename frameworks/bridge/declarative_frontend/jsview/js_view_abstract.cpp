@@ -6542,6 +6542,13 @@ bool JSViewAbstract::ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color
 
 bool JSViewAbstract::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
+    RefPtr<ResourceObject> resObj;
+    return ParseLengthMetricsToDimension(jsValue, result, resObj);
+}
+
+bool JSViewAbstract::ParseLengthMetricsToDimension(
+    const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resourceObj)
+{
     if (jsValue->IsNumber()) {
         result = CalcDimension(jsValue->ToNumber<double>(), DimensionUnit::FP);
         return true;
@@ -6559,6 +6566,13 @@ bool JSViewAbstract::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, 
         double value = valObj->ToNumber<double>();
         auto unit = static_cast<DimensionUnit>(jsObj->GetProperty("unit")->ToNumber<int32_t>());
         result = CalcDimension(value, unit);
+        auto jsRes = jsObj->GetProperty("res");
+        if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
+            !jsRes->IsNull() && jsRes->IsObject()) {
+            JSRef<JSObject> resObj = JSRef<JSObject>::Cast(jsRes);
+            JSViewAbstract::CompleteResourceObject(resObj);
+            resourceObj = JSViewAbstract::GetResourceObject(resObj);
+        }
         return true;
     }
     return false;
@@ -6567,6 +6581,12 @@ bool JSViewAbstract::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, 
 bool JSViewAbstract::ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
     return ParseLengthMetricsToDimension(jsValue, result) ? GreatOrEqual(result.Value(), 0.0f) : false;
+}
+
+bool JSViewAbstract::ParseLengthMetricsToPositiveDimension(
+    const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resObj)
+{
+    return ParseLengthMetricsToDimension(jsValue, result, resObj) ? GreatOrEqual(result.Value(), 0.0f) : false;
 }
 
 bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result,
@@ -8847,11 +8867,15 @@ void JSViewAbstract::JsFocusBox(const JSCallbackInfo& info)
     NG::FocusBoxStyle style;
 
     CalcDimension margin;
-    if (ParseLengthMetricsToDimension(obj->GetProperty("margin"), margin)) {
+    RefPtr<ResourceObject> resObjMargin;
+    if (ParseLengthMetricsToDimension(obj->GetProperty("margin"), margin, resObjMargin)) {
+        ViewAbstractModel::GetInstance()->SetFocusBoxStyleUpdateFunc(style, resObjMargin, "focusBoxStyleMargin");
         style.margin = margin;
     }
     CalcDimension strokeWidth;
-    if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), strokeWidth)) {
+    RefPtr<ResourceObject> resObjWidth;
+    if (ParseLengthMetricsToPositiveDimension(obj->GetProperty("strokeWidth"), strokeWidth, resObjWidth)) {
+        ViewAbstractModel::GetInstance()->SetFocusBoxStyleUpdateFunc(style, resObjWidth, "focusBoxStyleWidth");
         style.strokeWidth = strokeWidth;
     }
     Color strokeColor;

@@ -2676,11 +2676,36 @@ void ViewAbstract::ResetNextFocus()
     focusHub->ResetNextFocus();
 }
 
+void SetFocusBoxUpdateFunc(FrameNode* frameNode, const NG::FocusBoxStyle& style)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode), style](const RefPtr<ResourceObject>& resObj) {
+        CHECK_NULL_VOID(resObj);
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto focusHub = frameNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        NG::FocusBoxStyle focusBoxStyle = style;
+        focusBoxStyle.ReloadResources();
+        focusHub->GetFocusBox().SetStyle(focusBoxStyle);
+    };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    pattern->AddResObj("focusBox", resObj, std::move(updateFunc));
+}
+
 void ViewAbstract::SetFocusBoxStyle(const NG::FocusBoxStyle& style)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->GetFocusBox().SetStyle(style);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        SetFocusBoxUpdateFunc(frameNode, style);
+    }
 }
 
 void ViewAbstract::SetClickDistance(FrameNode* frameNode, double clickDistance)
@@ -8884,12 +8909,50 @@ void ViewAbstract::ResetNextFocus(FrameNode* frameNode)
     focusHub->ResetNextFocus();
 }
 
-void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style)
+void ViewAbstract::SetFocusBoxStyleUpdateFunc(
+    NG::FocusBoxStyle& style, const RefPtr<ResourceObject>& resObj, const std::string& property)
+{
+    if (property.empty()) {
+        return;
+    }
+    if (!resObj) {
+        style.RemoveResource(property);
+        return;
+    }
+    auto&& updateFunc = [property](const RefPtr<ResourceObject>& resObj, NG::FocusBoxStyle& style) {
+        if (property == "focusBoxStyleColor") {
+            Color strokeColor;
+            ResourceParseUtils::ParseResColor(resObj, strokeColor);
+            style.strokeColor = strokeColor;
+        } else if (property == "focusBoxStyleMargin") {
+            CalcDimension margin;
+            ResourceParseUtils::ParseResDimensionFpNG(resObj, margin, false);
+            style.margin = margin;
+        } else if (property == "focusBoxStyleWidth") {
+            CalcDimension strokeWidth;
+            ResourceParseUtils::ParseResDimensionFpNG(resObj, strokeWidth, false);
+            style.strokeWidth = strokeWidth;
+        }
+    };
+    style.AddResource(property, resObj, std::move(updateFunc));
+}
+
+void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style, bool isReset)
 {
     CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->GetFocusBox().SetStyle(style);
+
+    if (SystemProperties::ConfigChangePerform()) {
+        if (isReset) {
+            auto pattern = frameNode->GetPattern();
+            CHECK_NULL_VOID(pattern);
+            pattern->RemoveResObj("focusBox");
+        } else {
+            SetFocusBoxUpdateFunc(frameNode, style);
+        }
+    }
 }
 
 void ViewAbstract::SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled)

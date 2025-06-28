@@ -1465,6 +1465,12 @@ public:
         ViewAbstract::SetFocusBoxStyle(style);
     }
 
+    void SetFocusBoxStyleUpdateFunc(
+        NG::FocusBoxStyle& style, const RefPtr<ResourceObject>& resObj, const std::string& property) override
+    {
+        ViewAbstract::SetFocusBoxStyleUpdateFunc(style, resObj, property);
+    }
+
     void SetInspectorId(const std::string& inspectorId) override
     {
         ViewAbstract::SetInspectorId(inspectorId);

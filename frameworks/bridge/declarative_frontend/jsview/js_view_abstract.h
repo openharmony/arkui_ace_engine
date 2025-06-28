@@ -381,7 +381,11 @@ public:
     static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result,
         RefPtr<ResourceObject>& resObj);
     static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseLengthMetricsToDimension(
+        const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resObj);
     static bool ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseLengthMetricsToPositiveDimension(
+        const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resObj);
     static bool ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result, RefPtr<ResourceObject>& resObj);

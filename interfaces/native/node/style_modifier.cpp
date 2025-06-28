@@ -4009,8 +4009,8 @@ int32_t SetFocusBox(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto* fullImpl = GetFullImpl();
     int32_t unit = GetDefaultUnit(node, UNIT_FP);
-    fullImpl->getNodeModifiers()->getCommonModifier()->setFocusBoxStyle(
-        node->uiNodeHandle, item->value[0].f32, unit, item->value[1].f32, unit, item->value[2].u32, NUM_7);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setFocusBoxStyle(node->uiNodeHandle, item->value[0].f32, unit,
+        item->value[1].f32, unit, item->value[2].u32, NUM_7, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
