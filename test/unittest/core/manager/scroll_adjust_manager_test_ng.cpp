@@ -87,24 +87,21 @@ HWTEST_F(ScrollAdjustmanagerTestNg, AdjustEndIndexTest, TestSize.Level1)
      * @tc.expected: step1. adjust result.
      */
     int32_t testResult = 1;
-    bool actual = scrollAdjustmanager_->AdjustEndIndex(0);
-    EXPECT_EQ(actual, testResult);
+    EXPECT_EQ(scrollAdjustmanager_->AdjustEndIndex(0), testResult);
     
     /**
      * @tc.steps: step1. adjust endindex, get adjust result.
      * @tc.expected: step1. adjust result.
      */
     testResult = 3;
-    actual = scrollAdjustmanager_->AdjustEndIndex(2);
-    EXPECT_EQ(actual, testResult);
+    EXPECT_EQ(scrollAdjustmanager_->AdjustEndIndex(2), testResult);
 
     /**
      * @tc.steps: step1. adjust endindex, get adjust result.
      * @tc.expected: step1. adjust result.
      */
     testResult = 0;
-    actual = scrollAdjustmanager_->AdjustEndIndex(-1);
-    EXPECT_EQ(actual, testResult);
+    EXPECT_EQ(scrollAdjustmanager_->AdjustEndIndex(-1), testResult);
 }
 
 /**
@@ -119,23 +116,20 @@ HWTEST_F(ScrollAdjustmanagerTestNg, AdjustCachedCountTest, TestSize.Level1)
      * @tc.expected: step1. adjust result.
      */
     int32_t testResult = 1;
-    bool actual = scrollAdjustmanager_->AdjustCachedCount(0);
-    EXPECT_EQ(actual, testResult);
+    EXPECT_EQ(scrollAdjustmanager_->AdjustCachedCount(0), testResult);
     
     /**
      * @tc.steps: step1. adjust cachecount, get adjust result.
      * @tc.expected: step1. adjust result.
      */
     testResult = 3;
-    actual = scrollAdjustmanager_->AdjustCachedCount(2);
-    EXPECT_EQ(actual, testResult);
+    EXPECT_EQ(scrollAdjustmanager_->AdjustCachedCount(2), testResult);
 
     /**
      * @tc.steps: step1. adjust cachecount, get adjust result.
      * @tc.expected: step1. adjust result.
      */
     testResult = 0;
-    actual = scrollAdjustmanager_->AdjustCachedCount(-1);
-    EXPECT_EQ(actual, testResult);
+    EXPECT_EQ(scrollAdjustmanager_->AdjustCachedCount(-1), testResult);
 }
 }

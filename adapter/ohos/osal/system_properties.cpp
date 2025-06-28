@@ -1341,11 +1341,13 @@ bool SystemProperties::IsWhiteBlockIdleChange()
 
 int32_t SystemProperties::GetWhiteBlockIndexValue()
 {
-    return std::stoi(OHOS::system::GetParameter("persist.resourceschedule.whiteblock.index", "0"));
+    auto ret = OHOS::system::GetParameter("persist.resourceschedule.whiteblock.index", "0");
+    return StringUtils::StringToInt(ret);
 }
 
 int32_t SystemProperties::GetWhiteBlockCacheCountValue()
 {
-    return std::stoi(OHOS::system::GetParameter("persist.resourceschedule.whiteblock.cachedcount", "0"));
+    auto ret = OHOS::system::GetParameter("persist.resourceschedule.whiteblock.cachedcount", "0");
+    return StringUtils::StringToInt(ret);
 }
 } // namespace OHOS::Ace
