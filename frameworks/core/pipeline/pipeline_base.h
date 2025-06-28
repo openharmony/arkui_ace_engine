@@ -1434,6 +1434,8 @@ public:
 
     virtual void NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) {};
 
+    virtual void DisableNotifyResponseRegionChanged() {};
+
     void SetTHPExtraManager(const RefPtr<NG::THPExtraManager>& thpExtraMgr)
     {
         thpExtraMgr_ = thpExtraMgr;
