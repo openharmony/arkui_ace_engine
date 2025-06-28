@@ -1366,6 +1366,8 @@ typedef struct Callback_SheetDismiss_Void Callback_SheetDismiss_Void;
 typedef struct Opt_Callback_SheetDismiss_Void Opt_Callback_SheetDismiss_Void;
 typedef struct Callback_SheetType_Void Callback_SheetType_Void;
 typedef struct Opt_Callback_SheetType_Void Opt_Callback_SheetType_Void;
+typedef struct Callback_Size_Void Callback_Size_Void;
+typedef struct Opt_Callback_Size_Void Opt_Callback_Size_Void;
 typedef struct Callback_SpringBackAction_Void Callback_SpringBackAction_Void;
 typedef struct Opt_Callback_SpringBackAction_Void Opt_Callback_SpringBackAction_Void;
 typedef struct Callback_StateStylesChange Callback_StateStylesChange;
@@ -10445,6 +10447,16 @@ typedef struct Opt_Callback_SheetType_Void {
     Ark_Tag tag;
     Callback_SheetType_Void value;
 } Opt_Callback_SheetType_Void;
+typedef struct Callback_Size_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Size size);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Size size);
+} Callback_Size_Void;
+typedef struct Opt_Callback_Size_Void {
+    Ark_Tag tag;
+    Callback_Size_Void value;
+} Opt_Callback_Size_Void;
 typedef struct Callback_SpringBackAction_Void {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_SpringBackAction parameter);
@@ -25499,6 +25511,23 @@ typedef struct GENERATED_ArkUINavPathStackAccessor {
                          const Opt_Boolean* animated);
 } GENERATED_ArkUINavPathStackAccessor;
 
+typedef struct GENERATED_ArkUINodeContainerOpsAccessor {
+    void (*addNodeContainerRootNode)(Ark_NativePointer self,
+                                     Ark_NativePointer child);
+    void (*setAboutToAppear)(Ark_NativePointer self,
+                             const Callback_Void* value);
+    void (*setAboutToDisappear)(Ark_NativePointer self,
+                                const Callback_Void* value);
+    void (*setAboutToResize)(Ark_NativePointer self,
+                             const Callback_Size_Void* value);
+    void (*setOnAttach)(Ark_NativePointer self,
+                        const Callback_Void* value);
+    void (*setOnDetach)(Ark_NativePointer self,
+                        const Callback_Void* value);
+    void (*setOnTouchEvent)(Ark_NativePointer self,
+                            const Callback_TouchEvent_Void* value);
+} GENERATED_ArkUINodeContainerOpsAccessor;
+
 typedef struct GENERATED_ArkUINavigationTransitionProxyAccessor {
     void (*destroyPeer)(Ark_NavigationTransitionProxy peer);
     Ark_NavigationTransitionProxy (*ctor)();
@@ -27625,6 +27654,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIGestureModifierAccessor* (*getGestureModifierAccessor)();
     const GENERATED_ArkUINavPathInfoAccessor* (*getNavPathInfoAccessor)();
     const GENERATED_ArkUINavPathStackAccessor* (*getNavPathStackAccessor)();
+    const GENERATED_ArkUINodeContainerOpsAccessor* (*getNodeContainerOpsAccessor)();
     const GENERATED_ArkUINavigationTransitionProxyAccessor* (*getNavigationTransitionProxyAccessor)();
     const GENERATED_ArkUICanvasGradientAccessor* (*getCanvasGradientAccessor)();
     const GENERATED_ArkUICanvasPathAccessor* (*getCanvasPathAccessor)();

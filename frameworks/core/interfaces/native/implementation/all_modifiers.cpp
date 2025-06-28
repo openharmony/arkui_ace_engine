@@ -312,6 +312,7 @@ const GENERATED_ArkUIUICommonEventAccessor* GetUICommonEventAccessor();
 const GENERATED_ArkUIGestureModifierAccessor* GetGestureModifierAccessor();
 const GENERATED_ArkUINavPathInfoAccessor* GetNavPathInfoAccessor();
 const GENERATED_ArkUINavPathStackAccessor* GetNavPathStackAccessor();
+const GENERATED_ArkUINodeContainerOpsAccessor* GetNodeContainerOpsAccessor();
 const GENERATED_ArkUINavigationTransitionProxyAccessor* GetNavigationTransitionProxyAccessor();
 const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor();
 const GENERATED_ArkUICanvasPathAccessor* GetCanvasPathAccessor();
@@ -669,6 +670,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetGestureModifierAccessor,
         GetNavPathInfoAccessor,
         GetNavPathStackAccessor,
+        GetNodeContainerOpsAccessor,
         GetNavigationTransitionProxyAccessor,
         GetCanvasGradientAccessor,
         GetCanvasPathAccessor,

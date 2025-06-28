@@ -61,7 +61,7 @@ import { Callback_Opt_Boolean_Void, OnCheckboxChangeCallback } from "./../checkb
 import { Resource } from "global.resource"
 import { StyledString, UserDataSpan, StyledStringMarshallCallback, StyledStringUnmarshallCallback } from "./../styledString"
 import { TabContentAnimatedTransition, Callback_TabContentTransitionProxy_Void, TabContentTransitionProxy, OnTabsAnimationEndCallback, TabsAnimationEvent, OnTabsAnimationStartCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback } from "./../tabs"
-import { Callback_onDragStart, Callback_RangeUpdate, Callback_StateStylesChange, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, Callback_CreateItem } from "./../arkui-custom"
+import { Callback_onDragStart, Callback_RangeUpdate, Callback_StateStylesChange, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, Callback_CreateItem, Callback_Size_Void } from "./../arkui-custom"
 import { Callback_RefreshStatus_Void, RefreshStatus } from "./../refresh"
 import { Callback_String_Number_Void, Callback_TextPickerResult_Void, TextPickerResult, Callback_Union_Number_Array_Number_Void, Callback_Union_String_Array_String_Void, OnTextPickerChangeCallback, TextPickerEnterSelectedAreaCallback, TextPickerScrollStopCallback, Type_TextPickerAttribute_onChange_callback } from "./../textPicker"
 import { Callback_String_Void } from "./../gridRow"
@@ -1298,6 +1298,12 @@ export function deserializeAndCallCallback_SheetType_Void(thisDeserializer: Dese
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((parameter: SheetType) => void))
     let parameter : SheetType = TypeChecker.SheetType_FromNumeric(thisDeserializer.readInt32())
     _call(parameter)
+}
+export function deserializeAndCallCallback_Size_Void(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as Callback_Size_Void)
+    let size : Size = thisDeserializer.readSize()
+    _call(size)
 }
 export function deserializeAndCallCallback_StateStylesChange(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2842,6 +2848,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case 1980824326/*CallbackKind.Kind_Callback_RichEditorTextSpanResult_Void*/: return deserializeAndCallCallback_RichEditorTextSpanResult_Void(thisDeserializer);
         case 22609082/*CallbackKind.Kind_Callback_SheetDismiss_Void*/: return deserializeAndCallCallback_SheetDismiss_Void(thisDeserializer);
         case -224451112/*CallbackKind.Kind_Callback_SheetType_Void*/: return deserializeAndCallCallback_SheetType_Void(thisDeserializer);
+        case -646869686/*CallbackKind.Kind_Callback_Size_Void*/: return deserializeAndCallCallback_Size_Void(thisDeserializer);
         case 1536231691/*CallbackKind.Kind_Callback_SpringBackAction_Void*/: return deserializeAndCallCallback_SpringBackAction_Void(thisDeserializer);
         case -1872286415/*CallbackKind.Kind_Callback_StateStylesChange*/: return deserializeAndCallCallback_StateStylesChange(thisDeserializer);
         case -879490874/*CallbackKind.Kind_Callback_String_Number_Void*/: return deserializeAndCallCallback_String_Number_Void(thisDeserializer);

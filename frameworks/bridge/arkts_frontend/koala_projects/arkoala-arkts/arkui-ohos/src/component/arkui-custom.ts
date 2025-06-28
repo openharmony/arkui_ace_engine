@@ -1185,6 +1185,7 @@ export interface SystemBarStyle {
     statusBarContentColor?: string;
 }
 export type Callback_StateStylesChange = (currentState: int32) => void;
+export type Callback_Size_Void = (size: Size) => void;
 export type Callback_onDragStart = (node: KPointer, dragEvent: DragEvent, extraParam: string) => void;
 export interface BuilderNodeOptions {
     selfIdealSize?: Size;
