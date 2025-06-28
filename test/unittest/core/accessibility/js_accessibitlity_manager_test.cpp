@@ -1452,6 +1452,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager029, TestSize.Level1)
     std::vector<std::string> pagePaths;
     auto context = MockPipelineContext::GetCurrentContext();
     RefPtr<MockStageManager> stageManager = AceType::MakeRefPtr<MockStageManager>(stageNode);
+    auto stageManagerBackup = context->stageManager_;
     context->stageManager_ = stageManager;
     ASSERT_NE(context->stageManager_, nullptr);
 
@@ -1494,6 +1495,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager029, TestSize.Level1)
         .WillOnce(Return(frameNode3));
     jsAccessibilityManager->GetCurrentWindowPages(context, pageNodes, pagePaths);
     ASSERT_EQ(pageNodes.size(), 3);
+    context->stageManager_ = stageManagerBackup;
 }
 
 /**
@@ -2289,6 +2291,88 @@ HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventForHostTest001, Tes
     auto result =
         jsAccessibilityManager->IsSendAccessibilityEventForHost(accessibilityEvent, "test", root->GetPageId());
     EXPECT_EQ(result, false);
+}
+
+
+/**
+* @tc.name: IsSendAccessibilityEventTestForHost004
+* @tc.desc: IsSendAccessibilityEvent
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, IsSendAccessibilityEventTestForHost004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager, test node
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    jsAccessibilityManager->AddFrameNodeToUecStatusVec(root);
+    jsAccessibilityManager->AddDefaultFocusNode(root);
+
+    AccessibilityEvent accessibilityEvent {
+        .nodeId = root->GetAccessibilityId(),
+        .type = AccessibilityEventType::PAGE_CHANGE
+    };
+
+    /**
+     * @tc.steps: step2. save events when UIExtension not ready
+     */
+    auto result =
+        jsAccessibilityManager->IsSendAccessibilityEventForHost(accessibilityEvent, "test", root->GetPageId() + 1);
+    EXPECT_EQ(result, true);
+
+    /**
+     * @tc.steps: step2. save events when UIExtension not ready
+     */
+    jsAccessibilityManager->UpdateFrameNodeState(root->GetId());
+    result =
+        jsAccessibilityManager->IsSendAccessibilityEventForHost(accessibilityEvent, "test", root->GetPageId());
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: SearchDefaultFocusByWindowIdNGTest001
+ * @tc.desc: SearchDefaultFocusByWindowIdNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, SearchDefaultFocusByWindowIdNGTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager, test node
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->AddDefaultFocusNode(frameNode);
+    /**
+    * @tc.steps: step2. test 
+    */
+    int32_t pageId = frameNode->GetPageId();
+    std::list<Accessibility::AccessibilityElementInfo> infos;
+
+    jsAccessibilityManager->SearchDefaultFocusByWindowIdNG(pageId + 1, infos, context);
+    EXPECT_TRUE(infos.empty());
+
+    jsAccessibilityManager->SearchDefaultFocusByWindowIdNG(pageId, infos, context);
+    EXPECT_FALSE(infos.empty());
+
+    infos.clear();
+    frameNode.Reset();
+    jsAccessibilityManager->SearchDefaultFocusByWindowIdNG(pageId, infos, context);
+    EXPECT_TRUE(infos.empty());
 }
 
 /**

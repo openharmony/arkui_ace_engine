@@ -3356,7 +3356,7 @@ namespace {
     {
         for (const auto& [node, status] : nodeVec) {
             auto frameNode = node.Upgrade();
-            if (frameNode && ((frameNode->GetPageId() == pageId || pageId == -1) && !status)) {
+            if (frameNode && (frameNode->GetPageId() == pageId && !status)) {
                 return false;
             }
         }
@@ -3381,20 +3381,6 @@ namespace {
                 ++it;
             }
         }
-    }
-
-    void UpdatePageId(const RefPtr<PipelineBase>& context, int32_t& pageId)
-    {
-        if (pageId != -1) {
-            return;
-        }
-        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
-        CHECK_NULL_VOID(ngPipeline);
-        auto stageManager = ngPipeline->GetStageManager();
-        CHECK_NULL_VOID(stageManager);
-        auto node = stageManager->GetLastPage();
-        CHECK_NULL_VOID(node);
-        pageId = node->GetPageId();
     }
 
     void ClearDefaultFocusList(std::list<WeakPtr<NG::FrameNode>>& nodeList)
@@ -3461,13 +3447,11 @@ bool JsAccessibilityManager::IsSendAccessibilityEvent(const AccessibilityEvent& 
         }
         pageController_.Update();
         if (!pageController_.CheckEmpty(infoOfNode.nodeInstanceId)) {
-            UpdatePageId(pipelineContext, infoOfNode.pageId);
             auto cached = CachePageEventByController(
                 accessibilityEvent, infoOfNode.componentType, infoOfNode.pageId, infoOfNode.nodeInstanceId);
             return !cached;
         }
     }
-    UpdatePageId(pipelineContext, infoOfNode.pageId);
     return IsSendAccessibilityEventForHost(accessibilityEvent, infoOfNode.componentType, infoOfNode.pageId);
 }
 
@@ -5926,7 +5910,6 @@ void JsAccessibilityManager::SearchDefaultFocusByWindowId(const int32_t windowId
 
     auto pipeline = GetPipelineByWindowId(windowId);
     if (pipeline) {
-        UpdatePageId(pipeline, pageId);
         auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
         if (ngPipeline) {
             SearchDefaultFocusByWindowIdNG(pageId, infos, pipeline);
@@ -5938,7 +5921,7 @@ void JsAccessibilityManager::SearchDefaultFocusByWindowId(const int32_t windowId
     auto defaultFocusNodeList = GetDefaultFocusList();
     for (const auto& defaultFocusNode : defaultFocusNodeList) {
         auto frameNode = defaultFocusNode.Upgrade();
-        if (frameNode && (frameNode->GetPageId() == pageId || pageId == -1)) {
+        if (frameNode && frameNode->GetPageId() == pageId) {
             auto node = GetAccessibilityNodeFromPage(frameNode->GetAccessibilityId());
             CHECK_NULL_CONTINUE(node);
             AccessibilityElementInfo nodeInfo;
@@ -5959,7 +5942,7 @@ void JsAccessibilityManager::SearchDefaultFocusByWindowIdNG(const int32_t pageId
 
     for (const auto& defaultFocusNode : defaultFocusList_) {
         auto node = defaultFocusNode.Upgrade();
-        if (node && (node->GetPageId() == pageId || pageId == -1)) {
+        if (node && node->GetPageId() == pageId) {
             AccessibilityElementInfo nodeInfo;
 
             CommonProperty commonProperty;
