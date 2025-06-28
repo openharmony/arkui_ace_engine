@@ -255,7 +255,7 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
             destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
         }
         ArkUIAniModule._ComponentSnapshot_createFromBuilderWithCallback(
-            rootNode, destroyCallback, callback, delay, checkImageStatus);
+            rootNode, destroyCallback, callback, delay, checkImageStatus, options);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -271,7 +271,7 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
             destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
         }
         let pixmap = ArkUIAniModule._ComponentSnapshot_createFromBuilderWithPromise(
-            rootNode, destroyCallback, delay, checkImageStatus);
+            rootNode, destroyCallback, delay, checkImageStatus, options);
         ArkUIAniModule._Common_Restore_InstanceId();
         return pixmap;
     }
@@ -296,7 +296,8 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
         return pixmap;
     }
 
-    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number, checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number,
+        checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let node = content.getFrameNode();
         if (node === undefined || node === null) {

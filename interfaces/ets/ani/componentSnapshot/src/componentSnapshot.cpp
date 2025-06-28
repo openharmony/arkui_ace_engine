@@ -164,6 +164,7 @@ void TriggerJsCallback(SnapshotAsyncCtx* asyncCtx)
                                                         resultRef.data(), &fnReturnVal)) != ANI_OK) {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "FunctionalObject_Call Failed!");
         };
+        ctx->env->GlobalReference_Delete(ctx->callbackRef);
     } else {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error!");
     }
@@ -212,7 +213,9 @@ auto CreateCallbackFunc(ani_env* env, ani_object callback, ani_object& result)
 {
     auto* asyncCtx = new SnapshotAsyncCtx;
     if (callback) {
-        asyncCtx->callbackRef = callback;
+        ani_ref objectGRef;
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(callback), &objectGRef);
+        asyncCtx->callbackRef = reinterpret_cast<ani_object>(objectGRef);;
     }
     if (!asyncCtx->callbackRef) {
         if (ANI_OK != env->Promise_New(&asyncCtx->deferred, &result)) {
