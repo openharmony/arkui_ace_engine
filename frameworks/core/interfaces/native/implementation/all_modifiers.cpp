@@ -256,6 +256,7 @@ const GENERATED_ArkUIGridItemOpsAccessor* GetGridItemOpsAccessor();
 const GENERATED_ArkUIFilterAccessor* GetFilterAccessor();
 const GENERATED_ArkUIVisualEffectAccessor* GetVisualEffectAccessor();
 const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor();
+const GENERATED_ArkUIStepperOpsAccessor* GetStepperOpsAccessor();
 const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor();
 const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor();
 const GENERATED_ArkUIAlertDialogAccessor* GetAlertDialogAccessor();
@@ -590,6 +591,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetFilterAccessor,
         GetVisualEffectAccessor,
         GetNavExtenderAccessor,
+        GetStepperOpsAccessor,
         GetEventEmulatorAccessor,
         GetActionSheetAccessor,
         GetAlertDialogAccessor,

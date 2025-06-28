@@ -272,6 +272,7 @@ typedef enum CallbackKind {
     Kind_ShouldBuiltInRecognizerParallelWithCallback = -250780276,
     Kind_SizeChangeCallback = -1716637992,
     Kind_SliderTriggerChangeCallback = 711649376,
+    Kind_StepperIndexCallback = 2068688176,
     Kind_StyledStringMarshallCallback = 1095217433,
     Kind_StyledStringUnmarshallCallback = 1359717794,
     Kind_SubmitCallback = -712186065,

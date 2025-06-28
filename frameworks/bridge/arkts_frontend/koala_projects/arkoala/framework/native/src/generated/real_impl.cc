@@ -14310,6 +14310,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // NavExtenderAccessor
+    namespace StepperOpsAccessor {
+    Ark_NativePointer RegisterStepperIndexCallbackImpl(Ark_NativePointer node,
+                                                       const Ark_Number* value,
+                                                       const StepperIndexCallback* callback)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        //auto convValue = Converter::Convert<type>(node);
+        //auto convValue = Converter::OptConvert<type>(node); // for enums
+        //undefinedModelNG::SetRegisterStepperIndexCallback(frameNode, convValue);
+        return {};
+    }
+    } // StepperOpsAccessor
     namespace EventEmulatorAccessor {
     void EmitTextInputEventImpl(Ark_NativePointer node,
                                 const Ark_String* text)
@@ -21642,6 +21655,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &NavExtenderAccessorImpl;
     }
 
+    const GENERATED_ArkUIStepperOpsAccessor* GetStepperOpsAccessor()
+    {
+        static const GENERATED_ArkUIStepperOpsAccessor StepperOpsAccessorImpl {
+            StepperOpsAccessor::RegisterStepperIndexCallbackImpl,
+        };
+        return &StepperOpsAccessorImpl;
+    }
+
     const GENERATED_ArkUIEventEmulatorAccessor* GetEventEmulatorAccessor()
     {
         static const GENERATED_ArkUIEventEmulatorAccessor EventEmulatorAccessorImpl {
@@ -24543,6 +24564,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetFilterAccessor,
             GetVisualEffectAccessor,
             GetNavExtenderAccessor,
+            GetStepperOpsAccessor,
             GetEventEmulatorAccessor,
             GetActionSheetAccessor,
             GetAlertDialogAccessor,
