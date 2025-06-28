@@ -35495,6 +35495,378 @@ Ark_NativePointer impl_TextFieldOps_registerTextFieldValueCallback(Ark_NativePoi
         return GetAccessors()->getTextFieldOpsAccessor()->registerTextFieldValueCallback(node, (const Ark_ResourceStr*)&value_value, (const TextFieldValueCallback*)&callback_value);
 }
 KOALA_INTEROP_DIRECT_3(TextFieldOps_registerTextFieldValueCallback, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_TextFieldOps_textFieldOpsSetWidth(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Union_Length_LayoutPolicy value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            const Ark_Int8 value_value_buf__selector = thisDeserializer.readInt8();
+            Ark_Union_Length_LayoutPolicy value_value_buf_ = {};
+            value_value_buf_.selector = value_value_buf__selector;
+            if (value_value_buf__selector == 0) {
+                value_value_buf_.selector = 0;
+                value_value_buf_.value0 = thisDeserializer.readLength();
+            }
+            else if (value_value_buf__selector == 1) {
+                value_value_buf_.selector = 1;
+                value_value_buf_.value1 = thisDeserializer.readLayoutPolicy();
+            }
+            else {
+                INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
+            }
+            value_value_buf.value = static_cast<Ark_Union_Length_LayoutPolicy>(value_value_buf_);
+        }
+        Opt_Union_Length_LayoutPolicy value_value = value_value_buf;;
+        return GetAccessors()->getTextFieldOpsAccessor()->textFieldOpsSetWidth(node, (const Opt_Union_Length_LayoutPolicy*)&value_value);
+}
+KOALA_INTEROP_DIRECT_3(TextFieldOps_textFieldOpsSetWidth, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_TextFieldOps_textFieldOpsSetHeight(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Union_Length_LayoutPolicy value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            const Ark_Int8 value_value_buf__selector = thisDeserializer.readInt8();
+            Ark_Union_Length_LayoutPolicy value_value_buf_ = {};
+            value_value_buf_.selector = value_value_buf__selector;
+            if (value_value_buf__selector == 0) {
+                value_value_buf_.selector = 0;
+                value_value_buf_.value0 = thisDeserializer.readLength();
+            }
+            else if (value_value_buf__selector == 1) {
+                value_value_buf_.selector = 1;
+                value_value_buf_.value1 = thisDeserializer.readLayoutPolicy();
+            }
+            else {
+                INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
+            }
+            value_value_buf.value = static_cast<Ark_Union_Length_LayoutPolicy>(value_value_buf_);
+        }
+        Opt_Union_Length_LayoutPolicy value_value = value_value_buf;;
+        return GetAccessors()->getTextFieldOpsAccessor()->textFieldOpsSetHeight(node, (const Opt_Union_Length_LayoutPolicy*)&value_value);
+}
+KOALA_INTEROP_DIRECT_3(TextFieldOps_textFieldOpsSetHeight, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_TextFieldOps_textFieldOpsSetPadding(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Union_Padding_Length_LocalizedPadding value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            const Ark_Int8 value_value_buf__selector = thisDeserializer.readInt8();
+            Ark_Union_Padding_Length_LocalizedPadding value_value_buf_ = {};
+            value_value_buf_.selector = value_value_buf__selector;
+            if (value_value_buf__selector == 0) {
+                value_value_buf_.selector = 0;
+                Ark_Padding value_value_buf__u = {};
+                const auto value_value_buf__u_top_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+                Opt_Length value_value_buf__u_top_buf = {};
+                value_value_buf__u_top_buf.tag = value_value_buf__u_top_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+                if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf__u_top_buf_runtimeType))
+                {
+                    value_value_buf__u_top_buf.value = thisDeserializer.readLength();
+                }
+                value_value_buf__u.top = value_value_buf__u_top_buf;
+                const auto value_value_buf__u_right_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+                Opt_Length value_value_buf__u_right_buf = {};
+                value_value_buf__u_right_buf.tag = value_value_buf__u_right_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+                if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf__u_right_buf_runtimeType))
+                {
+                    value_value_buf__u_right_buf.value = thisDeserializer.readLength();
+                }
+                value_value_buf__u.right = value_value_buf__u_right_buf;
+                const auto value_value_buf__u_bottom_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+                Opt_Length value_value_buf__u_bottom_buf = {};
+                value_value_buf__u_bottom_buf.tag = value_value_buf__u_bottom_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+                if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf__u_bottom_buf_runtimeType))
+                {
+                    value_value_buf__u_bottom_buf.value = thisDeserializer.readLength();
+                }
+                value_value_buf__u.bottom = value_value_buf__u_bottom_buf;
+                const auto value_value_buf__u_left_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+                Opt_Length value_value_buf__u_left_buf = {};
+                value_value_buf__u_left_buf.tag = value_value_buf__u_left_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+                if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf__u_left_buf_runtimeType))
+                {
+                    value_value_buf__u_left_buf.value = thisDeserializer.readLength();
+                }
+                value_value_buf__u.left = value_value_buf__u_left_buf;
+                value_value_buf_.value0 = value_value_buf__u;
+            }
+            else if (value_value_buf__selector == 1) {
+                value_value_buf_.selector = 1;
+                value_value_buf_.value1 = thisDeserializer.readLength();
+            }
+            else if (value_value_buf__selector == 2) {
+                value_value_buf_.selector = 2;
+                value_value_buf_.value2 = thisDeserializer.readLocalizedPadding();
+            }
+            else {
+                INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
+            }
+            value_value_buf.value = static_cast<Ark_Union_Padding_Length_LocalizedPadding>(value_value_buf_);
+        }
+        Opt_Union_Padding_Length_LocalizedPadding value_value = value_value_buf;;
+        return GetAccessors()->getTextFieldOpsAccessor()->textFieldOpsSetPadding(node, (const Opt_Union_Padding_Length_LocalizedPadding*)&value_value);
+}
+KOALA_INTEROP_DIRECT_3(TextFieldOps_textFieldOpsSetPadding, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_TextFieldOps_textFieldOpsSetMargin(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Union_Padding_Length_LocalizedPadding value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            const Ark_Int8 value_value_buf__selector = thisDeserializer.readInt8();
+            Ark_Union_Padding_Length_LocalizedPadding value_value_buf_ = {};
+            value_value_buf_.selector = value_value_buf__selector;
+            if (value_value_buf__selector == 0) {
+                value_value_buf_.selector = 0;
+                Ark_Padding value_value_buf__u = {};
+                const auto value_value_buf__u_top_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+                Opt_Length value_value_buf__u_top_buf = {};
+                value_value_buf__u_top_buf.tag = value_value_buf__u_top_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+                if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf__u_top_buf_runtimeType))
+                {
+                    value_value_buf__u_top_buf.value = thisDeserializer.readLength();
+                }
+                value_value_buf__u.top = value_value_buf__u_top_buf;
+                const auto value_value_buf__u_right_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+                Opt_Length value_value_buf__u_right_buf = {};
+                value_value_buf__u_right_buf.tag = value_value_buf__u_right_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+                if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf__u_right_buf_runtimeType))
+                {
+                    value_value_buf__u_right_buf.value = thisDeserializer.readLength();
+                }
+                value_value_buf__u.right = value_value_buf__u_right_buf;
+                const auto value_value_buf__u_bottom_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+                Opt_Length value_value_buf__u_bottom_buf = {};
+                value_value_buf__u_bottom_buf.tag = value_value_buf__u_bottom_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+                if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf__u_bottom_buf_runtimeType))
+                {
+                    value_value_buf__u_bottom_buf.value = thisDeserializer.readLength();
+                }
+                value_value_buf__u.bottom = value_value_buf__u_bottom_buf;
+                const auto value_value_buf__u_left_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+                Opt_Length value_value_buf__u_left_buf = {};
+                value_value_buf__u_left_buf.tag = value_value_buf__u_left_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+                if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf__u_left_buf_runtimeType))
+                {
+                    value_value_buf__u_left_buf.value = thisDeserializer.readLength();
+                }
+                value_value_buf__u.left = value_value_buf__u_left_buf;
+                value_value_buf_.value0 = value_value_buf__u;
+            }
+            else if (value_value_buf__selector == 1) {
+                value_value_buf_.selector = 1;
+                value_value_buf_.value1 = thisDeserializer.readLength();
+            }
+            else if (value_value_buf__selector == 2) {
+                value_value_buf_.selector = 2;
+                value_value_buf_.value2 = thisDeserializer.readLocalizedPadding();
+            }
+            else {
+                INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
+            }
+            value_value_buf.value = static_cast<Ark_Union_Padding_Length_LocalizedPadding>(value_value_buf_);
+        }
+        Opt_Union_Padding_Length_LocalizedPadding value_value = value_value_buf;;
+        return GetAccessors()->getTextFieldOpsAccessor()->textFieldOpsSetMargin(node, (const Opt_Union_Padding_Length_LocalizedPadding*)&value_value);
+}
+KOALA_INTEROP_DIRECT_3(TextFieldOps_textFieldOpsSetMargin, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_TextFieldOps_textFieldOpsSetBorder(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_BorderOptions value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            value_value_buf.value = thisDeserializer.readBorderOptions();
+        }
+        Opt_BorderOptions value_value = value_value_buf;;
+        return GetAccessors()->getTextFieldOpsAccessor()->textFieldOpsSetBorder(node, (const Opt_BorderOptions*)&value_value);
+}
+KOALA_INTEROP_DIRECT_3(TextFieldOps_textFieldOpsSetBorder, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_TextFieldOps_textFieldOpsSetBorderWidth(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            const Ark_Int8 value_value_buf__selector = thisDeserializer.readInt8();
+            Ark_Union_Length_EdgeWidths_LocalizedEdgeWidths value_value_buf_ = {};
+            value_value_buf_.selector = value_value_buf__selector;
+            if (value_value_buf__selector == 0) {
+                value_value_buf_.selector = 0;
+                value_value_buf_.value0 = thisDeserializer.readLength();
+            }
+            else if (value_value_buf__selector == 1) {
+                value_value_buf_.selector = 1;
+                value_value_buf_.value1 = thisDeserializer.readEdgeWidths();
+            }
+            else if (value_value_buf__selector == 2) {
+                value_value_buf_.selector = 2;
+                value_value_buf_.value2 = thisDeserializer.readLocalizedEdgeWidths();
+            }
+            else {
+                INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
+            }
+            value_value_buf.value = static_cast<Ark_Union_Length_EdgeWidths_LocalizedEdgeWidths>(value_value_buf_);
+        }
+        Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths value_value = value_value_buf;;
+        return GetAccessors()->getTextFieldOpsAccessor()->textFieldOpsSetBorderWidth(node, (const Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths*)&value_value);
+}
+KOALA_INTEROP_DIRECT_3(TextFieldOps_textFieldOpsSetBorderWidth, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_TextFieldOps_textFieldOpsSetBorderColor(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            const Ark_Int8 value_value_buf__selector = thisDeserializer.readInt8();
+            Ark_Union_ResourceColor_EdgeColors_LocalizedEdgeColors value_value_buf_ = {};
+            value_value_buf_.selector = value_value_buf__selector;
+            if (value_value_buf__selector == 0) {
+                value_value_buf_.selector = 0;
+                const Ark_Int8 value_value_buf__u_selector = thisDeserializer.readInt8();
+                Ark_ResourceColor value_value_buf__u = {};
+                value_value_buf__u.selector = value_value_buf__u_selector;
+                if (value_value_buf__u_selector == 0) {
+                    value_value_buf__u.selector = 0;
+                    value_value_buf__u.value0 = static_cast<Ark_Color>(thisDeserializer.readInt32());
+                }
+                else if (value_value_buf__u_selector == 1) {
+                    value_value_buf__u.selector = 1;
+                    value_value_buf__u.value1 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+                }
+                else if (value_value_buf__u_selector == 2) {
+                    value_value_buf__u.selector = 2;
+                    value_value_buf__u.value2 = static_cast<Ark_String>(thisDeserializer.readString());
+                }
+                else if (value_value_buf__u_selector == 3) {
+                    value_value_buf__u.selector = 3;
+                    value_value_buf__u.value3 = thisDeserializer.readResource();
+                }
+                else {
+                    INTEROP_FATAL("One of the branches for value_value_buf__u has to be chosen through deserialisation.");
+                }
+                value_value_buf_.value0 = static_cast<Ark_ResourceColor>(value_value_buf__u);
+            }
+            else if (value_value_buf__selector == 1) {
+                value_value_buf_.selector = 1;
+                value_value_buf_.value1 = thisDeserializer.readEdgeColors();
+            }
+            else if (value_value_buf__selector == 2) {
+                value_value_buf_.selector = 2;
+                value_value_buf_.value2 = thisDeserializer.readLocalizedEdgeColors();
+            }
+            else {
+                INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
+            }
+            value_value_buf.value = static_cast<Ark_Union_ResourceColor_EdgeColors_LocalizedEdgeColors>(value_value_buf_);
+        }
+        Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors value_value = value_value_buf;;
+        return GetAccessors()->getTextFieldOpsAccessor()->textFieldOpsSetBorderColor(node, (const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors*)&value_value);
+}
+KOALA_INTEROP_DIRECT_3(TextFieldOps_textFieldOpsSetBorderColor, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_TextFieldOps_textFieldOpsSetBorderStyle(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Union_BorderStyle_EdgeStyles value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            const Ark_Int8 value_value_buf__selector = thisDeserializer.readInt8();
+            Ark_Union_BorderStyle_EdgeStyles value_value_buf_ = {};
+            value_value_buf_.selector = value_value_buf__selector;
+            if (value_value_buf__selector == 0) {
+                value_value_buf_.selector = 0;
+                value_value_buf_.value0 = static_cast<Ark_BorderStyle>(thisDeserializer.readInt32());
+            }
+            else if (value_value_buf__selector == 1) {
+                value_value_buf_.selector = 1;
+                value_value_buf_.value1 = thisDeserializer.readEdgeStyles();
+            }
+            else {
+                INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
+            }
+            value_value_buf.value = static_cast<Ark_Union_BorderStyle_EdgeStyles>(value_value_buf_);
+        }
+        Opt_Union_BorderStyle_EdgeStyles value_value = value_value_buf;;
+        return GetAccessors()->getTextFieldOpsAccessor()->textFieldOpsSetBorderStyle(node, (const Opt_Union_BorderStyle_EdgeStyles*)&value_value);
+}
+KOALA_INTEROP_DIRECT_3(TextFieldOps_textFieldOpsSetBorderStyle, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_TextFieldOps_textFieldOpsSetBorderRadius(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            const Ark_Int8 value_value_buf__selector = thisDeserializer.readInt8();
+            Ark_Union_Length_BorderRadiuses_LocalizedBorderRadiuses value_value_buf_ = {};
+            value_value_buf_.selector = value_value_buf__selector;
+            if (value_value_buf__selector == 0) {
+                value_value_buf_.selector = 0;
+                value_value_buf_.value0 = thisDeserializer.readLength();
+            }
+            else if (value_value_buf__selector == 1) {
+                value_value_buf_.selector = 1;
+                value_value_buf_.value1 = thisDeserializer.readBorderRadiuses();
+            }
+            else if (value_value_buf__selector == 2) {
+                value_value_buf_.selector = 2;
+                value_value_buf_.value2 = thisDeserializer.readLocalizedBorderRadiuses();
+            }
+            else {
+                INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
+            }
+            value_value_buf.value = static_cast<Ark_Union_Length_BorderRadiuses_LocalizedBorderRadiuses>(value_value_buf_);
+        }
+        Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses value_value = value_value_buf;;
+        return GetAccessors()->getTextFieldOpsAccessor()->textFieldOpsSetBorderRadius(node, (const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses*)&value_value);
+}
+KOALA_INTEROP_DIRECT_3(TextFieldOps_textFieldOpsSetBorderRadius, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_TextFieldOps_textFieldOpsSetBackgroundColor(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_ResourceColor value_value_buf = {};
+        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
+        {
+            const Ark_Int8 value_value_buf__selector = thisDeserializer.readInt8();
+            Ark_ResourceColor value_value_buf_ = {};
+            value_value_buf_.selector = value_value_buf__selector;
+            if (value_value_buf__selector == 0) {
+                value_value_buf_.selector = 0;
+                value_value_buf_.value0 = static_cast<Ark_Color>(thisDeserializer.readInt32());
+            }
+            else if (value_value_buf__selector == 1) {
+                value_value_buf_.selector = 1;
+                value_value_buf_.value1 = static_cast<Ark_Number>(thisDeserializer.readNumber());
+            }
+            else if (value_value_buf__selector == 2) {
+                value_value_buf_.selector = 2;
+                value_value_buf_.value2 = static_cast<Ark_String>(thisDeserializer.readString());
+            }
+            else if (value_value_buf__selector == 3) {
+                value_value_buf_.selector = 3;
+                value_value_buf_.value3 = thisDeserializer.readResource();
+            }
+            else {
+                INTEROP_FATAL("One of the branches for value_value_buf_ has to be chosen through deserialisation.");
+            }
+            value_value_buf.value = static_cast<Ark_ResourceColor>(value_value_buf_);
+        }
+        Opt_ResourceColor value_value = value_value_buf;;
+        return GetAccessors()->getTextFieldOpsAccessor()->textFieldOpsSetBackgroundColor(node, (const Opt_ResourceColor*)&value_value);
+}
+KOALA_INTEROP_DIRECT_3(TextFieldOps_textFieldOpsSetBackgroundColor, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_ActionSheet_show(KSerializerBuffer thisArray, int32_t thisLength) {
         Deserializer thisDeserializer(thisArray, thisLength);
         Ark_ActionSheetOptions value_value = thisDeserializer.readActionSheetOptions();;
