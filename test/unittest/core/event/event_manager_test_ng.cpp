@@ -1747,4 +1747,43 @@ HWTEST_F(EventManagerTestNg, EventManagerTest097, TestSize.Level1)
     eventManager->CheckAndLogLastConsumedAxisEventInfo(eventId, action);
     EXPECT_EQ(eventManager->lastConsumedEvent_.eventId, eventId);
 }
+
+/**
+ * @tc.name: EventManagerTest098
+ * @tc.desc: Test RemoveOverlayByESC
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest098, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    KeyEvent event;
+
+    event.code = KeyCode::KEY_ESCAPE;
+    event.action = KeyAction::DOWN;
+    EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
+    event.code = KeyCode::KEY_CTRL_LEFT;
+    event.action = KeyAction::UP;
+    EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
+    event.code = KeyCode::KEY_ESCAPE;
+    event.action = KeyAction::UP;
+    EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
+    event.code = KeyCode::KEY_CTRL_LEFT;
+    event.action = KeyAction::DOWN;
+    EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
+
+    MockContainer::SetUp();
+    auto container = MockContainer::Current();
+    container->isSubContainer_ = true;
+    container->isDialogContainer_ = true;
+    EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
+    container->isSubContainer_ = false;
+    container->isDialogContainer_ = false;
+    EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
+        container->isSubContainer_ = true;
+    container->isDialogContainer_ = false;
+    EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
+    container->isSubContainer_ = false;
+    container->isDialogContainer_ = true;
+    EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
+}
 } // namespace OHOS::Ace::NG

@@ -103,6 +103,11 @@ public:
         return isSubContainer_;
     }
 
+    bool IsDialogContainer() const override
+    {
+        return isDialogContainer_;
+    }
+
     bool IsFreeMultiWindow() const override
     {
         return isFreeMultiWindow_;
@@ -163,6 +168,7 @@ private:
     bool isFormRender_ = false;
     bool isUIExtensionWindow_ = false;
     bool isSubContainer_ = false;
+    bool isDialogContainer_ = false;
     bool isFreeMultiWindow_ = false;
     bool isSceneBoardWindow_ = false;
     bool isCrossAxisWindow_ = false;
