@@ -1135,12 +1135,7 @@ void JSTextPickerParser::ParsePickerBackgroundStyle(const JSRef<JSObject>& param
                 bgStyle.borderRadius = NG::BorderRadiusProperty(calcDimension);
             }
         } else if (ParseBindSheetBorderRadiusProps(borderRadius, borderRadiusProperty)) {
-            if (!borderRadiusProperty.radiusTopLeft->IsNegative() &&
-                !borderRadiusProperty.radiusTopRight->IsNegative() &&
-                !borderRadiusProperty.radiusBottomLeft->IsNegative() &&
-                !borderRadiusProperty.radiusBottomRight->IsNegative()) {
-                bgStyle.borderRadius = borderRadiusProperty;
-            }
+            SetBorderRadiusWithCheck(bgStyle.borderRadius, borderRadiusProperty);
         }
     }
 }

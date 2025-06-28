@@ -63,6 +63,8 @@ enum class ResourceType : uint32_t {
     RAWFILE = 30000
 };
 
+static std::vector<std::pair<int32_t, RefPtr<ResourceObject>>> DEFAULT_RESOURCE_PAIR_ARRAY;
+
 enum class JSCallbackInfoType { STRING, NUMBER, OBJECT, BOOLEAN, FUNCTION };
 
 struct LocalizedCalcDimension {
@@ -128,7 +130,8 @@ public:
     static void GetFractionStops(
         std::vector<std::pair<float, float>>& fractionStops, const JSRef<JSVal>& array);
     static void NewGetGradientColorStops(NG::Gradient& gradient, const std::unique_ptr<JsonValue>& jsonValue);
-    static void NewGetJsGradientColorStops(NG::Gradient& gradient, const JSRef<JSVal>& colorStops);
+    static void NewGetJsGradientColorStops(NG::Gradient& gradient, const JSRef<JSVal>& colorStops,
+        const int32_t mapIdx = 0);
     static void NewGetJsGradientColorStopsCheck(NG::Gradient& gradient, const JSRef<JSVal>& colorStops);
 
     static void JsScale(const JSCallbackInfo& info);
@@ -378,8 +381,13 @@ public:
     static bool ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result,
         RefPtr<ResourceObject>& resObj);
     static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseLengthMetricsToDimension(
+        const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resObj);
     static bool ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static bool ParseLengthMetricsToPositiveDimension(
+        const JSRef<JSVal>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resObj);
     static bool ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result);
+    static bool ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result);
     static bool ParseJsDouble(const JSRef<JSVal>& jsValue, double& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJsInt32(const JSRef<JSVal>& jsValue, int32_t& result);
@@ -449,9 +457,9 @@ public:
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
     static bool GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
     static void ParseShadowPropsUpdate(const JSRef<JSObject>& jsObj, double& radius, Shadow& shadow);
-    static bool ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow);
+    static bool ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow, const bool configChangePerform = false);
     static void ParseShadowOffsetXY(const JSRef<JSObject>& jsObj, Shadow& shadow);
-    static bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
+    static bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow, const bool configChangePerform = false);
     static bool ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsResource(const JSRef<JSVal>& jsValue, CalcDimension& result,
         RefPtr<ResourceObject>& resObj);
@@ -468,6 +476,7 @@ public:
     static void JsLayoutWeight(const JSCallbackInfo& info);
 
     static void JsAlign(const JSCallbackInfo& info);
+    static void JsLayoutGravity(const JSCallbackInfo& info);
     static void JsPosition(const JSCallbackInfo& info);
     static void JsMarkAnchor(const JSCallbackInfo& info);
     static void JsOffset(const JSCallbackInfo& info);
@@ -476,6 +485,7 @@ public:
     static void JsOverlay(const JSCallbackInfo& info);
     static Alignment ParseAlignment(int32_t align);
     static LayoutCalPolicy ParseLayoutPolicy(const std::string& layoutPolicy);
+    static Alignment ParseLocalizedAlignment(std::string localizedAlignment);
     static void JsAlignRules(const JSCallbackInfo& info);
     static void JsChainMode(const JSCallbackInfo& info);
 
@@ -522,6 +532,8 @@ public:
     static void JsClip(const JSCallbackInfo& info);
     static void JsClipShape(const JSCallbackInfo& info);
 
+    static void ParseProgressMaskResObj(const JSRef<JSVal>& jColor, Color& colorVal,
+        RefPtr<NG::ProgressMaskProperty>& progressMask);
     static void ParseJsMaskProperty(const JSRef<JSObject>& paramObject);
     static void JsMask(const JSCallbackInfo& info);
     static void JsMaskShape(const JSCallbackInfo& info);
@@ -676,8 +688,14 @@ public:
     static void GetBorderRadius(const char* key, JSRef<JSObject>& object, CalcDimension& radius);
     static void GetBorderRadiusResObj(const char* key, JSRef<JSObject>& object, CalcDimension& radius,
         RefPtr<ResourceObject>& resObj);
+    static void RegisterTextBackgroundStyleResource(TextBackgroundStyle& textBackgroundStyle,
+        RefPtr<ResourceObject>& resObjTopLeft, RefPtr<ResourceObject>& resObjTopRight,
+        RefPtr<ResourceObject>& resObjBottomLeft, RefPtr<ResourceObject>& resObjBottomRight);
     static bool ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
         CalcDimension& bottomLeft, CalcDimension& bottomRight);
+    static bool ParseAllBorderRadiuses(JSRef<JSObject>& object, CalcDimension& topLeft, CalcDimension& topRight,
+        CalcDimension& bottomLeft, CalcDimension& bottomRight, TextBackgroundStyle& textBackgroundStyle);
+    static void ParseAllBorderRadiuses(JSRef<JSObject>& object, NG::BorderRadiusProperty& borderRadius);
     static void JsPointLight(const JSCallbackInfo& info);
 
     template<typename T>
@@ -780,7 +798,9 @@ public:
         const JSRef<JSVal>& jsValue, uint32_t& symbolId, RefPtr<ResourceObject>& symbolResourceObject);
     static void ParseJsSymbolCustomFamilyNames(std::vector<std::string>& customFamilyNames,
         const JSRef<JSVal>& jsValue);
-    static bool ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result);
+    static bool ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result,
+        bool enableResourceUpdate = false,
+        std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr = DEFAULT_RESOURCE_PAIR_ARRAY);
     static bool ParseBorderWidthProps(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty);
     static bool ParseBorderColorProps(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
     static bool ParseBorderStyleProps(const JSRef<JSVal>& args, NG::BorderStyleProperty& borderStyleProperty);
@@ -834,11 +854,15 @@ public:
     static void ParseDragSpringLoadingConfiguration(
         const JSRef<JSObject>& paramObj, const RefPtr<NG::DragSpringLoadingConfiguration>& config);
     static void ParseDialogWidthAndHeight(DialogProperties& properties, const JSRef<JSObject>& obj);
+    static void SetBorderRadiusWithCheck(std::optional<NG::BorderRadiusProperty>& result,
+        NG::BorderRadiusProperty& dimension);
 
 private:
-    static bool ParseJsStrArrayInternal(const JSRef<JSVal>& jsValue, std::vector<std::string>& result,
+    static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
+        const Color& color, bool state);
+    static bool ParseJsStrArrayInternal(const JSRef<JSArray>& jsArray, std::vector<std::string>& result,
         std::vector<RefPtr<ResourceObject>>& resObjArray);
-    static bool ParseJsIntegerArrayInternal(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result,
+    static bool ParseJsIntegerArrayInternal(const JSRef<JSArray>& jsArray, std::vector<uint32_t>& result,
         std::vector<RefPtr<ResourceObject>>& resObjArray);
     static bool ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJSMediaWithRawFile(const JSRef<JSObject>& jsObj, std::string& result,
@@ -879,21 +903,27 @@ private:
     static void GetBorderRadiusBottomRight(const JSRef<JSVal>& jsValue, NG::BorderRadiusProperty& borderRadius);
     static void ParseSweepGradientCenter(NG::Gradient& newGradient, const JSRef<JSArray> centerArray);
     static void ParseRadialGradientCenter(NG::Gradient& newGradient, const JSRef<JSArray> centerArray);
-    static void NewParseGradientColor(NG::Gradient& gradient, JSRef<JSArray>& subArray,
-        NG::GradientColor& gradientColor, size_t& i, size_t& length);
+    static void NewParseGradientColor(NG::Gradient& gradient, RefPtr<ResourceObject>& resObj,
+        NG::GradientColor& gradientColor, int32_t& indx);
+    static void NewParseSweepGradientColor(NG::Gradient& gradient, RefPtr<ResourceObject>& resObj,
+        NG::GradientColor& gradientColor, int32_t& indx);
+    static void NewParseRadialGradientColor(NG::Gradient& gradient, RefPtr<ResourceObject>& resObj,
+        NG::GradientColor& gradientColor, int32_t& indx);
     static bool ParseBackgroundBuilder(
         const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, std::function<void()>& builderFunc);
     static void SetBorderColorProps(const Color& color, NG::BorderColorProperty& props, const char* corner);
     static void ParseBorderColorProps(
         const JSRef<JSObject>& object, NG::BorderColorProperty& props, const char* propName);
     static void GetBorderColors(const JSRef<JSObject>& object, NG::BorderColorProperty& borderColor);
-    static bool GetBorderColorsFromResource(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
+    static void GetBorderColorsFromResource(const JSRef<JSVal>& args, NG::BorderColorProperty& colorProperty);
     static void SetBorderRadiusProps(const CalcDimension& dim, NG::BorderRadiusProperty& props, const char* propName);
-    static void GetBorderRadiusProps(
-        const JSRef<JSObject>& object, NG::BorderRadiusProperty& props, bool notNegative, const char* propName);
-    static bool GetBorderRadiusFromResource(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props);
-    static void ParseBorderWidthFromResource(const JSRef<JSVal>& jsVal, NG::BorderWidthProperty& props);
-    static bool GetBorderWidthFromResource(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty);
+    static void GetBorderRadiusUpdate(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props);
+    static void ParseBorderRadiusPropsUpdate(
+        const char* key, const JSRef<JSObject>& object, NG::BorderRadiusProperty& props);
+    static void GetBorderRadiusByLengthMetricsUpdate(
+        const char* key, const JSRef<JSObject>& object, NG::BorderRadiusProperty& props, bool notNegative);
+    static void GetBorderRadiusObject(const JSRef<JSObject>& object, NG::BorderRadiusProperty& props, bool notNegative);
+    static void GetBorderWidthFromResource(const JSRef<JSVal>& args, NG::BorderWidthProperty& borderWidthProperty);
     static void GetBorderWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty);
     static void GetBorderEndWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty);
     static void GetBorderStartWidth(const JSRef<JSObject>& object, NG::BorderWidthProperty& borderWidthProperty);

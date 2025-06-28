@@ -181,8 +181,19 @@ void JSGauge::SetColors(const JSCallbackInfo& info)
     GaugeModel::GetInstance()->SetColors(colors, weights);
 }
 
+void UpdateConfigChangeFlags(bool useJsLinearGradient, bool useSpecialDefaultIndicator)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        GaugeModel::GetInstance()->SetUseGradient(useJsLinearGradient);
+        GaugeModel::GetInstance()->SetUseSpecialDefaultIndicator(useSpecialDefaultIndicator);
+    }
+}
+
 void JSGauge::SetGradientColors(const JSCallbackInfo& info)
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        GaugeModel::GetInstance()->SetUseGradient(false);
+    }
     if (info[0]->IsNull() || info[0]->IsUndefined()) {
         GaugeModel::GetInstance()->ResetGradientColors();
         return;
@@ -191,6 +202,8 @@ void JSGauge::SetGradientColors(const JSCallbackInfo& info)
     NG::GaugeType type = NG::GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT;
     std::vector<NG::ColorStopArray> colors;
     std::vector<float> weights;
+    bool useJsLinearGradient = false;
+    bool useSpecialDefaultIndicator = false;
     if (info[0]->IsArray()) {
         auto jsColorsArray = JSRef<JSArray>::Cast(info[0]);
         if (jsColorsArray->Length() == 0) {
@@ -215,16 +228,18 @@ void JSGauge::SetGradientColors(const JSCallbackInfo& info)
             weights.push_back(weight);
             // Get color
             JSRef<JSVal> jsColorValue = tempColors->GetValueAt(0);
-            ConvertGradientColor(jsColorValue, colors, type);
+            ConvertGradientColor(jsColorValue, colors, type, useJsLinearGradient, useSpecialDefaultIndicator);
         }
         type = NG::GaugeType::TYPE_CIRCULAR_MULTI_SEGMENT_GRADIENT;
         SortColorStopOffset(colors);
         GaugeModel::GetInstance()->SetGradientColors(colors, weights, type);
+        UpdateConfigChangeFlags(useJsLinearGradient, useSpecialDefaultIndicator);
         return;
     }
-    ConvertGradientColor(info[0], colors, type);
+    ConvertGradientColor(info[0], colors, type, useJsLinearGradient, useSpecialDefaultIndicator);
     SortColorStopOffset(colors);
     GaugeModel::GetInstance()->SetGradientColors(colors, weights, type);
+    UpdateConfigChangeFlags(useJsLinearGradient, useSpecialDefaultIndicator);
 }
 
 void JSGauge::SortColorStopOffset(std::vector<NG::ColorStopArray>& colors)
@@ -243,20 +258,20 @@ void JSGauge::SortColorStopOffset(std::vector<NG::ColorStopArray>& colors)
     }
 }
 
-void JSGauge::ConvertGradientColor(
-    const JsiRef<JsiValue>& itemParam, std::vector<NG::ColorStopArray>& colors, NG::GaugeType& type)
+void JSGauge::ConvertGradientColor(const JsiRef<JsiValue>& itemParam, std::vector<NG::ColorStopArray>& colors,
+    NG::GaugeType& type, bool& useJsLinearGradient, bool& useSpecialDefaultIndicator)
 {
     if (!itemParam->IsObject()) {
         type = NG::GaugeType::TYPE_CIRCULAR_MONOCHROME;
-        return ConvertResourceColor(itemParam, colors);
+        return ConvertResourceColor(itemParam, colors, useSpecialDefaultIndicator);
     }
 
     JSLinearGradient* jsLinearGradient = JSRef<JSObject>::Cast(itemParam)->Unwrap<JSLinearGradient>();
     if (!jsLinearGradient) {
         type = NG::GaugeType::TYPE_CIRCULAR_MONOCHROME;
-        return ConvertResourceColor(itemParam, colors);
+        return ConvertResourceColor(itemParam, colors, useSpecialDefaultIndicator);
     }
-
+    useJsLinearGradient = true;
     type = NG::GaugeType::TYPE_CIRCULAR_SINGLE_SEGMENT_GRADIENT;
     if (jsLinearGradient->GetGradient().size() == 0) {
         NG::ColorStopArray colorStopArray;
@@ -267,11 +282,18 @@ void JSGauge::ConvertGradientColor(
     }
 }
 
-void JSGauge::ConvertResourceColor(const JsiRef<JsiValue>& itemParam, std::vector<NG::ColorStopArray>& colors)
+void JSGauge::ConvertResourceColor(
+    const JsiRef<JsiValue>& itemParam, std::vector<NG::ColorStopArray>& colors, bool& useSpecialDefaultIndicator)
 {
     Color color;
-    if (!ParseJsColor(itemParam, color)) {
+    RefPtr<ResourceObject> resObj;
+    bool state = ParseJsColor(itemParam, color, resObj);
+    if (!state) {
         color = ERROR_COLOR;
+    }
+    if (SystemProperties::ConfigChangePerform() && state && color.GetResourceId() == 0 && resObj &&
+        resObj->GetId() > 0) {
+        useSpecialDefaultIndicator = true;
     }
     NG::ColorStopArray colorStopArray;
     colorStopArray.emplace_back(std::make_pair(color, Dimension(0.0)));
@@ -284,9 +306,8 @@ void JSGauge::SetStrokeWidth(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resObj;
     if (SystemProperties::ConfigChangePerform()) {
         bool state = ParseJsDimensionVpNG(info[0], strokeWidth, resObj);
-        if (resObj) {
-            GaugeModel::GetInstance()->CreateWithResourceObj(OHOS::Ace::GaugeResourceType::STROKE_WIDTH, resObj);
-        } else if (state && strokeWidth.Unit() != DimensionUnit::PERCENT) {
+        GaugeModel::GetInstance()->CreateWithResourceObj(OHOS::Ace::GaugeResourceType::STROKE_WIDTH, resObj);
+        if (state && strokeWidth.Unit() != DimensionUnit::PERCENT) {
             GaugeModel::GetInstance()->SetStrokeWidth(strokeWidth);
         } else {
             GaugeModel::GetInstance()->SetStrokeWidth(CalcDimension(0));
@@ -332,7 +353,8 @@ void HandleShadowRadius(const JSRef<JSVal>& jsRadius, NG::GaugeShadowOptions& sh
             }
         };
         shadowOptions.AddResource("gauge.shadow.radius", radiusResObj, std::move(radiusUpdateFunc));
-    } else if (state && !NonPositive(radius)) {
+    }
+    if (state && !NonPositive(radius)) {
         shadowOptions.radius = radius;
     } else {
         shadowOptions.radius = NG::DEFAULT_GAUGE_SHADOW_RADIUS;
@@ -354,7 +376,8 @@ void HandleShadowOffsetX(const JSRef<JSVal>& jsOffsetX, NG::GaugeShadowOptions& 
             }
         };
         shadowOptions.AddResource("gauge.shadow.offsetX", offsetXResObj, std::move(offsetXUpdateFunc));
-    } else if (stateX) {
+    }
+    if (stateX) {
         shadowOptions.offsetX = offsetX;
     } else {
         shadowOptions.offsetX = NG::DEFAULT_GAUGE_SHADOW_OFFSETX;
@@ -376,7 +399,8 @@ void HandleShadowOffsetY(const JSRef<JSVal>& jsOffsetY, NG::GaugeShadowOptions& 
             }
         };
         shadowOptions.AddResource("gauge.shadow.offsetY", offsetYResObj, std::move(offsetYUpdateFunc));
-    } else if (stateY) {
+    }
+    if (stateY) {
         shadowOptions.offsetY = offsetY;
     } else {
         shadowOptions.offsetY = NG::DEFAULT_GAUGE_SHADOW_OFFSETY;
@@ -476,9 +500,8 @@ void HandleIndicatorIcon(const JSRef<JSVal>& jsIcon)
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         bool state = JSViewAbstract::ParseJsMedia(jsIcon, iconPath, resObj);
-        if (resObj) {
-            GaugeModel::GetInstance()->CreateWithResourceObj(OHOS::Ace::GaugeResourceType::INDICATOR_ICON, resObj);
-        } else if (state) {
+        GaugeModel::GetInstance()->CreateWithResourceObj(OHOS::Ace::GaugeResourceType::INDICATOR_ICON, resObj);
+        if (state) {
             GaugeModel::GetInstance()->SetIndicatorIconPath(iconPath, "", "");
         } else {
             GaugeModel::GetInstance()->ResetIndicatorIconPath();
@@ -500,17 +523,16 @@ void HandleIndicatorSpace(const JSRef<JSVal>& jsSpace)
     CalcDimension space;
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
-        bool state = JSViewAbstract::ParseJsDimensionVpNG(jsSpace, space, resObj);
-        if (resObj) {
-            GaugeModel::GetInstance()->CreateWithResourceObj(OHOS::Ace::GaugeResourceType::INDICATOR_SPACE, resObj);
-        } else if (state) {
+        bool state = JSViewAbstract::ParseJsDimensionVpNG(jsSpace, space, resObj, false);
+        GaugeModel::GetInstance()->CreateWithResourceObj(OHOS::Ace::GaugeResourceType::INDICATOR_SPACE, resObj);
+        if (state) {
             if (space.IsNegative()) {
                 space = NG::INDICATOR_DISTANCE_TO_TOP;
             }
             GaugeModel::GetInstance()->SetIndicatorSpace(space);
         } else {
             space = NG::INDICATOR_DISTANCE_TO_TOP;
-            GaugeModel::GetInstance()->ResetIndicatorSpace();
+            GaugeModel::GetInstance()->SetIndicatorSpace(space);
         }
     } else {
         if (!JSViewAbstract::ParseJsDimensionVpNG(jsSpace, space, false)) {
@@ -525,6 +547,9 @@ void HandleIndicatorSpace(const JSRef<JSVal>& jsSpace)
 
 void JSGauge::SetIndicator(const JSCallbackInfo& info)
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        GaugeModel::GetInstance()->SetUseSpecialDefaultIndicator(false);
+    }
     if (info[0]->IsNull()) {
         GaugeModel::GetInstance()->SetIsShowIndicator(false);
         return;

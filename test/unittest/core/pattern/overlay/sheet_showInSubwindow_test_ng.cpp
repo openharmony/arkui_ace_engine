@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_mask_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -586,8 +587,13 @@ HWTEST_F(SheetShowInSubwindowTestNg, GetSheetTypeNumber1, TestSize.Level1)
      * @tc.steps: step3. Set preferType is Bottom, and Set Offset property.
      * @tc.expected: the sheetType is SHEET_BOTTOM_OFFSET.
      */
+    auto manager = pipelineContext->GetWindowManager();
+    ASSERT_NE(manager, nullptr);
+    auto isPcOrPadFreeMultiWindow = []() {
+        return true;
+    };
+    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
     sheetStyle.bottomOffset = OffsetF(0, -10);
-    SystemProperties::SetDeviceType(DeviceType::TWO_IN_ONE);
     layoutProperty->UpdateSheetStyle(sheetStyle);
     auto sheetType3 = sheetPattern->GetSheetType();
     EXPECT_EQ(sheetType3, SheetType::SHEET_BOTTOM_OFFSET);
@@ -1491,5 +1497,118 @@ HWTEST_F(SheetShowInSubwindowTestNg, UpdateSheetObject, TestSize.Level1)
     ASSERT_NE(object6, nullptr);
     EXPECT_TRUE(object6->GetSheetType() == SheetType::SHEET_POPUP);
     EXPECT_FLOAT_EQ(object6->sheetWidth_, 20.0f);
+}
+
+/**
+ * @tc.type: FUNC
+ * @tc.name: Test BindSheet
+ * @tc.desc: Test SheetSideObject::AvoidKeyboard.
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, TestSideSheetAvoidKeyboard1, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet node and initialize sheet pattern.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto scroll = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    auto builderContent =
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    builderContent->MountToParent(scroll);
+    scroll->MountToParent(sheetNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->InitSheetObject();
+    sheetPattern->UpdateSheetObject(SheetType::SHEET_SIDE);
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
+    sheetPattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::NONE;
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    EXPECT_TRUE(object->GetSheetType() == SheetType::SHEET_SIDE);
+    object->AvoidKeyboard(false);
+    EXPECT_FALSE(sheetNode->GetFocusHub()->currentFocus_);
+    EXPECT_EQ(sheetPattern->GetKeyboardAvoidMode(), SheetKeyboardAvoidMode::NONE);
+    /**
+     * @tc.cases: case1. sheet focuses but keyboard is not up.
+     */
+    sheetNode->GetFocusHub()->currentFocus_ = true;
+    sheetPattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
+    object->AvoidKeyboard(false);
+    EXPECT_EQ(sheetPattern->GetKeyboardHeight(), 0);
+    object->AvoidKeyboard(true);
+    EXPECT_EQ(sheetPattern->GetKeyboardHeight(), 0);
+    /**
+     * @tc.cases: case2. sheet focuses and keyboard is up.
+     */
+    auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    SafeAreaInsets::Inset upKeyboard { 0, 200 };
+    safeAreaManager->keyboardInset_ = upKeyboard;
+    MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
+    object->AvoidKeyboard(false);
+    EXPECT_EQ(sheetPattern->keyboardHeight_, 200);
+    /**
+     * @tc.cases: case3. sheet focuses and keyboard is down.
+     */
+    SafeAreaInsets::Inset downKeyboard { 0, 0 };
+    safeAreaManager->keyboardInset_ = downKeyboard;
+    object->AvoidKeyboard(false);
+    EXPECT_EQ(sheetPattern->keyboardHeight_, 0);
+}
+
+/**
+ * @tc.type: FUNC
+ * @tc.name: Test BindSheet
+ * @tc.desc: Test SheetSideObject::AvoidKeyboard.
+ */
+HWTEST_F(SheetShowInSubwindowTestNg, TestSideSheetAvoidKeyboard2, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet node and initialize sheet pattern.
+     */
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto scroll = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    auto builderContent =
+        FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 0, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    builderContent->MountToParent(scroll);
+    scroll->MountToParent(sheetNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->InitSheetObject();
+    sheetPattern->UpdateSheetObject(SheetType::SHEET_SIDE);
+    sheetPattern->SetScrollNode(WeakPtr<FrameNode>(scroll));
+    sheetPattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::RESIZE_ONLY;
+    auto object = AceType::DynamicCast<SheetSideObject>(sheetPattern->GetSheetObject());
+    ASSERT_NE(object, nullptr);
+    EXPECT_TRUE(object->GetSheetType() == SheetType::SHEET_SIDE);
+    object->AvoidKeyboard(false);
+    EXPECT_FALSE(sheetNode->GetFocusHub()->currentFocus_);
+    EXPECT_EQ(sheetPattern->GetKeyboardAvoidMode(), SheetKeyboardAvoidMode::RESIZE_ONLY);
+    /**
+     * @tc.cases: case1. sheet focuses and keyboard is up.
+     */
+    sheetNode->GetFocusHub()->currentFocus_ = true;
+    auto safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    SafeAreaInsets::Inset upKeyboard { 0, 200 };
+    safeAreaManager->keyboardInset_ = upKeyboard;
+    MockPipelineContext::GetCurrent()->safeAreaManager_ = safeAreaManager;
+    MockPipelineContext::GetCurrent()->SetRootSize(800, 2000);
+    object->AvoidKeyboard(false);
+    EXPECT_EQ(sheetPattern->keyboardHeight_, 200);
+    EXPECT_TRUE(NearEqual(object->resizeDecreasedHeight_, 200.0f));
+    /**
+     * @tc.cases: case2. sheet focuses and keyboard is down.
+     */
+    SafeAreaInsets::Inset downKeyboard { 0, 0 };
+    safeAreaManager->keyboardInset_ = downKeyboard;
+    object->AvoidKeyboard(true);
+    EXPECT_EQ(sheetPattern->keyboardHeight_, 0);
+    EXPECT_TRUE(NearEqual(object->resizeDecreasedHeight_, 0.0f));
 }
 } // namespace OHOS::Ace::NG

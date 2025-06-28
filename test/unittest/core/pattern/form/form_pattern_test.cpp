@@ -110,7 +110,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_001, TestSize.Level1)
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
-    
+
     EXPECT_EQ(pattern->scopeId_, 0);
     auto  host = pattern->GetHost();
     EXPECT_NE(host, nullptr);
@@ -150,7 +150,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_003, TestSize.Level1)
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
-    
+
     auto host = pattern->GetHost();
     EXPECT_NE(host, nullptr);
     pattern->OnAttachToFrameNode();
@@ -183,7 +183,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_004, TestSize.Level1)
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
-    
+
     EXPECT_FALSE(pattern->shouldResponseClick_);
     auto host = pattern->GetHost();
     EXPECT_NE(host, nullptr);
@@ -233,7 +233,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_005, TestSize.Level1)
     RefPtr<FormNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
-    
+
     TouchEventInfo event("onTouchDown");
     TouchLocationInfo touchLocationInfo(1);
     touchLocationInfo.SetTouchType(TouchType::DOWN);
@@ -413,7 +413,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_011, TestSize.Level1)
     RefPtr<FrameNode> frameNode = CreateFromNode();
     auto pattern = frameNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
-    
+
     auto host = pattern->GetHost();
     pattern->SnapshotSurfaceNode();
     EXPECT_NE(host, nullptr);
@@ -567,7 +567,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_017, TestSize.Level1)
     EXPECT_NE(result, nullptr);
     int32_t num = formNode->GetTotalChildCount();
     EXPECT_EQ(num, 1);
-    
+
     result = pattern->CreateImageNode();
     num = formNode->GetTotalChildCount();
     EXPECT_EQ(num, 2);
@@ -639,7 +639,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_020, TestSize.Level1)
     int32_t num = renderContext->GetHost()->GetChildren().size();
     pattern->OnRebuildFrame();
     EXPECT_EQ(num, 0);
-    
+
     pattern->isSnapshot_ = true;
     pattern->frameNode_ = nullptr;
     pattern->OnRebuildFrame();
@@ -1680,7 +1680,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_043, TestSize.Level1)
     RefPtr<FormNode> formNode = CreateFromNode();
     auto pattern = formNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
-    
+
     pattern->FireFormSurfaceDetachCallback();
     EXPECT_TRUE(pattern->isFrsNodeDetached_);
 }
@@ -2070,5 +2070,23 @@ HWTEST_F(FormPatternTest, FormPatternTest_056, TestSize.Level1)
     EXPECT_NE(textNode, nullptr);
     textNode = pattern->CreateForbiddenTextNode(APP_LOCKED_RESOURCE_NAME, false);
     EXPECT_NE(textNode, nullptr);
+}
+
+/**
+ * @tc.name: FormPatternTest_057
+ * @tc.desc: DelayRemoveFormChildNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_057, TestSize.Level1)
+{
+    RefPtr<FormNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    EXPECT_NE(pattern, nullptr);
+    RefPtr<FrameNode> childNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    pattern->AddFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE, childNode);
+    pattern->DelayRemoveFormChildNode(FormChildNodeType::FORM_STATIC_IMAGE_NODE);
+    int32_t num = formNode->GetTotalChildCount();
+    EXPECT_EQ(num, 0);
 }
 } // namespace OHOS::Ace::NG

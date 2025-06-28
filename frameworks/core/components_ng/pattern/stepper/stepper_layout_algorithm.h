@@ -44,6 +44,7 @@ private:
     float CaluateButtonHeight(LayoutWrapper* layoutWrapper, bool isRight);
     void SuitAgeLayoutButton(
         LayoutWrapper* layoutWrapper, float rightButtonHeight, float leftButtonHeight, bool isRight);
+    void ReCalcStepperSize(LayoutWrapper* layoutWrapper, float rightButtonHeight, float leftButtonHeight);
     bool layoutLeftButton_ = true;
     bool isLoadingButton_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(StepperLayoutAlgorithm);

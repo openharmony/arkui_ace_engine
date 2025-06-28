@@ -218,9 +218,9 @@ public:
     {
         return 0;
     }
-    bool GetIsWideColorGamut() const override
+    uint32_t GetInnerColorGamut() const override
     {
-        return false;
+        return 0;
     }
     void SetMemoryName(std::string pixelMapName) const override {}
 };

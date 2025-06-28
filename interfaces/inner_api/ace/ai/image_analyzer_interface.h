@@ -40,6 +40,17 @@ public:
     virtual void UpdateOverlayStatus(void** overlayData, ImageAnalyzerInnerConfig* config) = 0;
     virtual void UpdateOverlayActiveStatus(void** overlayData, bool status) = 0;
     virtual void UpdateAIButtonConfig(void** overlayData, AIButtonConfig* config) = 0;
+    /**
+     * @brief Handling keyboard events related to image analysis.
+     *
+     * When the user triggers a button operation in the image analysis interface (such as floating UI), this function
+     * is called to pass the event to the underlying image analysis module.
+     *
+     * @param[in,out] overlayData Pointer to the context data for image analysis.
+     *                            This data usually includes the currently displayed UI status, bound objects, etc.
+     * @param[in]     keyEvent    A pointer to a key event object, containing the type of key operation and key value.
+     */
+    virtual void UpdateKeyEvent(void** overlayData, void* keyEvent) {};
 protected:
     virtual ~ImageAnalyzerInterface() {}
 }; // namespace OHOS::Ace

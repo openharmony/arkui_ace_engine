@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "ability.h"
-#include "ability_loader.h"
 #include "want.h"
 #include "window.h"
 

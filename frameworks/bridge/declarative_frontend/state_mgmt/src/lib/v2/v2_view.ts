@@ -340,10 +340,8 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         // if memory watch register the callback func, then report such information to memory watch
         // when custom node destroyed
         if (ArkUIObjectFinalizationRegisterProxy.callbackFunc_) {
-            ArkUIObjectFinalizationRegisterProxy.call({
-                hash: Utils.getArkTsUtil().getHash(this),
-                name: this.constructor.name,
-                msg: `${this.debugInfo__()} is in the process of destruction`});
+            ArkUIObjectFinalizationRegisterProxy.call(new WeakRef(this),
+                `${this.debugInfo__()} is in the process of destruction`);
         }
     }
 
@@ -395,7 +393,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      }
 
     public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: { prototype: Object, pop?: () => void }): void {
-        if (this.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+        if (PUV2ViewBase.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
             const prebuildFunc: PrebuildFunc = () => {
               this.observeComponentCreation2(compilerAssignedUpdateFunc, classObject);
             };
@@ -692,12 +690,13 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     }
 
     /*
-      findProvidePU finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
+      findProvidePU__ finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
       if 'this' ViewPU has a @Provide('providedPropName') return it, otherwise ask from its parent ViewPU.
       function needed for mixed @Component and @ComponentV2 parent child hierarchies.
     */
-    public findProvidePU(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
-        return this.getParent()?.findProvidePU(providedPropName);
+    public findProvidePU__(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
+        return this.getParent()?.findProvidePU__(providedPropName) ||
+          (this.__parentViewBuildNode__ && this.__parentViewBuildNode__.findProvidePU__(providedPropName));
     }
 
     get localStorage_(): LocalStorage {
@@ -796,17 +795,20 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             .filter((varName) => !varName.startsWith(ProviderConsumerUtilV2.ALIAS_PREFIX)) // remove provider & consumer prefix
             .forEach((varName) => {
                 const prop: any = Reflect.get(meta, varName);
-                if ('deco' in prop) {
-                    retVal += ` ${prop.deco}`; // main decorator
-                }
-                if ('deco2' in prop) {
-                    retVal += ` ${prop.deco2}`; // sub decorator like @Once
-                }
-                if ('aliasName' in prop) {
-                    retVal += `(${prop.aliasName})`; // aliasName for provider & consumer
+                if (prop && typeof prop === 'object') {
+                    if ('deco' in prop) {
+                        retVal += ` ${prop.deco}`; // main decorator
+                    }
+                    if ('deco2' in prop) {
+                        retVal += ` ${prop.deco2}`; // sub decorator like @Once
+                    }
+                    if ('aliasName' in prop) {
+                        retVal += `(${prop.aliasName})`; // aliasName for provider & consumer
+                    }
                 }
                 retVal += ` varName: ${varName}`;
-                let dependentElmtIds = this[ObserveV2.SYMBOL_REFS][varName];
+
+                let dependentElmtIds = this[ObserveV2.SYMBOL_REFS]?.[varName];
                 if (dependentElmtIds) {
                     retVal += `\n  |--DependentElements:`;
                     dependentElmtIds.forEach((elmtId) => {

@@ -533,7 +533,7 @@ public:
     virtual void OnBackgroundColorUpdate(const Color& value) {}
     virtual void OnOpacityUpdate(double opacity) {}
     virtual void OnDynamicRangeModeUpdate(DynamicRangeMode dynamicRangeMode) {}
-    virtual void SetIsWideColorGamut(bool isWideColorGamut) {}
+    virtual void SetColorGamut(uint32_t colorGamut) {}
     virtual void SetAlphaOffscreen(bool isOffScreen) {}
     virtual void OnSphericalEffectUpdate(double radio) {}
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
@@ -933,6 +933,7 @@ protected:
 
 private:
     friend class ViewAbstract;
+    friend class ViewAbstractModelStatic;
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;
     RefPtr<OneCenterTransitionOptionType> oneCenterTransition_;

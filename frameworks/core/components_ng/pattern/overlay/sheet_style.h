@@ -108,6 +108,21 @@ struct SheetPopupInfo {
     SheetArrowPosition arrowPosition = SheetArrowPosition::NONE;
     float sheetOffsetX = 0.f;
     float sheetOffsetY = 0.f;
+    bool keyboardShow = false;
+
+    void Reset()
+    {
+        finalPlacement = Placement::NONE;
+        placementOnTarget = true;
+        placementRechecked = false;
+        showArrow = true;
+        arrowOffsetX = 0.f;
+        arrowOffsetY = 0.f;
+        arrowPosition = SheetArrowPosition::NONE;
+        sheetOffsetX = 0.f;
+        sheetOffsetY = 0.f;
+        keyboardShow = false;
+    }
 };
 
 struct SheetKeyHash {
@@ -147,6 +162,7 @@ enum class SheetKeyboardAvoidMode {
     TRANSLATE_AND_RESIZE,
     RESIZE_ONLY,
     TRANSLATE_AND_SCROLL,
+    POPUP_SHEET,
 };
 
 struct SheetStyle {

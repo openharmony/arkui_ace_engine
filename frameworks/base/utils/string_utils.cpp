@@ -14,6 +14,7 @@
  */
 
 #include "base/utils/string_utils.h"
+#include "core/pipeline/base/constants.h"
 
 #ifndef WINDOWS_PLATFORM
 #include "securec.h"
@@ -23,7 +24,7 @@ namespace OHOS::Ace::StringUtils {
 namespace {
 const size_t MAX_STRING_SIZE = 256;
 } // namespace
-
+const double RADIANS_VALUE = 2 * ACE_PI; // one turn means 2*pi rad
 const char DEFAULT_STRING[] = "error";
 const std::wstring DEFAULT_WSTRING = L"error";
 const std::u16string DEFAULT_USTRING = u"error";

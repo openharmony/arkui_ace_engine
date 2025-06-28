@@ -154,6 +154,8 @@ public:
     void OnRefreshAccessedHistory(const std::string& url, bool isReload) override;
     bool OnHandleInterceptRequest(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
                                   std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response) override;
+    std::string OnHandleOverrideErrorPage(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
+                                          std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error) override;
     bool OnHandleInterceptUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
     void OnResource(const std::string& url) override;
     void OnScaleChanged(float oldScaleFactor, float newScaleFactor) override;
@@ -309,6 +311,18 @@ public:
 
     void OnPip(int status, int delegate_id, int child_id, int frame_routing_id, int width, int height) override;
 
+    bool OnAllSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSAllSslErrorResult> result, OHOS::NWeb::SslError error,
+        const std::string& url, const std::string& originalUrl, const std::string& referrer, bool isFatalError,
+        bool isMainFrame, const std::vector<std::string>& certChainData) override;
+
+    void ShowMagnifier() override;
+
+    void HideMagnifier() override;
+
+    void OnPageTitleV2(const std::string &title, bool isRealTitle) override;
+
+    void OnInsertBlanklessFrame(const std::string& pathToFrame) override;
+    void OnRemoveBlanklessFrame(int delayTime) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

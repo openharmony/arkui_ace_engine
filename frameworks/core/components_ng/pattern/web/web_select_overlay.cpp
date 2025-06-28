@@ -56,6 +56,9 @@ bool WebSelectOverlay::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuPar
         pattern->ShowMagnifier(static_cast<int>(pattern->touchPointX), static_cast<int>(pattern->touchPointY));
         return false;
     }
+    if (overlayType == INSERT_OVERLAY) {
+        CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
+    }
     selectTemporarilyHidden_ = false;
     selectTemporarilyHiddenByScroll_ = false;
     SelectOverlayInfo selectInfo;
@@ -82,6 +85,7 @@ bool WebSelectOverlay::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuPar
     CHECK_NULL_RETURN(host, false);
     StartListenSelectOverlayParentScroll(host);
     ProcessOverlay({ .animation = true });
+    SetTouchHandleExistState(true);
     return true;
 }
 
@@ -108,20 +112,7 @@ void WebSelectOverlay::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebT
     }
     if (!isShowHandle_) {
         if (overlayType == INSERT_OVERLAY) {
-            SelectOverlayInfo selectInfo;
-            selectInfo.isSingleHandle = true;
-            selectInfo.firstHandle.paintRect = ComputeTouchHandleRect(insertHandle_);
-            CheckHandles(selectInfo.firstHandle, insertHandle_);
-            selectInfo.secondHandle.isShow = false;
-            selectInfo.menuInfo.menuDisable = true;
-            selectInfo.menuInfo.menuIsShow = false;
-            selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
-            SetEditMenuOptions(selectInfo);
-            RegisterSelectOverlayEvent(selectInfo);
-            selectInfo.isHandleLineShow = false;
-            isShowHandle_ = true;
-            webSelectInfo_ = selectInfo;
-            ProcessOverlay({ .animation = true });
+            CloseOverlay(false, CloseReason::CLOSE_REASON_CLICK_OUTSIDE);
             return;
         }
     } else {
@@ -347,9 +338,6 @@ void WebSelectOverlay::SetMenuOptions(SelectOverlayInfo& selectInfo,
         selectInfo.menuInfo.showCopyAll = true;
     }
     bool detectFlag = !isSelectAll_;
-    if (isSelectAll_) {
-        selectInfo.menuInfo.showCopyAll = false;
-    }
 
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
@@ -828,7 +816,7 @@ void WebSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType ty
 {
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
-    if (id != OptionMenuActionId::SELECT_ALL && id != OptionMenuActionId::COPY) {
+    if (id == OptionMenuActionId::PASTE || id == OptionMenuActionId::CUT) {
         isSelectAll_ = false;
     }
     if (!quickMenuCallback_) {
@@ -941,8 +929,10 @@ void WebSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst
 void WebSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
 {
     HideMagnifier();
-    UpdateSelectMenuOptions();
+    isSelectAll_ = false;
     selectOverlayDragging_ = false;
+    webSelectInfo_.menuInfo.showCopyAll = true;
+    UpdateSelectMenuOptions();
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
     auto delegate = pattern->delegate_;
@@ -978,6 +968,7 @@ void WebSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         pattern->CloseSelectOverlay();
         SelectCancel();
     }
+    UpdateSingleHandleVisible(true);
 }
 
 void WebSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
@@ -996,6 +987,7 @@ void WebSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reaso
     aiMenuType_ = TextDataDetectType::INVALID;
     webSelectInfo_.menuInfo.aiMenuOptionType = aiMenuType_;
     StopListenSelectOverlayParentScroll(host);
+    SetTouchHandleExistState(false);
 }
 
 void WebSelectOverlay::AfterCloseOverlay()
@@ -1086,7 +1078,6 @@ void WebSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo &selectInfo, 
     selectInfo.onClick = webSelectInfo_.onClick;
     selectInfo.enableHandleLevel = true;
     selectInfo.enableSubWindowMenu = true;
-    selectInfo.isHandleLineShow = webSelectInfo_.isHandleLineShow;
 }
 
 void WebSelectOverlay::OnHandleMarkInfoChange(
@@ -1132,7 +1123,6 @@ void WebSelectOverlay::UpdateSelectMenuOptions()
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
     if (isSelectAll_) {
-        webSelectInfo_.menuInfo.showCopyAll = true;
         isSelectAll_ = false;
     }
     if (!queryWord.empty()) {
@@ -1179,8 +1169,37 @@ void WebSelectOverlay::UpdateAISelectMenu(TextDataDetectType type, const std::st
 void WebSelectOverlay::UpdateIsSelectAll()
 {
     if (isSelectAll_) {
-        webSelectInfo_.menuInfo.showCopyAll = true;
         isSelectAll_ = false;
     }
+}
+
+void WebSelectOverlay::UpdateSingleHandleVisible(bool isVisible)
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (IsSingleHandle()) {
+        pattern->UpdateSingleHandleVisible(isVisible);
+    }
+}
+
+bool WebSelectOverlay::IsSingleHandle()
+{
+    WebOverlayType overlayType = GetTouchHandleOverlayType(insertHandle_, startSelectionHandle_, endSelectionHandle_);
+    return overlayType == INSERT_OVERLAY;
+}
+
+void WebSelectOverlay::OnHandleIsHidden()
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateSingleHandleVisible(false);
+    SetTouchHandleExistState(false);
+}
+
+void WebSelectOverlay::SetTouchHandleExistState(bool touchHandleExist)
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTouchHandleExistState(touchHandleExist);
 }
 } // namespace OHOS::Ace::NG

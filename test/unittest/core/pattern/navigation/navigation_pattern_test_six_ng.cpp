@@ -21,6 +21,7 @@
 
 #define protected public
 #define private public
+#include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
@@ -250,6 +251,9 @@ HWTEST_F(NavigationPatternTestSixNg, AdjustNodeForDestForceSplit002, TestSize.Le
     auto navigationPrimaryContentNode = FrameNode::CreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     navigationNode->primaryContentNode_ = navigationPrimaryContentNode;
+    auto phNode = ForceSplitUtils::CreatePlaceHolderNode();
+    ASSERT_NE(phNode, nullptr);
+    navigationNode->forceSplitPlaceHolderNode_ = phNode;
     auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navigationStack->Add(PAGE01, navDestination01Node);
@@ -287,6 +291,9 @@ HWTEST_F(NavigationPatternTestSixNg, AdjustNodeForDestForceSplit003, TestSize.Le
     auto navigationPrimaryContentNode = FrameNode::CreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     navigationNode->primaryContentNode_ = navigationPrimaryContentNode;
+    auto phNode = ForceSplitUtils::CreatePlaceHolderNode();
+    ASSERT_NE(phNode, nullptr);
+    navigationNode->forceSplitPlaceHolderNode_ = phNode;
     auto navDestination01Node = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     navigationStack->Add(PAGE01, navDestination01Node);

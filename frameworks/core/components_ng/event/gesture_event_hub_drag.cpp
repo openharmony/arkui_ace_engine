@@ -598,7 +598,6 @@ bool GestureEventHub::IsNeedSwitchToSubWindow(const PreparedInfoForDrag& dragInf
 
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
-    isRestoreDrag_ = false;
     TAG_LOGD(AceLogTag::ACE_DRAG, "Start handle onDragStart.");
     auto frameNode = GetFrameNode();
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -654,7 +653,6 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->ResetBundleInfo();
     if (DragDropGlobalController::GetInstance().GetDragStartRequestStatus() == DragStartRequestStatus::READY) {
-        isRestoreDrag_ = true;
         DoOnDragStartHandling(info, frameNode, dragDropInfo, event, dragPreviewInfo, pipeline);
     } else {
         dragDropManager->SetDelayDragCallBack(continueFunc);
@@ -981,9 +979,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto windowId = container->GetWindowId();
     ShadowInfoCore shadowInfo { pixelMapDuplicated, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
     auto dragMoveLastPoint = dragDropManager->GetDragMoveLastPointByCurrentPointer(info.GetPointerId());
-    auto screenX = isRestoreDrag_ ? info.GetScreenLocation().GetX() : dragMoveLastPoint.GetScreenX();
-    auto screenY = isRestoreDrag_ ? info.GetScreenLocation().GetY() : dragMoveLastPoint.GetScreenY();
-
+    auto screenX = DragDropGlobalController::GetInstance().GetAsyncDragCallback() ?
+        dragMoveLastPoint.GetScreenX() : info.GetScreenLocation().GetX();
+    auto screenY = DragDropGlobalController::GetInstance().GetAsyncDragCallback() ?
+        dragMoveLastPoint.GetScreenY() : info.GetScreenLocation().GetY();
+    
     DragDataCore dragData { { shadowInfo }, {}, udKey, extraInfoLimited, arkExtraInfoJson->ToString(),
         static_cast<int32_t>(info.GetSourceDevice()), recordsSize, info.GetPointerId(),
         screenX, screenY, info.GetTargetDisplayId(), windowId, true, false, summary, false, detailedSummary };
@@ -1194,6 +1194,8 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
             }
             event->SetScreenX(info.GetScreenLocation().GetX());
             event->SetScreenY(info.GetScreenLocation().GetY());
+            event->SetGlobalDisplayX(info.GetGlobalDisplayLocation().GetX());
+            event->SetGlobalDisplayY(info.GetGlobalDisplayLocation().GetY());
             event->SetPressedKeyCodes(info.GetPressedKeyCodes());
             eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event);
             eventHub->HandleInternalOnDrop(event, "");
@@ -1818,6 +1820,8 @@ RefPtr<OHOS::Ace::DragEvent> GestureEventHub::CreateDragEvent(const GestureEvent
     event->SetScreenY(info.GetScreenLocation().GetY());
     event->SetDisplayX(info.GetScreenLocation().GetX());
     event->SetDisplayY(info.GetScreenLocation().GetY());
+    event->SetGlobalDisplayX(info.GetGlobalDisplayLocation().GetX());
+    event->SetGlobalDisplayY(info.GetGlobalDisplayLocation().GetY());
     event->SetSourceTool(info.GetSourceTool());
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, event);

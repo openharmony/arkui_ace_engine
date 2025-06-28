@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,8 +21,8 @@
 #include "native_type.h"
 #include "node_model.h"
 #include "node_transition.h"
-#include "waterflow_section_option.h"
 #include "progress_option.h"
+#include "waterflow_section_option.h"
 
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
@@ -830,7 +830,7 @@ int32_t SetWidth(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     auto* fullImpl = GetFullImpl();
     // 1 for vp. check in DimensionUnit.
     fullImpl->getNodeModifiers()->getCommonModifier()->setWidth(
-        node->uiNodeHandle, item->value[NUM_0].f32, GetDefaultUnit(node, UNIT_VP), nullptr);
+        node->uiNodeHandle, item->value[NUM_0].f32, GetDefaultUnit(node, UNIT_VP), nullptr, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -860,7 +860,7 @@ int32_t SetHeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     auto* fullImpl = GetFullImpl();
     // 1 for vp. check in DimensionUnit.
     fullImpl->getNodeModifiers()->getCommonModifier()->setHeight(
-        node->uiNodeHandle, item->value[NUM_0].f32, GetDefaultUnit(node, UNIT_VP), nullptr);
+        node->uiNodeHandle, item->value[NUM_0].f32, GetDefaultUnit(node, UNIT_VP), nullptr, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -892,10 +892,10 @@ int32_t SetBackgroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
             node->uiNodeHandle, item->value[NUM_0].u32);
     } else if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputBackgroundColor(
-            node->uiNodeHandle, item->value[NUM_0].u32);
+            node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaBackgroundColor(
-            node->uiNodeHandle, item->value[NUM_0].u32);
+            node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundColor(
             node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
@@ -1062,6 +1062,7 @@ const ArkUI_AttributeItem* GetBackgroundImageResizableWithSlice(ArkUI_NodeHandle
     g_numberValues[NUM_1].f32 = slice.top;
     g_numberValues[NUM_2].f32 = slice.right;
     g_numberValues[NUM_3].f32 = slice.bottom;
+    g_attributeItem.size = NUM_4;
     return &g_attributeItem;
 }
 
@@ -1083,13 +1084,13 @@ int32_t SetPadding(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     struct ArkUISizeType left = { item->value[leftIndex].f32, unit };
     if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputPadding(
-            node->uiNodeHandle, &top, &right, &bottom, &left);
+            node->uiNodeHandle, &top, &right, &bottom, &left, nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaPadding(
-            node->uiNodeHandle, &top, &right, &bottom, &left);
+            node->uiNodeHandle, &top, &right, &bottom, &left, nullptr);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setPadding(
-            node->uiNodeHandle, &top, &right, &bottom, &left);
+            node->uiNodeHandle, &top, &right, &bottom, &left, nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -1191,12 +1192,22 @@ int32_t SetMargin(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputMargin(
-            node->uiNodeHandle, &top, &right, &bottom, &left);
+            node->uiNodeHandle, &top, &right, &bottom, &left, nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMargin(
+            node->uiNodeHandle, &top, &right, &bottom, &left, nullptr);
+    } else if (node->type == ARKUI_NODE_TOGGLE) {
+        fullImpl->getNodeModifiers()->getToggleModifier()->setToggleMargin(
+            node->uiNodeHandle, &top, &right, &bottom, &left);
+    } else if (node->type == ARKUI_NODE_CHECKBOX) {
+        fullImpl->getNodeModifiers()->getCheckboxModifier()->setCheckboxMargin(
+            node->uiNodeHandle, &top, &right, &bottom, &left);
+    } else if (node->type == ARKUI_NODE_RADIO) {
+        fullImpl->getNodeModifiers()->getRadioModifier()->setRadioMargin(
             node->uiNodeHandle, &top, &right, &bottom, &left);
     } else {
-        fullImpl->getNodeModifiers()->getCommonModifier()->setMargin(node->uiNodeHandle, &top, &right, &bottom, &left);
+        fullImpl->getNodeModifiers()->getCommonModifier()->setMargin(node->uiNodeHandle, &top, &right, &bottom, &left,
+            nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -1209,6 +1220,12 @@ void ResetMargin(ArkUI_NodeHandle node)
         fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputMargin(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->resetTextAreaMargin(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_TOGGLE) {
+        fullImpl->getNodeModifiers()->getToggleModifier()->resetToggleMargin(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_CHECKBOX) {
+        fullImpl->getNodeModifiers()->getCheckboxModifier()->resetCheckboxMargin(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_RADIO) {
+        fullImpl->getNodeModifiers()->getRadioModifier()->resetRadioMargin(node->uiNodeHandle);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->resetMargin(node->uiNodeHandle);
     }
@@ -1563,7 +1580,7 @@ int32_t SetLinearGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     };
 
     fullImpl->getNodeModifiers()->getCommonModifier()->setLinearGradient(
-        node->uiNodeHandle, values, NUM_4, colors, size * NUM_3);
+        node->uiNodeHandle, values, NUM_4, colors, size * NUM_3, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1648,7 +1665,7 @@ int32_t SetOpacity(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getCommonModifier()->setOpacity(node->uiNodeHandle, item->value[0].f32);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setOpacity(node->uiNodeHandle, item->value[0].f32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -1699,7 +1716,7 @@ int32_t SetBorderWidth(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             node->uiNodeHandle, widthVals, widthUnits, ALLOW_SIZE_4);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBorderWidth(
-            node->uiNodeHandle, widthVals, widthUnits, ALLOW_SIZE_4);
+            node->uiNodeHandle, widthVals, widthUnits, ALLOW_SIZE_4, nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -1767,7 +1784,7 @@ int32_t SetBorderRadius(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBorderRadius(
-            node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4);
+            node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4, nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -1832,7 +1849,7 @@ int32_t SetBorderWidthPercent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
             node->uiNodeHandle, widthVals, widthUnits, ALLOW_SIZE_4);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBorderWidth(
-            node->uiNodeHandle, widthVals, widthUnits, ALLOW_SIZE_4);
+            node->uiNodeHandle, widthVals, widthUnits, ALLOW_SIZE_4, nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -1890,7 +1907,7 @@ int32_t SetBorderRadiusPercent(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
             node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBorderRadius(
-            node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4);
+            node->uiNodeHandle, radiusVals, radiusUnits, ALLOW_SIZE_4, nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -1936,7 +1953,7 @@ int32_t SetBorderColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             node->uiNodeHandle, colors[NUM_0], colors[NUM_1], colors[NUM_2], colors[NUM_3]);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->setBorderColor(
-            node->uiNodeHandle, colors[NUM_0], colors[NUM_1], colors[NUM_2], colors[NUM_3]);
+            node->uiNodeHandle, colors[NUM_0], colors[NUM_1], colors[NUM_2], colors[NUM_3], nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -2216,7 +2233,7 @@ int32_t SetHitTestBehavior(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
         return ERROR_CODE_PARAM_INVALID;
     }
     if (item->value[0].i32 < ArkUI_HitTestMode::ARKUI_HIT_TEST_MODE_DEFAULT ||
-        item->value[0].i32 > ArkUI_HitTestMode::ARKUI_HIT_TEST_MODE_NONE) {
+        item->value[0].i32 > ArkUI_HitTestMode::ARKUI_HIT_TEST_MODE_BLOCK_DESCENDANTS) {
         return ERROR_CODE_PARAM_INVALID;
     }
     // already check in entry point.
@@ -2280,7 +2297,8 @@ int32_t SetShadow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     auto* fullImpl = GetFullImpl();
     ArkUIInt32orFloat32 shadows[NUM_1] = { {.i32 = ArkUI_ShadowStyle::ARKUI_SHADOW_STYLE_OUTER_DEFAULT_XS} };
     shadows[NUM_0].i32 = item->value[0].i32;
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_1);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_1,
+        nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -2338,7 +2356,8 @@ int32_t SetCustomShadow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (length > NUM_6) {
         shadows[NUM_6].i32 = item->value[NUM_6].i32;
     }
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_7);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_7,
+        nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -2765,7 +2784,7 @@ int32_t SetSweepGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     values[NUM_12].i32 = item->size > NUM_5 ? item->value[NUM_5].i32 : static_cast<ArkUI_Int32>(true);
 
     fullImpl->getNodeModifiers()->getCommonModifier()->setSweepGradient(
-        node->uiNodeHandle, values, NUM_13, colors, size * NUM_3, ColorSpace::SRGB);
+        node->uiNodeHandle, values, NUM_13, colors, size * NUM_3, ColorSpace::SRGB, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -2867,7 +2886,7 @@ int32_t SetRadialGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
 
     values[NUM_9].i32 = item->size > NUM_3 ? item->value[NUM_3].i32 : static_cast<ArkUI_Int32>(false);
     fullImpl->getNodeModifiers()->getCommonModifier()->setRadialGradient(
-        node->uiNodeHandle, values, NUM_10, colors, size * NUM_3);
+        node->uiNodeHandle, values, NUM_10, colors, size * NUM_3, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -3361,13 +3380,13 @@ int32_t SetForegroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
         if (std::strcmp(item->string, COLORING_STRATEGY) == 0) {
             isColor = false;
             fullImpl->getNodeModifiers()->getCommonModifier()->setForegroundColor(
-                node->uiNodeHandle, isColor, static_cast<uint32_t>(ForegroundColorStrategy::INVERT));
+                node->uiNodeHandle, isColor, static_cast<uint32_t>(ForegroundColorStrategy::INVERT), nullptr);
             return ERROR_CODE_NO_ERROR;
         }
         if (std::strcmp(item->string, COLOR_MARKERS) == 0 && item->size > 0) {
             isColor = true;
             fullImpl->getNodeModifiers()->getCommonModifier()->setForegroundColor(
-                node->uiNodeHandle, isColor, item->value[0].u32);
+                node->uiNodeHandle, isColor, item->value[0].u32, nullptr);
             return ERROR_CODE_NO_ERROR;
         }
     }
@@ -3379,11 +3398,11 @@ int32_t SetForegroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
         item->value[0].i32 == ArkUI_ColorStrategy::ARKUI_COLOR_STRATEGY_PRIMARY) {
         isColor = false;
         fullImpl->getNodeModifiers()->getCommonModifier()->setForegroundColor(
-            node->uiNodeHandle, isColor, item->value[0].i32);
+            node->uiNodeHandle, isColor, item->value[0].i32, nullptr);
     } else {
         isColor = true;
         fullImpl->getNodeModifiers()->getCommonModifier()->setForegroundColor(
-            node->uiNodeHandle, isColor, item->value[0].u32);
+            node->uiNodeHandle, isColor, item->value[0].u32, nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -3611,7 +3630,7 @@ int32_t SetWidthPercent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->setWidth(
-        node->uiNodeHandle, item->value[NUM_0].f32, UNIT_PERCENT, nullptr);
+        node->uiNodeHandle, item->value[NUM_0].f32, UNIT_PERCENT, nullptr, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -3638,7 +3657,7 @@ int32_t SetHeightPercent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->setHeight(
-        node->uiNodeHandle, item->value[NUM_0].f32, UNIT_PERCENT, nullptr);
+        node->uiNodeHandle, item->value[NUM_0].f32, UNIT_PERCENT, nullptr, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -3671,7 +3690,8 @@ int32_t SetPaddingPercent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     struct ArkUISizeType right = { item->value[rightIndex].f32, UNIT_PERCENT };
     struct ArkUISizeType bottom = { item->value[bottomIndex].f32, UNIT_PERCENT };
     struct ArkUISizeType left = { item->value[leftIndex].f32, UNIT_PERCENT };
-    fullImpl->getNodeModifiers()->getCommonModifier()->setPadding(node->uiNodeHandle, &top, &right, &bottom, &left);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setPadding(node->uiNodeHandle, &top, &right, &bottom, &left,
+        nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -3709,12 +3729,13 @@ int32_t SetMarginPercent(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     struct ArkUISizeType left = { item->value[leftIndex].f32, UNIT_PERCENT };
     if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputMargin(
-            node->uiNodeHandle, &top, &right, &bottom, &left);
+            node->uiNodeHandle, &top, &right, &bottom, &left, nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMargin(
-            node->uiNodeHandle, &top, &right, &bottom, &left);
+            node->uiNodeHandle, &top, &right, &bottom, &left, nullptr);
     } else {
-        fullImpl->getNodeModifiers()->getCommonModifier()->setMargin(node->uiNodeHandle, &top, &right, &bottom, &left);
+        fullImpl->getNodeModifiers()->getCommonModifier()->setMargin(node->uiNodeHandle, &top, &right, &bottom, &left,
+            nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -3797,7 +3818,7 @@ int32_t SetOutlineColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
 
     fullImpl->getNodeModifiers()->getCommonModifier()->setOutlineColor(
-        node->uiNodeHandle, colors, ALLOW_SIZE_8);
+        node->uiNodeHandle, colors, ALLOW_SIZE_8, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -3887,7 +3908,7 @@ int32_t SetColorBlend(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->setColorBlend(
-        node->uiNodeHandle, item->value[NUM_0].u32);
+        node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -3988,8 +4009,8 @@ int32_t SetFocusBox(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto* fullImpl = GetFullImpl();
     int32_t unit = GetDefaultUnit(node, UNIT_FP);
-    fullImpl->getNodeModifiers()->getCommonModifier()->setFocusBoxStyle(
-        node->uiNodeHandle, item->value[0].f32, unit, item->value[1].f32, unit, item->value[2].u32, NUM_7);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setFocusBoxStyle(node->uiNodeHandle, item->value[0].f32, unit,
+        item->value[1].f32, unit, item->value[2].u32, NUM_7, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -4097,13 +4118,14 @@ int32_t SetFontColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     switch (node->type) {
         case ARKUI_NODE_TEXT_INPUT:
             fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputFontColor(
-                node->uiNodeHandle, item->value[0].u32);
+                node->uiNodeHandle, item->value[0].u32, nullptr);
             break;
         case ARKUI_NODE_TEXT:
             fullImpl->getNodeModifiers()->getTextModifier()->setFontColor(node->uiNodeHandle, item->value[0].u32, nullptr);
             break;
         case ARKUI_NODE_SPAN:
-            fullImpl->getNodeModifiers()->getSpanModifier()->setSpanFontColor(node->uiNodeHandle, item->value[0].u32);
+            fullImpl->getNodeModifiers()->getSpanModifier()->setSpanFontColor(
+                node->uiNodeHandle, item->value[0].u32, nullptr);
             break;
         case ARKUI_NODE_BUTTON:
             fullImpl->getNodeModifiers()->getButtonModifier()->setButtonFontColor(
@@ -4111,7 +4133,7 @@ int32_t SetFontColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             break;
         case ARKUI_NODE_TEXT_AREA:
             fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaFontColor(
-                node->uiNodeHandle, item->value[0].u32);
+                node->uiNodeHandle, item->value[0].u32, nullptr);
             break;
         default:
             return ERROR_CODE_PARAM_INVALID;
@@ -4153,7 +4175,7 @@ int32_t SetFontWeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             fullImpl->getNodeModifiers()->getTextModifier()->setFontWeight(node->uiNodeHandle, item->value[0].i32);
             break;
         case ARKUI_NODE_SPAN:
-            fullImpl->getNodeModifiers()->getSpanModifier()->setSpanFontWeight(node->uiNodeHandle, item->value[0].i32);
+            fullImpl->getNodeModifiers()->getSpanModifier()->setSpanFontWeight(node->uiNodeHandle, item->value[0].i32, nullptr);
             break;
         case ARKUI_NODE_BUTTON:
             fullImpl->getNodeModifiers()->getButtonModifier()->setButtonFontWeightEnum(
@@ -4211,18 +4233,21 @@ int32_t SetFontSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     int32_t unit = GetDefaultUnit(node, UNIT_FP);
     if (node->type == ARKUI_NODE_TEXT_INPUT) {
         struct ArkUILengthType fontSize = { nullptr, item->value[0].f32, unit };
-        fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputFontSize(node->uiNodeHandle, &fontSize);
+        fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputFontSize(
+            node->uiNodeHandle, &fontSize, nullptr);
     } else if (node->type == ARKUI_NODE_TEXT) {
-        fullImpl->getNodeModifiers()->getTextModifier()->setFontSize(node->uiNodeHandle, item->value[0].f32, unit, nullptr);
+        fullImpl->getNodeModifiers()->getTextModifier()->setFontSize(
+            node->uiNodeHandle, item->value[0].f32, unit, nullptr);
     } else if (node->type == ARKUI_NODE_SPAN) {
         fullImpl->getNodeModifiers()->getSpanModifier()->setSpanFontSize(
-            node->uiNodeHandle, item->value[0].f32, unit);
+            node->uiNodeHandle, item->value[0].f32, unit, nullptr);
     } else if (node->type == ARKUI_NODE_BUTTON) {
         fullImpl->getNodeModifiers()->getButtonModifier()->setButtonFontSize(node->uiNodeHandle,
             item->value[0].f32, unit);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         struct ArkUIResourceLength fontSize = { item->value[0].f32, unit, nullptr };
-        fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaFontSize(node->uiNodeHandle, &fontSize);
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaFontSize(
+            node->uiNodeHandle, &fontSize, nullptr);
     } else {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -4353,10 +4378,10 @@ int32_t SetCaretColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     auto* fullImpl = GetFullImpl();
     if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCaretColor(
-            node->uiNodeHandle, item->value[NUM_0].u32);
+            node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaCaretColor(
-            node->uiNodeHandle, item->value[NUM_0].u32);
+            node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     } else {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -4402,7 +4427,7 @@ int32_t SetCaretStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     auto* fullImpl = GetFullImpl();
     int32_t unit = GetDefaultUnit(node, UNIT_VP);
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCaret(
-        node->uiNodeHandle, item->value[NUM_0].f32, unit);
+        node->uiNodeHandle, item->value[NUM_0].f32, unit, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -4534,10 +4559,10 @@ int32_t SetPlaceholderColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
     auto* fullImpl = GetFullImpl();
     if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputPlaceholderColor(
-            node->uiNodeHandle, item->value[NUM_0].u32);
+            node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaPlaceholderColor(
-            node->uiNodeHandle, item->value[NUM_0].u32);
+            node->uiNodeHandle, item->value[NUM_0].u32, nullptr);
     } else {
         return ERROR_CODE_PARAM_INVALID;
     }
@@ -4690,7 +4715,7 @@ int32_t SetSelectedBackgroundColor(ArkUI_NodeHandle node, const ArkUI_AttributeI
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputSelectedBackgroundColor(
-        node->uiNodeHandle, item->value[0].u32);
+        node->uiNodeHandle, item->value[0].u32, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -4783,7 +4808,7 @@ int32_t SetTextInputCancelButton(ArkUI_NodeHandle node, const ArkUI_AttributeIte
     }
     
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCancelButton(node->uiNodeHandle,
-        item->value[NUM_0].i32, &size, color, str.c_str());
+        item->value[NUM_0].i32, &size, color, str.c_str(), nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -4879,7 +4904,7 @@ int32_t SetTextInputUnderlineColor(ArkUI_NodeHandle node, const ArkUI_AttributeI
     ArkUI_Bool hasValues[NUM_4] = { 1, 1, 1, 1 };
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputUserUnderlineColor(
-        node->uiNodeHandle, values, hasValues, NUM_4);
+        node->uiNodeHandle, values, hasValues, NUM_4, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -5440,7 +5465,7 @@ int32_t SetTextAreaLineHeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
     }
     int32_t unit = GetDefaultUnit(node, UNIT_FP);
     fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaLineHeight(
-        node->uiNodeHandle, static_cast<ArkUI_Float32>(item->value[0].i32), unit);
+        node->uiNodeHandle, static_cast<ArkUI_Float32>(item->value[0].i32), unit, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -5468,7 +5493,7 @@ int32_t SetTextInputLineHeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     }
     int32_t unit = GetDefaultUnit(node, UNIT_FP);
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputLineHeight(
-        node->uiNodeHandle, static_cast<ArkUI_Float32>(item->value[0].i32), unit);
+        node->uiNodeHandle, static_cast<ArkUI_Float32>(item->value[0].i32), unit, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -6918,6 +6943,35 @@ const ArkUI_AttributeItem* GetListStackFromEnd(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetListSyncLoad(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    ArkUI_Bool enabled = true;
+    if (InRegion(NUM_0, NUM_1, item->value[NUM_0].i32)) {
+        enabled = item->value[NUM_0].i32;
+    }
+    auto listModifier = GetFullImpl()->getNodeModifiers()->getListModifier();
+    listModifier->setListSyncLoad(node->uiNodeHandle, enabled);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetListSyncLoad(ArkUI_NodeHandle node)
+{
+    auto listModifier = GetFullImpl()->getNodeModifiers()->getListModifier();
+    listModifier->resetListSyncLoad(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetListSyncLoad(ArkUI_NodeHandle node)
+{
+    auto listModifier = GetFullImpl()->getNodeModifiers()->getListModifier();
+    ArkUI_Int32 value = listModifier->getListSyncLoad(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
+
 // TextArea
 int32_t SetTextAreaPlaceholderFont(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
@@ -7703,9 +7757,11 @@ int32_t SetTextShadow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
         item->value[3].f32, item->value[4].f32 };
     shadows.emplace_back(shadow);
     if (node->type == ARKUI_NODE_TEXT) {
-        fullImpl->getNodeModifiers()->getTextModifier()->setTextShadow(node->uiNodeHandle, &shadows[0], shadows.size());
+        fullImpl->getNodeModifiers()->getTextModifier()->setTextShadow(node->uiNodeHandle, &shadows[0], shadows.size(),
+            nullptr, nullptr, nullptr, nullptr);
     } else if (node->type == ARKUI_NODE_SPAN) {
-        fullImpl->getNodeModifiers()->getSpanModifier()->setTextShadow(node->uiNodeHandle, &shadows[0], shadows.size());
+        fullImpl->getNodeModifiers()->getSpanModifier()->setTextShadow(node->uiNodeHandle, &shadows[0], shadows.size(),
+            nullptr, nullptr, nullptr, nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -7731,10 +7787,10 @@ int32_t SetTextMinFontSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
             node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputAdaptMinFontSize(
-            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaAdaptMinFontSize(
-            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -7777,10 +7833,10 @@ int32_t SetTextMaxFontSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
             node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputAdaptMaxFontSize(
-            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
         fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaAdaptMaxFontSize(
-            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+            node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -8956,15 +9012,16 @@ int32_t SetTextFontFamily(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
 
     if (node->type == ARKUI_NODE_TEXT_INPUT) {
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputFontFamily(
-            node->uiNodeHandle, const_cast<const char**>(families.get()), fontFamilies.size());
+            node->uiNodeHandle, const_cast<const char**>(families.get()), fontFamilies.size(), nullptr);
     } else if (node->type == ARKUI_NODE_TEXT) {
         fullImpl->getNodeModifiers()->getTextModifier()->setTextFontFamily(
             node->uiNodeHandle, const_cast<const char**>(families.get()), fontFamilies.size(), nullptr);
     } else if (node->type == ARKUI_NODE_SPAN) {
         fullImpl->getNodeModifiers()->getSpanModifier()->setSpanFontFamily(
-            node->uiNodeHandle, const_cast<const char**>(families.get()), fontFamilies.size());
+            node->uiNodeHandle, const_cast<const char**>(families.get()), fontFamilies.size(), nullptr);
     } else if (node->type == ARKUI_NODE_TEXT_AREA) {
-        fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaFontFamily(node->uiNodeHandle, item->string);
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaFontFamily(
+            node->uiNodeHandle, item->string, nullptr);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -10625,7 +10682,8 @@ int32_t SetBackgroundBlurStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     bool isValidColor = false;
     Color inactiveColor = Color::TRANSPARENT;
     fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundBlurStyle(
-        node->uiNodeHandle, &intArray, scale, &greyVector[0], NUM_2, isValidColor, inactiveColor.GetValue(), true);
+        node->uiNodeHandle, &intArray, scale, &greyVector[0], NUM_2, isValidColor, inactiveColor.GetValue(), true,
+        nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -11114,7 +11172,7 @@ int32_t SetMarkAnchor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     CalcDimension yDimension(0, static_cast<DimensionUnit>(unit));
     yDimension.SetValue(item->value[NUM_1].f32);
     fullImpl->getNodeModifiers()->getCommonModifier()->setMarkAnchor(node->uiNodeHandle, xDimension.Value(),
-        unit, yDimension.Value(), unit);
+        unit, yDimension.Value(), unit, nullptr, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -11197,15 +11255,15 @@ int32_t SetLineHeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             break;
         case ARKUI_NODE_SPAN:
             fullImpl->getNodeModifiers()->getSpanModifier()->setSpanLineHeight(
-                node->uiNodeHandle, item->value[0].f32, unit);
+                node->uiNodeHandle, item->value[0].f32, unit, nullptr);
             break;
         case ARKUI_NODE_TEXT_INPUT:
             fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputLineHeight(
-                node->uiNodeHandle, item->value[0].f32, unit);
+                node->uiNodeHandle, item->value[0].f32, unit, nullptr);
             break;
         case ARKUI_NODE_TEXT_AREA:
             fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaLineHeight(
-                node->uiNodeHandle, item->value[0].f32, unit);
+                node->uiNodeHandle, item->value[0].f32, unit, nullptr);
             break;
         default:
             break;
@@ -11239,7 +11297,7 @@ int32_t SetDecoration(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     switch (node->type) {
         case ARKUI_NODE_SPAN:
             fullImpl->getNodeModifiers()->getSpanModifier()->setSpanDecoration(
-                node->uiNodeHandle, decoration, decorationColor, decorationStyle, 1.0f);
+                node->uiNodeHandle, decoration, decorationColor, nullptr, decorationStyle, 1.0f);
             break;
         case ARKUI_NODE_TEXT:
             fullImpl->getNodeModifiers()->getTextModifier()->setTextDecoration(
@@ -11285,7 +11343,7 @@ int32_t SetLetterSpacing(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     switch (node->type) {
         case ARKUI_NODE_SPAN:
             fullImpl->getNodeModifiers()->getSpanModifier()->setSpanLetterSpacing(
-                node->uiNodeHandle, &letterSpacingValue);
+                node->uiNodeHandle, &letterSpacingValue, nullptr);
             break;
         case ARKUI_NODE_TEXT:
             fullImpl->getNodeModifiers()->getTextModifier()->setTextLetterSpacing(
@@ -11293,11 +11351,11 @@ int32_t SetLetterSpacing(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
             break;
         case ARKUI_NODE_TEXT_INPUT:
             fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputLetterSpacing(
-                node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+                node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
             break;
         case ARKUI_NODE_TEXT_AREA:
             fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaLetterSpacing(
-                node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP));
+                node->uiNodeHandle, item->value[0].f32, GetDefaultUnit(node, UNIT_FP), nullptr);
             break;
         default:
             break;
@@ -11744,7 +11802,7 @@ int32_t SetSpanTextBackgroundStyle(ArkUI_NodeHandle node, const ArkUI_AttributeI
     }
 
     fullImpl->getNodeModifiers()->getSpanModifier()->setSpanTextBackgroundStyle(
-        node->uiNodeHandle, item->value[NUM_0].u32, radiusVals, radiusUnits, NUM_4);
+        node->uiNodeHandle, item->value[NUM_0].u32, radiusVals, radiusUnits, NUM_4, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -12087,7 +12145,7 @@ int32_t SetFillColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getImageModifier()->setFillColor(
-        node->uiNodeHandle, static_cast<ArkUI_Uint32>(item->value[0].u32), nullptr);
+        node->uiNodeHandle, static_cast<ArkUI_Uint32>(item->value[0].u32));
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -14634,6 +14692,36 @@ const ArkUI_AttributeItem* GetWaterFlowCachedCount(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetWaterFlowSyncLoad(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size < NUM_1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    ArkUI_Bool syncLoad = DEFAULT_FALSE;
+    if (InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[0].i32)) {
+        syncLoad = item->value[0].i32;
+    }
+    GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setSyncLoad(node->uiNodeHandle, syncLoad);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetWaterFlowSyncLoad(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetSyncLoad(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetWaterFlowSyncLoad(ArkUI_NodeHandle node)
+{
+    ArkUI_Bool syncLoad = GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getSyncLoad(node->uiNodeHandle);
+    g_numberValues[0].i32 = syncLoad;
+    g_attributeItem.size = 1;
+    return &g_attributeItem;
+}
+
 int32_t SetWaterFlowFooter(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (!item->object) {
@@ -14780,7 +14868,7 @@ int32_t SetRelativeContainerGuideLine(ArkUI_NodeHandle node, const ArkUI_Attribu
         guidelineStyle.push_back(style);
     }
     GetFullImpl()->getNodeModifiers()->getRelativeContainerModifier()->setGuideLine(
-        node->uiNodeHandle, guidelineStyle.data(), size);
+        node->uiNodeHandle, guidelineStyle.data(), size, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -15331,6 +15419,36 @@ const ArkUI_AttributeItem* GetGridCachedCount(ArkUI_NodeHandle node)
 {
     ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getGridModifier()->getCachedCount(node->uiNodeHandle);
     g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
+
+int32_t SetGridSyncLoad(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size < NUM_1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    ArkUI_Bool syncLoad = DEFAULT_FALSE;
+    if (InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[0].i32)) {
+        syncLoad = item->value[0].i32;
+    }
+    GetFullImpl()->getNodeModifiers()->getGridModifier()->setSyncLoad(node->uiNodeHandle, syncLoad);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetGridSyncLoad(ArkUI_NodeHandle node)
+{
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getGridModifier()->resetSyncLoad(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetGridSyncLoad(ArkUI_NodeHandle node)
+{
+    ArkUI_Bool syncLoad = GetFullImpl()->getNodeModifiers()->getGridModifier()->getSyncLoad(node->uiNodeHandle);
+    g_numberValues[0].i32 = syncLoad;
+    g_attributeItem.size = 1;
     return &g_attributeItem;
 }
 
@@ -16738,7 +16856,7 @@ int32_t SetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
     static Setter* setters[] = { SetListDirection, SetListSticky, SetListSpace, SetListNodeAdapter, SetListCachedCount,
         SetListScrollToIndex, SetListAlignListItem, SetListChildrenMainSize, SetListInitialIndex, SetListDivider,
         SetListScrollToItemInGroup, SetListLanes, SetListScrollSnapAlign, SetListMaintainVisibleContentPosition,
-        SetListStackFromEnd, SetListFocusWrapMode };
+        SetListStackFromEnd, SetListFocusWrapMode, SetListSyncLoad };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -16750,7 +16868,8 @@ const ArkUI_AttributeItem* GetListAttribute(ArkUI_NodeHandle node, int32_t subTy
 {
     static Getter* getters[] = { GetListDirection, GetListSticky, GetListSpace, GetListNodeAdapter, GetListCachedCount,
         nullptr, GetListAlignListItem, nullptr, GetListInitialIndex, GetListDivider, nullptr, GetListLanes,
-        GetListScrollSnapAlign, GetListMaintainVisibleContentPosition, GetListStackFromEnd, GetListFocusWrapMode };
+        GetListScrollSnapAlign, GetListMaintainVisibleContentPosition, GetListStackFromEnd, GetListFocusWrapMode,
+        GetListSyncLoad };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "loadingprogress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return &g_attributeItem;
@@ -16763,7 +16882,7 @@ void ResetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     static Resetter* resetters[] = { ResetListDirection, ResetListSticky, ResetListSpace, ResetListNodeAdapter,
         ResetListCachedCount, nullptr, ResetListAlignListItem, ResetListChildrenMainSize, ResetListInitialIndex,
         ResetListDivider, nullptr, ResetListLanes, ResetListScrollSnapAlign, ResetListMaintainVisibleContentPosition,
-        ResetListStackFromEnd, ResetListFocusWrapMode };
+        ResetListStackFromEnd, ResetListFocusWrapMode, ResetListSyncLoad };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -16964,7 +17083,8 @@ int32_t SetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
 {
     static Setter* setters[] = { SetLayoutDirection, SetColumnsTemplate, SetRowsTemplate, SetWaterFlowColumnsGap,
         SetWaterFlowRowsGap, SetWaterFlowSectionOption, SetWaterFlowNodeAdapter, SetWaterFlowCachedCount,
-        SetWaterFlowFooter, SetWaterFlowScrollToIndex, SetItemConstraintSize, SetWaterFlowLayoutMode };
+        SetWaterFlowFooter, SetWaterFlowScrollToIndex, SetItemConstraintSize, SetWaterFlowLayoutMode,
+        SetWaterFlowSyncLoad };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -16976,7 +17096,8 @@ void ResetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetLayoutDirection, ResetColumnsTemplate, ResetRowsTemplate,
         ResetWaterFlowColumnsGap, ResetWaterFlowRowsGap, ResetWaterFlowSectionOption, ResetWaterFlowNodeAdapter,
-        ResetWaterFlowCachedCount, ResetWaterFlowFooter, nullptr, ResetItemConstraintSize, ResetWaterFlowLayoutMode };
+        ResetWaterFlowCachedCount, ResetWaterFlowFooter, nullptr, ResetItemConstraintSize, ResetWaterFlowLayoutMode,
+        ResetWaterFlowSyncLoad };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -16988,7 +17109,7 @@ const ArkUI_AttributeItem* GetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t 
 {
     static Getter* getters[] = { GetLayoutDirection, GetColumnsTemplate, GetRowsTemplate, GetWaterFlowColumnsGap,
         GetWaterFlowRowsGap, GetWaterFlowSectionOption, GetWaterFlowNodeAdapter, GetWaterFlowCachedCount, nullptr,
-        nullptr, GetItemConstraintSize, GetWaterFlowLayoutMode };
+        nullptr, GetItemConstraintSize, GetWaterFlowLayoutMode, GetWaterFlowSyncLoad };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -17010,7 +17131,7 @@ int32_t SetRelativeContainerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, 
 int32_t SetGridAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
     static Setter* setters[] = { SetGridColumnsTemplate, SetGridRowsTemplate, SetGridColumnsGap, SetGridRowsGap,
-        SetGridNodeAdapter, SetGridCachedCount, SetGridFocusWrapMode };
+        SetGridNodeAdapter, SetGridCachedCount, SetGridFocusWrapMode, SetGridSyncLoad };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -17031,7 +17152,7 @@ void ResetRelativeContainerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 void ResetGridAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetGridColumnsTemplate, ResetGridRowsTemplate, ResetGridColumnsGap,
-        ResetGridRowsGap, ResetGridNodeAdapter, ResetGridCachedCount, ResetGridFocusWrapMode };
+        ResetGridRowsGap, ResetGridNodeAdapter, ResetGridCachedCount, ResetGridFocusWrapMode, ResetGridSyncLoad };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -17053,7 +17174,7 @@ const ArkUI_AttributeItem* GetRelativeContainerAttribute(ArkUI_NodeHandle node, 
 const ArkUI_AttributeItem* GetGridAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Getter* getters[] = { GetGridColumnsTemplate, GetGridRowsTemplate, GetGridColumnsGap, GetGridRowsGap,
-        GetGridNodeAdapter, GetGridCachedCount };
+        GetGridNodeAdapter, GetGridCachedCount, nullptr, GetGridSyncLoad };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;

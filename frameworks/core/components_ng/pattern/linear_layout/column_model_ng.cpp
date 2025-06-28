@@ -86,6 +86,39 @@ void ColumnModelNG::SetSpace(FrameNode* frameNode, const std::optional<Dimension
     }
 }
 
+void ColumnModelNG::SetSpace(FrameNode* frameNode, const RefPtr<ResourceObject>& spaceResObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LinearLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<LinearLayoutPattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string columnString = pattern->GetResCacheMapByKey("column.space");
+        CalcDimension value;
+        if (columnString.empty()) {
+            ResourceParseUtils::ParseResDimensionVp(resObj, value);
+            pattern->AddResCache("column.space", value.ToString());
+        } else {
+            value = StringUtils::StringToCalcDimension(columnString);
+        }
+        if (GreatOrEqual(value.Value(), 0.0)) {
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, value, frameNode);
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        } else {
+            ACE_RESET_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, frameNode);
+        }
+    };
+    pattern->AddResObj("column.space", spaceResObj, std::move(updateFunc));
+    CalcDimension value;
+    ResourceParseUtils::ParseResDimensionVp(spaceResObj, value);
+    if (GreatOrEqual(value.Value(), 0.0)) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, value, frameNode);
+    }
+}
+
 RefPtr<FrameNode> ColumnModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(
@@ -95,6 +128,17 @@ RefPtr<FrameNode> ColumnModelNG::CreateFrameNode(int32_t nodeId)
         castLinearLayoutProperty->UpdateFlexDirection(FlexDirection::COLUMN);
     }
     return frameNode;
+}
+
+void ColumnModelNG::ResetResObj(FrameNode* frameNode, const std::string& key)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<LinearLayoutPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
 }
 
 void ColumnModelNG::SetAlignItems(FlexAlign flexAlign)

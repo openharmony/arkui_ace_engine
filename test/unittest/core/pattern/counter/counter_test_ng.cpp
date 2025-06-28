@@ -21,6 +21,7 @@
 
 #define protected public
 #define private public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/test_ng.h"
@@ -28,12 +29,12 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "core/components_ng/pattern/counter/counter_theme_wrapper.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
+#include "core/components_ng/pattern/counter/counter_theme_wrapper.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
-#include "frameworks/core/interfaces/arkoala/arkoala_api.h"
 #include "frameworks/core/components_ng/pattern/text/text_pattern.h"
+#include "frameworks/core/interfaces/arkoala/arkoala_api.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -534,15 +535,28 @@ HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest001, TestSize.Lev
 {
     CounterModelNG model;
     model.Create();
-    GetInstance();
 
     auto jsResourceType = JsCounterResourceType::Height;
     auto resObj = AceType::MakeRefPtr<ResourceObject>();
 
     model.CreateWithResourceObj(jsResourceType, resObj);
 
-    auto selfIdealSize = layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize;
-    EXPECT_NE(selfIdealSize->Height()->dimension_.Value(), 0.0);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CounterPattern>();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto counterTheme = pipeline->GetTheme<CounterTheme>();
+    ASSERT_NE(counterTheme, nullptr);
+
+    g_isConfigChangePerform = true;
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto selfIdealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
+    EXPECT_EQ(selfIdealSize->Height()->dimension_.Value(), counterTheme->GetHeight().Value());
 }
 
 /**
@@ -554,14 +568,194 @@ HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest002, TestSize.Lev
 {
     CounterModelNG model;
     model.Create();
-    GetInstance();
 
     auto jsResourceType = JsCounterResourceType::Width;
     auto resObj = AceType::MakeRefPtr<ResourceObject>();
 
     model.CreateWithResourceObj(jsResourceType, resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CounterPattern>();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto counterTheme = pipeline->GetTheme<CounterTheme>();
+    ASSERT_NE(counterTheme, nullptr);
 
-    auto selfIdealSize = layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize;
-    EXPECT_NE(selfIdealSize->Width()->dimension_.Value(), 0.0);
+    g_isConfigChangePerform = true;
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto selfIdealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
+    EXPECT_EQ(selfIdealSize->Width()->dimension_.Value(), counterTheme->GetWidth().Value());
+}
+
+/**
+ * @tc.name: CounterModelNGCreateWithResourceObjTest003
+ * @tc.desc: Test CreateWithResourceObj function with JsCounterResourceType::Height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest003, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+
+    auto jsResourceType = JsCounterResourceType::Height;
+    std::vector<ResourceObjectParams> resObjParamsList;
+    ResourceObjectParams params { .value = "test", .type = ResourceObjectParamType::STRING };
+    resObjParamsList.push_back(params);
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(-1, -1, resObjParamsList, "com.example.test", "entry", 100000);
+    model.CreateWithResourceObj(jsResourceType, resObj);
+
+    auto element = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::DynamicCast<CounterNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CounterPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipelineContext = frameNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    g_isConfigChangePerform = true;
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto selfIdealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
+    EXPECT_EQ(selfIdealSize->Height()->dimension_.Value(), 0);
+}
+
+/**
+ * @tc.name: CounterModelNGCreateWithResourceObjTest004
+ * @tc.desc: Test CreateWithResourceObj function with JsCounterResourceType::Width.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest004, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+
+    auto jsResourceType = JsCounterResourceType::Width;
+    std::vector<ResourceObjectParams> resObjParamsList;
+    ResourceObjectParams params { .value = "test", .type = ResourceObjectParamType::STRING };
+    resObjParamsList.push_back(params);
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(-1, -1, resObjParamsList, "com.example.test", "entry", 100000);
+    model.CreateWithResourceObj(jsResourceType, resObj);
+
+    auto element = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::DynamicCast<CounterNode>(element);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CounterPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipelineContext = frameNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+
+    g_isConfigChangePerform = true;
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto selfIdealSize = layoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
+    EXPECT_EQ(selfIdealSize->Width()->dimension_.Value(), 0);
+}
+
+/**
+ * @tc.name: CounterModelNGCreateWithResourceObjTest005
+ * @tc.desc: Test CreateWithResourceObj function with JsCounterResourceType::BackgroundColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest005, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+
+    auto jsResourceType = JsCounterResourceType::BackgroundColor;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+
+    model.CreateWithResourceObj(jsResourceType, resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CounterPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto counterTheme = pipeline->GetTheme<CounterTheme>();
+    ASSERT_NE(counterTheme, nullptr);
+
+    g_isConfigChangePerform = true;
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+    auto renderContext = frameNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColor().has_value(), false);
+}
+
+/**
+ * @tc.name: CounterModelNGCreateWithResourceObjTest006
+ * @tc.desc: Test CreateWithResourceObj function with JsCounterResourceType::BackgroundColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest006, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+
+    auto jsResourceType = JsCounterResourceType::BackgroundColor;
+    std::vector<ResourceObjectParams> resObjParamsList;
+    ResourceObjectParams params { .value = "test", .type = ResourceObjectParamType::STRING };
+    resObjParamsList.push_back(params);
+    RefPtr<ResourceObject> resObj =
+        AceType::MakeRefPtr<ResourceObject>(-1, -1, resObjParamsList, "com.example.test", "entry", 100000);
+
+    model.CreateWithResourceObj(jsResourceType, resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CounterPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto counterTheme = pipeline->GetTheme<CounterTheme>();
+    ASSERT_NE(counterTheme, nullptr);
+
+    auto pipelineContext = frameNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->SetIsSystemColorChange(true);
+    g_isConfigChangePerform = false;
+    int32_t colorMode = static_cast<int32_t>(ColorMode::LIGHT);
+    pattern->OnColorModeChange(static_cast<int32_t>(ColorMode::DARK));
+    auto renderContext = frameNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColor().has_value(), true);
+
+    g_isConfigChangePerform = true;
+    colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+    EXPECT_EQ(renderContext->GetBackgroundColor().has_value(), true);
+}
+
+/**
+ * @tc.name: CounterModelNGCreateWithResourceObjTest007
+ * @tc.desc: Test CreateWithResourceObj function with JsCounterResourceType error.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CounterTestNg, CounterModelNGCreateWithResourceObjTest007, TestSize.Level1)
+{
+    CounterModelNG model;
+    model.Create();
+    auto resObj = AceType::MakeRefPtr<ResourceObject>();
+    auto jsResourceType = static_cast<JsCounterResourceType>(-1);
+    model.CreateWithResourceObj(jsResourceType, resObj);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto counterTheme = pipeline->GetTheme<CounterTheme>();
+    ASSERT_NE(counterTheme, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColor().has_value(), false);
 }
 } // namespace OHOS::Ace::NG

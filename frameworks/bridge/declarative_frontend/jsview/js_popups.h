@@ -31,6 +31,10 @@ public:
     static void ParseMenuShowInSubWindowParam(
         const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam, bool isCheckThemeValue = true);
     static void ParseLayoutRegionMargin(const JSRef<JSVal>& jsValue, std::optional<CalcDimension>& calcDimension);
+    static void ParseLayoutRegionMargin(const JSRef<JSVal>& jsValue, std::optional<CalcDimension>& calcDimension,
+        RefPtr<ResourceObject>& resObj);
+    static void ParseResLayoutRegionMargin(const RefPtr<ResourceObject>& resObj,
+        std::optional<CalcDimension>& calcDimension);
     static void ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuBlurStyleOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuBorderRadius(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
@@ -45,8 +49,28 @@ public:
     static void ParseMenuHapticFeedbackMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuOutlineWidth(const JSRef<JSVal>& outlineWidthValue, NG::MenuParam& menuParam);
     static void ParseMenuOutlineColor(const JSRef<JSVal>& outlineColorValue, NG::MenuParam& menuParam);
+    static void ParseMenuPreviewScaleMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuAvailableLayoutArea(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuMaskType(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuModalMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
+    static void ParseMenuoffsetParam(const JSRef<JSObject>& offsetObj, NG::MenuParam& menuParam);
+private:
+    static void ParseMenuOutlineColorObject(const JSRef<JSVal>& outlineColorValue, NG::MenuParam& menuParam,
+        NG::BorderColorProperty& outlineColor);
+    static void ParseMenuOutlineColorWithResourceObj(const RefPtr<ResourceObject>& leftColorResObj,
+        const RefPtr<ResourceObject>& rightColorResObj, const RefPtr<ResourceObject>& topColorResObj,
+        const RefPtr<ResourceObject>& bottomColorResObj, NG::BorderColorProperty& outlineColor);
+    static void ParseMenuOutlineColorWithResourceObj(const RefPtr<ResourceObject>& borderColorResObj,
+        NG::BorderColorProperty& outlineColor);
+    static void ParseMenuOutlineWidthObject(const JSRef<JSVal>& outlineWidthValue, NG::MenuParam& menuParam,
+        NG::BorderWidthProperty& outlineWidth);
+    static void ParseMenuOutlineWidthWithResourceObj(const RefPtr<ResourceObject>& borderWidthResObj,
+        NG::BorderWidthProperty& outlineWidth);
+    static void ParseMenuOutlineWidthWithResourceObj(const RefPtr<ResourceObject>& leftResObj,
+        const RefPtr<ResourceObject>& rightResObj, const RefPtr<ResourceObject>& topResObj,
+        const RefPtr<ResourceObject>& bottomResObj, NG::BorderWidthProperty& outlineWidth);
+    static void ParseMenuBorderRadiusWithResourceObj(const RefPtr<ResourceObject>& borderRadiusResObj,
+        NG::BorderRadiusProperty& menuBorderRadius);
 };
 } // namespace OHOS::Ace::Framework
 

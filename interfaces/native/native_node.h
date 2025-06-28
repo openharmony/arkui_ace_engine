@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -136,6 +136,11 @@ typedef enum {
      * @since 20
      */
     ARKUI_NODE_EMBEDDED_COMPONENT,
+    /**
+     * Undefined.
+     * @since 20
+     */
+    ARKUI_NODE_UNDEFINED,
 } ArkUI_NodeType;
 
 /**
@@ -5072,7 +5077,8 @@ typedef enum {
      * The parameter type is {@link ArkUI_EdgeEffect}. The default value is <b>ARKUI_EDGE_EFFECT_NONE</b>.\n
      * .value[1]?.i32: whether to enable the scroll effect when the component content size is smaller than the
      * component itself. Optional. The value <b>1</b> means to enable the scroll effect, and <b>0</b> means the
-     * opposite. The default value is <b>1</b>. \n
+     * opposite. The default value for the List/Grid/WaterFlow component is <b>0</b>, and the default value for the
+     * Scroll component is <b>1</b>. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: effect used at the edges of the component when the boundary of the scrollable content is reached.
@@ -5578,6 +5584,22 @@ typedef enum {
      * @since 16
      */
     NODE_LIST_STACK_FROM_END = 1003014,
+
+    /**
+     * @brief Defines whether the <b>List</b> component loads child nodes synchronously.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the <b>List</b> component synchronously loads child nodes.
+     * The value <b>0</b> means loading by frames, and <b>1</b> means synchronous loading. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the <b>List</b> component synchronously loads child nodes.
+     * The value <b>0</b> means loading by frames, and <b>1</b> means synchronous loading. \n
+     *
+     * @since 20
+     */
+    NODE_LIST_SYNC_LOAD = 1003016,
 
     /**
      * @brief Defines whether to enable loop playback for the swiper. This attribute can be set, reset, and obtained
@@ -6364,6 +6386,22 @@ typedef enum {
     NODE_WATER_FLOW_LAYOUT_MODE,
 
     /**
+     * @brief Defines whether the <b>WaterFlow</b> component loads child nodes synchronously.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the <b>WaterFlow</b> component synchronously loads child nodes.
+     * The value <b>0</b> means loading by frames, and <b>1</b> means synchronous loading. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the <b>WaterFlow</b> component synchronously loads child nodes.
+     * The value <b>0</b> means loading by frames, and <b>1</b> means synchronous loading. \n
+     *
+     * @since 20
+     */
+    NODE_WATER_FLOW_SYNC_LOAD = 1010012,
+
+    /**
      * @brief Sets the number of columns in the water flow layout. If this parameter is not set, one column is used by
      * default. This attribute can be set, reset, and obtained as required through APIs.
      * For example, <b>'1fr 1fr 2fr'</b> indicates three columns, with the first column taking up 1/4 of the parent
@@ -6444,6 +6482,38 @@ typedef enum {
      * .value[0].i32: number of cached items in the water flow adapter. \n
      */
     NODE_GRID_CACHED_COUNT,
+
+    /**
+     * @brief Defines the focus wrap mode for the <b>Grid</b> component.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: focus wrap mode of the <b>Grid</b> component.
+     *                The parameter type is {@link ArkUI_FocusWrapMode}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: focus wrap mode of the <b>Grid</b> component.
+     *                The parameter type is {@link ArkUI_FocusWrapMode}. \n
+     *
+     * @since 20
+     */
+    NODE_GRID_FOCUS_WRAP_MODE = 1013006,
+
+    /**
+     * @brief Defines whether the <b>Grid</b> component loads child nodes synchronously.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the <b>Grid</b> component synchronously loads child nodes.
+     * The value <b>0</b> means loading by frames, and <b>1</b> means synchronous loading. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether the <b>Grid</b> component synchronously loads child nodes.
+     * The value <b>0</b> means loading by frames, and <b>1</b> means synchronous loading. \n
+     *
+     * @since 20
+     */
+    NODE_GRID_SYNC_LOAD = 1013007,
 
     /**
     * @brief Defines the column width of the text picker.
@@ -9183,6 +9253,19 @@ int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInWindow(ArkUI_NodeHandle node, ArkU
 int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInScreen(ArkUI_NodeHandle node, ArkUI_IntOffset* screenOffset);
 
 /**
+ * @brief Obtains the offset of a component relative to the global display.
+ * The relative position does not count in transformation attributes, such as translate.
+ *
+ * @param node Pointer to the <b>ArkUI_NodeHandle</b> representing the component.
+ * @param offset Offset of the component relative to the global display, in px.
+ * @return Result code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 20
+ */
+int32_t OH_ArkUI_NodeUtils_GetLayoutPositionInGlobalDisplay(ArkUI_NodeHandle node, ArkUI_IntOffset* offset);
+
+/**
  * @brief Obtain the position of the component in the window, including the properties of graphic translation changes.
  *
  * @param node ArkUI_NodeHandle pointer.
@@ -9696,6 +9779,24 @@ int32_t OH_ArkUI_PostUITask(ArkUI_ContextHandle context, void* taskData, void (*
  * @since 20
  */
 int32_t OH_ArkUI_PostUITaskAndWait(ArkUI_ContextHandle context, void* taskData, void (*task)(void* taskData));
+
+/**
+ * @brief Sets the inverse color algorithm for components and instances.
+ *
+ * @param uiContext Indicates the context in which the inverse color feature should take effect. If the value is null,
+ *                  the feature applies to the entire application process.
+ * @param forceDark Indicates whether the inverse color feature is enabled.
+ * @param nodeType Indicates the component type for which to enable the inverse color feature. If the value is null,
+ *                 enabling the feature for all components.
+ * @param colorInvertFunc Indicates the user-defined inverse color algorithm.
+ * @return Returns the error code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ERROR_CODE_CAPI_INIT_ERROR} if CAPI init error.
+           Returns {@link ARKUI_ERROR_CODE_FORCE_DARK_CONFIG_INVALID} if force dark config is invalid.
+ * @since 20
+ */
+int32_t OH_ArkUI_SetForceDarkConfig(ArkUI_ContextHandle uiContext, bool forceDark, ArkUI_NodeType nodeType,
+    uint32_t (*colorInvertFunc)(uint32_t color));
 
 #ifdef __cplusplus
 }

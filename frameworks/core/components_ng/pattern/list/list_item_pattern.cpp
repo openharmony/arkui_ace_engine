@@ -674,7 +674,7 @@ void ListItemPattern::StartSpringMotion(float start, float end, float velocity, 
         }
         listItem->MarkDirtyNode();
         if (trigOnFinishEvent) {
-            listItem->FireOnFinshEvent();
+            listItem->FireOnFinishEvent();
         }
     });
 }
@@ -1388,9 +1388,8 @@ void ListItemPattern::HandleFocusEvent()
     pattern->SetFocusIndex(GetIndexInList());
     if (groupIndex >= 0) {
         pattern->SetGroupFocusIndex(groupIndex);
-        pattern->SetFocusIndexChangedByListItemGroup(true);
     } else {
-        pattern->SetFocusIndexChangedByListItemGroup(false);
+        pattern->ResetGroupFocusIndex();
     }
 }
 

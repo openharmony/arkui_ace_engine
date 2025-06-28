@@ -122,7 +122,11 @@ DragDropManager::DragDropManager()
 
 const Point DragDropManager::GetDragMoveLastPointByCurrentPointer(int32_t pointerId)
 {
-    return fingerPointInfo_[pointerId];
+    auto it = fingerPointInfo_.find(pointerId);
+    if (it != fingerPointInfo_.end()) {
+        return it->second;
+    }
+    return Point(0, 0);
 }
 
 void DragDropManager::UpdatePointInfoForFinger(int32_t pointerId, Point point)
@@ -2121,6 +2125,8 @@ void DragDropManager::UpdateNotifyDragEvent(
     notifyEvent->SetY((double)point.GetY());
     notifyEvent->SetScreenX((double)point.GetScreenX());
     notifyEvent->SetScreenY((double)point.GetScreenY());
+    notifyEvent->SetGlobalDisplayX(point.GetGlobalDisplayX());
+    notifyEvent->SetGlobalDisplayY(point.GetGlobalDisplayY());
     if (dragEventType != DragEventType::START) {
         if (dragEventType != DragEventType::DROP) {
             notifyEvent->SetVelocity(velocityTracker_.GetVelocity());
@@ -2140,6 +2146,8 @@ void DragDropManager::UpdateDragEvent(
     event->SetScreenY(point.GetScreenY());
     event->SetDisplayX((double)pointerEvent.GetDisplayX());
     event->SetDisplayY((double)pointerEvent.GetDisplayY());
+    event->SetGlobalDisplayX(pointerEvent.GetGlobalDisplayX());
+    event->SetGlobalDisplayY(pointerEvent.GetGlobalDisplayY());
     event->SetVelocity(velocityTracker_.GetVelocity());
     event->SetSummary(summaryMap_);
     event->SetPreviewRect(GetDragWindowRect(point));
@@ -2168,9 +2176,7 @@ void DragDropManager::ClearExtraInfo()
 bool DragDropManager::IsMSDPDragging() const
 {
     ACE_SCOPED_TRACE("drag: get drag state from msdp");
-    DragState dragState;
-    InteractionInterface::GetInstance()->GetDragState(dragState);
-    return dragState == DragState::START;
+    return InteractionInterface::GetInstance()->IsDragStart();
 }
 
 void DragDropManager::ClearVelocityInfo()
@@ -2516,11 +2522,13 @@ void DragDropManager::InitDragAnimationPointerEvent(const GestureEvent& event, b
     if (isDragStartPending) {
         auto dragMoveLastPoint = GetDragMoveLastPointByCurrentPointer(event.GetPointerId());
         dragAnimationPointerEvent_ = DragPointerEvent(dragMoveLastPoint.GetX(),
-            dragMoveLastPoint.GetY(), dragMoveLastPoint.GetScreenX(), dragMoveLastPoint.GetScreenY());
+            dragMoveLastPoint.GetY(), dragMoveLastPoint.GetScreenX(), dragMoveLastPoint.GetScreenY(),
+            dragMoveLastPoint.GetGlobalDisplayX(), dragMoveLastPoint.GetGlobalDisplayY());
         return;
     }
     dragAnimationPointerEvent_ = DragPointerEvent(event.GetGlobalLocation().GetX(),
-        event.GetGlobalLocation().GetY(), event.GetScreenLocation().GetX(), event.GetScreenLocation().GetY());
+        event.GetGlobalLocation().GetY(), event.GetScreenLocation().GetX(), event.GetScreenLocation().GetY(),
+        event.GetGlobalDisplayLocation().GetX(), event.GetGlobalDisplayLocation().GetY());
 }
 
 void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event,
@@ -3080,7 +3088,6 @@ const RefPtr<NG::OverlayManager> DragDropManager::GetDragAnimationOverlayManager
 
 void DragDropManager::RemoveDragFrameNode(int32_t id)
 {
-    dragFrameNodes_.erase(id);
     gridDragFrameNodes_.erase(id);
     listDragFrameNodes_.erase(id);
     textFieldDragFrameNodes_.erase(id);
@@ -3317,7 +3324,8 @@ void DragDropManager::HandleTouchEvent(const TouchEvent& event)
         if (!IsDragging() || !IsSameDraggingPointer(event.id)) {
             return;
         }
-        auto pointerEvent = DragPointerEvent(event.x, event.y, event.screenX, event.screenY);
+        auto pointerEvent = DragPointerEvent(
+            event.x, event.y, event.screenX, event.screenY, event.globalDisplayX, event.globalDisplayY);
         SetDragAnimationPointerEvent(pointerEvent);
     } else if ((event.type == TouchType::UP) || (event.type == TouchType::CANCEL)) {
         ResetDraggingStatus(event);

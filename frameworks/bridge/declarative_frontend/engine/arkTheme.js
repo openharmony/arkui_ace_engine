@@ -505,6 +505,15 @@ if (globalThis.WithTheme !== undefined) {
         ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions !== null && themeOptions !== void 0 ? themeOptions : {}, theme);
     };
     globalThis.WithTheme.pop = function () {
+        var _a;
+        if (PUV2ViewBase.isNeedBuildPrebuildCmd() && PUV2ViewBase.prebuildFuncQueues.has(PUV2ViewBase.prebuildingElmtId_)) {
+            const prebuildFunc = () => {
+                globalThis.WithTheme.pop();
+            };
+            (_a = PUV2ViewBase.prebuildFuncQueues.get(PUV2ViewBase.prebuildingElmtId_)) === null || _a === void 0 ? void 0 : _a.push(prebuildFunc);
+            ViewStackProcessor.PushPrebuildCompCmd();
+            return;
+        }
         ArkThemeScopeManager.getInstance().onScopeExit();
         getUINativeModule().theme.pop();
     };
@@ -1019,7 +1028,7 @@ class ArkThemeScopeManager {
         (_a = this.defaultTheme) === null || _a === void 0 ? void 0 : _a.unbindFromScope(0);
         this.defaultTheme = ArkThemeScopeManager.SystemTheme;
         const cloneTheme = ArkThemeScopeManager.cloneCustomThemeWithExpand(customTheme);
-        this.defaultTheme = this.makeTheme(customTheme, ThemeColorMode.SYSTEM);
+        this.defaultTheme = this.makeTheme(cloneTheme, ThemeColorMode.SYSTEM);
         this.defaultTheme.bindToScope(0);
         ArkThemeNativeHelper.sendThemeToNative(this.defaultTheme, 0);
         ArkThemeNativeHelper.setDefaultTheme(cloneTheme);

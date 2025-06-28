@@ -107,9 +107,11 @@ ohos_shared_library("ace_ndk") {
       "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
     ]
     external_deps += [
+      "c_utils:utils",
       "graphic_2d:native_drawing_ndk",
       "hilog:libhilog",
       "image_framework:pixelmap",
+      "ipc:ipc_core",
       "napi:ace_napi",
       "resource_management:global_resmgr",
       "udmf:libudmf",

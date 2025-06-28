@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,12 @@
 
 namespace OHOS::Ace::V2 {
 namespace {
+constexpr int XS = 0;
+constexpr int SM = 1;
+constexpr int MD = 2;
+constexpr int LG = 3;
+constexpr int XL = 4;
+constexpr int XXL = 5;
 RefPtr<GridSizeInfo> ParseBreakpoints(const BreakPoints& breakpoints)
 {
     auto sizeInfo = AceType::MakeRefPtr<GridSizeInfo>();
@@ -156,4 +162,28 @@ double GridContainerUtils::ProcessColumnWidth(const std::pair<double, double>& g
     return 0.0;
 }
 
+void GridContainerUtils::InheritGridRowColumns(const RefPtr<V2::GridContainerSize>& gridContainerSize,
+    int32_t *containerSizeArray, int32_t size)
+{
+    for (auto i = 0; i < size; ++i) {
+        if (containerSizeArray[i] > 0) {
+            containerSizeArray[0] = containerSizeArray[i];
+            break;
+        }
+    }
+    if (containerSizeArray[0] <= 0) {
+        return;
+    }
+    for (auto i = 1; i < size; ++i) {
+        if (containerSizeArray[i] <= 0) {
+            containerSizeArray[i] = containerSizeArray[i - 1];
+        }
+    }
+    gridContainerSize->xs = containerSizeArray[XS];
+    gridContainerSize->sm = containerSizeArray[SM];
+    gridContainerSize->md = containerSizeArray[MD];
+    gridContainerSize->lg = containerSizeArray[LG];
+    gridContainerSize->xl = containerSizeArray[XL];
+    gridContainerSize->xxl = containerSizeArray[XXL];
+}
 } // namespace OHOS::Ace::V2

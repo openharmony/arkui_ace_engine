@@ -28,6 +28,7 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -49,6 +50,31 @@ void ArcIndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto actualHeight = selfIdealSize.Height().has_value()
                             ? selfIdealSize.Height().value()
                             : Dimension(ARC_INDEXER_SIZE, DimensionUnit::VP).ConvertToPx();
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (layoutPolicy.has_value()) {
+        auto isMainMatchParent =
+            (layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH)
+                == LayoutCalPolicy::MATCH_PARENT);
+        auto isCrossMatchParent =
+            (layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH)
+                == LayoutCalPolicy::MATCH_PARENT);
+
+        // When the width parameter is MATCH_PARENT, set the width to be equal to the parent's width.
+        if (isMainMatchParent) {
+            auto parentMainSize = GetMainAxisSize(layoutConstraint.parentIdealSize, Axis::VERTICAL);
+            if (parentMainSize) {
+                actualHeight = parentMainSize.value();
+            }
+        }
+
+        // When the height parameter is MATCH_PARENT, set the height to be equal to the parent's height.
+        if (isCrossMatchParent) {
+            auto parentCrossSize = GetCrossAxisSize(layoutConstraint.parentIdealSize, Axis::VERTICAL);
+            if (parentCrossSize) {
+                actualWidth = parentCrossSize.value();
+            }
+        }
+    }
     actualSize_ = actualWidth > actualHeight ? actualHeight : actualWidth;
     layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(actualWidth, actualHeight));
     MeasureArc(layoutWrapper);
@@ -93,7 +119,7 @@ void ArcIndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 OffsetT<Dimension> ArcIndexerLayoutAlgorithm::CalcArcItemPosition(LayoutWrapper* layoutWrapper, int32_t index)
 {
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingWithoutBorder();
-    float itemAngle = (startAngle_ + stepAngle_ * index) * M_PI / HALF_CIRCLE_ANGLE;
+    float itemAngle = (startAngle_ + stepAngle_ * index) * ACE_PI / HALF_CIRCLE_ANGLE;
     auto positionX = arcCenter_.GetX() + arcRadius_ * cos(itemAngle) - itemRadius_ - padding.left.value_or(0);
     auto positionY = arcCenter_.GetY() + arcRadius_ * sin(itemAngle) - itemRadius_ - padding.top.value_or(0);
     return OffsetT<Dimension>(Dimension(positionX), Dimension(positionY));
@@ -141,7 +167,7 @@ void ArcIndexerLayoutAlgorithm::MeasureArc(LayoutWrapper* layoutWrapper)
         arcRadius_ = height * HALF - itemRadius_ - verticalPadding * HALF;
     }
 
-    stepAngle_ = DOUBLE * atan2f(itemRadius_, arcRadius_) * HALF_CIRCLE_ANGLE / M_PI;
+    stepAngle_ = DOUBLE * atan2f(itemRadius_, arcRadius_) * HALF_CIRCLE_ANGLE / ACE_PI;
     auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(true);
     if (autoCollapse && fullCount_ > ARC_INDEXER_COLLAPSE_ITEM_COUNT) {
         fullCount_ += 1;

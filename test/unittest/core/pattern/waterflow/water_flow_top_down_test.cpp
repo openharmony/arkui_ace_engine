@@ -672,6 +672,7 @@ HWTEST_F(WaterFlowTestNg, Cache002, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, Refresh002, TestSize.Level1)
 {
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     MockAnimationManager::GetInstance().SetTicks(1);
     MockAnimationManager::GetInstance().Reset();
     RefreshModelNG refreshModel;
@@ -1438,5 +1439,79 @@ HWTEST_F(WaterFlowTopDownScrollerTestNg, ModeTransition001, TestSize.Level1)
     auto secObj = pattern_->GetOrCreateWaterFlowSections();
     secObj->ChangeData(0, 0, newSection);
     FlushUITasks();
+}
+
+/**
+ * @tc.name: onWillStopDragging001
+ * @tc.desc: Test onWillStopDragging001
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, onWillStopDragging001, TestSize.Level1)
+{
+    bool isOnWillStopDraggingCallBack = false;
+    Dimension willStopDraggingVelocity;
+    auto onWillStopDragging = [&willStopDraggingVelocity, &isOnWillStopDraggingCallBack](
+                           Dimension velocity) {
+        willStopDraggingVelocity = velocity;
+        isOnWillStopDraggingCallBack = true;
+    };
+
+    WaterFlowModelNG model = CreateWaterFlow();
+    CreateWaterFlowItems();
+    CreateDone();
+    eventHub_->SetOnWillStopDragging(onWillStopDragging);
+
+    GestureEvent info;
+    info.SetMainVelocity(1200.f);
+    info.SetMainDelta(200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isOnWillStopDraggingCallBack);
+    EXPECT_FLOAT_EQ(willStopDraggingVelocity.Value(), info.GetMainVelocity());
+}
+
+/**
+ * @tc.name: onWillStopDragging002
+ * @tc.desc: Test onWillStopDragging002
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, onWillStopDragging002, TestSize.Level1)
+{
+    bool isOnWillStopDraggingCallBack = false;
+    Dimension willStopDraggingVelocity;
+    auto onWillStopDragging = [&willStopDraggingVelocity, &isOnWillStopDraggingCallBack](
+                           Dimension velocity) {
+        willStopDraggingVelocity = velocity;
+        isOnWillStopDraggingCallBack = true;
+    };
+
+    WaterFlowModelNG model = CreateWaterFlow();
+    CreateWaterFlowItems();
+    CreateDone();
+    eventHub_->SetOnWillStopDragging(onWillStopDragging);
+
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isOnWillStopDraggingCallBack);
+    EXPECT_FLOAT_EQ(willStopDraggingVelocity.Value(), info.GetMainVelocity());
 }
 } // namespace OHOS::Ace::NG

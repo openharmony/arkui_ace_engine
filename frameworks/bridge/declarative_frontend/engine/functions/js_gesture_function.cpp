@@ -18,9 +18,10 @@
 
 #include "base/log/log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_common_utils.h"
 
 namespace OHOS::Ace::Framework {
-
+using namespace OHOS::Ace::Framework::CommonUtils;
 void JsGestureFunction::Execute()
 {
     JsFunction::Execute();
@@ -138,6 +139,7 @@ JSRef<JSObject> JsGestureFunction::CreateFingerInfo(const FingerInfo& fingerInfo
     const OHOS::Ace::Offset& globalLocation = fingerInfo.globalLocation_;
     const OHOS::Ace::Offset& localLocation = fingerInfo.localLocation_;
     const OHOS::Ace::Offset& screenLocation  = fingerInfo.screenLocation_;
+    const OHOS::Ace::Offset& globalDisplayLocation  = fingerInfo.globalDisplayLocation_;
     fingerInfoObj->SetProperty<int32_t>("id", fingerInfo.fingerId_);
     fingerInfoObj->SetProperty<int32_t>("hand", fingerInfo.operatingHand_);
     fingerInfoObj->SetProperty<double>("globalX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
@@ -146,6 +148,10 @@ JSRef<JSObject> JsGestureFunction::CreateFingerInfo(const FingerInfo& fingerInfo
     fingerInfoObj->SetProperty<double>("localY", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
     fingerInfoObj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
     fingerInfoObj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));
+    fingerInfoObj->SetProperty<double>(
+        "globalDisplayX", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX()));
+    fingerInfoObj->SetProperty<double>(
+        "globalDisplayY", PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY()));
     return fingerInfoObj;
 }
 

@@ -108,12 +108,10 @@ config("ace_config") {
 
   if (use_mingw_win) {
     cflags_cc += [ "-std=c++17" ]
-    defines += [ "_USE_MATH_DEFINES" ]
   }
 
   if (use_linux) {
     cflags_cc += [ "-std=c++17" ]
-    defines += [ "_USE_MATH_DEFINES" ]
   }
 
   ldflags = []

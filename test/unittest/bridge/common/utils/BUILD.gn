@@ -23,6 +23,7 @@ ohos_unittest("bridge_utils_test") {
     "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
     "$ace_root/frameworks/core/components/common/properties/clip_path.cpp",
     "$ace_root/frameworks/core/components/common/properties/decoration.cpp",
+    "$ace_root/frameworks/core/pipeline/base/constants.cpp",
     "utils_test.cpp",
   ]
 

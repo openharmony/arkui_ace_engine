@@ -25,6 +25,7 @@
 #include "core/event/ace_events.h"
 #include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1078,19 +1079,19 @@ OffsetF SwiperIndicatorPattern::CalculateAngleOffset(float centerX, float center
     double radians = 0.0;
     OffsetF angleOffset;
     if (GreatOrEqual(angle, 0.0) && LessNotEqual(angle, QUARTER_CIRCLE_ANGLE)) {
-        radians = std::abs(angle) * M_PI / HALF_CIRCLE_ANGLE;
+        radians = std::abs(angle) * ACE_PI / HALF_CIRCLE_ANGLE;
         angleOffset.SetX(centerX + cos(radians) * radius);
         angleOffset.SetY(centerY + sin(radians) * radius);
     } else if (GreatOrEqual(angle, QUARTER_CIRCLE_ANGLE) && LessNotEqual(angle, HALF_CIRCLE_ANGLE)) {
-        radians = std::abs(HALF_CIRCLE_ANGLE - angle) * M_PI / HALF_CIRCLE_ANGLE;
+        radians = std::abs(HALF_CIRCLE_ANGLE - angle) * ACE_PI / HALF_CIRCLE_ANGLE;
         angleOffset.SetX(centerX - cos(radians) * radius);
         angleOffset.SetY(centerY + sin(radians) * radius);
     } else if (GreatOrEqual(angle, HALF_CIRCLE_ANGLE) && LessNotEqual(angle, THREE_QUARTER_CIRCLE_ANGLE)) {
-        radians = std::abs(angle - HALF_CIRCLE_ANGLE) * M_PI / HALF_CIRCLE_ANGLE;
+        radians = std::abs(angle - HALF_CIRCLE_ANGLE) * ACE_PI / HALF_CIRCLE_ANGLE;
         angleOffset.SetX(centerX - cos(radians) * radius);
         angleOffset.SetY(centerY - sin(radians) * radius);
     } else if (GreatOrEqual(angle, THREE_QUARTER_CIRCLE_ANGLE) && LessNotEqual(angle, FULL_CIRCLE_ANGLE)) {
-        radians = std::abs(FULL_CIRCLE_ANGLE - angle) * M_PI / HALF_CIRCLE_ANGLE;
+        radians = std::abs(FULL_CIRCLE_ANGLE - angle) * ACE_PI / HALF_CIRCLE_ANGLE;
         angleOffset.SetX(centerX + cos(radians) * radius);
         angleOffset.SetY(centerY - sin(radians) * radius);
     }
@@ -1101,7 +1102,7 @@ OffsetF SwiperIndicatorPattern::CalculateRectLayout(
     double angle, float radius, OffsetF angleOffset, Dimension& width, Dimension& height)
 {
     OffsetF hotRegionOffset = angleOffset;
-    Dimension oneAngleLength = Dimension(sin(M_PI / HALF_CIRCLE_ANGLE) * radius, DimensionUnit::PX);
+    Dimension oneAngleLength = Dimension(sin(ACE_PI / HALF_CIRCLE_ANGLE) * radius, DimensionUnit::PX);
     // The number 0.5 represents equal division
     if ((GreatOrEqual(angle, QUARTER_CIRCLE_ANGLE * 0.5) &&
             LessNotEqual(angle, QUARTER_CIRCLE_ANGLE * 0.5 + QUARTER_CIRCLE_ANGLE)) ||

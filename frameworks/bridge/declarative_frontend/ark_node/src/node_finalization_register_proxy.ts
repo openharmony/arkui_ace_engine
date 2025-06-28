@@ -36,6 +36,7 @@ class FrameNodeFinalizationRegisterProxy {
   constructor() {
     this.finalizationRegistry_ = new FinalizationRegistry((heldValue: number) => {
       FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(heldValue);
+      FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.delete(heldValue);
     });
   }
   public static register(target: FrameNode, heldValue: number) {
@@ -45,6 +46,7 @@ class FrameNodeFinalizationRegisterProxy {
   public static instance_: FrameNodeFinalizationRegisterProxy = new FrameNodeFinalizationRegisterProxy();
   public static ElementIdToOwningFrameNode_ = new Map<number, WeakRef<FrameNode>>();
   public static FrameNodeInMainTree_ = new Map<number, FrameNode>();
+  public static rootFrameNodeIdToBuilderNode_ = new Map<number, WeakRef<FrameNode>>();
   private finalizationRegistry_: FinalizationRegistry;
 }
 

@@ -298,11 +298,14 @@ public:
     bool IsScrollable() const;
     void AvoidAiBar();
 
+    void BeforeCreateLayoutWrapper() override;
     void AvoidSafeArea(bool forceAvoid = false);
+    void AvoidKeyboard(bool forceAvoid);
     void CheckBuilderChange();
     float GetSheetHeightChange();
     void ScrollTo(float height);
     bool AdditionalScrollTo(const RefPtr<FrameNode>& scroll, float height);
+    void SetColumnMinSize(bool reset = false);
     float InitialSingleGearHeight(NG::SheetStyle& sheetStyle);
     float GetSheetTopSafeArea();
     float UpdateSheetTransitionOffset();
@@ -361,10 +364,11 @@ public:
     bool GetWindowButtonRect(NG::RectF& floatButtons);
     bool GetWindowButtonRectForAllAPI(NG::RectF& floatButtons);
 
+    bool IsPcOrPadFreeMultiWindowMode() const;
+
     void SetBottomOffset(const SheetStyle &sheetStyle)
     {
-        DeviceType deviceType = SystemProperties::GetDeviceType();
-        if (deviceType != DeviceType::TWO_IN_ONE) {
+        if (!IsPcOrPadFreeMultiWindowMode()) {
             TAG_LOGI(AceLogTag::ACE_SHEET, "Bottom offset invalid");
             return;
         }
@@ -575,6 +579,16 @@ public:
         sheetOffsetY_ = offsetY;
     }
 
+    bool IsWindowRotate() const
+    {
+        return windowRotate_;
+    }
+
+    void SetWindowRotate(bool windowRotate)
+    {
+        windowRotate_ = windowRotate;
+    }
+
     void SetWindowChanged(bool change)
     {
         windowChanged_ = change;
@@ -603,6 +617,11 @@ public:
     void SetIsScrolling(bool value)
     {
        isScrolling_ = value;
+    }
+
+    SheetKeyboardAvoidMode GetKeyboardAvoidMode() const
+    {
+        return keyboardAvoidMode_;
     }
 
     float GetScrollHeightNoProcess() const
@@ -932,6 +951,9 @@ public:
     void ResetScrollUserDefinedIdealSize(const RefPtr<SheetObject>& oldObject, const RefPtr<SheetObject>& newObject);
     void UpdateSheetPopupInfo(const SheetPopupInfo& sheetPopupInfo)
     {
+        if (!NearEqual(sheetPopupInfo_.sheetOffsetY, sheetPopupInfo.sheetOffsetY)) {
+            sheetOffsetYChanged_ = true;
+        }
         sheetPopupInfo_ = sheetPopupInfo;
     }
 
@@ -1021,6 +1043,7 @@ public:
         return windowSize_;
     }
 
+    void TranslateTo(float height);
     void GetArrowOffsetByPlacement(const RefPtr<SheetPresentationLayoutAlgorithm>& layoutAlgorithm);
     void DismissSheetShadow(const RefPtr<RenderContext>& context);
     void ResetClipShape();
@@ -1058,8 +1081,6 @@ private:
 
     void RegisterHoverModeChangeCallback();
     void InitPageHeight();
-    void TranslateTo(float height);
-    void SetColumnMinSize(bool reset = false);
     void UpdateCloseIconStatus();
     void UpdateTitlePadding();
     RefPtr<FrameNode> GetTitleNode();
@@ -1093,6 +1114,7 @@ private:
     void SetSheetOuterBorderWidth(const RefPtr<SheetTheme>& sheetTheme, const NG::SheetStyle& sheetStyle);
     PipelineContext* GetSheetMainPipeline() const;
     float GetBottomSafeArea();
+    void StopModifySheetTransition();
     void AvoidKeyboardBySheetMode(bool forceAvoid = false);
     void DecreaseScrollHeightInSheet(float decreaseHeight);
     void UpdateSheetWhenSheetTypeChanged();
@@ -1140,7 +1162,7 @@ private:
     float wrapperHeight_ = 0.0f; // sheetWrapper frameSize Height
     float wrapperWidth_ = 0.0f; // sheetWrapper frameSize Width
     float pageHeight_ = 0.0f; // root Height, = maxSize.Height()
-    float scrollHeight_ = 0.0f;
+    float scrollHeight_ = 0.0f; // not scroll frameHeight, it is scroll Height after ScrollTo.
     float preWidth_ = 0.0f;
     int32_t preType_ = -1;
     float sheetTopSafeArea_ = .0f;
@@ -1209,6 +1231,7 @@ private:
     bool isPlayTransition_ = false;
     Placement finalPlacement_ = Placement::BOTTOM;
     bool showArrow_ = true;
+    bool sheetOffsetYChanged_ = false;
     SheetArrowPosition arrowPosition_ = SheetArrowPosition::NONE;
     SheetPopupInfo sheetPopupInfo_;
     WeakPtr<FrameNode> closeButtonNode_;

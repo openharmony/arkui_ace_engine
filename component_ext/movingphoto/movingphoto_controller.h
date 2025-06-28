@@ -32,6 +32,12 @@ public:
     using StartPlaybackImpl = std::function<void()>;
     using StopPlaybackImpl = std::function<void()>;
     using RefreshMovingPhotoImpl = std::function<void()>;
+    using PauseImpl = std::function<void()>;
+    using ResetImpl = std::function<void()>;
+    using RestartImpl = std::function<void()>;
+    using EnableTransitionImpl = std::function<void(bool)>;
+    using SetPlaybackPeriodFucImpl = std::function<void(int64_t, int64_t)>;
+    using EnableAutoPlayImpl = std::function<void(bool)>;
 
     void SetStartPlaybackImpl(StartPlaybackImpl&& startPlaybackImpl)
     {
@@ -69,10 +75,88 @@ public:
         }
     }
 
+    void SetPauseImpl(PauseImpl&& pauseImpl)
+    {
+        pauseImpl_ = std::move(pauseImpl);
+    }
+
+    void Pause()
+    {
+        if (pauseImpl_) {
+            pauseImpl_();
+        }
+    }
+
+    void SetResetImpl(ResetImpl&& resetImpl)
+    {
+        resetImpl_ = std::move(resetImpl);
+    }
+
+    void Reset()
+    {
+        if (resetImpl_) {
+            resetImpl_();
+        }
+    }
+
+    void SetRestartImpl(RestartImpl&& restartImpl)
+    {
+        restartImpl_ = std::move(restartImpl);
+    }
+
+    void Restart()
+    {
+        if (restartImpl_) {
+            restartImpl_();
+        }
+    }
+
+    void SetPlaybackPeriodImpl(SetPlaybackPeriodFucImpl&& setPlaybackPeriodImpl)
+    {
+        setPlaybackPeriodFucImpl_ = std::move(setPlaybackPeriodImpl);
+    }
+
+    void SetPlaybackPeriod(int64_t startTime, int64_t endTime)
+    {
+        if (setPlaybackPeriodFucImpl_) {
+            setPlaybackPeriodFucImpl_(startTime, endTime);
+        }
+    }
+
+    void SetEnableTransitionImpl(EnableTransitionImpl&& enableTransitionImpl)
+    {
+        enableTransitionImpl_ = std::move(enableTransitionImpl);
+    }
+
+    void EnableTransition(bool enabled)
+    {
+        if (enableTransitionImpl_) {
+            enableTransitionImpl_(enabled);
+        }
+    }
+
+    void SetEnableAutoPlayImpl(EnableAutoPlayImpl&& enableAutoPlayImpl)
+    {
+        enableAutoPlayImpl_ = std::move(enableAutoPlayImpl);
+    }
+
+    void EnableAutoPlay(bool enabled)
+    {
+        if (enableAutoPlayImpl_) {
+            enableAutoPlayImpl_(enabled);
+        }
+    }
+
 private:
     StartPlaybackImpl startPlaybackImpl_;
     StopPlaybackImpl stopPlaybackImpl_;
     RefreshMovingPhotoImpl refreshMovingPhotoImpl_;
+    PauseImpl pauseImpl_;
+    ResetImpl resetImpl_;
+    RestartImpl restartImpl_;
+    EnableTransitionImpl enableTransitionImpl_;
+    SetPlaybackPeriodFucImpl setPlaybackPeriodFucImpl_;
+    EnableAutoPlayImpl enableAutoPlayImpl_;
 };
 
 } // namespace OHOS::Ace::NG

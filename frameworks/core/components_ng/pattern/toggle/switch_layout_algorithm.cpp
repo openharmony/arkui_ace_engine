@@ -60,6 +60,12 @@ std::optional<SizeF> SwitchLayoutAlgorithm::MeasureContent(
             frameHeight = contentConstraint.maxSize.Height();
         }
     }
+
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+
+    if (layoutPolicy.has_value() && layoutPolicy->IsMatch()) {
+        LayoutPolicyIsMatchParent(contentConstraint, layoutPolicy, frameWidth, frameHeight);
+    }
     float width = 0.0f;
     float height = 0.0f;
     CalcHeightAndWidth(frameNode, height, width, frameHeight, frameWidth);
@@ -128,6 +134,21 @@ void SwitchLayoutAlgorithm::CalcHeightAndWidth(
         } else {
             height = frameHeight;
             width = frameWidth;
+        }
+    }
+}
+
+void SwitchLayoutAlgorithm::LayoutPolicyIsMatchParent(const LayoutConstraintF& contentConstraint,
+    std::optional<NG::LayoutPolicyProperty> layoutPolicy, float& frameWidth, float& frameHeight)
+{
+    if (layoutPolicy->IsWidthMatch()) {
+        if (contentConstraint.parentIdealSize.Width().has_value()) {
+            frameWidth = contentConstraint.parentIdealSize.Width().value();
+        }
+    }
+    if (layoutPolicy->IsHeightMatch()) {
+        if (contentConstraint.parentIdealSize.Height().has_value()) {
+            frameHeight = contentConstraint.parentIdealSize.Height().value();
         }
     }
 }

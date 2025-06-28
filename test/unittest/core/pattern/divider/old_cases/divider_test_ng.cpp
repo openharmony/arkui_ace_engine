@@ -18,6 +18,7 @@
 #define protected public
 
 #include "base/geometry/ng/size_t.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/divider/divider_layout_algorithm.h"
@@ -25,6 +26,7 @@
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -329,15 +331,46 @@ HWTEST_F(DividerTestNg, DivideAlgorithmTest004, TestSize.Level1)
  */
 HWTEST_F(DividerTestNg, ResObjDividerColorTest1, TestSize.Level1)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<Pattern>();
-    CHECK_NULL_VOID(pattern);
-    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);;
-    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {};
-    updateFunc(resObj);
-    pattern->AddResObj("divider.Color", resObj, std::move(updateFunc));
+    testProperty.strokeWidth = STROKE_WIDTH;
+    testProperty.vertical = VERTICAL_TRUE;
+    auto frameNode = CreateDividerNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DividerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    DividerModelNG dividerModelNG;
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, 0);
+    dividerModelNG.DividerColor(resObj);
     std::string divider = pattern->GetResCacheMapByKey("divider.Color");
     EXPECT_EQ(divider, "");
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate
+ * @tc.desc: Test OnColorConfigurationUpdate of Divider
+ * @tc.type: FUNC
+ */
+HWTEST_F(DividerTestNg, OnColorConfigurationUpdateTest001, TestSize.Level1)
+{
+    testProperty.strokeWidth = STROKE_WIDTH;
+    testProperty.vertical = VERTICAL_TRUE;
+    LayoutConstraintF layoutConstraintF;
+    layoutConstraintF.maxSize = MAX_SIZE;
+    RefPtr<DividerLayoutAlgorithm> dividerLayoutAlgorithm = AceType::MakeRefPtr<DividerLayoutAlgorithm>();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
+    RefPtr<FrameNode> frameNode = CreateDividerNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DividerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    pattern->OnColorConfigurationUpdate();
+    g_isConfigChangePerform = false;
+    auto paintProperty = frameNode->GetPaintProperty<DividerRenderProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto color = paintProperty->GetDividerColorValue();
+    EXPECT_EQ(color.ColorToString(), "#FF000000");
 }
 } // namespace OHOS::Ace::NG

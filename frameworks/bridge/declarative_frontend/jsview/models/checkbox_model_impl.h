@@ -34,6 +34,8 @@ public:
     void ResetSelectedColor() override {};
     void ResetUnSelectedColor() override {};
     void ResetCheckMarkColor() override {};
+    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
+        const CheckBoxColorType checkBoxColorType) override {};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_CHECKBOX_MODEL_IMPL_H

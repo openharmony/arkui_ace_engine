@@ -33,18 +33,19 @@ public:
     {
         return arcAarRect_;
     }
-    virtual bool InBarTouchRegion(const Point& point) const override;
-    virtual bool InBarHoverRegion(const Point& point) const override;
-    virtual bool InBarRectRegion(const Point& point) const override;
-    virtual void SetBarRegion(const Offset& offset, const Size& size) override;
-    virtual void SetRoundTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset,
+    bool InBarTouchRegion(const Point& point) const override;
+    bool InBarHoverRegion(const Point& point) const override;
+    bool InBarRectRegion(const Point& point) const override;
+    void SetBarRegion(
+        const Offset& offset, const Size& size, const RefPtr<PipelineContext>& context = nullptr) override;
+    void SetRoundTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset,
         double mainScrollExtent) override;
-    virtual float CalcPatternOffset(float scrollBarOffset) const override;
+    float CalcPatternOffset(float scrollBarOffset) const override;
 
 private:
     void SetRoundTrickRegion(double estimatedHeight, double barRegionSize, double activeSize,
         double activeMainOffset, double normalWidth, const Size& size);
-    void CalcReservedHeight() override;
+    void CalcReservedHeight(const RefPtr<PipelineContext>& context = nullptr) override;
 
 private:
     ArcRound arcHoverRegion_;

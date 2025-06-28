@@ -193,7 +193,7 @@ void ListHeightOffsetCalculator::CalculateLazyForEachNodeWithPosMap(RefPtr<UINod
 void ListHeightOffsetCalculator::CalculateUINode(RefPtr<UINode> node, bool checkStart)
 {
     CHECK_NULL_VOID(node);
-    auto children = node->GetChildren();
+    const auto& children = node->GetChildren();
     int32_t index = 0;
     for (const auto& child : children) {
         index++;

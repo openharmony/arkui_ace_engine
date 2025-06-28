@@ -24,7 +24,9 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
-#include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_common_event_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_cited_event_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_event_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_hover_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
@@ -661,7 +663,7 @@ void JSRichEditor::EditMenuOptions(const JSCallbackInfo& info)
     NG::OnPrepareMenuCallback onPrepareMenuCallback;
     JSViewAbstract::ParseEditMenuOptions(info, onCreateMenuCallback, onMenuItemClick, onPrepareMenuCallback);
     RichEditorModel::GetInstance()->SetSelectionMenuOptions(
-        std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 
 void JSRichEditor::SetOnShare(const JSCallbackInfo& info)

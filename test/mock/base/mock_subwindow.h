@@ -28,7 +28,7 @@ public:
     MOCK_METHOD0(InitContainer, void());
     MOCK_METHOD0(ResizeWindow, void());
     MOCK_METHOD0(ResizeWindowForMenu, void());
-    MOCK_METHOD1(SetFollowParentWindowLayoutEnabled, void(bool enable));
+    MOCK_METHOD1(SetFollowParentWindowLayoutEnabled, bool(bool enable));
     MOCK_METHOD0(GetRect, NG::RectF());
     MOCK_METHOD0(UpdatePreviewPosition, void());
     MOCK_METHOD1(GetMenuPreviewCenter, bool(NG::OffsetF& offset));

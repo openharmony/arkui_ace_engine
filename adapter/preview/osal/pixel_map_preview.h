@@ -49,9 +49,9 @@ public:
     }
     bool EncodeTlv(std::vector<uint8_t>& buff) override;
     uint32_t WritePixels(const WritePixelsOptions& opts) override;
-    bool GetIsWideColorGamut() const override
+    uint32_t GetInnerColorGamut() const override
     {
-        return false;
+        return 0;
     }
     void SetMemoryName(std::string pixelMapName) const override;
 

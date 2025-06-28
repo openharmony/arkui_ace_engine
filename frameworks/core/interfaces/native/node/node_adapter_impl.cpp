@@ -382,15 +382,31 @@ ArkUI_Int32 GetAllItem(ArkUINodeAdapterHandle handle, ArkUINodeHandle** items, A
     return handle->builder->GetAllItem(items, size);
 }
 
+int32_t GetLazyForEachChildIndex(const RefPtr<NG::UINode>& node)
+{
+    int32_t index = 0;
+    for (const auto& iter : node->GetChildren()) {
+        if (AceType::InstanceOf<NG::LazyForEachNode>(iter)) {
+            return index;
+        }
+        index++;
+    }
+    return -1;
+}
+
 ArkUI_Bool AttachHostNode(ArkUINodeAdapterHandle handle, ArkUINodeHandle host)
 {
     CHECK_NULL_RETURN(handle, true);
     CHECK_NULL_RETURN(host, true);
+    auto* uiNode = reinterpret_cast<NG::UINode*>(host);
+    // A NodeAdapter only allows binding to one LazyForEach
+    if (GetLazyForEachChildIndex(Referenced::Claim(uiNode)) != -1) {
+        return false;
+    }
     if (!handle->node) {
         handle->node =
             NG::LazyForEachNode::CreateLazyForEachNode(ElementRegister::GetInstance()->MakeUniqueId(), handle->builder);
     }
-    auto* uiNode = reinterpret_cast<NG::UINode*>(host);
     if (AceType::InstanceOf<NG::FrameNode>(uiNode)) {
         auto* frameNode = reinterpret_cast<NG::FrameNode*>(uiNode);
         if (frameNode->GetPattern()->OnAttachAdapter(Referenced::Claim(frameNode), handle->node)) {
@@ -407,7 +423,23 @@ void DetachHostNode(ArkUINodeHandle host)
 {
     CHECK_NULL_VOID(host);
     auto* uiNode = reinterpret_cast<NG::UINode*>(host);
-    const auto& child = AceType::DynamicCast<NG::LazyForEachNode>(uiNode->GetChildAtIndex(0));
+    if (!AceType::InstanceOf<NG::FrameNode>(uiNode)) {
+        return;
+    }
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(uiNode);
+    // Component overload unbinding method, unbind LazyForEach according to your own specifications
+    if (frameNode->GetPattern()->DetachHostNodeAdapter(Referenced::Claim(frameNode))) {
+        return;
+    }
+    int32_t index = 0;
+    // The default first node is LazyForEach. If the LazyForEach node is not unbound
+    if (!AceType::InstanceOf<NG::LazyForEachNode>(uiNode->GetChildAtIndex(0))) {
+        index = GetLazyForEachChildIndex(Referenced::Claim(uiNode));
+    }
+    if (index == -1) {
+        return;
+    }
+    const auto& child = AceType::DynamicCast<NG::LazyForEachNode>(uiNode->GetChildAtIndex(index));
     CHECK_NULL_VOID(child);
     uiNode->RemoveChild(child);
     const auto& builder = AceType::DynamicCast<NG::NativeLazyForEachBuilder>(child->GetBuilder());
@@ -421,13 +453,35 @@ ArkUINodeAdapterHandle GetNodeAdapter(ArkUINodeHandle host)
 {
     CHECK_NULL_RETURN(host, nullptr);
     auto* uiNode = reinterpret_cast<NG::UINode*>(host);
-    const auto& child = AceType::DynamicCast<NG::LazyForEachNode>(uiNode->GetChildAtIndex(0));
+    if (!AceType::InstanceOf<NG::FrameNode>(uiNode)) {
+        return nullptr;
+    }
+    ArkUINodeAdapterHandle handle = nullptr;
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(uiNode);
+    if (frameNode->GetPattern()->GetNodeAdapterComponent(handle, Referenced::Claim(frameNode))) {
+        return handle;
+    }
+    int32_t index = 0;
+    // The default first node is LazyForEach. If the LazyForEach node is not unbound
+    if (!AceType::InstanceOf<NG::LazyForEachNode>(uiNode->GetChildAtIndex(0))) {
+        index = GetLazyForEachChildIndex(Referenced::Claim(uiNode));
+    }
+    if (index == -1) {
+        return nullptr;
+    }
+    const auto& child = AceType::DynamicCast<NG::LazyForEachNode>(uiNode->GetChildAtIndex(index));
     CHECK_NULL_RETURN(child, nullptr);
     const auto& builder = AceType::DynamicCast<NG::NativeLazyForEachBuilder>(child->GetBuilder());
     CHECK_NULL_RETURN(builder, nullptr);
     return builder->GetHostHandle();
 }
 
+ArkUI_CharPtr GetNodeTypeInNodeAdapter(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_RETURN(currentNode, "");
+    return currentNode->GetTag().c_str();
+}
 } // namespace
 
 const ArkUINodeAdapterAPI* GetNodeAdapterAPI()
@@ -448,7 +502,8 @@ const ArkUINodeAdapterAPI* GetNodeAdapterAPI()
         .getAllItem = GetAllItem,
         .attachHostNode = AttachHostNode,
         .detachHostNode = DetachHostNode,
-        .getNodeAdapter = GetNodeAdapter
+        .getNodeAdapter = GetNodeAdapter,
+        .getNodeType = GetNodeTypeInNodeAdapter,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;

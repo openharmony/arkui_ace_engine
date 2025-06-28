@@ -24,6 +24,8 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_layout_property.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -199,25 +201,16 @@ void SheetSideObject::InitAnimationForOverlay(bool isTransitionIn, bool isFirstT
     CHECK_NULL_VOID(sheetPattern);
     auto sheetNode = sheetPattern->GetHost();
     CHECK_NULL_VOID(sheetNode);
-    auto context = sheetNode->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    context->UpdateRenderGroup(true, false, true);
-    TAG_LOGD(AceLogTag::ACE_SHEET, "UpdateRenderGroup start");
     auto sheetParent = AceType::DynamicCast<FrameNode>(sheetNode->GetParent());
     CHECK_NULL_VOID(sheetParent);
     if (isTransitionIn) {
         if (isFirstTransition) {
-            sheetNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_OPEN,
-                WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
             TransformTranslateExit();
+            sheetPattern->GetBuilderInitHeight();
         }
         sheetPattern->FireOnTypeDidChange();
-        sheetPattern->FireOnWidthDidChange();
+        sheetPattern->FireOnHeightDidChange();
         ACE_SCOPED_TRACE("Side Sheet starts the entrance animation");
-    } else {
-        sheetNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE,
-            WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-        sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     }
 }
 
@@ -236,7 +229,6 @@ void SheetSideObject::SetFinishEventForAnimationOption(
                 auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
                 CHECK_NULL_VOID(pattern);
                 pattern->OnAppear();
-                pattern->SendMessagesBeforeFirstTransitionIn(true);
                 pattern->AvoidAiBar();
                 pattern->FireOnWidthDidChange();
             });
@@ -565,5 +557,108 @@ void SheetSideObject::CreatePropertyCallback()
     };
     auto property = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     sheetPattern->SetProperty(property);
+}
+
+SheetKeyboardAvoidMode SheetSideObject::GetAvoidKeyboardModeByDefault() const
+{
+    return SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
+}
+
+void SheetSideObject::BeforeCreateLayoutWrapper()
+{
+    AvoidKeyboard(false);
+}
+
+void SheetSideObject::AvoidKeyboard(bool forceAvoid)
+{
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    auto host = sheetPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(host->GetFocusHub());
+    auto keyboardAvoidMode = sheetPattern->GetKeyboardAvoidMode();
+    bool isCurrentFocus = host->GetFocusHub()->IsCurrentFocus();
+    if (keyboardAvoidMode == SheetKeyboardAvoidMode::NONE || !isCurrentFocus) {
+        TAG_LOGD(AceLogTag::ACE_SHEET,
+            "Sheet will not avoid keyboard.keyboardAvoidMode:%{public}d, isCurrentFocus:%{public}d.",
+            keyboardAvoidMode, isCurrentFocus);
+        return;
+    }
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto manager = pipelineContext->GetSafeAreaManager();
+    auto keyboradHeight = manager->GetKeyboardInset().Length();
+    if (sheetPattern->GetKeyboardHeight() == keyboradHeight && !forceAvoid) {
+        return;
+    }
+    sheetPattern->SetKeyboardHeight(keyboradHeight);
+    if (sheetPattern->GetDismissProcess()) {
+        TAG_LOGD(AceLogTag::ACE_SHEET,
+            "The sheet will disappear, so there's no need to handle canceling keyboard avoidance here.");
+        return;
+    }
+    // 1.handle non upward logic: avoidKeyboardMode::RESIZE_ONLY or avoidKeyboardMode::TRANSLATE_AND_RESIZE
+    resizeDecreasedHeight_ = keyboradHeight;
+    auto heightUp = isCurrentFocus ? GetUpOffsetCaretNeed() : 0.0f;
+    // 2.Side Sheet is not to handle upward logic
+
+    // 3.deal with left height(heightUp), scroll or resize
+    // textInput will be lefted, which depends on the ability of the Scroll Components.
+    // this is different from other sheetType.
+    switch (keyboardAvoidMode) {
+        case SheetKeyboardAvoidMode::RESIZE_ONLY:
+            break;
+        case SheetKeyboardAvoidMode::TRANSLATE_AND_RESIZE:
+            if (NonPositive(heightUp)) {
+                resizeDecreasedHeight_ = 0.0f;
+            }
+            break;
+        case SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL:
+        default:
+            if (NonPositive(heightUp)) {
+                resizeDecreasedHeight_ = 0.0f;
+            } else {
+                sheetPattern->SetColumnMinSize(NonPositive(resizeDecreasedHeight_));
+            }
+            break;
+    }
+}
+
+float SheetSideObject::GetUpOffsetCaretNeed()
+{
+    // TextFieldManagerNG::GetClickPosition: The upper left corner offset of the cursor position relative to rootNode
+    // TextFieldManagerNG::GetHeight: the cursor Height + 24vp
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_RETURN(sheetPattern, 0.0f);
+    auto host = sheetPattern->GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, 0.0f);
+    auto manager = pipelineContext->GetSafeAreaManager();
+    auto keyboardHeight = manager->GetKeyboardInset().Length();
+    if (keyboardHeight == 0) {
+        return 0.f;
+    }
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipelineContext->GetTextFieldManager());
+    // inputH : Distance from input component's Caret to bottom of screen
+    // = caret's offset + caret's height + 24vp
+    if (textFieldManager && !textFieldManager->GetOptionalClickPosition().has_value() &&
+        !pipelineContext->UsingCaretAvoidMode()) {
+        TAG_LOGD(AceLogTag::ACE_SHEET, "illegal caret position, don't calc height this time");
+        return .0f;
+    }
+    float inputH = textFieldManager ? (pipelineContext->GetRootHeight() -
+        textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight()) : 0.f;
+    // keyboardH : keyboard height + height of the bottom navigation bar
+    auto keyboardH = keyboardHeight + manager->GetSystemSafeArea().bottom_.Length();
+    // The minimum height of the input component from the bottom of the screen after popping up the soft keyboard
+    auto inputMinH = keyboardH;
+    if (inputH >= inputMinH) {
+        // Caret needs not up
+        TAG_LOGD(AceLogTag::ACE_SHEET, "Caret witch in Sheet needs not up");
+        return .0f;
+    }
+    // The expected height of the Caret to be lifted
+    return inputMinH - inputH;
 }
 } // namespace OHOS::Ace::NG

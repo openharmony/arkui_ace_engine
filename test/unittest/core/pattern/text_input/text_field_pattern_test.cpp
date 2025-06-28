@@ -394,6 +394,17 @@ HWTEST_F(TextFieldPatternTest, TextPattern016, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->mouseStatus_ = MouseStatus::MOVE;
     pattern->HandleSingleClickEvent(info);
+
+    pattern->textRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
+    Offset offset(20.0f, 120.0f);
+    auto caretOffset = pattern->GetCaretClickLocalOffset(offset);
+    EXPECT_EQ(caretOffset.GetX(), 100.0f);
+    EXPECT_EQ(caretOffset.GetY(), 120.0f);
+    pattern->contentRect_ = RectF(0.0f, 0.0f, 50.0f, 50.0f);
+    offset = Offset(20.0f, 60.0f);
+    caretOffset = pattern->GetCaretClickLocalOffset(offset);
+    EXPECT_EQ(caretOffset.GetX(), 50.0f);
+    EXPECT_EQ(caretOffset.GetY(), 25.0f);
 }
 
 /**
@@ -2963,6 +2974,22 @@ HWTEST_F(TextFieldPatternTest, HandleOnDeleteCombTest, TestSize.Level1)
     pattern_->HandleOnDeleteComb(false);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTextValue(), "");
+}
+
+/**
+ * @tc.name: ToJsonValue001
+ * @tc.desc: test capitalizationmode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, ToJsonValue001, TestSize.Level1)
+{
+    NG::InspectorFilter filter;
+    JsonValue jsonValue;
+
+    int32_t autoCapitalizationMode = static_cast<int32_t>(AutoCapitalizationMode::NONE);
+    bool ret = jsonValue.PutExtAttr("capitalizationmode", autoCapitalizationMode, filter);
+
+    EXPECT_TRUE(ret);
 }
 
 /**

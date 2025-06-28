@@ -172,7 +172,6 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPropertyTest002, TestSize.Level1)
     MovingPhotoModelNG movingphoto;
     auto movingPhotoController = AceType::MakeRefPtr<MovingPhotoController>();
     movingphoto.Create(movingPhotoController);
-
     auto frameNodeTemp = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNodeTemp);
     auto movingPhotoPatternTemp = AceType::DynamicCast<MovingPhotoPattern>(frameNodeTemp->GetPattern());
@@ -471,7 +470,6 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest008, TestSize.Level1)
     // set MovingPhotoEvent
     auto movingPhotoEventHub = frameNode->GetOrCreateEventHub<MovingPhotoEventHub>();
     ASSERT_TRUE(movingPhotoEventHub);
-
     auto movingPhotoLayoutProperty = pattern->GetLayoutProperty<MovingPhotoLayoutProperty>();
 
     /**
@@ -1045,7 +1043,6 @@ HWTEST_F(MovingphotoTestNg, ShouldUpdateImageAnalyzer001, TestSize.Level1)
     ASSERT_NE(movingphotoPattern, nullptr);
     auto movingPhotoLayoutProperty = frameNode->GetLayoutProperty<MovingPhotoLayoutProperty>();
     ASSERT_NE(movingPhotoLayoutProperty, nullptr);
-
     EXPECT_FALSE(movingphotoPattern->ShouldUpdateImageAnalyzer());
 }
 

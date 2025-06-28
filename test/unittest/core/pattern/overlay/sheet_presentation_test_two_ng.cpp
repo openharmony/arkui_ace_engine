@@ -972,6 +972,54 @@ HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBySheetMode007, TestSize.Level
 }
 
 /**
+ * @tc.name: AvoidKeyboardBySheetMode008
+ * @tc.desc: Increase the coverage of SheetPresentationPattern::AvoidKeyboardBySheetMode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBySheetMode008, TestSize.Level1)
+{
+    SheetPresentationTestTwoNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_ETS_TAG, 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, V2::TEXT_ETS_TAG, std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->keyboardAvoidMode_ = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
+    auto host = sheetPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipelineContext = host->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    sheetPattern->keyboardHeight_ = safeAreaManager->GetKeyboardInset().Length() + 10.0f;
+    sheetPattern->isDismissProcess_ = false;
+    sheetPattern->isScrolling_ = true;
+    sheetPattern->isAnimationProcess_ = true;
+    sheetPattern->AvoidKeyboardBySheetMode();
+    AnimationOption option;
+    auto propertyCallback = []() {};
+    sheetPattern->animation_ = AnimationUtils::StartAnimation(option, propertyCallback);
+    auto focusHub = host->GetFocusHub();
+    focusHub->currentFocus_ = true;
+    safeAreaManager->keyboardInset_.end = 1000.0f;
+    pipelineContext->rootHeight_ = 1800.0f;
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
+
+    EXPECT_NE(sheetPattern->keyboardAvoidMode_, SheetKeyboardAvoidMode::NONE);
+    EXPECT_NE(sheetPattern->keyboardHeight_, safeAreaManager->GetKeyboardInset().Length());
+    EXPECT_FALSE(sheetPattern->isDismissProcess_);
+    EXPECT_FALSE(sheetPattern->AvoidKeyboardBeforeTranslate());
+    EXPECT_TRUE(sheetPattern->isScrolling_);
+    EXPECT_NE(sheetPattern->GetSheetHeightChange(), 0.0f);
+    EXPECT_TRUE(focusHub->IsCurrentFocus());
+    EXPECT_TRUE(sheetPattern->IsSheetBottomStyle());
+    EXPECT_TRUE(sheetPattern->IsSheetBottomStyle());
+    sheetPattern->AvoidKeyboardBySheetMode();
+    EXPECT_TRUE(sheetPattern->isAnimationProcess_);
+    EXPECT_FALSE(sheetPattern->isAnimationBreak_);
+    SheetPresentationTestTwoNg::TearDownTestCase();
+}
+
+/**
  * @tc.name: IsNeedPlayTransition001
  * @tc.desc: Test update detents of sheetStyle.
  * @tc.type: FUNC
@@ -1548,7 +1596,14 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset002, TestSize.Level1)
      * @tc.steps: step1. set up bind sheet and theme.
      */
     SetOnBindSheet();
-    SystemProperties::SetDeviceType(DeviceType::TWO_IN_ONE);
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto manager = pipelineContext->GetWindowManager();
+    ASSERT_NE(manager, nullptr);
+    auto isPcOrPadFreeMultiWindow = []() {
+        return true;
+    };
+    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode(
         "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -1677,7 +1732,12 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset004, TestSize.Level1)
     SystemProperties::SetDeviceType(DeviceType::PHONE);
     auto sheetType = sheetPattern->GetSheetType();
     EXPECT_NE(sheetType, SheetType::SHEET_BOTTOM_OFFSET);
-    SystemProperties::SetDeviceType(DeviceType::TWO_IN_ONE);
+    auto manager = pipelineContext->GetWindowManager();
+    ASSERT_NE(manager, nullptr);
+    auto isPcOrPadFreeMultiWindow = []() {
+        return true;
+    };
+    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
     auto sheetType1 = sheetPattern->GetSheetType();
     EXPECT_EQ(sheetType1, SheetType::SHEET_BOTTOM_OFFSET);
 
@@ -1763,7 +1823,12 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset006, TestSize.Level1)
     PipelineBase::GetCurrentContext()->minPlatformVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWELVE);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     pipelineContext->displayWindowRectInfo_.width_ = SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx();
-    SystemProperties::SetDeviceType(DeviceType::TWO_IN_ONE);
+    auto manager = pipelineContext->GetWindowManager();
+    ASSERT_NE(manager, nullptr);
+    auto isPcOrPadFreeMultiWindow = []() {
+        return true;
+    };
+    manager->SetIsPcOrPadFreeMultiWindowModeCallback(std::move(isPcOrPadFreeMultiWindow));
     auto sheetType = sheetPattern->GetSheetType();
 
     /**

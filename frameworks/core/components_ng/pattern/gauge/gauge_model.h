@@ -57,6 +57,8 @@ public:
     virtual void ResetIndicatorIconPath() = 0;
     virtual void ResetIndicatorSpace() = 0;
     virtual void CreateWithResourceObj(GaugeResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) = 0;
+    virtual void SetUseGradient(bool useGradient) = 0;
+    virtual void SetUseSpecialDefaultIndicator(bool useSpecialDefaultIndicator) = 0;
 
 private:
     static std::unique_ptr<GaugeModel> instance_;

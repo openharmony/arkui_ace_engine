@@ -71,7 +71,8 @@ public:
     void SetDraggableStateAsync(bool state, int64_t downTime) override;
 
     int32_t EnableInternalDropAnimation(const std::string& animationInfo) override;
-
+    
+    bool IsDragStart() const override;
 private:
     std::shared_ptr<CoordinationListenerImpl> consumer_;
 };

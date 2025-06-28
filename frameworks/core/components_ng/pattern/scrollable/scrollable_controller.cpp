@@ -107,6 +107,9 @@ void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, float vel
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
+    pattern->SetIsOverScroll(false);
+    pattern->SetCanStayOverScroll(false);
+    pattern->SetAnimateCanOverScroll(false);
     if (scrollEdgeType == ScrollEdgeType::SCROLL_TOP) {
         pattern->ScrollAtFixedVelocity(velocity);
     } else if (scrollEdgeType == ScrollEdgeType::SCROLL_BOTTOM) {
@@ -118,6 +121,8 @@ void ScrollableController::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smoo
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
+    pattern->SetIsOverScroll(false);
+    pattern->SetCanStayOverScroll(false);
     if (pattern->GetAxis() != Axis::NONE) {
         pattern->ScrollToEdge(scrollEdgeType, smooth);
     }
@@ -138,6 +143,8 @@ void ScrollableController::ScrollPage(bool reverse, bool smooth)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
+    pattern->SetIsOverScroll(false);
+    pattern->SetCanStayOverScroll(false);
     if (pattern->GetAxis() == Axis::NONE) {
         return;
     }

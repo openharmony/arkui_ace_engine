@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos_var.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ohos_source_set("ace_layout_inspector_mock") {
@@ -174,7 +173,7 @@ ohos_unittest("layout_inspector_test") {
     "mock_websocket_manager.cpp",
   ]
   defines = []
-  if (use_new_skia) {
+  if (ace_engine_feature_enable_upgrade_skia) {
     defines += [ "USE_NEW_SKIA" ]
   }
 

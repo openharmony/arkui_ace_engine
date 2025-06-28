@@ -24,6 +24,7 @@
 #endif
 
 #include "core/pipeline/base/rosen_render_context.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -40,7 +41,7 @@ void DrawScaleArc(RenderContext& context, const RenderRingInfo& trackInfo)
     SkPath path;
     path.addRRect(SkRRect::MakeRectXY(SkRect::MakeWH(trackInfo.scaleStrokeWidth, trackInfo.thickness),
         trackInfo.thickness / 2.0, trackInfo.thickness / 2.0));
-    double pathDistance = 2.0 * M_PI *
+    double pathDistance = 2.0 * ACE_PI *
                           (trackInfo.radius + (NearEqual(trackInfo.clockwise, 1.0) ? trackInfo.thickness : 0.0)) /
                           trackInfo.totalScaleNumber;
     paint.setPathEffect(
@@ -54,7 +55,7 @@ void DrawScaleArc(RenderContext& context, const RenderRingInfo& trackInfo)
     RSRecordingPath path;
     path.AddRoundRect(RSRect(0, 0, trackInfo.scaleStrokeWidth, trackInfo.thickness),
         trackInfo.thickness / 2.0, trackInfo.thickness / 2.0);
-    double pathDistance = 2.0 * M_PI *
+    double pathDistance = 2.0 * ACE_PI *
                           (trackInfo.radius + (NearEqual(trackInfo.clockwise, 1.0) ? trackInfo.thickness : 0.0)) /
                           trackInfo.totalScaleNumber;
     pen.SetPathEffect(RSPathEffect::CreatePathDashEffect(

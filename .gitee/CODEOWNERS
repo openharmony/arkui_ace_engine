@@ -237,6 +237,12 @@ component_ext/movingphoto/ @wangrunsen
 
 [Examples]
 examples/ @arkuipopupwindow
+examples/Image/ @arkui_image
+examples/Dialog_C/ @arkui_image
+examples/Info/ @arkui_image
+examples/ImageAnimator/ @arkui_image
+examples/Picker/ @arkui_image
+examples/PickDialog/ @arkui_image
 
 [Frameworks Base]
 frameworks/base/background_task_helper/background_task_helper.h @arkuiframework
@@ -726,6 +732,18 @@ frameworks/bridge/declarative_frontend/engine/functions/js_foreach_function.cpp 
 frameworks/bridge/declarative_frontend/engine/functions/js_foreach_function.h @arkuistatemgmt
 frameworks/bridge/declarative_frontend/engine/functions/js_function.cpp @arkuievent
 frameworks/bridge/declarative_frontend/engine/functions/js_function.h @arkuievent
+frameworks/bridge/declarative_frontend/engine/functions/js_animation_on_finish_function.cpp @arkuievent
+frameworks/bridge/declarative_frontend/engine/functions/js_animation_on_finish_function.h @arkuievent
+frameworks/bridge/declarative_frontend/engine/functions/js_cited_event_function.cpp @arkuievent
+frameworks/bridge/declarative_frontend/engine/functions/js_cited_event_function.h @arkuievent
+frameworks/bridge/declarative_frontend/engine/functions/js_common_event_function.cpp @arkuievent
+frameworks/bridge/declarative_frontend/engine/functions/js_common_event_function.h @arkuievent
+frameworks/bridge/declarative_frontend/engine/functions/js_common_gesture_function.cpp @arkuievent
+frameworks/bridge/declarative_frontend/engine/functions/js_common_gesture_function.h @arkuievent
+frameworks/bridge/declarative_frontend/engine/functions/js_event_function.cpp @arkuievent
+frameworks/bridge/declarative_frontend/engine/functions/js_event_function.h @arkuievent
+frameworks/bridge/declarative_frontend/engine/functions/js_xcomponent_onload_function.cpp @arkuievent
+frameworks/bridge/declarative_frontend/engine/functions/js_xcomponent_onload_function.h @arkuievent
 frameworks/bridge/declarative_frontend/engine/functions/js_gesture_function.cpp @arkuievent
 frameworks/bridge/declarative_frontend/engine/functions/js_gesture_function.h @arkuievent
 frameworks/bridge/declarative_frontend/engine/functions/js_gesture_judge_function.cpp @arkuievent
@@ -2597,8 +2615,8 @@ frameworks/core/components_ng/property/property.cpp @arkuievent
 frameworks/core/components_ng/property/property.h @arkuievent
 frameworks/core/components_ng/property/safe_area_insets.cpp @arkuilayout
 frameworks/core/components_ng/property/safe_area_insets.h @arkuilayout
-frameworks/core/components_ng/property/templates_parser.cpp @arkuievent
-frameworks/core/components_ng/property/templates_parser.h @arkuievent
+frameworks/core/components_ng/property/templates_parser.cpp @arkuiscroll
+frameworks/core/components_ng/property/templates_parser.h @arkuiscroll
 frameworks/core/components_ng/property/transition_property.h @arkui_superman
 frameworks/core/components_ng/render/adapter/animated_image.cpp @arkui_image
 frameworks/core/components_ng/render/adapter/animated_image.h @arkui_image
@@ -3242,3 +3260,4 @@ test/unittest/interfaces/ @arkuiframework
 test/unittest/interfaces/ui_input_event_test.cpp @arkuievent
 test/unittest/interfaces/ace_ui_input_event/ @arkuievent
 test/unittest/interfaces/ace_gesture/ @arkuievent
+test/unittest/interfaces/form_render/ @form_framework

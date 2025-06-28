@@ -33,6 +33,7 @@
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -341,12 +342,12 @@ private:
 
     static float Deg2rad(float deg)
     {
-        return static_cast<float>(deg * M_PI / STRAIGHT_ANGLE_D);
+        return static_cast<float>(deg * ACE_PI / STRAIGHT_ANGLE_D);
     }
 
     static float Rad2deg(float rad)
     {
-        return static_cast<float>(rad * STRAIGHT_ANGLE_D / M_PI);
+        return static_cast<float>(rad * STRAIGHT_ANGLE_D / ACE_PI);
     }
 
     static void EndPointsFromAngle(float angle, const SkSize& size, SkPoint& firstPoint, SkPoint& secondPoint)

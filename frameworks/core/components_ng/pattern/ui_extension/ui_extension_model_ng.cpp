@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -29,7 +30,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, cons
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
+    auto frameNode = UIExtensionNode::GetOrCreateUIExtensionNode(
         V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
     auto wantWrap = WantWrap::CreateWantWrap(bundleName, abilityName);
     CHECK_NULL_RETURN(wantWrap, frameNode);
@@ -48,7 +49,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(
     bool isAsyncModalBinding = config.isAsyncModalBinding;
     bool isModal = config.isModal;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
+    auto frameNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
         [isAsyncModalBinding, isModal]() {
             return AceType::MakeRefPtr<UIExtensionPattern>(false, isModal, isAsyncModalBinding);
         });
@@ -66,9 +67,6 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(
     pattern->SetOnReceiveCallback(std::move(callbacks.onReceive));
     pattern->SetModalOnRemoteReadyCallback(std::move(callbacks.onRemoteReady));
     pattern->SetModalOnDestroy(std::move(callbacks.onDestroy));
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_RETURN(dragDropManager, frameNode);
-    dragDropManager->AddDragFrameNode(nodeId, AceType::WeakClaim(AceType::RawPtr(frameNode)));
     return frameNode;
 }
 
@@ -78,7 +76,7 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
+    auto frameNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
         [transferringCaller]() { return AceType::MakeRefPtr<UIExtensionPattern>(transferringCaller); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
@@ -90,9 +88,6 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->AddDragFrameNode(nodeId, AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 
 // for EmbeddedComponent
@@ -100,7 +95,7 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, Ses
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::EMBEDDED_COMPONENT_ETS_TAG, nodeId,
+    auto frameNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::EMBEDDED_COMPONENT_ETS_TAG, nodeId,
         [sessionType]() { return AceType::MakeRefPtr<UIExtensionPattern>(false, false, false, sessionType); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
@@ -112,9 +107,6 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, Ses
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->AddDragFrameNode(nodeId, AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 
 void UIExtensionModelNG::Create(const UIExtensionConfig& config)
@@ -160,9 +152,6 @@ void UIExtensionModelNG::CreateIsolatedComponent(const UIExtensionConfig& config
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->AddDragFrameNode(nodeId, AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 
 void UIExtensionModelNG::CreateSecurityUIExtension(const UIExtensionConfig& config)
@@ -182,9 +171,6 @@ void UIExtensionModelNG::CreateSecurityUIExtension(const UIExtensionConfig& conf
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->AddDragFrameNode(nodeId, AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 
 void UIExtensionModelNG::InitializeDynamicComponent(const RefPtr<FrameNode>& frameNode, const std::string& hapPath,

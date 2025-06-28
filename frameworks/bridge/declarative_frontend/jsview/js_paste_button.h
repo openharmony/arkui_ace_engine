@@ -33,7 +33,7 @@ public:
         JsFunction(JSRef<JSObject>(), jsFunction) {}
 
     ~JsPasteButtonClickFunction() override {};
-    void Execute() override
+    void Execute()
     {
         JsFunction::ExecuteJS();
     };

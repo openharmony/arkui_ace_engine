@@ -569,6 +569,8 @@
       OHOS::Ace::NG::SwiperPattern::IsAtStart*;
       OHOS::Ace::NG::SwiperPattern::IsAtEnd*;
       OHOS::Ace::PipelineBase::GetImageCache*;
+      "OHOS::Ace::ACE_PI";
+      "OHOS::Ace::ACE_E";
     };
   local:
     *;

@@ -2,6 +2,9 @@
   "src": [
     "pages/Index",
     "extensionAbility/pages/Index",
-    "pages/components/dialog/embeddedDialogPageTwo"
+    "pages/components/dialog/embeddedDialogPageTwo",
+    "pages/components/dialog/page/CustomDialogTestLevel0_0",
+    "pages/components/dialog/page/CustomDialogTestLevel0_1",
+    "pages/components/dialog/page/CustomDialogTestLevel0_2"
   ]
 }

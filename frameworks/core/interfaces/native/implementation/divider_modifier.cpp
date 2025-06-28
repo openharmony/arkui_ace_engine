@@ -50,7 +50,7 @@ void ColorImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    DividerModelNG::SetDividerColor(frameNode, Converter::OptConvert<Color>(*value));
+    DividerModelNG::SetDividerColor(frameNode, Converter::OptConvert<Color>(*value), false);
 }
 
 void StrokeWidthImpl(Ark_NativePointer node,

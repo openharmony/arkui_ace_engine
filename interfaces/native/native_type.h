@@ -844,7 +844,18 @@ typedef enum {
      */
     ARKUI_HIT_TEST_MODE_TRANSPARENT,
     /** The node does not respond to the hit test of a touch event. */
-    ARKUI_HIT_TEST_MODE_NONE
+    ARKUI_HIT_TEST_MODE_NONE,
+    /**
+     * Blocks all lower priority siblings and parents node from receiving the event.
+     * @since 20
+     */
+    ARKUI_HIT_TEST_MODE_BLOCK_HIERARCHY,
+    /**
+     * Self not respond to the hit test for touch events,
+     * and all descebdants (children, grandchildren, etc.) not respond to the hit test for touch events too.
+     * @since 20
+     */
+    ARKUI_HIT_TEST_MODE_BLOCK_DESCENDANTS,
 } ArkUI_HitTestMode;
 
 /**
@@ -2285,6 +2296,11 @@ typedef enum {
      * @since 20
      */
     ARKUI_ERROR_CODE_NODE_ON_INVALID_THREAD = 106204,
+    /**
+     * @error Force dark config is invalid.
+     * @since 20
+     */
+    ARKUI_ERROR_CODE_FORCE_DARK_CONFIG_INVALID = 106205,
     /**
      * @error The node requesting focus is not focusable.
      * @since 15

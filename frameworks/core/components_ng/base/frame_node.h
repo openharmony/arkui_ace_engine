@@ -46,6 +46,7 @@
 #include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/event/target_component.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/base/lazy_compose_adapter.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -73,7 +74,6 @@ class StateModifyTask;
 class UITask;
 struct DirtySwapConfig;
 class DragDropRelatedConfigurations;
-class ScrollWindowAdapter;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
@@ -253,7 +253,7 @@ public:
 
     void SetOnAreaChangeCallback(OnAreaChangedFunc&& callback);
 
-    void TriggerOnAreaChangeCallback(uint64_t nanoTimestamp);
+    void TriggerOnAreaChangeCallback(uint64_t nanoTimestamp, int32_t areaChangeMinDepth = -1);
 
     void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
 
@@ -291,7 +291,8 @@ public:
         eventHub_->CleanVisibleAreaCallback(false);
     }
 
-    void TriggerVisibleAreaChangeCallback(uint64_t timestamp, bool forceDisappear = false);
+    void TriggerVisibleAreaChangeCallback(
+        uint64_t timestamp, bool forceDisappear = false, int32_t isVisibleChangeMinDepth = -1);
 
     void SetOnSizeChangeCallback(OnSizeChangedFunc&& callback);
 
@@ -445,10 +446,12 @@ public:
 
     HitTestResult AxisTest(const PointF &globalPoint, const PointF &parentLocalPoint, const PointF &parentRevertPoint,
         TouchRestrict &touchRestrict, AxisTestResult &axisResult) override;
-
     ACE_NON_VIRTUAL void CollectSelfAxisResult(const PointF& globalPoint, const PointF& localPoint, bool& consumed,
         const PointF& parentRevertPoint, AxisTestResult& axisResult, bool& preventBubbling, HitTestResult& testResult,
-        TouchRestrict& touchRestrict);
+        TouchRestrict& touchRestrict, bool blockHierarchy);
+    void HitTestChildren(const PointF& globalPoint, const PointF& localPoint, const PointF& subRevertPoint,
+        TouchRestrict& touchRestrict, AxisTestResult& newComingTargets, bool& preventBubbling, bool& consumed,
+        bool& blockHierarchy);
 
     void AnimateHoverEffect(bool isHovered) const;
 
@@ -533,6 +536,10 @@ public:
 
     OffsetF GetPositionToScreen();
 
+    OffsetF GetGlobalPositionOnDisplay() const;
+
+    OffsetF GetFinalOffsetRelativeToWindow(PipelineContext* pipelineContext) const;
+
     OffsetF GetPositionToParentWithTransform() const;
 
     OffsetF GetPositionToScreenWithTransform();
@@ -548,7 +555,7 @@ public:
     // deprecated, please use GetPaintRectOffsetNG.
     // this function only consider transform of itself when calculate transform,
     // do not consider the transform of its ansestors
-    OffsetF GetPaintRectOffset(bool excludeSelf = false, bool checkBoundary = false) const;
+    OffsetF GetPaintRectOffset(bool excludeSelf = false, bool checkBoundary = false, bool checkScreen = false) const;
 
     // returns a node's offset relative to root.
     // and accumulate every ancestor node's graphic properties such as rotate and transform
@@ -853,7 +860,13 @@ public:
     // Called to perform layout children.
     void Layout() override;
 
-    int32_t GetTotalChildCount() const override;
+    int32_t GetTotalChildCount() const override
+    {
+        if (arkoalaLazyAdapter_) {
+            return arkoalaLazyAdapter_->GetTotalCount();
+        }
+        return UINode::TotalChildCount();
+    }
 
     int32_t GetTotalChildCountWithoutExpanded() const
     {
@@ -1230,6 +1243,19 @@ public:
 
     void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType) override;
 
+    /* ============================== Arkoala LazyForEach adapter section START ==============================*/
+    void ArkoalaSynchronize(
+        LazyComposeAdapter::CreateItemCb creator, LazyComposeAdapter::UpdateRangeCb updater, int32_t totalCount);
+
+    void ArkoalaRemoveItemsOnChange(int32_t changeIndex);
+
+private:
+    /* temporary adapter to provide LazyForEach feature in Arkoala */
+    std::unique_ptr<LazyComposeAdapter> arkoalaLazyAdapter_;
+
+public:
+    /* ============================== Arkoala LazyForEach adapter section END ================================*/
+
     void ChildrenUpdatedFrom(int32_t index);
     int32_t GetChildrenUpdated() const
     {
@@ -1291,7 +1317,8 @@ public:
 
     void OnThemeScopeUpdate(int32_t themeScopeId) override;
 
-    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag = false);
+    OffsetF CalculateOffsetRelativeToWindow(
+        uint64_t nanoTimestamp, bool logFlag = false, int32_t areaChangeMinDepth = -1);
 
     bool IsDebugInspectorId();
 
@@ -1331,10 +1358,26 @@ public:
         return topWindowBoundary_;
     }
 
+    void ClearCachedGlobalOffset()
+    {
+        cachedGlobalOffset_ = { 0, OffsetF() };
+    }
+
+    void ClearCachedIsFrameDisappear()
+    {
+        cachedIsFrameDisappear_ = { 0, false };
+    }
+
     void SetTopWindowBoundary(bool topWindowBoundary)
     {
         topWindowBoundary_ = topWindowBoundary;
     }
+
+    bool CheckTopScreen() const
+    {
+        return GetTag() == V2::SCREEN_ETS_TAG;
+    }
+
     bool CheckVisibleOrActive() override;
 
     void SetPaintNode(const RefPtr<FrameNode>& paintNode)
@@ -1364,10 +1407,6 @@ public:
         layoutProperty_->SetNeedLazyLayout(value);
     }
 
-    void AddVisibilityDumpInfo(const std::pair<uint64_t, std::pair<VisibleType, bool>>& dumpInfo);
-
-    std::string PrintVisibilityDumpInfo() const;
-    
     void SetRemoveToolbarItemCallback(uint32_t id, std::function<void()>&& callback)
     {
         removeToolbarItemCallbacks_[id] = callback;
@@ -1394,9 +1433,6 @@ public:
     void AddToOcclusionMap(bool enable);
     void MarkModifyDoneUnsafely();
     void MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag);
-
-    ScrollWindowAdapter* GetScrollWindowAdapter() const;
-    ScrollWindowAdapter* GetOrCreateScrollWindowAdapter();
 
 protected:
     void DumpInfo() override;
@@ -1487,8 +1523,8 @@ private:
         double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
     void ProcessThrottledVisibleCallback(bool forceDisappear);
     bool IsFrameDisappear() const;
-    bool IsFrameDisappear(uint64_t timestamp);
-    bool IsFrameAncestorDisappear(uint64_t timestamp);
+    bool IsFrameDisappear(uint64_t timestamp, int32_t isVisibleChangeMinDepth = -1);
+    bool IsFrameAncestorDisappear(uint64_t timestamp, int32_t isVisibleChangeMinDepth = -1);
     void ThrottledVisibleTask();
 
     void OnPixelRoundFinish(const SizeF& pixelGridRoundSize);
@@ -1706,7 +1742,6 @@ private:
     friend class Pattern;
     mutable std::shared_mutex fontSizeCallbackMutex_;
     mutable std::shared_mutex colorModeCallbackMutex_;
-    std::deque<std::pair<uint64_t, std::pair<VisibleType, bool>>> visibilityDumpInfos_;
 
     RefPtr<Kit::FrameNode> kitNode_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);

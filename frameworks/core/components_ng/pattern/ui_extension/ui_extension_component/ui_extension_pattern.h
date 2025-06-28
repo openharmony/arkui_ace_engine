@@ -115,7 +115,7 @@ public:
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
-    void OnVisibleChange(bool visible) override;
+    void OnVisibleChangeInner(bool visible);
     void OnMountToParentDone() override;
     void AfterMountToParent() override;
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
@@ -266,6 +266,7 @@ public:
     {
         avoidInfo_ = info;
     }
+    bool HandleTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);

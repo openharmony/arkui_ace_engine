@@ -15,8 +15,8 @@
 
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 
-#include "base/log/log_wrapper.h"
 #include "base/log/event_report.h"
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
@@ -54,12 +54,28 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     Axis axis = info_.axis_;
     frameSize_ = CreateIdealSize(
         gridLayoutProperty->GetLayoutConstraint().value(), axis, gridLayoutProperty->GetMeasureType(), true);
+    auto layoutPolicy = gridLayoutProperty->GetLayoutPolicyProperty();
+    auto isMainWrap = false;
+    if (layoutPolicy.has_value()) {
+        auto isVertical = axis == Axis::VERTICAL;
+        auto widthLayoutPolicy = layoutPolicy.value().widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto heightLayoutPolicy = layoutPolicy.value().heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+        auto isMainFix = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+        isMainWrap = (isVertical ? heightLayoutPolicy : widthLayoutPolicy) == LayoutCalPolicy::WRAP_CONTENT;
+        if (isMainFix) {
+            frameSize_.SetMainSize(Infinity<float>(), axis);
+        }
+        auto layoutPolicySize = ConstrainIdealSizeByLayoutPolicy(
+            gridLayoutProperty->GetLayoutConstraint().value(), widthLayoutPolicy, heightLayoutPolicy, axis);
+        frameSize_.UpdateIllegalSizeWithCheck(layoutPolicySize.ConvertToSizeT());
+    }
     if (NearZero(GetMainAxisSize(frameSize_, axis))) {
         TAG_LOGW(AceLogTag::ACE_GRID, "size of main axis value is 0, please check");
         return;
     }
-    bool matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(frameSize_, axis));
-    syncLoad_ = gridLayoutProperty->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren;
+    bool matchChildren = GreaterOrEqualToInfinity(GetMainAxisSize(frameSize_, axis)) || isMainWrap;
+    syncLoad_ = gridLayoutProperty->GetSyncLoad().value_or(!SystemProperties::IsSyncLoadEnabled()) || matchChildren ||
+                info_.targetIndex_.has_value();
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize_);
     MinusPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), frameSize_);
     info_.contentEndPadding_ = ScrollableUtils::CheckHeightExpansion(gridLayoutProperty, axis);
@@ -444,6 +460,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     }
     if (enableSkipping_) {
         SkipLargeOffset(mainSize, layoutWrapper);
+        syncLoad_ = syncLoad_ || (reason_ == GridReloadReason::SKIP_LARGE_OFFSET && scrollSource_ != SCROLL_FROM_JUMP);
     }
 
     if (!info_.lastCrossCount_) {
@@ -524,6 +541,9 @@ void GridScrollLayoutAlgorithm::ReloadToStartIndex(float mainSize, float crossSi
             info_.reachEnd_ = true;
             break;
         }
+        if (measureInNextFrame_) {
+            break;
+        }
     }
     info_.startMainLineIndex_ = currentMainLineIndex_;
     info_.UpdateStartIndexByStartLine();
@@ -581,6 +601,9 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
             info_.lineHeightMap_[info_.startMainLineIndex_] = lineHeight;
             blankAtStart -= (lineHeight + mainGap_);
             fillNewLine = true;
+            if (measureInNextFrame_) {
+                break;
+            }
             continue;
         }
         info_.reachStart_ = true;
@@ -1443,6 +1466,11 @@ void GridScrollLayoutAlgorithm::AddForwardLines(
             break;
         }
         addLine = true;
+        if (!syncLoad_ && NearEqual(info_.prevOffset_, info_.currentOffset_) &&
+            layoutWrapper->ReachResponseDeadline()) {
+            measureInNextFrame_ = true;
+            break;
+        }
     }
     if (!addLine) {
         return;
@@ -1544,7 +1572,7 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
         info_.endIndex_ = currentIndex;
         currentIndex++;
         doneFillLine = true;
-        if (!syncLoad_ && NearEqual(info_.prevOffset_, info_.currentOffset_) &&
+        if (!reverse && !syncLoad_ && NearEqual(info_.prevOffset_, info_.currentOffset_) &&
             layoutWrapper->ReachResponseDeadline()) {
             measureInNextFrame_ = true;
             break;

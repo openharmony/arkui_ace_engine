@@ -558,7 +558,13 @@ public:
     void TryForceSplitIfNeeded(const SizeF& frameSize);
     void SwapNavDestinationAndPlaceHolder(bool needFireLifecycle);
     bool IsPrimaryNode(const RefPtr<NavDestinationGroupNode>& destNode) const;
+    // Only used for the toolbar in 'container_modal' component
     void SetToolbarManagerNavigationMode(NavigationMode mode);
+
+    bool CreateHomeDestination(RefPtr<UINode>& customNode, RefPtr<NavDestinationGroupNode>& homeDest);
+    bool IsHomeDestinationVisible();
+    void FireHomeDestinationLifeCycleIfNeeded(NavDestinationLifecycle lifecycle, bool isModeChange = false,
+        NavDestinationActiveReason reason = NavDestinationActiveReason::TRANSITION);
 
 private:
     bool IsDestinationNeedHideInPush(
@@ -581,15 +587,15 @@ private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath,
         int32_t preLastStandardIndex = -1);
-    void TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
-        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible = false);
-    bool TriggerCustomAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
-        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
+    void TransitionWithAnimation(RefPtr<NavDestinationGroupNode> preTopNavDestination,
+        RefPtr<NavDestinationGroupNode> newTopNavDestination, bool isPopPage, bool isNeedVisible = false);
+    bool TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> preTopNavDestination,
+        RefPtr<NavDestinationGroupNode> newTopNavDestination, bool isPopPage);
 
     void OnCustomAnimationFinish(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
-    void TransitionWithOutAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
-        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool needVisible = false);
+    void TransitionWithOutAnimation(RefPtr<NavDestinationGroupNode> preTopNavDestination,
+        RefPtr<NavDestinationGroupNode> newTopNavDestination, bool isPopPage, bool needVisible = false);
     NavigationTransition ExecuteTransition(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     RefPtr<RenderContext> GetTitleBarRenderContext();
@@ -601,6 +607,7 @@ private:
     void DoNavbarHideAnimation(const RefPtr<NavigationGroupNode>& hostNode);
     RefPtr<FrameNode> GetNavigationNode() const;
     RefPtr<FrameNode> GetNavBarNode() const;
+    RefPtr<FrameNode> GetNavBarNodeOrHomeDestination() const;
     RefPtr<FrameNode> GetContentNode() const;
     RefPtr<FrameNode> GetDividerNode() const;
     void FireInterceptionEvent(bool isBefore,
@@ -629,9 +636,9 @@ private:
         const RefPtr<FrameNode> &newTopNavDestination, int32_t preLastStandardIndex = -1);
     void UpdateNavPathList();
     void RefreshNavDestination();
-    void DealTransitionVisibility(const RefPtr<FrameNode>& node, bool isVisible, bool isNavBar);
-    void NotifyNavDestinationSwitch(const RefPtr<NavDestinationContext>& from,
-        const RefPtr<NavDestinationContext>& to, NavigationOperation operation);
+    void DealTransitionVisibility(const RefPtr<FrameNode>& node, bool isVisible, bool isNavBarOrHomeDestination);
+    void NotifyNavDestinationSwitch(RefPtr<NavDestinationContext> from,
+        RefPtr<NavDestinationContext> to, NavigationOperation operation);
 
     void UpdateIsAnimation(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath);
     void StartTransition(const RefPtr<NavDestinationGroupNode>& preDestination,
@@ -648,8 +655,8 @@ private:
     void StartDefaultAnimation(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& topDestination,
         bool isPopPage, bool isNeedInVisible = false);
-    bool ExecuteAddAnimation(const RefPtr<NavDestinationGroupNode>& preTopDestination,
-        const RefPtr<NavDestinationGroupNode>& topDestination,
+    bool ExecuteAddAnimation(RefPtr<NavDestinationGroupNode> preTopDestination,
+        RefPtr<NavDestinationGroupNode> topDestination,
         bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy,
         NavigationTransition navigationTransition);
     bool GetIsFocusable(const RefPtr<FrameNode>& frameNode);
@@ -672,6 +679,7 @@ private:
     void SetNavigationWidthToolBarManager(float navBarWidth, float navDestWidth, float dividerWidth);
     void NavigationModifyDoneToolBarManager();
     void UpdateNavigationStatus();
+    void UpdateChildLayoutPolicy();
 
     void GetVisibleNodes(bool isPre, std::vector<WeakPtr<NavDestinationNodeBase>>& visibleNodes);
     void UpdatePageViewportConfigIfNeeded(const RefPtr<NavDestinationGroupNode>& preTopDestination,
@@ -683,12 +691,18 @@ private:
         std::vector<WeakPtr<NavDestinationNodeBase>>& visibleNodes);
     void OnAllTransitionAnimationFinish();
     void UpdatePageLevelConfigForSizeChanged();
+    void UpdatePageLevelConfigForSizeChangedWhenNoAnimation();
     RefPtr<NavDestinationNodeBase> GetLastStandardNodeOrNavBar();
     void HideSystemBarIfNeeded();
     void ShowOrRestoreSystemBarIfNeeded();
     bool IsEquivalentToStackMode();
     void ClearPageAndNavigationConfig();
     bool CustomizeExpandSafeArea() override;
+
+    bool IsEnableMatchParent() override
+    {
+        return false;
+    }
 
     void RegisterForceSplitListener(PipelineContext* context, int32_t nodeId);
     void UnregisterForceSplitListener(PipelineContext* context, int32_t nodeId);
@@ -704,6 +718,8 @@ private:
     void AdjustNodeForDestForceSplit(bool needTriggerLifecycle);
     void AdjustNodeForNonDestForceSplit(bool needTriggerLifecycle);
     void ClearSecondaryNodesIfNeeded(NavPathList&& preList);
+    void UpdateNavContentAndPlaceHolderVisibility(const RefPtr<FrameNode>& navContentNode,
+        const RefPtr<FrameNode>& phNode, const std::vector<RefPtr<NavDestinationGroupNode>>& stackNodes);
 
     bool IsTopPrimaryNode(const RefPtr<NavDestinationGroupNode>& node);
     
@@ -723,6 +739,12 @@ private:
     static bool CheckIfNeedHideOrShowPrimaryNodes(const RefPtr<NavigationPattern>& pattern, int32_t lastStandardIndex);
     bool CheckIfNoNeedAnimationForForceSplit(const RefPtr<NavDestinationGroupNode>& preDestination,
         const RefPtr<NavDestinationGroupNode>& topDestination);
+    bool ShouldFireHomeDestiationLifecycle(NavDestinationLifecycle lifecycle,
+        const RefPtr<NavDestinationPattern>& destPattern, int32_t lastStandardIndex,
+        int32_t curStackSize, bool isModeChange);
+    void FireHomeDestinationLifecycleForTransition(NavDestinationLifecycle lifecycle);
+    RefPtr<NavDestinationContext> GetHomeDestinationContext();
+    bool GetHomeDestinationName(const RefPtr<FrameNode>& hostNode, std::string& name);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;

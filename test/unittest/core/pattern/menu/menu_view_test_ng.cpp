@@ -1507,4 +1507,40 @@ HWTEST_F(MenuViewTestNg, Create002, TestSize.Level1)
     EXPECT_EQ(menuWrapperNode->GetChildren().size(), 1);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
 }
+
+/**
+ * @tc.name: UpdateMenuProperties002
+ * @tc.desc: Verify UpdateMenuProperties function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuProperties002, TestSize.Level1)
+{
+    MenuParam menuParam;
+    menuParam.anchorPosition = OffsetF(10.0f, 10.0f);
+    ASSERT_NE(wrapperNode_, nullptr);
+    ASSERT_NE(menuFrameNode_, nullptr);
+    MenuView::UpdateMenuProperties(wrapperNode_, menuFrameNode_, menuParam, MenuType::MENU);
+    auto menuProperty = menuFrameNode_->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuProperty, nullptr);
+    EXPECT_EQ(menuProperty->HasAnchorPosition(), true);
+}
+
+/**
+ * @tc.name: UpdateMenuPositionLeft
+ * @tc.desc: Verify UpdateMenuProperties function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuViewTestNg, UpdateMenuPositionLeft, TestSize.Level1)
+{
+    MarginProperty menuNodeMargin;
+    std::map<AlignDirection, AlignRule> menuNodeAlignRules;
+    std::map<std::string, AlignRule> alignMap = { { "top", { .anchor = "__stack__", .vertical = VerticalAlign::TOP } },
+        { "center", { .anchor = "__stack__", .vertical = VerticalAlign::CENTER } },
+        { "bottom", { .anchor = "__stack__", .vertical = VerticalAlign::BOTTOM } },
+        { "start", { .anchor = "__stack__", .horizontal = HorizontalAlign::START } },
+        { "middle", { .anchor = "__stack__", .horizontal = HorizontalAlign::CENTER } },
+        { "end", { .anchor = "__stack__", .horizontal = HorizontalAlign::END } } };
+    MenuView::UpdateMenuPositionLeft(menuNodeMargin, menuNodeAlignRules, alignMap["start"], 0, 0);
+    EXPECT_EQ(menuNodeAlignRules[AlignDirection::LEFT].horizontal, HorizontalAlign::START);
+}
 } // namespace OHOS::Ace::NG

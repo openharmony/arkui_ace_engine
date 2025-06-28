@@ -20,6 +20,7 @@
 #ifdef OHOS_PLATFORM
 #include "core/components/common/painter/rosen_svg_painter.h"
 #endif
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -33,15 +34,15 @@ constexpr Dimension OVAL_HEIGHT = 98.0_vp;
 constexpr Dimension OFFSET_X = (OVAL_WIDTH - ARC_BUTTON_WIDTH) / 2.0;
 constexpr Dimension OFFSET_Y = CIRCLE_DIAMETER - ARC_BUTTON_HEIGHT;
 constexpr double CIRCLE_START_ANGLE = 0.759;
-constexpr double CIRCLE_SWEEP_ANGLE = M_PI - CIRCLE_START_ANGLE * 2;
+const double CIRCLE_SWEEP_ANGLE = ACE_PI - CIRCLE_START_ANGLE * 2;
 constexpr double OVAL_START_ANGLE = 4.0;
-constexpr double OVAL_SWEEP_ANGLE = M_PI * 3 - OVAL_START_ANGLE * 2;
-constexpr double RADIAN_TO_DEGREE = 180.0 / M_PI;
+const double OVAL_SWEEP_ANGLE = ACE_PI * 3 - OVAL_START_ANGLE * 2;
+const double RADIAN_TO_DEGREE = 180.0 / ACE_PI;
 
 // Definition for download button in watch
 constexpr Dimension CIRCLE_PROGRESS_THICKNESS = 2.0_vp;
 constexpr Dimension WATCH_DOWNLOAD_SIZE_DELTA = 8.0_vp;
-constexpr double PROGRESS_START_ANGLE = 1.5 * M_PI;
+const double PROGRESS_START_ANGLE = 1.5 * ACE_PI;
 
 // Definition for animation
 constexpr uint8_t DEFAULT_OPACITY = 255;

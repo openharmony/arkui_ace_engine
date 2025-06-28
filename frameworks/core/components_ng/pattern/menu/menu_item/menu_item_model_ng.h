@@ -42,34 +42,47 @@ public:
     void SetLabelFontFamily(const std::vector<std::string> &families) override;
     void SetSelectedChangeEvent(std::function<void(bool)>&& selectedChangeEvent) override;
     void SetSelectIconSymbol(std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply) override;
+    void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj, MenuItemFontColorType type) override;
+    void CreateWithDimensionFpResourceObj(const RefPtr<ResourceObject>& resObj, MenuItemFontSizeType type) override;
+    void CreateWithFontFamilyResourceObj(const RefPtr<ResourceObject>& resObj, MenuItemFontFamilyType type) override;
+    void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj, MenuItemStringType type) override;
+    void CreateWithMediaResourceObj(const RefPtr<ResourceObject>& resObj, const MenuItemIconType type) override;
 
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetSelected(FrameNode* frameNode, bool isSelected = false);
     static void SetLabelFontColor(FrameNode* frameNode, const std::optional<Color>& color);
-    static void SetLabelFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize);
-    static void SetLabelFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& weight);
-    static void SetLabelFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& families);
-    static void SetLabelFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& style);
+    static void SetLabelFontSize(FrameNode* frameNode, const Dimension& fontSize);
+    static void SetLabelFontWeight(FrameNode* frameNode, FontWeight weight);
+    static void SetLabelFontFamily(FrameNode* frameNode, const std::vector<std::string>& families);
+    static void SetLabelFontStyle(FrameNode* frameNode, Ace::FontStyle style);
     static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& color);
-    static void SetFontSize(FrameNode* frameNode, const std::optional<Dimension>& fontSize);
-    static void SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& weight);
-    static void SetFontStyle(FrameNode* frameNode, const std::optional<Ace::FontStyle>& style);
-    static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& families);
+    static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
+    static void SetFontWeight(FrameNode* frameNode, FontWeight weight);
+    static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& families);
+    static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle style);
     static void SetSelectIcon(FrameNode* frameNode, bool isShow = false);
-    static void SetSelectIconSrc(FrameNode* frameNode, const std::optional<std::string>& src);
+    static void SetSelectIconSrc(FrameNode* frameNode, const std::string& src);
     static void SetSelectIconSymbol(FrameNode* frameNode, std::function<void(WeakPtr<NG::FrameNode>)>&& symbolApply);
     static void SetOnChange(FrameNode* frameNode, std::function<void(bool)>&& onChange);
     static RefPtr<FrameNode> CreateMenuItem(OptionParam&& param, const MenuParam& menuParam);
-    static void SetupMenuItemProperties(const RefPtr<FrameNode>& menuItem, const RefPtr<SelectTheme>& theme);
-    static void AddChild(FrameNode* frameNode, const RefPtr<NG::UINode>& customNode);
-    static void AddRowChild(FrameNode* frameNode, const MenuItemProperties& menuItemProps);
-    static void UpdateMenuProperty(FrameNode* frameNode, const MenuItemProperties& menuItemProps);
     static void SetSelectedChangeEvent(FrameNode* frameNode, std::function<void(bool)>&& selectedChangeEvent);
-
+    static void CreateWithColorResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        MenuItemFontColorType type);
+    static void CreateWithDimensionFpResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        MenuItemFontSizeType type);
+    static void CreateWithFontFamilyResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        MenuItemFontFamilyType type);
+    static void CreateWithStringResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        MenuItemStringType type);
+    static void CreateWithMediaResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
+        const MenuItemIconType type);
 private:
     void UpdateMenuProperty(const RefPtr<NG::FrameNode>& menuItem, const MenuItemProperties& menuItemProps);
-    static void DoMountRow(const RefPtr<NG::FrameNode>& menuItem);
-    static void UpdateRadius(const RefPtr<NG::FrameNode>& menuItem);
+    static void SetupMenuItemProperties(const RefPtr<FrameNode>& menuItem, const RefPtr<SelectTheme>& theme);
+    static const std::string ColorTypeToString(const MenuItemFontColorType type);
+    static const std::string DimensionTypeToString(const MenuItemFontSizeType type);
+    static const std::string StringTypeToString(const MenuItemStringType type);
+    static const std::string FamilyTypeToString(const MenuItemFontFamilyType type);
+    static const std::string MediaTypeToString(const MenuItemIconType type);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_MODEL_NG_H

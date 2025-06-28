@@ -59,6 +59,8 @@ void SetDragEventProperty(const RefPtr<OHOS::Ace::DragEvent>& info, ArkUINodeEve
     event.dragEvent.displayY = info->GetDisplayY();
     event.dragEvent.screenX = info->GetScreenX();
     event.dragEvent.screenY = info->GetScreenY();
+    event.dragEvent.globalDisplayX = info->GetGlobalDisplayX();
+    event.dragEvent.globalDisplayY = info->GetGlobalDisplayY();
 
     event.dragEvent.previewRectWidth = info->GetPreviewRect().Width();
     event.dragEvent.previewRectHeight = info->GetPreviewRect().Height();
@@ -144,6 +146,10 @@ void SetOnDragStart(ArkUINodeHandle node, void* extraParam)
         event.dragEvent.bundleName = strdup(info->GetDragSource().c_str());
         event.dragEvent.isRemoteDev = info->isRemoteDev();
         SendArkUISyncEvent(&event);
+        info->SetUseDataLoadParams(event.dragEvent.useDataLoadParams);
+        RefPtr<DataLoadParams> udDataLoadParams =
+            UdmfClient::GetInstance()->TransformDataLoadParamsForNative(event.dragEvent.dataLoadParams);
+        info->SetDataLoadParams(udDataLoadParams);
         RefPtr<UnifiedData> udData =
             UdmfClient::GetInstance()->TransformUnifiedDataForNative(event.dragEvent.unifiedData);
 

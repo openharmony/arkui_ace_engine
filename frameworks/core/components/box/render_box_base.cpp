@@ -18,11 +18,12 @@
 #include "base/log/dump_log.h"
 #include "base/utils/string_expression.h"
 #include "core/components/text_field/render_text_field.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 namespace {
 
-const double CIRCLE_LAYOUT_IN_BOX_SCALE = sin(M_PI_4);
+const double CIRCLE_LAYOUT_IN_BOX_SCALE = sin(ACE_PI / 4);
 constexpr double BOX_DIAMETER_TO_RADIUS = 2.0;
 constexpr int32_t COMPATIBLE_VERSION = 5;
 constexpr double TWO_SIDES = 2.0;

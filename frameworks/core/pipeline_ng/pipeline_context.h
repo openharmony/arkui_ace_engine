@@ -32,6 +32,7 @@
 #include "base/view_data/view_data_wrap.h"
 #include "core/accessibility/accessibility_manager_ng.h"
 #include "core/common/ai/ai_write_adapter.h"
+#include "core/common/color_inverter.h"
 #include "core/common/frontend.h"
 #include "core/common/thp_extra_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -99,6 +100,7 @@ public:
     using TransformHintChangedCallbackMap = std::unordered_map<int32_t, std::function<void(uint32_t)>>;
     using PredictTask = std::function<void(int64_t, bool)>;
     using RotationEndCallbackMap = std::unordered_map<int32_t, std::function<void()>>;
+    using RawKeyboardChangedCallbackMap = std::unordered_map<int32_t, std::function<void()>>;
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
         const RefPtr<Frontend>& frontend, int32_t instanceId);
@@ -249,13 +251,13 @@ public:
         const RefPtr<FrameNode> &node);
     void FlushDragEvents();
     void FlushDragEvents(const RefPtr<DragDropManager>& manager,
-        std::string extraInfo,
+        const std::string& extraInfo,
         const RefPtr<FrameNode>& node,
         const std::list<DragPointerEvent>& pointEvent);
     void FlushDragEvents(const RefPtr<DragDropManager>& manager,
-        std::unordered_map<int32_t, DragPointerEvent> newIdPoints,
-        std::string& extraInfo,
-        std::unordered_map<int, DragPointerEvent> &idToPoints,
+        const std::unordered_map<int32_t, DragPointerEvent>& newIdPoints,
+        const std::string& extraInfo,
+        const std::unordered_map<int, DragPointerEvent>& idToPoints,
         const RefPtr<FrameNode>& node);
 
     // Called by view when axis event received.
@@ -307,6 +309,24 @@ public:
     void RemoveVisibleAreaChangeNode(int32_t nodeId);
 
     void HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp);
+
+    void SetAreaChangeNodeMinDepth(int32_t depth)
+    {
+        if (areaChangeNodeMinDepth_ > 0) {
+            areaChangeNodeMinDepth_ = std::min(areaChangeNodeMinDepth_, depth);
+        } else {
+            areaChangeNodeMinDepth_ = depth;
+        }
+    }
+
+    void SetIsDisappearChangeNodeMinDepth(int32_t depth)
+    {
+        if (isDisappearChangeNodeMinDepth_ > 0) {
+            isDisappearChangeNodeMinDepth_ = std::min(isDisappearChangeNodeMinDepth_, depth);
+        } else {
+            isDisappearChangeNodeMinDepth_ = depth;
+        }
+    }
 
     void HandleSubwindow(bool isShow);
 
@@ -667,6 +687,20 @@ public:
         halfFoldHoverChangedCallbackMap_.erase(callbackId);
     }
 
+    int32_t RegisterRawKeyboardChangedCallback(std::function<void()>&& callback)
+    {
+        if (callback) {
+            rawKeyboardChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
+
+    void UnRegisterRawKeyboardChangedCallback(int32_t callbackId)
+    {
+        rawKeyboardChangedCallbackMap_.erase(callbackId);
+    }
+
     void UpdateHalfFoldHoverStatus(int32_t windowWidth, int32_t windowHeight);
 
     bool IsHalfFoldHoverStatus()
@@ -675,6 +709,8 @@ public:
     }
 
     void OnHalfFoldHoverChangedCallback();
+
+    void OnRawKeyboardChangedCallback() override;
 
     int32_t RegisterFoldDisplayModeChangedCallback(std::function<void(FoldDisplayMode)>&& callback)
     {
@@ -979,6 +1015,8 @@ public:
 
     void NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) override;
 
+    void DisableNotifyResponseRegionChanged() override;
+
     void SetLocalColorMode(ColorMode colorMode)
     {
         auto localColorModeValue = static_cast<int32_t>(colorMode);
@@ -1130,7 +1168,10 @@ public:
         uiTranslateManager_->RemoveTranslateListener(nodeId);
     }
 
-    void SetEnableSwipeBack(bool isEnable) override;
+    void SetEnableSwipeBack(bool isEnable) override
+    {
+        enableSwipeBack_ = isEnable;
+    }
 
     Offset GetHostParentOffsetToWindow() const
     {
@@ -1212,8 +1253,9 @@ public:
         keyOcclusionNodes_[frameNodeId] = enable;
     }
     const RefPtr<NodeRenderStatusMonitor>& GetNodeRenderStatusMonitor();
-    void RemoveNodeFromDirtyRenderNode(int32_t nodeId, int32_t pageId);
-    void GetRemovedDirtyRenderAndErase(uint32_t id);
+    void RegisterArkUIObjectLifecycleCallback(Kit::ArkUIObjectLifecycleCallback&& callback);
+    void UnregisterArkUIObjectLifecycleCallback();
+    void FireArkUIObjectLifecycleCallback(void* data);
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1305,6 +1347,7 @@ private:
     void CompensateTouchMoveEvent(const TouchEvent& event);
 
     bool CompensateTouchMoveEventFromUnhandledEvents(const TouchEvent& event);
+    void CompensateTouchMoveEventBeforeDown();
 
     void DispatchMouseToTouchEvent(const MouseEvent& event, const RefPtr<FrameNode>& node);
 
@@ -1334,6 +1377,7 @@ private:
     void DumpElement(const std::vector<std::string>& params, bool hasJson) const;
     void DumpData(const RefPtr<FrameNode>& node, const std::vector<std::string>& params, bool hasJson) const;
     void OnDumpInjection(const std::vector<std::string>& params) const;
+    void DumpForceColor(const std::vector<std::string>& params) const;
     void OnRotationAnimationEnd();
     template<typename T>
     struct NodeCompare {
@@ -1412,11 +1456,19 @@ private:
     HalfFoldHoverChangedCallbackMap halfFoldHoverChangedCallbackMap_;
     FoldDisplayModeChangedCallbackMap foldDisplayModeChangedCallbackMap_;
     TransformHintChangedCallbackMap transformHintChangedCallbackMap_;
+    RawKeyboardChangedCallbackMap rawKeyboardChangedCallbackMap_;
 
     bool isOnAreaChangeNodesCacheVaild_ = false;
     std::vector<FrameNode*> onAreaChangeNodesCache_;
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
+
+    // MinDepth < 0, do not work;
+    // MinDepth = 0, no Change Node from last frame;
+    // MinDepth > 0, represent Change MinDepth from last frame;
+    int32_t areaChangeNodeMinDepth_ = -1;
+    int32_t isDisappearChangeNodeMinDepth_ = -1;
+
     std::unordered_map<int32_t, std::vector<MouseEvent>> historyMousePointsById_;
     std::unordered_map<int32_t, std::vector<DragPointerEvent>> historyPointsEventById_;
     RefPtr<AccessibilityManagerNG> accessibilityManagerNG_;
@@ -1442,7 +1494,7 @@ private:
     WeakPtr<FrameNode> windowSceneNode_;
     uint32_t nextScheduleTaskId_ = 0;
     uint64_t resampleTimeStamp_ = 0;
-    bool touchAccelarate_ = false;
+    bool touchAccelarate_ = true;
     bool isEventsPassThrough_ = false;
     bool backgroundColorModeUpdated_ = false;  // Dark/light color switch flag
     uint64_t animationTimeStamp_ = 0;
@@ -1503,6 +1555,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 
     int32_t preNodeId_ = -1;
+    bool enableSwipeBack_ = true;
 
     RefPtr<AvoidInfoManager> avoidInfoMgr_ = MakeRefPtr<AvoidInfoManager>();
     RefPtr<MemoryManager> memoryMgr_ = MakeRefPtr<MemoryManager>();
@@ -1543,6 +1596,7 @@ private:
     std::set<WeakPtr<NG::UINode>> needRenderForDrawChildrenNodes_;
     std::unordered_map<int32_t, bool> keyOcclusionNodes_;
     RefPtr<NodeRenderStatusMonitor> nodeRenderStatusMonitor_;
+    Kit::ArkUIObjectLifecycleCallback objectLifecycleCallback_;
 };
 
 /**

@@ -38,7 +38,7 @@ std::vector<std::string> JsForEachFunction::ExecuteIdentityMapper()
             jsKeysArr = JSRef<JSArray>::Cast(jsKeys);
         }
     } else {
-        jsKeysArr = JSRef<JSArray>::Cast(jsThis_.Lock());
+        jsKeysArr = JSRef<JSArray>::Cast(This());
     }
     int length = static_cast<int>(jsKeysArr->Length());
 
@@ -63,11 +63,11 @@ std::vector<std::string> JsForEachFunction::ExecuteIdentityMapper()
 void JsForEachFunction::ExecuteBuilderForIndex(int32_t index)
 {
     // indexed item
-    JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(jsThis_.Lock());
+    JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(This());
     JSRef<JSVal> params[2];
     params[0] = jsArray->GetValueAt(index);
     params[1] = JSRef<JSVal>::Make(ToJSValue(index));
-    jsViewMapperFunc_.Lock()->Call(jsThis_.Lock(), 2, params);
+    jsViewMapperFunc_.Lock()->Call(This(), 2, params); // 2: array size of params
 }
 
 } // namespace OHOS::Ace::Framework

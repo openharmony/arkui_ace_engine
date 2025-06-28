@@ -26,6 +26,7 @@
 #include "core/components/plugin/plugin_element.h"
 #include "core/components/plugin/plugin_window.h"
 #include "core/components/plugin/render_plugin.h"
+#include "ability_info.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -38,9 +39,10 @@ const char* GetDeclarativeSharedLibrary()
     return DECLARATIVE_ARK_ENGINE_SHARED_LIB;
 }
 
-void PluginSubContainer::Initialize()
+void PluginSubContainer::Initialize(const std::string& codeLanguage)
 {
-    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "PluginSubContainer initialize start.");
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT,
+        "PluginSubContainer initialize start. codeLanguage:%{public}s", codeLanguage.c_str());
     ContainerScope scope(instanceId_);
 
     auto outSidePipelineContext = outSidePipelineContext_.Upgrade();

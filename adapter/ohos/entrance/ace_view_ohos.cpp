@@ -553,7 +553,7 @@ bool AceViewOhos::ProcessFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>
     return nonPointerEventCallback_(event, std::move(markProcess));
 }
 
-bool AceViewOhos::ProcessDigitalCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+void AceViewOhos::ProcessDigitalCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     bool isInjected)
 {
     CrownEvent event;
@@ -567,8 +567,8 @@ bool AceViewOhos::ProcessDigitalCrownEvent(const std::shared_ptr<MMI::PointerEve
             std::chrono::duration_cast<std::chrono::microseconds>(event.timeStamp.time_since_epoch()).count(),
             enabled);
     };
-    CHECK_NULL_RETURN(crownEventCallback_, false);
-    return crownEventCallback_(event, markProcess);
+    CHECK_NULL_VOID(crownEventCallback_);
+    crownEventCallback_(event, markProcess);
 }
 
 const void* AceViewOhos::GetNativeWindowById(uint64_t textureId)

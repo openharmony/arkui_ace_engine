@@ -42,6 +42,7 @@ public:
     virtual void SetInputCount(double count) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetTextColor(const Color& value) = 0;
+    virtual void SetTextColorByUser(bool isSetByUser) = 0;
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
@@ -49,6 +50,9 @@ public:
     virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
     virtual void CreateWithResourceObj(
         JsTextTimerResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) = 0;
+    virtual void SetFontSizeByUser(bool value) = 0;
+    virtual void SetFontWeightByUser(bool value) = 0;
+    virtual void SetFontFamilyByUser(bool value) = 0;
 
 private:
     static std::unique_ptr<TextTimerModel> instance_;

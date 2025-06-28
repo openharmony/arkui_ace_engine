@@ -41,6 +41,7 @@ class ACE_FORCE_EXPORT AppBarView : public Referenced {
 public:
     AppBarView() = default;
     RefPtr<FrameNode> Create(const RefPtr<FrameNode>& stage);
+    RefPtr<Pattern> GetAtomicServicePattern();
     void SetVisible(bool visible) {}
     void SetRowColor(const std::optional<Color>& color) {}
     void SetContent(const std::string& content) {}
@@ -51,6 +52,7 @@ public:
     void OnMenuClick();
     void OnCloseClick();
     void RequestAtomicServiceTerminate();
+    void SetOnBackPressedConsumed();
     void CreateServicePanel(const std::string& appGalleryBundleName, const std::string& abilityName,
         std::map<std::string, std::string>& params);
     static void BuildAppbar(RefPtr<PipelineBase> pipleline);

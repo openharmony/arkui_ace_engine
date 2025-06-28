@@ -151,6 +151,7 @@ typedef enum CallbackKind {
     Kind_Callback_TerminationInfo_Void = 691098197,
     Kind_Callback_TextPickerResult_Void = 1290504509,
     Kind_Callback_TextRange_Void = 811915501,
+    Kind_Callback_CreateItem = -2019730059,
     Kind_Callback_TimePickerResult_Void = 1557859605,
     Kind_Callback_TouchEvent_HitTestMode = -274419246,
     Kind_Callback_TouchEvent_Void = -1676021850,

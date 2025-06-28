@@ -54,9 +54,12 @@ public:
     static bool ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
         RefPtr<ResourceObject>& resourceObject);
-    static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
+    static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& color,
+        std::vector<RefPtr<ResourceObject>>& resObjs);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
-        RefPtr<ResourceObject>& resourceObject);
+        bool fromTheme = false);
+    static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
+        RefPtr<ResourceObject>& resourceObject, bool fromTheme = false);
     static bool ParseJsColorAlpha(
         const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value,
@@ -65,10 +68,13 @@ public:
     static bool ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
         RefPtr<ResourceObject>& resourceObject);
     static void CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj);
-    static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result);
     static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
-        RefPtr<ResourceObject>& resourceObject);
+        bool fromTheme = false);
+    static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
+        RefPtr<ResourceObject>& resourceObject, bool fromTheme = false);
     static bool ParseColorMetricsToColor(const EcmaVM *vm, const Local<JSValueRef> &jsValue, Color& result);
+    static bool ParseColorMetricsToColor(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result, RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsDimensionFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj,
         DimensionUnit dimensionUnit, CalcDimension& result, RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsDimensionFromResourceNG(
@@ -162,14 +168,22 @@ public:
         std::string& customFamilyName);
     static void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args,
         std::optional<CalcDimension>& optionalDimension);
+    static void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args,
+        std::optional<CalcDimension>& optionalDimension, RefPtr<ResourceObject>& resObj);
     static void ParseOuterBorderForDashParams(EcmaVM* vm, const Local<JSValueRef>& args,
         std::optional<CalcDimension>& optionalDimension);
+    static void ParseOuterBorderForDashParams(EcmaVM* vm, const Local<JSValueRef>& args,
+        std::optional<CalcDimension>& optionalDimension, RefPtr<ResourceObject>& resObj);
     static void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim,
         std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units);
     static void ParseJsAngle(const EcmaVM* vm, const Local<JSValueRef>& value, std::optional<float>& angle);
     static bool ParseJsInt32(const EcmaVM* vm, const Local<JSValueRef>& value, int32_t& result);
+    static void ParseGradientCenter(const EcmaVM* vm, const Local<JSValueRef>& value,
+        std::vector<ArkUIInt32orFloat32>& values, std::vector<RefPtr<ResourceObject>>& vectorResObj);
     static void ParseGradientCenter(
         const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& values);
+    static void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef>& value,
+        std::vector<ArkUIInt32orFloat32>& colors, std::vector<RefPtr<ResourceObject>>& vectorResObj);
     static void ParseGradientColorStops(
         const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& colors);
     static void ParseGradientAngle(
@@ -199,7 +213,7 @@ public:
     }
     template <class T>
     static bool ParseArrayWithResObj(const EcmaVM *vm, const Local<JSValueRef> &arg, T *array, int32_t defaultLength,
-        std::function<T(const EcmaVM *, const Local<JSValueRef> &, const RefPtr<ResourceObject> &)> getValue,
+        std::function<T(const EcmaVM *, const Local<JSValueRef> &, RefPtr<ResourceObject> &)> getValue,
         std::vector<RefPtr<ResourceObject>>& resObjArray)
     {
         CHECK_NULL_RETURN(vm, false);
@@ -235,6 +249,8 @@ public:
         const Local<JSValueRef> &jsOffIconSrc, PasswordIcon& result);
     static void ParsePadding(
         const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result);
+    static void ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
+                             ArkUISizeType& result, RefPtr<ResourceObject>& resObj);
     static bool ParseResponseRegion(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue,
         ArkUI_Float32* regionValues, int32_t* regionUnits, uint32_t length);
@@ -267,15 +283,26 @@ public:
         EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex);
     static void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
         EcmaVM* vm, std::vector<ArkUI_Float32>& values, int32_t argsIndex);
+    static void SetTextBackgroundStyle(std::shared_ptr<TextBackgroundStyle> style, Color color,
+        RefPtr<ResourceObject>& colorResObj, const ArkUI_Float32* values, const ArkUI_Int32* units);
+    static void RegisterTextBackgroundStyleResource(std::shared_ptr<TextBackgroundStyle> textBackgroundStyle,
+        RefPtr<ResourceObject>& resObjTopLeft, RefPtr<ResourceObject>& resObjTopRight,
+        RefPtr<ResourceObject>& resObjBottomLeft, RefPtr<ResourceObject>& resObjBottomRight);
     static void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
         EcmaVM* vm, std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units, int32_t argsIndex);
+    static void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
+        EcmaVM* vm, std::vector<ArkUI_Float32>& values, std::vector<ArkUI_Int32>& units, int32_t argsIndex,
+        std::shared_ptr<TextBackgroundStyle> style);
     static void PushOuterBorderStyleVector(
         const std::optional<BorderStyle>& value, std::vector<uint32_t> &options);
     static void ParseOuterBorderStyle(ArkUIRuntimeCallInfo* runtimeCallInfo,
         EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex);
+    static bool ParseMargin(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUISizeType& top, ArkUISizeType& right,
+        ArkUISizeType& bottom, ArkUISizeType& left);
     static void SetBorderWidthArray(const EcmaVM* vm, const Local<JSValueRef>& args,
         ArkUI_Float32 values[], int units[], int index);
-    static ArkUISizeType ParseJsToArkUISize(const EcmaVM *vm, const Local<JSValueRef> &arg);
+    static ArkUISizeType ParseJsToArkUISize(const EcmaVM *vm, const Local<JSValueRef> &arg,
+        RefPtr<ResourceObject>& resObj);
     static bool IsDrawable(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
     static RefPtr<PixelMap> GetDrawablePixmap(const EcmaVM* vm, Local<JSValueRef> obj);
     static Rosen::BrightnessBlender* CreateRSBrightnessBlenderFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj);
@@ -332,6 +359,10 @@ public:
         return panda::JSValueRef::Undefined(vm);
     }
     static Local<panda::ArrayRef> ChoosePointToJSValue(const EcmaVM* vm, std::vector<int> input);
+
+private:
+    static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
+        const Color& color, bool state);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

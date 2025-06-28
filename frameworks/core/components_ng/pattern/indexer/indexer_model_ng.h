@@ -68,6 +68,9 @@ public:
     void SetSelectedBGColorByUser(bool isByUser) override;
     void SetPopupUnselectedColorByUser(bool isByUser) override;
     void SetPopupTitleBackgroundByUser(bool isByUser) override;
+    void SetPopupSelectedColorByUser(bool isByUser) override;
+    void SetPopupItemBackgroundColorByUser(bool isByUser) override;
+    void SetPopupBackgroundColorByUser(bool isByUser) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isArc = false);
     static void CreateWithResourceObj(
@@ -121,6 +124,18 @@ public:
     static void SetSelectedBGColorByUser(FrameNode* frameNode, bool isByUser);
     static void SetPopupUnselectedColorByUser(FrameNode* frameNode, bool isByUser);
     static void SetPopupTitleBackgroundByUser(FrameNode* frameNode, bool isByUser);
+    static void SetPopupSelectedColorByUser(FrameNode* frameNode, bool isByUser);
+    static void SetPopupItemBackgroundByUser(FrameNode* frameNode, bool isByUser);
+    static void SetPopupBackgroundByUser(FrameNode* frameNode, bool isByUser);
+    static void RemoveColor(FrameNode* frameNode);
+    static void RemovePopupColor(FrameNode* frameNode);
+    static void RemoveSelectedColor(FrameNode* frameNode);
+    static void RemoveSelectedBackgroundColor(FrameNode* frameNode);
+    static void RemovePopupUnselectedColor(FrameNode* frameNode);
+    static void RemovePopupBackground(FrameNode* frameNode);
+    static void RemovePopupSelectedColor(FrameNode* frameNode);
+    static void RemovePopupItemBackground(FrameNode* frameNode);
+    static void RemovePopupTitleBackground(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_INDEXER_INDEXER_MODEL_NG_H

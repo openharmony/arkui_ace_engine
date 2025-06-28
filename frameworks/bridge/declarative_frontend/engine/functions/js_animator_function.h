@@ -28,7 +28,7 @@ public:
     explicit JsAnimatorFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
 
     ~JsAnimatorFunction() override {};
-    void Execute() override
+    void Execute()
     {
         ExecuteJS();
     }

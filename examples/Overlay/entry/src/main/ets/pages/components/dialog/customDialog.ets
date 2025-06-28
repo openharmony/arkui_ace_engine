@@ -13,115 +13,40 @@
  * limitations under the License.
  */
 
+import router from '@ohos.router';
+
+import { TestListOption } from '../../../common/DataModel'
+
 @Builder
 export function CustomDialogBuilder(name: string, param: Object) {
   CustomDialogExample()
 }
 
-@CustomDialog
-@Component
-struct CustomBuilder {
-  @Prop textValue: string
-  @Prop inputValue: string
-  controller?: CustomDialogController
-  // 若尝试在CustomDialog中传入多个其他的Controller，以实现在CustomDialog中打开另一个或另一些CustomDialog,
-  // 那么此处需要将指向自己的controller放在所有controller的后面
-  cancel: () => void = () => {
-  }
-  confirm: () => void = () => {
-  }
-
-  build() {
-    Column() {
-      Text('Change text').fontSize(20).margin({ top: 10, bottom: 10 })
-      TextInput({ placeholder: '', text: this.textValue }).height(60).width('90%')
-        .onChange((value: string) => {
-          this.textValue = value
-        })
-      Flex({ justifyContent: FlexAlign.SpaceAround }) {
-        Button('cancel')
-          .onClick(() => {
-            if (this.controller != undefined) {
-              this.controller.close()
-              this.cancel()
-            }
-          }).backgroundColor(0xffffff).fontColor(Color.Black)
-        Button('confirm')
-          .onClick(() => {
-            if (this.controller != undefined) {
-              this.inputValue = this.textValue
-              this.controller.close()
-              this.confirm()
-            }
-          }).backgroundColor(0xffffff).fontColor(Color.Red)
-      }.margin({ bottom: 10 })
-    }.borderRadius(10)
-  }
-}
+const testList: TestListOption[] = [
+  { title: '自定义弹窗_基本功能_0', url: 'pages/components/dialog/page/CustomDialogTestLevel0_0' },
+  { title: '自定义弹窗_基本功能_1', url: 'pages/components/dialog/page/CustomDialogTestLevel0_1' },
+  { title: '自定义弹窗_基本功能_生命周期', url: 'pages/components/dialog/page/CustomDialogTestLevel0_2' },
+]
 
 @Entry
 @Component
 struct CustomDialogExample {
   pathStack: NavPathStack = new NavPathStack()
 
-  @State textValue: string = ''
-  @State inputValue: string = 'click me'
-  dialogController: CustomDialogController | null = new CustomDialogController({
-    builder: CustomBuilder({
-      cancel: ()=> { this.onCancel() },
-      confirm: ()=> { this.onAccept() },
-      textValue: this.textValue,
-      inputValue: this.inputValue
-    }),
-    cancel: this.exitApp,
-    autoCancel: true,
-    onWillDismiss:(dismissDialogAction: DismissDialogAction)=> {
-      console.info('reason=' + JSON.stringify(dismissDialogAction.reason))
-      console.log('dialog onWillDismiss')
-      if (dismissDialogAction.reason == DismissReason.PRESS_BACK) {
-        dismissDialogAction.dismiss()
-      }
-      if (dismissDialogAction.reason == DismissReason.TOUCH_OUTSIDE) {
-        dismissDialogAction.dismiss()
-      }
-    },
-    alignment: DialogAlignment.Bottom,
-    customStyle: false,
-    cornerRadius: 10,
-  })
-
-  // 在自定义组件即将析构销毁时将dialogController置空
-  aboutToDisappear() {
-    this.dialogController = null
-  }
-
-  onCancel() {
-    console.info('Callback when the first button is clicked')
-  }
-
-  onAccept() {
-    console.info('Callback when the second button is clicked')
-  }
-
-  exitApp() {
-    console.info('Click the callback in the blank area')
-  }
-
   build() {
     NavDestination() {
-      Column({ space: 5 }) {
-        Text('dialogController.open')
-          .fontColor(Color.Gray)
-          .width('100%')
-          .padding(10)
-
-        Button(this.inputValue)
-          .onClick(() => {
-            if (this.dialogController != null) {
-              this.dialogController.open()
-            }
-          })
-      }.width('100%').margin({ top: 5 })
+      List({ space: 8 }) {
+        ForEach(testList, (item: TestListOption) => {
+          ListItem() {
+            Text(item.title).width('100%').backgroundColor(Color.Pink).fontSize(20)
+              .onClick(() => {
+                router.pushUrl({
+                  url: item.url
+                }, router.RouterMode.Single)
+              })
+          }
+        }, (item: TestListOption) => item.title)
+      }.borderWidth(2).padding(5)
     }
     .title('CustomDialog')
     .onBackPressed(() => {

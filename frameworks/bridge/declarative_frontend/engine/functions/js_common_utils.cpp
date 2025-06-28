@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_common_utils.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::Framework::CommonUtils {
 
@@ -59,6 +60,32 @@ JSRef<JSObject> CreateEventTargetObject(const std::shared_ptr<BaseGestureEvent>&
     return target;
 }
 
+JSRef<JSObject> CreateEventTargetObject(const BaseEventInfo& info)
+{
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    JSRef<JSObject> target = objectTemplate->NewInstance();
+    JSRef<JSObject> area = objectTemplate->NewInstance();
+    JSRef<JSObject> offset = objectTemplate->NewInstance();
+    JSRef<JSObject> globalOffset = objectTemplate->NewInstance();
+    const auto& localOffset = info.GetTarget().area.GetOffset();
+    const auto& origin = info.GetTarget().origin;
+    offset->SetProperty<double>("x", localOffset.GetX().ConvertToVp());
+    offset->SetProperty<double>("y", localOffset.GetY().ConvertToVp());
+    globalOffset->SetProperty<double>("x", (origin.GetX().ConvertToVp() + localOffset.GetX().ConvertToVp()));
+    globalOffset->SetProperty<double>("y", (origin.GetY().ConvertToVp() + localOffset.GetY().ConvertToVp()));
+    area->SetPropertyObject("position", offset);
+    area->SetPropertyObject("globalPosition", globalOffset);
+    area->SetProperty<double>("width", info.GetTarget().area.GetWidth().ConvertToVp());
+    area->SetProperty<double>("height", info.GetTarget().area.GetHeight().ConvertToVp());
+    target->SetPropertyObject("area", area);
+    if (info.GetTarget().id.empty()) {
+        target->SetPropertyObject("id", JsiValue::Undefined());
+    } else {
+        target->SetProperty<const char*>("id", info.GetTarget().id.c_str());
+    }
+    return target;
+}
+
 bool SetBaseGestureEventInfo(JSRef<JSObject> obj, const std::shared_ptr<BaseGestureEvent>& info)
 {
     CHECK_NULL_RETURN(info, false);
@@ -73,6 +100,8 @@ bool SetBaseGestureEventInfo(JSRef<JSObject> obj, const std::shared_ptr<BaseGest
     obj->SetProperty<int32_t>("targetDisplayId", info->GetTargetDisplayId());
     obj->SetProperty<float>("axisVertical", info->GetVerticalAxis());
     obj->SetProperty<float>("axisHorizontal", info->GetHorizontalAxis());
+    obj->SetPropertyObject(
+        "getModifierKeyState", JSRef<JSFunc>::New<FunctionCallback>(NG::ArkTSUtils::JsGetModifierKeyState));
     CreateFingerInfosObject(info, obj);
     return true;
 }

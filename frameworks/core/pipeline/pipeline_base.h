@@ -719,10 +719,12 @@ public:
         return {};
     }
 
+    bool CheckIfGetTheme();
+
     template<typename T>
     bool GetDraggable()
     {
-        if (isJsCard_ || isFormRender_) {
+        if (!CheckIfGetTheme()) {
             return false;
         }
         auto theme = GetTheme<T>();
@@ -1064,7 +1066,11 @@ public:
 
     void SetGetWindowRectImpl(std::function<Rect()>&& callback);
 
+    void InitGetGlobalWindowRectCallback(std::function<Rect()>&& callback);
+
     Rect GetCurrentWindowRect() const;
+
+    Rect GetGlobalDisplayWindowRect() const;
 
     using SafeAreaInsets = NG::SafeAreaInsets;
 
@@ -1213,6 +1219,7 @@ public:
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) {}
     virtual void OnFoldStatusChange(FoldStatus foldStatus) {}
     virtual void OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) {}
+    virtual void OnRawKeyboardChangedCallback() {}
 
     void SetIsAppWindow(bool isAppWindow)
     {
@@ -1426,6 +1433,8 @@ public:
     };
 
     virtual void NotifyResponseRegionChanged(const RefPtr<NG::FrameNode>& rootNode) {};
+
+    virtual void DisableNotifyResponseRegionChanged() {};
 
     void SetTHPExtraManager(const RefPtr<NG::THPExtraManager>& thpExtraMgr)
     {

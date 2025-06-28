@@ -22,6 +22,7 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
+#include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -42,6 +43,7 @@
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -765,6 +767,20 @@ void ScrollablePattern::SetGetSnapTypeCallback(const RefPtr<Scrollable>& scrolla
     });
 }
 
+void ScrollablePattern::SetOnWillStopDraggingCallback(const RefPtr<Scrollable>& scrollable)
+{
+    CHECK_NULL_VOID(scrollable);
+    scrollable->SetOnWillStopDraggingCallback([weak = WeakClaim(this)](float velocity) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto eventHub = pattern->GetOrCreateEventHub<ScrollableEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        OnWillStopDraggingEvent callback = eventHub->GetOnWillStopDragging();
+        CHECK_NULL_VOID(callback);
+        callback(Dimension(velocity));
+    });
+}
+
 RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
 {
     auto host = GetHost();
@@ -791,6 +807,7 @@ RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
     SetDragFRCSceneCallback(scrollable);
     SetOnContinuousSliding(scrollable);
     SetGetSnapTypeCallback(scrollable);
+    SetOnWillStopDraggingCallback(scrollable);
     if (!NearZero(velocityScale_)) {
         scrollable->SetUnstaticVelocityScale(velocityScale_);
     }
@@ -834,6 +851,11 @@ void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
 
 void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
+    if (GetAxis() == Axis::FREE) {
+        gestureHub->RemoveTouchEvent(touchEvent_);
+        touchEvent_.Reset();
+        return;
+    }
     // use TouchEvent to receive next touch down event to stop animation.
     if (touchEvent_) {
         return;
@@ -1181,7 +1203,7 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
         }
         auto barColor = property->GetScrollBarColor();
         if (barColor) {
-            scrollBar_->SetForegroundColor(barColor.value());
+            scrollBar_->SetForegroundColor(barColor.value(), isRoundScroll_);
         }
         auto scrollableBarMargin = property->GetScrollBarMargin();
         if (scrollableBarMargin) {
@@ -2849,6 +2871,10 @@ void ScrollablePattern::FireOnScrollStart(bool withPerfMonitor)
     if (withPerfMonitor) {
         PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
     }
+    auto pipeline = host->GetContext();
+    if (pipeline) {
+        pipeline->DisableNotifyResponseRegionChanged();
+    }
     if (GetScrollAbort()) {
         ACE_SCOPED_TRACE("ScrollAbort, no OnScrollStart, id:%d, tag:%s",
             static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
@@ -2886,6 +2912,10 @@ void ScrollablePattern::FireOnScroll(float finalOffset, OnScrollEvent& onScroll)
     auto offsetPX = Dimension(finalOffset);
     auto offsetVP = Dimension(offsetPX.ConvertToVp(), DimensionUnit::VP);
     auto scrollState = GetScrollState();
+    if (SystemProperties::IsWhiteBlockEnabled() &&
+        ScrollAdjustmanager::GetInstance().ChangeScrollStateIfNeed(scrollState)) {
+        onScroll(0.0_vp, ScrollState::IDLE);
+    }
     bool isTriggered = false;
     if (!NearZero(finalOffset)) {
         onScroll(offsetVP, scrollState);
@@ -3539,7 +3569,7 @@ PositionMode ScrollablePattern::GetPositionMode()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, PositionMode::RIGHT);
     auto positionMode = PositionMode::RIGHT;
-    if (axis_ == Axis::HORIZONTAL) {
+    if (axis_ == Axis::HORIZONTAL || axis_ == Axis::FREE) {
         positionMode = PositionMode::BOTTOM;
     } else {
         auto isRtl = host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
@@ -4260,7 +4290,7 @@ void ScrollablePattern::OnColorConfigurationUpdate()
     if (paintProperty) {
         auto barColor = paintProperty->GetScrollBarColor();
         if (barColor) {
-            scrollBar_->SetForegroundColor(barColor.value());
+            scrollBar_->SetForegroundColor(barColor.value(), isRoundScroll_);
             return;
         }
     }
@@ -4268,8 +4298,10 @@ void ScrollablePattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
     CHECK_NULL_VOID(theme);
-    scrollBar_->SetForegroundColor(theme->GetForegroundColor());
-    scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
+    scrollBar_->SetForegroundColor(theme->GetForegroundColor(), isRoundScroll_);
+    scrollBar_->SetBackgroundColor(theme->GetBackgroundColor(), isRoundScroll_);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    paintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
 }
 
 SizeF ScrollablePattern::GetViewSizeMinusPadding() const
@@ -4306,10 +4338,6 @@ void ScrollablePattern::StopScrollableAndAnimate()
 void ScrollablePattern::GetRepeatCountInfo(
     RefPtr<UINode> node, int32_t& repeatDifference, int32_t& firstRepeatCount, int32_t& totalChildCount)
 {
-    if (auto* adapter = GetScrollWindowAdapter(); adapter) {
-        totalChildCount = adapter->GetTotalCount();
-        return;
-    }
     CHECK_NULL_VOID(node);
     auto& children = node->GetChildren();
     for (const auto& child : children) {

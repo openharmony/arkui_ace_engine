@@ -215,7 +215,7 @@ public:
 
     void CloseSwipeAction(OnFinishFunc&& onFinishCallback);
 
-    void FireOnFinshEvent() const
+    void FireOnFinishEvent() const
     {
         if (onFinishEvent_) {
             onFinishEvent_();
@@ -244,6 +244,21 @@ public:
     SwipeActionState GetSwipeActionState();
 
     bool FindHeadOrTailChild(const RefPtr<FocusHub>& childFocus, FocusStep step, WeakPtr<FocusHub>& target);
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return true;
+    }
+
+    bool IsEnableFix() override
+    {
+        return true;
+    }
+
+    bool IsEnableMatchParent() override
+    {
+        return true;
+    }
 
 protected:
     void OnModifyDone() override;

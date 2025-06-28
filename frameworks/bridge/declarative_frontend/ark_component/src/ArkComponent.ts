@@ -633,8 +633,8 @@ class BorderStyleModifier extends ModifierWithKey<BorderStyle | EdgeStyles> {
   }
 }
 
-class ShadowModifier extends ModifierWithKey<ShadowOptions | ShadowStyle> {
-  constructor(value: ShadowOptions | ShadowStyle) {
+class ShadowModifier extends ModifierWithKey<ShadowOptions | ArkShadowStyle> {
+  constructor(value: ShadowOptions | ArkShadowStyle) {
     super(value);
   }
   static identity: Symbol = Symbol('shadow');
@@ -642,8 +642,8 @@ class ShadowModifier extends ModifierWithKey<ShadowOptions | ShadowStyle> {
     if (reset) {
       getUINativeModule().common.resetShadow(node);
     } else {
-      if (isNumber(this.value)) {
-        getUINativeModule().common.setShadow(node, this.value, undefined, undefined, undefined, undefined, undefined, undefined);
+      if (isNumber(this.value.shadowStyle)) {
+        getUINativeModule().common.setShadow(node, this.value.shadowStyle, undefined, undefined, undefined, undefined, undefined, undefined);
       } else {
         getUINativeModule().common.setShadow(node, undefined,
           (this.value as ShadowOptions).radius,
@@ -657,6 +657,9 @@ class ShadowModifier extends ModifierWithKey<ShadowOptions | ShadowStyle> {
   }
 
   checkObjectDiff(): boolean {
+    if (isNumber(this.value.shadowStyle)) {
+      return true;
+    }
     return !((this.stageValue as ShadowOptions).radius === (this.value as ShadowOptions).radius &&
       (this.stageValue as ShadowOptions).type === (this.value as ShadowOptions).type &&
       (this.stageValue as ShadowOptions).color === (this.value as ShadowOptions).color &&
@@ -712,8 +715,8 @@ class OpacityModifier extends ModifierWithKey<number | Resource> {
   }
 }
 
-class AlignModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class AlignModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
     super(value);
   }
   static identity: Symbol = Symbol('align');
@@ -725,6 +728,20 @@ class AlignModifier extends ModifierWithKey<number> {
     }
   }
 }
+
+class LayoutGravityModifier extends ModifierWithKey<string> {
+    constructor(value: string) {
+      super(value);
+    }
+    static identity: Symbol = Symbol('layoutGravity');
+    applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+        getUINativeModule().common.resetLayoutGravity(node);
+      } else {
+        getUINativeModule().common.setLayoutGravity(node, this.value);
+      }
+    }
+  }
 
 class BackdropBlurModifier extends ModifierWithKey<ArkBlurOptions> {
   constructor(value: ArkBlurOptions) {
@@ -1309,10 +1326,19 @@ class OutlineModifier extends ModifierWithKey<OutlineOptions> {
           topColor = this.value.color;
           bottomColor = this.value.color;
         } else {
-          leftColor = (this.value.color as EdgeColors).left;
-          rightColor = (this.value.color as EdgeColors).right;
-          topColor = (this.value.color as EdgeColors).top;
-          bottomColor = (this.value.color as EdgeColors).bottom;
+          const localizedEdgeColors = this.value.color as LocalizedEdgeColors);
+          if (localizedEdgeColors.start || localizedEdgeColors.end) {
+            leftColor = localizedEdgeColors.start;
+            rightColor = localizedEdgeColors.end;
+            topColor = localizedEdgeColors.top;
+            bottomColor = localizedEdgeColors.bottom;
+          } else {
+            const edgeColors = this.value.color as EdgeColors;
+            leftColor = edgeColors.left;
+            rightColor = edgeColors.right;
+            topColor = edgeColors.top;
+            bottomColor = edgeColors.bottom;
+          }
         }
       }
       let topLeft;
@@ -2230,6 +2256,21 @@ class OnGestureRecognizerJudgeBeginModifier extends ModifierWithKey<GestureRecog
   }
 }
 
+declare type TouchTestDoneCallback = (event: BaseGestureEvent, recognizers: Array<GestureRecognizer>) => void;
+class OnTouchTestDoneModifier extends ModifierWithKey<TouchTestDoneCallback> {
+  constructor(value: TouchTestDoneCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onTouchTestDone');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnTouchTestDone(node);
+    } else {
+      getUINativeModule().common.setOnTouchTestDone(node, this.value);
+    }
+  }
+}
+
 declare type ShouldBuiltInRecognizerParallelWithCallback = (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer;
 class ShouldBuiltInRecognizerParallelWithModifier extends ModifierWithKey<ShouldBuiltInRecognizerParallelWithCallback> {
   constructor(value: ShouldBuiltInRecognizerParallelWithCallback) {
@@ -3065,6 +3106,12 @@ class DragPreviewModifier extends ModifierWithKey<ArkDragPreview> {
 
   checkObjectDiff(): boolean {
     return !this.value.isEqual(this.stageValue);
+  }
+}
+
+class ArkShadowStyle {
+  constructor() {
+    this.shadowStyle = undefined;
   }
 }
 
@@ -3995,6 +4042,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   private _onAreaChange: AreaChangeEventCallback = null;
   private _onGestureJudgeBegin: GestureJudgeBeginCallback = null;
   private _onGestureRecognizerJudgeBegin: GestureRecognizerJudgeBeginCallback = null;
+  private _onTouchTestDone: TouchTestDoneCallback = null;
   private _shouldBuiltInRecognizerParallelWith: ShouldBuiltInRecognizerParallelWithCallback = null;
   private _onFocusAxisEvent: FocusAxisEventCallback = null;
 
@@ -4095,6 +4143,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     touchRecognizers?: Array<TouchRecognizer>) => GestureJudgeResult): this {
     this._onGestureRecognizerJudgeBegin = callback;
     modifierWithKey(this._modifiersWithKeys, OnGestureRecognizerJudgeBeginModifier.identity, OnGestureRecognizerJudgeBeginModifier, callback);
+    return this;
+  }
+  onTouchTestDone(callback: (event: BaseGestureEvent, recognizers: Array<GestureRecognizer>) => void): this {
+    this._onTouchTestDone = callback;
+    modifierWithKey(this._modifiersWithKeys, OnTouchTestDoneModifier.identity, OnTouchTestDoneModifier, callback);
     return this;
   }
   shouldBuiltInRecognizerParallelWith(callback: (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer): this {
@@ -5033,11 +5086,20 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  align(value: Alignment): this {
-    if (isNumber(value)) {
-      modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, value);
-    } else {
+  align(value: Alignment | LocalizedAlignment): this {
+    if (!isNumber(value) && !isString(value)) {
       modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, value);
+    }
+    return this;
+  }
+
+  layoutGravity(value:string): this {
+    if (!isString(value)) {
+      modifierWithKey(this._modifiersWithKeys, LayoutGravityModifier.identity, LayoutGravityModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, LayoutGravityModifier.identity, LayoutGravityModifier, value);
     }
     return this;
   }
@@ -5319,7 +5381,13 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   shadow(value: ShadowOptions | ShadowStyle): this {
-    modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, value);
+    let arkShadowStyle = new ArkShadowStyle();
+    if (typeof value === 'object') {
+      modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, value);
+    } else if (typeof value === 'number') {
+      arkShadowStyle.shadowStyle = value;
+      modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, arkShadowStyle);
+    }
     return this;
   }
 

@@ -475,4 +475,35 @@ void TextTimerPattern::UpdateFontFamily(const std::vector<std::string>& fontFami
         layoutProperty->UpdateFontFamily(fontFamilies);
     }
 }
+
+void TextTimerPattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+
+    auto pops = host->GetLayoutProperty<TextTimerLayoutProperty>();
+    CHECK_NULL_VOID(pops);
+
+    if (!pops->HasTextColorSetByUser() || (pops->HasTextColorSetByUser() && !pops->GetTextColorSetByUserValue())) {
+        UpdateTextColor(theme->GetTextStyle().GetTextColor(), false);
+    }
+    if (!pops->GetTextFontSizeSetByUserValue(false)) {
+        UpdateFontSize(theme->GetTextStyle().GetFontSize(), false);
+    }
+    if (!pops->GetTextFontWeightSetByUserValue(false)) {
+        UpdateFontWeight(theme->GetTextStyle().GetFontWeight(), false);
+    }
+    if (!pops->GetTextFontFamilySetByUserValue(false)) {
+        UpdateFontFamily(theme->GetTextStyle().GetFontFamilies(), false);
+    }
+}
 } // namespace OHOS::Ace::NG

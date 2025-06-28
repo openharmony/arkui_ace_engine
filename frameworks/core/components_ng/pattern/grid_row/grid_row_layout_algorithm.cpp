@@ -262,7 +262,7 @@ void GridRowLayoutAlgorithm::OnBreakPointChange(LayoutWrapper* layoutWrapper, co
             "[%{public}s-%{public}d] breakpoint has changed to a new sizeType:%{public}s and breakpoint reference "
             "%{public}d",
             host->GetTag().c_str(), host->GetId(), sizeTypeString.c_str(),
-            hostLayoutProperty->GetBreakPointsValue().reference);
+            hostLayoutProperty->GetBreakPointsValue(V2::BreakPoints()).reference);
         hostEventHub->FireChangeEvent(sizeTypeString);
     };
     context->AddAfterLayoutTask(task);
@@ -284,7 +284,7 @@ bool GridRowLayoutAlgorithm::GetSizeTypeAndMaxSize(LayoutWrapper* layoutWrapper,
     auto windowManager = context->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, false);
     auto mode = windowManager->GetWindowMode();
-    sizeType = GridContainerUtils::ProcessGridSizeType(layoutProperty->GetBreakPointsValue(),
+    sizeType = GridContainerUtils::ProcessGridSizeType(layoutProperty->GetBreakPointsValue(V2::BreakPoints()),
         Size(maxSize.Width(), maxSize.Height()), mode, PipelineBase::GetCurrentContextSafelyWithCheck());
     return true;
 }
@@ -298,10 +298,10 @@ void GridRowLayoutAlgorithm::ParseGridRowParams(LayoutWrapper *layoutWrapper, co
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
-    auto gutter = GridContainerUtils::ProcessGutter(sizeType, layoutProperty->GetGutterValue());
+    auto gutter = GridContainerUtils::ProcessGutter(sizeType, layoutProperty->GetGutterValue(V2::Gutter()));
     gutterInDouble_ =
         std::make_pair<double, double>(context->NormalizeToPx(gutter.first), context->NormalizeToPx(gutter.second));
-    columnNum_ = GridContainerUtils::ProcessColumn(sizeType, layoutProperty->GetColumnsValue());
+    columnNum_ = GridContainerUtils::ProcessColumn(sizeType, layoutProperty->GetColumnsValue(V2::GridContainerSize()));
     if (columnNum_ <= 0) {
         columnNum_ = DEFAULT_COLUMN_NUMBER;
     }
@@ -337,7 +337,7 @@ bool GridRowLayoutAlgorithm::IsRightToLeft(LayoutWrapper* layoutWrapper)
 {
     const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, false);
-    auto directionVal = layoutProperty->GetDirectionValue();
+    auto directionVal = layoutProperty->GetDirectionValue(V2::GridRowDirection::Row);
     auto textDirection = layoutProperty->GetLayoutDirection();
     if (textDirection == TextDirection::AUTO) {
         textDirection = AceApplicationInfo::GetInstance().IsRightToLeft() ? TextDirection::RTL : TextDirection::LTR;

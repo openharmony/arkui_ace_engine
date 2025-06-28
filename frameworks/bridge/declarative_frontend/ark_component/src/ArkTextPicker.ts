@@ -373,7 +373,10 @@ class TextpickerSelectedBackgroundStyleModifier extends ModifierWithKey<PickerBa
       const { color, borderRadius } = this.value;
       if (borderRadius != null) {
         const borderRadiusKeys = Object.keys(borderRadius);
-        let topLeft, topRight, bottomLeft, bottomRight;
+        let topLeft;
+        let topRight;
+        let bottomLeft;
+        let bottomRight;
         if (borderRadiusKeys.indexOf('value') >= 0) {
           topLeft = topRight = bottomLeft = bottomRight = borderRadius;
         } else if (borderRadiusKeys.indexOf('topLeft') >= 0) {
@@ -389,36 +392,41 @@ class TextpickerSelectedBackgroundStyleModifier extends ModifierWithKey<PickerBa
         }
         getUINativeModule().textpicker.setTextpickerSelectedBackgroundStyle(node, color, topLeft, topRight, bottomLeft,
           bottomRight);
+      } else {
+        getUINativeModule().textpicker.setTextpickerSelectedBackgroundStyle(node, color, undefined, undefined,
+          undefined, undefined);
       }
     }
   }
   checkObjectDiff(): boolean {
     if (!(this.stageValue.color === this.value.color)) {
       return true;
-    } else if (Object.keys(this.value.borderRadius).indexOf('value') >= 0) {
-      return !(
-        (this.stageValue.borderRadius as LengthMetrics).value === (this.value.borderRadius as LengthMetrics).value &&
-        (this.stageValue.borderRadius as LengthMetrics).unit === (this.value.borderRadius as LengthMetrics).unit);
-    } else if (Object.keys(this.value.borderRadius).indexOf('topLeft') >= 0) {
-      return !(
-        (this.stageValue.borderRadius as BorderRadiuses).topLeft ===
-        (this.value.borderRadius as BorderRadiuses).topLeft &&
-        (this.stageValue.borderRadius as BorderRadiuses).topRight ===
-        (this.value.borderRadius as BorderRadiuses).topRight &&
-        (this.stageValue.borderRadius as BorderRadiuses).bottomLeft ===
-        (this.value.borderRadius as BorderRadiuses).bottomLeft &&
-        (this.stageValue.borderRadius as BorderRadiuses).bottomRight ===
-        (this.value.borderRadius as BorderRadiuses).bottomRight);
-    } else if (Object.keys(this.value.borderRadius).indexOf('topStart') >= 0) {
-      return !(
-        (this.stageValue.borderRadius as LocalizedBorderRadiuses).topStart ===
-        (this.value.borderRadius as LocalizedBorderRadiuses).topStart &&
-        (this.stageValue.borderRadius as LocalizedBorderRadiuses).topEnd ===
-        (this.value.borderRadius as LocalizedBorderRadiuses).topEnd &&
-        (this.stageValue.borderRadius as LocalizedBorderRadiuses).bottomStart ===
-        (this.value.borderRadius as LocalizedBorderRadiuses).bottomStart &&
-        (this.stageValue.borderRadius as LocalizedBorderRadiuses).bottomEnd ===
-        (this.value.borderRadius as LocalizedBorderRadiuses).bottomEnd);
+    } else if (this.stageValue.borderRadius != null && this.value.borderRadius != null) {
+      if (Object.keys(this.value.borderRadius).indexOf('value') >= 0) {
+        return !(
+          (this.stageValue.borderRadius as LengthMetrics).value === (this.value.borderRadius as LengthMetrics).value &&
+          (this.stageValue.borderRadius as LengthMetrics).unit === (this.value.borderRadius as LengthMetrics).unit);
+      } else if (Object.keys(this.value.borderRadius).indexOf('topLeft') >= 0) {
+        return !(
+          (this.stageValue.borderRadius as BorderRadiuses).topLeft ===
+          (this.value.borderRadius as BorderRadiuses).topLeft &&
+          (this.stageValue.borderRadius as BorderRadiuses).topRight ===
+          (this.value.borderRadius as BorderRadiuses).topRight &&
+          (this.stageValue.borderRadius as BorderRadiuses).bottomLeft ===
+          (this.value.borderRadius as BorderRadiuses).bottomLeft &&
+          (this.stageValue.borderRadius as BorderRadiuses).bottomRight ===
+          (this.value.borderRadius as BorderRadiuses).bottomRight);
+      } else if (Object.keys(this.value.borderRadius).indexOf('topStart') >= 0) {
+        return !(
+          (this.stageValue.borderRadius as LocalizedBorderRadiuses).topStart ===
+          (this.value.borderRadius as LocalizedBorderRadiuses).topStart &&
+          (this.stageValue.borderRadius as LocalizedBorderRadiuses).topEnd ===
+          (this.value.borderRadius as LocalizedBorderRadiuses).topEnd &&
+          (this.stageValue.borderRadius as LocalizedBorderRadiuses).bottomStart ===
+          (this.value.borderRadius as LocalizedBorderRadiuses).bottomStart &&
+          (this.stageValue.borderRadius as LocalizedBorderRadiuses).bottomEnd ===
+          (this.value.borderRadius as LocalizedBorderRadiuses).bottomEnd);
+      }
     }
     return true;
   }

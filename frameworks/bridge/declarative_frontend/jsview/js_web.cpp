@@ -32,7 +32,9 @@
 #endif
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_common_utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_event_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_key_function.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -98,6 +100,7 @@ WebModel* WebModel::GetInstance()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+using namespace OHOS::Ace::Framework::CommonUtils;
 bool JSWeb::webDebuggingAccess_ = false;
 int32_t JSWeb::webDebuggingPort_ = 0;
 class JSWebDialog : public Referenced {
@@ -1039,6 +1042,11 @@ public:
         error_ = eventInfo.GetError();
     }
 
+    void SetOverrideErrorPageEvent(const OnOverrideErrorPageEvent& eventInfo)
+    {
+        error_ = eventInfo.GetError();
+    }
+
     void GetErrorCode(const JSCallbackInfo& args)
     {
         auto code = JSVal(ToJSValue(error_->GetCode()));
@@ -1334,6 +1342,11 @@ public:
     void SetOnInterceptRequestEvent(const OnInterceptRequestEvent& eventInfo)
     {
         request_ = eventInfo.GetRequest();
+    }
+
+    void SetOnOverrideErrorPageEvent(const OnOverrideErrorPageEvent& eventInfo)
+    {
+        request_ = eventInfo.GetWebResourceRequest();
     }
 
     void SetLoadInterceptEvent(const LoadInterceptEvent& eventInfo)
@@ -1942,6 +1955,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onErrorReceive", &JSWeb::OnErrorReceive);
     JSClass<JSWeb>::StaticMethod("onHttpErrorReceive", &JSWeb::OnHttpErrorReceive);
     JSClass<JSWeb>::StaticMethod("onInterceptRequest", &JSWeb::OnInterceptRequest);
+    JSClass<JSWeb>::StaticMethod("onOverrideErrorPage", &JSWeb::OnOverrideErrorPage);
     JSClass<JSWeb>::StaticMethod("onUrlLoadIntercept", &JSWeb::OnUrlLoadIntercept);
     JSClass<JSWeb>::StaticMethod("onLoadIntercept", &JSWeb::OnLoadIntercept);
     JSClass<JSWeb>::StaticMethod("onlineImageAccess", &JSWeb::OnLineImageAccessEnabled);
@@ -2069,6 +2083,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("dataDetectorConfig", &JSWeb::DataDetectorConfig);
     JSClass<JSWeb>::StaticMethod("bypassVsyncCondition", &JSWeb::BypassVsyncCondition);
     JSClass<JSWeb>::StaticMethod("enableFollowSystemFontWeight", &JSWeb::EnableFollowSystemFontWeight);
+    JSClass<JSWeb>::StaticMethod("gestureFocusMode", &JSWeb::GestureFocusMode);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -2205,6 +2220,7 @@ JSRef<JSVal> LoadWebTitleReceiveEventToJSValue(const LoadWebTitleReceiveEvent& e
 {
     JSRef<JSObject> obj = JSRef<JSObject>::New();
     obj->SetProperty("title", eventInfo.GetTitle());
+    obj->SetProperty("isRealTitle", eventInfo.GetIsRealTitle());
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -2370,6 +2386,40 @@ JSRef<JSVal> WebAllSslErrorEventToJSValue(const WebAllSslErrorEvent& eventInfo)
     obj->SetProperty("referrer", eventInfo.GetReferrer());
     obj->SetProperty("isFatalError", eventInfo.GetIsFatalError());
     obj->SetProperty("isMainFrame", eventInfo.GetIsMainFrame());
+
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (!engine || !engine->GetNativeEngine()) {
+        return JSRef<JSVal>::Cast(obj);
+    }
+    napi_env env = reinterpret_cast<napi_env>(engine->GetNativeEngine());
+    std::vector<std::string> certChainDerData = eventInfo.GetCertChainData();
+    JSRef<JSArray> certsArr = JSRef<JSArray>::New();
+    for (uint8_t i = 0; i < certChainDerData.size(); i++) {
+        if (i == UINT8_MAX) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Cert chain data array reach max.");
+            break;
+        }
+        void *data = nullptr;
+        napi_value buffer = nullptr;
+        napi_value item = nullptr;
+        napi_status status = napi_create_arraybuffer(env, certChainDerData[i].size(), &data, &buffer);
+        if (status != napi_ok) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Create array buffer failed, status = %{public}d.", status);
+            continue;
+        }
+        if (memcpy_s(data, certChainDerData[i].size(), certChainDerData[i].data(), certChainDerData[i].size()) != 0) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Cert chain data failed, index = %{public}u.", i);
+            continue;
+        }
+        status = napi_create_typedarray(env, napi_uint8_array, certChainDerData[i].size(), buffer, 0, &item);
+        if (status != napi_ok) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "Create typed array failed, status = %{public}d.", status);
+            continue;
+        }
+        JSRef<JSVal> cert = JsConverter::ConvertNapiValueToJsVal(item);
+        certsArr->SetValueAt(i, cert);
+    }
+    obj->SetPropertyObject("certChainData", certsArr);
     return JSRef<JSVal>::Cast(obj);
 }
 
@@ -2541,6 +2591,16 @@ void JSWeb::Create(const JSCallbackInfo& info)
             func->Call(webviewController, 1, argv);
         };
 
+        auto setWebDetachFunction = controller->GetProperty("setWebDetach");
+        std::function<void(int32_t)> setWebDetachCallback = nullptr;
+        if (setWebDetachFunction->IsFunction()) {
+            setWebDetachCallback = [webviewController = controller, func = JSRef<JSFunc>::Cast(setWebDetachFunction)](
+                                     int32_t webId) {
+                JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
+                func->Call(webviewController, 1, argv);
+            };
+        }
+
         auto setHapPathFunction = controller->GetProperty("innerSetHapPath");
         std::function<void(const std::string&)> setHapPathCallback = nullptr;
         if (setHapPathFunction->IsFunction()) {
@@ -2618,6 +2678,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
         WebModel::GetInstance()->SetPermissionClipboard(std::move(requestPermissionsFromUserCallback));
         WebModel::GetInstance()->SetOpenAppLinkFunction(std::move(openAppLinkCallback));
         WebModel::GetInstance()->SetDefaultFileSelectorShow(std::move(fileSelectorShowFromUserCallback));
+        WebModel::GetInstance()->SetWebDetachFunction(std::move(setWebDetachCallback));
         auto getCmdLineFunction = controller->GetProperty("getCustomeSchemeCmdLine");
         if (!getCmdLineFunction->IsFunction()) {
             return;
@@ -3304,6 +3365,54 @@ void JSWeb::OnInterceptRequest(const JSCallbackInfo& args)
         return nullptr;
     };
     WebModel::GetInstance()->SetOnInterceptRequest(jsCallback);
+}
+
+JSRef<JSVal> OnOverrideErrorPageEventToJSValue(const OnOverrideErrorPageEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSObject> requestObj = JSClass<JSWebResourceRequest>::NewInstance();
+    auto requestEvent = Referenced::Claim(requestObj->Unwrap<JSWebResourceRequest>());
+    requestEvent->SetOnOverrideErrorPageEvent(eventInfo);
+
+    JSRef<JSObject> errorObj = JSClass<JSWebResourceError>::NewInstance();
+    auto errorEvent = Referenced::Claim(errorObj->Unwrap<JSWebResourceError>());
+    errorEvent->SetOverrideErrorPageEvent(eventInfo);
+
+    obj->SetPropertyObject("webResourceRequest", requestObj);
+    obj->SetPropertyObject("error", errorObj);
+
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnOverrideErrorPage(const JSCallbackInfo& args)
+{
+    if ((args.Length() <= 0) || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<OnOverrideErrorPageEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), OnOverrideErrorPageEventToJSValue);
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
+                          const BaseEventInfo* info) -> std::string {
+        auto webNode = node.Upgrade();
+        CHECK_NULL_RETURN(webNode, nullptr);
+        ContainerScope scope(webNode->GetInstanceId());
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, nullptr);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            pipelineContext->UpdateCurrentActiveNode(node);
+        }
+        auto* eventInfo = TypeInfoHelper::DynamicCast<OnOverrideErrorPageEvent>(info);
+        if (!eventInfo) {
+            return "";
+        }
+        JSRef<JSVal> html = func->ExecuteWithValue(*eventInfo);
+        if (html->IsString()) {
+            return html->ToString();
+        }
+        return "";
+    };
+    WebModel::GetInstance()->SetOnOverrideErrorPage(jsCallback);
 }
 
 void JSWeb::OnUrlLoadIntercept(const JSCallbackInfo& args)
@@ -5280,6 +5389,7 @@ JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventIn
     const OHOS::Ace::Offset& globalLocation = touchInfo.GetGlobalLocation();
     const OHOS::Ace::Offset& localLocation = touchInfo.GetLocalLocation();
     const OHOS::Ace::Offset& screenLocation = touchInfo.GetScreenLocation();
+    const OHOS::Ace::Offset& globalDisplayLocation = touchInfo.GetGlobalDisplayLocation();
     touchInfoObj->SetProperty<int32_t>("type", static_cast<int32_t>(touchInfo.GetTouchType()));
     touchInfoObj->SetProperty<int32_t>("id", touchInfo.GetFingerId());
     touchInfoObj->SetProperty<double>("displayX", screenLocation.GetX());
@@ -5290,6 +5400,8 @@ JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventIn
     touchInfoObj->SetProperty<double>("screenY", globalLocation.GetY());
     touchInfoObj->SetProperty<double>("x", localLocation.GetX());
     touchInfoObj->SetProperty<double>("y", localLocation.GetY());
+    touchInfoObj->SetProperty<double>("globalDisplayX", globalDisplayLocation.GetX());
+    touchInfoObj->SetProperty<double>("globalDisplayY", globalDisplayLocation.GetY());
     touchInfoObj->Wrap<TouchEventInfo>(&info);
     return touchInfoObj;
 }
@@ -6026,5 +6138,16 @@ void JSWeb::BypassVsyncCondition(int32_t webBypassVsyncCondition)
 void JSWeb::EnableFollowSystemFontWeight(bool enableFollowSystemFontWeight)
 {
     WebModel::GetInstance()->SetEnableFollowSystemFontWeight(enableFollowSystemFontWeight);
+}
+
+void JSWeb::GestureFocusMode(int32_t gestureFocusMode)
+{
+    if (gestureFocusMode < static_cast<int32_t>(GestureFocusMode::DEFAULT) ||
+        gestureFocusMode > static_cast<int32_t>(GestureFocusMode::GESTURE_TAP_AND_LONG_PRESS)) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "GestureFocusMode param err");
+        return;
+    }
+    auto mode = static_cast<enum GestureFocusMode>(gestureFocusMode);
+    WebModel::GetInstance()->SetGestureFocusMode(mode);
 }
 } // namespace OHOS::Ace::Framework

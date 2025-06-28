@@ -49,6 +49,11 @@ void ScrollPattern::OnModifyDone()
     if (axis != GetAxis()) {
         SetAxis(axis);
         ResetPosition();
+        if (axis == Axis::FREE) {
+            InitFreeScroll();
+        } else {
+            freePanGesture_.Reset();
+        }
     }
     if (!GetScrollableEvent()) {
         AddScrollEvent();
@@ -254,6 +259,7 @@ void ScrollPattern::ResetPosition()
 {
     currentOffset_ = 0.0f;
     lastOffset_ = 0.0f;
+    crossOffset_ = 0.0f;
 }
 
 bool ScrollPattern::IsAtTop() const
@@ -731,7 +737,8 @@ void ScrollPattern::ScrollTo(float position)
 void ScrollPattern::DoJump(float position, int32_t source)
 {
     float setPosition = (GetAxis() == Axis::HORIZONTAL && IsRowReverse()) ? -position : position;
-    if (!NearEqual(currentOffset_, setPosition) && GreatOrEqual(scrollableDistance_, 0.0f)) {
+    if ((!NearEqual(currentOffset_, setPosition) && GreatOrEqual(scrollableDistance_, 0.0f)) ||
+        GetCanStayOverScroll()) {
         UpdateCurrentOffset(setPosition - currentOffset_, source);
     }
 }
@@ -1536,5 +1543,28 @@ void ScrollPattern::TriggerScrollBarDisplay()
     CHECK_NULL_VOID(scrollBar);
     scrollBar->PlayScrollBarAppearAnimation();
     scrollBar->ScheduleDisappearDelayTask();
+}
+
+void ScrollPattern::InitFreeScroll()
+{
+    if (freePanGesture_) {
+        return;
+    }
+    PanDirection panDirection { .type = PanDirection::ALL };
+    double distance = SystemProperties::GetScrollableDistance();
+    PanDistanceMap distanceMap;
+    if (Positive(distance)) {
+        distanceMap[SourceTool::UNKNOWN] = distance;
+    } else {
+        distanceMap[SourceTool::UNKNOWN] = DEFAULT_PAN_DISTANCE.ConvertToPx();
+        distanceMap[SourceTool::PEN] = DEFAULT_PEN_PAN_DISTANCE.ConvertToPx();
+    }
+    freePanGesture_ = AceType::MakeRefPtr<NG::PanRecognizer>(DEFAULT_PAN_FINGER, panDirection, distanceMap);
+    freePanGesture_->SetOnActionUpdate([this](const GestureEvent& event) {
+        crossOffset_ += static_cast<float>(event.GetDelta().GetY());
+        currentOffset_ += static_cast<float>(event.GetDelta().GetX());
+        auto host = GetHost();
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    });
 }
 } // namespace OHOS::Ace::NG

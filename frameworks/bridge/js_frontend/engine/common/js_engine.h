@@ -344,6 +344,8 @@ public:
     virtual std::shared_ptr<void> SerializeValue(
         const std::shared_ptr<Framework::JsValue>& jsValue) { return nullptr; }
 
+    virtual void TriggerModuleSerializer() {}
+
     virtual void SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder) {}
 
     virtual void SetPkgNameList(const std::map<std::string, std::string>& map) {}
@@ -534,6 +536,11 @@ public:
     {
         napi_value value = nullptr;
         return value;
+    }
+
+    virtual bool BuilderNodeFunc(std::string functionName, const std::vector<int32_t>& nodeIds)
+    {
+        return false;
     }
 
     virtual napi_value GetFrameNodeValueByNodeId(int32_t nodeId)

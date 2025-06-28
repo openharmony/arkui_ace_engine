@@ -338,6 +338,7 @@ ArkUINativeModuleValue NavigationBridge::SetToolBarConfiguration(ArkUIRuntimeCal
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    NavigationModelNG::ResetResObj(frameNode, NavigationPatternType::NAV_BAR, "navigation.toolbarConfiguration");
     using namespace OHOS::Ace::Framework;
     JsiCallbackInfo info = JsiCallbackInfo(runtimeCallInfo);
     bool hideText = false;
@@ -381,6 +382,7 @@ ArkUINativeModuleValue NavigationBridge::SetToolBarConfiguration(ArkUIRuntimeCal
     }
     NG::NavigationToolbarOptions options;
     JSNavigationUtils::ParseToolbarOptions(info, options);
+    NavigationModelNG::ResetResObj(frameNode, NavigationPatternType::NAV_BAR, "navigation.navigationToolbarOptions");
     NavigationModel::GetInstance()->SetToolbarOptions(std::move(options));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -801,6 +803,8 @@ ArkUINativeModuleValue NavigationBridge::SetBackButtonIcon(ArkUIRuntimeCallInfo*
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    NavigationModelNG::ResetResObj(frameNode, NavigationPatternType::TITLE_BAR, "navigation.backButtonIcon.icon");
 
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
     std::string src;
@@ -827,10 +831,10 @@ ArkUINativeModuleValue NavigationBridge::SetBackButtonIcon(ArkUIRuntimeCallInfo*
     }
     imageOption.noPixMap = noPixMap;
     imageOption.isValidImage = isValidImage;
-    if (!SystemProperties::ConfigChangePerform()) {
-        NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap);
-    } else {
+    if (SystemProperties::ConfigChangePerform() && backButtonIconResObj) {
         NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, imageOption, pixMap, backButtonIconResObj);
+    } else {
+        NavigationModelNG::SetBackButtonIcon(frameNode, iconSymbol, src, imageOption, pixMap);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -842,6 +846,7 @@ ArkUINativeModuleValue NavigationBridge::ResetBackButtonIcon(ArkUIRuntimeCallInf
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    NavigationModelNG::ResetResObj(frameNode, NavigationPatternType::TITLE_BAR, "navigation.backButtonIcon.icon");
     bool noPixMap = false;
     NG::ImageOption imageOption;
     imageOption.noPixMap = noPixMap;

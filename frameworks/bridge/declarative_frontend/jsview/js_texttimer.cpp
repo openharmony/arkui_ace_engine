@@ -126,6 +126,7 @@ void JSTextTimer::SetFontDefault()
     RefPtr<TextTheme> textTheme = GetTheme<TextTheme>();
     TextTimerModel::GetInstance()->SetFontSize(textTheme->GetTextStyle().GetFontSize());
     TextTimerModel::GetInstance()->SetTextColor(textTheme->GetTextStyle().GetTextColor());
+    TextTimerModel::GetInstance()->SetTextColorByUser(false);
     TextTimerModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
     TextTimerModel::GetInstance()->SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
     TextTimerModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
@@ -180,11 +181,10 @@ void JSTextTimer::SetFontSize(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resObj;
     if (SystemProperties::ConfigChangePerform()) {
         bool state = ParseJsDimensionFp(info[0], fontSize, resObj);
-        if (resObj) {
-            TextTimerModel::GetInstance()->CreateWithResourceObj(JsTextTimerResourceType::FONTSIZE, resObj);
-            return;
-        } else if (state && !fontSize.IsNegative() && fontSize.Unit() != DimensionUnit::PERCENT) {
+        TextTimerModel::GetInstance()->CreateWithResourceObj(JsTextTimerResourceType::FONTSIZE, resObj);
+        if (state && !fontSize.IsNegative() && fontSize.Unit() != DimensionUnit::PERCENT) {
             TextTimerModel::GetInstance()->SetFontSize(fontSize);
+            TextTimerModel::GetInstance()->SetFontSizeByUser(true);
             return;
         } else {
             auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -193,6 +193,7 @@ void JSTextTimer::SetFontSize(const JSCallbackInfo& info)
             CHECK_NULL_VOID(theme);
             fontSize = theme->GetTextStyle().GetFontSize();
             TextTimerModel::GetInstance()->SetFontSize(fontSize);
+            TextTimerModel::GetInstance()->SetFontSizeByUser(false);
         }
     } else {
         if (!ParseJsDimensionFp(info[0], fontSize)) {
@@ -218,9 +219,8 @@ void JSTextTimer::SetTextColor(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resObj;
     if (SystemProperties::ConfigChangePerform()) {
         bool state = ParseJsColor(info[0], textColor, resObj);
-        if (resObj) {
-            TextTimerModel::GetInstance()->CreateWithResourceObj(JsTextTimerResourceType::TEXTCOLOR, resObj);
-        } else if (state) {
+        TextTimerModel::GetInstance()->CreateWithResourceObj(JsTextTimerResourceType::TEXTCOLOR, resObj);
+        if (state) {
             TextTimerModel::GetInstance()->SetTextColor(textColor);
         } else {
             auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -228,6 +228,7 @@ void JSTextTimer::SetTextColor(const JSCallbackInfo& info)
             auto theme = pipelineContext->GetTheme<TextTheme>();
             textColor = theme->GetTextStyle().GetTextColor();
             TextTimerModel::GetInstance()->SetTextColor(textColor);
+            TextTimerModel::GetInstance()->SetTextColorByUser(false);
         }
     } else {
         if (!ParseJsColor(info[0], textColor)) {
@@ -236,7 +237,6 @@ void JSTextTimer::SetTextColor(const JSCallbackInfo& info)
             auto theme = pipelineContext->GetTheme<TextTheme>();
             textColor = theme->GetTextStyle().GetTextColor();
         }
-
         TextTimerModel::GetInstance()->SetTextColor(textColor);
     }
 }
@@ -263,11 +263,19 @@ void JSTextTimer::SetFontWeight(const JSCallbackInfo& info)
     auto fontWeight = info[0];
     if (fontWeight->IsUndefined()) {
         TextTimerModel::GetInstance()->SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
+        if (SystemProperties::ConfigChangePerform()) {
+            TextTimerModel::GetInstance()->CreateWithResourceObj(JsTextTimerResourceType::FONTWEIGHT, nullptr);
+        }
+        TextTimerModel::GetInstance()->SetFontWeightByUser(false);
         return;
     }
 
     if (fontWeight->IsNull()) {
         TextTimerModel::GetInstance()->SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
+        if (SystemProperties::ConfigChangePerform()) {
+            TextTimerModel::GetInstance()->CreateWithResourceObj(JsTextTimerResourceType::FONTWEIGHT, nullptr);
+        }
+        TextTimerModel::GetInstance()->SetFontWeightByUser(false);
         return;
     }
     std::string weight;
@@ -277,14 +285,13 @@ void JSTextTimer::SetFontWeight(const JSCallbackInfo& info)
         if (SystemProperties::ConfigChangePerform()) {
             RefPtr<ResourceObject> resObj;
             ParseJsString(fontWeight, weight, resObj);
-            if (resObj) {
-                TextTimerModel::GetInstance()->CreateWithResourceObj(JsTextTimerResourceType::FONTWEIGHT, resObj);
-            }
+            TextTimerModel::GetInstance()->CreateWithResourceObj(JsTextTimerResourceType::FONTWEIGHT, resObj);
         } else {
             ParseJsString(fontWeight, weight);
         }
     }
     TextTimerModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(weight));
+    TextTimerModel::GetInstance()->SetFontWeightByUser(true);
 }
 
 void JSTextTimer::SetFontStyle(int32_t value)
@@ -304,10 +311,10 @@ void JSTextTimer::SetFontFamily(const JSCallbackInfo& info)
     RefPtr<ResourceObject> resObj;
     if (SystemProperties::ConfigChangePerform()) {
         bool state = ParseJsFontFamilies(info[0], fontFamilies, resObj);
-        if (resObj) {
-            TextTimerModel::GetInstance()->CreateWithResourceObj(JsTextTimerResourceType::FONTFAMILY, resObj);
-        } else if (state) {
+        TextTimerModel::GetInstance()->CreateWithResourceObj(JsTextTimerResourceType::FONTFAMILY, resObj);
+        if (state) {
             TextTimerModel::GetInstance()->SetFontFamily(fontFamilies);
+            TextTimerModel::GetInstance()->SetFontFamilyByUser(true);
         }
     } else {
         if (!ParseJsFontFamilies(info[0], fontFamilies)) {

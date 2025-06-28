@@ -202,14 +202,16 @@ class ColorMetrics {
   private alpha_: number;
   private resourceId_: number;
   private colorSpace_: ColorSpace;
+  private res_: Resource | undefined;
   private static clamp(value: number): number {
     return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
   }
-  private constructor(red: number, green: number, blue: number, alpha: number = MAX_CHANNEL_VALUE) {
+  private constructor(red: number, green: number, blue: number, alpha: number = MAX_CHANNEL_VALUE, res?: Resource) {
     this.red_ = ColorMetrics.clamp(red);
     this.green_ = ColorMetrics.clamp(green);
     this.blue_ = ColorMetrics.clamp(blue);
     this.alpha_ = ColorMetrics.clamp(alpha);
+    this.res_ = res === undefined ? undefined : res;
   }
   private toNumeric(): number {
     return (this.alpha_ << 24) + (this.red_ << 16) + (this.green_ << 8) + this.blue_;
@@ -276,7 +278,7 @@ class ColorMetrics {
       const blue = chanels[2];
       const alpha = chanels[3];
       const resourceId = chanels[4];
-      const colorMetrics = new ColorMetrics(red, green, blue, alpha);
+      const colorMetrics = new ColorMetrics(red, green, blue, alpha, color);
       colorMetrics.setResourceId(resourceId);
       return colorMetrics;
     } else if (typeof color === 'number') {
@@ -708,6 +710,7 @@ class RenderNode extends Disposable {
     this.childrenList.push(node);
     node.parentRenderNode = new WeakRef(this);
     getUINativeModule().renderNode.appendChild(this.nodePtr, node.nodePtr);
+    getUINativeModule().renderNode.addBuilderNode(this.nodePtr, node.nodePtr);
   }
   insertChildAfter(child: RenderNode, sibling: RenderNode | null) {
     if (child === undefined || child === null) {
@@ -729,6 +732,7 @@ class RenderNode extends Disposable {
       this.childrenList.splice(indexOfSibling + 1, 0, child);
       getUINativeModule().renderNode.insertChildAfter(this.nodePtr, child.nodePtr, sibling.nodePtr);
     }
+    getUINativeModule().renderNode.addBuilderNode(this.nodePtr, child.nodePtr);
   }
   removeChild(node: RenderNode) {
     if (node === undefined || node === null) {
@@ -741,9 +745,11 @@ class RenderNode extends Disposable {
     const child = this.childrenList[index];
     child.parentRenderNode = null;
     this.childrenList.splice(index, 1);
+    getUINativeModule().renderNode.removeBuilderNode(this.nodePtr, node.nodePtr);
     getUINativeModule().renderNode.removeChild(this.nodePtr, node.nodePtr);
   }
   clearChildren() {
+    getUINativeModule().renderNode.clearBuilderNode(this.nodePtr);
     this.childrenList = new Array<RenderNode>();
     getUINativeModule().renderNode.clearChildren(this.nodePtr);
   }
@@ -805,8 +811,14 @@ class RenderNode extends Disposable {
     this.nodePtr = null;
     this._nativeRef = null;
   }
+  getNodeType(): string {
+    return getUINativeModule().renderNode.getNodeType(this.nodePtr);
+  }
   dispose() {
     super.dispose();
+    if (this.nodePtr) {
+      getUINativeModule().renderNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'RenderNode', this.getNodeType() || 'RenderNode', this.nodePtr);
+    }
     this._nativeRef?.dispose();
     this.baseNode_?.disposeNode();
     this._frameNode?.deref()?.resetNodePtr();

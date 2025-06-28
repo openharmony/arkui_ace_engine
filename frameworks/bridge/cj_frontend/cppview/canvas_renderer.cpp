@@ -578,7 +578,7 @@ int64_t NativeCanvasRenderer::CreateConicGradient(const double startAngle, const
     double density = GetDensity();
     Gradient gradient = Gradient();
     gradient.SetType(GradientType::CONIC);
-    gradient.GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (EVEN_CHECK * M_PI))));
+    gradient.GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (EVEN_CHECK * ACE_PI))));
     gradient.GetConicGradient().centerX = AnimatableDimension(Dimension(x * density));
     gradient.GetConicGradient().centerY = AnimatableDimension(Dimension(y * density));
 

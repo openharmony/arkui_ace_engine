@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/log/event_report.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -800,6 +801,9 @@ void Scrollable::HandleDragEnd(const GestureEvent& info, bool isFromPanEnd)
             HandleDragUpdate(info);
         }
     }
+    if (onWillStopDraggingCallback_) {
+        onWillStopDraggingCallback_(info.GetMainVelocity());
+    }
     ReportToDragFRCScene(info.GetMainVelocity(), NG::SceneStatus::END);
     bool isScrollFromTouchPad = info.GetSourceTool() == SourceTool::TOUCHPAD;
     isDragUpdateStop_ = false;
@@ -941,7 +945,7 @@ void Scrollable::TriggerFrictionAnimation(float mainPosition, float friction, fl
     lastPosition_ = currentPos_;
     frictionVelocity_ = initVelocity_;
     frictionOffsetProperty_->Set(mainPosition);
-    float response = fabs(2 * M_PI / (FRICTION_SCALE * friction));
+    float response = fabs(2 * ACE_PI / (FRICTION_SCALE * friction));
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, 1.0f, 0.0f);
     AnimationOption option;
     option.SetCurve(curve);
@@ -1590,6 +1594,7 @@ void Scrollable::UpdateScrollSnapEndWithOffset(double offset)
         }
         updateSnapAnimationCount_++;
         endPos_ -= offset;
+        finalPosition_ = endPos_;
         snapOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
         AnimationUtils::StartAnimation(
             option,

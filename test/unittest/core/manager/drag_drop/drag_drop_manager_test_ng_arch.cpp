@@ -1248,13 +1248,11 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage050, TestSi
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNodeNull, nullptr);
-    dragDropManager->AddDragFrameNode(frameNodeNull->GetId(), frameNodeNull);
     frameNodeNull.Reset();
     auto frameNodeGeoNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeGeoNull =
         AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeGeoNullId, AceType::MakeRefPtr<Pattern>());
     frameNodeGeoNull->SetGeometryNode(nullptr);
-    dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
     auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     std::string onDropInfo;
@@ -1292,14 +1290,12 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage051, TestSi
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNodeNull, nullptr);
-    dragDropManager->AddDragFrameNode(frameNodeNull->GetId(), frameNodeNull);
     frameNodeNull.Reset();
     auto frameNodeGeoNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeGeoNull =
         AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeGeoNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNodeGeoNull, nullptr);
     frameNodeGeoNull->SetGeometryNode(nullptr);
-    dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
     auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     std::string onDropInfo;
@@ -1336,14 +1332,12 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage052, TestSi
     auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeNull = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNodeNull, nullptr);
-    dragDropManager->AddDragFrameNode(frameNodeNull->GetId(), frameNodeNull);
     frameNodeNull.Reset();
     auto frameNodeGeoNullId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNodeGeoNull =
         AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeGeoNullId, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNodeGeoNull, nullptr);
     frameNodeGeoNull->SetGeometryNode(nullptr);
-    dragDropManager->AddDragFrameNode(frameNodeGeoNull->GetId(), frameNodeGeoNull);
     auto eventHub = frameNode->GetOrCreateEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
     std::string onDropInfo;

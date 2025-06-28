@@ -18,7 +18,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
-void NavigationModelImpl::Create()
+void NavigationModelImpl::Create(bool useHomeDestination)
 {
     auto navigationContainer = AceType::MakeRefPtr<NavigationContainerComponent>();
     ViewStackProcessor::GetInstance()->Push(navigationContainer);
@@ -56,7 +56,7 @@ void NavigationModelImpl::SetTitleHeight(const Dimension& height, bool isValid)
     return;
 }
 
-void NavigationModelImpl::SetTitleHeight(const RefPtr<ResourceObject>& resObj, bool isValid)
+void NavigationModelImpl::SetTitleHeight(const RefPtr<ResourceObject>& resObj)
 {
     return;
 }
@@ -324,5 +324,5 @@ void NavigationModelImpl::SetCustomTransition(NavigationTransitionEvent&& animat
 
 void NavigationModelImpl::SetIsCustomAnimation(bool isCustom) {}
 
-void NavigationModelImpl::SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {}
+void NavigationModelImpl::SetIgnoreLayoutSafeArea(const NG::IgnoreLayoutSafeAreaOpts& opts) {}
 } // namespace OHOS::Ace::Framework

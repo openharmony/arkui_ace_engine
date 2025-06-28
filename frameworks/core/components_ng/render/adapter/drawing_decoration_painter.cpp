@@ -16,6 +16,7 @@
 #include "core/components_ng/render/adapter/drawing_decoration_painter.h"
 
 #include "core/components_ng/property/measure_utils.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -300,12 +301,12 @@ private:
 
     static float Deg2rad(float deg)
     {
-        return static_cast<float>(deg * M_PI / 180.0);
+        return static_cast<float>(deg * ACE_PI / 180.0);
     }
 
     static float Rad2deg(float rad)
     {
-        return static_cast<float>(rad * 180.0 / M_PI);
+        return static_cast<float>(rad * 180.0 / ACE_PI);
     }
 
     static void EndPointsFromAngle(float angle, const RSSize& size, RSPoint& firstPoint, RSPoint& secondPoint)

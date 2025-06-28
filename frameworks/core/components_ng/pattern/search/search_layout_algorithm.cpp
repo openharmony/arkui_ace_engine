@@ -174,6 +174,7 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     if (widthPolicy == LayoutCalPolicy::WRAP_CONTENT || widthPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
         textFieldLayoutProperty->UpdateLayoutPolicyProperty(widthPolicy, true);
         childLayoutConstraint.maxSize.SetWidth(textFieldWidth);
+        childLayoutConstraint.minSize.SetWidth(GetSearchFieldMinWidth(layoutWrapper));
     } else {
         textFieldLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
         childLayoutConstraint.selfIdealSize.SetWidth(textFieldWidth);
@@ -477,7 +478,8 @@ void SearchLayoutAlgorithm::SelfMeasure(LayoutWrapper* layoutWrapper)
     constraint->selfIdealSize.SetHeight(searchHeight);
     auto searchWidth = CalcSearchWidth(constraint.value(), layoutWrapper);
     auto layoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
-    if (layoutPolicy == LayoutCalPolicy::WRAP_CONTENT || layoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
+    if ((layoutPolicy == LayoutCalPolicy::WRAP_CONTENT && Positive(searchWidthReducedLength_)) ||
+        layoutPolicy == LayoutCalPolicy::FIX_AT_IDEAL_SIZE) {
         searchWidth -= searchWidthReducedLength_;
     }
     SizeF idealSize(searchWidth, searchHeight);
@@ -497,10 +499,6 @@ double SearchLayoutAlgorithm::CalcSearchWidth(
     auto searchConstraint = contentConstraint;
     auto maxWidth = TextBase::GetConstraintMaxLength(layoutWrapper, contentConstraint, true);
     auto idealWidth = contentConstraint.selfIdealSize.Width().value_or(maxWidth);
-    auto widthLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, true);
-    if (widthLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
-        return idealWidth;
-    }
     auto maxHeight = TextBase::GetConstraintMaxLength(layoutWrapper, contentConstraint, false);
     auto idealHeight = contentConstraint.selfIdealSize.Height().value_or(maxHeight);
     auto maxIdealSize = SizeF { idealWidth, idealHeight };
@@ -560,7 +558,7 @@ double SearchLayoutAlgorithm::CalcSearchHeight(
     auto verticalPadding = padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f);
     searchHeight = std::max(verticalPadding, static_cast<float>(searchHeight));
     auto searchHeightAdapt = searchHeight;
-    if (!IsFixedHeightMode(layoutWrapper)) {
+    if (!IsFixedHeightMode(layoutWrapper) && layoutPolicy != LayoutCalPolicy::MATCH_PARENT) {
         searchHeightAdapt = std::max(searchHeightAdapt, CalcSearchAdaptHeight(layoutWrapper));
         renderContext->SetClipToBounds(false);
     } else {
@@ -576,7 +574,7 @@ double SearchLayoutAlgorithm::CalcSearchHeight(
     auto hasHeight = calcLayoutConstraint->selfIdealSize.has_value() &&
         calcLayoutConstraint->selfIdealSize->Height().has_value();
     if (hasMinSize && ((hasMaxSize && constraint.minSize.Height() >= constraint.maxSize.Height())
-        || (!hasMaxSize && !hasHeight))) {
+        || (!hasMaxSize && !hasHeight && layoutPolicy != LayoutCalPolicy::MATCH_PARENT))) {
         return constraint.minSize.Height();
     }
     if (hasMinSize) {
@@ -1003,5 +1001,17 @@ double SearchLayoutAlgorithm::CalcSymbolIconHeight(
     auto iconSize = symbolLayoutProperty->GetFontSize().value_or(defaultSymbolIconSize);
 
     return iconSize.ConvertToPxDistribute(minFontScale_, maxFontScale_);
+}
+
+float SearchLayoutAlgorithm::GetSearchFieldMinWidth(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, 0.0f);
+    auto textFieldWrapper = layoutWrapper->GetOrCreateChildByIndex(TEXTFIELD_INDEX);
+    CHECK_NULL_RETURN(textFieldWrapper, 0.0f);
+    auto textFieldNode = textFieldWrapper->GetHostNode();
+    CHECK_NULL_RETURN(textFieldNode, 0.0f);
+    auto textFieldPattern = textFieldNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, 0.0f);
+    return textFieldPattern->GetCaretRect().Width();
 }
 } // namespace OHOS::Ace::NG

@@ -29,4 +29,14 @@ ACE_WEAK_SYM std::optional<RectF> AppBarView::GetAppBarRect()
 {
     return RectF();
 }
+
+ACE_WEAK_SYM RefPtr<Pattern> AppBarView::GetAtomicServicePattern()
+{
+    return nullptr;
+}
+
+ACE_WEAK_SYM void AppBarView::SetOnBackPressedConsumed()
+{
+    return;
+}
 } // namespace OHOS::Ace::NG

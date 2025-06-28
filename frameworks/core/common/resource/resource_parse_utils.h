@@ -38,7 +38,8 @@ enum class ResourceType : uint32_t {
     PATTERN,
     STRARRAY,
     MEDIA = 20000,
-    RAWFILE = 30000
+    RAWFILE = 30000,
+    SYMBOL = 40000
 };
 
 class ResourceParseUtils final : public AceType {
@@ -106,9 +107,22 @@ public:
         return false;
     }
 
+    static void SetIsReloading(bool isReloading)
+    {
+        isReloading_ = isReloading;
+    }
+
+    static bool IsReloading()
+    {
+        return isReloading_;
+    }
+
 private:
+    static bool ParseResColorWithName(const RefPtr<ResourceObject>& resObj, Color& result,
+        RefPtr<ResourceWrapper>& resourceWrapper);
     static bool ParseResStringObj(const std::vector<ResourceObjectParams>& params,
         RefPtr<ResourceWrapper>& resourceWrapper, std::string& result, int32_t type);
+    static bool isReloading_;
 };
 }
 #endif

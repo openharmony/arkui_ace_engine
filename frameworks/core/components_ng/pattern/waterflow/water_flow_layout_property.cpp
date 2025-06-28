@@ -31,6 +31,7 @@ void WaterFlowLayoutProperty::ResetWaterflowLayoutInfoAndMeasure() const
     auto pattern = host->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ResetLayoutInfo();
+    pattern->InvalidatedOffset();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 

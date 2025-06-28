@@ -31,6 +31,7 @@
 
 #include "core/components/common/painter/border_image_painter.h"
 #include "core/pipeline/base/rosen_render_context.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -370,12 +371,12 @@ private:
 
     static float Deg2rad(float deg)
     {
-        return static_cast<float>(deg * M_PI / 180.0);
+        return static_cast<float>(deg * ACE_PI / 180.0);
     }
 
     static float Rad2deg(float rad)
     {
-        return static_cast<float>(rad * 180.0 / M_PI);
+        return static_cast<float>(rad * 180.0 / ACE_PI);
     }
 
 #ifndef USE_ROSEN_DRAWING

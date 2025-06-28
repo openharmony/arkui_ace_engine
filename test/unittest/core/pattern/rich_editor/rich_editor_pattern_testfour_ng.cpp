@@ -30,6 +30,9 @@ public:
     void SetUp() override;
     void TearDown() override;
     static void TearDownTestSuite();
+private:
+    int32_t CheckMaxLines(int32_t maxLines);
+    float CheckMaxLinesHeight(float maxLinesHeight);
 };
 
 void RichEditorPatternTestFourNg::SetUp()
@@ -264,6 +267,14 @@ HWTEST_F(RichEditorPatternTestFourNg, SetMaxLength002, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->GetMaxLength(), INT_MAX);
 }
 
+int32_t RichEditorPatternTestFourNg::CheckMaxLines(int32_t maxLines)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->SetMaxLines(maxLines);
+    return richEditorPattern->GetMaxLines();
+}
+
+
 /**
  * @tc.name: SetMaxLines001
  * @tc.desc: test SetMaxLines
@@ -272,10 +283,7 @@ HWTEST_F(RichEditorPatternTestFourNg, SetMaxLength002, TestSize.Level1)
 HWTEST_F(RichEditorPatternTestFourNg, SetMaxLines001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    int32_t maxLines = 1;
-    richEditorPattern->SetMaxLines(maxLines);
-    EXPECT_EQ(richEditorPattern->GetMaxLines(), 1);
+    EXPECT_EQ(CheckMaxLines(1), 1);
 }
 
 /**
@@ -287,9 +295,7 @@ HWTEST_F(RichEditorPatternTestFourNg, SetMaxLines002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    int32_t maxLines = 0;
-    richEditorPattern->SetMaxLines(maxLines);
-    EXPECT_EQ(richEditorPattern->GetMaxLines(), 0);
+    EXPECT_EQ(CheckMaxLines(0), 0);
 }
 
 /**
@@ -303,6 +309,13 @@ HWTEST_F(RichEditorPatternTestFourNg, SetMaxLines003, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->GetMaxLines(), INT_MAX);
 }
 
+float RichEditorPatternTestFourNg::CheckMaxLinesHeight(float maxLinesHeight)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    richEditorPattern->SetMaxLinesHeight(maxLinesHeight);
+    return richEditorPattern->GetMaxLinesHeight();
+}
+
 /**
  * @tc.name: SetMaxLinesHeight001
  * @tc.desc: test SetMaxLinesHeight
@@ -311,10 +324,7 @@ HWTEST_F(RichEditorPatternTestFourNg, SetMaxLines003, TestSize.Level1)
 HWTEST_F(RichEditorPatternTestFourNg, SetMaxLinesHeight001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    float height = 0.0f;
-    richEditorPattern->SetMaxLinesHeight(height);
-    EXPECT_EQ(richEditorPattern->GetMaxLinesHeight(), 0.0f);
+    EXPECT_EQ(CheckMaxLinesHeight(0.0f), 0.0f);
 }
 
 /**
@@ -325,10 +335,7 @@ HWTEST_F(RichEditorPatternTestFourNg, SetMaxLinesHeight001, TestSize.Level1)
 HWTEST_F(RichEditorPatternTestFourNg, SetMaxLinesHeight002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    float height = 10.0f;
-    richEditorPattern->SetMaxLinesHeight(height);
-    EXPECT_EQ(richEditorPattern->GetMaxLinesHeight(), 10.0f);
+    EXPECT_EQ(CheckMaxLinesHeight(10.0f), 10.0f);
 }
 
 /**

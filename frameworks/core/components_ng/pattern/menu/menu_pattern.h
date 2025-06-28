@@ -91,6 +91,31 @@ public:
         return { 0, 0 };
     }
 
+    bool IsEnableMatchParent() override
+    {
+        return IsMultiMenu();
+    }
+
+    bool IsEnableChildrenMatchParent() override
+    {
+        return IsMultiMenu();
+    }
+
+    bool IsEnableFix() override
+    {
+        return IsMultiMenu();
+    }
+
+    bool IsChildColumnLayout() override
+    {
+        return IsMultiMenu();
+    }
+
+    bool IsChildComponentContent() override
+    {
+        return IsMultiMenu();
+    }
+
     bool IsFocusViewLegal() override
     {
         return type_ == MenuType::MENU || type_ == MenuType::CONTEXT_MENU || type_ == MenuType::SUB_MENU;
@@ -596,6 +621,16 @@ public:
         return menuWindowRect_;
     }
 
+    void SetMenuLayoutParam(const PreviewMenuParam& layoutParam)
+    {
+        layoutParam_ = layoutParam;
+    }
+
+    PreviewMenuParam GetMenuLayoutParam() const
+    {
+        return layoutParam_;
+    }
+
     OffsetF GetPreviewMenuDisappearPosition()
     {
         return disappearOffset_;
@@ -617,6 +652,9 @@ public:
     {
         return customNode_.Upgrade();
     }
+
+    void UpdateSelectOptionTextByIndex(int32_t index, const std::string& text);
+    void UpdateSelectOptionIconByIndex(int32_t index, const std::string& icon);
 
     void InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuTheme);
 
@@ -660,6 +698,21 @@ public:
     void SetOriginPreviewYForStack(float tmp)
     {
         originPreviewYForStack_ = tmp;
+    }
+
+    void SetDisableMenuBgColor(bool ret = false)
+    {
+        isDisableMenuBgColor_ = ret;
+    }
+
+    void SetSubMenuDepth(int32_t depth)
+    {
+        subMenuDepth_ = depth;
+    }
+
+    int32_t GetSubMenuDepth() const
+    {
+        return subMenuDepth_;
     }
 
 protected:
@@ -712,11 +765,9 @@ private:
         bool isNeedRestoreNodeId) const;
     MenuItemInfo GetMenuItemInfo(const RefPtr<UINode>& child, const RefPtr<FrameNode>& subMenu,
         bool isNeedRestoreNodeId) const;
-    void ShowStackMenuAppearOpacityAndBlurAnimation(const RefPtr<RenderContext>& mainMenuContext) const;
-    void ShowStackMenuDisappearOpacityAndBlurAnimation(const RefPtr<FrameNode>& menuNode,
-        const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const;
     std::vector<RefPtr<RenderContext>> GetOtherMenuItemContext(const RefPtr<FrameNode>& subMenuNode) const;
     void ShowArrowRotateAnimation() const;
+    void ShowArrowReverseRotateAnimation() const;
     RefPtr<FrameNode> GetArrowNode(const RefPtr<FrameNode>& host) const; // arrowNode in subMenu
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -734,6 +785,17 @@ private:
     RefPtr<FrameNode> BuildContentModifierNode(int index);
     bool IsMenuScrollable() const;
     void UpdateClipPath(const RefPtr<LayoutWrapper>& dirty);
+    RefPtr<FrameNode> GetTitleContentNode(const RefPtr<FrameNode>& subMenuNode) const;
+    void ShowStackSubMenuAnimation(const RefPtr<FrameNode>& mainMenu, const RefPtr<FrameNode>& subMenuNode);
+    void ShowStackMainMenuAnimation(const RefPtr<FrameNode>& mainMenu, const RefPtr<FrameNode>& subMenuNode,
+        const RefPtr<FrameNode>& menuWrapper);
+    void ShowStackMainMenuOpacityAnimation(const RefPtr<FrameNode>& mainMenu);
+    void ShowStackSubMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode,
+        const RefPtr<FrameNode>& subMenuNode) const;
+    void ShowStackMainMenuDisappearOpacityAnimation(const RefPtr<FrameNode>& menuNode,
+        AnimationOption& option) const;
+    void ShowStackMainMenuDisappearAnimation(const RefPtr<FrameNode>& menuNode,
+        const RefPtr<FrameNode>& subMenuNode, AnimationOption& option) const;
 
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
@@ -786,11 +848,16 @@ private:
     bool isStackSubmenu_ = false;
     bool isNeedDivider_ = false;
     Rect menuWindowRect_;
+    PreviewMenuParam layoutParam_;
     WeakPtr<UINode> customNode_ = nullptr;
     std::optional<MenuPathParams> pathParams_ = std::nullopt;
     float translateYForStack_ = 0.0f;
     float originMenuYForStack_ = 0.0f;
     float originPreviewYForStack_ = 0.0f;
+    bool isDisableMenuBgColor_ = false;
+
+    // only used for Side sub menu
+    int32_t subMenuDepth_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);
 };

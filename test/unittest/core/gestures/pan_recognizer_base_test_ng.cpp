@@ -20,6 +20,7 @@
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/event/ace_events.h"
 #include "core/gestures/gesture_info.h"
+#include "core/pipeline/base/constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -251,7 +252,7 @@ const std::vector<PanTestCase> TEST_CASES = {
 namespace {
 float DegreesToRadians(float degrees)
 {
-    return static_cast<float>(degrees * M_PI / HALF_CIRCLE);
+    return static_cast<float>(degrees * ACE_PI / HALF_CIRCLE);
 }
 
 void CalculateEndPoint(const PointF& startPoint, float distance, float angle, PointF& endPoint)
@@ -384,7 +385,7 @@ HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerBaseTest001, TestSize.Level1)
      */
     panGestureOption->SetDistance(-1);
     panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
-    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN], 5);
+    EXPECT_EQ(panRecognizer->distanceMap_[SourceTool::UNKNOWN].ConvertToPx(), 5);
     /**
      * @tc.steps: step3. create PanRecognizer with illegal direction.
      * @tc.expected: step3. direction_ equals.

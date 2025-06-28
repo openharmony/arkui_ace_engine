@@ -26,7 +26,7 @@ public:
     explicit JsWebViewFunction(const JSRef<JSFunc>& jsFunction)
         : JsFunction(JSRef<JSObject>(), jsFunction) {}
     ~JsWebViewFunction() override = default;
-    void Execute() override
+    void Execute()
     {
         ExecuteJS();
     }

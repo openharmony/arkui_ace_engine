@@ -14,6 +14,7 @@
  */
 
 #include "core/components/indexer/render_indexer_circle.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {
 
@@ -40,7 +41,7 @@ void RenderIndexerCircle::Update(const RefPtr<Component>& component)
     if (componentIndex) {
         itemMaxCount_ = std::clamp(componentIndex->GetMaxShowCount(), 1, INDEXER_ITEM_MAX_COUNT + 1);
         hasCollapseItem_ = componentIndex->HasCollapseItem();
-        perItemExtent_ = DOUBLE * M_PI / itemMaxCount_;
+        perItemExtent_ = DOUBLE * ACE_PI / itemMaxCount_;
         indexerChangeEvent_ =
             AceAsyncEvent<void(const std::string&)>::Create(componentIndex->GetIndexerChange(), context_);
     }
@@ -109,8 +110,8 @@ void RenderIndexerCircle::SetItemPosition(const RefPtr<RenderNode>& item, double
 {
     double itemRadius = outerRadius_ - itemSize_ * HALF;
     Offset position;
-    position.SetX(itemRadius + itemRadius * sin(M_PI_2 + angle));
-    position.SetY(itemRadius - itemRadius * cos(M_PI_2 + angle));
+    position.SetX(itemRadius + itemRadius * sin(ACE_PI / 2 + angle));
+    position.SetY(itemRadius - itemRadius * cos(ACE_PI / 2 + angle));
     item->SetPosition(position);
 }
 
@@ -131,7 +132,7 @@ void RenderIndexerCircle::ResetItemsPosition()
         ++count;
     }
 
-    arcMaxLen_ = count == itemMaxCount_ ? M_PI * DOUBLE : (count - 1) * perItemExtent_;
+    arcMaxLen_ = count == itemMaxCount_ ? ACE_PI * DOUBLE : (count - 1) * perItemExtent_;
     if (curStatus_ != IndexerItemStatus::ANIMATION) {
         arc_->SetSweepAngle(arcMaxLen_);
     }
@@ -276,7 +277,7 @@ int32_t RenderIndexerCircle::GetTouchedItemIndex(const Offset& touchPosition)
 
     double touchAngle = atan2(touchPosition.GetY() - outerRadius_, touchPosition.GetX() - outerRadius_);
     if (touchPosition.GetY() - outerRadius_ < 0.0) {
-        touchAngle += DOUBLE * M_PI;
+        touchAngle += DOUBLE * ACE_PI;
     }
     touchAngle += arcHeadPosition_;
 
@@ -291,8 +292,8 @@ void RenderIndexerCircle::InitIndexTable()
     LOGI("[indexer] InitIndexTable Count:%{public}d, MaxCount:%{public}d", itemCount_, itemMaxCount_);
     for (int32_t i = 0; i < itemMaxCount_; ++i) {
         itemInfo_[i][TABLE_ANGLE] = INDEXER_ARC_BEGIN + i * perItemExtent_;
-        itemInfo_[i][TABLE_POSITION_X] = sin(M_PI_2 + itemInfo_[i][TABLE_ANGLE]);
-        itemInfo_[i][TABLE_POSITION_Y] = -cos(M_PI_2 + itemInfo_[i][TABLE_ANGLE]);
+        itemInfo_[i][TABLE_POSITION_X] = sin(ACE_PI / 2 + itemInfo_[i][TABLE_ANGLE]);
+        itemInfo_[i][TABLE_POSITION_Y] = -cos(ACE_PI / 2 + itemInfo_[i][TABLE_ANGLE]);
     }
 }
 
@@ -324,8 +325,8 @@ void RenderIndexerCircle::InitIndicatorBox()
         Offset boxPosition;
         double angle = INDEXER_ARC_BEGIN + (collapseItemCount_ - 1) * perItemExtent_;
         double itemRadius = outerRadius_ - itemSize_ * HALF;
-        boxPosition.SetX(itemRadius + itemRadius * sin(M_PI_2 + angle));
-        boxPosition.SetY(itemRadius - itemRadius * cos(M_PI_2 + angle));
+        boxPosition.SetX(itemRadius + itemRadius * sin(ACE_PI / 2 + angle));
+        boxPosition.SetY(itemRadius - itemRadius * cos(ACE_PI / 2 + angle));
         indicatorBox_->SetPosition(boxPosition);
         indicatorBox_->SetColor(Color::TRANSPARENT, false);
         itemColorEnabled_ = true;
@@ -725,14 +726,14 @@ void RenderIndexerCircle::SetCollapseItemPosition(double position)
         collapse = true;
     }
     // rotate angle
-    double rotate = collapseItemPosition_ + M_PI_2;
+    double rotate = collapseItemPosition_ + ACE_PI / 2;
     if (collapse) {
-        rotate += M_PI;
+        rotate += ACE_PI;
     }
 
     RefPtr<RenderIndexerItem> collapseItem = AceType::DynamicCast<RenderIndexerItem>(GetChildren().back());
     if (collapseItem) {
-        collapseItem->SetRotate(rotate * INDEXER_ANGLE_TO_RADIAN / M_PI);
+        collapseItem->SetRotate(rotate * INDEXER_ANGLE_TO_RADIAN / ACE_PI);
     }
 }
 
@@ -756,8 +757,8 @@ bool RenderIndexerCircle::CollapseItemHitTest(const Offset& position)
         return false;
     }
 
-    double centerX = outerRadius_ + (outerRadius_ - itemSize_ * HALF) * sin(M_PI_2 + collapseItemPosition_);
-    double centerY = outerRadius_ - (outerRadius_ - itemSize_ * HALF) * cos(M_PI_2 + collapseItemPosition_);
+    double centerX = outerRadius_ + (outerRadius_ - itemSize_ * HALF) * sin(ACE_PI / 2 + collapseItemPosition_);
+    double centerY = outerRadius_ - (outerRadius_ - itemSize_ * HALF) * cos(ACE_PI / 2 + collapseItemPosition_);
     double distance = pow(position.GetX() - centerX, 2) + pow(position.GetY() - centerY, 2);
     if (distance > hotRgnRadius * hotRgnRadius) {
         LOGI("[indexer] CollapseItemHitTest, NOT HIT");
@@ -969,7 +970,7 @@ double RenderIndexerCircle::GetPositionAngle(const Offset& position)
     double touchAngle = atan2(position.GetY() - outerRadius_, position.GetX() - outerRadius_);
     double itemRadius = itemSize_ / (outerRadius_ - itemSize_ * HALF) * HALF;
     if (touchAngle < arcHeadPosition_ - itemRadius) {
-        touchAngle += M_PI * DOUBLE;
+        touchAngle += ACE_PI * DOUBLE;
     }
     return touchAngle;
 }

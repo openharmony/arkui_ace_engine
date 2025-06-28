@@ -32,7 +32,7 @@ class JsOnAreaChangeFunction : public JsFunction {
 public:
     explicit JsOnAreaChangeFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(jsFunction) {}
     ~JsOnAreaChangeFunction() override = default;
-    void Execute() override
+    void Execute()
     {
         ExecuteJS();
     }

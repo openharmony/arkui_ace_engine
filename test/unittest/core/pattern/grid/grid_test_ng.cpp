@@ -27,6 +27,8 @@
 #include "core/components_ng/pattern/refresh/refresh_theme_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_model_ng.h"
+#include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/base/mock_system_properties.h"
 
 #ifndef TEST_IRREGULAR_GRID
 #include "test/mock/base/mock_system_properties.h"
@@ -35,6 +37,8 @@ namespace OHOS::Ace::NG {
 void GridTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
     MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -53,7 +57,7 @@ void GridTestNg::SetUpTestSuite()
     EXPECT_CALL(*(AceType::DynamicCast<MockContainer>(container)), GetWindowId()).Times(AnyNumber());
     MockAnimationManager::Enable(true);
 #ifndef TEST_IRREGULAR_GRID
-    g_irregularGrid = false;
+    SystemProperties::gridIrregularLayoutEnable_ = false;
 #endif
 }
 
@@ -70,15 +74,21 @@ void GridTestNg::CheckPreloadListEqual(const std::list<int32_t>& expectedList) c
 void GridTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
 }
 
 void GridTestNg::SetUp()
 {
     MockAnimationManager::GetInstance().Reset();
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
 }
 
 void GridTestNg::TearDown()
 {
+    ResetMockResourceData();
+    g_isConfigChangePerform = false;
     RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;

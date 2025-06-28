@@ -1962,4 +1962,28 @@ HWTEST_F(TextClockTestNG, TextClockTest018, TestSize.Level1)
     EXPECT_FALSE(pattern->OnThemeScopeUpdate(host->GetThemeScopeId()));
     EXPECT_EQ(textProperty->GetPropertyChangeFlag(), PROPERTY_CHANGE_FLAG_CHECK);
 }
+
+/**
+ * @tc.name: TextClockTest019
+ * @tc.desc: Test RemoveResObjByKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextClockTestNG, TextClockTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textClock frameNode.
+     */
+    TextClockModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextClockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj) {};
+    pattern->AddResObj("textClockFormat", resObj, std::move(updateFunc));
+    model.RemoveResObjByKey("textClockFormat");
+    std::string result = pattern->GetResCacheMapByKey("textClockFormat");
+    EXPECT_EQ(result, "");
+}
 } // namespace OHOS::Ace::NG

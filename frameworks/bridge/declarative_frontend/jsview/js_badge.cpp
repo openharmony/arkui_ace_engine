@@ -109,6 +109,8 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
             bool yState = ParseJsDimensionVp(yVal, dimenY, resObjY);
             badgeParameters.resourceBadgePositionXObject = resObjX;
             badgeParameters.resourceBadgePositionYObject = resObjY;
+            badgeParameters.badgePositionXByUser = true;
+            badgeParameters.badgePositionYByUser = true;
             bool hasX = resObjX || xState;
             bool hasY = resObjY || yState;
             if (!(hasX || hasY)) {
@@ -116,6 +118,11 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
                 badgeParameters.badgePositionY = badgeTheme->GetBadgePositionY();
                 badgeParameters.resourceBadgePositionXObject = nullptr;
                 badgeParameters.resourceBadgePositionYObject = nullptr;
+                badgeParameters.badgePositionXByUser = false;
+                badgeParameters.badgePositionYByUser = false;
+            } else {
+                badgeParameters.badgePositionX = dimenX;
+                badgeParameters.badgePositionY = dimenY;
             }
         } else {
             bool xResult = ParseJsDimensionVp(xVal, dimenX);
@@ -147,6 +154,7 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         Color colorVal;
         if (SystemProperties::ConfigChangePerform()) {
             RefPtr<ResourceObject> resObj;
+            badgeParameters.badgeTextColorByUser = true;
             bool state = ParseJsColor(colorValue, colorVal, resObj);
             if (resObj) {
                 badgeParameters.resourceColorObject = resObj;
@@ -154,6 +162,9 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
                 badgeParameters.badgeTextColor = colorVal;
             } else if (themeColors) {
                 badgeParameters.badgeTextColor = themeColors->FontOnPrimary();
+                badgeParameters.badgeTextColorByUser = false;
+            } else {
+                badgeParameters.badgeTextColorByUser = false;
             }
         } else {
             if (ParseJsColor(colorValue, colorVal)) {
@@ -166,6 +177,7 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         CalcDimension fontSize;
         if (SystemProperties::ConfigChangePerform()) {
             RefPtr<ResourceObject> resObj;
+            badgeParameters.badgeFontSizeByUser = true;
             bool state = ParseJsDimensionNG(fontSizeValue, fontSize, DimensionUnit::FP, resObj);
             if (resObj) {
                 badgeParameters.resourceFontSizeObject = resObj;
@@ -173,6 +185,7 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
                 badgeParameters.badgeFontSize = fontSize;
                 isDefaultFontSize = false;
             } else {
+                badgeParameters.badgeFontSizeByUser = false;
                 badgeParameters.badgeFontSize =
                     !fontSizeValue->IsUndefined() ? badgeTheme->GetBadgeFontSize() : UNDEFINED_DIMENSION;
             }
@@ -191,6 +204,7 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         CalcDimension badgeSize;
         if (SystemProperties::ConfigChangePerform()) {
             RefPtr<ResourceObject> resObj;
+            badgeParameters.badgeCircleSizeByUser = true;
             bool state = ParseJsDimensionNG(badgeSizeValue, badgeSize, DimensionUnit::FP, resObj);
             if (resObj) {
                 badgeParameters.resourceBadgeSizeObject = resObj;
@@ -199,10 +213,11 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
                 isDefaultBadgeSize = false;
             } else {
                 badgeParameters.badgeCircleSize = badgeTheme->GetBadgeCircleSize();
+                badgeParameters.badgeCircleSizeByUser = false;
             }
         } else {
-            if (ParseJsDimensionNG(badgeSizeValue, badgeSize, DimensionUnit::FP) &&
-                badgeSize.IsNonNegative() && badgeSize.Unit() != DimensionUnit::PERCENT) {
+            if (ParseJsDimensionNG(badgeSizeValue, badgeSize, DimensionUnit::FP) && badgeSize.IsNonNegative() &&
+                badgeSize.Unit() != DimensionUnit::PERCENT) {
                 badgeParameters.badgeCircleSize = badgeSize;
                 isDefaultBadgeSize = false;
             } else {
@@ -214,11 +229,14 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         Color color;
         if (SystemProperties::ConfigChangePerform()) {
             RefPtr<ResourceObject> badgeColorResObj;
+            badgeParameters.badgeColorByUser = false;
             bool state = ParseJsColor(badgeColorValue, color, badgeColorResObj);
             if (badgeColorResObj) {
                 badgeParameters.resourceBadgeColorObject = badgeColorResObj;
+                badgeParameters.badgeColorByUser = true;
             } else if (state) {
                 badgeParameters.badgeColor = color;
+                badgeParameters.badgeColorByUser = true;
             } else if (themeColors) {
                 badgeParameters.badgeColor = themeColors->Warning();
             }
@@ -233,14 +251,15 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
 
         if (SystemProperties::ConfigChangePerform()) {
             RefPtr<ResourceObject> resObj;
+            badgeParameters.badgeBorderWidthByUser = true;
             bool state = ParseJsDimensionVp(borderWidthValue, borderWidth, resObj);
             if (resObj) {
                 badgeParameters.resourceBorderWidthObject = resObj;
+            } else if (state && borderWidth.IsNonNegative() && borderWidth.Unit() != DimensionUnit::PERCENT) {
+                badgeParameters.badgeBorderWidth = borderWidth;
             } else {
-                badgeParameters.badgeBorderWidth =
-                    (state && borderWidth.IsNonNegative() && borderWidth.Unit() != DimensionUnit::PERCENT)
-                        ? borderWidth
-                        : badgeTheme->GetBadgeBorderWidth();
+                badgeParameters.badgeBorderWidth = badgeTheme->GetBadgeBorderWidth();
+                badgeParameters.badgeBorderWidthByUser = false;
             }
         } else {
             if (ParseJsDimensionVp(borderWidthValue, borderWidth) && borderWidth.IsNonNegative() &&
@@ -253,11 +272,14 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         Color borderColor;
         if (SystemProperties::ConfigChangePerform()) {
             RefPtr<ResourceObject> borderColorResObj;
+            badgeParameters.badgeBorderColorByUser = false;
             bool state = ParseJsColor(borderColorValue, borderColor, borderColorResObj);
             if (borderColorResObj) {
                 badgeParameters.resourceBorderColorObject = borderColorResObj;
+                badgeParameters.badgeBorderColorByUser = true;
             } else if (state) {
                 badgeParameters.badgeBorderColor = borderColor;
+                badgeParameters.badgeBorderColorByUser = true;
             } else {
                 badgeParameters.badgeBorderColor =
                     themeColors ? themeColors->Warning() : badgeTheme->GetBadgeBorderColor();

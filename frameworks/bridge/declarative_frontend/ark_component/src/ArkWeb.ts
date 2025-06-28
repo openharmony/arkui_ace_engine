@@ -1292,6 +1292,20 @@ class WebOnDataResubmittedModifier extends ModifierWithKey<(event: { handler: Da
   }
 }
 
+class WebGestureFocusModeModifier extends ModifierWithKey<GestureFocusMode> {
+  constructor(value: GestureFocusMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webGestureFocusModeModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetGestureFocusMode(node);
+    } else {
+      getUINativeModule().web.setGestureFocusMode(node, this.value);
+    }
+  }
+}
+
 class ArkWebComponent extends ArkComponent implements WebAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1490,6 +1504,9 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     return this;
   }
   onInterceptRequest(callback: (event?: { request: WebResourceRequest; } | undefined) => WebResourceResponse): this {
+    throw new Error('Method not implemented.');
+  }
+  onOverrideErrorPage(callback: (event?: { webResourceRequest: WebResourceRequest; error: WebResourceError; } | undefined) => string): this {
     throw new Error('Method not implemented.');
   }
   onPermissionRequest(callback: (event?: { request: PermissionRequest; } | undefined) => void): this {
@@ -1760,6 +1777,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   onSafeBrowsingCheckResult(callback: OnSafeBrowsingCheckResultCallback): this{
     modifierWithKey(this._modifiersWithKeys, WebOnSafeBrowsingCheckResultModifier.identity, WebOnSafeBrowsingCheckResultModifier, callback);
+    return this;
+  }
+  gestureFocusMode(mode: GestureFocusMode): this {
+    modifierWithKey(this._modifiersWithKeys, WebGestureFocusModeModifier.identity, WebGestureFocusModeModifier, mode);
     return this;
   }
 }

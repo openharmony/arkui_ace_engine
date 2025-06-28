@@ -28,6 +28,7 @@ public:
     static RefPtr<FrameNode> CreatePlaceHolderContent(const RefPtr<PipelineContext>& context);
     static RefPtr<NavDestinationGroupNode> CreatePlaceHolderNavDestination(const RefPtr<PipelineContext>& context);
     static bool IsNavDestinationHomePage(const RefPtr<NavDestinationGroupNode>& node);
+    static RefPtr<FrameNode> CreatePlaceHolderNode();
 };
 
 } // namespace OHOS::Ace::NG

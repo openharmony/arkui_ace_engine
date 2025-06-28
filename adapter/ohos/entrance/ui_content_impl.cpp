@@ -44,6 +44,7 @@
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/referenced.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
@@ -165,6 +166,8 @@ static bool g_isDragging = false;
     if (!*_##name->isValid_) {                          \
         ifInvalid;                                      \
     }
+#define PETALMAPS_SEARCH_URL(address) \
+    (std::string("https://www.petalmaps.com/search/?q=") + (address) + "&utm_source=fb")
 
 struct UIContentImplHelper {
     explicit UIContentImplHelper(UIContentImpl* uiContent) : uiContent_(uiContent)
@@ -2042,6 +2045,7 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
     CapabilityRegistry::Register();
     ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
     XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
+    PerfMonitor::GetPerfMonitor()->SetApplicationInfo();
 
     auto task = [] {
         std::unordered_map<std::string, std::string> payload;
@@ -2461,6 +2465,18 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         auto url = urlPrefix + appName;
         want.SetUri(url);
         abilityContext->StartAbility(want, REQUEST_CODE);
+    });
+
+    container->SetOpenLinkOnMapSearch([context = context_](const std::string& address) {
+        auto sharedContext = context.lock();
+        CHECK_NULL_VOID(sharedContext);
+        auto abilityContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+        CHECK_NULL_VOID(abilityContext);
+        AAFwk::Want want;
+        auto url = PETALMAPS_SEARCH_URL(address);
+        want.SetUri(url);
+        abilityContext->OpenLink(want, REQUEST_CODE);
     });
 
     container->SetAbilityOnJumpBrowser([context = context_](const std::string& address) {

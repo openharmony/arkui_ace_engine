@@ -20,6 +20,7 @@
 #include "test/mock/core/common/mock_theme_default.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/base/mock_system_properties.h"
 
 #include "core/components/theme/icon_theme.h"
 #include "core/components/picker/picker_theme.h"
@@ -35,6 +36,9 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr uint32_t SELECTED_INDEX_1 = 1;
+} // namespace
 
 class TextPickerResourceTest : public testing::Test {
 public:
@@ -157,6 +161,106 @@ HWTEST_F(TextPickerResourceTest, ParseCascadeRangeOptions002, TestSize.Level1)
     EXPECT_EQ(options.size(), 2);
     EXPECT_EQ(options[0].rangeResult, expectValue1);
     EXPECT_EQ(options[1].rangeResult, expectValue2);
+}
+
+/**
+ * @tc.name: ParseSingleIconTextResourceObj001
+ * @tc.desc: Test ParseSingleIconTextResourceObj when resObj is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, ParseSingleIconTextResourceObj001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set g_isConfigChangePerform to true.
+     */
+    g_isConfigChangePerform = true;
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+
+    /**
+     * @tc.steps: step3. Call ParseSingleIconTextResourceObj to register the resourceObject callback function.
+     */
+    std::vector<NG::RangeContent> newRange = { { "", "" }, { "", "" }, { "", "" } };
+    TextPickerModelNG::GetInstance()->ParseSingleIconTextResourceObj(newRange);
+    pattern->resourceMgr_->ReloadResources();
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    std::vector<NG::RangeContent> resultRange = textPickerPattern->GetRange();
+    EXPECT_EQ(resultRange.size(), oldRange.size());
+    for (uint32_t i = 0; i < resultRange.size(); i++) {
+        EXPECT_EQ(resultRange[i].text_, oldRange[i].text_);
+    }
+}
+
+/**
+ * @tc.name: ParseSingleIconTextResourceObj002
+ * @tc.desc: Test ParseSingleIconTextResourceObj when resObj is not null but is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerResourceTest, ParseSingleIconTextResourceObj002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPicker.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    auto theme = pipeline->GetTheme<PickerTheme>();
+
+    SystemProperties::SetDeviceType(DeviceType::PHONE);
+    SystemProperties::SetDeviceOrientation(static_cast<int32_t>(DeviceOrientation::LANDSCAPE));
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<NG::RangeContent> oldRange = { { "", "Text1" }, { "", "Text2" }, { "", "Text3" } };
+    TextPickerModelNG::GetInstance()->SetRange(oldRange);
+    TextPickerModelNG::GetInstance()->SetSelected(SELECTED_INDEX_1);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set g_isConfigChangePerform to true.
+     */
+    g_isConfigChangePerform = true;
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+
+    /**
+     * @tc.steps: step3. Call ParseSingleIconTextResourceObj to register the resourceObject callback function.
+     * @tc.expected: Dut to resourceObject is invalid, range will be set to default value.
+     */
+    std::vector<NG::RangeContent> newRange = {
+        { "", "1", AceType::MakeRefPtr<ResourceObject>(), AceType::MakeRefPtr<ResourceObject>() },
+        { "", "2", AceType::MakeRefPtr<ResourceObject>(), AceType::MakeRefPtr<ResourceObject>() },
+        { "", "3", AceType::MakeRefPtr<ResourceObject>(), AceType::MakeRefPtr<ResourceObject>() },
+        { "", "4", AceType::MakeRefPtr<ResourceObject>(), AceType::MakeRefPtr<ResourceObject>() }
+    };
+    TextPickerModelNG::GetInstance()->ParseSingleIconTextResourceObj(newRange);
+    pattern->resourceMgr_->ReloadResources();
+
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    std::vector<NG::RangeContent> resultRange = textPickerPattern->GetRange();
+    EXPECT_EQ(resultRange.size(), newRange.size());
+    for (uint32_t i = 0; i < resultRange.size(); i++) {
+        EXPECT_EQ(resultRange[i].text_, "");
+    }
 }
 
 } // namespace OHOS::Ace::NG

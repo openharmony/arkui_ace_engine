@@ -25,6 +25,7 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_node.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
@@ -2452,7 +2453,7 @@ void OnClick0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onClick = [callback = CallbackHelper(*value)](GestureEvent& info) {
         const auto event = Converter::ArkClickEventSync(info);
-        callback.InvokeSync(event.ArkValue());
+        callback.Invoke(event.ArkValue());
     };
     NG::ViewAbstract::SetOnClick(frameNode, std::move(onClick));
 }
@@ -3538,7 +3539,7 @@ void Clip0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetClipEdge(frameNode, Converter::OptConvert<bool>(*value).value_or(false));
+    ViewAbstractModelStatic::SetClipEdge(frameNode, Converter::OptConvert<bool>(*value).value_or(false));
 }
 void Clip1Impl(Ark_NativePointer node,
                const Opt_Boolean* value)
@@ -3783,7 +3784,7 @@ void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
     auto builder = [callback = CallbackHelper(*value), node]() -> RefPtr<UINode> {
         return callback.BuildSync(node);
     };
-    ViewAbstractModelNG::SetAccessibilityVirtualNode(frameNode, std::move(builder));
+    ViewAbstractModelStatic::SetAccessibilityVirtualNode(frameNode, std::move(builder));
 }
 void AccessibilityCheckedImpl(Ark_NativePointer node,
                               Ark_Boolean value)
@@ -4361,7 +4362,7 @@ void BindPopupImpl(Ark_NativePointer node,
         });
     CHECK_NULL_VOID(popupParam);
     popupParam->SetIsShow(Converter::Convert<bool>(show));
-    ViewAbstractModelNG::BindPopup(frameNode, popupParam, customNode);
+    ViewAbstractModelStatic::BindPopup(frameNode, popupParam, customNode);
 }
 void BindMenuBase(Ark_NativePointer node,
     Ark_Boolean isShow,
@@ -4393,14 +4394,14 @@ void BindMenuBase(Ark_NativePointer node,
     Converter::VisitUnion(*content,
         [frameNode, menuParam](const Array_MenuElement& value) {
             auto optionsParam = Converter::Convert<std::vector<OptionParam>>(value);
-            ViewAbstractModelNG::BindMenu(frameNode, std::move(optionsParam), nullptr, menuParam);
+            ViewAbstractModelStatic::BindMenu(frameNode, std::move(optionsParam), nullptr, menuParam);
         },
         [frameNode, node, menuParam](const CustomNodeBuilder& value) {
             auto builder = [callback = CallbackHelper(value), node]() {
                 auto uiNode = callback.BuildSync(node);
                 ViewStackProcessor::GetInstance()->Push(uiNode);
             };
-            ViewAbstractModelNG::BindMenu(frameNode, {}, std::move(builder), menuParam);
+            ViewAbstractModelStatic::BindMenu(frameNode, {}, std::move(builder), menuParam);
         },
         []() {});
 }
@@ -4441,9 +4442,9 @@ void BindContextMenu0Impl(Ark_NativePointer node,
         menuParam.isShowHoverImage = false;
         menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
     }
-    ViewAbstractModelNG::BindContextMenuStatic(
+    ViewAbstractModelStatic::BindContextMenuStatic(
         AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
-    ViewAbstractModelNG::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
+    ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
 }
 void BindContextMenu1Impl(Ark_NativePointer node,
                           Ark_Boolean isShown,
@@ -4464,9 +4465,9 @@ void BindContextMenu1Impl(Ark_NativePointer node,
     menuParam.previewMode = MenuPreviewMode::NONE;
     std::function<void()> previewBuildFunc = nullptr;
     g_bindContextMenuParams(menuParam, options, previewBuildFunc, node, frameNode);
-    ViewAbstractModelNG::BindContextMenuStatic(
+    ViewAbstractModelStatic::BindContextMenuStatic(
         AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
-    ViewAbstractModelNG::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
+    ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
 }
 void BindContentCover0Impl(Ark_NativePointer node,
                            const Opt_Boolean* isShow,

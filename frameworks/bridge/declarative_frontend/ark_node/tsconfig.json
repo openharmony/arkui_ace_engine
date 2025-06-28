@@ -16,6 +16,7 @@
         "src/component_content.ts",
         "src/node_content.ts",
         "src/disposable.ts",
+        "src/common.ts",
     ],
     "compilerOptions": {
         "module": "none",

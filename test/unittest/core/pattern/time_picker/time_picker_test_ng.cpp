@@ -340,6 +340,24 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle004, Tes
 }
 
 /**
+ * @tc.name: TimePickerModelNGSetDisappearTextStyle005
+ * @tc.desc: Test TimePickerModelNG SetDisappearTextStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGSetDisappearTextStyle005, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    PickerTextStyle data;
+    TimePickerModelNG::GetInstance()->SetDisappearTextStyle(theme, data);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_FALSE(pickerProperty->HasFontStyle());
+}
+
+/**
  * @tc.name: TimePickerModelNGSetNormalTextStyle001
  * @tc.desc: Test TimePickerModelNG SetNormalTextStyle.
  * @tc.type: FUNC
@@ -1153,11 +1171,11 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern006, TestSize.Level1)
 
     minuteColumnPattern->InitMouseAndPressEvent();
     (*minuteColumnPattern->mouseEvent_)(true);
-    EXPECT_TRUE(minuteColumnPattern->hoverd_);
+    EXPECT_TRUE(minuteColumnPattern->hovered_);
     auto renderContext = buttonNode->GetRenderContext();
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLACK);
     (*minuteColumnPattern->mouseEvent_)(false);
-    EXPECT_FALSE(minuteColumnPattern->hoverd_);
+    EXPECT_FALSE(minuteColumnPattern->hovered_);
     renderContext = buttonNode->GetRenderContext();
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::TRANSPARENT);
 
@@ -1178,12 +1196,12 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern006, TestSize.Level1)
     touchEventInfo.touches_.clear();
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfoUp));
 
-    minuteColumnPattern->hoverd_ = true;
+    minuteColumnPattern->hovered_ = true;
     (*minuteColumnPattern->touchListener_)(touchEventInfo);
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLACK);
     EXPECT_EQ(minuteColumnPattern->GetLocalDownDistance(), 0.0f);
 
-    minuteColumnPattern->hoverd_ = false;
+    minuteColumnPattern->hovered_ = false;
     (*minuteColumnPattern->touchListener_)(touchEventInfo);
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::TRANSPARENT);
 
@@ -1193,10 +1211,10 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern006, TestSize.Level1)
     touchEventInfo.touches_.clear();
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfoMove));
 
-    minuteColumnPattern->hoverd_ = true;
+    minuteColumnPattern->hovered_ = true;
     (*minuteColumnPattern->touchListener_)(touchEventInfo);
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::BLACK);
-    minuteColumnPattern->hoverd_ = false;
+    minuteColumnPattern->hovered_ = false;
     (*minuteColumnPattern->touchListener_)(touchEventInfo);
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::TRANSPARENT);
 }

@@ -139,4 +139,26 @@ int32_t UIContextImpl::GetContainerModalButtonsWidth()
     context_->GetContainerModalButtonsRect(containerModal, buttonsRect);
     return static_cast<int32_t>(buttonsRect.Width());
 }
+
+void UIContextImpl::RegisterArkUIObjectLifecycleCallback(ArkUIObjectLifecycleCallback&& callback)
+{
+    CHECK_NULL_VOID(context_);
+    context_->RegisterArkUIObjectLifecycleCallback(std::move(callback));
+}
+
+void UIContextImpl::UnregisterArkUIObjectLifecycleCallback()
+{
+    CHECK_NULL_VOID(context_);
+    context_->UnregisterArkUIObjectLifecycleCallback();
+}
+
+NG::OffsetF UIContextImpl::GetContainerModalButtonsOffset()
+{
+    Ace::NG::RectF buttonsRect;
+    CHECK_NULL_RETURN(context_, buttonsRect.GetOffset());
+    Ace::NG::RectF containerModal;
+    context_->GetContainerModalButtonsRect(containerModal, buttonsRect);
+    return buttonsRect.GetOffset();
+}
+
 } // namespace OHOS::Ace::Kit

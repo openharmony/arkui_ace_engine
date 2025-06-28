@@ -181,6 +181,11 @@
       "buildFunction": "bindContextMenuLeftBuilder"
     },
     {
+      "name": "bindContextMenuPreview",
+      "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuPreview.ets",
+      "buildFunction": "bindContextMenuPreviewBuilder"
+    },
+    {
       "name": "OverlayIndex",
       "pageSourceFile": "src/main/ets/pages/components/overlay/Index.ets",
       "buildFunction": "OverlayIndexBuilder"

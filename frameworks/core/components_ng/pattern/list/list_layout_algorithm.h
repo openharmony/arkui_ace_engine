@@ -466,7 +466,7 @@ public:
         isRoundingMode_ = true;
     }
 
-    bool MeasureInNextFrame() const
+    bool MeasureInNextFrame() const override
     {
         return measureInNextFrame_;
     }
@@ -613,6 +613,8 @@ protected:
         return 0.0f;
     }
 
+    void LostChildFocusToSelf(LayoutWrapper* layoutWrapper, int32_t start, int32_t end);
+
     virtual void MeasureHeader(LayoutWrapper* layoutWrapper) {}
     virtual void LayoutHeader(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize) {}
     virtual void CalcContentOffset(const RefPtr<ListLayoutProperty>& property);
@@ -679,6 +681,9 @@ private:
 
     std::pair<int32_t, float> RequestNewItemsBackward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
+
+    std::pair<int32_t, float> FindIndexAndDeltaInPosMap(float delta) const;
+    bool CanUseInfoInPosMap(int32_t index, float delta) const;
 
     void FixPredictSnapOffsetAlignStart();
     void FixPredictSnapOffsetAlignEnd();

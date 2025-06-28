@@ -56,6 +56,9 @@ class ComponentContent extends Content implements IDisposable {
     this.builderNode_.onRecycleWithBindObject();
   }
   public dispose(): void {
+    if (this.getNodePtr()) {
+      getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'ComponentContent', this.getFrameNode()?.getNodeType() || 'ComponentContent', this.getNodePtr());
+    }
     this.disposable_.dispose();
     this.detachFromParent();
     this.attachNodeRef_?.dispose();
@@ -90,5 +93,9 @@ class ComponentContent extends Content implements IDisposable {
 
   public updateConfiguration(): void {
     this.builderNode_.updateConfiguration();
+  }
+
+  public inheritFreezeOptions(enable: boolean): void {
+    this.builderNode_.inheritFreezeOptions(enable);
   }
 }

@@ -1569,4 +1569,186 @@ HWTEST_F(MenuPattern2TestNg, SetMenuBackGroundStyle001, TestSize.Level1)
     menuParam.type = MenuType::CONTEXT_MENU;
     menuPattern->SetMenuBackGroundStyle(outterMenuNode, menuParam);
 }
+
+/**
+ * @tc.name: ShowStackSubMenuAnimation001
+ * @tc.desc: Verify ShowStackSubMenuAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, ShowStackSubMenuAnimation001, TestSize.Level1)
+{
+    auto mainMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(mainMenuNode, nullptr);
+    auto subMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(subMenuNode, nullptr);
+    
+    auto scrollNode = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    scrollNode->MountToParent(subMenuNode);
+    auto innerMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 4, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(scrollNode);
+    
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    MenuItemModelNG MneuItemModelInstance;
+    MneuItemModelInstance.Create(itemOption);
+    auto titleFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(titleFrameNode, nullptr);
+    titleFrameNode->MountToParent(innerMenuNode);
+    auto menuItem = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItem, nullptr);
+    menuItem->MountToParent(innerMenuNode);
+
+    auto menuPattern = subMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->ShowStackSubMenuAnimation(mainMenuNode, subMenuNode);
+
+    auto titlePattern = titleFrameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(titlePattern, nullptr);
+    auto titleContentNode = titlePattern->GetContentNode();
+    ASSERT_NE(titleContentNode, nullptr);
+    auto textProperty = titleContentNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProperty, nullptr);
+    EXPECT_EQ(textProperty->GetFontWeight(), FontWeight::BOLD);
+}
+
+/**
+ * @tc.name: ShowStackMainMenuAnimation001
+ * @tc.desc: Verify ShowStackMainMenuAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, ShowStackMainMenuAnimation001, TestSize.Level1)
+{
+    auto mainMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(mainMenuNode, nullptr);
+    auto scrollNode = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    scrollNode->MountToParent(mainMenuNode);
+    auto innerMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 4, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(scrollNode);
+
+    auto subMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(subMenuNode, nullptr);
+    auto subMenuPattern = subMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(subMenuPattern, nullptr);
+    subMenuPattern->translateYForStack_ = 10.0f;
+
+    auto menuWrapperNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() {return AceType::MakeRefPtr<MenuWrapperPattern>(1);});
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto previewNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(previewNode, nullptr);
+    mainMenuNode->MountToParent(menuWrapperNode);
+    previewNode->MountToParent(menuWrapperNode);
+    subMenuNode->MountToParent(menuWrapperNode);
+    subMenuPattern->ShowStackMainMenuAnimation(mainMenuNode, subMenuNode, menuWrapperNode);
+
+    auto innerMenuContext = innerMenuNode->GetRenderContext();
+    ASSERT_NE(innerMenuContext, nullptr);
+    EXPECT_EQ(innerMenuContext->GetOpacity(), 0.4f);
+}
+
+/**
+ * @tc.name: ShowStackSubMenuDisappearAnimation001
+ * @tc.desc: Verify ShowStackSubMenuDisappearAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, ShowStackSubMenuDisappearAnimation001, TestSize.Level1)
+{
+    auto mainMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(mainMenuNode, nullptr);
+    auto subMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(subMenuNode, nullptr);
+    auto scrollNode = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    scrollNode->MountToParent(subMenuNode);
+    auto innerMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 4, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(scrollNode);
+    
+    MenuItemProperties itemOption;
+    itemOption.content = "content";
+    itemOption.labelInfo = "label";
+    MenuItemModelNG MneuItemModelInstance;
+    MneuItemModelInstance.Create(itemOption);
+    auto titleFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(titleFrameNode, nullptr);
+    titleFrameNode->MountToParent(innerMenuNode);
+    auto menuItem = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItem, nullptr);
+    menuItem->MountToParent(innerMenuNode);
+
+    auto menuPattern = subMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->ShowStackSubMenuDisappearAnimation(mainMenuNode, subMenuNode);
+    auto titlePattern = titleFrameNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(titlePattern, nullptr);
+    auto titleContentNode = titlePattern->GetContentNode();
+    ASSERT_NE(titleContentNode, nullptr);
+    auto textProperty = titleContentNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textProperty, nullptr);
+    EXPECT_EQ(textProperty->GetFontWeight(), FontWeight::MEDIUM);
+}
+
+/**
+ * @tc.name: ShowStackMainMenuDisappearAnimation001
+ * @tc.desc: Verify ShowStackMainMenuDisappearAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, ShowStackMainMenuDisappearAnimation001, TestSize.Level1)
+{
+    auto mainMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(mainMenuNode, nullptr);
+    auto scrollNode = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    scrollNode->MountToParent(mainMenuNode);
+    auto innerMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 4, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(scrollNode);
+
+    auto subMenuNode =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    ASSERT_NE(subMenuNode, nullptr);
+    auto mainMenuPattern = mainMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(mainMenuPattern, nullptr);
+    mainMenuPattern->originMenuYForStack_ = 10.0f;
+    mainMenuPattern->originPreviewYForStack_ = 10.0f;
+
+    auto menuWrapperNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() {return AceType::MakeRefPtr<MenuWrapperPattern>(1);});
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto previewNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(previewNode, nullptr);
+    mainMenuNode->MountToParent(menuWrapperNode);
+    previewNode->MountToParent(menuWrapperNode);
+    subMenuNode->MountToParent(menuWrapperNode);
+    AnimationOption option = AnimationOption();
+    mainMenuPattern->ShowStackMainMenuDisappearAnimation(mainMenuNode, subMenuNode, option);
+
+    auto innerMenuContext = innerMenuNode->GetRenderContext();
+    ASSERT_NE(innerMenuContext, nullptr);
+    EXPECT_EQ(innerMenuContext->GetOpacity(), 1.0f);
+}
 } // namespace OHOS::Ace::NG

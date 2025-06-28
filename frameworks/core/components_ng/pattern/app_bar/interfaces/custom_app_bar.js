@@ -39,6 +39,8 @@ const f2 = 'arkui_custom_app_bar_close_click';
 const g2 = 'arkui_custom_app_bar_did_build';
 const ARKUI_APP_BAR_SERVICE_PANEL = 'arkui_app_bar_service_panel';
 const ARKUI_APP_BAR_CLOSE = 'arkui_app_bar_close';
+const ARKUI_APP_BAR_ON_BACK_PRESSED = 'arkui_app_bar_on_back_pressed';
+const ARKUI_APP_BAR_ON_BACK_PRESSED_CONSUMED = 'arkui_app_bar_on_back_pressed_consumed';
 const h2 = 10;
 class o1 {
     constructor(a2, b2) {
@@ -309,6 +311,15 @@ class e1 extends ViewPU {
         else if (eventName === i2) {
             this.contentBgColor = param;
         }
+        else if (eventName === ARKUI_APP_BAR_ON_BACK_PRESSED) {
+            this.onBackPressed();
+        }
+    }
+    onBackPressed() {
+        ContainerAppBar.callNative(ARKUI_APP_BAR_ON_BACK_PRESSED);
+    }
+    onBackPressedConsumed() {
+        ContainerAppBar.callNative(ARKUI_APP_BAR_ON_BACK_PRESSED_CONSUMED);
     }
     onColorConfigurationUpdate(s1) {
         this.isDark = s1;

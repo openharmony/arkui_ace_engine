@@ -236,6 +236,13 @@ void WebModelImpl::SetOnInterceptRequest(std::function<RefPtr<WebResponse>(const
     webComponent->SetOnInterceptRequest(std::move(jsCallback));
 }
 
+void WebModelImpl::SetOnOverrideErrorPage(std::function<std::string(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetOnOverrideErrorPage(std::move(jsCallback));
+}
+
 void WebModelImpl::SetOnUrlLoadIntercept(std::function<bool(const BaseEventInfo* info)>&& jsCallback)
 {
     auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());

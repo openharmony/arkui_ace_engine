@@ -943,12 +943,15 @@ class c3 extends ViewPU {
     }
     setMaximizeVisibility(h3) {
         this.maximizeVisibility = h3 ? Visibility.None : Visibility.Visible;
+        this.setRowVisibility();
     }
     setMinimizeVisibility(g3) {
         this.minimizeVisibility = g3 ? Visibility.None : Visibility.Visible;
+        this.setRowVisibility();
     }
     setCloseVisibility(f3) {
         this.closeVisibility = f3 ? Visibility.None : Visibility.Visible;
+        this.setRowVisibility();
     }
     setCloseStatus(isEnabled) {
         this.closeStatus = isEnabled;
@@ -975,7 +978,7 @@ class c3 extends ViewPU {
     setRowVisibility() {
         if (this.maximizeVisibility === Visibility.None && this.minimizeVisibility === Visibility.None &&
             this.closeVisibility === Visibility.None) {
-            this.rowVisibility = Visibility.None;
+            this.rowVisibility = Visibility.Hidden;
         }
         else {
             this.rowVisibility = Visibility.Visible;

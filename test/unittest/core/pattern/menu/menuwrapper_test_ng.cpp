@@ -1519,6 +1519,11 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg032, TestSize.Level1)
     wrapperPattern->isShowInSubWindow_ = false;
     wrapperPattern->isFirstShow_ = false;
     EXPECT_FALSE(wrapperPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, configDirtySwap));
+    layoutProperty->UpdateShowInSubWindow(true);
+    wrapperPattern->isOpenMenu_ = true;
+    wrapperPattern->menuStatus_ = MenuStatus::ON_SHOW_ANIMATION;
+    wrapperNode->onMainTree_ = true;
+    EXPECT_FALSE(wrapperPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, configDirtySwap));
 }
 
 /**
@@ -2262,6 +2267,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperHotArea001, TestSize.Level1)
      */
     auto mockContainer = MockContainer::Current();
     auto instanceId = context->GetInstanceId();
+    AceEngine::Get().RemoveContainer(instanceId);
     AceEngine::Get().containerMap_.emplace(instanceId, mockContainer);
     wrapperPattern->menuParam_.modalMode = ModalMode::TARGET_WINDOW;
     wrapperPattern->AddTargetWindowHotArea(rects);
@@ -2336,6 +2342,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperHotArea003, TestSize.Level1)
     auto context = wrapperNode->GetContext();
     ASSERT_NE(context, nullptr);
     auto instanceId = context->GetInstanceId();
+    AceEngine::Get().RemoveContainer(instanceId);
     AceEngine::Get().containerMap_.emplace(instanceId, mockContainer);
     wrapperPattern->menuParam_.modalMode = ModalMode::TARGET_WINDOW;
     std::vector<Rect> rects;

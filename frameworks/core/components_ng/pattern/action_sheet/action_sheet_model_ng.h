@@ -30,12 +30,12 @@ public:
         ButtonInfo& buttonInfo, DialogProperties& arg) override;
     void SetOnWillDismiss(std::function<void(const int32_t& info, const int32_t& instanceId)>&& onWillDismissFunc,
         DialogProperties& arg) override;
-    void CreateWithOptionsResourceObj(const RefPtr<OHOS::Ace::NG::DialogPattern>& pattern,
+    static void CreateWithOptionsResourceObj(const RefPtr<OHOS::Ace::NG::DialogPattern>& pattern,
         const RefPtr<ResourceObject>& textColorResObj, ActionSheetType type);
-    std::string DialogTypeStr(ActionSheetType type);
-    void UpdateActionSheetType(
+    static std::string DialogTypeStr(ActionSheetType type);
+    static void UpdateActionSheetType(
         const RefPtr<OHOS::Ace::NG::DialogPattern>& pattern, ActionSheetType type, std::string result);
-    void CreateWithColorResourceObj(const RefPtr<OHOS::Ace::NG::DialogPattern>& pattern,
+    static void CreateWithColorResourceObj(const RefPtr<OHOS::Ace::NG::DialogPattern>& pattern,
         const RefPtr<ResourceObject>& textColorResObj, ActionSheetType type);
 };
 } // namespace OHOS::Ace::NG

@@ -29,6 +29,7 @@
 #include "core/components/common/properties/paint_state.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
+#include "core/pipeline/base/constants.h"
 
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
@@ -262,7 +263,7 @@ void JSCanvasRenderer::JsCreateConicGradient(const JSCallbackInfo& info)
     double density = GetDensity();
     auto gradient = std::make_shared<Gradient>();
     gradient->SetType(GradientType::CONIC);
-    gradient->GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (2 * M_PI))));
+    gradient->GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (2 * ACE_PI))));
     gradient->GetConicGradient().centerX = AnimatableDimension(Dimension(x * density));
     gradient->GetConicGradient().centerY = AnimatableDimension(Dimension(y * density));
     JSRef<JSObject> pasteObj = createGradientObj(gradient);

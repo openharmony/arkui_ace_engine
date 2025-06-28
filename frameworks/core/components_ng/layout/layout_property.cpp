@@ -157,6 +157,7 @@ void LayoutProperty::Reset()
     propVisibility_.reset();
     propIsBindOverlay_.reset();
     backgroundIgnoresLayoutSafeAreaEdges_.reset();
+    localizedBackgroundIgnoresLayoutSafeAreaEdges_.reset();
     CleanDirty();
 }
 
@@ -398,6 +399,8 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     overlayOffsetX_ = layoutProperty->overlayOffsetX_;
     overlayOffsetY_ = layoutProperty->overlayOffsetY_;
     backgroundIgnoresLayoutSafeAreaEdges_ = layoutProperty->backgroundIgnoresLayoutSafeAreaEdges_;
+    localizedBackgroundIgnoresLayoutSafeAreaEdges_ =
+        layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_;
 }
 
 void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)
@@ -1005,11 +1008,10 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
     // update visibility value.
     propVisibility_ = visible;
     auto pipeline = host->GetContext();
-    uint64_t vsyncTime = 0;
-    if (pipeline) {
-        vsyncTime = pipeline->GetVsyncTime();
+
+    if ((preVisibility != propVisibility_) && pipeline) {
+        pipeline->SetIsDisappearChangeNodeMinDepth(host->GetDepth());
     }
-    host->AddVisibilityDumpInfo({ vsyncTime, { visible, isUserSet } });
 
     host->NotifyVisibleChange(preVisibility.value_or(VisibleType::VISIBLE), visible);
     if (allowTransition && preVisibility) {
@@ -1190,7 +1192,7 @@ void LayoutProperty::UpdateBackgroundIgnoresLayoutSafeAreaEdges(uint32_t value)
         return;
     }
     backgroundIgnoresLayoutSafeAreaEdges_ = value;
-    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT;
 }
 
 TextDirection LayoutProperty::GetNonAutoLayoutDirection() const
@@ -1241,6 +1243,36 @@ void LayoutProperty::UpdateAlignment(Alignment value)
         positionProperty_ = std::make_unique<PositionProperty>();
     }
     if (positionProperty_->UpdateAlignment(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT;
+    }
+}
+
+void LayoutProperty::UpdateLocalizedAlignment(std::string value)
+{
+    if (!positionProperty_) {
+        positionProperty_ = std::make_unique<PositionProperty>();
+    }
+    if (positionProperty_->UpdateLocalizedAlignment(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT;
+    }
+}
+
+void LayoutProperty::UpdateLayoutGravity(Alignment value)
+{
+    if (!positionProperty_) {
+        positionProperty_ = std::make_unique<PositionProperty>();
+    }
+    if (positionProperty_->UpdateLayoutGravity(value)) {
+        propertyChangeFlag_ = propertyChangeFlag_ |  PROPERTY_UPDATE_MEASURE;
+    }
+}
+
+void LayoutProperty::UpdateIsMirrorable(bool value)
+{
+    if (!positionProperty_) {
+        positionProperty_ = std::make_unique<PositionProperty>();
+    }
+    if (positionProperty_->UpdateIsMirrorable(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT;
     }
 }
@@ -1875,7 +1907,7 @@ void LayoutProperty::CheckLocalizedOuterBorderColor(const TextDirection& directi
         borderColors.topColor = outerBorderColorProperty.topColor;
     }
     if (outerBorderColorProperty.bottomColor.has_value()) {
-        borderColors.topColor = outerBorderColorProperty.bottomColor;
+        borderColors.bottomColor = outerBorderColorProperty.bottomColor;
     }
     target->UpdateOuterBorderColor(borderColors);
 }
@@ -2029,6 +2061,48 @@ void LayoutProperty::CheckIgnoreLayoutSafeArea(const TextDirection& direction)
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE;
         ignoreLayoutSafeAreaOpts_->edges = edges;
     }
+}
+
+void LayoutProperty::CheckBackgroundLayoutSafeAreaEdges(const TextDirection& direction)
+{
+    if (!backgroundIgnoresLayoutSafeAreaEdges_.has_value()) {
+        return;
+    }
+
+    auto rawEdges = backgroundIgnoresLayoutSafeAreaEdges_.value();
+    LayoutSafeAreaEdge edges = LAYOUT_SAFE_AREA_EDGE_NONE;
+    if (rawEdges & LAYOUT_SAFE_AREA_EDGE_TOP) {
+        edges |= LAYOUT_SAFE_AREA_EDGE_TOP;
+    }
+    if (rawEdges & LAYOUT_SAFE_AREA_EDGE_BOTTOM) {
+        edges |= LAYOUT_SAFE_AREA_EDGE_BOTTOM;
+    }
+    if (rawEdges & LAYOUT_SAFE_AREA_EDGE_START) {
+        if (direction == TextDirection::RTL) {
+            edges |= LAYOUT_SAFE_AREA_EDGE_END;
+        } else {
+            edges |= LAYOUT_SAFE_AREA_EDGE_START;
+        }
+    }
+    if (rawEdges & LAYOUT_SAFE_AREA_EDGE_END) {
+        if (direction == TextDirection::RTL) {
+            edges |= LAYOUT_SAFE_AREA_EDGE_START;
+        } else {
+            edges |= LAYOUT_SAFE_AREA_EDGE_END;
+        }
+    }
+
+    if (edges != localizedBackgroundIgnoresLayoutSafeAreaEdges_.value_or(LAYOUT_SAFE_AREA_EDGE_NONE)) {
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT;
+        localizedBackgroundIgnoresLayoutSafeAreaEdges_ = edges;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& target = host->GetRenderContext();
+    CHECK_NULL_VOID(target);
+    target->UpdateBackgroundIgnoresLayoutSafeAreaEdges(
+        localizedBackgroundIgnoresLayoutSafeAreaEdges_.value_or(LAYOUT_SAFE_AREA_EDGE_NONE));
 }
 
 void LayoutProperty::LocalizedPaddingOrMarginChange(
@@ -2283,6 +2357,16 @@ void LayoutProperty::CheckLocalizedBorderImageOutset(const TextDirection& direct
     target->UpdateBorderImage(borderImageProperty);
 }
 
+void LayoutProperty::CheckLocalizedAlignment(const TextDirection& direction)
+{
+    CHECK_NULL_VOID(GetPositionProperty());
+    if (GetPositionProperty()->GetIsMirrorable().value_or(false)) {
+        auto localizedAlignment = GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+        auto alignment = GetAlignmentStringFromLocalized(direction, localizedAlignment);
+        GetPositionProperty()->UpdateLocalizedAlignment(alignment);
+    }
+}
+
 std::string LayoutProperty::LayoutInfoToString()
 {
     std::stringstream ss;
@@ -2303,5 +2387,27 @@ std::string LayoutProperty::LayoutInfoToString()
 RefPtr<GeometryTransition> LayoutProperty::GetGeometryTransition() const
 {
     return geometryTransition_.Upgrade();
+}
+
+std::string LayoutProperty::GetAlignmentStringFromLocalized(
+    TextDirection layoutDirection, std::string localizedAlignment)
+{
+    static const std::unordered_map<std::string, std::pair<std::string, std::string>> alignmentMap = {
+        {"top_start", {"top_start", "top_end"}},
+        {"top", {"top", "top"}},
+        {"top_end", {"top_end", "top_start"}},
+        {"start", {"start", "end"}},
+        {"center", {"center", "center"}},
+        {"end", {"end", "start"}},
+        {"bottom_start", {"bottom_start", "bottom_end"}},
+        {"bottom", {"bottom", "bottom"}},
+        {"bottom_end", {"bottom_end", "bottom_start"}}
+    };
+
+    auto it = alignmentMap.find(localizedAlignment);
+    if (it != alignmentMap.end()) {
+        return layoutDirection == TextDirection::LTR ? it->second.first : it->second.second;
+    }
+    return "center";
 }
 } // namespace OHOS::Ace::NG

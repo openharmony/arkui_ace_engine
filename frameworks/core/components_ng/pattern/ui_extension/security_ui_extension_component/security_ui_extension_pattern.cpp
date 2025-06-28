@@ -708,7 +708,7 @@ bool SecurityUIExtensionPattern::GetDensityDpi()
     return densityDpi_;
 }
 
-void SecurityUIExtensionPattern::OnVisibleChange(bool visible)
+void SecurityUIExtensionPattern::OnVisibleChangeInner(bool visible)
 {
     PLATFORM_LOGI("The component is changing from '%{public}s' to '%{public}s'.",
         isVisible_ ? "visible" : "invisible", visible ? "visible" : "invisible");
@@ -743,7 +743,7 @@ void SecurityUIExtensionPattern::RegisterVisibleAreaChange()
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto uiExtension = weak.Upgrade();
         CHECK_NULL_VOID(uiExtension);
-        uiExtension->OnVisibleChange(visible);
+        uiExtension->OnVisibleChangeInner(visible);
     };
     auto host = GetHost();
     CHECK_NULL_VOID(host);

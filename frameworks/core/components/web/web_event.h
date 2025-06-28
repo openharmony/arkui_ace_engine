@@ -572,6 +572,23 @@ public:
                                                 referrer_(referrer),
                                                 isFatalError_(isFatalError),
                                                 isMainFrame_(isMainFrame) {}
+    WebAllSslErrorEvent(const RefPtr<AllSslErrorResult>& result,
+                        int32_t error,
+                        const std::string& url,
+                        const std::string& originalUrl,
+                        const std::string& referrer,
+                        bool isFatalError,
+                        bool isMainFrame,
+                        const std::vector<std::string>& certChainData
+    )
+        : BaseEventInfo("WebAllSslErrorEvent"), result_(result),
+                                                error_(error),
+                                                url_(url),
+                                                originalUrl_(originalUrl),
+                                                referrer_(referrer),
+                                                isFatalError_(isFatalError),
+                                                isMainFrame_(isMainFrame),
+                                                certChainData_(certChainData) {}
     ~WebAllSslErrorEvent() = default;
 
     const RefPtr<AllSslErrorResult>& GetResult() const
@@ -609,6 +626,11 @@ public:
         return isMainFrame_;
     }
 
+    const std::vector<std::string>& GetCertChainData() const
+    {
+        return certChainData_;
+    }
+
 private:
     RefPtr<AllSslErrorResult> result_;
     int32_t error_;
@@ -617,6 +639,7 @@ private:
     const std::string& referrer_;
     bool isFatalError_;
     bool isMainFrame_;
+    std::vector<std::string> certChainData_;
 };
 
 class ACE_EXPORT SslSelectCertResult : public AceType {
@@ -833,8 +856,8 @@ class ACE_EXPORT LoadWebTitleReceiveEvent : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(LoadWebTitleReceiveEvent, BaseEventInfo);
 
 public:
-    explicit LoadWebTitleReceiveEvent(const std::string& title)
-        : BaseEventInfo("LoadWebTitleReceiveEvent"), title_(title)
+    explicit LoadWebTitleReceiveEvent(const std::string& title, bool isRealTitle = false)
+        : BaseEventInfo("LoadWebTitleReceiveEvent"), title_(title), isRealTitle_(isRealTitle)
     {}
     ~LoadWebTitleReceiveEvent() = default;
 
@@ -843,8 +866,14 @@ public:
         return title_;
     }
 
+    bool GetIsRealTitle() const
+    {
+        return isRealTitle_;
+    }
+
 private:
     std::string title_;
+    bool isRealTitle_;
 };
 
 class ACE_EXPORT FullScreenExitHandler : public AceType {
@@ -1190,6 +1219,29 @@ public:
 
 private:
     RefPtr<WebRequest> request_;
+};
+
+class ACE_EXPORT OnOverrideErrorPageEvent : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(OnOverrideErrorPageEvent, BaseEventInfo);
+
+public:
+    OnOverrideErrorPageEvent(const RefPtr<WebRequest>& webResourceRequest, const RefPtr<WebError>& error)
+        : BaseEventInfo("OnOverrideErrorPageEvent"), webResourceRequest_(webResourceRequest), error_(error) {}
+    ~OnOverrideErrorPageEvent() = default;
+
+    const RefPtr<WebRequest>& GetWebResourceRequest() const
+    {
+        return webResourceRequest_;
+    }
+
+    const RefPtr<WebError>& GetError() const
+    {
+        return error_;
+    }
+
+private:
+    RefPtr<WebRequest> webResourceRequest_;
+    RefPtr<WebError> error_;
 };
 
 class ACE_EXPORT LoadWebRequestFocusEvent : public BaseEventInfo {

@@ -418,7 +418,8 @@ public:
     {
         HandleSysScaleChanged();
         return MakeRefPtr<RichEditorLayoutAlgorithm>(
-            spans_, &paragraphs_, &paragraphCache_, styleManager_, NeedShowPlaceholder(), GetAISpanMap());
+            spans_, &paragraphs_, &paragraphCache_, styleManager_, NeedShowPlaceholder(),
+            AISpanLayoutInfo{ GetAISpanMap(), NeedShowAIDetect() });
     }
 
     void HandleSysScaleChanged()
@@ -890,6 +891,8 @@ public:
     bool IsHandlesShow() override;
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
+    void InitAiSelection(const Offset& globalOffset);
+    bool CheckAIPreviewMenuEnable();
     void CreateDragNode();
     float GetMaxSelectedWidth();
     void InitDragShadow(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& dragNode, bool isDragShadowNeeded,
@@ -1152,8 +1155,8 @@ public:
 
     void HideMenu();
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
-    void OnSelectionMenuOptionsUpdate(
-        const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick);
+    void OnSelectionMenuOptionsUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
+        const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     RectF GetTextContentRect(bool isActualText = false) const override
     {
         return contentRect_;
@@ -1377,6 +1380,7 @@ private:
     Color GetUrlPressColor();
     RefPtr<RichEditorSelectOverlay> selectOverlay_;
     Offset ConvertGlobalToLocalOffset(const Offset& globalOffset);
+    Offset ConvertGlobalToTextOffset(const Offset& globalOffset);
     void UpdateSelectMenuInfo(SelectMenuInfo& selectInfo);
     void HandleOnPaste() override;
     std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)> CreatePasteCallback();
@@ -1427,6 +1431,7 @@ private:
     void HandleLongPress(GestureEvent& info);
     void HandleDoubleClickOrLongPress(GestureEvent& info);
     void HandleDoubleClickOrLongPress(GestureEvent& info, RefPtr<FrameNode> host);
+    bool HandleLongPressOnAiSelection();
     void StartVibratorByLongPress();
     std::string GetPositionSpansText(int32_t position, int32_t& startSpan);
     void FireOnSelect(int32_t selectStart, int32_t selectEnd);
@@ -1436,6 +1441,7 @@ private:
     void MouseRightFocus(const MouseInfo& info);
     bool IsScrollBarPressed(const MouseInfo& info);
     void HandleMouseLeftButtonMove(const MouseInfo& info);
+    void AdjustMouseLocalOffset(Offset& offset);
     void HandleMouseSelect(const Offset& localOffset);
     void HandleMouseLeftButtonPress(const MouseInfo& info);
     void HandleShiftSelect(int32_t position);
@@ -1490,27 +1496,6 @@ private:
     void ReplacePlaceholderWithCustomSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void ReplacePlaceholderWithSymbolSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void ReplacePlaceholderWithImageSpan(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
-    void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto dragDropManager = context->GetDragDropManager();
-        CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
-    }
-
-    void RemoveDragFrameNodeFromManager(const RefPtr<FrameNode>& frameNode)
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto dragDropManager = context->GetDragDropManager();
-        CHECK_NULL_VOID(dragDropManager);
-        dragDropManager->RemoveDragFrameNode(frameNode->GetId());
-    }
 
     void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
     void HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
@@ -1663,7 +1648,8 @@ private:
     TextStyleResult GetTextStyleBySpanItem(const RefPtr<SpanItem>& spanItem);
     void CopyTextLineStyleToTextStyleResult(const RefPtr<SpanItem>& spanItem, TextStyleResult& textStyle);
     ImageStyleResult GetImageStyleBySpanItem(const RefPtr<SpanItem>& spanItem);
-    void SetSubSpans(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
+    void SetSubSpans(RefPtr<SpanString>& spanString, int32_t start, int32_t end,
+        const std::list<RefPtr<SpanItem>>& spans);
     void SetSubMap(RefPtr<SpanString>& spanString);
     void OnCopyOperationExt(RefPtr<PasteDataMix>& pasteData);
     void AddSpanByPasteData(const RefPtr<SpanString>& spanString, TextChangeReason reason = TextChangeReason::PASTE);
@@ -1715,8 +1701,10 @@ private:
         RefPtr<SpanItem> spanItem, const RefPtr<FrameNode>& frameNode, const SpanOptionBase& options);
     void UpdateGestureHotZone(const RefPtr<LayoutWrapper>& dirty);
     void ClearOnFocusTextField(FrameNode* node);
-    void ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result);
-    RefPtr<SpanString> GetSpanStringByResultObject(const ResultObject& result);
+    void ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result,
+        const std::list<RefPtr<SpanItem>>& spans);
+    RefPtr<SpanString> GetSpanStringByResultObject(const ResultObject& result,
+        const std::list<RefPtr<SpanItem>>& spans);
     bool InitPreviewText(const std::u16string& previewTextValue, const PreviewRange& range);
     bool ReplaceText(const std::u16string& previewTextValue, const PreviewRange& range);
     bool UpdatePreviewText(const std::u16string& previewTextValue, const PreviewRange& range);
@@ -1729,10 +1717,13 @@ private:
     void AsyncHandleOnCopyStyledStringHtml(RefPtr<SpanString>& subSpanString);
     bool NeedShowPlaceholder() const;
     bool IsSelectAll() override;
+    std::pair<int32_t, int32_t> GetSpanRangeByResultObject(const ResultObject& result);
+    std::list<RefPtr<SpanItem>> CopySpansForClipboard();
 #ifdef CROSS_PLATFORM
     bool UnableStandardInputCrossPlatform(TextInputConfiguration& config, bool isFocusViewChanged);
 #endif
     void OnAccessibilityEventTextChange(const std::string& changeType, const std::string& changeString);
+    void ReportComponentChangeEvent();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;

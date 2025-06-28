@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
+#include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t ARG_NUM_NATIVE_NODE = 0;
@@ -161,10 +162,12 @@ ArkUINativeModuleValue ProgressBridge::SetProgressColor(ArkUIRuntimeCallInfo* ru
     auto nativeNode = nodePtr(nativeArg->ToNativePointer(vm)->Value());
     Color color;
     OHOS::Ace::NG::Gradient gradient;
+    RefPtr<ResourceObject> colorResObj;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
-        nodeModifiers->getProgressModifier()->setProgressColor(nativeNode, color.GetValue());
+    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj)) {
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        nodeModifiers->getProgressModifier()->setProgressColorPtr(nativeNode, color.GetValue(), colorRawPtr);
     } else if (ConvertProgressResourceColor(vm, colorArg, gradient)) {
         ArkUIGradientType gradientObj;
         auto colorlength = gradient.GetColors().size();
@@ -177,8 +180,7 @@ ArkUINativeModuleValue ProgressBridge::SetProgressColor(ArkUIRuntimeCallInfo* ru
 
         for (int32_t i = 0; i < static_cast<int32_t>(colorlength); i++) {
             colorValues.push_back(gradient.GetColors()[i].GetLinearColor().GetValue());
-            offsetValues.push_back(ArkUILengthType {
-                .number = static_cast<ArkUI_Float32>(gradient.GetColors()[i].GetDimension().Value()),
+            offsetValues.push_back(ArkUILengthType { .number = gradient.GetColors()[i].GetDimension().Value(),
                 .unit = static_cast<int8_t>(gradient.GetColors()[i].GetDimension().Unit()) });
         }
 
@@ -216,7 +218,12 @@ void ParseStrokeWidth(
         const std::string& value = strokeWidthArg->ToString(vm)->ToString(vm);
         strokeWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, DEFAULT_STROKE_WIDTH);
     } else {
-        ArkTSUtils::ParseJsDimension(vm, strokeWidthArg, strokeWidth, DimensionUnit::VP, false);
+        RefPtr<ResourceObject> resObj;
+        ArkTSUtils::ParseJsDimension(vm, strokeWidthArg, strokeWidth, DimensionUnit::VP, resObj, false);
+        if (resObj) {
+            progressStyle.styleResource.strokeWidthRawPtr = AceType::RawPtr(resObj);
+            resObj->IncRefCount();
+        }
     }
 
     if ((LessOrEqual(strokeWidth.Value(), 0.0f) || strokeWidth.Unit() == DimensionUnit::PERCENT) && theme) {
@@ -241,7 +248,12 @@ void ParseBorderWidth(
         const std::string& value = borderWidthArg->ToString(vm)->ToString(vm);
         borderWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, DEFAULT_BORDER_WIDTH);
     } else {
-        ArkTSUtils::ParseJsDimension(vm, borderWidthArg, borderWidth, DimensionUnit::VP, false);
+        RefPtr<ResourceObject> resObj;
+        ArkTSUtils::ParseJsDimension(vm, borderWidthArg, borderWidth, DimensionUnit::VP, resObj, false);
+        if (resObj) {
+            progressStyle.styleResource.borderWidthRawPtr = AceType::RawPtr(resObj);
+            resObj->IncRefCount();
+        }
     }
     if (borderWidth.IsNegative()) {
         progressStyle.borderWidthValue = DEFAULT_BORDER_WIDTH;
@@ -301,7 +313,12 @@ void ParseScaleWidth(
         const std::string& value = scaleWidthArg->ToString(vm)->ToString(vm);
         scaleWidth = StringUtils::StringToDimensionWithUnit(value, DimensionUnit::VP, DEFAULT_SCALE_WIDTH);
     } else {
-        ArkTSUtils::ParseJsDimension(vm, scaleWidthArg, scaleWidth, DimensionUnit::VP, false);
+        RefPtr<ResourceObject> resObj;
+        ArkTSUtils::ParseJsDimension(vm, scaleWidthArg, scaleWidth, DimensionUnit::VP, resObj, false);
+        if (resObj) {
+            progressStyle.styleResource.scaleWidthRawPtr = AceType::RawPtr(resObj);
+            resObj->IncRefCount();
+        }
     }
     if (scaleWidth.IsNegative()) {
         scaleWidth = CalcDimension(DEFAULT_SCALE_WIDTH, DimensionUnit::VP);
@@ -330,9 +347,14 @@ void ParseBorderColor(
 {
     Local<JSValueRef> borderColorArg = runtimeCallInfo->GetCallArgRef(index);
     Color borderColor = DEFAULT_BORDER_COLOR;
-
-    if (borderColorArg->IsNull() || !ArkTSUtils::ParseJsColorAlpha(vm, borderColorArg, borderColor)) {
+    RefPtr<ResourceObject> resObj;
+    if (borderColorArg->IsNull() || !ArkTSUtils::ParseJsColorAlpha(vm, borderColorArg, borderColor, resObj)) {
         borderColor = DEFAULT_BORDER_COLOR;
+    }
+
+    if (resObj) {
+        progressStyle.styleResource.borderColorRawPtr = AceType::RawPtr(resObj);
+        resObj->IncRefCount();
     }
 
     progressStyle.borderColor = borderColor.GetValue();
@@ -344,8 +366,13 @@ void ParseFontColor(
     Local<JSValueRef> fontColorArg = runtimeCallInfo->GetCallArgRef(index);
     Color fontColor = DEFAULT_FONT_COLOR;
 
-    if (fontColorArg->IsNull() || !ArkTSUtils::ParseJsColorAlpha(vm, fontColorArg, fontColor)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (fontColorArg->IsNull() || !ArkTSUtils::ParseJsColorAlpha(vm, fontColorArg, fontColor, colorResObj)) {
         fontColor = DEFAULT_FONT_COLOR;
+    }
+    if (colorResObj) {
+        progressStyle.styleResource.fontColorRawPtr = AceType::RawPtr(colorResObj);
+        colorResObj->IncRefCount();
     }
 
     progressStyle.fontColor = fontColor.GetValue();
@@ -396,13 +423,18 @@ void ParseCapsuleFontSize(
     Local<JSValueRef> sizeArg = runtimeCallInfo->GetCallArgRef(index);
 
     CalcDimension fontSize;
-    if (sizeArg->IsNull() || !ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize) || fontSize.IsNegative() ||
+    RefPtr<ResourceObject> resObj;
+    if (sizeArg->IsNull() || !ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, resObj) || fontSize.IsNegative() ||
         fontSize.Unit() == DimensionUnit::PERCENT) {
         progressStyle.fontInfo.fontSizeNumber = DEFAULT_CAPSULE_FONT_SIZE;
         progressStyle.fontInfo.fontSizeUnit = static_cast<int8_t>(DEFAULT_CAPSULE_FONT_UNIT);
     } else {
         progressStyle.fontInfo.fontSizeNumber = fontSize.Value();
         progressStyle.fontInfo.fontSizeUnit = static_cast<int8_t>(fontSize.Unit());
+        if (resObj) {
+            progressStyle.styleResource.fontResource.fontSizeRawPtr = AceType::RawPtr(resObj);
+            resObj->IncRefCount();
+        }
     }
 }
 
@@ -562,7 +594,11 @@ ArkUINativeModuleValue ProgressBridge::SetProgressStyle(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(progressLayoutProperty, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> contentArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_CONTENT);
     std::string content;
-    ArkTSUtils::ParseJsString(vm, contentArg, content);
+    RefPtr<ResourceObject> contentResObj;
+    ArkTSUtils::ParseJsString(vm, contentArg, content, contentResObj);
+    if (contentResObj) {
+        progressStyle.styleResource.contentRawPtr = AceType::RawPtr(contentResObj);
+    }
     auto progresstype = progressLayoutProperty->GetType();
     if (progresstype == ProgressType::LINEAR) {
         ParseLinearStyle(vm, runtimeCallInfo, progressStyle);
@@ -591,11 +627,13 @@ ArkUINativeModuleValue ProgressBridge::SetProgressBackgroundColor(ArkUIRuntimeCa
     Color color;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resObj)) {
         nodeModifiers->getProgressModifier()->resetProgressBackgroundColor(nativeNode);
     } else {
+        auto colorRawPtr = AceType::RawPtr(resObj);
         nodeModifiers->getProgressModifier()->setProgressBackgroundColorWithColorSpace(
-            nativeNode, color.GetValue(), color.GetColorSpace());
+            nativeNode, color.GetValue(), color.GetColorSpace(), colorRawPtr);
     }
 
     return panda::JSValueRef::Undefined(vm);

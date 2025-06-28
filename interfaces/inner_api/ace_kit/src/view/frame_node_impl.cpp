@@ -292,6 +292,9 @@ NodeHandle FrameNodeImpl::GetParentHandle()
     auto* frameNode = reinterpret_cast<AceNode*>(frameNode_);
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto parent = frameNode->GetParent();
+    while (parent != nullptr && !AceType::InstanceOf<NG::FrameNode>(parent)) {
+        parent = parent->GetParent();
+    }
     CHECK_NULL_RETURN(parent, nullptr);
     return reinterpret_cast<NodeHandle>(OHOS::Ace::AceType::RawPtr(parent));
 }
@@ -366,7 +369,23 @@ void FrameNodeImpl::SetLinearGradientBlur(const NG::LinearGradientBlurPara& blur
 
 void FrameNodeImpl::SetCompositingFilter(const OHOS::Rosen::Filter* compositingFilter)
 {
-    NG::ViewAbstract::SetCompositingFilter(compositingFilter);
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetCompositingFilter(frameNode_, compositingFilter);
 }
 
+void FrameNodeImpl::ResetCompositingFilter()
+{
+    CHECK_NULL_VOID(frameNode_);
+    NG::ViewAbstract::SetCompositingFilter(frameNode_, nullptr);
+}
+
+bool FrameNodeImpl::NeedAvoidContainerModal()
+{
+    CHECK_NULL_RETURN(frameNode_, false);
+    auto pipeline = frameNode_->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto avoidInfoMgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_RETURN(avoidInfoMgr, false);
+    return avoidInfoMgr->NeedAvoidContainerModal();
+}
 } // namespace OHOS::Ace::Kit

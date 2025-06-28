@@ -41,6 +41,14 @@ RefPtr<TextTimerController> TextTimerModelNG::Create()
         textNode->MountToParent(textTimerNode);
     }
     stack->Push(textTimerNode);
+    auto textTimerLayoutProperty = textTimerNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    if (textTimerLayoutProperty) {
+        textTimerLayoutProperty->ResetTextColorSetByUser();
+        textTimerLayoutProperty->ResetTextFontSizeSetByUser();
+        textTimerLayoutProperty->ResetTextFontWeightSetByUser();
+        textTimerLayoutProperty->ResetTextFontFamilySetByUser();
+    }
+
     return textTimerPattern ? textTimerPattern->GetTextTimerController() : nullptr;
 }
 
@@ -67,14 +75,45 @@ void TextTimerModelNG::SetFontSize(const Dimension& value)
 void TextTimerModelNG::SetTextColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColor, value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColorSetByUser, true);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
+void TextTimerModelNG::SetTextColorByUser(bool isSetByUser)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColorSetByUser, isSetByUser);
+}
+
+void TextTimerModelNG::SetTextColorByUser(FrameNode* frameNode, bool isSetByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColorSetByUser, isSetByUser, frameNode);
+}
+
 void TextTimerModelNG::SetTextShadow(const std::vector<Shadow>& value)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextTimerPattern>();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        if (!frameNode) {
+            return;
+        }
+        std::vector<Shadow> shadows = value;
+        for (auto& shadow : shadows) {
+            shadow.ReloadResources();
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextShadow, shadows, frameNode);
+    };
     ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextShadow, value);
+    if (SystemProperties::ConfigChangePerform()) {
+        updateFunc(resObj);
+        pattern->AddResObj("textTimer.shadow", resObj, std::move(updateFunc));
+    }
 }
 
 void TextTimerModelNG::SetItalicFontStyle(Ace::FontStyle value)
@@ -148,6 +187,7 @@ void TextTimerModelNG::SetInputCount(FrameNode* frameNode, double count)
 void TextTimerModelNG::SetFontColor(FrameNode* frameNode, const Color& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColor, value, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColorSetByUser, true, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, value, frameNode);
     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
@@ -180,7 +220,26 @@ void TextTimerModelNG::SetFormat(FrameNode* frameNode, const std::string& format
 
 void TextTimerModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)
 {
+    CHECK_NULL_VOID(frameNode);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        if (!frameNode) {
+            return;
+        }
+        std::vector<Shadow> shadows = value;
+        for (auto& shadow : shadows) {
+            shadow.ReloadResources();
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextShadow, shadows, frameNode);
+    };
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextShadow, value, frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern<TextTimerPattern>();
+        CHECK_NULL_VOID(pattern);
+        updateFunc(resObj);
+        pattern->AddResObj("textTimer.shadow", resObj, std::move(updateFunc));
+    }
 }
 
 void TextTimerModelNG::SetBuilderFunc(FrameNode* frameNode, TextTimerMakeCallback&& makeFunc)
@@ -212,6 +271,8 @@ void TextTimerModelNG::HandleTextColor(FrameNode* frameNode, const RefPtr<Resour
     std::string key = "textTimer.textColor";
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         Color result;
         if (!ResourceParseUtils::ParseResColor(resObj, result)) {
@@ -223,7 +284,6 @@ void TextTimerModelNG::HandleTextColor(FrameNode* frameNode, const RefPtr<Resour
         }
         pattern->UpdateTextColor(result, true);
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
@@ -232,12 +292,13 @@ void TextTimerModelNG::HandleFontWeight(FrameNode* frameNode, const RefPtr<Resou
     std::string key = "textTimer.fontWeight";
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         std::string fontWeightStr;
         ResourceParseUtils::ParseResString(resObj, fontWeightStr);
         pattern->UpdateFontWeight(ConvertStrToFontWeight(fontWeightStr), isFirstLoad);
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
@@ -246,6 +307,8 @@ void TextTimerModelNG::HandleFontSize(FrameNode* frameNode, const RefPtr<Resourc
     std::string key = "textTimer.fontSize";
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         CalcDimension fontSize;
         if (!ResourceParseUtils::ParseResDimensionFp(resObj, fontSize) || fontSize.IsNegative() ||
@@ -259,7 +322,6 @@ void TextTimerModelNG::HandleFontSize(FrameNode* frameNode, const RefPtr<Resourc
         pattern->UpdateFontSize(fontSize, isFirstLoad);
     };
 
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
@@ -268,6 +330,8 @@ void TextTimerModelNG::HandleFontFamily(FrameNode* frameNode, const RefPtr<Resou
     std::string key = "textTimer.fontFamily";
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj(key);
+    CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& resObj, bool isFirstLoad = false) {
         std::vector<std::string> fontFamilies;
         if (!ResourceParseUtils::ParseResFontFamilies(resObj, fontFamilies)) {
@@ -275,7 +339,6 @@ void TextTimerModelNG::HandleFontFamily(FrameNode* frameNode, const RefPtr<Resou
         }
         pattern->UpdateFontFamily(fontFamilies, isFirstLoad);
     };
-    updateFunc(resObj, true);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
@@ -284,23 +347,69 @@ void TextTimerModelNG::CreateWithResourceObj(
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (resObj) {
-        switch (jsResourceType) {
-            case JsTextTimerResourceType::TEXTCOLOR:
-                HandleTextColor(frameNode, resObj);
-                break;
-            case JsTextTimerResourceType::FONTWEIGHT:
-                HandleFontWeight(frameNode, resObj);
-                break;
-            case JsTextTimerResourceType::FONTSIZE:
-                HandleFontSize(frameNode, resObj);
-                break;
-            case JsTextTimerResourceType::FONTFAMILY:
-                HandleFontFamily(frameNode, resObj);
-                break;
-            default:
-                return;
-        }
+    CreateWithResourceObj(frameNode, jsResourceType, resObj);
+}
+
+void TextTimerModelNG::CreateWithResourceObj(
+    FrameNode* frameNode, JsTextTimerResourceType jsResourceType, const RefPtr<ResourceObject>& resObj)
+{
+    switch (jsResourceType) {
+        case JsTextTimerResourceType::TEXTCOLOR:
+            HandleTextColor(frameNode, resObj);
+            break;
+        case JsTextTimerResourceType::FONTWEIGHT:
+            HandleFontWeight(frameNode, resObj);
+            break;
+        case JsTextTimerResourceType::FONTSIZE:
+            HandleFontSize(frameNode, resObj);
+            break;
+        case JsTextTimerResourceType::FONTFAMILY:
+            HandleFontFamily(frameNode, resObj);
+            break;
+        default:
+            return;
+    }
+}
+
+void TextTimerModelNG::SetFontSizeByUser(bool isSetByUser)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextFontSizeSetByUser, isSetByUser);
+    }
+}
+
+void TextTimerModelNG::SetFontWeightByUser(bool isSetByUser)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextFontWeightSetByUser, isSetByUser);
+    }
+}
+
+void TextTimerModelNG::SetFontFamilyByUser(bool isSetByUser)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextFontFamilySetByUser, isSetByUser);
+    }
+}
+
+void TextTimerModelNG::SetFontSizeByUser(FrameNode* frameNode, bool isSetByUser)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextFontSizeSetByUser, isSetByUser, frameNode);
+    }
+}
+
+void TextTimerModelNG::SetFontWeightByUser(FrameNode* frameNode, bool isSetByUser)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextFontWeightSetByUser, isSetByUser, frameNode);
+    }
+}
+
+void TextTimerModelNG::SetFontFamilyByUser(FrameNode* frameNode, bool isSetByUser)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextFontFamilySetByUser, isSetByUser, frameNode);
     }
 }
 } // namespace OHOS::Ace::NG

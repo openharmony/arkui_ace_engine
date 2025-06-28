@@ -16,6 +16,7 @@
 #include "frameworks/core/components_ng/render/adapter/matrix2d.h"
 #include "include/core/SkMatrix.h"
 #include "2d_graphics/include/utils/matrix.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 constexpr double OHOS_SEMI_CIRCLE_ANGEL = 180.0;
@@ -80,7 +81,7 @@ void Matrix2D::Rotate(TransformParam& param, double degree, double rx, double ry
     SkMatrix skMatrix;
     ConvertToMatrix(param, skMatrix);
     // convert from radians to degree.
-    degree = degree * OHOS_SEMI_CIRCLE_ANGEL / M_PI;
+    degree = degree * OHOS_SEMI_CIRCLE_ANGEL / ACE_PI;
     skMatrix = skMatrix.preRotate(degree, rx, ry);
     ConvertToTransformParam(param, skMatrix);
 }

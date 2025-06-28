@@ -23,5 +23,8 @@ namespace OHOS::Ace::NG::NodeModifier {
     const CJUISpanModifier* GetCJUISpanModifier();
     void SetCustomSpanOnMeasure(ArkUINodeHandle node, void* extraParam);
     void SetCustomSpanOnDraw(ArkUINodeHandle node, void* extraParam);
+
+    template<typename T>
+    void ProcessResourceObj(UINode* uiNode, std::string key, T value, void* objRawPtr);
 }
 #endif

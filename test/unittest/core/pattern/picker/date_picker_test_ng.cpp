@@ -209,7 +209,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelCreateDatePicker001, TestSize.Level1)
     columnPattern->FlushCurrentOptions();
 
     columnPattern->mouseEvent_->onHoverCallback_(true);
-    EXPECT_TRUE(columnPattern->hoverd_);
+    EXPECT_TRUE(columnPattern->hovered_);
     TouchLocationInfo touchLocationInfo(0);
 
     TouchEventInfo touchEventInfo1("");
@@ -231,7 +231,7 @@ HWTEST_F(DatePickerTestNg, DatePickerModelCreateDatePicker001, TestSize.Level1)
     EXPECT_EQ(columnPattern->hoverColor_, renderContext->GetBackgroundColor());
 
     columnPattern->mouseEvent_->onHoverCallback_(false);
-    EXPECT_FALSE(columnPattern->hoverd_);
+    EXPECT_FALSE(columnPattern->hovered_);
     TouchEventInfo touchEventInfo4("");
     touchLocationInfo.SetTouchType(TouchType::UP);
     touchEventInfo4.AddTouchLocationInfo(std::move(touchLocationInfo));

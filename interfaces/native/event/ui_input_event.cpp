@@ -748,8 +748,7 @@ int32_t OH_ArkUI_PointerEvent_GetPointerId(const ArkUI_UIInputEvent* event, uint
             if (!isCurrentCTouchEventParamValid(touchEvent, pointerIndex)) {
                 RETURN_RET_WITH_STATUS_CHECK(0, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
-
-            RETURN_RET_WITH_STATUS_CHECK(touchEvent->touchPointes[pointerIndex].id, ARKUI_ERROR_CODE_PARAM_INVALID);
+            RETURN_RET_WITH_STATUS_CHECK(touchEvent->touchPointes[pointerIndex].id, ARKUI_ERROR_CODE_NO_ERROR);
         }
         case C_MOUSE_EVENT_ID: {
             const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
@@ -1478,6 +1477,274 @@ float OH_ArkUI_PointerEvent_GetDisplayYByIndex(const ArkUI_UIInputEvent* event, 
     RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
 }
 
+float HandleCTouchEventGlobalDisplayX(const ArkUI_UIInputEvent* event)
+{
+    const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+    if (!touchEvent) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(
+        static_cast<float>(touchEvent->actionTouchPoint.globalDisplayX), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+float HandleCClickEventGlobalDisplayX(const ArkUI_UIInputEvent* event)
+{
+    const auto* clickEvent = reinterpret_cast<ArkUIClickEvent*>(event->inputEvent);
+    if (!clickEvent) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(static_cast<float>(clickEvent->globalDisplayX), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+float HandleCHoverEventGlobalDisplayX(const ArkUI_UIInputEvent* event)
+{
+    const auto* hoverEvent = reinterpret_cast<ArkUIHoverEvent*>(event->inputEvent);
+    if (!hoverEvent) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(static_cast<float>(hoverEvent->globalDisplayX), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+float HandleCMouseEventGlobalDisplayX(const ArkUI_UIInputEvent* event)
+{
+    const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+    if (!mouseEvent) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(
+        static_cast<float>(mouseEvent->actionTouchPoint.globalDisplayX), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+float HandleCAxisEventGlobalDisplayX(const ArkUI_UIInputEvent* event)
+{
+    const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+    if (!axisEvent) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(
+        static_cast<float>(axisEvent->actionTouchPoint.globalDisplayX), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+float HandleTouchEventGlobalDisplayX(const ArkUI_UIInputEvent* event)
+{
+    const auto* touchEvent = reinterpret_cast<const OHOS::Ace::TouchEvent*>(event->inputEvent);
+    if (touchEvent) {
+        RETURN_RET_WITH_STATUS_CHECK(static_cast<float>(touchEvent->globalDisplayX), ARKUI_ERROR_CODE_NO_ERROR);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+float HandleAxisEventGlobalDisplayX(const ArkUI_UIInputEvent* event)
+{
+    const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
+    if (axisEvent) {
+        RETURN_RET_WITH_STATUS_CHECK(static_cast<float>(axisEvent->globalDisplayX), ARKUI_ERROR_CODE_NO_ERROR);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+float OH_ArkUI_PointerEvent_GetGlobalDisplayX(const ArkUI_UIInputEvent* event)
+{
+    const int32_t supportedScenario = S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_MOUSE |
+                                      S_NODE_ON_AXIS | S_NODE_ON_CLICK_EVENT | S_NODE_ON_HOVER_MOVE |
+                                      S_GESTURE_TOUCH_EVENT | S_GESTURE_AXIS_EVENT | S_GESTURE_MOUSE_EVENT |
+                                      S_NXC_ON_TOUCH_INTERCEPT | S_NXC_DISPATCH_AXIS_EVENT | S_NODE_ON_HOVER_EVENT;
+    CheckSupportedScenarioAndResetEventStatus(supportedScenario, event);
+    if (!event) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    std::map<ArkUIEventTypeId, std::function<float(ArkUI_UIInputEvent*)>> eventHandlers = {
+        { C_TOUCH_EVENT_ID, HandleCTouchEventGlobalDisplayX },
+        { TOUCH_EVENT_ID, HandleTouchEventGlobalDisplayX },
+        { AXIS_EVENT_ID, HandleAxisEventGlobalDisplayX },
+        { C_MOUSE_EVENT_ID, HandleCMouseEventGlobalDisplayX },
+        { C_AXIS_EVENT_ID, HandleCAxisEventGlobalDisplayX },
+        { C_CLICK_EVENT_ID, HandleCClickEventGlobalDisplayX },
+        { C_HOVER_EVENT_ID, HandleCHoverEventGlobalDisplayX },
+    };
+    auto it = eventHandlers.find(event->eventTypeId);
+    if (it != eventHandlers.end()) {
+        ArkUI_UIInputEvent* inputEvent = const_cast<ArkUI_UIInputEvent*>(event);
+        return it->second(inputEvent);
+    }
+    LOGE("The parameter of OH_ArkUI_PointerEvent_GetGlobalDisplayX is invalid");
+    RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+}
+
+float OH_ArkUI_PointerEvent_GetGlobalDisplayXByIndex(const ArkUI_UIInputEvent* event, uint32_t pointerIndex)
+{
+    const int32_t supportedScenario = S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_MOUSE |
+                                      S_NODE_ON_AXIS | S_NODE_ON_HOVER_MOVE | S_GESTURE_TOUCH_EVENT |
+                                      S_GESTURE_AXIS_EVENT | S_GESTURE_MOUSE_EVENT;
+    CheckSupportedScenarioAndResetEventStatus(supportedScenario, event);
+    if (!event) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            if (!isCurrentCTouchEventParamValid(touchEvent, pointerIndex)) {
+                RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(
+                static_cast<float>(touchEvent->touchPointes[pointerIndex].globalDisplayX), ARKUI_ERROR_CODE_NO_ERROR);
+        }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent || pointerIndex != 0) {
+                RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(
+                static_cast<float>(mouseEvent->actionTouchPoint.globalDisplayX), ARKUI_ERROR_CODE_NO_ERROR);
+        }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent || pointerIndex != 0) {
+                RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(
+                static_cast<float>(axisEvent->actionTouchPoint.globalDisplayX), ARKUI_ERROR_CODE_NO_ERROR);
+        }
+        default:
+            break;
+    }
+    RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+}
+
+float HandleCTouchEventGlobalDisplayY(const ArkUI_UIInputEvent* event)
+{
+    const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+    if (!touchEvent) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(
+        static_cast<float>(touchEvent->actionTouchPoint.globalDisplayY), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+float HandleCClickEventGlobalDisplayY(const ArkUI_UIInputEvent* event)
+{
+    const auto* clickEvent = reinterpret_cast<ArkUIClickEvent*>(event->inputEvent);
+    if (!clickEvent) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(static_cast<float>(clickEvent->globalDisplayY), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+float HandleCHoverEventGlobalDisplayY(const ArkUI_UIInputEvent* event)
+{
+    const auto* hoverEvent = reinterpret_cast<ArkUIHoverEvent*>(event->inputEvent);
+    if (!hoverEvent) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(static_cast<float>(hoverEvent->globalDisplayY), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+float HandleCMouseEventGlobalDisplayY(const ArkUI_UIInputEvent* event)
+{
+    const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+    if (!mouseEvent) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(
+        static_cast<float>(mouseEvent->actionTouchPoint.globalDisplayY), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+float HandleCAxisEventGlobalDisplayY(const ArkUI_UIInputEvent* event)
+{
+    const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+    if (!axisEvent) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(
+        static_cast<float>(axisEvent->actionTouchPoint.globalDisplayY), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+float HandleTouchEventGlobalDisplayY(const ArkUI_UIInputEvent* event)
+{
+    const auto* touchEvent = reinterpret_cast<const OHOS::Ace::TouchEvent*>(event->inputEvent);
+    if (touchEvent) {
+        RETURN_RET_WITH_STATUS_CHECK(static_cast<float>(touchEvent->globalDisplayY), ARKUI_ERROR_CODE_NO_ERROR);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+float HandleAxisEventGlobalDisplayY(const ArkUI_UIInputEvent* event)
+{
+    const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
+    if (axisEvent) {
+        RETURN_RET_WITH_STATUS_CHECK(static_cast<float>(axisEvent->globalDisplayY), ARKUI_ERROR_CODE_NO_ERROR);
+    }
+    RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+float OH_ArkUI_PointerEvent_GetGlobalDisplayY(const ArkUI_UIInputEvent* event)
+{
+    const int32_t supportedScenario = S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_MOUSE |
+                                      S_NODE_ON_AXIS | S_NODE_ON_CLICK_EVENT | S_NODE_ON_HOVER_MOVE |
+                                      S_GESTURE_TOUCH_EVENT | S_GESTURE_AXIS_EVENT | S_GESTURE_MOUSE_EVENT |
+                                      S_NXC_ON_TOUCH_INTERCEPT | S_NXC_DISPATCH_AXIS_EVENT | S_NODE_ON_HOVER_EVENT;
+    CheckSupportedScenarioAndResetEventStatus(supportedScenario, event);
+    if (!event) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    std::map<ArkUIEventTypeId, std::function<float(ArkUI_UIInputEvent*)>> eventHandlers = {
+        { C_TOUCH_EVENT_ID, HandleCTouchEventGlobalDisplayY },
+        { TOUCH_EVENT_ID, HandleTouchEventGlobalDisplayY },
+        { AXIS_EVENT_ID, HandleAxisEventGlobalDisplayY },
+        { C_MOUSE_EVENT_ID, HandleCMouseEventGlobalDisplayY },
+        { C_AXIS_EVENT_ID, HandleCAxisEventGlobalDisplayY },
+        { C_CLICK_EVENT_ID, HandleCClickEventGlobalDisplayY },
+        { C_HOVER_EVENT_ID, HandleCHoverEventGlobalDisplayY },
+    };
+    auto it = eventHandlers.find(event->eventTypeId);
+    if (it != eventHandlers.end()) {
+        ArkUI_UIInputEvent* inputEvent = const_cast<ArkUI_UIInputEvent*>(event);
+        return it->second(inputEvent);
+    }
+    LOGE("The parameter of OH_ArkUI_PointerEvent_GetGlobalDisplayY is invalid");
+    RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+}
+
+float OH_ArkUI_PointerEvent_GetGlobalDisplayYByIndex(const ArkUI_UIInputEvent* event, uint32_t pointerIndex)
+{
+    const int32_t supportedScenario = S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_MOUSE |
+                                      S_NODE_ON_AXIS | S_NODE_ON_HOVER_MOVE | S_GESTURE_TOUCH_EVENT |
+                                      S_GESTURE_AXIS_EVENT | S_GESTURE_MOUSE_EVENT;
+    CheckSupportedScenarioAndResetEventStatus(supportedScenario, event);
+    if (!event) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            if (!isCurrentCTouchEventParamValid(touchEvent, pointerIndex)) {
+                RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(
+                static_cast<float>(touchEvent->touchPointes[pointerIndex].globalDisplayY), ARKUI_ERROR_CODE_NO_ERROR);
+        }
+        case C_MOUSE_EVENT_ID: {
+            const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent || pointerIndex != 0) {
+                RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(
+                static_cast<float>(mouseEvent->actionTouchPoint.globalDisplayY), ARKUI_ERROR_CODE_NO_ERROR);
+        }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (!axisEvent || pointerIndex != 0) {
+                RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(
+                static_cast<float>(axisEvent->actionTouchPoint.globalDisplayY), ARKUI_ERROR_CODE_NO_ERROR);
+        }
+        default:
+            break;
+    }
+    RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+}
+
 float OH_ArkUI_PointerEvent_GetPressure(const ArkUI_UIInputEvent* event, uint32_t pointerIndex)
 {
     CheckSupportedScenarioAndResetEventStatus(S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_MOUSE |
@@ -1683,7 +1950,7 @@ int32_t OH_ArkUI_PointerEvent_GetInteractionHandByIndex(const ArkUI_UIInputEvent
             RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_NO_ERROR, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
             break;
     }
-    RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_NO_ERROR, ARKUI_ERROR_CODE_PARAM_INVALID);
+    RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_NO_ERROR, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 float OH_ArkUI_PointerEvent_GetTouchAreaWidth(const ArkUI_UIInputEvent* event, uint32_t pointerIndex)
@@ -1968,6 +2235,54 @@ float OH_ArkUI_PointerEvent_GetHistoryDisplayY(
             }
             RETURN_RET_WITH_STATUS_CHECK(
                 touchEvent->historyEvents[historyIndex].touchPointes[pointerIndex].screenY, ARKUI_ERROR_CODE_NO_ERROR);
+        }
+        default:
+            break;
+    }
+    RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+}
+
+float OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayX(
+    const ArkUI_UIInputEvent* event, uint32_t pointerIndex, uint32_t historyIndex)
+{
+    CheckSupportedScenarioAndResetEventStatus(
+        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE, event);
+    if (!event) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            if (!isHistoryCTouchEventParamValid(touchEvent, historyIndex, pointerIndex)) {
+                RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(
+                static_cast<float>(touchEvent->historyEvents[historyIndex].touchPointes[pointerIndex].globalDisplayX),
+                ARKUI_ERROR_CODE_NO_ERROR);
+        }
+        default:
+            break;
+    }
+    RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+}
+
+float OH_ArkUI_PointerEvent_GetHistoryGlobalDisplayY(
+    const ArkUI_UIInputEvent* event, uint32_t pointerIndex, uint32_t historyIndex)
+{
+    CheckSupportedScenarioAndResetEventStatus(
+        S_NODE_TOUCH_EVENT | S_NODE_ON_TOUCH_INTERCEPT | S_NODE_ON_HOVER_MOVE, event);
+    if (!event) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            if (!isHistoryCTouchEventParamValid(touchEvent, historyIndex, pointerIndex)) {
+                RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+            }
+            RETURN_RET_WITH_STATUS_CHECK(
+                static_cast<float>(touchEvent->historyEvents[historyIndex].touchPointes[pointerIndex].globalDisplayY),
+                ARKUI_ERROR_CODE_NO_ERROR);
         }
         default:
             break;
@@ -2480,7 +2795,7 @@ int32_t OH_ArkUI_FocusAxisEvent_SetStopPropagation(const ArkUI_UIInputEvent* eve
         default:
             RETURN_RET_WITH_STATUS_CHECK(OHOS::Ace::ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
     }
-    RETURN_RET_WITH_STATUS_CHECK(OHOS::Ace::ERROR_CODE_NO_ERROR, ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
+    RETURN_RET_WITH_STATUS_CHECK(OHOS::Ace::ERROR_CODE_NO_ERROR, ARKUI_ERROR_CODE_NO_ERROR);
 }
 
 float HandleCMouseEventTargetWidth(const ArkUI_UIInputEvent* event)
@@ -3513,14 +3828,15 @@ ArkUI_ErrorCode CheckIsSupportedScenario(int32_t scenarioExpr, const ArkUI_UIInp
                                                        : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
         }
         case C_CLICK_EVENT_ID: {
-            if ((event->inputType == ARKUI_UIINPUTEVENT_TYPE_KEY) && (scenarioExpr & S_GESTURE_CLICK_EVENT)) {
+            if (event->inputType == ARKUI_UIINPUTEVENT_TYPE_KEY) {
                 // click event from click or tap gesture triggered by keyboard
-                return ARKUI_ERROR_CODE_NO_ERROR;
-            } else if (scenarioExpr & S_NODE_ON_CLICK_EVENT) {
+                return scenarioExpr & S_GESTURE_CLICK_EVENT ? ARKUI_ERROR_CODE_NO_ERROR
+                                                            : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
+            } else {
                 // click event registed by NODE_ON_CLICK
-                return ARKUI_ERROR_CODE_NO_ERROR;
+                return scenarioExpr & S_NODE_ON_CLICK_EVENT ? ARKUI_ERROR_CODE_NO_ERROR
+                                                            : ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
             }
-            return ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT;
         }
         case C_HOVER_EVENT_ID: {
             // hover event registed by NODE_ON_HOVER_EVENT

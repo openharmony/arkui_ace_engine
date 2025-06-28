@@ -119,7 +119,9 @@ WeakPtr<FocusHub> GridFocus::GetNextFocusSimplified(FocusStep step, const RefPtr
 WeakPtr<FocusHub> GridFocus::GetNextFocusNode(
     FocusStep step, const WeakPtr<FocusHub>& currentFocusNode, bool isMainSkip)
 {
-    step = HandleDirectionStep(step);
+    if (!isTab_) {
+        step = HandleDirectionStep(step);
+    }
     if (!GetCurrentFocusInfo(step, currentFocusNode)) {
         return nullptr;
     }

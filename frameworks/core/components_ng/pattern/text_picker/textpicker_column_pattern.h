@@ -419,6 +419,7 @@ public:
     void SetSelectedMarkId(const int strColumnId);
     void UpdateUserSetSelectColor(void);
     void StopHaptic();
+    void HandleAccessibilityTextChange();
 #ifdef SUPPORT_DIGITAL_CROWN
     int32_t& GetSelectedColumnId();
     bool IsCrownEventEnded();

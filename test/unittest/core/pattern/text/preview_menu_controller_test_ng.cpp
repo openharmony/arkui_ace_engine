@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
@@ -20,6 +21,7 @@
 
 #include "core/components/select/select_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor_drag/preview_menu_controller.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -185,38 +187,68 @@ HWTEST_F(PreviewMenuControllerTest, CreateLinkingNodeTest, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
 
-    auto callback = []() {};
     // Test with URL type
-    auto urlNode = controller.CreateLinkingNode(TextDataDetectType::URL, callback);
+    auto urlNode = controller.CreatePreview(TextDataDetectType::URL);
     EXPECT_NE(urlNode, nullptr);
 
-    // Test with DATE_TIME type
-    auto dateNode = controller.CreateLinkingNode(TextDataDetectType::DATE_TIME, callback);
-    EXPECT_NE(dateNode, nullptr);
+    // Test with PHONE_NUMBER type
+    auto node = controller.CreatePreview(TextDataDetectType::PHONE_NUMBER);
+    EXPECT_NE(node, nullptr);
 
-    // Test with ADDRESS type
-    auto addrNode = controller.CreateLinkingNode(TextDataDetectType::ADDRESS, callback);
-    EXPECT_NE(addrNode, nullptr);
-}
+    auto flexLayoutProperty = node->GetLayoutProperty<FlexLayoutProperty>();
 
-/**
- * @tc.name: CreateContactNodeTest001
- * @tc.desc: Test layout properties are correctly set
- * @tc.type: FUNC
- */
-HWTEST_F(PreviewMenuControllerTest, CreateContactNodeTest001, TestSize.Level1)
-{
-    auto contactNode = PreviewMenuController::CreateContactNode("Test", nullptr);
-    auto flexLayoutProperty = contactNode->GetLayoutProperty<FlexLayoutProperty>();
-    
     // Verify flex layout properties
     EXPECT_EQ(flexLayoutProperty->GetFlexDirection(), FlexDirection::ROW);
     EXPECT_EQ(flexLayoutProperty->GetCrossAxisAlign(), FlexAlign::CENTER);
-    
+
     // Verify padding
     const auto& padding = flexLayoutProperty->GetPaddingProperty();
     EXPECT_NE(padding, nullptr);
     EXPECT_EQ(padding->left.value_or(CalcLength(Dimension())), CalcLength(PADDING_SIZE));
     EXPECT_EQ(padding->right.value_or(CalcLength(Dimension())), CalcLength(PADDING_SIZE));
+
+    // Test with ADDRESS type
+    auto addrNode = controller.CreatePreview(TextDataDetectType::ADDRESS);
+    EXPECT_NE(addrNode, nullptr);
+}
+
+/**
+ * @tc.name: CreateContactErrorNodeTest001
+ * @tc.desc: Test layout properties are correctly set
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreviewMenuControllerTest, CreateContactErrorNodeTest001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::FLEX_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<FlexLayoutPattern>(false); });
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    PreviewMenuController::CreateContactErrorNode(frameNode, "Test", nullptr);
+    auto avatarNode = frameNode->GetChildByIndex(0);
+    EXPECT_NE(avatarNode, nullptr);
+    auto textNode = frameNode->GetChildByIndex(1);
+    EXPECT_NE(textNode, nullptr);
+}
+
+/**
+ * @tc.name:  GetErrorCallback
+ * @tc.desc: Test GetErrorCallback creates node with correct properties for different types
+ * @tc.type: FUNC
+ */
+HWTEST_F(PreviewMenuControllerTest, GetErrorCallbackTest, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto previewNode = FrameNode::GetOrCreateFrameNode(
+        V2::COLUMN_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto callback = []() {};
+    const std::string testContent = "test_content";
+    auto errorCallback = PreviewMenuController::GetErrorCallback(
+        previewNode, TextDataDetectType::PHONE_NUMBER, testContent, std::move(callback));
+
+    // 模拟调用errorCallback
+    errorCallback(0, "test_error", "test_message");
+    // 验证previewNode挂孩子节点
+    EXPECT_FALSE(previewNode->GetChildren().empty());
 }
 } // namespace OHOS::Ace::NG

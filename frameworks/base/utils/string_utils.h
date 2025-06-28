@@ -41,7 +41,7 @@ constexpr int32_t TEXT_CASE_UPPERCASE = 2;
 constexpr double PERCENT_VALUE = 100.0;
 constexpr double DEGREES_VALUE = 360.0; // one turn means 360 deg
 constexpr double GRADIANS_VALUE = 400.0; // one turn means 400 grad
-constexpr double RADIANS_VALUE = 2 * M_PI; // one turn means 2*pi rad
+const extern double RADIANS_VALUE; // one turn means 2*pi rad
 const char ELLIPSIS[] = "...";
 
 inline std::u16string Str8ToStr16(const std::string& str)

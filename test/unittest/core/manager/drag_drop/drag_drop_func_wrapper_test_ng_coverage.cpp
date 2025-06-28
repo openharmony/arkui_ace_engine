@@ -1438,6 +1438,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage041
     auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
     ASSERT_NE(unifiedData, nullptr);
     dragEvent->SetData(unifiedData);
+    dragEvent->SetUseDataLoadParams(true);
     EXPECT_CALL(*unifiedData, GetSize()).WillRepeatedly(testing::Return(0));
     ASSERT_NE(dragEvent->GetData(), nullptr);
     auto dataLoadParams = AceType::MakeRefPtr<DataLoadParams>();
@@ -1448,6 +1449,12 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage041
     ASSERT_NE(dragEvent->GetDataLoadParams(), nullptr);
     DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, summary, detailedSummary, ret);
     EXPECT_EQ(ret, 0);
+    EXPECT_EQ(dragEvent->IsUseDataLoadParams(), true);
+
+    dragEvent->SetUseDataLoadParams(false);
+    DragDropFuncWrapper::ProcessDragDropData(dragEvent, udKey, summary, detailedSummary, ret);
+    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(dragEvent->IsUseDataLoadParams(), false);
 
     EXPECT_CALL(*mockUdmfClient, SetDelayInfo(_, _)).WillRepeatedly(testing::Return(1));
     EXPECT_CALL(*mockUdmfClient, SetData(_, _)).WillRepeatedly(testing::Return(1));
@@ -1457,7 +1464,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage041
 }
 
 /**
- * @tc.name: Test DragDropFuncWrapperTestNgCoverage040
+ * @tc.name: Test DragDropFuncWrapperTestNgCoverage042
  * @tc.desc: Test EnvelopedDataLoadParams func
  * @tc.type: FUNC
  * @tc.author:

@@ -785,6 +785,24 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragInsertStyledString003, TestSize.Level
 }
 
 /**
+ * @tc.name: HandleOnDragInsertStyledString004
+ * @tc.desc: test HandleOnDragInsertStyledString
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNg, HandleOnDragInsertStyledString004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_VALUE2);
+    richEditorPattern->isDragSponsor_ = false;
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->dragRange_ = { 0, 10 };
+    richEditorPattern->HandleOnDragInsertStyledString(spanStringRef);
+    EXPECT_TRUE(richEditorPattern->caretPosition_ == richEditorPattern->dragRange_.second);
+}
+
+/**
  * @tc.name: JudgeContentDraggable001
  * @tc.desc: test JudgeContentDraggable
  * @tc.type: FUNC

@@ -18,10 +18,14 @@
 #include <ani.h>
 
 #include "auto_fill_manager.h"
+#include "bundlemgr/bundle_mgr_proxy.h"
+#include "if_system_ability_manager.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "iservice_registry.h"
 #include "scene_board_judgement.h"
 #include "ui/rs_surface_node.h"
 #include "ui_extension_context.h"
+#include "system_ability_definition.h"
 #include "wm_common.h"
 
 #include "adapter/ohos/entrance/ace_view_ohos.h"
@@ -41,6 +45,7 @@
 #include "base/i18n/localization.h"
 #include "base/log/event_report.h"
 #include "base/log/jank_frame_report.h"
+#include "base/memory/referenced.h"
 #include "base/thread/background_task_executor.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "bridge/card_frontend/card_frontend.h"
@@ -239,6 +244,18 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     } else if (abilityInfo) {
         bundleName = abilityInfo->bundleName;
         moduleName = abilityInfo->moduleName;
+    } else {
+        auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        CHECK_NULL_VOID(systemAbilityMgr);
+        auto bundleObj = systemAbilityMgr->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+        CHECK_NULL_VOID(bundleObj);
+        auto bundleMgrProxy = iface_cast<AppExecFwk::IBundleMgr>(bundleObj);
+        CHECK_NULL_VOID(bundleMgrProxy);
+        AppExecFwk::BundleInfo bundleInfo;
+        bundleMgrProxy->GetBundleInfoForSelf(
+            static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE), bundleInfo);
+        bundleName = bundleInfo.name;
+        moduleName = bundleInfo.entryModuleName;                
     }
     int32_t instanceId = pipelineContext->GetInstanceId();
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
@@ -716,6 +733,21 @@ std::shared_ptr<void> AceContainer::SerializeValue(
         declarativeFrontend->GetJsEngine());
     CHECK_NULL_RETURN(jsEngine, nullptr);
     return jsEngine->SerializeValue(jsValue);
+}
+
+void AceContainer::TriggerModuleSerializer()
+{
+    ContainerScope scope(instanceId_);
+#ifdef NG_BUILD
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontendNG>(frontend_);
+#else
+    auto declarativeFrontend = AceType::DynamicCast<DeclarativeFrontend>(frontend_);
+#endif
+    CHECK_NULL_VOID(declarativeFrontend);
+    auto jsEngine = AceType::DynamicCast<Framework::JsiDeclarativeEngine>(
+        declarativeFrontend->GetJsEngine());
+    CHECK_NULL_VOID(jsEngine);
+    jsEngine->TriggerModuleSerializer();
 }
 
 void AceContainer::SetJsContextWithDeserialize(const std::shared_ptr<void>& recoder)
@@ -1269,14 +1301,7 @@ void AceContainer::InitializeCallback()
                 RES_TYPE_CROWN_ROTATION_STATUS, static_cast<int32_t>(event.action), mapPayload);
         }
         ContainerScope scope(id);
-        bool result = false;
-        auto crownTask = [context, event, &result, markProcess, id]() {
-            ContainerScope scope(id);
-            result = context->OnNonPointerEvent(event);
-            CHECK_NULL_VOID(markProcess);
-            markProcess();
-        };
-        auto asyncCrownTask = [context, event, markProcess, id]() {
+        auto crownTask = [context, event, markProcess, id]() {
             ContainerScope scope(id);
             context->OnNonPointerEvent(event);
             CHECK_NULL_VOID(markProcess);
@@ -1285,11 +1310,10 @@ void AceContainer::InitializeCallback()
         auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
             crownTask();
-            return result;
+            return;
         }
         context->GetTaskExecutor()->PostTask(
-            asyncCrownTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent", PriorityType::VIP);
-        return result;
+            crownTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent", PriorityType::VIP);
     };
     aceView_->RegisterCrownEventCallback(crownEventCallback);
 
@@ -1517,6 +1541,8 @@ void AceContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiW
     container->SetUIWindowInner(uiWindow);
     if (!container->IsSceneBoardWindow()) {
         ResourceManager::GetInstance().SetResourceCacheSize(RESOURCE_CACHE_DEFAULT_SIZE);
+    } else {
+        OHOS::Rosen::RSUIDirector::SetTypicalResidentProcess(true);
     }
 }
 
@@ -2488,6 +2514,12 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
     assetManagerImpl->SetLibPath("default", libPath);
 }
 
+void AceContainer::SetIsFormRender(bool isFormRender)
+{
+    OHOS::Rosen::RSUIDirector::SetTypicalResidentProcess(isFormRender);
+    isFormRender_ = isFormRender;
+}
+
 void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, float width,
     float height, uint32_t windowId, UIEnvCallback callback)
 {
@@ -2696,6 +2728,23 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         fontManager->SetStartAbilityOnJumpBrowserHandler(startAbilityOnJumpBrowserHandler);
     }
 
+    auto&& openLinkOnMapSearchHandler = [weak = WeakClaim(this), instanceId](const std::string& address) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        ContainerScope scope(instanceId);
+        auto context = container->GetPipelineContext();
+        CHECK_NULL_VOID(context);
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakPtr<AceContainer>(container), address]() {
+                auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
+                container->OnOpenLinkOnMapSearch(address);
+            },
+            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleOpenLinkOnMapSearch");
+    };
+    if (fontManager) {
+        fontManager->SetOpenLinkOnMapSearchHandler(openLinkOnMapSearchHandler);
+    }
     auto&& setStatusBarEventHandler = [weak = WeakClaim(this), instanceId](const Color& color) {
         auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
@@ -3045,6 +3094,15 @@ void AceContainer::InitWindowCallback()
         CHECK_NULL_RETURN(window, rect);
         auto windowRect = window->GetRect();
         rect.SetRect(windowRect.posX_, windowRect.posY_, windowRect.width_, windowRect.height_);
+        return rect;
+    });
+
+    pipelineContext_->InitGetGlobalWindowRectCallback([window = uiWindow_]() -> Rect {
+        Rect rect;
+        CHECK_NULL_RETURN(window, rect);
+        auto globalDisplayWindowRect = window->GetGlobalDisplayRect();
+        rect.SetRect(globalDisplayWindowRect.posX_, globalDisplayWindowRect.posY_, globalDisplayWindowRect.width_,
+            globalDisplayWindowRect.height_);
         return rect;
     });
 }
@@ -3883,6 +3941,8 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
         dragPointerEvent.windowX = pointerItem.GetWindowX();
         dragPointerEvent.windowY = pointerItem.GetWindowY();
     }
+    dragPointerEvent.globalDisplayX = pointerItem.GetGlobalX();
+    dragPointerEvent.globalDisplayY = pointerItem.GetGlobalY();
     dragPointerEvent.deviceId = pointerItem.GetDeviceId();
     dragPointerEvent.sourceTool = static_cast<SourceTool>(pointerItem.GetToolType());
     dragPointerEvent.displayId = currentPointerEvent->GetTargetDisplayId();
@@ -3938,6 +3998,8 @@ bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEve
         dragPointerEvent.windowX = pointerItem.GetWindowX();
         dragPointerEvent.windowY = pointerItem.GetWindowY();
     }
+    dragPointerEvent.globalDisplayX = pointerItem.GetGlobalX();
+    dragPointerEvent.globalDisplayY = pointerItem.GetGlobalY();
     return true;
 }
 

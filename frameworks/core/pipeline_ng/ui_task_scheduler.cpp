@@ -16,19 +16,22 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 #include <unistd.h>
-#include "ui/base/ace_type.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/pipeline/base/element_register.h"
 
 #ifdef FFRT_EXISTS
 #include "base/longframe/long_frame_report.h"
 #endif
+#include "base/perfmonitor/perf_monitor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr char LIBFFRT_LIB64_PATH[] = "/system/lib64/ndk/libffrt.z.so";
 constexpr int32_t ENDORSE_LAYOUT_COUNT = 2;
+
+#ifndef IS_RELEASE_VERSION
+constexpr int32_t SINGLE_FRAME_TIME_NANOSEC = 16600000;
+constexpr int32_t NANO_TO_MICRO = 1000;
+#endif
 } // namespace
 uint64_t UITaskScheduler::frameId_ = 0;
 
@@ -97,37 +100,6 @@ void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     }
 }
 
-bool UITaskScheduler::RemoveNodeFromDirtyRender(int32_t nodeId, int32_t pageId)
-{
-    auto it = dirtyRenderNodes_.find(pageId);
-    if (it == dirtyRenderNodes_.end()) {
-        return false;
-    }
-    auto& result = it->second;
- 
-    auto iter = result.begin();
-    while (iter != result.end()) {
-        if ((*iter)->GetId() == nodeId) {
-            result.erase(iter);
-            removedDirtyRenderNodes_.emplace(nodeId);
-            return true;
-        } else {
-            ++iter;
-        }
-    }
-    return false;
-}
-
-bool UITaskScheduler::RemoveDirtyRenderNodes(uint32_t id)
-{
-    auto iter = removedDirtyRenderNodes_.find(id);
-    if (iter != removedDirtyRenderNodes_.end()) {
-        removedDirtyRenderNodes_.erase(iter);
-        return true;
-    }
-    return false;
-}
-
 void UITaskScheduler::ExpandSafeArea()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -176,6 +148,9 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 
     // Priority task creation
     int64_t time = 0;
+#ifndef IS_RELEASE_VERSION
+    int64_t duration = 0;
+#endif
     for (auto&& node : dirtyLayoutNodesSet) {
         // need to check the node is destroying or not before CreateLayoutTask
         if (!node || node->IsInDestroying()) {
@@ -187,6 +162,9 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
         if (frameInfo_ != nullptr) {
             frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
         }
+#ifndef IS_RELEASE_VERSION
+        duration += time;
+#endif
     }
 
     while (!ignoreLayoutSafeAreaBundles_.empty()) {
@@ -202,6 +180,11 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 #endif
 
     isLayouting_ = false;
+#ifndef IS_RELEASE_VERSION
+    if (duration > SINGLE_FRAME_TIME_NANOSEC) {
+        PerfMonitor::GetPerfMonitor()->SetSubHealthInfo("SUBHEALTH", "FlushLayoutTask", duration / NANO_TO_MICRO);
+    }
+#endif
 }
 
 void UITaskScheduler::FlushPostponedLayoutTask(bool forceUseMainThread)
@@ -229,18 +212,7 @@ void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushRender();
     }
-    if (!removedDirtyRenderNodes_.empty()) {
-        auto removedDirtyNodes = std::move(removedDirtyRenderNodes_);
-        for (int32_t id: removedDirtyNodes) {
-            auto node = ElementRegister::GetInstance()->GetNodeById(id);
-            auto framenode = AceType::DynamicCast<FrameNode>(node);
-            if (framenode) {
-                dirtyRenderNodes_[framenode->GetPageId()].emplace(framenode);
-                framenode->ResetRenderDirtyMarked(true);
-            }
-        }
 
-    }
     auto dirtyRenderNodes = std::move(dirtyRenderNodes_);
     // Priority task creation
     int64_t time = 0;

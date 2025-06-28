@@ -161,12 +161,3 @@ globalThis.TabContent.attributeModifier = function (modifier: ArkComponent): voi
     return new modifierJS.TabContentModifier(nativePtr, classType);
   });
 };
-
-globalThis.TabContent.onWillShow = function (value: VoidCallback): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().tabContent.setTabContentOnWillShow(nodePtr, value);
-};
-globalThis.TabContent.onWillHide = function (value: VoidCallback): void {
-  let nodePtr = getUINativeModule().frameNode.getStackTopNode();
-  getUINativeModule().tabContent.setTabContentOnWillHide(nodePtr, value);
-};

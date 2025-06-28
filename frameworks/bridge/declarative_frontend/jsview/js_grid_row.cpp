@@ -354,10 +354,9 @@ void ParseGutterObject(const JSRef<JSVal>& gutterObject, RefPtr<V2::Gutter>& gut
     if (JSContainerBase::ParseJsDimensionVp(gutterObject, dim, dimResObj)) {
         if (SystemProperties::ConfigChangePerform() && dimResObj) {
             isHorizontal ? SetXGutterResObj(dimResObj, gutter) : SetYGutterResObj(dimResObj, gutter);
-        } else {
-            isHorizontal ? gutter->SetXGutter(dim) : gutter->SetYGutter(dim);
-            return;
         }
+        isHorizontal ? gutter->SetXGutter(dim) : gutter->SetYGutter(dim);
+        return;
     }
     if (!gutterObject->IsObject()) {
         return;

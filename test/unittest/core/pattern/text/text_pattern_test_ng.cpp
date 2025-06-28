@@ -1279,7 +1279,6 @@ HWTEST_F(TextPatternTestNg, OnDragEndNoChild002, TestSize.Level1)
     EXPECT_NE(textPattern->status_, Status::NONE);
 }
 
-
 /**
  * @tc.name: HandleSingleClickEvent003
  * @tc.desc: Test HandleSingleClickEvent
@@ -1415,7 +1414,6 @@ HWTEST_F(TextPatternTestNg, HandleSingleClickEvent010, TestSize.Level1)
     textPattern->HandleSingleClickEvent(info);
     EXPECT_EQ(textPattern->moveOverClickThreshold_, false);
 }
-
 
 /**
  * @tc.name: HandleSingleClickEvent011
@@ -1568,5 +1566,543 @@ HWTEST_F(TextPatternTestNg, RegisterVisibleAreaChangeCallback019, TestSize.Level
     auto pipeline = PipelineBase::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     textPattern->RegisterVisibleAreaChangeCallback();
+}
+
+/**
+ * @tc.name: ExecSubComponent001
+ * @tc.desc: Test ExecSubComponent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, ExecSubComponent001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    int32_t spanId = -1;
+    std::vector<SubComponentInfo> subComponentInfos;
+    SubComponentInfo subComponentInfo;
+    subComponentInfos.emplace_back(subComponentInfo);
+    auto result = textPattern->ExecSubComponent(spanId);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: ExecSubComponent002
+ * @tc.desc: Test ExecSubComponent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, ExecSubComponent002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    int32_t spanId = 1;
+    std::vector<SubComponentInfo> subComponentInfos;
+    SubComponentInfo subComponentInfo;
+    subComponentInfos.emplace_back(subComponentInfo);
+    auto result = textPattern->ExecSubComponent(spanId);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: ActSetSelection001
+ * @tc.desc: Test ActSetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, ActSetSelection001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    int32_t start = 1;
+    int32_t end = 1;
+    textPattern->textForDisplay_ = u"asdfghjkl";
+    OffsetF offset = {0, 0};
+    textPattern->ActSetSelection(start, end);
+    EXPECT_EQ(textPattern->parentGlobalOffset_, offset);
+}
+
+/**
+ * @tc.name: ActSetSelection002
+ * @tc.desc: Test ActSetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, ActSetSelection002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    int32_t start = 1;
+    int32_t end = 10;
+    textPattern->textForDisplay_ = u"asdfghjkl";
+    OffsetF offset = {0, 0};
+    textPattern->ActSetSelection(start, end);
+    EXPECT_EQ(textPattern->parentGlobalOffset_, offset);
+}
+
+/**
+ * @tc.name: ActSetSelection003
+ * @tc.desc: Test ActSetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, ActSetSelection003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+    ASSERT_NE(textPattern->pManager_, nullptr);
+    int32_t start = 1;
+    int32_t end = 10;
+    textPattern->textForDisplay_ = u"asdfghjkl";
+    textPattern->textSelector_.firstHandle = { 1, 2, 1, 2 };
+    textPattern->textSelector_.secondHandle = { 1, 2, 1, 2 };
+    textPattern->ActSetSelection(start, end);
+    EXPECT_EQ(textPattern->selectOverlay_, 1);
+}
+
+/**
+ * @tc.name: ActSetSelection004
+ * @tc.desc: Test ActSetSelection
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, ActSetSelection004, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+    ASSERT_NE(textPattern->pManager_, nullptr);
+    int32_t start = 1;
+    int32_t end = 10;
+    textPattern->textForDisplay_ = u"asdfghjkl";
+    textPattern->textSelector_.firstHandle = { 1, 2, 1, 2 };
+    textPattern->textSelector_.secondHandle = {};
+    textPattern->ActSetSelection(start, end);
+    EXPECT_EQ(textPattern->selectOverlay_, 1);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap001
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    RefPtr<LayoutWrapperNode> dirty = frameNode->CreateLayoutWrapper(false, false);
+    ASSERT_NE(dirty, nullptr);
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    dirty->skipMeasureContent_ = true;
+    auto result = textPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap002
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    RefPtr<LayoutWrapperNode> dirty = frameNode->CreateLayoutWrapper(false, false);
+    ASSERT_NE(dirty, nullptr);
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    dirty->skipMeasureContent_ = true;
+    auto result = textPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap003
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    RefPtr<LayoutWrapperNode> dirty = frameNode->CreateLayoutWrapper(false, false);
+    ASSERT_NE(dirty, nullptr);
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    dirty->skipMeasureContent_ = false;
+    auto result = textPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap004
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, OnDirtyLayoutWrapperSwap004, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    RefPtr<LayoutWrapperNode> dirty = frameNode->CreateLayoutWrapper(false, false);
+    ASSERT_NE(dirty, nullptr);
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    dirty->skipMeasureContent_ = false;
+    auto result = textPattern->OnDirtyLayoutWrapperSwap(dirty, config);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: PreCreateLayoutWrapper001
+ * @tc.desc: Test PreCreateLayoutWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, PreCreateLayoutWrapper001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->childNodes_.emplace_back(frameNode);
+    textPattern->placeholderCount_ = 1;
+    textPattern->PreCreateLayoutWrapper();
+    EXPECT_EQ(textPattern->placeholderCount_, 0);
+}
+
+/**
+ * @tc.name: PreCreateLayoutWrapper002
+ * @tc.desc: Test PreCreateLayoutWrapper
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, PreCreateLayoutWrapper002, TestSize.Level1)
+{
+    auto textPattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->childNodes_.emplace_back();
+    textPattern->childNodes_.clear();
+    textPattern->placeholderCount_ = 1;
+    textPattern->PreCreateLayoutWrapper();
+    EXPECT_NE(textPattern->placeholderCount_, 0);
+}
+
+/**
+ * @tc.name: InitSpanItem001
+ * @tc.desc: Test InitSpanItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, InitSpanItem001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->childNodes_.emplace_back(frameNode);
+    auto host = textPattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    textPattern->textForDisplay_ = u"asdfghjkl";
+    const auto& children = host->GetChildren();
+    std::stack<SpanNodeInfo> nodes;
+    nodes.push({ .node = *children.rbegin() });
+    textPattern->InitSpanItem(nodes);
+    EXPECT_EQ(textPattern->textForDisplay_, u"");
+}
+
+/**
+ * @tc.name: InitSpanItem002
+ * @tc.desc: Test InitSpanItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, InitSpanItem002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->childNodes_.emplace_back(frameNode);
+    textPattern->textForDisplay_ = u"asdfghjkl";
+    std::stack<SpanNodeInfo> nodes;
+    textPattern->InitSpanItem(nodes);
+    EXPECT_NE(textPattern->textForDisplay_, u"");
+}
+
+/**
+ * @tc.name: OnVisibleChange001
+ * @tc.desc: Test OnVisibleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, OnVisibleChange001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    bool isVisible = false;
+    textPattern->textSelector_.baseOffset = 1;
+    textPattern->textSelector_.destinationOffset = 1;
+    textPattern->OnVisibleChange(isVisible);
+    EXPECT_EQ(textPattern->dataDetectorAdapter_->aiDetectDelayTask_.Cancel(), true);
+}
+
+/**
+ * @tc.name: OnVisibleChange002
+ * @tc.desc: Test OnVisibleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, OnVisibleChange002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    bool isVisible = false;
+    textPattern->textDetectEnable_ = true;
+    textPattern->OnVisibleChange(isVisible);
+    EXPECT_EQ(textPattern->dataDetectorAdapter_->aiDetectDelayTask_.Cancel(), true);
+}
+
+/**
+ * @tc.name: OnVisibleChange003
+ * @tc.desc: Test OnVisibleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, OnVisibleChange003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    bool isVisible = false;
+    textPattern->textDetectEnable_ = false;
+    textPattern->OnVisibleChange(isVisible);
+    EXPECT_EQ(textPattern->dataDetectorAdapter_->aiDetectDelayTask_.Cancel(), true);
+}
+
+/**
+ * @tc.name: OnVisibleChange004
+ * @tc.desc: Test OnVisibleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, OnVisibleChange004, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    bool isVisible = true;
+    textPattern->textDetectEnable_ = false;
+    textPattern->enabled_ = false;
+    textPattern->OnVisibleChange(isVisible);
+    EXPECT_EQ(textPattern->dataDetectorAdapter_->aiDetectDelayTask_.Cancel(), true);
+}
+
+/**
+ * @tc.name: OnVisibleChange005
+ * @tc.desc: Test OnVisibleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, OnVisibleChange005, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    bool isVisible = true;
+    textPattern->textDetectEnable_ = true;
+    textPattern->enabled_ = true;
+    textPattern->OnVisibleChange(isVisible);
+    EXPECT_EQ(textPattern->dataDetectorAdapter_->aiDetectDelayTask_.Cancel(), true);
+}
+
+/**
+ * @tc.name: HandleSurfaceChanged001
+ * @tc.desc: Test HandleSurfaceChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, HandleSurfaceChanged001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    int32_t newWidth = 1;
+    int32_t newHeight = 1;
+    int32_t prevWidth = 1;
+    int32_t prevHeight = 1;
+    WindowSizeChangeReason type = WindowSizeChangeReason::HIDE;
+    textPattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, type);
+    EXPECT_NE(textLayoutProperty->propNeedReCreateParagraph_, true);
+}
+
+/**
+ * @tc.name: HandleSurfaceChanged002
+ * @tc.desc: Test HandleSurfaceChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, HandleSurfaceChanged002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    int32_t newWidth = 1;
+    int32_t newHeight = 2;
+    int32_t prevWidth = 1;
+    int32_t prevHeight = 1;
+    WindowSizeChangeReason type = WindowSizeChangeReason::HIDE;
+    textPattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, type);
+    EXPECT_NE(textLayoutProperty->propNeedReCreateParagraph_, true);
+}
+
+/**
+ * @tc.name: HandleSurfaceChanged003
+ * @tc.desc: Test HandleSurfaceChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, HandleSurfaceChanged003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    int32_t newWidth = 1;
+    int32_t newHeight = 1;
+    int32_t prevWidth = 1;
+    int32_t prevHeight = 2;
+    WindowSizeChangeReason type = WindowSizeChangeReason::HIDE;
+    textPattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, type);
+    EXPECT_NE(textLayoutProperty->propNeedReCreateParagraph_, true);
+}
+
+/**
+ * @tc.name: HandleSurfaceChanged004
+ * @tc.desc: Test HandleSurfaceChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, HandleSurfaceChanged004, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    int32_t newWidth = 1;
+    int32_t newHeight = 2;
+    int32_t prevWidth = 1;
+    int32_t prevHeight = 2;
+    WindowSizeChangeReason type = WindowSizeChangeReason::HIDE;
+    textPattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, type);
+    EXPECT_NE(textLayoutProperty->propNeedReCreateParagraph_, true);
+}
+
+/**
+ * @tc.name: HandleSurfaceChanged005
+ * @tc.desc: Test HandleSurfaceChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, HandleSurfaceChanged005, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    int32_t newWidth = 1;
+    int32_t newHeight = 2;
+    int32_t prevWidth = 1;
+    int32_t prevHeight = 2;
+    WindowSizeChangeReason type = WindowSizeChangeReason::DRAG;
+    textPattern->HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight, type);
+    EXPECT_NE(textLayoutProperty->propNeedReCreateParagraph_, true);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->magnifierController_ =
+        AceType::MakeRefPtr<MagnifierController>(AccessibilityManagerNG::WeakClaim(AceType::RawPtr(textPattern)));
+    textPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(textPattern->magnifierController_->colorModeChange_, true);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate002
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, OnColorConfigurationUpdate002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->magnifierController_ = nullptr;
+    textPattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(textPattern->magnifierController_->colorModeChange_, true);
+}
+
+/**
+ * @tc.name: GetOriginCaretPosition001
+ * @tc.desc: Test GetOriginCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, GetOriginCaretPosition001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    OffsetF offset = { 1.0f, 1.0f };
+    textPattern->originCaretPosition_ = offset;
+    auto result = textPattern->GetOriginCaretPosition(offset);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: GetOriginCaretPosition002
+ * @tc.desc: Test GetOriginCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternTestNg, GetOriginCaretPosition002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    OffsetF offset = { -1.0f, -1.0f };
+    textPattern->originCaretPosition_ = offset;
+    auto result = textPattern->GetOriginCaretPosition(offset);
+    EXPECT_EQ(result, false);
 }
 } // namespace OHOS::Ace::NG

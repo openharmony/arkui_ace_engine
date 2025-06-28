@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/stage/content_root_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -106,9 +107,10 @@ void SheetPresentationPattern::OnModifyDone()
     }
     InitPanEvent();
     InitPageHeight();
-    InitScrollProps();
     UpdateSheetType();
     UpdateSheetObject(sheetType_);
+    InitSheetMode();
+    InitScrollProps();
     InitFoldCreaseRegion();
 }
 
@@ -203,7 +205,6 @@ void SheetPresentationPattern::InitPageHeight()
     if (!NearEqual(currentTopSafeArea, sheetTopSafeArea_)) {
         topSafeAreaChanged_ = true;
     }
-    InitSheetMode();
 }
 
 void SheetPresentationPattern::InitScrollProps()
@@ -240,19 +241,9 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
     UpdateSheetTitle();
     ClipSheetNode();
 
-    auto sheetType = GetSheetType();
-    if (sheetType != SheetType::SHEET_POPUP && sheetType != SheetType::SHEET_SIDE) {
-        if (windowRotate_) {
-            // When rotating the screen,
-            // first switch the sheet to the position corresponding to the proportion before rotation
-            TranslateTo(pageHeight_ - height_);
-            windowRotate_ = false;
-        } else {
-            // After rotation, if need to avoid the keyboard, trigger the avoidance behavior
-            AvoidSafeArea();
-        }
-    }
-    if (GetSheetType() == SheetType::SHEET_POPUP) {
+    sheetObject_->AvoidKeyboardInDirtyLayoutProcess();
+    
+    if (sheetType_ == SheetType::SHEET_POPUP) {
         MarkSheetPageNeedRender();
     }
     return true;
@@ -347,8 +338,15 @@ void SheetPresentationPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(sheetTheme);
     sheetThemeType_ = sheetTheme->GetSheetType();
     scale_ = targetNodeContext->GetFontScale();
-    targetNodeContext->AddWindowSizeChangeCallback(host->GetId());
-    targetNodeContext->AddOnAreaChangeNode(targetNode->GetId());
+    if (IsShowInSubWindow()) {
+        targetNodeContext->AddWindowSizeChangeCallback(host->GetId());
+        targetNodeContext->AddOnAreaChangeNode(targetNode->GetId());
+    } else {
+        auto currentPipeline = host->GetContext();
+        CHECK_NULL_VOID(currentPipeline);
+        currentPipeline->AddWindowSizeChangeCallback(host->GetId());
+        currentPipeline->AddOnAreaChangeNode(targetNode->GetId());
+    }
     OnAreaChangedFunc onAreaChangedFunc = [sheetNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
                                               const OffsetF& /* oldOrigin */, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
@@ -890,7 +888,19 @@ float SheetPresentationPattern::InitialSingleGearHeight(NG::SheetStyle& sheetSty
     return sheetHeight;
 }
 
+void SheetPresentationPattern::BeforeCreateLayoutWrapper()
+{
+    ContentRootPattern::BeforeCreateLayoutWrapper();
+    CHECK_NULL_VOID(sheetObject_);
+    sheetObject_->BeforeCreateLayoutWrapper();
+}
+
 void SheetPresentationPattern::AvoidSafeArea(bool forceAvoid)
+{
+    sheetObject_->AvoidKeyboard(forceAvoid);
+}
+
+void SheetPresentationPattern::AvoidKeyboard(bool forceAvoid)
 {
     auto sheetType = GetSheetType();
     if (sheetType == SheetType::SHEET_POPUP || IsCurSheetNeedHalfFoldHover() ||
@@ -1591,12 +1601,14 @@ void SheetPresentationPattern::FireCommonCallback()
 
 void SheetPresentationPattern::PopupSheetChanged()
 {
-    if (SheetHeightNeedChanged() || SheetWidthNeedChanged() || typeChanged_) {
+    // when sheet height and width not change, but sheetOffsetY changed because of avoiding keyboard, update offsetY.
+    if (SheetHeightNeedChanged() || SheetWidthNeedChanged() || typeChanged_ || sheetOffsetYChanged_) {
         FireCommonCallback();
         auto renderContext = GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateTransformTranslate({ 0.0f, Dimension(sheetOffsetY_), 0.0f });
         typeChanged_ = false;
+        sheetOffsetYChanged_ = false;
     }
 }
 
@@ -1896,11 +1908,10 @@ SheetType SheetPresentationPattern::GetSheetType() const
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     TAG_LOGD(AceLogTag::ACE_SHEET, "GetSheetType displayWindowRect info is : %{public}s",
         windowGlobalRect.ToString().c_str());
-    DeviceType deviceType = SystemProperties::GetDeviceType();
     // only bottom when width is less than 600vp
     if ((windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) ||
         (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM)) {
-        return sheetStyle.bottomOffset.has_value() && deviceType == DeviceType::TWO_IN_ONE ?
+        return sheetStyle.bottomOffset.has_value() && IsPcOrPadFreeMultiWindowMode() ?
             SheetType::SHEET_BOTTOM_OFFSET : SheetType::SHEET_BOTTOM;
     }
     if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_SIDE) {
@@ -1922,7 +1933,7 @@ void SheetPresentationPattern::InitSheetMode()
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     scrollSizeMode_ = sheetStyle.scrollSizeMode.value_or(ScrollSizeMode::FOLLOW_DETENT);
-    keyboardAvoidMode_ = sheetStyle.sheetKeyboardAvoidMode.value_or(SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL);
+    keyboardAvoidMode_ = sheetStyle.sheetKeyboardAvoidMode.value_or(sheetObject_->GetAvoidKeyboardModeByDefault());
     sheetEffectEdge_ = sheetStyle.sheetEffectEdge.value_or(SheetEffectEdge::ALL);
 }
 
@@ -2042,7 +2053,10 @@ void SheetPresentationPattern::SetUIFirstSwitch(bool isFirstTransition, bool isN
 void SheetPresentationPattern::SetWindowUseImplicitAnimation(FrameNode* sheetNode, bool useImplicit)
 {
     CHECK_NULL_VOID(sheetNode);
-    if (IsShowInSubWindow()) {
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (sheetStyle.showInSubWindow.value_or(false)) {
         TAG_LOGD(AceLogTag::ACE_SHEET, "UseImplicitAnimation ShowInSubWindow");
         return;
     }
@@ -2218,7 +2232,7 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
             option.GetOnFinishEvent());
         SetBottomStyleHotAreaInSubwindow();
     } else {
-        AnimationUtils::StopAnimation(animation_);
+        StopModifySheetTransition();
         animation_ = AnimationUtils::StartAnimation(
             option,
             sheetObject_->GetSheetAnimationEvent(isTransitionIn, offset),
@@ -2982,6 +2996,13 @@ void SheetPresentationPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("IsShouldDismiss", shouldDismiss_ ? "true" : "false");
 }
 
+void SheetPresentationPattern::StopModifySheetTransition()
+{
+    if (isAnimationProcess_ && animation_) {
+        AnimationUtils::StopAnimation(animation_);
+    }
+}
+
 void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
 {
     auto host = GetHost();
@@ -3006,7 +3027,7 @@ void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
             "The sheet will disappear, so there's no need to handle canceling keyboard avoidance here.");
         return;
     }
-
+    StopModifySheetTransition();
     // 1.handle non upward logic: avoidKeyboardMode::RESIZE_ONLY
     if (AvoidKeyboardBeforeTranslate()) {
         return;
@@ -3864,6 +3885,7 @@ void SheetPresentationPattern::UpdateSheetObject(SheetType type)
     FireOnTypeDidChange();
     // start init new sheet data
     InitPanEvent();
+    InitSheetMode();
     isFirstInit_ = false;
     AvoidAiBar();
 }
@@ -3893,5 +3915,17 @@ void SheetPresentationPattern::ResetScrollUserDefinedIdealSize(
 void SheetPresentationPattern::OnLanguageConfigurationUpdate()
 {
     sheetObject_->OnLanguageConfigurationUpdate();
+}
+
+bool SheetPresentationPattern::IsPcOrPadFreeMultiWindowMode() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto windowManager = pipelineContext->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, false);
+    TAG_LOGI(AceLogTag::ACE_SHEET, "FreeMultiWindowMode: %{public}d", windowManager->IsPcOrPadFreeMultiWindowMode());
+    return windowManager->IsPcOrPadFreeMultiWindowMode();
 }
 } // namespace OHOS::Ace::NG

@@ -86,6 +86,21 @@
       "buildFunction": "SelectLevel11Builder"
     },
     {
+      "name": "SelectLevel2",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel2.ets",
+      "buildFunction": "SelectLevel2Builder"
+    },
+    {
+      "name": "SelectLevel3",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel3.ets",
+      "buildFunction": "SelectLevel3Builder"
+    },
+    {
+      "name": "SelectLevel4",
+      "pageSourceFile": "src/main/ets/pages/components/select/selectLevel4.ets",
+      "buildFunction": "SelectLevel4Builder"
+    },
+    {
       "name": "ButtonIndex",
       "pageSourceFile": "src/main/ets/pages/components/button/Index.ets",
       "buildFunction": "ButtonIndexBuilder"
@@ -129,6 +144,61 @@
       "name": "ButtonModifier",
       "pageSourceFile": "src/main/ets/pages/components/button/buttonModifier.ets",
       "buildFunction": "ButtonModifierBuilder"
+    },
+    {
+      "name": "ButtonLevel1",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel1.ets",
+      "buildFunction": "ButtonLevel1Builder"
+    },
+    {
+      "name": "ButtonLevel2",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel2.ets",
+      "buildFunction": "ButtonLevel2Builder"
+    },
+    {
+      "name": "ButtonLevel3",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel3.ets",
+      "buildFunction": "ButtonLevel3Builder"
+    },
+    {
+      "name": "ButtonLevel4",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel4.ets",
+      "buildFunction": "ButtonLevel4Builder"
+    },
+    {
+      "name": "ButtonLevel5",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel5.ets",
+      "buildFunction": "ButtonLevel5Builder"
+    },
+    {
+      "name": "ButtonLevel6",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel6.ets",
+      "buildFunction": "ButtonLevel6Builder"
+    },
+    {
+      "name": "ButtonLevel7",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel7.ets",
+      "buildFunction": "ButtonLevel7Builder"
+    },
+    {
+      "name": "ButtonLevel8",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel8.ets",
+      "buildFunction": "ButtonLevel8Builder"
+    },
+    {
+      "name": "ButtonLevel9",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel9.ets",
+      "buildFunction": "ButtonLevel9Builder"
+    },
+    {
+      "name": "ButtonLevel10",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel10.ets",
+      "buildFunction": "ButtonLevel10Builder"
+    },
+    {
+      "name": "ButtonLevel11",
+      "pageSourceFile": "src/main/ets/pages/components/button/buttonLevel11.ets",
+      "buildFunction": "ButtonLevel11Builder"
     },
     {
       "name": "ToggleIndex",
@@ -271,6 +341,31 @@
       "buildFunction": "CheckboxMultiTestLevel0Builder"
     },
     {
+      "name": "CheckboxLevel0",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxLevel0.ets",
+      "buildFunction": "CheckboxLevel0Builder"
+    },
+    {
+      "name": "CheckboxLevel1",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxLevel1.ets",
+      "buildFunction": "CheckboxLevel1Builder"
+    },
+    {
+      "name": "CheckboxLevel2",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxLevel2.ets",
+      "buildFunction": "CheckboxLevel2Builder"
+    },
+    {
+      "name": "CheckboxLevel3",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxLevel3.ets",
+      "buildFunction": "CheckboxLevel3Builder"
+    },
+    {
+      "name": "CheckboxLevel4",
+      "pageSourceFile": "src/main/ets/pages/components/checkbox/checkboxLevel4.ets",
+      "buildFunction": "CheckboxLevel4Builder"
+    },
+    {
       "name": "RatingIndex",
       "pageSourceFile": "src/main/ets/pages/components/rating/Index.ets",
       "buildFunction": "RatingIndexBuilder"
@@ -389,6 +484,11 @@
       "name": "RadioBuild",
       "pageSourceFile": "src/main/ets/pages/components/radio/radioBuild.ets",
       "buildFunction": "RadioBuildBuilder"
+    },
+    {
+      "name": "RadioLevel1",
+      "pageSourceFile": "src/main/ets/pages/components/radio/radioLevel1.ets",
+      "buildFunction": "RadioLevel1Builder"
     },
     {
       "name": "FormIndex",

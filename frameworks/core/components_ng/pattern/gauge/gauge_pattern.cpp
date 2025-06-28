@@ -404,7 +404,38 @@ void GaugePattern::OnColorModeChange(uint32_t colorMode)
     CHECK_NULL_VOID(pipelineContext);
     if (host->GetRerenderable()) {
         host->MarkModifyDone();
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
+}
+
+void GaugePattern::OnColorConfigurationUpdate()
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto paintProperty = host->GetPaintProperty<GaugePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    bool isGradientColorsResEmpty = true;
+    if (paintProperty->GetUseJsLinearGradientValue(false) || !paintProperty->HasGradientColors()) {
+        return;
+    }
+    auto gradientColors = paintProperty->GetGradientColorsValue();
+    for (auto& colorStopArray : gradientColors) {
+        for (auto& colorStop : colorStopArray) {
+            Color& color = colorStop.first;
+            if (color.GetResourceId() != 0) {
+                color.UpdateColorByResourceId();
+                isGradientColorsResEmpty = false;
+            }
+        }
+    }
+    if (!isGradientColorsResEmpty) {
+        paintProperty->UpdateGradientColors(gradientColors);
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 } // namespace OHOS::Ace::NG

@@ -414,6 +414,7 @@ HWTEST_F(ListItemGroupPatternTestNg, OnDirtyLayoutWrapperSwap002, TestSize.Level
         AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
     RefPtr<ListItemGroupLayoutAlgorithm> listItemGroupLayoutAlgorithm =
         AceType::MakeRefPtr<ListItemGroupLayoutAlgorithm>(0, 0, 2);
+    listItemGroupLayoutAlgorithm->itemPosition_[0] = { 2, 2.0f, 4.0f, true };
     RefPtr<ListItemGroupLayoutProperty> listItemGroupLayoutProperty =
         AceType::MakeRefPtr<ListItemGroupLayoutProperty>();
     V2::ItemDivider itemDivider;
@@ -1377,6 +1378,13 @@ HWTEST_F(ListItemGroupPatternTestNg, DetermineSingleLaneStep001, TestSize.Level1
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
     RefPtr<ListItemGroupPattern> listItemGroupPattern =
         AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto curPattern = AceType::MakeRefPtr<ListPattern>();
+    auto curFrame = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, curPattern);
+    ASSERT_NE(curFrame, nullptr);
+    auto ListItemGroupNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 1, listItemGroupPattern);
+    ASSERT_NE(ListItemGroupNode, nullptr);
+    ListItemGroupNode->parent_ = curFrame;
+    listItemGroupPattern->frameNode_ = ListItemGroupNode;
 
     /**
      * @tc.steps: step2. Set step to RIGHT, isVertical to false and itemTotalCount_ to 2
@@ -1408,6 +1416,13 @@ HWTEST_F(ListItemGroupPatternTestNg, DetermineSingleLaneStep002, TestSize.Level1
     RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
     RefPtr<ListItemGroupPattern> listItemGroupPattern =
         AceType::MakeRefPtr<ListItemGroupPattern>(shallowBuilder, V2::ListItemGroupStyle::CARD);
+    auto curPattern = AceType::MakeRefPtr<ListPattern>();
+    auto curFrame = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, curPattern);
+    ASSERT_NE(curFrame, nullptr);
+    auto ListItemGroupNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, 1, listItemGroupPattern);
+    ASSERT_NE(ListItemGroupNode, nullptr);
+    ListItemGroupNode->parent_ = curFrame;
+    listItemGroupPattern->frameNode_ = ListItemGroupNode;
 
     /**
      * @tc.steps: step2. Set step to LEFT, isVertical to false and itemTotalCount_ to 2

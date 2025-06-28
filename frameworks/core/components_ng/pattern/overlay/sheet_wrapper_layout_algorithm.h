@@ -113,6 +113,8 @@ private:
     void RemeasureForPopup(LayoutWrapper* layoutWrapper);
     void UpdateSheetNodePopupInfo(LayoutWrapper* layoutWrapper);
 
+    bool IsTargetNodeHideByKeyboard(const SafeAreaInsets::Inset& keyboardInset, const RefPtr<FrameNode>& targetNode);
+
     using DirectionCheckFunc = bool (SheetWrapperLayoutAlgorithm::*)(const SizeF&, const OffsetF&);
     std::unordered_map<Placement, DirectionCheckFunc> directionCheckFunc_;
     using OffsetGetFunc = OffsetF (SheetWrapperLayoutAlgorithm::*)(const SizeF&, const OffsetF&);

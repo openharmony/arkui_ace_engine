@@ -278,6 +278,8 @@ void JSCalendarPicker::SetEdgeAlign(const JSCallbackInfo& info)
         if (dxResObj || dyResObj) {
             std::vector<RefPtr<ResourceObject>> resArray = { dxResObj, dyResObj };
             CalendarPickerModel::GetInstance()->ParseEdgeAlignResObj(resArray);
+        } else {
+            CalendarPickerModel::GetInstance()->CalendarPickerRemoveResObj("CalendarPicker.EdgeAlign");
         }
     } else {
         ParseJsDimensionVp(dxValue, dx);

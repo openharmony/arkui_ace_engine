@@ -201,6 +201,7 @@ public:
     // Set by user define, which will replace old one.
     void SetUserOnClick(GestureEventFunc&& clickEvent,
         double distanceThreshold = std::numeric_limits<double>::infinity());
+    void SetUserOnClick(GestureEventFunc&& clickEvent, Dimension distanceThreshold);
     void SetNodeClickDistance(double distanceThreshold = std::numeric_limits<double>::infinity());
      // Set by JS FrameNode.
     void SetJSFrameNodeOnClick(GestureEventFunc&& clickEvent);
@@ -518,7 +519,6 @@ private:
     bool monopolizeEvents_ = false;
     float menuPreviewScale_ = DEFALUT_DRAG_PPIXELMAP_SCALE;
     bool isDragNewFwk_ = false;
-    bool isRestoreDrag_ = false;
 };
 
 } // namespace OHOS::Ace::NG

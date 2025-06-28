@@ -378,7 +378,7 @@ public:
         prevMeasureBreak_ = value;
     }
 
-    bool MeasureInNextFrame() const
+    bool GroupMeasureInNextFrame() const
     {
         return measureInNextFrame_;
     }
@@ -564,6 +564,7 @@ private:
 
     std::optional<ListItemGroupCacheParam> cacheParam_;
     PositionMap cachedItemPosition_;
+    PositionMap recycledItemPosition_;
 
     bool isStackFromEnd_ = false;
     bool isLayouted_ = true;

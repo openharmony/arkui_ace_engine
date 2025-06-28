@@ -33,6 +33,8 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
     ACE_DISALLOW_COPY_AND_MOVE(NavDestinationLayoutAlgorithm);
+    void MeasureAdaptiveLayoutChildren(
+        LayoutWrapper* layoutWrapper, SizeF& realSize, float titleBarHeight, float toolBarHeight);
 
     void SetIsShown(bool isShown)
     {

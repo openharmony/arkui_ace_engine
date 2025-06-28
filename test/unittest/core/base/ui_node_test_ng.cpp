@@ -26,6 +26,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
+#include "core/common/builder_util.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -51,6 +52,8 @@ const RefPtr<FrameNode> FIVE = FrameNode::CreateFrameNode("five", 5, AceType::Ma
 const RefPtr<FrameNode> F_ONE = FrameNode::CreateFrameNode("one", 5, AceType::MakeRefPtr<Pattern>());
 const int32_t TEST_ID_ONE = 21;
 const int32_t TEST_ID_TWO = 22;
+constexpr size_t SIZE_ZERO = 0;
+constexpr size_t SIZE_ONE = 1;
 } // namespace
 
 class TestNode : public UINode {
@@ -1296,6 +1299,48 @@ HWTEST_F(UINodeTestNg, GetCurrentCustomNodeInfo002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetFilePath001
+ * @tc.desc: Test ui node method GetCurrentCustomNodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetFilePath001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = FrameNode::CreateFrameNode("filePathNode", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    node->tag_ = V2::COMMON_VIEW_ETS_TAG;
+
+    node->SetFilePath("abc");
+    EXPECT_EQ(node->GetFilePath(), "");
+    node->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    node->SetFilePath("abc");
+    EXPECT_EQ(node->GetFilePath(), "abc");
+}
+
+/**
+ * @tc.name: GetFilePath002
+ * @tc.desc: Test ui node method GetCurrentCustomNodeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, GetFilePath002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto node = FrameNode::CreateFrameNode("filePathNode", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    node->tag_ = V2::COMMON_VIEW_ETS_TAG;
+
+    node->SetFilePath("a/b/c");
+    EXPECT_EQ(node->GetFilePath(), "");
+    node->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    node->SetFilePath("a/b/c");
+    EXPECT_EQ(node->GetFilePath(), "a/b/c");
+}
+
+/**
  * @tc.name: GetPerformanceCheckData001
  * @tc.desc: Test ui node method GetCurrentCustomNodeInfo
  * @tc.type: FUNC
@@ -2387,6 +2432,51 @@ HWTEST_F(UINodeTestNg, UINodeTestNg072, TestSize.Level1)
     EXPECT_NE(ZERO->OnRemoveFromParent(false), false);
     ZERO->SetDestroying(false);
     ZERO->Clean();
+}
+
+/**
+ * @tc.name: UINodeTestNg073
+ * @tc.desc: Test ui node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, UINodeTestNg073, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frame node
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto parent = FrameNode::CreateFrameNode("parent", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode("child", childId, AceType::MakeRefPtr<Pattern>(), false);
+
+    child->tag_ = V2::IMAGE_ETS_TAG;
+    parent->AddChild(child);
+    std::list<RefPtr<UINode>> nodes;
+
+    /**
+     * @tc.steps: step2. call GetFirstBuilderNode
+     * @tc.expected: child isRootBuilderNode_ is true, nodes size is 1
+     */
+    child->SetIsRootBuilderNode(true);
+    BuilderUtils::GetFirstBuilderNode(parent, nodes);
+    EXPECT_EQ(nodes.size(), SIZE_ONE);
+
+    child->SetIsRootBuilderNode(false);
+    auto son = FrameNode::CreateFrameNode(
+        "son", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    child->AddChild(son);
+    son->SetIsRootBuilderNode(true);
+    child->tag_ = V2::NODE_CONTAINER_ETS_TAG;
+    nodes.clear();
+    BuilderUtils::GetFirstBuilderNode(parent, nodes);
+    EXPECT_EQ(nodes.size(), SIZE_ZERO);
+    child->tag_ = V2::JS_NODE_SLOT_ETS_TAG;
+    BuilderUtils::GetFirstBuilderNode(parent, nodes);
+    EXPECT_EQ(nodes.size(), SIZE_ZERO);
+
+    child->tag_ = V2::IMAGE_ETS_TAG;
+    BuilderUtils::GetFirstBuilderNode(parent, nodes);
+    EXPECT_EQ(nodes.size(), SIZE_ONE);
 }
 
 /**
@@ -3648,5 +3738,29 @@ HWTEST_F(UINodeTestNg, FreeUINodeTestNg009, TestSize.Level1)
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     EXPECT_EQ(frameNode->isFreeNode_, true);
     EXPECT_EQ(frameNode->isFreeState_, true);
+}
+
+/**
+ * @tc.name: AddChildOPTTest001
+ * @tc.desc: Test AddChild optimize
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNg, AddChildOPTTest001, TestSize.Level1)
+{
+    ONE->Clean();
+    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
+    auto testNode2 = TestNode::CreateTestNode(TEST_ID_TWO);
+    ONE->AddChild(TWO, 1, false);
+    ONE->AddChild(testNode, 1, false);
+    ONE->AddChild(testNode2, 1, false);
+    ONE->AddChildBefore(testNode, testNode2);
+    EXPECT_EQ(ONE->children_.size(), 3);
+    ONE->Clean();
+    ONE->AddChild(TWO, 1, false);
+    ONE->AddChild(testNode, 1, false);
+    ONE->AddChild(testNode2, 1, false);
+    ONE->AddChildAfter(testNode2, testNode);
+    EXPECT_EQ(ONE->children_.size(), 3);
+    ONE->Clean();
 }
 } // namespace OHOS::Ace::NG

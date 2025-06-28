@@ -12,7 +12,6 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//build/ohos_var.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 
@@ -132,6 +131,7 @@ template("ace_core_source_set") {
       "common/agingadapation/aging_adapation_dialog_util.cpp",
       "common/anr_thread.cpp",
       "common/asset_manager_impl.cpp",
+      "common/builder_util.cpp",
       "common/card_scope.cpp",
       "common/clipboard/clipboard_proxy.cpp",
       "common/container.cpp",
@@ -165,6 +165,7 @@ template("ace_core_source_set") {
       "common/vibrator/vibrator_proxy.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
+      "common/color_inverter.cpp",
 
       # declaration
       "components/declaration/badge/badge_declaration.cpp",
@@ -525,7 +526,7 @@ template("ace_core_source_set") {
       defines += [ "ENABLE_OPENCL" ]
     }
 
-    if (use_new_skia) {
+    if (ace_engine_feature_enable_upgrade_skia) {
       defines += [ "USE_NEW_SKIA" ]
     }
 
@@ -760,6 +761,7 @@ template("ace_core_ng_source_set") {
       "common/agingadapation/aging_adapation_dialog_util.cpp",
       "common/anr_thread.cpp",
       "common/asset_manager_impl.cpp",
+      "common/builder_util.cpp",
       "common/card_scope.cpp",
       "common/clipboard/clipboard_proxy.cpp",
       "common/container.cpp",
@@ -793,6 +795,7 @@ template("ace_core_ng_source_set") {
       "common/vibrator/vibrator_proxy.cpp",
       "common/watch_dog.cpp",
       "common/window.cpp",
+      "common/color_inverter.cpp",
 
       # event
       "event/axis_event.cpp",
@@ -1163,7 +1166,7 @@ template("ace_core_ng_source_set") {
       defines += [ "ENABLE_OPENCL" ]
     }
 
-    if (use_new_skia) {
+    if (ace_engine_feature_enable_upgrade_skia) {
       defines += [ "USE_NEW_SKIA" ]
     }
 

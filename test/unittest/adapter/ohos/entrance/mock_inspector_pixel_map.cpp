@@ -104,9 +104,9 @@ uint32_t PixelMapOhos::WritePixels(const WritePixelsOptions& opts)
 {
     return 0;
 }
-bool PixelMapOhos::GetIsWideColorGamut() const
+uint32_t PixelMapOhos::GetInnerColorGamut() const
 {
-    return false;
+    return 0;
 }
 void PixelMapOhos::SetMemoryName(std::string pixelMapName) const
 {

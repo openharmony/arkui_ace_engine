@@ -25,7 +25,7 @@ class JsOnChildTouchTestFunction : public JsFunction {
 public:
     explicit JsOnChildTouchTestFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
     ~JsOnChildTouchTestFunction() override = default;
-    void Execute() override;
+    void Execute();
     JSRef<JSVal> Execute(const std::vector<NG::TouchTestInfo>& touchInfo);
 
 private:

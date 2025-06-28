@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -464,7 +465,7 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart002, TestSize.Level1)
      /**
      * @tc.steps: step5. call OnDragStart
      */
-    gestureHub->isRestoreDrag_ = true;
+    DragDropGlobalController::GetInstance().SetAsyncDragCallback(nullptr);
     gestureHub->OnDragStart(info, pipline, webFrameNode, dragDropInfo, event);
     EXPECT_NE(gestureHub->pixelMap_, nullptr);
     EXPECT_NE(gestureHub->dragEventActuator_, nullptr);
@@ -924,7 +925,7 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart035, TestSize.Level1)
      * @tc.steps: step3. call OnDragStart block
      */
     auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
-    gestureHub->isRestoreDrag_ = false;
+    DragDropGlobalController::GetInstance().SetAsyncDragCallback([]{});
     gestureHub->OnDragStart(info, pipline, frameNode, dragDropInfo, event);
     EXPECT_EQ(info.GetInputEventType(), InputEventType::MOUSE_BUTTON);
 }

@@ -17,6 +17,7 @@
 #include "base/geometry/dimension.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/data_panel/data_panel_theme.h"
 #include "core/components/divider/divider_theme.h"
@@ -53,12 +54,15 @@ void ConvertThemeColor(std::vector<OHOS::Ace::NG::Gradient>& colors)
     }
 }
 
-bool ConvertResourceColor(const EcmaVM* vm, const Local<JSValueRef>& item, OHOS::Ace::NG::Gradient& gradient)
+bool ConvertResourceColor(const EcmaVM* vm, const Local<JSValueRef>& item, OHOS::Ace::NG::Gradient& gradient,
+    size_t index, std::vector<RefPtr<ResourceObject>>& resObjs)
 {
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, item, color)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, item, color, resObj)) {
         return false;
     }
+    resObjs.push_back(resObj);
     OHOS::Ace::NG::GradientColor gradientColorStart;
     gradientColorStart.SetLinearColor(LinearColor(color));
     gradientColorStart.SetDimension(Dimension(0.0));
@@ -70,15 +74,16 @@ bool ConvertResourceColor(const EcmaVM* vm, const Local<JSValueRef>& item, OHOS:
     return true;
 }
 
-bool ConvertGradientColor(const EcmaVM* vm, const Local<JSValueRef>& itemParam, OHOS::Ace::NG::Gradient& gradient)
+bool ConvertGradientColor(const EcmaVM* vm, const Local<JSValueRef>& itemParam, OHOS::Ace::NG::Gradient& gradient,
+    size_t index, std::vector<RefPtr<ResourceObject>>& resObjs)
 {
     if (!itemParam->IsObject(vm)) {
-        return ConvertResourceColor(vm, itemParam, gradient);
+        return ConvertResourceColor(vm, itemParam, gradient, index, resObjs);
     }
     Framework::JSLinearGradient* jsLinearGradient =
         static_cast<Framework::JSLinearGradient*>(itemParam->ToObject(vm)->GetNativePointerField(vm, 0));
     if (!jsLinearGradient) {
-        return ConvertResourceColor(vm, itemParam, gradient);
+        return ConvertResourceColor(vm, itemParam, gradient, index, resObjs);
     }
 
     size_t colorLength = jsLinearGradient->GetGradient().size();
@@ -95,7 +100,7 @@ bool ConvertGradientColor(const EcmaVM* vm, const Local<JSValueRef>& itemParam, 
 }
 
 void SetTrackShadowObject(ArkUINodeHandle nativeNode, std::vector<OHOS::Ace::NG::Gradient>& shadowColors,
-    double radius, double offsetX, double offsetY)
+    const struct ArkUIDatePanelTrackShadow& trackShadow, const struct ArkUIShadowOptionsResource& shadowOptionsRes)
 {
     ArkUIGradientType gradient;
     gradient.length = shadowColors.size();
@@ -106,8 +111,7 @@ void SetTrackShadowObject(ArkUINodeHandle nativeNode, std::vector<OHOS::Ace::NG:
         linearLength[i] = shadowColors[i].GetColors().size();
         for (uint32_t j = 0; j < linearLength[i]; j++) {
             allColor.emplace_back(shadowColors[i].GetColors()[j].GetLinearColor().GetValue());
-            allOffset.emplace_back(ArkUILengthType {
-                .number = static_cast<ArkUI_Float32>(shadowColors[i].GetColors()[j].GetDimension().Value()),
+            allOffset.emplace_back(ArkUILengthType { .number = shadowColors[i].GetColors()[j].GetDimension().Value(),
                 .unit = static_cast<int8_t>(shadowColors[i].GetColors()[j].GetDimension().Unit()) });
         }
     }
@@ -116,7 +120,7 @@ void SetTrackShadowObject(ArkUINodeHandle nativeNode, std::vector<OHOS::Ace::NG:
     gradient.gradientLength = linearLength.get();
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_VOID(nodeModifiers);
-    nodeModifiers->getDataPanelModifier()->setTrackShadow(nativeNode, &gradient, radius, offsetX, offsetY);
+    nodeModifiers->getDataPanelModifier()->setTrackShadowPtr(nativeNode, &gradient, &trackShadow, &shadowOptionsRes);
 }
 } // namespace
 
@@ -130,6 +134,7 @@ ArkUINativeModuleValue DataPanelBridge::SetValueColors(ArkUIRuntimeCallInfo* run
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     std::vector<OHOS::Ace::NG::Gradient> shadowColors;
+    std::vector<RefPtr<ResourceObject>> colorVectorResObj;
     if (!colors.IsEmpty() && colors->IsArray(vm)) {
         auto colorsArray = panda::CopyableGlobal<panda::ArrayRef>(vm, colors);
         if (colorsArray.IsEmpty() || colorsArray->IsUndefined() || colorsArray->IsNull()) {
@@ -138,13 +143,15 @@ ArkUINativeModuleValue DataPanelBridge::SetValueColors(ArkUIRuntimeCallInfo* run
         for (size_t i = 0; i < colorsArray->Length(vm); ++i) {
             auto item = colorsArray->GetValueAt(vm, colors, i);
             OHOS::Ace::NG::Gradient gradient;
-            if (!ConvertGradientColor(vm, item, gradient)) {
+            if (!ConvertGradientColor(vm, item, gradient, i, colorVectorResObj)) {
                 shadowColors.clear();
                 ConvertThemeColor(shadowColors);
                 break;
             }
             shadowColors.emplace_back(gradient);
         }
+    } else {
+        ConvertThemeColor(shadowColors);
     }
     ArkUIGradientType gradient;
     gradient.length = shadowColors.size();
@@ -165,7 +172,9 @@ ArkUINativeModuleValue DataPanelBridge::SetValueColors(ArkUIRuntimeCallInfo* run
     gradient.gradientLength = linearLength.get();
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getDataPanelModifier()->setValueColors(nativeNode, &gradient);
+
+    nodeModifiers->getDataPanelModifier()->setValueColorsPtr(
+        nativeNode, &gradient, static_cast<void*>(&colorVectorResObj));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -180,6 +189,74 @@ ArkUINativeModuleValue DataPanelBridge::ResetValueColors(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getDataPanelModifier()->resetValueColors(nativeNode);
     return panda::JSValueRef::Undefined(vm);
+}
+
+void ParseTrackShadowProperties(EcmaVM* vm, const Local<panda::ObjectRef>& obj, ArkUIDatePanelTrackShadow& trackShadow,
+    ArkUIShadowOptionsResource& shadowOptionsRes, RefPtr<DataPanelTheme>& theme)
+{
+    auto jsRadius = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "radius"));
+    auto jsOffsetX = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "offsetX"));
+    auto jsOffsetY = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "offsetY"));
+
+    RefPtr<ResourceObject> radiusResObj;
+    if (!ArkTSUtils::ParseJsDouble(vm, jsRadius, trackShadow.radius, radiusResObj) || NonPositive(trackShadow.radius)) {
+        trackShadow.radius = theme->GetTrackShadowRadius().ConvertToVp();
+    }
+
+    RefPtr<ResourceObject> offsetXResObj;
+    if (!ArkTSUtils::ParseJsDouble(vm, jsOffsetX, trackShadow.offsetX, offsetXResObj)) {
+        trackShadow.offsetX = theme->GetTrackShadowOffsetX().ConvertToVp();
+    }
+
+    RefPtr<ResourceObject> offsetYResObj;
+    if (!ArkTSUtils::ParseJsDouble(vm, jsOffsetY, trackShadow.offsetY, offsetYResObj)) {
+        trackShadow.offsetY = theme->GetTrackShadowOffsetY().ConvertToVp();
+    }
+
+    if (SystemProperties::ConfigChangePerform()) {
+        shadowOptionsRes.radiusRawPtr = AceType::RawPtr(radiusResObj);
+        if (radiusResObj != nullptr) {
+            radiusResObj->IncRefCount();
+        }
+        shadowOptionsRes.offsetXRawPtr = AceType::RawPtr(offsetXResObj);
+        if (offsetXResObj != nullptr) {
+            offsetXResObj->IncRefCount();
+        }
+        shadowOptionsRes.offsetYRawPtr = AceType::RawPtr(offsetYResObj);
+        if (offsetYResObj != nullptr) {
+            offsetYResObj->IncRefCount();
+        }
+    }
+}
+
+void ParseTrackShadowColors(EcmaVM* vm, const Local<panda::ObjectRef>& obj,
+    std::vector<OHOS::Ace::NG::Gradient>& shadowColors, ArkUIDatePanelTrackShadow& trackShadow)
+{
+    auto colors = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "colors"));
+    std::vector<RefPtr<ResourceObject>> colorVectorResObj;
+    ConvertThemeColor(shadowColors);
+    if (!colors.IsEmpty() && colors->IsArray(vm)) {
+        shadowColors.clear();
+        auto colorsArray = panda::CopyableGlobal<panda::ArrayRef>(vm, colors);
+        if (colorsArray.IsEmpty() || colorsArray->IsUndefined() || colorsArray->IsNull()) {
+            return;
+        }
+        for (size_t i = 0; i < colorsArray->Length(vm); ++i) {
+            auto item = colorsArray->GetValueAt(vm, colors, i);
+            OHOS::Ace::NG::Gradient gradient;
+            if (!ConvertGradientColor(vm, item, gradient, i, colorVectorResObj)) {
+                shadowColors.clear();
+                ConvertThemeColor(shadowColors);
+                break;
+            }
+            shadowColors.emplace_back(gradient);
+        }
+        if (colorVectorResObj.empty()) {
+            trackShadow.colorRawPtr = nullptr;
+        } else {
+            trackShadow.colorRawPtr = static_cast<void*>(&colorVectorResObj);
+        }
+    }
 }
 
 ArkUINativeModuleValue DataPanelBridge::SetTrackShadow(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -201,47 +278,35 @@ ArkUINativeModuleValue DataPanelBridge::SetTrackShadow(ArkUIRuntimeCallInfo* run
         return panda::JSValueRef::Undefined(vm);
     }
     auto obj = secondArg->ToObject(vm);
-    auto jsRadius = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "radius"));
-    auto jsOffsetX = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "offsetX"));
-    auto jsOffsetY = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "offsetY"));
     RefPtr<DataPanelTheme> theme = ArkTSUtils::GetTheme<DataPanelTheme>();
-    double radius = 0.0;
-    if (!ArkTSUtils::ParseJsDouble(vm, jsRadius, radius) || NonPositive(radius)) {
-        radius = theme->GetTrackShadowRadius().ConvertToVp();
-    }
+    ArkUIDatePanelTrackShadow trackShadow = { .radius = 0.0, .offsetX = 0.0, .offsetY = 0.0 };
+    ArkUIShadowOptionsResource shadowOptionsRes;
+    ParseTrackShadowProperties(vm, obj, trackShadow, shadowOptionsRes, theme);
 
-    double offsetX = 0.0;
-    if (!ArkTSUtils::ParseJsDouble(vm, jsOffsetX, offsetX)) {
-        offsetX = theme->GetTrackShadowOffsetX().ConvertToVp();
-    }
-
-    double offsetY = 0.0;
-    if (!ArkTSUtils::ParseJsDouble(vm, jsOffsetY, offsetY)) {
-        offsetY = theme->GetTrackShadowOffsetY().ConvertToVp();
-    }
-
-    auto colors = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "colors"));
     std::vector<OHOS::Ace::NG::Gradient> shadowColors;
+    auto colors = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "colors"));
+    std::vector<RefPtr<ResourceObject>> colorVectorResObj;
     ConvertThemeColor(shadowColors);
     if (!colors.IsEmpty() && colors->IsArray(vm)) {
         shadowColors.clear();
         auto colorsArray = panda::CopyableGlobal<panda::ArrayRef>(vm, colors);
         if (colorsArray.IsEmpty() || colorsArray->IsUndefined() || colorsArray->IsNull()) {
-            SetTrackShadowObject(nativeNode, shadowColors, radius, offsetX, offsetY);
+            SetTrackShadowObject(nativeNode, shadowColors, trackShadow, shadowOptionsRes);
             return panda::JSValueRef::Undefined(vm);
         }
         for (size_t i = 0; i < colorsArray->Length(vm); ++i) {
             auto item = colorsArray->GetValueAt(vm, colors, i);
             OHOS::Ace::NG::Gradient gradient;
-            if (!ConvertGradientColor(vm, item, gradient)) {
+            if (!ConvertGradientColor(vm, item, gradient, i, colorVectorResObj)) {
                 shadowColors.clear();
                 ConvertThemeColor(shadowColors);
                 break;
             }
             shadowColors.emplace_back(gradient);
         }
+        trackShadow.colorRawPtr = colorVectorResObj.empty() ? nullptr : static_cast<void*>(&colorVectorResObj);
     }
-    SetTrackShadowObject(nativeNode, shadowColors, radius, offsetX, offsetY);
+    SetTrackShadowObject(nativeNode, shadowColors, trackShadow, shadowOptionsRes);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -295,13 +360,17 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelTrackBackgroundColor(ArkUIRu
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
         RefPtr<DataPanelTheme> theme = ArkTSUtils::GetTheme<DataPanelTheme>();
         color = theme->GetBackgroundColor();
     }
+
+    auto colorRawPtr = AceType::RawPtr(colorResObj);
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getDataPanelModifier()->setDataPanelTrackBackgroundColor(nativeNode, color.GetValue());
+    nodeModifiers->getDataPanelModifier()->setDataPanelTrackBackgroundColorPtr(
+        nativeNode, color.GetValue(), colorRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -329,8 +398,9 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelStrokeWidth(ArkUIRuntimeCall
 
     RefPtr<DataPanelTheme> theme = ArkTSUtils::GetTheme<DataPanelTheme>();
     CalcDimension strokeWidth;
+    RefPtr<ResourceObject> strokeWidthResObj;
 
-    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, strokeWidth)) {
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsValue, strokeWidth, strokeWidthResObj)) {
         strokeWidth = theme->GetThickness();
     }
 
@@ -343,11 +413,11 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelStrokeWidth(ArkUIRuntimeCall
     if (strokeWidth.IsNegative() || strokeWidth.Unit() == DimensionUnit::PERCENT) {
         strokeWidth = theme->GetThickness();
     }
-
+    auto strokeWidthRawPtr = AceType::RawPtr(strokeWidthResObj);
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getDataPanelModifier()->setDataPanelStrokeWidth(
-        nativeNode, strokeWidth.Value(), static_cast<int32_t>(strokeWidth.Unit()));
+    nodeModifiers->getDataPanelModifier()->setDataPanelStrokeWidthPtr(
+        nativeNode, strokeWidth.Value(), static_cast<int32_t>(strokeWidth.Unit()), strokeWidthRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 

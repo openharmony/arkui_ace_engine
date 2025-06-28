@@ -29,7 +29,7 @@ public:
     static void JSBind(BindingTarget globalObj);
 
     ~JsDragFunction() override {};
-    void Execute() override;
+    void Execute();
     JSRef<JSVal> Execute(const RefPtr<DragEvent>& info);
     JSRef<JSVal> ItemDragStartExecute(const ItemDragInfo& info, int32_t itemIndex);
     void ItemDragEnterExecute(const ItemDragInfo& info);
@@ -54,6 +54,8 @@ public:
     void GetJsPasteData(const JSCallbackInfo& args);
     void GetScreenX(const JSCallbackInfo& args);
     void GetScreenY(const JSCallbackInfo& args);
+    void GetGlobalDisplayX(const JSCallbackInfo& args);
+    void GetGlobalDisplayY(const JSCallbackInfo& args);
     void GetDisplayId(const JSCallbackInfo& args);
     void GetX(const JSCallbackInfo& args);
     void GetY(const JSCallbackInfo& args);

@@ -339,4 +339,55 @@ void NavigationLayoutUtil::UpdateContentSafeAreaPadding(
 
     contentLayoutProperty->UpdateSafeAreaPadding(paddingProperty);
 }
+
+void NavigationLayoutUtil::UpdateConstraintWhenFixOrWrap(
+    const RefPtr<LayoutProperty>& layoutProperty, LayoutConstraintF& constraint, SizeF size)
+{
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    bool isWidthWrapOrFix =
+        layoutPolicy.has_value() ? layoutPolicy->IsWidthWrap() || layoutPolicy->IsWidthFix() : false;
+    bool isHeightWrapOrFix =
+        layoutPolicy.has_value() ? layoutPolicy->IsHeightWrap() || layoutPolicy->IsHeightFix() : false;
+    constraint.selfIdealSize = OptionalSizeF();
+    bool isAutoHeight = NavigationLayoutAlgorithm::IsAutoHeight(layoutProperty);
+    if (!isWidthWrapOrFix) {
+        constraint.selfIdealSize.SetWidth(size.Width());
+    }
+
+    if (!isHeightWrapOrFix && !isAutoHeight) {
+        constraint.selfIdealSize.SetHeight(size.Height());
+    }
+}
+std::pair<bool, bool> NavigationLayoutUtil::CheckVerticalExtend(
+    const RefPtr<NavDestinationLayoutPropertyBase>& layoutProperty, const RefPtr<NavDestinationNodeBase>& hostNode,
+    const NG::IgnoreLayoutSafeAreaOpts& opts)
+{
+    auto defaultValue = std::make_pair(false, false);
+    if (!layoutProperty || !hostNode) {
+        return defaultValue;
+    }
+    const auto& padding = layoutProperty->CreatePaddingAndBorder();
+    float topPadding = padding.top.value_or(0.0f);
+    if (!NearEqual(topPadding, 0.0f)) {
+        return defaultValue;
+    }
+
+    bool isCanTopExtend = true;
+    isCanTopExtend &= ((opts.edges & LAYOUT_SAFE_AREA_EDGE_TOP) && (opts.type & LAYOUT_SAFE_AREA_TYPE_SYSTEM));
+    auto navBasePattern = hostNode->GetPattern<NavDestinationPatternBase>();
+    CHECK_NULL_RETURN(navBasePattern, defaultValue);
+    auto barStyle = navBasePattern->GetTitleBarStyle().value_or(BarStyle::STANDARD);
+    if (!(layoutProperty->GetHideTitleBar().value_or(false) || barStyle == BarStyle::STACK ||
+            (barStyle == BarStyle::SAFE_AREA_PADDING && !NearZero(navBasePattern->GetTitleBarOffsetY())))) {
+        isCanTopExtend = false;
+    }
+
+    bool isCanBottomExtend = true;
+    isCanBottomExtend &= ((opts.edges & LAYOUT_SAFE_AREA_EDGE_BOTTOM) && (opts.type & LAYOUT_SAFE_AREA_TYPE_SYSTEM));
+    // toolbar is visible, can't extend
+    if (hostNode->IsToolBarVisible()) {
+        isCanBottomExtend = false;
+    }
+    return std::make_pair(isCanTopExtend, isCanBottomExtend);
+}
 } // namespace OHOS::Ace::NG

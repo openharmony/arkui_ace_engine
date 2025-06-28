@@ -38,7 +38,7 @@ public:
     {}
     ~PluginSubContainer() = default;
 
-    void Initialize();
+    void Initialize(const std::string& codeLanguage);
     void RunPlugin(const std::string& path, const std::string& module, const std::string& source,
         const std::string& moduleResPath, const std::string& data);
     void RunDecompressedPlugin(const std::string& path, const std::string& module, const std::string& source,

@@ -170,8 +170,8 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     if (!fontFamily->IsNull() && !fontFamily->IsUndefined()) {
         std::vector<std::string> fontFamilies;
         RefPtr<ResourceObject> fontFamiliesResObj;
-        font.fontFamilies = fontFamilies;
         if (JSContainerBase::ParseJsFontFamilies(fontFamily, fontFamilies, fontFamiliesResObj)) {
+            font.fontFamilies = fontFamilies;
             if (SystemProperties::ConfigChangePerform() && fontFamiliesResObj) {
                 RegisterResource<std::vector<std::string>>(
                     "FontFamily", fontFamiliesResObj, fontFamilies);
@@ -204,8 +204,6 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
         auto theme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         fontSize = theme->GetTextStyle().GetFontSize();
- 
- 
     }
     UnRegisterResource("FontSize");
     TextModel::GetInstance()->SetFontSize(fontSize);
@@ -636,11 +634,20 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
     JSRef<JSVal> args = info[0];
-    if (!ParseJsDimensionFpNG(args, value, false)) {
+    RefPtr<ResourceObject> resObj;
+    if (!ParseJsDimensionFpNG(args, value, resObj, false)) {
         value.Reset();
         TextModel::GetInstance()->SetLetterSpacing(value);
         return;
+    } else if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<CalcDimension>("LetterSpacing", resObj, value);
+        return;
     }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<CalcDimension>("LetterSpacing", resObj, value);
+        return;
+    }
+    UnRegisterResource("LetterSpacing");
     TextModel::GetInstance()->SetLetterSpacing(value);
 }
 
@@ -876,7 +883,7 @@ void JSText::Create(const JSCallbackInfo& info)
         jsController->SetController(controller);
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
             auto styledString = jsController->GetStyledString();
-            if (styledString) {
+            if (styledString && controller) {
                 controller->SetStyledString(styledString, false);
                 jsController->ClearStyledString();
             }
@@ -1146,6 +1153,10 @@ void JSText::SetShaderStyle(const JSCallbackInfo& info)
 void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient)
 {
     CalcDimension value;
+    if (info.Length() < 1 || (info.Length() > 0 && !info[0]->IsObject())) {
+        TextModel::GetInstance()->ResetGradientShaderStyle();
+        return;
+    }
     auto shaderStyleObj = JSRef<JSObject>::Cast(info[0]);
     if (shaderStyleObj->HasProperty("center") && shaderStyleObj->HasProperty("radius")) {
         NewJsRadialGradient(info, gradient);
@@ -1153,9 +1164,38 @@ void JSText::ParseShaderStyle(const JSCallbackInfo& info, NG::Gradient& gradient
     } else if (shaderStyleObj->HasProperty("colors")) {
         NewJsLinearGradient(info, gradient);
         TextModel::GetInstance()->SetGradientShaderStyle(gradient);
+    } else if (shaderStyleObj->HasProperty("color")) {
+        Color textColor;
+        auto infoColor = shaderStyleObj->GetProperty("color");
+        ParseJsColor(infoColor, textColor);
+        TextModel::GetInstance()->SetColorShaderStyle(textColor);
     } else {
         TextModel::GetInstance()->ResetGradientShaderStyle();
     }
+}
+
+void JSText::SetContentTransition(const JSCallbackInfo& info)
+{
+    if (info.Length() > 0 && !info[0]->IsObject()) {
+        TextModel::GetInstance()->ResetContentTransition();
+        return;
+    }
+    auto contentTransitionObj = JSRef<JSObject>::Cast(info[0]);
+    TextFlipDirection direction = TextFlipDirection::DOWN;
+    bool enableBlur = false;
+    if (contentTransitionObj->HasProperty("flipDirection")) {
+        auto directionObj = contentTransitionObj->GetProperty("flipDirection");
+        if (directionObj->IsNumber()) {
+            direction = static_cast<TextFlipDirection>(directionObj->ToNumber<int32_t>());
+        }
+    }
+    if (contentTransitionObj->HasProperty("enableBlur")) {
+        auto enableBlurObj = contentTransitionObj->GetProperty("enableBlur");
+        if (enableBlurObj->IsBoolean()) {
+            enableBlur = enableBlurObj->ToBoolean();
+        }
+    }
+    TextModel::GetInstance()->SetContentTransition(TextEffectStrategy::FLIP, direction, enableBlur);
 }
 
 void JSText::JSBind(BindingTarget globalObj)
@@ -1195,6 +1235,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("selectedBackgroundColor", &JSText::SetSelectedBackgroundColor);
     JSClass<JSText>::StaticMethod("decoration", &JSText::SetDecoration);
     JSClass<JSText>::StaticMethod("heightAdaptivePolicy", &JSText::SetHeightAdaptivePolicy);
+    JSClass<JSText>::StaticMethod("contentTransition", &JSText::SetContentTransition);
     JSClass<JSText>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSText>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
     JSClass<JSText>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);

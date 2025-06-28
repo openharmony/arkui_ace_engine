@@ -138,11 +138,25 @@ public:
         windowRectImpl_ = std::move(callback);
     }
 
+    void InitGetGlobalWindowRectCallback(std::function<Rect()>&& callback)
+    {
+        globalDisplayWindowRectImpl_ = std::move(callback);
+    }
+
     virtual Rect GetCurrentWindowRect() const
     {
         Rect rect;
         if (windowRectImpl_) {
             rect = windowRectImpl_();
+        }
+        return rect;
+    }
+
+    virtual Rect GetGlobalDisplayWindowRect() const
+    {
+        Rect rect;
+        if (globalDisplayWindowRectImpl_) {
+            rect = globalDisplayWindowRectImpl_();
         }
         return rect;
     }
@@ -265,6 +279,7 @@ protected:
 
 private:
     std::function<Rect()> windowRectImpl_;
+    std::function<Rect()> globalDisplayWindowRectImpl_;
     std::unique_ptr<PlatformWindow> platformWindow_;
 
     ACE_DISALLOW_COPY_AND_MOVE(Window);

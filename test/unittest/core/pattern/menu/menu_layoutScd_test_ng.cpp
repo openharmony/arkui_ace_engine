@@ -48,6 +48,7 @@
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -266,6 +267,9 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4200, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
     auto menuGeometryNode = menuNode->GetGeometryNode();
     ASSERT_NE(menuGeometryNode, nullptr);
@@ -338,6 +342,9 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4300, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
     auto menuGeometryNode = menuNode->GetGeometryNode();
     ASSERT_NE(menuGeometryNode, nullptr);
@@ -401,6 +408,9 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4400, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
     auto menuGeometryNode = menuNode->GetGeometryNode();
     ASSERT_NE(menuGeometryNode, nullptr);
@@ -417,7 +427,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4400, TestSize.Level1)
     menuAlgorithm->targetOffset_ = OffsetF(OFFSET_FORTH, OFFSET_FORTH);
     menuAlgorithm->targetSecurity_ = TARGET_SECURITY.ConvertToPx();
     menuAlgorithm->previewScale_ = 1.0f;
-    auto pipelineContext = menuAlgorithm->GetCurrentPipelineContext();
+    auto pipelineContext = DialogManager::GetMainPipelineContext(menuNode);
     ASSERT_NE(pipelineContext, nullptr);
 
     /**
@@ -470,6 +480,9 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4500, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
     auto menuGeometryNode = menuNode->GetGeometryNode();
     ASSERT_NE(menuGeometryNode, nullptr);
@@ -486,7 +499,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4500, TestSize.Level1)
     menuAlgorithm->targetOffset_ = OffsetF(OFFSET_FORTH, 0.0f);
     menuAlgorithm->targetSecurity_ = TARGET_SECURITY.ConvertToPx();
     menuAlgorithm->previewScale_ = 1.0f;
-    auto pipelineContext = menuAlgorithm->GetCurrentPipelineContext();
+    auto pipelineContext = DialogManager::GetMainPipelineContext(menuNode);
     ASSERT_NE(pipelineContext, nullptr);
 
     /**
@@ -524,14 +537,15 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4600, TestSize.Level1)
     ScreenSystemManager::GetInstance().dipScale_ = DIP_SCALE;
     ScreenSystemManager::GetInstance().screenWidth_ = FULL_SCREEN_HEIGHT;
     auto context = PipelineBase::GetCurrentContext();
-    if (context) {
-        context->dipScale_ = DIP_SCALE;
-    }
+    context->dipScale_ = context ? DIP_SCALE : context->dipScale_;
     SystemProperties::SetDeviceType(DeviceType::TABLET);
     auto menuWrapperNode = GetPreviewMenuWrapper();
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
     auto menuGeometryNode = menuNode->GetGeometryNode();
     ASSERT_NE(menuGeometryNode, nullptr);
@@ -548,7 +562,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4600, TestSize.Level1)
     menuAlgorithm->targetOffset_ = OffsetF(OFFSET_THIRD, OFFSET_THIRD);
     menuAlgorithm->targetSecurity_ = TARGET_SECURITY.ConvertToPx();
     menuAlgorithm->previewScale_ = 1.0f;
-    auto pipelineContext = menuAlgorithm->GetCurrentPipelineContext();
+    auto pipelineContext = DialogManager::GetMainPipelineContext(menuNode);
     ASSERT_NE(pipelineContext, nullptr);
 
     /**
@@ -604,6 +618,9 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg4700, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
     ASSERT_NE(menuAlgorithmWrapper, nullptr);
     auto menuGeometryNode = menuNode->GetGeometryNode();
@@ -816,6 +833,9 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5100, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
     auto menuGeometryNode = menuNode->GetGeometryNode();
     ASSERT_NE(menuGeometryNode, nullptr);
@@ -875,6 +895,9 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5200, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
     auto menuGeometryNode = menuNode->GetGeometryNode();
     ASSERT_NE(menuGeometryNode, nullptr);
@@ -932,6 +955,9 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5300, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
     auto menuGeometryNode = menuNode->GetGeometryNode();
     ASSERT_NE(menuGeometryNode, nullptr);
@@ -1001,6 +1027,9 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5400, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
     auto menuGeometryNode = menuNode->GetGeometryNode();
     ASSERT_NE(menuGeometryNode, nullptr);
@@ -1075,6 +1104,9 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5500, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
     auto menuGeometryNode = menuNode->GetGeometryNode();
     ASSERT_NE(menuGeometryNode, nullptr);
@@ -1091,7 +1123,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5500, TestSize.Level1)
     menuAlgorithm->targetOffset_ = OffsetF(OFFSET_FORTH, OFFSET_THIRD);
     menuAlgorithm->targetSecurity_ = TARGET_SECURITY.ConvertToPx();
     menuAlgorithm->previewScale_ = 1.0f;
-    auto pipelineContext = menuAlgorithm->GetCurrentPipelineContext();
+    auto pipelineContext = DialogManager::GetMainPipelineContext(menuNode);
     ASSERT_NE(pipelineContext, nullptr);
 
     /**
@@ -1136,6 +1168,9 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5600, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
     auto menuGeometryNode = menuNode->GetGeometryNode();
     ASSERT_NE(menuGeometryNode, nullptr);
@@ -1198,6 +1233,9 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5700, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
     auto menuGeometryNode = menuNode->GetGeometryNode();
     ASSERT_NE(menuGeometryNode, nullptr);
@@ -1254,6 +1292,9 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5800, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
+    auto container = Container::Current();
+    menuNode->instanceId_ = container->GetInstanceId();
+    AceEngine::Get().AddContainer(container->GetInstanceId(), container);
     auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
     auto menuGeometryNode = menuNode->GetGeometryNode();
     ASSERT_NE(menuGeometryNode, nullptr);
@@ -1269,7 +1310,7 @@ HWTEST_F(MenuLayout2TestNg, MenuLayoutAlgorithmTestNg5800, TestSize.Level1)
     menuAlgorithm->targetOffset_ = OffsetF(OFFSET_FORTH, 0.0f);
     menuAlgorithm->targetSecurity_ = TARGET_SECURITY.ConvertToPx();
     menuAlgorithm->previewScale_ = 1.0f;
-    auto pipelineContext = menuAlgorithm->GetCurrentPipelineContext();
+    auto pipelineContext = DialogManager::GetMainPipelineContext(menuNode);
     ASSERT_NE(pipelineContext, nullptr);
 
     /**
@@ -1902,7 +1943,8 @@ HWTEST_F(MenuLayout2TestNg, IsSelectMenuShowInSubWindow005, TestSize.Level1)
 
 /**
  * @tc.name: IsSelectMenuShowInSubWindow006
- * @tc.desc: test theme->GetExpandDisplay()为true but menuLayoutProperty->GetShowInSubWindowValue(false) is false, return false
+ * @tc.desc: test theme->GetExpandDisplay() is true but menuLayoutProperty->GetShowInSubWindowValue(false) is false,
+ * return false
  * @tc.type: FUNC
  */
 HWTEST_F(MenuLayout2TestNg, IsSelectMenuShowInSubWindow006, TestSize.Level1)

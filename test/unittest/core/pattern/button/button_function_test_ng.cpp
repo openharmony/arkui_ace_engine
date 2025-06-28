@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -107,6 +107,9 @@ class ButtonFunctionTestNg : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+    static void CreateLayoutTask(const RefPtr<FrameNode>& frameNode);
+    static RefPtr<FrameNode> CreateButton(
+        const std::u16string& content, const std::function<void(ButtonModelNG)>& callback);
 
 protected:
     PaddingProperty CreatePadding(float left, float top, float right, float bottom);
@@ -301,6 +304,27 @@ void ButtonFunctionTestNg::CheckTextMarqueeOption(RefPtr<FrameNode> frameNode, b
     EXPECT_EQ(textLayoutProp->GetTextMarqueeFadeout(), true);
     EXPECT_EQ(textLayoutProp->GetTextMarqueeStart(), isMarqueeStart);
     EXPECT_EQ(textLayoutProp->GetTextMarqueeStartPolicy(), MarqueeStartPolicy::DEFAULT);
+}
+
+RefPtr<FrameNode> ButtonFunctionTestNg::CreateButton(
+    const std::u16string& content, const std::function<void(ButtonModelNG)>& callback)
+{
+    ButtonModelNG model;
+    std::string contentStr(content.begin(), content.end());
+    model.Create(contentStr);
+    if (callback) {
+        callback(model);
+    }
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    ViewStackProcessor::GetInstance()->PopContainer();
+    return AceType::DynamicCast<FrameNode>(element);
+}
+
+void ButtonFunctionTestNg::CreateLayoutTask(const RefPtr<FrameNode>& frameNode)
+{
+    frameNode->SetActive();
+    frameNode->SetLayoutDirtyMarked(true);
+    frameNode->CreateLayoutTask();
 }
 
 /**
@@ -1533,7 +1557,7 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest024, TestSize.Level1)
     buttonPattern->HandleBlurStyleTask();
     buttonPattern->RemoveIsFocusActiveUpdateEvent();
     buttonPattern->UpdateButtonStyle();
-    
+
     /**
      * @tc.steps: step6. visit function CheckTextMarqueeOption.
      * @tc.expected: step6. check whether the properties is correct.
@@ -1541,4 +1565,42 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest024, TestSize.Level1)
     CheckTextMarqueeOption(frameNode, false);
 }
 
+/**
+ * @tc.name: test match parent layout policy.
+ * @tc.desc: test the measure result when setting layoutPolicy is match parent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, LayoutPolicyTest001, TestSize.Level1)
+{
+    RefPtr<FrameNode> button;
+    RefPtr<FrameNode> frameNode = CreateButton(u"partent", [this, &button](ButtonModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        button = CreateButton(u"child", [](ButtonModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+        });
+    });
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(button, nullptr);
+    ASSERT_EQ(frameNode->GetChildren().size(), 1);
+    CreateLayoutTask(frameNode);
+
+    // Expect button's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect button1's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode1 = button->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+}
 } // namespace OHOS::Ace::NG

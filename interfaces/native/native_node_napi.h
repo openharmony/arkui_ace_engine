@@ -70,6 +70,28 @@ int32_t OH_ArkUI_GetContextFromNapiValue(napi_env env, napi_value value, ArkUI_C
 int32_t OH_ArkUI_GetNodeContentFromNapiValue(napi_env env, napi_value value, ArkUI_NodeContentHandle* content);
 
 /**
+ * @brief Initialize the ArkTS method for the specified env environment. Cannot be called on
+ *        the non-UI thread. Checking for non-UI thread calls will abort.
+ *
+ * @param env napi environment pointer.
+ * @return The error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if env is null or failed to set the whitelist.
+ *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
+ * @since 20
+ */
+ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env);
+
+/**
+ * @brief Notify the specified env environment is invalid. Cannot be called on
+ *        the non-UI thread. Checking for non-UI thread calls will abort.
+ *
+ * @param env napi environment pointer.
+ * @since 20
+ */
+void OH_ArkUI_NotifyArkTSEnvDestroy(napi_env env);
+
+/**
  * @brief Obtain the ID of the Navigation component where the node is located.
  *
  * @param node The node.

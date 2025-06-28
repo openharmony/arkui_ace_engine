@@ -30,7 +30,7 @@ public:
  * @tc.desc: Test images size before and after type switching, resource to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0024, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0024, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -82,7 +82,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0024, TestSize.Level1)
  * @tc.desc: Test isAnimation before and after type switching, resource to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0025, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0025, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -134,7 +134,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0025, TestSize.Level1)
  * @tc.desc: Test status before and after type switching, resource to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0026, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0026, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -186,7 +186,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0026, TestSize.Level1)
  * @tc.desc: Test durationTotal before and after type switching, resource to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0027, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0027, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -238,7 +238,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0027, TestSize.Level1)
  * @tc.desc: Test nowImageIndex before and after type switching, resource to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0028, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0028, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -290,7 +290,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0028, TestSize.Level1)
  * @tc.desc: Test isSrcUndefined before and after type switching, resource to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0029, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0029, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -342,7 +342,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0029, TestSize.Level1)
  * @tc.desc: Test ImageType before and after type switching, resource to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0030, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0030, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -394,7 +394,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0030, TestSize.Level1)
  * @tc.desc: Test Duration before and after type switching, pixelMap list to undefined
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0031, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0031, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     std::vector<ImageProperties> images;
@@ -446,7 +446,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0031, TestSize.Level1)
  * @tc.desc: Test Iteration before and after type switching, pixelMap list to undefined
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0032, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0032, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     std::vector<ImageProperties> images;
@@ -498,7 +498,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0032, TestSize.Level1)
  * @tc.desc: Test durationTotal before and after type switching, pixelMap list to undefined
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0033, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0033, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     std::vector<ImageProperties> images;
@@ -550,7 +550,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0033, TestSize.Level1)
  * @tc.desc: Test nowImageIndex before and after type switching, pixelMap list to undefined
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0034, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0034, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     std::vector<ImageProperties> images;
@@ -602,7 +602,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0034, TestSize.Level1)
  * @tc.desc: Test Test frameNode before and after type switching, undefined to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0035, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0035, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -656,7 +656,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0035, TestSize.Level1)
  * @tc.desc: Test Duration before and after type switching, undefined to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0036, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0036, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -708,7 +708,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0036, TestSize.Level1)
  * @tc.desc: Test Iteration before and after type switching, undefined to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0037, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0037, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -760,7 +760,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0037, TestSize.Level1)
  * @tc.desc: Test images size before and after type switching, undefined to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0038, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0038, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -812,7 +812,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0038, TestSize.Level1)
  * @tc.desc: Test isAnimation before and after type switching, undefined to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0039, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0039, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -864,7 +864,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0039, TestSize.Level1)
  * @tc.desc: Test status before and after type switching, undefined to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0040, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0040, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -916,7 +916,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0040, TestSize.Level1)
  * @tc.desc: Test durationTotal before and after type switching, undefined to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0041, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0041, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -968,7 +968,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0041, TestSize.Level1)
  * @tc.desc: Test nowImageIndex before and after type switching, undefined to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0042, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0042, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -1020,7 +1020,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0042, TestSize.Level1)
  * @tc.desc: Test isSrcUndefined before and after type switching, undefined to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0043, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0043, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -1072,7 +1072,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0043, TestSize.Level1)
  * @tc.desc: Test ImageType before and after type switching, undefined to pixelMap list
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0044, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0044, TestSize.Level0)
 {
     ImageModelNG imageModelNG;
     RefPtr<PixelMap> pixMap = nullptr;
@@ -1124,7 +1124,7 @@ HWTEST_F(ImageTestThreeNg, ImagePixelMapListTest0044, TestSize.Level1)
  * @tc.desc: call CreateCompleteCallBackInDataReady.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternCreateCompleteCallBackInDataReady, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternCreateCompleteCallBackInDataReady, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1141,7 +1141,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternCreateCompleteCallBackInDataReady, TestSi
  * @tc.desc: call SetOnFinishCallback.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternSetOnFinishCallback, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternSetOnFinishCallback, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1163,7 +1163,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternSetOnFinishCallback, TestSize.Level1)
  * @tc.desc: call CheckHandles.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternCheckHandles, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternCheckHandles, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1180,7 +1180,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternCheckHandles, TestSize.Level1)
  * @tc.desc: call CalAndUpdateSelectOverlay.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternCalAndUpdateSelectOverlay, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternCalAndUpdateSelectOverlay, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1200,7 +1200,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternCalAndUpdateSelectOverlay, TestSize.Level
  * @tc.desc: call GetParentGlobalOffset.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternGetParentGlobalOffset, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternGetParentGlobalOffset, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1216,7 +1216,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternGetParentGlobalOffset, TestSize.Level1)
  * @tc.desc: call OnAreaChangedInner.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternOnAreaChangedInner, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternOnAreaChangedInner, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1233,7 +1233,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnAreaChangedInner, TestSize.Level1)
  * @tc.desc: call StartDecoding.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternStartDecoding, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternStartDecoding, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1250,7 +1250,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternStartDecoding, TestSize.Level1)
  * @tc.desc: call OnRecycle.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternOnRecycle, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternOnRecycle, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1266,7 +1266,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnRecycle, TestSize.Level1)
  * @tc.desc: call OnReuse.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternOnReuse, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternOnReuse, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1282,7 +1282,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnReuse, TestSize.Level1)
  * @tc.desc: call HandleCopy.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternHandleCopy, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternHandleCopy, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1339,7 +1339,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternHandleCopy, TestSize.Level1)
  * @tc.desc: call ToJsonValue.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternToJsonValue, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternToJsonValue, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1357,7 +1357,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternToJsonValue, TestSize.Level1)
  * @tc.desc: call UpdateFillColorIfForegroundColor.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternUpdateFillColorIfForegroundColor, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternUpdateFillColorIfForegroundColor, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1374,7 +1374,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternUpdateFillColorIfForegroundColor, TestSiz
  * @tc.desc: call BetweenSelectedPosition.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternBetweenSelectedPosition, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternBetweenSelectedPosition, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1393,7 +1393,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternBetweenSelectedPosition, TestSize.Level1)
  * @tc.desc: call GetImageColorFilterStr.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternGetImageColorFilterStr, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternGetImageColorFilterStr, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1408,11 +1408,72 @@ HWTEST_F(ImageTestThreeNg, ImagePatternGetImageColorFilterStr, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ImagePatternGetSrcTypeToString001
+ * @tc.desc: call GetSrcTypeToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternGetSrcTypeToString001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode and imagePattern.
+     */
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    /**
+     * @tc.steps: step2. SrcType value should be we set.
+     */
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::UNSUPPORTED).c_str(), "unsupported");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::FILE).c_str(), "file");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::ASSET).c_str(), "asset");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::NETWORK).c_str(), "network");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::MEMORY).c_str(), "memory");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::BASE64).c_str(), "base64");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::INTERNAL).c_str(), "internal");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::RESOURCE).c_str(), "resource");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::DATA_ABILITY).c_str(), "dataAbility");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::DATA_ABILITY_DECODED).c_str(), "dataAbilityDecoded");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::RESOURCE_ID).c_str(), "resourceId");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::PIXMAP).c_str(), "pixmap");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::ASTC).c_str(), "astc");
+}
+
+/**
+ * @tc.name: ImagePatternGetSrcTypeToString002
+ * @tc.desc: call GetSrcTypeToString with error type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternGetSrcTypeToString002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode and imagePattern.
+     */
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    std::string retStr;
+
+    /**
+     * @tc.steps: step2. call GetSrcTypeToString with error value.
+     */
+    auto errType = static_cast<SrcType>(99);
+    retStr = imagePattern->GetSrcTypeToString(errType);
+
+    /**
+     * @tc.steps: step3. SrcType value should be null string.
+     */
+    EXPECT_STREQ(retStr.c_str(), "");
+}
+
+/**
  * @tc.name: ImagePatternSetImageAnalyzerConfig
  * @tc.desc: call SetImageAnalyzerConfig.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternSetImageAnalyzerConfig, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternSetImageAnalyzerConfig, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1430,7 +1491,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternSetImageAnalyzerConfig, TestSize.Level1)
  * @tc.desc: call CreateAnalyzerOverlay.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternCreateAnalyzerOverlay, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternCreateAnalyzerOverlay, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1488,7 +1549,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternCreateAnalyzerOverlay, TestSize.Level1)
  * @tc.desc: call UpdateAnalyzerOverlayLayout.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternUpdateAnalyzerOverlayLayout, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternUpdateAnalyzerOverlayLayout, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1506,7 +1567,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternUpdateAnalyzerOverlayLayout, TestSize.Lev
  * @tc.desc: call DestroyAnalyzerOverlay.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternDestroyAnalyzerOverlay, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternDestroyAnalyzerOverlay, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1524,7 +1585,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternDestroyAnalyzerOverlay, TestSize.Level1)
  * @tc.desc: call ReleaseImageAnalyzer.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternReleaseImageAnalyzer, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternReleaseImageAnalyzer, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1542,7 +1603,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternReleaseImageAnalyzer, TestSize.Level1)
  * @tc.desc: call UpdateAnalyzerUIConfig.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternUpdateAnalyzerUIConfig, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternUpdateAnalyzerUIConfig, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1559,7 +1620,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternUpdateAnalyzerUIConfig, TestSize.Level1)
  * @tc.desc: call hasSceneChanged.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternhasSceneChanged, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternhasSceneChanged, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1575,7 +1636,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternhasSceneChanged, TestSize.Level1)
  * @tc.desc: call ResetImage.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternResetImage, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternResetImage, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1591,7 +1652,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternResetImage, TestSize.Level1)
  * @tc.desc: call ResetAltImage.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternResetAltImage001, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternResetAltImage001, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -1649,7 +1710,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternResetAltImage001, TestSize.Level1)
  * @tc.desc: call ResetAltImage.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternResetAltImage002, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternResetAltImage002, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1665,7 +1726,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternResetAltImage002, TestSize.Level1)
  * @tc.desc: call ResetPictureSize.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternResetPictureSize, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternResetPictureSize, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1681,7 +1742,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternResetPictureSize, TestSize.Level1)
  * @tc.desc: call SetColorFilter.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternSetColorFilter, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternSetColorFilter, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1697,7 +1758,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternSetColorFilter, TestSize.Level1)
  * @tc.desc: call SetImageFit.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternSetImageFit, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternSetImageFit, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1767,7 +1828,7 @@ void ImagePatternMethods01()
  * @tc.desc: call void methods.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternMethods, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternMethods, TestSize.Level0)
 {
     ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ImagePatternMethods01();
@@ -1778,7 +1839,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternMethods, TestSize.Level1)
  * @tc.desc: call IsSupportImageAnalyzerFeature.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternIsSupportImageAnalyzerFeature0045, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternIsSupportImageAnalyzerFeature0045, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1796,7 +1857,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternIsSupportImageAnalyzerFeature0045, TestSi
  * @tc.desc: call ResetFormAnimationStartTime.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternResetFormAnimationStartTime0046, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternResetFormAnimationStartTime0046, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1813,7 +1874,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternResetFormAnimationStartTime0046, TestSize
  * @tc.desc: call UpdateFormDurationByRemainder.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternUpdateFormDurationByRemainder0047, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternUpdateFormDurationByRemainder0047, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1833,7 +1894,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternUpdateFormDurationByRemainder0047, TestSi
  * @tc.desc: call hasSceneChanged.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternhasSceneChanged0048, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternhasSceneChanged0048, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1850,7 +1911,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternhasSceneChanged0048, TestSize.Level1)
  * @tc.desc: call OnAreaChangedInner.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternOnAreaChangedInner111, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternOnAreaChangedInner111, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1867,7 +1928,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnAreaChangedInner111, TestSize.Level1)
  * @tc.desc: Test Image related method calls.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternCreateNodePaintMethod0050, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternCreateNodePaintMethod0050, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1882,7 +1943,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternCreateNodePaintMethod0050, TestSize.Level
  * @tc.desc: Test Image related method calls.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternOnDirtyLayoutWrapperSwap0051, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternOnDirtyLayoutWrapperSwap0051, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1915,7 +1976,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnDirtyLayoutWrapperSwap0051, TestSize.Le
  * @tc.desc: Test Image related method calls.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternOnImageModifyDone0052, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternOnImageModifyDone0052, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1931,7 +1992,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnImageModifyDone0052, TestSize.Level1)
  * @tc.desc: Test Image related method calls.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternControlAnimation0053, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternControlAnimation0053, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1954,7 +2015,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternControlAnimation0053, TestSize.Level1)
  * @tc.desc: call OnAreaChangedInner.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternOnAreaChangedInner0054, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternOnAreaChangedInner0054, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -1972,7 +2033,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnAreaChangedInner0054, TestSize.Level1)
  * @tc.desc: call OnAreaChangedInner.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternIsSupportImageAnalyzerFeature0055, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternIsSupportImageAnalyzerFeature0055, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -2000,7 +2061,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternIsSupportImageAnalyzerFeature0055, TestSi
  * @tc.desc: call OnAreaChangedInner.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternSetImageAIOptions0056, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternSetImageAIOptions0056, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -2017,7 +2078,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternSetImageAIOptions0056, TestSize.Level1)
  * @tc.desc: call OnAreaChangedInner.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternEnableAnalyzer0057, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternEnableAnalyzer0057, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -2035,7 +2096,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternEnableAnalyzer0057, TestSize.Level1)
  * @tc.desc: call OnAreaChangedInner.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternGetImageColorFilterStr0058, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternGetImageColorFilterStr0058, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -2053,7 +2114,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternGetImageColorFilterStr0058, TestSize.Leve
  * @tc.desc: call OnAreaChangedInner.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternOnLanguageConfigurationUpdate0059, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternOnLanguageConfigurationUpdate0059, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -2073,7 +2134,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnLanguageConfigurationUpdate0059, TestSi
  * @tc.desc: call OnAreaChangedInner.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternOnAttachToFrameNode0060, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternOnAttachToFrameNode0060, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -2089,7 +2150,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternOnAttachToFrameNode0060, TestSize.Level1)
  * @tc.desc: call OnAreaChangedInner.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternUpdateDragEvent0061, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternUpdateDragEvent0061, TestSize.Level0)
 {
     auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
     ASSERT_NE(frameNode, nullptr);
@@ -2114,7 +2175,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternUpdateDragEvent0061, TestSize.Level1)
  * @tc.desc: call UpdateDragEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImagePatternUpdateDragEvent0062, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImagePatternUpdateDragEvent0062, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -2153,7 +2214,7 @@ HWTEST_F(ImageTestThreeNg, ImagePatternUpdateDragEvent0062, TestSize.Level1)
  * @tc.desc: call Creat.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImageCreator0063, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImageCreator0063, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -2191,7 +2252,7 @@ HWTEST_F(ImageTestThreeNg, ImageCreator0063, TestSize.Level1)
  * @tc.desc: call Creat.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ImageCreator0064, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ImageCreator0064, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -2227,7 +2288,7 @@ HWTEST_F(ImageTestThreeNg, ImageCreator0064, TestSize.Level1)
  * @tc.desc: call ResetImage.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ResetImage0065, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ResetImage0065, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.
@@ -2270,7 +2331,7 @@ HWTEST_F(ImageTestThreeNg, ResetImage0065, TestSize.Level1)
  * @tc.desc: call ResetImage.
  * @tc.type: FUNC
  */
-HWTEST_F(ImageTestThreeNg, ResetImage0066, TestSize.Level1)
+HWTEST_F(ImageTestThreeNg, ResetImage0066, TestSize.Level0)
 {
     /**
      * @tc.steps: step1. create Image frameNode.

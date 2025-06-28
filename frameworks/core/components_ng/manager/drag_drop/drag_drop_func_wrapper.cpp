@@ -734,6 +734,8 @@ void DragDropFuncWrapper::ConvertPointerEvent(const TouchEvent& touchPoint, Drag
     event.windowY = touchPoint.y;
     event.displayX = touchPoint.screenX;
     event.displayY = touchPoint.screenY;
+    event.globalDisplayX = touchPoint.globalDisplayX;
+    event.globalDisplayY = touchPoint.globalDisplayY;
     event.deviceId = touchPoint.deviceId;
     event.displayId = touchPoint.targetDisplayId;
     event.x = event.windowX;
@@ -1527,10 +1529,11 @@ void DragDropFuncWrapper::ProcessDragDropData(const RefPtr<OHOS::Ace::DragEvent>
         DragDropBehaviorReporter::GetInstance().UpdateRecordSize(unifiedData->GetSize());
     }
     auto dataLoadParams = dragEvent->GetDataLoadParams();
-    if (dataLoadParams) {
+    auto isUseDataLoadParams = dragEvent->IsUseDataLoadParams();
+    if (dataLoadParams && isUseDataLoadParams) {
         UdmfClient::GetInstance()->SetDelayInfo(dataLoadParams, udKey);
     }
-    if (unifiedData) {
+    if (unifiedData && !isUseDataLoadParams) {
         ACE_SCOPED_TRACE("drag: set drag data to udmf");
         if (UdmfClient::GetInstance()->SetData(unifiedData, udKey) != 0) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF set data failed, return value is %{public}d", ret);

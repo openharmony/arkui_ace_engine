@@ -23,3 +23,13 @@ ohos_unittest("container_scope_test") {
 
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
+
+ace_unittest("color_inverter_test") {
+  type = "new"
+  module_out_path = frameworks_test_output_path
+  sources = [
+    "color_inverter_test.cpp",
+  ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+}

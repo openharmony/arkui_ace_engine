@@ -70,7 +70,7 @@ using CardViewPositionCallBack = std::function<void(int id, float offsetX, float
 using DragEventCallBack = std::function<void(const DragPointerEvent&, const DragEventAction&,
     const RefPtr<NG::FrameNode>&)>;
 using StopDragCallback = std::function<void()>;
-using CrownEventCallback = std::function<bool(const CrownEvent&, const std::function<void()>&)>;
+using CrownEventCallback = std::function<void(const CrownEvent&, const std::function<void()>&)>;
 
 class PipelineBase;
 
@@ -697,6 +697,15 @@ public:
     {
         return false;
     }
+    virtual Rect GetGlobalScaledRect() const
+    {
+        return Rect();
+    }
+
+    virtual bool IsPcOrFreeMultiWindowCapability() const
+    {
+        return false;
+    }
 
     virtual Rect GetUIExtensionHostWindowRect()
     {
@@ -764,6 +773,8 @@ public:
     static bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes);
 
     virtual void UpdateColorMode(uint32_t colorMode) {};
+
+    virtual void TriggerModuleSerializer() {};
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::vector<std::string> GetFontFamilyName(const std::string& path);

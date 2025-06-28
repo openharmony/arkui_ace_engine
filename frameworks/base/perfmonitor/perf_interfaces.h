@@ -43,10 +43,12 @@ public:
     static void StartCommercial(const std::string& sceneId, PerfActionType type, const std::string& note);
     static void EndCommercial(const std::string& sceneId, bool isRsRender);
     static void SetFrameTime(int64_t vsyncTime, int64_t duration, double jank, const std::string& windowName);
+    static void SetSubHealthInfo(const std::string& info, const std::string& reason, const int32_t duration);
 
     static void ReportJankFrameApp(double jank, int32_t jankThreshold);
     static void ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
         const std::string& pageName);
+    static void SetApplicationInfo();
 };
 
 } // namespace OHOS::Ace

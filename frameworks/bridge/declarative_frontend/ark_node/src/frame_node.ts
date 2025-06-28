@@ -53,6 +53,7 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
   protected _nativeRef: NativeStrongRef | NativeWeakRef;
   protected renderNode_: RenderNode;
   protected baseNode_: BaseNode;
+  protected builderNode_: JSBuilderNode;
   protected uiContext_: UIContext | undefined | null;
   protected nodePtr_: NodePtr;
   protected instanceId_?: number;
@@ -147,6 +148,12 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
     this.baseNode_ = baseNode;
     this.renderNode_?.setBaseNode(baseNode);
   }
+  setBuilderNode(builderNode: JSBuilderNode | null): void {
+    this.builderNode_ = builderNode;
+  }
+  getBuilderNode(): JSBuilderNode | null {
+    return this.builderNode_ || null;
+  }
   setAdapterRef(adapter: NodeAdapter | undefined): void {
     this.nodeAdapterRef_ = adapter;
   }
@@ -163,6 +170,9 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
   }
   dispose(): void {
     super.dispose();
+    if (this.nodePtr_) {
+      getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
+    }
     this.renderNode_?.dispose();
     FrameNodeFinalizationRegisterProxy.ElementIdToOwningFrameNode_.delete(this._nodeId);
     this._nodeId = -1;
@@ -238,6 +248,7 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, node.nodePtr_);
+    getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, node.nodePtr_);
     __JSScopeUtil__.restoreInstanceId();
     if (!flag) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
@@ -254,6 +265,7 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     let flag = getUINativeModule().frameNode.appendChild(this.nodePtr_, content.getNodeWithoutProxy());
+    getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, content.getNodePtr());
     __JSScopeUtil__.restoreInstanceId();
     if (!flag) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
@@ -267,6 +279,7 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
       return;
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    getUINativeModule().frameNode.removeBuilderNode(this.nodePtr_, content.getNodePtr());
     getUINativeModule().frameNode.removeChild(this.nodePtr_, content.getNodePtr());
     content.setAttachedParent(undefined);
     __JSScopeUtil__.restoreInstanceId();
@@ -286,6 +299,7 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
     } else {
       flag = getUINativeModule().frameNode.insertChildAfter(this.nodePtr_, child.nodePtr_, sibling.getNodePtr());
     }
+    getUINativeModule().frameNode.addBuilderNode(this.nodePtr_, child.nodePtr_);
     __JSScopeUtil__.restoreInstanceId();
     if (!flag) {
       throw { message: 'The FrameNode is not modifiable.', code: 100021 };
@@ -298,6 +312,7 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
       return;
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    getUINativeModule().frameNode.removeBuilderNode(this.nodePtr_, node.nodePtr_);
     getUINativeModule().frameNode.removeChild(this.nodePtr_, node.nodePtr_);
     __JSScopeUtil__.restoreInstanceId();
     this._childList.delete(node._nodeId);
@@ -305,6 +320,7 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
 
   clearChildren(): void {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    getUINativeModule().frameNode.clearBuilderNode(this.nodePtr_);
     getUINativeModule().frameNode.clearChildren(this.nodePtr_);
     __JSScopeUtil__.restoreInstanceId();
     this._childList.clear();
@@ -449,6 +465,11 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
 
   getPositionToWindow(): Position {
     const position = getUINativeModule().frameNode.getPositionToWindow(this.getNodePtr());
+    return { x: position[0], y: position[1] };
+  }
+
+  getGlobalPositionOnDisplay(): Position {
+    const position = getUINativeModule().frameNode.getGlobalPositionOnDisplay(this.getNodePtr());
     return { x: position[0], y: position[1] };
   }
 
@@ -1245,6 +1266,96 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
          return undefined;
       }
       node._componentAttribute = new ArkToggleComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Column', (node: FrameNode): ArkColumnComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkColumnComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Row', (node: FrameNode): ArkRowComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkRowComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Stack', (node: FrameNode): ArkStackComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkStackComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Flex', (node: FrameNode): ArkFlexComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkFlexComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['RelativeContainer', (node: FrameNode): ArkRelativeContainerComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkRelativeContainerComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['XComponent', (node: FrameNode): ArkXComponentComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+        return undefined;
+      }
+      node._componentAttribute = new ArkXComponentComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Progress', (node: FrameNode): ArkProgressComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkProgressComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['LoadingProgress', (node: FrameNode): ArkLoadingProgressComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkLoadingProgressComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      return node._componentAttribute;
+    }],
+    ['Image', (node: FrameNode): ArkImageComponent => {
+      if (node._componentAttribute) {
+        return node._componentAttribute;
+      }
+      if (!node.getNodePtr()) {
+         return undefined;
+      }
+      node._componentAttribute = new ArkImageComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }]
   ]

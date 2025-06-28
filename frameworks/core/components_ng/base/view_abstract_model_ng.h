@@ -715,6 +715,21 @@ public:
         ViewAbstract::SetAlign(alignment);
     }
 
+    void SetAlign(const std::string& localizedAlignment) override
+    {
+        ViewAbstract::SetAlign(localizedAlignment);
+    }
+
+    void SetLayoutGravity(const Alignment& alignment) override
+    {
+        ViewAbstract::SetLayoutGravity(alignment);
+    }
+
+    void SetIsMirrorable(const bool& isMirrorable) override
+    {
+        ViewAbstract::SetIsMirrorable(isMirrorable);
+    }
+
     void SetAlignRules(const std::map<AlignDirection, AlignRule>& alignRules) override
     {
         ViewAbstract::SetAlignRules(alignRules);
@@ -974,11 +989,6 @@ public:
         ViewAbstract::SetProgressMask(progress);
     }
 
-    void CreateWithMaskResourceObj(const RefPtr<NG::ProgressMaskProperty>& progress) override
-    {
-        ViewAbstract::CreateWithMaskResourceObj(progress);
-    }
-
     void SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
     {
         ViewAbstract::SetBackdropBlur(radius, blurOption, sysOptions);
@@ -1113,6 +1123,12 @@ public:
     }
 
     void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc, double distanceThreshold) override
+    {
+        ViewAbstract::SetOnClick(std::move(tapEventFunc), distanceThreshold);
+    }
+
+    void SetOnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+        Dimension distanceThreshold) override
     {
         ViewAbstract::SetOnClick(std::move(tapEventFunc), distanceThreshold);
     }
@@ -1449,6 +1465,12 @@ public:
         ViewAbstract::SetFocusBoxStyle(style);
     }
 
+    void SetFocusBoxStyleUpdateFunc(
+        NG::FocusBoxStyle& style, const RefPtr<ResourceObject>& resObj, const std::string& property) override
+    {
+        ViewAbstract::SetFocusBoxStyleUpdateFunc(style, resObj, property);
+    }
+
     void SetInspectorId(const std::string& inspectorId) override
     {
         ViewAbstract::SetInspectorId(inspectorId);
@@ -1586,12 +1608,7 @@ public:
     void BindContextMenu(ResponseType type, std::function<void()>& buildFunc, const MenuParam& menuParam,
         std::function<void()>& previewBuildFunc) override;
 
-    void BindContextMenu(const RefPtr<FrameNode>& targetNode, ResponseType type, std::function<void()>& buildFunc,
-        const NG::MenuParam& menuParam, std::function<void()>& previewBuildFunc) override;
-
     void BindDragWithContextMenuParams(const NG::MenuParam& menuParam) override;
-
-    void BindDragWithContextMenuParams(FrameNode* targetNode, const NG::MenuParam& menuParam) override;
 
     void BindContentCover(bool isShow, std::function<void(const std::string&)>&& callback,
         std::function<void()>&& buildFunc, NG::ModalStyle& modalStyle, std::function<void()>&& onAppear,
@@ -1637,16 +1654,27 @@ public:
     void SetAccessibilityUseSamePage(const std::string& pageMode) override;
     void SetAccessibilityScrollTriggerable(bool triggerable, bool resetValue) override;
     void SetAccessibilityFocusDrawLevel(int32_t drawLevel) override;
-    std::string PopupTypeStr(PopupType& type);
-    void UpdateColor(PopupType& type, const Color& color);
-    void CreateWithColorResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, PopupType& type) override;
-    void CreateWithBoolResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj) override;
-    virtual void CreateWithResourceObj(
-        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj, PopupType type) override;
+    static std::string PopupTypeStr(const PopupType& type);
+    static void UpdateColor(const RefPtr<NG::FrameNode>& frameNode, const PopupType& type, const Color& color);
+    static void CreateWithColorResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& ColorResObj, const PopupType& type);
+    static void CreateWithBoolResourceObj(
+        const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& maskResObj);
+    static std::string PopupOptionTypeStr(const PopupOptionsType& type);
+    static void ParseOptionsDimension(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& dimensionResObj, const PopupOptionsType& type, CalcDimension& dimession);
+    static void CreateWithDimensionResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& dimensionResObj, const PopupOptionsType& type);
+    virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& resourceObj, const PopupType& type) override;
     virtual void CreateWithResourceObj(
         const RefPtr<NG::FrameNode>& frameNode, const RefPtr<ResourceObject>& resourceObj) override;
+    void RemoveResObj(const std::string& key) override
+    {
+        ViewAbstract::RemoveResObj(key);
+    }
+    virtual void CreateWithResourceObj(const RefPtr<NG::FrameNode>& frameNode,
+        const RefPtr<ResourceObject>& resourceObj, const PopupOptionsType& type) override;
     void SetForegroundColor(const Color& color) override
     {
         ViewAbstract::SetForegroundColor(color);
@@ -1844,6 +1872,11 @@ public:
         ViewAbstract::SetFocusScopePriority(focusScopeId, focusPriority);
     }
 
+    void ResetResObj(const std::string& key) override
+    {
+        ViewAbstract::ResetResObj(key);
+    }
+
     static void SetAccessibilityGroup(FrameNode* frameNode, bool accessible);
     static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)
     {
@@ -1919,28 +1952,12 @@ public:
     {
         ViewAbstract::SetCompositingFilter(frameNode, compositingFilter);
     }
+    static void RemoveResObj(FrameNode* frameNode, const std::string& key);
 
-    static void SetAccessibilityVirtualNode(FrameNode* frameNode, std::function<RefPtr<NG::UINode>()>&& buildFunc);
-    static void BindPopup(FrameNode* targetNode, const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode)
-    {
-        CHECK_NULL_VOID(targetNode);
-        ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
-    }
-    static void BindMenu(FrameNode* frameNode, std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
-        const MenuParam& menuParam);
-    static void BindMenuGesture(FrameNode* frameNode, std::vector<NG::OptionParam>&& params,
-        std::function<void()>&& buildFunc, const MenuParam& menuParam);
-    static void BindContextMenuStatic(const RefPtr<FrameNode>& targetNode, ResponseType type,
-        std::function<void()>&& buildFunc, const NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
-    static void BindDragWithContextMenuParamsStatic(FrameNode* targetNode, const NG::MenuParam& menuParam);
 private:
-    static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
-    static void RegisterContextMenuKeyEvent(
+    bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
+    void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>&& buildFunc, const MenuParam& menuParam);
-    static void CreateCustomMenuWithPreview(FrameNode* targetNode, std::function<void()>&& buildFunc,
-        const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
-    static void BindContextMenuSingle(FrameNode* targetNode, std::function<void()>&& buildFunc,
-        const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
 
     void CreateAnimatablePropertyFloat(
         const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent) override

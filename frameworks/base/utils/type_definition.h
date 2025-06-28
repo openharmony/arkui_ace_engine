@@ -18,10 +18,12 @@
 
 #include <chrono>
 
+#ifndef ACE_NON_VIRTUAL
 #ifdef ACE_UNITTEST
 #define ACE_NON_VIRTUAL virtual // support gmock in unitest
 #else
 #define ACE_NON_VIRTUAL
+#endif
 #endif
 
 namespace OHOS::Ace {

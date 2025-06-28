@@ -23,6 +23,7 @@
 #include <memory>
 
 #include "ecmascript/napi/include/jsnapi.h"
+#include "native_engine/impl/ark/ark_native_engine.h"
 #include "native_engine/native_engine.h"
 
 #include "base/log/log.h"
@@ -76,6 +77,7 @@ public:
     bool ExecuteJsBinForAOT(const std::string& fileName,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
     shared_ptr<JsValue> GetGlobal() override;
+    shared_ptr<JsValue> GetGlobal(ArkNativeEngine* nativeArkEngine);
     void RunGC() override;
     void RunFullGC() override;
 

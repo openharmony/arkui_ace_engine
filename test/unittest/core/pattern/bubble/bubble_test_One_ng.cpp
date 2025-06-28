@@ -840,13 +840,12 @@ HWTEST_F(BubbleTestOneNg, FitToScreenNew001, TestSize.Level1)
     ASSERT_NE(layoutAlgorithm, nullptr);
     size_t index = 0;
     SizeF childSize;
-    OffsetF arrowPosition;
-    OffsetF testF = layoutAlgorithm->FitToScreenNew(OffsetF(10.0f, 10.0f), 0, index, childSize, arrowPosition);
+    OffsetF testF = layoutAlgorithm->FitToScreenNew(OffsetF(10.0f, 10.0f), 0, index, childSize);
     EXPECT_EQ(testF, OffsetF(0.0f, 0.0f));
-    testF = layoutAlgorithm->FitToScreenNew(OffsetF(0.0f, 0.0f), 0, index, childSize, arrowPosition, true);
+    testF = layoutAlgorithm->FitToScreenNew(OffsetF(0.0f, 0.0f), 0, index, childSize, true);
     EXPECT_EQ(testF, OffsetF(0.0f, 0.0f));
     layoutAlgorithm->arrowPlacement_ = Placement::BOTTOM;
-    testF = layoutAlgorithm->FitToScreenNew(OffsetF(0.0f, 0.0f), 0, index, childSize, arrowPosition, true);
+    testF = layoutAlgorithm->FitToScreenNew(OffsetF(0.0f, 0.0f), 0, index, childSize, true);
     EXPECT_EQ(testF, OffsetF(0.0f, 0.0f));
 }
 
@@ -1536,8 +1535,8 @@ HWTEST_F(BubbleTestOneNg, BubblePaintMethod004, TestSize.Level1)
     /**
      * @tc.steps: step2. Call the function PaintOuterBorder and PaintInnerBorder.
      */
-    
-    bubblePaintMethod.GetInnerBorderOffset();
+    auto theme = AceType::MakeRefPtr<PopupTheme>();
+    bubblePaintMethod.GetInnerBorderOffset(theme);
     int32_t settingApiVersion = 12;
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
     MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
@@ -1571,18 +1570,20 @@ HWTEST_F(BubbleTestOneNg, BubblePaintMethod005, TestSize.Level1)
     /**
      * @tc.steps: step2. Call the function BuildDoubleBorderPath.
      */
+    auto popupTheme = AceType::MakeRefPtr<PopupTheme>();
+    ASSERT_NE(popupTheme, nullptr);
     bubblePaintMethod.needPaintOuterBorder_ = false;
     bubblePaintMethod.arrowPlacement_ = Placement::NONE;
-    bubblePaintMethod.BuildDoubleBorderPath(Path);
+    bubblePaintMethod.BuildDoubleBorderPath(Path, popupTheme);
     bubblePaintMethod.needPaintOuterBorder_ = true;
     bubblePaintMethod.arrowPlacement_ = Placement::BOTTOM;
-    bubblePaintMethod.BuildDoubleBorderPath(Path);
+    bubblePaintMethod.BuildDoubleBorderPath(Path, popupTheme);
     bubblePaintMethod.arrowPlacement_ = Placement::LEFT;
-    bubblePaintMethod.BuildDoubleBorderPath(Path);
+    bubblePaintMethod.BuildDoubleBorderPath(Path, popupTheme);
     bubblePaintMethod.arrowPlacement_ = Placement::RIGHT;
-    bubblePaintMethod.BuildDoubleBorderPath(Path);
+    bubblePaintMethod.BuildDoubleBorderPath(Path, popupTheme);
     bubblePaintMethod.arrowPlacement_ = Placement::TOP;
-    bubblePaintMethod.BuildDoubleBorderPath(Path);
+    bubblePaintMethod.BuildDoubleBorderPath(Path, popupTheme);
     /**
      * @tc.steps: step3. call SetShowArrow.
      * @tc.expected: step3. Check the property.

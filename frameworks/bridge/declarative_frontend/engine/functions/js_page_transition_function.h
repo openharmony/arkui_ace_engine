@@ -29,7 +29,7 @@ public:
     explicit JsPageTransitionFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
 
     ~JsPageTransitionFunction() override {};
-    void Execute() override
+    void Execute()
     {
         ExecuteJS();
     }

@@ -24,6 +24,7 @@
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/text/paragraph_util.h"
 
 namespace OHOS::Ace::NG {
 
@@ -3650,11 +3651,11 @@ HWTEST_F(TextTestNg, CreateImageSourceInfo001, TestSize.Level1)
      * @tc.steps: step2. Construct data and call CreatImageSourceInfo
      */
     ImageSpanOptions textOptions;
-    textPattern->CreateImageSourceInfo(textOptions);
+    ParagraphUtil::CreateImageSourceInfo(textOptions);
     textOptions.image = "textImage";
     textOptions.bundleName = "textBundleName";
     textOptions.moduleName = "textModuleName";
-    textPattern->CreateImageSourceInfo(textOptions);
+    ParagraphUtil::CreateImageSourceInfo(textOptions);
     EXPECT_TRUE(textOptions.image.has_value());
     EXPECT_TRUE(textOptions.bundleName.has_value());
     EXPECT_TRUE(textOptions.moduleName.has_value());
@@ -3974,7 +3975,7 @@ HWTEST_F(TextTestNg, TextPattern010, TestSize.Level1)
     options.bundleName = BUNDLE_NAME;
     options.moduleName = MODULE_NAME;
     options.offset = 1;
-    auto imageSourceInfo = pattern->CreateImageSourceInfo(options);
+    auto imageSourceInfo = ParagraphUtil::CreateImageSourceInfo(options);
     EXPECT_EQ(imageSourceInfo.isFromReset_, 0);
 }
 

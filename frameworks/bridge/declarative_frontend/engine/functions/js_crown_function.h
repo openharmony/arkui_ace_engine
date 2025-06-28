@@ -26,7 +26,7 @@ public:
     explicit JsCrownFunction(const JSRef<JSFunc>& jsFunction)
         : JsFunction(JSRef<JSObject>(), jsFunction) {}
     ~JsCrownFunction() override = default;
-    void Execute() override
+    void Execute()
     {
         ExecuteJS();
     }

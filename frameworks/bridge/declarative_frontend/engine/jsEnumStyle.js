@@ -365,6 +365,19 @@ let Alignment;
   Alignment[Alignment.BottomEnd = 8] = 'BottomEnd';
 })(Alignment || (Alignment = {}));
 
+let LocalizedAlignment;
+(function (LocalizedAlignment) {
+  LocalizedAlignment.TOP_START = 'top_start';
+  LocalizedAlignment.TOP = 'top';
+  LocalizedAlignment.TOP_END = 'top_end';
+  LocalizedAlignment.START = 'start';
+  LocalizedAlignment.CENTER = 'center';
+  LocalizedAlignment.END = 'end';
+  LocalizedAlignment.BOTTOM_START = 'bottom_start';
+  LocalizedAlignment.BOTTOM = 'bottom';
+  LocalizedAlignment.BOTTOM_END = 'bottom_end';
+})(LocalizedAlignment || (LocalizedAlignment = {}));
+
 let ChainStyle;
 (function (ChainStyle) {
   ChainStyle[ChainStyle.SPREAD = 0] = 'SPREAD';
@@ -672,6 +685,12 @@ let FlexWrap;
   FlexWrap[FlexWrap.Wrap = 1] = 'Wrap';
   FlexWrap[FlexWrap.WrapReverse = 2] = 'WrapReverse';
 })(FlexWrap || (FlexWrap = {}));
+
+let FlipDirection;
+(function (FlipDirection) {
+  FlipDirection[FlipDirection.DOWN = 0] = 'DOWN';
+  FlipDirection[FlipDirection.UP = 1] = 'UP';
+})(FlipDirection || (FlipDirection = {}));
 
 class LayoutPolicy {
   id_ = '';
@@ -1218,6 +1237,18 @@ let ModalMode;
   ModalMode[ModalMode.TARGET_WINDOW = 2] = 'TARGET_WINDOW';
 })(ModalMode || (ModalMode = {}));
 
+let PreviewScaleMode;
+(function (PreviewScaleMode) {
+  PreviewScaleMode[PreviewScaleMode.AUTO = 0] = 'AUTO';
+  PreviewScaleMode[PreviewScaleMode.CONSTANT = 1] = 'CONSTANT';
+  PreviewScaleMode[PreviewScaleMode.MAINTAIN = 2] = 'MAINTAIN';
+})(PreviewScaleMode || (PreviewScaleMode = {}));
+
+let AvailableLayoutArea;
+(function (AvailableLayoutArea) {
+  AvailableLayoutArea[AvailableLayoutArea.SAFE_AREA = 0] = 'SAFE_AREA';
+})(AvailableLayoutArea || (AvailableLayoutArea = {}));
+
 let TextChangeReason;
 (function (TextChangeReason) {
   TextChangeReason[TextChangeReason.UNKNOWN = 0] = 'UNKNOWN';
@@ -1615,6 +1646,45 @@ class QuickReplaceSymbolEffect extends SymbolEffect {
   }
 }
 
+class ShaderStyle {
+}
+
+class RadialGradientStyle extends ShaderStyle {
+  constructor(options) {
+    super();
+    this.type = 'RadialGradientStyle';
+    this.options = options;
+  }
+  options(value) {
+    this.options = value;
+    return this;
+  }
+}
+
+class LinearGradientStyle extends ShaderStyle {
+  constructor(options) {
+    super();
+    this.type = 'LinearGradientStyle';
+    this.options = options;
+  }
+  options(value) {
+    this.options = value;
+    return this;
+  }
+}
+
+class ColorShaderStyle extends ShaderStyle {
+  constructor(color) {
+    super();
+    this.type = 'ColorShaderStyle';
+    this.color = color;
+  }
+  color(value) {
+    this.color = value;
+    return this;
+  }
+}
+
 let RichEditorSpanType;
 (function (RichEditorSpanType) {
   RichEditorSpanType[RichEditorSpanType.TEXT = 0] = 'TEXT';
@@ -1730,6 +1800,8 @@ let HitTestMode;
   HitTestMode[HitTestMode.Block = 1] = 'Block';
   HitTestMode[HitTestMode.Transparent = 2] = 'Transparent';
   HitTestMode[HitTestMode.None = 3] = 'None';
+  HitTestMode[HitTestMode.BLOCK_HIERARCHY = 4] = 'BLOCK_HIERARCHY';
+  HitTestMode[HitTestMode.BLOCK_DESCENDANTS = 5] = 'BLOCK_DESCENDANTS';
 })(HitTestMode || (HitTestMode = {}));
 
 let GridDirection;
@@ -1794,6 +1866,13 @@ let TouchTestStrategy;
   TouchTestStrategy.FORWARD = 2;
 })(TouchTestStrategy || (TouchTestStrategy = {}));
 
+let EffectLayer;
+(function (EffectLayer) {
+  EffectLayer.NONE = 0;
+  EffectLayer.CHARGE_MOTION = 1;
+  EffectLayer.CHARGE_TEXT = 2;
+})(EffectLayer || (EffectLayer = {}));
+
 let ModalTransition;
 (function (ModalTransition) {
   ModalTransition[ModalTransition.Default = 0] = 'Default';
@@ -1844,6 +1923,7 @@ let SheetKeyboardAvoidMode;
   SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.TRANSLATE_AND_RESIZE = 1] = 'TRANSLATE_AND_RESIZE';
   SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.RESIZE_ONLY = 2] = 'RESIZE_ONLY';
   SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.TRANSLATE_AND_SCROLL = 3] = 'TRANSLATE_AND_SCROLL';
+  SheetKeyboardAvoidMode[SheetKeyboardAvoidMode.POPUP_SHEET = 4] = 'POPUP_SHEET';
 })(SheetKeyboardAvoidMode || (SheetKeyboardAvoidMode = {}));
 
 let FunctionKey;
@@ -2749,7 +2829,12 @@ class NavPathStack {
   popToName(name, result, animated) {
     let index = this.pathArray.findIndex(element => element.name === name);
     if (index === -1) {
-      return -1;
+      if (this.pathArray.length === 0) {
+        return -1;
+      }
+      if (!this.nativeStack?.isHomeName(name)) {
+        return -1;
+      }
     }
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     this.pathArray.splice(index + 1);
@@ -4159,3 +4244,9 @@ let KeyboardFluidLightMode;
   KeyboardFluidLightMode[KeyboardFluidLightMode.NONE = 0] = 'NONE';
   KeyboardFluidLightMode[KeyboardFluidLightMode.BACKGROUND_FLUID_LIGHT = 1] = 'BACKGROUND_FLUID_LIGHT';
 })(KeyboardFluidLightMode || (KeyboardFluidLightMode = {}));
+
+let GestureFocusMode;
+(function (GestureFocusMode) {
+  GestureFocusMode[GestureFocusMode.DEFAULT = 0] = 'DEFAULT';
+  GestureFocusMode[GestureFocusMode.GESTURE_TAP_AND_LONG_PRESS = 1] = 'GESTURE_TAP_AND_LONG_PRESS';
+})(GestureFocusMode || (GestureFocusMode = {}));

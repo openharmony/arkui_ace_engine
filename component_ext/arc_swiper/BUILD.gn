@@ -86,8 +86,6 @@ ohos_shared_library("arcswiper") {
     "-Os",
   ]
 
-  defines += [ "_USE_MATH_DEFINES" ]
-
   relative_install_dir = "module/arkui"
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part

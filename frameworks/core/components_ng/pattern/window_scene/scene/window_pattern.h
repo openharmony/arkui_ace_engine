@@ -85,6 +85,11 @@ protected:
         const std::string& nodeType, int32_t index = DEFAULT_NODE_SLOT);
     void RemoveChild(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& child,
         const std::string& nodeType, bool allowTransition = false);
+    
+    ImageRotateOrientation TransformOrientationForMatchSnapshot(uint32_t lastRotation, uint32_t windowRotation);
+    ImageRotateOrientation TransformOrientationForDisMatchSnapshot(uint32_t lastRotation, uint32_t windowRotation,
+        uint32_t snapshotRotation);
+    uint32_t TransformOrientation(uint32_t lastRotation, uint32_t windowRotation, uint32_t count);
 
     virtual void OnActivation() {}
     virtual void OnConnect() {}
@@ -98,6 +103,7 @@ protected:
     virtual void OnRemoveSnapshot() {}
     virtual void OnAppRemoveStartingWindow() {}
     virtual void OnUpdateSnapshotWindow() {}
+    virtual void OnPreLoadStartingWindowFinished() {}
 
     RefPtr<FrameNode> startingWindow_;
     RefPtr<StartingWindowLayoutHelper> startingWindowLayoutHelper_;
@@ -113,7 +119,6 @@ protected:
     const std::string newAppWindowName_ = "NewAppWindow";
     bool attachToFrameNodeFlag_ = false;
     bool isBlankForSnapshot_ = false;
-    bool syncStartingWindow_ = false;
 
     sptr<Rosen::Session> session_;
     int32_t instanceId_ = Container::CurrentId();
@@ -126,6 +131,8 @@ private:
     void UpdateStartingWindowProperty(const Rosen::SessionInfo& sessionInfo,
         Color &color, ImageSourceInfo &sourceInfo);
     bool CheckAndAddStartingWindowAboveLocked();
+    void HideStartingWindow();
+    CancelableCallback<void()> interruptStartingTask_;
 
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     friend class LifecycleListener;

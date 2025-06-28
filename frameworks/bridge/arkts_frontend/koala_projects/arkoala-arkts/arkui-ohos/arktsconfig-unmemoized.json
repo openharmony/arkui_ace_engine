@@ -5,9 +5,6 @@
         "baseUrl": "./build/unmemoized/src",
         "paths": {
             "#components": ["./generated/arkts"],
-            "#arkcompat/*": ["../../../../../arkoala/arkui-common/build/unmemoized/src/arkts/*"],
-            "#arkstate": ["../../../../../arkoala/arkui-common/build/unmemoized/src"],
-            "@koalaui/arkui-common": ["../../../../../arkoala/arkui-common/build/unmemoized/src"],
             "@ohos/arkui": ["./"],
             "@ohos/arkui/*": ["./*"],
             "@koalaui/interop": ["../../../../../interop/src/arkts"],

@@ -20,6 +20,7 @@ config("uisession_manager_public_config") {
     "$ace_root/frameworks",
     "include/",
     "$ace_root/interfaces/inner_api/ui_session",
+    "$ace_root/interfaces/inner_api/ace_kit/include",
   ]
   if (current_os == "ohos") {
     defines = [ "OHOS_PLATFORM" ]

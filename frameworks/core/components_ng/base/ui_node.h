@@ -115,8 +115,6 @@ public:
         bool addDefaultTransition = false, bool addModalUiextension = false);
     void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
     void AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
-    UINode* GetChildAfter(UINode* node);
-    UINode* GetChildBefore(UINode* node);
 
     std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child, bool allowTransition = false);
     bool RemoveChildSilently(const RefPtr<UINode>& child);
@@ -223,12 +221,15 @@ public:
         return parent_.Upgrade();
     }
 
+    RefPtr<UINode> GetAncestor() const;
+
     void SetNeedCallChildrenUpdate(bool needCallChildrenUpdate)
     {
         needCallChildrenUpdate_ = needCallChildrenUpdate;
     }
 
     virtual void SetParent(const WeakPtr<UINode>& parent, bool needDetect = true);
+    void SetAncestor(const WeakPtr<UINode>& parent);
     // Tree operation end.
 
     // performance.
@@ -574,6 +575,20 @@ public:
             nodeInfo_->codeCol = col;
         }
     }
+    void SetFilePath(const std::string& sources)
+    {
+        if (nodeInfo_) {
+            nodeInfo_->pagePath = sources;
+        }
+    }
+
+    std::string GetFilePath() const
+    {
+        if (nodeInfo_) {
+            return nodeInfo_->pagePath;
+        }
+        return "";
+    }
     void SetForeachItem()
     {
         if (nodeInfo_) {
@@ -634,6 +649,11 @@ public:
     void UpdateNodeStatus(NodeStatus nodeStatus);
     void SetIsRootBuilderNode(bool isRootBuilderNode);
     bool GetIsRootBuilderNode() const;
+    void SetNodeAdapter(bool enable)
+    {
+        isNodeAdapter_ = enable;
+    }
+    
 
     bool IsArkTsFrameNode() const
     {
@@ -782,7 +802,7 @@ public:
     virtual void FireOnNodeDestroyCallback()
     {
         CHECK_NULL_VOID(destroyCallback_);
-        destroyCallback_(GetId());
+        destroyCallback_(nodeId_);
     }
 
     bool IsAllowAddChildBelowModalUec() const
@@ -1152,6 +1172,17 @@ protected:
      */
     int32_t CalcAbsPosition(int32_t changeIdx, int64_t id) const;
     const static std::set<std::string> layoutTags_;
+
+    std::string tag_ = "UINode";
+    int32_t depth_ = Infinity<int32_t>();
+    int32_t hostRootId_ = 0;
+    int32_t hostPageId_ = 0;
+    int32_t nodeId_ = 0;
+    int64_t accessibilityId_ = -1;
+    int32_t layoutPriority_ = 0;
+    int32_t rootNodeId_ = 0; // host is Page or NavDestination
+    int32_t themeScopeId_ = 0;
+
 private:
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
@@ -1183,16 +1214,8 @@ private:
     // disappearingChild、index、branchId
     std::list<std::tuple<RefPtr<UINode>, uint32_t, int32_t>> disappearingChildren_;
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
-    WeakPtr<UINode> parent_;
-    std::string tag_ = "UINode";
-    int32_t depth_ = Infinity<int32_t>();
-    int32_t hostRootId_ = 0;
-    int32_t hostPageId_ = 0;
-    int32_t nodeId_ = 0;
-    int64_t accessibilityId_ = -1;
-    int32_t layoutPriority_ = 0;
-    int32_t rootNodeId_ = 0; // host is Page or NavDestination
-    int32_t themeScopeId_ = 0;
+    WeakPtr<UINode> parent_; // maybe wrong when not on the tree
+    WeakPtr<UINode> ancestor_; // always correct parent ptr, used to remove duplicates when inserting child nodes
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool isFreeNode_ = false;
@@ -1214,6 +1237,7 @@ private:
     int32_t instanceId_ = -1;
     int32_t apiVersion_ = 0;
     uint32_t nodeFlag_ { 0 };
+    bool isNodeAdapter_ = false;
 
     int32_t restoreId_ = -1;
 

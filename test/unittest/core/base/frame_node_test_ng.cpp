@@ -775,6 +775,37 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCreateRenderTask0016, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FrameNodeTestNg_CreateRenderTask0017
+ * @tc.desc: Test frame node method
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeCreateRenderTask0017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build a object to CreateRenderTask
+     * @tc.expected: expect The isRenderDirtyMarked_ is false.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->isRenderDirtyMarked_ = true;
+    frameNode->isObservedByDrawChildren_ = true;
+    frameNode->renderContext_->UpdateAccessibilityFocus(true);
+    /**
+     * @tc.steps: step2. create layoutProperty.
+     */
+    NG::RectF testRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
+    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
+    layoutProperty->SetLayoutRect(testRect);
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+
+    /**
+     * @tc.steps: step3. call the function CreateRenderTask.
+     */
+    frameNode->SetLayoutProperty(layoutProperty);
+    frameNode->CreateRenderTask(true).value()();
+    EXPECT_NE(frameNode, nullptr);
+}
+
+/**
  * @tc.name: FrameNodeTestNg_UpdateLayoutPropertyFlag0018
  * @tc.desc: Test frame node method
  * @tc.type: FUNC
@@ -975,7 +1006,8 @@ public:
 
     MOCK_METHOD(bool, IsOutOfTouchTestRegion, (const PointF&, const TouchEvent&, std::vector<RectF>*));
     MOCK_METHOD(void, CollectSelfAxisResult,
-        (const PointF&, const PointF&, bool&, const PointF&, AxisTestResult&, bool&, HitTestResult&, TouchRestrict&));
+        (const PointF&, const PointF&, bool&, const PointF&, AxisTestResult&, bool&, HitTestResult&, TouchRestrict&,
+            bool));
 };
 
 using NiceMockFrameNode = NiceMock<MockFrameNode>;
@@ -1002,14 +1034,15 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAxisTest0027, TestSize.Level1)
     std::vector<RefPtr<MockFrameNode>> nodes = { stackNode, node1, node2 };
     for (auto& item : nodes) {
         item->isActive_ = true;
-        const auto& inputEventHub = item->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
+        const auto& inputEventHub = item->GetOrCreateEventHub<EventHub>()->GetOrCreateInputEventHub();
         inputEventHub->SetAxisEvent([&item](AxisInfo& info) {});
         ON_CALL((*item), CollectSelfAxisResult(testing::_, testing::_, testing::_, testing::_, testing::_, testing::_,
-                             testing::_, testing::_))
-            .WillByDefault(testing::Invoke([&inputEventHub](const PointF&, const PointF&, bool&, const PointF&,
-                                               AxisTestResult& axisResult, bool&, HitTestResult&, TouchRestrict&) {
-                axisResult.emplace_back(inputEventHub->axisEventActuator_->axisEventTarget_);
-            }));
+                             testing::_, testing::_, testing::_))
+            .WillByDefault(
+                testing::Invoke([&inputEventHub](const PointF&, const PointF&, bool&, const PointF&,
+                                    AxisTestResult& axisResult, bool&, HitTestResult&, TouchRestrict&, bool) {
+                    axisResult.emplace_back(inputEventHub->axisEventActuator_->axisEventTarget_);
+                }));
         ON_CALL((*item), IsOutOfTouchTestRegion(testing::_, testing::_, testing::_))
             .WillByDefault(
                 testing::Invoke([](const PointF&, const TouchEvent&, std::vector<RectF>*) { return false; }));

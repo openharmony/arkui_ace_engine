@@ -78,6 +78,9 @@ public:
     bool GetIsPluralLineSupported();
     bool GetIsAccessibilityGroup();
     std::string GetHtmlElementId();
+    std::string GetComponentTypeDescription();
+    int32_t GetCheckboxGroupSelectedStatus();
+    std::string GetExpandedState();
 
 private:
     std::shared_ptr<NWeb::NWebAccessibilityNodeInfo> node_;

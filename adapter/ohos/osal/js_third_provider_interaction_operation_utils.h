@@ -32,6 +32,7 @@ void TransformAccessbilityElementInfo(
     accessibilityElementInfo.SetHint(nativeInfo.GetHintText());
     accessibilityElementInfo.SetAccessibilityText(nativeInfo.GetAccessibilityText());
     accessibilityElementInfo.SetDescriptionInfo(nativeInfo.GetAccessibilityDescription());
+    accessibilityElementInfo.SetOriginalText(nativeInfo.GetContents());
 
     auto nodeList = nativeInfo.GetChildNodeIds();
     for (const auto& node : nodeList) {

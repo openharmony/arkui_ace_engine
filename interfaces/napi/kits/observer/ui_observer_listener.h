@@ -50,8 +50,9 @@ public:
         const RefPtr<NG::FrameNode> frameNode);
     void OnPanGestureStateChange(const GestureEvent& gestureEventInfo, const RefPtr<NG::PanRecognizer>& current,
         const RefPtr<NG::FrameNode> frameNode);
-    void OnGestureStateChange(const GestureEvent& gestureEventInfo, const RefPtr<NG::NGGestureRecognizer>& current,
-        const RefPtr<NG::FrameNode> frameNode, NG::GestureActionPhase phase);
+    void OnGestureStateChange(NG::GestureListenerType gestureListenerType, const GestureEvent& gestureEventInfo,
+        const RefPtr<NG::NGGestureRecognizer>& current, const RefPtr<NG::FrameNode> frameNode,
+        NG::GestureActionPhase phase);
     void OnTabContentStateChange(const NG::TabContentInfo& tabContentInfo);
     void OnNodeRenderStateChange(NG::FrameNode* frameNode, NG::NodeRenderState nodeRenderState);
     void OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo);

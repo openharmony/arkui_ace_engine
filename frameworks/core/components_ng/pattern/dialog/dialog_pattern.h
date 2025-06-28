@@ -102,10 +102,7 @@ public:
         return AceType::MakeRefPtr<DialogLayoutProperty>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return AceType::MakeRefPtr<DialogLayoutAlgorithm>();
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     RefPtr<EventHub> CreateEventHub() override
     {
@@ -365,7 +362,7 @@ public:
     void UpdateContent(const Color& color, ActionSheetType type);
     void UpdateBorderWidth(const NG::BorderWidthProperty& width);
     void UpdateBorderColor(const NG::BorderColorProperty& color);
-    void UpdateCornerRadius(const NG::BorderRadiusProperty& radius);
+    void UpdateCornerRadius(NG::BorderRadiusProperty& radius);
     void UpdateButtonBackgroundColor(const Color& color, int32_t buttonIndex);
     void UpdateButtonFontColor(const std::string colorStr, int32_t buttonIndex);
     void UpdateButtonText(const std::string text, int32_t buttonIndex);

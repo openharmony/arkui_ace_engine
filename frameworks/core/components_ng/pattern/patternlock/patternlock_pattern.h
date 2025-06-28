@@ -169,7 +169,7 @@ private:
     void CalculateCellCenter();
     OffsetF GetTouchOffsetToNode();
     void InitSkipUnselectedPoint();
-
+    void OnColorConfigurationUpdate() override;
     RefPtr<V2::PatternLockController> patternLockController_;
     RefPtr<TouchEventImpl> touchDownListener_;
     RefPtr<TouchEventImpl> touchUpListener_;

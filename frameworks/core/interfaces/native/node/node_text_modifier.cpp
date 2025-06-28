@@ -77,7 +77,6 @@ constexpr int NUM_9 = 9;
 constexpr int NUM_10 = 10;
 constexpr float DEFAULT_ANGLE = 180.0f;
 constexpr double PERCENT_100 = 100.0;
-constexpr float MAX_ANGLE = 360.0f;
 
 std::map<TextHeightAdaptivePolicy, int> TEXT_HEIGHT_ADAPTIVE_POLICY_MAP = {
     { TextHeightAdaptivePolicy::MAX_LINES_FIRST, 0 },
@@ -257,6 +256,11 @@ void ResetFontColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ResetTextColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("TextColor");
+    }
 }
 
 uint32_t GetFontColor(ArkUINodeHandle node)
@@ -310,6 +314,11 @@ void ResetFontSize(ArkUINodeHandle node)
     CHECK_NULL_VOID(theme);
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
     TextModelNG::SetFontSize(frameNode, fontSize);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("FontSize");
+    }
 }
 
 void SetTextLineHeight(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* lineHeightRawPtr)
@@ -333,6 +342,11 @@ void ResetTextLineHeight(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetLineHeight(frameNode, DEFAULT_LINE_HEIGHT);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("LineHeight");
+    }
 }
 
 void SetTextTextOverflow(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -393,6 +407,11 @@ void ResetTextDecoration(ArkUINodeHandle node)
     TextModelNG::SetTextDecoration(frameNode, DEFAULT_TEXT_DECORATION);
     TextModelNG::SetTextDecorationColor(frameNode, DEFAULT_DECORATION_COLOR);
     TextModelNG::SetTextDecorationStyle(frameNode, DEFAULT_DECORATION_STYLE);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("TextDecorationColor");
+    }
 }
 
 void SetTextTextCase(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -452,6 +471,11 @@ void ResetTextMinFontSize(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetAdaptMinFontSize(frameNode, DEFAULT_MIN_FONT_SIZE);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("AdaptMinFontSize");
+    }
 }
 
 void SetTextDraggable(ArkUINodeHandle node, ArkUI_Uint32 draggable)
@@ -498,6 +522,11 @@ void ResetTextMaxFontSize(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetAdaptMaxFontSize(frameNode, DEFAULT_MAX_FONT_SIZE);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("AdapttMaxFontSize");
+    }
 }
 
 void SetTextMinFontScale(ArkUINodeHandle node, ArkUI_Float32 number, void* minFontScaleRawPtr)
@@ -513,6 +542,11 @@ void ResetTextMinFontScale(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetMinFontScale(frameNode, DEFAULT_MIN_FONT_SCALE);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("MinFontScale");
+    }
 }
 
 void SetTextMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 number, void* maxFontScaleRawPtr)
@@ -528,6 +562,11 @@ void ResetTextMaxFontScale(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetMaxFontScale(frameNode, DEFAULT_MAX_FONT_SCALE);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("MaxFontScale");
+    }
 }
 
 void SetTextFontFamily(ArkUINodeHandle node, const char** fontFamilies, ArkUI_Uint32 length, void* fontFamilyRawPtr)
@@ -556,6 +595,11 @@ void ResetTextFontFamily(ArkUINodeHandle node)
     std::vector<std::string> families;
     families.emplace_back(DEFAULT_FAMILY);
     TextModelNG::SetFontFamily(frameNode, families);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("FontFamily");
+    }
 }
 
 void SetTextCopyOption(ArkUINodeHandle node, ArkUI_Int32 copyOption)
@@ -572,12 +616,33 @@ void ResetTextCopyOption(ArkUINodeHandle node)
     TextModelNG::SetCopyOption(frameNode, DEFAULT_COPY_OPTION);
 }
 
-void SetTextTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length)
+void SetTextTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shadows, ArkUI_Uint32 length,
+    const void* radiusResArrs, const void* colorResArrs,
+    const void* offsetXResArrs, const void* offsetYResArrs)
 {
     CHECK_NULL_VOID(shadows);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<Shadow> shadowList(length);
+    std::vector<RefPtr<ResourceObject>> radiusResArr;
+    std::vector<RefPtr<ResourceObject>> colorResArr;
+    std::vector<RefPtr<ResourceObject>> offsetXResArr;
+    std::vector<RefPtr<ResourceObject>> offsetYResArr;
+    if (radiusResArrs != nullptr) {
+        radiusResArr = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(radiusResArrs));
+    }
+    if (colorResArrs != nullptr) {
+        colorResArr =
+            *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(colorResArrs));
+    }
+    if (offsetXResArrs != nullptr) {
+        offsetXResArr =
+            *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(offsetXResArrs));
+    }
+    if (offsetYResArrs != nullptr) {
+        offsetYResArr =
+        *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(offsetYResArrs));
+    }
     for (uint32_t i = 0; i < length; i++) {
         Shadow shadow;
         ArkUITextShadowStruct* shadowStruct = shadows + i;
@@ -587,6 +652,11 @@ void SetTextTextShadow(ArkUINodeHandle node, struct ArkUITextShadowStruct* shado
         shadow.SetOffsetX(shadowStruct->offsetX);
         shadow.SetOffsetY(shadowStruct->offsetY);
         shadow.SetIsFilled(static_cast<bool>(shadowStruct->fill));
+        RefPtr<ResourceObject> radiusObject = (radiusResArr.size() > i) ? radiusResArr[i] : nullptr;
+        RefPtr<ResourceObject> colorObject = (colorResArr.size() > i) ? colorResArr[i] : nullptr;
+        RefPtr<ResourceObject> offsetXObject = (offsetXResArr.size() > i) ? offsetXResArr[i] : nullptr;
+        RefPtr<ResourceObject> offsetYObject = (offsetYResArr.size() > i) ? offsetYResArr[i] : nullptr;
+        Shadow::RegisterShadowResourceObj(shadow, radiusObject, colorObject, offsetXObject, offsetYObject);
         shadowList.at(i) = shadow;
     }
     TextModelNG::SetTextShadow(frameNode, shadowList);
@@ -664,6 +734,11 @@ void ResetTextTextIndent(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetTextIndent(frameNode, CalcDimension(0, DimensionUnit::FP));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("TextIndent");
+    }
 }
 
 void SetTextBaselineOffset(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* baselineOffsetRawPtr)
@@ -680,6 +755,11 @@ void ResetTextBaselineOffset(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetBaselineOffset(frameNode, DEFAULT_BASELINE_OFFSET);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("BaselineOffset");
+    }
 }
 
 ArkUI_Float32 GetTextBaselineOffset(ArkUINodeHandle node)
@@ -1038,6 +1118,11 @@ void ResetTextCaretColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(theme);
     auto caretColor = static_cast<int32_t>(theme->GetCaretColor().GetValue());
     TextModelNG::SetCaretColor(frameNode, Color(caretColor));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("TextCaretColor");
+    }
 }
 
 void SetTextSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* selectedBackgroundColorRawPtr)
@@ -1061,6 +1146,11 @@ void ResetTextSelectedBackgroundColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::ResetSelectedBackgroundColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("SelectedBackgroundColor");
+    }
 }
 
 void SetLineBreakStrategy(ArkUINodeHandle node, ArkUI_Uint32 lineBreakStrategy)
@@ -1135,7 +1225,8 @@ void ResetTextSelectableMode(ArkUINodeHandle node)
 }
 
 void SetTextDataDetectorConfigWithEvent(
-    ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig)
+    ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig, void* entityColorRawPtr,
+    void* entityDecorationColorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1151,6 +1242,16 @@ void SetTextDataDetectorConfigWithEvent(
     textDetectConfig.entityDecorationStyle = TextDecorationStyle(arkUITextDetectConfig->entityDecorationStyle);
     textDetectConfig.enablePreviewMenu = arkUITextDetectConfig->entityEnablePreviewMenu;
     TextModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
+    if (SystemProperties::ConfigChangePerform()) {
+        if (entityColorRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(entityColorRawPtr));
+            TextDetectConfig::RegisterColorResource(textDetectConfig, resObj);
+        }
+        if (entityDecorationColorRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(entityDecorationColorRawPtr));
+            TextDetectConfig::RegisterDecoColorResource(textDetectConfig, resObj);
+        }
+    }
 }
 
 void ResetTextDataDetectorConfigWithEvent(ArkUINodeHandle node)
@@ -1159,6 +1260,11 @@ void ResetTextDataDetectorConfigWithEvent(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextDetectConfig textDetectConfig;
     TextModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("dataDetectorConfig");
+    }
 }
 
 void SetTextOnCopy(ArkUINodeHandle node, void* callback)
@@ -1357,17 +1463,6 @@ void ResetEnableAutoSpacing(ArkUINodeHandle node)
     TextModelNG::SetEnableAutoSpacing(frameNode, false);
 }
 
-ArkUI_Float32 CheckAngle(const ArkUI_Float32 angle)
-{
-    if (LessNotEqual(angle, 0.0f)) {
-        return 0.0f;
-    }
-    if (GreatNotEqual(angle, MAX_ANGLE)) {
-        return MAX_ANGLE;
-    }
-    return angle;
-}
-
 void SetLinearGradientDirectionTo(std::shared_ptr<LinearGradient>& linearGradient, const GradientDirection direction)
 {
     switch (direction) {
@@ -1500,7 +1595,7 @@ void SetRadialGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* 
     }
     if (static_cast<bool>(radiusHasValue)) {
         auto unit = static_cast<DimensionUnit>(radiusUnit);
-        auto value = CheckAngle(radiusValue);
+        auto value = static_cast<float>(radiusValue);
         gradient.GetRadialGradient()->radialVerticalSize = CalcDimension(value, unit);
         gradient.GetRadialGradient()->radialHorizontalSize = CalcDimension(value, unit);
     }
@@ -1649,6 +1744,13 @@ ArkUI_Int32 GetTextRadialGradient(ArkUINodeHandle node, ArkUI_Float32 (*values)[
     return index;
 }
 
+void SetColorShaderColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetColorShaderStyle(frameNode, Color(color));
+}
+
 void SetTextVerticalAlign(ArkUINodeHandle node, ArkUI_Uint32 textVerticalAlign)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1668,6 +1770,21 @@ ArkUI_Uint32 GetTextVerticalAlign(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, static_cast<uint32_t>(TextVerticalAlign::BASELINE));
     return static_cast<ArkUI_Uint32>(TextModelNG::GetTextVerticalAlign(frameNode));
+}
+
+void SetTextContentTransition(ArkUINodeHandle node, ArkUI_Int32 flipDirection, ArkUI_Bool enableBlur)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetContentTransition(frameNode, TextEffectStrategy::FLIP,
+        static_cast<TextFlipDirection>(flipDirection), static_cast<bool>(enableBlur));
+}
+
+void ResetTextContentTransition(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::ResetContentTransition(frameNode);
 }
 } // namespace
 
@@ -1820,6 +1937,9 @@ const ArkUITextModifier* GetTextModifier()
         .setTextVerticalAlign = SetTextVerticalAlign,
         .resetTextVerticalAlign = ResetTextVerticalAlign,
         .getTextVerticalAlign = GetTextVerticalAlign,
+        .setTextContentTransition = SetTextContentTransition,
+        .resetTextContentTransition = ResetTextContentTransition,
+        .setColorShaderColor = SetColorShaderColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

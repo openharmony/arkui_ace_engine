@@ -1516,6 +1516,10 @@ declare class ArkWebComponent extends ArkComponent implements WebAttribute {
     onInterceptRequest(callback: (event?: {
         request: WebResourceRequest;
     } | undefined) => WebResourceResponse): this;
+    onOverrideErrorPage(callback: (event?: {
+        webResourceRequest: WebResourceRequest;
+        error: WebResourceError;
+    } | undefined) => string): this;
     onPermissionRequest(callback: (event?: {
         request: PermissionRequest;
     } | undefined) => void): this;
@@ -2103,6 +2107,8 @@ declare class ArkSymbolGlyphComponent extends ArkComponent implements SymbolGlyp
     effectStrategy(value: SymbolEffectStrategy): SymbolGlyphAttribute;
     minFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
     maxFontScale(value: Optional<number | Resource>): SymbolGlyphAttribute;
+    symbolShadow(value: Optional<ShadowOptions>): SymbolGlyphAttribute;
+    shaderStyle(value: ShaderStyle[]): SymbolGlyphAttribute;
 }
 
 declare class ArkSymbolSpanComponent extends ArkComponent implements SymbolSpanAttribute {

@@ -2018,4 +2018,78 @@ HWTEST_F(ScrollEventTestNg, HandleCrownActionEnd001, TestSize.Level1)
     scrollable->HandleTouchDown(true);
     EXPECT_FALSE(scrollable->isTouching_);
 }
+
+/**
+ * @tc.name: onWillStopDragging001
+ * @tc.desc: Test onWillStopDragging001
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, onWillStopDragging001, TestSize.Level1)
+{
+    bool isOnWillStopDraggingCallBack = false;
+    Dimension willStopDraggingVelocity;
+    auto onWillStopDragging = [&willStopDraggingVelocity, &isOnWillStopDraggingCallBack](
+                           Dimension velocity) {
+        willStopDraggingVelocity = velocity;
+        isOnWillStopDraggingCallBack = true;
+    };
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    eventHub_->SetOnWillStopDragging(onWillStopDragging);
+
+    GestureEvent info;
+    info.SetMainVelocity(-1200.f);
+    info.SetMainDelta(-200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isOnWillStopDraggingCallBack);
+    EXPECT_FLOAT_EQ(willStopDraggingVelocity.Value(), info.GetMainVelocity());
+}
+
+/**
+ * @tc.name: onWillStopDragging002
+ * @tc.desc: Test onWillStopDragging002
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, onWillStopDragging002, TestSize.Level1)
+{
+    bool isOnWillStopDraggingCallBack = false;
+    Dimension willStopDraggingVelocity;
+    auto onWillStopDragging = [&willStopDraggingVelocity, &isOnWillStopDraggingCallBack](
+                           Dimension velocity) {
+        willStopDraggingVelocity = velocity;
+        isOnWillStopDraggingCallBack = true;
+    };
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    eventHub_->SetOnWillStopDragging(onWillStopDragging);
+
+    GestureEvent info;
+    info.SetMainVelocity(1200.f);
+    info.SetMainDelta(200.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isOnWillStopDraggingCallBack);
+    EXPECT_FLOAT_EQ(willStopDraggingVelocity.Value(), info.GetMainVelocity());
+}
 } // namespace OHOS::Ace::NG

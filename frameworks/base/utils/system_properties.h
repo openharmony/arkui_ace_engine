@@ -740,9 +740,16 @@ public:
 
     static bool IsPageTransitionFreeze();
 
+    static bool IsSoftPageTransition();
+
     static bool IsFormSkeletonBlurEnabled();
 
     static int32_t getFormSharedImageCacheThreshold();
+
+    static bool IsWhiteBlockEnabled();
+    static bool IsWhiteBlockIdleChange();
+    static int32_t GetWhiteBlockIndexValue();
+    static int32_t GetWhiteBlockCacheCountValue();
 
     static WidthLayoutBreakPoint GetWidthLayoutBreakpoints()
     {
@@ -827,6 +834,7 @@ private:
     static bool enableScrollableItemPool_;
     static bool navigationBlurEnabled_;
     static bool gridCacheEnabled_;
+    static bool gridIrregularLayoutEnable_;
     static bool sideBarContainerBlurEnable_;
     static std::atomic<bool> stateManagerEnable_;
     static std::atomic<bool> acePerformanceMonitorEnable_;
@@ -848,11 +856,13 @@ private:
     static int32_t dragDropFrameworkStatus_;
     static int32_t touchAccelarate_;
     static bool pageTransitionFrzEnabled_;
+    static bool softPagetransition_;
     static bool formSkeletonBlurEnabled_;
     static int32_t formSharedImageCacheThreshold_;
     static WidthLayoutBreakPoint widthLayoutBreakpoints_;
     static HeightLayoutBreakPoint heightLayoutBreakpoints_;
     static bool syncLoadEnabled_;
+    static bool whiteBlockEnabled_;
 };
 
 } // namespace OHOS::Ace

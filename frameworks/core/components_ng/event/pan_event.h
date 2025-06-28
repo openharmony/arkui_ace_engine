@@ -73,6 +73,8 @@ public:
         float distance);
     PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers,
         PanDistanceMap distanceMap);
+    PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers,
+        const PanDistanceMapDimension& distanceMap);
     ~PanEventActuator() override = default;
 
     void ReplacePanEvent(const RefPtr<PanEvent>& panEvent)

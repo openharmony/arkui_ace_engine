@@ -957,6 +957,19 @@ void CalendarPickerModelNG::ParseEdgeAlignResObj(FrameNode* frameNode,
     pickerPattern->AddResObj("CalendarPicker.EdgeAlign", resObj, std::move(updateFunc));
 }
 
+void CalendarPickerModelNG::CalendarPickerRemoveResObj(const std::string& key)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->RemoveResObj(key);
+}
+
 void CalendarPickerModelNG::CalendarPickerRemoveResObj(FrameNode* frameNode, const std::string& key)
 {
     if (!SystemProperties::ConfigChangePerform()) {

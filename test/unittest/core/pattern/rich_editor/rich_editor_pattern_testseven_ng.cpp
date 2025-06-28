@@ -277,4 +277,62 @@ HWTEST_F(RichEditorPatternTestSevenNg, ProvideabilityNameText, TestSize.Level1)
 #endif
 }
 
+/**
+ * @tc.name: GetSpanRangeByResultObject
+ * @tc.desc: test GetSpanRangeByResultObject function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, GetSpanRangeByResultObject, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto rangeStart = 1;
+    SpanPosition spanPosition;
+    spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = rangeStart;
+    ResultObject result;
+    result.spanPosition = spanPosition;
+    result.offsetInSpan[0] = 1;
+    result.offsetInSpan[1] = 2;
+    auto [selectStartResult, selectEndResult] = richEditorPattern->GetSpanRangeByResultObject(result);
+    auto selectStart = 2;
+    auto selectEnd = 3;
+    EXPECT_EQ(selectStart, selectStartResult);
+    EXPECT_EQ(selectEnd, selectEndResult);
+}
+
+/**
+ * @tc.name: CopySpansForClipboard
+ * @tc.desc: test CopySpansForClipboard function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, CopySpansForClipboard, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    RefPtr<SpanItem> spanItem1 = AceType::MakeRefPtr<SpanItem>();
+    spanItem->spanItemType = SpanItemType::SYMBOL;
+    spanItem1->spanItemType = SpanItemType::NORMAL;
+    int32_t position = 2;
+    spanItem1->position = position;
+    std::u16string content = u"123";
+    spanItem1->content = content;
+    richEditorPattern->spans_.push_back(spanItem);
+    richEditorPattern->spans_.push_back(spanItem1);
+    auto copySpans = richEditorPattern->CopySpansForClipboard();
+    std::u16string resultContent = u"";
+    int32_t resultPosition = -1;
+    if (!copySpans.empty()) {
+        for (const auto& spanItem : copySpans) {
+            if (spanItem->spanItemType == SpanItemType::NORMAL) {
+                resultContent = spanItem->content;
+                resultPosition = spanItem->position;
+            }
+        }
+    }
+    EXPECT_EQ(resultContent, content);
+    EXPECT_EQ(resultPosition, position);
+}
 } // namespace OHOS::Ace::NG

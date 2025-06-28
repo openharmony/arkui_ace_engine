@@ -316,9 +316,12 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
     }
     Color colorVal;
     parseOk = Color::ParseColorString(colorValue, colorVal);
-    swiperParameters.colorVal = parseOk ? colorVal : swiperIndicatorTheme->GetColor();
+    swiperParameters.colorVal = parseOk ? (swiperParameters.parametersByUser.insert("colorVal"), colorVal)
+        : swiperIndicatorTheme->GetColor();
     parseOk = Color::ParseColorString(selectedColorValue, colorVal);
-    swiperParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
+    swiperParameters.selectedColorVal = parseOk
+        ? (swiperParameters.parametersByUser.insert("selectedColorVal"), colorVal)
+        : swiperIndicatorTheme->GetSelectedColor();
     ParseDotIndicatorSize(frameNode, dotIndicatorInfo, swiperIndicatorTheme, swiperParameters);
     GetDotIndicatorSpaceAndIgnoreSize(dotIndicatorInfo, swiperIndicatorTheme, swiperParameters);
     ParseMaxDisplayCount(dotIndicatorInfo, swiperParameters);
@@ -337,6 +340,7 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
         swiperParameters.resourceColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_COLOR);
         swiperParameters.resourceSelectedColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_COLOR);
     }
+    swiperParameters.parametersByUser.insert("dotIndicator");
     return swiperParameters;
 }
 
@@ -1565,8 +1569,7 @@ void SetSwiperOnChange(ArkUINodeHandle node, void* callback)
         auto onEvent = reinterpret_cast<std::function<void(const BaseEventInfo*)>*>(callback);
         SwiperModelNG::SetOnChange(frameNode, std::move(*onEvent));
     } else {
-        std::function<void(const BaseEventInfo* info)> onEvent = nullptr;
-        SwiperModelNG::SetOnChange(frameNode, std::move(onEvent));
+        SwiperModelNG::SetOnChange(frameNode, nullptr);
     }
 }
 
@@ -1574,8 +1577,7 @@ void ResetSwiperOnChange(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::function<void(const BaseEventInfo* info)> onEvent = nullptr;
-    SwiperModelNG::SetOnChange(frameNode, std::move(onEvent));
+    SwiperModelNG::SetOnChange(frameNode, nullptr);
 }
 
 void SetSwiperOnSelected(ArkUINodeHandle node, void* callback)

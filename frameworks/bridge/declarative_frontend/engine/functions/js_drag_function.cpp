@@ -110,6 +110,8 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("getPasteData", &JsDragEvent::GetJsPasteData);
     JSClass<JsDragEvent>::CustomMethod("getDisplayX", &JsDragEvent::GetScreenX);
     JSClass<JsDragEvent>::CustomMethod("getDisplayY", &JsDragEvent::GetScreenY);
+    JSClass<JsDragEvent>::CustomMethod("getGlobalDisplayX", &JsDragEvent::GetGlobalDisplayX);
+    JSClass<JsDragEvent>::CustomMethod("getGlobalDisplayY", &JsDragEvent::GetGlobalDisplayY);
     JSClass<JsDragEvent>::CustomMethod("getDragSource", &JsDragEvent::GetDragSource);
     JSClass<JsDragEvent>::CustomMethod("isRemote", &JsDragEvent::IsRemote);
     JSClass<JsDragEvent>::CustomMethod("getWindowX", &JsDragEvent::GetX);
@@ -173,6 +175,20 @@ void JsDragEvent::GetScreenY(const JSCallbackInfo& args)
     args.SetReturnValue(yValueRef);
 }
 
+void JsDragEvent::GetGlobalDisplayX(const JSCallbackInfo& args)
+{
+    auto xValue = JSVal(ToJSValue(PipelineBase::Px2VpWithCurrentDensity(dragEvent_->GetGlobalDisplayX())));
+    auto xValueRef = JSRef<JSVal>::Make(xValue);
+    args.SetReturnValue(xValueRef);
+}
+
+void JsDragEvent::GetGlobalDisplayY(const JSCallbackInfo& args)
+{
+    auto yValue = JSVal(ToJSValue(PipelineBase::Px2VpWithCurrentDensity(dragEvent_->GetGlobalDisplayY())));
+    auto yValueRef = JSRef<JSVal>::Make(yValue);
+    args.SetReturnValue(yValueRef);
+}
+
 void JsDragEvent::GetDragSource(const JSCallbackInfo& args)
 {
     CHECK_NULL_VOID(dragEvent_);
@@ -229,6 +245,7 @@ void JsDragEvent::SetData(const JSCallbackInfo& args)
     napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
     RefPtr<UnifiedData> udData = UdmfClient::GetInstance()->TransformUnifiedData(nativeValue);
     CHECK_NULL_VOID(udData);
+    dragEvent_->SetUseDataLoadParams(false);
     dragEvent_->SetData(udData);
 }
 
@@ -249,6 +266,7 @@ void JsDragEvent::SetDataLoadParams(const JSCallbackInfo& args)
     napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
     RefPtr<DataLoadParams> udDataLoadParams = UdmfClient::GetInstance()->TransformDataLoadParams(env, nativeValue);
     CHECK_NULL_VOID(udDataLoadParams);
+    dragEvent_->SetUseDataLoadParams(true);
     dragEvent_->SetDataLoadParams(udDataLoadParams);
 }
 

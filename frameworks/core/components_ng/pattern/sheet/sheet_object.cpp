@@ -624,4 +624,37 @@ void SheetObject::CreatePropertyCallback()
     auto property = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     sheetPattern->SetProperty(property);
 }
+
+SheetKeyboardAvoidMode SheetObject::GetAvoidKeyboardModeByDefault() const
+{
+    if (sheetType_ == SheetType::SHEET_POPUP) {
+        return SheetKeyboardAvoidMode::NONE;
+    }
+    return SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
+}
+
+void SheetObject::AvoidKeyboardInDirtyLayoutProcess()
+{
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    if (sheetType_ == SheetType::SHEET_POPUP) {
+        return;
+    }
+    if (sheetPattern->IsWindowRotate()) {
+        // When rotating the screen,
+        // first switch the sheet to the position corresponding to the proportion before rotation
+        sheetPattern->TranslateTo(sheetPattern->GetPageHeightWithoutOffset() - sheetPattern->GetHeight());
+        sheetPattern->SetWindowRotate(false);
+    } else {
+        // After rotation, if need to avoid the keyboard, trigger the avoidance behavior
+        AvoidKeyboard(false);
+    }
+}
+
+void SheetObject::AvoidKeyboard(bool forceAvoid)
+{
+    auto sheetPattern = GetPattern();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->AvoidKeyboard(forceAvoid);
+}
 } // namespace OHOS::Ace::NG

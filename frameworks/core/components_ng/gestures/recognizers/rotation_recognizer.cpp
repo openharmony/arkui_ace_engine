@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/common/reporter/reporter.h"
@@ -20,6 +21,7 @@
 #include "core/components_ng/manager/event/json_report.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -56,7 +58,7 @@ void RotationRecognizer::OnAccepted()
     }
     
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Rotation accepted, tag = %{public}s",
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "ROTATE RACC, T: %{public}s",
         node ? node->GetTag().c_str() : "null");
     lastRefereeState_ = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
@@ -64,8 +66,9 @@ void RotationRecognizer::OnAccepted()
     if (!touchPoints_.empty()) {
         touchPoint = touchPoints_.begin()->second;
     }
-    localMatrix_ = NGGestureRecognizer::GetTransformMatrix(GetAttachedNode(), false,
-        isPostEventResult_, touchPoint.postEventNodeId);
+    bool needPostEvent = isPostEventResult_ || touchPoint.passThrough;
+    localMatrix_ = NGGestureRecognizer::GetTransformMatrix(
+        GetAttachedNode(), false, needPostEvent, touchPoint.postEventNodeId);
     SendCallbackMsg(onActionStart_, GestureCallbackType::START);
     isNeedResetVoluntarily_ = false;
 }
@@ -329,7 +332,7 @@ double RotationRecognizer::ComputeAngle()
     double fy = touchPoints_[*fId].y;
     double sx = touchPoints_[*sId].x;
     double sy = touchPoints_[*sId].y;
-    double angle = atan2(fy - sy, fx - sx) * 180.0 / M_PI;
+    double angle = atan2(fy - sy, fx - sx) * 180.0 / ACE_PI;
     return angle;
 }
 
@@ -402,7 +405,7 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
         info.SetInputEventType(inputEventType_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
-        HandleGestureAccept(info, type);
+        HandleGestureAccept(info, type, GestureListenerType::ROTATION);
         callbackFunction(info);
         HandleReports(info, type);
     }

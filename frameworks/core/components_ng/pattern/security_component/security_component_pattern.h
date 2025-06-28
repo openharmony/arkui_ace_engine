@@ -98,7 +98,9 @@ public:
 protected:
     void InitOnTouch(RefPtr<FrameNode>& secCompNode);
     void InitOnKeyEvent(RefPtr<FrameNode>& secCompNode);
+    void InitOnAccessibilityEvent(RefPtr<FrameNode>& secCompNode);
     bool OnKeyEvent(const KeyEvent& event);
+    bool OnAccessibilityEvent(const SecCompEnhanceEvent& event);
     void OnTouch(const TouchEventInfo& info);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnModifyDone() override;
@@ -130,6 +132,7 @@ private:
     void UnregisterSecurityComponent();
     int32_t ReportSecurityComponentClickEvent(GestureEvent& event, std::string& message);
     int32_t ReportSecurityComponentClickEvent(const KeyEvent& event);
+    int32_t ReportSecurityComponentClickEvent(const SecCompEnhanceEvent& event);
     void DoTriggerOnclick(int32_t result);
     void DelayReleaseNode(uint64_t index);
     std::function<int32_t(int32_t)> CreateFirstUseDialogCloseFunc(
@@ -140,6 +143,7 @@ private:
     RefPtr<ClickEvent> clickListener_;
     RefPtr<TouchEventImpl> onTouchListener_;
     bool isSetOnKeyEvent = false;
+    bool isSetOnAccessibilityEvent_ = false;
     bool isAppearCallback_ = false;
 #ifdef SECURITY_COMPONENT_ENABLE
     std::shared_ptr<AppExecFwk::EventHandler> uiEventHandler_ = nullptr;

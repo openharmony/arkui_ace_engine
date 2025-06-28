@@ -34,7 +34,7 @@ public:
     explicit JsClickFunction(const JSRef<JSFunc>& jsFunction) : JsFunction(JSRef<JSObject>(), jsFunction) {}
 
     ~JsClickFunction() override {};
-    void Execute() override;
+    void Execute();
     void Execute(const ClickInfo& info);
     void Execute(GestureEvent& info);
     void Execute(MouseInfo& info);
@@ -47,7 +47,7 @@ public:
     explicit JsWeakClickFunction(const JSRef<JSFunc>& jsFunction) : JsWeakFunction(JSRef<JSObject>(), jsFunction) {}
 
     ~JsWeakClickFunction() override {};
-    void Execute() override;
+    void Execute();
     void Execute(const ClickInfo& info);
     void Execute(GestureEvent& info);
     void Execute(MouseInfo& info);

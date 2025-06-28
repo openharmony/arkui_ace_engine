@@ -57,6 +57,9 @@ public:
     constexpr explicit Color(uint32_t value) : colorValue_(ColorParam { .value = value }) {}
     constexpr explicit Color(uint32_t value, uint32_t resId)
         : colorValue_(ColorParam { .value = value }), resourceId_(resId) {}
+    constexpr explicit Color(uint32_t value, ColorSpace colorSpace)
+        : colorValue_(ColorParam { .value = value }), colorSpace_(colorSpace)
+    {}
     ~Color() = default;
 
     static Color FromARGB(uint8_t alpha, uint8_t red, uint8_t green, uint8_t blue);
@@ -158,6 +161,7 @@ public:
     Color operator/(double value) const;
 
     std::string ColorToString() const;
+    std::string ToSvgFillColorKey() const;
 
     static Color ColorFromString(const std::string& str);
     static bool MatchColorHexString(const std::string& colorStr);

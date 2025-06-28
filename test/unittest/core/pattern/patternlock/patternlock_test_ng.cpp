@@ -1538,4 +1538,163 @@ HWTEST_F(PatternLockTestNg, PatternLockPropertyUpdateTest001, TestSize.Level1)
     pattern_->UpdateSideLength(length, true);
     EXPECT_EQ(layoutProperty->GetSideLength().value(), length);
 }
+
+/**
+ * @tc.name: PatternLockTestOnColorConfigurationUpdate001
+ * @tc.desc: Test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockTestOnColorConfigurationUpdate001, TestSize.Level1)
+{
+    Create([](PatternLockModelNG model) {});
+    ASSERT_NE(pattern_, nullptr);
+    auto host = pattern_->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto pipeline = host->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto layoutProperty = host->GetPaintProperty<PatternLockPaintProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    g_isConfigChangePerform = false;
+    pattern_->OnColorConfigurationUpdate();
+
+    g_isConfigChangePerform = true;
+    pattern_->OnColorConfigurationUpdate();
+
+    layoutProperty->ResetPathColorSetByUser();
+    layoutProperty->ResetRegularColorSetByUser();
+    layoutProperty->ResetActiveColorSetByUser();
+    layoutProperty->ResetSelectedColorSetByUser();
+    layoutProperty->ResetActiveCircleColorSetByUser();
+    pattern_->OnColorConfigurationUpdate();
+
+    layoutProperty->UpdatePathColorSetByUser(true);
+    layoutProperty->UpdateRegularColorSetByUser(true);
+    layoutProperty->UpdateActiveColorSetByUser(true);
+    layoutProperty->UpdateSelectedColorSetByUser(true);
+    layoutProperty->UpdateActiveCircleColorSetByUser(true);
+    pattern_->OnColorConfigurationUpdate();
+
+    layoutProperty->UpdatePathColorSetByUser(false);
+    layoutProperty->UpdateRegularColorSetByUser(false);
+    layoutProperty->UpdateActiveColorSetByUser(false);
+    layoutProperty->UpdateSelectedColorSetByUser(false);
+    layoutProperty->UpdateActiveCircleColorSetByUser(false);
+
+    pipeline->SetIsSystemColorChange(true);
+    auto theme = pipeline->GetTheme<V2::PatternLockTheme>();
+    ASSERT_NE(theme, nullptr);
+    Color testColor = theme->GetPathColor();
+    pattern_->OnColorConfigurationUpdate();
+
+    EXPECT_EQ(layoutProperty->GetPathColor(), testColor);
+}
+
+/**
+ * @tc.name: PatternLockTestSelectedColor001
+ * @tc.desc: Test SelectedColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockTestSelectedColor001, TestSize.Level1)
+{
+    PatternLockModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetPaintProperty<PatternLockPaintProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    model.SetSelectedColorByUser(true);
+    model.SetPathColorByUser(true);
+    model.SetActiveColorByUser(true);
+    model.SetRegularColorByUser(true);
+    model.SetActiveCircleColorByUser(true);
+
+    EXPECT_TRUE(layoutProperty->GetPathColorSetByUser());
+    EXPECT_TRUE(layoutProperty->GetSelectedColorSetByUser());
+    EXPECT_TRUE(layoutProperty->GetActiveColorSetByUser());
+    EXPECT_TRUE(layoutProperty->GetRegularColorSetByUser());
+    EXPECT_TRUE(layoutProperty->GetActiveCircleColorSetByUser());
+}
+
+/**
+ * @tc.name: PatternLockTestCreateWithResourceObj001
+ * @tc.desc: Test CreateWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockTestCreateWithResourceObj001, TestSize.Level1)
+{
+    PatternLockModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<PatternLockPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto layoutProperty = frameNode->GetPaintProperty<PatternLockPaintProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    ResourceObjectParams params { .value = "test", .type = ResourceObjectParamType::STRING };
+    std::vector<ResourceObjectParams> resObjParamsList;
+    resObjParamsList.push_back(params);
+    RefPtr<ResourceObject> resObjWithDimensionId =
+        AceType::MakeRefPtr<ResourceObject>(100000, 10007, resObjParamsList, "com.example.test", "entry", 100000);
+    RefPtr<ResourceObject> resObjId = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+
+    for (int i = static_cast<int>(PatternLockResourceType::SELECTEDCOLOR);
+         i <= static_cast<int>(PatternLockResourceType::ACTIVECIRCLECOLOR); ++i) {
+        auto jsResourceType = static_cast<PatternLockResourceType>(i);
+        model.CreateWithResourceObj(jsResourceType, resObjId);
+    }
+    model.CreateWithResourceObj(static_cast<PatternLockResourceType>(100), resObjWithDimensionId);
+    int32_t colorMode = static_cast<int32_t>(ColorMode::DARK);
+    pattern->OnColorModeChange(colorMode);
+
+    for (int i = static_cast<int>(PatternLockResourceType::SELECTEDCOLOR);
+         i <= static_cast<int>(PatternLockResourceType::ACTIVECIRCLECOLOR); ++i) {
+        auto jsResourceType = static_cast<PatternLockResourceType>(i);
+        model.CreateWithResourceObj(jsResourceType, resObjWithDimensionId);
+    }
+    pattern->OnColorModeChange(colorMode);
+    auto theme = pipeline->GetTheme<V2::PatternLockTheme>();
+    ASSERT_NE(theme, nullptr);
+    Color testColor = theme->GetRegularColor();
+
+    EXPECT_EQ(layoutProperty->GetRegularColor(), testColor);
+}
+
+/**
+ * @tc.name: PatternLockTestGetTouchOffsetToNode001
+ * @tc.desc: Test GetTouchOffsetToNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockTestGetTouchOffsetToNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PatternLock ModelNG and Pattern.
+     */
+    PatternLockModelNG model;
+    model.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<PatternLockPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. set offset location.
+     */
+    float offsetX = 0.0f;
+    float offsetY = 0.0f;
+    Offset offset(offsetX, offsetY);
+    TouchLocationInfo locationInfo(0);
+    locationInfo.SetLocalLocation(offset);
+
+    /**
+     * @tc.steps: step3. call GetTouchOffsetToNode.
+     * @tc.expected: (0,0).
+     */
+    auto NodeOffset = pattern->GetTouchOffsetToNode();
+    auto offsetZero = OffsetF(0.0f, 0.0f);
+    EXPECT_EQ(NodeOffset, offsetZero);
+}
 } // namespace OHOS::Ace::NG
