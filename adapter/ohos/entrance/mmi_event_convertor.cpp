@@ -144,14 +144,15 @@ uint64_t GetPointerSensorTime(const std::shared_ptr<MMI::PointerEvent>& pointerE
     return inputTime;
 }
 
-TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType)
+TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType,
+    bool useHighPrecision)
 {
     TouchPoint touchPoint;
     // just get the max of width and height
     touchPoint.size = std::max(pointerItem.GetWidth(), pointerItem.GetHeight()) / 2.0;
     touchPoint.id = pointerItem.GetPointerId();
     touchPoint.downTime = TimeStamp(std::chrono::microseconds(pointerItem.GetDownTime()));
-    if (sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
+    if (useHighPrecision && sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN) {
         touchPoint.x = static_cast<float>(pointerItem.GetWindowXPos());
         touchPoint.y = static_cast<float>(pointerItem.GetWindowYPos());
         touchPoint.screenX = static_cast<float>(pointerItem.GetDisplayXPos());
@@ -194,7 +195,7 @@ void UpdateTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, To
             LOGE("get pointer item failed.");
             continue;
         }
-        auto touchPoint = ConvertTouchPoint(item, pointerEvent->GetSourceType());
+        auto touchPoint = ConvertTouchPoint(item, pointerEvent->GetSourceType(), false);
         touchPoint.CovertId();
         touchEvent.pointers.emplace_back(std::move(touchPoint));
     }
@@ -315,7 +316,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         LOGE("get pointer item failed.");
         return TouchEvent();
     }
-    auto touchPoint = ConvertTouchPoint(item, pointerEvent->GetSourceType());
+    auto touchPoint = ConvertTouchPoint(item, pointerEvent->GetSourceType(), true);
     TouchEvent event = ConvertTouchEventFromTouchPoint(touchPoint);
     std::chrono::microseconds microseconds(GetPointerSensorTime(pointerEvent));
     TimeStamp time(microseconds);
