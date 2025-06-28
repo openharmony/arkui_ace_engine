@@ -104,7 +104,7 @@ class ObserveV2 {
   // ViewV2s Grouped by instance id (container id)
   private viewV2NeedUpdateMap_: Map<number, Map<ViewV2 | ViewPU, Array<number>>> = new Map();
 
-  // To avoid multiple schedules on the same container.
+  // To avoid multiple schedules on the same container
   private scheduledContainerIds_: Set<number> = new Set();
 
   // avoid recursive execution of updateDirty
@@ -185,7 +185,7 @@ class ObserveV2 {
     // element id can be registered from id2cmp in aboutToBeDeletedInternal and unregisterElmtIdsFromIViews
     // PersistenceV2Impl instance is Singleton
     if (cmp instanceof ViewBuildNodeBase || cmp instanceof PersistenceV2Impl) {
-      this.id2cmp_[id] = new WeakRef<ViewBuildNodeBase|PersistenceV2Impl>(cmp);
+      this.id2cmp_[id] = new WeakRef<ViewBuildNodeBase | PersistenceV2Impl>(cmp);
       return;
     } 
     const weakRef = WeakRefPool.get(cmp);
@@ -554,12 +554,6 @@ class ObserveV2 {
       }
     } // for
 
-    // Group elementIds/ViewV2's into this.viewV2NeedUpdateMap_ by their containerId.
-    // this.viewV2NeedUpdateMap_ will be used in the optimization path when updating the elements in VSync callback.
-    if (this.isParentChildOptimizable_) {
-      this.groupElementIdsByContainer();
-    }
-
     // report the stateVar changed when recording the profiler
     if (stateMgmtDFX.enableProfiler && !ignoreOnProfiler) {
       stateMgmtDFX.reportStateInfoToProfilerV2(target, attrName, changedIdSet);
@@ -571,46 +565,48 @@ class ObserveV2 {
    * Make sure view.getInstanceId() is called only once for each view., not for all elmtIds!!!
    */
   private groupElementIdsByContainer(): void {
-    stateMgmtConsole.debug(`ObserveV2.groupElementIdsByContainer by their containerId`);
-    if (this.elmtIdsChanged_.size === 0) {
-      stateMgmtConsole.debug(`ObserveV2.groupElementIdsByContainer - no elementIds to group`);
-      return;
-    }
+    stateMgmtConsole.debug('ObserveV2.groupElementIdsByContainer');
 
-    const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);
-    // Important: Clear the elmtIdsChanged_
-    this.elmtIdsChanged_ = new Set();
+    // Create sorted array and clear set
+    const elmtIds = Array.from(this.elmtIdsChanged_, Number).sort((a, b) => a - b);
+    this.elmtIdsChanged_.clear();
 
     // Cache for view -> instanceId
     const viewInstanceIdCache = new Map<ViewV2 | ViewPU, number>();
 
-    elmtIds.forEach((elmtId) => {
-      const view = this.id2cmp_[elmtId]?.deref();
-      if ((view instanceof ViewV2) || (view instanceof ViewPU)) {
-        let instanceId: number;
-        if (viewInstanceIdCache.has(view)) {
-          // If we already have the instanceId for this view, use it.
-          instanceId = viewInstanceIdCache.get(view);
-        } else {
-          // Call to c++ only once for each view.
-          instanceId = view.getInstanceId();
-          // Cache the instanceId for this view.
-          viewInstanceIdCache.set(view, instanceId);
+    for (const elmtId of elmtIds) {
+        const view = this.id2cmp_[elmtId]?.deref();
+
+        // Early continue for invalid views
+        if (!(view instanceof ViewV2 || view instanceof ViewPU)) {
+            continue;
         }
+
+        // Get or cache instanceId
+        let instanceId = viewInstanceIdCache.get(view);
+        if (instanceId === undefined) {
+            instanceId = view.getInstanceId();
+            viewInstanceIdCache.set(view, instanceId);
+        }
+
+        // Get or create viewMap
         let viewMap = this.viewV2NeedUpdateMap_.get(instanceId);
         if (!viewMap) {
           viewMap = new Map<ViewV2 | ViewPU, Array<number>>();
           this.viewV2NeedUpdateMap_.set(instanceId, viewMap);
         }
-        if (!viewMap.has(view)) {
-          viewMap.set(view, []);
-        }
-        viewMap.get(view)!.push(elmtId);
-        stateMgmtConsole.debug(`groupElementIdsByContainer: add elmtId: ${elmtId}, view: ${view.constructor.name}, view.getInstanceId(): ${instanceId}`);
-      }
-    });
-  }
 
+        // Get or create view's element array
+        let elements = viewMap.get(view);
+        if (!elements) {
+            elements = [];
+            viewMap.set(view, elements);
+        }
+
+        elements.push(elmtId);
+        stateMgmtConsole.debug(`groupElementIdsByContainer: elmtId=${elmtId}, view=${view.constructor.name}, instanceId=${instanceId}`);
+    }
+}
   public updateDirty(): void {
     this.startDirty_ = true;
     this.isParentChildOptimizable_ ? this.updateDirty2Optimized(): this.updateDirty2(false);
@@ -630,92 +626,77 @@ class ObserveV2 {
     // Obtain and unregister the removed elmtIds
     UINodeRegisterProxy.obtainDeletedElmtIds();
     UINodeRegisterProxy.unregisterElmtIdsFromIViews();
+
     this.updateComputedAndMonitors();
 
+    if (this.elmtIdsChanged_.size === 0) {
+      stateMgmtConsole.debug(`Vsync request is unnecessary when no elements have changed - returning from updateDirty2Optimized`);
+      return;
+    }
+
+    // Group elementIds before scheduling update
+    this.groupElementIdsByContainer();
+
     // At this point, we have the viewV2NeedUpdateMap_ populated with the ViewV2/elementIds that need update
-    if (this.viewV2NeedUpdateMap_.size > 0) {
-      for (const containerId of this.viewV2NeedUpdateMap_.keys()) {
-        if (!this.scheduledContainerIds_.has(containerId)) {
-          stateMgmtConsole.debug(`  scheduling update for containerId: ${containerId}`);
-          this.scheduledContainerIds_.add(containerId);
-          ViewStackProcessor.scheduleUpdateOnNextVSync(this.flushDirtyViewsOnVSync.bind(this), containerId);
-        } else {
-          stateMgmtConsole.debug(`  containerId: ${containerId} already scheduled, skipping`);
-        }
+    // For each containerId (instance/container) in the map, schedule an update.
+    for (const containerId of this.viewV2NeedUpdateMap_.keys()) {
+      if (!this.scheduledContainerIds_.has(containerId)) {
+        stateMgmtConsole.debug(`  scheduling update for containerId: ${containerId}`);
+        this.scheduledContainerIds_.add(containerId);
+        ViewStackProcessor.scheduleUpdateOnNextVSync(this.onVSyncUpdate.bind(this), containerId);
       }
     }
     stateMgmtConsole.debug(`ObservedV2.updateDirty2Optimized() end`);
   }
-
   // Callback from C++ on VSync
-  public flushDirtyViewsOnVSync(containerId: number) : boolean {
-    aceDebugTrace.begin(`ObservedV2.flushDirtyViewsOnVSync`);
+  public onVSyncUpdate(containerId: number): boolean {
     stateMgmtConsole.debug(`ObservedV2.flushDirtyViewsOnVSync containerId=${containerId} start`);
+    aceDebugTrace.begin(`ObservedV2.onVSyncUpdate`);
+    let maxFlushTimes = 3; // Refer PipelineContext::FlushDirtyNodeUpdate()
     // Obtain and unregister the removed elmtIds
     UINodeRegisterProxy.obtainDeletedElmtIds();
     UINodeRegisterProxy.unregisterElmtIdsFromIViews();
 
-    let returnVal = false;
-    let maxFlushTimes = 3; // Refer PipelineContext::FlushDirtyNodeUpdate()
-
-    // priority order of processing:
-    // 1- update computed properties until no more need computed props update
-    // 2- update monitors paths until no more monitors paths and no more computed props
-    // 3- run all monitor functions
-    // 4- update UINodes until no more monitors, no more computed props, and no more UINodes
+    // Process updates in priority order: computed properties, monitors, UI nodes
     do {
       this.updateComputedAndMonitors();
-      // Get the ViewV2 map that need update for the given containerId from this.viewV2NeedUpdateMap_
       const viewV2Map = this.viewV2NeedUpdateMap_.get(containerId);
-      stateMgmtConsole.debug(`flushDirtyViewsOnVSync: containerId: ${containerId}, viewV2Map size: ${viewV2Map?.size}`);
 
-      // Important: Clear the ViewV2s from viewV2NeedUpdateMap_ for the current containerId.
+      // Clear the ViewV2 map for the current containerId
       this.viewV2NeedUpdateMap_.delete(containerId);
 
-      if (viewV2Map && viewV2Map.size > 0) {
-        // Update the elements. This would generate new elements in elmtIdsChanged_ in nested update cases,
-        // and viewV2NeedUpdateMap_ will be updated in fireChange().
+      if (viewV2Map?.size) {
+        // Update elements, generating new elmtIds in elmtIdsChanged_ for nested updates
         viewV2Map.forEach((elmtIds, view) => {
-          stateMgmtConsole.debug(`flushDirtyViewsOnVSync: Updating view: ${view.constructor.name}, ElementIds: [${elmtIds.join(', ')}]`);
-            elmtIds.forEach((elmtId) => {
-              if (view.isViewActive()) {
-                stateMgmtConsole.debug(`Updating element ${elmtId} in view ${view.constructor.name}`);
-                view.UpdateElement(elmtId);
-              } else {
-                // Schedule a delayed update if the view is inactive
-                view.scheduleDelayedUpdate(elmtId);
-              }
-            });
+          this.updateUINodesSynchronously(elmtIds, view);
         });
+
+        if (this.elmtIdsChanged_.size) {
+          this.groupElementIdsByContainer();
+        }
       } else {
-        // This path will not/should not be reached. Handling this if any rare cases!
-        stateMgmtConsole.error(`ERROR: No views to update.`);
-        ViewStackProcessor.scheduleUpdateOnNextVSync(null, containerId);
-        return returnVal; // false
+        stateMgmtConsole.error(`No views to update for containerId=${containerId}`);
+        break; // Exit loop early since no updates are possible
+      }
+    } while (this.hasPendingUpdates(containerId) && --maxFlushTimes > 0);
+
+    // Check if more updates are needed
+    const viewV2Map = this.viewV2NeedUpdateMap_.get(containerId);
+
+    if (!viewV2Map || viewV2Map.size === 0) {
+      if (viewV2Map?.size === 0) {
+        this.viewV2NeedUpdateMap_.delete(containerId);
       }
 
-      maxFlushTimes--;
-    } while (this.hasPendingUpdates(containerId) && maxFlushTimes > 0);
+      ViewStackProcessor.scheduleUpdateOnNextVSync(null, containerId);
 
-    const viewV2Map = this.viewV2NeedUpdateMap_.get(containerId);
-    if (!viewV2Map) {
-      stateMgmtConsole.debug(`  viewV2Map null, scheduleUpdateOnNextVSync(null) containerId: ` + containerId);
-      ViewStackProcessor.scheduleUpdateOnNextVSync(null, containerId);
-    } else if (viewV2Map.size === 0) {
-      stateMgmtConsole.debug(`  viewV2Map.size is 0, scheduleUpdateOnNextVSync(null) containerId: ` + containerId);
-      this.viewV2NeedUpdateMap_.delete(containerId);
-      ViewStackProcessor.scheduleUpdateOnNextVSync(null, containerId);
-    } else {
-      // There are still views that need to be updated.
-      returnVal = true;
+      // After all processing, remove from scheduled set
+      this.scheduledContainerIds_.delete(containerId);
+      return false;
     }
-
-    // After all processing, remove from scheduled set.
-    this.scheduledContainerIds_.delete(containerId);
-
-    stateMgmtConsole.debug(`ObservedV2.flushDirtyViewsOnVSync containerId=${containerId} end`);
     aceDebugTrace.end();
-    return returnVal;
+    stateMgmtConsole.debug(`ObservedV2.onVSyncUpdate there are still views to be updated for containerId=${containerId}`);
+    return true;
   }
 
   public hasPendingUpdates(containerId: number): boolean {
@@ -795,8 +776,8 @@ class ObserveV2 {
       }
     } while (this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
 
-    stateMgmtConsole.debug(`ObservedV2.updateDirty2 updateUISynchronously=${updateUISynchronously} - DONE `);
     aceDebugTrace.end();
+    stateMgmtConsole.debug(`ObservedV2.updateDirty2 updateUISynchronously=${updateUISynchronously} - DONE `);
   }
 
   public updateDirtyComputedProps(computed: Array<number>): void {
@@ -873,12 +854,12 @@ class ObserveV2 {
    * @param elmtIds
    *
    */
-  private updateUINodesSynchronously(elmtIds: Array<number>): void {
+  private updateUINodesSynchronously(elmtIds: Array<number>, inView?: ViewPU | ViewV2): void {
     stateMgmtConsole.debug(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtIds: ${JSON.stringify(elmtIds)} ...`);
     aceDebugTrace.begin(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtId`);
 
     elmtIds.forEach((elmtId) => {
-      const view = this.id2cmp_[elmtId]?.deref();
+      let view = inView ?? this.id2cmp_[elmtId]?.deref();
       if ((view instanceof ViewV2) || (view instanceof ViewPU)) {
         if (view.isViewActive()) {
           // FIXME need to call syncInstanceId before update?
