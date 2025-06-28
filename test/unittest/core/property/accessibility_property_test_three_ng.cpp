@@ -32,11 +32,16 @@
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "frameworks/base/utils/multi_thread.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+const std::string TEST_TEXT = "test text";
+} // namespace
+
 class MockPattern : public Pattern {
 public:
     MockPattern() = default;
@@ -282,5 +287,63 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree011, Te
     node->isActive_ = true;
     ret = accessibilityProperty.HoverTestRecursive(parentPoint, node, path, debugInfo, ancestorGroupFlag);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest012
+ * @tc.desc: Test the method SetAccessibilityGroup.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree012, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    EXPECT_FALSE(accessibilityProperty.accessibilityGroup_);
+    WeakPtr<FrameNode> hostBak = accessibilityProperty.host_;
+    bool accessibilityGroup = true;
+    accessibilityProperty.SetAccessibilityGroup(accessibilityGroup);
+    EXPECT_TRUE(accessibilityProperty.accessibilityGroup_);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest013
+ * @tc.desc: Test the method SetAccessibilityTextWithEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree013, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    EXPECT_FALSE(accessibilityProperty.accessibilityText_.has_value());
+    WeakPtr<FrameNode> hostBak = accessibilityProperty.host_;
+    accessibilityProperty.SetAccessibilityTextWithEvent(TEST_TEXT);
+    EXPECT_EQ(accessibilityProperty.accessibilityText_.value_or(""), TEST_TEXT);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest014
+ * @tc.desc: Test the method SetAccessibilityDescriptionWithEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree014, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    EXPECT_FALSE(accessibilityProperty.accessibilityDescription_.has_value());
+    WeakPtr<FrameNode> hostBak = accessibilityProperty.host_;
+    accessibilityProperty.SetAccessibilityDescriptionWithEvent(TEST_TEXT);
+    EXPECT_EQ(accessibilityProperty.accessibilityDescription_.value_or(""), TEST_TEXT);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest015
+ * @tc.desc: Test the method SetAccessibilityLevel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree015, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    EXPECT_FALSE(accessibilityProperty.accessibilityLevel_.has_value());
+    WeakPtr<FrameNode> hostBak = accessibilityProperty.host_;
+    std::string accessibilityLevel = "auto";
+    accessibilityProperty.SetAccessibilityLevel(accessibilityLevel);
+    EXPECT_EQ(accessibilityProperty.accessibilityLevel_.value_or(""), accessibilityLevel);
 }
 } // namespace OHOS::Ace::NG
