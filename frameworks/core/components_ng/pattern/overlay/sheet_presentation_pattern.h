@@ -1114,6 +1114,7 @@ private:
     void SetSheetOuterBorderWidth(const RefPtr<SheetTheme>& sheetTheme, const NG::SheetStyle& sheetStyle);
     PipelineContext* GetSheetMainPipeline() const;
     float GetBottomSafeArea();
+    void StopModifySheetTransition();
     void AvoidKeyboardBySheetMode(bool forceAvoid = false);
     void DecreaseScrollHeightInSheet(float decreaseHeight);
     void UpdateSheetWhenSheetTypeChanged();
