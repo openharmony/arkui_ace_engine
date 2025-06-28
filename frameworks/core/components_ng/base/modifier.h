@@ -434,6 +434,16 @@ public:
         }
         return {};
     }
+
+    T GetStagingValue() const
+    {
+        auto property = AceType::DynamicCast<S>(GetProperty());
+        if (property) {
+            return property->GetStagingValue();
+        }
+        return {};
+    }
+
     void AnimateWithVelocity(const AnimationOption& option, T value, T velocity,
         const FinishCallback& finishCallback);
 private:

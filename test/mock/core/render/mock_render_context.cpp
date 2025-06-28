@@ -28,22 +28,22 @@ void InitProp(const RefPtr<PropertyBase>& propBase)
         MockAnimationProxy<float>::GetInstance().RegisterProperty(prop, prop->Get());
         // setup proxy for Set, Get, GetStageValue
         prop->SetUpCallbacks(
-            [weak = WeakPtr(prop)]() { return MockAnimationProxy<float>::GetInstance().GetEndValue(weak.Upgrade()); },
+            [weak = WeakPtr(prop)]() { return MockAnimationProxy<float>::GetInstance().GetValue(weak.Upgrade()); },
             [weak = WeakPtr(prop)](
                 float value) { MockAnimationProxy<float>::GetInstance().RecordPropChange(weak, value); },
             [weak = WeakPtr(prop)]() {
-                return MockAnimationProxy<float>::GetInstance().GetStagingValue(weak.Upgrade());
+                return MockAnimationProxy<float>::GetInstance().GetEndValue(weak.Upgrade());
             });
     }
 
     if (auto prop = AceType::DynamicCast<AnimatablePropertyOffsetF>(propBase); prop) {
         MockAnimationProxy<OffsetF>::GetInstance().RegisterProperty(prop, prop->Get());
         prop->SetUpCallbacks(
-            [weak = WeakPtr(prop)]() { return MockAnimationProxy<OffsetF>::GetInstance().GetEndValue(weak.Upgrade()); },
+            [weak = WeakPtr(prop)]() { return MockAnimationProxy<OffsetF>::GetInstance().GetValue(weak.Upgrade()); },
             [weak = WeakPtr(prop)](
                 OffsetF value) { MockAnimationProxy<OffsetF>::GetInstance().RecordPropChange(weak, value); },
             [weak = WeakPtr(prop)]() {
-                return MockAnimationProxy<OffsetF>::GetInstance().GetStagingValue(weak.Upgrade());
+                return MockAnimationProxy<OffsetF>::GetInstance().GetEndValue(weak.Upgrade());
             });
     }
     /* add code for other types */
@@ -61,7 +61,7 @@ void MockRenderContext::AttachNodeAnimatableProperty(RefPtr<NodeAnimatableProper
 void MockRenderContext::CancelTranslateXYAnimation()
 {
     CHECK_NULL_VOID(translateXY_);
-    translateXY_->Set(translateXY_->GetStagingValue());
+    translateXY_->Set(translateXY_->Get());
 }
 OffsetF MockRenderContext::GetTranslateXYProperty()
 {
@@ -69,7 +69,7 @@ OffsetF MockRenderContext::GetTranslateXYProperty()
         translateXY_ = MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
         InitProp(translateXY_);
     }
-    return translateXY_->GetStagingValue();
+    return translateXY_->Get();
 }
 void MockRenderContext::UpdateTranslateInXY(const OffsetF& offset)
 {
