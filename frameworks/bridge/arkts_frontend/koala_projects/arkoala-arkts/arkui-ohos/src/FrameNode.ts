@@ -31,9 +31,15 @@ import { RenderNode, RenderNodeInternal } from "./RenderNode"
 import { CommonAttribute, ArkCommonMethodPeer, CommonMethod, UIGestureEvent, UICommonEvent, UICommonEventInternal } from './component/common'
 import { ArkBaseNode } from './handwritten/modifiers/ArkBaseNode'
 import { ArkListNode } from './handwritten/modifiers/ArkListNode'
-import { ArkTextNode } from './handwritten/modifiers/ArkTextNode'
+import { ArkSearchNode } from './handwritten/modifiers/ArkSearchNode'
+import { ArkTextAreaNode } from './handwritten/modifiers/ArkTextAreaNode'
+import { ArkTextInputNode } from './handwritten/modifiers/ArkTextInputNode'
 import { ModifierType } from './handwritten/modifiers/ArkCommonModifier'
 import { ListOptions, ListAttribute, ArkListPeer } from './component/list'
+import { SearchOptions, SearchAttribute, ArkSearchPeer } from './component/search'
+import { TextAreaOptions, TextAreaAttribute, ArkTextAreaPeer } from './component/textArea'
+import { TextInputOptions, TextInputAttribute, ArkTextInputPeer } from './component/textInput'
+import { ArkTextNode } from './handwritten/modifiers/ArkTextNode'
 import { TextOptions, TextAttribute, ArkTextPeer } from './component/text'
 import { Deserializer } from "./component/peers/Deserializer";
 import { ComponentContent } from './ComponentContent';
@@ -973,6 +979,71 @@ export namespace typeNode {
             return arknode;
         });
     }
+}
+
+export namespace typeNode {
+    class SearchFrameNode extends TypedFrameNode<ArkSearchNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkSearchNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: SearchOptions): SearchAttribute {
+            let arkSearchNode = this.attribute as ArkSearchNode;
+            return arkSearchNode!.initialize(options);
+        }
+    }
+
+    class TextAreaFrameNode extends TypedFrameNode<ArkTextAreaNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextAreaNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: TextAreaOptions): TextAreaAttribute {
+            let arkTextAreaNode = this.attribute as ArkTextAreaNode;
+            return arkTextAreaNode!.initialize(options);
+        }
+    }
+
+    class TextInputFrameNode extends TypedFrameNode<ArkTextInputNode> {
+        constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextInputNode) {
+            super(uiContext, type, attrCreator);
+        }
+        initialize(options: TextInputOptions): TextInputAttribute {
+            let arkTextInputNode = this.attribute as ArkTextInputNode;
+            return arkTextInputNode!.initialize(options);
+        }
+    }
+
+    // // @ts-ignore
+    // function createNode(context: UIContext, type: string): SearchFrameNode {
+    //     return new SearchFrameNode(context, 'Search', (node: FrameNode, type: ModifierType): ArkSearchNode => {
+    //         let arknode = new ArkSearchNode();
+    //         const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+    //         const peer = new ArkSearchPeer(retval, node._nodeId as int32, "Search", 0);
+    //         arknode.setPeer(peer);
+    //         return arknode;
+    //     });
+    // }
+
+    // // @ts-ignore
+    // function createNode(context: UIContext, type: string): TextAreaFrameNode {
+    //     return new TextAreaFrameNode(context, 'TextArea', (node: FrameNode, type: ModifierType): ArkTextAreaNode => {
+    //         let arknode = new ArkTextAreaNode();
+    //         const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+    //         const peer = new ArkTextAreaPeer(retval, node._nodeId as int32, "TextArea", 0);
+    //         arknode.setPeer(peer);
+    //         return arknode;
+    //     });
+    // }
+
+    // // @ts-ignore
+    // function createNode(context: UIContext, type: string): TextInputFrameNode {
+    //     return new TextInputFrameNode(context, 'TextInput', (node: FrameNode, type: ModifierType): ArkTextInputNode => {
+    //         let arknode = new ArkTextInputNode();
+    //         const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+    //         const peer = new ArkTextInputPeer(retval, node._nodeId as int32, "TextInput", 0);
+    //         arknode.setPeer(peer);
+    //         return arknode;
+    //     });
+    // }
 }
 
 export namespace typeNode {
