@@ -174,7 +174,8 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
     CHECK_NULL_RETURN(env, ARKUI_ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(OHOS::Ace::NodeModel::InitialFullImpl(), ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
     auto callback = [](const char* moduleName) -> bool {
-        const char* allowedModules[] = { "arkui.node", "arkui.modifier", "measure", "arkui.UIContext" };
+        const char* allowedModules[] = { "arkui.node", "arkui.modifier", "measure", "arkui.UIContext",
+            "arkui.observer" };
         for (const char* allowedModule : allowedModules) {
             if (std::strcmp(moduleName, allowedModule) == 0) {
                 return true;
