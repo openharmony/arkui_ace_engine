@@ -123,7 +123,7 @@ RefPtr<UINode> DialogManager::GetDialogNodeByContentNode(const RefPtr<UINode>& c
     return parent;
 }
 
-bool DialogManager::IfNeedAvoidDock(const RefPtr<FrameNode>& currentNode) const
+bool DialogManager::IsPcOrFreeMultiWindow(const RefPtr<FrameNode>& currentNode) const
 {
     auto pipelineContext = currentNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipelineContext, false);
