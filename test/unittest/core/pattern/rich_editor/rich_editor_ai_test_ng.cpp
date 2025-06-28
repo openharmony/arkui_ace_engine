@@ -546,4 +546,31 @@ HWTEST_F(RichEditorAITestOneNg, InitAiselection, TestSize.Level1)
     EXPECT_FALSE(textSelector2.aiStart.has_value());
     EXPECT_FALSE(textSelector2.aiEnd.has_value());
 }
+
+/**
+ * @tc.name: UpdateAIStyle
+ * @tc.desc: test UpdateAIStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAITestOneNg, UpdateAIStyle, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto& spans = richEditorPattern->spans_;
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->aiSpanResultCount = 1;
+    spans.push_back(spanItem);
+
+    TextDetectConfig textDetectConfig;
+
+    textDetectConfig.entityColor = TEXT_COLOR_VALUE;
+    textDetectConfig.entityDecorationType = TextDecoration::OVERLINE;
+    textDetectConfig.entityDecorationColor = Color::BLACK;
+    textDetectConfig.entityDecorationStyle = TextDecorationStyle ::DOUBLE;
+    richEditorPattern->SetTextDetectConfig(textDetectConfig);
+
+    EXPECT_EQ(spanItem->aiSpanResultCount, 0);
+}
 }
