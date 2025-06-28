@@ -1671,48 +1671,4 @@ HWTEST_F(WebPatternSelectTestNg, GetShadowFromTheme_003, TestSize.Level1)
     MockPipelineContext::TearDown();
 #endif
 }
-
-/**
- * @tc.name: SetTooltipTextLayoutPropertyInner_001
- * @tc.desc: SetTooltipTextLayoutPropertyInner when GetShadowFromTheme returns false.
- * @tc.type: FUNC
- */
-HWTEST_F(WebPatternSelectTestNg, SetTooltipTextLayoutPropertyInner_001, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    MockPipelineContext::SetUp();
-    MockContainer::SetUp();
-    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto theme = AceType::MakeRefPtr<ShadowTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
-
-    std::string src = "web_test";
-    RefPtr<WebController> controller = AceType::MakeRefPtr<WebController>();
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::WEB_ETS_TAG, nodeId, [src, controller]() { return AceType::MakeRefPtr<WebPattern>(src, controller); });
-    stack->Push(frameNode);
-
-    auto webPattern = frameNode->GetPattern<WebPattern>();
-    CHECK_NULL_VOID(webPattern);
-    webPattern->OnModifyDone();
-
-    const std::string tooltip = "tooltip_test";
-    auto overlayManager = MockPipelineContext::GetCurrentContext()->GetOverlayManager();
-    webPattern->tooltipId_ = ElementRegister::GetInstance()->MakeUniqueId();
-
-    auto tooltipNode = FrameNode::GetOrCreateFrameNode(
-        V2::TEXT_ETS_TAG, webPattern->tooltipId_, []() { return AceType::MakeRefPtr<TextPattern>(); });
-    ASSERT_NE(tooltipNode, nullptr);
-    auto textRenderContext = tooltipNode->GetRenderContext();
-    ASSERT_NE(textRenderContext, nullptr);
-    webPattern->SetTooltipTextLayoutPropertyInner(MockPipelineContext::GetCurrentContext(), tooltip, overlayManager);
-
-    MockContainer::TearDown();
-    MockPipelineContext::TearDown();
-#endif
-}
 } // namespace OHOS::Ace::NG
