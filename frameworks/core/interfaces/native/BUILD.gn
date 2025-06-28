@@ -141,7 +141,10 @@ template("ace_core_interfaces_native_node") {
       "ani/content_slot_ani_modifier.cpp",
       "ani/custom_node_ani_modifier.cpp",
       "ani/drag_ani_modifier.cpp",
+      "ani/drag_controller_ani_modifier.cpp",
+      "ani/drag_controller_utils.cpp",
       "ani/image_ani_modifier.cpp",
+      "ani/image_span_ani_modifier.cpp",
       "ani/node_ani_modifier.cpp",
       "ani/web_ani_modifier.cpp",
       "ani/waterflow_ani_modifier.cpp",
@@ -153,6 +156,8 @@ template("ace_core_interfaces_native_node") {
         "ani/common_ani_modifier.cpp",
         "ani/node_ani_modifier.cpp",
         "ani/waterflow_ani_modifier.cpp",
+        "ani/drag_controller_ani_modifier.cpp",
+        "ani/drag_controller_utils.cpp",
       ]
     }
 
@@ -215,6 +220,20 @@ template("ace_core_interfaces_native_node") {
       "graphic_2d:librender_service_client",
       "runtime_core:ani",
     ]
+    if (defined(config.pixel_map_support)) {
+      external_deps += [
+        "image_framework:image",
+        "image_framework:image_taihe",
+      ]
+    }
+    if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
+        external_deps += [ "device_status:devicestatus_client" ]
+      if (defined(global_parts_info.distributeddatamgr_udmf)) {
+        external_deps += [ "udmf:udmf_client" ]
+        external_deps += [ "udmf:libudmf" ]
+        external_deps += [ "udmf:udmf_taihe_native" ]
+      }
+    }
     if (build_ohos_sdk) {
       external_deps -= [
         "runtime_core:ani",

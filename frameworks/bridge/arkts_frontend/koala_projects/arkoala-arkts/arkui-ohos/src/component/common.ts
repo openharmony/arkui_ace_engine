@@ -39,8 +39,7 @@ import { ResizableOptions } from "./image"
 import { VisualEffect, Filter, BrightnessBlender } from "./arkui-uieffect"
 import { FocusBoxStyle, FocusPriority } from "./focus"
 import { TransformationMatrix } from "./arkui-common"
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup } from "./gesture"
-import { BlendMode } from "./arkui-drawing"
+import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup, GestureGroupHandler } from "./gesture"
 import { StyledString } from "./styledString"
 import { Callback_Number_Number_Void } from "./grid"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -5602,7 +5601,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_expandSafeArea(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    backgroundAttribute(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): void {
+    backgroundAttribute(builder: CustomBuilder | undefined, options?: BackgroundOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         let builder_type : int32 = RuntimeType.UNDEFINED
         builder_type = runtimeType(builder)
@@ -7820,6 +7819,37 @@ export type Callback_Literal_Boolean_isVisible_Void = (event: Literal_Boolean_is
 export interface Literal_ResourceColor_color {
     color: ResourceColor;
 }
+export enum BlendMode {
+    CLEAR = 0,
+    SRC = 1,
+    DST = 2,
+    SRC_OVER = 3,
+    DST_OVER = 4,
+    SRC_IN = 5,
+    DST_IN = 6,
+    SRC_OUT = 7,
+    DST_OUT = 8,
+    SRC_ATOP = 9,
+    DST_ATOP = 10,
+    XOR = 11,
+    PLUS = 12,
+    MODULATE = 13,
+    SCREEN = 14,
+    OVERLAY = 15,
+    DARKEN = 16,
+    LIGHTEN = 17,
+    COLOR_DODGE = 18,
+    COLOR_BURN = 19,
+    HARD_LIGHT = 20,
+    SOFT_LIGHT = 21,
+    DIFFERENCE = 22,
+    EXCLUSION = 23,
+    MULTIPLY = 24,
+    HUE = 25,
+    SATURATION = 26,
+    COLOR = 27,
+    LUMINOSITY = 28
+}
 export interface PopupOptions {
     message: string;
     placement?: Placement;
@@ -8057,7 +8087,7 @@ export type Callback_DragEvent_String_Void = (event: DragEvent, extraParams?: st
 export type Callback_PreDragStatus_Void = (parameter: PreDragStatus) => void;
 export type Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult = (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult;
 export type Callback_TouchEvent_HitTestMode = (parameter: TouchEvent) => HitTestMode;
-export interface Literal_Alignment_align {
+export interface BackgroundOptions {
     align?: Alignment;
 }
 export interface CommonMethod {
@@ -8123,8 +8153,9 @@ export interface CommonMethod {
     groupDefaultFocus(value: boolean | undefined): this
     focusOnTouch(value: boolean | undefined): this
     focusBox(value: FocusBoxStyle | undefined): this
-    animationStart(value: AnimateParam | undefined): this
-    animationStop(value: AnimateParam | undefined):this
+    // when use buildSystem memo-plugin will insert animation declaration
+    // animationStart(value: AnimateParam | undefined): this
+    // animationStop(value: AnimateParam | undefined):this
     __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
         callback: (value: number | AnimatableArithmetic<T>) => void): void
     transition(effect: TransitionOptions | TransitionEffect | undefined | TransitionEffect | undefined, onFinish?: TransitionFinishCallback): this
@@ -8225,7 +8256,7 @@ export interface CommonMethod {
     accessibilityFocusDrawLevel(value: FocusDrawLevel | undefined): this
     customProperty(name: string | undefined, value: Object | undefined): this
     expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this
-    background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this
+    background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this
     backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this
     backgroundBlurStyle(style: BlurStyle | undefined, options?: BackgroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
     foregroundBlurStyle(style: BlurStyle | undefined, options?: ForegroundBlurStyleOptions, sysOptions?: SystemAdaptiveOptions): this
@@ -8906,7 +8937,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {
         return this
     }
-    public background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this {
+    public background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         return this
     }
     public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
@@ -11143,10 +11174,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this {
+    public background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         if (this.checkPriority("background")) {
             const builder_casted = builder as (CustomBuilder | undefined)
-            const options_casted = options as (Literal_Alignment_align)
+            const options_casted = options as (BackgroundOptions)
             this.getPeer()?.backgroundAttribute(builder_casted, options_casted)
             return this
         }
@@ -11361,21 +11392,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
         if (this.checkPriority("blendMode")) {
-            const value_type = runtimeType(value)
-            const type_type = runtimeType(type)
-            if (((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) && ((RuntimeType.OBJECT == type_type) || (RuntimeType.OBJECT == type_type))) {
-                const value_casted = value as (BlendMode | undefined)
-                const type_casted = type as (BlendApplyType)
-                this.getPeer()?.blendMode0Attribute(value_casted, type_casted)
-                return this
-            }
-            if (((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) && ((RuntimeType.OBJECT == type_type) || (RuntimeType.OBJECT == type_type))) {
-                const mode_casted = value as (BlendMode | undefined)
-                const type_casted = type as (BlendApplyType)
-                this.getPeer()?.blendMode1Attribute(mode_casted, type_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (BlendMode | undefined)
+            const type_casted = type as (BlendApplyType)
+            this.getPeer()?.blendMode0Attribute(value_casted, type_casted)
+            return this
         }
         return this
     }

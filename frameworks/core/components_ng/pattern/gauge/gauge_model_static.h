@@ -28,6 +28,7 @@ public:
     static void SetGaugeStrokeWidth(FrameNode* frameNode, const std::optional<Dimension>& strokeWidth);
     static void SetIndicatorSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
     static void SetPrivacySensitive(FrameNode* frameNode, const std::optional<bool>& flag);
+    static void SetDescription(FrameNode* frameNode, const RefPtr<AceType>& customNode);
 };
 } // namespace OHOS::Ace::NG
 

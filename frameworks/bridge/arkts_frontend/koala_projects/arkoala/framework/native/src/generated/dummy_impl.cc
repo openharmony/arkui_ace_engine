@@ -35139,6 +35139,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOwnerViewImpl(Ark_CustomDialogController peer, Ark_NodeHandle node)
+    {
+        if (!needGroupedLog(1))
+            return;
+        string out("setOwnerView(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // CustomDialogControllerAccessor
     namespace LinearGradientAccessor {
     void DestroyPeerImpl(Ark_LinearGradient peer)
@@ -36575,6 +36583,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append("[return {}] \n");
         appendGroupedLog(1, out);
         return {};
+    }
+    Ark_Boolean IsScrollableComponentImpl(Ark_EventTargetInfo peer)
+    {
+        if (!needGroupedLog(1))
+            return 0;
+        string out("isScrollableComponent(");
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
     }
     } // EventTargetInfoAccessor
     namespace GestureRecognizerAccessor {
@@ -45548,6 +45566,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CustomDialogControllerAccessor::GetFinalizerImpl,
             CustomDialogControllerAccessor::OpenImpl,
             CustomDialogControllerAccessor::CloseImpl,
+            CustomDialogControllerAccessor::SetOwnerViewImpl,
         };
         return &CustomDialogControllerAccessorImpl;
     }
@@ -45883,6 +45902,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             EventTargetInfoAccessor::CtorImpl,
             EventTargetInfoAccessor::GetFinalizerImpl,
             EventTargetInfoAccessor::GetIdImpl,
+            EventTargetInfoAccessor::IsScrollableComponentImpl,
         };
         return &EventTargetInfoAccessorImpl;
     }

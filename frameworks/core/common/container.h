@@ -785,6 +785,9 @@ public:
 
     static bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes);
 
+    // Get the subFrontend of container
+    virtual RefPtr<Frontend> GetSubFrontend() const { return nullptr; }
+
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::vector<std::string> GetFontFamilyName(const std::string& path);

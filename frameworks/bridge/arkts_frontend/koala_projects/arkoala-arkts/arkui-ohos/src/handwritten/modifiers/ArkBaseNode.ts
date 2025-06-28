@@ -20,7 +20,7 @@ import { BlurOptions, BlurStyle, BorderImageOption, ChainStyle, ClickEffect, Cli
 import { ContextMenuOptions, CustomBuilder, CustomPopupOptions, DragEvent, DragInteractionOptions, DragItemInfo } from '../../component/common';
 import { DragPreviewOptions, DrawModifier, EffectType, ForegroundBlurStyleOptions, ForegroundEffectOptions } from '../../component/common';
 import { GeometryTransitionOptions, GestureModifier, GestureRecognizerJudgeBeginCallback, HoverEvent, InvertOptions, KeyEvent } from '../../component/common';
-import { LinearGradientBlurOptions, Literal_Alignment_align, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs } from '../../component/common';
+import { LinearGradientBlurOptions, BackgroundOptions, Literal_Union_Number_Literal_Number_offset_span_lg_md_sm_xs } from '../../component/common';
 import { LocalizedAlignRuleOptions, MenuElement, MenuOptions, ModalTransition, MotionBlurOptions, MotionPathOptions } from '../../component/common';
 import { MouseEvent, OutlineStyle, OverlayOptions, PixelRoundPolicy, PixelStretchEffectOptions, PopupOptions, PreDragStatus } from '../../component/common';
 import { ProgressMask, Rectangle, RotateOptions, SafeAreaEdge, SafeAreaType, ScaleOptions, ShadowOptions, ShadowStyle } from '../../component/common';
@@ -42,7 +42,7 @@ import { FocusBoxStyle, FocusPriority } from "../../component/focus"
 import { TransformationMatrix } from "../../component/arkui-common"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "../../component/gesture"
 import { ComponentContent } from "../../component/arkui-custom"
-import { BlendMode } from "../../component/arkui-drawing"
+import { BlendMode } from "../../component/common"
 import { InteropNativeModule } from '@koalaui/interop';
 
 export class ArkBaseNode extends ComponentBase implements CommonAttribute {
@@ -576,7 +576,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {
         return this
     }
-    public background(builder: CustomBuilder | undefined, options?: Literal_Alignment_align): this {
+    public background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         return this
     }
     public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {

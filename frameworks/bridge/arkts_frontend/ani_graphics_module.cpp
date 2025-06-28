@@ -21,8 +21,11 @@
 #include "canvas_ani/ani_canvas.h"
 #endif
 
+#include "bridge/arkts_frontend/arkts_ani_utils.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
+#include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/render_node_peer_impl.h"
+#include "core/interfaces/native/node/extension_custom_node.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Framework {
@@ -205,5 +208,57 @@ void AniGraphicsModule::SetDrawModifier(ani_env* env, ani_long ptr, ani_object d
             frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
         }
     }
+}
+
+void AniGraphicsModule::SetCustomCallback(
+    ani_env* env, ani_long ptr, ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout)
+{
+    auto customFuncExisted = false;
+    auto customNode = AceType::MakeRefPtr<NG::ExtensionCustomNode>();
+    if (fnObjMeasure != nullptr) {
+        customFuncExisted = true;
+        ani_ref fnObjGlobalRef = nullptr;
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObjMeasure), &fnObjGlobalRef);
+        auto callbackFunc = [env, fnObjGlobalRef](const NG::LayoutConstraintF& context) -> void {
+            std::vector<ani_ref> params;
+            auto width1 = ArktsAniUtils::FloatToNumberObject(env, context.maxSize.Width());
+            auto height1 = ArktsAniUtils::FloatToNumberObject(env, context.maxSize.Height());
+            auto width2 = ArktsAniUtils::FloatToNumberObject(env, context.minSize.Width());
+            auto height2 = ArktsAniUtils::FloatToNumberObject(env, context.minSize.Height());
+            auto width3 = ArktsAniUtils::FloatToNumberObject(env, context.percentReference.Width());
+            auto height3 = ArktsAniUtils::FloatToNumberObject(env, context.percentReference.Height());
+            params.emplace_back((ani_ref)width1);
+            params.emplace_back((ani_ref)height1);
+            params.emplace_back((ani_ref)width2);
+            params.emplace_back((ani_ref)height2);
+            params.emplace_back((ani_ref)width3);
+            params.emplace_back((ani_ref)height3);
+            ani_ref fnReturnVal;
+            env->FunctionalObject_Call(
+                reinterpret_cast<ani_fn_object>(fnObjGlobalRef), params.size(), params.data(), &fnReturnVal);
+        };
+        customNode->SetMeasureCallback(callbackFunc);
+    }
+    if (fnObjLayout != nullptr) {
+        customFuncExisted = true;
+        ani_ref fnObjGlobalRef = nullptr;
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObjLayout), &fnObjGlobalRef);
+        auto callbackFunc = [env, fnObjGlobalRef](const NG::OffsetF& context) -> void {
+            std::vector<ani_ref> params;
+            params.emplace_back((ani_ref)ArktsAniUtils::CreateDoubleObject(env, context.GetX()));
+            params.emplace_back((ani_ref)ArktsAniUtils::CreateDoubleObject(env, context.GetY()));
+            ani_ref fnReturnVal;
+            env->FunctionalObject_Call(
+                reinterpret_cast<ani_fn_object>(fnObjGlobalRef), params.size(), params.data(), &fnReturnVal);
+        };
+        customNode->SetLayoutCallback(callbackFunc);
+    }
+    if (!customFuncExisted) {
+        return;
+    }
+    auto* frameNodePeer = reinterpret_cast<FrameNodePeer*>(ptr);
+    CHECK_NULL_VOID(frameNodePeer);
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
+    frameNode->SetExtensionHandler(customNode);
 }
 } // namespace OHOS::Ace::Framework

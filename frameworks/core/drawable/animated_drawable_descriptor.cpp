@@ -32,7 +32,7 @@ int32_t AnimatedDrawableDescriptor::GetTotalDuration()
 {
     auto size = pixelMapList_.size();
     if (totalDuration_ < 0) {
-        totalDuration_ = static_cast<int32_t>(size);
+        totalDuration_ = static_cast<int32_t>(size*DEFAULT_DURATION);
     }
     return totalDuration_;
 }

@@ -14,6 +14,7 @@
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("./interop.gni")
 
 interop_root = ""
 
@@ -55,4 +56,14 @@ group("interop") {
     deps = [
       "$interop_root:interop.abc"
     ]
+}
+
+generate_static_abc("interop-arkts_abc") {
+  base_url = "./src/arkts"
+  files = koalaui_interop_files
+  package = "@koalaui/interop"
+  paths_keys = koalaui_interop_path_keys
+  paths_values = koalaui_interop_path_values
+  dst_file = target_out_dir + "/interop-arkts.abc"
+  out_puts = [ target_out_dir + "/interop-arkts.abc" ]
 }

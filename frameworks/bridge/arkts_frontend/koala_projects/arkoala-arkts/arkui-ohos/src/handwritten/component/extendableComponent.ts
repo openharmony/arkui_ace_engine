@@ -16,6 +16,7 @@
 import { int32 } from "@koalaui/common"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { IProvideDecoratedVariable } from "../stateManagement/decorator";
+import { PeerNode } from "../PeerNode";
 
 export interface LifeCycle {
     aboutToAppear(): void {}
@@ -28,6 +29,7 @@ export interface LifeCycle {
 export interface IExtendableComponent {
     getUIContext(): UIContext;
     getUniqueId(): int32;
+    getPeerNode(): PeerNode | undefined;
 }
 
 export abstract class ExtendableComponent implements LifeCycle {
@@ -68,5 +70,8 @@ export abstract class ExtendableComponent implements LifeCycle {
     }
     getUniqueId(): int32 {
         return this.delegate_!.getUniqueId();
+    }
+    getPeerNode(): PeerNode | undefined {
+        return this.delegate_!.getPeerNode();
     }
 }

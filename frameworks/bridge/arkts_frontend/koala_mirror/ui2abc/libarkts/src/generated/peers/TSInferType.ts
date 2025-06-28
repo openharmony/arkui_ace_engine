@@ -33,7 +33,7 @@ import { TSTypeParameter } from "./TSTypeParameter"
 import { TypeNode } from "./TypeNode"
 export class TSInferType extends TypeNode {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 110)
+        assertValidPeer(pointer, 111)
         super(pointer)
     }
     static createTSInferType(typeParam?: TSTypeParameter): TSInferType {

@@ -31,8 +31,9 @@
 
 namespace OHOS::Ace::Ani {
 namespace {
-const char PIXEL_MAP_CONSTRUCTOR[] = "L@ohos/multimedia/image/image/PixelMap;:";
-const char PIXEL_MAP_DRAWABLE[] = "L@ohos/arkui/drawableDescriptor/PixelMapDrawableDescriptor;";
+constexpr char PIXEL_MAP_CONSTRUCTOR[] = "L@ohos/multimedia/image/image/PixelMap;:";
+constexpr char PIXEL_MAP_DRAWABLE[] = "L@ohos/arkui/drawableDescriptor/PixelMapDrawableDescriptor;";
+constexpr char ARRAY_GET[] = "i:C{std.core.Object}";
 } // namespace
 
 void CreatePixelMapDrawable(
@@ -90,7 +91,7 @@ void CreateAnimatedDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, a
     ani_class arrayClass;
     env->FindClass("C{escompat.Array}", &arrayClass);
     ani_method getDataMethod;
-    env->Class_FindMethod(arrayClass, "$_get", nullptr, &getDataMethod);
+    env->Class_FindMethod(arrayClass, "$_get", ARRAY_GET, &getDataMethod);
     for (size_t index = 0; index < size; index++) {
         ani_ref pixelmapAni;
         env->Object_CallMethod_Ref(pixelmapsAni, getDataMethod, &pixelmapAni, index);
@@ -98,6 +99,29 @@ void CreateAnimatedDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, a
         results.push_back(PixelMap::Create(pixelmap));
     }
     drawable->SetPixelMapList(results);
+    if (isOptionsUndefined) {
+        return;
+    }
+    ani_boolean isDurationUndefined;
+    ani_boolean isIterationsUndefined;
+    ani_ref durationRef;
+    ani_ref iterationsRef;
+    env->Object_GetPropertyByName_Ref(optionsAni, "duration", &durationRef);
+    env->Object_GetPropertyByName_Ref(optionsAni, "iterations", &iterationsRef);
+    ani_object durationAni = static_cast<ani_object>(durationRef);
+    ani_object iterationsAni = static_cast<ani_object>(iterationsRef);
+    env->Reference_IsUndefined(durationAni, &isDurationUndefined);
+    env->Reference_IsUndefined(iterationsAni, &isIterationsUndefined);
+    if (!isDurationUndefined) {
+        ani_double duration;
+        env->Object_CallMethodByName_Double(durationAni, "unboxed", ":d", &duration);
+        drawable->SetTotalDuration(static_cast<int32_t>(duration));
+    }
+    if (!isIterationsUndefined) {
+        ani_double iterations;
+        env->Object_CallMethodByName_Double(iterationsAni, "unboxed", ":d", &iterations);
+        drawable->SetIterations(static_cast<int32_t>(iterations));
+    }
 }
 
 void CreatePixelMap(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_object drawableAni)

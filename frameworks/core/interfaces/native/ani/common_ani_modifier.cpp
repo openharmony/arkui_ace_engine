@@ -22,6 +22,7 @@
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "frameworks/bridge/arkts_frontend/ani_context_module.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 
@@ -74,6 +75,17 @@ ani_long BuilderProxyNodeConstruct(ArkUI_Int32 id)
     return reinterpret_cast<ani_long>(AceType::RawPtr(proxyNode));
 }
 
+void SetCustomCallback(ani_env* env, ani_long ptr, ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout)
+{
+    Framework::AniGraphicsModule::SetCustomCallback(env, ptr, fnObjMeasure, fnObjLayout);
+}
+
+ArkUI_Int32 RequireArkoalaNodeId(ArkUI_Int32 capacity)
+{
+    auto cursor = ElementRegister::GetInstance()->RequireArkoalaNodeId(capacity);
+    return cursor;
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -82,7 +94,9 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .restoreInstanceId = OHOS::Ace::NG::RestoreInstanceId,
         .setDrawCallback = OHOS::Ace::NG::SetDrawCallback,
         .getCurrentInstanceId = OHOS::Ace::NG::GetCurrentInstanceId,
-        .builderProxyNodeConstruct = OHOS::Ace::NG::BuilderProxyNodeConstruct };
+        .builderProxyNodeConstruct = OHOS::Ace::NG::BuilderProxyNodeConstruct,
+        .setCustomCallback = OHOS::Ace::NG::SetCustomCallback,
+        .requireArkoalaNodeId = OHOS::Ace::NG::RequireArkoalaNodeId };
     return &impl;
 }
 

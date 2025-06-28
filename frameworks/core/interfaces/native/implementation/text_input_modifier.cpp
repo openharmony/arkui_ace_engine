@@ -869,9 +869,9 @@ void EditMenuOptionsImpl(Ark_NativePointer node,
     auto onCreateMenuCallback = [arkCreateMenu = CallbackHelper(optValue->onCreateMenu)](
         const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
             auto menuItems = Converter::ArkValue<Array_TextMenuItem>(systemMenuItems, Converter::FC);
-            auto arkResult = arkCreateMenu.InvokeWithObtainResult<
+            auto result = arkCreateMenu.InvokeWithOptConvertResult<std::vector<NG::MenuOptionsParam>,
                 Array_TextMenuItem, Callback_Array_TextMenuItem_Void>(menuItems);
-            return Converter::Convert<std::vector<NG::MenuOptionsParam>>(arkResult);
+            return result.value_or(std::vector<NG::MenuOptionsParam>());
         };
     auto onMenuItemClick = [arkMenuItemClick = CallbackHelper(optValue->onMenuItemClick)](
         NG::MenuItemParam menuOptionsParam) -> bool {

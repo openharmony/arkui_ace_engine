@@ -93,6 +93,7 @@ void CheckBoxModelStatic::SetBuilder(FrameNode* frameNode, std::function<void(vo
     auto checkBoxPattern = frameNode->GetPattern<CheckBoxPattern>();
     CHECK_NULL_VOID(checkBoxPattern);
     checkBoxPattern->SetIndicatorBuilder(buildFunc);
+    frameNode->MarkModifyDone();
 }
 
 void CheckBoxModelStatic::SetBuilder(FrameNode* frameNode, std::optional<std::function<void(void)>>& buildFunc)

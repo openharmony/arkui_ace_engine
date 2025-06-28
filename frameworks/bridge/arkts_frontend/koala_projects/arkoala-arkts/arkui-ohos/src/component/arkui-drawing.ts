@@ -17,6 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { Color } from "./enums"
+import { BlendMode } from "./common"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, KInt, KBoolean, KStringPtr } from "@koalaui/interop"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
@@ -260,37 +261,6 @@ export class DrawingCanvas implements MaterializedBase {
     private drawRect_serialize(left: number, top: number, right: number, bottom: number): void {
         ArkUIGeneratedNativeModule._DrawingCanvas_drawRect(this.peer!.ptr, left, top, right, bottom)
     }
-}
-export enum BlendMode {
-    CLEAR = 0,
-    SRC = 1,
-    DST = 2,
-    SRC_OVER = 3,
-    DST_OVER = 4,
-    SRC_IN = 5,
-    DST_IN = 6,
-    SRC_OUT = 7,
-    DST_OUT = 8,
-    SRC_ATOP = 9,
-    DST_ATOP = 10,
-    XOR = 11,
-    PLUS = 12,
-    MODULATE = 13,
-    SCREEN = 14,
-    OVERLAY = 15,
-    DARKEN = 16,
-    LIGHTEN = 17,
-    COLOR_DODGE = 18,
-    COLOR_BURN = 19,
-    HARD_LIGHT = 20,
-    SOFT_LIGHT = 21,
-    DIFFERENCE = 22,
-    EXCLUSION = 23,
-    MULTIPLY = 24,
-    HUE = 25,
-    SATURATION = 26,
-    COLOR = 27,
-    LUMINOSITY = 28
 }
 export enum RectType {
     DEFAULT = 0,

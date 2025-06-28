@@ -268,7 +268,7 @@ void DescriptionImpl(Ark_NativePointer node,
         return;
     }
     CallbackHelper(*optValue).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-        GaugeModelNG::SetDescription(frameNode, uiNode);
+        GaugeModelStatic::SetDescription(frameNode, uiNode);
         }, node);
 }
 void TrackShadowImpl(Ark_NativePointer node,

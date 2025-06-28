@@ -88,26 +88,19 @@ void ButtonModelStatic::SetButtonSize(FrameNode* frameNode, const std::optional<
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
 }
 
-void ButtonModelStatic::SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& optControlSize)
+void ButtonModelStatic::SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize)
 {
-    if (optControlSize) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, ControlSize, optControlSize.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, ControlSize, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    if (controlSize.has_value()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, ControlSize, controlSize.value());
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto buttonTheme = context->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        SetButtonSize(frameNode, controlSize, buttonTheme);
+        Dimension fontSize = buttonTheme->GetTextSize(controlSize.value());
+        SetFontSize(frameNode, fontSize);
     }
-    auto context = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_VOID(context);
-    auto buttonTheme = context->GetTheme<ButtonTheme>();
-    CHECK_NULL_VOID(buttonTheme);
-    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    ControlSize controlSize = layoutProperty->GetControlSize().value_or(ControlSize::NORMAL);
-    auto padding = buttonTheme->GetPadding(controlSize);
-    PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
-        CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
-    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
-    Dimension fontSize = buttonTheme->GetTextSize(controlSize);
-    SetFontSize(frameNode, fontSize);
 }
 
 void ButtonModelStatic::SetLabel(FrameNode* frameNode, const char* label)
@@ -146,17 +139,6 @@ RefPtr<FrameNode> ButtonModelStatic::CreateFrameNode(int32_t nodeId)
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
-    if (layoutProperty->GetPaddingProperty()) {
-        return frameNode;
-    }
-    auto context = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(context, nullptr);
-    auto buttonTheme = context->GetTheme<ButtonTheme>();
-    CHECK_NULL_RETURN(buttonTheme, nullptr);
-    auto padding = buttonTheme->GetPadding();
-    PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
-        CalcLength(padding.Top()), CalcLength(padding.Bottom()), std::nullopt, std::nullopt };
-    layoutProperty->UpdatePadding(defaultPadding);
     return frameNode;
 }
 
@@ -255,6 +237,19 @@ void ButtonModelStatic::SetType(FrameNode* frameNode, const std::optional<int> v
             // undefined use capsule type.
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::CAPSULE, frameNode);
         }
+    }
+    auto buttonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    if (buttonLayoutProperty->HasLabel()) {
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        auto context = frameNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto buttonTheme = context->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        auto padding = buttonTheme->GetPadding();
+        PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
+            CalcLength(padding.Top()), CalcLength(padding.Bottom()), std::nullopt, std::nullopt };
+        layoutProperty->UpdatePadding(defaultPadding);
     }
 }
 

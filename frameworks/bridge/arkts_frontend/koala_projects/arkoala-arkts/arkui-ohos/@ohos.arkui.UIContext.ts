@@ -25,6 +25,7 @@ import { AnimatorResult, AnimatorOptions, Animator} from "@ohos/animator"
 import { Context, PointerStyle, PixelMap } from "#external"
 import { componentUtils } from "@ohos/arkui/componentUtils"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
+import { dragController } from "@ohos/arkui/dragController"
 import { focusController } from "@ohos/arkui/focusController"
 import { Frame } from "arkui/Graphics"
 import { KeyEvent } from "arkui/component/common"
@@ -39,8 +40,9 @@ import { ActionSheet, ActionSheetOptions} from "arkui/component/actionSheet"
 import inspector from "@ohos/arkui/inspector"
 import router from '@ohos/router'
 import promptAction from '@ohos/promptAction';
-import { AsyncCallback, CustomBuilder } from 'arkui/component'
+import { AsyncCallback, CustomBuilder, DragItemInfo } from 'arkui/component'
 import { Router as RouterExt } from 'arkui/handwritten';
+import { ComponentContent } from "arkui/ComponentContent"
 
 export class UIInspector {
     public createComponentObserver(id: string): inspector.ComponentObserver {
@@ -190,6 +192,36 @@ export class ComponentSnapshot {
     public getSyncWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): PixelMap {
         throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
     }
+
+    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number, checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+        throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
+    }
+}
+
+export class DragController {
+    //@ts-ignore
+    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo,
+        callback: AsyncCallback<dragController.DragEventParam>): void {
+        throw Error("executeDrag with callback not implemented in DragController!")
+    }
+    //@ts-ignore
+    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo):
+        Promise<dragController.DragEventParam> {
+        throw Error("executeDrag with promise not implemented in DragController!")
+    }
+    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo>,
+        dragInfo: dragController.DragInfo): dragController.DragAction {
+        throw Error("createDragAction not implemented in DragController!")
+    }
+    public setDragEventStrictReportingEnabled(enable: boolean): void {
+        throw Error("setDragEventStrictReportingEnabled not implemented in DragController!")
+    }
+    public cancelDataLoading(key: string): void {
+        throw Error("setDragEventStrictReportingEnabled not implemented in DragController!")
+    }
+    public notifyDragStartRequest(requestStatus: dragController.DragStartRequestStatus): void {
+        throw Error("setDragEventStrictReportingEnabled not implemented in DragController!")
+    }
 }
 
 export class ContextMenuController {
@@ -287,6 +319,10 @@ export class UIContext {
     
     public getComponentSnapshot(): ComponentSnapshot {
         throw Error("getComponentSnapshot not implemented in UIContext!")
+    }
+
+    public getDragController(): DragController {
+        throw Error("getDragController not implemented in UIContext!")
     }
 
     public getRouter(): Router {

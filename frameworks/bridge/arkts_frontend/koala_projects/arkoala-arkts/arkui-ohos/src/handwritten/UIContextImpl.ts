@@ -16,13 +16,13 @@
 import { FrameNode, FrameNodeInternal, FrameNodeUtils } from "arkui/FrameNode"
 import { ArkUIGeneratedNativeModule } from "#components"
 import { int32, int64 } from "@koalaui/common"
-import { nullptr, KPointer, KSerializerBuffer } from "@koalaui/interop"
+import { nullptr, KPointer, KSerializerBuffer, toPeerPtr } from "@koalaui/interop"
 import { _animateTo } from "arkui/handwritten/ArkAnimation"
 import { AnimateParam } from 'arkui/component'
 import { AnimatorResult , AnimatorOptions, Animator} from "@ohos/animator"
 import { UIContext, MeasureUtils, Font, TextMenuController, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, PromptAction, AtomicServiceBar, Router, CursorController, MediaQuery,
-    ComponentSnapshot }
+    ComponentSnapshot, DragController }
     from "@ohos/arkui/UIContext"
 import { StateManager, ComputableState } from "@koalaui/runtime"
 import { Context, PointerStyle, PixelMap } from "#external"
@@ -47,12 +47,13 @@ import { focusController } from "@ohos/arkui/focusController"
 import { KeyProcessingMode } from "arkui/component/focus"
 import { componentUtils } from "@ohos/arkui/componentUtils"
 import { componentSnapshot } from "@ohos/arkui/componentSnapshot"
+import { dragController } from "@ohos/arkui/dragController"
 import { UIContextDispatchKeyEvent, UIContextAtomicServiceBar } from "arkui/component/arkui-custom"
 import { Serializer } from "arkui/component/peers/Serializer"
 import { GlobalScopeUicontextFontScale, GlobalScopeUicontextTextMenu } from "arkui/component/arkui-uicontext-text-utils"
 import { GlobalScope } from "arkui/component/GlobalScope"
 import { mediaquery } from '@ohos/mediaquery'
-import { AsyncCallback, CustomBuilder, ArkComponentRootPeer } from 'arkui/component'
+import { AsyncCallback, CustomBuilder, ArkComponentRootPeer, DragItemInfo } from 'arkui/component'
 import { createUiDetachedRoot, destroyUiDetachedRoot } from "arkui/ArkUIEntry"
 import { PeerNode } from 'arkui/PeerNode'
 import { Deserializer } from "arkui/component/peers/Deserializer"
@@ -61,6 +62,7 @@ import { KBuffer } from "@koalaui/interop"
 import { deserializeAndCallCallback } from "arkui/component/peers/CallbackDeserializeCall"
 import { InteropNativeModule } from "@koalaui/interop"
 import { Router as RouterExt } from 'arkui/handwritten';
+import { ComponentContent } from "arkui/ComponentContent"
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -291,6 +293,193 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
         ArkUIAniModule._Common_Restore_InstanceId();
         return pixmap;
     }
+
+    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number, checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let node = content.getFrameNode();
+        if (node === undefined || node === null) {
+            throw Error("The type of parameters is incorrect.");
+        }
+        let frameNode = node as FrameNode
+        const destroyCallback = (): void => {}
+        let pixmap = ArkUIAniModule._ComponentSnapshot_createFromComponentWithPromise(
+            toPeerPtr(frameNode), destroyCallback, delay, checkImageStatus, options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return pixmap;
+    }
+}
+
+export class DragControllerImpl extends DragController {
+    instanceId_: int32
+    constructor(instanceId: int32) {
+        super()
+        this.instanceId_ = instanceId;
+    }
+
+    //@ts-ignore
+    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo,
+        callback: AsyncCallback<dragController.DragEventParam>): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        if (typeof custom === "function") {
+            const peerNode = createUiDetachedRoot((): PeerNode => {
+                return ArkComponentRootPeer.create(undefined);
+            }, custom as CustomBuilder);
+            let rootNode = peerNode.peer.ptr;
+            const destroyCallback = (): void => {
+                destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
+            }
+            let dragItemInfoNull: DragItemInfo = {};
+            ArkUIAniModule._DragController_executeDragWithCallback(dragItemInfoNull, rootNode,
+                destroyCallback, dragInfo, callback);
+        } else {
+            let destroyCallback = (): void => { };
+            let customDragInfo = custom as DragItemInfo;
+
+            if (customDragInfo.pixelMap !== undefined) {
+                ArkUIAniModule._DragController_executeDragWithCallback(custom as DragItemInfo, nullptr,
+                    destroyCallback, dragInfo, callback);
+            } else {
+                const peerNode = createUiDetachedRoot((): PeerNode => {
+                    return ArkComponentRootPeer.create(undefined);
+                }, customDragInfo.builder as CustomBuilder);
+                let rootNode = peerNode.peer.ptr;
+                destroyCallback = (): void => {
+                    destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
+                }
+                let dragItemInfoNull: DragItemInfo = {};
+                ArkUIAniModule._DragController_executeDragWithCallback(dragItemInfoNull, rootNode,
+                    destroyCallback, dragInfo, callback);
+            }
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    // @ts-ignore
+    public executeDrag(custom: CustomBuilder | DragItemInfo, dragInfo: dragController.DragInfo):
+        Promise<dragController.DragEventParam> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let promise = new Promise<dragController.DragEventParam>((resolve, reject) => { });
+        if (typeof custom === "function") {
+            const peerNode = createUiDetachedRoot((): PeerNode => {
+                return ArkComponentRootPeer.create(undefined);
+            }, custom as CustomBuilder);
+            let rootNode = peerNode.peer.ptr;
+            const destroyCallback = (): void => {
+                destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
+            }
+            let dragItemInfoNull: DragItemInfo = {};
+            promise = ArkUIAniModule._DragController_executeDragWithPromise(dragItemInfoNull, rootNode,
+                destroyCallback, dragInfo);
+        } else {
+            let destroyCallback = (): void => { };
+            let customDragInfo = custom as DragItemInfo;
+
+            if (customDragInfo.pixelMap !== undefined) {
+                promise = ArkUIAniModule._DragController_executeDragWithPromise(custom as DragItemInfo,
+                    nullptr, destroyCallback, dragInfo);
+            } else {
+                const peerNode = createUiDetachedRoot((): PeerNode => {
+                    return ArkComponentRootPeer.create(undefined);
+                }, customDragInfo.builder as CustomBuilder);
+                let rootNode = peerNode.peer.ptr;
+                destroyCallback = (): void => {
+                    destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
+                }
+                let dragItemInfoNull: DragItemInfo = {};
+                promise = ArkUIAniModule._DragController_executeDragWithPromise(dragItemInfoNull, rootNode,
+                    destroyCallback, dragInfo);
+            }
+        }
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return promise;
+    }
+
+    private handleDragActionCreationForBuilder(customArray: Array<CustomBuilder | DragItemInfo>,
+        dragInfo: dragController.DragInfo): dragController.DragAction {
+        let rootNodeArray: Array<KPointer> = [];
+        let peerNodeArray: Array<PeerNode> = [];
+        customArray.forEach((customBuilder) => {
+            const builder = customBuilder as CustomBuilder;
+            const peerNode = createUiDetachedRoot((): PeerNode => {
+                return ArkComponentRootPeer.create(undefined);
+            }, builder);
+            let rootNode = peerNode.peer.ptr;
+            rootNodeArray.push(rootNode);
+            peerNodeArray.push(peerNode);
+        });
+        let destroyCallback = (): void => {
+            peerNodeArray.forEach((peerNode) => {
+                destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
+            });
+        };
+        let dragItemInfoArray: Array<DragItemInfo> = [];
+        return ArkUIAniModule._DragController_createDragAction(dragItemInfoArray, rootNodeArray,
+            destroyCallback, dragInfo);
+    }
+
+    private handleDragActionCreationForDragItemInfo(customArray: Array<CustomBuilder | DragItemInfo>,
+        dragInfo: dragController.DragInfo): dragController.DragAction {
+        let rootNodeArray: Array<KPointer> = [];
+        let peerNodeArray: Array<PeerNode> = [];
+        let dragItemInfoArray: Array<DragItemInfo> = [];
+        let destroyCallback = (): void => { };
+        customArray.forEach(item => {
+            if (item instanceof DragItemInfo) {
+                dragItemInfoArray.push(item);
+            } else {
+                const builder = item as CustomBuilder;
+                const peerNode = createUiDetachedRoot((): PeerNode => {
+                    return ArkComponentRootPeer.create(undefined);
+                }, builder);
+                const rootNode = peerNode.peer.ptr;
+                rootNodeArray.push(rootNode);
+                peerNodeArray.push(peerNode);
+                destroyCallback = (): void => {
+                    peerNodeArray.forEach((peerNode) => {
+                        destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
+                    });
+                    rootNodeArray.length = 0;
+                    peerNodeArray.length = 0;
+                };
+            }
+        });
+        return ArkUIAniModule._DragController_createDragAction(dragItemInfoArray, rootNodeArray,
+            destroyCallback, dragInfo);
+    }
+
+    public createDragAction(customArray: Array<CustomBuilder | DragItemInfo>,
+        dragInfo: dragController.DragInfo): dragController.DragAction {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+
+        let firstNonUndefinedElement = customArray.find((element) => element !== undefined);
+        if (typeof firstNonUndefinedElement === "function") {
+            let dragAction = this.handleDragActionCreationForBuilder(customArray, dragInfo);
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return dragAction;
+        } else {
+            let dragAction = this.handleDragActionCreationForDragItemInfo(customArray, dragInfo);
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return dragAction;
+        }
+    }
+
+    public setDragEventStrictReportingEnabled(enable: boolean): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        ArkUIAniModule._DragController_setDragEventStrictReportingEnabled(enable);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public cancelDataLoading(key: string): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        ArkUIAniModule._DragController_cancelDataLoading(key);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    public notifyDragStartRequest(requestStatus: dragController.DragStartRequestStatus): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        ArkUIAniModule._DragController_notifyDragStartReques(requestStatus);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
 }
 
 export class RouterImpl extends Router {
@@ -391,6 +580,7 @@ export class UIContextImpl extends UIContext {
     focusController_: FocusControllerImpl;
     componentUtils_: ComponentUtilsImpl;
     componentSnapshot_: ComponentSnapshotImpl;
+    dragController_: DragControllerImpl;
     atomicServiceBar_: AtomicServiceBarInternal;
     uiInspector_: UIInspectorImpl | null = null;
     contextMenuController_: ContextMenuControllerImpl;
@@ -412,6 +602,7 @@ export class UIContextImpl extends UIContext {
         this.focusController_ = new FocusControllerImpl(instanceId);
         this.componentUtils_ = new ComponentUtilsImpl(instanceId);
         this.componentSnapshot_ = new ComponentSnapshotImpl(instanceId);
+        this.dragController_ = new DragControllerImpl(instanceId);
         this.atomicServiceBar_ = new AtomicServiceBarInternal(instanceId);
         this.contextMenuController_ = new ContextMenuControllerImpl(instanceId);
         this.cursorController_ = new CursorControllerImpl(instanceId);
@@ -562,6 +753,10 @@ export class UIContextImpl extends UIContext {
 
     public getComponentSnapshot(): ComponentSnapshot {
         return this.componentSnapshot_;
+    }
+
+    public getDragController(): DragController {
+        return this.dragController_;
     }
 
     public getCursorController(): CursorController {

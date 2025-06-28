@@ -38,7 +38,7 @@ import { Program } from "./Program"
 import { Statement } from "./Statement"
 export class ETSModule extends BlockStatement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 82)
+        assertValidPeer(pointer, 83)
         super(pointer)
     }
     static createETSModule(statementList: readonly Statement[], ident: Identifier | undefined, flag: Es2pandaModuleFlag, program?: Program): ETSModule {

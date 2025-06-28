@@ -30,6 +30,7 @@ import { Offset, ResourceColor, Dimension, BorderRadiuses, EdgeWidths, EdgeColor
 import { Callback_DismissDialogAction_Void, DismissDialogAction, LevelMode, ImmersiveMode } from "./actionSheet"
 import { BorderStyle } from "./enums"
 import { LengthMetrics } from "../Graphics"
+import { ExtendableComponent } from "./extendableComponent";
 export class CustomDialogControllerInternal {
     public static fromPtr(ptr: KPointer): CustomDialogController {
         const obj : CustomDialogController = new CustomDialogController(undefined)
@@ -39,6 +40,7 @@ export class CustomDialogControllerInternal {
 }
 export class CustomDialogController implements MaterializedBase {
     peer?: Finalizable | undefined = undefined
+    customComponent?: ExtendableComponent | undefined = undefined
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
@@ -49,29 +51,34 @@ export class CustomDialogController implements MaterializedBase {
         thisSerializer.release()
         return retval
     }
-    constructor(value?: CustomDialogControllerOptions) {
-        if ((value) !== (undefined))
+    constructor(value?: CustomDialogControllerOptions, instance?: ExtendableComponent) {
+        if ((value) !== (undefined) && (instance) !== (undefined))
         {
             const ctorPtr : KPointer = CustomDialogController.ctor_customdialogcontroller((value)!)
             this.peer = new Finalizable(ctorPtr, CustomDialogController.getFinalizer())
+            this.customComponent = (instance)!
         }
     }
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._CustomDialogController_getFinalizer()
     }
-    public open(): undefined {
-        return this.open_serialize()
+    public open(): void {
+        this.open_serialize()
     }
-    public close(): undefined {
-        return this.close_serialize()
+    public close(): void {
+        this.close_serialize()
     }
-    private open_serialize(): undefined {
-        const retval  = ArkUIGeneratedNativeModule._CustomDialogController_open(this.peer!.ptr)
-        return retval
+    private open_serialize(): void {
+        if (this.customComponent) {
+            const peerNode = this.customComponent!.getPeerNode()
+            if (peerNode) {
+                ArkUIGeneratedNativeModule._CustomDialogController_setOwnerView(this.peer!.ptr, peerNode!.getPeerPtr())
+                ArkUIGeneratedNativeModule._CustomDialogController_open(this.peer!.ptr)
+            }
+        }
     }
-    private close_serialize(): undefined {
-        const retval  = ArkUIGeneratedNativeModule._CustomDialogController_close(this.peer!.ptr)
-        return retval
+    private close_serialize(): void {
+        ArkUIGeneratedNativeModule._CustomDialogController_close(this.peer!.ptr)
     }
 }
 export interface CustomDialogControllerOptions {
