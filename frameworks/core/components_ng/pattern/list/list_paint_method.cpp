@@ -101,6 +101,24 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     UpdateDividerList(dividerInfo, clip);
 }
 
+void ListPaintMethod::UpdateBoundsRect(const RectF& frameRect, bool clip)
+{
+    RectF boundsRect;
+    if (!clip && !itemPosition_.empty()) {
+        auto mainSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos;
+        boundsRect.SetLeft(std::min(0.0f, vertical_ ? itemPosition_.begin()->second.startPos : 0.0f));
+        boundsRect.SetTop(std::min(0.0f, vertical_ ? 0.0f : itemPosition_.begin()->second.startPos));
+        boundsRect.SetWidth(std::max(frameRect.Width(), vertical_ ? mainSize : frameRect.Width()));
+        boundsRect.SetHeight(std::max(frameRect.Height(), vertical_ ? frameRect.Height() : mainSize));
+    } else {
+        boundsRect.SetLeft(0.0f);
+        boundsRect.SetTop(0.0f);
+        boundsRect.SetWidth(frameRect.Width());
+        boundsRect.SetHeight(frameRect.Height());
+    }
+    listContentModifier_->SetBoundsRect(boundsRect);
+}
+
 void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo, bool clip)
 {
     listContentModifier_->SetDividerPainter(
