@@ -120,8 +120,13 @@ export class RichEditorBaseController implements MaterializedBase {
         ArkUIGeneratedNativeModule._RichEditorBaseController_closeSelectionMenu(this.peer!.ptr)
     }
     private getTypingStyle_serialize(): RichEditorTextStyle {
-        const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_getTypingStyle(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const retval =
+            ArkUIGeneratedNativeModule._RichEditorBaseController_getTypingStyle(this.peer!.ptr) as FixedArray<byte>
+        let exactRetValue: byte[] = new Array<byte>;
+        for (let i = 0; i < retval.length; i++) {
+            exactRetValue.push(new Byte(retval[i]));
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : RichEditorTextStyle = retvalDeserializer.readRichEditorTextStyle()
         return returnResult
     }
@@ -156,14 +161,32 @@ export class RichEditorBaseController implements MaterializedBase {
         return obj
     }
     private getPreviewText_serialize(): PreviewText {
-        const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_getPreviewText(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const retval =
+            ArkUIGeneratedNativeModule._RichEditorBaseController_getPreviewText(this.peer!.ptr) as FixedArray<byte>
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : PreviewText = retvalDeserializer.readPreviewText()
         return returnResult
     }
     private getCaretRect_serialize(): RectResult | undefined {
-        const retval  = ArkUIGeneratedNativeModule._RichEditorBaseController_getCaretRect(this.peer!.ptr)
-        throw new Error("Object deserialization is not implemented.")
+        const retval =
+            ArkUIGeneratedNativeModule._RichEditorBaseController_getCaretRect(this.peer!.ptr) as FixedArray<byte>
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
+        const buffer_runtimeType  = (retvalDeserializer.readInt8() as int32)
+        let buffer : RectResult | undefined
+        if ((RuntimeType.UNDEFINED) != (buffer_runtimeType))
+        {
+            buffer = (retvalDeserializer.readRectResult() as RectResult)
+        }
+        const returnResult : RectResult | undefined = buffer
+        return returnResult
     }
 }
 export class ArkRichEditorPeer extends ArkCommonMethodPeer {
@@ -1728,8 +1751,12 @@ export class RichEditorStyledStringController extends RichEditorBaseController i
         return obj
     }
     private getSelection_serialize(): RichEditorRange {
-        const retval  = ArkUIGeneratedNativeModule._RichEditorStyledStringController_getSelection(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        const retval  = ArkUIGeneratedNativeModule._RichEditorStyledStringController_getSelection(this.peer!.ptr) as FixedArray<byte>
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : RichEditorRange = retvalDeserializer.readRichEditorRange()
         return returnResult
     }
