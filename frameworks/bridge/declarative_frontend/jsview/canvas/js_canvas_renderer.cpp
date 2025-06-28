@@ -27,6 +27,7 @@
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/components/font/rosen_font_collection.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline/base/constants.h"
@@ -351,7 +352,7 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
             auto fontStyle = ConvertStrToFontStyle(fontProp);
             paintState_.SetFontStyle(fontStyle);
             renderingContext2DModel_->SetFontStyle(fontStyle);
-        } else if (FONT_FAMILIES.find(fontProp) != FONT_FAMILIES.end()) {
+        } else if (FONT_FAMILIES.find(fontProp) != FONT_FAMILIES.end() || IsCustomFont(fontProp)) {
             auto families = ConvertStrToFontFamilies(fontProp);
             paintState_.SetFontFamilies(families);
             renderingContext2DModel_->SetFontFamilies(families);
@@ -1699,10 +1700,10 @@ bool JSCanvasRenderer::IsCustomFont(const std::string& fontName)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto fontManager = pipeline->GetFontManager();
-    CHECK_NULL_RETURN(fontManager, false);
-    auto fontNames = fontManager->GetFontNames();
-    return std::find(fontNames.begin(), fontNames.end(), fontName) != fontNames.end();
+    CHECK_NULL_RETURN(pipeline->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY), false);
+    auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
+    return (fontCollection && fontCollection->GetFontMgr() &&
+            fontCollection->GetFontMgr()->MatchFamilyStyle(fontName.c_str(), {}));
 }
 
 bool JSCanvasRenderer::IsValidLetterSpacing(const std::string& letterSpacing)
