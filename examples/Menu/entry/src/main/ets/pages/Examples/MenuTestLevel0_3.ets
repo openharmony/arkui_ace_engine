@@ -13,8 +13,8 @@
  * limitations under the License.
  */
  
-import { MyComponent } from "../common/MyComponent"
-import { MenuBuilder, MenuAttrOptions } from  '../customBuilder/MenuBuilder'
+import { MyComponent } from "../../common/MyComponent"
+import { MenuBuilder, MenuAttrOptions } from  '../../customBuilder/MenuBuilder'
 
 @Extend(Text)
 function paramTextStyle() {
@@ -118,7 +118,7 @@ struct MenuTestLevel0_3 {
   // 菜单的预览图
   @Builder
   MenuPreviewBuilder() {
-    Image($r('app.media.startIcon'))
+    Image($r('app.media.app_icon'))
       .width(120)
       .height(60)
   }
