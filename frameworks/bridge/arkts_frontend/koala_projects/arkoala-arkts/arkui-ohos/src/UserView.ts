@@ -54,9 +54,21 @@ export class UserView {
     }
 }
 
+export interface NavInterface {
+    bundleName: string;
+    moduleName: string;
+    pagePath: string;
+    pageFullPath: string;
+    integratedHsp: string;
+}
+
 export class EntryPoint {
     constructor() {}
     /** @memo */
     entry(): void {
+    }
+
+    public static RegisterNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface) {
+        
     }
 }
