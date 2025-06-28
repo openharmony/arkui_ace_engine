@@ -14,6 +14,28 @@
  */
 
 import { ExpectedFrameRateRange } from './arkui.component.common'
+import { FillMode, PlayMode } from './arkui.component.enums'
+
+export class SimpleAnimatorOptions {
+
+  static { loadLibrary("animator_ani") }
+
+  SimpleAnimatorOptionsResult:long = 0;
+
+  public native constructor(begin: number, end: number);
+
+  public native duration(duration: number): SimpleAnimatorOptions;
+
+  public native easing(curve: string): SimpleAnimatorOptions;
+
+  public native delay(delay: number): SimpleAnimatorOptions;
+
+  public native fill(fillMode: FillMode): SimpleAnimatorOptions;
+
+  public native direction(direction: PlayMode): SimpleAnimatorOptions;
+
+  public native iterations(iterations: number): SimpleAnimatorOptions;
+}
 
 interface AnimatorOptions {
     duration: number;
@@ -28,7 +50,7 @@ interface AnimatorOptions {
 
 export default class Animator {
     static { loadLibrary("animator_ani") }
-    static native create(options: AnimatorOptions): AnimatorResult;
+    static native create(options: AnimatorOptions | SimpleAnimatorOptions): AnimatorResult;
 }
 
 export interface AnimatorResult {

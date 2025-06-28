@@ -19,7 +19,7 @@ import { int32, int64 } from "@koalaui/common"
 import { nullptr, KPointer, KSerializerBuffer, toPeerPtr } from "@koalaui/interop"
 import { _animateTo } from "arkui/handwritten/ArkAnimation"
 import { AnimateParam } from 'arkui/component'
-import { AnimatorResult , AnimatorOptions, Animator} from "@ohos/animator"
+import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } from "@ohos/animator"
 import { UIContext, MeasureUtils, Font, TextMenuController, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
     MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController }
@@ -878,7 +878,7 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
-    public createAnimator(options: AnimatorOptions): AnimatorResult {
+    public createAnimator(options: AnimatorOptions | SimpleAnimatorOptions): AnimatorResult {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
         let animatorRet = Animator.create(options);
         ArkUIAniModule._Common_Restore_InstanceId();
