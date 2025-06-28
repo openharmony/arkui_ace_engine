@@ -10301,30 +10301,37 @@ ArkUINativeModuleValue CommonBridge::SetFocusBox(ArkUIRuntimeCallInfo* runtimeCa
     auto colorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     ArkUI_Uint32 hasValue = 0;
     CalcDimension margin;
+    std::vector<RefPtr<ResourceObject>> focusBoxResObjs;
+    RefPtr<ResourceObject> resObjMargin;
     if (!marginArg->IsUndefined() && !marginArg->IsNull()) {
-        if (ArkTSUtils::ParseJsDimensionFpNG(vm, marginArg, margin, false)) {
+        if (ArkTSUtils::ParseJsDimensionFpNG(vm, marginArg, margin, resObjMargin, false)) {
             hasValue = 1;
-        } else if (ArkTSUtils::ParseJsLengthMetrics(vm, marginArg, margin)) {
+        } else if (ArkTSUtils::ParseJsLengthMetrics(vm, marginArg, margin, resObjMargin)) {
             hasValue = 1;
         }
     }
+    focusBoxResObjs.push_back(resObjMargin);
     hasValue = hasValue << 1;
     CalcDimension width;
+    RefPtr<ResourceObject> resObjWidth;
     if (!widthArg->IsUndefined() && !widthArg->IsNull()) {
-        if (ArkTSUtils::ParseJsDimensionFpNG(vm, widthArg, width, false) && GreatOrEqual(width.Value(), 0.0f)) {
+        if (ArkTSUtils::ParseJsDimensionFpNG(vm, widthArg, width, resObjWidth, false) && GreatOrEqual(width.Value(), 0.0f)) {
             hasValue += 1;
-        } else if (ArkTSUtils::ParseJsLengthMetrics(vm, widthArg, width) && GreatOrEqual(width.Value(), 0.0f)) {
+        } else if (ArkTSUtils::ParseJsLengthMetrics(vm, widthArg, width, resObjWidth) && GreatOrEqual(width.Value(), 0.0f)) {
             hasValue += 1;
         }
     }
+    focusBoxResObjs.push_back(resObjWidth);
     hasValue = hasValue << 1;
     Color strokeColor;
+    RefPtr<ResourceObject> resObjColor;
     if (!colorArg->IsUndefined() && !colorArg->IsNull() && ParseColorMetricsToColor(vm, colorArg, strokeColor)) {
         hasValue += 1;
     }
+    focusBoxResObjs.push_back(resObjColor);
     GetArkUINodeModifiers()->getCommonModifier()->setFocusBoxStyle(nativeNode, margin.Value(),
         static_cast<int>(margin.Unit()), width.Value(), static_cast<int>(width.Unit()), strokeColor.GetValue(),
-        hasValue);
+        hasValue, static_cast<void*>(&focusBoxResObjs));
     return panda::JSValueRef::Undefined(vm);
 }
 

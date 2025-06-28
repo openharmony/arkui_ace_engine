@@ -408,6 +408,8 @@ public:
     static void SetNextFocus(FocusIntension key, const std::string& nextFocus);
     static void ResetNextFocus();
     static void SetFocusBoxStyle(const NG::FocusBoxStyle& style);
+    static void SetFocusBoxStyleUpdateFunc(
+        NG::FocusBoxStyle& style, const RefPtr<ResourceObject>& resObj, const std::string& property);
     static void SetOnAppear(std::function<void()> &&onAppear);
     static void SetOnDisappear(std::function<void()> &&onDisappear);
     static void SetOnAttach(std::function<void()> &&onAttach);
@@ -879,7 +881,7 @@ public:
     static void SetNextFocus(
         FrameNode* frameNode, FocusIntension key, const std::variant<WeakPtr<AceType>, std::string> nextFocus);
     static void ResetNextFocus(FrameNode* frameNode);
-    static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style);
+    static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style, bool isReset = false);
     static void SetClickDistance(FrameNode* frameNode, double clickDistance);
     static void SetOnFocusAxisEvent(FrameNode* frameNode, OnFocusAxisEventFunc &&onFocusAxisCallback);
 #ifdef SUPPORT_DIGITAL_CROWN

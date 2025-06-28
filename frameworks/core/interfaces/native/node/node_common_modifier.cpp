@@ -8118,12 +8118,17 @@ void ResetNextFocus(ArkUINodeHandle node)
 }
 
 void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int32 marginUnit,
-    ArkUI_Float32 valueStrokeWidth, ArkUI_Int32 widthUnit, ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue)
+    ArkUI_Float32 valueStrokeWidth, ArkUI_Int32 widthUnit, ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue,
+    void* focusBoxResObjs)
 {
     CHECK_NULL_VOID(node);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     auto marginUnitEnum = static_cast<OHOS::Ace::DimensionUnit>(marginUnit);
     auto widthUnitEnum = static_cast<OHOS::Ace::DimensionUnit>(widthUnit);
+    std::vector<RefPtr<ResourceObject>> focusBoxResObjArray(NUM_3, nullptr);
+    if (focusBoxResObjs) {
+        focusBoxResObjArray = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(focusBoxResObjs));
+    }
     NG::FocusBoxStyle style;
     if ((hasValue >> 2) & 1) { // 2: margin
         CalcDimension margin = CalcDimension(valueMargin, DimensionUnit::FP);
@@ -8132,6 +8137,7 @@ void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int
             margin.SetUnit(marginUnitEnum);
         }
         style.margin = margin;
+        ViewAbstract::SetFocusBoxStyleUpdateFunc(style, focusBoxResObjArray[NUM_0], "focusBoxStyleMargin");
     }
     if ((hasValue >> 1) & 1) { // 1: strokeWidth
         CalcDimension strokeWidth = CalcDimension(valueStrokeWidth, DimensionUnit::FP);
@@ -8140,10 +8146,12 @@ void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int
             strokeWidth.SetUnit(widthUnitEnum);
         }
         style.strokeWidth = strokeWidth;
+        ViewAbstract::SetFocusBoxStyleUpdateFunc(style, focusBoxResObjArray[NUM_1], "focusBoxStyleWidth");
     }
     if ((hasValue >> 0) & 1) { // 0: strokeColor
         Color strokeColor(valueColor);
         style.strokeColor = strokeColor;
+        ViewAbstract::SetFocusBoxStyleUpdateFunc(style, focusBoxResObjArray[NUM_2], "focusBoxStyleColor");
     }
     ViewAbstract::SetFocusBoxStyle(frameNode, style);
 }
@@ -8153,7 +8161,7 @@ void ResetFocusBoxStyle(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::FocusBoxStyle style;
-    ViewAbstract::SetFocusBoxStyle(frameNode, style);
+    ViewAbstract::SetFocusBoxStyle(frameNode, style, true);
 }
 
 void SetClickDistance(ArkUINodeHandle node, ArkUI_Float32 valueMargin)
