@@ -44,11 +44,6 @@ void ArkoalaLazyNode::DoSetActiveChildRange(
     });
 }
 
-// void ArkoalaLazyNode::OnDataChange(int32_t changeIndex)
-// {
-//     items_.RemoveIf([idx = static_cast<int32_t>(changeIndex)](const uint32_t& k, const auto& _) { return k >= idx;
-//     });
-// }
 RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
 {
     const auto indexCasted = static_cast<int32_t>(index);
@@ -68,6 +63,7 @@ RefPtr<UINode> ArkoalaLazyNode::GetFrameChildByIndex(uint32_t index, bool needBu
 
     return newItem;
 }
+
 RefPtr<FrameNode> ArkoalaLazyNode::GetFrameNode(int32_t index)
 {
     auto item = items_.Get(index);

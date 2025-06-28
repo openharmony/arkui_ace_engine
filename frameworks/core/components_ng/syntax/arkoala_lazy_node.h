@@ -58,11 +58,11 @@ public:
 
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree) override;
 
-    void DoRemoveChildInRenderTree(uint32_t index, bool isAll) final {
+    void DoRemoveChildInRenderTree(uint32_t index, bool isAll) final
+    {
         LOGI("Koala lazyForEach: doRemove called %u. Not implemented", index);
     }
-    void DoSetActiveChildRange(
-        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache) final;
+    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache) final;
 
     bool IsAtomicNode() const final
     {
@@ -83,6 +83,18 @@ public:
 
     void OnDataChange(int32_t changeIndex, int32_t count, NotificationType type)
     {
+        // temp: naive data reset
+        for (const auto& [index, nodeWeak] : items_) {
+            auto node = nodeWeak.Upgrade();
+            if (index >= changeIndex) {
+                RemoveChild(node);
+            }
+        }
+        items_.RemoveIf([changeIndex](const uint32_t& k, const auto& _) {
+            const auto idx = static_cast<int32_t>(k);
+            return idx >= changeIndex;
+        });
+
         auto parent = GetParent();
         int64_t accessibilityId = GetAccessibilityId();
         if (parent) {
