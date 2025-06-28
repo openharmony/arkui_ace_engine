@@ -536,6 +536,9 @@ HWTEST_F(WebPatternPartOneTest, OnAttachToMainTree_001, TestSize.Level1)
 
     webPattern->OnAttachToMainTree();
     ASSERT_NE(webPattern->delegate_, nullptr);
+
+    webPattern->delegate_->SetPageFinishedState(true);
+    EXPECT_EQ(webPattern->delegate_->GetPageFinishedState(), true);
 #endif
 }
 

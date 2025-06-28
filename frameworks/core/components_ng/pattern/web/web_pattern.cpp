@@ -1061,6 +1061,10 @@ void WebPattern::OnAttachToMainTree()
     // report component is in foreground.
     delegate_->OnRenderToForeground();
 
+    if (delegate_->GetPageFinishedState()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnAttachToMainTree delegate_ pageFinishedState is true");
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
