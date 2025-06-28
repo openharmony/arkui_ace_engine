@@ -51,6 +51,11 @@
       "buildFunction": "EmbeddedDialogPageOneBuilder"
     },
     {
+      "name": "DialogLevel0",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/dialogLevel0.ets",
+      "buildFunction": "DialogLevelOBuilder"
+    },
+    {
       "name": "MenuIndex",
       "pageSourceFile": "src/main/ets/pages/components/menu/Index.ets",
       "buildFunction": "MenuIndexBuilder"
@@ -184,6 +189,21 @@
       "name": "bindContextMenuPreview",
       "pageSourceFile": "src/main/ets/pages/components/menu/bindContextMenuPreview.ets",
       "buildFunction": "bindContextMenuPreviewBuilder"
+    },
+    {
+      "name": "MenuLevel0",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuLevel0.ets",
+      "buildFunction": "MenuLevel0Builder"
+    },
+    {
+      "name": "MenuLevel1",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuLevel1.ets",
+      "buildFunction": "MenuLevel1Builder"
+    },
+    {
+      "name": "MenuLevel2",
+      "pageSourceFile": "src/main/ets/pages/components/menu/menuLevel2.ets",
+      "buildFunction": "MenuLevel2Builder"
     },
     {
       "name": "OverlayIndex",

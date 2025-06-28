@@ -99,6 +99,10 @@
     {
       "name": "maxFontSize",
       "value": "30"
+    },
+    {
+      "name": "Test_Values",
+      "value": "50.00vp"
     }
   ]
 }
