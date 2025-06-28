@@ -3320,6 +3320,24 @@ void deserializeAndCallSyncCallback_SheetType_Void(Ark_VMContext vmContext, KSer
     Ark_SheetType parameter = static_cast<Ark_SheetType>(thisDeserializer.readInt32());
     _callSync(vmContext, _resourceId, parameter);
 }
+void deserializeAndCallCallback_Size_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Size size)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_Size size = thisDeserializer.readSize();
+    _call(_resourceId, size);
+}
+void deserializeAndCallSyncCallback_Size_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Size size)>(thisDeserializer.readPointer());
+    Ark_Size size = thisDeserializer.readSize();
+    _callSync(vmContext, _resourceId, size);
+}
 void deserializeAndCallCallback_SpringBackAction_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
@@ -7349,6 +7367,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case 1980824326/*Kind_Callback_RichEditorTextSpanResult_Void*/: return deserializeAndCallCallback_RichEditorTextSpanResult_Void(thisArray, thisLength);
         case 22609082/*Kind_Callback_SheetDismiss_Void*/: return deserializeAndCallCallback_SheetDismiss_Void(thisArray, thisLength);
         case -224451112/*Kind_Callback_SheetType_Void*/: return deserializeAndCallCallback_SheetType_Void(thisArray, thisLength);
+        case -646869686/*Kind_Callback_Size_Void*/: return deserializeAndCallCallback_Size_Void(thisArray, thisLength);
         case 1536231691/*Kind_Callback_SpringBackAction_Void*/: return deserializeAndCallCallback_SpringBackAction_Void(thisArray, thisLength);
         case -1872286415/*Kind_Callback_StateStylesChange*/: return deserializeAndCallCallback_StateStylesChange(thisArray, thisLength);
         case -879490874/*Kind_Callback_String_Number_Void*/: return deserializeAndCallCallback_String_Number_Void(thisArray, thisLength);
@@ -7663,6 +7682,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case 1980824326/*Kind_Callback_RichEditorTextSpanResult_Void*/: return deserializeAndCallSyncCallback_RichEditorTextSpanResult_Void(vmContext, thisArray, thisLength);
         case 22609082/*Kind_Callback_SheetDismiss_Void*/: return deserializeAndCallSyncCallback_SheetDismiss_Void(vmContext, thisArray, thisLength);
         case -224451112/*Kind_Callback_SheetType_Void*/: return deserializeAndCallSyncCallback_SheetType_Void(vmContext, thisArray, thisLength);
+        case -646869686/*Kind_Callback_Size_Void*/: return deserializeAndCallSyncCallback_Size_Void(vmContext, thisArray, thisLength);
         case 1536231691/*Kind_Callback_SpringBackAction_Void*/: return deserializeAndCallSyncCallback_SpringBackAction_Void(vmContext, thisArray, thisLength);
         case -1872286415/*Kind_Callback_StateStylesChange*/: return deserializeAndCallSyncCallback_StateStylesChange(vmContext, thisArray, thisLength);
         case -879490874/*Kind_Callback_String_Number_Void*/: return deserializeAndCallSyncCallback_String_Number_Void(vmContext, thisArray, thisLength);

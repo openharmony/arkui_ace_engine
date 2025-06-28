@@ -38119,6 +38119,91 @@ void impl_NavPathStack_setPathStack(Ark_NativePointer thisPtr, KSerializerBuffer
         GetAccessors()->getNavPathStackAccessor()->setPathStack(self, (const Array_NavPathInfo*)&pathStack_value, (const Opt_Boolean*)&animated_value);
 }
 KOALA_INTEROP_DIRECT_V3(NavPathStack_setPathStack, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_NodeContainerOps_addNodeContainerRootNode(Ark_NativePointer self, Ark_NativePointer child)
+{
+    GetAccessors()->getNodeContainerOpsAccessor()->addNodeContainerRootNode(self, child);
+}
+KOALA_INTEROP_DIRECT_V2(NodeContainerOps_addNodeContainerRootNode, Ark_NativePointer, Ark_NativePointer)
+void impl_NodeContainerOps_setAboutToAppear(Ark_NativePointer self, KSerializerBuffer thisArray, int32_t thisLength)
+{
+    DeserializerBase thisDeserializer(thisArray, thisLength);
+    Callback_Void value_value = { thisDeserializer.readCallbackResource(),
+        reinterpret_cast<void (*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(
+            reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))),
+        reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(
+            thisDeserializer.readPointerOrDefault(
+                reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void)))) };
+    ;
+    GetAccessors()->getNodeContainerOpsAccessor()->setAboutToAppear(self, (const Callback_Void*)&value_value);
+}
+KOALA_INTEROP_DIRECT_V3(NodeContainerOps_setAboutToAppear, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_NodeContainerOps_setAboutToDisappear(Ark_NativePointer self, KSerializerBuffer thisArray, int32_t thisLength)
+{
+    DeserializerBase thisDeserializer(thisArray, thisLength);
+    Callback_Void value_value = { thisDeserializer.readCallbackResource(),
+        reinterpret_cast<void (*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(
+            reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))),
+        reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(
+            thisDeserializer.readPointerOrDefault(
+                reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void)))) };
+    ;
+    GetAccessors()->getNodeContainerOpsAccessor()->setAboutToDisappear(self, (const Callback_Void*)&value_value);
+}
+KOALA_INTEROP_DIRECT_V3(NodeContainerOps_setAboutToDisappear, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_NodeContainerOps_setAboutToResize(Ark_NativePointer self, KSerializerBuffer thisArray, int32_t thisLength)
+{
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Callback_Size_Void value_value = { thisDeserializer.readCallbackResource(),
+            reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_Size size)>(
+                thisDeserializer.readPointerOrDefault(
+                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Size_Void)))),
+            reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Size size)>(
+                thisDeserializer.readPointerOrDefault(
+                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Size_Void)))) };
+        ;
+        GetAccessors()->getNodeContainerOpsAccessor()->setAboutToResize(self, (const Callback_Size_Void*)&value_value);
+}
+KOALA_INTEROP_DIRECT_V3(NodeContainerOps_setAboutToResize, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_NodeContainerOps_setOnAttach(Ark_NativePointer self, KSerializerBuffer thisArray, int32_t thisLength)
+{
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Callback_Void value_value = { thisDeserializer.readCallbackResource(),
+            reinterpret_cast<void (*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(
+                reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))),
+            reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(
+                thisDeserializer.readPointerOrDefault(
+                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void)))) };
+        ;
+        GetAccessors()->getNodeContainerOpsAccessor()->setOnAttach(self, (const Callback_Void*)&value_value);
+}
+KOALA_INTEROP_DIRECT_V3(NodeContainerOps_setOnAttach, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_NodeContainerOps_setOnDetach(Ark_NativePointer self, KSerializerBuffer thisArray, int32_t thisLength)
+{
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Callback_Void value_value = { thisDeserializer.readCallbackResource(),
+            reinterpret_cast<void (*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(
+                reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))),
+            reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(
+                thisDeserializer.readPointerOrDefault(
+                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void)))) };
+        ;
+        GetAccessors()->getNodeContainerOpsAccessor()->setOnDetach(self, (const Callback_Void*)&value_value);
+}
+KOALA_INTEROP_DIRECT_V3(NodeContainerOps_setOnDetach, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_NodeContainerOps_setOnTouchEvent(Ark_NativePointer self, KSerializerBuffer thisArray, int32_t thisLength)
+{
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Callback_TouchEvent_Void value_value = { thisDeserializer.readCallbackResource(),
+            reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_TouchEvent event)>(
+                thisDeserializer.readPointerOrDefault(
+                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_TouchEvent_Void)))),
+            reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent event)>(
+                thisDeserializer.readPointerOrDefault(
+                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_TouchEvent_Void)))) };
+        ;
+        GetAccessors()->getNodeContainerOpsAccessor()->setOnTouchEvent(self, (const Callback_TouchEvent_Void*)&value_value);
+}
+KOALA_INTEROP_DIRECT_V3(NodeContainerOps_setOnTouchEvent, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_NavigationTransitionProxy_ctor() {
         return GetAccessors()->getNavigationTransitionProxyAccessor()->ctor();
 }
