@@ -39,6 +39,8 @@ import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
 import { ActionSheet, ActionSheetOptions} from "arkui/component/actionSheet"
 import inspector from "@ohos/arkui/inspector"
 import router from '@ohos/router'
+import { ComponentContent } from 'arkui/ComponentContent'
+import overlayManager from '@ohos/overlayManager'
 import promptAction from '@ohos/promptAction';
 import { AsyncCallback, CustomBuilder, DragItemInfo } from 'arkui/component'
 import { Router as RouterExt } from 'arkui/handwritten';
@@ -224,9 +226,52 @@ export class DragController {
     }
 }
 
+export interface OverlayManagerOptions {
+    renderRootOverlay?: boolean;
+    enableBackPressedEvent?: boolean;
+}
+
 export class ContextMenuController {
     public close(): void {
         throw Error("close not implemented in ContextMenuController!")
+    }
+}
+
+export class OverlayManager {
+    setOverlayManagerOptions(options: OverlayManagerOptions): boolean {
+        throw Error("setOverlayManagerOptions not implemented in OverlayManager!")
+    }
+
+    getOverlayManagerOptions(): OverlayManagerOptions {
+        throw Error("getOverlayManagerOptions not implemented in OverlayManager!")
+    }
+
+    addComponentContent(content: ComponentContent, index?: number): void {
+        throw Error("addComponentContent not implemented in OverlayManager!")
+    }
+
+    addComponentContentWithOrder(content: ComponentContent, levelOrder?: number): void {
+        throw Error("addComponentContentWithOrder not implemented in OverlayManager!")
+    }
+
+    removeComponentContent(content: ComponentContent): void {
+        throw Error("removeComponentContent not implemented in OverlayManager!")
+    }
+
+    showComponentContent(content: ComponentContent): void {
+        throw Error("showComponentContent not implemented in OverlayManager!")
+    }
+
+    hideComponentContent(content: ComponentContent): void {
+        throw Error("hideComponentContent not implemented in OverlayManager!")
+    }
+
+    showAllComponentContents(): void {
+        throw Error("showAllComponentContents not implemented in OverlayManager!")
+    }
+
+    hideAllComponentContents(): void {
+        throw Error("hideAllComponentContents not implemented in OverlayManager!")
     }
 }
 
@@ -357,6 +402,18 @@ export class UIContext {
     }
     public getUIObserver(): UIObserver {
         throw Error("getUIObserver not implemented in UIContext!")
+    }
+
+    public getOverlayManager(): OverlayManager {
+        throw Error("getOverlayManager not implemented in UIContext!")
+    }
+
+    public setOverlayManagerOptions(options: OverlayManagerOptions): boolean {
+        throw Error("setOverlayManagerOptions not implemented in UIContext!")
+    }
+
+    public getOverlayManagerOptions(): OverlayManagerOptions {
+        throw Error("getOverlayManagerOptions not implemented in UIContext!")
     }
 
     public getPromptAction(): PromptAction {
