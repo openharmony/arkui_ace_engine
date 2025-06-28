@@ -700,9 +700,9 @@ public:
         originPreviewYForStack_ = tmp;
     }
 
-    void SetDisableMenuBgColor(bool ret = false)
+    void SetDisableMenuBgColorByUser(bool isSetByUser = false)
     {
-        isDisableMenuBgColor_ = ret;
+        isDisableMenuBgColorByUser_ = isSetByUser;
     }
 
     void SetSubMenuDepth(int32_t depth)
@@ -854,7 +854,7 @@ private:
     float translateYForStack_ = 0.0f;
     float originMenuYForStack_ = 0.0f;
     float originPreviewYForStack_ = 0.0f;
-    bool isDisableMenuBgColor_ = false;
+    bool isDisableMenuBgColorByUser_ = false;
 
     // only used for Side sub menu
     int32_t subMenuDepth_ = 0;

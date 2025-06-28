@@ -58,6 +58,8 @@ public:
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
         const RadioColorType radioColorType) override;
+    void SetUncheckedBorderColorByJSRadioTheme(bool flag) override;
+    void SetIndicatorColorByJSRadioTheme(bool flag) override;
     static void CreateWithColorResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj,
         const RadioColorType radioColorType);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);

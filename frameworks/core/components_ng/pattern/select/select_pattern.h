@@ -252,15 +252,8 @@ public:
     void UpdateComponentColor(const Color& color, const SelectColorType selectColorType);
     void SetColorByUser(const RefPtr<FrameNode>& host);
     void UpdateMenuOption(int32_t index, const std::string& value, const SelectOptionType optionType);
-    void SetNormalOptionBgColorResource(bool flag)
-    {
-        isNormalOptionBgColorFlag_ = flag;
-    }
-
-    bool IsNormalOptionBgColorResource()
-    {
-        return isNormalOptionBgColorFlag_;
-    }
+    void SetModifierByUser(const RefPtr<FrameNode>& frameNode, const RefPtr<SelectPaintProperty>& props,
+        const RefPtr<SelectLayoutProperty>& layoutProps);
 
 private:
     void OnAttachToFrameNode() override;
@@ -270,8 +263,6 @@ private:
     void HandleFocusStyleTask();
     void HandleBlurStyleTask();
     void SetFocusStyle();
-    void SetMenuBackgroundColorByUser(Color themeColor);
-    void SetOptionBgColorByUser(Color themeColor);
     void ClearFocusStyle();
     void ModFocusIconStyle(RefPtr<SelectTheme> selectTheme, bool focusedFlag);
     void InitFocusEvent();
@@ -402,8 +393,6 @@ private:
     std::function<void(WeakPtr<NG::FrameNode>)> textApply_ = nullptr;
     std::function<void(WeakPtr<NG::FrameNode>)> textOptionApply_ = nullptr;
     std::function<void(WeakPtr<NG::FrameNode>)> textSelectOptionApply_ = nullptr;
-    bool isNormalOptionBgColorFlag_ = false;
-    std::optional<Color> menuBackgroundColor_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -367,7 +367,6 @@ void RadioModelNG::CreateWithColorResourceObj(FrameNode* frameNode, const RefPtr
                 pattern->UpdateRadioComponentColor(result, radioColorType);
             }
         };
-        updateFunc(resObj);
         pattern->AddResObj(key, resObj, std::move(updateFunc));
     } else {
         pattern->RemoveResObj(key);
@@ -401,5 +400,23 @@ void RadioModelNG::SetIsUserSetMargin(FrameNode* frameNode, bool isUserSet)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     pattern->SetIsUserSetMargin(isUserSet);
+}
+
+void RadioModelNG::SetUncheckedBorderColorByJSRadioTheme(bool flag)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetUncheckedBorderColorByJSRadioTheme(flag);
+}
+
+void RadioModelNG::SetIndicatorColorByJSRadioTheme(bool flag)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIndicatorColorByJSRadioTheme(flag);
 }
 } // namespace OHOS::Ace::NG

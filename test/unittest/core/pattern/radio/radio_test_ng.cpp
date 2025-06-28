@@ -21,6 +21,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
+#include "ui/resource/resource_info.h"
 
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -2363,5 +2364,163 @@ HWTEST_F(RadioTestNg, RadioPatternTest052, TestSize.Level1)
     pattern->UpdateUncheckStatus(frameNode);
     EXPECT_FALSE(radioPaintProperty->GetRadioCheckValue());
     MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: RadioCreateResetSetByUserTest001
+ * @tc.desc: Test RadioModelNG::Create resets *_SetByUser flags in RadioPaintProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioCreateResetSetByUserTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a radio button and retrieve its paint property.
+     * @tc.expected: step1. Frame node and paint property are created successfully.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Set all *_SetByUser flags to true.
+     * @tc.expected: step2. Flags are successfully set to true.
+     */
+    radioPaintProperty->UpdateRadioCheckedBackgroundColorSetByUser(true);
+    radioPaintProperty->UpdateRadioUncheckedBorderColorSetByUser(true);
+    radioPaintProperty->UpdateRadioIndicatorColorSetByUser(true);
+
+    /**
+     * @tc.steps: step3. Create another radio button and check its paint property.
+     * @tc.expected: step3. All *_SetByUser flags are reset to false by Create().
+     */
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    radioModelNG.Create(NAME1, GROUP_NAME1, INDICATOR_TYPE_TICK);
+    auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode2, nullptr);
+
+    auto radioPaintProperty2 = frameNode2->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty2, nullptr);
+
+    EXPECT_FALSE(radioPaintProperty2->HasRadioCheckedBackgroundColorSetByUser());
+    EXPECT_FALSE(radioPaintProperty2->HasRadioUncheckedBorderColorSetByUser());
+    EXPECT_FALSE(radioPaintProperty2->HasRadioIndicatorColorSetByUser());
+}
+
+/**
+ * @tc.name: CreateWithColorResourceObj001
+ * @tc.desc: Test RadioModelNG CreateWithColorResourceObj with different resource objects.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, CreateWithColorResourceObj001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a radio button and retrieve its pattern.
+     * @tc.expected: step1. Frame node and pattern are created successfully.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set checked background color with null resource object.
+     * @tc.expected: step2. Color value is not set (nullopt).
+     */
+    radioModelNG.CreateWithColorResourceObj(nullptr, RadioColorType::CHECKED_BACKGROUND_COLOR);
+
+    auto paintProperty = pattern->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto colorRet = paintProperty->GetRadioCheckedBackgroundColor();
+    EXPECT_FALSE(colorRet.has_value());
+
+    /**
+     * @tc.steps: step3. Create valid color resource object and set checked background color.
+     * @tc.expected: step3. Color value is set to red (#FFFF0000).
+     */
+    ResourceObjectParams param;
+    param.type = ResourceObjectParamType::STRING;
+    param.value = "#FFFF0000";
+    int32_t resourceType = static_cast<int32_t>(Kit::ResourceType::COLOR);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(
+        1001, resourceType, std::vector<ResourceObjectParams> { param }, "testBundle", "testModule", 0);
+
+    radioModelNG.CreateWithColorResourceObj(resObj, RadioColorType::CHECKED_BACKGROUND_COLOR);
+
+    colorRet = paintProperty->GetRadioCheckedBackgroundColor();
+    EXPECT_TRUE(colorRet.has_value());
+
+    /**
+     * @tc.steps: step4. Add resource to cache and reload resources.
+     * @tc.expected: step4. Resource manager reloads without errors.
+     */
+    std::string key = "radio" + RadioModelNG::ColorTypeToString(RadioColorType::CHECKED_BACKGROUND_COLOR);
+    pattern->AddResCache(key, param.value.value());
+    auto resMgr = pattern->resourceMgr_;
+    ASSERT_NE(resMgr, nullptr);
+    resMgr->ReloadResources();
+}
+
+/**
+ * @tc.name: CreateWithColorResourceObj002
+ * @tc.desc: Test RadioModelNG CreateWithColorResourceObj when resource object is not provided.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, CreateWithColorResourceObj002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a radio button and retrieve its pattern.
+     * @tc.expected: step1. Frame node and pattern are created successfully.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Set indicator color with null resource object.
+     * @tc.expected: step2. Indicator color value is not set (nullopt).
+     */
+    radioModelNG.CreateWithColorResourceObj(nullptr, RadioColorType::INDICATOR_COLOR);
+
+    auto paintProperty = pattern->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto colorRet = paintProperty->GetRadioIndicatorColor();
+    EXPECT_FALSE(colorRet.has_value());
+}
+
+/**
+ * @tc.name: ColorTypeToString
+ * @tc.desc: Test RadioModelNG ColorTypeToString function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, ColorTypeToString, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Define test cases for all RadioColorType values and an unknown value.
+     * @tc.expected: step1. Test cases cover all possible enum values and edge case.
+     */
+    std::vector<std::pair<RadioColorType, std::string>> types = {
+        { RadioColorType::CHECKED_BACKGROUND_COLOR, "CheckedBackgroundColor" },
+        { RadioColorType::UNCHECKED_BORDER_COLOR, "UncheckedBorderColor" },
+        { RadioColorType::INDICATOR_COLOR, "IndicatorColor" },
+        { static_cast<RadioColorType>(999), "Unknown" }
+    };
+
+    /**
+     * @tc.steps: step2. Iterate through test cases and verify string conversion.
+     * @tc.expected: step2. All enum values are converted to their correct string representations.
+     */
+    for (const auto& [type, expected] : types) {
+        auto result = RadioModelNG::ColorTypeToString(type);
+        EXPECT_EQ(result, expected);
+    }
 }
 } // namespace OHOS::Ace::NG

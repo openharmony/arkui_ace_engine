@@ -39,6 +39,16 @@ void ResetRadioChecked(ArkUINodeHandle node)
     RadioModelNG::SetChecked(frameNode, DEFAULT_CHECKED);
 }
 
+void SetRadioColorSetByUser(ArkUINodeHandle node, ArkUI_Bool isCheckedBackgroundColorSetByUser,
+    ArkUI_Bool isUncheckedBorderColorSetByUser, ArkUI_Bool isIndicatorColorSetByUser)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RadioModelNG::SetCheckedBackgroundColorSetByUser(frameNode, isCheckedBackgroundColorSetByUser);
+    RadioModelNG::SetUncheckedBorderColorSetByUser(frameNode, isUncheckedBorderColorSetByUser);
+    RadioModelNG::SetIndicatorColorSetByUser(frameNode, isIndicatorColorSetByUser);
+}
+
 void SetRadioStyle(ArkUINodeHandle node, ArkUI_Uint32 checkedBackgroundColor, ArkUI_Uint32 uncheckedBorderColor,
     ArkUI_Uint32 indicatorColor)
 {
@@ -48,9 +58,6 @@ void SetRadioStyle(ArkUINodeHandle node, ArkUI_Uint32 checkedBackgroundColor, Ar
     RadioModelNG::SetCheckedBackgroundColor(frameNode, Color(checkedBackgroundColor));
     RadioModelNG::SetUncheckedBorderColor(frameNode, Color(uncheckedBorderColor));
     RadioModelNG::SetIndicatorColor(frameNode, Color(indicatorColor));
-    RadioModelNG::SetCheckedBackgroundColorSetByUser(frameNode, true);
-    RadioModelNG::SetUncheckedBorderColorSetByUser(frameNode, true);
-    RadioModelNG::SetIndicatorColorSetByUser(frameNode, true);
 }
 
 void SetRadioStylePtr(ArkUINodeHandle node, ArkUI_Uint32 checkedBackgroundColor, ArkUI_Uint32 uncheckedBorderColor,
@@ -100,10 +107,9 @@ void ResetRadioStyle(ArkUINodeHandle node)
     RadioModelNG::SetUncheckedBorderColorSetByUser(frameNode, false);
     RadioModelNG::SetIndicatorColorSetByUser(frameNode, false);
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        RadioModelNG::CreateWithColorResourceObj(frameNode, resObj, RadioColorType::CHECKED_BACKGROUND_COLOR);
-        RadioModelNG::CreateWithColorResourceObj(frameNode, resObj, RadioColorType::UNCHECKED_BORDER_COLOR);
-        RadioModelNG::CreateWithColorResourceObj(frameNode, resObj, RadioColorType::INDICATOR_COLOR);
+        RadioModelNG::CreateWithColorResourceObj(frameNode, nullptr, RadioColorType::CHECKED_BACKGROUND_COLOR);
+        RadioModelNG::CreateWithColorResourceObj(frameNode, nullptr, RadioColorType::UNCHECKED_BORDER_COLOR);
+        RadioModelNG::CreateWithColorResourceObj(frameNode, nullptr, RadioColorType::INDICATOR_COLOR);
     }
 }
 
@@ -423,6 +429,7 @@ const ArkUIRadioModifier* GetRadioModifier()
     static const ArkUIRadioModifier modifier = {
         .setRadioChecked = SetRadioChecked,
         .resetRadioChecked = ResetRadioChecked,
+        .setRadioColorSetByUser = SetRadioColorSetByUser,
         .setRadioStyle = SetRadioStyle,
         .setRadioStylePtr = SetRadioStylePtr,
         .resetRadioStyle = ResetRadioStyle,

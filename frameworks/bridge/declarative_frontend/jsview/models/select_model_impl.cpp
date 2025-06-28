@@ -238,7 +238,7 @@ void SelectModelImpl::SetSelectedOptionFontColor(const Color& color)
     }
 }
 
-void SelectModelImpl::SetOptionBgColor(const Color& color, bool isNormal)
+void SelectModelImpl::SetOptionBgColor(const Color& color)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto selectComponent = AceType::DynamicCast<SelectComponent>(component);

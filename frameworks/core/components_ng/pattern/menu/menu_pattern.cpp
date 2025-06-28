@@ -2265,7 +2265,7 @@ void MenuPattern::OnColorConfigurationUpdate()
     auto renderContext = host->GetRenderContext();
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()
         || menuTheme->GetMenuBlendBgColor()) {
-        if (!isDisableMenuBgColor_) {
+        if (!isDisableMenuBgColorByUser_) {
             renderContext->UpdateBackgroundColor(menuTheme->GetBackgroundColor());
         }
     } else {

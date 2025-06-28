@@ -82,8 +82,7 @@ void ResetToggleSelectedColor(ArkUINodeHandle node)
     std::optional<Color> selectedColor;
     ToggleModelNG::SetSelectedColor(frameNode, selectedColor);
     if (SystemProperties::ConfigChangePerform()) {
-        auto colorResObj = AceType::MakeRefPtr<ResourceObject>();
-        ToggleModelNG::CreateWithResourceObj(frameNode, ToggleColorType::SELECTED_COLOR, colorResObj);
+        ToggleModelNG::CreateWithResourceObj(frameNode, ToggleColorType::SELECTED_COLOR, nullptr);
     }
 }
 
@@ -92,6 +91,7 @@ void SetToggleSwitchPointColor(ArkUINodeHandle node, ArkUI_Uint32 switchPointCol
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ToggleModelNG::SetSwitchPointColor(frameNode, Color(switchPointColor));
+    ToggleModelNG::SetSwitchPointColorSetByUser(frameNode, true);
 }
 
 void SetToggleSwitchPointColorPtr(ArkUINodeHandle node, ArkUI_Uint32 switchPointColor, void* colorRawPtr)
@@ -121,9 +121,9 @@ void ResetToggleSwitchPointColor(ArkUINodeHandle node)
         color = theme->GetPointColor();
     }
     ToggleModelNG::SetSwitchPointColor(frameNode, Color(color));
+    ToggleModelNG::SetSwitchPointColorSetByUser(frameNode, false);
     if (SystemProperties::ConfigChangePerform()) {
-        auto colorResObj = AceType::MakeRefPtr<ResourceObject>();
-        ToggleModelNG::CreateWithResourceObj(frameNode, ToggleColorType::SWITCH_POINT_COLOR, colorResObj);
+        ToggleModelNG::CreateWithResourceObj(frameNode, ToggleColorType::SWITCH_POINT_COLOR, nullptr);
     }
 }
 
@@ -307,14 +307,14 @@ void SetTogglePointRadius(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32
     ToggleModelNG::SetPointRadius(frameNode, switchPointRadius);
 }
 
-void SetTogglePointRadiusPtr(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* radiuRawPtr)
+void SetTogglePointRadiusPtr(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* radiusRawPtr)
 {
     CHECK_NULL_VOID(node);
     SetTogglePointRadius(node, value, unit);
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* pointRadius = reinterpret_cast<ResourceObject*>(radiuRawPtr);
+        auto* pointRadius = reinterpret_cast<ResourceObject*>(radiusRawPtr);
         auto resObj = AceType::Claim(pointRadius);
         ToggleModelNG::CreateWithResourceObj(frameNode, ToggleDimensionType::POINT_RADIUS, resObj);
     }
@@ -326,8 +326,7 @@ void ResetTogglePointRadius(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ToggleModelNG::ResetPointRadius(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        ToggleModelNG::CreateWithResourceObj(frameNode, ToggleDimensionType::POINT_RADIUS, resObj);
+        ToggleModelNG::CreateWithResourceObj(frameNode, ToggleDimensionType::POINT_RADIUS, nullptr);
     }
 }
 
@@ -336,6 +335,7 @@ void SetToggleUnselectedColor(ArkUINodeHandle node, ArkUI_Uint32 unselectedColor
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ToggleModelNG::SetUnselectedColor(frameNode, Color(unselectedColor));
+    ToggleModelNG::SetUnselectedColorSetByUser(frameNode, true);
 }
 
 void SetToggleUnselectedColorPtr(ArkUINodeHandle node, ArkUI_Uint32 unselectedColor, void* colorRawPtr)
@@ -366,9 +366,9 @@ void ResetToggleUnselectedColor(ArkUINodeHandle node)
         unselectedColor = switchTheme->GetInactiveColor();
     }
     ToggleModelNG::SetUnselectedColor(frameNode, unselectedColor);
+    ToggleModelNG::SetUnselectedColorSetByUser(frameNode, false);
     if (SystemProperties::ConfigChangePerform()) {
-        auto colorResObj = AceType::MakeRefPtr<ResourceObject>();
-        ToggleModelNG::CreateWithResourceObj(frameNode, ToggleColorType::UN_SELECTED_COLOR, colorResObj);
+        ToggleModelNG::CreateWithResourceObj(frameNode, ToggleColorType::UN_SELECTED_COLOR, nullptr);
     }
 }
 
@@ -381,14 +381,14 @@ void SetToggleTrackBorderRadius(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI
     ToggleModelNG::SetTrackBorderRadius(frameNode, borderRadius);
 }
 
-void SetToggleTrackBorderRadiusPtr(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* radiuRawPtr)
+void SetToggleTrackBorderRadiusPtr(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* radiusRawPtr)
 {
     CHECK_NULL_VOID(node);
     SetToggleTrackBorderRadius(node, value, unit);
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* trackBorderRadius = reinterpret_cast<ResourceObject*>(radiuRawPtr);
+        auto* trackBorderRadius = reinterpret_cast<ResourceObject*>(radiusRawPtr);
         auto resObj = AceType::Claim(trackBorderRadius);
         ToggleModelNG::CreateWithResourceObj(frameNode, ToggleDimensionType::TRACK_BORDER_RADIUS, resObj);
     }
@@ -400,8 +400,7 @@ void ResetToggleTrackBorderRadius(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ToggleModelNG::ResetTrackBorderRadius(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        ToggleModelNG::CreateWithResourceObj(frameNode, ToggleDimensionType::TRACK_BORDER_RADIUS, resObj);
+        ToggleModelNG::CreateWithResourceObj(frameNode, ToggleDimensionType::TRACK_BORDER_RADIUS, nullptr);
     }
 }
 
