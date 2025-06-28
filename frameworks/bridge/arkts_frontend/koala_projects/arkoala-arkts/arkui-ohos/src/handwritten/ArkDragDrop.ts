@@ -88,25 +88,28 @@ export function hookRegisterOnDragStartImpl(node: ArkCommonMethodComponent, onDr
             const value_extraInfo = itemInfo.extraInfo
             let value_extraInfo_type: int32 = RuntimeType.UNDEFINED
             value_extraInfo_type = runtimeType(value_extraInfo)
-            if ((RuntimeType.UNDEFINED) != (value_extraInfo_type)) {
+            if ((RuntimeType.UNDEFINED) !== (value_extraInfo_type)) {
                 const value_extraInfo_value = value_extraInfo!
                 ArkUIAniModule._DragEvent_Set_ExtraInfo(toPeerPtr(dragEvent), value_extraInfo_value)
             }
-
-            const value_builder = itemInfo.builder as CustomBuilder
-            const peerNode = createUiDetachedRoot((): PeerNode  => {
-                return ArkComponentRootPeer.create(undefined)
-            }, value_builder)
-            const createBuilderNodeTree = () : KPointer => {
-                return peerNode.peer.ptr
-            }
-            let customNode = createBuilderNodeTree();
-            ArkUIAniModule._DragEvent_Set_CustomNode(toPeerPtr(dragEvent), customNode)
-
+            const value_builder = itemInfo.builder
+            let value_builder_type: int32 = RuntimeType.UNDEFINED
+            value_builder_type = runtimeType(value_builder)
+            if ((RuntimeType.FUNCTION) === (value_builder_type)) {
+                const value_builder_value = itemInfo.builder as CustomBuilder
+                const peerNode = createUiDetachedRoot((): PeerNode  => {
+                    return ArkComponentRootPeer.create(undefined)
+                }, value_builder_value)
+                const createBuilderNodeTree = () : KPointer => {
+                    return peerNode.peer.ptr
+                }
+                let customNode = createBuilderNodeTree()
+                ArkUIAniModule._DragEvent_Set_CustomNode(toPeerPtr(dragEvent), customNode)
+            } 
             const value_pixelMap = itemInfo.pixelMap as PixelMap
             let value_pixelMap_type: int32 = RuntimeType.UNDEFINED
             value_pixelMap_type = runtimeType(value_pixelMap)
-            if ((RuntimeType.UNDEFINED) != (value_pixelMap_type)) {
+            if ((RuntimeType.UNDEFINED) !== (value_pixelMap_type)) {
                 ArkUIAniModule._DragEvent_Set_PixelMap(toPeerPtr(dragEvent), value_pixelMap)
             }
         }
