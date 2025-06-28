@@ -43,7 +43,7 @@ declare class NativeViewPartialUpdate {
   markStatic(): void;
   elmtIdExists(elmtId: number): boolean;
   findChildByIdForPreview(viewId: number): object;
-  queryNavDestinationInfo(): object;
+  queryNavDestinationInfo(isInner: boolean | undefined): object;
   queryNavigationInfo(): object;
   queryRouterPageInfo(): object;
   getUIContext(): object;
