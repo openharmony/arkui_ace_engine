@@ -27,6 +27,8 @@ void SetDrawCallback(ani_env* env, ani_object obj, ani_long ptr, ani_fn_object f
 void SetDrawModifier(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_object drawModifier);
 void Invalidate(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr);
 ani_long BuilderProxyNodeConstruct(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id);
+void SetBackgroundImagePixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object node,
+    ani_object pixelMap, ani_int repeat);
 void SetCustomCallback(ani_env* env, ani_object obj, ani_long ptr,
     ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout);
 ani_int RequireArkoalaNodeId(ani_env* env, ani_object obj, ani_int capacity);
