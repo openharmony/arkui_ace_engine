@@ -24796,6 +24796,26 @@ typedef struct GENERATED_ArkUITextFieldOpsAccessor {
     Ark_NativePointer (*registerTextFieldValueCallback)(Ark_NativePointer node,
                                                         const Ark_ResourceStr* value,
                                                         const TextFieldValueCallback* callback);
+    Ark_NativePointer (*textFieldOpsSetWidth)(Ark_NativePointer node,
+                                              const Opt_Union_Length_LayoutPolicy* value);
+    Ark_NativePointer (*textFieldOpsSetHeight)(Ark_NativePointer node,
+                                               const Opt_Union_Length_LayoutPolicy* value);
+    Ark_NativePointer (*textFieldOpsSetPadding)(Ark_NativePointer node,
+                                                const Opt_Union_Padding_Length_LocalizedPadding* value);
+    Ark_NativePointer (*textFieldOpsSetMargin)(Ark_NativePointer node,
+                                               const Opt_Union_Padding_Length_LocalizedPadding* value);
+    Ark_NativePointer (*textFieldOpsSetBorder)(Ark_NativePointer node,
+                                               const Opt_BorderOptions* value);
+    Ark_NativePointer (*textFieldOpsSetBorderWidth)(Ark_NativePointer node,
+                                                    const Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths* value);
+    Ark_NativePointer (*textFieldOpsSetBorderColor)(Ark_NativePointer node,
+                                                    const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value);
+    Ark_NativePointer (*textFieldOpsSetBorderStyle)(Ark_NativePointer node,
+                                                    const Opt_Union_BorderStyle_EdgeStyles* value);
+    Ark_NativePointer (*textFieldOpsSetBorderRadius)(Ark_NativePointer node,
+                                                     const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value);
+    Ark_NativePointer (*textFieldOpsSetBackgroundColor)(Ark_NativePointer node,
+                                                        const Opt_ResourceColor* value);
 } GENERATED_ArkUITextFieldOpsAccessor;
 
 typedef struct GENERATED_ArkUIActionSheetAccessor {

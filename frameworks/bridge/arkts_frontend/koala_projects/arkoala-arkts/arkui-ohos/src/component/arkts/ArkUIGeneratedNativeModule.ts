@@ -4684,6 +4684,26 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextFieldOps_registerTextFieldValueCallback(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetWidth(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetHeight(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetPadding(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetMargin(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetBorder(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetBorderWidth(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetBorderColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetBorderStyle(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetBorderRadius(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetBackgroundColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
     native static _ToggleOps_registerIsOnCallback(node: KPointer, isOn: KInt, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _ActionSheet_show(thisArray: KSerializerBuffer, thisLength: int32): undefined
