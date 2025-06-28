@@ -819,6 +819,12 @@ RefPtr<WebResponse> WebDelegate::OnInterceptRequest(const std::shared_ptr<BaseEv
 {
     return nullptr;
 }
+std::string WebDelegate::OnOverrideErrorPage(
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error)
+{
+    return "";
+}
 void WebDelegate::OnTooltip(const std::string& tooltip) {}
 void WebDelegate::OnRequestFocus() {}
 void WebDelegate::OnRenderExited(OHOS::NWeb::RenderExitReason reason) {}

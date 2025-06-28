@@ -154,6 +154,8 @@ public:
     void OnRefreshAccessedHistory(const std::string& url, bool isReload) override;
     bool OnHandleInterceptRequest(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
                                   std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response) override;
+    std::string OnHandleOverrideErrorPage(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
+                                          std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error) override;
     bool OnHandleInterceptUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request) override;
     void OnResource(const std::string& url) override;
     void OnScaleChanged(float oldScaleFactor, float newScaleFactor) override;

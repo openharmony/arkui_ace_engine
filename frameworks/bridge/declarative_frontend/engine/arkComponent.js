@@ -30732,6 +30732,9 @@ class ArkWebComponent extends ArkComponent {
   onInterceptRequest(callback) {
     throw new Error('Method not implemented.');
   }
+  onOverrideErrorPage(callback) {
+    throw new Error('Method not implemented.');
+  }
   onPermissionRequest(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnPermissionRequestModifier.identity, WebOnPermissionRequestModifier, callback);
     return this;

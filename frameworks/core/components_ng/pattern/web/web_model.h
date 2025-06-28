@@ -62,6 +62,7 @@ public:
     virtual void SetOnErrorReceive(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnHttpErrorReceive(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnInterceptRequest(std::function<RefPtr<WebResponse>(const BaseEventInfo* info)>&& jsCallback) = 0;
+    virtual void SetOnOverrideErrorPage(std::function<std::string(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnUrlLoadIntercept(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnLoadIntercept(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnFileSelectorShow(std::function<bool(const BaseEventInfo* info)>&& jsCallback) = 0;

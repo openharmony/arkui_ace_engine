@@ -367,6 +367,19 @@ bool WebClientImpl::OnHandleInterceptUrlLoading(std::shared_ptr<OHOS::NWeb::NWeb
     return result;
 }
 
+std::string WebClientImpl::OnHandleOverrideErrorPage(
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
+    std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error)
+{
+    auto delegate = webDelegate_.Upgrade();
+    if (!delegate) {
+        return "";
+    }
+    ContainerScope scope(delegate->GetInstanceId());
+
+    return delegate->OnOverrideErrorPage(request, error);
+}
+
 bool WebClientImpl::OnHandleInterceptRequest(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
                                              std::shared_ptr<OHOS::NWeb::NWebUrlResourceResponse> response)
 {
