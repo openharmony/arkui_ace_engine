@@ -598,6 +598,24 @@ void AssignCast(std::optional<DragPreviewMode>& dst, const Ark_DragPreviewMode& 
 }
 
 template<>
+void AssignCast(std::optional<DraggingSizeChangeEffect>& dst, const Ark_DraggingSizeChangeEffect& src)
+{
+    switch (src) {
+        case ARK_DRAGGING_SIZE_CHANGE_EFFECT_DEFAULT:
+            dst = DraggingSizeChangeEffect::DEFAULT;
+            break;
+        case ARK_DRAGGING_SIZE_CHANGE_EFFECT_SIZE_TRANSITION:
+            dst = DraggingSizeChangeEffect::SIZE_TRANSITION;
+            break;
+        case ARK_DRAGGING_SIZE_CHANGE_EFFECT_SIZE_CONTENT_TRANSITION:
+            dst = DraggingSizeChangeEffect::SIZE_CONTENT_TRANSITION;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_DraggingSizeChangeEffect: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<DynamicRangeMode>& dst, const Ark_DynamicRangeMode& src)
 {
     switch (src) {
