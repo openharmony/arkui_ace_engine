@@ -1357,6 +1357,7 @@ public:
 
     float GetCaretWidth();
     void UpdateCaretStyleByTypingStyle();
+    void MarkAISpanStyleChanged() override;
 
 #if defined(IOS_PLATFORM)
     const TextEditingValue& GetInputEditingValue() const override;

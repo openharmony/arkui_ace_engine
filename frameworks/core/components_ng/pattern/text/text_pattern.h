@@ -266,6 +266,12 @@ public:
     {
         return dataDetectorAdapter_->textDetectResult_;
     }
+    virtual void MarkAISpanStyleChanged()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+    }
     void SetTextDetectConfig(const TextDetectConfig& textDetectConfig)
     {
         dataDetectorAdapter_->SetTextDetectTypes(textDetectConfig.types);
@@ -277,9 +283,7 @@ public:
         auto textDetectConfigCache = dataDetectorAdapter_->textDetectConfigStr_;
         dataDetectorAdapter_->textDetectConfigStr_ = textDetectConfig.ToString();
         if (textDetectConfigCache != dataDetectorAdapter_->textDetectConfigStr_) {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
+            MarkAISpanStyleChanged();
         }
         dataDetectorAdapter_->enablePreviewMenu_ = textDetectConfig.enablePreviewMenu;
     }
