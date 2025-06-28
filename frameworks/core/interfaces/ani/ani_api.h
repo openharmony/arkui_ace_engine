@@ -73,6 +73,7 @@ struct ArkUIAniDragModifier {
     void (*setDragAllowDropNull)(ArkUINodeHandle node);
     void (*setDragAllowDrop)(ArkUINodeHandle node, const char** allowDrops, ArkUI_Int32 length);
     void (*setDragPreview)(ArkUINodeHandle node, ArkUIDragInfo dragInfo);
+    const char* (*getUdKey)(ani_ref event);
 };
 struct ArkUIAniCommonModifier {
     ani_ref* (*getHostContext)();

@@ -54,6 +54,8 @@ export class ArkUIAniModule {
 
     native static _DragEvent_Get_Summary(ptr: KLong) : unifiedDataChannel.Summary
 
+    native static _DragEvent_Start_Data_Loading(ptr: KLong, data : unifiedDataChannel.GetDataParams) : string
+
     native static _DragEvent_Set_PixelMap(ptr: KLong, pixelMap: image.PixelMap) : void
 
     native static _DragEvent_Set_ExtraInfo(ptr: KLong, extraInfo: string) : void

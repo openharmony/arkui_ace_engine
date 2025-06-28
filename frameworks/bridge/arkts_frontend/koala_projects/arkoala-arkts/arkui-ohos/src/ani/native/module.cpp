@@ -135,6 +135,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventGetSummary)
         },
         ani_native_function {
+            "_DragEvent_Start_Data_Loading",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragEveStartDataLoading)
+        },
+        ani_native_function {
             "_DragEvent_Set_PixelMap",
             "JL@ohos/multimedia/image/image/PixelMap;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventSetPixelMap)

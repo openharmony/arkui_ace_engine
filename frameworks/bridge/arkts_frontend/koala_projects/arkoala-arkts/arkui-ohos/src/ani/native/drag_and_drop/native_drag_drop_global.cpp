@@ -23,6 +23,7 @@
 #include "pixel_map_taihe_ani.h"
 #include "udmf_ani_converter_utils.h"
 #include "core/common/udmf/udmf_client.h"
+#include "udmf_async_client.h"
 
 namespace OHOS::Ace::Ani {
 void DragEventSetData([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -55,6 +56,9 @@ ani_object DragEventGetData([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_
     }
     auto unifiedDataPtr = reinterpret_cast<OHOS::UDMF::UnifiedData*>(
         modifier->getDragAniModifier()->getDragData(dragEvent));
+    if (!unifiedDataPtr) {
+        return result_obj;
+    }
     std::shared_ptr<OHOS::UDMF::UnifiedData> unifiedData(unifiedDataPtr);
     auto unifiedData_obj = OHOS::UDMF::AniConverter::WrapUnifiedData(env, unifiedData);
     ani_boolean isUnifiedData;
@@ -91,6 +95,31 @@ ani_object DragEventGetSummary([[maybe_unused]] ani_env* env, [[maybe_unused]] a
         return result_obj;
     }
     return summary_obj;
+}
+
+ani_string DragEveStartDataLoading([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object dataSyncOptions)
+{
+    ani_string value = {};
+    auto dragEvent = reinterpret_cast<ani_ref>(pointer);
+    const auto* modifier = GetNodeAniModifier();
+    if (!dragEvent || !modifier || !modifier->getDragAniModifier() || !env) {
+        return value;
+    }
+    const char* ptr = modifier->getDragAniModifier()->getUdKey(dragEvent);
+    std::string key = ptr ? ptr : "";
+    if (key.empty()) {
+        return value;
+    }
+    auto getDataParams = OHOS::UDMF::AniConverter::UnwrapGetDataParams(env, dataSyncOptions, key);
+    getDataParams.query.key = key;
+    getDataParams.query.intention = UDMF::Intention::UD_INTENTION_DRAG;
+    int32_t status = OHOS::UDMF::UdmfAsyncClient::GetInstance().StartAsyncDataRetrieval(getDataParams);
+    if (status != 0) {
+        return value;
+    }
+    auto result = AniUtils::StdStringToANIString(env, key);
+    return result.value_or(value);
 }
 
 void DragEventSetPixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
