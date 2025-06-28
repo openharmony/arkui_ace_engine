@@ -28,7 +28,7 @@ export function ForEach<T>(
     keyGenerator?: (item: T, index: number) => string,
 ) {
     if (arr === null || arr === undefined) {
-        InteropNativeModule._NativeLog('input array is null or undefined error. Application error!');
+        InteropNativeModule._NativeLog('input array function is null or undefined error. Application error!');
         return;
     }
     if (typeof itemGenerator !== 'function') {
@@ -42,6 +42,10 @@ export function ForEach<T>(
     /** @memo */
     const createAndUpdate = (): void => {
         const array: Array<T> = arr();
+        if (array === null || array === undefined) {
+            InteropNativeModule._NativeLog('input array is null or undefined error. Application error!');
+            return;
+        }
         const length: number = array.length;
         const key = (element: T, index: int32): int32 => keyGenerator ? hashCodeFromString(keyGenerator!(element, (index as number))) : index;
         /** @memo */
