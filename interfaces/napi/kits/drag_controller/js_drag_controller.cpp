@@ -786,6 +786,10 @@ int32_t SetUnifiedData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, std::st
 {
     int32_t dataSize = 1;
     CHECK_NULL_RETURN(asyncCtx, dataSize);
+    if (asyncCtx->dataLoadParams) {
+        UdmfClient::GetInstance()->SetDelayInfo(asyncCtx->dataLoadParams, udKey);
+        dataSize = static_cast<int32_t>(asyncCtx->dataLoadParams->GetRecordCount());
+    }
     if (asyncCtx->unifiedData) {
         int32_t ret = UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
         if (ret != 0) {
@@ -1160,6 +1164,7 @@ void GetParams(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, int32_t& dataSi
     }
     if (asyncCtx->dataLoadParams) {
         UdmfClient::GetInstance()->SetDelayInfo(asyncCtx->dataLoadParams, udKey);
+        dataSize = static_cast<int32_t>(asyncCtx->dataLoadParams->GetRecordCount());
     }
     auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
     if (badgeNumber.has_value()) {
@@ -1282,6 +1287,7 @@ bool ParseDataLoadParams(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, napi_
         auto dataLoadParams = UdmfClient::GetInstance()->TransformDataLoadParams(asyncCtx->env, dataLoadParamsNApi);
         CHECK_NULL_RETURN(dataLoadParams, false);
         asyncCtx->dataLoadParams = dataLoadParams;
+        asyncCtx->unifiedData = nullptr;
         return true;
     }
     return false;
