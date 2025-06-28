@@ -52,6 +52,7 @@ def find_files(include_patterns, exclude_patterns=None, base_url=None):
                 filtered_file_list.append(file_path)
         file_list = filtered_file_list
 
+    file_list.sort()
     return file_list
 
 def generate_files_var_name(package_name, part_index=None):
