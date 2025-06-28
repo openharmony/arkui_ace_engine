@@ -95,56 +95,56 @@ struct MenuTestLevel0_0 {
     //3 value和icon组合验证: 不同字符串
     {
       value: "Menu ".repeat(1),
-      icon: $r('app.media.startIcon'),
+      icon: $r('app.media.app_icon'),
       action: () => {
       }
     },
     //4
     {
       value: "Menu ".repeat(0),
-      icon: $r('app.media.startIcon'),
+      icon: $r('app.media.app_icon'),
       action: () => {
       }
     },
     //5
     {
       value: "Menu ".repeat(5),
-      icon: $r('app.media.startIcon'),
+      icon: $r('app.media.app_icon'),
       action: () => {
       }
     },
     //6
     {
       value: "Menu ".repeat(10),
-      icon: $r('app.media.startIcon'),
+      icon: $r('app.media.app_icon'),
       action: () => {
       }
     },
     //7
     {
       value: "Menu \n".repeat(3), //实际省略号绘制
-      icon: $r('app.media.startIcon'),
+      icon: $r('app.media.app_icon'),
       action: () => {
       }
     },
     //8
     {
       value: "undefined", //实际不绘制
-      icon: $r('app.media.startIcon'),
+      icon: $r('app.media.app_icon'),
       action: () => {
       }
     },
     //9 value和icon组合验证
     {
       value: "svgIcon".repeat(1),
-      icon: $r('app.media.startIcon'),
+      icon: $r('app.media.app_icon'),
       action: () => {
       }
     },
     //10
     {
       value: "gifIcon".repeat(1),
-      icon: $r("app.media.startIcon"),
+      icon: $r("app.media.app_icon"),
       action: () => {
       }
     },
@@ -165,28 +165,28 @@ struct MenuTestLevel0_0 {
     //13
     {
       value: "webpIcon".repeat(1),
-      icon: $r("app.media.startIcon"),
+      icon: $r("app.media.app_icon"),
       action: () => {
       }
     },
     //14
     {
       value: "mp4Icon".repeat(1),
-      icon: $r("app.media.startIcon"),
+      icon: $r("app.media.app_icon"),
       action: () => {
       }
     },
     //15
     {
       value: "2to1Icon".repeat(1),
-      icon: $r("app.media.startIcon"),
+      icon: $r("app.media.app_icon"),
       action: () => {
       }
     },
     //16
     {
       value: "1to2Icon".repeat(1),
-      icon: $r("app.media.startIcon"),
+      icon: $r("app.media.app_icon"),
       action: () => {
       }
     },
