@@ -6,6 +6,7 @@
     "pages/scrollable/StickyNestedScroll",
     "pages/scrollable/EnabledScroll",
     "pages/scrollable/NestedWeb",
+    "pages/scrollable/RefreshNestedScroll",
     "pages/scrollable/ScrollEventObserver",
     "pages/Tabs/TabsMainPage",
     "pages/Tabs/BarBackgroundBlurStyle",
@@ -65,6 +66,7 @@
     "pages/Scroll/NestedScrollBar",
     "pages/Scroll/RecycleView/Index",
     "pages/Scroll/ScrollNode",
+    "pages/Scroll/ScrollWithLayoutWeight",
     "pages/LazyVGridLayout/LazyVGridLayoutMainPage",
     "pages/LazyVGridLayout/LazyVGridLayoutAttribute"
   ]
