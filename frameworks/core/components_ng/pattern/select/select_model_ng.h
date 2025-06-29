@@ -165,7 +165,6 @@ public:
     static void SetFontColorByUser(FrameNode* frameNode, bool isValidValue);
 
 private:
-    std::string ColorTypeToString(const SelectColorType& selectColorType);
     void AddResObjWithCallBack(
         std::string key, const RefPtr<ResourceObject>& resObj, const int32_t index, const SelectOptionType& optionType);
 };
