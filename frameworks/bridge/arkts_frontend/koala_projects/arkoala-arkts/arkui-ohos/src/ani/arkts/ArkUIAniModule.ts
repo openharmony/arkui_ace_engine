@@ -14,6 +14,7 @@
  */
 
 import { KPointer, KInt, KLong } from "@koalaui/interop"
+import { drawing } from "@ohos/graphics/drawing"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
 import common from "@ohos.app.ability.common"
@@ -31,6 +32,7 @@ export class ArkUIAniModule {
         loadLibrary("arkoala_native_ani")
     }
 
+    native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void
     native static _Web_SetWebOptions(ptr: KPointer, webviewController: webview.WebviewController): void
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
     native static _ConvertUtils_ConvertToPixelMapAni(ptr: KPointer): image.PixelMap

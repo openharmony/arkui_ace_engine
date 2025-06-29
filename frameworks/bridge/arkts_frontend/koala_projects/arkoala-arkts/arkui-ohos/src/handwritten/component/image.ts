@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+import { ArkUIAniModule } from "arkui.ani"
+
 export class ColorContent {
     constructor() {}
     public static readonly ORIGIN: ColorContent = new ColorContent();
@@ -71,4 +73,21 @@ function hookSetImageFillColor(peer: KPointer, value: ResourceColor | undefined 
         const value_casted = value as (ResourceColor | undefined)
         fillColor0Attribute(peer, value_casted)
     }
+}
+
+function hookSetResizableOptions(peer: ArkImagePeer, value: ResizableOptions | undefined) {
+    if (value != undefined && value.lattice != undefined) {
+        ArkUIAniModule._Image_ResizableOptions(peer.getPeerPtr(), value.lattice as drawing.Lattice)
+        return
+    }
+    const thisSerializer : Serializer = Serializer.hold()
+    let value_type : int32 = RuntimeType.UNDEFINED
+    value_type = runtimeType(value)
+    thisSerializer.writeInt8(value_type as int32)
+    if ((RuntimeType.UNDEFINED) != (value_type)) {
+        const value_value  = value!
+        thisSerializer.writeResizableOptions(value_value)
+    }
+    ArkUIGeneratedNativeModule._ImageAttribute_resizable(peer.getPeerPtr(), thisSerializer.asBuffer(), thisSerializer.length())
+    thisSerializer.release()
 }

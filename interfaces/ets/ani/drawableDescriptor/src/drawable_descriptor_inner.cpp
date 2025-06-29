@@ -89,7 +89,7 @@ void CreateAnimatedDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, a
     env->Array_GetLength(pixelmapsAni, &size);
     std::vector<RefPtr<PixelMap>> results;
     ani_class arrayClass;
-    env->FindClass("C{escompat.Array}", &arrayClass);
+    env->FindClass("escompat.Array", &arrayClass);
     ani_method getDataMethod;
     env->Class_FindMethod(arrayClass, "$_get", ARRAY_GET, &getDataMethod);
     for (size_t index = 0; index < size; index++) {

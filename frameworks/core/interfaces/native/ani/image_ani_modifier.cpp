@@ -15,15 +15,27 @@
 
 #include "image_ani_modifier.h"
 
+#include "base/image/drawing_lattice.h"
 #include "base/log/log.h"
+#include "core/components_ng/pattern/image/image_model_static.h"
 
 namespace OHOS::Ace::NG {
 
 void SetPixelMap(ArkUINodeHandle node, void* pixelMap) {}
 
+void SetResizableLattice(ArkUINodeHandle node, void* aniLattice)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto lattice = DrawingLattice::CreateDrawingLatticeFromAni(aniLattice);
+    ImageModelStatic::SetResizableLattice(frameNode, lattice);
+}
+
 const ArkUIAniImageModifier* GetImageAniModifier()
 {
-    static const ArkUIAniImageModifier impl = { .setPixelMap = OHOS::Ace::NG::SetPixelMap };
+    static const ArkUIAniImageModifier impl = {
+        .setPixelMap = OHOS::Ace::NG::SetPixelMap,
+        .setResizableLattice = OHOS::Ace::NG::SetResizableLattice,
+    };
     return &impl;
 }
 

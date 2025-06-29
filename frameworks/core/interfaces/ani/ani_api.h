@@ -56,6 +56,7 @@ struct ArkUIDragInfo {
 
 struct ArkUIAniImageModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
+    void (*setResizableLattice)(ArkUINodeHandle node, void* lattice);
 };
 
 struct ArkUIAniWebModifier {

@@ -168,5 +168,11 @@ void ImageModelStatic::SetEnhancedImageQuality(FrameNode* frameNode, const std::
     CHECK_NULL_VOID(pattern);
     pattern->SetImageQuality(imageQuality.value_or(AIImageQuality::NONE));
 }
+
+void ImageModelStatic::SetResizableLattice(FrameNode* frameNode, const RefPtr<DrawingLattice>& lattice)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageResizableLattice, lattice, frameNode);
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_STATIC_CPP
