@@ -369,7 +369,8 @@ ArkUINativeModuleValue TextAreaBridge::SetPlaceholderColor(ArkUIRuntimeCallInfo 
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaPlaceholderColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaPlaceholderColor(
@@ -631,7 +632,8 @@ ArkUINativeModuleValue TextAreaBridge::SetCaretColor(ArkUIRuntimeCallInfo *runti
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaCaretColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaCaretColor(
@@ -696,7 +698,8 @@ ArkUINativeModuleValue TextAreaBridge::SetFontColor(ArkUIRuntimeCallInfo *runtim
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaFontColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaFontColor(
@@ -879,7 +882,8 @@ ArkUINativeModuleValue TextAreaBridge::SetDecoration(ArkUIRuntimeCallInfo* runti
         textAreaDecoration = secondArg->Int32Value(vm);
     }
     RefPtr<ResourceObject> resourceObject;
-    ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color, Color::BLACK, resourceObject);
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color, Color::BLACK, resourceObject, nodeInfo);
     int32_t textDecorationStyle = static_cast<int32_t>(DEFAULT_DECORATION_STYLE);
     if (fourthArg->IsInt()) {
         textDecorationStyle = fourthArg->Int32Value(vm);
@@ -1256,7 +1260,8 @@ ArkUINativeModuleValue TextAreaBridge::SetSelectedBackgroundColor(ArkUIRuntimeCa
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resourceObject;
-    if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         if (color.GetAlpha() == DEFAULT_ALPHA) {
             color = color.ChangeOpacity(DEFAULT_OPACITY);
         }
@@ -1300,8 +1305,9 @@ ArkUINativeModuleValue TextAreaBridge::SetCaretStyle(ArkUIRuntimeCallInfo* runti
     Color color;
     uint32_t caretColor;
     RefPtr<ResourceObject> colorObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (!caretColorArg->IsUndefined()) {
-        if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color, colorObject)) {
+        if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color, colorObject, nodeInfo)) {
             caretColor = color.GetValue();
         } else {
             caretColor = textFieldTheme->GetCursorColor().GetValue();
@@ -2311,7 +2317,8 @@ ArkUINativeModuleValue TextAreaBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaBackgroundColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBackgroundColorWithColorSpace(

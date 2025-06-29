@@ -858,8 +858,9 @@ public:
         NG::BorderRadiusProperty& dimension);
 
 private:
+    static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);
     static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
-        const Color& color, bool state);
+        Color& color, bool state);
     static bool ParseJsStrArrayInternal(const JSRef<JSArray>& jsArray, std::vector<std::string>& result,
         std::vector<RefPtr<ResourceObject>>& resObjArray);
     static bool ParseJsIntegerArrayInternal(const JSRef<JSArray>& jsArray, std::vector<uint32_t>& result,

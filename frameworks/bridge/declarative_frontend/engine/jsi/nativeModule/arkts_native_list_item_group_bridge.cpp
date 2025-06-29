@@ -66,7 +66,8 @@ ArkUINativeModuleValue ListItemGroupBridge::SetDivider(ArkUIRuntimeCallInfo* run
     Color colorObj;
     RefPtr<ResourceObject> resObjColor;
     bool setByUser = false;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj, resObjColor)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj, resObjColor, nodeInfo)) {
         color = listTheme->GetDividerColor().GetValue();
         setByUser = false;
     } else {

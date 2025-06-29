@@ -222,7 +222,8 @@ ArkUINativeModuleValue ButtonBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeC
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getButtonModifier()->resetButtonFontColor(nativeNode);
     } else {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
@@ -364,7 +365,8 @@ ArkUINativeModuleValue ButtonBridge::SetBackgroundColor(ArkUIRuntimeCallInfo *ru
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getButtonModifier()->resetButtonBackgroundColor(nativeNode);
     } else {
         auto colorRawPtr = AceType::RawPtr(colorResObj);

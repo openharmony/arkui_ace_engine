@@ -200,8 +200,9 @@ ArkUINativeModuleValue ToggleBridge::SetSelectedColor(ArkUIRuntimeCallInfo* runt
 
     Color color;
     RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (colorArg->IsNull() || colorArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj)) {
+        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getToggleModifier()->resetToggleSelectedColor(nativeNode);
     } else {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
@@ -232,8 +233,9 @@ ArkUINativeModuleValue ToggleBridge::SetSwitchPointColor(ArkUIRuntimeCallInfo* r
 
     Color color;
     RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (colorArg->IsNull() || colorArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj)) {
+        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getToggleModifier()->resetToggleSwitchPointColor(nativeNode);
     } else {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
@@ -290,7 +292,9 @@ void ToggleBridge::SetUnselectedColor(const EcmaVM* vm, ArkUINodeHandle nativeNo
     CHECK_NULL_VOID(vm);
     Color unselectedColor;
     RefPtr<ResourceObject> resObj;
-    if (arg->IsNull() || arg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, arg, unselectedColor, resObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (arg->IsNull() || arg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, arg, unselectedColor, resObj,
+        nodeInfo)) {
         GetArkUINodeModifiers()->getToggleModifier()->resetToggleUnselectedColor(nativeNode);
         return;
     }
@@ -304,7 +308,8 @@ void ToggleBridge::SetPointColor(const EcmaVM* vm, ArkUINodeHandle nativeNode, c
     CHECK_NULL_VOID(vm);
     Color pointColor;
     RefPtr<ResourceObject> resObj;
-    if (arg->IsNull() || arg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, arg, pointColor, resObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (arg->IsNull() || arg->IsUndefined() || !ArkTSUtils::ParseJsColorAlpha(vm, arg, pointColor, resObj, nodeInfo)) {
         GetArkUINodeModifiers()->getToggleModifier()->resetToggleSwitchPointColor(nativeNode);
         return;
     }

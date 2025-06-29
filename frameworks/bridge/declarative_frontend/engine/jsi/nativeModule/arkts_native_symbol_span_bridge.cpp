@@ -52,7 +52,8 @@ ArkUINativeModuleValue SymbolSpanBridge::SetFontColor(ArkUIRuntimeCallInfo* runt
         Local<JSValueRef> value = panda::ArrayRef::GetValueAt(vm, array, index);
         Color color;
         RefPtr<ResourceObject> resObj;
-        if (ArkTSUtils::ParseJsColorAlpha(vm, value, color, resObj)) {
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        if (ArkTSUtils::ParseJsColorAlpha(vm, value, color, resObj, nodeInfo)) {
             colorArray.emplace_back(color.GetValue());
             colorArr.emplace_back(color);
         } else {

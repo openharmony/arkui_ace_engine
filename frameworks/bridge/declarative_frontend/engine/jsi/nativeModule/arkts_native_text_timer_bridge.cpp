@@ -51,7 +51,8 @@ ArkUINativeModuleValue TextTimerBridge::SetFontColor(ArkUIRuntimeCallInfo* runti
     RefPtr<ResourceObject> colorResObj;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, paramArg, color, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, paramArg, color, colorResObj, nodeInfo)) {
         nodeModifiers->getTextTimerModifier()->resetFontColor(nativeNode);
     } else {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
