@@ -206,9 +206,9 @@ void TrackBackgroundColorImpl(Ark_NativePointer node,
 void StrokeWidthImpl(Ark_NativePointer node,
                      const Opt_Length* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto width = value ? Converter::OptConvert<Dimension>(*value) : std::nullopt;
+    auto width = value ? Converter::OptConvertFromArkLength(value->value, DimensionUnit::VP) : std::nullopt;
     Validator::ValidateNonNegative(width);
     Validator::ValidateNonPercent(width);
     DataPanelModelStatic::SetStrokeWidth(frameNode, width);
