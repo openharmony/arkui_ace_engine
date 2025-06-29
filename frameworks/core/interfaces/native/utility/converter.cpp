@@ -1907,6 +1907,36 @@ std::optional<Dimension> OptConvertFromArkResource(const Ark_Resource& src, Dime
     return dimension;
 }
 
+std::optional<Dimension> OptConvertFromArkLengthResource(const Ark_Resource& src, DimensionUnit defaultUnit)
+{
+    ResourceConverter converter(src);
+    std::optional<Dimension> dimension;
+    ResourceType type = static_cast<ResourceType>(OptConvert<int>(src.type).value_or(0));
+    if (type == ResourceType::STRING || type == ResourceType::FLOAT) {
+        auto temp = src;
+        temp.type = ArkValue<Opt_Number>(static_cast<Ark_Int32>(ResourceType::STRING));
+        ResourceConverter converter(temp);
+        std::optional<std::string> optStr = converter.ToString();
+        if (optStr.has_value() && !optStr.value().empty()) {
+            dimension = ConvertFromString(optStr.value(), defaultUnit);
+        } else {
+            ResourceConverter converter2(src);
+            std::optional<std::string> optStr2 = converter2.ToString();
+            if (optStr2.has_value()) {
+                dimension = ConvertFromString(optStr2.value(), defaultUnit);
+            }
+        }
+    } else if (type == ResourceType::INTEGER) {
+        std::optional<int32_t> intValue = converter.ToInt();
+        if (intValue.has_value()) {
+            dimension = Dimension(intValue.value(), defaultUnit);
+        }
+    } else {
+        LOGE("Unexpected converter type: %{public}d\n", type);
+    }
+    return dimension;
+}
+
 std::optional<Dimension> OptConvertFromArkNumStrRes(const Ark_Union_Number_String_Resource& src,
     DimensionUnit defaultUnit)
 {
@@ -1928,6 +1958,23 @@ std::optional<Dimension> OptConvertFromArkNumStrRes(const Ark_Union_Number_Strin
         LOGE("Unexpected converter type: %{public}d\n", selector);
     }
     return dimension;
+}
+
+std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)
+{
+    std::optional<Dimension> dimension;
+    if (src.type == Ark_Tag::INTEROP_TAG_RESOURCE || src.type == Ark_RuntimeType::INTEROP_RUNTIME_OBJECT) {
+        auto resource = ArkValue<Ark_Resource>(src);
+        dimension = OptConvertFromArkLengthResource(resource, defaultUnit);
+        return dimension.value_or(Dimension());
+    } else {
+        auto unit = static_cast<OHOS::Ace::DimensionUnit>(src.unit);
+        auto value = src.value;
+        if (unit == OHOS::Ace::DimensionUnit::PERCENT) {
+            value /= 100.0f;
+        }
+        return Dimension(value, unit);
+    }
 }
 
 template<>
