@@ -100,6 +100,13 @@ class ObserveV2 {
   private computedPropIdsChanged_: Set<number> = new Set();
   private monitorIdsChanged_: Set<number> = new Set();
   private persistenceChanged_: Set<number> = new Set();
+
+  // ViewV2s Grouped by instance id (container id)
+  private viewV2NeedUpdateMap_: Map<number, Map<ViewV2 | ViewPU, Array<number>>> = new Map();
+
+  // To avoid multiple schedules on the same container
+  private scheduledContainerIds_: Set<number> = new Set();
+
   // avoid recursive execution of updateDirty
   // by state changes => fireChange while
   // UINode rerender or @monitor function execution
@@ -115,6 +122,9 @@ class ObserveV2 {
 
   // use for mark current reuse id, ObserveV2.NO_REUSE(-1) mean no reuse on-going
   protected currentReuseId_: number = ObserveV2.NO_REUSE;
+
+  // flag to disable nested component optimization if V1 and V2 components are involved in the nested cases.
+  public isParentChildOptimizable_ : boolean = true;
 
   private static obsInstance_: ObserveV2;
 
@@ -175,7 +185,7 @@ class ObserveV2 {
     // element id can be registered from id2cmp in aboutToBeDeletedInternal and unregisterElmtIdsFromIViews
     // PersistenceV2Impl instance is Singleton
     if (cmp instanceof ViewBuildNodeBase || cmp instanceof PersistenceV2Impl) {
-      this.id2cmp_[id] = new WeakRef<ViewBuildNodeBase|PersistenceV2Impl>(cmp);
+      this.id2cmp_[id] = new WeakRef<ViewBuildNodeBase | PersistenceV2Impl>(cmp);
       return;
     } 
     const weakRef = WeakRefPool.get(cmp);
@@ -550,10 +560,184 @@ class ObserveV2 {
     }
   }
 
+  /**
+   * Group elementIds by their containerId (instanceId).
+   * Make sure view.getInstanceId() is called only once for each view., not for all elmtIds!!!
+   */
+  private groupElementIdsByContainer(): void {
+    stateMgmtConsole.debug('ObserveV2.groupElementIdsByContainer');
+
+    // Create sorted array and clear set
+    const elmtIds = Array.from(this.elmtIdsChanged_, Number).sort((a, b) => a - b);
+    this.elmtIdsChanged_.clear();
+
+    // Cache for view -> instanceId
+    const viewInstanceIdCache = new Map<ViewV2 | ViewPU, number>();
+
+    for (const elmtId of elmtIds) {
+        const view = this.id2cmp_[elmtId]?.deref();
+
+        // Early continue for invalid views
+        if (!(view instanceof ViewV2 || view instanceof ViewPU)) {
+            continue;
+        }
+
+        // Get or cache instanceId
+        let instanceId = viewInstanceIdCache.get(view);
+        if (instanceId === undefined) {
+            instanceId = view.getInstanceId();
+            viewInstanceIdCache.set(view, instanceId);
+        }
+
+        // Get or create viewMap
+        let viewMap = this.viewV2NeedUpdateMap_.get(instanceId);
+        if (!viewMap) {
+          viewMap = new Map<ViewV2 | ViewPU, Array<number>>();
+          this.viewV2NeedUpdateMap_.set(instanceId, viewMap);
+        }
+
+        // Get or create view's element array
+        let elements = viewMap.get(view);
+        if (!elements) {
+            elements = [];
+            viewMap.set(view, elements);
+        }
+
+        elements.push(elmtId);
+        stateMgmtConsole.debug(`groupElementIdsByContainer: elmtId=${elmtId}, view=${view.constructor.name}, instanceId=${instanceId}`);
+    }
+}
   public updateDirty(): void {
     this.startDirty_ = true;
-    this.updateDirty2(false);
+    this.isParentChildOptimizable_ ? this.updateDirty2Optimized(): this.updateDirty2(false);
     this.startDirty_ = false;
+  }
+
+  /**
+     * Optimized version of updateDirty2
+     * execute /update in this order
+     * - @Computed variables
+     * - @Monitor functions
+     * Request a frame update and schedule a callback to trigger on the next VSync update
+    */
+  public updateDirty2Optimized(): void {
+    stateMgmtConsole.debug(`ObservedV2.updateDirty2Optimized() start`);
+    // Calling these functions to retain the original behavior
+    // Obtain and unregister the removed elmtIds
+    UINodeRegisterProxy.obtainDeletedElmtIds();
+    UINodeRegisterProxy.unregisterElmtIdsFromIViews();
+
+    this.updateComputedAndMonitors();
+
+    if (this.elmtIdsChanged_.size === 0) {
+      stateMgmtConsole.debug(`Vsync request is unnecessary when no elements have changed - returning from updateDirty2Optimized`);
+      return;
+    }
+
+    // Group elementIds before scheduling update
+    this.groupElementIdsByContainer();
+
+    // At this point, we have the viewV2NeedUpdateMap_ populated with the ViewV2/elementIds that need update
+    // For each containerId (instance/container) in the map, schedule an update.
+    for (const containerId of this.viewV2NeedUpdateMap_.keys()) {
+      if (!this.scheduledContainerIds_.has(containerId)) {
+        stateMgmtConsole.debug(`  scheduling update for containerId: ${containerId}`);
+        this.scheduledContainerIds_.add(containerId);
+        ViewStackProcessor.scheduleUpdateOnNextVSync(this.onVSyncUpdate.bind(this), containerId);
+      }
+    }
+    stateMgmtConsole.debug(`ObservedV2.updateDirty2Optimized() end`);
+  }
+  // Callback from C++ on VSync
+  public onVSyncUpdate(containerId: number): boolean {
+    stateMgmtConsole.debug(`ObservedV2.flushDirtyViewsOnVSync containerId=${containerId} start`);
+    aceDebugTrace.begin(`ObservedV2.onVSyncUpdate`);
+    let maxFlushTimes = 3; // Refer PipelineContext::FlushDirtyNodeUpdate()
+    // Obtain and unregister the removed elmtIds
+    UINodeRegisterProxy.obtainDeletedElmtIds();
+    UINodeRegisterProxy.unregisterElmtIdsFromIViews();
+
+    // Process updates in priority order: computed properties, monitors, UI nodes
+    do {
+      this.updateComputedAndMonitors();
+      const viewV2Map = this.viewV2NeedUpdateMap_.get(containerId);
+
+      // Clear the ViewV2 map for the current containerId
+      this.viewV2NeedUpdateMap_.delete(containerId);
+
+      if (viewV2Map?.size) {
+        // Update elements, generating new elmtIds in elmtIdsChanged_ for nested updates
+        viewV2Map.forEach((elmtIds, view) => {
+          this.updateUINodesSynchronously(elmtIds, view);
+        });
+
+        if (this.elmtIdsChanged_.size) {
+          this.groupElementIdsByContainer();
+        }
+      } else {
+        stateMgmtConsole.error(`No views to update for containerId=${containerId}`);
+        break; // Exit loop early since no updates are possible
+      }
+    } while (this.hasPendingUpdates(containerId) && --maxFlushTimes > 0);
+
+    // Check if more updates are needed
+    const viewV2Map = this.viewV2NeedUpdateMap_.get(containerId);
+
+    if (!viewV2Map || viewV2Map.size === 0) {
+      if (viewV2Map?.size === 0) {
+        this.viewV2NeedUpdateMap_.delete(containerId);
+      }
+
+      ViewStackProcessor.scheduleUpdateOnNextVSync(null, containerId);
+
+      // After all processing, remove from scheduled set
+      this.scheduledContainerIds_.delete(containerId);
+      return false;
+    }
+    aceDebugTrace.end();
+    stateMgmtConsole.debug(`ObservedV2.onVSyncUpdate there are still views to be updated for containerId=${containerId}`);
+    return true;
+  }
+
+  public hasPendingUpdates(containerId: number): boolean {
+    const viewV2Map = this.viewV2NeedUpdateMap_.get(containerId);
+    let ret = ((viewV2Map && viewV2Map.size > 0) || this.monitorIdsChanged_.size > 0 || this.computedPropIdsChanged_.size > 0);
+    stateMgmtConsole.debug(`hasPendingUpdates() containerId: ${containerId}, viewV2Map size: ${viewV2Map?.size}, ret: ${ret}`);
+    return ret;
+  }
+
+  /**
+   * execute /update in this order
+   * - @Computed variables
+   * - @Monitor functions
+   * - UINode re-render
+   * three nested loops, means:
+   * process @Computed until no more @Computed need update
+   * process @Monitor until no more @Computed and @Monitor
+  */
+  private updateComputedAndMonitors(): void {
+    do {
+      while (this.computedPropIdsChanged_.size) {
+        //  sort the ids and update in ascending order
+        // If a @Computed property depends on other @Computed properties, their
+        // ids will be smaller as they are defined first.
+        const computedProps = Array.from(this.computedPropIdsChanged_).sort((id1, id2) => id1 - id2);
+        this.computedPropIdsChanged_ = new Set<number>();
+        this.updateDirtyComputedProps(computedProps);
+      }
+
+      if (this.persistenceChanged_.size) {
+        const persistKeys: Array<number> = Array.from(this.persistenceChanged_);
+        this.persistenceChanged_ = new Set<number>();
+        PersistenceV2Impl.instance().onChangeObserved(persistKeys);
+      }
+
+      if (this.monitorIdsChanged_.size) {
+        const monitors = this.monitorIdsChanged_;
+        this.monitorIdsChanged_ = new Set<number>();
+        this.updateDirtyMonitors(monitors);
+      }
+    } while (this.monitorIdsChanged_.size + this.persistenceChanged_.size + this.computedPropIdsChanged_.size > 0);
   }
 
   /**
@@ -583,28 +767,7 @@ class ObserveV2 {
     // 3- update UINodes until no more monitors, no more computed props, and no more UINodes
     // FIXME prevent infinite loops
     do {
-      do {
-        while (this.computedPropIdsChanged_.size) {
-          //  sort the ids and update in ascending order
-          // If a @Computed property depends on other @Computed properties, their
-          // ids will be smaller as they are defined first.
-          const computedProps = Array.from(this.computedPropIdsChanged_).sort((id1, id2) => id1 - id2);
-          this.computedPropIdsChanged_ = new Set<number>();
-          this.updateDirtyComputedProps(computedProps);
-        }
-
-        if (this.persistenceChanged_.size) {
-          const persistKeys: Array<number> = Array.from(this.persistenceChanged_);
-          this.persistenceChanged_ = new Set<number>();
-          PersistenceV2Impl.instance().onChangeObserved(persistKeys);
-        }
-
-        if (this.monitorIdsChanged_.size) {
-          const monitors = this.monitorIdsChanged_;
-          this.monitorIdsChanged_ = new Set<number>();
-          this.updateDirtyMonitors(monitors);
-        }
-      } while (this.monitorIdsChanged_.size + this.persistenceChanged_.size + this.computedPropIdsChanged_.size > 0);
+      this.updateComputedAndMonitors();
 
       if (this.elmtIdsChanged_.size) {
         const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);
@@ -613,8 +776,8 @@ class ObserveV2 {
       }
     } while (this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
 
-    stateMgmtConsole.debug(`ObservedV2.updateDirty2 updateUISynchronously=${updateUISynchronously} - DONE `);
     aceDebugTrace.end();
+    stateMgmtConsole.debug(`ObservedV2.updateDirty2 updateUISynchronously=${updateUISynchronously} - DONE `);
   }
 
   public updateDirtyComputedProps(computed: Array<number>): void {
@@ -691,12 +854,12 @@ class ObserveV2 {
    * @param elmtIds
    *
    */
-  private updateUINodesSynchronously(elmtIds: Array<number>): void {
+  private updateUINodesSynchronously(elmtIds: Array<number>, inView?: ViewPU | ViewV2): void {
     stateMgmtConsole.debug(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtIds: ${JSON.stringify(elmtIds)} ...`);
     aceDebugTrace.begin(`ObserveV2.updateUINodesSynchronously: ${elmtIds.length} elmtId`);
-    
+
     elmtIds.forEach((elmtId) => {
-      const view = this.id2cmp_[elmtId]?.deref();
+      let view = inView ?? this.id2cmp_[elmtId]?.deref();
       if ((view instanceof ViewV2) || (view instanceof ViewPU)) {
         if (view.isViewActive()) {
           // FIXME need to call syncInstanceId before update?

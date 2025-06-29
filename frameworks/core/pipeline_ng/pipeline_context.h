@@ -416,6 +416,9 @@ public:
     void FlushDirtyNodeUpdate();
     void FlushSafeAreaPaddingProcess();
 
+    void FlushTSUpdates();
+    void SetFlushTSUpdates(std::function<bool(int32_t)>&& flushTSUpdates) override;
+
     void SetRootRect(double width, double height, double offset) override;
 
     void SetWindowSceneConsumed(bool isConsumed);
@@ -1521,6 +1524,7 @@ private:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)> sizeChangeByRotateCallback_;
     std::function<void(const std::string&)> linkJumpCallback_ = nullptr;
     std::function<void()> dragWindowVisibleCallback_;
+    std::function<bool(int32_t)> flushTSUpdatesCb_;
 
     std::optional<bool> needSoftKeyboard_;
     std::optional<bool> windowFocus_;

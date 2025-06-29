@@ -516,6 +516,8 @@ void PipelineContext::FlushDirtyNodeUpdate()
         --maxFlushTimes;
     }
 
+    FlushTSUpdates();
+
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushBuild();
     }
@@ -525,6 +527,28 @@ void PipelineContext::FlushDirtyNodeUpdate()
         PerfMonitor::GetPerfMonitor()->SetSubHealthInfo("SUBHEALTH", "FlushDirtyNodeUpdate", duration);
     }
 #endif
+}
+
+// Executes the callback function for typescript update, if set
+void PipelineContext::FlushTSUpdates()
+{
+    if (flushTSUpdatesCb_) {
+        // Pass the current container id in the callback.
+        bool result = flushTSUpdatesCb_(GetInstanceId());
+        if (result) {
+            // There is more to update
+            RequestFrame();
+        }
+    }
+}
+
+// Sets the callback for VSync updates and initiates a frame request
+void PipelineContext::SetFlushTSUpdates(std::function<bool(int32_t)>&& flushTSUpdates)
+{
+    flushTSUpdatesCb_ = std::move(flushTSUpdates);
+    if (flushTSUpdatesCb_) {
+        RequestFrame();
+    }
 }
 
 uint32_t PipelineContext::AddScheduleTask(const RefPtr<ScheduleTask>& task)
