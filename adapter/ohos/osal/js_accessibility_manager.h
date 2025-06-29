@@ -121,6 +121,7 @@ enum class DumpMode {
     EMBED_HOVER_TEST,
     SET_CHECKLIST_TEST,
     GET_CHECKLIST_TEST,
+    SPECIFIC_SEARCH_TEST,
 };
 
 struct DumpInfoArgument {
@@ -274,6 +275,8 @@ public:
         int64_t uiExtensionOffset) override;
     void SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode, const int32_t windowId);
+    void SearchElementInfoBySpecificProperty(const int64_t elementId, const SpecificPropertyParam &param,
+        const int32_t requestId, AccessibilityElementOperatorCallback &callback, const int32_t windowId);
     void SearchElementInfosByText(const int64_t elementId, const std::string& text, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId);
     void SearchDefaultFocusByWindowId(const int32_t windowId, int32_t pageId, const int32_t requestId,
@@ -293,6 +296,15 @@ public:
     void SearchElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
         std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
         const int64_t uiExtensionOffset = 0) override;
+    void FindUIExtensionAccessibilityElement(RefPtr<NG::FrameNode> checkNode, const std::string &customId,
+        std::list<AccessibilityElementInfo> &treeInfos, std::list<AccessibilityElementInfo> &infos,
+        const RefPtr<PipelineBase>& context);
+    bool SetAccessibilityCustomId(RefPtr<NG::FrameNode> checkNode, const std::string &customId,
+        CommonProperty &commonProperty, std::list<AccessibilityElementInfo> &infos,
+        const RefPtr<PipelineBase>& context);
+    void SearchElementInfoByCustomIdNG(const int64_t elementId, const std::string &customId,
+        std::list<AccessibilityElementInfo> &infos, std::list<AccessibilityElementInfo> &treeInfos,
+        const RefPtr<PipelineBase>& context);
     void SearchDefaultFocusByWindowIdNG(const int32_t pageId,
         std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context);
     void SearchElementInfosByTextNG(int64_t elementId, const std::string& text,
@@ -410,7 +422,9 @@ public:
     WeakPtr<NG::WebPattern> GetWebPatternBySurfaceId(const std::string& surfaceId) override;
     void SetWebPatternBySurfaceId(const std::string& surfaceId, WeakPtr<NG::WebPattern> pattern) override;
     void RemoveWebPatternBySurfaceId(const std::string& surfaceId) override;
-
+    void SearchAccessibilityNodeBySpecificProperty(const int64_t elementId,
+        const SpecificPropertyParam &param, const int32_t requestId,
+        AccessibilityElementOperatorCallback &callback, const int32_t windowId);
     void UpdateAccessibilityNodeRect(const RefPtr<NG::FrameNode>& frameNode) override;
     void OnAccessbibilityDetachFromMainTree(const RefPtr<NG::FrameNode>& frameNode) override;
 
@@ -453,6 +467,9 @@ private:
         // Accessibility override.
         RetError SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode) override;
+        void HandleSearchElementInfoCallback(AccessibilityElementOperatorCallback& callback, int32_t requestId);
+        void SearchElementInfoBySpecificProperty(const int64_t elementId, const SpecificPropertyParam &param,
+            const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
         void SearchElementInfosByText(const int64_t elementId, const std::string& text, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback) override;
         void SearchDefaultFocusByWindowId(const int32_t windowId, const int32_t requestId,
@@ -494,6 +511,8 @@ private:
         // Accessibility override.
         RetError SearchElementInfoByAccessibilityId(const int64_t elementId, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode) override;
+        void SearchElementInfoBySpecificProperty(const int64_t elementId, const SpecificPropertyParam &param,
+            const int32_t requestId, AccessibilityElementOperatorCallback &callback) override;
         void SearchElementInfosByText(const int64_t elementId, const std::string& text, const int32_t requestId,
             Accessibility::AccessibilityElementOperatorCallback& callback) override;
         void SearchDefaultFocusByWindowId(const int32_t windowId, const int32_t requestId,
@@ -601,6 +620,10 @@ private:
     void SetSearchElementInfoByAccessibilityIdResult(Accessibility::AccessibilityElementOperatorCallback& callback,
         std::list<Accessibility::AccessibilityElementInfo>&& infos, const int32_t requestId, bool checkEmbed = false);
 
+    void SetSearchElementInfoByCustomIdResult(Accessibility::AccessibilityElementOperatorCallback& callback,
+        std::list<AccessibilityElementInfo> &infos, const std::list<AccessibilityElementInfo> &treeInfos,
+        const int32_t requestId);
+
     void SetSearchElementInfoByTextResult(Accessibility::AccessibilityElementOperatorCallback& callback,
         std::list<Accessibility::AccessibilityElementInfo>&& infos, const int32_t requestId);
 
@@ -663,6 +686,7 @@ private:
     void DumpEmbedHoverTestNG(const std::vector<std::string>& params, uint32_t windowId);
     void DumpSetCheckListTest(const std::vector<std::string>& params);
     void DumpGetCheckListTest(const std::vector<std::string>& params);
+    void DumpSpecificPropertySearchTest(const std::vector<std::string>& params, uint32_t windowId);
 
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
         const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node = nullptr);

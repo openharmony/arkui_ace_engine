@@ -2711,6 +2711,24 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager045, TestSize.Level1)
     EXPECT_EQ(infosSecond.size(), 1);
 }
 
+/**
+ * @tc.name: JsAccessibilityManager046
+ * @tc.desc: test OnDumpInfoNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager046, TestSize.Level1)
+{
+    std::vector<std::string> params;
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    params.push_back("-inspector");
+    params.push_back("--specific-search");
+    params.push_back("1");
+    params.push_back("2");
+    auto ret = jsAccessibilityManager->CheckDumpInfoParams(params);
+    EXPECT_EQ(ret, true);
+    jsAccessibilityManager->OnDumpInfoNG(params, 1, false);
+}
+
 #ifdef WEB_SUPPORTED
 /**
  * @tc.name: GetWebAccessibilityIdBySurfaceId
