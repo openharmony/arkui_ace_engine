@@ -189,33 +189,6 @@ void NodeContainerPattern::OnMountToParentDone()
     SetExportTextureInfoIfNeeded();
 }
 
-void NodeContainerPattern::OnAttachToMainTree()
-{
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    std::list<RefPtr<NG::UINode>> nodes;
-    BuilderUtils::GetFirstBuilderNode(frameNode, nodes);
-    if (nodes.empty()) {
-        return;
-    }
-    if (BuilderUtils::HasParentView(frameNode)) {
-        BuilderUtils::AddBuilderToContainer(frameNode, nodes);
-        return;
-    }
-    auto parent = frameNode->GetParent();
-    while (parent) {
-        if (BuilderUtils::IsBuilderContainer(parent) && BuilderUtils::HasParentView(parent)) {
-            BuilderUtils::AddBuilderToContainer(parent, nodes);
-            return;
-        }
-        if (BuilderUtils::IsBuilderRootNode(parent)) {
-            BuilderUtils::AddBuilderToBuilder(parent, nodes);
-            return;
-        }
-        parent = parent->GetParent();
-    }
-}
-
 RefPtr<NodeContainerEventHub> NodeContainerPattern::GetNodeContainerEventHub()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

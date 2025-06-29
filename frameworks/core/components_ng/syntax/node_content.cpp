@@ -28,7 +28,7 @@ void NodeContent::AttachToNode(UINode* node)
     nodeSlot_ = WeakClaim(node);
     for (const auto& child : children_) {
         node->AddChild(child);
-        BuilderUtils::AddBuilderToParent(slot, child);
+        BuilderUtils::AddBuilderToParent(Claim(node), child);
     }
     node->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     if (node->IsOnMainTree()) {
@@ -93,7 +93,6 @@ void NodeContent::OnAttachToMainTree()
         return;
     }
     onMainTree_ = true;
-    AddBuilderToSlot();
     if (onAttachCallback_) {
         onAttachCallback_();
     }
@@ -107,15 +106,6 @@ void NodeContent::OnDetachFromMainTree()
     onMainTree_ = false;
     if (onDetachCallback_) {
         onDetachCallback_();
-    }
-}
-
-void NodeContent::AddBuilderToSlot()
-{
-    auto slot = nodeSlot_.Upgrade();
-    CHECK_NULL_VOID(slot && !slot->GetChildren().empty());
-    for (const auto& child : slot->GetChildren()) {
-        BuilderUtils::AddBuilderToParent(slot, child);
     }
 }
 
