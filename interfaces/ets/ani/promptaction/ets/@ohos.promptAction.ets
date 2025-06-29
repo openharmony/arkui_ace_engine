@@ -12,106 +12,67 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+import { ResourceColor, Offset, Dimension, EdgeStyles, EdgeColors, EdgeWidths,
+    BorderRadiuses } from 'arkui.component.units'
+import { AsyncCallback, Callback } from '@ohos.base'
+import { BlurStyle, ShadowOptions, ShadowStyle, HoverModeAreaType, Rectangle, TransitionEffect, KeyboardAvoidMode,
+    DismissReason, BackgroundBlurStyleOptions, BackgroundEffectOptions } from 'arkui.component.common'
+import { CustomBuilder } from 'arkui.component.builder'
+import { DialogAlignment } from 'arkui.component.alertDialog'
+import { BorderStyle, Alignment } from 'arkui.component.enums'
+import { Resource } from 'global.resource'
+import { LengthMetrics } from 'arkui.Graphics'
+
+export enum LevelMode {
+    OVERLAY = 0,
+    EMBEDDED = 1,
+}
+
+export enum ImmersiveMode {
+    DEFAULT = 0,
+    EXTEND = 1,
+}
+
+export interface DismissDialogAction {
+    dismiss: (() => void);
+    reason: DismissReason;
+}
+
+class DismissDialogActionInner implements DismissDialogAction {
+    dismissDialogAction:long = 0;
+    constructor(action:long) {
+        if(this.dismissDialogAction == 0){
+            this.dismissDialogAction = action;
+        }
+    }
+
+    // set and get dismiss
+    private native setDismiss(value: () => void) : void;
+    set dismiss(value: () => void) {
+        this.setDismiss(value);
+    }
+    get dismiss(): () => void {
+        return this.dismiss;
+    }
+
+    // set and get reason
+    private native setReason(value: DismissReason) : void;
+    set reason(value: DismissReason) {
+        this.setReason(value);
+    }
+    get reason(): DismissReason {
+        return this.reason;
+    }
+}
+
 export default namespace promptAction {
     loadLibrary("promptAction_ani");
-    export enum ShadowStyle {
-        OUTER_DEFAULT_XS = 0,
-        OUTER_DEFAULT_SM = 1,
-        OUTER_DEFAULT_MD = 2,
-        OUTER_DEFAULT_LG = 3,
-        OUTER_FLOATING_SM = 4,
-        OUTER_FLOATING_MD = 5
-    }
-
-    export enum Color {
-        WHITE = 0,
-        BLACK = 1,
-        BLUE = 2,
-        BROWN = 3,
-        GRAY = 4,
-        GREEN = 5,
-        GREY = 6,
-        ORANGE = 7,
-        PINK = 8,
-        RED = 9,
-        YELLOW = 10,
-        TRANSPARENT = 11
-    }
-
-    export enum BlurStyle {
-        Thin = 0,
-        Regular = 1,
-        Thick = 2,
-        BACKGROUND_THIN = 3,
-        BACKGROUND_REGULAR = 4,
-        BACKGROUND_THICK = 5,
-        BACKGROUND_ULTRA_THICK = 6,
-        NONE = 7,
-        COMPONENT_ULTRA_THIN = 8,
-        COMPONENT_THIN = 9,
-        COMPONENT_REGULAR = 10,
-        COMPONENT_THICK = 11,
-        COMPONENT_ULTRA_THICK = 12,
-    }
-
-    export enum Alignment {
-        TOP_START = "TopStart",
-        TOP = "Top",
-        TOP_END = "TopEnd",
-        START = "Start",
-        CENTER = "Center",
-        END = "End",
-        BOTTOM_START = "BottomStart",
-        BOTTOM = "Bottom",
-        BOTTOM_END = "BottomEnd",
-    }
 
     export enum ToastShowMode {
         DEFAULT = 0,
         TOP_MOST = 1,
         SYSTEM_TOP_MOST = 2
-    }
-
-    export enum ShadowType {
-        COLOR = 0,
-        BLUR = 1,
-    }
-
-    export enum ColoringStrategy {
-        INVERT = "invert",
-        AVERAGE = "average",
-        PRIMARY = "primary",
-    }
-
-    export enum HoverModeAreaType {
-        TOP_SCREEN = 0,
-        BOTTOM_SCREEN = 1,
-    }
-
-    export interface Resource {
-
-        id: number;
-        bundleName: string;
-        moduleName: string;
-        params?: Array<String>;
-        type?: number;
-    };
-
-    export type ResourceColor = Color | number | string | Resource;
-    export type Length = number | string | Resource;
-
-    export interface Offset {
-        dx: Length;
-        dy: Length;
-    }
-
-    export interface ShadowOptions {
-        radius: number | Resource;
-        type?: ShadowType;
-        color?: Color | string | Resource| ColoringStrategy;
-        offsetX?: number | Resource;
-        offsetY?: number | Resource;
-        fill?: boolean;
     }
 
     export default interface ShowToastOptions
@@ -129,5 +90,138 @@ export default namespace promptAction {
         enableHoverMode?: boolean;
         hoverModeArea?: HoverModeAreaType;
     }
-    export native function showToast(options: ShowToastOptions):void;
+
+    export interface Button {
+        text: string | Resource;
+        color: string | Resource;
+        primary?: boolean;
+    }
+
+    export interface ShowDialogOptions {
+        title?: string | Resource;
+        message?: string | Resource;
+        buttons?: Array<Button>
+        maskRect?: Rectangle;
+        alignment?: DialogAlignment;
+        offset?: Offset;
+        showInSubWindow?: boolean;
+        isModal?: boolean;
+        backgroundColor?: ResourceColor;
+        backgroundBlurStyle?: BlurStyle;
+        backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
+        backgroundEffect?: BackgroundEffectOptions;
+        shadow?: ShadowOptions | ShadowStyle;
+        enableHoverMode?: boolean;
+        hoverModeArea?: HoverModeAreaType;
+        onDidAppear?: (() => void);
+        onDidDisappear?: (() => void);
+        onWillAppear?: (() => void);
+        onWillDisappear?: (() => void);
+        levelMode?: LevelMode;
+        levelUniqueId?: number;
+        immersiveMode?: ImmersiveMode;
+    }
+
+    export interface ShowDialogSuccessResponse {
+        index: number;
+    }
+
+    class ShowDialogSuccessResponseInner implements ShowDialogSuccessResponse {
+        index: number = 0;
+    }
+
+    export type PromptActionSingleButton = [Button];
+    export type PromptActionDoubleButtons = [Button, Button | undefined];
+    export type PromptActionTripleButtons = [Button, Button | undefined, Button | undefined];
+    export type PromptActionQuadrupleButtons = [Button, Button | undefined, Button | undefined, Button | undefined];
+    export type PromptActionQuintupleButtons = [
+        Button, Button | undefined, Button | undefined, Button | undefined, Button | undefined];
+    export type PromptActionSextupleButtons = [
+        Button, Button | undefined, Button | undefined, Button | undefined, Button | undefined, Button | undefined];
+
+    export interface ActionMenuOptions {
+        title?: string | Resource;
+        buttons: PromptActionSingleButton | PromptActionDoubleButtons | PromptActionTripleButtons |
+            PromptActionQuadrupleButtons | PromptActionQuintupleButtons | PromptActionSextupleButtons;
+        showInSubwindow?: boolean;
+        isModal?: boolean;
+        levelMode?: LevelMode;
+        levelUniqueId?: number;
+        immersiveMode?: ImmersiveMode;
+    }
+
+    export interface ActionMenuSuccessResponse {
+        index: number;
+    }
+
+    class ActionMenuSuccessResponseInner implements ActionMenuSuccessResponse {
+        index: number = 0;
+    }
+
+    export interface BaseDialogOptions {
+        maskRect?: Rectangle;
+        alignment?: DialogAlignment;
+        offset?: Offset;
+        showInSubWindow?: boolean;
+        isModal?: boolean;
+        autoCancel?: boolean;
+        transition?: TransitionEffect;
+        dialogTransition?: TransitionEffect;
+        maskTransition?: TransitionEffect;
+        maskColor?: ResourceColor;
+        onWillDismiss?: Callback<DismissDialogAction>;
+        onDidAppear?: (() => void);
+        onDidDisappear?: (() => void);
+        onWillAppear?: (() => void);
+        onWillDisappear?: (() => void);
+        keyboardAvoidMode?: KeyboardAvoidMode;
+        enableHoverMode?: boolean;
+        hoverModeArea?: HoverModeAreaType;
+        backgroundBlurStyleOptions?: BackgroundBlurStyleOptions;
+        backgroundEffect?: BackgroundEffectOptions;
+        keyboardAvoidDistance?: LengthMetrics;
+        levelMode?: LevelMode;
+        levelUniqueId?: number;
+        immersiveMode?: ImmersiveMode;
+        focusable?: boolean;
+    }
+
+    export interface CustomDialogOptions extends BaseDialogOptions {
+        builder: CustomBuilder;
+        backgroundColor?: ResourceColor;
+        cornerRadius?: Dimension | BorderRadiuses;
+        width?: Dimension;
+        height?: Dimension;
+        borderWidth?: Dimension | EdgeWidths;
+        borderColor?: ResourceColor | EdgeColors;
+        borderStyle?: BorderStyle | EdgeStyles;
+        backgroundBlurStyle?: BlurStyle;
+        shadow?: ShadowOptions | ShadowStyle;
+    }
+
+    export native function showToast(options: ShowToastOptions): void;
+
+    export native function openToast(options: ShowToastOptions): Promise<number>;
+
+    export native function closeToast(toastId: number): void;
+
+    export native function showDialog1(options: ShowDialogOptions,
+        callback?: AsyncCallback<ShowDialogSuccessResponse>): void;
+
+    export native function showDialog(options: ShowDialogOptions): Promise<ShowDialogSuccessResponse>;
+
+    export native function showActionMenu1(options: ActionMenuOptions,
+        callback?: AsyncCallback<ActionMenuSuccessResponse>): void;
+
+    export native function showActionMenu(options: ActionMenuOptions): Promise<ActionMenuSuccessResponse>;
+
+    export native function openCustomDialog1(contentNode: long, options?: BaseDialogOptions): Promise<void>;
+
+    export native function openCustomDialog(options: CustomDialogOptions): Promise<number>;
+
+    export native function updateCustomDialog(contentNode: long, options: BaseDialogOptions): Promise<void>;
+
+    export native function closeCustomDialog1(contentNode: long): Promise<void>;
+
+    export native function closeCustomDialog(dialogId: number): void;
 }

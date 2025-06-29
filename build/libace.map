@@ -228,6 +228,7 @@
       OHOS::Ace::Framework::ManifestParser::*;
       OHOS::Ace::NG::PipelineContext::*;
       OHOS::Ace::NG::OverlayManager::*;
+      OHOS::Ace::NG::DialogManagerStatic::*;
       OHOS::Ace::PipelineBase::PostAsyncEvent*;
       "OHOS::Ace::PipelineBase::GetFrontend() const";
       OHOS::Ace::NG::UINode::*;

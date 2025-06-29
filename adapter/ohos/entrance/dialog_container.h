@@ -64,6 +64,11 @@ public:
     static void ShowToastStatic(int32_t instanceId, const NG::ToastInfo& toastInfo,
         std::function<void(int32_t)>&& callback);
     static void CloseToastStatic(int32_t instanceId, const int32_t toastId, std::function<void(int32_t)>&& callback);
+    static void ShowDialogStatic(int32_t instanceId, const DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback);
+    static void ShowActionMenuStatic(int32_t instanceId, const DialogProperties& dialogProps,
+        std::function<void(int32_t, int32_t)>&& callback);
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DialogContainer);
 };

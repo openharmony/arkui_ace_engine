@@ -632,6 +632,80 @@ export class PromptActionImpl extends PromptAction {
         promptAction.closeToast(toastId);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
+
+    showDialog1(options: promptAction.ShowDialogOptions,
+        callback?: AsyncCallback<promptAction.ShowDialogSuccessResponse>): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        promptAction.showDialog1(options, callback);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    showDialog(options: promptAction.ShowDialogOptions): Promise<promptAction.ShowDialogSuccessResponse> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const retval = promptAction.showDialog(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return retval;
+    }
+
+    showActionMenu1(options: promptAction.ActionMenuOptions,
+        callback?: AsyncCallback<promptAction.ActionMenuSuccessResponse>): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        promptAction.showActionMenu1(options, callback);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    showActionMenu(options: promptAction.ActionMenuOptions): Promise<promptAction.ActionMenuSuccessResponse> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const retval = promptAction.showActionMenu(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return retval;
+    }
+
+    openCustomDialog1(content: ComponentContent, options?: promptAction.BaseDialogOptions): Promise<void> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let ptr: KPointer = 0
+        if (content.getNodePtr() !== undefined) {
+            ptr = content.getNodePtr() as (KPointer)
+        }
+        const retval = promptAction.openCustomDialog1(ptr, options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return retval;
+    }
+
+    openCustomDialog(options: promptAction.CustomDialogOptions): Promise<number> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const retval = promptAction.openCustomDialog(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return retval;
+    }
+
+    updateCustomDialog(content: ComponentContent, options: promptAction.BaseDialogOptions): Promise<void> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let ptr: KPointer = 0
+        if (content.getNodePtr() !== undefined) {
+            ptr = content.getNodePtr() as (KPointer)
+        }
+        const retval = promptAction.updateCustomDialog(ptr, options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return retval;
+    }
+
+    closeCustomDialog1(content: ComponentContent): Promise<void> {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let ptr: KPointer = 0
+        if (content.getNodePtr() !== undefined) {
+            ptr = content.getNodePtr() as (KPointer)
+        }
+        const retval = promptAction.closeCustomDialog1(ptr);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return retval;
+    }
+
+    closeCustomDialog(dialogId: number): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        promptAction.closeCustomDialog(dialogId);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
 }
 
 export class CursorControllerImpl extends CursorController {

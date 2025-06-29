@@ -72,6 +72,7 @@ template("ace_base_source_set") {
       "perfmonitor/perf_monitor.cpp",
       "ressched/ressched_report.cpp",
       "subwindow/subwindow_manager.cpp",
+      "subwindow/subwindow_manager_static.cpp",
       "thread/background_task_executor.cpp",
       "thread/task_dependency_manager.cpp",
       "utils/base_id.cpp",
