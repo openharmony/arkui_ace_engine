@@ -47,26 +47,32 @@ enum class ResourceType : uint32_t {
     RAWFILE = 30000,
     NONE = 40000
 };
+
+struct NodeInfo {
+    std::string nodeTag;
+    ColorMode localColorMode;
+};
 class ArkTSUtils {
 public:
     static uint32_t ColorAlphaAdapt(uint32_t origin);
     static bool ParseJsColorContent(const EcmaVM* vm, const Local<JSValueRef>& value);
     static bool ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
-        RefPtr<ResourceObject>& resourceObject);
+        RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& color,
-        std::vector<RefPtr<ResourceObject>>& resObjs);
+        std::vector<RefPtr<ResourceObject>>& resObjs, const NodeInfo& nodeInfo);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
         bool fromTheme = false);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
-        RefPtr<ResourceObject>& resourceObject, bool fromTheme = false);
+        RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo, bool fromTheme = false);
     static bool ParseJsColorAlpha(
         const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor);
     static bool ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value,
-        Color& result, const Color& defaultColor, RefPtr<ResourceObject>& resourceObject);
+        Color& result, const Color& defaultColor, RefPtr<ResourceObject>& resourceObject,
+        const NodeInfo& nodeInfo);
     static bool ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result);
     static bool ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
-        RefPtr<ResourceObject>& resourceObject);
+        RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo);
     static void CompleteResourceObject(const EcmaVM* vm, Local<panda::ObjectRef>& jsObj);
     static bool ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
         bool fromTheme = false);
@@ -183,7 +189,8 @@ public:
     static void ParseGradientCenter(
         const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& values);
     static void ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef>& value,
-        std::vector<ArkUIInt32orFloat32>& colors, std::vector<RefPtr<ResourceObject>>& vectorResObj);
+        std::vector<ArkUIInt32orFloat32>& colors, std::vector<RefPtr<ResourceObject>>& vectorResObj,
+        const NodeInfo& nodeInfo);
     static void ParseGradientColorStops(
         const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& colors);
     static void ParseGradientAngle(
@@ -359,10 +366,12 @@ public:
         return panda::JSValueRef::Undefined(vm);
     }
     static Local<panda::ArrayRef> ChoosePointToJSValue(const EcmaVM* vm, std::vector<int> input);
+    static NodeInfo MakeNativeNodeInfo(ArkUINodeHandle node);
 
 private:
+    static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);
     static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
-        const Color& color, bool state);
+        Color& color, bool state, const NodeInfo& nodeInfo);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

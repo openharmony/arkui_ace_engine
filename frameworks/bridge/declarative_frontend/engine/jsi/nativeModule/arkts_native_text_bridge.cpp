@@ -165,7 +165,8 @@ ArkUINativeModuleValue TextBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeCal
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getTextModifier()->resetFontColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTextModifier()->setFontColor(
@@ -334,7 +335,8 @@ ArkUINativeModuleValue TextBridge::SetDecoration(ArkUIRuntimeCallInfo* runtimeCa
         textDecoration = secondArg->Int32Value(vm);
     }
     RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color, resourceObject)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color, resourceObject, nodeInfo)) {
         color = DEFAULT_DECORATION_COLOR;
     }
     if (fourthArg->IsInt()) {
@@ -1266,7 +1268,8 @@ ArkUINativeModuleValue TextBridge::SetCaretColor(ArkUIRuntimeCallInfo *runtimeCa
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         GetArkUINodeModifiers()->getTextModifier()->resetTextCaretColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTextModifier()->setTextCaretColor(
@@ -1296,7 +1299,8 @@ ArkUINativeModuleValue TextBridge::SetSelectedBackgroundColor(ArkUIRuntimeCallIn
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         GetArkUINodeModifiers()->getTextModifier()->resetTextSelectedBackgroundColor(nativeNode);
     } else {
         if (color.GetAlpha() == DEFAULT_ALPHA) {
@@ -1366,7 +1370,7 @@ ArkUINativeModuleValue TextBridge::SetDataDetectorConfig(ArkUIRuntimeCallInfo* r
     }
     RefPtr<ResourceObject> colorResObj;
     RefPtr<ResourceObject> decColorResObj;
-    ParseAIEntityColorAndPreview(runtimeCallInfo, arkUITextDetectConfig, colorResObj, decColorResObj);
+    ParseAIEntityColorAndPreview(runtimeCallInfo, arkUITextDetectConfig, colorResObj, decColorResObj, nativeNode);
     GetArkUINodeModifiers()->getTextModifier()->setTextDataDetectorConfigWithEvent(nativeNode,
         &arkUITextDetectConfig, AceType::RawPtr(colorResObj), AceType::RawPtr(decColorResObj));
     return panda::JSValueRef::Undefined(vm);
@@ -1374,13 +1378,15 @@ ArkUINativeModuleValue TextBridge::SetDataDetectorConfig(ArkUIRuntimeCallInfo* r
 
 void TextBridge::ParseAIEntityColorAndPreview(
     ArkUIRuntimeCallInfo* runtimeCallInfo, struct ArkUITextDetectConfigStruct& arkUITextDetectConfig,
-    RefPtr<ResourceObject>& colorResObj, RefPtr<ResourceObject>& decColorResObj)
+    RefPtr<ResourceObject>& colorResObj, RefPtr<ResourceObject>& decColorResObj,
+    ArkUINodeHandle nativeNode)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
     TextDetectConfig textDetectConfig;
     Local<JSValueRef> entityColorArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    ArkTSUtils::ParseJsColorAlpha(vm, entityColorArg, textDetectConfig.entityColor, colorResObj);
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    ArkTSUtils::ParseJsColorAlpha(vm, entityColorArg, textDetectConfig.entityColor, colorResObj, nodeInfo);
     arkUITextDetectConfig.entityColor = textDetectConfig.entityColor.GetValue();
 
     Local<JSValueRef> entityDecorationTypeArg = runtimeCallInfo->GetCallArgRef(NUM_4);
@@ -1394,7 +1400,7 @@ void TextBridge::ParseAIEntityColorAndPreview(
         arkUITextDetectConfig.entityDecorationType = entityDecorationTypeArg->Int32Value(vm);
     }
     if (ArkTSUtils::ParseJsColorAlpha(vm, entityDecorationColorArg, textDetectConfig.entityDecorationColor,
-        decColorResObj)) {
+        decColorResObj, nodeInfo)) {
         arkUITextDetectConfig.entityDecorationColor = textDetectConfig.entityDecorationColor.GetValue();
     }
     if (entityDecorationStyleArg->IsInt()) {

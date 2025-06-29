@@ -230,7 +230,8 @@ ArkUINativeModuleValue SliderBridge::SetStepColor(ArkUIRuntimeCallInfo* runtimeC
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getSliderModifier()->resetStepColor(nativeNode);
     } else {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
@@ -259,7 +260,8 @@ ArkUINativeModuleValue SliderBridge::SetBlockBorderColor(ArkUIRuntimeCallInfo* r
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getSliderModifier()->resetBlockBorderColor(nativeNode);
     } else {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
@@ -321,7 +323,8 @@ ArkUINativeModuleValue SliderBridge::SetBlockColor(ArkUIRuntimeCallInfo* runtime
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getSliderModifier()->resetBlockColor(nativeNode);
     } else {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
@@ -350,6 +353,7 @@ ArkUINativeModuleValue SliderBridge::SetTrackBackgroundColor(ArkUIRuntimeCallInf
     Gradient gradient;
     Color color;
     RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (ConvertSliderGradientColor(vm, secondArg, gradient)) {
         ArkUIGradientType gradientObj;
         auto colorLength = gradient.GetColors().size();
@@ -370,7 +374,7 @@ ArkUINativeModuleValue SliderBridge::SetTrackBackgroundColor(ArkUIRuntimeCallInf
         gradientObj.offset = &(*offsetValues.begin());
         GetArkUINodeModifiers()->getSliderModifier()->setLinearTrackBackgroundColor(
             nativeNode, &gradientObj, colorLength);
-    } else if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
+    } else if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
         GetArkUINodeModifiers()->getSliderModifier()->setTrackBackgroundColorPtr(
             nativeNode, color.GetValue(), colorRawPtr);
@@ -400,6 +404,7 @@ ArkUINativeModuleValue SliderBridge::SetSelectColor(ArkUIRuntimeCallInfo* runtim
     Gradient gradient;
     Color color;
     RefPtr<ResourceObject> colorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (ConvertSliderGradientColor(vm, secondArg, gradient)) {
         ArkUIGradientType gradientObj;
         auto colorLength = gradient.GetColors().size();
@@ -420,7 +425,7 @@ ArkUINativeModuleValue SliderBridge::SetSelectColor(ArkUIRuntimeCallInfo* runtim
         gradientObj.color = &(*colorValues.begin());
         gradientObj.offset = &(*offsetValues.begin());
         GetArkUINodeModifiers()->getSliderModifier()->setLinearSelectColor(nativeNode, &gradientObj, colorLength);
-    } else if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj)) {
+    } else if (ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, colorResObj, nodeInfo)) {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
         GetArkUINodeModifiers()->getSliderModifier()->setSelectColorPtr(nativeNode, color.GetValue(), colorRawPtr);
     } else {

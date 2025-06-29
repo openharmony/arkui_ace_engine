@@ -98,8 +98,9 @@ ArkUINativeModuleValue TimepickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> textColorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (colorArg->IsNull() || colorArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, textColorResObj)) {
+        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, textColorResObj, nodeInfo)) {
         color.SetValue(DEFAULT_TIME_PICKER_TEXT_COLOR);
     }
 
@@ -147,8 +148,9 @@ ArkUINativeModuleValue TimepickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> textColorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (colorArg->IsNull() || colorArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, textColorResObj)) {
+        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, textColorResObj, nodeInfo)) {
         color.SetValue(DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR);
     }
 
@@ -196,8 +198,9 @@ ArkUINativeModuleValue TimepickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> textColorResObj;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (colorArg->IsNull() || colorArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, textColorResObj)) {
+        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, textColorResObj, nodeInfo)) {
         color.SetValue(DEFAULT_TIME_PICKER_TEXT_COLOR);
     }
 

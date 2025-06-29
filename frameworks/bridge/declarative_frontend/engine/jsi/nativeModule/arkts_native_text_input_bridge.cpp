@@ -112,7 +112,8 @@ ArkUINativeModuleValue TextInputBridge::SetCaretColor(ArkUIRuntimeCallInfo *runt
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputCaretColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCaretColor(
@@ -199,7 +200,8 @@ ArkUINativeModuleValue TextInputBridge::SetPlaceholderColor(ArkUIRuntimeCallInfo
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputPlaceholderColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputPlaceholderColor(
@@ -597,8 +599,9 @@ ArkUINativeModuleValue TextInputBridge::SetCaretStyle(ArkUIRuntimeCallInfo *runt
     Color color;
     uint32_t caretColor;
     RefPtr<ResourceObject> colorObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (!caretColorArg->IsUndefined()) {
-        if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color, colorObject)) {
+        if (ArkTSUtils::ParseJsColorAlpha(vm, caretColorArg, color, colorObject, nodeInfo)) {
             caretColor = color.GetValue();
         } else {
             caretColor = textFieldTheme->GetCursorColor().GetValue();
@@ -860,7 +863,8 @@ ArkUINativeModuleValue TextInputBridge::SetSelectedBackgroundColor(ArkUIRuntimeC
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputSelectedBackgroundColor(nativeNode);
     } else {
         if (color.GetAlpha() == DEFAULT_ALPHA) {
@@ -1002,7 +1006,8 @@ ArkUINativeModuleValue TextInputBridge::SetFontColor(ArkUIRuntimeCallInfo *runti
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputFontColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputFontColor(
@@ -1141,7 +1146,8 @@ ArkUINativeModuleValue TextInputBridge::SetDecoration(ArkUIRuntimeCallInfo* runt
         textInputDecoration = secondArg->Int32Value(vm);
     }
     RefPtr<ResourceObject> resourceObject;
-    ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color, Color::BLACK, resourceObject);
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    ArkTSUtils::ParseJsColorAlpha(vm, thirdArg, color, Color::BLACK, resourceObject, nodeInfo);
     int32_t textDecorationStyle = static_cast<int32_t>(DEFAULT_DECORATION_STYLE);
     if (fourthArg->IsInt()) {
         textDecorationStyle = fourthArg->Int32Value(vm);
@@ -1300,8 +1306,9 @@ ArkUINativeModuleValue TextInputBridge::SetUnderlineColor(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> disableArg = runtimeCallInfo->GetCallArgRef(5); // 5: disable value
     Color underlineColor;
     RefPtr<ResourceObject> normalObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (!underlineColorArg->IsUndefined() &&
-        ArkTSUtils::ParseJsColorAlpha(vm, underlineColorArg, underlineColor, normalObject)) {
+        ArkTSUtils::ParseJsColorAlpha(vm, underlineColorArg, underlineColor, normalObject, nodeInfo)) {
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputNormalUnderlineColor(
             nativeNode, underlineColor.GetValue(), AceType::RawPtr(normalObject));
     } else if (!normalArg->IsUndefined() || !typingArg->IsUndefined() ||
@@ -1309,21 +1316,21 @@ ArkUINativeModuleValue TextInputBridge::SetUnderlineColor(ArkUIRuntimeCallInfo* 
         UserUnderlineColor userColor = UserUnderlineColor();
         Color typingColor;
         RefPtr<ResourceObject> typingObject;
-        if (ArkTSUtils::ParseJsColorAlpha(vm, typingArg, typingColor, typingObject)) {
+        if (ArkTSUtils::ParseJsColorAlpha(vm, typingArg, typingColor, typingObject, nodeInfo)) {
             userColor.typing = typingColor;
         }
         Color normalColor;
-        if (ArkTSUtils::ParseJsColorAlpha(vm, normalArg, normalColor, normalObject)) {
+        if (ArkTSUtils::ParseJsColorAlpha(vm, normalArg, normalColor, normalObject, nodeInfo)) {
             userColor.normal = normalColor;
         }
         Color errorColor;
         RefPtr<ResourceObject> errorObject;
-        if (ArkTSUtils::ParseJsColorAlpha(vm, errorArg, errorColor, errorObject)) {
+        if (ArkTSUtils::ParseJsColorAlpha(vm, errorArg, errorColor, errorObject, nodeInfo)) {
             userColor.error = errorColor;
         }
         Color disableColor;
         RefPtr<ResourceObject> disableObject;
-        if (ArkTSUtils::ParseJsColorAlpha(vm, disableArg, disableColor, disableObject)) {
+        if (ArkTSUtils::ParseJsColorAlpha(vm, disableArg, disableColor, disableObject, nodeInfo)) {
             userColor.disable = disableColor;
         }
         ArkUI_Uint32 values[ARG_GROUP_LENGTH];
@@ -2380,7 +2387,8 @@ ArkUINativeModuleValue TextInputBridge::SetBackgroundColor(ArkUIRuntimeCallInfo 
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputBackgroundColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputBackgroundColorWithColorSpace(

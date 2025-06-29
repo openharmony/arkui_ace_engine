@@ -124,7 +124,8 @@ ArkUINativeModuleValue TextClockBridge::SetFontColor(ArkUIRuntimeCallInfo* runti
     RefPtr<ResourceObject> fontColorResObj;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, fontColorArg, color, fontColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, fontColorArg, color, fontColorResObj, nodeInfo)) {
         nodeModifiers->getTextClockModifier()->resetFontColor(nativeNode);
     } else {
         auto fontColorRawPtr = AceType::RawPtr(fontColorResObj);
