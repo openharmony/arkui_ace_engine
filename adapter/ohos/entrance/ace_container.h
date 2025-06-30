@@ -953,6 +953,8 @@ private:
 
     void FlushReloadTask(bool needReloadTransition, const ConfigurationChange& configurationChange);
 
+    void UpdateSubContainerDensity(ResourceConfiguration& resConfig);
+
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;
