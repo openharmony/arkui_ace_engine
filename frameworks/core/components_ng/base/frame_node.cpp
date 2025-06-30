@@ -4210,7 +4210,7 @@ void FrameNode::OnAccessibilityEvent(
     }
 }
 
-void SetAccessibilityFocusFalse(
+void clearAccessibilityFocus(
     const RefPtr<AccessibilityProperty>& accessibilityProperty, const RefPtr<RenderContext>& renderContext)
 {
     CHECK_NULL_VOID(accessibilityProperty);
@@ -4237,7 +4237,7 @@ void FrameNode::OnRecycle()
     
     auto accessibilityProperty = GetAccessibilityProperty<NG::AccessibilityProperty>();
     auto renderContext = GetRenderContext();
-    SetAccessibilityFocusFalse(accessibilityProperty, renderContext);
+    clearAccessibilityFocus(accessibilityProperty, renderContext);
 }
 
 void FrameNode::OnReuse()
