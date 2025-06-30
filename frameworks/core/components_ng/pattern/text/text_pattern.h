@@ -957,6 +957,13 @@ protected:
         isDetachFromMainTree_ = true;
     }
 
+    void CreateMultipleClickRecognizer()
+    {
+        if (!multipleClickRecognizer_) {
+            multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+        }
+    }
+
     bool SetActionExecSubComponent();
     void GetSubComponentInfosForAISpans(std::vector<SubComponentInfo>& subComponentInfos);
     void GetSubComponentInfosForSpans(std::vector<SubComponentInfo>& subComponentInfos);
@@ -1035,7 +1042,7 @@ protected:
     std::vector<SubComponentInfoEx> subComponentInfos_;
     virtual std::vector<RectF> GetSelectedRects(int32_t start, int32_t end);
     MouseFormat currentMouseStyle_ = MouseFormat::DEFAULT;
-    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
+    RefPtr<MultipleClickRecognizer> multipleClickRecognizer_;
     bool ShowShadow(const PointF& textOffset, const Color& color);
     virtual PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect);
     bool hasUrlSpan_ = false;

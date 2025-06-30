@@ -461,10 +461,18 @@ float TextFieldPattern::GetTextOrPlaceHolderFontSize()
 
 TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
 {
-    if (PipelineContext::GetCurrentContextSafelyWithCheck() &&
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    if (context &&
         // for normal app add version protection, enable keyboard as default start from API 10 or higher
-        PipelineContext::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
-        needToRequestKeyboardOnFocus_ = !GetIndependentControlKeyboard();
+        context->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
+        auto theme = context->GetTheme<TextFieldTheme>();
+        if (theme) {
+            independentControlKeyboard_ = theme->GetIndependentControlKeyboard();
+            needToRequestKeyboardOnFocus_ = !independentControlKeyboard_;
+        } else {
+            needToRequestKeyboardOnFocus_ = true;
+        }
     }
     contentController_ = MakeRefPtr<ContentController>(WeakClaim(this));
     selectController_ = MakeRefPtr<TextSelectController>(WeakClaim(this));
@@ -491,10 +499,6 @@ bool TextFieldPattern::GetIndependentControlKeyboard()
 
 TextFieldPattern::~TextFieldPattern()
 {
-    if (textEditingController_) {
-        textEditingController_->Clear();
-        textEditingController_->RemoveObserver(WeakClaim(this));
-    }
     CloseSelectOverlay();
     if (isCustomKeyboardAttached_) {
         CloseCustomKeyboard();
