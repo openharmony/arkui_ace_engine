@@ -3146,7 +3146,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnRecycle001, TestSize.Level1)
      * @tc.expected: expect not focused
      */
     frameNode->OnRecycle();
-    EXPECT_FALSE(renderContext->GetAccessibilityFocus());
     EXPECT_FALSE(accessibilityProperty->GetAccessibilityFocusState());
+    EXPECT_FALSE(renderContext->GetAccessibilityFocus().value_or(false));
 }
 } // namespace OHOS::Ace::NG
