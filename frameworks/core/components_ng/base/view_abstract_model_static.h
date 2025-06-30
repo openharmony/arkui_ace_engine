@@ -208,6 +208,15 @@ public:
     static void SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest);
     static void SetOnGestureRecognizerJudgeBegin(
         FrameNode* frameNode, GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool innerGestureFlag = false);
+    static void SetBrightness(FrameNode* frameNode, const std::optional<Dimension>& brightness);
+    static void SetContrast(FrameNode* frameNode, const std::optional<Dimension>& contrast);
+    static void SetLightUpEffect(FrameNode* frameNode, const std::optional<double> radio);
+    static void SetClickEffectLevel(FrameNode* frameNode,
+        const std::optional<ClickEffectLevel>& level, std::optional<float> scaleValue);
+    static void SetOuterBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value);
+    static void SetOuterBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value);
+    static void SetOuterBorderColor(FrameNode* frameNode, const BorderColorProperty& value);
+    static void SetOuterBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value);
 
 private:
     static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);

@@ -28,7 +28,7 @@ import { TransformationMatrix } from "../../component/arkui-common"
 import { UniformDataType } from "../../component/arkui-uniformtypedescriptor"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureType, GestureMask } from "../../component/gesture"
 import { ComponentContent } from "../../component/arkui-custom"
-import { BlendMode } from "../../component/arkui-drawing"
+import { BlendMode } from "../../component/common"
 import { int32} from "@koalaui/common"
 import { PeerNode } from '../../PeerNode';
 
