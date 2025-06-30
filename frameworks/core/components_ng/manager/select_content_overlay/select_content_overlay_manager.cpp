@@ -164,11 +164,6 @@ void SelectContentOverlayManager::NotifyAccessibilityOwner()
     context->AddAfterLayoutTask([weakNode = WeakClaim(RawPtr(owner)), weakManager = WeakClaim(this)]() {
         auto owner = weakNode.Upgrade();
         CHECK_NULL_VOID(owner);
-        auto manager = weakManager.Upgrade();
-        CHECK_NULL_VOID(manager);
-        if (!manager->IsMenuShow()) {
-            return;
-        }
         owner->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
     });
 }
@@ -801,7 +796,7 @@ bool SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
     auto menuNode = menuNode_.Upgrade();
     auto handleNode = handleNode_.Upgrade();
     auto owner = selectOverlayHolder_->GetOwner();
-    if (owner) {
+    if (owner && IsMenuShow()) {
         auto ownerTag = owner->GetTag();
         if (ownerTag != V2::RICH_EDITOR_ETS_TAG ||
             (reason != CloseReason::CLOSE_REASON_SELECT_ALL && reason != CloseReason::CLOSE_REASON_BY_RECREATE)) {
