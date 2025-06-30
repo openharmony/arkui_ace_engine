@@ -14,6 +14,10 @@
  */
 
 #include "gtest/gtest.h"
+
+#define protected public
+#define private public
+
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/memory/referenced.h"
