@@ -5623,9 +5623,6 @@ export class TypeChecker {
         else if ((value) === (FormDimension.DIMENSION_3_3)) {
             return true
         }
-        else if ((value) === (FormDimension.DIMENSION_3_4)) {
-            return true
-        }
         else {
             throw new Error("Can not discriminate value typeof FormDimension")
         }
