@@ -964,9 +964,6 @@ HWTEST_F(WebModelStaticTest, SetNativeEmbedOptions001, TestSize.Level1)
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
 
-    //WebModelStatic::SetNativeEmbedOptions(AccessibilityManager::RawPtr(frameNode), false);
-    //EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckIntrinsicSizeEnabled(false), false);
-
     WebModelStatic::SetNativeEmbedOptions(AccessibilityManager::RawPtr(frameNode), true);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckIntrinsicSizeEnabled(true), true);
 #endif
