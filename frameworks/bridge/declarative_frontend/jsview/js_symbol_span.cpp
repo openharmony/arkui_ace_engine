@@ -174,7 +174,6 @@ void JSSymbolSpan::RegisterSpanResource(const std::string& key, const RefPtr<Res
     auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
     if (spanNode) {
         spanNode->RegisterResource<T>(key, resObj, value);
-        return;
     }
 }
 
@@ -185,7 +184,6 @@ void JSSymbolSpan::UnregisterSpanResource(const std::string& key)
     auto spanNode = AceType::DynamicCast<NG::SpanNode>(uiNode);
     if (spanNode) {
         spanNode->UnregisterResource(key);
-        return;
     }
 }
 } // namespace OHOS::Ace::Framework

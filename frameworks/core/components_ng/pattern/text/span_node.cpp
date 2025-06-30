@@ -368,8 +368,8 @@ void SpanItem::SpanDumpInfoAdvance()
             auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById                 \
                 <SpanNode>(nodeId);                                                             \
             CHECK_NULL_VOID(spanNode);                                                          \
-            if (auto castedVal = DynamicCast<PropertyValue<VALUE_TYPE>>(value)) {               \
-                spanNode->UPDATE_METHOD(castedVal->value);                                      \
+            if (auto realValue = std::get_if<VALUE_TYPE>(&(value->GetValue()))) {                             \
+                spanNode->UPDATE_METHOD(*realValue);                                             \
                                                                                                 \
             }                                                                                   \
         }                                                                                       \
@@ -396,7 +396,6 @@ void ContainerSpanNode::RegisterResource(const std::string& key, const RefPtr<Re
         spanNode->UpdateSpanResource<T>(key, resObj);
     };
     AddResObj(key, resObj, std::move(updateFunc));
-    UpdateProperty<T>(key, value);
 }
 
 template void ContainerSpanNode::RegisterResource<Color>(
@@ -414,17 +413,35 @@ template void ContainerSpanNode::RegisterResource<FontWeight>(
 template<typename T>
 void ContainerSpanNode::UpdateSpanResource(const std::string& key, const RefPtr<ResourceObject>& resObj)
 {
-    T Val = ParseResToObject<T>(resObj);
-    UpdateProperty<T>(key, Val);
+    UpdateProperty<T>(key, resObj);
     MarkTextDirty();
 }
 
 using Handler = std::function<void(int32_t, RefPtr<PropertyValueBase>)>;
 
 template<typename T>
-void ContainerSpanNode::UpdateProperty(std::string key, T value)
+void ContainerSpanNode::UpdateProperty(std::string key, const RefPtr<ResourceObject>& resObj)
 {
-    UpdatePropertyImpl(key, AceType::MakeRefPtr<PropertyValue<T>>(value));
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    if constexpr (std::is_same_v<T, std::string>) {
+        value->SetValueType(ValueType::STRING);
+    } else if (std::is_same_v<T, std::u16string>) {
+        value->SetValueType(ValueType::U16STRING);
+    } else if constexpr(std::is_same_v<T, Color>) {
+        value->SetValueType(ValueType::COLOR);
+    } else if constexpr(std::is_same_v<T, double>) {
+        value->SetValueType(ValueType::DOUBLE);
+    } else if constexpr(std::is_same_v<T, CalcDimension>) {
+        value->SetValueType(ValueType::CALDIMENSION);
+    } else if constexpr(std::is_same_v<T, float>) {
+        value->SetValueType(ValueType::FLOAT);
+    } else if constexpr(std::is_same_v<T, std::vector<std::string>>) {
+        value->SetValueType(ValueType::VECTOR_STRING);
+    } else if constexpr(std::is_same_v<T, FontWeight>) {
+        value->SetValueType(ValueType::FONT_WEIGHT);
+    }
+    ParseResToObject(resObj, value);
+    UpdatePropertyImpl(key, value);
 }
 
 void ContainerSpanNode::UpdatePropertyImpl(
@@ -442,7 +459,6 @@ void SpanNode::RegisterResource(const std::string& key, const RefPtr<ResourceObj
         spanNode->UpdateSpanResource<T>(key, resObj);
     };
     AddResObj(key, resObj, std::move(updateFunc));
-    UpdateProperty<T>(key, value);
 }
 
 template void SpanNode::RegisterResource<CalcDimension>(
@@ -459,8 +475,7 @@ template void SpanNode::RegisterResource<FontWeight>(
 template<typename T>
 void SpanNode::UpdateSpanResource(const std::string& key, const RefPtr<ResourceObject>& resObj)
 {
-    T Val = ParseResToObject<T>(resObj);
-    UpdateProperty<T>(key, Val);
+    UpdateProperty<T>(key, resObj);
     auto spanItem = GetSpanItem();
     auto pattern = spanItem->GetTextPattern().Upgrade();
     CHECK_NULL_VOID(pattern);
@@ -472,29 +487,38 @@ void SpanNode::UpdateSpanResource(const std::string& key, const RefPtr<ResourceO
     }
 }
 
-template<typename T>
-T BaseSpan::ParseResToObject(const RefPtr<ResourceObject>& resObj)
+void BaseSpan::ParseResToObject(const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> valueBase)
 {
-    T value {};
-    CHECK_NULL_RETURN(resObj, value);
-    if constexpr (std::is_same_v<T, std::string>) {
+    if (valueBase->GetValueType() == ValueType::STRING) {
+        std::string value;
         ResourceParseUtils::ParseResString(resObj, value);
-    } else if constexpr(std::is_same_v<T, std::u16string>) {
+        valueBase->SetValue(value);
+    } else if (valueBase->GetValueType() == ValueType::U16STRING) {
+        std::u16string value;
         ResourceParseUtils::ParseResString(resObj, value);
-    } else if constexpr(std::is_same_v<T, FontWeight>) {
+        valueBase->SetValue(value);
+    } else if (valueBase->GetValueType() == ValueType::FONT_WEIGHT) {
         std::string fontWeightStr;
         ResourceParseUtils::ParseResString(resObj, fontWeightStr);
-        value = Framework::ConvertStrToFontWeight(fontWeightStr);
-    } else if constexpr(std::is_same_v<T, Color>) {
+        auto value = Framework::ConvertStrToFontWeight(fontWeightStr);
+        valueBase->SetValue(value);
+    } else if (valueBase->GetValueType() == ValueType::COLOR) {
+        Color value;
         ResourceParseUtils::ParseResColor(resObj, value);
-    } else if constexpr(std::is_same_v<T, double>) {
+        valueBase->SetValue(value);
+    } else if (valueBase->GetValueType() == ValueType::DOUBLE) {
+        double value;
         ResourceParseUtils::ParseResDouble(resObj, value);
-    } else if constexpr(std::is_same_v<T, std::vector<std::string>>) {
-        ResourceParseUtils::ParseResFontFamilies(resObj, value);
-    } else if constexpr(std::is_same_v<T, CalcDimension>) {
+        valueBase->SetValue(value);
+    } else if (valueBase->GetValueType() == ValueType::CALDIMENSION) {
+        CalcDimension value;
         ResourceParseUtils::ParseResDimensionNG(resObj, value, DimensionUnit::FP, false);
+        valueBase->SetValue(value);
+    } else if (valueBase->GetValueType() == ValueType::VECTOR_STRING) {
+        std::vector<std::string> value;
+        ResourceParseUtils::ParseResFontFamilies(resObj, value);
+        valueBase->SetValue(value);
     }
-    return value;
 }
 
 void SpanNode::UnregisterResource(const std::string& key)
@@ -537,15 +561,35 @@ void SpanNode::RegisterSymbolFontColorResource(const std::string& key,
 }
 
 template<typename T>
-void SpanNode::UpdateProperty(std::string key, T value)
+void SpanNode::UpdateProperty(std::string key, const RefPtr<ResourceObject>& resObj)
 {
-    UpdatePropertyImpl(key, AceType::MakeRefPtr<PropertyValue<T>>(value));
+    auto value = AceType::MakeRefPtr<PropertyValueBase>();
+    if constexpr (std::is_same_v<T, std::string>) {
+        value->SetValueType(ValueType::STRING);
+    } else if (std::is_same_v<T, std::u16string>) {
+        value->SetValueType(ValueType::U16STRING);
+    } else if constexpr(std::is_same_v<T, Color>) {
+        value->SetValueType(ValueType::COLOR);
+    } else if constexpr(std::is_same_v<T, double>) {
+        value->SetValueType(ValueType::DOUBLE);
+    } else if constexpr(std::is_same_v<T, CalcDimension>) {
+        value->SetValueType(ValueType::CALDIMENSION);
+    } else if constexpr(std::is_same_v<T, float>) {
+        value->SetValueType(ValueType::FLOAT);
+    } else if constexpr(std::is_same_v<T, std::vector<std::string>>) {
+        value->SetValueType(ValueType::VECTOR_STRING);
+    } else if constexpr(std::is_same_v<T, FontWeight>) {
+        value->SetValueType(ValueType::FONT_WEIGHT);
+    }
+    ParseResToObject(resObj, value);
+    UpdatePropertyImpl(key, value);
 }
 
 void SpanNode::UpdatePropertyImpl(
     const std::string& key, RefPtr<PropertyValueBase> value)
 {
-    static const std::unordered_map<std::string, Handler> span_handlers = {
+    CHECK_NULL_VOID(value);
+    const std::unordered_map<std::string, Handler> span_handlers = {
         DEFINE_SPAN_PROP_HANDLER(fontSize, CalcDimension, UpdateFontSize),
         DEFINE_SPAN_PROP_HANDLER(fontColor, Color, UpdateTextColor),
         DEFINE_SPAN_PROP_HANDLER(fontWeight, FontWeight, UpdateFontWeight),

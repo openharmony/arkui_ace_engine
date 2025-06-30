@@ -547,8 +547,7 @@ public:
         return resourceMgr_;
     }
 
-    template<typename T>
-    T ParseResToObject(const RefPtr<ResourceObject>& resObj);
+    void ParseResToObject(const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> value);
 
     virtual void UnregisterResource(const std::string& key)
     {
@@ -661,7 +660,7 @@ public:
     template<typename T>
     void UpdateSpanResource(const std::string& key, const RefPtr<ResourceObject>& resObj);
     template<typename T>
-    void UpdateProperty(std::string key, T value);
+    void UpdateProperty(std::string key, const RefPtr<ResourceObject>& resObj);
     void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value);
 
     void UpdateContent(const uint32_t& unicode)
@@ -1165,7 +1164,7 @@ public:
     template<typename T>
     void UpdateSpanResource(const std::string& key, const RefPtr<ResourceObject>& resObj);
     template<typename T>
-    void UpdateProperty(std::string key, T value);
+    void UpdateProperty(std::string key, const RefPtr<ResourceObject>& resObj);
     void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value);
 
 private:

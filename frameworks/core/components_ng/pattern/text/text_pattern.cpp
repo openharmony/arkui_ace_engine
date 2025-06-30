@@ -6479,14 +6479,15 @@ void TextPattern::HandleFormVisibleChange(bool visible)
     }
 }
 
-#define DEFINE_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                   \
-    {                                                                              \
-        #KEY_TYPE, [](TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) { \
-            if (auto castedVal = DynamicCast<PropertyValue<VALUE_TYPE>>(value)) {  \
-                prop->UPDATE_METHOD(castedVal->value);                             \
-            }                                                                      \
-        }                                                                          \
-    }
+#define DEFINE_PROP_HANDLER(KEY_TYPE, VALUE_TYPE, UPDATE_METHOD)                        \
+    {                                                                                   \
+        #KEY_TYPE, [](TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {      \
+            if (auto realValue = std::get_if<VALUE_TYPE>(&(value->GetValue()))) {       \
+                prop->UPDATE_METHOD(*realValue);                                        \
+            }                                                                           \
+                                                                                        \
+        }                                                                               \
+    }                                                                                   \
  
 void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value)
 {
@@ -6494,8 +6495,9 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
     CHECK_NULL_VOID(frameNode);
     auto property = frameNode->GetLayoutPropertyPtr<TextLayoutProperty>();
     CHECK_NULL_VOID(property);
+    CHECK_NULL_VOID(value);
     using Handler = std::function<void(TextLayoutProperty*, RefPtr<PropertyValueBase>)>;
-    static const std::unordered_map<std::string, Handler> handlers = {
+    const std::unordered_map<std::string, Handler> handlers = {
         DEFINE_PROP_HANDLER(FontSize, CalcDimension, UpdateFontSize),
         DEFINE_PROP_HANDLER(TextIndent, CalcDimension, UpdateTextIndent),
         DEFINE_PROP_HANDLER(MinFontScale, float, UpdateMinFontScale),
@@ -6512,11 +6514,11 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
 
         {"SelectedBackgroundColor", [wp = WeakClaim(RawPtr(frameNode))](
             TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
-                    if (intVal->value.GetAlpha() == 255) {
-                        intVal->value = intVal->value.ChangeOpacity(0.2);
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                        if (realValue->GetAlpha() == 255) {
+                        *realValue = realValue->ChangeOpacity(0.2);
                     }
-                    prop->UpdateSelectedBackgroundColor(intVal->value);
+                    prop->UpdateSelectedBackgroundColor(*realValue);
                 }
             }
         },
@@ -6524,16 +6526,16 @@ void TextPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValu
         { "TextColor",
             [node = WeakClaim(RawPtr((frameNode))), weak = WeakClaim(this)](
                 TextLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
-                if (auto intVal = DynamicCast<PropertyValue<Color>>(value)) {
-                    prop->UpdateTextColorByRender(intVal->value);
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    prop->UpdateTextColorByRender(*realValue);
                     auto frameNode = node.Upgrade();
                     CHECK_NULL_VOID(frameNode);
                     auto pattern = weak.Upgrade();
                     CHECK_NULL_VOID(pattern);
-                    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, intVal->value, frameNode);
+                    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, *realValue, frameNode);
                     ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
                     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
-                    pattern->UpdateFontColor(intVal->value);
+                    pattern->UpdateFontColor(*realValue);
                 }
             }
         },
