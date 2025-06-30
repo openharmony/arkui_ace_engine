@@ -144,6 +144,12 @@ struct ArkUIAniVideoModifier {
 struct ArkUIAniShapeModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelMap);
 };
+struct ArkUIAniXComponentModifier {
+    void (*setXComponentControllerCallback)(ArkUINodeHandle node,
+        std::function<void(const std::string&)>&& onSurfaceCreated,
+        std::function<void(const std::string&, float, float, float, float)>&& onSurfaceChanged,
+        std::function<void(const std::string&)>&& onSurfaceDestroyed);
+};
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -160,6 +166,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniImageSpanModifier* (*getImageSpanAniModifier)();
     const ArkUIAniVideoModifier* (*getArkUIAniVideoModifier)();
     const ArkUIAniShapeModifier* (*getArkUIAniShapeModifier)();
+    const ArkUIAniXComponentModifier* (*getArkUIAniXComponentModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);
