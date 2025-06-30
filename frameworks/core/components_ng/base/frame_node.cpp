@@ -4214,10 +4214,10 @@ void SetAccessibilityFocusFalse(
     const RefPtr<AccessibilityProperty>& accessibilityProperty, const RefPtr<RenderContext>& renderContext)
 {
     CHECK_NULL_VOID(accessibilityProperty);
-    auto isFocus = accessibilityProperty->GetAccessibilityFocusState();
-    if (isFocus) {
+    CHECK_NULL_VOID(renderContext);
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() &&
+        accessibilityProperty->GetAccessibilityFocusState()) {
         accessibilityProperty->SetAccessibilityFocusState(false);
-        CHECK_NULL_VOID(renderContext);
         if (renderContext->GetAccessibilityFocus().value_or(false)) {
             renderContext->UpdateAccessibilityFocus(false);
         }
@@ -4234,11 +4234,10 @@ void FrameNode::OnRecycle()
     layoutProperty_->ResetGeometryTransition();
     pattern_->OnRecycle();
     UINode::OnRecycle();
-    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
-        auto accessibilityProperty = GetAccessibilityProperty<NG::AccessibilityProperty>();
-        auto renderContext = GetRenderContext();
-        SetAccessibilityFocusFalse(accessibilityProperty, renderContext);
-    }
+    
+    auto accessibilityProperty = GetAccessibilityProperty<NG::AccessibilityProperty>();
+    auto renderContext = GetRenderContext();
+    SetAccessibilityFocusFalse(accessibilityProperty, renderContext);
 }
 
 void FrameNode::OnReuse()
