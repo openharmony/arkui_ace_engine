@@ -7624,11 +7624,11 @@ void SwiperPattern::ReportComponentChangeEvent(
 void SwiperPattern::NotifyDataChange(int32_t index, int32_t count)
 {
     ACE_SCOPED_TRACE("Swiper NotifyDataChange index %d count %d", index, count);
-    if (!oldChildrenSize_.has_value() || count == 0) {
+    if (!oldChildrenSize_.has_value() || count == 0 || !GetMaintainVisibleContentPosition()) {
         return;
     }
     auto curretIndex = GetLoopIndex(currentIndex_, oldChildrenSize_.value());
-    if (GetMaintainVisibleContentPosition() && index < curretIndex) {
+    if (index < curretIndex || (index == curretIndex && count > 0)) {
         jumpIndex_ = jumpIndex_.value_or(CheckIndexRange(curretIndex + count));
     }
 }
