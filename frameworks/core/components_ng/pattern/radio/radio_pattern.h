@@ -219,6 +219,7 @@ private:
     void UpdateSelectStatus(bool isSelected);
     void FireBuilder();
     bool OnKeyEvent(const KeyEvent& event);
+    void UpdateGroupStatus(FrameNode* frameNode);
 
     void ImageNodeCreate();
     void startEnterAnimation();

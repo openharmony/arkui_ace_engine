@@ -363,6 +363,8 @@ private:
         return skipGestureEvents_;
     }
 
+    void RemoveCallbackOnDetach(FrameNode* frameNode);
+
     Axis direction_ = Axis::HORIZONTAL;
     enum SliderChangeMode { Begin = 0, Moving = 1, End = 2, Click = 3 };
     float value_ = 0.0f;

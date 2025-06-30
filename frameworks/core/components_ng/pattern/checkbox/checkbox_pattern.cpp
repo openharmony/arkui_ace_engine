@@ -501,9 +501,8 @@ void CheckBoxPattern::UpdateUIStatus(bool check)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+void CheckBoxPattern::UpdateGroupStatus(FrameNode* frameNode)
 {
-    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
     CHECK_NULL_VOID(frameNode);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
@@ -515,6 +514,13 @@ void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(groupNode);
     auto checkboxList = groupManager->GetCheckboxList(group);
     UpdateCheckBoxGroupStatus(groupNode, checkboxList);
+}
+
+
+void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
+    UpdateGroupStatus(frameNode);
 }
 
 void CheckBoxPattern::OnDetachFromMainTree()

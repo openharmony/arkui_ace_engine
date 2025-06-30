@@ -26,17 +26,6 @@ void CheckBoxPattern::OnDetachFromMainTreeMultiThread()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto frameNode = host.GetRawPtr();
-    CHECK_NULL_VOID(frameNode);
-    auto groupManager = GetGroupManager();
-    CHECK_NULL_VOID(groupManager);
-    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto group = eventHub->GetGroupName() + currentNavId_.value_or(groupManager->GetLastNavId());
-    groupManager->RemoveCheckBoxFromGroup(group, frameNode->GetId());
-    auto groupNode = groupManager->GetCheckboxGroup(group);
-    CHECK_NULL_VOID(groupNode);
-    auto checkboxList = groupManager->GetCheckboxList(group);
-    UpdateCheckBoxGroupStatus(groupNode, checkboxList);
+    UpdateGroupStatus(host.GetRawPtr());
 }
 } // namespace OHOS::Ace::NG

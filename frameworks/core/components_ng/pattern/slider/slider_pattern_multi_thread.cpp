@@ -20,13 +20,6 @@
 namespace OHOS::Ace::NG {
 void SliderPattern::UpdateValueMultiThread(float value)
 {
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider update value %{public}d %{public}f", panMoveFlag_, value_);
-    if (!panMoveFlag_) {
-        auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
-        CHECK_NULL_VOID(sliderPaintProperty);
-        sliderPaintProperty->UpdateValue(value);
-    }
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto updateTask = [this]() {
@@ -54,18 +47,6 @@ void SliderPattern::OnDetachFromMainTreeMultiThread()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto frameNode = host.GetRawPtr();
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
-    pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
-    pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
-    hasVisibleChangeRegistered_ = false;
-
-    auto accessibilityManager = pipeline->GetAccessibilityManager();
-    CHECK_NULL_VOID(accessibilityManager);
-    accessibilityManager->DeregisterAccessibilitySAObserverCallback(frameNode->GetAccessibilityId());
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "Slider OnDetachFromMainTree OK");
+    RemoveCallbackOnDetach(host.GetRawPtr());
 }
 } // namespace OHOS::Ace::NG

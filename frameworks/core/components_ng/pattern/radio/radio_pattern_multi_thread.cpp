@@ -26,12 +26,6 @@ void RadioPattern::OnDetachFromMainTreeMultiThread()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto frameNode = host.GetRawPtr();
-    CHECK_NULL_VOID(frameNode);
-    auto groupManager = GetGroupManager();
-    CHECK_NULL_VOID(groupManager);
-    auto radioEventHub = frameNode->GetEventHub<NG::RadioEventHub>();
-    CHECK_NULL_VOID(radioEventHub);
-    groupManager->RemoveRadioFromGroup(radioEventHub->GetGroup(), frameNode->GetId());
+    UpdateGroupStatus(host.GetRawPtr());
 }
 } // namespace OHOS::Ace::NG

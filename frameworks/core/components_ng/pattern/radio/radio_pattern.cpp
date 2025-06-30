@@ -49,15 +49,20 @@ void RadioPattern::OnAttachToFrameNode()
     host->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
 }
 
-void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+void RadioPattern::UpdateGroupStatus(FrameNode* frameNode)
 {
-    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
     CHECK_NULL_VOID(frameNode);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
     auto radioEventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     CHECK_NULL_VOID(radioEventHub);
     groupManager->RemoveRadioFromGroup(radioEventHub->GetGroup(), frameNode->GetId());
+}
+
+void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
+    UpdateGroupStatus(frameNode);
 }
 
 void RadioPattern::OnDetachFromMainTree()

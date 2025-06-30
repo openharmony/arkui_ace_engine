@@ -1916,14 +1916,14 @@ void SliderPattern::SetSliderValue(double value, int32_t mode)
 
 void SliderPattern::UpdateValue(float value)
 {
-    auto host = GetHost();
-    FREE_NODE_CHECK(host, UpdateValue, value);
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider update value %{public}d %{public}f", panMoveFlag_, value_);
     if (!panMoveFlag_) {
         auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
         CHECK_NULL_VOID(sliderPaintProperty);
         sliderPaintProperty->UpdateValue(value);
     }
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, UpdateValue, value);
     CalcSliderValue();
     FireBuilder();
 }
@@ -2118,9 +2118,9 @@ RefPtr<FrameNode> SliderPattern::BuildContentModifierNode()
     return (makeFunc_.value())(sliderConfiguration);
 }
 
-void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+void SliderPattern::RemoveCallbackOnDetach(FrameNode* frameNode)
 {
-    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
+    CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
@@ -2131,7 +2131,13 @@ void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->DeregisterAccessibilitySAObserverCallback(frameNode->GetAccessibilityId());
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "Slider OnDetachFromFrameNode OK");
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "Slider RemoveCallbackOnDetach OK");
+}
+
+void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
+    RemoveCallbackOnDetach(frameNode);
 }
 
 void SliderPattern::OnDetachFromMainTree()

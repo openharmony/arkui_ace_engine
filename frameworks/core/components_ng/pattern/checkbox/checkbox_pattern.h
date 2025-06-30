@@ -193,6 +193,7 @@ private:
     void StartExitAnimation();
     void UpdateState();
     void UpdateUnSelect();
+    void UpdateGroupStatus(FrameNode* frameNode);
     void CheckBoxGroupIsTrue();
     void SetPrePageIdToLastPageId();
     // Init key event
