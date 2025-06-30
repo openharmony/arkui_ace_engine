@@ -4560,6 +4560,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _NavExtender_popToName(pathStack: KPointer, name: KStringPtr, animated: KInt): number
     @ani.unsafe.Direct
+    native static _StepperOps_registerStepperIndexCallback(node: KPointer, value: number, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
     native static _EventEmulator_emitClickEvent(node: KPointer, event: KPointer): void
     @ani.unsafe.Quick
     native static _EventEmulator_emitTextInputEvent(node: KPointer, text: KStringPtr): void

@@ -92,6 +92,7 @@ import { PasteButtonCallback, PasteButtonOnClickResult } from "./../pasteButton"
 import { PluginErrorCallback, PluginErrorData } from "./../pluginComponent"
 import { SaveButtonCallback, SaveButtonOnClickResult } from "./../saveButton"
 import { SelectedCallback } from "./../griditemops"
+import { StepperIndexCallback } from "./../stepperops"
 import { TypeChecker } from "#components"
 import { NodeContainer_AboutToResizeCallback } from "./../nodeContainer"
 import { Size, DrawContext } from "../../Graphics"
@@ -2253,6 +2254,12 @@ export function deserializeAndCallSliderTriggerChangeCallback(thisDeserializer: 
     let mode : SliderChangeMode = TypeChecker.SliderChangeMode_FromNumeric(thisDeserializer.readInt32())
     _call(value, mode)
 }
+export function deserializeAndCallStepperIndexCallback(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as StepperIndexCallback)
+    let stepperIndex : number = (thisDeserializer.readNumber() as number)
+    _call(stepperIndex)
+}
 export function deserializeAndCallStyledStringMarshallCallback(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as StyledStringMarshallCallback)
@@ -2783,6 +2790,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case -250780276/*CallbackKind.Kind_ShouldBuiltInRecognizerParallelWithCallback*/: return deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(thisDeserializer);
         case -1716637992/*CallbackKind.Kind_SizeChangeCallback*/: return deserializeAndCallSizeChangeCallback(thisDeserializer);
         case 711649376/*CallbackKind.Kind_SliderTriggerChangeCallback*/: return deserializeAndCallSliderTriggerChangeCallback(thisDeserializer);
+        case 2068688176/*CallbackKind.Kind_StepperIndexCallback*/: return deserializeAndCallStepperIndexCallback(thisDeserializer);
         case 1095217433/*CallbackKind.Kind_StyledStringMarshallCallback*/: return deserializeAndCallStyledStringMarshallCallback(thisDeserializer);
         case 1359717794/*CallbackKind.Kind_StyledStringUnmarshallCallback*/: return deserializeAndCallStyledStringUnmarshallCallback(thisDeserializer);
         case -712186065/*CallbackKind.Kind_SubmitCallback*/: return deserializeAndCallSubmitCallback(thisDeserializer);

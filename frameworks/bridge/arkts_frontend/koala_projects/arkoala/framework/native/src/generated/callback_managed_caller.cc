@@ -6584,6 +6584,26 @@ void callManagedSliderTriggerChangeCallbackSync(Ark_VMContext vmContext, Ark_Int
     argsSerializer.writeInt32(static_cast<Ark_SliderChangeMode>(mode));
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
+void callManagedStepperIndexCallback(Ark_Int32 resourceId, Ark_Number stepperIndex)
+{
+    CallbackBuffer _buffer = {{}, {}};
+    const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    _buffer.resourceHolder.holdCallbackResource(&_callbackResourceSelf);
+    Serializer argsSerializer = Serializer((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_StepperIndexCallback);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeNumber(stepperIndex);
+    enqueueCallback(&_buffer);
+}
+void callManagedStepperIndexCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Number stepperIndex)
+{
+    uint8_t _buffer[4096];
+    Serializer argsSerializer = Serializer((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
+    argsSerializer.writeInt32(Kind_StepperIndexCallback);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeNumber(stepperIndex);
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
+}
 void callManagedStyledStringMarshallCallback(Ark_Int32 resourceId, Ark_UserDataSpan marshallableVal, Callback_Buffer_Void continuation)
 {
     CallbackBuffer _buffer = {{}, {}};
@@ -7524,6 +7544,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_ShouldBuiltInRecognizerParallelWithCallback: return reinterpret_cast<Ark_NativePointer>(callManagedShouldBuiltInRecognizerParallelWithCallback);
         case Kind_SizeChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSizeChangeCallback);
         case Kind_SliderTriggerChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSliderTriggerChangeCallback);
+        case Kind_StepperIndexCallback: return reinterpret_cast<Ark_NativePointer>(callManagedStepperIndexCallback);
         case Kind_StyledStringMarshallCallback: return reinterpret_cast<Ark_NativePointer>(callManagedStyledStringMarshallCallback);
         case Kind_StyledStringUnmarshallCallback: return reinterpret_cast<Ark_NativePointer>(callManagedStyledStringUnmarshallCallback);
         case Kind_SubmitCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSubmitCallback);
@@ -7817,6 +7838,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_ShouldBuiltInRecognizerParallelWithCallback: return reinterpret_cast<Ark_NativePointer>(callManagedShouldBuiltInRecognizerParallelWithCallbackSync);
         case Kind_SizeChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSizeChangeCallbackSync);
         case Kind_SliderTriggerChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSliderTriggerChangeCallbackSync);
+        case Kind_StepperIndexCallback: return reinterpret_cast<Ark_NativePointer>(callManagedStepperIndexCallbackSync);
         case Kind_StyledStringMarshallCallback: return reinterpret_cast<Ark_NativePointer>(callManagedStyledStringMarshallCallbackSync);
         case Kind_StyledStringUnmarshallCallback: return reinterpret_cast<Ark_NativePointer>(callManagedStyledStringUnmarshallCallbackSync);
         case Kind_SubmitCallback: return reinterpret_cast<Ark_NativePointer>(callManagedSubmitCallbackSync);

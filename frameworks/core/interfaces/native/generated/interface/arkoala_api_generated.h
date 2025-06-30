@@ -1595,6 +1595,8 @@ typedef struct SizeChangeCallback SizeChangeCallback;
 typedef struct Opt_SizeChangeCallback Opt_SizeChangeCallback;
 typedef struct SliderTriggerChangeCallback SliderTriggerChangeCallback;
 typedef struct Opt_SliderTriggerChangeCallback Opt_SliderTriggerChangeCallback;
+typedef struct StepperIndexCallback StepperIndexCallback;
+typedef struct Opt_StepperIndexCallback Opt_StepperIndexCallback;
 typedef struct StyledStringMarshallCallback StyledStringMarshallCallback;
 typedef struct Opt_StyledStringMarshallCallback Opt_StyledStringMarshallCallback;
 typedef struct StyledStringUnmarshallCallback StyledStringUnmarshallCallback;
@@ -11408,6 +11410,15 @@ typedef struct Opt_SliderTriggerChangeCallback {
     Ark_Tag tag;
     SliderTriggerChangeCallback value;
 } Opt_SliderTriggerChangeCallback;
+typedef struct StepperIndexCallback {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Number stepperIndex);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number stepperIndex);
+} StepperIndexCallback;
+typedef struct Opt_StepperIndexCallback {
+    Ark_Tag tag;
+    StepperIndexCallback value;
+} Opt_StepperIndexCallback;
 typedef struct StyledStringMarshallCallback {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_UserDataSpan marshallableVal, const Callback_Buffer_Void continuation);
@@ -24191,6 +24202,12 @@ typedef struct GENERATED_ArkUINavExtenderAccessor {
                             Ark_Boolean animated);
 } GENERATED_ArkUINavExtenderAccessor;
 
+typedef struct GENERATED_ArkUIStepperOpsAccessor {
+    Ark_NativePointer (*registerStepperIndexCallback)(Ark_NativePointer node,
+                                                      const Ark_Number* value,
+                                                      const StepperIndexCallback* callback);
+} GENERATED_ArkUIStepperOpsAccessor;
+
 typedef struct GENERATED_ArkUIEventEmulatorAccessor {
     void (*emitClickEvent)(Ark_NativePointer node,
                            Ark_ClickEvent event);
@@ -26919,6 +26936,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIFilterAccessor* (*getFilterAccessor)();
     const GENERATED_ArkUIVisualEffectAccessor* (*getVisualEffectAccessor)();
     const GENERATED_ArkUINavExtenderAccessor* (*getNavExtenderAccessor)();
+    const GENERATED_ArkUIStepperOpsAccessor* (*getStepperOpsAccessor)();
     const GENERATED_ArkUIEventEmulatorAccessor* (*getEventEmulatorAccessor)();
     const GENERATED_ArkUIActionSheetAccessor* (*getActionSheetAccessor)();
     const GENERATED_ArkUIAlertDialogAccessor* (*getAlertDialogAccessor)();

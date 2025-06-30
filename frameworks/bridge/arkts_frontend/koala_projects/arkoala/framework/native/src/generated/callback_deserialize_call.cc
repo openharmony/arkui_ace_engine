@@ -6052,6 +6052,24 @@ void deserializeAndCallSyncSliderTriggerChangeCallback(Ark_VMContext vmContext, 
     Ark_SliderChangeMode mode = static_cast<Ark_SliderChangeMode>(thisDeserializer.readInt32());
     _callSync(vmContext, _resourceId, value, mode);
 }
+void deserializeAndCallStepperIndexCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number stepperIndex)>(thisDeserializer.readPointer());
+    thisDeserializer.readPointer();
+    Ark_Number stepperIndex = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    _call(_resourceId, stepperIndex);
+}
+void deserializeAndCallSyncStepperIndexCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto _callSync = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number stepperIndex)>(thisDeserializer.readPointer());
+    Ark_Number stepperIndex = static_cast<Ark_Number>(thisDeserializer.readNumber());
+    _callSync(vmContext, _resourceId, stepperIndex);
+}
 void deserializeAndCallStyledStringMarshallCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     Deserializer thisDeserializer = Deserializer(thisArray, thisLength);
@@ -7014,6 +7032,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case -250780276/*Kind_ShouldBuiltInRecognizerParallelWithCallback*/: return deserializeAndCallShouldBuiltInRecognizerParallelWithCallback(thisArray, thisLength);
         case -1716637992/*Kind_SizeChangeCallback*/: return deserializeAndCallSizeChangeCallback(thisArray, thisLength);
         case 711649376/*Kind_SliderTriggerChangeCallback*/: return deserializeAndCallSliderTriggerChangeCallback(thisArray, thisLength);
+        case 2068688176/*Kind_StepperIndexCallback*/: return deserializeAndCallStepperIndexCallback(thisArray, thisLength);
         case 1095217433/*Kind_StyledStringMarshallCallback*/: return deserializeAndCallStyledStringMarshallCallback(thisArray, thisLength);
         case 1359717794/*Kind_StyledStringUnmarshallCallback*/: return deserializeAndCallStyledStringUnmarshallCallback(thisArray, thisLength);
         case -712186065/*Kind_SubmitCallback*/: return deserializeAndCallSubmitCallback(thisArray, thisLength);
@@ -7308,6 +7327,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case -250780276/*Kind_ShouldBuiltInRecognizerParallelWithCallback*/: return deserializeAndCallSyncShouldBuiltInRecognizerParallelWithCallback(vmContext, thisArray, thisLength);
         case -1716637992/*Kind_SizeChangeCallback*/: return deserializeAndCallSyncSizeChangeCallback(vmContext, thisArray, thisLength);
         case 711649376/*Kind_SliderTriggerChangeCallback*/: return deserializeAndCallSyncSliderTriggerChangeCallback(vmContext, thisArray, thisLength);
+        case 2068688176/*Kind_StepperIndexCallback*/: return deserializeAndCallSyncStepperIndexCallback(vmContext, thisArray, thisLength);
         case 1095217433/*Kind_StyledStringMarshallCallback*/: return deserializeAndCallSyncStyledStringMarshallCallback(vmContext, thisArray, thisLength);
         case 1359717794/*Kind_StyledStringUnmarshallCallback*/: return deserializeAndCallSyncStyledStringUnmarshallCallback(vmContext, thisArray, thisLength);
         case -712186065/*Kind_SubmitCallback*/: return deserializeAndCallSyncSubmitCallback(vmContext, thisArray, thisLength);

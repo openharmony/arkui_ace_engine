@@ -35054,6 +35054,12 @@ Ark_Number impl_NavExtender_popToName(Ark_NativePointer pathStack, const KString
     return GetAccessors()->getNavExtenderAccessor()->popToName(static_cast<Ark_NavPathStack>(pathStack), (const Ark_String*)(&name), animated);
 }
 KOALA_INTEROP_3(NavExtender_popToName, KInteropNumber, Ark_NativePointer, KStringPtr, Ark_Boolean)
+Ark_NativePointer impl_StepperOps_registerStepperIndexCallback(Ark_NativePointer node, KInteropNumber value, KSerializerBuffer thisArray, int32_t thisLength) {
+        Deserializer thisDeserializer(thisArray, thisLength);
+        StepperIndexCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Number stepperIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_StepperIndexCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Number stepperIndex)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_StepperIndexCallback))))};;
+        return GetAccessors()->getStepperOpsAccessor()->registerStepperIndexCallback(node, (const Ark_Number*) (&value), (const StepperIndexCallback*)&callback_value);
+}
+KOALA_INTEROP_DIRECT_4(StepperOps_registerStepperIndexCallback, Ark_NativePointer, Ark_NativePointer, KInteropNumber, KSerializerBuffer, int32_t)
 void impl_EventEmulator_emitClickEvent(Ark_NativePointer node, Ark_NativePointer event) {
         GetAccessors()->getEventEmulatorAccessor()->emitClickEvent(node, static_cast<Ark_ClickEvent>(event));
 }
