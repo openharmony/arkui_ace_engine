@@ -24617,12 +24617,12 @@ typedef struct GENERATED_ArkUITabsOpsAccessor {
                                                const IndexCallback* callback);
 } GENERATED_ArkUITabsOpsAccessor;
 
-typedef struct GENERATED_ArkUIUIContextImpAccessor {
+typedef struct GENERATED_ArkUIIUIContextAccessor {
     void (*freezeUINode0)(const Ark_String* id,
                           Ark_Boolean isFrozen);
     void (*freezeUINode1)(const Ark_Number* id,
                           Ark_Boolean isFrozen);
-} GENERATED_ArkUIUIContextImpAccessor;
+} GENERATED_ArkUIIUIContextAccessor;
 
 typedef struct GENERATED_ArkUIGridItemOpsAccessor {
     Ark_NativePointer (*registerSelectedCallback)(Ark_NativePointer node,
@@ -27602,7 +27602,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor* (*getGlobalScopeUicontextFontScaleAccessor)();
     const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor* (*getGlobalScopeUicontextTextMenuAccessor)();
     const GENERATED_ArkUITabsOpsAccessor* (*getTabsOpsAccessor)();
-    const GENERATED_ArkUIUIContextImpAccessor* (*getUIContextImpAccessor)();
+    const GENERATED_ArkUIIUIContextAccessor* (*getIUIContextAccessor)();
     const GENERATED_ArkUIGridItemOpsAccessor* (*getGridItemOpsAccessor)();
     const GENERATED_ArkUIFilterAccessor* (*getFilterAccessor)();
     const GENERATED_ArkUIVisualEffectAccessor* (*getVisualEffectAccessor)();

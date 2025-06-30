@@ -262,7 +262,7 @@ const GENERATED_ArkUIRenderNodeAccessor* GetRenderNodeAccessor();
 const GENERATED_ArkUIGlobalScopeUicontextFontScaleAccessor* GetGlobalScopeUicontextFontScaleAccessor();
 const GENERATED_ArkUIGlobalScopeUicontextTextMenuAccessor* GetGlobalScopeUicontextTextMenuAccessor();
 const GENERATED_ArkUITabsOpsAccessor* GetTabsOpsAccessor();
-const GENERATED_ArkUIUIContextImpAccessor* GetUIContextImpAccessor();
+const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor();
 const GENERATED_ArkUIGridItemOpsAccessor* GetGridItemOpsAccessor();
 const GENERATED_ArkUIFilterAccessor* GetFilterAccessor();
 const GENERATED_ArkUIVisualEffectAccessor* GetVisualEffectAccessor();
@@ -620,7 +620,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetGlobalScopeUicontextFontScaleAccessor,
         GetGlobalScopeUicontextTextMenuAccessor,
         GetTabsOpsAccessor,
-        GetUIContextImpAccessor,
+        GetIUIContextAccessor,
         GetGridItemOpsAccessor,
         GetFilterAccessor,
         GetVisualEffectAccessor,

@@ -4568,9 +4568,9 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _GlobalScopeUicontextTextMenu_setMenuOptions(thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
-    native static _UIContextImp_freezeUINode0(id: KStringPtr, isFrozen: KInt): void
+    native static _IUIContext_freezeUINode0(id: KStringPtr, isFrozen: KInt): void
     @ani.unsafe.Direct
-    native static _UIContextImp_freezeUINode1(id: number, isFrozen: KInt): void
+    native static _IUIContext_freezeUINode1(id: number, isFrozen: KInt): void
     @ani.unsafe.Direct
     native static _TabsOps_registerBarMode(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
