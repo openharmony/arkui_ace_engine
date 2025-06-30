@@ -35,6 +35,7 @@ public:
 
     void RunScopeUITaskSync(Task&& task, const std::string& name) override;
     void RunScopeUITask(Task&& task, const std::string& name) override;
+    void RunScopeUIDelayedTask(Task&& task, const std::string& name, uint32_t delayTime) override;
 
     void OnBackPressed() override;
 

@@ -64,6 +64,15 @@ void UIContextImpl::RunScopeUITask(Task&& task, const std::string& name)
     taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
 }
 
+void UIContextImpl::RunScopeUIDelayedTask(Task&& task, const std::string& name, uint32_t delayTime)
+{
+    CHECK_NULL_VOID(context_);
+    const auto& taskExecutor = context_->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    ContainerScope scope(context_->GetInstanceId());
+    taskExecutor->PostDelayedTask(task, TaskExecutor::TaskType::UI, delayTime, name);
+}
+
 void UIContextImpl::OnBackPressed()
 {
     CHECK_NULL_VOID(context_);
