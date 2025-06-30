@@ -739,4 +739,38 @@ HWTEST_F(RichEditorCaretTestNg, OnCaretTwinkling001, TestSize.Level1)
     EXPECT_FALSE(richEditorPattern->caretVisible_);
 }
 
+/**
+ * @tc.name: CalcMoveDownPos001
+ * @tc.desc: test CalcMoveDownPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, CalcMoveDownPos001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->overlayMod_ = nullptr;
+    int32_t result = 1;
+    float leadingMarginOffset = 10.0f;
+    result = richEditorPattern->CalcMoveDownPos(leadingMarginOffset);
+    EXPECT_EQ(result, 0);
+}
+
+/**
+ * @tc.name: CalcMoveDownPos002
+ * @tc.desc: test CalcMoveDownPos
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, CalcMoveDownPos002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ASSERT_NE(richEditorPattern->overlayMod_, nullptr);
+    int32_t result = 1;
+    float leadingMarginOffset = 10.0f;
+    result = richEditorPattern->CalcMoveDownPos(leadingMarginOffset);
+    EXPECT_EQ(result, 0);
+}
+
 }

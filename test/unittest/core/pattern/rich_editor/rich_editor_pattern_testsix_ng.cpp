@@ -306,24 +306,6 @@ HWTEST_F(RichEditorPatternTestSixNg, FromStyledString002, TestSize.Level1)
 }
 
 /**
- * @tc.name: BeforeAddImage001
- * @tc.desc: test BeforeAddImage
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, BeforeAddImage001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RichEditorChangeValue changeValue;
-    ImageSpanOptions options;
-    auto eventHub = richEditorNode_->GetOrCreateEventHub<RichEditorEventHub>();
-    eventHub->SetOnDidChange([](const RichEditorChangeValue& value) -> bool { return false; });
-    auto ret = richEditorPattern->BeforeAddImage(changeValue, options, 100);
-    EXPECT_TRUE(ret);
-}
-
-/**
  * @tc.name: UpdateChildrenOffset003
  * @tc.desc: test UpdateChildrenOffset
  * @tc.type: FUNC
@@ -404,38 +386,6 @@ HWTEST_F(RichEditorPatternTestSixNg, UpdateChildrenOffset005, TestSize.Level1)
 
     richEditorPattern->UpdateChildrenOffset();
     EXPECT_FALSE(childNode2->GetSpanItem());
-}
-
-/**
- * @tc.name: CursorMoveLineEnd001
- * @tc.desc: test CursorMoveLineEnd
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, CursorMoveLineEnd001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->textSelector_.baseOffset = 1;
-    richEditorPattern->textSelector_.destinationOffset = 2;
-    richEditorPattern->CursorMoveLineEnd();
-    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
-}
-
-/**
- * @tc.name: CursorMoveLineEnd002
- * @tc.desc: test CursorMoveLineEnd
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, CursorMoveLineEnd002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 1;
-    richEditorPattern->CursorMoveLineEnd();
-    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 }
 
 /**

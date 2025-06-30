@@ -161,65 +161,6 @@ HWTEST_F(RichEditorEventTestNg, HandleBlurEvent002, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleFocusEvent001
- * @tc.desc: test HandleFocusEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEventTestNg, HandleFocusEvent001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    richEditorPattern->previewLongPress_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->previewLongPress_ = false;
-
-    richEditorPattern->usingMouseRightButton_ = true;
-    richEditorPattern->isLongPress_ = true;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = false;
-    richEditorPattern->isLongPress_ = true;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = true;
-    richEditorPattern->isLongPress_ = false;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = true;
-    richEditorPattern->isLongPress_ = true;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = true;
-    richEditorPattern->isLongPress_ = true;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = false;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = false;
-    richEditorPattern->isLongPress_ = false;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = false;
-    richEditorPattern->isLongPress_ = false;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
-    richEditorPattern->HandleFocusEvent();
-
-    richEditorPattern->usingMouseRightButton_ = false;
-    richEditorPattern->isLongPress_ = false;
-    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = false;
-    richEditorPattern->HandleFocusEvent();
-
-    EXPECT_EQ(richEditorPattern->textSelector_.SelectNothing(), true);
-}
-
-/**
  * @tc.name: HandleUserLongPressEvent001
  * @tc.desc: test HandleUserLongPressEvent
  * @tc.type: FUNC
@@ -352,6 +293,85 @@ HWTEST_F(RichEditorEventTestNg, HandleUserGestureEvent001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetGestureOptions001
+ * @tc.desc: test SetGestureOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, SetGestureOptions001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    OHOS::Ace::UserGestureOptions userGestureOptions;
+    userGestureOptions.onLongPress = [](GestureEvent& info) {};
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+
+    richEditorPattern->SetGestureOptions(userGestureOptions, spanItem);
+
+    EXPECT_NE(userGestureOptions.onLongPress, nullptr);
+}
+
+/**
+ * @tc.name: HandleFocusEvent001
+ * @tc.desc: test HandleFocusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, HandleFocusEvent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->previewLongPress_ = true;
+    richEditorPattern->HandleFocusEvent();
+
+    richEditorPattern->previewLongPress_ = false;
+
+    richEditorPattern->usingMouseRightButton_ = true;
+    richEditorPattern->isLongPress_ = true;
+    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
+    richEditorPattern->HandleFocusEvent();
+
+    richEditorPattern->usingMouseRightButton_ = false;
+    richEditorPattern->isLongPress_ = true;
+    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
+    richEditorPattern->HandleFocusEvent();
+
+    richEditorPattern->usingMouseRightButton_ = true;
+    richEditorPattern->isLongPress_ = false;
+    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
+    richEditorPattern->HandleFocusEvent();
+
+    richEditorPattern->usingMouseRightButton_ = true;
+    richEditorPattern->isLongPress_ = true;
+    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
+    richEditorPattern->HandleFocusEvent();
+
+    richEditorPattern->usingMouseRightButton_ = true;
+    richEditorPattern->isLongPress_ = true;
+    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = false;
+    richEditorPattern->HandleFocusEvent();
+
+    richEditorPattern->usingMouseRightButton_ = false;
+    richEditorPattern->isLongPress_ = false;
+    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
+    richEditorPattern->HandleFocusEvent();
+
+    richEditorPattern->usingMouseRightButton_ = false;
+    richEditorPattern->isLongPress_ = false;
+    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
+    richEditorPattern->HandleFocusEvent();
+
+    richEditorPattern->usingMouseRightButton_ = false;
+    richEditorPattern->isLongPress_ = false;
+    richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = false;
+    richEditorPattern->HandleFocusEvent();
+
+    EXPECT_EQ(richEditorPattern->textSelector_.SelectNothing(), true);
+}
+
+/**
  * @tc.name: HandleFocusEvent002
  * @tc.desc: test HandleFocusEvent
  * @tc.type: FUNC
@@ -454,6 +474,146 @@ HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback005, TestSize.Level1)
     Offset point(10, 10);
     thumbnailCallback(point);
     EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
+}
+
+/**
+ * @tc.name: IsResponseRegionExpandingNeededForStylus003
+ * @tc.desc: test IsResponseRegionExpandingNeededForStylus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEvent touchEvent;
+    touchEvent.sourceTool = SourceTool::PEN;
+    touchEvent.type = TouchType::DOWN;
+    bool ret = false;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ExpandDefaultResponseRegion001
+ * @tc.desc: test ExpandDefaultResponseRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, ExpandDefaultResponseRegion001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RectF rect(0, 0, 5, 5);
+    RectF retRect;
+    retRect = richEditorPattern->ExpandDefaultResponseRegion(rect);
+    EXPECT_EQ(rect.Width(), retRect.Width());
+}
+
+/**
+ * @tc.name: IsResponseRegionExpandingNeededForStylus001
+ * @tc.desc: test IsResponseRegionExpandingNeededForStylus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEvent touchEvent;
+    touchEvent.sourceTool = SourceTool::UNKNOWN;
+    bool ret = true;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsResponseRegionExpandingNeededForStylus002
+ * @tc.desc: test IsResponseRegionExpandingNeededForStylus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::UNKNOWN;
+    bool ret = true;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsResponseRegionExpandingNeededForStylus004
+ * @tc.desc: test IsResponseRegionExpandingNeededForStylus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEvent touchEvent;
+    touchEvent.sourceTool = SourceTool::PEN;
+    touchEvent.type = TouchType::UNKNOWN;
+    bool ret = true;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsResponseRegionExpandingNeededForStylus005
+ * @tc.desc: test IsResponseRegionExpandingNeededForStylus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->GetHost()->GetFocusHub()->SetFocusType(FocusType::DISABLE);
+    TouchEvent touchEvent;
+    touchEvent.sourceTool = SourceTool::PEN;
+    touchEvent.type = TouchType::DOWN;
+    bool ret = true;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsResponseRegionExpandingNeededForStylus006
+ * @tc.desc: test testInput text IsResponseRegionExpandingNeededForStylus001
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, IsResponseRegionExpandingNeededForStylus006, TestSize.Level0)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.x = 10;
+    touchEvent.y = 10;
+    auto ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+    touchEvent.sourceTool = SourceTool::PEN;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_TRUE(ret);
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.type = TouchType::MOVE;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+    touchEvent.sourceTool = SourceTool::PEN;
+    touchEvent.type = TouchType::MOVE;
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.sourceTool = SourceTool::PEN;
+    EXPECT_TRUE(richEditorNode_->IsVisible());
+    richEditorNode_->layoutProperty_->OnVisibilityUpdate(VisibleType::INVISIBLE);
+    EXPECT_FALSE(richEditorNode_->IsVisible());
+    ret = richEditorPattern->IsResponseRegionExpandingNeededForStylus(touchEvent);
+    EXPECT_FALSE(ret);
 }
 
 }

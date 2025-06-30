@@ -1233,4 +1233,22 @@ HWTEST_F(RichEditorStyleTestNg, UpdateDecorationStyle001, TestSize.Level1)
     EXPECT_EQ(spanItem->useThemeDecorationColor, false);
 }
 
+/**
+ * @tc.name: UpdateDecoration001
+ * @tc.desc: test UpdateDecoration
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, UpdateDecoration001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    RefPtr<SpanNode> spanNode = OHOS::Ace::NG::SpanNode::CreateSpanNode(1);
+    UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateTextDecorationStyle = TextDecorationStyle::DASHED;
+    TextStyle textStyle;
+    richEditorPattern->UpdateDecoration(spanNode, updateSpanStyle, textStyle);
+    ASSERT_EQ(updateSpanStyle.updateTextDecoration.has_value(), false);
+}
+
 }

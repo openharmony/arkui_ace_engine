@@ -134,6 +134,52 @@ HWTEST_F(RichEditorClickTestNg, HandleClickEvent001, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
 }
 
+/**
+ * @tc.name: HandleClickEvent002
+ * @tc.desc: test RichEditorPattern HandleClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorClickTestNg, HandleClickEvent002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    GestureEvent info;
+    info.localLocation_ = Offset(0, 0);
+    ParagraphStyle paragraphStyle;
+    auto paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    richEditorPattern->pManager_->AddParagraph({ .paragraph = paragraph, .paragraphStyle = paragraphStyle });
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    richEditorPattern->GetFocusHub()->focusType_ = FocusType::DISABLE;
+    richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
+    richEditorPattern->HandleClickEvent(info);
+    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+}
+
+/**
+ * @tc.name: HandleClickEvent002
+ * @tc.desc: test RichEditorPattern HandleClickEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorClickTestNg, HandleClickEvent003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    GestureEvent info;
+    info.localLocation_ = Offset(0, 0);
+    ParagraphStyle paragraphStyle;
+    auto paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    richEditorPattern->pManager_->AddParagraph({ .paragraph = paragraph, .paragraphStyle = paragraphStyle });
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    richEditorPattern->GetFocusHub()->focusType_ = FocusType::NODE;
+    richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
+    richEditorPattern->HandleClickEvent(info);
+    EXPECT_FALSE(richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_);
+}
+
 /*
  * @tc.name: DoubleHandleClickEvent001
  * @tc.desc: test double click
@@ -306,29 +352,6 @@ HWTEST_F(RichEditorClickTestNg, CreateAndShowSingleHandle, TestSize.Level1)
     ASSERT_NE(richEditorPattern->selectOverlay_, nullptr);
     richEditorPattern->CreateAndShowSingleHandle();
     EXPECT_TRUE(richEditorPattern->selectOverlay_->IsSingleHandle());
-}
-
-/**
- * @tc.name: HandleClickEvent002
- * @tc.desc: test RichEditorPattern HandleClickEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, HandleClickEvent002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    GestureEvent info;
-    info.localLocation_ = Offset(0, 0);
-    ParagraphStyle paragraphStyle;
-    auto paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
-    richEditorPattern->pManager_->AddParagraph({ .paragraph = paragraph, .paragraphStyle = paragraphStyle });
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    richEditorPattern->GetFocusHub()->focusType_ = FocusType::DISABLE;
-    richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
-    richEditorPattern->HandleClickEvent(info);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 }
 
 /**
@@ -659,29 +682,6 @@ HWTEST_F(RichEditorClickTestNg, HandleUserClickEvent003, TestSize.Level1)
 
     bool ret = richEditorPattern->HandleUserClickEvent(info);
     EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: HandleClickEvent002
- * @tc.desc: test RichEditorPattern HandleClickEvent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, HandleClickEvent003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    GestureEvent info;
-    info.localLocation_ = Offset(0, 0);
-    ParagraphStyle paragraphStyle;
-    auto paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
-    richEditorPattern->pManager_->AddParagraph({ .paragraph = paragraph, .paragraphStyle = paragraphStyle });
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    richEditorPattern->GetFocusHub()->focusType_ = FocusType::NODE;
-    richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_ = true;
-    richEditorPattern->HandleClickEvent(info);
-    EXPECT_FALSE(richEditorPattern->dataDetectorAdapter_->hasClickedAISpan_);
 }
 
 } // namespace OHOS::Ace::NG
