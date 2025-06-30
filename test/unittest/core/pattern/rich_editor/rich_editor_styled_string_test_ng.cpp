@@ -777,7 +777,6 @@ HWTEST_F(RichEditorStyledStringTestNg, CopySpanStyle004, TestSize.Level1)
     style.SetFontFeatures(TEXT_FONTFEATURE);
     style.SetFontSize(FONT_SIZE_VALUE);
 
-    layoutAlgorithm->typingTextStyle_ = style;
     layoutAlgorithm->CopySpanStyle(source, target);
     EXPECT_EQ(target->fontStyle->GetFontSize(), FONT_SIZE_VALUE);
 }
