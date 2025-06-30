@@ -110,6 +110,7 @@ constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t AUTOFILL_DELAY_TIME = 200;
 constexpr int32_t IMAGE_POINTER_CUSTOM_CHANNEL = 4;
 constexpr int32_t TOUCH_EVENT_MAX_SIZE = 5;
+constexpr int32_t MOUSE_EVENT_MAX_SIZE = 10;
 constexpr int32_t KEYEVENT_MAX_NUM = 1000;
 constexpr int32_t MAXIMUM_ROTATION_DELAY_TIME = 800;
 constexpr int32_t RESERVED_DEVICEID1 = 0xAAAAAAFF;
@@ -1777,6 +1778,13 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
         GetWebId(), static_cast<int32_t>(info.GetAction()), static_cast<int32_t>(info.GetButton()));
 
     isMouseEvent_ = true;
+    mouseInfo_ = info;
+    if (info.GetButton() == MouseButton::LEFT_BUTTON
+    && (info.GetAction() == MouseAction::PRESS || info.GetAction() == MouseAction::RELEASE)) {
+        if (mouseInfoQueue_.size() < MOUSE_EVENT_MAX_SIZE) {
+            mouseInfoQueue_.push(info);
+        }
+    }
     WebOnMouseEvent(info);
 
     auto host = GetHost();
@@ -1805,7 +1813,7 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
         (info.GetButton() == MouseButton::FORWARD_BUTTON)) {
         OnTooltip("");
     }
-    if (info.GetAction() == MouseAction::PRESS) {
+    if (info.GetAction() == MouseAction::PRESS && !GetNativeEmbedModeEnabledValue(false)) {
         delegate_->OnContextMenuHide("");
         WebRequestFocus();
     }
