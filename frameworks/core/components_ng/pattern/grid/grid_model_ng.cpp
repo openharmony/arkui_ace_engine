@@ -234,6 +234,15 @@ void GridModelNG::SetFocusWrapMode(const std::optional<FocusWrapMode>& focusWrap
     }
 }
 
+FocusWrapMode GridModelNG::GetFocusWrapMode(FrameNode* frameNode)
+{
+    FocusWrapMode focusWrapMode = FocusWrapMode::DEFAULT;
+    CHECK_NULL_RETURN(frameNode, focusWrapMode);
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        GridLayoutProperty, FocusWrapMode, focusWrapMode, frameNode, focusWrapMode);
+    return focusWrapMode;
+}
+
 void GridModelNG::SetAlignItems(GridItemAlignment itemAlign)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridLayoutProperty, AlignItems, itemAlign);
