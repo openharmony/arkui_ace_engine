@@ -98,7 +98,7 @@ public:
     virtual void SetSelectedOptionFontFamily(const std::vector<std::string>& value);
     virtual void SetSelectedOptionItalicFontStyle(const Ace::FontStyle& value);
     virtual void SetSelectedOptionFontColor(const Color& color);
-    virtual void SetOptionBgColor(const Color& color, bool isNormal = true);
+    virtual void SetOptionBgColor(const Color& color);
     virtual void SetOptionFontSize(const Dimension& value);
     virtual void SetOptionFontWeight(const FontWeight& value);
     virtual void SetOptionFontFamily(const std::vector<std::string>& value);
@@ -144,11 +144,14 @@ public:
     virtual void ResetShowInSubWindow() = 0;
     virtual void SetShowDefaultSelectedIcon(bool show) = 0;
     virtual void ResetShowDefaultSelectedIcon() = 0;
-    virtual void CreateWithColorResourceObj(const RefPtr<ResourceObject>& resObj,
-        const SelectColorType selectColorType) {};
+    virtual void CreateWithColorResourceObj(
+        const RefPtr<ResourceObject>& resObj, const SelectColorType& selectColorType) {};
     virtual void CreateWithValueIconResourceObj(const std::vector<SelectResObjParam>& resObjVec) {};
     virtual void CreateWithIntegerResourceObj(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithStringResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void SetOptionFontColorByUser(bool isValidValue) {};
+    virtual void SetMenuBackgroundColorByUser(bool isFromModifier) {};
+    virtual void SetFontColorByUser(bool isValidValue) {};
 
 private:
     static std::unique_ptr<SelectModel> instance_;

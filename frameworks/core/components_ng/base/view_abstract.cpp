@@ -3685,16 +3685,16 @@ void ViewAbstract::UpdatePopupParamResource(const RefPtr<PopupParam>& param, con
         auto arrowWidthResourceObject = param->GetArrowWidthResourceObject();
         optionsType = POPUP_OPTIONTYPE_ARROWWIDTH;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, arrowWidthResourceObject, optionsType);
-        auto arrowHeightResourceObject = param->GeArrowHeightResourceObject();
+        auto arrowHeightResourceObject = param->GetArrowHeightResourceObject();
         optionsType = POPUP_OPTIONTYPE_ARROWHEIGHT;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, arrowHeightResourceObject, optionsType);
-        auto radiusResourceObject = param->GeRadiusResourceObject();
+        auto radiusResourceObject = param->GetRadiusResourceObject();
         optionsType = POPUP_OPTIONTYPE_RADIUS;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, radiusResourceObject, optionsType);
-        auto outLineResourceObject = param->GeOutlineWidthResourceObject();
+        auto outLineResourceObject = param->GetOutlineWidthResourceObject();
         optionsType = POPUP_OPTIONTYPE_OUTLINEWIDTH;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, outLineResourceObject, optionsType);
-        auto borderResourceObject = param->GeBorderWidthResourceObject();
+        auto borderResourceObject = param->GetBorderWidthResourceObject();
         optionsType = POPUP_OPTIONTYPE_BORDERWIDTH;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, borderResourceObject, optionsType);
     }

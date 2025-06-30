@@ -2237,6 +2237,12 @@ UpdateSpanStyle RichEditorPattern::GetUpdateSpanStyle()
     return updateSpanStyle_;
 }
 
+void RichEditorPattern::MarkAISpanStyleChanged()
+{
+    std::for_each(spans_.begin(), spans_.end(), [](const auto& span) { span->aiSpanResultCount = 0; });
+    TextPattern::MarkAISpanStyleChanged();
+}
+
 void RichEditorPattern::UpdateCaretStyleByTypingStyle()
 {
     bool empty = spans_.empty();

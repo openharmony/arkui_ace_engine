@@ -2413,5 +2413,83 @@ HWTEST_F(PipelineContextTestNg, SetIsTransFlagTest, TestSize.Level1)
     context_->SetIsTransFlag(false);
     EXPECT_FALSE(context_->isTransFlag_);
 }
+
+/**
+ * @tc.name: PipelineContextTestNg124
+ * @tc.desc: Test SetFlushTSUpdates and FlushTSUpdates with a callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg124, TestSize.Level1)
+{
+    // checking for valid context and window
+    ASSERT_NE(context_, nullptr);
+    auto mockWindow = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(mockWindow, nullptr);
+
+    // callback setup that triggeres only one frame req
+    bool callbackCalled = false;
+    auto callback = [&callbackCalled](int32_t id) -> bool {
+        callbackCalled = true;
+        return false;
+    };
+
+    // Expect RequestFrame when setting the callback
+    EXPECT_CALL(*mockWindow, RequestFrame()).Times(1);
+    context_->SetFlushTSUpdates(std::move(callback));
+
+    // Call FlushTSUpdates and check callback runs
+    EXPECT_CALL(*mockWindow, RequestFrame()).Times(0);
+    context_->FlushTSUpdates();
+    EXPECT_TRUE(callbackCalled);
+}
+
+/**
+ * @tc.name: PipelineContextTestNg125
+ * @tc.desc: Test FlushTSUpdates with callback returning true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg125, TestSize.Level1)
+{
+    // checking for valid context and window
+    ASSERT_NE(context_, nullptr);
+    auto mockWindow = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(mockWindow, nullptr);
+
+    // Set up a callback that returns true once
+    int callbackCount = 0;
+    auto callback = [&callbackCount](int32_t id) -> bool {
+        callbackCount++;
+        return callbackCount == 1;
+    };
+
+    // Expecting RequestFrame when setting the callback
+    EXPECT_CALL(*mockWindow, RequestFrame()).Times(1);
+    context_->SetFlushTSUpdates(std::move(callback));
+
+    // Call FlushTSUpdates twice
+    EXPECT_CALL(*mockWindow, RequestFrame()).Times(1);
+    context_->FlushTSUpdates(); // First call: returns true
+    EXPECT_CALL(*mockWindow, RequestFrame()).Times(0);
+    context_->FlushTSUpdates(); // Second call: returns false
+    EXPECT_EQ(callbackCount, 2); // Callback ran twice
+}
+
+/**
+ * @tc.name: PipelineContextTestNg126
+ * @tc.desc: Test FlushTSUpdates with no callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg126, TestSize.Level1)
+{
+    // checking for valid context and window
+    ASSERT_NE(context_, nullptr);
+    auto mockWindow = (MockWindow*)(context_->window_.get());
+    ASSERT_NE(mockWindow, nullptr);
+
+    // No callback set and no frame request expected
+    EXPECT_CALL(*mockWindow, RequestFrame()).Times(0);
+    context_->SetFlushTSUpdates(nullptr);
+    context_->FlushTSUpdates();
+}
 } // namespace NG
 } // namespace OHOS::Ace

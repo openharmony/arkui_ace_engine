@@ -195,6 +195,20 @@ void SetItem4GetDotIndicatorInfo(
     }
 }
 
+void InitIndicatorParametersWithResObj(SwiperParameters& indicatorParameters, const void* resObjs)
+{
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto resourceObjs = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(resObjs));
+    indicatorParameters.resourceItemWidthValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_WIDTH);
+    indicatorParameters.resourceItemHeightValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_HEIGHT);
+    indicatorParameters.resourceSelectedItemWidthValueObject =
+        resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_WIDTH);
+    indicatorParameters.resourceSelectedItemHeightValueObject =
+        resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_HEIGHT);
+    indicatorParameters.resourceColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_COLOR);
+    indicatorParameters.resourceSelectedColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_COLOR);
+}
+
 SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std::string>& dotIndicatorInfo,
     const void* resObjs)
 {
@@ -223,9 +237,12 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
     }
     Color colorVal;
     parseOk = Color::ParseColorString(colorValue, colorVal);
-    indicatorParameters.colorVal = parseOk ? colorVal : swiperIndicatorTheme->GetColor();
+    indicatorParameters.colorVal = parseOk ? (indicatorParameters.parametersByUser.insert("colorVal"), colorVal)
+        : swiperIndicatorTheme->GetColor();
     parseOk = Color::ParseColorString(selectedColorValue, colorVal);
-    indicatorParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
+    indicatorParameters.selectedColorVal = parseOk
+        ? (indicatorParameters.parametersByUser.insert("selectedColorVal"), colorVal)
+        : swiperIndicatorTheme->GetSelectedColor();
     auto maxDisplayCount = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_MAX_DISPLAY_COUNT);
     if (!maxDisplayCount.empty()) {
         indicatorParameters.maxDisplayCountVal = StringUtils::StringToInt(maxDisplayCount);
@@ -234,17 +251,7 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
     bool parseSpaceOk = !spaceValue.empty() && space.Unit() != DimensionUnit::PERCENT;
     auto defaultSpaceSize = swiperIndicatorTheme->GetIndicatorDotItemSpace();
     indicatorParameters.dimSpace = (parseSpaceOk && !(space < 0.0_vp)) ? space : defaultSpaceSize;
-    if (SystemProperties::ConfigChangePerform()) {
-        auto resourceObjs = *(static_cast<const std::vector<RefPtr<ResourceObject>>*>(resObjs));
-        indicatorParameters.resourceItemWidthValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_WIDTH);
-        indicatorParameters.resourceItemHeightValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_ITEM_HEIGHT);
-        indicatorParameters.resourceSelectedItemWidthValueObject =
-            resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_WIDTH);
-        indicatorParameters.resourceSelectedItemHeightValueObject =
-            resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_ITEM_HEIGHT);
-        indicatorParameters.resourceColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_COLOR);
-        indicatorParameters.resourceSelectedColorValueObject = resourceObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_COLOR);
-    }
+    InitIndicatorParametersWithResObj(indicatorParameters, resObjs);
     return indicatorParameters;
 }
 

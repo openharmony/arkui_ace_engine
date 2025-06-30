@@ -111,6 +111,26 @@ public:
         isResource_ = isResource;
     }
 
+    void SetColorMode(ColorMode colorMode)
+    {
+        colorMode_ = colorMode;
+    }
+
+    const ColorMode& GetColorMode() const
+    {
+        return colorMode_;
+    }
+
+    void SetHasDarkRes(bool hasDarkRes)
+    {
+        hasDarkRes_ = hasDarkRes;
+    }
+
+    bool HasDarkResource() const
+    {
+        return hasDarkRes_;
+    }
+
 private:
     int32_t id_;
     int32_t type_;
@@ -120,7 +140,9 @@ private:
     std::string bundleName_;
     std::string moduleName_;
     std::string nodeTag_;
+    ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
     bool isResource_ = true;
+    bool hasDarkRes_ = false;
 };
 } // namespace OHOS::Ace
 

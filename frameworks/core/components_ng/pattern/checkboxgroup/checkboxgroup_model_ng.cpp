@@ -286,10 +286,10 @@ CheckBoxStyle CheckBoxGroupModelNG::GetCheckboxGroupStyle(FrameNode* frameNode)
     return value;
 }
 
-std::string CheckBoxGroupModelNG::ColorTypeToString(const CheckBoxGroupColorType checkBoxGroupColorType)
+std::string CheckBoxGroupModelNG::ColorTypeToString(const CheckBoxGroupColorType& type)
 {
     std::string rst;
-    switch (checkBoxGroupColorType) {
+    switch (type) {
         case CheckBoxGroupColorType::SELECTED_COLOR:
             rst = "SelectedColor";
             break;
@@ -335,19 +335,86 @@ void CheckBoxGroupModelNG::ResetCheckMarkColor()
 }
 
 void CheckBoxGroupModelNG::CreateWithColorResourceObj(
-    const RefPtr<ResourceObject>& resObj, const CheckBoxGroupColorType checkBoxGroupColorType)
+    const RefPtr<ResourceObject>& resObj, const CheckBoxGroupColorType& type)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    CreateWithResourceObj(frameNode, checkBoxGroupColorType, resObj);
+    CreateWithResourceObj(frameNode, type, resObj);
 }
 
-void CheckBoxGroupModelNG::ResetUnSelectedColor(FrameNode* frameNode)
+void CheckBoxGroupModelNG::ResetComponentColor(FrameNode* frameNode, const CheckBoxGroupColorType& type)
 {
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
-        CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColor, PROPERTY_UPDATE_RENDER, frameNode);
-    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
-        CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<CheckboxTheme>();
+    CHECK_NULL_VOID(theme);
+    Color color;
+    switch (type) {
+        case CheckBoxGroupColorType::SELECTED_COLOR:
+            ResetSelectedColor(frameNode);
+            color = theme->GetActiveColor();
+            ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColor, color, frameNode);
+            break;
+        case CheckBoxGroupColorType::UN_SELECTED_COLOR:
+            ResetUnSelectedColor(frameNode);
+            color = theme->GetInactiveColor();
+            ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColor, color, frameNode);
+            break;
+        default:
+            break;
+    }
+}
+
+void CheckBoxGroupModelNG::UpdateComponentColor(
+    FrameNode* frameNode, const CheckBoxGroupColorType& type, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    switch (type) {
+        case CheckBoxGroupColorType::SELECTED_COLOR:
+            SetSelectedColor(frameNode, color);
+            break;
+        case CheckBoxGroupColorType::UN_SELECTED_COLOR:
+            SetUnSelectedColor(frameNode, color);
+            break;
+        default:
+            break;
+    }
+}
+
+void CheckBoxGroupModelNG::CreateWithResourceObj(
+    FrameNode* frameNode, const CheckBoxGroupColorType& type, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    std::string key = "checkboxgroup" + ColorTypeToString(type);
+    if (!resObj) {
+        pattern->RemoveResObj(key);
+        return;
+    }
+    auto&& updateFunc = [type, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        CHECK_NULL_VOID(resObj);
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        Color result;
+        if (!ResourceParseUtils::ParseResColor(resObj, result)) {
+            ResetComponentColor(AceType::RawPtr(frameNode), type);
+        } else {
+            UpdateComponentColor(AceType::RawPtr(frameNode), type, result);
+        }
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
+}
+
+void CheckBoxGroupModelNG::SetUnSelectedColorByUser(FrameNode* frameNode, bool flag)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColorFlagByUser, flag, frameNode);
+}
+
+void CheckBoxGroupModelNG::SetSelectedColorByUser(FrameNode* frameNode, bool flag)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColorFlagByUser, flag, frameNode);
 }
 
 void CheckBoxGroupModelNG::ResetSelectedColor(FrameNode* frameNode)
@@ -358,45 +425,11 @@ void CheckBoxGroupModelNG::ResetSelectedColor(FrameNode* frameNode)
         CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
-void CheckBoxGroupModelNG::UpdateComponentColor(FrameNode* frameNode, const CheckBoxGroupColorType checkBoxColorType)
+void CheckBoxGroupModelNG::ResetUnSelectedColor(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(frameNode);
-    switch (checkBoxColorType) {
-        case CheckBoxGroupColorType::SELECTED_COLOR:
-            ResetSelectedColor(frameNode);
-            break;
-        case CheckBoxGroupColorType::UN_SELECTED_COLOR:
-            ResetUnSelectedColor(frameNode);
-            break;
-        default:
-            break;
-    }
-}
-
-void CheckBoxGroupModelNG::CreateWithResourceObj(
-    FrameNode* frameNode, const CheckBoxGroupColorType jsResourceType, const RefPtr<ResourceObject>& resObj)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
-    CHECK_NULL_VOID(pattern);
-    std::string key = "checkboxgroup" + ColorTypeToString(jsResourceType);
-    pattern->RemoveResObj(key);
-    CHECK_NULL_VOID(resObj);
-
-    auto&& updateFunc = [jsResourceType, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
-        auto frameNode = weak.Upgrade();
-        CHECK_NULL_VOID(frameNode);
-        auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
-        CHECK_NULL_VOID(pattern);
-        Color result;
-        if (!ResourceParseUtils::ParseResColor(resObj, result)) {
-            UpdateComponentColor(AceType::RawPtr(frameNode), jsResourceType);
-            return;
-        }
-
-        pattern->UpdateCheckBoxGroupComponentColor(result, jsResourceType);
-    };
-    updateFunc(resObj);
-    pattern->AddResObj(key, resObj, std::move(updateFunc));
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+        CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColorFlagByUser, PROPERTY_UPDATE_RENDER, frameNode);
 }
 } // namespace OHOS::Ace::NG

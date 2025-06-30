@@ -60,7 +60,8 @@ ArkUINativeModuleValue MenuItemBridge::SetLabelFontColor(ArkUIRuntimeCallInfo* r
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getMenuItemModifier()->resetLabelFontColor(nativeNode);
     } else {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
@@ -88,7 +89,8 @@ ArkUINativeModuleValue MenuItemBridge::SetContentFontColor(ArkUIRuntimeCallInfo*
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getMenuItemModifier()->resetContentFontColor(nativeNode);
     } else {
         auto colorRawPtr = AceType::RawPtr(colorResObj);

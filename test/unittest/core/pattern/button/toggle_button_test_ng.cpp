@@ -38,6 +38,7 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#include "test/mock/base/mock_system_properties.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -888,5 +889,87 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest019, TestSize.Level1)
     buttonFrameNode->UpdateInspectorId("Toggle");
     togglePattern->frameNode_ = std::move(buttonFrameNode);
     togglePattern->OnAfterModifyDone();
+}
+
+/**
+ * @tc.name: UpdateComponentColor
+ * @tc.desc: test ToggleButtonPattern::UpdateComponentColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, UpdateComponentColor, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.isOn = std::make_optional(IS_ON);
+    RefPtr<FrameNode> frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto togglePattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
+    ASSERT_NE(togglePattern, nullptr);
+    auto pipelineContext = frameNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ToggleButtonPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. pattern UpdateComponentColor.
+     * @tc.expected: step2. check whether the function is executed successfully.
+     */
+    std::vector<std::pair<bool, bool>> vec { { true, true }, { true, false }, { false, true }, { false, false } };
+    for (const auto& pair : vec) {
+        pipelineContext->SetIsSystemColorChange(pair.first);
+        frameNode->SetRerenderable(pair.second);
+        togglePattern->UpdateComponentColor(Color::RED, ToggleColorType::SWITCH_POINT_COLOR);
+        togglePattern->UpdateComponentColor(Color::RED, ToggleColorType::UN_SELECTED_COLOR);
+        if (pipelineContext->IsSystmColorChange() && pair.second) {
+            auto ret = paintProperty->GetSelectedColor();
+            EXPECT_EQ(ret.value_or(Color::BLACK), Color::BLACK);
+            togglePattern->UpdateComponentColor(Color::RED, ToggleColorType::SELECTED_COLOR);
+            ret = paintProperty->GetSelectedColor();
+            EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+        }
+    }
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate
+ * @tc.desc: test ToggleButtonPattern::OnColorConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, OnColorConfigurationUpdate, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.isOn = std::make_optional(IS_ON);
+    RefPtr<FrameNode> frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto togglePattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
+    ASSERT_NE(togglePattern, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ToggleTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto pops = frameNode->GetPaintProperty<ToggleButtonPaintProperty>();
+    ASSERT_NE(pops, nullptr);
+
+    /**
+     * @tc.steps: step2. pattern OnColorConfigurationUpdate.
+     * @tc.expected: step2. check whether the function is executed successfully.
+     */
+    Color color = theme->GetCheckedColor();
+    std::vector<std::pair<bool, bool>> vec { { true, false }, { true, true }, { false, true }, { false, false } };
+    for (const auto& pair : vec) {
+        g_isConfigChangePerform = pair.first;
+        pops->UpdateSelectedColorSetByUser(pair.second);
+        togglePattern->OnColorConfigurationUpdate();
+        if (pair.first && !pair.second) {
+            auto ret = pops->GetSelectedColor();
+            EXPECT_EQ(ret.value_or(Color::BLACK), color);
+        }
+    }
+    g_isConfigChangePerform = false;
 }
 } // namespace OHOS::Ace::NG

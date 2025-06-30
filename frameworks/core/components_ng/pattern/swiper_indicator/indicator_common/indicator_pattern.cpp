@@ -653,6 +653,12 @@ void IndicatorPattern::UpdateDefaultColor()
         swiperDigitalParameters_->selectedFontColor =
             swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
     }
+    if (swiperParameters_ && !swiperParameters_->parametersByUser.count("colorVal")) {
+        swiperParameters_->colorVal = swiperIndicatorTheme->GetColor();
+    }
+    if (swiperParameters_ && !swiperParameters_->parametersByUser.count("selectedColorVal")) {
+        swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
+    }
 }
 
 void IndicatorPattern::OnColorModeChange(uint32_t colorMode)

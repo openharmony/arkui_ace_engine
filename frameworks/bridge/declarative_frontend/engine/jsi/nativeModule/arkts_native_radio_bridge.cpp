@@ -91,27 +91,39 @@ ArkUINativeModuleValue RadioBridge::SetRadioStyle(ArkUIRuntimeCallInfo* runtimeC
     RefPtr<ResourceObject> unBorderColorResObj;
     RefPtr<ResourceObject> indicatorColorResObj;
     ArkUIRadioColorStruct resObjStru;
+    bool jsBgColorSetByUser = false;
+    bool jsUnBorderColorSetByUser = false;
+    bool jsIndicatorColorSetByUser = false;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+
     if (checkedBackgroundColor->IsNull() || checkedBackgroundColor->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, checkedBackgroundColor, checkedBackgroundColorVal, backgroundColorResObj)) {
+        !ArkTSUtils::ParseJsColorAlpha(vm, checkedBackgroundColor, checkedBackgroundColorVal, backgroundColorResObj,
+        nodeInfo)) {
         checkedBackgroundColorVal = radioTheme->GetActiveColor();
     } else {
+        jsBgColorSetByUser = true;
         resObjStru.checkedBackgroundColor = AceType::RawPtr(backgroundColorResObj);
     }
     Color uncheckedBorderColorVal;
     if (uncheckedBorderColor->IsNull() || uncheckedBorderColor->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, uncheckedBorderColor, uncheckedBorderColorVal, unBorderColorResObj)) {
+        !ArkTSUtils::ParseJsColorAlpha(vm, uncheckedBorderColor, uncheckedBorderColorVal,
+        unBorderColorResObj, nodeInfo)) {
         uncheckedBorderColorVal = radioTheme->GetInactiveColor();
     } else {
+        jsUnBorderColorSetByUser = true;
         resObjStru.uncheckedBorderColor = AceType::RawPtr(unBorderColorResObj);
     }
     Color indicatorColorVal;
     if (indicatorColor->IsNull() || indicatorColor->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, indicatorColor, indicatorColorVal, indicatorColorResObj)) {
+        !ArkTSUtils::ParseJsColorAlpha(vm, indicatorColor, indicatorColorVal, indicatorColorResObj, nodeInfo)) {
         indicatorColorVal = radioTheme->GetPointColor();
     } else {
+        jsIndicatorColorSetByUser = true;
         resObjStru.indicatorColor = AceType::RawPtr(indicatorColorResObj);
     }
 
+    GetArkUINodeModifiers()->getRadioModifier()->setRadioColorSetByUser(
+        nativeNode, jsBgColorSetByUser, jsUnBorderColorSetByUser, jsIndicatorColorSetByUser);
     GetArkUINodeModifiers()->getRadioModifier()->setRadioStylePtr(nativeNode,
         checkedBackgroundColorVal.GetValue(), uncheckedBorderColorVal.GetValue(),
         indicatorColorVal.GetValue(), resObjStru);

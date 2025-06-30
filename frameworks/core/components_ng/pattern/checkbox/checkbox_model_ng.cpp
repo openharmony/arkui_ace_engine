@@ -374,15 +374,39 @@ void CheckBoxModelNG::CreateWithColorResourceObj(
     CreateWithResourceObj(frameNode, checkBoxColorType, resObj);
 }
 
-void CheckBoxModelNG::UpdateComponentColor(FrameNode* frameNode, const CheckBoxColorType checkBoxColorType)
+void CheckBoxModelNG::ResetComponentColor(FrameNode* frameNode, const CheckBoxColorType type)
 {
     CHECK_NULL_VOID(frameNode);
-    switch (checkBoxColorType) {
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<CheckboxTheme>(frameNode->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    Color color;
+    switch (type) {
         case CheckBoxColorType::SELECTED_COLOR:
             ResetSelectedColor(frameNode);
+            color = theme->GetActiveColor();
+            ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelectedColor, color, frameNode);
             break;
         case CheckBoxColorType::UN_SELECTED_COLOR:
             ResetUnSelectedColor(frameNode);
+            color = theme->GetInactiveColor();
+            ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxUnSelectedColor, color, frameNode);
+            break;
+        default:
+            break;
+    }
+}
+
+void CheckBoxModelNG::UpdateComponentColor(FrameNode* frameNode, const CheckBoxColorType type, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    switch (type) {
+        case CheckBoxColorType::SELECTED_COLOR:
+            SetSelectedColor(frameNode, color);
+            break;
+        case CheckBoxColorType::UN_SELECTED_COLOR:
+            SetUnSelectedColor(frameNode, color);
             break;
         default:
             break;
@@ -390,29 +414,27 @@ void CheckBoxModelNG::UpdateComponentColor(FrameNode* frameNode, const CheckBoxC
 }
 
 void CheckBoxModelNG::CreateWithResourceObj(
-    FrameNode* frameNode, const CheckBoxColorType jsResourceType, const RefPtr<ResourceObject>& resObj)
+    FrameNode* frameNode, const CheckBoxColorType type, const RefPtr<ResourceObject>& resObj)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     CHECK_NULL_VOID(pattern);
-
-    std::string key = "checkbox" + ColorTypeToString(jsResourceType);
-    pattern->RemoveResObj(key);
-    CHECK_NULL_VOID(resObj);
-    auto&& updateFunc = [jsResourceType, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+    std::string key = "checkbox" + ColorTypeToString(type);
+    if (!resObj) {
+        pattern->RemoveResObj(key);
+        return;
+    }
+    auto&& updateFunc = [type, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        CHECK_NULL_VOID(resObj);
         auto frameNode = weak.Upgrade();
         CHECK_NULL_VOID(frameNode);
-        auto pattern = frameNode->GetPattern<CheckBoxPattern>();
-        CHECK_NULL_VOID(pattern);
         Color result;
-        if (ResourceParseUtils::ParseResColor(resObj, result)) {
-            UpdateComponentColor(AceType::RawPtr(frameNode), jsResourceType);
-            return;
+        if (!ResourceParseUtils::ParseResColor(resObj, result)) {
+            ResetComponentColor(AceType::RawPtr(frameNode), type);
+        } else {
+            UpdateComponentColor(AceType::RawPtr(frameNode), type, result);
         }
-
-        pattern->UpdateCheckboxComponentColor(result, jsResourceType);
     };
-    updateFunc(resObj);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 

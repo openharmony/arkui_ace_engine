@@ -410,7 +410,7 @@ ArkUINativeModuleValue NavDestinationBridge::SetTitle(ArkUIRuntimeCallInfo* runt
 
     ArkUINavigationTitlebarOptions options;
     if (optionsArg->IsObject(vm)) {
-        NativeNavigationUtils::ParseTitleOptions(vm, optionsArg, options);
+        NativeNavigationUtils::ParseTitleOptions(vm, optionsArg, nativeNode, options);
     }
     ArkUINavigationTitleInfo titleInfo = { hasSub, hasMain, subtitle.c_str(), title.c_str() };
     auto titleRawPtr = AceType::RawPtr(titleResObj);

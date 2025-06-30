@@ -252,9 +252,12 @@ void JSIndicator::SetDotIndicatorInfo(const JSRef<JSObject>& obj, SwiperParamete
     RefPtr<ResourceObject> resColorObj;
     RefPtr<ResourceObject> resSelectedColorObj;
     auto parseOk = ParseJsColor(colorValue, colorVal, resColorObj);
-    swiperParameters.colorVal = parseOk ? colorVal : swiperIndicatorTheme->GetColor();
+    swiperParameters.colorVal = parseOk ? (swiperParameters.parametersByUser.insert("colorVal"), colorVal)
+        : swiperIndicatorTheme->GetColor();
     parseOk = ParseJsColor(selectedColorValue, colorVal, resSelectedColorObj);
-    swiperParameters.selectedColorVal = parseOk ? colorVal : swiperIndicatorTheme->GetSelectedColor();
+    swiperParameters.selectedColorVal = parseOk
+        ? (swiperParameters.parametersByUser.insert("selectedColorVal"), colorVal)
+        : swiperIndicatorTheme->GetSelectedColor();
     if (SystemProperties::ConfigChangePerform()) {
         swiperParameters.resourceColorValueObject = resColorObj;
         swiperParameters.resourceSelectedColorValueObject = resSelectedColorObj;

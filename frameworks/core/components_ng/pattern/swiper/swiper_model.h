@@ -220,8 +220,8 @@ public:
     virtual void SetIndicatorController(Framework::JSIndicatorController* controller) {}
     virtual Framework::JSIndicatorController* GetIndicatorController() { return nullptr; }
     virtual void SetMaintainVisibleContentPosition(bool value) {}
-    virtual void ProcessNextMarginwithResourceObj(const RefPtr<ResourceObject>& resObj) {}
-    virtual void ProcessPreviousMarginwithResourceObj(const RefPtr<ResourceObject>& resObj) {};
+    virtual void ProcessNextMarginWithResourceObj(const RefPtr<ResourceObject>& resObj) {}
+    virtual void ProcessPreviousMarginWithResourceObj(const RefPtr<ResourceObject>& resObj) {};
 
 private:
     static std::unique_ptr<SwiperModel> instance_;

@@ -647,23 +647,6 @@ void CheckBoxGroupPattern::OnColorConfigurationUpdate()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     OnThemeScopeUpdate(host->GetThemeScopeId());
-    if (SystemProperties::ConfigChangePerform()) {
-        auto pipeline = host->GetContextWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<CheckboxTheme>();
-        CHECK_NULL_VOID(theme);
-
-        auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-
-        if (!paintProperty->GetCheckBoxGroupSelectedColorFlagByUserValue(false)) {
-            UpdateCheckBoxGroupComponentColor(theme->GetActiveColor(), CheckBoxGroupColorType::SELECTED_COLOR);
-        }
-
-        if (!paintProperty->GetCheckBoxGroupUnSelectedColorFlagByUserValue(false)) {
-            UpdateCheckBoxGroupComponentColor(theme->GetInactiveColor(), CheckBoxGroupColorType::UN_SELECTED_COLOR);
-        }
-    }
     host->MarkModifyDone();
     host->MarkDirtyNode();
 }
@@ -679,15 +662,15 @@ bool CheckBoxGroupPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     CHECK_NULL_RETURN(checkBoxTheme, result);
     auto checkBoxGroupPaintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
     CHECK_NULL_RETURN(checkBoxGroupPaintProperty, result);
-    if (!checkBoxGroupPaintProperty->HasCheckBoxGroupSelectedColorFlagByUser()) {
+    if (!checkBoxGroupPaintProperty->GetCheckBoxGroupSelectedColorFlagByUserValue(false)) {
         checkBoxGroupPaintProperty->UpdateCheckBoxGroupSelectedColor(checkBoxTheme->GetActiveColor());
         result = true;
     }
-    if (!checkBoxGroupPaintProperty->HasCheckBoxGroupUnSelectedColorFlagByUser()) {
+    if (!checkBoxGroupPaintProperty->GetCheckBoxGroupUnSelectedColorFlagByUserValue(false)) {
         checkBoxGroupPaintProperty->UpdateCheckBoxGroupUnSelectedColor(checkBoxTheme->GetInactiveColor());
         result = true;
     }
-    if (!checkBoxGroupPaintProperty->HasCheckBoxGroupCheckMarkColorFlagByUser()) {
+    if (!checkBoxGroupPaintProperty->GetCheckBoxGroupCheckMarkColorFlagByUserValue(false)) {
         checkBoxGroupPaintProperty->UpdateCheckBoxGroupCheckMarkColor(checkBoxTheme->GetPointColor());
         result = true;
     }
@@ -835,33 +818,6 @@ std::optional<bool> CheckBoxGroupPattern::ParseSelectStatus(const std::string& c
     }
 
     return json->GetBool("selectStatus");
-}
-
-void CheckBoxGroupPattern::UpdateCheckBoxGroupComponentColor(const Color& color,
-    const CheckBoxGroupColorType checkBoxGroupColorType)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto paintProperty = GetPaintProperty<CheckBoxGroupPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-
-    if (pipelineContext->IsSystmColorChange()) {
-        switch (checkBoxGroupColorType) {
-            case CheckBoxGroupColorType::SELECTED_COLOR:
-                paintProperty->UpdateCheckBoxGroupSelectedColor(color);
-                paintProperty->UpdateCheckBoxGroupSelectedColorFlagByUser(true);
-                break;
-            case CheckBoxGroupColorType::UN_SELECTED_COLOR:
-                paintProperty->UpdateCheckBoxGroupUnSelectedColor(color);
-                paintProperty->UpdateCheckBoxGroupUnSelectedColorFlagByUser(true);
-                break;
-        }
-    }
-    if (host->GetRerenderable()) {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
 }
 
 int32_t CheckBoxGroupPattern::OnInjectionEvent(const std::string& command)

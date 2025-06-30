@@ -6816,20 +6816,61 @@ bool JSViewAbstract::ParseJsObjColorFromResource(const JSRef<JSObject> &jsObj, C
     return false;
 }
 
+bool JSViewAbstract::CheckDarkResource(const RefPtr<ResourceObject>& resObj)
+{
+    if (!SystemProperties::GetResourceDecoupling() || !resObj) {
+        return false;
+    }
+    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
+    CHECK_NULL_RETURN(resourceAdapter, false);
+
+    int32_t resId = resObj->GetId();
+    bool hasDarkRes = false;
+    auto params = resObj->GetParams();
+    if (resId == -1 && (params.size() > 0)) {
+        hasDarkRes = resourceAdapter->ExistDarkResByName(params[params.size() - 1].value.value(),
+            std::to_string(resObj->GetType()));
+    } else {
+        hasDarkRes = resourceAdapter->ExistDarkResById(std::to_string(resId));
+    }
+    return hasDarkRes;
+}
+
 void JSViewAbstract::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
-    const Color& color, bool state)
+    Color& color, bool state)
 {
     if (!state || !SystemProperties::ConfigChangePerform()) {
         return;
     }
+
+    auto node = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+    CHECK_NULL_VOID(node);
+
+    auto instanceId = Container::CurrentIdSafely();
+    auto nodeTag = node->GetTag();
+    auto invertFunc = ColorInverter::GetInstance().GetInvertFunc(instanceId, nodeTag);
+    CHECK_NULL_VOID(invertFunc);
+
+    auto localColorMode = node->GetLocalColorMode();
+    if (localColorMode == ColorMode::LIGHT) {
+        resObj = nullptr;
+        return;
+    }
+
+    auto colorMode = Container::CurrentColorMode();
+    bool hasDarkRes = CheckDarkResource(resObj);
+    if ((colorMode == ColorMode::DARK || localColorMode == ColorMode::DARK) && (!resObj || !hasDarkRes)) {
+        color = Color(invertFunc(color.GetValue()));
+    }
     if (!resObj) {
         resObj = AceType::MakeRefPtr<ResourceObject>();
         resObj->SetIsResource(false);
-        resObj->SetInstanceId(Container::CurrentIdSafely());
+        resObj->SetInstanceId(instanceId);
     }
-    auto node = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+    resObj->SetNodeTag(nodeTag);
+    resObj->SetColorMode(colorMode);
+    resObj->SetHasDarkRes(hasDarkRes);
     resObj->SetColor(color);
-    resObj->SetNodeTag(node ? node->GetTag() : "");
 }
 
 bool JSViewAbstract::ParseJsColor(const JSRef<JSVal>& jsValue, Color& result)

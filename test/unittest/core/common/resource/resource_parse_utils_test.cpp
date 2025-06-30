@@ -243,7 +243,7 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest004, TestSize.Level1)
 }
 
 /**
- * @tc.name: ResourceParseUtilsTest003
+ * @tc.name: ResourceParseUtilsTest005
  * @tc.desc: Test resourceParseUtils.
  * @tc.type: FUNC
  */
@@ -261,5 +261,29 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest005, TestSize.Level1)
     Color result;
     ResourceParseUtils::ParseResColor(resObj, result);
     EXPECT_EQ(color, result);
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest006
+ * @tc.desc: Test resourceParseUtils.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ParseResColor with different colormode.
+     * @tc.expect: ParseResColor return True.
+     */
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    Color color = Color::WHITE;
+    resObj->SetColor(color);
+    resObj->SetIsResource(false);
+    resObj->SetColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+    ResourceParseUtils::SetIsReloading(false);
+    EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObj, color));
+    resObj->SetColorMode(ColorMode::DARK);
+    EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObj, color));
+    resObj->SetColorMode(ColorMode::LIGHT);
+    EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObj, color));
 }
 } // namespace OHOS::Ace

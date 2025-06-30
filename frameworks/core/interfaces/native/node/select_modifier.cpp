@@ -55,9 +55,13 @@ void SetValuePtr(ArkUINodeHandle node, ArkUI_CharPtr value, void* valueRawPtr)
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* selectobj = reinterpret_cast<ResourceObject*>(valueRawPtr);
-        auto valueResObj = AceType::Claim(selectobj);
-        SelectModelNG::CreateWithStringResourceObj(frameNode, valueResObj);
+        if (valueRawPtr) {
+            auto* selectobj = reinterpret_cast<ResourceObject*>(valueRawPtr);
+            auto valueResObj = AceType::Claim(selectobj);
+            SelectModelNG::CreateWithStringResourceObj(frameNode, valueResObj);
+        } else {
+            SelectModelNG::CreateWithStringResourceObj(frameNode, nullptr);
+        }
     }
 }
 
@@ -78,9 +82,13 @@ void SetSelectedPtr(ArkUINodeHandle node, ArkUI_Int32 idx, void* selectedRawPtr)
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* selectobj = reinterpret_cast<ResourceObject*>(selectedRawPtr);
-        auto selectedResObj = AceType::Claim(selectobj);
-        SelectModelNG::CreateWithIntegerResourceObj(frameNode, selectedResObj);
+        if (selectedRawPtr) {
+            auto* selectobj = reinterpret_cast<ResourceObject*>(selectedRawPtr);
+            auto selectedResObj = AceType::Claim(selectobj);
+            SelectModelNG::CreateWithIntegerResourceObj(frameNode, selectedResObj);
+        } else {
+            SelectModelNG::CreateWithIntegerResourceObj(frameNode, nullptr);
+        }
     }
 }
 
@@ -98,10 +106,14 @@ void SetSelectFontColorPtr(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontC
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* fontColor = reinterpret_cast<ResourceObject*>(fontColorRawPtr);
-        auto fontColorResObj = AceType::Claim(fontColor);
-        SelectModelNG::CreateWithColorResourceObj(
-            frameNode, fontColorResObj, SelectColorType::FONT_COLOR);
+        SelectModelNG::SetFontColorByUser(frameNode, true);
+        if (fontColorRawPtr) {
+            auto* fontColor = reinterpret_cast<ResourceObject*>(fontColorRawPtr);
+            auto fontColorResObj = AceType::Claim(fontColor);
+            SelectModelNG::CreateWithColorResourceObj(frameNode, fontColorResObj, SelectColorType::FONT_COLOR);
+        } else {
+            SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::FONT_COLOR);
+        }
     }
 }
 
@@ -119,9 +131,14 @@ void SetSelectedOptionBgColorPtr(ArkUINodeHandle node, ArkUI_Uint32 color, void*
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* bgColor = reinterpret_cast<ResourceObject*>(optionBgColorRawPtr);
-        auto bgColorResObj = AceType::Claim(bgColor);
-        SelectModelNG::CreateWithColorResourceObj(frameNode, bgColorResObj, SelectColorType::SELECTED_OPTION_BG_COLOR);
+        if (optionBgColorRawPtr) {
+            auto* bgColor = reinterpret_cast<ResourceObject*>(optionBgColorRawPtr);
+            auto bgColorResObj = AceType::Claim(bgColor);
+            SelectModelNG::CreateWithColorResourceObj(
+                frameNode, bgColorResObj, SelectColorType::SELECTED_OPTION_BG_COLOR);
+        } else {
+            SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::SELECTED_OPTION_BG_COLOR);
+        }
     }
 }
 
@@ -139,9 +156,13 @@ void SetOptionBgColorPtr(ArkUINodeHandle node, ArkUI_Uint32 color, void* optionB
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* bgColor = reinterpret_cast<ResourceObject*>(optionBgColorRawPtr);
-        auto bgColorResObj = AceType::Claim(bgColor);
-        SelectModelNG::CreateWithColorResourceObj(frameNode, bgColorResObj, SelectColorType::OPTION_BG_COLOR);
+        if (optionBgColorRawPtr) {
+            auto* bgColor = reinterpret_cast<ResourceObject*>(optionBgColorRawPtr);
+            auto bgColorResObj = AceType::Claim(bgColor);
+            SelectModelNG::CreateWithColorResourceObj(frameNode, bgColorResObj, SelectColorType::OPTION_BG_COLOR);
+        } else {
+            SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::OPTION_BG_COLOR);
+        }
     }
 }
 
@@ -159,9 +180,14 @@ void SetOptionFontColorPtr(ArkUINodeHandle node, ArkUI_Uint32 color, void* fontC
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* fontColor = reinterpret_cast<ResourceObject*>(fontColorRawPtr);
-        auto fontColorResObj = AceType::Claim(fontColor);
-        SelectModelNG::CreateWithColorResourceObj(frameNode, fontColorResObj, SelectColorType::OPTION_FONT_COLOR);
+        SelectModelNG::SetOptionFontColorByUser(frameNode, true);
+        if (fontColorRawPtr) {
+            auto* fontColor = reinterpret_cast<ResourceObject*>(fontColorRawPtr);
+            auto fontColorResObj = AceType::Claim(fontColor);
+            SelectModelNG::CreateWithColorResourceObj(frameNode, fontColorResObj, SelectColorType::OPTION_FONT_COLOR);
+        } else {
+            SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::OPTION_FONT_COLOR);
+        }
     }
 }
 
@@ -179,10 +205,14 @@ void SetSelectedOptionFontColorPtr(ArkUINodeHandle node, ArkUI_Uint32 color, voi
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* fontColor = reinterpret_cast<ResourceObject*>(fontColorRawPtr);
-        auto fontColorResObj = AceType::Claim(fontColor);
-        SelectModelNG::CreateWithColorResourceObj(
-            frameNode, fontColorResObj, SelectColorType::SELECTED_OPTION_FONT_COLOR);
+        if (fontColorRawPtr) {
+            auto* fontColor = reinterpret_cast<ResourceObject*>(fontColorRawPtr);
+            auto fontColorResObj = AceType::Claim(fontColor);
+            SelectModelNG::CreateWithColorResourceObj(
+                frameNode, fontColorResObj, SelectColorType::SELECTED_OPTION_FONT_COLOR);
+        } else {
+            SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::SELECTED_OPTION_FONT_COLOR);
+        }
     }
 }
 
@@ -345,8 +375,7 @@ void ResetValue(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetValue(frameNode, "");
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        SelectModelNG::CreateWithStringResourceObj(frameNode, resObj);
+        SelectModelNG::CreateWithStringResourceObj(frameNode, nullptr);
     }
 }
 
@@ -356,8 +385,7 @@ void ResetSelected(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::SetSelected(frameNode, DEFAULT_SELECT);
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        SelectModelNG::CreateWithIntegerResourceObj(frameNode, resObj);
+        SelectModelNG::CreateWithIntegerResourceObj(frameNode, nullptr);
     }
 }
 
@@ -369,8 +397,8 @@ void ResetSelectFontColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(selectTheme);
     SelectModelNG::SetFontColor(frameNode, selectTheme->GetFontColor());
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        SelectModelNG::CreateWithColorResourceObj(frameNode, resObj, SelectColorType::FONT_COLOR);
+        SelectModelNG::SetFontColorByUser(frameNode, false);
+        SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::FONT_COLOR);
     }
 }
 
@@ -382,8 +410,7 @@ void ResetSelectedOptionBgColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(selectTheme);
     SelectModelNG::SetSelectedOptionBgColor(frameNode, selectTheme->GetSelectedColor());
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        SelectModelNG::CreateWithColorResourceObj(frameNode, resObj, SelectColorType::SELECTED_OPTION_BG_COLOR);
+        SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::SELECTED_OPTION_BG_COLOR);
     }
 }
 
@@ -393,10 +420,9 @@ void ResetOptionBgColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     auto selectTheme = GetTheme<SelectTheme>();
     CHECK_NULL_VOID(selectTheme);
-    SelectModelNG::SetOptionBgColor(frameNode, selectTheme->GetBackgroundColor(), false);
+    SelectModelNG::SetOptionBgColor(frameNode, selectTheme->GetBackgroundColor());
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        SelectModelNG::CreateWithColorResourceObj(frameNode, resObj, SelectColorType::OPTION_BG_COLOR);
+        SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::OPTION_BG_COLOR);
     }
 }
 
@@ -408,8 +434,8 @@ void ResetOptionFontColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(selectTheme);
     SelectModelNG::SetOptionFontColor(frameNode, selectTheme->GetMenuFontColor());
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        SelectModelNG::CreateWithColorResourceObj(frameNode, resObj, SelectColorType::OPTION_FONT_COLOR);
+        SelectModelNG::SetOptionFontColorByUser(frameNode, false);
+        SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::OPTION_FONT_COLOR);
     }
 }
 
@@ -421,8 +447,7 @@ void ResetSelectedOptionFontColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(selectTheme);
     SelectModelNG::SetSelectedOptionFontColor(frameNode, selectTheme->GetSelectedColorText());
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        SelectModelNG::CreateWithColorResourceObj(frameNode, resObj, SelectColorType::SELECTED_OPTION_FONT_COLOR);
+        SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::SELECTED_OPTION_FONT_COLOR);
     }
 }
 
@@ -643,13 +668,18 @@ void SetMenuBgColorPtr(ArkUINodeHandle node, ArkUI_Uint32 color, void* menuBgCol
 {
     CHECK_NULL_VOID(node);
     SetMenuBgColor(node, color);
-    if (SystemProperties::ConfigChangePerform() && menuBgColorRawPtr) {
+    if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* menuBgColor = reinterpret_cast<ResourceObject*>(menuBgColorRawPtr);
-        auto menuBgColorResObj = AceType::Claim(menuBgColor);
-        SelectModelNG::CreateWithColorResourceObj(frameNode, menuBgColorResObj,
-            SelectColorType::MENU_BACKGROUND_COLOR);
+        SelectModelNG::SetMenuBackgroundColorByUser(frameNode, false);
+        if (menuBgColorRawPtr) {
+            auto* menuBgColor = reinterpret_cast<ResourceObject*>(menuBgColorRawPtr);
+            auto menuBgColorResObj = AceType::Claim(menuBgColor);
+            SelectModelNG::CreateWithColorResourceObj(
+                frameNode, menuBgColorResObj, SelectColorType::MENU_BACKGROUND_COLOR);
+        } else {
+            SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::MENU_BACKGROUND_COLOR);
+        }
     }
 }
 
@@ -661,8 +691,8 @@ void ResetMenuBgColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(selectTheme);
     SelectModelNG::SetMenuBackgroundColor(frameNode, selectTheme->GetBackgroundColor());
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        SelectModelNG::CreateWithColorResourceObj(frameNode, resObj, SelectColorType::MENU_BACKGROUND_COLOR);
+        SelectModelNG::SetMenuBackgroundColorByUser(frameNode, false);
+        SelectModelNG::CreateWithColorResourceObj(frameNode, nullptr, SelectColorType::MENU_BACKGROUND_COLOR);
     }
 }
 

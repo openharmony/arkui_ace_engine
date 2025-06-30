@@ -528,56 +528,6 @@ void CheckBoxPattern::UpdateUIStatus(bool check)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void CheckBoxPattern::UpdateCheckboxComponentColor(const Color& color, const CheckBoxColorType checkBoxColorType)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto paintProperty = GetPaintProperty<CheckBoxPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-
-    if (pipelineContext->IsSystmColorChange()) {
-        switch (checkBoxColorType) {
-            case CheckBoxColorType::SELECTED_COLOR:
-                paintProperty->UpdateCheckBoxSelectedColor(color);
-                paintProperty->UpdateCheckBoxSelectedColorFlagByUser(true);
-                break;
-            case CheckBoxColorType::UN_SELECTED_COLOR:
-                paintProperty->UpdateCheckBoxUnSelectedColor(color);
-                paintProperty->UpdateCheckBoxUnSelectedColorFlagByUser(true);
-                break;
-        }
-    }
-    if (host->GetRerenderable()) {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
-}
-
-void CheckBoxPattern::UpdateComponentColor(const Color& color, const ToggleColorType toggleColorType)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipelineContext = host->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto paintProperty = GetPaintProperty<CheckBoxPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-
-    if (pipelineContext->IsSystmColorChange()) {
-        switch (toggleColorType) {
-            case ToggleColorType::SELECTED_COLOR:
-                paintProperty->UpdateCheckBoxSelectedColor(color);
-                paintProperty->UpdateCheckBoxSelectedColorFlagByUser(true);
-                break;
-            default:
-                break;
-        }
-    }
-    if (host->GetRerenderable()) {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
-}
-
 void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1124,16 +1074,16 @@ bool CheckBoxPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     auto result = false;
     auto checkBoxPaintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
     CHECK_NULL_RETURN(checkBoxPaintProperty, false);
-    if (!checkBoxPaintProperty->HasCheckBoxSelectedColorFlagByUser()) {
+    if (!checkBoxPaintProperty->GetCheckBoxSelectedColorFlagByUserValue(false)) {
         checkBoxPaintProperty->UpdateCheckBoxSelectedColor(checkBoxTheme->GetActiveColor());
         result = true;
     }
-    if (!checkBoxPaintProperty->HasCheckBoxUnSelectedColorFlagByUser()) {
+    if (!checkBoxPaintProperty->GetCheckBoxUnSelectedColorFlagByUserValue(false)) {
         checkBoxPaintProperty->UpdateCheckBoxUnSelectedColor(checkBoxTheme->GetInactiveColor());
         result = true;
     }
 
-    if (!checkBoxPaintProperty->HasCheckBoxCheckMarkColorFlagByUser()) {
+    if (!checkBoxPaintProperty->GetCheckBoxCheckMarkColorFlagByUserValue(false)) {
         checkBoxPaintProperty->UpdateCheckBoxCheckMarkColor(checkBoxTheme->GetPointColor());
         result = true;
     }

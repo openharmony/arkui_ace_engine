@@ -350,17 +350,18 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperDisplayArrow(ArkUIRuntimeCallInfo*
     CalcDimension lengthValue;
     Color color;
     std::vector<RefPtr<ResourceObject>> resObjs;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     resObjs.resize(ARROW_RESOURCE_VECTOR_LENGTH);
     std::string backgroundSizeStr = ArkTSUtils::ParseJsDimension(vm, backgroundSize, lengthValue, DimensionUnit::VP,
         resObjs.at(ARROW_RESOURCE_BACKGROUND_SIZE), false)
         ? std::to_string(lengthValue.Value()) + GetDimensionUnitString(lengthValue.Unit()) : "-";
     std::string backgroundColorStr = ArkTSUtils::ParseJsColorAlpha(vm, backgroundColor, color,
-        resObjs.at(ARROW_RESOURCE_BACKGROUND_COLOR)) ? std::to_string(color.GetValue()) : "-";
+        resObjs.at(ARROW_RESOURCE_BACKGROUND_COLOR), nodeInfo) ? std::to_string(color.GetValue()) : "-";
     std::string arrowSizeStr = ArkTSUtils::ParseJsDimensionNG(vm, arrowSize, lengthValue, DimensionUnit::VP,
         resObjs.at(ARROW_RESOURCE_SIZE), false)
         ? std::to_string(lengthValue.Value()) + GetDimensionUnitString(lengthValue.Unit()) : "-";
     std::string arrowColorStr = ArkTSUtils::ParseJsColorAlpha(vm, arrowColor, color,
-        resObjs.at(ARROW_RESOURCE_COLOR)) ? std::to_string(color.GetValue()) : "-";
+        resObjs.at(ARROW_RESOURCE_COLOR), nodeInfo) ? std::to_string(color.GetValue()) : "-";
     std::string isHoverShowStr = "2";
     if (!isHoverShow->IsUndefined()) {
         isHoverShowStr = isHoverShow->ToBoolean(vm)->Value() ? "1" : "0";
@@ -802,7 +803,7 @@ void GetSpaceAndBottom(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::s
 }
 
 std::string GetSwiperDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
-    std::vector<RefPtr<ResourceObject>>& resObjs)
+    std::vector<RefPtr<ResourceObject>>& resObjs, ArkUINodeHandle nativeNode)
 {
     Local<JSValueRef> itemWidthArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_ITEM_WIDTH);
     Local<JSValueRef> itemHeightArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_ITEM_HEIGHT);
@@ -835,10 +836,11 @@ std::string GetSwiperDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM*
         mask = maskArg->ToBoolean(vm)->Value() ? "1" : "0";
     }
     Color color;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     std::string colorStr = ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color,
-        resObjs.at(DOT_INDICATOR_RESOURCE_COLOR)) ? std::to_string(color.GetValue()) : "-";
+        resObjs.at(DOT_INDICATOR_RESOURCE_COLOR), nodeInfo) ? std::to_string(color.GetValue()) : "-";
     std::string selectedColor = ArkTSUtils::ParseJsColorAlpha(vm, selectedColorArg, color,
-        resObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_COLOR)) ? std::to_string(color.GetValue()) : "-";
+        resObjs.at(DOT_INDICATOR_RESOURCE_SELECTED_COLOR), nodeInfo) ? std::to_string(color.GetValue()) : "-";
     std::string left = GetStringByValueRef(vm, leftArg, resObjs.at(INDICATOR_RESOURCE_LEFT));
     std::string top = GetStringByValueRef(vm, topArg, resObjs.at(INDICATOR_RESOURCE_TOP));
     std::string right = GetStringByValueRef(vm, rightArg, resObjs.at(INDICATOR_RESOURCE_RIGHT));
@@ -854,7 +856,7 @@ std::string GetSwiperDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM*
     return indicatorStr;
 }
 std::string GetSwiperDigitIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm,
-    std::vector<RefPtr<ResourceObject>>& resObjs)
+    std::vector<RefPtr<ResourceObject>>& resObjs, ArkUINodeHandle nativeNode)
 {
     Local<JSValueRef> fontColorArg = runtimeCallInfo->GetCallArgRef(DIGIT_INDICATOR_FONT_COLOR);
     Local<JSValueRef> selectedFontColorArg = runtimeCallInfo->GetCallArgRef(DIGIT_INDICATOR_SELECTED_FONT_COLOR);
@@ -872,10 +874,11 @@ std::string GetSwiperDigitIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaV
     Local<JSValueRef> setIgnoreSizeArg = runtimeCallInfo->GetCallArgRef(DIGIT_INDICATOR_SET_IGNORE_SIZE);
     Color color;
     CalcDimension calc;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     std::string fontColor = ArkTSUtils::ParseJsColorAlpha(vm, fontColorArg, color,
-        resObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_COLOR)) ? std::to_string(color.GetValue()) : "-";
+        resObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_COLOR), nodeInfo) ? std::to_string(color.GetValue()) : "-";
     std::string selectedFontColor = ArkTSUtils::ParseJsColorAlpha(vm, selectedFontColorArg, color,
-        resObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_SELECTED_COLOR)) ? std::to_string(color.GetValue()) : "-";
+        resObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_SELECTED_COLOR), nodeInfo) ? std::to_string(color.GetValue()) : "-";
     std::string digitFontSize = ArkTSUtils::ParseJsDimension(vm, digitFontSizeArg, calc, DimensionUnit::FP,
         resObjs.at(DIGIT_INDICATOR_RESOURCE_FONT_SIZE), false)
         ? std::to_string(calc.Value()) + GetDimensionUnitString(calc.Unit()) : "-";
@@ -925,9 +928,9 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperIndicator(ArkUIRuntimeCallInfo* ru
         std::string indicator = indicatorArg->ToBoolean(vm)->Value() ? "1" : "0";
         indicatorStr = type + "|" + indicator;
     } else if (type == "ArkDotIndicator") {
-        indicatorStr = type + "|" + GetSwiperDotIndicator(runtimeCallInfo, vm, resObjs);
+        indicatorStr = type + "|" + GetSwiperDotIndicator(runtimeCallInfo, vm, resObjs, nativeNode);
     } else if (type == "ArkDigitIndicator") {
-        indicatorStr = type + "|" + GetSwiperDigitIndicator(runtimeCallInfo, vm, resObjs);
+        indicatorStr = type + "|" + GetSwiperDigitIndicator(runtimeCallInfo, vm, resObjs, nativeNode);
     } else if (type == "IndicatorComponentController") {
         Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
         Framework::JSIndicatorController* jsController =

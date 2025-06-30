@@ -273,6 +273,9 @@ void JSSlider::SetTrackColor(const JSCallbackInfo& info)
             SliderModel::GetInstance()->CreateWithColorResourceObj(resObj, SliderColorType::TRACK_COLOR);
         }
     }
+    if (SystemProperties::ConfigChangePerform()) {
+        SliderModel::GetInstance()->CreateWithColorResourceObj(nullptr, SliderColorType::TRACK_COLOR);
+    }
     // Set track gradient color to NG::SliderModelNG
     SliderModel::GetInstance()->SetTrackBackgroundColor(gradient, isResourceColor);
 }
@@ -600,6 +603,7 @@ void JSSlider::SetBlockStyle(const JSCallbackInfo& info)
         std::string moduleName;
         if (!ParseJsMedia(image, src, resObj)) {
             ResetBlockStyle();
+            return;
         } else {
             GetJsMediaBundleInfo(image, bundleName, moduleName);
             SliderModel::GetInstance()->SetBlockImage(src, bundleName, moduleName);

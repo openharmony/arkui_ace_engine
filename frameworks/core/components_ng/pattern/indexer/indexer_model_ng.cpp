@@ -314,13 +314,18 @@ void IndexerModelNG::SetCreatChangeEvent(std::function<void(const int32_t select
 }
 
 template<typename T, typename... Args>
-void ParseType(std::string type, const RefPtr<ResourceObject>& resObj, T& result, Args... args)
+void ParseType(
+    RefPtr<FrameNode> frameNode, std::string type, const RefPtr<ResourceObject>& resObj, T& result, Args... args)
 {
+    CHECK_NULL_VOID(frameNode);
     if constexpr (std::is_same_v<T, std::optional<Color>>) {
         Color color;
+        bool setByUser = false;
         if (ResourceParseUtils::ParseResColor(resObj, color)) {
             result = color;
+            setByUser = true;
         }
+        IndexerModelNG::ChangeFlagForSetByUser(AceType::RawPtr(frameNode), type, setByUser);
     } else if constexpr (std::is_same_v<T, CalcDimension> && sizeof...(Args) == 1) {
         auto tuple = std::make_tuple(args...);
         DimensionUnit unit = std::get<0>(tuple);
@@ -366,6 +371,29 @@ void FontSizeParseFail(std::string type, const RefPtr<FrameNode>& frameNode, T& 
     }
 }
 
+void IndexerModelNG::ChangeFlagForSetByUser(FrameNode* frameNode, std::string type, bool setByUser)
+{
+    if (type == "Color") {
+        SetColorByUser(frameNode, setByUser);
+    } else if (type == "PopupColor") {
+        SetPopupColorByUser(frameNode, setByUser);
+    } else if (type == "SelectedBackgroundColor") {
+        SetSelectedBGColorByUser(frameNode, setByUser);
+    } else if (type == "PopupUnselectedColor") {
+        SetPopupUnselectedColorByUser(frameNode, setByUser);
+    } else if (type == "PopupTitleBackground") {
+        SetPopupTitleBackgroundByUser(frameNode, setByUser);
+    } else if (type == "PopupSelectedColor") {
+        SetPopupSelectedColorByUser(frameNode, setByUser);
+    } else if (type == "PopupItemBackground") {
+        SetPopupItemBackgroundByUser(frameNode, setByUser);
+    } else if (type == "PopupBackground") {
+        SetPopupBackgroundByUser(frameNode, setByUser);
+    } else if (type == "SelectedColor") {
+        SetSelectedColorByUser(frameNode, setByUser);
+    }
+}
+
 #define UPDATE_VALUE(type, name, resObj, resultType, ...)                             \
     case type:                                                                        \
         do {                                                                          \
@@ -393,7 +421,7 @@ void FontSizeParseFail(std::string type, const RefPtr<FrameNode>& frameNode, T& 
             auto frameNode = weak.Upgrade();                                                               \
             CHECK_NULL_VOID(frameNode);                                                                    \
             resultType result;                                                                             \
-            ParseType(#name, resObj, result, ##__VA_ARGS__);                                               \
+            ParseType(frameNode, #name, resObj, result, ##__VA_ARGS__);                                    \
             FontSizeParseFail(#name, frameNode, result);                                                   \
             IndexerModelNG::Set##name(AceType::RawPtr(frameNode), result);                                 \
         };                                                                                                 \
@@ -415,26 +443,26 @@ void FontSizeParseFail(std::string type, const RefPtr<FrameNode>& frameNode, T& 
         } while (false);                                                                                      \
         break
 
-#define REGISTER_RESOURCE_FONT_UPDATE_FUNC(frameNode, fontType, name, resObj, resultType, ...)      \
-    do {                                                                                            \
-        CHECK_NULL_BREAK(frameNode);                                                                \
-        auto pattern = frameNode->GetPattern();                                                     \
-        CHECK_NULL_BREAK(pattern);                                                                  \
-        pattern->RemoveResObj("indexer." #fontType #name);                                          \
-        CHECK_NULL_VOID(resObj);                                                                    \
-        CHECK_NULL_BREAK(SystemProperties::ConfigChangePerform());                                  \
+#define REGISTER_RESOURCE_FONT_UPDATE_FUNC(frameNode, fontType, name, resObj, resultType, ...)             \
+    do {                                                                                                   \
+        CHECK_NULL_BREAK(frameNode);                                                                       \
+        auto pattern = frameNode->GetPattern();                                                            \
+        CHECK_NULL_BREAK(pattern);                                                                         \
+        pattern->RemoveResObj("indexer." #fontType #name);                                                 \
+        CHECK_NULL_VOID(resObj);                                                                           \
+        CHECK_NULL_BREAK(SystemProperties::ConfigChangePerform());                                         \
         auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) { \
             auto frameNode = weak.Upgrade();                                                               \
             CHECK_NULL_VOID(frameNode);                                                                    \
-            resultType result;                                                                      \
-            ParseType(#name, resObj, result, ##__VA_ARGS__);                                        \
-            TextStyle textStyle;                                                                    \
-            FontSizeParseFail(#fontType #name, frameNode, result);                                  \
-            ACE_GET_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, fontType, textStyle, frameNode);    \
-            textStyle.SetFont##name(result);                                                        \
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, fontType, textStyle, frameNode); \
-        };                                                                                          \
-        pattern->AddResObj("indexer." #fontType #name, resObj, std::move(updateFunc));              \
+            resultType result;                                                                             \
+            ParseType(frameNode, #name, resObj, result, ##__VA_ARGS__);                                    \
+            TextStyle textStyle;                                                                           \
+            FontSizeParseFail(#fontType #name, frameNode, result);                                         \
+            ACE_GET_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, fontType, textStyle, frameNode);           \
+            textStyle.SetFont##name(result);                                                               \
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, fontType, textStyle, frameNode);        \
+        };                                                                                                 \
+        pattern->AddResObj("indexer." #fontType #name, resObj, std::move(updateFunc));                     \
     } while (false)
 
 void IndexerModelNG::CreateWithResourceObj(IndexerJsResourceType jsType, const RefPtr<ResourceObject>& resObj)

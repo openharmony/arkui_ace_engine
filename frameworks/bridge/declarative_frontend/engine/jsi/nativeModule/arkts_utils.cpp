@@ -29,7 +29,6 @@
 #include "frameworks/core/common/card_scope.h"
 #include "frameworks/core/common/resource/resource_configuration.h"
 #include "frameworks/core/common/resource/resource_parse_utils.h"
-#include "frameworks/core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -106,40 +105,87 @@ uint32_t ArkTSUtils::ColorAlphaAdapt(uint32_t origin)
     return result;
 }
 
+NodeInfo ArkTSUtils::MakeNativeNodeInfo(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if (!frameNode) {
+        return { "", ColorMode::COLOR_MODE_UNDEFINED };
+    }
+    return { frameNode ? frameNode->GetTag() : "",
+        frameNode ? frameNode->GetLocalColorMode() : ColorMode::COLOR_MODE_UNDEFINED };
+}
+
+bool ArkTSUtils::CheckDarkResource(const RefPtr<ResourceObject>& resObj)
+{
+    if (!SystemProperties::GetResourceDecoupling() || !resObj) {
+        return false;
+    }
+    auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
+    CHECK_NULL_RETURN(resourceAdapter, false);
+
+    int32_t resId = resObj->GetId();
+    bool hasDarkRes = false;
+    auto params = resObj->GetParams();
+    if (resId == -1 && (params.size() > 0)) {
+        hasDarkRes = resourceAdapter->ExistDarkResByName(params[params.size() - 1].value.value(),
+            std::to_string(resObj->GetType()));
+    } else {
+        hasDarkRes = resourceAdapter->ExistDarkResById(std::to_string(resId));
+    }
+    return hasDarkRes;
+}
+
 void ArkTSUtils::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
-    const Color& color, bool state)
+    Color& color, bool state, const NodeInfo& nodeInfo)
 {
     if (!state || !SystemProperties::ConfigChangePerform()) {
         return;
     }
+
+    auto instanceId = Container::CurrentIdSafely();
+    auto invertFunc = ColorInverter::GetInstance().GetInvertFunc(instanceId, nodeInfo.nodeTag);
+    CHECK_NULL_VOID(invertFunc);
+
+    if (nodeInfo.localColorMode == ColorMode::LIGHT) {
+        resObj = nullptr;
+        return;
+    }
+    auto colorMode = Container::CurrentColorMode();
+    bool hasDarkRes = CheckDarkResource(resObj);
+    if ((colorMode == ColorMode::DARK || nodeInfo.localColorMode == ColorMode::DARK) &&
+        (!resObj || !hasDarkRes)) {
+        color = Color(invertFunc(color.GetValue()));
+    }
     if (!resObj) {
         resObj = AceType::MakeRefPtr<ResourceObject>();
         resObj->SetIsResource(false);
-        resObj->SetInstanceId(Container::CurrentIdSafely());
+        resObj->SetInstanceId(instanceId);
     }
-    auto node = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+    resObj->SetNodeTag(nodeInfo.nodeTag);
+    resObj->SetColorMode(colorMode);
+    resObj->SetHasDarkRes(hasDarkRes);
     resObj->SetColor(color);
-    resObj->SetNodeTag(node ? node->GetTag() : "");
 }
 
 bool ArkTSUtils::ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result)
 {
     RefPtr<ResourceObject> resourceObject;
-    return ParseJsColor(vm, value, result, resourceObject);
+    NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
+    return ParseJsColor(vm, value, result, resourceObject, nodeInfo);
 }
 
 bool ArkTSUtils::ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
-    RefPtr<ResourceObject>& resourceObject)
+    RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo)
 {
     bool state = false;
     if (value->IsNumber()) {
         result = Color(value->Uint32Value(vm));
-        CompleteResourceObjectFromColor(resourceObject, result, true);
+        CompleteResourceObjectFromColor(resourceObject, result, true, nodeInfo);
         return true;
     }
     if (value->IsString(vm)) {
         state = Color::ParseColorString(value->ToString(vm)->ToString(vm), result);
-        CompleteResourceObjectFromColor(resourceObject, result, state);
+        CompleteResourceObjectFromColor(resourceObject, result, state, nodeInfo);
         return state;
     }
     if (value->IsObject(vm)) {
@@ -149,7 +195,7 @@ bool ArkTSUtils::ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, 
             return false;
         }
         state = ParseJsColorFromResource(vm, value, result, resourceObject);
-        CompleteResourceObjectFromColor(resourceObject, result, state);
+        CompleteResourceObjectFromColor(resourceObject, result, state, nodeInfo);
         return state;
     }
     return state;
@@ -158,11 +204,12 @@ bool ArkTSUtils::ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, 
 bool ArkTSUtils::ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result)
 {
     RefPtr<ResourceObject> resourceObject;
-    return ParseJsSymbolColorAlpha(vm, value, result, resourceObject);
+    NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
+    return ParseJsSymbolColorAlpha(vm, value, result, resourceObject, nodeInfo);
 }
 
 bool ArkTSUtils::ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
-    RefPtr<ResourceObject>& resourceObject)
+    RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo)
 {
     if (!value->IsNumber() && !value->IsString(vm) && !value->IsObject(vm)) {
         return false;
@@ -174,17 +221,16 @@ bool ArkTSUtils::ParseJsSymbolColorAlpha(const EcmaVM* vm, const Local<JSValueRe
     } else if (value->IsObject(vm)) {
         ParseJsColorFromResource(vm, value, result, resourceObject);
     }
-    CompleteResourceObjectFromColor(resourceObject, result, true);
+    CompleteResourceObjectFromColor(resourceObject, result, true, nodeInfo);
     return true;
 }
 
 bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& color,
-    std::vector<RefPtr<ResourceObject>>& resObjs)
+    std::vector<RefPtr<ResourceObject>>& resObjs, const NodeInfo& nodeInfo)
 {
     RefPtr<ResourceObject> resObj;
-    bool result = ArkTSUtils::ParseJsColorAlpha(vm, value, color, resObj);
+    bool result = ArkTSUtils::ParseJsColorAlpha(vm, value, color, resObj, nodeInfo);
     if (SystemProperties::ConfigChangePerform()) {
-        CompleteResourceObjectFromColor(resObj, color, result);
         if (resObj) {
             resObjs.push_back(resObj);
         } else {
@@ -197,30 +243,31 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
 bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, bool fromTheme)
 {
     RefPtr<ResourceObject> resourceObject;
-    return ParseJsColorAlpha(vm, value, result, resourceObject, fromTheme);
+    NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
+    return ParseJsColorAlpha(vm, value, result, resourceObject, nodeInfo, fromTheme);
 }
 
 bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result,
-    RefPtr<ResourceObject>& resourceObject, bool fromTheme)
+    RefPtr<ResourceObject>& resourceObject, const NodeInfo& nodeInfo, bool fromTheme)
 {
     bool state = false;
     if (value->IsNumber()) {
         result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
-        CompleteResourceObjectFromColor(resourceObject, result, true);
+        CompleteResourceObjectFromColor(resourceObject, result, true, nodeInfo);
         return true;
     }
     if (value->IsString(vm)) {
         state = Color::ParseColorString(value->ToString(vm)->ToString(vm), result);
-        CompleteResourceObjectFromColor(resourceObject, result, state);
+        CompleteResourceObjectFromColor(resourceObject, result, state, nodeInfo);
         return state;
     }
     if (value->IsObject(vm)) {
         if (ParseColorMetricsToColor(vm, value, result, resourceObject)) {
-            CompleteResourceObjectFromColor(resourceObject, result, true);
+            CompleteResourceObjectFromColor(resourceObject, result, true, nodeInfo);
             return true;
         }
         state = ParseJsColorFromResource(vm, value, result, resourceObject, fromTheme);
-        CompleteResourceObjectFromColor(resourceObject, result, state);
+        CompleteResourceObjectFromColor(resourceObject, result, state, nodeInfo);
         return state;
     }
     return false;
@@ -241,11 +288,13 @@ bool ArkTSUtils::ParseJsColorAlpha(
     const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor)
 {
     RefPtr<ResourceObject> resourceObject;
-    return ParseJsColorAlpha(vm, value, result, defaultColor, resourceObject);
+    NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
+    return ParseJsColorAlpha(vm, value, result, defaultColor, resourceObject, nodeInfo);
 }
 
 bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& value,
-    Color& result, const Color& defaultColor, RefPtr<ResourceObject>& resourceObject)
+    Color& result, const Color& defaultColor, RefPtr<ResourceObject>& resourceObject,
+    const NodeInfo& nodeInfo)
 {
     bool state = false;
     if (!value->IsNumber() && !value->IsString(vm) && !value->IsObject(vm)) {
@@ -253,16 +302,16 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
     }
     if (value->IsNumber()) {
         result = Color(ColorAlphaAdapt(value->Uint32Value(vm)));
-        CompleteResourceObjectFromColor(resourceObject, result, true);
+        CompleteResourceObjectFromColor(resourceObject, result, true, nodeInfo);
         return true;
     }
     if (value->IsString(vm)) {
         state = Color::ParseColorString(value->ToString(vm)->ToString(vm), result, defaultColor);
-        CompleteResourceObjectFromColor(resourceObject, result, state);
+        CompleteResourceObjectFromColor(resourceObject, result, state, nodeInfo);
         return state;
     }
     state = ParseJsColorFromResource(vm, value, result, resourceObject);
-    CompleteResourceObjectFromColor(resourceObject, result, state);
+    CompleteResourceObjectFromColor(resourceObject, result, state, nodeInfo);
     return state;
 }
 
@@ -1776,8 +1825,9 @@ uint32_t ArkTSUtils::parseShadowColor(const EcmaVM* vm, const Local<JSValueRef>&
 uint32_t ArkTSUtils::parseShadowColorWithResObj(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
     RefPtr<ResourceObject>& resObj)
 {
+    NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
     Color color = DEFAULT_TEXT_SHADOW_COLOR;
-    if (!ParseJsColorAlpha(vm, jsValue, color, resObj)) {
+    if (!ParseJsColorAlpha(vm, jsValue, color, resObj, nodeInfo)) {
         color = DEFAULT_TEXT_SHADOW_COLOR;
     }
     return color.GetValue();
@@ -2789,7 +2839,8 @@ void ArkTSUtils::ParseGradientCenter(const EcmaVM* vm, const Local<JSValueRef>& 
 }
 
 void ArkTSUtils::ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRef>& value,
-    std::vector<ArkUIInt32orFloat32>& colors, std::vector<RefPtr<ResourceObject>>& vectorResObj)
+    std::vector<ArkUIInt32orFloat32>& colors, std::vector<RefPtr<ResourceObject>>& vectorResObj,
+    const NodeInfo& nodeInfo)
 {
     if (!value->IsArray(vm)) {
         return;
@@ -2809,7 +2860,7 @@ void ArkTSUtils::ParseGradientColorStops(const EcmaVM *vm, const Local<JSValueRe
         Color color;
         auto colorParams = panda::ArrayRef::GetValueAt(vm, itemArray, NUM_0);
         RefPtr<ResourceObject> resObj;
-        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color, resObj)) {
+        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color, resObj, nodeInfo)) {
             continue;
         }
         if (SystemProperties::ConfigChangePerform()) {
@@ -2837,7 +2888,8 @@ void ArkTSUtils::ParseGradientColorStops(
     const EcmaVM* vm, const Local<JSValueRef>& value, std::vector<ArkUIInt32orFloat32>& colors)
 {
     std::vector<RefPtr<ResourceObject>> vectorResObj;
-    ArkTSUtils::ParseGradientColorStops(vm, value, colors, vectorResObj);
+    NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
+    ArkTSUtils::ParseGradientColorStops(vm, value, colors, vectorResObj, nodeInfo);
 }
 
 void ArkTSUtils::ParseGradientAngle(
