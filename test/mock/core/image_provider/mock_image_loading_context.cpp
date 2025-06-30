@@ -172,4 +172,9 @@ bool ImageLoadingContext::Downloadable()
 {
     return true;
 }
+
+std::string ImageLoadingContext::GetImageSizeInfo() const
+{
+    return "";
+}
 } // namespace OHOS::Ace::NG
