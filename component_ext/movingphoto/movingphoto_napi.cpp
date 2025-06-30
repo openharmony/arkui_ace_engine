@@ -356,7 +356,7 @@ napi_value RefreshMovingPhoto(napi_env env, napi_callback_info info)
     return ExtNapiUtils::CreateNull(env);
 }
 
-napi_value Pause(napi_env env, napi_callback_info info)
+napi_value PausePlayback(napi_env env, napi_callback_info info)
 {
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, NULL));
@@ -486,7 +486,7 @@ napi_value InitController(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("startPlayback", StartPlayback),
         DECLARE_NAPI_FUNCTION("stopPlayback", StopPlayback),
         DECLARE_NAPI_FUNCTION("refreshMovingPhoto", RefreshMovingPhoto),
-        DECLARE_NAPI_FUNCTION("pause", Pause),
+        DECLARE_NAPI_FUNCTION("pausePlayback", PausePlayback),
         DECLARE_NAPI_FUNCTION("reset", Reset),
         DECLARE_NAPI_FUNCTION("restart", Restart),
         DECLARE_NAPI_FUNCTION("enableTransition", EnableTransition),
