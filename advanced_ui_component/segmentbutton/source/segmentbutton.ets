@@ -1282,11 +1282,9 @@ export struct SegmentButton {
   private panGestureStartPoint: Point = { x: 0, y: 0 }
   private isPanGestureMoved: boolean = false
   @State shouldMirror: boolean = false
-  private isSegmentFocusStyleCustomized: boolean =
-    resourceToNumber(this.getUIContext()?.getHostContext(), segmentButtonTheme.SEGMENT_FOCUS_STYLE_CUSTOMIZED, 1.0) ===
-      0.0;
   private isGestureInProgress: boolean = false;
-
+  private isCustomizedCache?: boolean;
+    
   onItemsPositionChange() {
     if (this.options === void 0 || this.options.buttons === void 0) {
       return
@@ -1403,6 +1401,17 @@ export struct SegmentButton {
     return false
   }
 
+  private isSegmentFocusStyleCustomized(): boolean {
+    if (this.isCustomizedCache === undefined) {
+      this.isCustomizedCache = resourceToNumber(
+        this.getUIContext()?.getHostContext(), 
+        segmentButtonTheme.SEGMENT_FOCUS_STYLE_CUSTOMIZED,
+        1.0
+      ) < 0.1; //PC platform returns 0.0, default returns 1.0, using <0.1 to differentiate platform styles.
+    }
+    return this.isCustomizedCache;
+  }
+
   build() {
     Stack() {
       if (this.options !== void 0 && this.options.buttons != void 0) {
@@ -1465,7 +1474,7 @@ export struct SegmentButton {
           selectedIndexes: $selectedIndexes,
           maxFontScale: this.getMaxFontSize(),
           onItemClicked: this.onItemClicked,
-          isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized
+          isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized()
         })
       }
     }
