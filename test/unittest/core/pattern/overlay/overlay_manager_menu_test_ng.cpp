@@ -915,13 +915,13 @@ HWTEST_F(OverlayManagerMenuTestNg, CallMenuDisappearWithStatus001, TestSize.Leve
     column->MountToParent(rootNode);
     menuWrapperPattern->SetFilterColumnNode(column);
     auto callCount = 0;
-    auto aboutToDisapppearCallback = [&callCount]() {
+    auto aboutToDisappearCallback = [&callCount]() {
         callCount++;
     };
     auto disappearCallback = [&callCount]() {
         callCount++;
     };
-    menuWrapperPattern->RegisterMenuAboutToDisappearCallback(aboutToDisapppearCallback);
+    menuWrapperPattern->RegisterMenuAboutToDisappearCallback(aboutToDisappearCallback);
     menuWrapperPattern->RegisterMenuDisappearCallback(disappearCallback);
     menuWrapperPattern->menuStatus_ = MenuStatus::SHOW;
 
@@ -957,13 +957,13 @@ HWTEST_F(OverlayManagerMenuTestNg, CallMenuDisappearOnlyNewLifeCycle, TestSize.L
     column->MountToParent(rootNode);
     menuWrapperPattern->SetFilterColumnNode(column);
     auto callCount = 0;
-    auto aboutToDisapppearCallback = [&callCount]() {
+    auto aboutToDisappearCallback = [&callCount]() {
         callCount++;
     };
     auto disappearCallback = [&callCount]() {
         callCount++;
     };
-    menuWrapperPattern->RegisterMenuOnWillDisappearCallback(aboutToDisapppearCallback);
+    menuWrapperPattern->RegisterMenuOnWillDisappearCallback(aboutToDisappearCallback);
     menuWrapperPattern->RegisterMenuOnDidDisappearCallback(disappearCallback);
     menuWrapperPattern->menuStatus_ = MenuStatus::SHOW;
 

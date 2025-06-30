@@ -970,9 +970,11 @@ void ToggleModelNG::SetIsUserSetMargin(FrameNode* frameNode, bool isUserSet)
     CHECK_NULL_VOID(pattern);
     if (AceType::InstanceOf<SwitchPattern>(pattern)) {
         auto switchPattern = AceType::DynamicCast<SwitchPattern>(pattern);
+        CHECK_NULL_VOID(switchPattern);
         switchPattern->SetIsUserSetMargin(isUserSet);
     } else if (AceType::InstanceOf<CheckBoxPattern>(pattern)) {
         auto checkboxPattern = AceType::DynamicCast<CheckBoxPattern>(pattern);
+        CHECK_NULL_VOID(checkboxPattern);
         checkboxPattern->SetIsUserSetMargin(isUserSet);
     }
 }
