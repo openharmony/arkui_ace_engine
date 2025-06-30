@@ -206,6 +206,21 @@
       "buildFunction": "MenuLevel2Builder"
     },
     {
+      "name": "stackMenuAvoid",
+      "pageSourceFile": "src/main/ets/pages/components/menu/stackMenuAvoid.ets",
+      "buildFunction": "stackMenuAvoid"
+    },
+    {
+      "name": "MultiLevelSubMenu",
+      "pageSourceFile": "src/main/ets/pages/components/menu/MultiLevelSubMenu.ets",
+      "buildFunction": "MultiLevelSubMenu"
+    },
+    {
+      "name": "MenuTestLevel0_0",
+      "pageSourceFile": "src/main/ets/pages/components/menu/MenuTestLevel0_0.ets",
+      "buildFunction": "MenuTestLevel0_0"
+    },
+    {
       "name": "OverlayIndex",
       "pageSourceFile": "src/main/ets/pages/components/overlay/Index.ets",
       "buildFunction": "OverlayIndexBuilder"
