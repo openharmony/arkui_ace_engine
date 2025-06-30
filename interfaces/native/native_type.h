@@ -852,7 +852,7 @@ typedef enum {
     ARKUI_HIT_TEST_MODE_BLOCK_HIERARCHY,
     /**
      * Self not respond to the hit test for touch events,
-     * and all descebdants (children, grandchildren, etc.) not respond to the hit test for touch events too.
+     * and all descendants (children, grandchildren, etc.) not respond to the hit test for touch events too.
      * @since 20
      */
     ARKUI_HIT_TEST_MODE_BLOCK_DESCENDANTS,
