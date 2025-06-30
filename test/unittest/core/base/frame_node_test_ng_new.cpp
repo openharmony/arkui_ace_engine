@@ -3126,7 +3126,15 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnRecycle001, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
 
     /**
-     * @tc.steps: step2. change accessibilityProperty.
+     * @tc.steps: step2. create infoInstance.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto infoInstance = AceApplicationInfo::GetInstance();
+    EXPECT_NE(infoInstance, nullptr);
+    infoInstance->SetAccessibilityEnabled(true);
+
+    /**
+     * @tc.steps: step3. change accessibilityProperty.
      * @tc.expected: expect is not nullptr.
      */
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
@@ -3134,7 +3142,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnRecycle001, TestSize.Level1)
     accessibilityProperty->SetAccessibilityFocusState(true);
 
     /**
-     * @tc.steps: step3. change renderContext.
+     * @tc.steps: step4. change renderContext.
      * @tc.expected: expect is not nullptr.
      */
     auto renderContext = frameNode->GetRenderContext();
@@ -3142,7 +3150,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnRecycle001, TestSize.Level1)
     renderContext->UpdateAccessibilityFocus(true);
 
     /**
-     * @tc.steps: step4. test OnRecycle.
+     * @tc.steps: step5. test OnRecycle.
      * @tc.expected: expect not focused
      */
     frameNode->OnRecycle();
