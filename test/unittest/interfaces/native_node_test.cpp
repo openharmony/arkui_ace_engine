@@ -6091,6 +6091,31 @@ HWTEST_F(NativeNodeTest, NativeNodeTest099, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListItemGroupTest001
+ * @tc.desc: Test ListItemGroup set header and adapter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, ListItemGroupTest001, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto listItemGroup = nodeAPI->createNode(ARKUI_NODE_LIST_ITEM_GROUP);
+    auto header = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(listItemGroup, nullptr);
+    ArkUI_AttributeItem item0 = { nullptr, 0, nullptr, header };
+    auto ret = nodeAPI->setAttribute(listItemGroup, NODE_LIST_ITEM_GROUP_SET_HEADER, &item0);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    auto* nodeAdapter = fullImpl->getNodeAdapterAPI()->create();
+    auto adapter = reinterpret_cast<ArkUI_NodeAdapterHandle>(nodeAdapter);
+    item0.object = adapter;
+    ret = nodeAPI->setAttribute(listItemGroup, NODE_LIST_ITEM_GROUP_NODE_ADAPTER, &item0);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+
+    fullImpl->getNodeAdapterAPI()->dispose(nodeAdapter);
+    nodeAPI->disposeNode(listItemGroup);
+}
+
+/**
  * @tc.name: NativeNodeTest097
  * @tc.desc: Test SetOnVisibleAreaApproximateChange function.
  * @tc.type: FUNC
