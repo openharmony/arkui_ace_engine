@@ -31,7 +31,7 @@
          PipelineContext::SetCallBackNode(node);
          int state = (int)currentState;
          Ark_Int32 arkState = Converter::ArkValue<Ark_Int32>(state);
-         arkCallback.Invoke(arkState);
+         arkCallback.InvokeSync(arkState);
      };
      auto eventHub = frameNode->GetEventHub<NG::EventHub>();
      CHECK_NULL_VOID(eventHub);
