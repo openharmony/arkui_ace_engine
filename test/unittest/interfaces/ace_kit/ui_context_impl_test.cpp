@@ -26,6 +26,9 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#include <thread>
+#include <chrono>
+
 using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::Ace::Kit;
@@ -291,6 +294,59 @@ HWTEST_F(UIContextImplTest, RequestFrameTest002, TestSize.Level1)
     uiContext_null.RequestFrame();
 
     SUCCEED();
+}
+
+/**
+ * @tc.name: RunScopeUIDelayedTask001
+ * @tc.desc: Test adding a delayed task to the UI task list
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextImplTest, RunScopeUIDelayedTask001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize a flag to track task execution status and set param varibles for call
+     */
+    bool taskExecuted = false;
+    const std::string taskName = "taskName";
+    uint32_t delayTime = 1500;
+
+    /**
+     * @tc.steps: step2. Add a delayed task to the UI task list (name="taskName", delayTime=1500ms)
+     */
+    uiContext_->RunScopeUIDelayedTask([&]() { taskExecuted = true; }, taskName, delayTime);
+    
+    /**
+     * @tc.expected: step2. Task should be added without errors or crashes
+     */
+    SUCCEED();
+}
+
+/**
+ * @tc.name: RunScopeUIDelayedTask002
+ * @tc.desc: Test excute a delayed UI task
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIContextImplTest, RunScopeUIDelayedTask002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize a flag to track task execution status and set param varibles for call
+     */
+    bool taskExecuted = false;
+    const std::string taskName = "taskName";
+    uint32_t delayTime = 1500;
+
+    /**
+     * @tc.steps: step2. Add a delayed task to the UI task list (name="taskName", delayTime=1500ms)
+     *              Then check immediately flag should be not modified.
+     */
+    uiCotnext_->RunScopeUIDelayedTask([&]() { taskExecuted = true; }, taskName, delayTime);
+    EXPECT_FALSE(taskExecuted);
+
+    /**
+     * @tc.expected: step3. Wait for moment until task executed then check the flag, should be modified at final.
+     */
+    std::this_thread::sleep_for(std::chrono::seconds(3));
+    EXPECT_TRUE(taskExecuted);
 }
 
 /**
