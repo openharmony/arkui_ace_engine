@@ -2905,9 +2905,7 @@ void PipelineContext::OnTouchEvent(
     CHECK_RUN_ON(UI);
 
     HandlePenHoverOut(point);
-    auto gestureReferee = eventManager_->GetGestureRefereeNG(nullptr);
-    CHECK_NULL_VOID(gestureReferee);
-    if (gestureReferee->CheckSourceTypeChange(lastSourceType_)) {
+    if (CheckSourceTypeChange(point.sourceType)) {
         HandleTouchHoverOut(point);
     }
 
@@ -6356,7 +6354,6 @@ void PipelineContext::HandleTouchHoverOut(const TouchEvent& point)
     if (point.sourceTool != SourceTool::FINGER || NearZero(point.force)) {
         return;
     }
-    lastSourceType_ = SourceType::TOUCH;
     CHECK_RUN_ON(UI);
     eventManager_->CleanHoverStatusForDragBegin();
 }
@@ -6452,5 +6449,15 @@ void PipelineContext::DumpForceColor(const std::vector<std::string>& params) con
     auto invertColor = ColorInverter::GetInstance().Invert(
         color, PipelineContext::GetCurrentContext(), params[2]); // Index 2 represents the third parameter
     DumpLog::GetInstance().Print(1, "InvertColor: [" + invertColor.ToString() + "]");
+}
+
+bool PipelineContext::CheckSourceTypeChange(SourceType currentSourceType)
+{
+    bool ret = false;
+    if (currentSourceType != lastSourceType_) {
+        ret = true;
+        lastSourceType_ = currentSourceType;
+    }
+    return ret;
 }
 } // namespace OHOS::Ace::NG

@@ -351,4 +351,22 @@ HWTEST_F(NodeRenderStatusMonitorTestNg, NodeRenderStatusMonitorTestNg009, testin
     child->layoutProperty_->propVisibility_ = VisibleType::INVISIBLE;
     EXPECT_TRUE(monitor_->IsNodeRenderOut(AceType::RawPtr(child)));
 }
+
+/**
+ * @tc.name: CheckSourceTypeChangeTest
+ * @tc.desc: Test Check input source switching
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeRenderStatusMonitorTestNg, CheckSourceTypeChangeTest, testing::ext::TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->lastSourceType_ = SourceType::MOUSE;
+    EXPECT_FALSE(context->CheckSourceTypeChange(SourceType::MOUSE));
+
+    EXPECT_TRUE(context->CheckSourceTypeChange(SourceType::TOUCH));
+
+    EXPECT_TRUE(context->CheckSourceTypeChange(SourceType::MOUSE));
+    context->lastSourceType_ = SourceType::NONE;
+}
 } // namespace OHOS::Ace::NG
