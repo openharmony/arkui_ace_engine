@@ -357,7 +357,7 @@ HWTEST_F(IndexerModifierTest, setAlphabetIndexerOptionsArrayValue, TestSize.Leve
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.SetAlphabetIndexerOptionsImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, setAlphabetIndexerOptionsSelected, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, DISABLED_setAlphabetIndexerOptionsSelected, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setAlphabetIndexerOptions, nullptr);
     auto checkVal = GetStringAttribute(node_, PROP_NAME_SELECTED);

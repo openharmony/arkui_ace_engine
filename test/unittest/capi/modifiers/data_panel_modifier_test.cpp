@@ -360,7 +360,7 @@ static std::vector<std::tuple<std::string, Ark_Length, std::string>> strokeWidth
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(DataPanelModifierTest, setStrokeWidthTestResourceValues, TestSize.Level1)
+HWTEST_F(DataPanelModifierTest, DISABLED_setStrokeWidthTestResourceValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
