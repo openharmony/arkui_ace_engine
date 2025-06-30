@@ -265,9 +265,11 @@ void StepperLayoutAlgorithm::ReCalcStepperSize(
     totalSize.AddHeight(controlHeight);
     const auto& padding = stepperLayoutProperty->CreatePaddingAndBorder();
     AddPaddingToSize(padding, totalSize);
-
+    auto realSize = UpdateOptionSizeByCalcLayoutConstraint(OptionalSizeF(totalSize.Width(), totalSize.Height()),
+        layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint(),
+        layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()->percentReference);
     auto stepperGeometryNode = stepperNode->GetGeometryNode();
-    stepperGeometryNode->SetFrameSize(totalSize);
+    stepperGeometryNode->SetFrameSize(realSize.ConvertToSizeT());
 }
 
 void StepperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
