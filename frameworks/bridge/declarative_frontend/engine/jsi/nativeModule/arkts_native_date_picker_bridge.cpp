@@ -89,7 +89,8 @@ ArkUINativeModuleValue DatePickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     }
     Color color;
     RefPtr<ResourceObject> textColorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color, textColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color, textColorResObj, nodeInfo)) {
         Color::ParseColorString("#ff0a59f7", color);
     }
     std::string fontInfo =
@@ -150,7 +151,8 @@ ArkUINativeModuleValue DatePickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     }
     Color color;
     RefPtr<ResourceObject> textColorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color, textColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color, textColorResObj, nodeInfo)) {
         Color::ParseColorString("#ff182431", color);
     }
     std::string fontInfo =
@@ -211,7 +213,8 @@ ArkUINativeModuleValue DatePickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     }
     Color color;
     RefPtr<ResourceObject> textColorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color, textColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, textColorArgs, color, textColorResObj, nodeInfo)) {
         Color::ParseColorString("#ff182431", color);
     }
     std::string fontInfo =

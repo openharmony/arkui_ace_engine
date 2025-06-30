@@ -93,7 +93,8 @@ ArkUINativeModuleValue CalendarPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* 
     Color textColor = calendarTheme->GetEntryFontColor();
     RefPtr<ResourceObject> textColorResObj;
     if (!colorArg->IsUndefined()) {
-        ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor, textColorResObj);
+        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor, textColorResObj, nodeInfo);
     }
     CalcDimension fontSizeData(DEFAULT_TEXTSTYLE_FONTSIZE);
     std::string fontSize = fontSizeData.ToString();

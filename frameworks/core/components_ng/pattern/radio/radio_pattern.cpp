@@ -39,7 +39,7 @@ constexpr float DEFAULT_INTERPOLATINGSPRING_VELOCITY = 0.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_MASS = 1.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_STIFFNESS = 728.0f;
 constexpr float DEFAULT_INTERPOLATINGSPRING_DAMPING = 46.0f;
-
+constexpr Color DEFAULT_INDICATOR_DARK_LIGHT_COLOR = Color(0xffffffff);
 } // namespace
 
 void RadioPattern::OnAttachToFrameNode()
@@ -1053,6 +1053,8 @@ void RadioPattern::UpdateRadioComponentColor(const Color& color, const RadioColo
             paintProperty->UpdateRadioIndicatorColor(color);
             ImageNodeCreate();
             break;
+        default:
+            break;
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -1135,17 +1137,30 @@ void RadioPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(pipeline);
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
     CHECK_NULL_VOID(radioTheme);
+    auto pattern = host->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+
     if (!paintProperty->GetRadioCheckedBackgroundColorSetByUser().value_or(false)) {
         auto activeColor = radioTheme->GetActiveColor();
         paintProperty->UpdateRadioCheckedBackgroundColor(activeColor);
     }
     if (!paintProperty->GetRadioUncheckedBorderColorSetByUser().value_or(false)) {
-        auto inActiveColor = radioTheme->GetInactiveColor();
+        Color inActiveColor;
+        if (pattern->GetUncheckedBorderColorByJSRadioTheme()) {
+            inActiveColor = radioTheme->GetInactiveColor();
+        } else {
+            inActiveColor = radioTheme->GetUnCheckBorderColor();
+        }
         paintProperty->UpdateRadioUncheckedBorderColor(inActiveColor);
     }
     if (!paintProperty->GetRadioIndicatorColorSetByUser().value_or(false)) {
-        auto pointColor = radioTheme->GetPointColor();
-        paintProperty->UpdateRadioIndicatorColor(pointColor);
+        Color pointColor;
+        if (pattern->GetIndicatorColorByJSRadioTheme()) {
+            pointColor = radioTheme->GetPointColor();
+            paintProperty->UpdateRadioIndicatorColor(pointColor);
+        } else {
+            paintProperty->UpdateRadioIndicatorColor(DEFAULT_INDICATOR_DARK_LIGHT_COLOR);
+        }
         ImageNodeCreate();
     }
     host->MarkModifyDone();

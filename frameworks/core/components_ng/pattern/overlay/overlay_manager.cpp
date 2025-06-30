@@ -2615,6 +2615,7 @@ void OverlayManager::HideAllMenusWithoutAnimation(bool showInSubwindow)
         }
         RemoveMenuFilter(menuNode, false);
         EraseMenuInfo(targetId);
+        SetIsMenuShow(false);
     }
 }
 

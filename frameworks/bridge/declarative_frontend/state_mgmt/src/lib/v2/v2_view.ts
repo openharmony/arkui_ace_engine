@@ -60,6 +60,10 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         super(parent, elmtId, extraInfo);
         this.setIsV2(true);
         ViewBuildNodeBase.arkThemeScopeManager?.onViewPUCreate(this);
+        if (parent instanceof ViewPU) {
+            stateMgmtConsole.debug(`Both V1 and V2 components are involved. Disabling Parent-Child optimization`)
+            ObserveV2.getObserve().isParentChildOptimizable_ = false;
+        }
         stateMgmtConsole.debug(`ViewV2 constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
     }
 

@@ -562,29 +562,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchToJsonValue02, TestSize.Level1)
 }
 
 /**
- * @tc.name: FrameNodeGeometryNodeToJsonValue01
- * @tc.desc: Test the function GeometryNodeToJsonValue
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeGeometryNodeToJsonValue01, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode.
-     */
-    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
-    EXPECT_NE(frameNode->pattern_, nullptr);
-
-    /**
-     * @tc.steps: step2. call the function GeometryNodeToJsonValue.
-     */
-    InspectorFilter testFilter;
-    auto jsonValue = std::make_unique<JsonValue>();
-    testFilter.AddFilterAttr("focusable");
-    frameNode->GeometryNodeToJsonValue(jsonValue, testFilter);
-    EXPECT_FALSE(jsonValue->GetBool("enabled", false));
-}
-
-/**
  * @tc.name: FrameNodeToTreeJson01
  * @tc.desc: Test the function ToTreeJson
  * @tc.type: FUNC

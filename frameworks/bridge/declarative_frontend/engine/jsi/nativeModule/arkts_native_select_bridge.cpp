@@ -194,7 +194,8 @@ ArkUINativeModuleValue SelectBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeC
 
     Color fontColor;
     RefPtr<ResourceObject> fontColorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, fontColor, fontColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, fontColor, fontColorResObj, nodeInfo)) {
         return ResetFontColor(runtimeCallInfo);
     }
     auto fontColorRawPtr = AceType::RawPtr(fontColorResObj);
@@ -213,7 +214,8 @@ ArkUINativeModuleValue SelectBridge::SetSelectedOptionBgColor(ArkUIRuntimeCallIn
 
     Color selectedOptionBgColor;
     RefPtr<ResourceObject> optionBgColorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, selectedOptionBgColor, optionBgColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, selectedOptionBgColor, optionBgColorResObj, nodeInfo)) {
         return ResetSelectedOptionBgColor(runtimeCallInfo);
     }
     auto optionBgColorRawPtr = AceType::RawPtr(optionBgColorResObj);
@@ -232,7 +234,8 @@ ArkUINativeModuleValue SelectBridge::SetOptionBgColor(ArkUIRuntimeCallInfo* runt
 
     Color optionBgColor;
     RefPtr<ResourceObject> optionBgColorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, optionBgColor, optionBgColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, optionBgColor, optionBgColorResObj, nodeInfo)) {
         return ResetOptionBgColor(runtimeCallInfo);
     }
     auto optionBgColorRawPtr = AceType::RawPtr(optionBgColorResObj);
@@ -251,7 +254,8 @@ ArkUINativeModuleValue SelectBridge::SetOptionFontColor(ArkUIRuntimeCallInfo* ru
 
     Color optionFontColor;
     RefPtr<ResourceObject> optionFontColorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, optionFontColor, optionFontColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, optionFontColor, optionFontColorResObj, nodeInfo)) {
         return ResetOptionFontColor(runtimeCallInfo);
     }
     auto optionFontColorRawPtr = AceType::RawPtr(optionFontColorResObj);
@@ -269,7 +273,8 @@ ArkUINativeModuleValue SelectBridge::SetSelectedOptionFontColor(ArkUIRuntimeCall
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Color optionFontColor;
     RefPtr<ResourceObject> selectOptionFontColorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, optionFontColor, selectOptionFontColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, optionFontColor, selectOptionFontColorResObj, nodeInfo)) {
         return ResetSelectedOptionFontColor(runtimeCallInfo);
     }
     auto selectOptionFontColorRawPtr = AceType::RawPtr(selectOptionFontColorResObj);
@@ -875,7 +880,8 @@ ArkUINativeModuleValue SelectBridge::SetMenuBackgroundColor(ArkUIRuntimeCallInfo
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> menuBackgroundColorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, menuBackgroundColorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, menuBackgroundColorResObj, nodeInfo)) {
         return ResetMenuBackgroundColor(runtimeCallInfo);
     }
     auto menuBackgroundColorRawPtr = AceType::RawPtr(menuBackgroundColorResObj);

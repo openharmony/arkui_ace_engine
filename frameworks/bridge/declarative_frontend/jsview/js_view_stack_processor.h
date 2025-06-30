@@ -97,6 +97,11 @@ public:
      */
     static void JsMoveDeletedElmtIds(const JSCallbackInfo& info);
 
+    /*
+    * Orders a frame request and registers a callback on next vsync
+    */
+    static void JSScheduleUpdateOnNextVSync(const JSCallbackInfo& info);
+
     /**
      * Send state info profiler when state var changed
      * Used in V2.

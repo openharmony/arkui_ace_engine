@@ -200,6 +200,9 @@ abstract class ViewPU extends PUV2ViewBase
 
     ViewBuildNodeBase.arkThemeScopeManager?.onViewPUCreate(this)
 
+    // Disable optimization when V1 is involved.
+    ObserveV2.getObserve().isParentChildOptimizable_ = false;
+
     if (localStorage) {
       this.localStorage_ = localStorage;
       stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: Using LocalStorage instance provided via @Entry or view instance creation.`);

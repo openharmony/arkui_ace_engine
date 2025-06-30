@@ -32,7 +32,8 @@ ArkUINativeModuleValue HyperlinkBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCa
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> resourceObject;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         GetArkUINodeModifiers()->getHyperlinkModifier()->resetHyperlinkColor(nativeNode);
     } else {
         GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkColor(

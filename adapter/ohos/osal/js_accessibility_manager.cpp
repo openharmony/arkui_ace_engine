@@ -58,6 +58,7 @@ constexpr int32_t DELAY_SEND_EVENT_MILLISECOND = 20;
 constexpr uint32_t SUB_TREE_OFFSET_IN_PAGE_ID = 16;
 constexpr int32_t MAX_PAGE_ID_WITH_SUB_TREE = (1 << SUB_TREE_OFFSET_IN_PAGE_ID);
 constexpr int32_t MIN_NUM = 2;
+constexpr size_t MIN_PARAMS_SIZE = 2;
 constexpr int64_t INVALID_NODE_ID = -1;
 
 const std::string ACTION_ARGU_SCROLL_STUB = "scrolltype"; // wait for change
@@ -4455,6 +4456,35 @@ bool DumpProcessGetCheckListParameters(
     }
     return true;
 }
+
+bool DumpProcessSpecificSearchParameters(
+    const std::vector<std::string>& params,
+    int64_t& nodeId,
+    std::string& propertyTarget,
+    int32_t& propertyType)
+{
+    constexpr int32_t NUM_PARAMETERS_DIMENSION = 3;
+    if (params.size() < MIN_PARAMS_SIZE) {
+        return false;
+    }
+
+    for (auto arg = params.begin() + 1; arg != params.end(); ++arg) {
+        if (*arg == "--specific-search") {
+            if (std::distance(arg, params.end()) <= NUM_PARAMETERS_DIMENSION) {
+                DumpLog::GetInstance().Print(std::string("Error: parameters need with data"));
+                return false;
+            }
+            ++arg;
+            nodeId = StringUtils::StringToLongInt(*arg);
+            ++arg;
+            propertyTarget = *arg;
+            ++arg;
+            propertyType = StringUtils::StringToInt(*arg);
+            return true;
+        }
+    }
+    return false;
+}
 } // DFX related
 
 void JsAccessibilityManager::DumpInjectActionTest(const std::vector<std::string>& params)
@@ -4611,6 +4641,44 @@ void JsAccessibilityManager::DumpGetCheckListTest(const std::vector<std::string>
         DumpLog::GetInstance().Print("white list No: "+ std::to_string(event));
     }
     DumpLog::GetInstance().Print(std::string("Result: Get White List Done"));
+}
+
+void JsAccessibilityManager::DumpSpecificPropertySearchTest(const std::vector<std::string>& params, uint32_t windowId)
+{
+    int64_t nodeId = INVALID_NODE_ID;
+    std::string propertyTarget;
+    int32_t propertyType = 0;
+    if (!DumpProcessSpecificSearchParameters(params, nodeId, propertyTarget, propertyType)) {
+        return;
+    }
+
+    if (propertyType != SEARCH_TYPE::CUSTOMID) {
+        return;
+    }
+    auto pipeline = GetPipelineByWindowId(windowId);
+    CHECK_NULL_VOID(pipeline);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_VOID(ngPipeline);
+
+    RefPtr<NG::FrameNode> frameNode;
+    ngPipeline = FindPipelineByElementId(nodeId, frameNode);
+    CHECK_NULL_VOID(frameNode);
+
+    std::list<AccessibilityElementInfo> infos;
+    std::list<AccessibilityElementInfo> treeInfos;
+    SpecificPropertyParam propertyParam {
+        .propertyTarget = propertyTarget, .propertyType = static_cast<SEARCH_TYPE>(propertyType)};
+    SearchElementInfoByCustomIdNG(nodeId, propertyParam.propertyTarget, infos, treeInfos, ngPipeline);
+    DumpLog::GetInstance().Print(std::string("customId search start"));
+    DumpLog::GetInstance().Print("info size: " + std::to_string(infos.size()));
+    for (const auto& info : infos) {
+        DumpLog::GetInstance().Print("info Element ID: " + std::to_string(info.GetAccessibilityId()));
+    }
+    DumpLog::GetInstance().Print("treeInfos size: " + std::to_string(treeInfos.size()));
+    for (const auto& treeInfo : treeInfos) {
+        DumpLog::GetInstance().Print("treeInfo Element ID " + std::to_string(treeInfo.GetAccessibilityId()));
+    }
+    DumpLog::GetInstance().Print(std::string("Result: customId search done"));
 }
 
 void JsAccessibilityManager::DumpTreeNG(bool useWindowId, uint32_t windowId, int64_t rootId, bool isDumpSimplify)
@@ -4783,6 +4851,9 @@ bool JsAccessibilityManager::DumpInfoParams(const std::vector<std::string>& para
         } else if (*arg == "--get-whitelist") {
             argument.mode = DumpMode::GET_CHECKLIST_TEST;
             break;
+        } else if (*arg == "--specific-search") {
+            argument.mode = DumpMode::SPECIFIC_SEARCH_TEST;
+            break;
         } else if (*arg == "-v") {
             argument.verbose = true;
         } else if (*arg == "-json") {
@@ -4853,6 +4924,9 @@ void JsAccessibilityManager::ChooseDumpEvent(const std::vector<std::string>& par
             break;
         case DumpMode::GET_CHECKLIST_TEST:
             DumpGetCheckListTest(params);
+            break;
+        case DumpMode::SPECIFIC_SEARCH_TEST:
+            DumpSpecificPropertySearchTest(params, windowId);
             break;
         default:
             DumpLog::GetInstance().Print("Error: invalid arguments!");
@@ -5524,7 +5598,7 @@ RetError JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAcce
     if (!jsAccessibilityManager) {
         std::list<AccessibilityElementInfo> infos;
         callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
-        TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "SetSearchElementInfoByAccessibilityIdResult, requestId: %{public}d",
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "SetSearchElementInfoByAccessibilityIdResult, requestId: %{public}d",
             requestId);
         return RET_OK;
     }
@@ -5532,7 +5606,7 @@ RetError JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAcce
     if (!context) {
         std::list<AccessibilityElementInfo> infos;
         callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
-        TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "SetSearchElementInfoByAccessibilityIdResult, requestId: %{public}d",
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "SetSearchElementInfoByAccessibilityIdResult, requestId: %{public}d",
             requestId);
         return RET_OK;
     }
@@ -5543,7 +5617,7 @@ RetError JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAcce
             if (!jsAccessibilityManager) {
                 std::list<AccessibilityElementInfo> infos;
                 callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
-                TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY,
+                TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
                          "SetSearchElementInfoByAccessibilityIdResult, requestId: %{public}d", requestId);
                 return;
             }
@@ -5554,6 +5628,71 @@ RetError JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAcce
         TaskExecutor::TaskType::UI, "ArkUIAccessibilitySearchElementInfoById");
     return RET_OK;
 }
+
+void JsAccessibilityManager::JsInteractionOperation::HandleSearchElementInfoCallback(
+    AccessibilityElementOperatorCallback& callback, int32_t requestId)
+{
+    std::list<AccessibilityElementInfo> infos;
+    std::list<AccessibilityElementInfo> treeInfos;
+    callback.SetSearchElementInfoBySpecificPropertyResult(infos, treeInfos, requestId);
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+        "SetSearchElementInfoBySpecificPropertyResult, requestId: %{public}d", requestId);
+}
+
+void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoBySpecificProperty(const int64_t elementId,
+    const SpecificPropertyParam &param, const int32_t requestId, AccessibilityElementOperatorCallback &callback)
+{
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "ArkUI search by id: %{public}" PRId64 ", target: %{public}s,"
+        "type: %{public}d", elementId, param.propertyTarget.c_str(), param.propertyType);
+
+    int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+    int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
+
+    auto jsAccessibilityManager = GetHandler().Upgrade();
+    if (!jsAccessibilityManager) {
+        std::list<AccessibilityElementInfo> infos;
+        std::list<AccessibilityElementInfo> treeInfos;
+        callback.SetSearchElementInfoBySpecificPropertyResult(infos, treeInfos, requestId);
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "SetSearchElementInfoBySpecificPropertyResult, requestId: %{public}d",
+            requestId);
+        return;
+    }
+
+    auto windowId = windowId_;
+    auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
+    if (!context) {
+        std::list<AccessibilityElementInfo> infos;
+        std::list<AccessibilityElementInfo> treeInfos;
+        callback.SetSearchElementInfoBySpecificPropertyResult(infos, treeInfos, requestId);
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "SetSearchElementInfoBySpecificPropertyResult, requestId: %{public}d",
+            requestId);
+        return;
+    }
+    auto executor = context->GetTaskExecutor();
+    if (!executor) {
+        HandleSearchElementInfoCallback(callback, requestId);
+        return;
+    }
+
+    executor->PostTask(
+        [weak = GetHandler(), splitElementId, &param, requestId, &callback, windowId]() {
+            auto jsAccessibilityManager = weak.Upgrade();
+            if (!jsAccessibilityManager) {
+                std::list<AccessibilityElementInfo> infos;
+                std::list<AccessibilityElementInfo> treeInfos;
+                callback.SetSearchElementInfoBySpecificPropertyResult(infos, treeInfos, requestId);
+                TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+                    "SetSearchElementInfoBySpecificPropertyResult, requestId: %{public}d", requestId);
+            }
+            ACE_SCOPED_TRACE("SearchElementInfoBySpecificProperty");
+            jsAccessibilityManager->SearchElementInfoBySpecificProperty(
+                splitElementId, param, requestId, callback, windowId);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIAccessibilitySearchElementInfoByProperty");
+    return;
+}
+
 #ifdef WEB_SUPPORTED
 
 RetError JsAccessibilityManager::WebInteractionOperation::SearchElementInfoByAccessibilityId(const int64_t elementId,
@@ -5588,6 +5727,15 @@ RetError JsAccessibilityManager::WebInteractionOperation::SearchElementInfoByAcc
         },
         TaskExecutor::TaskType::UI, "ArkWebAccessibilitySearchElementInfoById");
     return RET_OK;
+}
+
+void JsAccessibilityManager::WebInteractionOperation::SearchElementInfoBySpecificProperty(
+    const int64_t elementId, const SpecificPropertyParam &param, const int32_t requestId,
+    AccessibilityElementOperatorCallback &callback)
+{
+    std::list<AccessibilityElementInfo> infos;
+    std::list<AccessibilityElementInfo> treeInfos;
+    callback.SetSearchElementInfoBySpecificPropertyResult(infos, treeInfos, requestId);
 }
 
 void JsAccessibilityManager::WebInteractionOperation::SearchElementInfosByText(const int64_t elementId,
@@ -5823,6 +5971,101 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(int64_t elemen
     UpdateWebEmbedParent(infos, node, commonProperty);
 }
 
+bool JsAccessibilityManager::SetAccessibilityCustomId(RefPtr<NG::FrameNode> checkNode, const std::string &customId,
+    CommonProperty &commonProperty, std::list<AccessibilityElementInfo> &infos, const RefPtr<PipelineBase>& context)
+{
+    if (checkNode->GetInspectorId().value_or("") == customId) {
+        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+        CHECK_NULL_RETURN(ngPipeline, false);
+        auto rootNode = ngPipeline->GetRootElement();
+        CHECK_NULL_RETURN(rootNode, false);
+        AccessibilityElementInfo nodeInfo;
+        UpdateAccessibilityElementInfo(checkNode, commonProperty, nodeInfo, ngPipeline);
+        SetRootAccessibilityVisible(checkNode, nodeInfo);
+        SetRootAccessibilityNextFocusId(checkNode, rootNode, nodeInfo);
+        SetRootAccessibilityPreFocusId(checkNode, rootNode, nodeInfo,
+            nextFocusMapWithSubWindow_[context->GetInstanceId()]);
+        infos.emplace_back(nodeInfo);
+        return true;
+    }
+    return false;
+}
+
+void JsAccessibilityManager::FindUIExtensionAccessibilityElement(RefPtr<NG::FrameNode> checkNode,
+    const std::string &customId, std::list<AccessibilityElementInfo> &treeInfos,
+    std::list<AccessibilityElementInfo> &infos, const RefPtr<PipelineBase>& context)
+{
+    auto nodeId = checkNode->GetAccessibilityId();
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_VOID(ngPipeline);
+    auto rootNode = ngPipeline->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+    if (uiExtensionManager && uiExtensionManager->IsWrapExtensionAbilityId(nodeId)) {
+        std::list<AccessibilityElementInfo> ueaInfos;
+        int32_t mode = static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN);
+        SearchParameter param {nodeId, "", mode, NG::UI_EXTENSION_OFFSET_MAX};
+        SearchExtensionElementInfoByAccessibilityIdNG(param, rootNode, ueaInfos, context, ngPipeline);
+        for (auto& ueaInfo : ueaInfos) {
+            if (ueaInfo.GetInspectorKey() == customId) {
+                infos.emplace_back(ueaInfo);
+                treeInfos.clear();
+                break;
+            }
+        }
+        if (!infos.empty()) {
+            return;
+        }
+    }
+}
+
+void JsAccessibilityManager::SearchElementInfoByCustomIdNG(const int64_t elementId, const std::string &customId,
+    std::list<AccessibilityElementInfo> &infos, std::list<AccessibilityElementInfo> &treeInfos,
+    const RefPtr<PipelineBase>& context)
+{
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId: %{public}" PRId64 ", customId: %{public}s",
+        elementId, customId.c_str());
+    auto mainContext = context_.Upgrade();
+    CHECK_NULL_VOID(mainContext);
+
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    CHECK_NULL_VOID(ngPipeline);
+    auto rootNode = ngPipeline->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+
+    CommonProperty commonProperty;
+    GenerateCommonProperty(ngPipeline, commonProperty, mainContext, rootNode);
+    int64_t nodeId = elementId;
+    if (elementId == -1) {
+        nodeId = rootNode->GetAccessibilityId();
+    }
+    auto node = GetFramenodeByAccessibilityId(rootNode, nodeId);
+    CHECK_NULL_VOID(node);
+    std::list<RefPtr<NG::FrameNode>> children { node };
+    while (!children.empty()) {
+        auto checkNode = children.front();
+        children.pop_front();
+        if (SetAccessibilityCustomId(checkNode, customId, commonProperty, infos, context)) {
+            treeInfos.clear();
+            break;
+        }
+#ifdef WINDOW_SCENE_SUPPORTED
+    FindUIExtensionAccessibilityElement(checkNode, customId, treeInfos, infos, context);
+#endif
+        auto accessibilityProperty = checkNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (accessibilityProperty && accessibilityProperty->GetChildTreeId() != -1) {
+            AccessibilityElementInfo nodeInfo;
+            UpdateAccessibilityElementInfo(checkNode, commonProperty, nodeInfo, ngPipeline);
+            SetRootAccessibilityVisible(checkNode, nodeInfo);
+            SetRootAccessibilityNextFocusId(checkNode, rootNode, nodeInfo);
+            SetRootAccessibilityPreFocusId(checkNode, rootNode, nodeInfo,
+                nextFocusMapWithSubWindow_[context->GetInstanceId()]);
+            treeInfos.emplace_back(nodeInfo);
+        }
+        GetChildrenFromFrameNode(checkNode, children, commonProperty);
+    }
+}
+
 void JsAccessibilityManager::SearchExtensionElementInfoByAccessibilityIdNG(const SearchParameter& searchParam,
     const RefPtr<NG::FrameNode>& node, std::list<Accessibility::AccessibilityElementInfo>& infos,
     const RefPtr<PipelineBase>& context, const RefPtr<NG::PipelineContext>& ngPipeline)
@@ -5894,6 +6137,31 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(const SearchParameter& s
         infos.emplace_back(info);
     }
 #endif
+}
+
+void JsAccessibilityManager::SearchElementInfoBySpecificProperty(const int64_t elementId,
+    const SpecificPropertyParam &param, const int32_t requestId,
+    AccessibilityElementOperatorCallback &callback, const int32_t windowId)
+{
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId: %{public}" PRId64 ", propType: %{public}d,"
+        "propTarget: %{public}s", elementId, param.propertyType, param.propertyTarget.c_str());
+    std::list<AccessibilityElementInfo> infos;
+    std::list<AccessibilityElementInfo> treeInfos;
+
+    auto pipeline = GetPipelineByWindowId(windowId);
+    if (pipeline) {
+        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+        if (ngPipeline) {
+            if (param.propertyType == SEARCH_TYPE::CUSTOMID) {
+                SearchElementInfoByCustomIdNG(elementId, param.propertyTarget, infos, treeInfos, pipeline);
+            }
+        } else {
+            SearchAccessibilityNodeBySpecificProperty(elementId, param, requestId, callback, windowId);
+        }
+    }
+
+    SetSearchElementInfoByCustomIdResult(callback, infos, treeInfos, requestId);
+    return;
 }
 
 RefPtr<NG::FrameNode> JsAccessibilityManager::FindNodeFromRootByExtensionId(
@@ -6299,13 +6567,13 @@ void JsAccessibilityManager::JsInteractionOperation::ExecuteAction(const int64_t
 
     auto jsAccessibilityManager = GetHandler().Upgrade();
     if (!jsAccessibilityManager) {
-        TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "ExecuteAction failed, requestId: %{public}d", requestId);
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "ExecuteAction failed, requestId: %{public}d", requestId);
         callback.SetExecuteActionResult(false, requestId);
         return;
     }
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
     if (!context) {
-        TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "ExecuteAction failed, requestId: %{public}d", requestId);
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "ExecuteAction failed, requestId: %{public}d", requestId);
         callback.SetExecuteActionResult(false, requestId);
         return;
     }
@@ -6316,7 +6584,7 @@ void JsAccessibilityManager::JsInteractionOperation::ExecuteAction(const int64_t
         [weak = GetHandler(), splitElementId, param, requestId, &callback, windowId] {
             auto jsAccessibilityManager = weak.Upgrade();
             if (!jsAccessibilityManager) {
-                TAG_LOGE(AceLogTag::ACE_ACCESSIBILITY, "ExecuteAction failed, requestId: %{public}d", requestId);
+                TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "ExecuteAction failed, requestId: %{public}d", requestId);
                 callback.SetExecuteActionResult(false, requestId);
                 return;
             }
@@ -8158,6 +8426,31 @@ void JsAccessibilityManager::SetSearchElementInfoByAccessibilityIdResult(Accessi
         }, TaskExecutor::TaskType::BACKGROUND, "ArkUIAccessibilitySetSearchElementInfoById");
 }
 
+void JsAccessibilityManager::SetSearchElementInfoByCustomIdResult(AccessibilityElementOperatorCallback& callback,
+    std::list<AccessibilityElementInfo> &infos, const std::list<AccessibilityElementInfo> &treeInfos,
+    const int32_t requestId)
+{
+    if (!IsRegister()) {
+        return;
+    }
+    auto context = GetPipelineContext().Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), infos = std::move(infos), treeInfos = std::move(treeInfos),
+            &callback, requestId] () mutable {
+            auto jsAccessibilityManager = weak.Upgrade();
+            CHECK_NULL_VOID(jsAccessibilityManager);
+            TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "winId: %{public}d, treeId: %{public}d, reqId: %{public}d",
+                jsAccessibilityManager->windowId_, jsAccessibilityManager->treeId_, requestId);
+            if (!jsAccessibilityManager->IsRegister()) {
+                return;
+            }
+            jsAccessibilityManager->UpdateElementInfosTreeId(infos);
+            callback.SetSearchElementInfoBySpecificPropertyResult(infos, treeInfos, requestId);
+        }, TaskExecutor::TaskType::BACKGROUND, "ArkUIAccessibilitySetSearchElementInfoById");
+    return;
+}
+
 void JsAccessibilityManager::SetSearchElementInfoByTextResult(AccessibilityElementOperatorCallback& callback,
     std::list<AccessibilityElementInfo>&& infos, const int32_t requestId)
 {
@@ -8841,5 +9134,59 @@ bool JsAccessibilityManager::CheckWhiteList(const uint32_t& eventType)
         }
     }
     return std::find(whiteList.begin(), whiteList.end(), eventType) != whiteList.end();
+}
+
+void JsAccessibilityManager::SearchAccessibilityNodeBySpecificProperty(const int64_t elementId,
+    const SpecificPropertyParam &param, const int32_t requestId,
+    AccessibilityElementOperatorCallback &callback, const int32_t windowId)
+{
+    std::list<AccessibilityElementInfo> infos;
+    std::list<AccessibilityElementInfo> treeInfos;
+
+    if (param.propertyType != SEARCH_TYPE::CUSTOMID) {
+        SetSearchElementInfoByCustomIdResult(callback, infos, treeInfos, requestId);
+        return;
+    }
+
+    auto pipeline = GetPipelineByWindowId(windowId);
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    if (!ngPipeline) {
+        SetSearchElementInfoByCustomIdResult(callback, infos, treeInfos, requestId);
+        return;
+    }
+    auto rootNode = ngPipeline->GetRootElement();
+
+    int64_t nodeId = elementId;
+    if (elementId == -1) {
+        nodeId = rootNode->GetAccessibilityId();
+    }
+    auto weak = WeakClaim(this);
+    auto jsAccessibilityManager = weak.Upgrade();
+    CHECK_NULL_VOID(jsAccessibilityManager);
+    auto node = jsAccessibilityManager->GetAccessibilityNodeFromPage(nodeId);
+    if (!node) {
+        SetSearchElementInfoByCustomIdResult(callback, infos, treeInfos, requestId);
+        return;
+    }
+    std::list<AccessibilityElementInfo> nodeInfos;
+    AccessibilityElementInfo nodeInfo;
+    UpdateAccessibilityNodeInfo(node, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_);
+    nodeInfos.push_back(nodeInfo);
+    // cache parent/siblings/children infos
+    UpdateCacheInfo(
+        infos,
+        static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN),
+        node,
+        jsAccessibilityManager,
+        jsAccessibilityManager->windowId_);
+
+    for (auto& nodeInfo : nodeInfos) {
+        if (nodeInfo.GetInspectorKey() == param.propertyTarget) {
+            infos.emplace_back(nodeInfo);
+            break;
+        }
+    }
+    SetSearchElementInfoByCustomIdResult(callback, infos, treeInfos, requestId);
+    return;
 }
 } // namespace OHOS::Ace::Framework

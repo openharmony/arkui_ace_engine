@@ -570,6 +570,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     }
     CheckScrollable();
     MarkSelectedItems();
+    ChangeCanStayOverScroll();
 
     if (gridLayoutAlgorithm->MeasureInNextFrame()) {
         ACE_SCOPED_TRACE("Grid MeasureInNextFrame");

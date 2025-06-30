@@ -107,7 +107,8 @@ ArkUINativeModuleValue CheckboxBridge::SetSelectedColor(ArkUIRuntimeCallInfo* ru
 
     Color selectedColor;
     RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, selectedColor, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, selectedColor, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getCheckboxModifier()->resetSelectedColor(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -127,7 +128,8 @@ ArkUINativeModuleValue CheckboxBridge::SetUnSelectedColor(ArkUIRuntimeCallInfo* 
 
     Color unSelectedColor;
     RefPtr<ResourceObject> colorResObj;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, unSelectedColor, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, unSelectedColor, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getCheckboxModifier()->resetUnSelectedColor(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }

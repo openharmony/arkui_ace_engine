@@ -218,11 +218,45 @@ HWTEST_F(ListSyncLoadTestNg, GroupSyncLoad001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Flush next frame
-     * @tc.expected: ListItemGroup load 2 item in 2th frame
+     * @tc.expected: List load 3 item in 2th frame
      */
-    MockPipelineContext::GetCurrent()->SetResponseTime(2);
+    MockPipelineContext::GetCurrent()->SetResponseTime(3);
     FlushUITasks(frameNode_);
-    EXPECT_EQ(itemGroupPatters_[0]->itemPosition_.size(), 4);
+    EXPECT_EQ(itemGroupPatters_[0]->itemPosition_.size(), 5);
+    EXPECT_FALSE(pattern_->prevMeasureBreak_);
+}
+
+/**
+ * @tc.name: GroupSyncLoad002
+ * @tc.desc: Test List sync load
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSyncLoadTestNg, GroupSyncLoad002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List, and jump to item9 in group
+     * @tc.expected: List load 2 item in first frame
+     */
+    ListModelNG model = CreateList();
+    model.SetSyncLoad(false);
+    CreateListItemGroup(V2::ListItemGroupStyle::NONE);
+    CreateListItems(10);
+    MockPipelineContext::GetCurrent()->SetResponseTime(3); // item9 will measure 2 times
+    pattern_->jumpIndex_ = 0;
+    pattern_->jumpIndexInGroup_ = 9;
+    CreateDone();
+    EXPECT_EQ(itemGroupPatters_[0]->itemPosition_.size(), 2);
+    EXPECT_EQ(itemGroupPatters_[0]->itemPosition_.count(9), 1);
+    EXPECT_EQ(itemGroupPatters_[0]->itemPosition_.count(8), 1);
+    EXPECT_TRUE(pattern_->prevMeasureBreak_);
+
+    /**
+     * @tc.steps: step2. Flush next frame
+     * @tc.expected: List load 3 item in 2th frame
+     */
+    MockPipelineContext::GetCurrent()->SetResponseTime(3);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(itemGroupPatters_[0]->itemPosition_.size(), 5);
     EXPECT_FALSE(pattern_->prevMeasureBreak_);
 }
 }

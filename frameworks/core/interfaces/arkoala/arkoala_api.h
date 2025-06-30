@@ -5268,10 +5268,10 @@ struct ArkUIToggleModifier {
     void (*setToggleSwitchPointColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 switchPointColor,
         ArkUI_VoidPtr colorRawPtr);
     void (*setTogglePointRadiusPtr)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit,
-        ArkUI_VoidPtr radiuRawPtr);
+        ArkUI_VoidPtr radiusRawPtr);
     void (*setToggleUnselectedColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 unselectedColor, ArkUI_VoidPtr colorRawPtr);
     void (*setToggleTrackBorderRadiusPtr)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit,
-        ArkUI_VoidPtr radiuRawPtr);
+        ArkUI_VoidPtr radiusRawPtr);
     void (*setToggleMargin)(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
         const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
     void (*resetToggleMargin)(ArkUINodeHandle node);
@@ -6274,6 +6274,8 @@ struct ArkUIRadioModifier {
     void (*setRadioMargin)(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
         const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
     void (*resetRadioMargin)(ArkUINodeHandle node);
+    void (*setRadioColorSetByUser)(ArkUINodeHandle node, ArkUI_Bool isCheckedBackgroundColorSetByUser,
+        ArkUI_Bool isUncheckedBorderColorSetByUser, ArkUI_Bool isIndicatorColorSetByUser);
 };
 
 struct ArkUIPatternLockControllerModifier {

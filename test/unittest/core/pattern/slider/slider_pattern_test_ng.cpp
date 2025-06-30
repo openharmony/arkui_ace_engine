@@ -19,6 +19,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/base/mock_system_properties.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/common/mock_container.h"
@@ -2397,5 +2398,155 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest035, TestSize.Level1)
      * @tc.steps: step3. Check the param value.
      */
     EXPECT_NO_FATAL_FAILURE(sliderPattern->UpdateEndsIsShowStepsPosition(testPosition, block, endsSize, 0, side));
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: test OnColorConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create slider frame node and initialize components.
+     * @tc.expected: step1. Frame node and related components are created successfully.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = frameNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto sliderTheme = pipelineContext->GetTheme<SliderTheme>();
+    ASSERT_NE(sliderTheme, nullptr);
+
+    /**
+     * @tc.steps: step2. Set all theme colors to RED and trigger color configuration update.
+     * @tc.expected: step2. Theme colors are updated to RED.
+     */
+    sliderTheme->blockColor_ = Color::RED;
+    sliderTheme->trackBgColor_ = Color::RED;
+    sliderTheme->trackSelectedColor_ = Color::RED;
+    pattern->OnColorConfigurationUpdate();
+
+    /**
+     * @tc.steps: step3. Simulate system color change and set user color flags.
+     * @tc.expected: step3. Block color is updated to theme color (RED) due to user flag.
+     */
+    g_isConfigChangePerform = true;
+    paintProperty->UpdateBlockColorSetByUser(false);
+    paintProperty->UpdateTrackBackgroundColorSetByUser(true);
+    paintProperty->UpdateSelectColorSetByUser(true);
+    pattern->OnColorConfigurationUpdate();
+    auto ret = paintProperty->GetBlockColor();
+    EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+
+    /**
+     * @tc.steps: step4. Reverse user color flags and trigger update again.
+     * @tc.expected: step4. Track background is set to resource color and select color is RED.
+     */
+    paintProperty->UpdateBlockColorSetByUser(true);
+    paintProperty->UpdateTrackBackgroundColorSetByUser(false);
+    paintProperty->UpdateSelectColorSetByUser(false);
+    pattern->OnColorConfigurationUpdate();
+
+    EXPECT_TRUE(paintProperty->GetTrackBackgroundIsResourceColor());
+    EXPECT_EQ(paintProperty->GetSelectColor(), Color::RED);
+    g_isConfigChangePerform = false;
+}
+
+/**
+ * @tc.name: UpdateSliderComponentColor001
+ * @tc.desc: test UpdateSliderComponentColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, UpdateSliderComponentColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create slider frame node and initialize components.
+     * @tc.expected: step1. Frame node and related components are created successfully.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = frameNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test UpdateSliderComponentColor under different system color change and rerenderable states.
+     * @tc.expected: step2. All slider component colors are updated to RED when system color changes and node is
+     * rerenderable.
+     */
+    std::vector<std::pair<bool, bool>> vec { { true, true }, { true, false }, { false, true }, { false, false } };
+    for (const auto& pair : vec) {
+        pipelineContext->SetIsSystemColorChange(pair.first);
+        frameNode->SetRerenderable(pair.second);
+        if (pipelineContext->IsSystmColorChange() && pair.second) {
+            Gradient gradientRes;
+            gradientRes.AddColor(GradientColor(Color::RED));
+            pattern->UpdateSliderComponentColor(Color::RED, SliderColorType::BLOCK_COLOR, gradientRes);
+            auto ret = paintProperty->GetBlockColor();
+            EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+            pattern->UpdateSliderComponentColor(Color::RED, SliderColorType::SELECT_COLOR, gradientRes);
+            ret = paintProperty->GetSelectColor();
+            EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+            pattern->UpdateSliderComponentColor(Color::RED, SliderColorType::BLOCK_BORDER_COLOR, gradientRes);
+            ret = paintProperty->GetBlockBorderColor();
+            EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+            pattern->UpdateSliderComponentColor(Color::RED, SliderColorType::STEP_COLOR, gradientRes);
+            ret = paintProperty->GetStepColor();
+            EXPECT_EQ(ret.value_or(Color::BLACK), Color::RED);
+            pattern->UpdateSliderComponentColor(Color::RED, SliderColorType::TRACK_COLOR, gradientRes);
+            auto gradientRet = paintProperty->GetTrackBackgroundColor();
+            EXPECT_EQ(gradientRet, gradientRes);
+        }
+    }
+}
+
+/**
+ * @tc.name: UpdateSliderComponentString001
+ * @tc.desc: test UpdateSliderComponentString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, UpdateSliderComponentString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create slider frame node and initialize components.
+     * @tc.expected: step1. Frame node and related components are created successfully.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(VALUE, STEP, MIN, MAX);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = frameNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto pattern = frameNode->GetPattern<SliderPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Test UpdateSliderComponentString under different system color change and rerenderable states.
+     * @tc.expected: step2. Slider shows tips when system color changes and node is rerenderable.
+     */
+    std::vector<std::pair<bool, bool>> vec { { true, true }, { true, false }, { false, true }, { false, false } };
+    for (const auto& pair : vec) {
+        pipelineContext->SetIsSystemColorChange(pair.first);
+        frameNode->SetRerenderable(pair.second);
+        if (pipelineContext->IsSystmColorChange() && pair.second) {
+            pattern->UpdateSliderComponentMedia();
+            pattern->UpdateSliderComponentString(true, "test");
+            EXPECT_TRUE(paintProperty->GetShowTips());
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

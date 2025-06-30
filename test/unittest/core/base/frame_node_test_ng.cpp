@@ -1511,55 +1511,6 @@ HWTEST_F(FrameNodeTestNg, SwapDirtyLayoutWrapperOnMainThread040, TestSize.Level1
 }
 
 /**
- * @tc.name: FrameNodeTouchTest047
- * @tc.desc: Test method GeometryNodeToJsonValue
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeTouchTest047, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct parameters.
-     */
-    std::unique_ptr<JsonValue> value = JsonUtil::Create(true);
-
-    /**
-     * @tc.steps: step2. construct parameters.
-     * @tc.expected: expect cover branch layoutProperty_ is nullptr.
-     */
-    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
-    EXPECT_EQ(FRAME_NODE2->layoutProperty_, nullptr);
-
-    /**
-     * @tc.steps: step3. set layoutProperty_ and call GeometryNodeToJsonValue.
-     * @tc.expected: expect cover branch layoutProperty_ is not nullptr.
-     */
-    auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
-    FRAME_NODE2->layoutProperty_ = layoutProperty;
-    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
-    EXPECT_NE(FRAME_NODE2->layoutProperty_, nullptr);
-
-    /**
-     * @tc.steps: step4. set calcLayoutConstraint_ and call GeometryNodeToJsonValue.
-     * @tc.expected: expect cover branch calcLayoutConstraint_ is not nullptr.
-     */
-    FRAME_NODE2->layoutProperty_->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
-
-    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
-    EXPECT_NE(FRAME_NODE2->layoutProperty_->calcLayoutConstraint_, nullptr);
-
-    /**
-     * @tc.steps: step5. set selfIdealSize and call GeometryNodeToJsonValue.
-     * @tc.expected: expect cover branch selfIdealSize has value.
-     */
-    std::optional<CalcLength> len = CalcLength("auto");
-    FRAME_NODE2->layoutProperty_->calcLayoutConstraint_->selfIdealSize = CalcSize(len, len);
-    FRAME_NODE2->GeometryNodeToJsonValue(value, filter);
-    EXPECT_NE(FRAME_NODE2->renderContext_, nullptr);
-
-    FRAME_NODE2->layoutProperty_ = nullptr;
-}
-
-/**
  * @tc.name: FrameNodeTestNg_TriggerVisibleAreaChangeCallback048
  * @tc.desc: Test frame node method
  * @tc.type: FUNC

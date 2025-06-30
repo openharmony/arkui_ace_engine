@@ -367,4 +367,27 @@ HWTEST_F(ScrollableAxisTestNg, NotifyFRCSceneInfo001, TestSize.Level1)
     ASSERT_NE(scrollable->axisAnimator_->axisScrollAnimator_, nullptr);
     EXPECT_TRUE(notifyFRCTrigger);
 }
+
+/**
+ * @tc.name: IsCompletedTest
+ * @tc.desc: Test the IsCompleted function of AxisScrollMotion
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableAxisTestNg, IsCompleted001, TestSize.Level1)
+{
+     /**
+     * @tc.steps: step1. Initialize AxisScrollMotion with currentTime = 1.0, endTime = 1.0
+     */
+    RefPtr<AxisScrollMotion> motion = AceType::MakeRefPtr<AxisScrollMotion>(0.0f, 0.0f);
+    motion->currentTime_ = 1.0f;
+    motion->endTime_ = 1.0f;
+    
+    /**
+     * @tc.steps: step2. Call IsCompleted
+     * @tc.expected: Return true and currentTime is reset to 0
+     */
+    auto result = motion->IsCompleted();
+    EXPECT_TRUE(result);
+    EXPECT_FLOAT_EQ(motion->currentTime_, 0.0f);
+}
 } // namespace OHOS::Ace::NG

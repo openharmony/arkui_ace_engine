@@ -68,16 +68,20 @@ void SetShowTips(ArkUINodeHandle node, ArkUI_Bool isShow, const char *value)
     SliderModelNG::SetShowTips(frameNode, static_cast<bool>(isShow), content);
 }
 
-void SetShowTipsPtr(ArkUINodeHandle node, ArkUI_Bool isShow, const char *value, void* strRawPtr)
+void SetShowTipsPtr(ArkUINodeHandle node, ArkUI_Bool isShow, const char* value, void* strRawPtr)
 {
     CHECK_NULL_VOID(node);
     SetShowTips(node, isShow, value);
     if (SystemProperties::ConfigChangePerform()) {
-        auto *frameNode = reinterpret_cast<FrameNode *>(node);
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* str = reinterpret_cast<ResourceObject*>(strRawPtr);
-        auto strResObj = AceType::Claim(str);
-        SliderModelNG::CreateWithStringResourceObj(frameNode, strResObj, static_cast<bool>(isShow));
+        if (strRawPtr) {
+            auto* str = reinterpret_cast<ResourceObject*>(strRawPtr);
+            auto strResObj = AceType::Claim(str);
+            SliderModelNG::CreateWithStringResourceObj(frameNode, strResObj, static_cast<bool>(isShow));
+        } else {
+            SliderModelNG::CreateWithStringResourceObj(frameNode, nullptr, static_cast<bool>(isShow));
+        }
     }
 }
 
@@ -88,8 +92,7 @@ void ResetShowTips(ArkUINodeHandle node)
     std::optional<std::string> content;
     SliderModelNG::SetShowTips(frameNode, DEFAULT_SHOW_TIPS, content);
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        SliderModelNG::CreateWithStringResourceObj(frameNode, resObj, false);
+        SliderModelNG::CreateWithStringResourceObj(frameNode, nullptr, false);
     }
 }
 
@@ -169,11 +172,15 @@ void SetStepColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
     CHECK_NULL_VOID(node);
     SetStepColor(node, color);
     if (SystemProperties::ConfigChangePerform()) {
-        auto *frameNode = reinterpret_cast<FrameNode *>(node);
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-        auto colorResObj = AceType::Claim(color);
-        SliderModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SliderColorType::STEP_COLOR);
+        if (colorRawPtr) {
+            auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+            auto colorResObj = AceType::Claim(color);
+            SliderModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SliderColorType::STEP_COLOR);
+        } else {
+            SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::STEP_COLOR);
+        }
     }
 }
 
@@ -183,8 +190,7 @@ void ResetStepColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SliderModelNG::ResetStepColor(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        SliderModelNG::CreateWithColorResourceObj(frameNode, resObj, SliderColorType::STEP_COLOR);
+        SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::STEP_COLOR);
     }
 }
 
@@ -200,11 +206,15 @@ void SetBlockBorderColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRaw
     CHECK_NULL_VOID(node);
     SetBlockBorderColor(node, color);
     if (SystemProperties::ConfigChangePerform()) {
-        auto *frameNode = reinterpret_cast<FrameNode *>(node);
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-        auto colorResObj = AceType::Claim(color);
-        SliderModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SliderColorType::BLOCK_BORDER_COLOR);
+        if (colorRawPtr) {
+            auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+            auto colorResObj = AceType::Claim(color);
+            SliderModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SliderColorType::BLOCK_BORDER_COLOR);
+        } else {
+            SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::BLOCK_BORDER_COLOR);
+        }
     }
 }
 
@@ -214,8 +224,7 @@ void ResetBlockBorderColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SliderModelNG::ResetBlockBorderColor(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        SliderModelNG::CreateWithColorResourceObj(frameNode, resObj, SliderColorType::BLOCK_BORDER_COLOR);
+        SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::BLOCK_BORDER_COLOR);
     }
 }
 
@@ -247,11 +256,15 @@ void SetBlockColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
     CHECK_NULL_VOID(node);
     SetBlockColor(node, color);
     if (SystemProperties::ConfigChangePerform()) {
-        auto *frameNode = reinterpret_cast<FrameNode *>(node);
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-        auto colorResObj = AceType::Claim(color);
-        SliderModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SliderColorType::BLOCK_COLOR);
+        if (colorRawPtr) {
+            auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+            auto colorResObj = AceType::Claim(color);
+            SliderModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SliderColorType::BLOCK_COLOR);
+        } else {
+            SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::BLOCK_COLOR);
+        }
     }
 }
 
@@ -261,8 +274,7 @@ void ResetBlockColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SliderModelNG::ResetBlockColor(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        SliderModelNG::CreateWithColorResourceObj(frameNode, resObj, SliderColorType::BLOCK_COLOR);
+        SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::BLOCK_COLOR);
     }
 }
 
@@ -278,11 +290,15 @@ void SetTrackBackgroundColorPtr(ArkUINodeHandle node, uint32_t color, void* colo
     CHECK_NULL_VOID(node);
     SetTrackBackgroundColor(node, color);
     if (SystemProperties::ConfigChangePerform()) {
-        auto *frameNode = reinterpret_cast<FrameNode *>(node);
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-        auto colorResObj = AceType::Claim(color);
-        SliderModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SliderColorType::TRACK_COLOR);
+        if (colorRawPtr) {
+            auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+            auto colorResObj = AceType::Claim(color);
+            SliderModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SliderColorType::TRACK_COLOR);
+        } else {
+            SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::TRACK_COLOR);
+        }
     }
 }
 
@@ -309,8 +325,7 @@ void ResetTrackBackgroundColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SliderModelNG::ResetTrackColor(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        SliderModelNG::CreateWithColorResourceObj(frameNode, resObj, SliderColorType::TRACK_COLOR);
+        SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::TRACK_COLOR);
     }
 }
 
@@ -326,11 +341,15 @@ void SetSelectColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
     CHECK_NULL_VOID(node);
     SetSelectColor(node, color);
     if (SystemProperties::ConfigChangePerform()) {
-        auto *frameNode = reinterpret_cast<FrameNode *>(node);
+        auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-        auto colorResObj = AceType::Claim(color);
-        SliderModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SliderColorType::SELECT_COLOR);
+        if (colorRawPtr) {
+            auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
+            auto colorResObj = AceType::Claim(color);
+            SliderModelNG::CreateWithColorResourceObj(frameNode, colorResObj, SliderColorType::SELECT_COLOR);
+        } else {
+            SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::SELECT_COLOR);
+        }
     }
 }
 
@@ -356,8 +375,7 @@ void ResetSelectColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SliderModelNG::ResetSelectColor(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        SliderModelNG::CreateWithColorResourceObj(frameNode, resObj, SliderColorType::SELECT_COLOR);
+        SliderModelNG::CreateWithColorResourceObj(frameNode, nullptr, SliderColorType::SELECT_COLOR);
     }
 }
 

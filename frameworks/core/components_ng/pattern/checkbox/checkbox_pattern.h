@@ -183,9 +183,6 @@ public:
     {
         return true;
     }
-    void UpdateCheckboxComponentColor(const Color& color, const CheckBoxColorType checkBoxColorType);
-    void UpdateComponentColor(const Color& color, const ToggleColorType toggleColorType);
-
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

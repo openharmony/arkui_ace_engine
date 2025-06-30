@@ -134,13 +134,15 @@ std::string ParseFontFamily(const EcmaVM* vm, const Local<JSValueRef>& fontFamil
 }
 
 Color ParseTextColor(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t argIndex,
-    RefPtr<ResourceObject>& textColorResObj, uint32_t defaultTextColor)
+    RefPtr<ResourceObject>& textColorResObj, uint32_t defaultTextColor,
+    ArkUINodeHandle nativeNode)
 {
     Color textColor;
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(argIndex);
 
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (colorArg->IsNull() || colorArg->IsUndefined() ||
-        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor, textColorResObj)) {
+        !ArkTSUtils::ParseJsColorAlpha(vm, colorArg, textColor, textColorResObj, nodeInfo)) {
         textColor.SetValue(defaultTextColor);
     }
     return textColor;
@@ -238,7 +240,7 @@ ArkUINativeModuleValue TextPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
 
     RefPtr<ResourceObject> textColorResObj;
     Color textColor = ParseTextColor(vm, runtimeCallInfo, COLOR_ARG_INDEX, textColorResObj,
-        DEFAULT_TIME_PICKER_TEXT_COLOR);
+        DEFAULT_TIME_PICKER_TEXT_COLOR, nativeNode);
 
     RefPtr<ResourceObject> fontSizeResObj;
     std::string fontSizeStr = ParseFontSize(vm, runtimeCallInfo, FONT_SIZE_ARG_INDEX, fontSizeResObj);
@@ -283,7 +285,7 @@ ArkUINativeModuleValue TextPickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
 
     RefPtr<ResourceObject> textColorResObj;
     Color textColor = ParseTextColor(vm, runtimeCallInfo, COLOR_ARG_INDEX, textColorResObj,
-        DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR);
+        DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR, nativeNode);
 
     RefPtr<ResourceObject> fontSizeResObj;
     std::string fontSizeStr = ParseFontSize(vm, runtimeCallInfo, FONT_SIZE_ARG_INDEX, fontSizeResObj);
@@ -328,7 +330,7 @@ ArkUINativeModuleValue TextPickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
 
     RefPtr<ResourceObject> textColorResObj;
     Color textColor = ParseTextColor(vm, runtimeCallInfo, COLOR_ARG_INDEX, textColorResObj,
-        DEFAULT_TIME_PICKER_TEXT_COLOR);
+        DEFAULT_TIME_PICKER_TEXT_COLOR, nativeNode);
 
     RefPtr<ResourceObject> fontSizeResObj;
     std::string fontSizeStr = ParseFontSize(vm, runtimeCallInfo, FONT_SIZE_ARG_INDEX, fontSizeResObj);
@@ -473,7 +475,8 @@ ArkUINativeModuleValue TextPickerBridge::SetDivider(ArkUIRuntimeCallInfo* runtim
     if (ParseDividerDimension(vm, dividerStrokeWidthArgs, dividerStrokeWidth, strokeWidthResObj)) {
         dividerStrokeWidth = pickerTheme ? pickerTheme->GetDividerThickness() : 0.0_vp;
     }
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj, colorResObj)) {
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, colorObj, colorResObj, nodeInfo)) {
         colorObj = pickerTheme ? pickerTheme->GetDividerColor() : Color::TRANSPARENT;
     }
     if (ParseDividerDimension(vm, dividerStartMarginArgs, dividerStartMargin, startMarginResObj)) {
@@ -589,7 +592,7 @@ ArkUINativeModuleValue TextPickerBridge::SetDefaultTextStyle(ArkUIRuntimeCallInf
 
     RefPtr<ResourceObject> textColorResObj;
     Color textColor = ParseTextColor(vm, runtimeCallInfo, COLOR_ARG_INDEX, textColorResObj,
-        DEFAULT_TIME_PICKER_TEXT_COLOR);
+        DEFAULT_TIME_PICKER_TEXT_COLOR, nativeNode);
 
     RefPtr<ResourceObject> fontSizeResObj;
     std::string fontSize = ParseFontSize(vm, runtimeCallInfo, FONT_SIZE_ARG_INDEX, fontSizeResObj);

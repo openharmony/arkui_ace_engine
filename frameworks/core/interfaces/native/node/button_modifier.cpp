@@ -183,8 +183,7 @@ void ResetButtonFontColor(ArkUINodeHandle node)
     Color textColor = buttonTheme->GetTextStyle().GetTextColor();
     ButtonModelNG::SetFontColor(frameNode, textColor);
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        ButtonModelNG::CreateWithColorResourceObj(frameNode, resObj, ButtonColorType::FONT_COLOR);
+        ButtonModelNG::CreateWithColorResourceObj(frameNode, nullptr, ButtonColorType::FONT_COLOR);
     }
 }
 
@@ -286,8 +285,7 @@ void ResetButtonFontFamily(ArkUINodeHandle node)
     std::vector<std::string> fontFamilyResult = Framework::ConvertStrToFontFamilies(familiesStr);
     ButtonModelNG::SetFontFamily(frameNode, fontFamilyResult);
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        ButtonModelNG::CreateWithFamiliesResourceObj(frameNode, resObj, ButtonStringType::FONT_FAMILY);
+        ButtonModelNG::CreateWithFamiliesResourceObj(frameNode, nullptr, ButtonStringType::FONT_FAMILY);
     }
 }
 
@@ -447,18 +445,14 @@ void SetButtonLabelStylePtr(ArkUINodeHandle node, ArkUI_CharPtr* stringParameter
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        if (sizeResObj.minFontSize) {
-            auto* minFontSize = reinterpret_cast<ResourceObject*>(sizeResObj.minFontSize);
-            auto minSizeResObj = AceType::Claim(minFontSize);
-            ButtonModelNG::CreateWithDimensionFpResourceObj(frameNode, minSizeResObj,
-                ButtonDimensionType::MIN_FONT_SIZE);
-        }
-        if (sizeResObj.maxFontSize) {
-            auto* maxFontSize = reinterpret_cast<ResourceObject*>(sizeResObj.maxFontSize);
-            auto maxSizeResObj = AceType::Claim(maxFontSize);
-            ButtonModelNG::CreateWithDimensionFpResourceObj(frameNode, maxSizeResObj,
-                ButtonDimensionType::MAX_FONT_SIZE);
-        }
+        auto* minFontSize = reinterpret_cast<ResourceObject*>(sizeResObj.minFontSize);
+        auto minSizeResObj = AceType::Claim(minFontSize);
+        ButtonModelNG::CreateWithDimensionFpResourceObj(frameNode, minSizeResObj,
+            ButtonDimensionType::MIN_FONT_SIZE);
+        auto* maxFontSize = reinterpret_cast<ResourceObject*>(sizeResObj.maxFontSize);
+        auto maxSizeResObj = AceType::Claim(maxFontSize);
+        ButtonModelNG::CreateWithDimensionFpResourceObj(frameNode, maxSizeResObj,
+            ButtonDimensionType::MAX_FONT_SIZE);
     }
 }
 
@@ -467,9 +461,8 @@ void ResetButtonLabelStyle(ArkUINodeHandle node)
     if (SystemProperties::ConfigChangePerform()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(node);
         CHECK_NULL_VOID(frameNode);
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        ButtonModelNG::CreateWithDimensionFpResourceObj(frameNode, resObj, ButtonDimensionType::MIN_FONT_SIZE);
-        ButtonModelNG::CreateWithDimensionFpResourceObj(frameNode, resObj, ButtonDimensionType::MAX_FONT_SIZE);
+        ButtonModelNG::CreateWithDimensionFpResourceObj(frameNode, nullptr, ButtonDimensionType::MIN_FONT_SIZE);
+        ButtonModelNG::CreateWithDimensionFpResourceObj(frameNode, nullptr, ButtonDimensionType::MAX_FONT_SIZE);
     }
     return;
 }
@@ -520,8 +513,7 @@ void ResetButtonBackgroundColor(ArkUINodeHandle node)
     backgroundColor = buttonTheme->GetBgColor();
     ButtonModelNG::BackgroundColor(frameNode, backgroundColor, false);
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        ButtonModelNG::CreateWithColorResourceObj(frameNode, resObj, ButtonColorType::BACKGROUND_COLOR);
+        ButtonModelNG::CreateWithColorResourceObj(frameNode, nullptr, ButtonColorType::BACKGROUND_COLOR);
     }
 }
 
@@ -764,8 +756,7 @@ void ResetButtonMinFontScale(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetMinFontScale(frameNode, DEFAULT_MIN_FONT_SCALE);
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        ButtonModelNG::CreateWithDoubleResourceObj(frameNode, resObj, ButtonDoubleType::MIN_FONT_SCALE);
+        ButtonModelNG::CreateWithDoubleResourceObj(frameNode, nullptr, ButtonDoubleType::MIN_FONT_SCALE);
     }
 }
 
@@ -795,8 +786,7 @@ void ResetButtonMaxFontScale(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ButtonModelNG::SetMaxFontScale(frameNode, DEFAULT_MAX_FONT_SCALE);
     if (SystemProperties::ConfigChangePerform()) {
-        auto resObj = AceType::MakeRefPtr<ResourceObject>();
-        ButtonModelNG::CreateWithDoubleResourceObj(frameNode, resObj, ButtonDoubleType::MAX_FONT_SCALE);
+        ButtonModelNG::CreateWithDoubleResourceObj(frameNode, nullptr, ButtonDoubleType::MAX_FONT_SCALE);
     }
 }
 

@@ -858,6 +858,7 @@ HWTEST_F(OverlayManagerMenuTestNg, HideAllMenusWithoutAnimation001, TestSize.Lev
      */
     overlayManager->HideAllMenusWithoutAnimation();
     EXPECT_TRUE(overlayManager->menuMap_.empty());
+    EXPECT_FALSE(overlayManager->IsMenuShow());
 }
 
 /**

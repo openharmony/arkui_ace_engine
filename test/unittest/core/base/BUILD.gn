@@ -36,6 +36,7 @@ ace_unittest("frame_node_test_ng") {
     "frame_node_test_ng_coverage_new.cpp",
     "frame_node_test_ng_new.cpp",
     "frame_node_test_ng_v3.cpp",
+    "frame_node_test_ng_dump.cpp",
   ]
 }
 

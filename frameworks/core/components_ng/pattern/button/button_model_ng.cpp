@@ -156,7 +156,6 @@ void ButtonModelNG::CreateWithColorResourceObj(
         ParseButtonResColor(resObj, result, buttonColorType);
         UpdateResColor(AceType::RawPtr(frameNode), result, buttonColorType);
     };
-    updateFunc(resObj);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
@@ -179,7 +178,6 @@ void ButtonModelNG::CreateWithStringResourceObj(const RefPtr<ResourceObject>& re
             pattern->UpdateComponentString(result, buttonStringType);
         }
     };
-    updateFunc(resObj);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
@@ -194,11 +192,12 @@ void ButtonModelNG::CreateWithFamiliesResourceObj(const RefPtr<ResourceObject>& 
 void ButtonModelNG::UpdateDefaultFamilies(
     FrameNode* frameNode, std::vector<std::string>& value, const ButtonStringType buttonStringType)
 {
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(frameNode);
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto textTheme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(textTheme);
-    value = textTheme->GetTextStyle().GetFontFamilies();
+    auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(buttonTheme);
+    value = buttonTheme->GetTextStyle().GetFontFamilies();
 
     if (pipelineContext->IsSystmColorChange()) {
         switch (buttonStringType) {
@@ -218,9 +217,9 @@ void ButtonModelNG::UpdateComponentFamilies(
     FrameNode* frameNode, const std::vector<std::string>& value, const ButtonStringType buttonStringType)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = PipelineBase::GetCurrentContext();
+    auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto textTheme = pipelineContext->GetTheme<TextTheme>();
+    auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
     if (pipelineContext->IsSystmColorChange()) {
         switch (buttonStringType) {
             case ButtonStringType::FONT_FAMILY:
@@ -260,7 +259,6 @@ void ButtonModelNG::CreateWithFamiliesResourceObj(
         }
         ButtonModelNG::UpdateComponentFamilies(AceType::RawPtr(frameNode), result, buttonStringType);
     };
-    updateFunc(resObj);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
@@ -289,7 +287,6 @@ void ButtonModelNG::CreateWithDimensionFpResourceObj(FrameNode* frameNode, const
             pattern->UpdateComponentDimension(result, buttonDimensionType);
         }
     };
-    updateFunc(resObj);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
@@ -305,12 +302,12 @@ bool ButtonModelNG::CheckFontScale(bool resultFlag, double result, const ButtonD
 {
     switch (buttonDoubleType) {
         case ButtonDoubleType::MIN_FONT_SCALE:
-            if (LessOrEqual(result, 0.0f) || GreatOrEqual(result, 1.0f)) {
+            if (LessNotEqual(result, 0.0f) || GreatNotEqual(result, 1.0f)) {
                 resultFlag = true;
             }
             break;
         case ButtonDoubleType::MAX_FONT_SCALE:
-            resultFlag = LessOrEqual(result, 1.0f);
+            resultFlag = LessNotEqual(result, 1.0f);
             break;
     }
     return resultFlag;
@@ -336,7 +333,6 @@ void ButtonModelNG::CreateWithDoubleResourceObj(
             pattern->UpdateComponentDouble(result, buttonDoubleType);
         }
     };
-    updateFunc(resObj);
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 

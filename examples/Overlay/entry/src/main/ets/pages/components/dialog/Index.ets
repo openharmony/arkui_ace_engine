@@ -35,6 +35,7 @@ export struct DialogIndex {
     { name: 'EmbeddedDialog', path: 'EmbeddedDialogPageOne' },
     { name: 'AlertDialogAvoid', path: 'AlertDialogAvoid' },
     { name: 'CustomDialogAvoid', path: 'CustomDialogAvoid' },
+    { name: 'Dialog组合场景1', path: 'DialogLevel0' }
   ]
 
   build() {

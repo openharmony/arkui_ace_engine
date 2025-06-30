@@ -93,6 +93,13 @@ public:
         mockRequestId = requestId;
     }
 
+    void SetSearchElementInfoBySpecificPropertyResult(const std::list<AccessibilityElementInfo> &infos,
+        const std::list<AccessibilityElementInfo> &treeInfos, const int32_t requestId) override
+    {
+        mockInfos_ = infos;
+        mockRequestId = requestId;
+    }
+
     std::list<Accessibility::AccessibilityElementInfo> mockInfos_;
     Accessibility::AccessibilityElementInfo mockInfo_;
     int32_t mockRequestId = 0;
@@ -582,6 +589,39 @@ HWTEST_F(JsThirdProviderInteractionOperationTest, JsThirdProviderInteractionOper
         event, callback);
 
     EXPECT_EQ(g_mockErrorCode, 0);
+}
+
+/**
+ * @tc.name: SearchElementInfoBySpecificProperty001
+ * @tc.desc: SearchElementInfoBySpecificProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsThirdProviderInteractionOperationTest, SearchElementInfoBySpecificProperty001, TestSize.Level1)
+{
+    auto ohAccessibilityProvider
+        = AceType::MakeRefPtr<MockOhAccessibilityProvider>();
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+
+    auto jsInteractionOperation = AceType::MakeRefPtr<Framework::JsThirdProviderInteractionOperation>(
+        ohAccessibilityProvider, jsAccessibilityManager, frameNode);
+    jsInteractionOperation->SetBelongTreeId(0);
+
+    int64_t elementId = -1;
+    int32_t requestId = 2;
+    int32_t mode = 8; // search tree
+    SpecificPropertyParam param;
+    MockAccessibilityElementOperatorCallback operatorCallback;
+
+    // 1 provider abnormal, callback should receive same request id and empty infos
+    ohAccessibilityProvider->SetInjectResult(-1);
+    jsInteractionOperation->SearchElementInfoBySpecificProperty(elementId, param, requestId, operatorCallback);
+
+    EXPECT_EQ(operatorCallback.mockInfos_.size(), 0);
+    EXPECT_EQ(operatorCallback.mockRequestId, requestId);
 }
 
 /**

@@ -73,6 +73,8 @@ public:
         const ToggleColorType toggleColorType) {};
     virtual void CreateWithDimensionVpResourceObj(const RefPtr<ResourceObject>& resObj,
         const ToggleDimensionType toggleDimensionType) {};
+    virtual void SetSwitchPointColorSetByUser(const bool flag) {};
+    virtual void SetUnselectedColorSetByUser(const bool flag) {};
 
 private:
     static std::unique_ptr<ToggleModel> instance_;

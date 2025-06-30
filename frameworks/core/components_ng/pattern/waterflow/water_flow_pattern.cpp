@@ -383,6 +383,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
     layoutInfo_->isDataValid_ = true;
 
+    ChangeCanStayOverScroll();
     return NeedRender();
 }
 
