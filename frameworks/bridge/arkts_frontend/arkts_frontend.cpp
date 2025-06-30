@@ -85,9 +85,10 @@ std::string GetErrorProperty(ani_env* aniEnv, ani_error aniError, const char* pr
         TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Object_GetType failed, status : %{public}d", status);
         return propertyValue;
     }
+    auto errorClass = static_cast<ani_class>(errorType);
     ani_method getterMethod = nullptr;
-    if ((status = aniEnv->Class_FindGetter(static_cast<ani_class>(errorType), property, &getterMethod)) != ANI_OK) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Class_FindGetter failed, status : %{public}d", status);
+    if ((status = aniEnv->Class_FindMethod(errorClass, property, nullptr, &getterMethod)) != ANI_OK) {
+        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "Class_FindMethod failed, status : %{public}d", status);
         return propertyValue;
     }
     ani_ref aniRef = nullptr;
@@ -121,9 +122,9 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
         ani_error aniError;
         env->GetUnhandledError(&aniError);
         env->ResetError();
-        std::string errorMsg = GetErrorProperty(env, aniError, "message");
-        std::string errorName = GetErrorProperty(env, aniError, "name");
-        std::string errorStack = GetErrorProperty(env, aniError, "stack");
+        std::string errorMsg = GetErrorProperty(env, aniError, "<get>message");
+        std::string errorName = GetErrorProperty(env, aniError, "<get>name");
+        std::string errorStack = GetErrorProperty(env, aniError, "<get>stack");
         LOGE("[%{public}s] Cannot load main class %{public}s, status: %{public}d, \nerrorMsg: %{public}s, \nerrorName: "
              "%{public}s, \nerrorStack: %{public}s",
             __func__, KOALA_APP_INFO.className, status, errorMsg.c_str(), errorName.c_str(), errorStack.c_str());
