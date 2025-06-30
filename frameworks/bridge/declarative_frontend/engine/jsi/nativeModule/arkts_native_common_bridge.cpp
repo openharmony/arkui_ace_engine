@@ -1575,22 +1575,6 @@ std::function<void(bool)> ParseTransitionCallback(
     return finishCallback;
 }
 
-bool ParseColorMetricsToColor(const EcmaVM *vm, const Local<JSValueRef> &jsValue, Color& result)
-{
-    if (!jsValue->IsObject(vm)) {
-        return false;
-    }
-    auto obj = jsValue->ToObject(vm);
-    auto toNumericProp = obj->Get(vm, "toNumeric");
-    if (toNumericProp->IsFunction(vm)) {
-        panda::Local<panda::FunctionRef> func = toNumericProp;
-            auto colorVal = func->Call(vm, obj, nullptr, 0);
-        result.SetValue(colorVal->Uint32Value(vm));
-        return true;
-    }
-    return false;
-}
-
 const std::vector<AccessibilitySamePageMode> PAGE_MODE_TYPE = { AccessibilitySamePageMode::SEMI_SILENT,
     AccessibilitySamePageMode::FULL_SILENT };
 const std::vector<FocusDrawLevel> FOCUS_DRAW_LEVEL = { FocusDrawLevel::SELF, FocusDrawLevel::TOP };
@@ -10348,7 +10332,8 @@ ArkUINativeModuleValue CommonBridge::SetFocusBox(ArkUIRuntimeCallInfo* runtimeCa
     hasValue = hasValue << 1;
     Color strokeColor;
     RefPtr<ResourceObject> resObjColor;
-    if (!colorArg->IsUndefined() && !colorArg->IsNull() && ParseColorMetricsToColor(vm, colorArg, strokeColor)) {
+    if (!colorArg->IsUndefined() && !colorArg->IsNull() &&
+        ArkTSUtils::ParseColorMetricsToColor(vm, colorArg, strokeColor, resObjColor)) {
         hasValue += 1;
     }
     focusBoxResObjs.push_back(resObjColor);
