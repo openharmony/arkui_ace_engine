@@ -1687,6 +1687,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountTimeNode(const DatePickerS
     timePickerRowPattern->SetShowLunarSwitch(settingData.lunarswitch);
     auto timePickerLayout = timeNode->GetLayoutProperty<TimePickerLayoutProperty>();
     CHECK_NULL_RETURN(timePickerLayout, nullptr);
+    timePickerLayout->UpdateLoop(settingData.canLoop);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         ZeroPrefixType hourOptions = settingData.dateTimeOptions.hourType;
         ZeroPrefixType minuteOptions = settingData.dateTimeOptions.minuteType;
