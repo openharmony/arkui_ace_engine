@@ -65,5 +65,6 @@ HWTEST_F(GradientStyleModifierTest, gradientStyleModifierTest001, TestSize.Level
      * @tc.steps: step4. check data size.
      */
     EXPECT_EQ(outputGradient.GetColors().size(), gradient.GetColors().size());
+    EXPECT_EQ(outputGradient.GetColors().at(0).GetColor().GetColorSpace(), ColorSpace::SRGB);
 }
 } // namespace OHOS::Ace::NG
