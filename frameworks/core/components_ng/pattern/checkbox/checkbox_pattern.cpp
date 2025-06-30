@@ -526,7 +526,7 @@ void CheckBoxPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 void CheckBoxPattern::OnDetachFromMainTree()
 {
     auto host = GetHost();
-    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
 }
 
 void CheckBoxPattern::CheckPageNode()

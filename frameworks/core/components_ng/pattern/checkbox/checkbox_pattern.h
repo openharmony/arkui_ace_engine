@@ -169,7 +169,7 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromFrameNodeMultiThread();
     void OnDetachFromMainTree() override;
-    void OnDetachFromMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void InitClickEvent();

@@ -68,7 +68,7 @@ void RadioPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 void RadioPattern::OnDetachFromMainTree()
 {
     auto host = GetHost();
-    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
 }
 
 void RadioPattern::SetBuilderState()

@@ -22,10 +22,8 @@ void CheckBoxPattern::OnDetachFromFrameNodeMultiThread()
 {
 }
 
-void CheckBoxPattern::OnDetachFromMainTreeMultiThread()
+void CheckBoxPattern::OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& frameNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    UpdateGroupStatus(host.GetRawPtr());
+    UpdateGroupStatus(frameNode.GetRawPtr());
 }
 } // namespace OHOS::Ace::NG
