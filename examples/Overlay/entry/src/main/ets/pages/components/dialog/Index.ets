@@ -33,6 +33,7 @@ export struct DialogIndex {
     { name: 'DialogLevelOrder', path: 'DialogLevelOrder' },
     { name: 'DialogFocusable', path: 'DialogFocusable' },
     { name: 'EmbeddedDialog', path: 'EmbeddedDialogPageOne' },
+    { name: 'Dialog组合场景1', path: 'DialogLevel0' }
   ]
 
   build() {

@@ -30,7 +30,10 @@ export struct RadioIndex {
     { name: 'RadioCustom', path: 'RadioCustom' },
     { name: 'RadioResponse', path: 'RadioResponse' },
     { name: 'RadioBuild', path: 'RadioBuild' },
-    { name: 'Radio组合场景1', path: 'RadioLevel1' }
+    { name: 'Radio组合场景1', path: 'RadioLevel1' },
+    { name: 'Radio组合场景2', path: 'RadioLevel2' },
+    { name: 'Radio组合场景3', path: 'RadioLevel3' },
+    { name: 'Radio组合场景4', path: 'RadioLevel4' }
   ]
 
   build() {
