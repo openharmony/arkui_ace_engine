@@ -1019,7 +1019,7 @@ class ArkThemeScopeManager {
         (_a = this.defaultTheme) === null || _a === void 0 ? void 0 : _a.unbindFromScope(0);
         this.defaultTheme = ArkThemeScopeManager.SystemTheme;
         const cloneTheme = ArkThemeScopeManager.cloneCustomThemeWithExpand(customTheme);
-        this.defaultTheme = this.makeTheme(customTheme, ThemeColorMode.SYSTEM);
+        this.defaultTheme = this.makeTheme(cloneTheme, ThemeColorMode.SYSTEM);
         this.defaultTheme.bindToScope(0);
         ArkThemeNativeHelper.sendThemeToNative(this.defaultTheme, 0);
         ArkThemeNativeHelper.setDefaultTheme(cloneTheme);
