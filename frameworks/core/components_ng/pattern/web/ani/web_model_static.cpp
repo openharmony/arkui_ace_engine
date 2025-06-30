@@ -268,7 +268,7 @@ void WebModelStatic::SetWebMediaAVSessionEnabled(FrameNode *frameNode, const std
     CHECK_NULL_VOID(frameNode);
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
-    webPatternStatic->UpdateWebMediaAVSessionEnabled(enable.value_or(false));
+    webPatternStatic->UpdateWebMediaAVSessionEnabled(enable.value_or(true));
 }
 
 void WebModelStatic::JavaScriptOnDocumentStart(FrameNode* frameNode, const ScriptItems& scriptItems)
