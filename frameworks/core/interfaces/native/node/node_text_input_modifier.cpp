@@ -60,7 +60,7 @@ constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SO
 constexpr bool DEFAULT_SELECT_ALL = false;
 constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
-std::string g_strValue;
+thread_local std::string g_strValue;
 constexpr int32_t ELLIPSIS_MODE_TAIL = 2;
 
 void SetTextInputCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr)

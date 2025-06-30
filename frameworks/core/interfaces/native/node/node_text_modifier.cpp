@@ -94,7 +94,7 @@ FontWeight ConvertStrToFontWeight(const char* weight, FontWeight defaultFontWeig
 }
 namespace {
 
-std::string g_strValue;
+thread_local std::string g_strValue;
 void SetTextContent(ArkUINodeHandle node, ArkUI_CharPtr value, void* contentRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
