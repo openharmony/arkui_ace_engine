@@ -399,6 +399,7 @@ void RadioModelNG::SetIsUserSetMargin(FrameNode* frameNode, bool isUserSet)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
     pattern->SetIsUserSetMargin(isUserSet);
 }
 

@@ -45,32 +45,6 @@ std::string GetModuleNameFromContainer()
     CHECK_NULL_RETURN(container, "");
     return container->GetModuleName();
 }
-
-bool ParseLocalizedMargin(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result)
-{
-    if (ArkTSUtils::ParseJsLengthMetrics(vm, value, dimen)) {
-        result.unit = static_cast<int8_t>(dimen.Unit());
-        if (dimen.CalcValue() != "") {
-            result.string = dimen.CalcValue().c_str();
-        } else {
-            result.value = dimen.Value();
-        }
-        return true;
-    }
-    return false;
-}
-
-void ParseNormalMargin(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result)
-{
-    if (ArkTSUtils::ParseJsDimensionVp(vm, value, dimen)) {
-        result.unit = static_cast<int8_t>(dimen.Unit());
-        if (dimen.CalcValue() != "") {
-            result.string = dimen.CalcValue().c_str();
-        } else {
-            result.value = dimen.Value();
-        }
-    }
-}
 }
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
@@ -2902,41 +2876,5 @@ void ArkTSUtils::ParseGradientAngle(
     degree.reset();
     values.push_back({ .i32 = static_cast<ArkUI_Int32>(angleHasValue) });
     values.push_back({ .f32 = static_cast<ArkUI_Float32>(angleValue) });
-}
-
-bool ArkTSUtils::ParseMargin(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUISizeType& top, ArkUISizeType& right,
-    ArkUISizeType& bottom, ArkUISizeType& left)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, false);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
-    CalcDimension topDimen(0, DimensionUnit::VP);
-    CalcDimension rightDimen(0, DimensionUnit::VP);
-    CalcDimension bottomDimen(0, DimensionUnit::VP);
-    CalcDimension leftDimen(0, DimensionUnit::VP);
-    bool isLengthMetrics = false;
-    if (secondArg->IsObject(vm)) {
-        isLengthMetrics |= ParseLocalizedMargin(vm, secondArg, topDimen, top);
-    }
-    if (thirdArg->IsObject(vm)) {
-        isLengthMetrics |= ParseLocalizedMargin(vm, thirdArg, rightDimen, right);
-    }
-    if (forthArg->IsObject(vm)) {
-        isLengthMetrics |= ParseLocalizedMargin(vm, forthArg, bottomDimen, bottom);
-    }
-    if (fifthArg->IsObject(vm)) {
-        isLengthMetrics |= ParseLocalizedMargin(vm, fifthArg, leftDimen, left);
-    }
-    if (isLengthMetrics) {
-        return true;
-    }
-    ParseNormalMargin(vm, secondArg, topDimen, top);
-    ParseNormalMargin(vm, thirdArg, rightDimen, right);
-    ParseNormalMargin(vm, forthArg, bottomDimen, bottom);
-    ParseNormalMargin(vm, fifthArg, leftDimen, left);
-    return false;
 }
 } // namespace OHOS::Ace::NG
