@@ -77,6 +77,7 @@ HWTEST_F(WebModelStaticTest, CreateFrameNode001, TestSize.Level1)
     SetWebIdCallback setWebIdCallback = [](int32_t) {};
     SetHapPathCallback setHapPathCallback = [](const std::string&) {};
     auto renderExitedId = [](const std::shared_ptr<BaseEventInfo>& info) {};
+    std::optional<BlurOnKeyboardHideMode> keyBoardMode;
 
     WebModelStatic::SetWebIdCallback(AccessibilityManager::RawPtr(frameNode), std::move(setWebIdCallback));
     WebModelStatic::SetHapPathCallback(AccessibilityManager::RawPtr(frameNode), std::move(setHapPathCallback));
@@ -103,7 +104,12 @@ HWTEST_F(WebModelStaticTest, CreateFrameNode001, TestSize.Level1)
     WebModelStatic::SetDarkMode(AccessibilityManager::RawPtr(frameNode), WebDarkMode::On);
     WebModelStatic::SetForceDarkAccess(AccessibilityManager::RawPtr(frameNode), true);
     WebModelStatic::SetAllowWindowOpenMethod(AccessibilityManager::RawPtr(frameNode), true);
-
+    WebModelStatic::SetUserAgent(AccessibilityManager::RawPtr(frameNode), "123");
+    WebModelStatic::NotifyPopupWindowResultStatic(-1, true);
+    WebModelStatic::NotifyPopupWindowResultStatic(1, true);
+    WebModelStatic::SetBlurOnKeyboardHideMode(AccessibilityManager::RawPtr(frameNode), keyBoardMode);
+    keyBoardMode = BlurOnKeyboardHideMode::BLUR;
+    WebModelStatic::SetBlurOnKeyboardHideMode(AccessibilityManager::RawPtr(frameNode), keyBoardMode);
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
     auto webSrc = webPatternStatic->GetWebSrc();
@@ -192,7 +198,11 @@ HWTEST_F(WebModelStaticTest, SetMixedMode002, TestSize.Level1)
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
 
-    WebModelStatic::SetMixedMode(AccessibilityManager::RawPtr(frameNode), MixedModeContent::MIXED_CONTENT_NEVER_ALLOW);
+    std::optional<MixedModeContent> mixedContentMode;
+    WebModelStatic::SetMixedMode(AccessibilityManager::RawPtr(frameNode), mixedContentMode);
+
+    mixedContentMode = MixedModeContent::MIXED_CONTENT_NEVER_ALLOW;
+    WebModelStatic::SetMixedMode(AccessibilityManager::RawPtr(frameNode), mixedContentMode);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->GetMixedMode(), MixedModeContent::MIXED_CONTENT_NEVER_ALLOW);
 #endif
 }
@@ -234,7 +244,11 @@ HWTEST_F(WebModelStaticTest, SetCacheMode001, TestSize.Level1)
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
 
-    WebModelStatic::SetCacheMode(AccessibilityManager::RawPtr(frameNode), WebCacheMode::DEFAULT);
+    std::optional<WebCacheMode> cacheMode;
+    WebModelStatic::SetCacheMode(AccessibilityManager::RawPtr(frameNode), cacheMode);
+
+    cacheMode = WebCacheMode::DEFAULT;
+    WebModelStatic::SetCacheMode(AccessibilityManager::RawPtr(frameNode), cacheMode);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->GetCacheMode(), WebCacheMode::DEFAULT);
 #endif
 }
@@ -255,7 +269,11 @@ HWTEST_F(WebModelStaticTest, SetDarkMode001, TestSize.Level1)
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
 
-    WebModelStatic::SetDarkMode(AccessibilityManager::RawPtr(frameNode), WebDarkMode::Auto);
+    std::optional<WebDarkMode> mode;
+    WebModelStatic::SetDarkMode(AccessibilityManager::RawPtr(frameNode), mode);
+
+    mode = WebDarkMode::Auto;
+    WebModelStatic::SetDarkMode(AccessibilityManager::RawPtr(frameNode), mode);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->GetDarkMode(), WebDarkMode::Auto);
 #endif
 }
@@ -318,7 +336,11 @@ HWTEST_F(WebModelStaticTest, SetKeyboardAvoidMode012, TestSize.Level1)
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
 
-    WebModelStatic::SetKeyboardAvoidMode(AccessibilityManager::RawPtr(frameNode), WebKeyboardAvoidMode::RESIZE_CONTENT);
+    std::optional<WebKeyboardAvoidMode> mode;
+    WebModelStatic::SetKeyboardAvoidMode(AccessibilityManager::RawPtr(frameNode), mode);
+
+    mode = WebKeyboardAvoidMode::RESIZE_CONTENT;
+    WebModelStatic::SetKeyboardAvoidMode(AccessibilityManager::RawPtr(frameNode), mode);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckKeyboardAvoidMode(WebKeyboardAvoidMode::RESIZE_CONTENT),
               true);
 #endif
@@ -942,9 +964,6 @@ HWTEST_F(WebModelStaticTest, SetNativeEmbedOptions001, TestSize.Level1)
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
 
-    WebModelStatic::SetNativeEmbedOptions(AccessibilityManager::RawPtr(frameNode), false);
-    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckIntrinsicSizeEnabled(false), false);
-
     WebModelStatic::SetNativeEmbedOptions(AccessibilityManager::RawPtr(frameNode), true);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckIntrinsicSizeEnabled(true), true);
 #endif
@@ -1111,8 +1130,16 @@ HWTEST_F(WebModelStaticTest, SetMediaOptions001, TestSize.Level1)
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
 
-    WebModelStatic::SetAudioResumeInterval(AccessibilityManager::RawPtr(frameNode), 0);
-    WebModelStatic::SetAudioExclusive(AccessibilityManager::RawPtr(frameNode), true);
+    std::optional<int32_t> resumeInterval;
+    WebModelStatic::SetAudioResumeInterval(AccessibilityManager::RawPtr(frameNode), resumeInterval);
+
+    resumeInterval = 0;
+    WebModelStatic::SetAudioResumeInterval(AccessibilityManager::RawPtr(frameNode), resumeInterval);
+
+    std::optional<bool> audioExclusive;
+    WebModelStatic::SetAudioExclusive(AccessibilityManager::RawPtr(frameNode), audioExclusive);
+    audioExclusive = true;
+    WebModelStatic::SetAudioExclusive(AccessibilityManager::RawPtr(frameNode), audioExclusive);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckAudioResumeInterval(0), true);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckAudioExclusive(true), true);
 #endif
@@ -1232,7 +1259,11 @@ HWTEST_F(WebModelStaticTest, SetCopyOptionMode008, TestSize.Level1)
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
 
-    WebModelStatic::SetCopyOptionMode(AccessibilityManager::RawPtr(frameNode), CopyOptions::Local);
+    std::optional<CopyOptions> mode;
+    WebModelStatic::SetCopyOptionMode(AccessibilityManager::RawPtr(frameNode), mode);
+
+    mode = CopyOptions::Local;
+    WebModelStatic::SetCopyOptionMode(AccessibilityManager::RawPtr(frameNode), mode);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckCopyOptionMode(2), true);
 #endif
 }
@@ -1397,7 +1428,11 @@ HWTEST_F(WebModelStaticTest, SetOverScrollMode007, TestSize.Level1)
     auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
     ASSERT_NE(webPatternStatic, nullptr);
 
-    WebModelStatic::SetOverScrollMode(AccessibilityManager::RawPtr(frameNode), OverScrollMode::ALWAYS);
+    std::optional<OverScrollMode> mode;
+    WebModelStatic::SetOverScrollMode(AccessibilityManager::RawPtr(frameNode), mode);
+
+    mode = OverScrollMode::ALWAYS;
+    WebModelStatic::SetOverScrollMode(AccessibilityManager::RawPtr(frameNode), mode);
     EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckOverScrollMode(OverScrollMode::ALWAYS), true);
 #endif
 }
@@ -1553,11 +1588,11 @@ HWTEST_F(WebModelStaticTest, SetWindowExitEventId001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetBlurOnKeyboardHideMode001
+ * @tc.name: SetSharedRenderProcessToken001
  * @tc.desc: Test web_model_static.cpp
  * @tc.type: FUNC
  */
-HWTEST_F(WebModelStaticTest, SetBlurOnKeyboardHideMode001, TestSize.Level1)
+HWTEST_F(WebModelStaticTest, SetSharedRenderProcessToken001, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
     auto* stack = ViewStackProcessor::GetInstance();
@@ -1566,11 +1601,887 @@ HWTEST_F(WebModelStaticTest, SetBlurOnKeyboardHideMode001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     stack->Push(frameNode);
 
-    std::optional<BlurOnKeyboardHideMode> keyBoardMode;
-    WebModelStatic::SetBlurOnKeyboardHideMode(AccessibilityManager::RawPtr(frameNode), keyBoardMode);
+    std::optional<std::string> sharedRenderProcessToken = "token";
+    WebModelStatic::SetSharedRenderProcessToken(AccessibilityManager::RawPtr(frameNode), sharedRenderProcessToken);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    EXPECT_EQ(webPatternStatic->GetSharedRenderProcessToken(), "token");
+#endif
+}
 
-    keyBoardMode = BlurOnKeyboardHideMode::BLUR;
-    WebModelStatic::SetBlurOnKeyboardHideMode(AccessibilityManager::RawPtr(frameNode), keyBoardMode);
+/**
+ * @tc.name: SetOverlayScrollbarEnabled001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOverlayScrollbarEnabled001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    WebModelStatic::SetOverlayScrollbarEnabled(AccessibilityManager::RawPtr(frameNode), true);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckOverlayScrollbarEnabled(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetTextAutosizing001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetTextAutosizing001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    WebModelStatic::SetTextAutosizing(AccessibilityManager::RawPtr(frameNode), true);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckTextAutosizing(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetWebMediaAVSessionEnabled001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetWebMediaAVSessionEnabled001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    std::optional<bool> enable;
+    WebModelStatic::SetWebMediaAVSessionEnabled(AccessibilityManager::RawPtr(frameNode), enable);
+
+    enable = true;
+    WebModelStatic::SetWebMediaAVSessionEnabled(AccessibilityManager::RawPtr(frameNode), enable);
+#endif
+}
+
+/**
+ * @tc.name: SetDefaultTextEncodingFormat001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetDefaultTextEncodingFormat001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    std::string textEncodingFormat;
+    WebModelStatic::SetDefaultTextEncodingFormat(AccessibilityManager::RawPtr(frameNode), textEncodingFormat);
+
+    textEncodingFormat = "format";
+    WebModelStatic::SetDefaultTextEncodingFormat(AccessibilityManager::RawPtr(frameNode), textEncodingFormat);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckDefaultTextEncodingFormat("format"), true);
+#endif
+}
+
+/**
+ * @tc.name: SetNativeVideoPlayerConfig001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetNativeVideoPlayerConfig001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    WebModelStatic::SetNativeVideoPlayerConfig(AccessibilityManager::RawPtr(frameNode), true, true);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    EXPECT_EQ(webPatternStatic->GetOrCreateWebProperty()->CheckNativeVideoPlayerConfig(
+              std::make_tuple(true, true)), true);
+#endif
+}
+
+/**
+ * @tc.name: SetNestedScrollExt001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetNestedScrollExt001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    NestedScrollOptionsExt nestedOpt;
+    WebModelStatic::SetNestedScrollExt(AccessibilityManager::RawPtr(frameNode), nestedOpt);
+
+    nestedOpt.scrollUp = NestedScrollMode::SELF_FIRST;
+    WebModelStatic::SetNestedScrollExt(AccessibilityManager::RawPtr(frameNode), nestedOpt);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    EXPECT_EQ(webPatternStatic->nestedScroll_.scrollUp, NestedScrollMode::SELF_FIRST);
+#endif
+}
+
+/**
+ * @tc.name: SetSelectionMenuOptions001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetSelectionMenuOptions001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    WebMenuOptionsParam webMenuOption = {};
+    MenuOptionsParam menuOptionsParam = {};
+    menuOptionsParam.id = "test";
+    webMenuOption.menuOption.push_back(menuOptionsParam);
+    WebModelStatic::SetSelectionMenuOptions(AccessibilityManager::RawPtr(frameNode), webMenuOption);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    EXPECT_FALSE(webPatternStatic->menuOptionParam_.empty());
+    EXPECT_EQ(webPatternStatic->menuOptionParam_.size(), 1);
+    EXPECT_EQ(webPatternStatic->menuOptionParam_[0].id, "test");
+#endif
+}
+
+/**
+ * @tc.name: SetEditMenuOptions001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetEditMenuOptions001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    int callCount = 0;
+    auto onCreateMenuCallback =
+        [](const std::vector<OHOS::Ace::NG::MenuItemParam>& /*items*/) -> std::vector<OHOS::Ace::NG::MenuOptionsParam> {
+        return {};
+    };
+    auto onMenuItemClick = [&callCount](const OHOS::Ace::NG::MenuItemParam& /*item*/) -> bool {
+        callCount++;
+        return false;
+    };
+    WebModelStatic::SetEditMenuOptions(AccessibilityManager::RawPtr(frameNode), onCreateMenuCallback, onMenuItemClick);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    webPatternStatic->onMenuItemClick_({});
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetNewDragStyle001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetNewDragStyle001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    WebModelStatic::SetNewDragStyle(AccessibilityManager::RawPtr(frameNode), true);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    EXPECT_EQ(webPatternStatic->IsNewDragStyle(), true);
+#endif
+}
+
+/**
+ * @tc.name: SetPreviewSelectionMenu001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetPreviewSelectionMenu001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    WebElementType type = WebElementType::IMAGE;
+    ResponseType responseType = ResponseType::RIGHT_CLICK;
+    MenuParam menuParam;
+
+    menuParam.previewMode = MenuPreviewMode::NONE;
+    menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+    menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
+    menuParam.type = NG::MenuType::CONTEXT_MENU;
+    menuParam.isShow = true;
+    auto param = std::make_shared<WebPreviewSelectionMenuParam>(type, responseType, nullptr,
+        nullptr, menuParam);
+    WebModelStatic::SetPreviewSelectionMenu(AccessibilityManager::RawPtr(frameNode), param);
+    auto webPatternStatic = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPatternStatic>();
+    ASSERT_NE(webPatternStatic, nullptr);
+    auto result = webPatternStatic->GetPreviewSelectionMenuParams(type, responseType);
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->type, type);
+    EXPECT_EQ(result->responseType, responseType);
+    EXPECT_EQ(result->menuBuilder, nullptr);
+    EXPECT_EQ(result->previewBuilder, nullptr);
+    EXPECT_EQ(result->menuParam.menuBindType, MenuBindingType::RIGHT_CLICK);
+#endif
+}
+
+/**
+ * @tc.name: SetOnGeolocationHide001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnGeolocationHide001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    auto callback = [&callCount](const BaseEventInfo* info) { callCount++; };
+    WebModelStatic::SetOnGeolocationHide(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->FireOnGeolocationHideEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetOnCommonDialog001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnCommonDialog001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) -> bool {
+        callCount++;
+        return true;
+    };
+    WebModelStatic::SetOnCommonDialog(AccessibilityManager::RawPtr(frameNode), callback,
+        DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    auto result = webEventHub->FireOnCommonDialogEvent(mockEventInfo, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
+    EXPECT_TRUE(result);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetOnErrorReceive001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnErrorReceive001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) { callCount++; };
+    WebModelStatic::SetOnErrorReceive(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnErrorReceiveEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetOnHttpErrorReceive001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnHttpErrorReceive001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) { callCount++; };
+    WebModelStatic::SetOnHttpErrorReceive(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnHttpErrorReceiveEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetOnUrlLoadIntercept001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnUrlLoadIntercept001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) -> bool {
+        callCount++;
+        return true;
+    };
+    WebModelStatic::SetOnUrlLoadIntercept(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnUrlLoadInterceptEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetOnFileSelectorShow001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnFileSelectorShow001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+        return true;
+    };
+    WebModelStatic::SetOnFileSelectorShow(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnFileSelectorShowEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetOnHttpAuthRequest001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnHttpAuthRequest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+        return true;
+    };
+    WebModelStatic::SetOnHttpAuthRequest(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnHttpAuthRequestEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetOnInterceptRequest001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnInterceptRequest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+        return nullptr;
+    };
+    WebModelStatic::SetOnInterceptRequest(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnInterceptRequestEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetOnContextMenuHide001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnContextMenuHide001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+        return true;
+    };
+    WebModelStatic::SetOnContextMenuHide(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnContextMenuHideEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetOnSslErrorRequest001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnSslErrorRequest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+        return true;
+    };
+    WebModelStatic::SetOnSslErrorRequest(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnSslErrorRequestEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetOnAllSslErrorRequest001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnAllSslErrorRequest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+        return true;
+    };
+    WebModelStatic::SetOnAllSslErrorRequest(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnAllSslErrorRequestEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetOnSslSelectCertRequest001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnSslSelectCertRequest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+        return true;
+    };
+    WebModelStatic::SetOnSslSelectCertRequest(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnSslSelectCertRequestEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetOnInterceptKeyEventCallback001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnInterceptKeyEventCallback001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const KeyEventInfo& keyEventInfo) -> bool {
+        return true;
+    };
+    WebModelStatic::SetOnInterceptKeyEventCallback(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto interceptKeyEventCallback = webEventHub->GetOnPreKeyEvent();
+    ASSERT_NE(interceptKeyEventCallback, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: SetFirstMeaningfulPaintId001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetFirstMeaningfulPaintId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    bool callbackCalled = false;
+    auto callback = [&callbackCalled](const std::shared_ptr<BaseEventInfo>& info) {
+        callbackCalled = true;
+    };
+    WebModelStatic::SetFirstMeaningfulPaintId(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->propOnFirstMeaningfulPaintEvent_(nullptr);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetLargestContentfulPaintId001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetLargestContentfulPaintId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    bool callbackCalled = false;
+    auto callback = [&callbackCalled](const std::shared_ptr<BaseEventInfo>& info) {
+        callbackCalled = true;
+    };
+    WebModelStatic::SetLargestContentfulPaintId(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->propOnLargestContentfulPaintEvent_(nullptr);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetOnLoadIntercept001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnLoadIntercept001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+        return true;
+    };
+    WebModelStatic::SetOnLoadIntercept(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnLoadInterceptEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetSafeBrowsingCheckResultId001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetSafeBrowsingCheckResultId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    bool callbackCalled = false;
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    auto callback = [&callbackCalled](const std::shared_ptr<BaseEventInfo> info) {
+        callbackCalled = true;
+    };
+    WebModelStatic::SetSafeBrowsingCheckResultId(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->FireOnSafeBrowsingCheckResultEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetIntelligentTrackingPreventionResultId001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetIntelligentTrackingPreventionResultId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    bool callbackCalled = false;
+    auto callback = [&callbackCalled](const std::shared_ptr<BaseEventInfo>& info) {
+        callbackCalled = true;
+    };
+    WebModelStatic::SetIntelligentTrackingPreventionResultId(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->propOnIntelligentTrackingPreventionResultEvent_(nullptr);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetNativeEmbedVisibilityChangeId001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetNativeEmbedVisibilityChangeId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) { callCount++; };
+    WebModelStatic::SetNativeEmbedVisibilityChangeId(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->FireOnNativeEmbedVisibilityChangeEvent(std::make_shared<NativeEmbedVisibilityInfo>(
+        true, "embed_id"));
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetOnOverrideUrlLoading001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnOverrideUrlLoading001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+        return true;
+    };
+    WebModelStatic::SetOnOverrideUrlLoading(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnOverrideUrlLoadingEvent(mockEventInfo);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetViewportFitChangedId001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetViewportFitChangedId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+    };
+    WebModelStatic::SetViewportFitChangedId(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->propOnViewportFitChangedEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetOnInterceptKeyboardAttach001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetOnInterceptKeyboardAttach001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) -> WebKeyboardOption {
+        callCount++;
+        return { };
+    };
+    WebModelStatic::SetOnInterceptKeyboardAttach(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->propOnInterceptKeyboardAttachEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
+#endif
+}
+/**
+ * @tc.name: SetAdsBlockedEventId001
+ * @tc.desc: Test web_model_static.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelStaticTest, SetAdsBlockedEventId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    int callCount = 0;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = WebModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+
+    auto callback = [&callCount](const BaseEventInfo* info) {
+        callCount++;
+    };
+    WebModelStatic::SetAdsBlockedEventId(AccessibilityManager::RawPtr(frameNode), callback);
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->propOnAdsBlockedEvent_(nullptr);
+    EXPECT_NE(callCount, 0);
 #endif
 }
 } // namespace OHOS::Ace::NG
