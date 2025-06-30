@@ -3301,7 +3301,7 @@ HWTEST_F(TextTestFiveNg, TextShiftMultipleSelection001, TestSize.Level1)
 HWTEST_F(TextTestFiveNg, TextEnableAutoSpacing, TestSize.Level1)
 {
     /**
-     * @tc.steps: Create Text filed node with default text and placeholder
+     * @tc.steps: Create Text filed node with default text and placeholder.
      */
     TextModelNG textModelNG;
     textModelNG.Create(CREATE_VALUE_W);

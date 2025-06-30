@@ -29,7 +29,7 @@ constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE_VALUE = Ace::FontStyle::NORMAL;
 constexpr Dimension DEFAULT_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
 constexpr Dimension DEFAULT_BASELINE_OFFSET { 0.0, DimensionUnit::FP };
-std::string g_strValue;
+thread_local std::string g_strValue;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
