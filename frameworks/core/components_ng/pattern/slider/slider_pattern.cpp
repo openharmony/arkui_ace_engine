@@ -15,11 +15,11 @@
 
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 
-#include "base/utils/multi_thread.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"

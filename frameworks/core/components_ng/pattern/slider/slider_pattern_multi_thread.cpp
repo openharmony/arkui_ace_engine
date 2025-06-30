@@ -36,6 +36,7 @@ void SliderPattern::OnAttachToFrameNodeMultiThread()
 
 void SliderPattern::OnAttachToMainTreeMultiThread()
 {
+    // Insecure operations are performed in the main thread after the main tree is mounted.
     RegisterVisibleAreaChange();
 }
 
