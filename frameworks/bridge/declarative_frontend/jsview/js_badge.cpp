@@ -79,12 +79,9 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         std::string valueResult;
         if (SystemProperties::ConfigChangePerform()) {
             RefPtr<ResourceObject> resObj;
-            bool state = ParseJsString(value, valueResult, resObj);
-            if (resObj) {
-                badgeParameters.resourceBadgeValueObject = resObj;
-            } else if (state) {
-                badgeParameters.badgeValue = valueResult;
-            }
+            ParseJsString(value, valueResult, resObj);
+            badgeParameters.resourceBadgeValueObject = resObj;
+            badgeParameters.badgeValue = valueResult;
         } else {
             ParseJsString(value, valueResult);
             badgeParameters.badgeValue = valueResult;
@@ -156,9 +153,8 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
             RefPtr<ResourceObject> resObj;
             badgeParameters.badgeTextColorByUser = true;
             bool state = ParseJsColor(colorValue, colorVal, resObj);
-            if (resObj) {
-                badgeParameters.resourceColorObject = resObj;
-            } else if (state) {
+            badgeParameters.resourceColorObject = resObj;
+            if (state) {
                 badgeParameters.badgeTextColor = colorVal;
             } else if (themeColors) {
                 badgeParameters.badgeTextColor = themeColors->FontOnPrimary();
@@ -179,9 +175,8 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
             RefPtr<ResourceObject> resObj;
             badgeParameters.badgeFontSizeByUser = true;
             bool state = ParseJsDimensionNG(fontSizeValue, fontSize, DimensionUnit::FP, resObj);
-            if (resObj) {
-                badgeParameters.resourceFontSizeObject = resObj;
-            } else if (state && fontSize.IsNonNegative() && fontSize.Unit() != DimensionUnit::PERCENT) {
+            badgeParameters.resourceFontSizeObject = resObj;
+            if (state && fontSize.IsNonNegative() && fontSize.Unit() != DimensionUnit::PERCENT) {
                 badgeParameters.badgeFontSize = fontSize;
                 isDefaultFontSize = false;
             } else {
@@ -206,9 +201,8 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
             RefPtr<ResourceObject> resObj;
             badgeParameters.badgeCircleSizeByUser = true;
             bool state = ParseJsDimensionNG(badgeSizeValue, badgeSize, DimensionUnit::FP, resObj);
-            if (resObj) {
-                badgeParameters.resourceBadgeSizeObject = resObj;
-            } else if (state && badgeSize.IsNonNegative() && badgeSize.Unit() != DimensionUnit::PERCENT) {
+            badgeParameters.resourceBadgeSizeObject = resObj;
+            if (state && badgeSize.IsNonNegative() && badgeSize.Unit() != DimensionUnit::PERCENT) {
                 badgeParameters.badgeCircleSize = badgeSize;
                 isDefaultBadgeSize = false;
             } else {
@@ -231,10 +225,8 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
             RefPtr<ResourceObject> badgeColorResObj;
             badgeParameters.badgeColorByUser = false;
             bool state = ParseJsColor(badgeColorValue, color, badgeColorResObj);
-            if (badgeColorResObj) {
-                badgeParameters.resourceBadgeColorObject = badgeColorResObj;
-                badgeParameters.badgeColorByUser = true;
-            } else if (state) {
+            badgeParameters.resourceBadgeColorObject = badgeColorResObj;
+            if (state) {
                 badgeParameters.badgeColor = color;
                 badgeParameters.badgeColorByUser = true;
             } else if (themeColors) {
@@ -253,9 +245,8 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
             RefPtr<ResourceObject> resObj;
             badgeParameters.badgeBorderWidthByUser = true;
             bool state = ParseJsDimensionVp(borderWidthValue, borderWidth, resObj);
-            if (resObj) {
-                badgeParameters.resourceBorderWidthObject = resObj;
-            } else if (state && borderWidth.IsNonNegative() && borderWidth.Unit() != DimensionUnit::PERCENT) {
+            badgeParameters.resourceBorderWidthObject = resObj;
+            if (state && borderWidth.IsNonNegative() && borderWidth.Unit() != DimensionUnit::PERCENT) {
                 badgeParameters.badgeBorderWidth = borderWidth;
             } else {
                 badgeParameters.badgeBorderWidth = badgeTheme->GetBadgeBorderWidth();
@@ -274,10 +265,8 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
             RefPtr<ResourceObject> borderColorResObj;
             badgeParameters.badgeBorderColorByUser = false;
             bool state = ParseJsColor(borderColorValue, borderColor, borderColorResObj);
-            if (borderColorResObj) {
-                badgeParameters.resourceBorderColorObject = borderColorResObj;
-                badgeParameters.badgeBorderColorByUser = true;
-            } else if (state) {
+            badgeParameters.resourceBorderColorObject = borderColorResObj;
+            if (state) {
                 badgeParameters.badgeBorderColor = borderColor;
                 badgeParameters.badgeBorderColorByUser = true;
             } else {
@@ -300,11 +289,8 @@ BadgeParameters JSBadge::CreateBadgeParameters(const JSCallbackInfo& info)
         } else if (SystemProperties::ConfigChangePerform()) {
             RefPtr<ResourceObject> resObj;
             ParseJsString(fontWeightValue, fontWeight, resObj);
-            if (resObj) {
-                badgeParameters.resourceFontWeightObject = resObj;
-            } else {
-                badgeParameters.badgeFontWeight = ConvertStrToFontWeight(fontWeight);
-            }
+            badgeParameters.resourceFontWeightObject = resObj;
+            badgeParameters.badgeFontWeight = ConvertStrToFontWeight(fontWeight);
         } else {
             if (!ParseJsString(fontWeightValue, fontWeight)) {
                 badgeParameters.badgeFontWeight = FontWeight::NORMAL;
