@@ -115,6 +115,9 @@ ohos_shared_library("ArkoalaLoader") {
     }
 
     external_deps = [ "hilog:hilog_ndk", "napi:ace_napi" ]
+
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
 }
 
 ohos_shared_library("vmloader") {
@@ -205,8 +208,6 @@ ohos_prebuilt_etc("arkoala_build") {
 group("arkoala") {
     deps = [
       "$koala_path:ArkoalaNative_ark",
-      "$koala_path:ArkoalaLoader",
-#      "$koala_path:vmloader",
       "$koala_path:arkoala_build"
     ]
 }

@@ -59,14 +59,21 @@ npm_cmd("ui2abc_build") {
 
 action("ui2abc_panda_sdk") {
     script = "gn/command/gen_sdk.py"
-
+    inputs = [
+      "$root_out_dir/clang_x64/arkcompiler/ets_frontend/es2panda"
+    ]
     outputs = [
         "$target_out_dir/panda-sdk"
     ]
 
     external_deps = [
         "ets_frontend:libes2panda_public(${toolchain_linux})",
+        "sdk:ohos_ets_api",
+        "sdk:ohos_ets_arkts",
     ]
+
+    external_deps += ets2abc_build_deps
+    external_deps += static_linker_build_deps
 
     args = [
         "--config", rebase_path("gn/sdk_config.json"),
