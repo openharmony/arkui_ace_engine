@@ -625,7 +625,7 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
                      "IsAxisAnimationRunning:%u, IsSnapAnimationRunning:%u, id:%d, tag:%s",
         info.GetInputEventType(), info.GetSourceTool(), isAxisEvent, IsAxisAnimationRunning(), IsSnapAnimationRunning(),
         nodeId_, nodeTag_.c_str());
-    if (isAxisEvent) {
+    if (isAxisEvent && !CanStayOverScroll()) {
         if (!IsAxisAnimationRunning() && !IsSnapAnimationRunning()) {
             axisSnapDistance_ = currentPos_;
             snapDirection_ = SnapDirection::NONE;
@@ -700,6 +700,7 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     ACE_SCOPED_TRACE(
         "HandleDragUpdate, mainDelta:%f, source:%d, id:%d, tag:%s", mainDelta, source, nodeId_, nodeTag_.c_str());
     if (isAxisEvent) {
+        CHECK_EQUAL_VOID(CanStayOverScroll(), true);
         ProcessAxisUpdateEvent(mainDelta);
         return;
     }
@@ -863,6 +864,10 @@ void Scrollable::ProcessAxisEndEvent()
     isTouching_ = false;
     isDragUpdateStop_ = false;
     JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_SCROLL);
+    if (CanStayOverScroll()) {
+        HandleOverScroll(0);
+        SetCanStayOverScroll(false);
+    }
 }
 
 void Scrollable::ReportToDragFRCScene(double velocity, NG::SceneStatus sceneStatus)
