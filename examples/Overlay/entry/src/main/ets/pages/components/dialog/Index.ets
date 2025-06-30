@@ -33,17 +33,21 @@ export struct DialogIndex {
     { name: 'DialogLevelOrder', path: 'DialogLevelOrder' },
     { name: 'DialogFocusable', path: 'DialogFocusable' },
     { name: 'EmbeddedDialog', path: 'EmbeddedDialogPageOne' },
+    { name: 'AlertDialogAvoid', path: 'AlertDialogAvoid' },
+    { name: 'CustomDialogAvoid', path: 'CustomDialogAvoid' },
     { name: 'Dialog组合场景1', path: 'DialogLevel0' }
   ]
 
   build() {
     NavDestination() {
-      NavList({
-        pages: this.paths,
-        onPathChange: (item: NavListItem) => {
-          this.pathStack.pushPath( { name: item.path } )
-        }
-      })
+      Scroll() {
+        NavList({
+          pages: this.paths,
+          onPathChange: (item: NavListItem) => {
+            this.pathStack.pushPath( { name: item.path } )
+          }
+        })
+      }
     }
     .title('Dialog')
     .onBackPressed(() => {
