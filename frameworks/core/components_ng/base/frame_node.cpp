@@ -4220,6 +4220,18 @@ void FrameNode::OnRecycle()
     layoutProperty_->ResetGeometryTransition();
     pattern_->OnRecycle();
     UINode::OnRecycle();
+
+    auto accessibilityProperty = GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto isFocus = accessibilityProperty->GetAccessibilityFocusState();
+    if (isFocus) {
+        accessibilityProperty->SetAccessibilityFocusState(false);
+        auto renderContext = GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (renderContext->GetAccessibilityFocus().value_or(false)) {
+            renderContext->UpdateAccessibilityFocus(false);
+        }
+    }
 }
 
 void FrameNode::OnReuse()
