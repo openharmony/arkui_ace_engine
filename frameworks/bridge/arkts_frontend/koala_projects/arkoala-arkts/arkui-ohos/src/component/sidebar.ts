@@ -31,7 +31,7 @@ import { CallbackKind } from "./peers/CallbackKind"
 import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { PixelMap } from "#external"
-import { SideBarContainerOpsHandWritten } from "./../handwritten"
+import { SideBarContainerOpsHandWritten, hookSideBarContainerSideBarWidthImpl, hookSideBarContainerMinSideBarWidthImpl, hookSideBarContainerMaxSideBarWidthImpl, hookSideBarContainerDividerImpl  } from "./../handwritten"
 
 export interface DividerStyle {
     strokeWidth: Length;
@@ -384,14 +384,9 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
         if (typeof value === "number" || typeof value === undefined) {
             if (this.checkPriority("sideBarWidth")) {
                 const value_type = runtimeType(value)
-                if ((RuntimeType.NUMBER == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                    const value_casted = value as (number | undefined)
-                    this.getPeer()?.sideBarWidth0Attribute(value_casted)
-                    return this
-                }
                 if ((RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                    const value_casted = value as (Length | undefined)
-                    this.getPeer()?.sideBarWidth1Attribute(value_casted)
+                    const value_casted = value as (number | Length | undefined)
+                    hookSideBarContainerSideBarWidthImpl(this.getPeer().peer.ptr, value_casted)
                     return this
                 }
                 throw new Error("Can not select appropriate overload")
@@ -404,14 +399,9 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
     public minSideBarWidth(value: number | undefined): this {
         if (this.checkPriority("minSideBarWidth")) {
             const value_type = runtimeType(value)
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (number | undefined)
-                this.getPeer()?.minSideBarWidth0Attribute(value_casted)
-                return this
-            }
             if ((RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (Length | undefined)
-                this.getPeer()?.minSideBarWidth1Attribute(value_casted)
+                const value_casted = value as (number | Length | undefined)
+                hookSideBarContainerMinSideBarWidthImpl(this.getPeer().peer.ptr, value_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -421,14 +411,9 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
     public maxSideBarWidth(value: number | undefined): this {
         if (this.checkPriority("maxSideBarWidth")) {
             const value_type = runtimeType(value)
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (number | undefined)
-                this.getPeer()?.maxSideBarWidth0Attribute(value_casted)
-                return this
-            }
             if ((RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (Length | undefined)
-                this.getPeer()?.maxSideBarWidth1Attribute(value_casted)
+                const value_casted = value as (number | Length | undefined)
+                hookSideBarContainerMaxSideBarWidthImpl(this.getPeer().peer.ptr, value_casted)
                 return this
             }
             throw new Error("Can not select appropriate overload")
@@ -454,7 +439,7 @@ export class ArkSideBarContainerComponent extends ArkCommonMethodComponent imple
     public divider(value: DividerStyle | null | undefined): this {
         if (this.checkPriority("divider")) {
             const value_casted = value as (DividerStyle | null | undefined)
-            this.getPeer()?.dividerAttribute(value_casted)
+            hookSideBarContainerDividerImpl(this.getPeer().peer.ptr, value_casted)
             return this
         }
         return this
