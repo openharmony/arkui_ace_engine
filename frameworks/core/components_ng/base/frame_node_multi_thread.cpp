@@ -70,4 +70,14 @@ void FrameNode::MarkNeedRenderMultiThread(bool isRenderBoundary)
         parent->MarkDirtyNode(PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST);
     }
 }
+
+void FrameNode::OnMountToParentDoneMultiThread()
+{
+    PostAfterAttachMainTreeTask([weak = WeakClaim(this)]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        CHECK_NULL_VOID(frameNode->GetPattern());
+        frameNode->GetPattern()->OnMountToParentDone();
+    });
+}
 } // namespace OHOS::Ace::NG
