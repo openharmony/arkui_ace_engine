@@ -111,14 +111,14 @@ struct CustomDialogExample {
         })
       }
 
-      // MenuItem({
-      //   content: '菜单选项D',
-      //   builder: this.SubMenu_Short
-      // })
-      // MenuItem({
-      //   content: '菜单选项E',
-      //   builder: this.SubMenu_Short
-      // })
+      MenuItem({
+        content: '菜单选项D',
+        builder: this.SubMenu_Short
+      })
+      MenuItem({
+        content: '菜单选项E',
+        builder: this.SubMenu_Short
+      })
     }
     .subMenuExpandingMode(SubMenuExpandingMode.STACK_EXPAND)
   }
@@ -546,20 +546,7 @@ struct StackSubMenuAvoidDemo {
           content: '菜单选项B',
           builder: this.SubMenu_Short
         })
-        // MenuItem({
-        //   content: '菜单选项C',
-        //   builder: this.SubMenu_Short
-        // })
       }
-
-      // MenuItem({
-      //   content: '菜单选项D',
-      //   builder: this.SubMenu_Short
-      // })
-      // MenuItem({
-      //   content: '菜单选项E',
-      //   builder: this.SubMenu_Short
-      // })
     }
     .subMenuExpandingMode(SubMenuExpandingMode.STACK_EXPAND)
   }
@@ -582,14 +569,14 @@ struct StackSubMenuAvoidDemo {
         })
       }
 
-      // MenuItem({
-      //   content: '菜单选项D',
-      //   builder: this.SubMenu_Medium
-      // })
-      // MenuItem({
-      //   content: '菜单选项E',
-      //   builder: this.SubMenu_Medium
-      // })
+      MenuItem({
+        content: '菜单选项D',
+        builder: this.SubMenu_Medium
+      })
+      MenuItem({
+        content: '菜单选项E',
+        builder: this.SubMenu_Medium
+      })
     }
     .subMenuExpandingMode(SubMenuExpandingMode.STACK_EXPAND)
   }
@@ -639,10 +626,10 @@ struct StackSubMenuAvoidDemo {
       MenuItem({ content: '复制2', labelInfo: 'Ctrl+C' })
       MenuItem({ content: '复制3', labelInfo: 'Ctrl+C' })
       MenuItem({ content: '复制4', labelInfo: 'Ctrl+C' })
-      // MenuItem({ content: '复制5', labelInfo: 'Ctrl+C' })
-      // MenuItem({ content: '复制6', labelInfo: 'Ctrl+C' })
-      // MenuItem({ content: '复制7', labelInfo: 'Ctrl+C' })
-      // MenuItem({ content: '复制8', labelInfo: 'Ctrl+C' })
+      MenuItem({ content: '复制5', labelInfo: 'Ctrl+C' })
+      MenuItem({ content: '复制6', labelInfo: 'Ctrl+C' })
+      MenuItem({ content: '复制7', labelInfo: 'Ctrl+C' })
+      MenuItem({ content: '复制8', labelInfo: 'Ctrl+C' })
     }
   }
 
