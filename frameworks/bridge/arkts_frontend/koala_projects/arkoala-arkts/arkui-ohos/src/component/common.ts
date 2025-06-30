@@ -7019,7 +7019,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_backToTop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    edgeEffectAttribute(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): void {
+    edgeEffectAttribute(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let edgeEffect_type : int32 = RuntimeType.UNDEFINED
         edgeEffect_type = runtimeType(edgeEffect)
@@ -9206,7 +9206,7 @@ export interface ScrollableCommonMethod extends CommonMethod {
     clipContent(value: ContentClipMode | RectShape | undefined): this
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
     backToTop(value: boolean | undefined): this
-    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this
+    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this
     fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this
 }
 export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle implements ScrollableCommonMethod {
@@ -9255,7 +9255,7 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
     public backToTop(value: boolean | undefined): this {
         return this
     }
-    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this {
         return this
     }
     public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
@@ -11775,10 +11775,10 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this {
         if (this.checkPriority("edgeEffect")) {
             const edgeEffect_casted = edgeEffect as (EdgeEffect | undefined)
-            const options_casted = options as (EdgeEffectOptions)
+            const options_casted = options as (EdgeEffectOptions | undefined)
             this.getPeer()?.edgeEffectAttribute(edgeEffect_casted, options_casted)
             return this
         }
