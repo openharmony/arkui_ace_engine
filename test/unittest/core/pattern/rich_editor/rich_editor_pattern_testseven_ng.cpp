@@ -302,6 +302,28 @@ HWTEST_F(RichEditorPatternTestSevenNg, GetSpanRangeByResultObject, TestSize.Leve
 }
 
 /**
+ * @tc.name: GetSpanRangeByResultObject002
+ * @tc.desc: test GetSpanRangeByResultObject function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, GetSpanRangeByResultObject002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    SpanPosition spanPosition;
+    ResultObject result;
+    result.spanPosition = spanPosition;
+    result.offsetInSpan[0] = 1;
+    result.offsetInSpan[1] = 2;
+    auto [selectStartResult, selectEndResult] = richEditorPattern->GetSpanRangeByResultObject(result);
+    auto selectStart = 1;
+    auto selectEnd = 2;
+    EXPECT_EQ(selectStart, selectStartResult);
+    EXPECT_EQ(selectEnd, selectEndResult);
+}
+
+/**
  * @tc.name: CopySpansForClipboard
  * @tc.desc: test CopySpansForClipboard function
  * @tc.type: FUNC
@@ -334,5 +356,21 @@ HWTEST_F(RichEditorPatternTestSevenNg, CopySpansForClipboard, TestSize.Level1)
     }
     EXPECT_EQ(resultContent, content);
     EXPECT_EQ(resultPosition, position);
+}
+
+/**
+ * @tc.name: ConvertGlobalToTextOffset002
+ * @tc.desc: test ConvertGlobalToTextOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, ConvertGlobalToTextOffset002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->richTextRect_ = RectF(50, 50, 100, 140);
+    auto globalOffset = Offset(100, 100);
+    auto textOffset = richEditorPattern->ConvertGlobalToTextOffset(globalOffset);
+    ASSERT_EQ(textOffset, Offset(50, 50));
 }
 } // namespace OHOS::Ace::NG
