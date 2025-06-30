@@ -219,7 +219,7 @@ class UIUtils {
    * @syscap SystemCapability.ArkUI.ArkUI.Full
    * @crossplatform
    * @atomicservice
-   * @since 12
+   * @since 19
    */
   static makeV1Observed(source) {
       return UIUtils.uiUtilsImpl_.makeV1Observed(source);
@@ -229,12 +229,12 @@ class UIUtils {
    * Enables V2 compatibility for the given object.
    * Ensures that the object and its nested properties conform to V2 behaviour.
    *
-   * @param {Object} source - The object to be made V2-compatible.
-   * @returns {Object} The processed object with V2 compatibility enabled.
+   * @param { Object } source - The object to be made V2-compatible.
+   * @returns { Object } The processed object with V2 compatibility enabled.
    * @syscap SystemCapability.ArkUI.ArkUI.Full
    * @crossplatform
    * @atomicservice
-   * @since 12
+   * @since 19
    */
   static enableV2Compatibility(source) {
     return UIUtils.uiUtilsImpl_.enableV2Compatibility(source);
@@ -254,6 +254,45 @@ class UIUtils {
    */
   static makeBinding(getter, setter) {
     return UIUtils.uiUtilsImpl_.makeBinding(getter, setter);
+  }
+
+  /**
+   * Dynamically add monitor for state variable change.
+   *
+   * @param { object } target class instance or custom component instance.
+   * @param { string | string[] } path  monitored change for state variable.
+   * @param { MonitorCallback } monitorCallback the function that triggers the callback when state variable change.
+   * @param { MonitorOptions} [options] the monitor configuration parameter.
+   * @throws { BusinessError } 130000 - The target is not a custom component instance or V2 class instance.
+   * @throws { BusinessError } 130001 - The path is invalid.
+   * @throws { BusinessError } 130002 - monitorCallback is not a function or an anonymous function.
+   * @static
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @crossplatform
+   * @atomicservice
+   * @since 20
+   */
+    static addMonitor(target, path, monitorCallback, options) {
+      UIUtils.uiUtilsImpl_.addMonitor(target, path, monitorCallback, options) ;
+    }
+
+  /**
+   * Dynamically clear monitor callback for state variable change.
+   *
+   * @param { object } target class instance or custom component instance.
+   * @param { string | string[] } path  monitored change for state variable.
+   * @param { MonitorCallback } [monitorCallback] the function that triggers the callback when state variable change.
+   * @throws { BusinessError } 130000 - The target is not a custom component instance or V2 class instance.
+   * @throws { BusinessError } 130001 - The path is invalid.
+   * @throws { BusinessError } 130002 - monitorCallback is not a function or an anonymous function.
+   * @static
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @crossplatform
+   * @atomicservice
+   * @since 20
+   */
+  static clearMonitor(target, path, monitorCallback) {
+    UIUtils.uiUtilsImpl_.clearMonitor(target, path, monitorCallback) ;
   }
 }
 
