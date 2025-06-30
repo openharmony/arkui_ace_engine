@@ -78,7 +78,7 @@ import { Resource } from "global.resource"
 import { PixelMap } from "#external"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, GuideLinePosition, GuideLineStyle, LocalizedBarrierStyle } from "./../relativeContainer"
-import { DrawingCanvas, DrawingCanvasInternal, DrawingColorFilter, DrawingColorFilterInternal, DrawingLattice, DrawingLatticeInternal, RectType } from "./../arkui-drawing"
+import { DrawingCanvas, DrawingCanvasInternal, DrawingColorFilter, DrawingColorFilterInternal, RectType } from "./../arkui-drawing"
 import { drawing } from "@ohos/graphics/drawing"
 import { BreakpointsReference, GridRowDirection, Callback_String_Void, BreakPoints, GridRowColumnOption, GridRowSizeOption, GutterOption, GridRowOptions } from "./../gridRow"
 import { CalendarAlign, CalendarPickerAttribute, Callback_Date_Void, CalendarOptions, CalendarDialogOptions } from "./../calendarPicker"
@@ -291,10 +291,6 @@ export class Serializer extends SerializerBase {
         valueSerializer.holdAndWriteObject(value)
     }
     writeDrawingColorFilter(value: DrawingColorFilter): void {
-        let valueSerializer : Serializer = this
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    writeDrawingLattice(value: DrawingLattice): void {
         let valueSerializer : Serializer = this
         valueSerializer.writePointer(toPeerPtr(value))
     }
@@ -14872,10 +14868,6 @@ export class Serializer extends SerializerBase {
         let value_lattice_type : int32 = RuntimeType.UNDEFINED
         value_lattice_type = runtimeType(value_lattice)
         valueSerializer.writeInt8(value_lattice_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_lattice_type)) {
-            const value_lattice_value  = value_lattice!
-            valueSerializer.writeDrawingLattice(value_lattice_value)
-        }
     }
     writeRestrictedWorker(value: RestrictedWorker): void {
         let valueSerializer : Serializer = this

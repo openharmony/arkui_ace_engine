@@ -91,7 +91,7 @@ import { Resource } from "global.resource"
 import { PixelMap } from "#external"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, GuideLinePosition, GuideLineStyle, LocalizedBarrierStyle } from "./../relativeContainer"
-import { DrawingCanvas, DrawingCanvasInternal, DrawingColorFilter, DrawingColorFilterInternal, DrawingLattice, DrawingLatticeInternal, RectType } from "./../arkui-drawing"
+import { DrawingCanvas, DrawingCanvasInternal, DrawingColorFilter, DrawingColorFilterInternal, RectType } from "./../arkui-drawing"
 import { BreakpointsReference, GridRowDirection, Callback_String_Void, BreakPoints, GridRowColumnOption, GridRowSizeOption, GutterOption, GridRowOptions } from "./../gridRow"
 import { CalendarAlign, CalendarPickerAttribute, Callback_Date_Void, CalendarOptions, CalendarDialogOptions } from "./../calendarPicker"
 import { CalendarController, CalendarControllerInternal, Literal_Number_day_month_year, Callback_CalendarRequestedData_Void, CalendarRequestedData, Callback_CalendarSelectedDate_Void, CalendarSelectedDate, CalendarDay, MonthData, CurrentDayStyle, NonCurrentDayStyle, TodayStyle, WeekStyle, WorkStateStyle } from "./../calendar"
@@ -327,11 +327,6 @@ export class Deserializer extends DeserializerBase {
         let valueDeserializer : Deserializer = this
         let ptr : KPointer = valueDeserializer.readPointer()
         return DrawingColorFilterInternal.fromPtr(ptr)
-    }
-    readDrawingLattice(): DrawingLattice {
-        let valueDeserializer : Deserializer = this
-        let ptr : KPointer = valueDeserializer.readPointer()
-        return DrawingLatticeInternal.fromPtr(ptr)
     }
     readDrawModifier(): DrawModifier {
         let valueDeserializer : Deserializer = this
@@ -18801,14 +18796,7 @@ export class Deserializer extends DeserializerBase {
             slice_buf = valueDeserializer.readEdgeWidths()
         }
         const slice_result : EdgeWidths | undefined = slice_buf
-        const lattice_buf_runtimeType  = (valueDeserializer.readInt8() as int32)
-        let lattice_buf : DrawingLattice | undefined
-        if ((RuntimeType.UNDEFINED) != (lattice_buf_runtimeType))
-        {
-            lattice_buf = (valueDeserializer.readDrawingLattice() as DrawingLattice)
-        }
-        const lattice_result : DrawingLattice | undefined = lattice_buf
-        let value : ResizableOptions = ({slice: slice_result, lattice: lattice_result} as ResizableOptions)
+        let value : ResizableOptions = ({slice: slice_result, lattice: undefined} as ResizableOptions)
         return value
     }
     readRestrictedWorker(): RestrictedWorker {

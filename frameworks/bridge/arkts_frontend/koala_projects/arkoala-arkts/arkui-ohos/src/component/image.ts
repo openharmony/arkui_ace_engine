@@ -28,7 +28,7 @@ import { PixelMap } from "#external"
 import { ResourceColor, ColorFilter, ResourceStr, EdgeWidths } from "./units"
 import { ImageFit, ImageRepeat, CopyOptions, Color } from "./enums"
 import { Matrix4Transit } from "./arkui-matrix4"
-import { DrawingColorFilter, DrawingLattice } from "./arkui-drawing"
+import { DrawingColorFilter } from "./arkui-drawing"
 import { ImageAnalyzerConfig, ImageAIOptions } from "./imageCommon"
 import { ResolutionQuality } from "./arkui-external"
 import { DrawableDescriptor } from "#external"
@@ -40,6 +40,7 @@ import { ArkImageNode } from "../handwritten/modifiers/ArkImageNode"
 import { ImageModifier } from "../handwritten/modifiers/ArkImageModifier"
 import { ArkCommonAttributeSet, applyUIAttributes } from "../handwritten/modifiers/ArkCommonModifier"
 import { AttributeUpdater } from "../AttributeUpdater"
+import { drawing } from "@ohos/graphics/drawing"
 
 export class ArkImagePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -753,7 +754,7 @@ export interface ImageError {
 }
 export interface ResizableOptions {
     slice?: EdgeWidths;
-    lattice?: DrawingLattice;
+    lattice?: drawing.Lattice;
 }
 export class ArkImageComponent extends ArkCommonMethodComponent implements ImageAttribute {
     getPeer(): ArkImagePeer {
@@ -976,9 +977,7 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
     }
     public resizable(value: ResizableOptions | undefined): this {
         if (this.checkPriority("resizable")) {
-            const value_casted = value as (ResizableOptions | undefined)
-            this.getPeer()?.resizableAttribute(value_casted)
-            return this
+            hookSetResizableOptions(this.getPeer()!, value)
         }
         return this
     }
