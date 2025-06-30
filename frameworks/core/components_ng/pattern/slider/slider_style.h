@@ -69,6 +69,7 @@ struct SliderPaintStyle {
 #ifdef SUPPORT_DIGITAL_CROWN
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DigitalCrownSensitivity, CrownSensitivity)
 #endif
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SliderShowStepOptions, SliderModel::SliderShowStepOptions)
 };
 struct SliderTipStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ShowTips, bool)

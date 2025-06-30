@@ -14025,7 +14025,15 @@ int32_t SetSliderShowSteps(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setShowSteps(node->uiNodeHandle, item->value[0].i32);
+    if (item->size == NUM_1) {
+        GetFullImpl()->getNodeModifiers()->getSliderModifier()->setShowSteps(node->uiNodeHandle, item->value[0].i32);
+    } else if ((item->size == NUM_2) && (CheckAttributeIsBool(item->value[1].u32))) {
+        ArkUISliderShowStepOptions* options = static_cast<ArkUISliderShowStepOptions*>(item->object);
+        GetFullImpl()->getNodeModifiers()->getSliderModifier()->setShowStepsWithOptions(
+            node->uiNodeHandle, item->value[0].i32, options, item->value[1].u32);
+    } else {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     return ERROR_CODE_NO_ERROR;
 }
 

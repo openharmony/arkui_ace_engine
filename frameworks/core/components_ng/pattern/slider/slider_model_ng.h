@@ -48,7 +48,7 @@ public:
     void SetSelectColor(const Gradient& value, bool isResourceColor = false) override;
     void SetMinLabel(float value) override;
     void SetMaxLabel(float value) override;
-    void SetShowSteps(bool value) override;
+    void SetShowSteps(bool value, const std::optional<SliderShowStepOptions>& options = std::nullopt) override;
     void SetShowTips(bool value, const std::optional<std::string>& content) override;
     void SetThickness(const Dimension& value) override;
     void SetBlockBorderColor(const Color& value) override;
@@ -117,7 +117,8 @@ public:
     static void SetBlockColor(FrameNode* frameNode, const Color& value);
     static void SetTrackBackgroundColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor = false);
     static void SetSelectColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor = false);
-    static void SetShowSteps(FrameNode* frameNode, bool value);
+    static void SetShowSteps(
+        FrameNode* frameNode, bool value, const std::optional<SliderShowStepOptions>& options = std::nullopt);
     static void SetSliderInteractionMode(FrameNode* frameNode, SliderInteraction mode);
     static void SetMinResponsiveDistance(FrameNode* frameNode, float value);
     static void SetValidSlideRange(FrameNode* frameNode, float fromValue, float toValue);

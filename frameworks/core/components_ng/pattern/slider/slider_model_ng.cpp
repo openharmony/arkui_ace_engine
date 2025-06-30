@@ -130,9 +130,12 @@ void SliderModelNG::SetValidSlideRange(float from, float to)
     SliderModelNG::SetValidSlideRange(frameNode, from, to);
 }
 
-void SliderModelNG::SetShowSteps(bool value)
+void SliderModelNG::SetShowSteps(bool value, const std::optional<SliderShowStepOptions>& options)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, ShowSteps, value);
+    if (value && options.has_value()) {
+        ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SliderShowStepOptions, options.value());
+    }
 }
 void SliderModelNG::SetSliderInteractionMode(SliderInteraction mode)
 {
@@ -477,9 +480,13 @@ void SliderModelNG::SetSelectColor(FrameNode* frameNode, const Gradient& value, 
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectIsResourceColor, isResourceColor, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectColorSetByUser, true, frameNode);
 }
-void SliderModelNG::SetShowSteps(FrameNode* frameNode, bool value)
+void SliderModelNG::SetShowSteps(
+    FrameNode* frameNode, bool value, const std::optional<SliderShowStepOptions>& options)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, ShowSteps, value, frameNode);
+    if (value && options.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SliderShowStepOptions, options.value(), frameNode);
+    }
 }
 void SliderModelNG::SetSliderInteractionMode(FrameNode* frameNode, SliderInteraction mode)
 {

@@ -1047,7 +1047,7 @@ declare class ArkSliderComponent extends ArkComponent implements SliderAttribute
     selectedColor(value: ResourceColor): this;
     minLabel(value: string): this;
     maxLabel(value: string): this;
-    showSteps(value: boolean): this;
+    showSteps(value: boolean, options?: SliderShowStepOptions): this;
     showTips(value: boolean, content?: any): this;
     trackThickness(value: Length): this;
     onChange(callback: (value: number, mode: SliderChangeMode) => void): this;

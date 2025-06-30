@@ -18933,6 +18933,32 @@ class ArkOnVisibleAreaChange {
     return this.ratios === another.ratios && this.event === another.event;
   }
 }
+class ArkSliderStepOptions {
+  constructor(value, options) {
+    this.showSteps = value;
+    this.stepOptions = options;
+  }
+  isEqual(another) {
+    let isShowStepsEqual = this.showSteps === another.showSteps;
+    let isStepOptionsEqual = true;
+    if ((this.stepOptions === null) || (this.stepOptions === undefined)) {
+      isStepOptionsEqual = (another.stepOptions === null) || (another.stepOptions === undefined);
+    } else if ((another.stepOptions === null) || (another.stepOptions === undefined)) {
+      isStepOptionsEqual = false;
+    } else if (this.stepOptions.stepsAccessibility.size !== another.stepOptions.stepsAccessibility.size) {
+      isStepOptionsEqual = false;
+    } else {
+      for (const [key, val] of this.stepOptions.stepsAccessibility) {
+        if (!another.stepOptions.stepsAccessibility.has(key)) {
+          isStepOptionsEqual = false;
+        } else if (!isBaseOrResourceEqual(another.stepOptions.stepsAccessibility.get(key), val)) {
+          isStepOptionsEqual = false;
+        }
+      }
+    }
+    return isShowStepsEqual && isStepOptionsEqual;
+  }
+}
 class ArkSliderTips {
   constructor(value, content) {
     this.showTip = value;
@@ -23653,8 +23679,9 @@ class ArkSliderComponent extends ArkComponent {
   maxLabel(value) {
     throw new Error('Method not implemented.');
   }
-  showSteps(value) {
-    modifierWithKey(this._modifiersWithKeys, ShowStepsModifier.identity, ShowStepsModifier, value);
+  showSteps(value, options) {
+    let stepOptions = new ArkSliderStepOptions(value, options);
+    modifierWithKey(this._modifiersWithKeys, ShowStepsModifier.identity, ShowStepsModifier, stepOptions);
     return this;
   }
   showTips(value, content) {
@@ -23981,11 +24008,29 @@ class ShowStepsModifier extends ModifierWithKey {
       getUINativeModule().slider.resetShowSteps(node);
     }
     else {
-      getUINativeModule().slider.setShowSteps(node, this.value);
+      getUINativeModule().slider.setShowSteps(node, this.value.showSteps, (_a = this.value) === null || _a === void 0 ? void 0 : _a.stepOptions);
     }
   }
   checkObjectDiff() {
-    return this.stageValue !== this.value;
+    let isShowStepsDiff = this.stageValue.showSteps !== this.value.showSteps;
+    let isStepOptionsDiff = false;
+    if ((this.stageValue.stepOptions === null) || (this.stageValue.stepOptions === undefined)) {
+      isStepOptionsDiff = (this.value.stepOptions !== null) && (this.value.stepOptions !== undefined);
+    } else if ((this.value.stepOptions === null) || (this.value.stepOptions === undefined)) {
+      isStepOptionsDiff = true;
+    } else if (this.stageValue.stepOptions.stepsAccessibility.size !==
+      this.value.stepOptions.stepsAccessibility.size) {
+      isStepOptionsDiff = true;
+    } else {
+      for (const [key, val] of this.stageValue.stepOptions.stepsAccessibility) {
+        if (!this.value.stepOptions.stepsAccessibility.has(key)) {
+          isStepOptionsDiff = true;
+        } else if (!isBaseOrResourceEqual(this.value.stepOptions.stepsAccessibility.get(key), val)) {
+          isStepOptionsDiff = true;
+        }
+      }
+    }
+    return isShowStepsDiff || isStepOptionsDiff;
   }
 }
 ShowStepsModifier.identity = Symbol('sliderShowSteps');
