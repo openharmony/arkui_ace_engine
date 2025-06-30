@@ -201,6 +201,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetOrCreateAnimatableProperty)
         },
         ani_native_function {
+            "_BackgroundImage_PixelMap",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetBackgroundImagePixelMap)
+        },
+        ani_native_function {
             "_DragController_executeDragWithCallback",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ANIExecuteDragWithCallback)

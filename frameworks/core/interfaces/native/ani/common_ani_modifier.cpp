@@ -17,10 +17,16 @@
 #include <memory>
 #include <vector>
 
+#include "ani_utils.h"
+
 #include "base/log/log.h"
 #include "bridge/arkts_frontend/ani_graphics_module.h"
+#include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/arkts_frontend/ani_context_module.h"
 #include "core/pipeline/base/element_register.h"
 
@@ -75,6 +81,25 @@ ani_long BuilderProxyNodeConstruct(ArkUI_Int32 id)
     return reinterpret_cast<ani_long>(AceType::RawPtr(proxyNode));
 }
 
+void SetBackgroundImagePixelMap(ani_env* env, ArkUINodeHandle node, ani_ref pixelMapPtr, ArkUI_Int32 repeat)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pixelMapValue = reinterpret_cast<void*>(pixelMapPtr);
+    CHECK_NULL_VOID(pixelMapValue);
+#if defined(PIXEL_MAP_SUPPORTED)
+    auto pixelMap = PixelMap::CreatePixelMap(pixelMapValue);
+    CHECK_NULL_VOID(pixelMap);
+    ViewAbstract::SetBackgroundImage(frameNode, ImageSourceInfo { pixelMap });
+#endif
+    auto arkRepeat = static_cast<OHOS::Ace::ImageRepeat>(repeat);
+    if (arkRepeat >= OHOS::Ace::ImageRepeat::NO_REPEAT && arkRepeat <= OHOS::Ace::ImageRepeat::REPEAT) {
+        ViewAbstract::SetBackgroundImageRepeat(frameNode, arkRepeat);
+    } else {
+        ViewAbstract::SetBackgroundImageRepeat(frameNode, OHOS::Ace::ImageRepeat::NO_REPEAT);
+    }
+}
+
 void SetCustomCallback(ani_env* env, ani_long ptr, ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout)
 {
     Framework::AniGraphicsModule::SetCustomCallback(env, ptr, fnObjMeasure, fnObjLayout);
@@ -95,6 +120,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .setDrawCallback = OHOS::Ace::NG::SetDrawCallback,
         .getCurrentInstanceId = OHOS::Ace::NG::GetCurrentInstanceId,
         .builderProxyNodeConstruct = OHOS::Ace::NG::BuilderProxyNodeConstruct,
+        .setBackgroundImagePixelMap = OHOS::Ace::NG::SetBackgroundImagePixelMap,
         .setCustomCallback = OHOS::Ace::NG::SetCustomCallback,
         .requireArkoalaNodeId = OHOS::Ace::NG::RequireArkoalaNodeId };
     return &impl;

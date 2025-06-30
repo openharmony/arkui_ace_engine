@@ -56,6 +56,7 @@ import { CommonModifier } from "../CommonModifier"
 import { AttributeUpdater } from "../ohos.arkui.modifier"
 import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 import { hookStateStyleImpl } from "../handwritten/ArkStateStyle"
+import { hookBackgroundImageImpl } from "../handwritten/ArkBackgroundImageImpl"
 import { rememberMutableState } from '@koalaui/runtime'
 import { hookDrawModifierInvalidateImpl, hookDrawModifierAttributeImpl } from "../handwritten/ArkDrawModifierImpl"
 import { hookDragPreview, hookAllowDropAttribute, hookRegisterOnDragStartImpl, hookOnDrop, hookDragEventStartDataLoading } from "../handwritten/ArkDragDrop"
@@ -11176,14 +11177,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
         if (this.checkPriority("backgroundImage")) {
-            const src_type = runtimeType(src)
-            const repeat_type = runtimeType(repeat)
-            if (((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type) || (RuntimeType.OBJECT == src_type) || (RuntimeType.UNDEFINED == src_type)) && ((RuntimeType.NUMBER == repeat_type) || (RuntimeType.OBJECT == repeat_type))) {
-                const src_casted = src as (ResourceStr | PixelMap | undefined)
-                const repeat_casted = repeat as (ImageRepeat)
-                this.getPeer()?.backgroundImage0Attribute(src_casted, repeat_casted)
-                return this
-            }
+            const src_casted = src as (ResourceStr | PixelMap | undefined)
+            const repeat_casted = repeat as (ImageRepeat | undefined)
+            hookBackgroundImageImpl(this.getPeer(), src_casted, repeat_casted)
         }
         return this
     }
