@@ -890,19 +890,6 @@ export namespace typeNode {
         }
     }
 
-    // @ts-ignore
-    function createNode(context: UIContext, type: string): ListFrameNode {
-        return new ListFrameNode(context, 'List', (node: FrameNode, type: ModifierType): ArkListNode => {
-            let arknode = new ArkListNode();
-            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
-            const peer = new ArkListPeer(retval, node._nodeId!.toInt(), "List", 0);
-            arknode.setPeer(peer);
-            return arknode;
-        });
-    }
-}
-
-export namespace typeNode {
     class SearchFrameNode extends TypedFrameNode<ArkSearchNode> {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkSearchNode) {
             super(uiContext, type, attrCreator);
@@ -933,41 +920,6 @@ export namespace typeNode {
         }
     }
 
-    // // @ts-ignore
-    // function createNode(context: UIContext, type: string): SearchFrameNode {
-    //     return new SearchFrameNode(context, 'Search', (node: FrameNode, type: ModifierType): ArkSearchNode => {
-    //         let arknode = new ArkSearchNode();
-    //         const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
-    //         const peer = new ArkSearchPeer(retval, node._nodeId as int32, "Search", 0);
-    //         arknode.setPeer(peer);
-    //         return arknode;
-    //     });
-    // }
-
-    // // @ts-ignore
-    // function createNode(context: UIContext, type: string): TextAreaFrameNode {
-    //     return new TextAreaFrameNode(context, 'TextArea', (node: FrameNode, type: ModifierType): ArkTextAreaNode => {
-    //         let arknode = new ArkTextAreaNode();
-    //         const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
-    //         const peer = new ArkTextAreaPeer(retval, node._nodeId as int32, "TextArea", 0);
-    //         arknode.setPeer(peer);
-    //         return arknode;
-    //     });
-    // }
-
-    // // @ts-ignore
-    // function createNode(context: UIContext, type: string): TextInputFrameNode {
-    //     return new TextInputFrameNode(context, 'TextInput', (node: FrameNode, type: ModifierType): ArkTextInputNode => {
-    //         let arknode = new ArkTextInputNode();
-    //         const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
-    //         const peer = new ArkTextInputPeer(retval, node._nodeId as int32, "TextInput", 0);
-    //         arknode.setPeer(peer);
-    //         return arknode;
-    //     });
-    // }
-}
-
-export namespace typeNode {
     class TextFrameNode extends TypedFrameNode<ArkTextNode> {
         constructor(uiContext: UIContext, type: string, attrCreator: (node: FrameNode, type: ModifierType) => ArkTextNode) {
             super(uiContext, type, attrCreator);
@@ -978,14 +930,60 @@ export namespace typeNode {
         }
     }
 
-//    // @ts-ignore
-//    function createTextNode(context: UIContext, type: 'Text'): TextFrameNode {
-//        return new TextFrameNode(context, 'Text', (node: FrameNode, type: ModifierType): ArkTextNode => {
-//            let arknode = new ArkTextNode();
-//            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
-//            const peer = new ArkTextPeer(retval, node._nodeId as int32, "Text", 0);
-//            arknode.setPeer(peer);
-//            return arknode;
-//        });
-//    }
+    overload createNode { createListNode, createSearchNode, createTextAreaNode, createTextInputNode, createTextNode }
+
+    // @ts-ignore
+    function createListNode(context: UIContext, type: string): ListFrameNode {
+        return new ListFrameNode(context, 'List', (node: FrameNode, type: ModifierType): ArkListNode => {
+            let arknode = new ArkListNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkListPeer(retval, node._nodeId!.toInt(), "List", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createSearchNode(context: UIContext, type: string): SearchFrameNode {
+        return new SearchFrameNode(context, 'Search', (node: FrameNode, type: ModifierType): ArkSearchNode => {
+            let arknode = new ArkSearchNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkSearchPeer(retval, node._nodeId as int32, "Search", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createTextAreaNode(context: UIContext, type: string): TextAreaFrameNode {
+        return new TextAreaFrameNode(context, 'TextArea', (node: FrameNode, type: ModifierType): ArkTextAreaNode => {
+            let arknode = new ArkTextAreaNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkTextAreaPeer(retval, node._nodeId as int32, "TextArea", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+    // @ts-ignore
+    function createTextInputNode(context: UIContext, type: string): TextInputFrameNode {
+        return new TextInputFrameNode(context, 'TextInput', (node: FrameNode, type: ModifierType): ArkTextInputNode => {
+            let arknode = new ArkTextInputNode();
+            const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+            const peer = new ArkTextInputPeer(retval, node._nodeId as int32, "TextInput", 0);
+            arknode.setPeer(peer);
+            return arknode;
+        });
+    }
+
+   // @ts-ignore
+   function createTextNode(context: UIContext, type: 'Text'): TextFrameNode {
+       return new TextFrameNode(context, 'Text', (node: FrameNode, type: ModifierType): ArkTextNode => {
+           let arknode = new ArkTextNode();
+           const retval = ArkUIGeneratedNativeModule._FrameNode_getFrameNodePtr(toPeerPtr(node));
+           const peer = new ArkTextPeer(retval, node._nodeId as int32, "Text", 0);
+           arknode.setPeer(peer);
+           return arknode;
+       });
+   }
 }
