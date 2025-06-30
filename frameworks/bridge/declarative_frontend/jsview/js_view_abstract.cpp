@@ -10605,7 +10605,7 @@ void JSViewAbstract::NewParseSweepGradientColor(NG::Gradient& gradient, RefPtr<R
     auto&& updateFunc = [gradientColor, indx](const RefPtr<ResourceObject>& resObj,
         NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t index = 0; index < colorLength; index++) {
             NG::GradientColor gradColor = colorVector[index];
@@ -10627,7 +10627,7 @@ void JSViewAbstract::NewParseRadialGradientColor(NG::Gradient& gradient, RefPtr<
     auto&& updateFunc = [gradientColor, indx](const RefPtr<ResourceObject>& resObj,
         NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t index = 0; index < colorLength; index++) {
             NG::GradientColor gradColor = colorVector[index];
@@ -10649,7 +10649,7 @@ void JSViewAbstract::NewParseGradientColor(NG::Gradient& gradient, RefPtr<Resour
     auto&& updateFunc = [gradientColor, indx](const RefPtr<ResourceObject>& resObj,
         NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t index = 0; index < colorLength; index++) {
             NG::GradientColor gradColor = colorVector[index];
@@ -10703,7 +10703,7 @@ void JSViewAbstract::NewGetJsGradientColorStops(NG::Gradient& gradient, const JS
         gradientColor.SetDimension(CalcDimension(value * 100.0, DimensionUnit::PERCENT));
         gradient.AddColor(gradientColor);
         if (SystemProperties::ConfigChangePerform() && resObj) {
-            int32_t indx = i - nullNum;
+            int32_t indx = static_cast<int32_t>(i) - nullNum;
             if (mapIdx == NUM_1) {
                 NewParseSweepGradientColor(gradient, resObj, gradientColor, indx);
             } else if (mapIdx == NUM_2) {
