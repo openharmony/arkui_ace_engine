@@ -182,16 +182,20 @@ ArkUINativeModuleValue CounterBridge::SetCounterSize(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> widthValue = runtimeCallInfo->GetCallArgRef(1); // 1: width Value
     Local<JSValueRef> heightValue = runtimeCallInfo->GetCallArgRef(2); // 2: height Value
     CalcDimension width;
-    ArkTSUtils::ParseJsDimensionVp(vm, widthValue, width, false);
+    RefPtr<ResourceObject> widthResObj;
+    ArkTSUtils::ParseJsDimensionVp(vm, widthValue, width, widthResObj, false);
     if (GreatNotEqual(width.Value(), 0.0)) {
-        GetArkUINodeModifiers()->getCounterModifier()->setCounterWidth(
-            nativeNode, width.Value(), static_cast<int>(width.Unit()));
+        auto widthRawPtr = AceType::RawPtr(widthResObj);
+        GetArkUINodeModifiers()->getCounterModifier()->setCounterWidthRes(
+            nativeNode, width.Value(), static_cast<int>(width.Unit()), widthRawPtr);
     }
     CalcDimension height;
-    ArkTSUtils::ParseJsDimensionVp(vm, heightValue, height, false);
+    RefPtr<ResourceObject> heightResObj;
+    ArkTSUtils::ParseJsDimensionVp(vm, heightValue, height, heightResObj, false);
     if (GreatNotEqual(height.Value(), 0.0)) {
-        GetArkUINodeModifiers()->getCounterModifier()->setCounterHeight(
-            nativeNode, height.Value(), static_cast<int>(height.Unit()));
+        auto heightRawPtr = AceType::RawPtr(heightResObj);
+        GetArkUINodeModifiers()->getCounterModifier()->setCounterHeightRes(
+            nativeNode, height.Value(), static_cast<int>(height.Unit()), heightRawPtr);
     }
     return panda::JSValueRef::Undefined(vm);
 }
