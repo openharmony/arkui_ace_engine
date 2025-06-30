@@ -230,7 +230,7 @@ export struct TabTitleBar {
             yOffset: 0,
             animation: {
               duration: 300,
-              curve: Curve.EaseInOut
+              curve: Curve.EaseInOut,
             }
           })
         })
@@ -289,16 +289,16 @@ struct CollapsibleMenuSection {
   getMoreIconFgColor() {
     return this.isMoreIconOnClick
       ? $r('sys.color.ohos_id_color_titlebar_icon_pressed')
-      : $r('sys.color.ohos_id_color_titlebar_icon')
+      : $r('sys.color.ohos_id_color_titlebar_icon');
   }
 
   getMoreIconBgColor() {
     if (this.isMoreIconOnClick) {
-      return $r('sys.color.ohos_id_color_click_effect')
+      return $r('sys.color.ohos_id_color_click_effect');
     } else if (this.isMoreIconOnHover) {
-      return $r('sys.color.ohos_id_color_hover')
+      return $r('sys.color.ohos_id_color_hover');
     } else {
-      return Color.Transparent
+      return Color.Transparent;
     }
   }
 
@@ -441,7 +441,7 @@ struct CollapsibleMenuSection {
     .width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum)
     .margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding })
     .onAppear(() => {
-      focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex)
+      focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex);
     })
   }
 }
@@ -451,36 +451,36 @@ struct TabContentItem {
   item: TabTitleBarTabItem = { title: '' };
   index: number = 0;
   maxIndex: number = 0;
-  onCustomClick?: (index: number) => void
-  onImageComplete?: (width: number) => void
+  onCustomClick?: (index: number) => void;
+  onImageComplete?: (width: number) => void;
 
-  @Prop currentIndex: number
+  @Prop currentIndex: number;
 
-  @State isOnFocus: boolean = false
-  @State isOnHover: boolean = false
-  @State isOnClick: boolean = false
-  @State tabWidth: number = 0
+  @State isOnFocus: boolean = false;
+  @State isOnHover: boolean = false;
+  @State isOnClick: boolean = false;
+  @State tabWidth: number = 0;
 
-  @State imageWidth: number = 24
-  @State imageHeight: number = 24
+  @State imageWidth: number = 24;
+  @State imageHeight: number = 24;
 
-  static readonly imageSize = 24
-  static readonly symbolSize = '24vp'
-  static readonly imageHotZoneWidth = 48
-  static readonly imageMagnificationFactor = 1.4
-  static readonly buttonBorderRadius = 8
-  static readonly focusBorderWidth = 2
-  static readonly paddingLeft = 8
-  static readonly paddingRight = 8
-  static readonly marginFirst = 16
+  static readonly imageSize = 24;
+  static readonly symbolSize = '24vp';
+  static readonly imageHotZoneWidth = 48;
+  static readonly imageMagnificationFactor = 1.4;
+  static readonly buttonBorderRadius = 8;
+  static readonly focusBorderWidth = 2;
+  static readonly paddingLeft = 8;
+  static readonly paddingRight = 8;
+  static readonly marginFirst = 16;
 
   getBgColor() {
     if (this.isOnClick) {
-      return $r('sys.color.ohos_id_color_click_effect')
+      return $r('sys.color.ohos_id_color_click_effect');
     } else if (this.isOnHover) {
-      return $r('sys.color.ohos_id_color_hover')
+      return $r('sys.color.ohos_id_color_hover');
     } else {
-      return Color.Transparent
+      return Color.Transparent;
     }
   }
 
@@ -490,18 +490,18 @@ struct TabContentItem {
         radius: $r('sys.float.ohos_id_corner_radius_clicked'),
         width: TabContentItem.focusBorderWidth,
         color: $r('sys.color.ohos_id_color_focused_outline'),
-        style: BorderStyle.Solid
+        style: BorderStyle.Solid,
       }
     }
     return { width: 0 }
   }
 
   getImageScaleFactor(): number {
-    return this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1
+    return this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1;
   }
 
   getImageLayoutWidth(): number {
-    return TabContentItem.imageSize / Math.max(this.imageHeight, 1.0) * this.imageWidth
+    return TabContentItem.imageSize / Math.max(this.imageHeight, 1.0) * this.imageWidth;
   }
 
   private toStringFormat(resource: ResourceStr | undefined): string | undefined {
@@ -646,21 +646,21 @@ struct TabContentItem {
             .onHover((isOn) => this.isOnHover = isOn)
             .onKeyEvent((event) => {
               if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-                return
+                return;
               }
               if (event.type === KeyType.Down) {
-                this.isOnClick = true
+                this.isOnClick = true;
               }
               if (event.type === KeyType.Up) {
-                this.isOnClick = false
+                this.isOnClick = false;
               }
             })
             .onTouch((event) => {
               if (event.type === TouchType.Down) {
-                this.isOnClick = true
+                this.isOnClick = true;
               }
               if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-                this.isOnClick = false
+                this.isOnClick = false;
               }
             })
             .onClick(() => this.onCustomClick && this.onCustomClick(this.index))
@@ -691,7 +691,7 @@ struct TabContentItem {
             normal: {
               .border({
                 radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-                width: 0
+                width: 0,
               })
             }
           })
@@ -699,7 +699,7 @@ struct TabContentItem {
     }
     .margin({
       left: this.index === 0 ? TabContentItem.marginFirst : 0,
-      right: this.index === this.maxIndex ? 12 : 0
+      right: this.index === this.maxIndex ? 12 : 0,
     })
   }
 }
@@ -709,30 +709,30 @@ struct ImageMenuItem {
   item: TabTitleBarMenuItem = { value: '' };
   index: number = 0;
 
-  static readonly imageSize = 24
-  static readonly imageHotZoneWidth = 48
-  static readonly buttonBorderRadius = 8
-  static readonly focusBorderWidth = 2
-  static readonly disabledImageOpacity = 0.4
-  static readonly focusablePrefix = "Id-TabTitleBar-ImageMenuItem-"
+  static readonly imageSize = 24;
+  static readonly imageHotZoneWidth = 48;
+  static readonly buttonBorderRadius = 8;
+  static readonly focusBorderWidth = 2;
+  static readonly disabledImageOpacity = 0.4;
+  static readonly focusablePrefix = "Id-TabTitleBar-ImageMenuItem-";
 
-  @State isOnFocus: boolean = false
-  @State isOnHover: boolean = false
-  @State isOnClick: boolean = false
+  @State isOnFocus: boolean = false;
+  @State isOnHover: boolean = false;
+  @State isOnClick: boolean = false;
 
   getFgColor() {
     return this.isOnClick
       ? $r('sys.color.ohos_id_color_titlebar_icon_pressed')
-      : $r('sys.color.ohos_id_color_titlebar_icon')
+      : $r('sys.color.ohos_id_color_titlebar_icon');
   }
 
   getBgColor() {
     if (this.isOnClick) {
-      return $r('sys.color.ohos_id_color_click_effect')
+      return $r('sys.color.ohos_id_color_click_effect');
     } else if (this.isOnHover) {
-      return $r('sys.color.ohos_id_color_hover')
+      return $r('sys.color.ohos_id_color_hover');
     } else {
-      return Color.Transparent
+      return Color.Transparent;
     }
   }
 
@@ -815,52 +815,52 @@ struct ImageMenuItem {
           radius: $r('sys.float.ohos_id_corner_radius_clicked'),
           width: ImageMenuItem.focusBorderWidth,
           color: $r('sys.color.ohos_id_color_focused_outline'),
-          style: BorderStyle.Solid
+          style: BorderStyle.Solid,
         })
       },
       normal: {
         .border({
           radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-          width: 0
+          width: 0,
         })
       }
     })
     .onFocus(() => {
       if (!this.item.isEnabled) {
-        return
+        return;
       }
-      this.isOnFocus = true
+      this.isOnFocus = true;
     })
     .onBlur(() => this.isOnFocus = false)
     .onHover((isOn) => {
       if (!this.item.isEnabled) {
-        return
+        return;
       }
-      this.isOnHover = isOn
+      this.isOnHover = isOn;
     })
     .onKeyEvent((event) => {
       if (!this.item.isEnabled) {
-        return
+        return;
       }
       if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-        return
+        return;
       }
       if (event.type === KeyType.Down) {
-        this.isOnClick = true
+        this.isOnClick = true;
       }
       if (event.type === KeyType.Up) {
-        this.isOnClick = false
+        this.isOnClick = false;
       }
     })
     .onTouch((event) => {
       if (!this.item.isEnabled) {
-        return
+        return;
       }
       if (event.type === TouchType.Down) {
-        this.isOnClick = true
+        this.isOnClick = true;
       }
       if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.isOnClick = false
+        this.isOnClick = false;
       }
     })
     .onClick(() => this.item.isEnabled && this.item.action && this.item.action())

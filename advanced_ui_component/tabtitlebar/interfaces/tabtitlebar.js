@@ -14,24 +14,33 @@
  */
 
 if (!('finalizeConstruction' in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
+    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
+    });
 }
 const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const MeasureText = requireNapi('measure');
 const hilog = requireNapi('hilog');
 const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
-const PUBLIC_MORE = { 'id': -1, 'type': 40000, params: ['sys.symbol.dot_grid_2x2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+const PUBLIC_MORE = {
+    'id': -1,
+    'type': 40000,
+    params: ['sys.symbol.dot_grid_2x2'],
+    'bundleName': '__harDefaultBundleName__',
+    'moduleName': '__harDefaultModuleName__',
+};
 const TEXT_EDITABLE_DIALOG = '18.3fp';
 const IMAGE_SIZE = '64vp';
 const MAX_DIALOG = '256vp';
 const MIN_DIALOG = '216vp';
 const RESOURCE_TYPE_SYMBOL = 40000;
+
 class ButtonGestureModifier {
     constructor(y47) {
         this.fontSize = 1;
         this.controller = null;
         this.controller = y47;
     }
+
     applyGesture(x47) {
         if (this.fontSize >= ButtonGestureModifier.minFontSize) {
             x47.addGesture(new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
@@ -43,14 +52,15 @@ class ButtonGestureModifier {
                 .onActionEnd(() => {
                     this.controller?.close();
                 }));
-        }
-        else {
+        } else {
             x47.clearGestures();
         }
     }
 }
+
 ButtonGestureModifier.longPressTime = 500;
 ButtonGestureModifier.minFontSize = 1.75;
+
 export class TabTitleBar extends ViewPU {
     constructor(r47, s47, t47, u47 = -1, v47 = undefined, w47) {
         super(r47, t47, u47, w47);
@@ -74,6 +84,7 @@ export class TabTitleBar extends ViewPU {
         this.setInitiallyProvidedValue(s47);
         this.finalizeConstruction();
     }
+
     setInitiallyProvidedValue(q47) {
         if (q47.tabItems !== undefined) {
             this.tabItems = q47.tabItems;
@@ -118,13 +129,16 @@ export class TabTitleBar extends ViewPU {
             this.rightContext2D = q47.rightContext2D;
         }
     }
+
     updateStateVars(p47) {
     }
+
     purgeVariableDependenciesOnElmtId(o47) {
         this.__tabWidth.purgeDependencyOnElmtId(o47);
         this.__currentIndex.purgeDependencyOnElmtId(o47);
         this.__fontSize.purgeDependencyOnElmtId(o47);
     }
+
     aboutToBeDeleted() {
         this.__tabWidth.aboutToBeDeleted();
         this.__currentIndex.aboutToBeDeleted();
@@ -132,24 +146,31 @@ export class TabTitleBar extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
+
     get tabWidth() {
         return this.__tabWidth.get();
     }
+
     set tabWidth(n47) {
         this.__tabWidth.set(n47);
     }
+
     get currentIndex() {
         return this.__currentIndex.get();
     }
+
     set currentIndex(m47) {
         this.__currentIndex.set(m47);
     }
+
     get fontSize() {
         return this.__fontSize.get();
     }
+
     set fontSize(l47) {
         this.__fontSize.set(l47);
     }
+
     GradientMask(a47, b47, c47, d47, e47, f47 = null) {
         this.observeComponentCreation2((j47, k47) => {
             Column.create();
@@ -172,8 +193,10 @@ export class TabTitleBar extends ViewPU {
         Canvas.pop();
         Column.pop();
     }
+
     emptyBuilder(z46 = null) {
     }
+
     aboutToAppear() {
         if (!this.swiperContent) {
             this.swiperContent = this.emptyBuilder;
@@ -183,6 +206,7 @@ export class TabTitleBar extends ViewPU {
         });
         this.loadOffsets();
     }
+
     loadOffsets() {
         this.tabOffsets.length = 0;
         let v46 = 0;
@@ -192,12 +216,10 @@ export class TabTitleBar extends ViewPU {
             if (w46.icon !== undefined || w46.symbolStyle !== undefined) {
                 if (Math.abs(this.imageWidths[x46]) > TabContentItem.imageHotZoneWidth) {
                     v46 += this.imageWidths[x46];
-                }
-                else {
+                } else {
                     v46 += TabContentItem.imageHotZoneWidth;
                 }
-            }
-            else {
+            } else {
                 v46 += TabContentItem.paddingLeft;
                 v46 += px2vp(MeasureText.measureText({
                     textContent: w46.title.toString(),
@@ -209,6 +231,7 @@ export class TabTitleBar extends ViewPU {
             this.tabOffsets.push(v46);
         });
     }
+
     initialRender() {
         this.observeComponentCreation2((t46, u46) => {
             Column.create();
@@ -218,8 +241,22 @@ export class TabTitleBar extends ViewPU {
                 justifyContent: FlexAlign.SpaceBetween,
                 alignItems: ItemAlign.Stretch
             });
-            Flex.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            Flex.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_max_padding_end'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
+            Flex.backgroundColor({
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_background'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            });
+            Flex.margin({
+                right: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_max_padding_end'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                }
+            });
             Flex.onAreaChange((r46, s46) => {
                 this.tabWidth = Number(s46.width) - this.menuSectionWidth;
             });
@@ -274,7 +311,8 @@ export class TabTitleBar extends ViewPU {
                                             this.imageWidths[o45] = b46;
                                             this.loadOffsets();
                                         }
-                                    }, undefined, v45, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 174, col: 21 });
+                                    }, undefined, v45, () => {
+                                    }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 174, col: 21 });
                                     ViewPU.create(x45);
                                     let e18 = () => {
                                         return {
@@ -290,8 +328,7 @@ export class TabTitleBar extends ViewPU {
                                         };
                                     };
                                     x45.paramsGenerator_ = e18;
-                                }
-                                else {
+                                } else {
                                     this.updateStateVarsOfChildByElmtId(v45, {
                                         currentIndex: this.currentIndex
                                     });
@@ -309,9 +346,11 @@ export class TabTitleBar extends ViewPU {
         ForEach.pop();
         List.pop();
         Column.pop();
-        this.GradientMask.bind(this)(this.leftContext2D, 0, TabTitleBar.totalHeight / 2, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2);
+        this.GradientMask.bind(this)(this.leftContext2D, 0, TabTitleBar.totalHeight / 2, TabTitleBar.gradientMaskWidth,
+            TabTitleBar.totalHeight / 2);
         Stack.pop();
-        this.GradientMask.bind(this)(this.rightContext2D, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2, 0, TabTitleBar.totalHeight / 2);
+        this.GradientMask.bind(this)(this.rightContext2D, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2, 0,
+            TabTitleBar.totalHeight / 2);
         Stack.pop();
         this.observeComponentCreation2((a45, b45) => {
             If.create();
@@ -327,7 +366,10 @@ export class TabTitleBar extends ViewPU {
                     {
                         this.observeComponentCreation2((c45, d45) => {
                             if (d45) {
-                                let e45 = new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + TabTitleBar.instanceCount++ }, undefined, c45, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 204, col: 11 });
+                                let e45 = new CollapsibleMenuSection(this,
+                                    { menuItems: this.menuItems, index: 1 + TabTitleBar.instanceCount++ }, undefined,
+                                    c45, () => {
+                                    }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 204, col: 11 });
                                 ViewPU.create(e45);
                                 let z17 = () => {
                                     return {
@@ -336,16 +378,14 @@ export class TabTitleBar extends ViewPU {
                                     };
                                 };
                                 e45.paramsGenerator_ = z17;
-                            }
-                            else {
+                            } else {
                                 this.updateStateVarsOfChildByElmtId(c45, {});
                             }
                         }, { name: 'CollapsibleMenuSection' });
                     }
                     __Common__.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
@@ -385,6 +425,7 @@ export class TabTitleBar extends ViewPU {
         Column.pop();
         Column.pop();
     }
+
     rerender() {
         this.updateDirtyElements();
     }
@@ -393,6 +434,7 @@ TabTitleBar.totalHeight = 56;
 TabTitleBar.correctionOffset = -40.0;
 TabTitleBar.gradientMaskWidth = 24;
 TabTitleBar.instanceCount = 0;
+
 class CollapsibleMenuSection extends ViewPU {
     constructor(m44, n44, o44, p44 = -1, q44 = undefined, r44) {
         super(m44, o44, p44, r44);
@@ -404,7 +446,13 @@ class CollapsibleMenuSection extends ViewPU {
         this.item = {
             value: PUBLIC_MORE,
             symbolStyle: new SymbolGlyphModifier(PUBLIC_MORE),
-            label: { 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+            label: {
+                'id': -1,
+                'type': 10003,
+                params: ['sys.string.ohos_toolbar_more'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            },
         };
         this.minFontSize = 1.75;
         this.isFollowingSystemFontScale = false;
@@ -426,7 +474,8 @@ class CollapsibleMenuSection extends ViewPU {
                     tabTitleDialog: this.item,
                     tabTitleBarDialog: this.item.label ? this.item.label : '',
                     fontSize: this.fontSize,
-                }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 273, col: 14 });
+                }, undefined, -1, () => {
+                }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 273, col: 14 });
                 s44.setController(this.dialogController);
                 ViewPU.create(s44);
                 let y17 = () => {
@@ -446,11 +495,14 @@ class CollapsibleMenuSection extends ViewPU {
             isModal: true,
             customStyle: true
         }, this);
-        this.__buttonGestureModifier = new ObservedPropertyObjectPU(new ButtonGestureModifier(this.dialogController), this, 'buttonGestureModifier');
+        this.__buttonGestureModifier =
+            new ObservedPropertyObjectPU(new ButtonGestureModifier(this.dialogController), this,
+                'buttonGestureModifier');
         this.setInitiallyProvidedValue(n44);
         this.declareWatch('fontSize', this.onFontSizeUpdated);
         this.finalizeConstruction();
     }
+
     setInitiallyProvidedValue(l44) {
         if (l44.menuItems !== undefined) {
             this.menuItems = l44.menuItems;
@@ -498,9 +550,11 @@ class CollapsibleMenuSection extends ViewPU {
             this.buttonGestureModifier = l44.buttonGestureModifier;
         }
     }
+
     updateStateVars(k44) {
         this.__fontSize.reset(k44.fontSize);
     }
+
     purgeVariableDependenciesOnElmtId(j44) {
         this.__isPopupShown.purgeDependencyOnElmtId(j44);
         this.__isMoreIconOnFocus.purgeDependencyOnElmtId(j44);
@@ -509,6 +563,7 @@ class CollapsibleMenuSection extends ViewPU {
         this.__fontSize.purgeDependencyOnElmtId(j44);
         this.__buttonGestureModifier.purgeDependencyOnElmtId(j44);
     }
+
     aboutToBeDeleted() {
         this.__isPopupShown.aboutToBeDeleted();
         this.__isMoreIconOnFocus.aboutToBeDeleted();
@@ -519,64 +574,100 @@ class CollapsibleMenuSection extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
+
     get isPopupShown() {
         return this.__isPopupShown.get();
     }
+
     set isPopupShown(i44) {
         this.__isPopupShown.set(i44);
     }
+
     get isMoreIconOnFocus() {
         return this.__isMoreIconOnFocus.get();
     }
+
     set isMoreIconOnFocus(h44) {
         this.__isMoreIconOnFocus.set(h44);
     }
+
     get isMoreIconOnHover() {
         return this.__isMoreIconOnHover.get();
     }
+
     set isMoreIconOnHover(g44) {
         this.__isMoreIconOnHover.set(g44);
     }
+
     get isMoreIconOnClick() {
         return this.__isMoreIconOnClick.get();
     }
+
     set isMoreIconOnClick(f44) {
         this.__isMoreIconOnClick.set(f44);
     }
+
     get fontSize() {
         return this.__fontSize.get();
     }
+
     set fontSize(e44) {
         this.__fontSize.set(e44);
     }
+
     get buttonGestureModifier() {
         return this.__buttonGestureModifier.get();
     }
+
     set buttonGestureModifier(d44) {
         this.__buttonGestureModifier.set(d44);
     }
+
     getMoreIconFgColor() {
         return this.isMoreIconOnClick
-            ? { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+            ? {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_titlebar_icon_pressed'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            } : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_titlebar_icon'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            };
     }
+
     getMoreIconBgColor() {
         if (this.isMoreIconOnClick) {
-            return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        }
-        else if (this.isMoreIconOnHover) {
-            return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        }
-        else {
+            return {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_click_effect'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            };
+        } else if (this.isMoreIconOnHover) {
+            return {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_hover'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            };
+        } else {
             return Color.Transparent;
         }
     }
+
     aboutToAppear() {
         try {
             let c44 = this.getUIContext();
             this.isFollowingSystemFontScale = c44.isFollowingSystemFontScale();
             this.maxFontScale = c44.getMaxFontScale();
-        }
-        catch (z43) {
+        } catch (z43) {
             let a44 = z43?.code;
             let b44 = z43?.message;
             hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${a44}, message: ${b44}`);
@@ -589,17 +680,20 @@ class CollapsibleMenuSection extends ViewPU {
         });
         this.fontSize = this.decideFontScale();
     }
+
     decideFontScale() {
-            let w43 = this.getUIContext();
-            this.systemFontScale = w43.getHostContext()?.config?.fontSizeScale ?? 1;
-            if (!this.isFollowingSystemFontScale) {
-                return 1;
-            }
+        let w43 = this.getUIContext();
+        this.systemFontScale = w43.getHostContext()?.config?.fontSizeScale ?? 1;
+        if (!this.isFollowingSystemFontScale) {
+            return 1;
+        }
         return Math.min(this.systemFontScale, this.maxFontScale);
     }
+
     onFontSizeUpdated() {
         this.buttonGestureModifier.fontSize = this.fontSize;
     }
+
     initialRender() {
         this.observeComponentCreation2((u43, v43) => {
             Column.create();
@@ -620,7 +714,14 @@ class CollapsibleMenuSection extends ViewPU {
                             {
                                 this.observeComponentCreation2((o43, p43) => {
                                     if (p43) {
-                                        let q43 = new ImageMenuItem(this, { item: n43, index: this.index * 1000 + m43 + 1 }, undefined, o43, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 342, col: 13 });
+                                        let q43 =
+                                            new ImageMenuItem(this, { item: n43, index: this.index * 1000 + m43 + 1 },
+                                                undefined, o43, () => {
+                                                }, {
+                                                    page: 'library/src/main/ets/components/tabtitlebar.ets',
+                                                    line: 342,
+                                                    col: 13
+                                                });
                                         ViewPU.create(q43);
                                         let x17 = () => {
                                             return {
@@ -629,8 +730,7 @@ class CollapsibleMenuSection extends ViewPU {
                                             };
                                         };
                                         q43.paramsGenerator_ = x17;
-                                    }
-                                    else {
+                                    } else {
                                         this.updateStateVarsOfChildByElmtId(o43, {});
                                     }
                                 }, { name: 'ImageMenuItem' });
@@ -640,8 +740,7 @@ class CollapsibleMenuSection extends ViewPU {
                     }, ForEach);
                     ForEach.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((y42, z42) => {
                         ForEach.create();
@@ -650,7 +749,14 @@ class CollapsibleMenuSection extends ViewPU {
                             {
                                 this.observeComponentCreation2((e43, f43) => {
                                     if (f43) {
-                                        let g43 = new ImageMenuItem(this, { item: d43, index: this.index * 1000 + c43 + 1 }, undefined, e43, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 347, col: 15 });
+                                        let g43 =
+                                            new ImageMenuItem(this, { item: d43, index: this.index * 1000 + c43 + 1 },
+                                                undefined, e43, () => {
+                                                }, {
+                                                    page: 'library/src/main/ets/components/tabtitlebar.ets',
+                                                    line: 347,
+                                                    col: 15
+                                                });
                                         ViewPU.create(g43);
                                         let v17 = () => {
                                             return {
@@ -659,19 +765,26 @@ class CollapsibleMenuSection extends ViewPU {
                                             };
                                         };
                                         g43.paramsGenerator_ = v17;
-                                    }
-                                    else {
+                                    } else {
                                         this.updateStateVarsOfChildByElmtId(e43, {});
                                     }
                                 }, { name: 'ImageMenuItem' });
                             }
                         };
-                        this.forEachUpdateFunction(y42, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), u17, undefined, true, false);
+                        this.forEachUpdateFunction(y42,
+                            this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), u17, undefined,
+                            true, false);
                     }, ForEach);
                     ForEach.pop();
                     this.observeComponentCreation2((s42, t42) => {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: true });
-                        Button.accessibilityText({ 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Button.accessibilityText({
+                            'id': -1,
+                            'type': 10003,
+                            params: ['sys.string.ohos_toolbar_more'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        });
                         Button.width(ImageMenuItem.imageHotZoneWidth);
                         Button.height(ImageMenuItem.imageHotZoneWidth);
                         Button.borderRadius(ImageMenuItem.buttonBorderRadius);
@@ -679,14 +792,32 @@ class CollapsibleMenuSection extends ViewPU {
                         Button.backgroundColor(this.getMoreIconBgColor());
                         ViewStackProcessor.visualState('focused');
                         Button.border({
-                            radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            radius: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.ohos_id_corner_radius_clicked'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
                             width: ImageMenuItem.focusBorderWidth,
-                            color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            color: {
+                                'id': -1,
+                                'type': 10001,
+                                params: ['sys.color.ohos_id_color_focused_outline'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
                             style: BorderStyle.Solid
                         });
                         ViewStackProcessor.visualState('normal');
                         Button.border({
-                            radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            radius: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.ohos_id_corner_radius_clicked'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
                             width: 0
                         });
                         ViewStackProcessor.visualState();
@@ -734,7 +865,13 @@ class CollapsibleMenuSection extends ViewPU {
                         SymbolGlyph.create(PUBLIC_MORE);
                         SymbolGlyph.fontSize(TabContentItem.symbolSize);
                         SymbolGlyph.draggable(false);
-                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                        SymbolGlyph.fontColor([{
+                            'id': -1,
+                            'type': 10001,
+                            params: ['sys.color.icon_primary'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        }]);
                         SymbolGlyph.focusable(true);
                     }, SymbolGlyph);
                     Button.pop();
@@ -745,16 +882,19 @@ class CollapsibleMenuSection extends ViewPU {
         Row.pop();
         Column.pop();
     }
+
     onPlaceChildren(k42, l42, m42) {
         l42.forEach((n42) => {
             n42.layout({ x: 0, y: 0 });
         });
         this.fontSize = this.decideFontScale();
     }
+
     popupBuilder(x41 = null) {
         this.observeComponentCreation2((i42, j42) => {
             Column.create();
-            Column.width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum);
+            Column.width(ImageMenuItem.imageHotZoneWidth +
+                CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum);
             Column.margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding });
             Column.onAppear(() => {
                 focusControl.requestFocus(ImageMenuItem.focusablePrefix + this.firstFocusableIndex);
@@ -767,8 +907,11 @@ class CollapsibleMenuSection extends ViewPU {
                 {
                     this.observeComponentCreation2((e42, f42) => {
                         if (f42) {
-                            let g42 = new ImageMenuItem(this, { item: d42, index: this.index * 1000 +
-                            CollapsibleMenuSection.maxCountOfVisibleItems + c42 }, undefined, e42, () => { }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 437, col: 11 });
+                            let g42 = new ImageMenuItem(this, {
+                                item: d42, index: this.index * 1000 +
+                                CollapsibleMenuSection.maxCountOfVisibleItems + c42
+                            }, undefined, e42, () => {
+                            }, { page: 'library/src/main/ets/components/tabtitlebar.ets', line: 437, col: 11 });
                             ViewPU.create(g42);
                             let t17 = () => {
                                 return {
@@ -778,25 +921,29 @@ class CollapsibleMenuSection extends ViewPU {
                                 };
                             };
                             g42.paramsGenerator_ = t17;
-                        }
-                        else {
+                        } else {
                             this.updateStateVarsOfChildByElmtId(e42, {});
                         }
                     }, { name: 'ImageMenuItem' });
                 }
             };
-            this.forEachUpdateFunction(y41, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), s17, undefined, true, false);
+            this.forEachUpdateFunction(y41,
+                this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), s17,
+                undefined, true, false);
         }, ForEach);
         ForEach.pop();
         Column.pop();
     }
+
     rerender() {
         this.updateDirtyElements();
     }
 }
+
 CollapsibleMenuSection.maxCountOfVisibleItems = 1;
 CollapsibleMenuSection.focusPadding = 4;
 CollapsibleMenuSection.marginsNum = 2;
+
 class TabContentItem extends ViewPU {
     constructor(r41, s41, t41, u41 = -1, v41 = undefined, w41) {
         super(r41, t41, u41, w41);
@@ -818,6 +965,7 @@ class TabContentItem extends ViewPU {
         this.setInitiallyProvidedValue(s41);
         this.finalizeConstruction();
     }
+
     setInitiallyProvidedValue(q41) {
         if (q41.item !== undefined) {
             this.item = q41.item;
@@ -853,9 +1001,11 @@ class TabContentItem extends ViewPU {
             this.imageHeight = q41.imageHeight;
         }
     }
+
     updateStateVars(p41) {
         this.__currentIndex.reset(p41.currentIndex);
     }
+
     purgeVariableDependenciesOnElmtId(o41) {
         this.__currentIndex.purgeDependencyOnElmtId(o41);
         this.__isOnFocus.purgeDependencyOnElmtId(o41);
@@ -865,6 +1015,7 @@ class TabContentItem extends ViewPU {
         this.__imageWidth.purgeDependencyOnElmtId(o41);
         this.__imageHeight.purgeDependencyOnElmtId(o41);
     }
+
     aboutToBeDeleted() {
         this.__currentIndex.aboutToBeDeleted();
         this.__isOnFocus.aboutToBeDeleted();
@@ -876,89 +1027,127 @@ class TabContentItem extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
+
     get currentIndex() {
         return this.__currentIndex.get();
     }
+
     set currentIndex(n41) {
         this.__currentIndex.set(n41);
     }
+
     get isOnFocus() {
         return this.__isOnFocus.get();
     }
+
     set isOnFocus(m41) {
         this.__isOnFocus.set(m41);
     }
+
     get isOnHover() {
         return this.__isOnHover.get();
     }
+
     set isOnHover(l41) {
         this.__isOnHover.set(l41);
     }
+
     get isOnClick() {
         return this.__isOnClick.get();
     }
+
     set isOnClick(k41) {
         this.__isOnClick.set(k41);
     }
+
     get tabWidth() {
         return this.__tabWidth.get();
     }
+
     set tabWidth(j41) {
         this.__tabWidth.set(j41);
     }
+
     get imageWidth() {
         return this.__imageWidth.get();
     }
+
     set imageWidth(i41) {
         this.__imageWidth.set(i41);
     }
+
     get imageHeight() {
         return this.__imageHeight.get();
     }
+
     set imageHeight(h41) {
         this.__imageHeight.set(h41);
     }
+
     getBgColor() {
         if (this.isOnClick) {
-            return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        }
-        else if (this.isOnHover) {
-            return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        }
-        else {
+            return {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_click_effect'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            };
+        } else if (this.isOnHover) {
+            return {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_hover'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            };
+        } else {
             return Color.Transparent;
         }
     }
+
     getBorderAttr() {
         if (this.isOnFocus) {
             return {
-                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                radius: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_corner_radius_clicked'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
                 width: TabContentItem.focusBorderWidth,
-                color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                color: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.ohos_id_color_focused_outline'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
                 style: BorderStyle.Solid
             };
         }
         return { width: 0 };
     }
+
     getImageScaleFactor() {
         return this.index === this.currentIndex ? TabContentItem.imageMagnificationFactor : 1;
     }
+
     getImageLayoutWidth() {
         return TabContentItem.imageSize / Math.max(this.imageHeight, 1.0) * this.imageWidth;
     }
+
     toStringFormat(c41) {
         if (typeof c41 === 'string') {
             return c41;
-        }
-        else if (typeof c41 === 'undefined') {
+        } else if (typeof c41 === 'undefined') {
             return '';
-        }
-        else {
+        } else {
             let d41 = '';
             try {
                 d41 = getContext()?.resourceManager?.getStringSync(c41);
-            }
-            catch (e41) {
+            } catch (e41) {
                 let f41 = e41?.code;
                 let g41 = e41?.message;
                 hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${f41},message:${g41}`);
@@ -966,6 +1155,7 @@ class TabContentItem extends ViewPU {
             return d41;
         }
     }
+
     initialRender() {
         this.observeComponentCreation2((a41, b41) => {
             Stack.create();
@@ -997,9 +1187,33 @@ class TabContentItem extends ViewPU {
                         Text.create(this.item.title);
                         Context.animation({ duration: 300 });
                         Text.fontSize(this.index === this.currentIndex
-                            ? { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline7'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline9'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                            ? {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.ohos_id_text_size_headline7'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            } : {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.ohos_id_text_size_headline9'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            });
                         Text.fontColor(this.index === this.currentIndex
-                            ? { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_text'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_text_off'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                            ? {
+                                'id': -1,
+                                'type': 10001,
+                                params: ['sys.color.ohos_id_color_titlebar_text'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            } : {
+                                'id': -1,
+                                'type': 10001,
+                                params: ['sys.color.ohos_id_color_titlebar_text_off'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            });
                         Text.fontWeight(FontWeight.Medium);
                         Text.focusable(true);
                         Context.animation(null);
@@ -1036,8 +1250,7 @@ class TabContentItem extends ViewPU {
                     }, Text);
                     Text.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((k40, l40) => {
                         Row.create();
@@ -1082,7 +1295,13 @@ class TabContentItem extends ViewPU {
                                 this.observeComponentCreation2((i40, j40) => {
                                     SymbolGlyph.create();
                                     Context.animation({ duration: 300 });
-                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                    SymbolGlyph.fontColor([{
+                                        'id': -1,
+                                        'type': 10001,
+                                        params: ['sys.color.icon_primary'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__',
+                                    }]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.item.symbolStyle);
                                     SymbolGlyph.fontSize(TabContentItem.symbolSize);
                                     SymbolGlyph.width(this.getImageLayoutWidth());
@@ -1098,8 +1317,7 @@ class TabContentItem extends ViewPU {
                                     SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                 }, SymbolGlyph);
                             });
-                        }
-                        else {
+                        } else {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((a40, b40) => {
                                     If.create();
@@ -1108,7 +1326,13 @@ class TabContentItem extends ViewPU {
                                             this.observeComponentCreation2((g40, h40) => {
                                                 SymbolGlyph.create(this.item.icon);
                                                 Context.animation({ duration: 300 });
-                                                SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                                SymbolGlyph.fontColor([{
+                                                    'id': -1,
+                                                    'type': 10001,
+                                                    params: ['sys.color.icon_primary'],
+                                                    'bundleName': '__harDefaultBundleName__',
+                                                    'moduleName': '__harDefaultModuleName__',
+                                                }]);
                                                 SymbolGlyph.fontSize(TabContentItem.symbolSize);
                                                 SymbolGlyph.width(this.getImageLayoutWidth());
                                                 SymbolGlyph.height(TabContentItem.imageSize);
@@ -1122,8 +1346,7 @@ class TabContentItem extends ViewPU {
                                                 SymbolGlyph.focusable(true);
                                             }, SymbolGlyph);
                                         });
-                                    }
-                                    else {
+                                    } else {
                                         this.ifElseBranchUpdateFunction(1, () => {
                                             this.observeComponentCreation2((c40, d40) => {
                                                 Image.create(this.item.icon);
@@ -1186,15 +1409,20 @@ class TabContentItem extends ViewPU {
                         Row.border(this.getBorderAttr());
                         ViewStackProcessor.visualState('normal');
                         Row.border({
-                            radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            radius: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.ohos_id_corner_radius_clicked'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
                             width: 0
                         });
                         ViewStackProcessor.visualState();
                     }, Row);
                     Row.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
@@ -1202,10 +1430,12 @@ class TabContentItem extends ViewPU {
         If.pop();
         Stack.pop();
     }
+
     rerender() {
         this.updateDirtyElements();
     }
 }
+
 TabContentItem.imageSize = 24;
 TabContentItem.symbolSize = '24vp';
 TabContentItem.imageHotZoneWidth = 48;
@@ -1215,6 +1445,7 @@ TabContentItem.focusBorderWidth = 2;
 TabContentItem.paddingLeft = 8;
 TabContentItem.paddingRight = 8;
 TabContentItem.marginFirst = 16;
+
 class ImageMenuItem extends ViewPU {
     constructor(m39, n39, o39, p39 = -1, q39 = undefined, r39) {
         super(m39, o39, p39, r39);
@@ -1229,6 +1460,7 @@ class ImageMenuItem extends ViewPU {
         this.setInitiallyProvidedValue(n39);
         this.finalizeConstruction();
     }
+
     setInitiallyProvidedValue(l39) {
         if (l39.item !== undefined) {
             this.item = l39.item;
@@ -1246,13 +1478,16 @@ class ImageMenuItem extends ViewPU {
             this.isOnClick = l39.isOnClick;
         }
     }
+
     updateStateVars(k39) {
     }
+
     purgeVariableDependenciesOnElmtId(j39) {
         this.__isOnFocus.purgeDependencyOnElmtId(j39);
         this.__isOnHover.purgeDependencyOnElmtId(j39);
         this.__isOnClick.purgeDependencyOnElmtId(j39);
     }
+
     aboutToBeDeleted() {
         this.__isOnFocus.aboutToBeDeleted();
         this.__isOnHover.aboutToBeDeleted();
@@ -1260,52 +1495,80 @@ class ImageMenuItem extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
+
     get isOnFocus() {
         return this.__isOnFocus.get();
     }
+
     set isOnFocus(i39) {
         this.__isOnFocus.set(i39);
     }
+
     get isOnHover() {
         return this.__isOnHover.get();
     }
+
     set isOnHover(h39) {
         this.__isOnHover.set(h39);
     }
+
     get isOnClick() {
         return this.__isOnClick.get();
     }
+
     set isOnClick(g39) {
         this.__isOnClick.set(g39);
     }
+
     getFgColor() {
         return this.isOnClick
-            ? { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+            ? {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_titlebar_icon_pressed'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            } : {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_titlebar_icon'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            };
     }
+
     getBgColor() {
         if (this.isOnClick) {
-            return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        }
-        else if (this.isOnHover) {
-            return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        }
-        else {
+            return {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_click_effect'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            };
+        } else if (this.isOnHover) {
+            return {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.ohos_id_color_hover'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__',
+            };
+        } else {
             return Color.Transparent;
         }
     }
+
     toStringFormat(b39) {
         if (typeof b39 === 'string') {
             return b39;
-        }
-        else if (typeof b39 === 'undefined') {
+        } else if (typeof b39 === 'undefined') {
             return '';
-        }
-        else {
+        } else {
             let c39 = '';
             try {
                 c39 = getContext()?.resourceManager?.getStringSync(b39);
-            }
-            catch (d39) {
+            } catch (d39) {
                 let e39 = d39?.code;
                 let f39 = d39?.message;
                 hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${e39},message:${f39}`);
@@ -1330,6 +1593,7 @@ class ImageMenuItem extends ViewPU {
         }
         return ' ';
     }
+
     initialRender() {
         this.observeComponentCreation2((w38, x38) => {
             Button.createWithChild({ type: ButtonType.Normal, stateEffect: this.item.isEnabled });
@@ -1344,14 +1608,32 @@ class ImageMenuItem extends ViewPU {
             Button.enabled(this.item.isEnabled ? this.item.isEnabled : false);
             ViewStackProcessor.visualState('focused');
             Button.border({
-                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                radius: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_corner_radius_clicked'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
                 width: ImageMenuItem.focusBorderWidth,
-                color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                color: {
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.ohos_id_color_focused_outline'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
                 style: BorderStyle.Solid
             });
             ViewStackProcessor.visualState('normal');
             Button.border({
-                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                radius: {
+                    'id': -1,
+                    'type': 10002,
+                    params: ['sys.float.ohos_id_corner_radius_clicked'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                },
                 width: 0
             });
             ViewStackProcessor.visualState();
@@ -1401,7 +1683,13 @@ class ImageMenuItem extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((u38, v38) => {
                         SymbolGlyph.create();
-                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                        SymbolGlyph.fontColor([{
+                            'id': -1,
+                            'type': 10001,
+                            params: ['sys.color.font_primary'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        }]);
                         SymbolGlyph.attributeModifier.bind(this)(this.item.symbolStyle);
                         SymbolGlyph.fontSize(TabContentItem.symbolSize);
                         SymbolGlyph.draggable(false);
@@ -1410,8 +1698,7 @@ class ImageMenuItem extends ViewPU {
                         SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                     }, SymbolGlyph);
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((o38, p38) => {
                         If.create();
@@ -1419,15 +1706,20 @@ class ImageMenuItem extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((s38, t38) => {
                                     SymbolGlyph.create(this.item.value);
-                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                    SymbolGlyph.fontColor([{
+                                        'id': -1,
+                                        'type': 10001,
+                                        params: ['sys.color.font_primary'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__',
+                                    }]);
                                     SymbolGlyph.fontSize(TabContentItem.symbolSize);
                                     SymbolGlyph.draggable(false);
                                     SymbolGlyph.focusable(this.item?.isEnabled);
                                     SymbolGlyph.key(ImageMenuItem.focusablePrefix + this.index);
                                 }, SymbolGlyph);
                             });
-                        }
-                        else {
+                        } else {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((q38, r38) => {
                                     Image.create(this.item.value);
@@ -1447,16 +1739,19 @@ class ImageMenuItem extends ViewPU {
         If.pop();
         Button.pop();
     }
+
     rerender() {
         this.updateDirtyElements();
     }
 }
+
 ImageMenuItem.imageSize = 24;
 ImageMenuItem.imageHotZoneWidth = 48;
 ImageMenuItem.buttonBorderRadius = 8;
 ImageMenuItem.focusBorderWidth = 2;
 ImageMenuItem.disabledImageOpacity = 0.4;
 ImageMenuItem.focusablePrefix = 'Id-TabTitleBar-ImageMenuItem-';
+
 class TabTitleBarDialog extends ViewPU {
     constructor(g38, h38, i38, j38 = -1, k38 = undefined, l38) {
         super(g38, i38, j38, l38);
@@ -1484,6 +1779,7 @@ class TabTitleBarDialog extends ViewPU {
         this.setInitiallyProvidedValue(h38);
         this.finalizeConstruction();
     }
+
     setInitiallyProvidedValue(f38) {
         if (f38.tabTitleDialog !== undefined) {
             this.tabTitleDialog = f38.tabTitleDialog;
@@ -1528,14 +1824,17 @@ class TabTitleBarDialog extends ViewPU {
             this.confirm = f38.confirm;
         }
     }
+
     updateStateVars(e38) {
     }
+
     purgeVariableDependenciesOnElmtId(d38) {
         this.__mainWindow.purgeDependencyOnElmtId(d38);
         this.__fontSize.purgeDependencyOnElmtId(d38);
         this.__maxLines.purgeDependencyOnElmtId(d38);
         this.__windowStandardHeight.purgeDependencyOnElmtId(d38);
     }
+
     aboutToBeDeleted() {
         this.__mainWindow.aboutToBeDeleted();
         this.__fontSize.aboutToBeDeleted();
@@ -1544,33 +1843,43 @@ class TabTitleBarDialog extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
+
     setController(c38) {
         this.controller = c38;
     }
+
     get mainWindow() {
         return this.__mainWindow.get();
     }
+
     set mainWindow(b38) {
         this.__mainWindow.set(b38);
     }
+
     get fontSize() {
         return this.__fontSize.get();
     }
+
     set fontSize(a38) {
         this.__fontSize.set(a38);
     }
+
     get maxLines() {
         return this.__maxLines.get();
     }
+
     set maxLines(z37) {
         this.__maxLines.set(z37);
     }
+
     get windowStandardHeight() {
         return this.__windowStandardHeight.get();
     }
+
     set windowStandardHeight(y37) {
         this.__windowStandardHeight.set(y37);
     }
+
     initialRender() {
         this.observeComponentCreation2((u36, v36) => {
             If.create();
@@ -1579,10 +1888,19 @@ class TabTitleBarDialog extends ViewPU {
                     this.observeComponentCreation2((w37, x37) => {
                         Column.create();
                         Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
-                        Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
-                        Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true });
+                        Column.constraintSize({
+                            minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG
+                        });
+                        Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined,
+                            { disableSystemAdaptation: true });
                         Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
-                        Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Column.borderRadius({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.corner_radius_level10'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        });
                     }, Column);
                     this.observeComponentCreation2((m37, n37) => {
                         If.create();
@@ -1590,20 +1908,37 @@ class TabTitleBarDialog extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((u37, v37) => {
                                     SymbolGlyph.create();
-                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                    SymbolGlyph.fontColor([{
+                                        'id': -1,
+                                        'type': 10001,
+                                        params: ['sys.color.font_primary'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__',
+                                    }]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.tabTitleDialog.symbolStyle);
                                     SymbolGlyph.fontSize(IMAGE_SIZE);
                                     SymbolGlyph.draggable(false);
                                     SymbolGlyph.focusable(this.tabTitleDialog?.isEnabled);
                                     SymbolGlyph.margin({
-                                        top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                                        bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                                        top: {
+                                            'id': -1,
+                                            'type': 10002,
+                                            params: ['sys.float.padding_level24'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__',
+                                        },
+                                        bottom: {
+                                            'id': -1,
+                                            'type': 10002,
+                                            params: ['sys.float.padding_level8'],
+                                            'bundleName': '__harDefaultBundleName__',
+                                            'moduleName': '__harDefaultModuleName__',
+                                        },
                                     });
                                     SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                 }, SymbolGlyph);
                             });
-                        }
-                        else if (this.tabTitleDialog.value) {
+                        } else if (this.tabTitleDialog.value) {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((o37, p37) => {
                                     If.create();
@@ -1611,36 +1946,70 @@ class TabTitleBarDialog extends ViewPU {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((s37, t37) => {
                                                 SymbolGlyph.create(this.tabTitleDialog.value);
-                                                SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                                SymbolGlyph.fontColor([{
+                                                    'id': -1,
+                                                    'type': 10001,
+                                                    params: ['sys.color.font_primary'],
+                                                    'bundleName': '__harDefaultBundleName__',
+                                                    'moduleName': '__harDefaultModuleName__',
+                                                }]);
                                                 SymbolGlyph.fontSize(IMAGE_SIZE);
                                                 SymbolGlyph.draggable(false);
                                                 SymbolGlyph.focusable(this.tabTitleDialog?.isEnabled);
                                                 SymbolGlyph.margin({
-                                                    top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                                                    bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                                                    top: {
+                                                        'id': -1,
+                                                        'type': 10002,
+                                                        params: ['sys.float.padding_level24'],
+                                                        'bundleName': '__harDefaultBundleName__',
+                                                        'moduleName': '__harDefaultModuleName__',
+                                                    },
+                                                    bottom: {
+                                                        'id': -1,
+                                                        'type': 10002,
+                                                        params: ['sys.float.padding_level8'],
+                                                        'bundleName': '__harDefaultBundleName__',
+                                                        'moduleName': '__harDefaultModuleName__',
+                                                    },
                                                 });
                                             }, SymbolGlyph);
                                         });
-                                    }
-                                    else {
+                                    } else {
                                         this.ifElseBranchUpdateFunction(1, () => {
                                             this.observeComponentCreation2((q37, r37) => {
                                                 Image.create(this.tabTitleDialog.value);
                                                 Image.width(IMAGE_SIZE);
                                                 Image.height(IMAGE_SIZE);
                                                 Image.margin({
-                                                    top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                                                    bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                                                    top: {
+                                                        'id': -1,
+                                                        'type': 10002,
+                                                        params: ['sys.float.padding_level24'],
+                                                        'bundleName': '__harDefaultBundleName__',
+                                                        'moduleName': '__harDefaultModuleName__',
+                                                    },
+                                                    bottom: {
+                                                        'id': -1,
+                                                        'type': 10002,
+                                                        params: ['sys.float.padding_level8'],
+                                                        'bundleName': '__harDefaultBundleName__',
+                                                        'moduleName': '__harDefaultModuleName__',
+                                                    },
                                                 });
-                                                Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                Image.fillColor({
+                                                    'id': -1,
+                                                    'type': 10001,
+                                                    params: ['sys.color.icon_primary'],
+                                                    'bundleName': '__harDefaultBundleName__',
+                                                    'moduleName': '__harDefaultModuleName__',
+                                                });
                                             }, Image);
                                         });
                                     }
                                 }, If);
                                 If.pop();
                             });
-                        }
-                        else {
+                        } else {
                             this.ifElseBranchUpdateFunction(2, () => {
                             });
                         }
@@ -1650,9 +2019,27 @@ class TabTitleBarDialog extends ViewPU {
                         Column.create();
                         Column.width('100%');
                         Column.padding({
-                            left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                            right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                            bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                            left: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.padding_level4'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
+                            right: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.padding_level4'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
+                            bottom: {
+                                'id': -1,
+                                'type': 10002,
+                                params: ['sys.float.padding_level12'],
+                                'bundleName': '__harDefaultBundleName__',
+                                'moduleName': '__harDefaultModuleName__',
+                            },
                         });
                     }, Column);
                     this.observeComponentCreation2((i37, j37) => {
@@ -1662,22 +2049,36 @@ class TabTitleBarDialog extends ViewPU {
                         Text.maxLines(this.maxLines);
                         Text.width('100%');
                         Text.textAlign(TextAlign.Center);
-                        Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Text.fontColor({
+                            'id': -1,
+                            'type': 10001,
+                            params: ['sys.color.font_primary'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        });
                     }, Text);
                     Text.pop();
                     Column.pop();
                     Column.pop();
                 });
-            }
-            else {
+            } else {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((g37, h37) => {
                         Column.create();
                         Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
-                        Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
-                        Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true });
+                        Column.constraintSize({
+                            minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG
+                        });
+                        Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined,
+                            { disableSystemAdaptation: true });
                         Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
-                        Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                        Column.borderRadius({
+                            'id': -1,
+                            'type': 10002,
+                            params: ['sys.float.corner_radius_level10'],
+                            'bundleName': '__harDefaultBundleName__',
+                            'moduleName': '__harDefaultModuleName__',
+                        });
                         Column.justifyContent(FlexAlign.Center);
                     }, Column);
                     this.observeComponentCreation2((w36, x36) => {
@@ -1686,7 +2087,13 @@ class TabTitleBarDialog extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((e37, f37) => {
                                     SymbolGlyph.create();
-                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                    SymbolGlyph.fontColor([{
+                                        'id': -1,
+                                        'type': 10001,
+                                        params: ['sys.color.font_primary'],
+                                        'bundleName': '__harDefaultBundleName__',
+                                        'moduleName': '__harDefaultModuleName__',
+                                    }]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.tabTitleDialog.symbolStyle);
                                     SymbolGlyph.fontSize(IMAGE_SIZE);
                                     SymbolGlyph.draggable(false);
@@ -1694,8 +2101,7 @@ class TabTitleBarDialog extends ViewPU {
                                     SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                 }, SymbolGlyph);
                             });
-                        }
-                        else if (this.tabTitleDialog.value) {
+                        } else if (this.tabTitleDialog.value) {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((y36, z36) => {
                                     If.create();
@@ -1703,32 +2109,54 @@ class TabTitleBarDialog extends ViewPU {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((c37, d37) => {
                                                 SymbolGlyph.create(this.tabTitleDialog.value);
-                                                SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.font_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                                SymbolGlyph.fontColor([{
+                                                    'id': -1,
+                                                    'type': 10001,
+                                                    params: ['sys.color.font_primary'],
+                                                    'bundleName': '__harDefaultBundleName__',
+                                                    'moduleName': '__harDefaultModuleName__',
+                                                }]);
                                                 SymbolGlyph.fontSize(IMAGE_SIZE);
                                                 SymbolGlyph.draggable(false);
                                                 SymbolGlyph.focusable(this.tabTitleDialog?.isEnabled);
                                                 SymbolGlyph.margin({
-                                                    top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                                                    bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                                                    top: {
+                                                        'id': -1,
+                                                        'type': 10002,
+                                                        params: ['sys.float.padding_level24'],
+                                                        'bundleName': '__harDefaultBundleName__',
+                                                        'moduleName': '__harDefaultModuleName__',
+                                                    },
+                                                    bottom: {
+                                                        'id': -1,
+                                                        'type': 10002,
+                                                        params: ['sys.float.padding_level8'],
+                                                        'bundleName': '__harDefaultBundleName__',
+                                                        'moduleName': '__harDefaultModuleName__',
+                                                    },
                                                 });
                                             }, SymbolGlyph);
                                         });
-                                    }
-                                    else {
+                                    } else {
                                         this.ifElseBranchUpdateFunction(1, () => {
                                             this.observeComponentCreation2((a37, b37) => {
                                                 Image.create(this.tabTitleDialog.value);
                                                 Image.width(IMAGE_SIZE);
                                                 Image.height(IMAGE_SIZE);
-                                                Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                Image.fillColor({
+                                                    'id': -1,
+                                                    'type': 10001,
+                                                    params: ['sys.color.icon_primary'],
+                                                    'bundleName': '__harDefaultBundleName__',
+                                                    'moduleName': '__harDefaultModuleName__',
+                                                });
                                             }, Image);
                                         });
                                     }
                                 }, If);
                                 If.pop();
                             });
-                        }
-                        else {
+                        } else {
                             this.ifElseBranchUpdateFunction(2, () => {
                             });
                         }
@@ -1740,6 +2168,7 @@ class TabTitleBarDialog extends ViewPU {
         }, If);
         If.pop();
     }
+
     async aboutToAppear() {
         try {
             let r36 = this.getUIContext().getHostContext();
@@ -1757,10 +2186,12 @@ class TabTitleBarDialog extends ViewPU {
             hilog.error(0x3900, 'tabTitleBar', `Faild to getSystemFontScale,cause, code: ${a44}, message: ${b44}`);
         }
     }
+
     rerender() {
         this.updateDirtyElements();
     }
 }
+
 class Util {
     static isSymbolResource(p36) {
         if (!Util.isResourceType(p36)) {
@@ -1769,6 +2200,7 @@ class Util {
         let q36 = p36;
         return q36.type === RESOURCE_TYPE_SYMBOL;
     }
+
     static isResourceType(o36) {
         if (!o36) {
             return false;
@@ -1781,5 +2213,5 @@ class Util {
 }
 
 export default {
-  TabTitleBar: TabTitleBar
+    TabTitleBar: TabTitleBar
 };
