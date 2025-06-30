@@ -1018,6 +1018,7 @@ Font Convert(const Ark_Font& src)
     Font font;
     if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(src.family); fontfamiliesOpt) {
         font.fontFamilies = fontfamiliesOpt->families;
+        font.fontFamiliesNG = std::optional<std::vector<std::string>>(fontfamiliesOpt->families);
     }
     auto fontSize = OptConvert<Dimension>(src.size);
     if (fontSize) {

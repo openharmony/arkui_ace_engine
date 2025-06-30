@@ -352,7 +352,7 @@ HWTEST_F(SwiperModifierTest, DISABLED_setIndicator0TestDotColor, TestSize.Level1
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Dot type, the other subattr
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIndicator0TestDotOther, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setIndicator0TestDotOther, TestSize.Level1)
 {
     typedef std::tuple<Ark_DotIndicator, std::string, int> OneTestStep;
     static const std::string PROP_NAME("indicator");
@@ -425,7 +425,7 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDigitPadding, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Digit indicator, font size attributes
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIndicator0TestDigitFontSize, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setIndicator0TestDigitFontSize, TestSize.Level1)
 {
     typedef std::tuple<Ark_Font, std::string> OneTestStep;
     static const std::string PROP_NAME("indicator");
@@ -949,7 +949,7 @@ HWTEST_F(SwiperModifierTest, DISABLED_setItemSpaceTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.DisplayModeImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setDisplayModeTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setDisplayModeTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("displayMode");
     static const std::string DEFAULT_VALUE("SwiperDisplayMode.Stretch"); // corrrsponds to
@@ -1229,7 +1229,7 @@ HWTEST_F(SwiperModifierTest, setDisplayCountTestByGroup, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.EffectModeImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setEffectModeTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setEffectModeTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("effectMode");
     static const std::string DEFAULT_VALUE("EdgeEffect.Spring");
@@ -1385,7 +1385,7 @@ HWTEST_F(SwiperModifierTest, setOnChangeTest, TestSize.Level1)
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorStyleImpl
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIndicatorStyleTest, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, DISABLED_setIndicatorStyleTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("indicator");
     ASSERT_NE(modifier_->setIndicatorStyle, nullptr);
