@@ -1132,7 +1132,3 @@ const trackInternal = (
   // used by IsObservedObjectV2
   target[ObserveV2.V2_DECO_META] ??= {};
 }; // trackInternal
-
-function updateDirty2ForAnimateTo() {
-  ObserveV2.getObserve().updateDirty2();
-}
