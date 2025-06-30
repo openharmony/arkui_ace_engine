@@ -79,6 +79,9 @@
             "@ohos/promptAction": [
                 "@ohos.promptAction.ets"
             ],
+            "@ohos/overlayManager": [
+                "@ohos.overlayManager.ets"
+            ],
             "@ohos/arkui/inspector": [
                 "@ohos.arkui.inspector.ets"
             ],

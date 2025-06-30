@@ -4032,9 +4032,27 @@ void OnDrop1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(eventCallback);
-    //auto convValue = Converter::OptConvert<type>(eventCallback); // for enums
-    //CommonMethodModelNG::SetOnDrop1(frameNode, convValue);
+    auto optValue = Converter::GetOptPtr(eventCallback);
+    if (!optValue) {
+        return;
+    }
+    auto onDrop = [callback = CallbackHelper(*optValue)](const RefPtr<OHOS::Ace::DragEvent>& dragEvent,
+        const std::string& extraParams) {
+        CHECK_NULL_VOID(dragEvent);
+        Ark_DragEvent arkDragEvent = Converter::ArkValue<Ark_DragEvent>(dragEvent);
+        callback.InvokeSync(arkDragEvent, Converter::ArkValue<Opt_String>(extraParams));
+    };
+    ViewAbstract::SetOnDrop(frameNode, std::move(onDrop));
+
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto optValueDropOption = Converter::GetOptPtr(dropOptions);
+    if (!optValueDropOption) {
+        eventHub->SetDisableDataPrefetch(false);
+        return;
+    }
+    auto disableDataPrefetch = Converter::OptConvert<bool>(optValueDropOption->disableDataPrefetch).value_or(false);
+    eventHub->SetDisableDataPrefetch(disableDataPrefetch);
 }
 void OnDragEndImpl(Ark_NativePointer node,
                    const Opt_Callback_DragEvent_String_Void* value)
@@ -5319,6 +5337,21 @@ void DragPreviewOptionsImpl(Ark_NativePointer node,
         if (isMultiSelectionEnabled) {
             previewOption->isMultiSelectionEnabled = isMultiSelectionEnabled.value();
         }
+        auto enableEdgeAutoScroll = Converter::OptConvert<Ark_Boolean>(
+            optionsOpt.value().enableEdgeAutoScroll);
+        if (enableEdgeAutoScroll) {
+            previewOption->enableEdgeAutoScroll = enableEdgeAutoScroll.value();
+        }
+        auto enableHapticFeedback = Converter::OptConvert<Ark_Boolean>(
+            optionsOpt.value().enableHapticFeedback);
+        if (enableHapticFeedback) {
+            previewOption->enableHapticFeedback = enableHapticFeedback.value();
+        }
+        auto isLiftingDisabled = Converter::OptConvert<Ark_Boolean>(
+            optionsOpt.value().isLiftingDisabled);
+        if (isLiftingDisabled) {
+            previewOption->isLiftingDisabled = isLiftingDisabled.value();
+        }
     }
     LOGE("CommonMethodModifier::DragPreviewOptionsImpl Ark_ImageModifier is not supported yet.");
     ViewAbstract::SetDragPreviewOptions(frameNode, *previewOption);
@@ -5516,17 +5549,15 @@ void BindContextMenuBase(Ark_NativePointer node,
     }
     auto type = Converter::OptConvertPtr<ResponseType>(responseType).value_or(ResponseType::LONG_PRESS);
     auto contentBuilder = [callback = CallbackHelper(*optValue), node, frameNode, type](
-        MenuParam menuParam, std::function<void()>&& previewBuildFunc) {
-        callback.BuildAsync([frameNode, menuParam, type, previewBuildFunc](const RefPtr<UINode>& uiNode) {
-                std::function<void()> previewFuncCopy = previewBuildFunc;
-                auto builder = [frameNode, uiNode]() {
-                    PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-                    ViewStackProcessor::GetInstance()->Push(uiNode);
-                };
-                ViewAbstractModelStatic::BindContextMenuStatic(
-                    AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewFuncCopy));
-                ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
-            }, node);
+                              MenuParam menuParam, std::function<void()>&& previewBuildFunc) {
+        auto builder = [node, frameNode, callback]() {
+            auto uiNode = callback.BuildSync(node);
+            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            ViewStackProcessor::GetInstance()->Push(uiNode);
+        };
+        ViewAbstractModelStatic::BindContextMenuStatic(
+            AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
+        ViewAbstractModelStatic::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
     };
     menuParam.previewMode = MenuPreviewMode::NONE;
     auto menuOption = Converter::GetOptPtr(options);

@@ -13,6 +13,7 @@
 
 import("//build/config/components/ets_frontend/ets2abc_config.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/adapter/ohos/build/common.gni")
 
 group("ace_ani_native_package") {
   deps = [ "ui_extension:arkuiuiextension_group" ]
@@ -30,8 +31,9 @@ ohos_shared_library("arkoala_native_ani") {
     "componentSnapshot/componentSnapshot_module.cpp",
     "content_slot/content_slot_module.cpp",
     "custom_node/custom_node_module.cpp",
-    "drag_and_drop/native_drag_drop_global.cpp",
     "dragController/drag_controller_module.cpp",
+    "drag_and_drop/native_drag_drop_global.cpp",
+    "image/native_image.cpp",
     "image_span/image_span_module.cpp",
     "load.cpp",
     "module.cpp",
@@ -47,11 +49,18 @@ ohos_shared_library("arkoala_native_ani") {
     "image_framework:image_taihe",
     "runtime_core:ani",
     "runtime_core:ani_helpers",
-    "udmf:udmf_taihe_native",
-    "udmf:udmf_client",
     "udmf:libudmf",
+    "udmf:udmf_client",
+    "udmf:udmf_taihe_native",
   ]
 
   configs = [ "$ace_root:ace_config" ]
+  defines = []
+  if (pixel_map_support) {
+    defines += [ "PIXEL_MAP_SUPPORTED" ]
+  }
+  if (enable_rosen_backend) {
+    defines += [ "ENABLE_ROSEN_BACKEND" ]
+  }
   output_extension = "so"
 }

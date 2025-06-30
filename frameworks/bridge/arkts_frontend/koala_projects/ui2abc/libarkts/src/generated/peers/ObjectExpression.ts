@@ -36,7 +36,7 @@ import { TypeNode } from "./TypeNode"
 import { ValidationInfo } from "./ValidationInfo"
 export class ObjectExpression extends AnnotatedExpression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 162)
+        assertValidPeer(pointer, 163)
         super(pointer)
     }
     static createObjectExpression(nodeType: Es2pandaAstNodeType, properties: readonly Expression[], trailingComma: boolean): ObjectExpression {

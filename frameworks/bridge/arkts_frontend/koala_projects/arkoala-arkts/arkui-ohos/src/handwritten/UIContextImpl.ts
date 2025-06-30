@@ -19,12 +19,12 @@ import { int32, int64 } from "@koalaui/common"
 import { nullptr, KPointer, KSerializerBuffer, toPeerPtr } from "@koalaui/interop"
 import { _animateTo } from "arkui/handwritten/ArkAnimation"
 import { AnimateParam } from 'arkui/component'
-import { AnimatorResult , AnimatorOptions, Animator} from "@ohos/animator"
+import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } from "@ohos/animator"
 import { UIContext, MeasureUtils, Font, TextMenuController, FocusController, ContextMenuController, ComponentUtils,
-    FrameCallback, UIInspector, UIObserver, PromptAction, AtomicServiceBar, Router, CursorController, MediaQuery,
-    ComponentSnapshot, DragController }
+    FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
+    MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController }
     from "@ohos/arkui/UIContext"
-import { StateManager, ComputableState } from "@koalaui/runtime"
+import { StateManager, ComputableState, GlobalStateManager, StateContext, memoEntry } from '@koalaui/runtime'
 import { Context, PointerStyle, PixelMap } from "#external"
 import { Nullable,  WidthBreakpoint, HeightBreakpoint } from "arkui/component/enums"
 import { KeyEvent } from "arkui/component/common"
@@ -34,6 +34,8 @@ import { AlertDialog, AlertDialogParamWithConfirm, AlertDialogParamWithButtons,
     AlertDialogParamWithOptions }from "arkui/component/alertDialog"
 import { ActionSheet, ActionSheetOptions } from "arkui/component/actionSheet"
 import inspector from "@ohos/arkui/inspector"
+import { ComponentContent } from 'arkui/ComponentContent'
+import overlayManager from '@ohos/overlayManager'
 import promptAction from '@ohos/promptAction'
 import { ContextMenu } from 'arkui/component/contextMenu'
 import { ArkUIAniModule } from "arkui.ani"
@@ -248,13 +250,13 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         const peerNode = createUiDetachedRoot((): PeerNode => {
             return ArkComponentRootPeer.create(undefined);
-        }, builder);
+        }, builder, this.instanceId_);
         let rootNode = peerNode.peer.ptr;
         const destroyCallback = (): void => {
             destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
         }
         ArkUIAniModule._ComponentSnapshot_createFromBuilderWithCallback(
-            rootNode, destroyCallback, callback, delay, checkImageStatus);
+            rootNode, destroyCallback, callback, delay, checkImageStatus, options);
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
@@ -264,13 +266,13 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         const peerNode = createUiDetachedRoot((): PeerNode => {
             return ArkComponentRootPeer.create(undefined);
-        }, builder);
+        }, builder, this.instanceId_);
         let rootNode = peerNode.peer.ptr;
         const destroyCallback = (): void => {
             destroyUiDetachedRoot(peerNode.peer.ptr, this.instanceId_);
         }
         let pixmap = ArkUIAniModule._ComponentSnapshot_createFromBuilderWithPromise(
-            rootNode, destroyCallback, delay, checkImageStatus);
+            rootNode, destroyCallback, delay, checkImageStatus, options);
         ArkUIAniModule._Common_Restore_InstanceId();
         return pixmap;
     }
@@ -295,7 +297,8 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
         return pixmap;
     }
 
-    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number, checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
+    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number,
+        checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let node = content.getFrameNode();
         if (node === undefined || node === null) {
@@ -513,6 +516,98 @@ export class UIInspectorImpl extends UIInspector {
     }
 }
 
+export class OverlayManagerImpl extends OverlayManager {
+    instanceId_: int32 = -1;
+    constructor(instanceId: int32) {
+        super()
+        this.instanceId_ = instanceId;
+    }
+
+    setOverlayManagerOptions(options: OverlayManagerOptions): boolean {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const retval = overlayManager.setOverlayManagerOptions(options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return retval;
+    }
+
+    getOverlayManagerOptions(): OverlayManagerOptions {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        const retval = overlayManager.getOverlayManagerOptions();
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return retval;
+    }
+
+    addComponentContent(content: ComponentContent, index?: number): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let ptr: KPointer = 0
+        if (content.getNodePtr() !== undefined) {
+            ptr = content.getNodePtr() as (KPointer)
+        }
+        let idx: number = -1
+        if (index !== undefined) {
+            idx = index
+        }
+        overlayManager.addComponentContent(ptr, idx);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    addComponentContentWithOrder(content: ComponentContent, levelOrder?: number): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let ptr: KPointer = 0
+        if (content.getNodePtr() !== undefined) {
+            ptr = content.getNodePtr() as (KPointer)
+        }
+        let order: number = 0
+        if (levelOrder !== undefined) {
+            order = levelOrder
+        }
+        overlayManager.addComponentContentWithOrder(ptr, order);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    removeComponentContent(content: ComponentContent): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let ptr: KPointer = 0
+        if (content.getNodePtr() !== undefined) {
+            ptr = content.getNodePtr() as (KPointer)
+        }
+        overlayManager.removeComponentContent(ptr);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    showComponentContent(content: ComponentContent): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let ptr: KPointer = 0
+        if (content.getNodePtr() !== undefined) {
+            ptr = content.getNodePtr() as (KPointer)
+        }
+        overlayManager.showComponentContent(ptr);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    hideComponentContent(content: ComponentContent): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let ptr: KPointer = 0
+        if (content.getNodePtr() !== undefined) {
+            ptr = content.getNodePtr() as (KPointer)
+        }
+        overlayManager.hideComponentContent(ptr);
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    showAllComponentContents(): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        overlayManager.showAllComponentContents();
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+
+    hideAllComponentContents(): void {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        overlayManager.hideAllComponentContents();
+        ArkUIAniModule._Common_Restore_InstanceId();
+    }
+}
+
 export class PromptActionImpl extends PromptAction {
     instanceId_: int32 = -1;
     constructor(instanceId: int32) {
@@ -560,16 +655,55 @@ export class CursorControllerImpl extends CursorController {
     }
 }
 
+export class DetachedRootEntry {
+    entry: ComputableState<PeerNode>;
+    constructor(entry: ComputableState<PeerNode>) {
+        this.entry = entry
+    }
+}
+
 export class DetachedRootEntryManager {
-    instanceId_: int32;
-    detachedRoots_: Map<KPointer, ComputableState<PeerNode>>;
-    constructor(instanceId: int32) {
-        this.detachedRoots_ = new Map<KPointer, ComputableState<PeerNode>>();
-        this.instanceId_ = instanceId;
+    uicontext_: UIContextImpl;
+    detachedRoots_: Map<KPointer, DetachedRootEntry>;
+    constructor(uicontext: UIContextImpl) {
+        this.detachedRoots_ = new Map<KPointer, DetachedRootEntry>();
+        this.uicontext_ = uicontext;
     }
 
-    public getDetachedRoots() : Map<KPointer, ComputableState<PeerNode>> {
-        return this.detachedRoots_;
+    public getDetachedRoots() : Map<KPointer, DetachedRootEntry> {
+         return this.detachedRoots_;
+     }
+
+    public createUiDetachedRoot(
+        peerFactory: () => PeerNode,
+        /** @memo */
+        builder: () => void
+    ): PeerNode {
+        let manager = this.uicontext_.stateMgr;
+        if (manager === undefined) {
+            manager = GlobalStateManager.instance;
+        }
+        const node = manager.updatableNode<PeerNode>(peerFactory(), (context: StateContext) => {
+            const frozen = manager.frozen
+            manager.frozen = true
+            ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
+            memoEntry<void>(context, 0, builder)
+            ArkUIAniModule._Common_Restore_InstanceId();
+            manager.frozen = frozen
+        })
+        this.detachedRoots_.set(node.value.peer.ptr, new DetachedRootEntry(node))
+        return node.value
+    }
+
+    public destroyUiDetachedRoot(ptr: KPointer): boolean {
+        if (!this.detachedRoots_.has(ptr)) {
+            return false;
+        }
+
+        const root = this.detachedRoots_.get(ptr)!
+        this.detachedRoots_.delete(ptr)
+        root.entry.dispose()
+        return true;
     }
 }
 
@@ -585,6 +719,7 @@ export class UIContextImpl extends UIContext {
     atomicServiceBar_: AtomicServiceBarInternal;
     uiInspector_: UIInspectorImpl | null = null;
     contextMenuController_: ContextMenuControllerImpl;
+    overlayManager_: OverlayManagerImpl | null = null;
     promptAction_: PromptActionImpl | null = null;
     cursorController_: CursorControllerImpl;
     font_: FontImpl;
@@ -610,7 +745,7 @@ export class UIContextImpl extends UIContext {
         this.font_ = new FontImpl(instanceId);
         this.measureUtils_ = new MeasureUtilsImpl(instanceId);
         this.textMenuController_ = new TextMenuControllerImpl(instanceId);
-        this.detachedRootEntryManager_ = new DetachedRootEntryManager(instanceId);
+        this.detachedRootEntryManager_ = new DetachedRootEntryManager(this);
     }
     public getInstanceId() : int32 {
         return this.instanceId_;
@@ -787,7 +922,7 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
-    public createAnimator(options: AnimatorOptions): AnimatorResult {
+    public createAnimator(options: AnimatorOptions | SimpleAnimatorOptions): AnimatorResult {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
         let animatorRet = Animator.create(options);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -910,6 +1045,37 @@ export class UIContextImpl extends UIContext {
             this.observer_ = new UIObserver(this.instanceId_);
         }
         return this.observer_ as UIObserver;
+    }
+
+    public getOverlayManager(): OverlayManager {
+        if (!this.overlayManager_) {
+            this.overlayManager_ = new OverlayManagerImpl(this.instanceId_);
+        }
+        if (this.overlayManager_) {
+            const options: OverlayManagerOptions = { renderRootOverlay: true, enableBackPressedEvent: false };
+            this.overlayManager_!.setOverlayManagerOptions(options);
+        }
+        return this.overlayManager_ as OverlayManager;
+    }
+
+    public setOverlayManagerOptions(options: OverlayManagerOptions): boolean {
+        if (!this.overlayManager_) {
+            this.overlayManager_ = new OverlayManagerImpl(this.instanceId_);
+        }
+        if (this.overlayManager_) {
+            return this.overlayManager_!.setOverlayManagerOptions(options);
+        }
+        return false;
+    }
+
+    public getOverlayManagerOptions(): OverlayManagerOptions {
+        if (!this.overlayManager_) {
+            this.overlayManager_ = new OverlayManagerImpl(this.instanceId_);
+        }
+        if (this.overlayManager_) {
+            return this.overlayManager_!.getOverlayManagerOptions();
+        }
+        return {};
     }
 
     public getPromptAction(): PromptAction {

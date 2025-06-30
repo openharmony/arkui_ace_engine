@@ -365,6 +365,8 @@ public:
         return pageRouterManager_;
     }
 
+    static void PreloadAceModule(void* aniEnv);
+    static void* preloadArkTSRuntime;
 private:
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<NG::PipelineContext> pipeline_;

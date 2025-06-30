@@ -56,6 +56,7 @@ struct ArkUIDragInfo {
 
 struct ArkUIAniImageModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);
+    void (*setResizableLattice)(ArkUINodeHandle node, void* lattice);
 };
 
 struct ArkUIAniWebModifier {
@@ -73,6 +74,7 @@ struct ArkUIAniDragModifier {
     void (*setDragAllowDropNull)(ArkUINodeHandle node);
     void (*setDragAllowDrop)(ArkUINodeHandle node, const char** allowDrops, ArkUI_Int32 length);
     void (*setDragPreview)(ArkUINodeHandle node, ArkUIDragInfo dragInfo);
+    const char* (*getUdKey)(ani_ref event);
 };
 struct ArkUIAniCommonModifier {
     ani_ref* (*getHostContext)();
@@ -82,7 +84,9 @@ struct ArkUIAniCommonModifier {
     ArkUI_Int32 (*getCurrentInstanceId)();
     ani_long (*builderProxyNodeConstruct)(ArkUI_Int32 id);
     ani_ref (*getSharedLocalStorage)();
+    void (*setBackgroundImagePixelMap)(ani_env* env, ArkUINodeHandle node, ani_ref pixelMapPtr, ArkUI_Int32 repeat);
     void (*setCustomCallback)(ani_env* env, ani_long ptr, ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout);
+    ArkUI_Int32 (*requireArkoalaNodeId)(ArkUI_Int32 capacity);
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);
@@ -102,10 +106,10 @@ struct ArkUIAniComponentSnapshotModifier {
     int32_t (*getCurrentIdSafely)();
     OHOS::Ace::RefPtr<OHOS::Ace::Container> (*getContainer)(int32_t instanceId);
     void (*createFromBuilder)(ArkUINodeHandle node,
-    std::function<void(std::shared_ptr<OHOS::Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    OHOS::Ace::NG::ComponentSnapshot::JsCallback&& callback,
     OHOS::Ace::NG::SnapshotParam param);
     void (*createFromComponent)(ArkUINodeHandle node,
-    std::function<void(std::shared_ptr<OHOS::Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    OHOS::Ace::NG::ComponentSnapshot::JsCallback&& callback,
     OHOS::Ace::NG::SnapshotParam param);
 };
 struct ArkUIAniAnimationModifier {

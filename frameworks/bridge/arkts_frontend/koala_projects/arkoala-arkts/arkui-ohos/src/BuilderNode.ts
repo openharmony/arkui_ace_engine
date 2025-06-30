@@ -17,7 +17,7 @@ import { TouchEvent, } from "./component/common"
 import { Size } from "./Graphics"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { Finalizable, InteropNativeModule, KPointer, loadNativeModuleLibrary, nullptr, pointer } from "@koalaui/interop"
-import { finalizerRegister, Thunk } from "@koalaui/common"
+import { finalizerRegister, Thunk, int32 } from "@koalaui/common"
 import { ComputableState, MutableState, rememberMutableState, StateManager, memoEntry, StateContext, createStateManager, GlobalStateManager, IncrementalNode } from "@koalaui/runtime"
 import { WrappedBuilder } from "./component/builder"
 import { BuilderRootFrameNode, FrameNode, FrameNodeUtils } from "./FrameNode"
@@ -25,6 +25,8 @@ import { BuilderRootNodeType, findPeerNode, PeerNode, PeerNodeType } from "./Pee
 import { BuilderNodeOps, BuilderNodeOptions } from "./component/arkui-custom"
 import { ArkBuilderProxyNodePeer } from "./handwritten/BuilderProxyNode"
 import { setNeedCreate } from "./ArkComponentRoot"
+import { UIContextUtil } from 'arkui/handwritten/UIContextUtil'
+import { ArkUIAniModule } from 'arkui.ani'
 
 export enum NodeRenderType {
     RENDER_TYPE_DISPLAY = 0,
@@ -68,12 +70,15 @@ function createUiDetachedBuilderRoot(
     peerFactory: () => BuilderRootNode,
     /** @memo */
     builder: () => void,
-    manager: StateManager
+    manager: StateManager,
+    instanceId: int32
 ): ComputableState<BuilderRootNode> {
     const node = manager.updatableNode<BuilderRootNode>(peerFactory(), (context: StateContext) => {
         const frozen = manager.frozen
         manager.frozen = true
+        ArkUIAniModule._Common_Sync_InstanceId(instanceId)
         memoEntry<void>(context, 0, builder)
+        ArkUIAniModule._Common_Restore_InstanceId()
         manager.frozen = frozen
     })
     detachedStatMgt.set(new WeakRef<StateManager>(manager), new WeakRef<ComputableState<BuilderRootNode>>(node))
@@ -234,6 +239,10 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     }
 
     public buildFunc(): void {
+        let instanceId : int32 = 0;
+        if (this.__uiContext === undefined) {
+            instanceId = UIContextUtil.getCurrentInstanceId();
+        }
         this.__rootStage = createUiDetachedBuilderRoot(() => {
             if (this.__root == null) {
                 this.__root = new BuilderRootNode();
@@ -254,7 +263,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
                 this.__builder?.builder(this.__params!.value);
                 setNeedCreate(result);
             }
-        }, this.__manager!)
+        }, this.__manager!, instanceId)
         this.__rootStage?.value;
         if (!this.__root?.firstChild || !findPeerNode(this.__root!)?.getPeerPtr()) {
             this.reset();

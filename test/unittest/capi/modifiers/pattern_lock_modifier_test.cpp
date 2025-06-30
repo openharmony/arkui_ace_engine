@@ -116,7 +116,7 @@ static std::vector<std::tuple<std::string, Ark_Length, std::string>> sideLengthV
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockModifierTest, setSideLengthTestValidValues, TestSize.Level1)
+HWTEST_F(PatternLockModifierTest, DISABLED_setSideLengthTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;

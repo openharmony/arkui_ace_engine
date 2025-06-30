@@ -28,7 +28,7 @@ import { PixelMap } from "#external"
 import { ResourceColor, ColorFilter, ResourceStr, EdgeWidths } from "./units"
 import { ImageFit, ImageRepeat, CopyOptions, Color } from "./enums"
 import { Matrix4Transit } from "./arkui-matrix4"
-import { DrawingColorFilter, DrawingLattice } from "./arkui-drawing"
+import { DrawingColorFilter } from "./arkui-drawing"
 import { ImageAnalyzerConfig, ImageAIOptions } from "./imageCommon"
 import { ResolutionQuality } from "./arkui-external"
 import { DrawableDescriptor } from "#external"
@@ -40,6 +40,7 @@ import { ArkImageNode } from "../handwritten/modifiers/ArkImageNode"
 import { ImageModifier } from "../handwritten/modifiers/ArkImageModifier"
 import { ArkCommonAttributeSet, applyUIAttributes } from "../handwritten/modifiers/ArkCommonModifier"
 import { AttributeUpdater } from "../AttributeUpdater"
+import { drawing } from "@ohos/graphics/drawing"
 
 export class ArkImagePeer extends ArkCommonMethodPeer {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -450,7 +451,7 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ImageAttribute_edgeAntialiasing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    onCompleteAttribute(value: ((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined): void {
+    onCompleteAttribute(value: ((event?: ImageCompleteEvent) => void) | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let value_type : int32 = RuntimeType.UNDEFINED
         value_type = runtimeType(value)
@@ -594,9 +595,7 @@ export interface ImageSourceSize {
     width: number;
     height: number;
 }
-export interface ColorContent {
-}
-export interface Type_ImageAttribute_onComplete_callback_event {
+export interface ImageCompleteEvent {
     width: number;
     height: number;
     componentWidth: number;
@@ -607,7 +606,7 @@ export interface Type_ImageAttribute_onComplete_callback_event {
     contentOffsetX: number;
     contentOffsetY: number;
 }
-export type Callback_Type_ImageAttribute_onComplete_callback_event_Void = (event?: Type_ImageAttribute_onComplete_callback_event) => void;
+export type ImageOnCompleteCallback = (event?: ImageCompleteEvent) => void;
 export interface ImageAttribute extends CommonMethod {
     alt(value: string | Resource | PixelMap | undefined): this
     matchTextDirection(value: boolean | undefined): this
@@ -627,7 +626,7 @@ export interface ImageAttribute extends CommonMethod {
     draggable(value: boolean | undefined): this
     pointLight(value: PointLightStyle | undefined): this
     edgeAntialiasing(value: number | undefined): this
-    onComplete(value: ((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined): this
+    onComplete(value: ((event?: ImageCompleteEvent) => void) | undefined): this
     onError(value: ImageErrorCallback | undefined): this
     onFinish(value: (() => void) | undefined): this
     enableAnalyzer(value: boolean | undefined): this
@@ -656,7 +655,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     draggable_value?: boolean | undefined
     pointLight_value?: PointLightStyle | undefined
     edgeAntialiasing_value?: number | undefined
-    onComplete_value?: ((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined
+    onComplete_value?: ((event?: ImageCompleteEvent) => void) | undefined
     onError_value?: ImageErrorCallback | undefined
     onFinish_value?: (() => void) | undefined
     enableAnalyzer_value?: boolean | undefined
@@ -719,7 +718,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     public edgeAntialiasing(value: number | undefined): this {
         return this
     }
-    public onComplete(value: ((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined): this {
+    public onComplete(value: ((event?: ImageCompleteEvent) => void) | undefined): this {
         return this
     }
     public onError(value: ImageErrorCallback | undefined): this {
@@ -755,7 +754,7 @@ export interface ImageError {
 }
 export interface ResizableOptions {
     slice?: EdgeWidths;
-    lattice?: DrawingLattice;
+    lattice?: drawing.Lattice;
 }
 export class ArkImageComponent extends ArkCommonMethodComponent implements ImageAttribute {
     getPeer(): ArkImagePeer {
@@ -820,18 +819,7 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
     }
     public fillColor(value: ResourceColor | undefined | ResourceColor | ColorContent | undefined): this {
         if (this.checkPriority("fillColor")) {
-            const value_type = runtimeType(value)
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ResourceColor | undefined)
-                this.getPeer()?.fillColor0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.NUMBER == value_type) || (RuntimeType.NUMBER == value_type) || (RuntimeType.STRING == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type) || (RuntimeType.UNDEFINED == value_type)) {
-                const value_casted = value as (ResourceColor | ColorContent | undefined)
-                this.getPeer()?.fillColor1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            hookSetImageFillColor(this.getPeer().getPeerPtr(), value)
         }
         return this
     }
@@ -947,9 +935,9 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         }
         return this
     }
-    public onComplete(value: ((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined): this {
+    public onComplete(value: ((event?: ImageCompleteEvent) => void) | undefined): this {
         if (this.checkPriority("onComplete")) {
-            const value_casted = value as (((event?: Type_ImageAttribute_onComplete_callback_event) => void) | undefined)
+            const value_casted = value as (((event?: ImageCompleteEvent) => void) | undefined)
             this.getPeer()?.onCompleteAttribute(value_casted)
             return this
         }
@@ -989,9 +977,7 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
     }
     public resizable(value: ResizableOptions | undefined): this {
         if (this.checkPriority("resizable")) {
-            const value_casted = value as (ResizableOptions | undefined)
-            this.getPeer()?.resizableAttribute(value_casted)
-            return this
+            hookSetResizableOptions(this.getPeer()!, value)
         }
         return this
     }

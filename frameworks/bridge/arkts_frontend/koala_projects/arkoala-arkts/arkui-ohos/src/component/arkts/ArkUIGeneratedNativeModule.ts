@@ -1491,9 +1491,9 @@ export class ArkUIGeneratedNativeModule {
     native static _ListAttribute_onScrollFrameBegin(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ListAttribute_onWillScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _ListAttribute_onDidScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void 
-    @ani.unsafe.Quick
+    @ani.unsafe.Direct
     native static _ListAttribute_lanes(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _ListAttribute_edgeEffect(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -4684,6 +4684,26 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextFieldOps_registerTextFieldValueCallback(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetWidth(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetHeight(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetPadding(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetMargin(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetBorder(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetBorderWidth(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetBorderColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetBorderStyle(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetBorderRadius(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _TextFieldOps_textFieldOpsSetBackgroundColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
     native static _ToggleOps_registerIsOnCallback(node: KPointer, isOn: KInt, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _ActionSheet_show(thisArray: KSerializerBuffer, thisLength: int32): undefined
@@ -5351,6 +5371,20 @@ export class ArkUIGeneratedNativeModule {
     native static _NavPathStack_getPathStack(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _NavPathStack_setPathStack(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NodeContainerOps_addNodeContainerRootNode(self: KPointer, child: KPointer): void
+    @ani.unsafe.Direct
+    native static _NodeContainerOps_setAboutToAppear(self: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NodeContainerOps_setAboutToDisappear(self: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NodeContainerOps_setAboutToResize(self: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NodeContainerOps_setOnAttach(self: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NodeContainerOps_setOnDetach(self: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _NodeContainerOps_setOnTouchEvent(self: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavigationTransitionProxy_ctor(): KPointer
     @ani.unsafe.Direct

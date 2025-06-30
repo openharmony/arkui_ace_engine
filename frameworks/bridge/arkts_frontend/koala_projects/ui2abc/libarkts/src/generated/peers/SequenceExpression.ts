@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Expression } from "./Expression"
 export class SequenceExpression extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 60)
+        assertValidPeer(pointer, 61)
         super(pointer)
     }
     static createSequenceExpression(sequence_arg: readonly Expression[]): SequenceExpression {

@@ -82,6 +82,9 @@
             "@ohos/arkui/graphics": [
                 "./@ohos.arkui.graphics.ts"
             ],
+            "@ohos/overlayManager": [
+                "./@ohos.overlayManager.ts"
+            ],
             "@ohos/promptAction": [
                 "./@ohos.promptAction.ts"
             ],            
@@ -112,6 +115,7 @@
         "./@ohos.graphics.common2D.ts",
         "./@ohos.graphics.drawing.ts",
         "./@ohos.arkui.graphics.ts",
+        "./@ohos.overlayManager.ts",
         "./@ohos.promptAction.ts"
     ],
     "exclude": [

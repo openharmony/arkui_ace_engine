@@ -32,7 +32,7 @@ import { Es2pandaAstNodeType } from "./../Es2pandaEnums"
 import { Statement } from "./Statement"
 export class TSModuleBlock extends Statement {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 116)
+        assertValidPeer(pointer, 117)
         super(pointer)
     }
     static createTSModuleBlock(statements: readonly Statement[]): TSModuleBlock {

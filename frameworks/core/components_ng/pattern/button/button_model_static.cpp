@@ -242,6 +242,7 @@ void ButtonModelStatic::SetType(FrameNode* frameNode, const std::optional<int> v
     CHECK_NULL_VOID(buttonLayoutProperty);
     if (buttonLayoutProperty->HasLabel()) {
         auto layoutProperty = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
         auto context = frameNode->GetContext();
         CHECK_NULL_VOID(context);
         auto buttonTheme = context->GetTheme<ButtonTheme>();

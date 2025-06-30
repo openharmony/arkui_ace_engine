@@ -3690,6 +3690,26 @@ void callManagedCallback_SheetType_VoidSync(Ark_VMContext vmContext, Ark_Int32 r
     argsSerializer.writeInt32(static_cast<Ark_SheetType>(parameter));
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
 }
+void callManagedCallback_Size_Void(Ark_Int32 resourceId, Ark_Size size)
+{
+    CallbackBuffer _buffer = {{}, {}};
+    const Ark_CallbackResource _callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    _buffer.resourceHolder.holdCallbackResource(&_callbackResourceSelf);
+    Serializer argsSerializer = Serializer((KSerializerBuffer)&(_buffer.buffer), sizeof(_buffer.buffer), &(_buffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_Callback_Size_Void);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeSize(size);
+    enqueueCallback(&_buffer);
+}
+void callManagedCallback_Size_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Size size)
+{
+    uint8_t _buffer[4096];
+    Serializer argsSerializer = Serializer((KSerializerBuffer)&_buffer, sizeof(_buffer), nullptr);
+    argsSerializer.writeInt32(Kind_Callback_Size_Void);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeSize(size);
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(_buffer), _buffer);
+}
 void callManagedCallback_SpringBackAction_Void(Ark_Int32 resourceId, Ark_SpringBackAction parameter)
 {
     CallbackBuffer _buffer = {{}, {}};
@@ -7906,6 +7926,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_RichEditorTextSpanResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_RichEditorTextSpanResult_Void);
         case Kind_Callback_SheetDismiss_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SheetDismiss_Void);
         case Kind_Callback_SheetType_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SheetType_Void);
+        case Kind_Callback_Size_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Size_Void);
         case Kind_Callback_SpringBackAction_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SpringBackAction_Void);
         case Kind_Callback_StateStylesChange: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_StateStylesChange);
         case Kind_Callback_String_Number_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_String_Number_Void);
@@ -8220,6 +8241,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_RichEditorTextSpanResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_RichEditorTextSpanResult_VoidSync);
         case Kind_Callback_SheetDismiss_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SheetDismiss_VoidSync);
         case Kind_Callback_SheetType_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SheetType_VoidSync);
+        case Kind_Callback_Size_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Size_VoidSync);
         case Kind_Callback_SpringBackAction_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SpringBackAction_VoidSync);
         case Kind_Callback_StateStylesChange: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_StateStylesChangeSync);
         case Kind_Callback_String_Number_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_String_Number_VoidSync);

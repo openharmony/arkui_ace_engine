@@ -28,6 +28,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/ace_ability.cpp",
       "$ace_root/adapter/ohos/entrance/ace_application_info.cpp",
       "$ace_root/adapter/ohos/entrance/ace_container.cpp",
+      "$ace_root/adapter/ohos/entrance/ace_container_hybrid_impl.cpp",
       "$ace_root/adapter/ohos/entrance/ace_data_ability.cpp",
       "$ace_root/adapter/ohos/entrance/ace_extra_input_data.cpp",
       "$ace_root/adapter/ohos/entrance/ace_form_ability.cpp",

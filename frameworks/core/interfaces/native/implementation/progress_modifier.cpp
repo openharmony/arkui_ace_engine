@@ -31,7 +31,7 @@ struct ProgressOptions {
 
 auto g_setLinearStyle = [](FrameNode* frameNode, const Ark_LinearStyleOptions& options) {
     // strokeWidth
-    auto strokeWidth = Converter::OptConvert<Dimension>(options.strokeWidth);
+    auto strokeWidth = Converter::OptConvertFromArkLength(options.strokeWidth.value, DimensionUnit::VP);
     Validator::ValidatePositive(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
     ProgressModelStatic::SetStrokeWidth(frameNode, strokeWidth);
@@ -47,7 +47,7 @@ auto g_setLinearStyle = [](FrameNode* frameNode, const Ark_LinearStyleOptions& o
 
 auto g_setRingStyle = [](FrameNode* frameNode, const Ark_RingStyleOptions& options) {
     // strokeWidth
-    auto strokeWidth = Converter::OptConvert<Dimension>(options.strokeWidth);
+    auto strokeWidth = Converter::OptConvertFromArkLength(options.strokeWidth.value, DimensionUnit::VP);
     Validator::ValidatePositive(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
     ProgressModelStatic::SetStrokeWidth(frameNode, strokeWidth);
@@ -92,7 +92,7 @@ auto g_setCapsuleStyle = [](FrameNode* frameNode, const Ark_CapsuleStyleOptions&
 
 auto g_setProgressStyle = [](FrameNode* frameNode, const Ark_ProgressStyleOptions& options) {
     // strokeWidth
-    auto strokeWidth = Converter::OptConvert<Dimension>(options.strokeWidth);
+    auto strokeWidth = Converter::OptConvertFromArkLength(options.strokeWidth.value, DimensionUnit::VP);
     Validator::ValidatePositive(strokeWidth);
     Validator::ValidateNonPercent(strokeWidth);
     ProgressModelStatic::SetStrokeWidth(frameNode, strokeWidth);

@@ -180,14 +180,16 @@ void AssignArkValue(Ark_UIFontConfig& dst, const FontConfigJsonInfo& src, ConvCo
     dst.fallbackGroups = Converter::ArkValue<Array_UIFontFallbackGroupInfo>(src.fallbackGroupSet, ctx);
 }
 
-void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src)
+void AssignArkValue(Ark_TextMenuItem& dst, const NG::MenuItemParam& src, ConvContext* ctx)
 {
     if (src.menuOptionsParam.content.has_value()) {
-        dst.content = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(src.menuOptionsParam.content.value());
+        dst.content = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(src.menuOptionsParam.content.value(), ctx);
+    } else {
+        dst.content = Converter::ArkUnion<Ark_ResourceStr, Ark_Empty>(nullptr);
     }
-    dst.icon = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.icon);
+    dst.icon = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.icon, ctx);
     dst.id = PeerUtils::CreatePeer<TextMenuItemIdPeer>(src.menuOptionsParam.id);
-    dst.labelInfo = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.labelInfo);
+    dst.labelInfo = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(src.menuOptionsParam.labelInfo, ctx);
 }
 
 void AssignArkValue(Ark_TextMetrics& dst, const OHOS::Ace::TextMetrics& src)
@@ -453,7 +455,12 @@ void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
     globPosition.y = Converter::ArkValue<Opt_Length>(src.origin.GetY().ConvertToVp());
     area.globalPosition = Converter::ArkValue<Ark_Position>(globPosition);
     dst.area = area;
-    dst.id = Converter::ArkValue<Opt_String>(src.id);
+    if (!src.id.empty()) {
+        dst.id = Converter::ArkValue<Opt_String>(src.id);
+    } else {
+        Opt_String optId = { .tag = INTEROP_TAG_UNDEFINED, .value = {} };
+        dst.id = optId;
+    }
 }
 
 void AssignArkValue(Ark_Header& dst, const Header& src, ConvContext *ctx)

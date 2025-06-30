@@ -55,39 +55,39 @@ export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
     }
     addNodeContainerRootNode(child: FrameNode | null) {
         if (!child) {
-            ArkUIGeneratedNativeModule._NodeContainerInterface_addNodeContainerRootNode(this.peer.ptr, 0)
+            ArkUIGeneratedNativeModule._NodeContainerOps_addNodeContainerRootNode(this.peer.ptr, 0)
             return
         }
-        ArkUIGeneratedNativeModule._NodeContainerInterface_addNodeContainerRootNode(this.peer.ptr, child.getPeer()?.ptr as pointer)
+        ArkUIGeneratedNativeModule._NodeContainerOps_addNodeContainerRootNode(this.peer.ptr, child.getPeer()?.ptr as pointer)
     }
     aboutToAppearAttribute(value: (() => void)) {
         const thisSerializer: Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._NodeContainerInterface_setAboutToAppear(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NodeContainerOps_setAboutToAppear(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     aboutToDisappearAttribute(value: (() => void)) {
         const thisSerializer: Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._NodeContainerInterface_setAboutToDisappear(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NodeContainerOps_setAboutToDisappear(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     aboutToResizeAttribute(value: ((size: Size) => void)) {
         const thisSerializer: Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._NodeContainerInterface_setAboutToResize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NodeContainerOps_setAboutToResize(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onAttachAttribute(value: (() => void)) {
         const thisSerializer: Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._NodeContainerInterface_setOnAttach(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NodeContainerOps_setOnAttach(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onDetachAttribute(value: (() => void)) {
         const thisSerializer: Serializer = Serializer.hold()
         thisSerializer.holdAndWriteCallback(value)
-        ArkUIGeneratedNativeModule._NodeContainerInterface_setOnDetach(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NodeContainerOps_setOnDetach(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     onTouchEventAttribute(value: ((event: TouchEvent) => void)) {
@@ -99,7 +99,7 @@ export class ArkNodeContainerPeer extends ArkCommonMethodPeer {
             const value_value  = value!
             thisSerializer.holdAndWriteCallback(value_value)
         }
-        ArkUIGeneratedNativeModule._NodeContainerInterface_setOnTouchEvent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._NodeContainerOps_setOnTouchEvent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }

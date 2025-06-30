@@ -61,7 +61,7 @@ import { Callback_Opt_Boolean_Void, OnCheckboxChangeCallback } from "./../checkb
 import { Resource } from "global.resource"
 import { StyledString, UserDataSpan, StyledStringMarshallCallback, StyledStringUnmarshallCallback } from "./../styledString"
 import { TabContentAnimatedTransition, Callback_TabContentTransitionProxy_Void, TabContentTransitionProxy, OnTabsAnimationEndCallback, TabsAnimationEvent, OnTabsAnimationStartCallback, OnTabsContentWillChangeCallback, OnTabsGestureSwipeCallback, TabsCustomContentTransitionCallback } from "./../tabs"
-import { Callback_onDragStart, Callback_RangeUpdate, Callback_StateStylesChange, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, Callback_CreateItem } from "./../arkui-custom"
+import { Callback_onDragStart, Callback_RangeUpdate, Callback_StateStylesChange, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, Callback_CreateItem, Callback_Size_Void } from "./../arkui-custom"
 import { Callback_RefreshStatus_Void, RefreshStatus } from "./../refresh"
 import { Callback_String_Number_Void, Callback_TextPickerResult_Void, TextPickerResult, Callback_Union_Number_Array_Number_Void, Callback_Union_String_Array_String_Void, OnTextPickerChangeCallback, TextPickerEnterSelectedAreaCallback, TextPickerScrollStopCallback, Type_TextPickerAttribute_onChange_callback } from "./../textPicker"
 import { Callback_String_Void } from "./../gridRow"
@@ -69,7 +69,7 @@ import { Callback_SwipeActionState_Void, SwipeActionState } from "./../listItem"
 import { Callback_SwiperContentTransitionProxy_Void, SwiperContentTransitionProxy, ContentDidScrollCallback, ContentWillScrollCallback, SwiperContentWillScrollResult, OnSwiperAnimationEndCallback, SwiperAnimationEvent, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback } from "./../swiper"
 import { Callback_TerminationInfo_Void, TerminationInfo } from "./../embeddedComponent"
 import { Callback_TimePickerResult_Void, TimePickerResult, OnTimePickerChangeCallback } from "./../timePicker"
-import { Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event, ImageErrorCallback, ImageError } from "./../image"
+import { ImageOnCompleteCallback, ImageCompleteEvent, ImageErrorCallback, ImageError } from "./../image"
 import { WithThemeAttribute, WithThemeInterface, WithThemeOptions } from "./../withTheme"
 import { Callback_WrappedBuilder_Args_Void, CommonConfiguration } from "./../arkui-wrapper-builder"
 import { CheckedCallback } from "./../radioops"
@@ -1299,6 +1299,12 @@ export function deserializeAndCallCallback_SheetType_Void(thisDeserializer: Dese
     let parameter : SheetType = TypeChecker.SheetType_FromNumeric(thisDeserializer.readInt32())
     _call(parameter)
 }
+export function deserializeAndCallCallback_Size_Void(thisDeserializer: Deserializer): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as Callback_Size_Void)
+    let size : Size = thisDeserializer.readSize()
+    _call(size)
+}
 export function deserializeAndCallCallback_StateStylesChange(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as Callback_StateStylesChange)
@@ -1440,9 +1446,9 @@ export function deserializeAndCallCallback_Tuple_Number_Number_Void(thisDeserial
 }
 export function deserializeAndCallCallback_Type_ImageAttribute_onComplete_callback_event_Void(thisDeserializer: Deserializer): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
-    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event?: Type_ImageAttribute_onComplete_callback_event) => void))
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event?: ImageCompleteEvent) => void))
     const event_buf_runtimeType  = (thisDeserializer.readInt8() as int32)
-    let event_buf : Type_ImageAttribute_onComplete_callback_event | undefined
+    let event_buf : ImageCompleteEvent | undefined
     if ((RuntimeType.UNDEFINED) != (event_buf_runtimeType))
     {
         const event_buf__width : number = (thisDeserializer.readNumber() as number)
@@ -1454,9 +1460,9 @@ export function deserializeAndCallCallback_Type_ImageAttribute_onComplete_callba
         const event_buf__contentHeight : number = (thisDeserializer.readNumber() as number)
         const event_buf__contentOffsetX : number = (thisDeserializer.readNumber() as number)
         const event_buf__contentOffsetY : number = (thisDeserializer.readNumber() as number)
-        event_buf = ({width: event_buf__width, height: event_buf__height, componentWidth: event_buf__componentWidth, componentHeight: event_buf__componentHeight, loadingStatus: event_buf__loadingStatus, contentWidth: event_buf__contentWidth, contentHeight: event_buf__contentHeight, contentOffsetX: event_buf__contentOffsetX, contentOffsetY: event_buf__contentOffsetY} as Type_ImageAttribute_onComplete_callback_event)
+        event_buf = ({width: event_buf__width, height: event_buf__height, componentWidth: event_buf__componentWidth, componentHeight: event_buf__componentHeight, loadingStatus: event_buf__loadingStatus, contentWidth: event_buf__contentWidth, contentHeight: event_buf__contentHeight, contentOffsetX: event_buf__contentOffsetX, contentOffsetY: event_buf__contentOffsetY} as ImageCompleteEvent)
     }
-    let event : Type_ImageAttribute_onComplete_callback_event | undefined = event_buf
+    let event : ImageCompleteEvent | undefined = event_buf
     _call(event)
 }
 export function deserializeAndCallCallback_UIExtensionProxy_Void(thisDeserializer: Deserializer): void {
@@ -2842,6 +2848,7 @@ export function deserializeAndCallCallback(thisDeserializer: Deserializer): void
         case 1980824326/*CallbackKind.Kind_Callback_RichEditorTextSpanResult_Void*/: return deserializeAndCallCallback_RichEditorTextSpanResult_Void(thisDeserializer);
         case 22609082/*CallbackKind.Kind_Callback_SheetDismiss_Void*/: return deserializeAndCallCallback_SheetDismiss_Void(thisDeserializer);
         case -224451112/*CallbackKind.Kind_Callback_SheetType_Void*/: return deserializeAndCallCallback_SheetType_Void(thisDeserializer);
+        case -646869686/*CallbackKind.Kind_Callback_Size_Void*/: return deserializeAndCallCallback_Size_Void(thisDeserializer);
         case 1536231691/*CallbackKind.Kind_Callback_SpringBackAction_Void*/: return deserializeAndCallCallback_SpringBackAction_Void(thisDeserializer);
         case -1872286415/*CallbackKind.Kind_Callback_StateStylesChange*/: return deserializeAndCallCallback_StateStylesChange(thisDeserializer);
         case -879490874/*CallbackKind.Kind_Callback_String_Number_Void*/: return deserializeAndCallCallback_String_Number_Void(thisDeserializer);

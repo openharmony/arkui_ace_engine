@@ -557,26 +557,9 @@ void NavDestinationModelNG::SetOnBackPressed(std::function<bool()>&& onBackPress
     navDestinationEventHub->SetOnBackPressed(onBackPressed);
 }
 
-void NavDestinationModelNG::SetOnBackPressed(FrameNode* frameNode, std::function<bool()>&& onBackPressed)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
-    CHECK_NULL_VOID(navDestinationEventHub);
-    navDestinationEventHub->SetOnBackPressed(onBackPressed);
-}
-
 void NavDestinationModelNG::SetOnReady(std::function<void(RefPtr<NavDestinationContext>)>&& onReady)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
-    CHECK_NULL_VOID(navDestinationEventHub);
-    navDestinationEventHub->SetOnReady(onReady);
-}
-
-void NavDestinationModelNG::SetOnReady(FrameNode* frameNode,
-                                       std::function<void(RefPtr<NavDestinationContext>)>&& onReady)
-{
     CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
@@ -641,13 +624,6 @@ void NavDestinationModelNG::SetNavDestinationMode(FrameNode* frameNode, NavDesti
     navDestinationNode->SetNavDestinationMode(mode);
 }
 
-void NavDestinationModelNG::SetNavDestinationMode(FrameNode* frameNode, const std::optional<NavDestinationMode>& mode)
-{
-    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    CHECK_NULL_VOID(navDestinationNode);
-    navDestinationNode->SetNavDestinationMode(mode.value_or(NavDestinationMode::STANDARD));
-}
-
 void NavDestinationModelNG::SetNavDestinationMode(NavDestinationMode mode)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -662,13 +638,6 @@ void NavDestinationModelNG::SetRecoverable(FrameNode* frameNode, bool recoverabl
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestination);
     navDestination->SetRecoverable(recoverable);
-}
-
-void NavDestinationModelNG::SetRecoverable(FrameNode* frameNode, const std::optional<bool>&recoverable)
-{
-    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
-    CHECK_NULL_VOID(navDestinationNode);
-    navDestinationNode->SetRecoverable(recoverable.value_or(true));
 }
 
 void NavDestinationModelNG::SetRecoverable(bool recoverable)
@@ -778,25 +747,9 @@ void NavDestinationModelNG::SetOnWillAppear(std::function<void()>&& willAppear)
     navDestinationEventHub->SetOnWillAppear(willAppear);
 }
 
-void NavDestinationModelNG::SetOnWillAppear(FrameNode* frameNode, std::function<void()>&& willAppear)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
-    CHECK_NULL_VOID(navDestinationEventHub);
-    navDestinationEventHub->SetOnWillAppear(willAppear);
-}
-
 void NavDestinationModelNG::SetOnWillHide(std::function<void()>&& willHide)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
-    CHECK_NULL_VOID(navDestinationEventHub);
-    navDestinationEventHub->SetOnWillHide(willHide);
-}
-
-void NavDestinationModelNG::SetOnWillHide(FrameNode* frameNode, std::function<void()>&& willHide)
-{
     CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
@@ -812,25 +765,9 @@ void NavDestinationModelNG::SetOnWillShow(std::function<void()>&& willShow)
     navDestinationEventHub->SetOnWillShow(willShow);
 }
 
-void NavDestinationModelNG::SetOnWillShow(FrameNode* frameNode, std::function<void()>&& willShow)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
-    CHECK_NULL_VOID(navDestinationEventHub);
-    navDestinationEventHub->SetOnWillShow(willShow);
-}
-
 void NavDestinationModelNG::SetOnWillDisAppear(std::function<void()>&& willDisAppear)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
-    CHECK_NULL_VOID(navDestinationEventHub);
-    navDestinationEventHub->SetOnWillDisAppear(willDisAppear);
-}
-
-void NavDestinationModelNG::SetOnWillDisAppear(FrameNode* frameNode, std::function<void()>&& willDisAppear)
-{
     CHECK_NULL_VOID(frameNode);
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);

@@ -34,7 +34,6 @@ export function RepeatImpl<T>(
     const repeat = remember(() => {
         return new RepeatAttributeImpl<T>();
     });
-    repeat.updateDataLength(arr.length);
     style?.(repeat);
     if (!repeat.itemGenFuncs_.get(RepeatEachFuncType)) {
         throw new Error('Repeat item builder function unspecified. Usage error!');
@@ -91,7 +90,7 @@ class RepeatDataSource<T> implements IDataSource<T> {
     }
 
     updateData(newArr: RepeatArray<T>, totalCount: number) {
-        this.total_ = totalCount
+        this.total_ = totalCount;
         // Compare array references first
         if (this.arr_ === newArr) {
             return;
@@ -138,16 +137,11 @@ const RepeatEachFuncType: string = '';
 export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
     itemGenFuncs_: Map<string, RepeatItemBuilder<T>> = new Map<string, RepeatItemBuilder<T>>();
     keyGenFunc_?: (item: T, index: number) => string;
-    dataLength_: number = 0;
-    totalCount_: number = 0;
+    userDefinedTotal_?: number;
     templateCacheSize_: Map<string, number> = new Map<string, number>();
     ttypeGenFunc_: TemplateTypedFunc<T> = () => RepeatEachFuncType;
     reusable_: boolean = false;
     isVirtualScroll_: boolean = false;
-
-    updateDataLength(value: number) {
-        this.dataLength_ = value;
-    }
 
     each(itemGenerator: RepeatItemBuilder<T>): RepeatAttributeImpl<T> {
         if (itemGenerator === undefined || typeof itemGenerator !== 'function') {
@@ -164,7 +158,7 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
     }
 
     virtualScroll(options?: VirtualScrollOptions): RepeatAttributeImpl<T> {
-        this.totalCount_ = options?.onTotalCount?.() ?? options?.totalCount ?? this.dataLength_;
+        this.userDefinedTotal_ = options?.onTotalCount?.() ?? options?.totalCount;
         this.reusable_ = options?.reusable !== false;
 
         this.isVirtualScroll_ = true;
@@ -197,7 +191,7 @@ function virtualRender<T>(
     repeatId: KoalaCallsiteKey,
 ): void {
     let dataSource = remember(() => new RepeatDataSource<T>(arr));
-    dataSource.updateData(arr, attributes.totalCount_);
+    dataSource.updateData(arr, attributes.userDefinedTotal_ ?? arr.length);
     /** @memo */
     const itemGen = (item: T, index: number): void => {
         const ri = new RepeatItemImpl<T>(item, index);

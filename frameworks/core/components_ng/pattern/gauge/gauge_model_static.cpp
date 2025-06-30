@@ -77,4 +77,15 @@ void GaugeModelStatic::SetPrivacySensitive(FrameNode* frameNode, const std::opti
     // }
     // ViewAbstractModelStatic::SetPrivacySensitive(frameNode, flag);
 }
+
+void GaugeModelStatic::SetDescription(FrameNode* frameNode, const RefPtr<AceType>& customNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gaugePattern = frameNode->GetPattern<GaugePattern>();
+    CHECK_NULL_VOID(gaugePattern);
+    auto customDescriptionNode = AceType::DynamicCast<NG::UINode>(customNode);
+    gaugePattern->SetDescriptionNode(customDescriptionNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GaugeLayoutProperty, IsShowDescription, true, frameNode);
+    frameNode->MarkModifyDone();
+}
 } // namespace OHOS::Ace::NG

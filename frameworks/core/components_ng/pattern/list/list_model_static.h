@@ -63,9 +63,10 @@ public:
     static void SetOnItemDelete(FrameNode* frameNode, OnItemDeleteEvent&& onItemDelete);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
-    static void SetChainAnimation(FrameNode* frameNode, bool chainAnimation);
+    static void SetChainAnimation(FrameNode* frameNode, const std::optional<bool>& chainAnimation);
     static void SetChainAnimationOptions(FrameNode* frameNode, const ChainAnimationOptions& options);
-    static void SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction);
+    static void SetScrollEnabled(FrameNode* frameNode, const std::optional<bool>& enableScrollInteraction);
+    static void SetListMaintainVisibleContentPosition(FrameNode* frameNode, const std::optional<bool>& enabled);
     static void SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled);
     static void SetLanes(FrameNode* frameNode, int32_t lanes);
     static void SetLaneGutter(FrameNode* frameNode, const Dimension& laneGutter);
@@ -73,8 +74,11 @@ public:
     static void SetLaneMinLength(FrameNode* frameNode, const Dimension& laneMinLength);
     static void SetLaneMaxLength(FrameNode* frameNode, const Dimension& laneMaxLength);
     static void SetEditMode(FrameNode* frameNode, bool editMode);
-    static void SetMultiSelectable(FrameNode* frameNode, bool selectable);
-    static void SetStackFromEnd(FrameNode* frameNode, const std::optional<bool>& enabled);
+    static void SetMultiSelectable(FrameNode* frameNode, const std::optional<bool>& selectable);
+    static void SetStackFromEnd(FrameNode* frameNode, const std::optional<bool>& isStackFromEnd);
+    static void SetEdgeEffect(
+        FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
+        const std::optional<EffectEdge>& effectEdge);
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };

@@ -24,7 +24,7 @@
 namespace OHOS::Ace::Platform {
 using CallbackTypeIsCurrentRunnerThread = std::function<bool(void)>;
 using CallbackTypePostTask = std::function<void(const std::function<void()>&, int64_t)>;
-using CallbackTypeHspBufferTracker = std::function<bool(const std::string&, bool, uint8_t**, size_t*, std::string&)>;
+using CallbackTypeHspBufferTracker = std::function<bool(const std::string&, uint8_t**, size_t*, std::string&)>;
 using CallbackTypeSetClipboardData = std::function<void(const std::string&)>;
 using CallbackTypeGetClipboardData = std::function<const std::string(void)>;
 using CallbackFlushEmpty = std::function<bool(const uint64_t)>;

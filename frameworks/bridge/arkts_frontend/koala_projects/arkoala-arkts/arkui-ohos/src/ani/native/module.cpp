@@ -24,6 +24,7 @@
 #include "drag_and_drop/native_drag_drop_global.h"
 #include "dragController/drag_controller_module.h"
 #include "image_span/image_span_module.h"
+#include "image/native_image.h"
 #include "load.h"
 #include "log/log.h"
 #include "utils/convert_utils.h"
@@ -44,6 +45,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
     }
 
     std::array methods = {
+        ani_native_function {
+            "_Image_ResizableOptions",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ImageResizableOptions)
+        },
         ani_native_function {
             "_Web_SetWebOptions",
             "JL@ohos/web/webview/webview/WebviewController;:V",
@@ -135,6 +141,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventGetSummary)
         },
         ani_native_function {
+            "_DragEvent_Start_Data_Loading",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragEveStartDataLoading)
+        },
+        ani_native_function {
             "_DragEvent_Set_PixelMap",
             "JL@ohos/multimedia/image/image/PixelMap;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventSetPixelMap)
@@ -195,6 +206,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetOrCreateAnimatableProperty)
         },
         ani_native_function {
+            "_BackgroundImage_PixelMap",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetBackgroundImagePixelMap)
+        },
+        ani_native_function {
             "_DragController_executeDragWithCallback",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ANIExecuteDragWithCallback)
@@ -253,6 +269,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_SetCustomCallback",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetCustomCallback)
+        },
+        ani_native_function {
+            "_RequireArkoalaNodeId",
+            "I:I",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RequireArkoalaNodeId)
         },
     };
 

@@ -464,4 +464,15 @@ void ArktsFrontend::SetAniContext(int32_t instanceId, ani_ref* context)
     std::shared_ptr<ani_ref> shared_ptr(context);
     Framework::AniContextModule::AddAniContext(instanceId, shared_ptr);
 }
+
+void* ArktsFrontend::preloadArkTSRuntime = nullptr;
+void ArktsFrontend::PreloadAceModule(void* aniEnv)
+{
+    ArktsFrontend::preloadArkTSRuntime = aniEnv;
+}
+
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceArkTSModule(void* aniEnv)
+{
+    ArktsFrontend::PreloadAceModule(aniEnv);
+}
 } // namespace OHOS::Ace

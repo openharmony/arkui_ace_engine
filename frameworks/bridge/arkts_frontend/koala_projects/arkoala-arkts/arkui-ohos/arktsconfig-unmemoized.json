@@ -88,6 +88,9 @@
             "@ohos/arkui/graphics": [
                 "../@ohos.arkui.graphics.ts"
             ],
+            "@ohos/overlayManager": [
+                "../@ohos.overlayManager.ts"
+            ],
             "@ohos/promptAction": [
                 "../@ohos.promptAction.ts"
             ],
@@ -112,6 +115,7 @@
         "build/unmemoized/@ohos.graphics.common2D.ts",
         "build/unmemoized/@ohos.graphics.drawing.ts",
         "build/unmemoized/@ohos.arkui.graphics.ts",
+        "build/unmemoized/@ohos.overlayManager.ts",
         "build/unmemoized/@ohos.promptAction.ts",
         "build/unmemoized/@ohos.arkui.componentSnapshot.ts",
         "build/unmemoized/@ohos.arkui.dragController.ts"

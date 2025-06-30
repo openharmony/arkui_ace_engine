@@ -39,8 +39,7 @@ import { ResizableOptions } from "./image"
 import { VisualEffect, Filter, BrightnessBlender } from "./arkui-uieffect"
 import { FocusBoxStyle, FocusPriority } from "./focus"
 import { TransformationMatrix } from "./arkui-common"
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup } from "./gesture"
-import { BlendMode } from "./arkui-drawing"
+import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, TapGestureInterface, LongPressGestureInterface, PanGestureInterface, PinchGestureInterface, SwipeGestureInterface, RotationGestureInterface, GestureGroupInterface, GestureHandler, GesturePriority, Gesture, GestureGroup, GestureGroupHandler } from "./gesture"
 import { StyledString } from "./styledString"
 import { Callback_Number_Number_Void } from "./grid"
 import { NodeAttach, remember } from "@koalaui/runtime"
@@ -57,11 +56,12 @@ import { CommonModifier } from "../CommonModifier"
 import { AttributeUpdater } from "../ohos.arkui.modifier"
 import { ArkBaseNode } from "../handwritten/modifiers/ArkBaseNode"
 import { hookStateStyleImpl } from "../handwritten/ArkStateStyle"
+import { hookBackgroundImageImpl } from "../handwritten/ArkBackgroundImageImpl"
 import { rememberMutableState } from '@koalaui/runtime'
 import { hookDrawModifierInvalidateImpl, hookDrawModifierAttributeImpl } from "../handwritten/ArkDrawModifierImpl"
-import { hookDragPreview, hookAllowDropAttribute, hookRegisterOnDragStartImpl } from "../handwritten/ArkDragDrop"
+import { hookDragPreview, hookAllowDropAttribute, hookRegisterOnDragStartImpl, hookOnDrop, hookDragEventStartDataLoading } from "../handwritten/ArkDragDrop"
 import { ArkUIAniModule } from "arkui.ani"
-import { PointerStyle, UnifiedData, Summary, PixelMap, UniformDataType } from "#external"
+import { PointerStyle, UnifiedData, Summary, PixelMap, UniformDataType, DataSyncOptions } from "#external"
 import { hookCommonMethodGestureImpl, hookCommonMethodGestureModifierImpl, hookCommonMethodParallelGestureImpl, hookCommonMethodPriorityGestureImpl } from "../handwritten/CommonHandWritten"
 export interface ICurve {
     interpolate(fraction: number): number
@@ -845,8 +845,7 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         return
     }
     public startDataLoading(options: DataSyncOptions): string {
-        const options_casted = options as (DataSyncOptions)
-        return this.startDataLoading_serialize(options_casted)
+        return hookDragEventStartDataLoading(this.peer!.ptr, options)
     }
     private getDragBehavior(): DragBehavior {
         return this.getDragBehavior_serialize()
@@ -896,8 +895,15 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
         return TypeChecker.DragResult_FromNumeric(retval)
     }
     private getPreviewRect_serialize(): Rectangle {
-        const retval  = ArkUIGeneratedNativeModule._DragEvent_getPreviewRect(this.peer!.ptr)
-        let retvalDeserializer : Deserializer = new Deserializer(retval, retval.length as int32)
+        // @ts-ignore
+        const retval  = ArkUIGeneratedNativeModule._DragEvent_getPreviewRect(this.peer!.ptr) as FixedArray<byte>
+        // @ts-ignore
+        let exactRetValue: byte[] = new Array<byte>
+        for (let i = 0; i < retval.length; i++) {
+            // @ts-ignore
+            exactRetValue.push(new Byte(retval[i]))
+        }
+        let retvalDeserializer : Deserializer = new Deserializer(exactRetValue, exactRetValue.length as int32)
         const returnResult : Rectangle = retvalDeserializer.readRectangle()
         return returnResult
     }
@@ -7014,7 +7020,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_backToTop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    edgeEffectAttribute(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): void {
+    edgeEffectAttribute(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): void {
         const thisSerializer : Serializer = Serializer.hold()
         let edgeEffect_type : int32 = RuntimeType.UNDEFINED
         edgeEffect_type = runtimeType(edgeEffect)
@@ -7626,9 +7632,7 @@ export enum DragBehavior {
     COPY = 0,
     MOVE = 1
 }
-export interface DataSyncOptions {
-    _DataSyncOptionsStub: string;
-}
+
 export enum DragResult {
     UNKNOWN = -1,
     DRAG_SUCCESSFUL = 0,
@@ -7819,6 +7823,37 @@ export interface Literal_Boolean_isVisible {
 export type Callback_Literal_Boolean_isVisible_Void = (event: Literal_Boolean_isVisible) => void;
 export interface Literal_ResourceColor_color {
     color: ResourceColor;
+}
+export enum BlendMode {
+    CLEAR = 0,
+    SRC = 1,
+    DST = 2,
+    SRC_OVER = 3,
+    DST_OVER = 4,
+    SRC_IN = 5,
+    DST_IN = 6,
+    SRC_OUT = 7,
+    DST_OUT = 8,
+    SRC_ATOP = 9,
+    DST_ATOP = 10,
+    XOR = 11,
+    PLUS = 12,
+    MODULATE = 13,
+    SCREEN = 14,
+    OVERLAY = 15,
+    DARKEN = 16,
+    LIGHTEN = 17,
+    COLOR_DODGE = 18,
+    COLOR_BURN = 19,
+    HARD_LIGHT = 20,
+    SOFT_LIGHT = 21,
+    DIFFERENCE = 22,
+    EXCLUSION = 23,
+    MULTIPLY = 24,
+    HUE = 25,
+    SATURATION = 26,
+    COLOR = 27,
+    LUMINOSITY = 28
 }
 export interface PopupOptions {
     message: string;
@@ -9172,7 +9207,7 @@ export interface ScrollableCommonMethod extends CommonMethod {
     clipContent(value: ContentClipMode | RectShape | undefined): this
     digitalCrownSensitivity(value: CrownSensitivity | undefined): this
     backToTop(value: boolean | undefined): this
-    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this
+    edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this
     fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this
 }
 export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle implements ScrollableCommonMethod {
@@ -9221,7 +9256,7 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
     public backToTop(value: boolean | undefined): this {
         return this
     }
-    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this {
         return this
     }
     public fadingEdge(enabled: boolean | undefined, options?: FadingEdgeOptions): this {
@@ -10545,20 +10580,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public onDrop(eventCallback: ((event: DragEvent,extraParams?: string) => void) | undefined | OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
         if (this.checkPriority("onDrop")) {
-            const eventCallback_type = runtimeType(eventCallback)
-            const dropOptions_type = runtimeType(dropOptions)
-            if ((RuntimeType.FUNCTION == eventCallback_type) || (RuntimeType.UNDEFINED == eventCallback_type)) {
-                const value_casted = eventCallback as (((event: DragEvent,extraParams?: string) => void) | undefined)
-                this.getPeer()?.onDrop0Attribute(value_casted)
-                return this
-            }
-            if ((RuntimeType.FUNCTION == eventCallback_type) || (RuntimeType.UNDEFINED == eventCallback_type)) {
-                const eventCallback_casted = eventCallback as (OnDragEventCallback | undefined)
-                const dropOptions_casted = dropOptions as (DropOptions)
-                this.getPeer()?.onDrop1Attribute(eventCallback_casted, dropOptions_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            hookOnDrop(this, eventCallback, dropOptions)
         }
         return this
     }
@@ -11155,14 +11177,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
         if (this.checkPriority("backgroundImage")) {
-            const src_type = runtimeType(src)
-            const repeat_type = runtimeType(repeat)
-            if (((RuntimeType.STRING == src_type) || (RuntimeType.OBJECT == src_type) || (RuntimeType.OBJECT == src_type) || (RuntimeType.UNDEFINED == src_type)) && ((RuntimeType.NUMBER == repeat_type) || (RuntimeType.OBJECT == repeat_type))) {
-                const src_casted = src as (ResourceStr | PixelMap | undefined)
-                const repeat_casted = repeat as (ImageRepeat)
-                this.getPeer()?.backgroundImage0Attribute(src_casted, repeat_casted)
-                return this
-            }
+            const src_casted = src as (ResourceStr | PixelMap | undefined)
+            const repeat_casted = repeat as (ImageRepeat | undefined)
+            hookBackgroundImageImpl(this.getPeer(), src_casted, repeat_casted)
         }
         return this
     }
@@ -11362,21 +11379,10 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
     }
     public blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
         if (this.checkPriority("blendMode")) {
-            const value_type = runtimeType(value)
-            const type_type = runtimeType(type)
-            if (((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) && ((RuntimeType.OBJECT == type_type) || (RuntimeType.OBJECT == type_type))) {
-                const value_casted = value as (BlendMode | undefined)
-                const type_casted = type as (BlendApplyType)
-                this.getPeer()?.blendMode0Attribute(value_casted, type_casted)
-                return this
-            }
-            if (((RuntimeType.OBJECT == value_type) || (RuntimeType.OBJECT == value_type)) && ((RuntimeType.OBJECT == type_type) || (RuntimeType.OBJECT == type_type))) {
-                const mode_casted = value as (BlendMode | undefined)
-                const type_casted = type as (BlendApplyType)
-                this.getPeer()?.blendMode1Attribute(mode_casted, type_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            const value_casted = value as (BlendMode | undefined)
+            const type_casted = type as (BlendApplyType)
+            this.getPeer()?.blendMode0Attribute(value_casted, type_casted)
+            return this
         }
         return this
     }
@@ -11765,10 +11771,10 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions): this {
+    public edgeEffect(edgeEffect: EdgeEffect | undefined, options?: EdgeEffectOptions | undefined): this {
         if (this.checkPriority("edgeEffect")) {
             const edgeEffect_casted = edgeEffect as (EdgeEffect | undefined)
-            const options_casted = options as (EdgeEffectOptions)
+            const options_casted = options as (EdgeEffectOptions | undefined)
             this.getPeer()?.edgeEffectAttribute(edgeEffect_casted, options_casted)
             return this
         }

@@ -34,7 +34,7 @@ import { Expression } from "./Expression"
 import { ValidationInfo } from "./ValidationInfo"
 export class Property extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 55)
+        assertValidPeer(pointer, 56)
         super(pointer)
     }
     static create1Property(kind: Es2pandaPropertyKind, key: Expression | undefined, value: Expression | undefined, isMethod: boolean, isComputed: boolean): Property {

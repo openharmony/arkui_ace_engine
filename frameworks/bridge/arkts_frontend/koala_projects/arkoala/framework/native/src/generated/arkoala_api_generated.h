@@ -1364,6 +1364,8 @@ typedef struct Callback_SheetDismiss_Void Callback_SheetDismiss_Void;
 typedef struct Opt_Callback_SheetDismiss_Void Opt_Callback_SheetDismiss_Void;
 typedef struct Callback_SheetType_Void Callback_SheetType_Void;
 typedef struct Opt_Callback_SheetType_Void Opt_Callback_SheetType_Void;
+typedef struct Callback_Size_Void Callback_Size_Void;
+typedef struct Opt_Callback_Size_Void Opt_Callback_Size_Void;
 typedef struct Callback_SpringBackAction_Void Callback_SpringBackAction_Void;
 typedef struct Opt_Callback_SpringBackAction_Void Opt_Callback_SpringBackAction_Void;
 typedef struct Callback_StateStylesChange Callback_StateStylesChange;
@@ -10444,6 +10446,16 @@ typedef struct Opt_Callback_SheetType_Void {
     Ark_Tag tag;
     Callback_SheetType_Void value;
 } Opt_Callback_SheetType_Void;
+typedef struct Callback_Size_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_Size size);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Size size);
+} Callback_Size_Void;
+typedef struct Opt_Callback_Size_Void {
+    Ark_Tag tag;
+    Callback_Size_Void value;
+} Opt_Callback_Size_Void;
 typedef struct Callback_SpringBackAction_Void {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_SpringBackAction parameter);
@@ -21152,7 +21164,7 @@ typedef struct GENERATED_ArkUIListModifier {
     void (*setOnItemDrop)(Ark_NativePointer node,
                           const Opt_Callback_ItemDragInfo_Number_Number_Boolean_Void* value);
     void (*setOnScrollFrameBegin)(Ark_NativePointer node,
-                                  const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain* value);
+                                  const Opt_OnScrollFrameBeginCallback* value);
     void (*setOnWillScroll)(Ark_NativePointer node,
                             const Opt_OnWillScrollCallback* value);
     void (*setOnDidScroll)(Ark_NativePointer node,
@@ -24796,6 +24808,26 @@ typedef struct GENERATED_ArkUITextFieldOpsAccessor {
     Ark_NativePointer (*registerTextFieldValueCallback)(Ark_NativePointer node,
                                                         const Ark_ResourceStr* value,
                                                         const TextFieldValueCallback* callback);
+    Ark_NativePointer (*textFieldOpsSetWidth)(Ark_NativePointer node,
+                                              const Opt_Union_Length_LayoutPolicy* value);
+    Ark_NativePointer (*textFieldOpsSetHeight)(Ark_NativePointer node,
+                                               const Opt_Union_Length_LayoutPolicy* value);
+    Ark_NativePointer (*textFieldOpsSetPadding)(Ark_NativePointer node,
+                                                const Opt_Union_Padding_Length_LocalizedPadding* value);
+    Ark_NativePointer (*textFieldOpsSetMargin)(Ark_NativePointer node,
+                                               const Opt_Union_Padding_Length_LocalizedPadding* value);
+    Ark_NativePointer (*textFieldOpsSetBorder)(Ark_NativePointer node,
+                                               const Opt_BorderOptions* value);
+    Ark_NativePointer (*textFieldOpsSetBorderWidth)(Ark_NativePointer node,
+                                                    const Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths* value);
+    Ark_NativePointer (*textFieldOpsSetBorderColor)(Ark_NativePointer node,
+                                                    const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value);
+    Ark_NativePointer (*textFieldOpsSetBorderStyle)(Ark_NativePointer node,
+                                                    const Opt_Union_BorderStyle_EdgeStyles* value);
+    Ark_NativePointer (*textFieldOpsSetBorderRadius)(Ark_NativePointer node,
+                                                     const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value);
+    Ark_NativePointer (*textFieldOpsSetBackgroundColor)(Ark_NativePointer node,
+                                                        const Opt_ResourceColor* value);
 } GENERATED_ArkUITextFieldOpsAccessor;
 
 typedef struct GENERATED_ArkUIActionSheetAccessor {
@@ -25477,6 +25509,23 @@ typedef struct GENERATED_ArkUINavPathStackAccessor {
                          const Array_NavPathInfo* pathStack,
                          const Opt_Boolean* animated);
 } GENERATED_ArkUINavPathStackAccessor;
+
+typedef struct GENERATED_ArkUINodeContainerOpsAccessor {
+    void (*addNodeContainerRootNode)(Ark_NativePointer self,
+                                     Ark_NativePointer child);
+    void (*setAboutToAppear)(Ark_NativePointer self,
+                             const Callback_Void* value);
+    void (*setAboutToDisappear)(Ark_NativePointer self,
+                                const Callback_Void* value);
+    void (*setAboutToResize)(Ark_NativePointer self,
+                             const Callback_Size_Void* value);
+    void (*setOnAttach)(Ark_NativePointer self,
+                        const Callback_Void* value);
+    void (*setOnDetach)(Ark_NativePointer self,
+                        const Callback_Void* value);
+    void (*setOnTouchEvent)(Ark_NativePointer self,
+                            const Callback_TouchEvent_Void* value);
+} GENERATED_ArkUINodeContainerOpsAccessor;
 
 typedef struct GENERATED_ArkUINavigationTransitionProxyAccessor {
     void (*destroyPeer)(Ark_NavigationTransitionProxy peer);
@@ -27603,6 +27652,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIGestureModifierAccessor* (*getGestureModifierAccessor)();
     const GENERATED_ArkUINavPathInfoAccessor* (*getNavPathInfoAccessor)();
     const GENERATED_ArkUINavPathStackAccessor* (*getNavPathStackAccessor)();
+    const GENERATED_ArkUINodeContainerOpsAccessor* (*getNodeContainerOpsAccessor)();
     const GENERATED_ArkUINavigationTransitionProxyAccessor* (*getNavigationTransitionProxyAccessor)();
     const GENERATED_ArkUICanvasGradientAccessor* (*getCanvasGradientAccessor)();
     const GENERATED_ArkUICanvasPathAccessor* (*getCanvasPathAccessor)();

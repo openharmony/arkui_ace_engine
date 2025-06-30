@@ -20,6 +20,7 @@
 #include "load.h"
 
 #include "base/utils/utils.h"
+#include "pixel_map_taihe_ani.h"
 
 namespace OHOS::Ace::Ani {
 
@@ -116,6 +117,23 @@ ani_object GetSharedLocalStorage([[maybe_unused]] ani_env* env)
     return nullptr;
 }
 
+void SetBackgroundImagePixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object node,
+    ani_object pixelMap, ani_int repeat)
+{
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(node);
+    auto pixelMapValue = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMap);
+    if (!pixelMapValue) {
+        return;
+    }
+    auto pixelMapPtr = reinterpret_cast<void*>(&pixelMapValue);
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setBackgroundImagePixelMap(
+        env, arkNode, reinterpret_cast<ani_ref>(pixelMapPtr), repeat);
+}
+
 void SetCustomCallback(ani_env* env, ani_object obj, ani_long ptr,
     ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout)
 {
@@ -124,5 +142,14 @@ void SetCustomCallback(ani_env* env, ani_object obj, ani_long ptr,
         return;
     }
     modifier->getCommonAniModifier()->setCustomCallback(env, ptr, fnObjMeasure, fnObjLayout);
+}
+
+ani_int RequireArkoalaNodeId(ani_env* env, ani_object obj, ani_int capacity)
+{
+    auto idCapacity = reinterpret_cast<ArkUI_Int32>(capacity);
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, -1);
+    auto cursor = modifier->getCommonAniModifier()->requireArkoalaNodeId(idCapacity);
+    return cursor;
 }
 } // namespace OHOS::Ace::Ani

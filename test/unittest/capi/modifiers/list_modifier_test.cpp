@@ -31,6 +31,14 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
+namespace Converter {
+inline void AssignArkValue(Ark_OnScrollFrameBeginHandlerResult& dst, const ScrollFrameResult& src,
+    ConvContext *ctx)
+{
+    dst.offsetRemain = Converter::ArkValue<Ark_Number>(src.offset);
+}
+} // Converter
+
 namespace {
 const auto FRICTION_RES_NAME = "friction_res_name";
 const auto FRICTION_RESOURCE = CreateResource(FRICTION_RES_NAME, Converter::ResourceType::FLOAT);
@@ -38,6 +46,7 @@ const auto FRICTION_VALUE = 1.2f;
 const auto DIVIDER_COLOR_RES_NAME = "divider_color_res_name";
 const auto DIVIDER_COLOR = "#08000000";
 const auto DIVIDER_COLOR_RESOURCE = CreateResource(DIVIDER_COLOR_RES_NAME, Converter::ResourceType::COLOR);
+const float TEST_OFFSET = 10.0f;
 } // namespace
 
 class ListModifierTest : public ModifierTestBase<GENERATED_ArkUIListModifier,
@@ -581,7 +590,7 @@ HWTEST_F(ListModifierTest, setEdgeEffectTest, TestSize.Level1)
     modifier_->setEdgeEffect(node_, &optValue, &options);
     fullJson = GetJsonValue(node_);
     edgeEffectCheckValue = GetAttrValue<std::string>(node_, "edgeEffect");
-    EXPECT_EQ(edgeEffectCheckValue, "EdgeEffect.None");
+    EXPECT_EQ(edgeEffectCheckValue, "EdgeEffect.Spring");
     edgeEffectOptionsObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "edgeEffectOptions");
     edgeEffectOptionsCheckValue = GetAttrValue<bool>(edgeEffectOptionsObject, "alwaysEnabled");
     EXPECT_EQ(edgeEffectOptionsCheckValue, true);
@@ -769,13 +778,13 @@ HWTEST_F(ListModifierTest, setDividerColorStringTest, TestSize.Level1)
     fullJson = GetJsonValue(node_);
     dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
     auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
-    EXPECT_EQ(strokeWidthCheckValue, "");
+    EXPECT_EQ(strokeWidthCheckValue, "0.00vp");
     auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
-    EXPECT_EQ(startMarginCheckValue, "");
+    EXPECT_EQ(startMarginCheckValue, "0.00vp");
     auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
-    EXPECT_EQ(endMarginCheckValue, "");
+    EXPECT_EQ(endMarginCheckValue, "0.00vp");
     colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
-    EXPECT_EQ(colorCheckValue, "");
+    EXPECT_EQ(colorCheckValue, "#00000000");
 }
 /**
  * @tc.name: setFrictionTest
@@ -1344,34 +1353,33 @@ HWTEST_F(ListModifierTest, setOnItemDropTest, TestSize.Level1)
  */
 HWTEST_F(ListModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
 {
-    Callback_Number_ScrollState_Literal_Number_offsetRemain func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    ASSERT_NE(eventHub, nullptr);
 
-    static const int32_t expectedResourceId = 123;
-    static const ScrollState expectedState = ScrollState::SCROLL;
+    ASSERT_NE(modifier_->setOnScrollFrameBegin, nullptr);
+    modifier_->setOnScrollFrameBegin(node_, nullptr);
+
+    static const Ark_Int32 expectedResId = 123;
     auto onScrollFrameBegin = [](Ark_VMContext context, const Ark_Int32 resourceId,
-        const Ark_Number offset, Ark_ScrollState state, const Callback_Literal_Number_offsetRemain_Void cbReturn)
-    {
-        EXPECT_EQ(Converter::Convert<int32_t>(resourceId), expectedResourceId);
-        EXPECT_EQ(Converter::OptConvert<ScrollState>(state), expectedState);
-        float offsetRemain = Converter::Convert<Dimension>(offset).ConvertToVp();
-        Ark_Literal_Number_offsetRemain arkResult {
-            .offsetRemain = Converter::ArkValue<Ark_Number>(offsetRemain)
-        };
-        CallbackHelper(cbReturn).InvokeSync(arkResult);
+        const Ark_Number offset, Ark_ScrollState state,
+        const Callback_OnScrollFrameBeginHandlerResult_Void cbReturn) {
+        EXPECT_EQ(resourceId, expectedResId);
+        EXPECT_EQ(Converter::Convert<float>(offset), TEST_OFFSET);
+        ScrollFrameResult result;
+        result.offset = Converter::Convert<Dimension>(offset);
+        CallbackHelper(cbReturn).InvokeSync(Converter::ArkValue<Ark_OnScrollFrameBeginHandlerResult>(result));
     };
-    func = Converter::ArkValue<Callback_Number_ScrollState_Literal_Number_offsetRemain>(
-        nullptr, onScrollFrameBegin, expectedResourceId
-    );
-    auto optFunc = Converter::ArkValue<Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain>(func);
-    modifier_->setOnScrollFrameBegin(node_, &optFunc);
+    auto arkFunc = Converter::ArkValue<OnScrollFrameBeginCallback>(
+        nullptr, onScrollFrameBegin, expectedResId);
+    auto arkFuncOpt = Converter::ArkValue<Opt_OnScrollFrameBeginCallback>(arkFunc);
+    modifier_->setOnScrollFrameBegin(node_, &arkFuncOpt);
 
-    auto fireOnScrollFrameBegin = eventHub->GetOnScrollFrameBegin();
-    ASSERT_NE(fireOnScrollFrameBegin, nullptr);
-    auto checkValue = CalcDimension(43, DimensionUnit::VP);
-    ScrollFrameResult result = fireOnScrollFrameBegin(checkValue, expectedState);
-    EXPECT_EQ(result.offset.ToString(), checkValue.ToString());
+    Dimension dimension(TEST_OFFSET);
+    ScrollState state = ScrollState::SCROLL;
+    ScrollFrameResult result = eventHub->GetOnScrollFrameBegin()(dimension, state);
+    EXPECT_EQ(result.offset.ConvertToPx(), dimension.ConvertToPx());
 }
 
 /*

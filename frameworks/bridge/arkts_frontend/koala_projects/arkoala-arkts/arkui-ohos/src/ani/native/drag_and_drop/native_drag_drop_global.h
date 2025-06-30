@@ -27,6 +27,8 @@ ani_object DragEventGetData([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_
     [[maybe_unused]] ani_long pointer);
 ani_object DragEventGetSummary([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer);
+ani_string DragEveStartDataLoading([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object dataSyncOptions);
 void DragEventSetPixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object pixelMap);
 void DragEventSetExtraInfo([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,

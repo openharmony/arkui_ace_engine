@@ -733,4 +733,93 @@ void TextFieldModelStatic::SetDefaultCancelIcon(FrameNode* frameNode)
     TextFieldModelNG::SetCancelIconColor(frameNode, color);
     TextFieldModelNG::SetCanacelIconSrc(frameNode, srcStr);
 }
+
+void TextFieldModelStatic::SetWidthAuto(FrameNode* frameNode, bool val)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateWidthAuto(val);
+}
+
+void TextFieldModelStatic::SetPadding(FrameNode* frameNode, const NG::PaddingProperty& newPadding,
+    bool tmp)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (tmp) {
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto theme = pattern->GetTheme();
+        CHECK_NULL_VOID(theme);
+        auto themePadding = theme->GetPadding();
+        PaddingProperty paddings;
+        paddings.top = NG::CalcLength(themePadding.Top().ConvertToPx());
+        paddings.bottom = NG::CalcLength(themePadding.Bottom().ConvertToPx());
+        paddings.left = NG::CalcLength(themePadding.Left().ConvertToPx());
+        paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
+        ViewAbstract::SetPadding(paddings);
+        ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, paddings, frameNode);
+        return;
+    }
+    NG::ViewAbstract::SetPadding(frameNode, newPadding);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding, frameNode);
+}
+
+void TextFieldModelStatic::SetMargin(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    const auto& margin = layoutProperty->GetMarginProperty();
+    CHECK_NULL_VOID(margin);
+    bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+
+    MarginProperty userMargin;
+    userMargin.top = margin->top;
+    userMargin.bottom = margin->bottom;
+    userMargin.left = margin->left.has_value() ? margin->left :
+        (isRTL ? margin->end : margin->start);
+    userMargin.right = margin->right.has_value() ? margin->right :
+        (isRTL ? margin->start : margin->end);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin, frameNode);
+}
+
+void TextFieldModelStatic::SetBackBorder(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->HasBorderRadius()) {
+        auto renderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+
+        bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+        auto radius = renderContext->GetBorderRadius().value();
+
+        radius.radiusTopLeft = radius.radiusTopLeft.has_value() ? radius.radiusTopLeft :
+            (isRTL ? radius.radiusTopEnd : radius.radiusTopStart);
+        radius.radiusTopRight = radius.radiusTopRight.has_value() ? radius.radiusTopRight :
+            (isRTL ? radius.radiusTopStart : radius.radiusTopEnd);
+        radius.radiusBottomLeft = radius.radiusBottomLeft.has_value() ? radius.radiusBottomLeft :
+            (isRTL ? radius.radiusBottomEnd : radius.radiusBottomStart);
+        radius.radiusBottomRight = radius.radiusBottomRight.has_value() ? radius.radiusBottomRight :
+            (isRTL ? radius.radiusBottomStart : radius.radiusBottomEnd);
+
+        ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderRadiusFlagByUser, radius, frameNode);
+    }
+    if (renderContext->HasBorderColor()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(
+            TextFieldPaintProperty, BorderColorFlagByUser, renderContext->GetBorderColor().value(), frameNode);
+    }
+    if (renderContext->HasBorderWidth()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(
+            TextFieldPaintProperty, BorderWidthFlagByUser, renderContext->GetBorderWidth().value(), frameNode);
+    }
+    if (renderContext->HasBorderStyle()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(
+            TextFieldPaintProperty, BorderStyleFlagByUser, renderContext->GetBorderStyle().value(), frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG

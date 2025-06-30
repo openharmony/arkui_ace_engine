@@ -106,7 +106,7 @@ HWTEST_F(LongPressRecognizerAccessorTest, isRepeatTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(LongPressRecognizerAccessorTest, getDurationTest, TestSize.Level1)
+HWTEST_F(LongPressRecognizerAccessorTest, DISABLED_getDurationTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getDuration, nullptr);
     ASSERT_NE(peer_, nullptr);

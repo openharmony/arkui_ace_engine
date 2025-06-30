@@ -14,6 +14,7 @@
  */
 
 import { KPointer, KInt, KLong } from "@koalaui/interop"
+import { drawing } from "@ohos/graphics/drawing"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
 import common from "@ohos.app.ability.common"
@@ -32,6 +33,7 @@ export class ArkUIAniModule {
         loadLibrary('arkoala_native_ani')
     }
 
+    native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void
     native static _Web_SetWebOptions(ptr: KPointer, webviewController: webview.WebviewController): void
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
     native static _ConvertUtils_ConvertToPixelMapAni(ptr: KPointer): image.PixelMap
@@ -56,6 +58,8 @@ export class ArkUIAniModule {
 
     native static _DragEvent_Get_Summary(ptr: KLong) : unifiedDataChannel.Summary
 
+    native static _DragEvent_Start_Data_Loading(ptr: KLong, data : unifiedDataChannel.GetDataParams) : string
+
     native static _DragEvent_Set_PixelMap(ptr: KLong, pixelMap: image.PixelMap) : void
 
     native static _DragEvent_Set_ExtraInfo(ptr: KLong, extraInfo: string) : void
@@ -72,11 +76,14 @@ export class ArkUIAniModule {
 
     // for componentSnapshot
     native static _ComponentSnapshot_createFromBuilderWithCallback(ptr: KPointer, destroyCallback: () => void,
-        callback: AsyncCallback<image.PixelMap>, delay?: number, checkImageStatus?: boolean): void
+        callback: AsyncCallback<image.PixelMap>, delay?: number, checkImageStatus?: boolean,
+        options?: componentSnapshot.SnapshotOptions): void
     native static _ComponentSnapshot_createFromBuilderWithPromise(ptr: KPointer, destroyCallback: () => void,
-        delay?: number, checkImageStatus?: boolean): Promise<image.PixelMap>
+        delay?: number, checkImageStatus?: boolean,
+        options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap>
     native static _ComponentSnapshot_createFromComponentWithPromise(ptr: KPointer, destroyCallback: () => void,
-        delay?: number, checkImageStatus?: boolean, options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap>
+        delay?: number, checkImageStatus?: boolean,
+        options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap>
 
     // for dragController
     native static _DragController_executeDragWithCallback(custom: DragItemInfo, builder: KPointer,
@@ -106,10 +113,12 @@ export class ArkUIAniModule {
     native static _Animation_SetOrCreateAnimatableProperty<T>(ptr: KPointer, propertyName: string, property: number | AnimatableArithmetic<T>,
         callback: (value: number | AnimatableArithmetic<T>) => void): void
 
+    native static _BackgroundImage_PixelMap(ptr: KPointer, pixelmap: image.PixelMap, repeat: KInt): void
     // for ImageSpan
     native static _ImageSpan_Set_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
     native static _ImageSpan_SetAlt_PixelMap(ptr: KPointer, pixelmap: image.PixelMap): void
     native static _SetCustomCallback(ptr: KPointer,
         measureCallback: ((width1: number, height1: number, width2: number, height2: number, width3: number,
         height3: number) => void), layoutCallback: ((x: number, y: number) => void)): void
+    native static _RequireArkoalaNodeId(capacity: KInt): KInt
 }

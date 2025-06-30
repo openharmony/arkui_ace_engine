@@ -21,7 +21,7 @@ import { int32, int64, float32, float64, unsafeCast } from "@koalaui/common"
 import { CallbackKind } from "./CallbackKind"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
-import { AccessibilityCallback, AccessibilityFocusCallback, Bindable, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DataSyncOptions, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, DrawModifierInternal, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, Literal_String_value_Callback_Void_action, ScrollResult, PopupMaskType, DividerStyle } from "./../common"
+import { AccessibilityCallback, AccessibilityFocusCallback, Bindable, GestureRecognizerJudgeBeginCallback, HoverCallback, OnDragEventCallback, OnMoveHandler, OnScrollCallback, PopupStateChangeCallback, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityHoverEvent, AccessibilityHoverEventInternal, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, CommonMethod, BlurStyle, BlendApplyType, BlurStyleActivePolicy, PickerTextStyle, ChainStyle, ContentClipMode, DismissReason, DragBehavior, DragEvent, DragEventInternal, DragResult, Rectangle, DraggingSizeChangeEffect, DragPreviewMode, DrawModifier, DrawModifierInternal, EffectEdge, EffectType, FinishCallbackType, GestureModifier, GestureModifierInternal, UIGestureEvent, ScrollableCommonMethod, ItemDragInfo, CustomBuilder, NestedScrollOptions, EdgeEffectOptions, HapticFeedbackMode, HoverModeAreaType, ICurve, ICurveInternal, KeyboardAvoidMode, LayoutPolicy, LayoutSafeAreaEdge, LayoutSafeAreaType, ChildrenMainSize, ChildrenMainSizeInternal, RectResult, MenuPolicy, MenuPreviewMode, ModalTransition, OutlineStyle, PixelMapMock, PixelMapMockInternal, PopupStateChangeParam, PreDragStatus, ProgressMask, ProgressMaskInternal, RepeatMode, SelectionOptions, SafeAreaEdge, SafeAreaType, ScrollSizeMode, TextDecorationOptions, TextContentControllerBase, TextContentControllerBaseInternal, ShadowStyle, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SourceTool, SourceType, BackgroundEffectOptions, BackgroundBlurStyleOptions, TranslateOptions, InputCounterOptions, ShadowOptions, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestInfo, TouchTestStrategy, TransitionEdge, TransitionEffect, TransitionEffectInternal, TransitionEffects, RotateOptions, ScaleOptions, AnimateParam, TransitionHierarchyStrategy, UICommonEvent, UICommonEventInternal, Callback_ClickEvent_Void, ClickEvent, ClickEventInternal, Callback_TouchEvent_Void, TouchEvent, TouchEventInternal, Callback_KeyEvent_Void, KeyEvent, KeyEventInternal, HoverEvent, HoverEventInternal, Callback_MouseEvent_Void, MouseEvent, MouseEventInternal, VisibleAreaEventOptions, SheetOptions, View, ViewInternal, Callback_KeyEvent_Boolean, Callback_Area_Area_Void, Callback_Array_TouchTestInfo_TouchResult, TouchResult, Callback_AxisEvent_Void, AxisEvent, AxisEventInternal, Callback_Boolean_HoverEvent_Void, Callback_CrownEvent_Void, CrownEvent, Callback_DismissContentCoverAction_Void, DismissContentCoverAction, Callback_DismissPopupAction_Void, DismissPopupAction, Callback_DismissSheetAction_Void, DismissSheetAction, Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo, DragItemInfo, Callback_DragEvent_String_Void, Callback_FocusAxisEvent_Void, FocusAxisEvent, FocusAxisEventInternal, Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult, Callback_HoverEvent_Void, Callback_Literal_Boolean_isVisible_Void, Literal_Boolean_isVisible, Callback_PreDragStatus_Void, Callback_SheetDismiss_Void, SheetDismiss, Callback_SheetType_Void, Callback_SpringBackAction_Void, SpringBackAction, Callback_TouchEvent_HitTestMode, BackgroundBrightnessOptions, BackgroundImageOptions, BlurOptions, ClickEffect, DateRange, DragInteractionOptions, DropOptions, ExpectedFrameRateRange, FocusMovement, ForegroundEffectOptions, GeometryTransitionOptions, InvertOptions, LinearGradient_common, Tuple_ResourceColor_Number, LinearGradientBlurOptions, FractionStop, LinearGradientOptions, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, Measurable, MeasurableInternal, MeasureResult, SizeResult, MotionBlurAnchor, MotionBlurOptions, MotionPathOptions, OverlayOffset, PixelRoundPolicy, PixelStretchEffectOptions, PreviewConfiguration, RadialGradientOptions, Tuple_Length_Length, StateStyles, SweepGradientOptions, SystemAdaptiveOptions, TipsOptions, TouchObject, AlignRuleOption, HorizontalAlignOptions, VerticalAlignOptions, BlurStyleOptions, ContentCoverOptions, BindOptions, ContextMenuAnimationOptions, MultiShadowOptions, DragPreviewOptions, EventTarget, FadingEdgeOptions, BaseEvent, BaseEventInternal, ForegroundBlurStyleOptions, HistoricalPoint, LightSource, LocalizedAlignRuleOptions, MenuElement, OverlayOptions, PickerDialogButtonStyle, ReuseOptions, sharedTransitionOptions, SheetTitleOptions, TransitionOptions, BorderImageOption, CustomPopupOptions, Literal_ResourceColor_color, PointLightStyle, PopupMessageOptions, Type_SheetOptions_detents, ContextMenuOptions, BorderRadiusType, MenuOptions, PopupOptions, Literal_String_value_Callback_Void_action, ScrollResult, PopupMaskType, DividerStyle, BlendMode } from "./../common"
 import { ButtonTriggerClickCallback, ButtonRole, ButtonStyleMode, ButtonType, ControlSize, ButtonOptions } from "./../button"
 import { Callback_Extender_OnFinish, Callback_Extender_OnProgress, DoubleAnimationParam } from "./../animationExtender"
 import { Callback_RangeUpdate, Context_getGroupDir_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, BuilderNodeOps, BuilderNodeOpsInternal, BuilderNodeOptions, ComponentContent, ComponentContentInternal, UnifiedData, UnifiedDataInternal, SystemBarStyle, Scene, SceneInternal, Context, ContextInternal, WorkerEventListener, WorkerEventListenerInternal, Event, ErrorEvent, MessageEvents, BaseContext, BaseContextInternal, PostMessageOptions, WorkerOptions, CustomColors, RestrictedWorker, RestrictedWorkerInternal, CustomTheme } from "./../arkui-custom"
@@ -32,7 +32,7 @@ import { EditableTextOnChangeCallback, OnDidChangeCallback, AutoCapitalizationMo
 import { ErrorCallback } from "./../ohos.base"
 import { GetItemMainSizeByIndex, WaterFlowAttribute, WaterFlowLayoutMode, WaterFlowSections, WaterFlowSectionsInternal, SectionOptions, WaterFlowOptions } from "./../waterFlow"
 import { ImageCompleteCallback, ImageLoadResult } from "./../imageSpan"
-import { ImageErrorCallback, ColorContent, DynamicRangeMode, ImageContent, ImageInterpolation, ImageRenderMode, ImageRotateOrientation, Callback_Type_ImageAttribute_onComplete_callback_event_Void, Type_ImageAttribute_onComplete_callback_event, ImageError, ImageSourceSize, ResizableOptions } from "./../image"
+import { ImageErrorCallback, ColorContent, DynamicRangeMode, ImageContent, ImageInterpolation, ImageRenderMode, ImageRotateOrientation, ImageOnCompleteCallback, ImageCompleteEvent, ImageError, ImageSourceSize, ResizableOptions } from "./../image"
 import { InterceptionModeCallback, InterceptionShowCallback, BarStyle, LaunchMode, NavBarPosition, NavigationMenuItem, NavigationOperation, NavigationTitleOptions, NavigationMenuOptions, ToolbarItem, NavigationToolbarOptions, NavigationAttribute, Tuple_Dimension_Dimension, NavigationMode, NavigationTitleMode, Callback_NavigationTitleMode_Void, Callback_Boolean_Void, Callback_NavigationMode_Void, Callback_String_Opt_Object_Void, Type_NavigationAttribute_customNavContentTransition_delegate, NavContentInfo, NavigationAnimatedTransition, NavigationCommonTitle, NavigationCustomTitle, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions, Callback_PopInfo_Void, PopInfo, NavigationInterception, ToolbarItemStatus, Callback_NavigationTransitionProxy_Void, NavigationTransitionProxy, NavigationTransitionProxyInternal, NavBar, MoreButtonOptions } from "./../navigation"
 import { LocationButtonCallback, LocationButtonOnClickResult, LocationDescription, LocationIconStyle, LocationButtonOptions } from "./../locationButton"
 import { MenuCallback, MenuOnAppearCallback, PasteEventCallback, SubmitCallback, RichEditorAttribute, Callback_RichEditorSelection_Void, RichEditorSelection, Callback_RichEditorRange_Void, RichEditorRange, Callback_RichEditorInsertValue_Boolean, RichEditorInsertValue, Callback_RichEditorTextSpanResult_Void, RichEditorTextSpanResult, Callback_TextRange_Void, Callback_RichEditorDeleteValue_Boolean, RichEditorDeleteValue, PasteEvent, Callback_RichEditorChangeValue_Boolean, RichEditorChangeValue, Callback_CutEvent_Void, CutEvent, Callback_CopyEvent_Void, CopyEvent, RichEditorSpanType, RichEditorResponseType, SelectionMenuOptions, KeyboardOptions, PlaceholderStyle, RichEditorBaseController, RichEditorBaseControllerInternal, RichEditorTextStyle, RichEditorController, RichEditorControllerInternal, RichEditorTextSpanOptions, RichEditorImageSpanOptions, RichEditorBuilderSpanOptions, RichEditorSymbolSpanOptions, RichEditorUpdateTextSpanStyleOptions, RichEditorUpdateImageSpanStyleOptions, RichEditorUpdateSymbolSpanStyleOptions, RichEditorParagraphStyleOptions, RichEditorImageSpanResult, RichEditorParagraphResult, RichEditorSpan, RichEditorDeleteDirection, RichEditorOptions, RichEditorStyledStringController, RichEditorStyledStringControllerInternal, RichEditorStyledStringOptions, LeadingMarginPlaceholder, PreviewMenuOptions, RichEditorGesture, RichEditorSpanPosition, RichEditorLayoutStyle, RichEditorParagraphStyle, RichEditorSymbolSpanStyle, RichEditorSpanStyleOptions, RichEditorUrlStyle, RichEditorImageSpanStyle, RichEditorImageSpanStyleResult, RichEditorTextStyleResult } from "./../richEditor"
@@ -78,7 +78,7 @@ import { Resource } from "global.resource"
 import { PixelMap } from "#external"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, GuideLinePosition, GuideLineStyle, LocalizedBarrierStyle } from "./../relativeContainer"
-import { BlendMode, DrawingCanvas, DrawingCanvasInternal, DrawingColorFilter, DrawingColorFilterInternal, DrawingLattice, DrawingLatticeInternal, RectType } from "./../arkui-drawing"
+import { DrawingCanvas, DrawingCanvasInternal, DrawingColorFilter, DrawingColorFilterInternal, RectType } from "./../arkui-drawing"
 import { drawing } from "@ohos/graphics/drawing"
 import { BreakpointsReference, GridRowDirection, Callback_String_Void, BreakPoints, GridRowColumnOption, GridRowSizeOption, GutterOption, GridRowOptions } from "./../gridRow"
 import { CalendarAlign, CalendarPickerAttribute, Callback_Date_Void, CalendarOptions, CalendarDialogOptions } from "./../calendarPicker"
@@ -171,7 +171,7 @@ import { MenuItemOptions } from "./../menuItem"
 import { TextBackgroundStyle } from "./../span"
 import { DividerStyle as DividerStyle_sidebar } from "./../sidebar"
 import promptAction from '@ohos/promptAction'
-import { PointerStyle } from '#external'
+import { PointerStyle, DataSyncOptions } from '#external'
 export class Serializer extends SerializerBase {
     private static pool?: Array<Serializer> | undefined = undefined
     private static poolTop: int32 = -1
@@ -291,10 +291,6 @@ export class Serializer extends SerializerBase {
         valueSerializer.holdAndWriteObject(value)
     }
     writeDrawingColorFilter(value: DrawingColorFilter): void {
-        let valueSerializer : Serializer = this
-        valueSerializer.writePointer(toPeerPtr(value))
-    }
-    writeDrawingLattice(value: DrawingLattice): void {
         let valueSerializer : Serializer = this
         valueSerializer.writePointer(toPeerPtr(value))
     }
@@ -2022,9 +2018,6 @@ export class Serializer extends SerializerBase {
         }
     }
     writeDataSyncOptions(value: DataSyncOptions): void {
-        let valueSerializer : Serializer = this
-        const value__DataSyncOptionsStub  = value._DataSyncOptionsStub
-        valueSerializer.writeString(value__DataSyncOptionsStub)
     }
     writeDatePickerOptions(value: DatePickerOptions): void {
         let valueSerializer : Serializer = this
@@ -11020,7 +11013,12 @@ export class Serializer extends SerializerBase {
                 const value_colors_value_element : ResourceColor | LinearGradient = value_colors_value[i]
                 let value_colors_value_element_type : int32 = RuntimeType.UNDEFINED
                 value_colors_value_element_type = runtimeType(value_colors_value_element)
-                if ((TypeChecker.isColor(value_colors_value_element)) || (RuntimeType.NUMBER == value_colors_value_element_type) || (RuntimeType.STRING == value_colors_value_element_type) || (RuntimeType.OBJECT == value_colors_value_element_type)) {
+                if (TypeChecker.isLinearGradient(value_colors_value_element)) {
+                    valueSerializer.writeInt8(1 as int32)
+                    const value_colors_value_element_1  = value_colors_value_element as LinearGradient
+                    valueSerializer.writeLinearGradient(value_colors_value_element_1)
+                }
+                else if ((TypeChecker.isColor(value_colors_value_element)) || (RuntimeType.NUMBER == value_colors_value_element_type) || (RuntimeType.STRING == value_colors_value_element_type) || (RuntimeType.OBJECT == value_colors_value_element_type)) {
                     valueSerializer.writeInt8(0 as int32)
                     const value_colors_value_element_0  = value_colors_value_element as ResourceColor
                     let value_colors_value_element_0_type : int32 = RuntimeType.UNDEFINED
@@ -11045,11 +11043,6 @@ export class Serializer extends SerializerBase {
                         const value_colors_value_element_0_3  = value_colors_value_element_0 as Resource
                         valueSerializer.writeResource(value_colors_value_element_0_3)
                     }
-                }
-                else if (TypeChecker.isLinearGradient(value_colors_value_element)) {
-                    valueSerializer.writeInt8(1 as int32)
-                    const value_colors_value_element_1  = value_colors_value_element as LinearGradient
-                    valueSerializer.writeLinearGradient(value_colors_value_element_1)
                 }
             }
         }
@@ -14875,10 +14868,6 @@ export class Serializer extends SerializerBase {
         let value_lattice_type : int32 = RuntimeType.UNDEFINED
         value_lattice_type = runtimeType(value_lattice)
         valueSerializer.writeInt8(value_lattice_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_lattice_type)) {
-            const value_lattice_value  = value_lattice!
-            valueSerializer.writeDrawingLattice(value_lattice_value)
-        }
     }
     writeRestrictedWorker(value: RestrictedWorker): void {
         let valueSerializer : Serializer = this
@@ -22205,15 +22194,15 @@ export class Serializer extends SerializerBase {
             const value_fontWeight_value  = value_fontWeight!
             let value_fontWeight_value_type : int32 = RuntimeType.UNDEFINED
             value_fontWeight_value_type = runtimeType(value_fontWeight_value)
-            if (RuntimeType.NUMBER == value_fontWeight_value_type) {
-                valueSerializer.writeInt8(0 as int32)
-                const value_fontWeight_value_0  = value_fontWeight_value as number
-                valueSerializer.writeNumber(value_fontWeight_value_0)
-            }
-            else if (TypeChecker.isFontWeight(value_fontWeight_value)) {
+            if (TypeChecker.isFontWeight(value_fontWeight_value)) {
                 valueSerializer.writeInt8(1 as int32)
                 const value_fontWeight_value_1  = value_fontWeight_value as FontWeight
                 valueSerializer.writeInt32(TypeChecker.FontWeight_ToNumeric(value_fontWeight_value_1))
+            }
+            else if (RuntimeType.NUMBER == value_fontWeight_value_type) {
+                valueSerializer.writeInt8(0 as int32)
+                const value_fontWeight_value_0  = value_fontWeight_value as number
+                valueSerializer.writeNumber(value_fontWeight_value_0)
             }
             else if (RuntimeType.STRING == value_fontWeight_value_type) {
                 valueSerializer.writeInt8(2 as int32)

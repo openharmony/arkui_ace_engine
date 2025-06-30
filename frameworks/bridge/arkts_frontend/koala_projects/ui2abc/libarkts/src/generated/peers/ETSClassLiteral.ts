@@ -33,7 +33,7 @@ import { Expression } from "./Expression"
 import { TypeNode } from "./TypeNode"
 export class ETSClassLiteral extends Expression {
     constructor(pointer: KNativePointer) {
-        assertValidPeer(pointer, 72)
+        assertValidPeer(pointer, 73)
         super(pointer)
     }
     static createETSClassLiteral(expr?: TypeNode): ETSClassLiteral {

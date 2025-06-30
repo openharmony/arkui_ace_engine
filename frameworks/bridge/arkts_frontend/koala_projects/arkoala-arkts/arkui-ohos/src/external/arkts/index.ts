@@ -31,4 +31,5 @@ export type Context = common.Context
 export type PointerStyle = pointer.PointerStyle
 export type UnifiedData = unifiedDataChannel.UnifiedData
 export type Summary = unifiedDataChannel.Summary
+export type DataSyncOptions = unifiedDataChannel.GetDataParams
 export type UniformDataType = uniformTypeDescriptor.UniformDataType

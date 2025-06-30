@@ -8917,7 +8917,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void OnScrollFrameBeginImpl(Ark_NativePointer node,
-                                const Opt_Callback_Number_ScrollState_Literal_Number_offsetRemain* value)
+                                const Opt_OnScrollFrameBeginCallback* value)
     {
         if (!needGroupedLog(1))
             return;
@@ -29101,6 +29101,146 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return nullptr;
     }
+    Ark_NativePointer TextFieldOpsSetWidthImpl(Ark_NativePointer node,
+                                               const Opt_Union_Length_LayoutPolicy* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetWidth(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer TextFieldOpsSetHeightImpl(Ark_NativePointer node,
+                                                const Opt_Union_Length_LayoutPolicy* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetHeight(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer TextFieldOpsSetPaddingImpl(Ark_NativePointer node,
+                                                 const Opt_Union_Padding_Length_LocalizedPadding* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetPadding(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer TextFieldOpsSetMarginImpl(Ark_NativePointer node,
+                                                const Opt_Union_Padding_Length_LocalizedPadding* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetMargin(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer TextFieldOpsSetBorderImpl(Ark_NativePointer node,
+                                                const Opt_BorderOptions* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetBorder(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer TextFieldOpsSetBorderWidthImpl(Ark_NativePointer node,
+                                                     const Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetBorderWidth(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer TextFieldOpsSetBorderColorImpl(Ark_NativePointer node,
+                                                     const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetBorderColor(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer TextFieldOpsSetBorderStyleImpl(Ark_NativePointer node,
+                                                     const Opt_Union_BorderStyle_EdgeStyles* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetBorderStyle(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer TextFieldOpsSetBorderRadiusImpl(Ark_NativePointer node,
+                                                      const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetBorderRadius(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer TextFieldOpsSetBackgroundColorImpl(Ark_NativePointer node,
+                                                         const Opt_ResourceColor* value)
+    {
+        if (!needGroupedLog(1))
+            return nullptr;
+        string out("textFieldOpsSetBackgroundColor(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
     } // TextFieldOpsAccessor
     namespace ActionSheetAccessor {
     void ShowImpl(const Ark_ActionSheetOptions* value)
@@ -44568,6 +44708,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUITextFieldOpsAccessor TextFieldOpsAccessorImpl {
             TextFieldOpsAccessor::RegisterTextFieldValueCallbackImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetWidthImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetHeightImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetPaddingImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetMarginImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetBorderImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetBorderWidthImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetBorderColorImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetBorderStyleImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetBorderRadiusImpl,
+            TextFieldOpsAccessor::TextFieldOpsSetBackgroundColorImpl,
         };
         return &TextFieldOpsAccessorImpl;
     }
