@@ -38564,16 +38564,22 @@ void impl_NodeContainerOps_setOnDetach(Ark_NativePointer self, KSerializerBuffer
 KOALA_INTEROP_DIRECT_V3(NodeContainerOps_setOnDetach, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NodeContainerOps_setOnTouchEvent(Ark_NativePointer self, KSerializerBuffer thisArray, int32_t thisLength)
 {
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_TouchEvent_Void value_value = { thisDeserializer.readCallbackResource(),
-            reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_TouchEvent event)>(
-                thisDeserializer.readPointerOrDefault(
-                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_TouchEvent_Void)))),
-            reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent event)>(
-                thisDeserializer.readPointerOrDefault(
-                    reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_TouchEvent_Void)))) };
-        ;
-        GetAccessors()->getNodeContainerOpsAccessor()->setOnTouchEvent(self, (const Callback_TouchEvent_Void*)&value_value);
+        Deserializer thisDeserializer(thisArray, thisLength);
+        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Callback_TouchEvent_Void value_value_buf = {};
+        value_value_buf.tag =
+            value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType)) {
+            value_value_buf.value = { thisDeserializer.readCallbackResource(),
+                reinterpret_cast<void (*)(const Ark_Int32 resourceId, const Ark_TouchEvent event)>(
+                    thisDeserializer.readPointerOrDefault(
+                        reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_TouchEvent_Void)))),
+                reinterpret_cast<void (*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TouchEvent event)>(
+                    thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(
+                        getManagedCallbackCallerSync(Kind_Callback_TouchEvent_Void)))) };
+        }
+        Opt_Callback_TouchEvent_Void value_value = value_value_buf;
+        GetAccessors()->getNodeContainerOpsAccessor()->setOnTouchEvent(self, (const Opt_Callback_TouchEvent_Void*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(NodeContainerOps_setOnTouchEvent, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_NavigationTransitionProxy_ctor() {

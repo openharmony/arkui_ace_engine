@@ -108,12 +108,16 @@ void SetOnDetachImpl(Ark_NativePointer self, const Callback_Void* value)
     };
     eventHub->SetControllerOnDetach(std::move(onDetachFunc));
 }
-void SetOnTouchEventImpl(Ark_NativePointer self, const Callback_TouchEvent_Void* value)
+void SetOnTouchEventImpl(Ark_NativePointer self, const Opt_Callback_TouchEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(self);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [callback = CallbackHelper(*value)](TouchEventInfo& info) {
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        ViewAbstract::DisableOnTouch(frameNode);
+        return;
+    }
+    auto onEvent = [callback = CallbackHelper(value->value)](TouchEventInfo& info) {
         const auto event = Converter::ArkTouchEventSync(info);
         callback.Invoke(event.ArkValue());
     };

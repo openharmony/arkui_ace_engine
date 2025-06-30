@@ -25525,7 +25525,7 @@ typedef struct GENERATED_ArkUINodeContainerOpsAccessor {
     void (*setOnDetach)(Ark_NativePointer self,
                         const Callback_Void* value);
     void (*setOnTouchEvent)(Ark_NativePointer self,
-                            const Callback_TouchEvent_Void* value);
+                            const Opt_Callback_TouchEvent_Void* value);
 } GENERATED_ArkUINodeContainerOpsAccessor;
 
 typedef struct GENERATED_ArkUINavigationTransitionProxyAccessor {
