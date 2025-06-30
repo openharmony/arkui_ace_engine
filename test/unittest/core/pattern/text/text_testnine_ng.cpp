@@ -732,6 +732,9 @@ HWTEST_F(TextTestNineNg, UpdateShaderStyle001, TestSize.Level1)
     gradient.CreateGradientWithType(NG::GradientType::RADIAL);
     layoutProperty->UpdateGradientShaderStyle(gradient);
     multipleAlgorithm->UpdateShaderStyle(layoutProperty, textStyle);
+    auto advancedTextStyle = textStyle.advancedTextStyle_;
+    EXPECT_NE(advancedTextStyle, nullptr);
+    EXPECT_EQ(advancedTextStyle->GetGradient().value().GetType(), Ace::GradientType::RADIAL);
     EXPECT_EQ(textStyle.GetGradient().value().GetType(), Ace::GradientType::RADIAL);
     auto radius = 10.0;
     auto value = CalcDimension(radius);
