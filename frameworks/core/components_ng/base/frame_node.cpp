@@ -4210,17 +4210,8 @@ void FrameNode::OnAccessibilityEvent(
     }
 }
 
-void FrameNode::OnRecycle()
+void SetAccessibilityFocusFalse()
 {
-    for (const auto& destroyCallback : destroyCallbacksMap_) {
-        if (destroyCallback.second) {
-            destroyCallback.second();
-        }
-    }
-    layoutProperty_->ResetGeometryTransition();
-    pattern_->OnRecycle();
-    UINode::OnRecycle();
-
     auto accessibilityProperty = GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     auto isFocus = accessibilityProperty->GetAccessibilityFocusState();
@@ -4231,6 +4222,21 @@ void FrameNode::OnRecycle()
         if (renderContext->GetAccessibilityFocus().value_or(false)) {
             renderContext->UpdateAccessibilityFocus(false);
         }
+    }
+}
+
+void FrameNode::OnRecycle()
+{
+    for (const auto& destroyCallback : destroyCallbacksMap_) {
+        if (destroyCallback.second) {
+            destroyCallback.second();
+        }
+    }
+    layoutProperty_->ResetGeometryTransition();
+    pattern_->OnRecycle();
+    UINode::OnRecycle();
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        SetAccessibilityFocusFalse();
     }
 }
 
