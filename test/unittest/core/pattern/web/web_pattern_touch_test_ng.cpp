@@ -1043,6 +1043,8 @@ HWTEST_F(WebPatternTouchTestNg, GetAllWebAccessibilityNodeInfos_001, TestSize.Le
     int32_t webId = 123;
     auto callback = [](std::shared_ptr<OHOS::Ace::JsonValue>& jsonNodeArray, int32_t receivedWebId) {};
     webPattern->GetAllWebAccessibilityNodeInfos(callback, webId);
+    webPattern->GetAllWebAccessibilityNodeInfos(callback, webId, true);
+    ASSERT_NE(webPattern->delegate_, nullptr);
 #endif
 }
 

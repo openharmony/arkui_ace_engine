@@ -7332,7 +7332,7 @@ std::string WebPattern::VectorIntToString(std::vector<int64_t>&& vec)
 }
 
 void WebPattern::WebNodeInfoToJsonValue(std::shared_ptr<OHOS::Ace::JsonValue>& jsonNodeArray,
-    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> webNodeInfo, std::string& nodeTag)
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> webNodeInfo, std::string& nodeTag, bool isArray)
 {
     auto jsonNode = JsonUtil::Create(true);
     jsonNode->Put(WEB_NODE_URL, delegate_ ? delegate_->GetUrl().c_str() : "");
@@ -7381,18 +7381,18 @@ void WebPattern::WebNodeInfoToJsonValue(std::shared_ptr<OHOS::Ace::JsonValue>& j
     JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::POPUP, webNodeInfo->GetIsPopupSupported());
     JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::DELETABLE, webNodeInfo->GetIsDeletable());
     JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::FOCUS, webNodeInfo->GetIsAccessibilityFocus());
-    jsonNodeArray->PutRef(nodeTag.c_str(), std::move(jsonNode));
+    JsonNodePutDefaultValue(jsonNode, WebAccessibilityType::NODE_TAG, nodeTag);
+    isArray ? jsonNodeArray->PutRef(std::move(jsonNode)) : jsonNodeArray->PutRef(nodeTag.c_str(), std::move(jsonNode));
 }
 
-void WebPattern::GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId)
+void WebPattern::GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId, bool needFilter)
 {
-    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> rootWebNode;
-    if (delegate_) {
-        rootWebNode = delegate_->GetAccessibilityNodeInfoById(-1);
-    }
+    CHECK_NULL_VOID(delegate_);
+    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> rootWebNode = delegate_->GetAccessibilityNodeInfoById(-1);
     CHECK_NULL_VOID(rootWebNode);
 
-    auto jsonNodeArray = static_cast<std::shared_ptr<JsonValue> >(JsonUtil::Create(true));
+    auto jsonNodeArray =
+        static_cast<std::shared_ptr<JsonValue>>(needFilter ? JsonUtil::Create(true) : JsonUtil::CreateArray(true));
     std::queue<uint64_t> que;
     for (auto id: rootWebNode->GetChildIds()) {
         que.push(id);
@@ -7405,10 +7405,14 @@ void WebPattern::GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId)
         auto webNodeInfo = delegate_->GetAccessibilityNodeInfoById(tmp);
         CHECK_NULL_VOID(webNodeInfo);
         auto componentType = webNodeInfo->GetComponentType();
-        if (componentType.compare(ACCESSIBILITY_GENERIC_CONTAINER) != 0
-            && componentType.compare(ACCESSIBILITY_PARAGRAPH) != 0
-            && componentType.compare(ACCESSIBILITY_IMAGE) != 0) {
-            WebNodeInfoToJsonValue(jsonNodeArray, webNodeInfo, componentType);
+        if (needFilter) {
+            if (componentType.compare(ACCESSIBILITY_GENERIC_CONTAINER) != 0
+                && componentType.compare(ACCESSIBILITY_PARAGRAPH) != 0
+                && componentType.compare(ACCESSIBILITY_IMAGE) != 0) {
+                WebNodeInfoToJsonValue(jsonNodeArray, webNodeInfo, componentType);
+            }
+        } else {
+            WebNodeInfoToJsonValue(jsonNodeArray, webNodeInfo, componentType, true);
         }
         for (auto id: webNodeInfo->GetChildIds()) {
             que.push(id);
@@ -7421,7 +7425,7 @@ void WebPattern::GetWebAllInfosImpl(WebNodeInfoCallback cb, int32_t webId)
     SetAccessibilityState(false);
 }
 
-void WebPattern::GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId)
+void WebPattern::GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t webId, bool needFilter)
 {
     CHECK_NULL_VOID(cb);
     inspectorAccessibilityEnable_ = true;
@@ -7431,10 +7435,11 @@ void WebPattern::GetAllWebAccessibilityNodeInfos(WebNodeInfoCallback cb, int32_t
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto taskExecutor = pipelineContext->GetTaskExecutor();
-    taskExecutor->PostDelayedTask([weak = WeakClaim(this), cb, webId] () {
+    taskExecutor->PostDelayedTask([weak = WeakClaim(this), cb, webId, needFilter] () {
         auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
         auto startTime = std::chrono::high_resolution_clock::now();
-        pattern->GetWebAllInfosImpl(cb, webId);
+        pattern->GetWebAllInfosImpl(cb, webId, needFilter);
         auto nowTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> diff =
             std::chrono::duration_cast<std::chrono::milliseconds>(nowTime - startTime);
