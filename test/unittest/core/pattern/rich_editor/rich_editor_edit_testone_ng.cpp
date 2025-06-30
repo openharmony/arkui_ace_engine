@@ -30,6 +30,10 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+    constexpr int32_t CALCLINEEND_POSITION = 0;
+    const std::u16string TEST_INSERT_LINE_SPACE = u" ";
+}
 
 class RichEditorEditTestOneNg : public RichEditorCommonTestNg {
 public:
@@ -316,6 +320,21 @@ HWTEST_F(RichEditorEditTestOneNg, CalcLineBeginPosition001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalcLineEndPosition
+ * @tc.desc: test CalcLineEndPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, CalcLineEndPosition, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->richTextRect_.y_ = 10.0f;
+    richEditorPattern->contentRect_.y_ = 20.0f;
+    EXPECT_EQ(richEditorPattern->CalcLineEndPosition(10), CALCLINEEND_POSITION);
+}
+
+/**
  * @tc.name: MoveTextRect001
  * @tc.desc: test MoveTextRect
  * @tc.type: FUNC
@@ -374,6 +393,228 @@ HWTEST_F(RichEditorEditTestOneNg, AdjustIndexSkipLineSeparator003, TestSize.Leve
     spanItem->content = u"AdjustInd\nxSkipLineSeparator";
     richEditorPattern->spans_.push_back(spanItem);
     EXPECT_TRUE(richEditorPattern->AdjustIndexSkipLineSeparator(currentPosition));
+}
+
+/**
+ * @tc.name: IsTextEditableForStylus001
+ * @tc.desc: test IsTextEditableForStylus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, IsTextEditableForStylus001, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    bool tag = richEditorPattern->IsTextEditableForStylus();
+    EXPECT_TRUE(tag);
+}
+
+/**
+ * @tc.name: IsTextEditableForStylus002
+ * @tc.desc: test IsTextEditableForStylus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, IsTextEditableForStylus002, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->GetFocusHub()->focusType_ = FocusType::DISABLE;
+    EXPECT_FALSE(richEditorPattern->GetFocusHub()->IsFocusable());
+    bool tag = richEditorPattern->IsTextEditableForStylus();
+    EXPECT_FALSE(tag);
+}
+
+/**
+ * @tc.name: IsTextEditableForStylus003
+ * @tc.desc: test IsTextEditableForStylus
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, IsTextEditableForStylus003, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->GetFocusHub()->focusType_ = FocusType::DISABLE;
+    EXPECT_FALSE(richEditorPattern->GetFocusHub()->IsFocusable());
+    EXPECT_TRUE(richEditorNode_->IsVisible());
+    richEditorNode_->layoutProperty_->OnVisibilityUpdate(VisibleType::INVISIBLE);
+    EXPECT_FALSE(richEditorNode_->IsVisible());
+    bool tag = richEditorPattern->IsTextEditableForStylus();
+    EXPECT_FALSE(tag);
+}
+
+/**
+ * @tc.name: GetRightWordPosition001
+ * @tc.desc: test GetRightWordPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, GetRightWordPosition001, TestSize.Level2)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_EQ(richEditorPattern->GetLeftWordPosition(richEditorPattern->caretPosition_), 0);
+    AddSpan(INIT_VALUE_1 + TEST_INSERT_LINE_SPACE);
+    EXPECT_EQ(richEditorPattern->GetRightWordPosition(richEditorPattern->GetTextContentLength()),
+        richEditorPattern->GetTextContentLength());
+}
+
+/**
+ * @tc.name: GetRightWordPosition002
+ * @tc.desc: test GetRightWordPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, GetRightWordPosition002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    std::u16string firstText = u"text";
+    AddSpan(firstText);
+    std::u16string space = u" ";
+    std::u16string secondText = u"content";
+    AddSpan(space + secondText);
+    auto initCaretPosition = firstText.size();
+    EXPECT_EQ(richEditorPattern->GetRightWordPosition(initCaretPosition), initCaretPosition + space.size());
+}
+
+/**
+ * @tc.name: GetRightWordPosition003
+ * @tc.desc: test GetRightWordPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, GetRightWordPosition003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    std::u16string firstText = u"Text ";
+    AddSpan(firstText);
+    std::u16string secondText = u"Content\n";
+    AddSpan(secondText);
+    AddSpan(INIT_VALUE_3);
+
+    auto initCaretPosition = firstText.size() + secondText.size() - 1;
+    EXPECT_EQ(richEditorPattern->GetRightWordPosition(initCaretPosition), initCaretPosition + 1);
+}
+
+/**
+ * @tc.name: GetRightWordPosition004
+ * @tc.desc: test GetRightWordPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, GetRightWordPosition004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ClearSpan();
+    std::string firstText = "text";
+    AddSpan(firstText);
+    std::string space = " ";
+    std::string secondText = "content";
+    AddSpan(space + secondText);
+    for (auto iter = richEditorPattern->spans_.cbegin(); iter != richEditorPattern->spans_.cend(); iter++) {
+        auto span = *iter;
+        span->placeholderIndex = 0;
+    }
+    int32_t initCaretPosition = firstText.size();
+    auto position =
+        std::clamp(initCaretPosition + 1, 0, static_cast<int32_t>(richEditorPattern->GetTextContentLength()));
+    EXPECT_EQ(richEditorPattern->GetRightWordPosition(initCaretPosition), position);
+}
+
+/**
+ * @tc.name: GetRightWordPosition005
+ * @tc.desc: test GetRightWordPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, GetRightWordPosition005, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ClearSpan();
+    std::string firstText = "text ";
+    AddSpan(firstText);
+    std::string secondText = "content";
+    AddSpan(secondText);
+    for (auto iter = richEditorPattern->spans_.cbegin(); iter != richEditorPattern->spans_.cend(); iter++) {
+        auto span = *iter;
+        span->placeholderIndex = 0;
+    }
+    int32_t initCaretPosition = firstText.size() + secondText.size() - 1;
+    auto position =
+        std::clamp(initCaretPosition + 1, 0, static_cast<int32_t>(richEditorPattern->GetTextContentLength()));
+    EXPECT_EQ(richEditorPattern->GetRightWordPosition(initCaretPosition), position);
+}
+
+/**
+ * @tc.name: GetParagraphEndPosition001
+ * @tc.desc: test GetParagraphEndPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, GetParagraphEndPosition001, TestSize.Level0)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    int32_t caretPosition = 10;
+    AddSpan(EXCEPT_VALUE);
+    auto iter = richEditorPattern->spans_.cbegin();
+    auto span = *iter;
+    ASSERT_NE(span, nullptr);
+    int32_t position = span->position - static_cast<int32_t>(span->content.length());
+    richEditorPattern->GetParagraphEndPosition(caretPosition);
+    EXPECT_EQ(position, span->position - static_cast<int32_t>(span->content.length()));
+    caretPosition = 1;
+    richEditorPattern->GetParagraphEndPosition(caretPosition);
+    EXPECT_EQ(position, span->position - static_cast<int32_t>(span->content.length()));
+}
+
+/**
+ * @tc.name: GetLeftWordPosition001
+ * @tc.desc: test GetLeftWordPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, GetLeftWordPosition001, TestSize.Level2)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_EQ(richEditorPattern->GetLeftWordPosition(richEditorPattern->caretPosition_), 0);
+    AddSpan(INIT_VALUE_1 + TEST_INSERT_LINE_SPACE);
+    EXPECT_EQ(richEditorPattern->GetLeftWordPosition(richEditorPattern->GetTextContentLength()), 0);
+}
+
+/**
+ * @tc.name: HandleOnEscape001
+ * @tc.desc: test HandleOnEscape
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, HandleOnEscape001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_FALSE(richEditorPattern->HandleOnEscape());
+}
+
+/**
+ * @tc.name: ClearContent001
+ * @tc.desc: test ClearContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, ClearContent001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto placeholderSpanNode = PlaceholderSpanNode::GetOrCreateSpanNode(V2::PLACEHOLDER_SPAN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
+    auto placeholderSpanItem = placeholderSpanNode->GetSpanItem();
+    ASSERT_NE(placeholderSpanItem, nullptr);
+    placeholderSpanItem->content = u" ";
+    placeholderSpanNode->MountToParent(richEditorNode_);
+    richEditorPattern->ClearContent(placeholderSpanNode);
+    EXPECT_TRUE(placeholderSpanItem->content.empty());
 }
 
 } // namespace OHOS::Ace::NG

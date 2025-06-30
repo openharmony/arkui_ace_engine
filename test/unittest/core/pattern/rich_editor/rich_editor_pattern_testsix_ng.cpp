@@ -181,57 +181,6 @@ HWTEST_F(RichEditorPatternTestSixNg, ClearContent001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetRightWordPosition004
- * @tc.desc: test GetRightWordPosition
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, GetRightWordPosition004, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    ClearSpan();
-    std::string firstText = "text";
-    AddSpan(firstText);
-    std::string space = " ";
-    std::string secondText = "content";
-    AddSpan(space + secondText);
-    for (auto iter = richEditorPattern->spans_.cbegin(); iter != richEditorPattern->spans_.cend(); iter++) {
-        auto span = *iter;
-        span->placeholderIndex = 0;
-    }
-    int32_t initCaretPosition = firstText.size();
-    auto position =
-        std::clamp(initCaretPosition + 1, 0, static_cast<int32_t>(richEditorPattern->GetTextContentLength()));
-    EXPECT_EQ(richEditorPattern->GetRightWordPosition(initCaretPosition), position);
-}
-
-/**
- * @tc.name: GetRightWordPosition005
- * @tc.desc: test GetRightWordPosition
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestSixNg, GetRightWordPosition005, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    ClearSpan();
-    std::string firstText = "text ";
-    AddSpan(firstText);
-    std::string secondText = "content";
-    AddSpan(secondText);
-    for (auto iter = richEditorPattern->spans_.cbegin(); iter != richEditorPattern->spans_.cend(); iter++) {
-        auto span = *iter;
-        span->placeholderIndex = 0;
-    }
-    int32_t initCaretPosition = firstText.size() + secondText.size() - 1;
-    auto position =
-        std::clamp(initCaretPosition + 1, 0, static_cast<int32_t>(richEditorPattern->GetTextContentLength()));
-    EXPECT_EQ(richEditorPattern->GetRightWordPosition(initCaretPosition), position);
-}
-
-/**
  * @tc.name: MouseRightFocus002
  * @tc.desc: test MouseRightFocus
  * @tc.type: FUNC

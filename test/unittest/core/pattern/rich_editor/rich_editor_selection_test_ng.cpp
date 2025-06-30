@@ -1823,4 +1823,41 @@ HWTEST_F(RichEditorSelectionTestNg, FireOnSelectionChange003, TestSize.Level0)
     EXPECT_TRUE(richEditorPattern->lastSelectionRange_ == range);
 }
 
+/**
+ * @tc.name: GetRectsForRange001
+ * @tc.desc: test GetRectsForRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectionTestNg, GetRectsForRange001, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    AddSpan(EXCEPT_VALUE);
+    ASSERT_FALSE(richEditorPattern->spans_.empty());
+    auto firstSpanItem = richEditorPattern->spans_.front();
+    ASSERT_NE(firstSpanItem, nullptr);
+    RectHeightStyle heightStyle = RectHeightStyle::TIGHT;
+    RectWidthStyle widthStyle = RectWidthStyle::TIGHT;
+
+    int32_t start = 0;
+    int32_t end = 10;
+    auto result = richEditorPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
+    EXPECT_TRUE(result.empty());
+
+    start = -5;
+    end = 10;
+    result = richEditorPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
+    EXPECT_TRUE(result.empty());
+
+    start = 0;
+    end = -5;
+    result = richEditorPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
+    EXPECT_TRUE(result.empty());
+
+    start = 10;
+    end = 0;
+    result = richEditorPattern->GetRectsForRange(start, end, heightStyle, widthStyle);
+    EXPECT_TRUE(result.empty());
+}
+
 } // namespace OHOS::Ace::NG
