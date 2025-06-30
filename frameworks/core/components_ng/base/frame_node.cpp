@@ -4935,28 +4935,35 @@ void FrameNode::ArkoalaRemoveItemsOnChange(int32_t changeIndex)
 void FrameNode::ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
 {
     CHECK_NULL_VOID(arkoalaLazyAdapter_);
-    int32_t startIndex = showCached ? std::max(0, start - cacheStart) : start;
-    int32_t endIndex = showCached ? std::min(GetTotalChildCount() - 1, end + cacheEnd) : end;
+    const int32_t liveStart = start - cacheStart;
+    const int32_t liveEnd = end + cacheEnd;
+    const int32_t visibleStart = showCached ? liveStart : start;
+    const int32_t visibleEnd = showCached ? liveEnd : end;
     std::vector<RefPtr<UINode>> toRemove;
     for (const auto& child : GetChildren()) {
         const int32_t index = static_cast<int32_t>(arkoalaLazyAdapter_->GetIndexOfChild(DynamicCast<FrameNode>(child)));
-        if (index >= startIndex && index <= endIndex) {
-            child->SetActive(true);
-        } else {
+        if (index < liveStart || index > liveEnd) {
             toRemove.push_back(child);
+            continue;
         }
+        child->SetActive(index >= visibleStart && index <= visibleEnd);
     }
     for (auto&& node : toRemove) {
         RemoveChild(node);
     }
-    arkoalaLazyAdapter_->SetActiveRange(startIndex - cacheStart, endIndex + cacheEnd);
+    arkoalaLazyAdapter_->SetActiveRange(liveStart, liveEnd);
 }
 
 RefPtr<LayoutWrapper> FrameNode::ArkoalaGetOrCreateChild(uint32_t index)
 {
     CHECK_NULL_RETURN(arkoalaLazyAdapter_, nullptr);
+    if (auto node = arkoalaLazyAdapter_->GetChild(index)) {
+        return node;
+    }
     auto node = arkoalaLazyAdapter_->GetOrCreateChild(index);
+    CHECK_NULL_RETURN(node, nullptr);
     AddChild(node);
+    node->SetActive(true);
     return node;
 }
 /* ============================== Arkoala LazyForEach adapter section END ================================*/
