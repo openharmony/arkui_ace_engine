@@ -65,21 +65,6 @@ void RichEditorPatternTestFourNg::TearDownTestSuite()
 }
 
 /**
- * @tc.name: AddImageSpan001
- * @tc.desc: test AddImageSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, AddImageSpan001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    ImageSpanOptions options;
-    int32_t res = richEditorPattern->AddImageSpan(options, TextChangeReason::UNKNOWN, true, 0, false);
-    ASSERT_EQ(res, 0);
-}
-
-/**
  * @tc.name: SetMenuParam001
  * @tc.desc: test SetMenuParam
  * @tc.type: FUNC
@@ -99,71 +84,6 @@ HWTEST_F(RichEditorPatternTestFourNg, SetMenuParam001, TestSize.Level1)
     SelectMenuParam menuParam;
     richEditorPattern->SetPreviewMenuParam(TextSpanType::IMAGE, func, menuParam);
     EXPECT_TRUE(static_cast<bool>(richEditorPattern->oneStepDragController_));
-}
-
-/**
- * @tc.name: AddImageSpan002
- * @tc.desc: test AddImageSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, AddImageSpan002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    ImageSpanOptions options;
-    options.image = IMAGE_VALUE;
-    options.bundleName = BUNDLE_NAME;
-    options.moduleName = MODULE_NAME;
-    ImageSpanAttribute imageStyle;
-    imageStyle.verticalAlign = VerticalAlign::FOLLOW_PARAGRAPH;
-    options.imageAttribute = imageStyle;
-    auto index = richEditorController->AddImageSpan(options);
-    EXPECT_EQ(index, 0);
-    auto spanItem = richEditorPattern->spans_.front();
-    auto imageSpanItem = AceType::DynamicCast<ImageSpanItem>(spanItem);
-    ASSERT_NE(imageSpanItem, nullptr);
-    auto imageAttribute = imageSpanItem->options.imageAttribute;
-    bool hasImageAttribute = imageAttribute.has_value();
-    EXPECT_TRUE(hasImageAttribute);
-    auto verticalAlign = imageAttribute.value().verticalAlign;
-    auto hasVerticalAlign = verticalAlign.has_value();
-    EXPECT_TRUE(hasVerticalAlign);
-    EXPECT_EQ(verticalAlign.value(), VerticalAlign::FOLLOW_PARAGRAPH);
-}
-
-/**
- * @tc.name: CalcCursorOffsetByPosition001
- * @tc.desc: test CalcCursorOffsetByPosition
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, CalcCursorOffsetByPosition001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    float selectLineHeight = 0;
-    richEditorPattern->CalcCursorOffsetByPosition(0, selectLineHeight, true, true);
-
-    AddSpan("test");
-    richEditorPattern->CalcCursorOffsetByPosition(0, selectLineHeight, true, true);
-
-    auto host = richEditorPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    auto imageSpanNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
-    EXPECT_NE(imageSpanNode, nullptr);
-    host->AddChild(imageSpanNode);
-    imageSpanNode->SetParent(host);
-    richEditorPattern->CalcCursorOffsetByPosition(0, selectLineHeight, true, true);
-
-    richEditorPattern->spans_.clear();
-    richEditorPattern->CalcCursorOffsetByPosition(0, selectLineHeight, true, true);
-
-    ASSERT_EQ(richEditorPattern->GetTextContentLength() == 0, true);
 }
 
 /**

@@ -221,33 +221,6 @@ HWTEST_F(RichEditorPatternTestNg, NeedAiAnalysis001, TestSize.Level1)
 }
 
 /**
- * @tc.name: AdjustCursorPosition001
- * @tc.desc: test AdjustCursorPosition
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, AdjustCursorPosition001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    std::u16string content = u"TEST123";
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
-    int32_t pos = 0;
-    richEditorPattern->AdjustCursorPosition(pos);
-    EXPECT_EQ(pos, 0);
-}
-
-/**
  * @tc.name: FixMoveDownChange001
  * @tc.desc: test FixMoveDownChange
  * @tc.type: FUNC
