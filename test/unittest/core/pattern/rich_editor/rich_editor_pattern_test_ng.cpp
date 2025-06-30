@@ -434,4 +434,25 @@ HWTEST_F(RichEditorPatternTestNg, DeleteToMaxLength002, TestSize.Level1)
     richEditorPattern->DeleteToMaxLength(len);
     ASSERT_EQ(richEditorPattern->previewLongPress_, false);
 }
+
+/**
+ * @tc.name: RichEditorScopeTest
+ * @tc.desc: test RichEditorScope
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestNg, RichEditorScopeTest, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto& requestFocusBySingleClick = richEditorPattern->requestFocusBySingleClick_;
+
+    requestFocusBySingleClick = false;
+    {
+        RICH_EDITOR_SCOPE(requestFocusBySingleClick);
+        EXPECT_EQ(requestFocusBySingleClick, true);
+    }
+    EXPECT_EQ(requestFocusBySingleClick, false);
+}
+
 } // namespace

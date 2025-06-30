@@ -3300,6 +3300,7 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
         if (focusHub->IsCurrentFocus()) {
             HandleOnEditChanged(true);
         }
+        RICH_EDITOR_SCOPE(requestFocusBySingleClick_);
         if (focusHub->RequestFocusImmediately()) {
             IF_TRUE(!shiftFlag_ || textSelector_.SelectNothing(), StartTwinkling());
             RequestKeyboard(false, true, true, info.GetSourceDevice());
@@ -3722,7 +3723,7 @@ void RichEditorPattern::HandleFocusEvent(FocusReason focusReason)
         needShowSoftKeyboard = false;
     }
 
-    RequestKeyboard(false, true, needShowSoftKeyboard);
+    IF_TRUE(!requestFocusBySingleClick_, RequestKeyboard(false, true, needShowSoftKeyboard));
     HandleOnEditChanged(true);
 }
 
