@@ -272,10 +272,11 @@ HWTEST_F(TextTestNineNg, OnMenuItemAction002, TestSize.Level1)
      * @tc.step: step4. test OnMenuItemAction
      */
     pattern->isMousePressed_ = true;
-    auto info = pattern->selectOverlay_->selectOverlayInfo_;
-    info->memuCallback.onAIMenuOption(OptionMenuActionId::AI_MENU_OPTION, "");
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto info = pipeline->GetSelectOverlayManager()->selectOverlayInfo_;
+    info.memuCallback.onAIMenuOption("");
     EXPECT_FALSE(pattern->SelectOverlayIsOn());
-    info->memuCallback.onAIMenuOption(OptionMenuActionId::AI_MENU_OPTION, "test");
+    info.memuCallback.onAIMenuOption("test");
     EXPECT_FALSE(pattern->SelectOverlayIsOn());
 }
 
