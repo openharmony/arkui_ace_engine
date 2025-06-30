@@ -16,6 +16,8 @@
     "pages/Examples/MenuTestLevel0_1",
     "pages/Examples/MenuTestLevel0_2",
     "pages/Examples/MenuTestLevel0_3",
+    "pages/Examples/stackMenuAvoid",
+    "pages/Examples/MultiLevelSubMenu",
 
     "pages/LifeCycle/Index",
     "pages/LifeCycle/aboutToAppear/BindMenu",

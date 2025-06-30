@@ -53,7 +53,10 @@ export struct MenuIndex {
     { name: 'bindContextMenuPreview', path: 'bindContextMenuPreview' },
     { name: 'menu组合场景1', path: 'MenuLevel0' },
     { name: 'menu组合场景2', path: 'MenuLevel1' },
-    { name: 'menu组合场景3', path: 'MenuLevel2' }
+    { name: 'menu组合场景3', path: 'MenuLevel2' },
+    { name: 'stackMenuAvoid', path: 'stackMenuAvoid'},
+    { name: 'MultiLevelSubMenu', path: 'MultiLevelSubMenu'},
+    { name: 'MenuTestLevel0_0', path: 'MenuTestLevel0_0'}
   ]
 
   build() {
