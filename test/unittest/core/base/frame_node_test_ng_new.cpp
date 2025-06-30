@@ -3110,4 +3110,43 @@ HWTEST_F(FrameNodeTestNg, FrameNodeIsJsCustomPropertyUpdated001, TestSize.Level1
     result = frameNode->IsJsCustomPropertyUpdated();
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: FrameNodeOnRecycle001
+ * @tc.desc: Test OnRecycle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeOnRecycle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. change accessibilityProperty.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    EXPECT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityFocusState(true);
+
+    /**
+     * @tc.steps: step3. change renderContext.
+     * @tc.expected: expect is not nullptr.
+     */
+    auto renderContext = frameNode->GetRenderContext();
+    EXPECT_NE(accessibilityProperty, nullptr);
+    renderContext->UpdateAccessibilityFocus(true);
+
+    /**
+     * @tc.steps: step4. test OnRecycle.
+     * @tc.expected: expect not focused
+     */
+    frameNode->OnRecycle();
+    EXPECT_FALSE(renderContext->GetAccessibilityFocus());
+    EXPECT_FALSE(accessibilityProperty->GetAccessibilityFocusState());
+}
 } // namespace OHOS::Ace::NG
