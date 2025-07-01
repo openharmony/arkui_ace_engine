@@ -52,17 +52,6 @@ const std::vector<TouchTimeTestCase> FLUSH_TOUCH_EVENTS_TESTCASES = {
     { DEFAULT_VSYNC_TIME, 0, { DEFAULT_VSYNC_TIME, AFTER_VSYNC_TIME }, 1, 2 },
 };
 
-class MockMockTaskExecutor : public MockScrollTaskExecutor {
-public:
-    MockMockTaskExecutor() = default;
-    explicit MockMockTaskExecutor(bool delayRun) {};
-
-    bool WillRunOnCurrentThread(TaskType type) const override
-    {
-        return false;
-    }
-};
-
 } // namespace
 /**
  * @tc.name: PipelineContextTestNg036
@@ -3118,8 +3107,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg230, TestSize.Level1)
     auto taskExecutor = context_->taskExecutor_;
     ASSERT_NE(taskExecutor, nullptr);
     context_->SetIsFormRender(false);
-    auto mockTaskExecutor = AceType::MakeRefPtr<MockMockTaskExecutor>();
-    context_->taskExecutor_ = mockTaskExecutor;
 
     context_->dirtyPropertyNodes_.clear();
     context_->FlushDirtyPropertyNodes();
