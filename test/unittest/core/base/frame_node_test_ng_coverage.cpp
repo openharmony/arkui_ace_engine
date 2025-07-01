@@ -2480,12 +2480,14 @@ HWTEST_F(FrameNodeTestNg, FrameNodeProcessThrottledVisibleCallback01, TestSize.L
     callbackInfo.callback = [&flag](bool input1, double input2) { flag += 1; };
     callbackInfo.period = minInterval;
     frameNode->SetVisibleAreaUserCallback({ 0.2, 0.8, 0.21, 0.79, 0.5 }, callbackInfo);
+    frameNode->lastThrottledVisibleRatio_ = 0.7f;
 
     /**
      * @tc.steps: step3. call the function ProcessThrottledVisibleCallback.
      */
     frameNode->ProcessThrottledVisibleCallback(true);
     EXPECT_TRUE(frameNode->eventHub_->GetThrottledVisibleAreaCallback().callback);
+    EXPECT_FLOAT_EQ(frameNode->lastThrottledVisibleRatio_, 0.0f);
 }
 
 /**
