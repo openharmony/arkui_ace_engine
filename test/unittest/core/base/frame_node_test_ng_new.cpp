@@ -3126,12 +3126,10 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnRecycle001, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
 
     /**
-     * @tc.steps: step2. create infoInstance.
+     * @tc.steps: step2. set infoInstance.
      * @tc.expected: expect is not nullptr.
      */
-    auto infoInstance = AceApplicationInfo::GetInstance();
-    EXPECT_NE(infoInstance, nullptr);
-    infoInstance->SetAccessibilityEnabled(true);
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
 
     /**
      * @tc.steps: step3. change accessibilityProperty.
