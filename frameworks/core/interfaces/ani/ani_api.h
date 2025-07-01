@@ -92,7 +92,7 @@ struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);
 };
 struct ArkUIAniDrawModifier {
-    void (*setDrawModifier)(ani_env* env, ani_long ptr, ani_object fnObj);
+    void (*setDrawModifier)(ani_env* env, ani_long ptr, ani_int flag, ani_object fnObj);
     void (*invalidate)(ani_env* env, ani_long ptr);
 };
 struct ArkUIAniContentSlotModifier {

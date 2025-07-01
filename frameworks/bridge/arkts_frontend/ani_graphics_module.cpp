@@ -30,6 +30,11 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
+namespace {
+const int32_t FLAG_DRAW_FRONT = 1;
+const int32_t FLAG_DRAW_CONTENT = 1 << 1;
+const int32_t FLAG_DRAW_BEHIND = 1 << 2;
+} // namespace
 ani_object CreateSizeObject(ani_env* env, const NG::DrawingContext& context)
 {
     ani_status status;
@@ -161,44 +166,50 @@ void AniGraphicsModule::Invalidate(ani_env* env, ani_long ptr)
     }
 }
 
-void AniGraphicsModule::SetDrawModifier(ani_env* env, ani_long ptr, ani_object drawModifierObj)
+void AniGraphicsModule::SetDrawModifier(ani_env* env, ani_long ptr, ani_int flag, ani_object drawModifierObj)
 {
     if (drawModifierObj == nullptr) {
         // drawModifierObj should not be nullptr;
         LOGF_ABORT("DrawModifier is undefined.");
     }
     ani_ref modifier;
-    env->GlobalReference_Create(reinterpret_cast<ani_ref>(drawModifierObj), &modifier);
-    auto drawBehindFunc = [env, object = modifier](const NG::DrawingContext& context) {
-        auto drawingContext = Framework::AniGraphicsModule::CreateDrawingContext(env, context);
-        if (!drawingContext) {
-            return;
-        }
-        env->Object_CallMethodByName_Void(
-            reinterpret_cast<ani_fn_object>(object), "drawBehind", "Larkui/Graphics/DrawContext;:V", drawingContext);
-    };
-    auto contentModifier = [env, object = modifier](const NG::DrawingContext& context) {
-        auto drawingContext = Framework::AniGraphicsModule::CreateDrawingContext(env, context);
-        if (!drawingContext) {
-            return;
-        }
-        env->Object_CallMethodByName_Void(
-            reinterpret_cast<ani_fn_object>(object), "drawContent", "Larkui/Graphics/DrawContext;:V", drawingContext);
-    };
-    auto frontModifier = [env, object = modifier](const NG::DrawingContext& context) {
-        auto drawingContext = Framework::AniGraphicsModule::CreateDrawingContext(env, context);
-        if (!drawingContext) {
-            return;
-        }
-        env->Object_CallMethodByName_Void(
-            reinterpret_cast<ani_fn_object>(object), "drawFront", "Larkui/Graphics/DrawContext;:V", drawingContext);
-    };
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(ptr);
     CHECK_NULL_VOID(frameNode && frameNode->IsSupportDrawModifier());
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(drawModifierObj), &modifier);
     RefPtr<NG::DrawModifier> drawModifier = AceType::MakeRefPtr<NG::DrawModifier>();
-    drawModifier->drawBehindFunc = drawBehindFunc;
-    drawModifier->drawContentFunc = contentModifier;
-    drawModifier->drawFrontFunc = frontModifier;
+    if (flag & FLAG_DRAW_BEHIND) {
+        auto drawBehindFunc = [env, object = modifier](const NG::DrawingContext& context) {
+            auto drawingContext = Framework::AniGraphicsModule::CreateDrawingContext(env, context);
+            if (!drawingContext) {
+                return;
+            }
+            env->Object_CallMethodByName_Void(reinterpret_cast<ani_fn_object>(object), "drawBehind",
+                "Larkui/Graphics/DrawContext;:V", drawingContext);
+        };
+        drawModifier->drawBehindFunc = drawBehindFunc;
+    }
+    if (flag & FLAG_DRAW_CONTENT) {
+        auto contentModifier = [env, object = modifier](const NG::DrawingContext& context) {
+            auto drawingContext = Framework::AniGraphicsModule::CreateDrawingContext(env, context);
+            if (!drawingContext) {
+                return;
+            }
+            env->Object_CallMethodByName_Void(reinterpret_cast<ani_fn_object>(object), "drawContent",
+                "Larkui/Graphics/DrawContext;:V", drawingContext);
+        };
+        drawModifier->drawContentFunc = contentModifier;
+    }
+    if (flag & FLAG_DRAW_FRONT) {
+        auto frontModifier = [env, object = modifier](const NG::DrawingContext& context) {
+            auto drawingContext = Framework::AniGraphicsModule::CreateDrawingContext(env, context);
+            if (!drawingContext) {
+                return;
+            }
+            env->Object_CallMethodByName_Void(
+                reinterpret_cast<ani_fn_object>(object), "drawFront", "Larkui/Graphics/DrawContext;:V", drawingContext);
+        };
+        drawModifier->drawFrontFunc = frontModifier;
+    }
     frameNode->SetDrawModifier(drawModifier);
     if (frameNode) {
         const auto& extensionHandler = frameNode->GetExtensionHandler();
