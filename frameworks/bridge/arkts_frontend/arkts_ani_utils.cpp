@@ -140,4 +140,45 @@ ani_object ArktsAniUtils::FloatToNumberObject(ani_env* env, const float& value)
     auto widthDoouble = ReplaceInfinity(value);
     return ArktsAniUtils::CreateDoubleObject(env, widthDoouble);
 }
+
+std::string ArktsAniUtils::ANIStringToStdString(ani_env* env, ani_string ani_str)
+{
+    ani_size strSize;
+    env->String_GetUTF8Size(ani_str, &strSize);
+
+    std::vector<char> buffer(strSize + 1); // +1 for null terminator
+    char* utf8_buffer = buffer.data();
+
+    ani_size bytes_written = 0;
+    env->String_GetUTF8(ani_str, utf8_buffer, strSize + 1, &bytes_written);
+
+    utf8_buffer[bytes_written] = '\0';
+    std::string content = std::string(utf8_buffer);
+    return content;
+}
+
+std::string ArktsAniUtils::JsonStringify(ani_env* env, ani_object src)
+{
+    ani_status status;
+    ani_class json;
+    status = env->FindClass("Lescompat/JSON;", &json);
+    if (status != ANI_OK) {
+        ani_error aniError;
+        env->GetUnhandledError(&aniError);
+        env->ResetError();
+        LOGW("Find JSON failed, status: %{public}d", status);
+        return "";
+    }
+    ani_ref result;
+    status =
+        env->Class_CallStaticMethodByName_Ref(json, "stringify", "Lstd/core/Object;:Lstd/core/String;", &result, src);
+    if (status != ANI_OK) {
+        ani_error aniError;
+        env->GetUnhandledError(&aniError);
+        env->ResetError();
+        LOGW("Call JSON.stringify failed, status: %{public}d", status);
+        return "";
+    }
+    return ArktsAniUtils::ANIStringToStdString(env, static_cast<ani_string>(result));
+}
 } // namespace OHOS::Ace

@@ -16,7 +16,10 @@
 #include "common_module.h"
 
 #include <memory>
+#include <string>
+#include <vector>
 
+#include "ani.h"
 #include "load.h"
 
 #include "base/utils/utils.h"
@@ -26,6 +29,24 @@
 #include "utils/ani_utils.h"
 
 namespace OHOS::Ace::Ani {
+namespace {
+std::string ANIUtils_ANIStringToStdString(ani_env* env, ani_string ani_str)
+{
+    ani_size strSize;
+    env->String_GetUTF8Size(ani_str, &strSize);
+
+    std::vector<char> buffer(strSize + 1); // +1 for null terminator
+    char* utf8_buffer = buffer.data();
+
+    ani_size bytes_written = 0;
+    env->String_GetUTF8(ani_str, utf8_buffer, strSize + 1, &bytes_written);
+
+    utf8_buffer[bytes_written] = '\0';
+    std::string content = std::string(utf8_buffer);
+    return content;
+}
+} // namespace
+
 ani_status GetAniEnv(ani_vm* vm, ani_env** env)
 {
     CHECK_NULL_RETURN(vm, ANI_ERROR);
@@ -656,5 +677,80 @@ void FrameNodeMarkDirtyNode(ani_env* env, ani_object obj, ani_long ptr)
         return;
     }
     modifier->getCommonAniModifier()->frameNodeMarkDirtyNode(env, ptr);
+}
+
+ani_int GetColorValue(ani_env* env, ani_object aniClass, ani_object src)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return 0;
+    }
+
+    ani_status status;
+    ani_class stringClass;
+    if ((status = env->FindClass("Lstd/core/String;", &stringClass)) != ANI_OK) {
+        HILOGW("GetColorValue find string failed. %{public}d", status);
+    }
+    ani_boolean isString;
+    if ((status = env->Object_InstanceOf(src, stringClass, &isString)) != ANI_OK) {
+        HILOGW("GetColorValue call instanceof string failed. %{public}d", status);
+    }
+    if(isString){
+        auto srcString = ANIUtils_ANIStringToStdString(env, static_cast<ani_string>(src));
+        return modifier->getCommonAniModifier()->getColorValueByString(srcString);
+    }
+
+    ani_class intClass;
+    if ((status = env->FindClass("Lstd/core/Int;", &intClass)) != ANI_OK) {
+        HILOGW("GetColorValue find int failed. %{public}d", status);
+    }
+    ani_boolean isInt;
+    if ((status = env->Object_InstanceOf(src, intClass, &isInt)) != ANI_OK) {
+        HILOGW("GetColorValue call instanceof int failed. %{public}d", status);
+    }
+    if (isInt) {
+        ani_int intSrc;
+        if ((status = env->Object_CallMethodByName_Int(src, "unboxed", ":I", &intSrc)) != ANI_OK) {
+            HILOGW("GetColorValue unboxed int failed. %{public}d", status);
+        }
+        return modifier->getCommonAniModifier()->getColorValueByNumber(static_cast<uint32_t>(intSrc));
+    }
+    return 0;
+}
+
+void SendThemeToNative(ani_env* env, ani_object aniClass, ani_array colorArray, ani_int id)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->sendThemeToNative(env, colorArray, id);
+}
+
+void SetDefaultTheme(ani_env* env, ani_object aniClass, ani_array colorArray, ani_boolean isDark)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setDefaultTheme(env, colorArray, isDark);
+}
+
+void UpdateColorMode(ani_env* env, ani_object aniClass, ani_int colorMode)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->updateColorMode(colorMode);
+}
+
+void RestoreColorMode(ani_env* env, ani_object aniClass)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return;
+    }
+    modifier->getCommonAniModifier()->restoreColorMode();
 }
 } // namespace OHOS::Ace::Ani

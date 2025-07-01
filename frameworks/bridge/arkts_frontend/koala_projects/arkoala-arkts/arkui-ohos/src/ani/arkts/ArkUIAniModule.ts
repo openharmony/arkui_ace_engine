@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { KPointer, KInt, KLong, KBoolean, KFloat } from "@koalaui/interop"
+import { KPointer, KInt, KLong, KBoolean, KFloat, KUInt } from "@koalaui/interop"
 import { drawing } from "@ohos/graphics/drawing"
 import image from "@ohos.multimedia.image"
 import webview from "@ohos.web.webview"
@@ -279,4 +279,9 @@ export class ArkUIAniModule {
     native static _TraceEnd(): void
     native static _AsyncTraceBegin(traceName: string, taskId: KInt): void
     native static _AsyncTraceEnd(traceName: string, taskId: KInt): void
+    native static _GetColorValue(color: number | string): KUInt
+    native static _SendThemeToNative(colorArray: ResourceColor[], elmtId: KInt): void
+    native static _SetDefaultTheme(colorArray: ResourceColor[], isDark: boolean): void
+    native static _UpdateColorMode(colorMode: KInt): void
+    native static _RestoreColorMode(): void
 }

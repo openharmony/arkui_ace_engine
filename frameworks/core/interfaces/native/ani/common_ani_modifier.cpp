@@ -30,7 +30,12 @@
 #include "core/interfaces/native/implementation/hover_event_peer.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/interfaces/native/ani/ani_theme.h"
+#include "core/interfaces/native/ani/ani_theme_module.h"
+#include "core/interfaces/native/ani/resource_ani_modifier.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/node/theme_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "bridge/arkts_frontend/ani_graphics_module.h"
@@ -42,6 +47,7 @@
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "frameworks/base/subwindow/subwindow_manager.h"
 
+#include <cstdint>
 #include <memory>
 #include <vector>
 
@@ -56,7 +62,20 @@ constexpr int NUM_5 = 5;
 constexpr int NUM_6 = 6;
 constexpr int NUM_7 = 7;
 constexpr int NUM_8 = 8;
+
+constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
+constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+
+uint32_t ColorAlphaAdapt(uint32_t origin)
+{
+    uint32_t result = origin;
+    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
+        result = origin | COLOR_ALPHA_VALUE;
+    }
+    return result;
 }
+} // namespace
+
 static thread_local std::vector<int32_t> restoreInstanceIds_;
 
 ani_ref* GetHostContext(ArkUI_Int32 key)
@@ -585,6 +604,77 @@ void FrameNodeMarkDirtyNode(ani_env* env, ani_long ptr)
     frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_DIFF);
 }
 
+ArkUI_Uint32 GetColorValueByString(const std::string& src)
+{
+    Color color;
+    Color::ParseColorString(src, color);
+    return color.GetValue();
+}
+
+ArkUI_Uint32 GetColorValueByNumber(ArkUI_Uint32 src)
+{
+    Color color(ColorAlphaAdapt(src));
+    return color.GetValue();
+}
+
+void SendThemeToNative(ani_env* env, ani_array colorArray, ani_int id)
+{
+    auto colors = AniThemeColors();
+    colors.SetColors(env, colorArray);
+
+    auto themeScopeId = static_cast<int32_t>(id);
+    AniThemeScope::aniThemes[themeScopeId].SetColors(colors);
+    // save the current theme when Theme was created by WithTheme container
+    if (AniThemeScope::isCurrentThemeDefault || themeScopeId > 0) {
+        std::optional<NG::AniTheme> themeOpt = std::make_optional(AniThemeScope::aniThemes[themeScopeId]);
+        AniThemeScope::aniCurrentTheme.swap(themeOpt);
+    }
+}
+
+void SetDefaultTheme(ani_env* env, ani_array colorArray, ani_boolean isDark)
+{
+    auto isDarkValue = static_cast<bool>(isDark);
+    ani_size length;
+    env->Array_GetLength(colorArray, &length);
+    if (length < TokenColors::TOTAL_NUMBER) {
+        LOGW("colorArray incorrect in SetDefaultTheme");
+    }
+    std::vector<uint32_t> colors;
+    auto basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
+    for (size_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
+        // type ResourceColor = number | string | Resource
+        ani_ref value;
+        auto status = env->Array_Get(colorArray, i, &value);
+        if (status != ANI_OK) {
+            LOGW("SetDefaultTheme colorArray get index: %{public}d failed", i);
+            continue;
+        }
+        Color color;
+        bool isColorAvailable = false;
+        if (!ResourceAniModifier::ParseAniColor(env, static_cast<ani_object>(value), color)) {
+            if (basisTheme) {
+                color = basisTheme->Colors()->GetByIndex(i);
+                isColorAvailable = true;
+            }
+        } else {
+            isColorAvailable = true;
+        }
+        colors.push_back(color.GetValue());
+    }
+    NodeModifier::GetThemeModifier()->setDefaultTheme(colors.data(), isDarkValue);
+}
+
+void UpdateColorMode(ani_int colorMode)
+{
+    auto colorModeValue = static_cast<int32_t>(colorMode);
+    AniThemeModule::UpdateColorMode(colorModeValue);
+}
+
+void RestoreColorMode()
+{
+    AniThemeModule::RestoreColorMode();
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -634,6 +724,11 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getClickEventPointer = OHOS::Ace::NG::GetClickEventPointer,
         .getHoverEventPointer = OHOS::Ace::NG::GetHoverEventPointer,
         .frameNodeMarkDirtyNode = OHOS::Ace::NG::FrameNodeMarkDirtyNode,
+        .getColorValueByNumber = OHOS::Ace::NG::GetColorValueByNumber,
+        .sendThemeToNative = OHOS::Ace::NG::SendThemeToNative,
+        .setDefaultTheme = OHOS::Ace::NG::SetDefaultTheme,
+        .updateColorMode = OHOS::Ace::NG::UpdateColorMode,
+        .restoreColorMode = OHOS::Ace::NG::RestoreColorMode
     };
     return &impl;
 }
