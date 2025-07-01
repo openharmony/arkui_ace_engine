@@ -2240,4 +2240,38 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest040, TestSize.Level1)
      */
     ASSERT_EQ(sliderContentModifier.GetStepPointVec().size(), 1);
 }
+
+/**
+ * @tc.name: SliderContentModifierTest041
+ * @tc.desc: TEST SliderContentModifier DrawStepPoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTestNg, SliderContentModifierTest041, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and sliderContentModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    Testing::MockCanvas canvas;
+
+    /**
+     * @tc.steps: step2. create frameNode and sliderContentModifier.
+     */
+    sliderContentModifier.SetHasPrefix(true);
+    sliderContentModifier.SetHasSuffix(true);
+    sliderContentModifier.SetSliderMode(SliderModel::SliderMode::NONE);
+    sliderContentModifier.DrawStepPoint(10.0f, 20.0f, 1, canvas, 5);
+
+    /**
+     * @tc.steps: step3. Check the param value.
+     */
+    ASSERT_EQ(sliderContentModifier.GetStepPointVec().size(), 1);
+}
 } // namespace OHOS::Ace::NG
