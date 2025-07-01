@@ -318,3 +318,42 @@ ohos_unittest("ImageCompressorTest") {
   ]
   part_name = ace_engine_part
 }
+
+ohos_unittest("image_loader_test") {
+  module_out_path = image_test_output_path
+
+  sources = [
+    "$ace_root/frameworks/core/image/image_loader.cpp",
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
+    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_file_cache.cpp",
+    "$ace_root/test/unittest/core/rosen/mock_internal_resource.cpp",
+    "image_loader_test.cpp",
+  ]
+
+  defines = [ "ACE UNITTEST" ]
+  if (ace_engine_feature_enable_upgrade_skia) {
+    defines += [ "USE_NEW_SKIA" ]
+  }
+  
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+    "$ace_root/test/unittest:ace_unittest_log",
+  ]
+  
+  external_deps = [
+    "googletest:gmock_main",
+    "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "skia:skia_canvaskit",
+  ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+}

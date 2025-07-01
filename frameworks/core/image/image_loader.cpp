@@ -14,7 +14,9 @@
  */
 
 #include "core/image/image_loader.h"
-
+#ifdef ACE_UNITTEST
+#include <unistd.h>
+#endif
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 #ifdef USE_NEW_SKIA
 #include "src/base/SkBase64.h"
@@ -38,16 +40,6 @@
 
 namespace OHOS::Ace {
 namespace {
-struct SkDataWrapper {
-    sk_sp<SkData> data;
-};
-
-inline void SkDataWrapperReleaseProc(const void* /* pixels */, void* context)
-{
-    SkDataWrapper* wrapper = reinterpret_cast<SkDataWrapper*>(context);
-    delete wrapper;
-}
-
 constexpr size_t FILE_HEAD_LENGTH = 7;           // 7 is the size of "file://"
 constexpr size_t MEMORY_HEAD_LENGTH = 9;         // 9 is the size of "memory://"
 constexpr size_t INTERNAL_FILE_HEAD_LENGTH = 15; // 15 is the size of "internal://app/"
@@ -153,16 +145,7 @@ std::shared_ptr<RSData> ImageLoader::LoadDataFromCachedFile(const std::string& u
             cacheFilePath.c_str(), strerror(errno));
         return nullptr;
     }
-    std::unique_ptr<FILE, decltype(&fclose)> file(fopen(realPath, "rb"), fclose);
-    if (file) {
-        auto skData = SkData::MakeFromFILE(file.get());
-        CHECK_NULL_RETURN(skData, nullptr);
-        auto rsData = std::make_shared<RSData>();
-        SkDataWrapper* wrapper = new SkDataWrapper { std::move(skData) };
-        rsData->BuildWithProc(wrapper->data->data(), wrapper->data->size(), SkDataWrapperReleaseProc, wrapper);
-        return rsData;
-    }
-    return nullptr;
+    return RSData::MakeFromFileName(realPath);
 }
 
 std::shared_ptr<RSData> ImageLoader::QueryImageDataFromImageCache(const ImageSourceInfo& sourceInfo)
@@ -261,7 +244,7 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& im
     }
     char realPath[PATH_MAX] = { 0x00 };
     realpath(filePath.c_str(), realPath);
-    auto result = SkData::MakeFromFileName(realPath);
+    auto result = RSData::MakeFromFileName(realPath);
     if (!result) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
             "read data failed, filePath: %{private}s, realPath: %{private}s, "
@@ -270,23 +253,13 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& im
         errorInfo = { ImageErrorCode::GET_IMAGE_FILE_READ_DATA_FAILED, "read data failed." };
         return nullptr;
     } else {
-        loadResultInfo.fileSize = result->size();
+        loadResultInfo.fileSize = result->GetSize();
         ACE_SCOPED_TRACE("LoadImageData result %s - %d", imageDfxConfig.ToStringWithSrc().c_str(),
-            static_cast<int32_t>(result->size()));
+            static_cast<int32_t>(result->GetSize()));
         TAG_LOGI(AceLogTag::ACE_IMAGE, "Read data %{private}s - %{public}s : %{public}d", realPath,
-            imageDfxConfig.ToStringWithoutSrc().c_str(), static_cast<int32_t>(result->size()));
+            imageDfxConfig.ToStringWithoutSrc().c_str(), static_cast<int32_t>(result->GetSize()));
     }
-    auto rsData = std::make_shared<RSData>();
-#ifdef PREVIEW
-    // on Windows previewer, SkData::MakeFromFile keeps the file open during Drawing::Data's lifetime
-    // return a copy to release the file handle
-    return rsData->BuildWithCopy(result->data(), result->size()) ? rsData : nullptr;
-#else
-    SkDataWrapper* wrapper = new SkDataWrapper { std::move(result) };
-    return rsData->BuildWithProc(wrapper->data->data(), wrapper->data->size(), SkDataWrapperReleaseProc, wrapper)
-               ? rsData
-               : nullptr;
-#endif
+    return result;
 }
 
 std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(const ImageSourceInfo& imageSourceInfo,
@@ -304,12 +277,8 @@ std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(const ImageSource
     CHECK_NULL_RETURN(dataProvider, nullptr);
     auto res = dataProvider->GetDataProviderResFromUri(src, errorInfo);
     CHECK_NULL_RETURN(res, nullptr);
-    // function is ok, just pointer cast from SKData to RSData
-    auto skData = SkData::MakeFromMalloc(res->GetData().release(), res->GetSize());
-    CHECK_NULL_RETURN(skData, nullptr);
     auto data = std::make_shared<RSData>();
-    SkDataWrapper* wrapper = new SkDataWrapper { std::move(skData) };
-    data->BuildWithProc(wrapper->data->data(), wrapper->data->size(), SkDataWrapperReleaseProc, wrapper);
+    data->BuildFromMalloc(res->GetData().release(), res->GetSize());
     return data;
 }
 
