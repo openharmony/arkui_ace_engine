@@ -543,12 +543,12 @@ void JSProgress::JsSetLinearStyleOptions(const JSCallbackInfo& info)
         return;
     }
     bool radiusState = ParseJsDimensionVpNG(strokeRadius, strokeRadiusDimension, strokeRadiusResObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::LSStrokeRadius, strokeRadiusResObj);
+    }
     if (!radiusState) {
         ProgressModel::GetInstance()->ResetStrokeRadius();
         return;
-    }
-    if (SystemProperties::ConfigChangePerform()) {
-        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::LSStrokeRadius, strokeRadiusResObj);
     }
 
     if (LessNotEqual(strokeRadiusDimension.Value(), 0.0f) || strokeRadiusDimension.Unit() == DimensionUnit::PERCENT) {
