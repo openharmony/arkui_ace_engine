@@ -14,13 +14,13 @@
  */
 
 /*用例描述
-  本用例实现了refreshContent参数在undefined与正常值之间动态切换的效果。
+  本用例通过子组件设置position属性的方式实现了刷新样式悬浮的效果。
 */
 
 import { ComponentContent } from '@ohos.arkui.node';
 
 class Params {
-  public refreshStatus: RefreshStatus = RefreshStatus.Inactive
+  public refreshStatus: RefreshStatus = RefreshStatus.Inactive;
 
   constructor(refreshStatus: RefreshStatus) {
     this.refreshStatus = refreshStatus;
@@ -45,37 +45,37 @@ function customRefreshingContent(params: Params) {
 
 @Entry
 @Component
-struct RefreshingContentSample {
-  @State isRefreshing: boolean = false
-  @State arr: String[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
-  @State refreshStatus: RefreshStatus = RefreshStatus.Inactive
-  @State customComponentContent: ComponentContent<Object> | undefined = undefined
-  private contentNode?: ComponentContent<Object> = undefined
-  private params: Params = new Params(RefreshStatus.Inactive)
+struct RefreshSuspensionEffectSample {
+  @State isRefreshing: boolean = false;
+  @State arr: String[] = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+  @State refreshStatus: RefreshStatus = RefreshStatus.Inactive;
+  @State customComponentContent: ComponentContent<Object> | undefined = undefined;
+  private contentNode?: ComponentContent<Object> = undefined;
+  private params: Params = new Params(RefreshStatus.Inactive);
 
   aboutToAppear(): void {
     let uiContext = this.getUIContext()
     this.contentNode = new ComponentContent(uiContext, wrapBuilder(customRefreshingContent), this.params)
   }
 
+  @Builder
+  customRefreshBuilder() {
+    Stack() {
+      Row() {
+        LoadingProgress().height(32)
+        Text('Refreshing...').fontSize(16).margin({ left: 20 })
+      }
+      .alignItems(VerticalAlign.Center)
+    }
+    .align(Alignment.Center)
+    .clip(true)
+    // 设置最小高度约束保证自定义组件高度随刷新区域高度变化时自定义组件高度不会低于minHeight
+    .constraintSize({ minHeight: 32 })
+    .width('100%')
+  }
+
   build() {
     Column() {
-      Column() {
-        // 设置refreshingContent
-        Button('refreshingContent: customRefreshComponentContent')
-          .margin('5vp')
-          .onClick(() => {
-            this.customComponentContent = this.contentNode
-          })
-
-        // 重置refreshingContent
-        Button('refreshingContent: undefined')
-          .margin('5vp')
-          .onClick(() => {
-            this.customComponentContent = undefined
-          })
-      }
-
       Refresh({ refreshing: $$this.isRefreshing, refreshingContent: this.customComponentContent }) {
         List() {
           ForEach(this.arr, (item: string) => {
@@ -96,6 +96,8 @@ struct RefreshingContentSample {
         })
         .width('100%')
         .height('100%')
+        // 固定list组件的位置可以实现刷新样式悬浮效果
+        .position({x: 0, y: 0})
         .alignListItem(ListItemAlign.Center)
         .scrollBar(BarState.Off)
       }
