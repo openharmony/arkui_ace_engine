@@ -152,6 +152,7 @@ arkui_files = [
   "arkui-preprocessed/arkui/stateManagement/base/observeSingleton.ets",
   "arkui-preprocessed/arkui/stateManagement/base/backingValue.ets",
   "arkui-preprocessed/arkui/stateManagement/base/observeWrappedArray.ets",
+  "arkui-preprocessed/arkui/stateManagement/base/observeWrappedBase.ets",
   "arkui-preprocessed/arkui/component/swiper.ets",
   "arkui-preprocessed/arkui/component/screen.ets",
   "arkui-preprocessed/arkui/component/image.ets",

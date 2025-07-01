@@ -17,13 +17,14 @@ import { IMutableKeyedStateMeta, IObservedObject, RenderIdType, WatchIdType } fr
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { FactoryInternal } from './iFactoryInternal';
 import { ObserveSingleton } from './observeSingleton';
+import { ObserveWrappedBase } from './observeWrappedBase';
 
 final class CONSTANT {
-    public static readonly OB_MAP_ANY_PROPERTY = "__OB_SET_ANY_PROPERTY";
-    public static readonly OB_LENGTH = "__OB_LENGTH";
+    public static readonly OB_MAP_ANY_PROPERTY = '__OB_SET_ANY_PROPERTY';
+    public static readonly OB_LENGTH = '__OB_LENGTH';
 }
 
-export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject {
+export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject, ObserveWrappedBase {
     public store_: Map<K, V>;
     // Use public access to enable unit testing.
     protected meta_: IMutableKeyedStateMeta;
@@ -41,7 +42,7 @@ export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject {
         super();
 
         this.store_ = map;
-        this.meta_ = FactoryInternal.mkMutableKeyedStateMeta("WrappedMap");
+        this.meta_ = FactoryInternal.mkMutableKeyedStateMeta('WrappedMap');
     }
 
     // implementation of ISubscribedWatches by forwarding to subscribedWatches
@@ -59,13 +60,13 @@ export class WrappedMap<K, V> extends Map<K, V> implements IObservedObject {
         return this.store_;
     }
 
-    public setV1RenderId(renderId : RenderIdType): void {
+    public setV1RenderId(renderId: RenderIdType): void {
         this.____V1RenderId = renderId;
     }
 
     // helper
     public shouldAddRef(): boolean {
-      return ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
+        return ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
     }
 
     public override toString(): String {

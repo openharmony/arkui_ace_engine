@@ -17,8 +17,9 @@ import { IMutableStateMeta, IObservedObject, RenderIdType, WatchIdType } from '.
 import { SubscribedWatches } from '../decoratorImpl/decoratorWatch';
 import { ObserveSingleton } from './observeSingleton';
 import { FactoryInternal } from './iFactoryInternal';
+import { ObserveWrappedBase } from './observeWrappedBase';
 
-export class WrappedDate extends Date implements IObservedObject {
+export class WrappedDate extends Date implements IObservedObject, ObserveWrappedBase {
     private store_: Date;
     private meta_: IMutableStateMeta;
     // support for @Watch
@@ -38,7 +39,7 @@ export class WrappedDate extends Date implements IObservedObject {
         super();
 
         this.store_ = date;
-        this.meta_ = FactoryInternal.mkMutableStateMeta("");
+        this.meta_ = FactoryInternal.mkMutableStateMeta('');
     }
 
     // implementation of ISubscribedWatches by forwarding to subscribedWatches
@@ -57,12 +58,12 @@ export class WrappedDate extends Date implements IObservedObject {
         return this.store_;
     }
 
-    public setV1RenderId(renderId : RenderIdType): void {
+    public setV1RenderId(renderId: RenderIdType): void {
         this.____V1RenderId = renderId;
     }
 
     public shouldAddRef(): boolean {
-      return ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
+        return ObserveSingleton.instance.shouldAddRef(this.____V1RenderId);
     }
 
     /**
@@ -129,7 +130,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setDate(value: byte): void {
         this.store_.setDate(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setDate");
+        this.executeOnSubscribingWatches('setDate');
     }
 
     /**
@@ -140,7 +141,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setDate(value: number): number {
         const result = this.store_.setDate(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setDate");        
+        this.executeOnSubscribingWatches('setDate');
         return result;
     }
 
@@ -152,7 +153,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setDay(value: byte): void {
         this.store_.setDay(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setDate");        
+        this.executeOnSubscribingWatches('setDate');
     }
 
     /**
@@ -173,7 +174,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setUTCDate(value: byte): void {
         this.store_.setUTCDate(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setUTCDate");        
+        this.executeOnSubscribingWatches('setUTCDate');
     }
 
     /**
@@ -184,7 +185,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setUTCDate(value: number): number {
         const result = this.store_.setUTCDate(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setUTCDate");        
+        this.executeOnSubscribingWatches('setUTCDate');
         return result;
     }
 
@@ -196,7 +197,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setUTCDay(value: byte): void {
         this.store_.setUTCDay(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setUTCDay");        
+        this.executeOnSubscribingWatches('setUTCDay');
     }
 
     /**
@@ -207,8 +208,8 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setUTCDay(value: number): number {
         const result = this.store_.setUTCDay(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setUTCDay");   
-        return result;     
+        this.executeOnSubscribingWatches('setUTCDay');
+        return result;
     }
 
     /**
@@ -288,7 +289,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setUTCFullYear(value: number, month?: number, date?: number): number {
         const result = this.store_.setUTCFullYear(value, month, date);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setUTCFullYear");
+        this.executeOnSubscribingWatches('setUTCFullYear');
         return result;
     }
 
@@ -300,7 +301,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setUTCFullYear(value: int): void {
         this.store_.setUTCFullYear(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setUTCFullYear");
+        this.executeOnSubscribingWatches('setUTCFullYear');
     }
 
     /**
@@ -311,7 +312,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setYear(value: number): void {
         this.store_.setYear(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setYear");
+        this.executeOnSubscribingWatches('setYear');
     }
 
     /**
@@ -322,7 +323,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setYear(value: int): void {
         this.store_.setYear(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setYear");
+        this.executeOnSubscribingWatches('setYear');
     }
 
     /**
@@ -333,7 +334,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setFullYear(value: number, month?: Number, date?: Number): number {
         const result = this.store_.setFullYear(value, month, date);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setFullYear");
+        this.executeOnSubscribingWatches('setFullYear');
         return result;
     }
 
@@ -345,7 +346,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setFullYear(value: int): void {
         this.store_.setFullYear(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setFullYear");
+        this.executeOnSubscribingWatches('setFullYear');
     }
 
     /**
@@ -382,7 +383,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setHours(value: byte): void {
         this.store_.setHours(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setHours");
+        this.executeOnSubscribingWatches('setHours');
     }
 
     /**
@@ -393,7 +394,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setHours(value: number, min?: number, sec?: number, ms?: number): number {
         const result = this.store_.setHours(value, min, sec, ms);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setHours");
+        this.executeOnSubscribingWatches('setHours');
         return result;
     }
 
@@ -405,7 +406,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setUTCHours(value: byte): void {
         this.store_.setUTCHours(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setHours");
+        this.executeOnSubscribingWatches('setHours');
     }
 
     /**
@@ -416,7 +417,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setUTCHours(value: number, min?: number, sec?: number, ms?: number): number {
         const result = this.store_.setUTCHours(value, min, sec, ms);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setUTCHours");
+        this.executeOnSubscribingWatches('setUTCHours');
         return result;
     }
 
@@ -454,7 +455,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setMilliseconds(value: short): void {
         this.store_.setMilliseconds(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setMilliseconds");
+        this.executeOnSubscribingWatches('setMilliseconds');
     }
 
     /**
@@ -465,7 +466,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setMilliseconds(value: number): number {
         const result = this.store_.setMilliseconds(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setMilliseconds");
+        this.executeOnSubscribingWatches('setMilliseconds');
         return result;
     }
 
@@ -477,7 +478,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setUTCMilliseconds(value: short): void {
         this.store_.setUTCMilliseconds(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setUTCMilliseconds");
+        this.executeOnSubscribingWatches('setUTCMilliseconds');
     }
 
     /**
@@ -488,8 +489,8 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setUTCMilliseconds(value: number): number {
         const result = this.store_.setUTCMilliseconds(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setUTCMilliseconds");
-        return result; 
+        this.executeOnSubscribingWatches('setUTCMilliseconds');
+        return result;
     }
 
     /**
@@ -526,7 +527,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setSeconds(value: number, ms?: number): number {
         const result = this.store_.setSeconds(value, ms);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setSeconds");
+        this.executeOnSubscribingWatches('setSeconds');
         return result;
     }
 
@@ -538,7 +539,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setSeconds(value: byte): void {
         this.store_.setSeconds(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setSeconds");
+        this.executeOnSubscribingWatches('setSeconds');
     }
 
     /**
@@ -549,7 +550,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setUTCSeconds(value: byte): void {
         this.store_.setUTCSeconds(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setUTCSeconds");
+        this.executeOnSubscribingWatches('setUTCSeconds');
     }
 
     /**
@@ -560,7 +561,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setUTCSeconds(value: number, ms?: number): number {
         const result = this.store_.setUTCSeconds(value, ms);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setUTCSeconds");
+        this.executeOnSubscribingWatches('setUTCSeconds');
         return result;
     }
 
@@ -588,7 +589,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setUTCMinutes(value: byte): void {
         this.store_.setUTCMinutes(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setUTCMinutes");
+        this.executeOnSubscribingWatches('setUTCMinutes');
     }
 
     /**
@@ -599,7 +600,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setUTCMinutes(value: number, sec?: Number, ms?: Number): number {
         const result = this.store_.setUTCMinutes(value, sec, ms);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setUTCMinutes");
+        this.executeOnSubscribingWatches('setUTCMinutes');
         return result;
     }
 
@@ -621,7 +622,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setMinutes(value: byte): void {
         this.store_.setMinutes(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setUTCMinutes");
+        this.executeOnSubscribingWatches('setUTCMinutes');
     }
 
     /**
@@ -632,7 +633,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setMinutes(value: number, sec?: number, ms?: number): number {
         const result = this.store_.setMinutes(value, sec, ms);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setUTCMinutes");
+        this.executeOnSubscribingWatches('setUTCMinutes');
         return result;
     }
 
@@ -673,7 +674,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setMonth(month: number, date?: number): number {
         const result = this.store_.setMonth(month, date);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setMonth");
+        this.executeOnSubscribingWatches('setMonth');
         return result;
     }
 
@@ -685,7 +686,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setMonth(month: int): void {
         this.store_.setMonth(month);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setMonth");
+        this.executeOnSubscribingWatches('setMonth');
     }
 
     /**
@@ -696,7 +697,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setUTCMonth(month: number, date?: number): number {
         const result = this.store_.setUTCMonth(month, date);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setUTCMonth");
+        this.executeOnSubscribingWatches('setUTCMonth');
         return result;
     }
 
@@ -708,7 +709,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setUTCMonth(month: int): void {
         this.store_.setUTCMonth(month);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setUTCMonth");
+        this.executeOnSubscribingWatches('setUTCMonth');
     }
 
     /**
@@ -734,7 +735,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setTime(value: long): void {
         this.store_.setTime(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setTime");
+        this.executeOnSubscribingWatches('setTime');
     }
 
     /**
@@ -748,7 +749,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setTime(value: number): number {
         const result = this.store_.setTime(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setTime");
+        this.executeOnSubscribingWatches('setTime');
         return result;
     }
 
@@ -773,7 +774,7 @@ export class WrappedDate extends Date implements IObservedObject {
     public override setTimezoneOffset(value: number): number {
         const result = this.store_.setTimezoneOffset(value);
         this.meta_.fireChange();
-        this.executeOnSubscribingWatches("setTime");
+        this.executeOnSubscribingWatches('setTime');
         return result;
     }
 
@@ -804,7 +805,7 @@ export class WrappedDate extends Date implements IObservedObject {
      */
     public override toJSON(): string {
         this.conditionalAddRef();
-        return this.store_.toJSON()??"";
+        return this.store_.toJSON() ?? '';
     }
 
     /**
@@ -871,10 +872,10 @@ export class WrappedDate extends Date implements IObservedObject {
         return this.store_.toUTCString();
     }
 
-    // shorthand function because  
+    // shorthand function because
     // Date can suffice with one meta
     // (IMutableStateMeta)
-    private conditionalAddRef() : void {
+    private conditionalAddRef(): void {
         if (this.shouldAddRef()) {
             this.meta_.addRef();
         }
