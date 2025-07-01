@@ -30,6 +30,8 @@ public:
     WebPatternStatic() = default;
     ~WebPatternStatic() = default;
     void SetWebSrcStatic(const std::string &webSrc);
+    void SetPopup(bool popup);
+    void SetParentNWebId(int32_t parentNWebId);
 };
 } // namespace OHOS::Ace::NG
 #endif // CAPI_STUBS_MOCK_WEB_PATTERN_STATIC_H

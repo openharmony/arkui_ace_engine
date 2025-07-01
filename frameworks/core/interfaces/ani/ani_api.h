@@ -48,6 +48,14 @@ typedef int ArkUI_Int32;
 typedef size_t ani_size;
 typedef _ArkUIContentSlot* ArkUIContentSlot;
 typedef _ArkUINodeContent* ArkUINodeContent;
+typedef struct WebviewControllerInfo {
+    std::function<int32_t()> getWebIdFunc = nullptr;
+    std::function<void(int32_t)> completeWindowNewFunc = nullptr;
+    std::function<long()> getNativePtrFunc = nullptr;
+    std::function<void()> releaseRefFunc = nullptr;
+    std::function<void(int32_t)> setWebIdFunc = nullptr;
+    std::function<void(const std::string&)> setHapPathFunc = nullptr;
+} WebviewControllerInfo;
 struct ArkUIDragInfo {
     void* pixelMap;
     bool onlyForLifting = false;
@@ -60,9 +68,8 @@ struct ArkUIAniImageModifier {
 };
 
 struct ArkUIAniWebModifier {
-    void (*setWebOptions)(ArkUINodeHandle node,
-        std::function<void(int32_t)>&& onNWebId,
-        std::function<void(const std::string&)>&& onHapPath);
+    void (*setWebOptions)(ArkUINodeHandle node, const WebviewControllerInfo& controllerInfo);
+    void (*setWebControllerControllerHandler)(void* controllerHandler, const WebviewControllerInfo& controllerInfo);
 };
 struct ArkUIAniDragModifier {
     void (*setDragData)(ani_ref event, ani_ref data);
