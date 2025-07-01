@@ -28,16 +28,20 @@ class ScrollPattern;
 class FreeScrollController final : public AceType {
     DECLARE_ACE_TYPE(FreeScrollController, AceType);
     ACE_DISALLOW_COPY_AND_MOVE(FreeScrollController);
+
 public:
     explicit FreeScrollController(ScrollPattern& pattern);
     ~FreeScrollController() final;
 
     RefPtr<PanRecognizer> GetFreePanGesture() const
     {
+        if (!enableScroll_) {
+            return MakeRefPtr<PanRecognizer>(0, PanDirection {}, 1.0); // dummy recognizer
+        }
         return freePanGesture_;
     }
 
-    void OnLayoutFinished(const OffsetF& adjustedOffset);
+    void OnLayoutFinished(const OffsetF& adjustedOffset, const SizeF& scrollableArea);
 
     OffsetF GetOffset() const;
 
@@ -69,6 +73,7 @@ private:
     RefPtr<TouchEventImpl> freeTouch_;
     float friction_ = 0.0f;
     bool duringPan_ = false;
+    bool enableScroll_ = true;
 };
 
 } // namespace OHOS::Ace::NG

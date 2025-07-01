@@ -218,7 +218,7 @@ OffsetF FreeScrollController::GetOffset() const
     return {};
 }
 
-void FreeScrollController::OnLayoutFinished(const OffsetF& adjustedOffset)
+void FreeScrollController::OnLayoutFinished(const OffsetF& adjustedOffset, const SizeF& scrollableArea)
 {
     if (offset_ && offset_->Get() != adjustedOffset) {
         offset_->Set(adjustedOffset);
@@ -227,6 +227,13 @@ void FreeScrollController::OnLayoutFinished(const OffsetF& adjustedOffset)
         // Fire onDidScroll only if the offset has changed.
         pattern_.FreeModeFireOnDidScroll(adjustedOffset - prevOffset_, duringPan_ ? ScrollState::SCROLL : ScrollState::FLING);
         prevOffset_ = adjustedOffset;
+    }
+    auto props = pattern_.GetLayoutProperty<ScrollLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    if (scrollableArea.IsNonNegative()) {
+        enableScroll_ = props->GetScrollEnabled().value_or(true);
+    } else {
+        enableScroll_ = props->GetScrollEnabled().value_or(true) && pattern_.GetAlwaysEnabled();
     }
 }
 } // namespace OHOS::Ace::NG

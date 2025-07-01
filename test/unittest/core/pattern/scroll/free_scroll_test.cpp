@@ -139,6 +139,16 @@ TEST_F(FreeScrollTest, RecognizerOverride001)
     EXPECT_EQ(*link.begin(), controller->freePanGesture_);
     EXPECT_EQ(*res.begin(), controller->freePanGesture_);
     ASSERT_TRUE(controller->freePanGesture_->onActionUpdate_);
+
+    ScrollModelNG::SetScrollEnabled(frameNode_.GetRawPtr(), false);
+    FlushUITasks(frameNode_);
+    res.clear();
+    link.clear();
+    scrollHandler->CollectScrollableTouchTarget({}, nullptr, res, frameNode_, nullptr, link);
+    EXPECT_EQ(link.size(), 1);
+    EXPECT_NE(*link.begin(), controller->freePanGesture_);
+    EXPECT_NE(*res.begin(), controller->freePanGesture_);
+    // ASSERT_FALSE(link.begin()->);
 }
 
 /**
@@ -154,11 +164,11 @@ TEST_F(FreeScrollTest, FreeScroll001)
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
 
-    PanUpdate({ -100, -100 });
+    PanUpdate({ -DELTA_X, -DELTA_Y });
 
     FlushUITasks(frameNode_);
-    EXPECT_EQ(GetChildX(frameNode_, 0), -100.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -100.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -DELTA_X);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -DELTA_Y);
 }
 
 /**
