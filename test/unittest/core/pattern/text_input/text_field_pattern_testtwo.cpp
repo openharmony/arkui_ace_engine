@@ -1420,6 +1420,11 @@ HWTEST_F(TextFieldPatternTestTwo, CheckIfNeedToResetKeyboard001, TestSize.Level0
     pattern->keyboard_ = TextInputType::UNSPECIFIED;
     pattern->CheckIfNeedToResetKeyboard();
     EXPECT_EQ(pattern->keyboard_, TextInputType::TEXT);
+
+    pattern->isCustomKeyboardAttached_ = false;
+    pattern->keyboard_ = TextInputType::ONE_TIME_CODE;
+    pattern->CheckIfNeedToResetKeyboard();
+    EXPECT_EQ(pattern->keyboard_, TextInputType::TEXT);
 }
 
 /**
