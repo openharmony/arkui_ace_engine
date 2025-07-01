@@ -19,6 +19,7 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -1921,14 +1922,24 @@ void SliderPattern::UpdateValue(float value)
         CHECK_NULL_VOID(sliderPaintProperty);
         sliderPaintProperty->UpdateValue(value);
     }
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, UpdateValue, host);
     CalcSliderValue();
     FireBuilder();
 }
 
 void SliderPattern::OnAttachToFrameNode()
 {
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
     RegisterVisibleAreaChange();
     InitHapticController();
+}
+
+void SliderPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
 void SliderPattern::StartAnimation()
@@ -2107,8 +2118,9 @@ RefPtr<FrameNode> SliderPattern::BuildContentModifierNode()
     return (makeFunc_.value())(sliderConfiguration);
 }
 
-void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+void SliderPattern::RemoveCallbackOnDetach(FrameNode* frameNode)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
@@ -2119,7 +2131,19 @@ void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->DeregisterAccessibilitySAObserverCallback(frameNode->GetAccessibilityId());
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "Slider OnDetachFromFrameNode OK");
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "Slider RemoveCallbackOnDetach OK");
+}
+
+void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    THREAD_SAFE_NODE_CHECK(frameNode, OnDetachFromFrameNode);
+    RemoveCallbackOnDetach(frameNode);
+}
+
+void SliderPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
 }
 
 void SliderPattern::InitOrRefreshSlipFactor()
