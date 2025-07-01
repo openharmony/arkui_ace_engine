@@ -29,6 +29,8 @@ constexpr float SMALL_CONTENT_W = 100;
 constexpr float SMALL_CONTENT_H = 50;
 constexpr float DELTA_X = 100.0f;
 constexpr float DELTA_Y = 100.0f;
+constexpr float LARGE_DELTA_X = 2000.0f;
+constexpr float LARGE_DELTA_Y = 2000.0f;
 constexpr float VELOCITY_X = 1000.0f;
 constexpr float VELOCITY_Y = 1000.0f;
 } // namespace
@@ -337,6 +339,18 @@ TEST_F(FreeScrollTest, Animation001)
     ASSERT_TRUE(pattern_->freeScroll_);
     EXPECT_EQ(GetChildX(frameNode_, 0), -DELTA_X - VELOCITY_X / pattern_->freeScroll_->friction_);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0);
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+
+    PanStart({});
+    PanUpdate({ -LARGE_DELTA_X, -LARGE_DELTA_Y });
+    FlushUITasks(frameNode_);
+    PanEnd({ -LARGE_DELTA_X, -LARGE_DELTA_Y }, { -VELOCITY_X, -VELOCITY_Y });
+    EXPECT_FALSE(MockAnimationManager::GetInstance().AllFinished());
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(frameNode_);
+    ASSERT_TRUE(pattern_->freeScroll_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), WIDTH - CONTENT_W);
+    EXPECT_EQ(GetChildY(frameNode_, 0), HEIGHT - CONTENT_H);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 }
 
