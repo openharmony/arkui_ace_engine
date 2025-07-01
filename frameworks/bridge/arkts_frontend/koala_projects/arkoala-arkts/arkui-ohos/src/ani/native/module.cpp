@@ -64,6 +64,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetWebOptions)
         },
         ani_native_function {
+            "_Web_SetWebController_ControllerHandler",
+            "JL@ohos/web/webview/webview/WebviewController;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetWebControllerControllerHandler)
+        },
+        ani_native_function {
             "_ConvertUtils_ConvertFromPixelMapAni",
             "L@ohos/multimedia/image/image/PixelMap;:J",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConvertFromPixelMapAni)

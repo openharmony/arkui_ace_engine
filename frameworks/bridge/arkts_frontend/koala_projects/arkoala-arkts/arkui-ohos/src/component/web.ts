@@ -604,9 +604,9 @@ export class ControllerHandler implements MaterializedBase {
     static getFinalizer(): KPointer {
         return ArkUIGeneratedNativeModule._ControllerHandler_getFinalizer()
     }
-    public setWebController(controller: WebviewController): void {
-        const controller_casted = controller as (WebviewController)
-        this.setWebController_serialize(controller_casted)
+    public setWebController(controller: WebviewControllerAni): void {
+        const controller_casted = controller as (WebviewControllerAni)
+        ArkUIAniModule._Web_SetWebController_ControllerHandler(this.peer!.ptr, controller_casted);
         return
     }
     private setWebController_serialize(controller: WebviewController): void {
