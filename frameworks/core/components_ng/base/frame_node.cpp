@@ -94,6 +94,22 @@ constexpr int32_t MIN_OPINC_AREA = 10000;
 } // namespace
 namespace OHOS::Ace::NG {
 
+namespace {
+void ClearAccessibilityFocus(const RefPtr<AccessibilityProperty>& accessibilityProperty,
+    const RefPtr<RenderContext>& renderContext)
+{
+    CHECK_NULL_VOID(accessibilityProperty);
+    CHECK_NULL_VOID(renderContext);
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() &&
+        accessibilityProperty->GetAccessibilityFocusState()) {
+        accessibilityProperty->SetAccessibilityFocusState(false);
+        if (renderContext->GetAccessibilityFocus().value_or(false)) {
+            renderContext->UpdateAccessibilityFocus(false);
+        }
+    }
+}
+} // namespace
+
 class FrameNode::FrameProxy final : public RecursiveLock {
 public:
     struct FrameChildNode {
@@ -4220,6 +4236,10 @@ void FrameNode::OnRecycle()
     layoutProperty_->ResetGeometryTransition();
     pattern_->OnRecycle();
     UINode::OnRecycle();
+    
+    auto accessibilityProperty = GetAccessibilityProperty<NG::AccessibilityProperty>();
+    auto renderContext = GetRenderContext();
+    ClearAccessibilityFocus(accessibilityProperty, renderContext);
 }
 
 void FrameNode::OnReuse()
