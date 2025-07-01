@@ -286,12 +286,8 @@ public:
                 true, instanceId);
             RemoveDownloadTaskWithPreload(url, false);
         };
-        innerCallback->OnCancel = [this, cancelCallback = downloadCallback.cancelCallback, instanceId, url]() {
+        innerCallback->OnCancel = [this, url]() {
             LOGI("Async Http task of url [%{private}s] cancelled", url.c_str());
-            std::string errorMsg = "Http task of url " + url + " canceled";
-            cancelCallback(errorMsg,
-                { ImageErrorCode::GET_IMAGE_ASYNC_HTTP_CANCELLED, "async http task of uri cancelled." }, true,
-                instanceId);
             RemoveDownloadTaskWithPreload(url, false);
         };
         innerCallback->OnFail = [this, failCallback = downloadCallback.failCallback, instanceId, url](
