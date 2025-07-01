@@ -6403,11 +6403,15 @@ bool WebPattern::OnNestedScroll(float& x, float& y, float& xVelocity, float& yVe
     if (expectedScrollAxis_ == Axis::HORIZONTAL) {
         offset = x;
         velocity = xVelocity;
-        y = 0.0f;
-        yVelocity = 0.0f;
+        if (isScrollStarted_) {
+            y = 0.0f;
+            yVelocity = 0.0f;
+        }
     } else {
-        x = 0.0f;
-        xVelocity = 0.0f;
+        if (isScrollStarted_) {
+            x = 0.0f;
+            xVelocity = 0.0f;
+        }
     }
     bool isConsumed = offset != 0 ? FilterScrollEventHandleOffset(offset) : FilterScrollEventHandlevVlocity(velocity);
     return isConsumed;
