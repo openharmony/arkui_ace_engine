@@ -37,7 +37,6 @@ import { CallbackTransformer } from "./peers/CallbackTransformer"
 import { NodeAttach, remember } from "@koalaui/runtime"
 
 import { Deserializer } from "./peers/Deserializer"
-import { SearchOpsHandWritten } from "./../handwritten"
 
 export class ArkSearchPeer extends ArkCommonMethodPeer {
     constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -1136,24 +1135,10 @@ export class ArkSearchComponent extends ArkCommonMethodComponent implements Sear
     getPeer(): ArkSearchPeer {
         return (this.peer as ArkSearchPeer)
     }
-    SearchOptionsValueIsBindable(value?: SearchOptions) : boolean {
-        if ((RuntimeType.UNDEFINED) != runtimeType(value)) {
-            const value_text  = value!.value;
-            if ((RuntimeType.UNDEFINED) != (runtimeType(value_text))) {
-                const value_text_value  = value_text!;
-                return TypeChecker.isBindableString(value_text_value);
-            }
-        }
-        return false;
-    }
     public setSearchOptions(options?: SearchOptions): this {
         if (this.checkPriority("setSearchOptions")) {
-            const options_casted = options as (SearchOptions | undefined)
-            this.getPeer()?.setSearchOptionsAttribute(options_casted)
-        }
-        if (this.SearchOptionsValueIsBindable(options)) {
-            SearchOpsHandWritten.hookSearchInputValueImpl(this.getPeer().peer.ptr,
-                (options!.value as Bindable<string>));
+            hookSetSearchOptions(this.getPeer(), options)
+            return this
         }
         return this
     }
