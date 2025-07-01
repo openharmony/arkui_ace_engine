@@ -6851,6 +6851,26 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetGestureFocusMode));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGestureFocusMode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetGestureFocusMode));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSslErrorEventReceive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnSslErrorEventReceive));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSslErrorEventReceive"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnSslErrorEventReceive));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnClientAuthenticationRequest"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnClientAuthenticationRequest));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnClientAuthenticationRequest"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnClientAuthenticationRequest));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnInterceptRequest"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnInterceptRequest));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnInterceptRequest"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnInterceptRequest));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnFaviconReceived"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnFaviconReceived));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnFaviconReceived"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnFaviconReceived));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnBeforeUnload"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetOnBeforeUnload));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnBeforeUnload"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetOnBeforeUnload));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif
