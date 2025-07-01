@@ -1952,17 +1952,27 @@ void JSViewAbstract::ParseModalTransitonEffect(
 
 void JSViewAbstract::ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle)
 {
-    auto modalTransition = paramObj->GetProperty("modalTransition");
+    auto modalTransitionValue = paramObj->GetProperty("modalTransition");
+    ParseModalTransition(modalTransitionValue, modalStyle.modalTransition, NG::ModalTransition::DEFAULT);
     auto backgroundColor = paramObj->GetProperty("backgroundColor");
-    if (modalTransition->IsNumber()) {
-        auto transitionNumber = modalTransition->ToNumber<int32_t>();
-        if (transitionNumber >= TRANSITION_NUM_ZERO && transitionNumber <= TRANSITION_NUM_TWO) {
-            modalStyle.modalTransition = static_cast<NG::ModalTransition>(transitionNumber);
-        }
-    }
     Color color;
     if (ParseJsColor(backgroundColor, color)) {
         modalStyle.backgroundColor = color;
+    }
+}
+
+void JSViewAbstract::ParseModalTransition(const JSRef<JSVal>& jsValue,
+    std::optional<NG::ModalTransition>& modalTransition, NG::ModalTransition defaultTransition)
+{
+    if (jsValue->IsNull() || jsValue->IsUndefined()) {
+        modalTransition = defaultTransition;
+    } else if (jsValue->IsNumber()) {
+        auto transitionNumber = jsValue->ToNumber<int32_t>();
+        if (transitionNumber >= TRANSITION_NUM_ZERO && transitionNumber <= TRANSITION_NUM_TWO) {
+            modalTransition = static_cast<NG::ModalTransition>(transitionNumber);
+        } else {
+            modalTransition = defaultTransition;
+        }
     }
 }
 
@@ -2117,17 +2127,6 @@ void JSViewAbstract::ParseSheetStyle(
     if (ParseSheetBackgroundBlurStyle(backgroundBlurStyle, styleOption)) {
         sheetStyle.backgroundBlurStyle = styleOption;
     }
-    bool showClose = true;
-    if (ParseJsBool(showCloseIcon, showClose)) {
-        sheetStyle.showCloseIcon = showClose;
-    } else if (!isPartialUpdate) {
-        sheetStyle.showCloseIcon = true;
-    }
-
-    bool isInteractive = false;
-    if (ParseJsBool(interactive, isInteractive)) {
-        sheetStyle.interactive = isInteractive;
-    }
 
     if (showDragBar->IsBoolean()) {
         sheetStyle.showDragBar = showDragBar->ToBoolean();
@@ -2151,11 +2150,27 @@ void JSViewAbstract::ParseSheetStyle(
         if (type->IsNumber()) {
             auto sheetType = type->ToNumber<int32_t>();
             if (sheetType >= static_cast<int>(NG::SheetType::SHEET_BOTTOM) &&
-                sheetType <= static_cast<int>(NG::SheetType::SHEET_SIDE)) {
+                sheetType <= static_cast<int>(NG::SheetType::SHEET_CONTENT_COVER)) {
                 sheetStyle.sheetType = static_cast<NG::SheetType>(sheetType);
             }
         }
     }
+
+    bool isInteractive = (NG::SheetType::SHEET_CONTENT_COVER == sheetStyle.sheetType);
+    ParseJsBool(interactive, isInteractive);
+    sheetStyle.interactive = isInteractive;
+
+    bool showClose = true;
+    if (NG::SheetType::SHEET_CONTENT_COVER == sheetStyle.sheetType) {
+        sheetStyle.showCloseIcon = false;
+    } else {
+        if (ParseJsBool(showCloseIcon, showClose)) {
+            sheetStyle.showCloseIcon = showClose;
+        } else if (!isPartialUpdate) {
+            sheetStyle.showCloseIcon = true;
+        }
+    }
+
     if (scrollSizeMode->IsNull() || scrollSizeMode->IsUndefined()) {
         sheetStyle.scrollSizeMode.reset();
     } else if (scrollSizeMode->IsNumber()) {
@@ -2285,12 +2300,21 @@ void JSViewAbstract::ParseSheetStyle(
     sheetStyle.sheetHeight = sheetStruct;
 
     ParseSheetSubWindowValue(paramObj, sheetStyle);
+
+    // parse ModalTransition
+    auto modalTransitionValue = paramObj->GetProperty("modalTransition");
+    ParseModalTransition(modalTransitionValue, sheetStyle.modalTransition, NG::ModalTransition::DEFAULT);
 }
 
 void JSViewAbstract::ParseSheetSubWindowValue(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
 {
     // parse sheet showInSubWindow
     sheetStyle.showInSubWindow = false;
+    // content cover is not shown in sub window
+    if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == NG::SheetType::SHEET_CONTENT_COVER) {
+        sheetStyle.showInSubWindow = false;
+        return;
+    }
     if (sheetStyle.showInPage == NG::SheetLevel::EMBEDDED) {
         return;
     }

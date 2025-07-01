@@ -1044,10 +1044,8 @@ struct CustomDialogContentComponent {
   private titleIndex: number = 0;
   private contentIndex: number = 1;
   private buttonIndex: number = 2;
-  private primaryTitleMaxFontSize: Length = `${TITLE_S}fp`;
-  private primaryTitleMinFontSize: Length = `${BODY_L}fp`;
-  private secondaryTitleMaxFontSize: Length = `${SUBTITLE_S}fp`;
-  private secondaryTitleMinFontSize: Length = `${BODY_S}fp`;
+  private primaryTitleFontSize: Length = `${TITLE_S}fp`;
+  private secondaryTitleFontSize: Length = `${SUBTITLE_S}fp`;
   private scroller: Scroller = new Scroller();
   @Param@Once isHasDefaultFocus: boolean = false;
   @Param@Once isAllFocusFalse: boolean = false;
@@ -1251,8 +1249,7 @@ struct CustomDialogContentComponent {
           .fontWeight(FontWeight.Bold)
           .fontColor(this.primaryTitleFontColorWithTheme)
           .textAlign(this.titleTextAlign)
-          .maxFontSize(this.primaryTitleMaxFontSize)
-          .minFontSize(this.primaryTitleMinFontSize)
+          .fontSize(this.primaryTitleFontSize)
           .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           .maxLines(TITLE_MAX_LINES)
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
@@ -1271,8 +1268,7 @@ struct CustomDialogContentComponent {
           .fontWeight(FontWeight.Regular)
           .fontColor(this.secondaryTitleFontColorWithTheme)
           .textAlign(this.titleTextAlign)
-          .maxFontSize(this.secondaryTitleMaxFontSize)
-          .minFontSize(this.secondaryTitleMinFontSize)
+          .fontSize(this.secondaryTitleFontSize)
           .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           .maxLines(TITLE_MAX_LINES)
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)

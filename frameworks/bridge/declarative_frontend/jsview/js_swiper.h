@@ -81,6 +81,7 @@ protected:
     static void SetIndicatorController(const JSCallbackInfo& info);
     static void ResetSwiperNode(const JSCallbackInfo& info);
     static void SetMaintainVisibleContentPosition(const JSCallbackInfo& info);
+    static void SetOnScrollStateChanged(const JSCallbackInfo& info);
 
     private:
         static bool ParseSpace(const JSRef<JSVal>& jsValue, CalcDimension& result);

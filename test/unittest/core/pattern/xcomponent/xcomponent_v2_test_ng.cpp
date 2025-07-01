@@ -67,6 +67,7 @@ public:
     {
         g_isCreated = false;
         g_isChanged = false;
+        g_isDestroyed = false;
     }
 
 protected:

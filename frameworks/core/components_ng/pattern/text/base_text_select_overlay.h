@@ -319,6 +319,11 @@ public:
         return manager->GetSelectOverlayInfo();
     }
     virtual void BeforeOnPrepareMenu() {}
+    virtual bool ChangeSecondHandleHeight(const GestureEvent& event, bool isOverlayMode)
+    {
+        return false;
+    }
+    bool GetDragViewHandleRects(RectF& firstRect, RectF& secondRect);
 
 protected:
     RectF MergeSelectedBoxes(

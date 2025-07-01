@@ -270,7 +270,7 @@ export class TipsDialog extends ViewPU {
         this.primaryButton = null;
         this.secondaryButton = null;
         this.buttons = undefined;
-        this.__textAlignment = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlignment');
+        this.__textAlignment = new ObservedPropertySimplePU(TextAlign.Center, this, 'textAlignment');
         this.marginOffset = 0;
         this.contentScroller = new Scroller();
         this.__fontColorWithTheme = new ObservedPropertyObjectPU({
@@ -284,11 +284,6 @@ export class TipsDialog extends ViewPU {
         this.themeColorMode = ThemeColorMode.SYSTEM;
         this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
         this.__minContentHeight = new ObservedPropertySimplePU(160, this, 'minContentHeight');
-        this.updateTextAlign = (maxWidth) => {
-            if (this.content) {
-                this.textAlignment = getTextAlign(maxWidth, this.content, `${BODY_L * this.fontSizeScale}vp`);
-            }
-        };
         this.imageIndex = 0;
         this.textIndex = 1;
         this.checkBoxIndex = 2;
@@ -357,9 +352,6 @@ export class TipsDialog extends ViewPU {
         }
         if (params.minContentHeight !== undefined) {
             this.minContentHeight = params.minContentHeight;
-        }
-        if (params.updateTextAlign !== undefined) {
-            this.updateTextAlign = params.updateTextAlign;
         }
         if (params.imageIndex !== undefined) {
             this.imageIndex = params.imageIndex;
@@ -502,7 +494,6 @@ export class TipsDialog extends ViewPU {
                         content: this.content,
                         checkTips: this.checkTips,
                         minContentHeight: this.__minContentHeight,
-                        updateTextAlign: this.updateTextAlign,
                         dialogBuilder: () => {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 ForEach.create();
@@ -559,7 +550,6 @@ export class TipsDialog extends ViewPU {
                             content: this.content,
                             checkTips: this.checkTips,
                             minContentHeight: this.minContentHeight,
-                            updateTextAlign: this.updateTextAlign,
                             dialogBuilder: () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     ForEach.create();
@@ -861,8 +851,6 @@ class TipsDialogContentLayout extends ViewPU {
         this.title = null;
         this.content = null;
         this.checkTips = null;
-        this.updateTextAlign = (maxWidth) => {
-        };
         this.__minContentHeight = new SynchedPropertySimpleTwoWayPU(params.minContentHeight, this, 'minContentHeight');
         this.dialogBuilder = this.doNothingBuilder;
         this.imageIndex = 0;
@@ -882,9 +870,6 @@ class TipsDialogContentLayout extends ViewPU {
         }
         if (params.checkTips !== undefined) {
             this.checkTips = params.checkTips;
-        }
-        if (params.updateTextAlign !== undefined) {
-            this.updateTextAlign = params.updateTextAlign;
         }
         if (params.dialogBuilder !== undefined) {
             this.dialogBuilder = params.dialogBuilder;
@@ -969,7 +954,6 @@ class TipsDialogContentLayout extends ViewPU {
         height += imageMeasureResult.height;
         if (this.title !== null || this.content !== null) {
             let textChild = children[this.textIndex];
-            this.updateTextAlign(sizeResult.width);
             let contentMaxHeight = Number(constraint.maxHeight) - imageMeasureResult.height - checkBoxHeight;
             let contentConstraint = {
                 maxWidth: constraint.maxWidth,
@@ -2154,7 +2138,7 @@ export class AlertDialog extends ViewPU {
         this.primaryButton = null;
         this.secondaryButton = null;
         this.buttons = undefined;
-        this.__textAlign = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlign');
+        this.__textAlign = new ObservedPropertySimplePU(TextAlign.Center, this, 'textAlign');
         this.contentScroller = new Scroller();
         this.__fontColorWithTheme = new ObservedPropertyObjectPU({
             'id': -1,
@@ -2345,9 +2329,6 @@ export class AlertDialog extends ViewPU {
             Text.margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) });
             Text.width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`);
             Text.textAlign(this.textAlign);
-            Text.onSizeChange((oldValue, newValue) => {
-                this.updateTextAlign(Number(newValue.width));
-            });
             Text.onKeyEvent((event) => {
                 if (event) {
                     resolveKeyEvent(event, this.contentScroller);
@@ -2369,10 +2350,6 @@ export class AlertDialog extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             };
         this.initButtons();
-    }
-
-    updateTextAlign(maxWidth) {
-        this.textAlign = getTextAlign(maxWidth, this.content, `${BODY_L * this.fontSizeScale}vp`);
     }
 
     initButtons() {
@@ -2707,12 +2684,8 @@ class CustomDialogContentComponent extends ViewPU {
         this.__customStyle = new ObservedPropertySimplePU(undefined, this, 'customStyle');
         this.__buttonMaxFontSize = new ObservedPropertyObjectPU(`${BODY_L}fp`, this, 'buttonMaxFontSize');
         this.__buttonMinFontSize = new ObservedPropertyObjectPU(9, this, 'buttonMinFontSize');
-        this.__primaryTitleMaxFontSize = new ObservedPropertyObjectPU(`${TITLE_S}fp`, this, 'primaryTitleMaxFontSize');
-        this.__primaryTitleMinFontSize = new ObservedPropertyObjectPU(`${BODY_L}fp`, this, 'primaryTitleMinFontSize');
-        this.__secondaryTitleMaxFontSize =
-            new ObservedPropertyObjectPU(`${SUBTITLE_SIZE()}fp`, this, 'secondaryTitleMaxFontSize');
-        this.__secondaryTitleMinFontSize =
-            new ObservedPropertyObjectPU(`${BODY_S}fp`, this, 'secondaryTitleMinFontSize');
+        this.__primaryTitleFontSize = new ObservedPropertyObjectPU(`${TITLE_S}fp`, this, 'primaryTitleFontSize');
+        this.__secondaryTitleFontSize = new ObservedPropertyObjectPU(`${SUBTITLE_SIZE()}fp`, this, 'secondaryTitleFontSize');
         this.__primaryTitleFontColorWithTheme = new ObservedPropertyObjectPU({
             'id': -1,
             'type': 10001,
@@ -2791,17 +2764,11 @@ class CustomDialogContentComponent extends ViewPU {
         if (params.buttonMinFontSize !== undefined) {
             this.buttonMinFontSize = params.buttonMinFontSize;
         }
-        if (params.primaryTitleMaxFontSize !== undefined) {
-            this.primaryTitleMaxFontSize = params.primaryTitleMaxFontSize;
+        if (params.primaryTitleFontSize !== undefined) {
+            this.primaryTitleFontSize = params.primaryTitleFontSize;
         }
-        if (params.primaryTitleMinFontSize !== undefined) {
-            this.primaryTitleMinFontSize = params.primaryTitleMinFontSize;
-        }
-        if (params.secondaryTitleMaxFontSize !== undefined) {
-            this.secondaryTitleMaxFontSize = params.secondaryTitleMaxFontSize;
-        }
-        if (params.secondaryTitleMinFontSize !== undefined) {
-            this.secondaryTitleMinFontSize = params.secondaryTitleMinFontSize;
+        if (params.secondaryTitleFontSize !== undefined) {
+            this.secondaryTitleFontSize = params.secondaryTitleFontSize;
         }
         if (params.primaryTitleFontColorWithTheme !== undefined) {
             this.primaryTitleFontColorWithTheme = params.primaryTitleFontColorWithTheme;
@@ -2856,10 +2823,8 @@ class CustomDialogContentComponent extends ViewPU {
         this.__customStyle.purgeDependencyOnElmtId(rmElmtId);
         this.__buttonMaxFontSize.purgeDependencyOnElmtId(rmElmtId);
         this.__buttonMinFontSize.purgeDependencyOnElmtId(rmElmtId);
-        this.__primaryTitleMaxFontSize.purgeDependencyOnElmtId(rmElmtId);
-        this.__primaryTitleMinFontSize.purgeDependencyOnElmtId(rmElmtId);
-        this.__secondaryTitleMaxFontSize.purgeDependencyOnElmtId(rmElmtId);
-        this.__secondaryTitleMinFontSize.purgeDependencyOnElmtId(rmElmtId);
+        this.__primaryTitleFontSize.purgeDependencyOnElmtId(rmElmtId);
+        this.__secondaryTitleFontSize.purgeDependencyOnElmtId(rmElmtId);
         this.__primaryTitleFontColorWithTheme.purgeDependencyOnElmtId(rmElmtId);
         this.__secondaryTitleFontColorWithTheme.purgeDependencyOnElmtId(rmElmtId);
         this.__titleTextAlign.purgeDependencyOnElmtId(rmElmtId);
@@ -2876,10 +2841,8 @@ class CustomDialogContentComponent extends ViewPU {
         this.__customStyle.aboutToBeDeleted();
         this.__buttonMaxFontSize.aboutToBeDeleted();
         this.__buttonMinFontSize.aboutToBeDeleted();
-        this.__primaryTitleMaxFontSize.aboutToBeDeleted();
-        this.__primaryTitleMinFontSize.aboutToBeDeleted();
-        this.__secondaryTitleMaxFontSize.aboutToBeDeleted();
-        this.__secondaryTitleMinFontSize.aboutToBeDeleted();
+        this.__primaryTitleFontSize.aboutToBeDeleted();
+        this.__secondaryTitleFontSize.aboutToBeDeleted();
         this.__primaryTitleFontColorWithTheme.aboutToBeDeleted();
         this.__secondaryTitleFontColorWithTheme.aboutToBeDeleted();
         this.__titleTextAlign.aboutToBeDeleted();
@@ -2956,36 +2919,20 @@ class CustomDialogContentComponent extends ViewPU {
         this.__buttonMinFontSize.set(newValue);
     }
 
-    get primaryTitleMaxFontSize() {
-        return this.__primaryTitleMaxFontSize.get();
+    get primaryTitleFontSize() {
+        return this.__primaryTitleFontSize.get();
     }
 
-    set primaryTitleMaxFontSize(newValue) {
-        this.__primaryTitleMaxFontSize.set(newValue);
+    set primaryTitleFontSize(newValue) {
+        this.__primaryTitleFontSize.set(newValue);
     }
 
-    get primaryTitleMinFontSize() {
-        return this.__primaryTitleMinFontSize.get();
+    get secondaryTitleFontSize() {
+        return this.__secondaryTitleFontSize.get();
     }
 
-    set primaryTitleMinFontSize(newValue) {
-        this.__primaryTitleMinFontSize.set(newValue);
-    }
-
-    get secondaryTitleMaxFontSize() {
-        return this.__secondaryTitleMaxFontSize.get();
-    }
-
-    set secondaryTitleMaxFontSize(newValue) {
-        this.__secondaryTitleMaxFontSize.set(newValue);
-    }
-
-    get secondaryTitleMinFontSize() {
-        return this.__secondaryTitleMinFontSize.get();
-    }
-
-    set secondaryTitleMinFontSize(newValue) {
-        this.__secondaryTitleMinFontSize.set(newValue);
+    set secondaryTitleFontSize(newValue) {
+        this.__secondaryTitleFontSize.set(newValue);
     }
 
     get primaryTitleFontColorWithTheme() {
@@ -3472,11 +3419,10 @@ class CustomDialogContentComponent extends ViewPU {
             Text.fontWeight(TITLE_FONT_WEIGHT());
             Text.fontColor(ObservedObject.GetRawObject(this.primaryTitleFontColorWithTheme));
             Text.textAlign(this.titleTextAlign);
-            Text.maxFontSize(ObservedObject.GetRawObject(this.primaryTitleMaxFontSize));
-            Text.minFontSize(ObservedObject.GetRawObject(this.primaryTitleMinFontSize));
+            Text.fontSize(ObservedObject.GetRawObject(this.primaryTitleFontSize));
             Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
             Text.maxLines(TITLE_MAX_LINES);
-            Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
+            Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.width('100%');
         }, Text);
@@ -3513,11 +3459,10 @@ class CustomDialogContentComponent extends ViewPU {
             Text.fontWeight(FontWeight.Regular);
             Text.fontColor(ObservedObject.GetRawObject(this.secondaryTitleFontColorWithTheme));
             Text.textAlign(this.titleTextAlign);
-            Text.maxFontSize(ObservedObject.GetRawObject(this.secondaryTitleMaxFontSize));
-            Text.minFontSize(ObservedObject.GetRawObject(this.secondaryTitleMinFontSize));
+            Text.fontSize(ObservedObject.GetRawObject(this.secondaryTitleFontSize));
             Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
             Text.maxLines(TITLE_MAX_LINES);
-            Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
+            Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.width('100%');
         }, Text);

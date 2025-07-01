@@ -10472,12 +10472,12 @@ void RichEditorPattern::HandleOnCameraInput()
 
 bool RichEditorPattern::CanStartAITask() const
 {
-    return TextPattern::CanStartAITask() && !isEditing_ && !spans_.empty();
+    return !isEditing_ && !spans_.empty() && TextPattern::CanStartAITask();
 }
 
 bool RichEditorPattern::NeedShowAIDetect()
 {
-    return TextPattern::NeedShowAIDetect() && !isEditing_ && !isShowPlaceholder_ && !spans_.empty();
+    return !isEditing_ && !isShowPlaceholder_ && !spans_.empty() && TextPattern::NeedShowAIDetect();
 }
 
 void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

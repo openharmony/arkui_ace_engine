@@ -1241,6 +1241,33 @@ void SwiperModelNG::SetMaintainVisibleContentPosition(FrameNode* frameNode, bool
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, MaintainVisibleContentPosition, value, frameNode);
 }
 
+void SwiperModelNG::SetOnScrollStateChanged(
+    std::function<void(const BaseEventInfo* info)>&& onScrollStateChanged)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateOnScrollStateChangedEvent([event = std::move(onScrollStateChanged)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
+void SwiperModelNG::SetOnScrollStateChanged(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onScrollStateChanged)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateOnScrollStateChangedEvent([event = std::move(onScrollStateChanged)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
 bool SwiperModelNG::GetMaintainVisibleContentPosition(FrameNode* frameNode)
 {
     bool value = false;

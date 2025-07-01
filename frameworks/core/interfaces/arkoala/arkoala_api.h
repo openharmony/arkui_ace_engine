@@ -1030,6 +1030,11 @@ struct ArkUIPickerEdgeAlignStruct {
     void* dyRawPtr;
 };
 
+struct ArkUISliderShowStepOptions {
+    uint32_t step;
+    const char* text;
+};
+
 enum ArkUINodeType {
     ARKUI_TEXT = 1,
     ARKUI_SPAN,
@@ -1217,6 +1222,7 @@ enum ArkUIEventSubKind {
     ON_SWIPER_SELECTED,
     ON_SWIPER_UNSELECTED,
     ON_SWIPER_CONTENT_WILL_SCROLL,
+    ON_SWIPER_SCROLL_STATE_CHANGED,
 
     ON_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_SCROLL,
     ON_SCROLL_FRAME_BEGIN,
@@ -3463,6 +3469,8 @@ struct ArkUISwiperModifier {
     void (*setMaintainVisibleContentPosition)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetMaintainVisibleContentPosition)(ArkUINodeHandle node);
     ArkUI_Int32 (*getMaintainVisibleContentPosition)(ArkUINodeHandle node);
+    void (*setSwiperOnScrollStateChanged)(ArkUINodeHandle node, void* callback);
+    void (*resetSwiperOnScrollStateChanged)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {
@@ -3683,6 +3691,7 @@ struct ArkUIGridModifier {
     void (*resetFriction)(ArkUINodeHandle node);
     void (*setGridFocusWrapMode)(ArkUINodeHandle node, ArkUI_Int32 focusWrapMode);
     void (*resetGridFocusWrapMode)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getGridFocusWrapMode)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getGridColumnsTemplate)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getGridRowsTemplate)(ArkUINodeHandle node);
     ArkUI_Float32 (*getGridColumnsGap)(ArkUINodeHandle node);
@@ -4229,6 +4238,8 @@ struct ArkUISliderModifier {
     void (*setBlockColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
     void (*setTrackBackgroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
     void (*setSelectColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
+    void (*setShowStepsWithOptions)(
+        ArkUINodeHandle node, ArkUI_Bool showSteps, ArkUISliderShowStepOptions* options, ArkUI_Int32 length);
 };
 
 struct ArkUIProgressModifier {
@@ -4956,6 +4967,16 @@ struct ArkUIWebModifier {
     void (*resetOnDataResubmitted)(ArkUINodeHandle node);
     void (*setGestureFocusMode)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetGestureFocusMode)(ArkUINodeHandle node);
+    void (*setOnSslErrorEventReceive)(ArkUINodeHandle node, void* callback);
+    void (*resetOnSslErrorEventReceive)(ArkUINodeHandle node);
+    void (*setOnClientAuthenticationRequest)(ArkUINodeHandle node, void* callback);
+    void (*resetOnClientAuthenticationRequest)(ArkUINodeHandle node);
+    void (*setOnInterceptRequest)(ArkUINodeHandle node, void* callback);
+    void (*resetOnInterceptRequest)(ArkUINodeHandle node);
+    void (*setOnFaviconReceived)(ArkUINodeHandle node, void* callback);
+    void (*resetOnFaviconReceived)(ArkUINodeHandle node);
+    void (*setOnBeforeUnload)(ArkUINodeHandle node, void* callback);
+    void (*resetOnBeforeUnload)(ArkUINodeHandle node);
 };
 
 struct ArkUIBlankModifier {

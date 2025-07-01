@@ -1250,6 +1250,9 @@ public:
     void ArkoalaRemoveItemsOnChange(int32_t changeIndex);
 
 private:
+    RefPtr<LayoutWrapper> ArkoalaGetOrCreateChild(uint32_t index);
+    void ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached);
+
     /* temporary adapter to provide LazyForEach feature in Arkoala */
     std::unique_ptr<LazyComposeAdapter> arkoalaLazyAdapter_;
 

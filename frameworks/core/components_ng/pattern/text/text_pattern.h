@@ -879,6 +879,10 @@ public:
     {
         return isAskCeliaEnabled_;
     }
+    void UpdateTextSelectorSecondHandle(const RectF& rect)
+    {
+        textSelector_.secondHandle = rect;
+    }
 
 protected:
     int32_t GetClickedSpanPosition()

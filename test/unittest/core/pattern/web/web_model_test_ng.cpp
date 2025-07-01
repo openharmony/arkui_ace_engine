@@ -4358,4 +4358,411 @@ HWTEST_F(WebModelTestNg, SetWebDetachFunction001, TestSize.Level1)
     EXPECT_NE(webPattern->GetSetWebDetachCallback(), nullptr);
     #endif
 }
+
+/**
+ * @tc.name: SetOnSslErrorRequest002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnSslErrorRequest002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->CreateEventHubInner();
+    stack->Push(frameNode);
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetOnSslErrorRequest(
+        AccessibilityManager::RawPtr(frameNode),
+        [&callbackCalled](const BaseEventInfo* info) -> bool {
+            callbackCalled = true;
+            return true;
+        });
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnSslErrorRequestEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetOnSslErrorRequest003
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnSslErrorRequest003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebModelNG webModelNG;
+    bool callbackCalled = false;
+    webModelNG.SetOnSslErrorRequest(nullptr, [&callbackCalled](const BaseEventInfo* info) -> bool {
+        callbackCalled = true;
+        return true;
+    });
+    EXPECT_FALSE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetOnSslErrorRequest004
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnSslErrorRequest004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->CreateEventHubInner();
+    stack->Push(frameNode);
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetOnSslErrorRequest(
+        AccessibilityManager::RawPtr(frameNode),
+        [&callbackCalled](const BaseEventInfo* info) -> bool {
+            callbackCalled = true;
+            return true;
+        });
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    EXPECT_EQ(webEventHub, nullptr);
+    EXPECT_FALSE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetOnClientAuthenticationRequest001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnClientAuthenticationRequest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->CreateEventHubInner();
+    stack->Push(frameNode);
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetOnClientAuthenticationRequest(
+        AccessibilityManager::RawPtr(frameNode),
+        [&callbackCalled](const BaseEventInfo* info) -> bool {
+            callbackCalled = true;
+            return true;
+        });
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnSslSelectCertRequestEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetOnClientAuthenticationRequest002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnClientAuthenticationRequest002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetOnClientAuthenticationRequest(
+        nullptr,
+        [&callbackCalled](const BaseEventInfo* info) -> bool {
+            callbackCalled = true;
+            return true;
+        });
+    EXPECT_FALSE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetOnClientAuthenticationRequest003
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnClientAuthenticationRequest003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->CreateEventHubInner();
+    stack->Push(frameNode);
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetOnClientAuthenticationRequest(
+        AccessibilityManager::RawPtr(frameNode),
+        [&callbackCalled](const BaseEventInfo* info) -> bool {
+            callbackCalled = true;
+            return true;
+        });
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    EXPECT_EQ(webEventHub, nullptr);
+    EXPECT_FALSE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetOnInterceptRequest002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnInterceptRequest002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    bool callbackCalled = false;
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->CreateEventHubInner();
+    stack->Push(frameNode);
+    WebModelNG webModelNG;
+    webModelNG.SetOnInterceptRequest(
+        AccessibilityManager::RawPtr(frameNode), [&callbackCalled](const BaseEventInfo* info) {
+            callbackCalled = true;
+            return nullptr;
+        });
+
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webEventHub->FireOnInterceptRequestEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetOnInterceptRequest003
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnInterceptRequest003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetOnInterceptRequest(
+        nullptr,
+        [&callbackCalled](const BaseEventInfo* info) -> bool {
+            callbackCalled = true;
+            return true;
+        });
+    EXPECT_FALSE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetOnInterceptRequest004
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnInterceptRequest004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->CreateEventHubInner();
+    stack->Push(frameNode);
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetOnInterceptRequest(
+        AccessibilityManager::RawPtr(frameNode),
+        [&callbackCalled](const BaseEventInfo* info) -> bool {
+            callbackCalled = true;
+            return true;
+        });
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    EXPECT_EQ(webEventHub, nullptr);
+    EXPECT_FALSE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetFaviconReceivedId001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetFaviconReceivedId001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->CreateEventHubInner();
+    stack->Push(frameNode);
+    WebModelNG webModelNG;
+    bool callbackCalled = false;
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    webModelNG.SetFaviconReceivedId(AccessibilityManager::RawPtr(frameNode),
+        [&callbackCalled](const std::shared_ptr<BaseEventInfo> info) { callbackCalled = true; });
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    webEventHub->FireOnFaviconReceivedEvent(mockEventInfo);
+    EXPECT_TRUE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetFaviconReceivedId002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetFaviconReceivedId002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetFaviconReceivedId(
+        nullptr,
+        [&callbackCalled](const BaseEventInfo* info) -> bool {
+            callbackCalled = true;
+            return true;
+        });
+    EXPECT_FALSE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetFaviconReceivedId003
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetFaviconReceivedId003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->CreateEventHubInner();
+    stack->Push(frameNode);
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetFaviconReceivedId(
+        AccessibilityManager::RawPtr(frameNode),
+        [&callbackCalled](const BaseEventInfo* info) -> bool {
+            callbackCalled = true;
+            return true;
+        });
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    EXPECT_EQ(webEventHub, nullptr);
+    EXPECT_FALSE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetOnBeforeUnload001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnBeforeUnload001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->CreateEventHubInner();
+    stack->Push(frameNode);
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetOnBeforeUnload(
+        AccessibilityManager::RawPtr(frameNode),
+        [&callbackCalled](const BaseEventInfo* info) -> bool {
+            callbackCalled = true;
+            return true;
+        },
+        DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
+
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    ASSERT_NE(webEventHub, nullptr);
+    auto mockEventInfo = std::make_shared<MockBaseEventInfo>();
+    auto result = webEventHub->FireOnCommonDialogEvent(mockEventInfo, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
+    EXPECT_TRUE(callbackCalled);
+    EXPECT_TRUE(result);
+#endif
+}
+
+/**
+ * @tc.name: SetOnBeforeUnload002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnBeforeUnload002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetOnBeforeUnload(
+        nullptr,
+        [&callbackCalled](const BaseEventInfo* info) -> bool {
+            callbackCalled = true;
+            return true;
+        },
+        DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
+    EXPECT_FALSE(callbackCalled);
+#endif
+}
+
+/**
+ * @tc.name: SetOnBeforeUnload003
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOnBeforeUnload003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    bool callbackCalled = false;
+    WebModelNG webModelNG;
+    webModelNG.SetOnBeforeUnload(
+        AccessibilityManager::RawPtr(frameNode),
+        [&callbackCalled](const BaseEventInfo* info) -> bool {
+            callbackCalled = true;
+            return true;
+        },
+        DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    EXPECT_EQ(webEventHub, nullptr);
+    EXPECT_FALSE(callbackCalled);
+#endif
+}
 } // namespace OHOS::Ace::NG

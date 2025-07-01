@@ -94,6 +94,22 @@ constexpr int32_t MIN_OPINC_AREA = 10000;
 } // namespace
 namespace OHOS::Ace::NG {
 
+namespace {
+void ClearAccessibilityFocus(const RefPtr<AccessibilityProperty>& accessibilityProperty,
+    const RefPtr<RenderContext>& renderContext)
+{
+    CHECK_NULL_VOID(accessibilityProperty);
+    CHECK_NULL_VOID(renderContext);
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() &&
+        accessibilityProperty->GetAccessibilityFocusState()) {
+        accessibilityProperty->SetAccessibilityFocusState(false);
+        if (renderContext->GetAccessibilityFocus().value_or(false)) {
+            renderContext->UpdateAccessibilityFocus(false);
+        }
+    }
+}
+} // namespace
+
 class FrameNode::FrameProxy final : public RecursiveLock {
 public:
     struct FrameChildNode {
@@ -4220,6 +4236,10 @@ void FrameNode::OnRecycle()
     layoutProperty_->ResetGeometryTransition();
     pattern_->OnRecycle();
     UINode::OnRecycle();
+    
+    auto accessibilityProperty = GetAccessibilityProperty<NG::AccessibilityProperty>();
+    auto renderContext = GetRenderContext();
+    ClearAccessibilityFocus(accessibilityProperty, renderContext);
 }
 
 void FrameNode::OnReuse()
@@ -4995,8 +5015,14 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config);
     needRerender =
         needRerender || pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config.skipMeasure, config.skipLayout);
-    if (needRerender || (extensionHandler_ && extensionHandler_->NeedRender()) ||
-        CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
+        auto skippedMeasure = config.skipMeasure || SkipMeasureContent();
+        needRerender = needRerender || (extensionHandler_ &&
+            (extensionHandler_->NeedRender() || (extensionHandler_->HasDrawModifier() && !skippedMeasure)));
+    } else {
+        needRerender = needRerender || (extensionHandler_ && extensionHandler_->NeedRender());
+    }
+    if (needRerender || CheckNeedRender(paintProperty_->GetPropertyChangeFlag())) {
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     layoutAlgorithm_.Reset();
@@ -5094,9 +5120,7 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
     if (arkoalaLazyAdapter_) {
-        auto node = arkoalaLazyAdapter_->GetOrCreateChild(index);
-        AddChild(node);
-        return node;
+        return ArkoalaGetOrCreateChild(index);
     }
     auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
     if (child) {
@@ -5163,22 +5187,7 @@ void FrameNode::RemoveAllChildInRenderTree()
 void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
 {
     if (arkoalaLazyAdapter_) {
-        int32_t startIndex = showCached ? std::max(0, start - cacheStart) : start;
-        int32_t endIndex = showCached ? std::min(GetTotalChildCount() - 1, end + cacheEnd) : end;
-        std::vector<RefPtr<UINode>> toRemove;
-        for (const auto& child : GetChildren()) {
-            const int32_t index = static_cast<int32_t>(arkoalaLazyAdapter_->GetIndexOfChild(DynamicCast<FrameNode>(child)));
-            if (index >= startIndex && index <= endIndex) {
-                child->SetActive(true);
-            } else {
-                toRemove.push_back(child);
-            }
-        }
-        for (auto&& node : toRemove) {
-            RemoveChild(node);
-        }
-        arkoalaLazyAdapter_->SetActiveRange(startIndex - cacheStart, endIndex + cacheEnd);
-        return;
+        return ArkoalaUpdateActiveRange(start, end, cacheStart, cacheEnd, showCached);
     }
     frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd, showCached);
 }
@@ -5208,6 +5217,41 @@ void FrameNode::ArkoalaRemoveItemsOnChange(int32_t changeIndex)
         RemoveChild(node);
     }
     arkoalaLazyAdapter_->OnDataChange(changeIndex);
+}
+
+void FrameNode::ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
+{
+    CHECK_NULL_VOID(arkoalaLazyAdapter_);
+    const int32_t liveStart = start - cacheStart;
+    const int32_t liveEnd = end + cacheEnd;
+    const int32_t visibleStart = showCached ? liveStart : start;
+    const int32_t visibleEnd = showCached ? liveEnd : end;
+    std::vector<RefPtr<UINode>> toRemove;
+    for (const auto& child : GetChildren()) {
+        const int32_t index = static_cast<int32_t>(arkoalaLazyAdapter_->GetIndexOfChild(DynamicCast<FrameNode>(child)));
+        if (index < liveStart || index > liveEnd) {
+            toRemove.push_back(child);
+            continue;
+        }
+        child->SetActive(index >= visibleStart && index <= visibleEnd);
+    }
+    for (auto&& node : toRemove) {
+        RemoveChild(node);
+    }
+    arkoalaLazyAdapter_->SetActiveRange(liveStart, liveEnd);
+}
+
+RefPtr<LayoutWrapper> FrameNode::ArkoalaGetOrCreateChild(uint32_t index)
+{
+    CHECK_NULL_RETURN(arkoalaLazyAdapter_, nullptr);
+    if (auto node = arkoalaLazyAdapter_->GetChild(index)) {
+        return node;
+    }
+    auto node = arkoalaLazyAdapter_->GetOrCreateChild(index);
+    CHECK_NULL_RETURN(node, nullptr);
+    AddChild(node);
+    node->SetActive(true);
+    return node;
 }
 /* ============================== Arkoala LazyForEach adapter section END ================================*/
 

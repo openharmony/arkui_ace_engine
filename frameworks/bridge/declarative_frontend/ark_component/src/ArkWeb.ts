@@ -1306,6 +1306,79 @@ class WebGestureFocusModeModifier extends ModifierWithKey<GestureFocusMode> {
   }
 }
 
+class WebOnSslErrorEventReceiveModifier extends ModifierWithKey<OnSslErrorEventReceiveEvent> {
+  constructor (value: OnSslErrorEventReceiveEvent) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnSslErrorEventReceiveModifier');
+  applyPeer (node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnSslErrorEventReceive(node);
+    } else {
+      getUINativeModule().web.setOnSslErrorEventReceive(node, this.value);
+    }
+  }
+}
+
+class WebOnClientAuthenticationRequestModifier extends ModifierWithKey<(event: { handler: ClientAuthenticationHandler; host: string; port: number;
+  keyTypes: string[]; issuers: string[] }) => void> {
+  constructor(value: (event: { handler: ClientAuthenticationHandler; host: string; port: number;
+    keyTypes: string[]; issuers: string[] }) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnClientAuthenticationRequestModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnClientAuthenticationRequest(node);
+    } else {
+      getUINativeModule().web.setOnClientAuthenticationRequest(node, this.value);
+    }
+  }
+}
+
+class WebOnInterceptRequestModifier extends ModifierWithKey<(event?: { request: WebResourceRequest } | undefined) => WebResourceResponse> {
+  constructor(value: (event?: { request: WebResourceRequest } | undefined) => WebResourceResponse) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnInterceptRequestModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnInterceptRequest(node);
+    } else {
+      getUINativeModule().web.setOnInterceptRequest(node, this.value);
+    }
+  }
+}
+
+class WebOnFaviconReceivedModifier extends ModifierWithKey<(event: { favicon: any; }) => void> {
+  constructor(value: (event: { favicon: any; }) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnFaviconReceivedModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnFaviconReceived(node);
+    } else {
+      getUINativeModule().web.setOnFaviconReceived(node, this.value);
+    }
+  }
+}
+
+class WebOnBeforeUnloadModifier extends
+  ModifierWithKey<(event?: { url: string; message: string;  isReload?: boolean; result: JsResult; } | undefined) => boolean> {
+  constructor(value: (event?: { url: string; message: string; isReload?: boolean; result: JsResult; } | undefined) => boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('webOnBeforeUnloadModifier')
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().web.resetOnBeforeUnload(node);
+    } else {
+      getUINativeModule().web.setOnBeforeUnload(node, this.value);
+    }
+  }
+}
+
 class ArkWebComponent extends ArkComponent implements WebAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1427,8 +1500,9 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     modifierWithKey(this._modifiersWithKeys, WebOnAlertModifier.identity, WebOnAlertModifier, callback);
     return this;
   }
-  onBeforeUnload(callback: (event?: { url: string; message: string; result: JsResult; } | undefined) => boolean): this {
-    throw new Error('Method not implemented.');
+  onBeforeUnload(callback: (event?: { url: string; message: string; result: JsResult; isReload?: boolean; } | undefined) => boolean): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnBeforeUnloadModifier.identity, WebOnBeforeUnloadModifier, callback);
+    return this;
   }
   onConfirm(callback: (event?: { url: string; message: string; result: JsResult; } | undefined) => boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebOnConfirmModifier.identity, WebOnConfirmModifier, callback);
@@ -1504,7 +1578,8 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     return this;
   }
   onInterceptRequest(callback: (event?: { request: WebResourceRequest; } | undefined) => WebResourceResponse): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnInterceptRequestModifier.identity, WebOnInterceptRequestModifier, callback);
+    return this;
   }
   onOverrideErrorPage(callback: (event?: { webResourceRequest: WebResourceRequest; error: WebResourceError; } | undefined) => string): this {
     throw new Error('Method not implemented.');
@@ -1533,8 +1608,9 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     modifierWithKey(this._modifiersWithKeys, WebOnScrollModifier.identity, WebOnScrollModifier, callback);
     return this;
   }
-  onSslErrorEventReceive(callback: (event: { handler: SslErrorHandler; error: SslError; }) => void): this {
-    throw new Error('Method not implemented.');
+  onSslErrorEventReceive(callback: OnSslErrorEventReceiveEvent): this {
+    modifierWithKey(this._modifiersWithKeys, WebOnSslErrorEventReceiveModifier.identity, WebOnSslErrorEventReceiveModifier, callback);
+    return this;
   }
   onSslErrorEvent(callback: (event: { handler: SslErrorHandler; error: SslError; url: string;
     originalUrl: string; referrer: string; isFatalError: boolean; isMainFrame: boolean; }) => void): this {
@@ -1545,7 +1621,8 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     handler: ClientAuthenticationHandler;
     host: string; port: number; keyTypes: string[]; issuers: string[];
   }) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnClientAuthenticationRequestModifier.identity, WebOnClientAuthenticationRequestModifier, callback);
+    return this;
   }
   onWindowNew(callback: (event: { isAlert: boolean; isUserTrigger: boolean; targetUrl: string; handler: ControllerHandler; }) => void): this {
     modifierWithKey(this._modifiersWithKeys, WebOnWindowNewModifier.identity, WebOnWindowNewModifier, callback);
@@ -1620,7 +1697,8 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     return this;
   }
   onFaviconReceived(callback: (event: { favicon: any; }) => void): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WebOnFaviconReceivedModifier.identity, WebOnFaviconReceivedModifier, callback);
+    return this;
   }
   onPageVisible(callback: (event: { url: string; }) => void): this {
     modifierWithKey(this._modifiersWithKeys, WebOnPageVisibleModifier.identity, WebOnPageVisibleModifier, callback);
@@ -1716,23 +1794,32 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     }
     return this;
   }
-  nestedScroll(value: NestedScrollOptionsExt): this {
-    let options = new ArkNestedScrollOptionsExt();
-    if (value) {
-      if (value.scrollUp) {
-        options.scrollUp = value.scrollUp;
-      }
-      if (value.scrollDown) {
-        options.scrollDown = value.scrollDown;
-      }
-      if (value.scrollLeft) {
-        options.scrollLeft = value.scrollLeft;
-      }
-      if (value.scrollRight) {
-        options.scrollRight = value.scrollRight;
-      }
-      modifierWithKey(this._modifiersWithKeys, WebNestedScrollModifier.identity, WebNestedScrollModifier, options);
+  nestedScroll(value: NestedScrollOptions | NestedScrollOptionsExt): this {
+    if (!value) return this;
+    const options = new ArkNestedScrollOptionsExt();
+    
+    if ('scrollUp' in value) {
+      options.scrollUp = value.scrollUp;
     }
+    if ('scrollDown' in value) {
+      options.scrollDown = value.scrollDown;
+    }
+    if ('scrollLeft' in value) {
+      options.scrollLeft = value.scrollLeft;
+    }
+    if ('scrollRight' in value) {
+      options.scrollRight = value.scrollRight;
+    }
+
+    if ('scrollForward' in value) {
+      options.scrollDown = value.scrollForward;
+      options.scrollRight = value.scrollForward;
+    }
+    if ('scrollBackward' in value) {
+      options.scrollUp = value.scrollBackward;
+      options.scrollLeft = value.scrollBackward;
+    }
+    modifierWithKey(this._modifiersWithKeys, WebNestedScrollModifier.identity, WebNestedScrollModifier, options);
     return this;
   }
   onOverrideUrlLoading(callback: OnOverrideUrlLoadingCallback): this {

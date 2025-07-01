@@ -42,6 +42,7 @@ public:
     }
 
     void SetSpecificSupportAction() override;
+    void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) override;
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SliderAccessibilityProperty);
 };

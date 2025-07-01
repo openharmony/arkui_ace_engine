@@ -661,8 +661,6 @@ public:
     float GetSelectMenuWidthFromTheme() const;
 
     bool IsSelectOverlayDefaultModeRightClickMenu();
-    void UpdateMenuDividerWithMode(const RefPtr<UINode>& previousNode, const RefPtr<UINode>& currentNode,
-        const RefPtr<MenuLayoutProperty>& property, int32_t& index);
     void RemoveLastNodeDivider(const RefPtr<UINode>& lastNode);
     void UpdateMenuItemDivider();
     void UpdateDividerProperty(const RefPtr<FrameNode>& dividerNode, const std::optional<V2::ItemDivider>& divider);
@@ -731,6 +729,12 @@ protected:
     virtual void UpdateBorderRadius(const RefPtr<FrameNode>& menuNode, const BorderRadiusProperty& borderRadius);
 
 private:
+    void UpdateMenuDividerWithMode(const RefPtr<UINode>& previousNode, const RefPtr<UINode>& currentNode,
+        const RefPtr<MenuLayoutProperty>& property, int32_t& index);
+    void AddGroupHeaderDivider(RefPtr<UINode>& previousNode, const RefPtr<UINode>& currentNode,
+        const RefPtr<MenuLayoutProperty>& property, int32_t& index);
+    void AddGroupFooterDivider(RefPtr<UINode>& previousNode, const RefPtr<UINode>& currentNode,
+        const RefPtr<MenuLayoutProperty>& property, int32_t& index);
     void OnAttachToFrameNode() override;
     int32_t RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

@@ -36,7 +36,7 @@ napi_value JsOnError(napi_env env, napi_callback_info info);
 napi_value JsOnPrepared(napi_env env, napi_callback_info info);
 napi_value StartPlayback(napi_env env, napi_callback_info info);
 napi_value StopPlayback(napi_env env, napi_callback_info info);
-napi_value Pause(napi_env env, napi_callback_info info);
+napi_value PausePlayback(napi_env env, napi_callback_info info);
 napi_value Reset(napi_env env, napi_callback_info info);
 napi_value Restart(napi_env env, napi_callback_info info);
 napi_value EnableTransition(napi_env env, napi_callback_info info);

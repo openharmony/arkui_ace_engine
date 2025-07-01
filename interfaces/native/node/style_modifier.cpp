@@ -14010,7 +14010,15 @@ int32_t SetSliderShowSteps(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    GetFullImpl()->getNodeModifiers()->getSliderModifier()->setShowSteps(node->uiNodeHandle, item->value[0].i32);
+    if (item->size == NUM_1) {
+        GetFullImpl()->getNodeModifiers()->getSliderModifier()->setShowSteps(node->uiNodeHandle, item->value[0].i32);
+    } else if ((item->size == NUM_2) && (CheckAttributeIsBool(item->value[1].u32))) {
+        ArkUISliderShowStepOptions* options = static_cast<ArkUISliderShowStepOptions*>(item->object);
+        GetFullImpl()->getNodeModifiers()->getSliderModifier()->setShowStepsWithOptions(
+            node->uiNodeHandle, item->value[0].i32, options, item->value[1].u32);
+    } else {
+        return ERROR_CODE_PARAM_INVALID;
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -15457,6 +15465,13 @@ void ResetGridFocusWrapMode(ArkUI_NodeHandle node)
     if (node->type == ARKUI_NODE_GRID) {
         fullImpl->getNodeModifiers()->getGridModifier()->resetGridFocusWrapMode(node->uiNodeHandle);
     }
+}
+
+const ArkUI_AttributeItem* GetGridFocusWrapMode(ArkUI_NodeHandle node)
+{
+    ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getGridModifier()->getGridFocusWrapMode(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
 }
 
 bool CheckIfAttributeLegal(ArkUI_NodeHandle node, int32_t type)
@@ -17159,7 +17174,7 @@ const ArkUI_AttributeItem* GetRelativeContainerAttribute(ArkUI_NodeHandle node, 
 const ArkUI_AttributeItem* GetGridAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Getter* getters[] = { GetGridColumnsTemplate, GetGridRowsTemplate, GetGridColumnsGap, GetGridRowsGap,
-        GetGridNodeAdapter, GetGridCachedCount, nullptr, GetGridSyncLoad };
+        GetGridNodeAdapter, GetGridCachedCount, GetGridFocusWrapMode, GetGridSyncLoad };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Grid node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;

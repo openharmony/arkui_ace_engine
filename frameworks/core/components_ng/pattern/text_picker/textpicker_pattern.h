@@ -108,7 +108,7 @@ public:
 
     void SetDefaultPickerItemHeight();
 
-    std::map<uint32_t, RefPtr<FrameNode>> GetColumnNodes();
+    std::map<uint32_t, RefPtr<FrameNode>> GetColumnNodes() const;
 
     RefPtr<FrameNode> GetColumnNode();
 

@@ -9743,13 +9743,26 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier, NG::FrameNode* frameNode)
 
 void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject()) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY) && !info[0]->IsObject()) {
         return;
     }
 
     auto frameNode = static_cast<NG::FrameNode*>(ViewAbstractModel::GetInstance()->GetFrameNode());
     bool IsSupportDrawModifier = frameNode && frameNode->IsSupportDrawModifier();
     if (!IsSupportDrawModifier) {
+        return;
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY) && !info[0]->IsObject()) {
+        ViewAbstractModel::GetInstance()->SetDrawModifier(nullptr);
+        if (frameNode) {
+            const auto& extensionHandler = frameNode->GetExtensionHandler();
+            if (extensionHandler) {
+                extensionHandler->InvalidateRender();
+                extensionHandler->ForegroundRender();
+            } else {
+                frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+            }
+        }
         return;
     }
     auto jsDrawModifier = JSRef<JSObject>::Cast(info[0]);

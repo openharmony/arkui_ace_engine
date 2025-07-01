@@ -5646,7 +5646,9 @@ void OverlayManager::PlaySheetTransition(
     CHECK_NULL_VOID(sheetNode);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
-    if (sheetPattern->GetSheetType() != SheetType::SHEET_SIDE && isTransitionIn && isFirstTransition &&
+    auto sheetObject = sheetPattern->GetSheetObject();
+    CHECK_NULL_VOID(sheetObject);
+    if (sheetObject->IsSheetObjectBase() && isTransitionIn && isFirstTransition &&
         NearZero(sheetHeight_)) {
         return;
     }

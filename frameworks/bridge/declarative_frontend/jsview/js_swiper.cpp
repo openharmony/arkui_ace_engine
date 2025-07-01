@@ -223,6 +223,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("onContentWillScroll", &JSSwiper::SetOnContentWillScroll);
     JSClass<JSSwiper>::StaticMethod("onSelected", &JSSwiper::SetOnSelected);
     JSClass<JSSwiper>::StaticMethod("maintainVisibleContentPosition", &JSSwiper::SetMaintainVisibleContentPosition);
+    JSClass<JSSwiper>::StaticMethod("onScrollStateChanged", &JSSwiper::SetOnScrollStateChanged);
     JSClass<JSSwiper>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -1808,5 +1809,26 @@ void JSSwiper::SetMaintainVisibleContentPosition(const JSCallbackInfo& info)
     }
 
     SwiperModel::GetInstance()->SetMaintainVisibleContentPosition(info[0]->ToBoolean());
+}
+void JSSwiper::SetOnScrollStateChanged(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto scrollStateHandler = AceType::MakeRefPtr<JsEventFunction<SwiperChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), SwiperChangeEventToJSValue);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onScrollStateChanged = [executionContext = info.GetExecutionContext(), func = std::move(scrollStateHandler),
+                          node = targetNode](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* scrollStateInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        if (!scrollStateInfo) {
+            TAG_LOGW(AceLogTag::ACE_SWIPER, "scrollStateInfo invalid, OnScrollStateChanged failed.");
+            return;
+        }
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(*scrollStateInfo);
+    };
+    SwiperModel::GetInstance()->SetOnScrollStateChanged(std::move(onScrollStateChanged));
 }
 } // namespace OHOS::Ace::Framework

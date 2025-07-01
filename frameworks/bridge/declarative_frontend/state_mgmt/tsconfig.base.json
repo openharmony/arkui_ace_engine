@@ -31,6 +31,7 @@
     "src/lib/sdk/persistent_storage.ts",
     "src/lib/sdk/environment.ts",
     "src/lib/sdk/i_repeat.ts",
+    "src/lib/sdk/i_monitor.d.ts",
 
     // common
     "src/lib/common/state_mgmt_console_trace.ts",
@@ -103,6 +104,7 @@
     // sdk
     "src/lib/sdk/v2_persistence.ts",
     "src/lib/sdk/ui_utils.ts",
+    "src/lib/sdk/business_error.ts",
 
     // common
     "src/lib/common/gesture_span.ts",

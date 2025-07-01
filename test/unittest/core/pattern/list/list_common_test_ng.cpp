@@ -4573,6 +4573,54 @@ HWTEST_F(ListCommonTestNg, LostChildFocusToSelf001, TestSize.Level1)
     EXPECT_FALSE(focusNode->IsCurrentFocus());
 }
 
+/**
+ * @tc.name: IsListItemGroupByIndex001
+ * @tc.desc: Test IsListItemGroupByIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, IsListItemGroupByIndex001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateFocusableListItems(10);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Listitem is NOT ListItemGroup.
+     * @tc.expected: function return false.
+     */
+    EXPECT_FALSE(pattern_->IsListItemGroupByIndex(0));
+    /**
+     * @tc.steps: step1. Invaild index.
+     * @tc.expected: function return false.
+     */
+    EXPECT_FALSE(pattern_->IsListItemGroupByIndex(-1));
+}
+
+/**
+ * @tc.name: IsListItemGroupByIndex002
+ * @tc.desc: Test IsListItemGroupByIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, IsListItemGroupByIndex002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    CreateFocusableListItemGroups(3);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Index for ListItemGroup is valid.
+     * @tc.expected: function return false.
+     */
+    EXPECT_TRUE(pattern_->IsListItemGroupByIndex(0));
+
+    /**
+     * @tc.steps: step1. Index for ListItemGroup is NOT valid.
+     * @tc.expected: function return false.
+     */
+    EXPECT_FALSE(pattern_->IsListItemGroupByIndex(-1));
+    EXPECT_FALSE(pattern_->IsListItemGroupByIndex(5));
+}
+
 void ListCommonTestNg::MapEventInLazyForEachForItemDragEvent(int32_t* actualDragStartIndex, int32_t* actualOnDropIndex,
     int32_t* actualOnLongPressIndex, int32_t* actualonMoveThroughFrom, int32_t* actualonMoveThroughTo)
 {

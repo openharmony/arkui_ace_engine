@@ -1771,15 +1771,20 @@ HWTEST_F(EventManagerTestNg, EventManagerTest098, TestSize.Level1)
     event.action = KeyAction::DOWN;
     EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
 
-    MockContainer::SetUp();
+    event.code = KeyCode::KEY_ESCAPE;
+    event.action = KeyAction::DOWN;
+
+    MockPipelineContext::SetUp();
+    MockContainer::SetUp(NG::PipelineContext::GetCurrentContext());
     auto container = MockContainer::Current();
+
     container->isSubContainer_ = true;
     container->isDialogContainer_ = true;
     EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
     container->isSubContainer_ = false;
     container->isDialogContainer_ = false;
     EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
-        container->isSubContainer_ = true;
+    container->isSubContainer_ = true;
     container->isDialogContainer_ = false;
     EXPECT_FALSE(eventManager->RemoveOverlayByESC(event));
     container->isSubContainer_ = false;

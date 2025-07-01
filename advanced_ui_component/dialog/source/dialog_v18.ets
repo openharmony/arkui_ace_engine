@@ -1089,10 +1089,8 @@ struct CustomDialogContentComponent {
   @State customStyle: boolean | undefined = undefined;
   @State buttonMaxFontSize: Length = `${BODY_L}fp`;
   @State buttonMinFontSize: Length = 9;
-  @State primaryTitleMaxFontSize: Length = `${TITLE_S}fp`;
-  @State primaryTitleMinFontSize: Length = `${BODY_L}fp`;
-  @State secondaryTitleMaxFontSize: Length = `${SUBTITLE_SIZE()}fp`;
-  @State secondaryTitleMinFontSize: Length = `${BODY_S}fp`;
+  @State primaryTitleFontSize: Length = `${TITLE_S}fp`;
+  @State secondaryTitleFontSize: Length = `${SUBTITLE_SIZE()}fp`;
   @State primaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @State secondaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_secondary');
   @State titleTextAlign: TextAlign = TextAlign.Center;
@@ -1303,8 +1301,7 @@ struct CustomDialogContentComponent {
           .fontWeight(TITLE_FONT_WEIGHT())
           .fontColor(this.primaryTitleFontColorWithTheme)
           .textAlign(this.titleTextAlign)
-          .maxFontSize(this.primaryTitleMaxFontSize)
-          .minFontSize(this.primaryTitleMinFontSize)
+          .fontSize(this.primaryTitleFontSize)
           .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           .maxLines(TITLE_MAX_LINES)
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
@@ -1323,8 +1320,7 @@ struct CustomDialogContentComponent {
           .fontWeight(FontWeight.Regular)
           .fontColor(this.secondaryTitleFontColorWithTheme)
           .textAlign(this.titleTextAlign)
-          .maxFontSize(this.secondaryTitleMaxFontSize)
-          .minFontSize(this.secondaryTitleMinFontSize)
+          .fontSize(this.secondaryTitleFontSize)
           .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           .maxLines(TITLE_MAX_LINES)
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
