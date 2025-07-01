@@ -23,7 +23,12 @@
 namespace OHOS::Ace::NG {
 FreeScrollController::FreeScrollController(ScrollPattern& pattern) : pattern_(pattern)
 {
-    offset_ = MakeRefPtr<NodeAnimatablePropertyOffsetF>(OffsetF {}, [this](const OffsetF& _) { pattern_.MarkDirty(); });
+    offset_ = MakeRefPtr<NodeAnimatablePropertyOffsetF>(OffsetF {}, [weak = WeakClaim(this)](const OffsetF& _) {
+        auto controller = weak.Upgrade();
+        if (controller) {
+            controller->pattern_.MarkDirty();
+        }
+    });
     auto* renderCtx = pattern_.GetRenderContext();
     CHECK_NULL_VOID(renderCtx);
     renderCtx->AttachNodeAnimatableProperty(offset_);
