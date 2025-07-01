@@ -2155,6 +2155,37 @@ HWTEST_F(SelectTestNg, ToJsonValue002, TestSize.Level1)
     EXPECT_FALSE(pattern->options_.empty());
 }
 
+/**
+ * @tc.name: ToJsonValue003
+ * @tc.desc: Test SelectPattern ToJsonDividerMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ToJsonValue003, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
+        { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto pattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto menuNode = pattern->GetMenuNode();
+    ASSERT_NE(menuNode, nullptr);
+    auto menuLayoutProps = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    ASSERT_NE(menuLayoutProps, nullptr);
+    auto json = JsonUtil::Create(true);
+    pattern->ToJsonDividerMode(json);
+    EXPECT_EQ(json->GetString("dividerMode", ""), "");
+    menuLayoutProps->UpdateItemDividerMode(DividerMode::FLOATING_ABOVE_MENU);
+    pattern->ToJsonDividerMode(json);
+    EXPECT_EQ(json->GetString("dividerMode", ""), "FLOATING_ABOVE_MENU");
+    json->Delete("dividerMode");
+    menuLayoutProps->UpdateItemDividerMode(DividerMode::EMBEDDED_IN_MENU);
+    pattern->ToJsonDividerMode(json);
+    EXPECT_EQ(json->GetString("dividerMode", ""), "EMBEDDED_IN_MENU");
+}
+
 HWTEST_F(SelectTestNg, SelectLayoutPropertyTest006, TestSize.Level1)
 {
     /**

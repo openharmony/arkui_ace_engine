@@ -1650,10 +1650,28 @@ void SelectPattern::ToJsonDivider(std::unique_ptr<JsonValue>& json, const Inspec
             divider->Put("startMargin", props->GetDividerValue().startMargin.ToString().c_str());
             divider->Put("endMargin", props->GetDividerValue().endMargin.ToString().c_str());
             divider->Put("color", props->GetDividerValue().color.ColorToString().c_str());
+            ToJsonDividerMode(divider);
             json->PutExtAttr("divider", divider->ToString().c_str(), filter);
         } else {
             json->PutExtAttr("divider", "", filter);
         }
+    }
+}
+
+void SelectPattern::ToJsonDividerMode(std::unique_ptr<JsonValue>& json) const
+{
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuLayoutProps = menu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(menuLayoutProps);
+    auto mode = menuLayoutProps->GetItemDividerMode();
+    if (!mode.has_value()) {
+        return;
+    }
+    if (mode.value() == DividerMode::FLOATING_ABOVE_MENU) {
+        json->Put("dividerMode", "FLOATING_ABOVE_MENU");
+    } else if (mode.value() == DividerMode::EMBEDDED_IN_MENU) {
+        json->Put("dividerMode", "EMBEDDED_IN_MENU");
     }
 }
 
