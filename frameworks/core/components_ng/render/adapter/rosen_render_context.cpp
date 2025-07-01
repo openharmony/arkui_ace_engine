@@ -37,6 +37,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/log/dump_log.h"
+#include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/animation/native_curve_helper.h"
 #include "core/components/theme/app_theme.h"
@@ -972,6 +973,8 @@ void RosenRenderContext::UpdateWindowActiveState(bool isActive)
 
 void RosenRenderContext::SetFrontBlurFilter()
 {
+    auto host = GetHost();
+    FREE_NODE_CHECK(host, SetFrontBlurFilter);
     CHECK_NULL_VOID(rsNode_);
     auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
@@ -6551,6 +6554,7 @@ void RosenRenderContext::NotifyHostTransformUpdated(bool changed)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    FREE_NODE_CHECK(host, NotifyHostTransformUpdated, changed);
     host->NotifyTransformInfoChanged();
     host->OnNodeTransformInfoUpdate(changed);
     host->UpdateAccessibilityNodeRect();

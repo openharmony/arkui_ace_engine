@@ -44,6 +44,7 @@
 #include "core/image/image_source_info.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/native/node/node_common_modifier_multi_thread.h"
 #include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/touch_event_convertor.h"
 #include "core/interfaces/native/node/view_model.h"
@@ -2322,6 +2323,7 @@ void SetGeometryTransition(ArkUINodeHandle node, ArkUI_CharPtr id, const ArkUIGe
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, SetGeometryTransition, node, id, options);
     std::string idStr(id);
     ViewAbstract::SetGeometryTransition(frameNode, idStr,
         static_cast<bool>(options->follow), static_cast<bool>(options->hierarchyStrategy));
@@ -2343,6 +2345,7 @@ void ResetGeometryTransition(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    FREE_NODE_CHECK(frameNode, ResetGeometryTransition, node);
     ViewAbstract::SetGeometryTransition(frameNode, "", false, true);
 }
 
