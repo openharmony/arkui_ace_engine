@@ -93,12 +93,14 @@ constexpr float WIDTH_RATIO_LIMIT = 1.0f;
 constexpr int32_t MIN_OPINC_AREA = 10000;
 } // namespace
 
-void ClearAccessibilityFocus(const OHOS::Ace::RefPtr<OHOS::Ace::NG::AccessibilityProperty>& accessibilityProperty,
-    const OHOS::Ace::RefPtr<OHOS::Ace::NG::RenderContext>& renderContext)
+namespace OHOS::Ace::NG {
+
+void ClearAccessibilityFocus(const RefPtr<AccessibilityProperty>& accessibilityProperty,
+    const RefPtr<RenderContext>& renderContext)
 {
     CHECK_NULL_VOID(accessibilityProperty);
     CHECK_NULL_VOID(renderContext);
-    if (OHOS::Ace::AceApplicationInfo::GetInstance().IsAccessibilityEnabled() &&
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() &&
         accessibilityProperty->GetAccessibilityFocusState()) {
         accessibilityProperty->SetAccessibilityFocusState(false);
         if (renderContext->GetAccessibilityFocus().value_or(false)) {
@@ -106,7 +108,6 @@ void ClearAccessibilityFocus(const OHOS::Ace::RefPtr<OHOS::Ace::NG::Accessibilit
         }
     }
 }
-namespace OHOS::Ace::NG {
 
 class FrameNode::FrameProxy final : public RecursiveLock {
 public:
