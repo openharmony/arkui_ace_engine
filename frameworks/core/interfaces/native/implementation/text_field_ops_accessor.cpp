@@ -15,6 +15,7 @@
 
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/text_field/text_field_model_static.h"
@@ -40,11 +41,28 @@ Ark_NativePointer RegisterTextFieldValueCallbackImpl(Ark_NativePointer node,
         auto changed = pattern->InitValueText(text.value());
         pattern->SetTextChangedAtCreation(changed);
     }
-
-    auto onEvent = [arkCallback = CallbackHelper(*callback)](const std::u16string& content) {
+    bool typeIsString = value->selector == 0;
+    Opt_Number resourceType = value->value1.type;
+    auto onEvent = [resourceType, typeIsString, arkCallback = CallbackHelper(*callback)]
+        (const std::u16string& content) {
         Converter::ConvContext ctx;
-        auto arkContent = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(content, &ctx);
-        arkCallback.Invoke(arkContent);
+        Ark_ResourceStr arkContent;
+        if (typeIsString) {
+            arkContent = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(content, &ctx);
+        } else {
+            auto container = Container::Current();
+            if (!container) {
+                LOGW("container is null");
+                return;
+            }
+            std::variant<int32_t, std::string> u8Content = UtfUtils::Str16DebugToStr8(content);
+            auto arkResourceContent = Converter::ArkValue<Ark_Resource>(u8Content, &ctx);
+            arkResourceContent.bundleName = Converter::ArkValue<Ark_String>(container->GetBundleName(), &ctx);
+            arkResourceContent.moduleName = Converter::ArkValue<Ark_String>(container->GetModuleName(), &ctx);
+            arkResourceContent.type = resourceType;
+            arkContent = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(arkResourceContent, &ctx);
+        }
+        arkCallback.InvokeSync(arkContent);
     };
     TextFieldModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
     return node;
