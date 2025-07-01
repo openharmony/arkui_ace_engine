@@ -199,7 +199,8 @@ void FormRenderWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFram
     decltype(frameRateData_) frameRateData{rate, animatorExpectedFrameRate, rateType};
     if (frameRateData_ != frameRateData) {
         frameRateData_ = frameRateData;
-        frameRateLinker_->UpdateFrameRateRange({0, RANGE_MAX_REFRESHRATE, rate, rateType}, animatorExpectedFrameRate);
+        auto rsUIContext = rsUIDirector ? rsUIDirector_->GetRSUIContext() : nullptr;
+        frameRateLinker_->UpdateFrameRateRange({0, RANGE_MAX_REFRESHRATE, rate, rateType}, animatorExpectedFrameRate, rsUIContext);
     }
 #endif
 }
