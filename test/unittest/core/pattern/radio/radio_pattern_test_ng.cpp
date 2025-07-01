@@ -1862,4 +1862,45 @@ HWTEST_F(RadioPatternTestNg, RadioPatternTest119, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->OnAfterModifyDone();
 }
+
+/**
+ * @tc.name: InitDefaultMarginTest001
+ * @tc.desc: Test Radio InitDefaultMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioPatternTestNg, InitDefaultMarginTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init radio node
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. make builderFunc
+     */
+    auto buildFunc = [](RadioConfiguration config) -> RefPtr<FrameNode> { return nullptr; };
+    /**
+     * @tc.steps: step3. set builder func and call InitDefaultMargin.
+     * @tc.expected: step3. margin property is null.
+     */
+    radioModelNG.SetIsUserSetMargin(true);
+    pattern->SetBuilderFunc(buildFunc);
+    pattern->InitDefaultMargin();
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_EQ(layoutProperty->GetMarginProperty(), nullptr);
+    /**
+     * @tc.steps: step4. clear builderFunc and call InitDefaultMargin.
+     * @tc.expected: step4. margin property is not null.
+     */
+    radioModelNG.SetIsUserSetMargin(false);
+    pattern->InitDefaultMargin();
+    EXPECT_NE(layoutProperty->GetMarginProperty(), nullptr);
+    pattern->SetBuilderFunc(nullptr);
+    pattern->InitDefaultMargin();
+    EXPECT_NE(layoutProperty->GetMarginProperty(), nullptr);
+}
 } // namespace OHOS::Ace::NG

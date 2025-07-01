@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_radio_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -438,6 +439,31 @@ ArkUINativeModuleValue RadioBridge::SetRadioOnChange(ArkUIRuntimeCallInfo* runti
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
     };
     GetArkUINodeModifiers()->getRadioModifier()->setRadioOnChange(nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RadioBridge::SetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    CommonBridge::SetMargin(runtimeCallInfo);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    GetArkUINodeModifiers()->getRadioModifier()->setIsUserSetMargin(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue RadioBridge::ResetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    CommonBridge::ResetMargin(runtimeCallInfo);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getRadioModifier()->setIsUserSetMargin(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 }

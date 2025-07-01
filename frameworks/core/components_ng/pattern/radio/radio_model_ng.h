@@ -46,6 +46,7 @@ public:
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
     void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs) override;
+    void SetIsUserSetMargin(bool isUserSet) override;
     void SetCheckedBackgroundColor(const Color& color) override;
     void SetUncheckedBorderColor(const Color& color) override;
     void SetIndicatorColor(const Color& color) override;
@@ -64,6 +65,7 @@ public:
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
     static void SetPadding(FrameNode* frameNode, const NG::PaddingProperty& newArgs);
+    static void SetIsUserSetMargin(FrameNode* frameNode, bool isUserSet);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetBuilderFunc(FrameNode* frameNode, NG::RadioMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, bool value);

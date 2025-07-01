@@ -41,6 +41,7 @@ public:
     virtual void SetWidth(const Dimension& width);
     virtual void SetHeight(const Dimension& height);
     virtual void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag);
+    virtual void SetIsUserSetMargin(bool isUserSet) {};
     virtual void SetChangeEvent(std::function<void(bool)>&& changeEvent) = 0;
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) {};
     virtual void SetCheckboxStyle(CheckBoxStyle checkboxStyle) {};

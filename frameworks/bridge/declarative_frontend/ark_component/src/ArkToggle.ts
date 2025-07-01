@@ -77,6 +77,36 @@ class ArkToggleComponent extends ArkComponent implements ToggleAttribute {
     modifierWithKey(this._modifiersWithKeys, ToggleSwitchStyleModifier.identity, ToggleSwitchStyleModifier, value);
     return this;
   }
+  margin(value: Margin | Length): this {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isLengthType(value) || isResource(value)) {
+        arkValue.top = <Length>value;
+        arkValue.right = <Length>value;
+        arkValue.bottom = <Length>value;
+        arkValue.left = <Length>value;
+      } else {
+        arkValue.top = value.top;
+        arkValue.bottom = value.bottom;
+        if (Object.keys(value).indexOf('right') >= 0) {
+          arkValue.right = value.right;
+        }
+        if (Object.keys(value).indexOf('end') >= 0) {
+          arkValue.right = value.end;
+        }
+        if (Object.keys(value).indexOf('left') >= 0) {
+          arkValue.left = value.left;
+        }
+        if (Object.keys(value).indexOf('start') >= 0) {
+          arkValue.left = value.start;
+        }
+      }
+      modifierWithKey(this._modifiersWithKeys, ToggleMarginModifier.identity, ToggleMarginModifier, arkValue);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, ToggleMarginModifier.identity, ToggleMarginModifier, undefined);
+    }
+    return this;
+  }
   contentModifier(value: ContentModifier<ToggleConfiguration>): this {
     modifierWithKey(this._modifiersWithKeys, ToggleContentModifier.identity, ToggleContentModifier, value);
     return this;
@@ -325,6 +355,28 @@ class ToggleSwitchStyleModifier extends ModifierWithKey<SwitchStyle> {
     } else {
       return true;
     }
+  }
+}
+
+class ToggleMarginModifier extends ModifierWithKey<ArkPadding> {
+  constructor(value: ArkPadding) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('toggleMargin');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().toggle.resetMargin(node);
+    } else {
+      getUINativeModule().toggle.setMargin(node, this.value.top,
+        this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
   }
 }
 

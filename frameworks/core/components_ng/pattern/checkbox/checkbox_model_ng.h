@@ -46,6 +46,7 @@ public:
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
     void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs, bool flag) override;
+    void SetIsUserSetMargin(bool isUserSet) override;
     void SetChangeEvent(ChangeEvent&& changeEvent) override;
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetCheckboxStyle(CheckBoxStyle checkboxStyle) override;
@@ -63,6 +64,7 @@ public:
     static void SetCheckMarkSize(FrameNode* frameNode, const Dimension& size);
     static void SetCheckMarkWidth(FrameNode* frameNode, const Dimension& width);
     static void SetPadding(FrameNode* frameNode, const NG::PaddingProperty& padding);
+    static void SetIsUserSetMargin(FrameNode* frameNode, bool isUserSet);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetBuilderFunc(FrameNode* frameNode, NG::CheckBoxMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, bool value);

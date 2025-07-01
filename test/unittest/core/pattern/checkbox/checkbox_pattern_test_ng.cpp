@@ -1630,4 +1630,45 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest045, TestSize.Level1)
     eventHub->getInnerFocusRectFunc_(paintRect);
     EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (-105.00, -105.00) - [400.00 x 400.00]");
 }
+
+/**
+ * @tc.name: InitDefaultMarginTest001
+ * @tc.desc: Test Checkbox InitDefaultMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPatternTestNG, InitDefaultMarginTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. make builderFunc
+     */
+    auto buildFunc = [](CheckBoxConfiguration config) -> RefPtr<FrameNode> { return nullptr; };
+    /**
+     * @tc.steps: step3. set builder func and call InitDefaultMargin.
+     * @tc.expected: step3. margin property is null.
+     */
+    checkBoxModelNG.SetIsUserSetMargin(true);
+    pattern->SetBuilderFunc(buildFunc);
+    pattern->InitDefaultMargin();
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    EXPECT_EQ(layoutProperty->GetMarginProperty(), nullptr);
+    /**
+     * @tc.steps: step4. clear builderFunc and call InitDefaultMargin.
+     * @tc.expected: step4. margin property is not null.
+     */
+    checkBoxModelNG.SetIsUserSetMargin(false);
+    pattern->InitDefaultMargin();
+    EXPECT_NE(layoutProperty->GetMarginProperty(), nullptr);
+    pattern->SetBuilderFunc(nullptr);
+    pattern->InitDefaultMargin();
+    EXPECT_NE(layoutProperty->GetMarginProperty(), nullptr);
+}
 } // namespace OHOS::Ace::NG

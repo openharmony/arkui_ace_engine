@@ -46,6 +46,7 @@ public:
     void SetBackgroundColor(const Color& color, bool flag) override;
     bool IsToggle() override;
     void SetPadding(const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs) override;
+    void SetIsUserSetMargin(bool isUserSet) override;
     void OnChangeEvent(ChangeEvent&& onChangeEvent) override;
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
@@ -68,6 +69,7 @@ public:
     static void SetHeight(FrameNode* frameNode, const Dimension& height);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetPadding(FrameNode* frameNode, const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs);
+    static void SetIsUserSetMargin(FrameNode* frameNode, bool isUserSet);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
     static void SetSwitchIsOn(FrameNode* frameNode, bool isOn);
     static void SetBuilderFunc(FrameNode* frameNode, NG::SwitchMakeCallback&& jsMake);

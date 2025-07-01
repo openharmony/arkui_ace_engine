@@ -4274,6 +4274,7 @@ struct ArkUICheckboxModifier {
     void (*resetCheckboxPadding)(ArkUINodeHandle node);
     void (*resetCheckboxResponseRegion)(ArkUINodeHandle node);
     void (*resetCheckboxOnChange)(ArkUINodeHandle node);
+    void (*setIsUserSetMargin)(ArkUINodeHandle node);
 
     ArkUI_Bool (*getSelect)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getSelectedColor)(ArkUINodeHandle node);
@@ -4499,6 +4500,7 @@ struct ArkUIToggleModifier {
     void (*setToggleState)(ArkUINodeHandle node, ArkUI_Bool isOn);
     void (*setToggleOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetToggleOnChange)(ArkUINodeHandle node);
+    void (*setIsUserSetMargin)(ArkUINodeHandle node);
 };
 
 struct ArkUINavigationModifier {
@@ -5363,6 +5365,7 @@ struct ArkUIRadioModifier {
     void (*setRadioOptions)(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_CharPtr group, ArkUI_Uint32 indicatorType);
     void (*setRadioOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetRadioOnChange)(ArkUINodeHandle node);
+    void (*setIsUserSetMargin)(ArkUINodeHandle node);
 };
 
 struct ArkUIPatternLockControllerModifier {

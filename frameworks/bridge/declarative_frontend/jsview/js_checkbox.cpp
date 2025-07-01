@@ -103,6 +103,7 @@ void JSCheckbox::JSBind(BindingTarget globalObj)
     JSClass<JSCheckbox>::StaticMethod("mark", &JSCheckbox::Mark);
     JSClass<JSCheckbox>::StaticMethod("responseRegion", &JSCheckbox::JsResponseRegion);
     JSClass<JSCheckbox>::StaticMethod("padding", &JSCheckbox::JsPadding);
+    JSClass<JSCheckbox>::StaticMethod("margin", &JSCheckbox::JsMargin);
     JSClass<JSCheckbox>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSCheckbox>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSCheckbox>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
@@ -324,6 +325,12 @@ void JSCheckbox::JsPadding(const JSCallbackInfo& info)
     bool flag = GetOldPadding(info, oldPadding);
     NG::PaddingProperty newPadding = GetNewPadding(info);
     CheckBoxModel::GetInstance()->SetPadding(oldPadding, newPadding, flag);
+}
+
+void JSCheckbox::JsMargin(const JSCallbackInfo& info)
+{
+    CheckBoxModel::GetInstance()->SetIsUserSetMargin(true);
+    JSViewAbstract::JsMargin(info);
 }
 
 bool JSCheckbox::GetOldPadding(const JSCallbackInfo& info, NG::PaddingPropertyF& padding)

@@ -15,6 +15,7 @@
 #include "node_toggle_modifier.h"
 
 #include "core/components/checkable/checkable_theme.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -360,6 +361,12 @@ void ResetToggleOnChange(ArkUINodeHandle node)
     ToggleModelNG::OnChange(frameNode, nullptr);
 }
 
+void SetIsUserSetMargin(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ToggleModelNG::SetIsUserSetMargin(frameNode, true);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUIToggleModifier* GetToggleModifier()
@@ -395,6 +402,7 @@ const ArkUIToggleModifier* GetToggleModifier()
         .setToggleState = SetToggleState,
         .setToggleOnChange = SetToggleOnChange,
         .resetToggleOnChange = ResetToggleOnChange,
+        .setIsUserSetMargin = SetIsUserSetMargin,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

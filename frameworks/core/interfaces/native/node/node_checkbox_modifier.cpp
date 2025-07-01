@@ -236,6 +236,13 @@ void ResetCheckboxShape(ArkUINodeHandle node)
     CheckBoxModelNG::SetCheckboxStyle(frameNode, CheckBoxStyle::CIRCULAR_STYLE);
 }
 
+void SetIsUserSetMargin(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CheckBoxModelNG::SetIsUserSetMargin(frameNode, true);
+}
+
 ArkUI_Bool GetSelect(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -342,6 +349,7 @@ const ArkUICheckboxModifier *GetCheckboxModifier()
         .resetCheckboxPadding = ResetCheckboxPadding,
         .resetCheckboxResponseRegion = ResetCheckboxResponseRegion,
         .resetCheckboxOnChange = ResetCheckboxOnChange,
+        .setIsUserSetMargin = SetIsUserSetMargin,
         .getSelect = GetSelect,
         .getSelectedColor = GetSelectedColor,
         .getUnSelectedColor = GetUnSelectedColor,

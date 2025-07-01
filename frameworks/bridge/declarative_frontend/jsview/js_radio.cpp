@@ -121,6 +121,7 @@ void JSRadio::JSBind(BindingTarget globalObj)
     JSClass<JSRadio>::StaticMethod("checked", &JSRadio::Checked);
     JSClass<JSRadio>::StaticMethod("size", &JSRadio::JsSize);
     JSClass<JSRadio>::StaticMethod("padding", &JSRadio::JsPadding);
+    JSClass<JSRadio>::StaticMethod("margin", &JSRadio::JsMargin);
     JSClass<JSRadio>::StaticMethod("radioStyle", &JSRadio::JsRadioStyle);
     JSClass<JSRadio>::StaticMethod("responseRegion", &JSRadio::JsResponseRegion);
     JSClass<JSRadio>::StaticMethod("hoverEffect", &JSRadio::JsHoverEffect);
@@ -199,6 +200,12 @@ void JSRadio::JsPadding(const JSCallbackInfo& info)
     NG::PaddingPropertyF oldPadding = GetOldPadding(info);
     NG::PaddingProperty newPadding = GetNewPadding(info);
     RadioModel::GetInstance()->SetPadding(oldPadding, newPadding);
+}
+
+void JSRadio::JsMargin(const JSCallbackInfo& info)
+{
+    RadioModel::GetInstance()->SetIsUserSetMargin(true);
+    JSViewAbstract::JsMargin(info);
 }
 
 NG::PaddingPropertyF JSRadio::GetOldPadding(const JSCallbackInfo& info)
