@@ -15,6 +15,7 @@
 
 
 #include "base/error/error_code.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager_static.h"
@@ -23,6 +24,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t CALLBACK_ERRORCODE_CANCEL = 1;
+constexpr int32_t CALLBACK_DATACODE_ZERO = 0;
 } // namespace
 
 DialogManagerStatic::DialogManagerStatic() = default;
@@ -168,5 +171,209 @@ void DialogManagerStatic::CloseToastStatic(const int32_t toastId, std::function<
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->CloseToast(toastId, std::move(callback));
+}
+
+void DialogManagerStatic::ShowDialogStatic(DialogProperties& dialogProps,
+    std::function<void(int32_t, int32_t)>&& callback, const int32_t containerId)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "Show dialog static enter.");
+    auto currentId = containerId;
+    if (containerId < 0) {
+        currentId = Container::CurrentId();
+    }
+
+    dialogProps.onSuccess = std::move(callback);
+    dialogProps.onCancel = [callback, currentId] {
+        ContainerScope scope(currentId);
+        auto context = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto task = [callback]() {
+            callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO);
+        };
+        context->GetTaskExecutor()->PostTask(
+            std::move(task), TaskExecutor::TaskType::UI, "ArkUIOverlayShowDialogCancel");
+    };
+
+    auto task = [dialogProps, currentId](const RefPtr<NG::OverlayManager>& overlayManager) {
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "Begin to show dialog static.");
+        CHECK_NULL_VOID(overlayManager);
+        auto container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_VOID(container);
+        if (container->IsSubContainer()) {
+            auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+            container = AceEngine::Get().GetContainer(parentContainerId);
+            CHECK_NULL_VOID(container);
+        }
+
+        if (!dialogProps.isShowInSubWindow) {
+            overlayManager->ShowDialog(dialogProps, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+            return;
+        }
+
+        auto dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProps, nullptr);
+        CHECK_NULL_VOID(dialog);
+        if (dialogProps.isModal && !container->IsUIExtensionWindow()) {
+            DialogProperties maskProps = {
+                .autoCancel = dialogProps.autoCancel,
+                .isMask = true,
+            };
+            auto mask = overlayManager->ShowDialog(maskProps, nullptr, false);
+            CHECK_NULL_VOID(mask);
+            overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
+        }
+    };
+
+    if (dialogProps.dialogLevelMode == LevelMode::EMBEDDED) {
+        ShowInEmbeddedOverlay(std::move(task), "ArkUIOverlayShowDialog", dialogProps.dialogLevelUniqueId);
+    } else {
+        MainWindowOverlayStatic(std::move(task), "ArkUIOverlayShowDialog", nullptr, currentId);
+    }
+}
+
+void DialogManagerStatic::ShowActionMenuStatic(DialogProperties& dialogProps,
+    std::function<void(int32_t, int32_t)>&& callback, const int32_t containerId)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "Show dialog static enter.");
+    auto currentId = containerId;
+    if (containerId < 0) {
+        currentId = Container::CurrentId();
+    }
+
+    dialogProps.onSuccess = std::move(callback);
+    dialogProps.onCancel = [callback, currentId] {
+        ContainerScope scope(currentId);
+        auto context = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto task = [callback]() {
+            callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO);
+        };
+        context->GetTaskExecutor()->PostTask(
+            std::move(task), TaskExecutor::TaskType::UI, "ArkUIOverlayShowActionMenuCancel");
+    };
+
+    auto task = [dialogProps, currentId](const RefPtr<NG::OverlayManager>& overlayManager) {
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "Begin to show actionMenu static.");
+        CHECK_NULL_VOID(overlayManager);
+        auto container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_VOID(container);
+        if (container->IsSubContainer()) {
+            auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+            container = AceEngine::Get().GetContainer(parentContainerId);
+            CHECK_NULL_VOID(container);
+        }
+
+        if (!dialogProps.isShowInSubWindow) {
+            overlayManager->ShowDialog(dialogProps, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
+            return;
+        }
+
+        RefPtr<NG::FrameNode> dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProps, nullptr);
+        CHECK_NULL_VOID(dialog);
+        if (dialogProps.isModal && !container->IsUIExtensionWindow()) {
+            DialogProperties maskProps = {
+                .autoCancel = dialogProps.autoCancel,
+                .isMask = true,
+            };
+            auto mask = overlayManager->ShowDialog(maskProps, nullptr, false);
+            CHECK_NULL_VOID(mask);
+            overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
+        }
+    };
+    ShowInEmbeddedOverlay(std::move(task), "ArkUIOverlayShowActionMenuInner", dialogProps.dialogLevelUniqueId);
+}
+
+void DialogManagerStatic::OpenCustomDialogStatic(DialogProperties& dialogProps,
+    std::function<void(int32_t)>&& callback, const int32_t containerId)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "Open custom dialog static enter.");
+    auto currentId = containerId;
+    if (containerId < 0) {
+        currentId = Container::CurrentId();
+    }
+
+    auto task = [dialogProps, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+        CHECK_NULL_VOID(overlayManager);
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "Begin to open custom dialog static.");
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        if (dialogProps.isShowInSubWindow) {
+            SubwindowManager::GetInstance()->OpenCustomDialogNG(dialogProps, std::move(callback));
+            if (dialogProps.isModal) {
+                TAG_LOGW(AceLogTag::ACE_OVERLAY, "Temporary not support isShowInSubWindow and isModal.");
+            }
+        } else {
+            overlayManager->OpenCustomDialog(dialogProps, std::move(callback));
+        }
+    };
+
+    if (dialogProps.dialogLevelMode == LevelMode::EMBEDDED) {
+        ShowInEmbeddedOverlay(std::move(task), "ArkUIOverlayShowDialog", dialogProps.dialogLevelUniqueId);
+    } else {
+        MainWindowOverlayStatic(std::move(task), "ArkUIOverlayShowDialog", nullptr, currentId);
+    }
+}
+
+void DialogManagerStatic::UpdateCustomDialogStatic(const WeakPtr<NG::UINode>& node, DialogProperties& dialogProps,
+    std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "Update custom dialog static enter.");
+    auto nodePtr = node.Upgrade();
+    CHECK_NULL_VOID(nodePtr);
+    auto context = nodePtr->GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    auto task = [node, dialogProps, callback, weak = WeakPtr<NG::OverlayManager>(overlayManager)]() mutable {
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID(overlayManager);
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Begin to update custom dialog static.");
+        overlayManager->UpdateCustomDialog(node, dialogProps, std::move(callback));
+    };
+    context->GetTaskExecutor()->PostTask(
+        std::move(task), TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog");
+}
+
+void DialogManagerStatic::CloseCustomDialogStatic(const int32_t dialogId, const int32_t containerId)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "Close custom dialog static enter.");
+    auto currentId = containerId;
+    if (containerId < 0) {
+        currentId = Container::CurrentId();
+    }
+
+    auto task = [dialogId](const RefPtr<NG::OverlayManager>& overlayManager) {
+        CHECK_NULL_VOID(overlayManager);
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Begin to close custom dialog static.");
+        overlayManager->CloseCustomDialog(dialogId);
+        SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
+    };
+    auto dialogNode = FrameNode::GetFrameNodeOnly(V2::DIALOG_ETS_TAG, dialogId);
+    auto currentOverlay = GetEmbeddedOverlayWithNode(dialogNode);
+    MainWindowOverlayStatic(std::move(task), "ArkUIOverlayCloseCustomDialog", currentOverlay, currentId);
+}
+
+void DialogManagerStatic::CloseCustomDialogStatic(const WeakPtr<NG::UINode>& node,
+    std::function<void(int32_t)> &&callback)
+{
+    TAG_LOGD(AceLogTag::ACE_DIALOG, "Close custom dialog static enter.");
+    auto nodePtr = node.Upgrade();
+    CHECK_NULL_VOID(nodePtr);
+    auto context = nodePtr->GetContextWithCheck();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    auto parent = GetDialogNodeByContentNode(nodePtr);
+    if (parent) {
+        auto currentOverlay = GetEmbeddedOverlayWithNode(parent);
+        if (currentOverlay) {
+            overlayManager = currentOverlay;
+        }
+    }
+
+    auto task = [node, callback, weak = WeakPtr<NG::OverlayManager>(overlayManager)]() mutable {
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID(overlayManager);
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Begin to close custom dialog static.");
+        overlayManager->CloseCustomDialog(node, std::move(callback));
+    };
+    context->GetTaskExecutor()->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIOverlayCloseCustomDialog");
 }
 } // namespace OHOS::Ace::NG

@@ -284,8 +284,46 @@ export class PromptAction {
         throw Error("openToast not implemented in PromptAction!")
     }
 
-    closeToast(toast: number): void {
+    closeToast(toastId: number): void {
         throw Error("closeToast not implemented in PromptAction!")
+    }
+
+    showDialog1(options: promptAction.ShowDialogOptions,
+        callback?: AsyncCallback<promptAction.ShowDialogSuccessResponse>): void {
+        throw Error("showDialog1 not implemented in PromptAction!")
+    }
+
+    showDialog(options: promptAction.ShowDialogOptions): Promise<promptAction.ShowDialogSuccessResponse> {
+        throw Error("showDialog not implemented in PromptAction!")
+    }
+
+    showActionMenu1(options: promptAction.ActionMenuOptions,
+        callback?: AsyncCallback<promptAction.ActionMenuSuccessResponse>): void {
+        throw Error("showActionMenu1 not implemented in PromptAction!")
+    }
+
+    showActionMenu(options: promptAction.ActionMenuOptions): Promise<promptAction.ActionMenuSuccessResponse> {
+        throw Error("showActionMenu not implemented in PromptAction!")
+    }
+
+    openCustomDialog1(content: ComponentContent, options?: promptAction.BaseDialogOptions): Promise<void> {
+        throw Error("openCustomDialog1 not implemented in PromptAction!")
+    }
+
+    openCustomDialog(options: promptAction.CustomDialogOptions): Promise<number> {
+        throw Error("openCustomDialog not implemented in PromptAction!")
+    }
+
+    updateCustomDialog(content: ComponentContent, options: promptAction.BaseDialogOptions): Promise<void> {
+        throw Error("updateCustomDialog not implemented in PromptAction!")
+    }
+
+    closeCustomDialog1(content: ComponentContent): Promise<void> {
+        throw Error("closeCustomDialog1 not implemented in PromptAction!")
+    }
+
+    closeCustomDialog(dialogId: number): void {
+        throw Error("closeCustomDialog not implemented in PromptAction!")
     }
 }
 
