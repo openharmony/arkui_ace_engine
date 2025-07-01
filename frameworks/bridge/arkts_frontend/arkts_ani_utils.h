@@ -18,6 +18,8 @@
 
 #include <cstdint>
 #include <type_traits>
+#include <string>
+#include "ui/base/macros.h"
 
 #include "ui/base/macros.h"
 
@@ -55,6 +57,7 @@ typedef struct __ani_env ani_env;
 typedef class __ani_object* ani_object;
 typedef class __ani_ref* ani_ref;
 typedef struct __ani_vm ani_vm;
+typedef class __ani_string* ani_string;
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT ArktsAniUtils final {
@@ -86,6 +89,16 @@ public:
      * Get std/core/Double by float.
      */
     static ani_object FloatToNumberObject(ani_env* env, const float& value);
+
+    /**
+     * Get std::string from std/core/String.
+     */
+    static std::string ANIStringToStdString(ani_env* env, ani_string ani_str);
+
+    /**
+     * Call JSON.stringify to generate the json string of ani_object.
+     */
+    static std::string JsonStringify(ani_env* env, ani_object src);
 };
 } // namespace OHOS::Ace
 

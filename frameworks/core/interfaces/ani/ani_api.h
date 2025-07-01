@@ -53,8 +53,10 @@ typedef class __ani_error* ani_error;
 typedef struct __ani_resolver *ani_resolver;
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
+typedef class __ani_array* ani_array;
 typedef _ArkUINode* ArkUINodeHandle;
 typedef int ArkUI_Int32;
+typedef uint32_t ArkUI_Uint32;
 typedef size_t ani_size;
 typedef _ArkUIContentSlot* ArkUIContentSlot;
 typedef _ArkUINodeContent* ArkUINodeContent;
@@ -305,6 +307,12 @@ struct ArkUIAniCommonModifier {
     void* (*getAxisEventPointer)(ani_long peer);
     void* (*getClickEventPointer)(ani_long peer);
     void* (*getHoverEventPointer)(ani_long peer);
+    ArkUI_Uint32 (*getColorValueByString)(const std::string& src);
+    ArkUI_Uint32 (*getColorValueByNumber)(ArkUI_Uint32 src);
+    void (*sendThemeToNative)(ani_env* env, ani_array colors, ani_int id);
+    void (*setDefaultTheme)(ani_env* env, ani_array colors, ani_boolean isDark);
+    void (*updateColorMode)(ani_int colorMode);
+    void (*restoreColorMode)();
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int, std::function<void()>&& onPageShow, std::function<void()>&& onPageHide,
