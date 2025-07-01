@@ -48,6 +48,18 @@ RefPtr<FrameNode> WebModelStatic::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
+void WebModelStatic::SetPopup(FrameNode* frameNode, bool isPopup, int32_t parentWebId)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetPopup(isPopup);
+    webPatternStatic->SetParentNWebId(parentWebId);
+    if (isPopup) {
+        webPatternStatic->SetWebSrc("");
+    }
+}
+
 void WebModelStatic::SetWebIdCallback(FrameNode* frameNode, std::function<void(int32_t)>&& webIdCallback)
 {
     CHECK_NULL_VOID(frameNode);
