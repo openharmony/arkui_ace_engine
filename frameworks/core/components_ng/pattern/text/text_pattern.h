@@ -867,7 +867,11 @@ public:
     void RelayoutResetOrUpdateTextEffect();
     void ReseTextEffect(bool clear = true);
     bool ResetTextEffectBeforeLayout();
-    
+    void UpdateTextSelectorSecondHandle(const RectF& rect)
+    {
+        textSelector_.secondHandle = rect;
+    }
+
 protected:
     int32_t GetClickedSpanPosition()
     {

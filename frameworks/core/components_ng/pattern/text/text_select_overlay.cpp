@@ -670,4 +670,44 @@ bool TextSelectOverlay::CheckTouchInHostNode(const PointF& touchPoint)
     selectedArea.SetOffset(selectedArea.GetOffset() - textPattern->GetParentGlobalOffset());
     return rect.IsInRegion(touchPoint) || selectedArea.IsInRegion(touchPoint);
 }
+
+bool TextSelectOverlay::ChangeSecondHandleHeight(const GestureEvent& event, bool isOverlayMode)
+{
+    if (isOverlayMode || CheckSwitchToMode(HandleLevelMode::OVERLAY)) {
+        return false;
+    }
+    auto secondHandleInfo = GetSecondHandleInfo();
+    CHECK_NULL_RETURN(secondHandleInfo, false);
+    auto handleRect = secondHandleInfo->localPaintRect;
+    auto height = handleRect.Height();
+    auto textPattern = GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, false);
+    textPattern->CalculateDefaultHandleHeight(height);
+    auto touchOffset = event.GetLocalLocation();
+    bool isTouchHandleCircle = GreatNotEqual(touchOffset.GetY(), handleRect.Bottom());
+    auto handleOffsetY =
+        isTouchHandleCircle ? handleRect.Bottom() - height : static_cast<float>(touchOffset.GetY()) - height / 2.0f;
+    auto secondHandle = textPattern->GetTextSelector().secondHandle;
+    secondHandle.SetTop(handleOffsetY + handleGlobalOffset_.GetY());
+    secondHandle.SetHeight(height);
+    textPattern->UpdateTextSelectorSecondHandle(secondHandle);
+    return true;
+}
+
+void TextSelectOverlay::GetVisibleDragViewHandles(RectF& first, RectF& second)
+{
+    auto selectOverlayInfo = GetSelectOverlayInfos();
+    CHECK_NULL_VOID(selectOverlayInfo);
+    RectF firstHandle;
+    RectF secondHandle;
+    if (!GetDragViewHandleRects(firstHandle, secondHandle)) {
+        return;
+    }
+    if (selectOverlayInfo->firstHandle.isShow) {
+        first = firstHandle;
+    }
+    if (selectOverlayInfo->secondHandle.isShow) {
+        second = secondHandle;
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -2297,11 +2297,9 @@ TextDragInfo TextFieldPattern::CreateTextDragInfo() const
     auto firstIndex = selectController_->GetFirstHandleIndex();
     auto secondIndex = selectController_->GetSecondHandleIndex();
     if (firstIndex > secondIndex) {
-        info.secondHandle = selectOverlayInfo->firstHandle.paintRect;
-        info.firstHandle = selectOverlayInfo->secondHandle.paintRect;
+        selectOverlay_->GetDragViewHandleRects(info.secondHandle, info.firstHandle);
     } else {
-        info.firstHandle = selectOverlayInfo->firstHandle.paintRect;
-        info.secondHandle = selectOverlayInfo->secondHandle.paintRect;
+        selectOverlay_->GetDragViewHandleRects(info.firstHandle, info.secondHandle);
     }
     auto firstIsShow = selectOverlayInfo->firstHandle.isShow;
     auto secondIsShow = selectOverlayInfo->secondHandle.isShow;
@@ -8443,9 +8441,6 @@ bool TextFieldPattern::IsReachedBoundary(float offset)
 
 OffsetF TextFieldPattern::GetTextPaintOffset() const
 {
-    if (selectOverlay_->HasRenderTransform()) {
-        return selectOverlay_->GetPaintRectOffsetWithTransform();
-    }
     return GetPaintRectGlobalOffset();
 }
 
@@ -8457,7 +8452,7 @@ OffsetF TextFieldPattern::GetPaintRectGlobalOffset() const
     CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     OffsetF textPaintOffset;
-    textPaintOffset = host->GetPaintRectOffset(false, true);
+    textPaintOffset = host->GetPaintRectOffsetNG(false, true);
     return textPaintOffset - rootOffset;
 }
 
