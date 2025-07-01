@@ -235,6 +235,7 @@ public:
     void SetMenuOutline(const MenuParam& menuParam);
     void SetTextModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& textApply);
     void SetArrowModifierApply(const std::function<void(WeakPtr<NG::FrameNode>)>& arrowApply);
+    void SetArrowColor(const Color& color);
     void SetOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionApply);
     void SetSelectedOptionTextModifier(const std::function<void(WeakPtr<NG::FrameNode>)>& optionSelectedApply);
     std::function<void(WeakPtr<NG::FrameNode>)>& GetTextModifier();

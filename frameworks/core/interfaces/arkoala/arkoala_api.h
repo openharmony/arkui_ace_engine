@@ -6187,6 +6187,8 @@ struct ArkUISelectModifier {
     void (*setSelectedOptionFontColorPtr)(ArkUINodeHandle node, const ArkUI_Uint32 colorVal,
         ArkUI_VoidPtr fontColorRawPtr);
     void (*setMenuBgColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr menuBgColorRawPtr);
+    void (*setArrowColor)(ArkUINodeHandle node, const ArkUI_Uint32 arrowColor);
+    void (*setShowDefaultSelectedIcon)(ArkUINodeHandle node, ArkUI_Bool show);
 };
 
 /** Common for all API variants.*/

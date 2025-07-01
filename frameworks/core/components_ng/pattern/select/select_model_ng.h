@@ -155,6 +155,7 @@ public:
     static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);
     static void SetMenuOutline(FrameNode* frameNode, const MenuParam& menuParam);
     static void SetShowInSubWindow(FrameNode* frameNode, bool isShowInSubWindow);
+    static void SetArrowColor(FrameNode* frameNode, const Color& color);
     static void SetShowDefaultSelectedIcon(FrameNode* frameNode, bool show);
     static void SetColorStatus(FrameNode* frameNode, const SelectColorType& type);
     void SetMenuBackgroundColorByUser(bool isFromModifier) override;
