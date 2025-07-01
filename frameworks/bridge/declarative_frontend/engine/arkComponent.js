@@ -4973,13 +4973,13 @@ class ArkComponent {
     return this;
   }
   shadow(value) {
-    let arkShadowStyle = new ArkShadowStyle();
-    if (typeof value === 'object') {
-      modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, value);
-    } else if (typeof value === 'number') {
+    if (typeof value === 'number') {
+      let arkShadowStyle = new ArkShadowStyle();
       arkShadowStyle.shadowStyle = value;
       modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, arkShadowStyle);
+      return this;
     }
+    modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, value);
     return this;
   }
   mask(value) {
