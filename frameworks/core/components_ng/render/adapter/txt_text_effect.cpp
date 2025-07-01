@@ -137,4 +137,11 @@ void TxtTextEffect::StopEffect()
     ACE_TEXT_SCOPED_TRACE("TxtTextEffect::StopEffect");
     textEffect_->StopEffect();
 }
+
+void TxtTextEffect::NoEffect(RSCanvas& canvas, double x, double y)
+{
+    CHECK_NULL_VOID(textEffect_);
+    ACE_TEXT_SCOPED_TRACE("TxtTextEffect::NoEffect");
+    textEffect_->NoEffect(&canvas, x, y);
+}
 } // namespace OHOS::Ace::NG

@@ -4287,7 +4287,7 @@ bool TextPattern::ResetTextEffectBeforeLayout()
     if (textLayoutProperty->GetTextEffectStrategyValue(TextEffectStrategy::NONE) == TextEffectStrategy::NONE ||
         textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE || !spans_.empty() ||
         isSpanStringMode_ || externalParagraph_ || IsSetObscured() || IsSensitiveEnable()) {
-        ReseTextEffect();
+        ResetTextEffect();
         return true;
     }
     return false;
@@ -4305,7 +4305,7 @@ void TextPattern::RelayoutResetOrUpdateTextEffect()
     }
 }
 
-void TextPattern::ReseTextEffect(bool clear)
+void TextPattern::ResetTextEffect()
 {
     CHECK_NULL_VOID(textEffect_);
     textEffect_->StopEffect();
@@ -4319,7 +4319,7 @@ RefPtr<TextEffect> TextPattern::GetOrCreateTextEffect(const std::u16string& cont
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
     if (textLayoutProperty->GetTextEffectStrategyValue(TextEffectStrategy::NONE) == TextEffectStrategy::NONE) {
-        ReseTextEffect();
+        ResetTextEffect();
         return nullptr;
     }
     if (ResetTextEffectBeforeLayout()) {
@@ -4327,7 +4327,7 @@ RefPtr<TextEffect> TextPattern::GetOrCreateTextEffect(const std::u16string& cont
     }
     auto isNumber = RegularMatchNumbers(content);
     if (!isNumber) {
-        ReseTextEffect();
+        ResetTextEffect();
         return nullptr;
     }
     if (!textEffect_) {
