@@ -486,7 +486,12 @@ void TextSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)
         textPattern->CalculateHandleOffsetAndShowOverlay();
         UpdateAllHandlesOffset();
     }
-    BaseTextSelectOverlay::OnHandleLevelModeChanged(mode);
+    if (mode == HandleLevelMode::OVERLAY) {
+        BaseTextSelectOverlay::OnHandleLevelModeChanged(mode);
+    } else {
+        BaseTextSelectOverlay::SetHandleLevelMode(mode);
+        BaseTextSelectOverlay::UpdateViewPort();
+    }
 }
 
 void TextSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst)
