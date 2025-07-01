@@ -19,26 +19,52 @@
 #include "core/components_ng/base/frame_node.h"
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/ani/web_model_static.h"
+#include "core/interfaces/native/implementation/controller_handler_peer_impl.h"
 #endif
 
 namespace OHOS::Ace::NG {
 
-void SetWebOptions(ArkUINodeHandle node,
-    std::function<void(int32_t)>&& onNWebId,
-    std::function<void(const std::string&)>&& onHapPath)
+void SetWebOptions(ArkUINodeHandle node, const WebviewControllerInfo& controllerInfo)
 {
 #ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    WebModelStatic::SetWebIdCallback(frameNode, std::move(onNWebId));
-    WebModelStatic::SetHapPathCallback(frameNode, std::move(onHapPath));
+    if (!frameNode) {
+        if (controllerInfo.releaseRefFunc) {
+            controllerInfo.releaseRefFunc();
+        }
+        return;
+    }
+    if (controllerInfo.getNativePtrFunc) {
+        int32_t parentNWebId = -1;
+        bool isPopup = ControllerHandlerPeer::ExistController(controllerInfo.getNativePtrFunc(), parentNWebId);
+        WebModelStatic::SetPopup(frameNode, isPopup, parentNWebId);
+    }
+    auto setWebIdFunc = std::move(controllerInfo.setWebIdFunc);
+    auto setHapPathFunc = std::move(controllerInfo.setHapPathFunc);
+    WebModelStatic::SetWebIdCallback(frameNode, std::move(setWebIdFunc));
+    WebModelStatic::SetHapPathCallback(frameNode, std::move(setHapPathFunc));
+#endif // WEB_SUPPORTED
+}
+
+void SetWebControllerControllerHandler(void* controllerHandler, const WebviewControllerInfo& controllerInfo)
+{
+#ifdef WEB_SUPPORTED
+    ControllerHandlerPeer* peer = reinterpret_cast<ControllerHandlerPeer *>(controllerHandler);
+    if (!peer) {
+        if (controllerInfo.releaseRefFunc) {
+            controllerInfo.releaseRefFunc();
+        }
+        return;
+    }
+    peer->SetWebController(controllerInfo);
 #endif // WEB_SUPPORTED
 }
 
 const ArkUIAniWebModifier* GetWebAniModifier()
 {
     static const ArkUIAniWebModifier impl = {
-        .setWebOptions = OHOS::Ace::NG::SetWebOptions
+        .setWebOptions = OHOS::Ace::NG::SetWebOptions,
+        .setWebControllerControllerHandler = OHOS::Ace::NG::SetWebControllerControllerHandler,
     };
     return &impl;
 }

@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT WebModelStatic : public OHOS::Ace::WebModel {
 public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetPopup(FrameNode* frameNode, bool isPopup, int32_t parentWebId);
     static void SetWebIdCallback(FrameNode* frameNode, std::function<void(int32_t)>&& webIdCallback);
     static void SetHapPathCallback(FrameNode* frameNode, std::function<void(const std::string&)>&& hapPathCallback);
     static void SetWebSrc(FrameNode* frameNode, const std::optional<std::string>& webSrc);

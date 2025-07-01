@@ -19,4 +19,10 @@ namespace OHOS::Ace::NG {
 void WebPatternStatic::SetWebSrcStatic(const std::string &webSrc)
 {
 }
+void WebPatternStatic::SetPopup(bool popup)
+{
+}
+void WebPatternStatic::SetParentNWebId(int32_t parentNWebId)
+{
+}
 } // namespace OHOS::Ace::NG
