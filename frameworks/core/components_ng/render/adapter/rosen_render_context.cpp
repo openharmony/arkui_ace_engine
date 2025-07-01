@@ -8168,4 +8168,10 @@ void RosenRenderContext::ModifyCustomBackground()
         backgroundModifier->Modify();
     }
 }
+
+void RosenRenderContext::SetNeedUseCmdlistDrawRegion(bool needUseCmdlistDrawRegion)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetNeedUseCmdlistDrawRegion(needUseCmdlistDrawRegion);
+}
 } // namespace OHOS::Ace::NG

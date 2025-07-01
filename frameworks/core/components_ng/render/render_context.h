@@ -828,6 +828,8 @@ public:
 
     virtual void RemoveFromTree() {}
 
+    virtual void SetNeedUseCmdlistDrawRegion(bool needUseCmdlistDrawRegion) {}
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
