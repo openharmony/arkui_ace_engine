@@ -38,15 +38,15 @@ export function RepeatImpl<T>(
     if (!repeat.itemGenFuncs_.get(RepeatEachFuncType)) {
         throw new Error('Repeat item builder function unspecified. Usage error!');
     }
-    if (repeat.isVirtualScroll_) {
+    if (repeat.disableVirtualScroll_) {
+        nonVirtualRender<T>(arr, repeat.itemGenFuncs_.get(RepeatEachFuncType)!, repeat.keyGenFunc_);
+    } else {
         const repeatId = __id();
         const node = contextNode<PeerNode>();
         scheduleCallback(() => // postpone until node is attached
             repeat.templateCacheSize_.forEach((size: number, template: string) => node.setReusePoolSize(size, template + repeatId))
         );
         virtualRender<T>(arr, repeat, repeatId);
-    } else {
-        nonVirtualRender<T>(arr, repeat.itemGenFuncs_.get(RepeatEachFuncType)!, repeat.keyGenFunc_);
     }
 }
 
@@ -141,7 +141,7 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
     templateCacheSize_: Map<string, number> = new Map<string, number>();
     ttypeGenFunc_: TemplateTypedFunc<T> = () => RepeatEachFuncType;
     reusable_: boolean = false;
-    isVirtualScroll_: boolean = false;
+    disableVirtualScroll_: boolean = false;
 
     each(itemGenerator: RepeatItemBuilder<T>): RepeatAttributeImpl<T> {
         if (itemGenerator === undefined || typeof itemGenerator !== 'function') {
@@ -161,7 +161,7 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
         this.userDefinedTotal_ = options?.onTotalCount?.() ?? options?.totalCount;
         this.reusable_ = options?.reusable !== false;
 
-        this.isVirtualScroll_ = true;
+        this.disableVirtualScroll_ = options?.disableVirtualScroll ?? false;
         return this;
     }
 

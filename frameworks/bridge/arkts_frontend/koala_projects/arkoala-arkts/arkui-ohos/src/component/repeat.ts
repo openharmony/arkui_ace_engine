@@ -34,6 +34,7 @@ export interface VirtualScrollOptions {
     totalCount?: number;
     reusable?: boolean;
     onTotalCount?: () => number;
+    disableVirtualScroll?: boolean;
 }
 
 export interface TemplateOptions {
