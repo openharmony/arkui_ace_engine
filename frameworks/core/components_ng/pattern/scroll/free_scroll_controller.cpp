@@ -132,7 +132,6 @@ void FreeScrollController::TryScrollAnimation(const OffsetF& velocity)
 {
     const auto curve = MakeRefPtr<ResponsiveSpringMotion>(fabs(2 * M_PI / friction_), 1.0f, 0.0f);
     AnimationOption option(curve, CUSTOM_SPRING_ANIMATION_DURATION);
-    option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
 
     OffsetF finalPos = offset_->Get() + velocity / friction_;
     ClampFinalPosition(finalPos);

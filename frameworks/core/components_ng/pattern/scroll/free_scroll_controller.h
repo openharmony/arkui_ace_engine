@@ -37,6 +37,13 @@ public:
         return freePanGesture_;
     }
 
+    void UpdateOffset(const OffsetF& offset)
+    {
+        if (offset_) {
+            offset_->Set(offset);
+        }
+    }
+
     OffsetF GetOffset() const;
 
 private:

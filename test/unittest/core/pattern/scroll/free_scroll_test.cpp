@@ -100,7 +100,7 @@ public:
     }
     void TouchDown()
     {
-        auto gesture = MakeTouchEvent(TouchType::DOWN, {1, 1});
+        auto gesture = MakeTouchEvent(TouchType::DOWN, { 1, 1 });
         const auto& controller = pattern_->freeScroll_;
         ASSERT_TRUE(controller && controller->freeTouch_);
         controller->freeTouch_->GetTouchEventCallback()(gesture);
@@ -108,7 +108,7 @@ public:
 
     void TouchUp()
     {
-        auto gesture = MakeTouchEvent(TouchType::UP, {1, 1});
+        auto gesture = MakeTouchEvent(TouchType::UP, { 1, 1 });
         const auto& controller = pattern_->freeScroll_;
         ASSERT_TRUE(controller && controller->freeTouch_);
         controller->freeTouch_->GetTouchEventCallback()(gesture);
@@ -158,6 +158,24 @@ TEST_F(FreeScrollTest, FreeScroll001)
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildX(frameNode_, 0), -100.0f);
     EXPECT_EQ(GetChildY(frameNode_, 0), -100.0f);
+}
+
+/**
+ * @tc.name: InitialOffset001
+ * @tc.desc: Test Scroll with Axis::FREE
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, InitialOffset001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    model.SetInitialOffset({ CalcDimension(0.5, DimensionUnit::PERCENT), CalcDimension(DELTA_X) });
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+
+    EXPECT_EQ(GetChildX(frameNode_, 0), -WIDTH / 2);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -DELTA_X);
 }
 
 /**
@@ -259,7 +277,7 @@ TEST_F(FreeScrollTest, OverScroll001)
     ScrollModelNG::SetEdgeEffect(frameNode_.GetRawPtr(), EdgeEffect::SPRING, true, EffectEdge::START);
     controller->offset_->Set(OffsetF { X, Y });
     FlushUITasks(frameNode_);
-    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(WIDTH - CONTENT_W, HEIGHT - CONTENT_H).ToString());
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(WIDTH - CONTENT_W, Y).ToString());
 
     ScrollModelNG::SetEdgeEffect(frameNode_.GetRawPtr(), EdgeEffect::SPRING, true, EffectEdge::END);
     controller->offset_->Set(OffsetF { X, Y });
@@ -301,7 +319,7 @@ TEST_F(FreeScrollTest, OverScroll002)
     ScrollModelNG::SetEdgeEffect(frameNode_.GetRawPtr(), EdgeEffect::SPRING, true, EffectEdge::END);
     controller->offset_->Set(OffsetF { -X, -Y });
     FlushUITasks(frameNode_);
-    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(alignX, alignY).ToString());
+    EXPECT_EQ(GetChildOffset(frameNode_, 0).ToString(), OffsetF(alignX, alignY - Y).ToString());
 }
 
 /**
@@ -375,7 +393,8 @@ TEST_F(FreeScrollTest, Animation002)
 
     PanEnd({ DELTA_X, DELTA_Y }, { VELOCITY_X, VELOCITY_Y });
     EXPECT_FALSE(MockAnimationManager::GetInstance().AllFinished());
-    MockAnimationManager::GetInstance().TickByVelocity(OffsetF(VELOCITY_X, VELOCITY_Y)); // simulate scrolling out of bounds
+    MockAnimationManager::GetInstance().TickByVelocity(
+        OffsetF(VELOCITY_X, VELOCITY_Y)); // simulate scrolling out of bounds
     FlushUITasks(frameNode_);
     EXPECT_GT(GetChildX(frameNode_, 0), VELOCITY_X);
     EXPECT_GT(GetChildY(frameNode_, 0), VELOCITY_Y);
