@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/scroll/free_scroll_controller.h"
 
-#include <cmath>
-
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 
@@ -138,7 +136,7 @@ void FreeScrollController::HandlePanEndOrCancel(const GestureEvent& event)
 
 void FreeScrollController::TryScrollAnimation(const OffsetF& velocity)
 {
-    const auto curve = MakeRefPtr<ResponsiveSpringMotion>(fabs(2 * M_PI / friction_), 1.0f, 0.0f);
+    const auto curve = MakeRefPtr<ResponsiveSpringMotion>(fabs(2 * ACE_PI / friction_), 1.0f, 0.0f);
     AnimationOption option(curve, CUSTOM_SPRING_ANIMATION_DURATION);
 
     OffsetF finalPos = offset_->Get() + velocity / friction_;
