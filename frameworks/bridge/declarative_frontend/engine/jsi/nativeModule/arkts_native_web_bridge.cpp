@@ -1873,7 +1873,7 @@ ArkUINativeModuleValue WebBridge::SetJavaScriptOnDocumentStart(ArkUIRuntimeCallI
         GetArkUINodeModifiers()->getWebModifier()->resetJavaScriptOnDocumentStart(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    std::vector<ArkUI_ScriptItemArray> scrpitinfos;
+    std::vector<ArkUI_ScriptItemArray> scriptInfos;
     auto scriptsArr = panda::Local<panda::ArrayRef>(scriptsArg);
     auto scriptRulesArr = panda::Local<panda::ArrayRef>(scriptRulesArg);
     int32_t size = static_cast<int32_t>(scriptsArr->Length(vm));
@@ -1896,9 +1896,9 @@ ArkUINativeModuleValue WebBridge::SetJavaScriptOnDocumentStart(ArkUIRuntimeCallI
         } else {
             info.scriptRulesSize = 0;
         }
-        scrpitinfos.push_back(info);
+        scriptInfos.push_back(info);
     }
-    ArkUI_ScriptItemArray* values = scrpitinfos.data();
+    ArkUI_ScriptItemArray* values = scriptInfos.data();
     GetArkUINodeModifiers()->getWebModifier()->setJavaScriptOnDocumentStart(nativeNode, values, size);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1927,7 +1927,7 @@ ArkUINativeModuleValue WebBridge::SetJavaScriptOnDocumentEnd(ArkUIRuntimeCallInf
         GetArkUINodeModifiers()->getWebModifier()->resetJavaScriptOnDocumentEnd(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    std::vector<ArkUI_ScriptItemArray> scrpitinfos;
+    std::vector<ArkUI_ScriptItemArray> scriptInfos;
     auto scriptsArr = panda::Local<panda::ArrayRef>(scriptsArg);
     auto scriptRulesArr = panda::Local<panda::ArrayRef>(scriptRulesArg);
     int32_t size = static_cast<int32_t>(scriptsArr->Length(vm));
@@ -1950,9 +1950,9 @@ ArkUINativeModuleValue WebBridge::SetJavaScriptOnDocumentEnd(ArkUIRuntimeCallInf
         } else {
             info.scriptRulesSize = 0;
         }
-        scrpitinfos.push_back(info);
+        scriptInfos.push_back(info);
     }
-    ArkUI_ScriptItemArray* values = scrpitinfos.data();
+    ArkUI_ScriptItemArray* values = scriptInfos.data();
     GetArkUINodeModifiers()->getWebModifier()->setJavaScriptOnDocumentEnd(nativeNode, values, size);
     return panda::JSValueRef::Undefined(vm);
 }
