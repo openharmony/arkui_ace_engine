@@ -1520,6 +1520,56 @@ GeometryTransitionOptions Convert(const Ark_GeometryTransitionOptions& src)
 }
 
 template<>
+RefPtr<PopupParam> Convert(const Ark_TipsOptions& src)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    auto appearingTimeOpt = Converter::OptConvert<int>(src.appearingTime);
+    if (appearingTimeOpt.has_value()) {
+        popupParam->SetAppearingTime(appearingTimeOpt.value());
+    }
+    auto disappearingTimeOpt = Converter::OptConvert<int>(src.disappearingTime);
+    if (disappearingTimeOpt.has_value()) {
+        popupParam->SetDisappearingTime(disappearingTimeOpt.value());
+    }
+    auto appearingTimeWithContinuousOperationOpt =
+        Converter::OptConvert<int>(src.appearingTimeWithContinuousOperation);
+    if (appearingTimeWithContinuousOperationOpt.has_value()) {
+        popupParam->SetAppearingTimeWithContinuousOperation(appearingTimeWithContinuousOperationOpt.value());
+    }
+    auto disappearingTimeWithContinuousOperationOpt =
+        Converter::OptConvert<int>(src.disappearingTimeWithContinuousOperation);
+    if (disappearingTimeWithContinuousOperationOpt.has_value()) {
+        popupParam->SetAppearingTime(disappearingTimeWithContinuousOperationOpt.value());
+    }
+    auto enableArrowOpt = Converter::OptConvert<bool>(src.enableArrow);
+    if (enableArrowOpt.has_value()) {
+        popupParam->SetEnableArrow(enableArrowOpt.value());
+    }
+    if (enableArrowOpt.value()) {
+        auto arrowPointPositionOpt = Converter::OptConvert<Dimension>(src.arrowPointPosition);
+        if (arrowPointPositionOpt.has_value()) {
+            popupParam->SetArrowOffset(arrowPointPositionOpt.value());
+        }
+        auto arrowWidthOpt = Converter::OptConvert<CalcDimension>(src.arrowWidth);
+        Validator::ValidateNonNegative(arrowWidthOpt);
+        Validator::ValidateNonPercent(arrowWidthOpt);
+        if (arrowWidthOpt.has_value()) {
+            popupParam->SetArrowWidth(arrowWidthOpt.value());
+        }
+        auto arrowHeightOpt = Converter::OptConvert<CalcDimension>(src.arrowHeight);
+        Validator::ValidateNonNegative(arrowHeightOpt);
+        Validator::ValidateNonPercent(arrowHeightOpt);
+        if (arrowHeightOpt.has_value()) {
+            popupParam->SetArrowHeight(arrowHeightOpt.value());
+        }
+    }
+    popupParam->SetBlockEvent(false);
+    popupParam->SetTipsFlag(true);
+    popupParam->SetShowInSubWindow(true);
+    return popupParam;
+}
+
+template<>
 RefPtr<PopupParam> Convert(const Ark_PopupOptions& src)
 {
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
@@ -5420,9 +5470,26 @@ void BindTipsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(message);
-    //auto convValue = Converter::OptConvert<type>(message); // for enums
-    //CommonMethodModelNG::SetBindTips(frameNode, convValue);
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    RefPtr<SpanString> styledString;
+    auto tipsOption = Converter::OptConvertPtr<Ark_TipsOptions>(options);
+    if (tipsOption.has_value()) {
+        popupParam = Converter::Convert<RefPtr<PopupParam>>(tipsOption.value());
+    }
+    Converter::VisitUnion(*message,
+        [frameNode, popupParam, styledString] (const Ark_ResourceStr& value) {
+            auto message = Converter::OptConvert<std::string>(value);
+            if (message.has_value()) {
+                popupParam->SetMessage(message.value());
+            }
+            ViewAbstractModelStatic::BindTips(frameNode, popupParam, styledString);
+        },
+        [] (const Ark_StyledString& value) {
+            return;
+        },
+        [] () {
+            return;
+        });
 }
 void BindPopupImpl(Ark_NativePointer node,
                    const Opt_Boolean* show,

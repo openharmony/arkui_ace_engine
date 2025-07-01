@@ -2056,7 +2056,8 @@ void ViewAbstract::BindPopup(
     }
 }
 
-void ViewAbstract::BindTips(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode)
+void ViewAbstract::BindTips(
+    const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<SpanString>& spanString)
 {
     CHECK_NULL_VOID(param);
     CHECK_NULL_VOID(targetNode);
@@ -2083,11 +2084,11 @@ void ViewAbstract::BindTips(const RefPtr<PopupParam>& param, const RefPtr<FrameN
             showInSubWindow = true;
         }
     }
-    HandleHoverTipsInfo(param, targetNode, tipsInfo, showInSubWindow, instanceId);
+    HandleHoverTipsInfo(param, targetNode, tipsInfo, showInSubWindow, spanString);
 }
 
 void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode,
-    PopupInfo& tipsInfo, bool showInSubWindow, int32_t instanceId)
+    PopupInfo& tipsInfo, bool showInSubWindow, const RefPtr<SpanString>& spanString)
 {
     CHECK_NULL_VOID(param);
     CHECK_NULL_VOID(targetNode);
@@ -2095,12 +2096,15 @@ void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const Re
     auto targetTag = targetNode->GetTag();
     auto popupId = tipsInfo.popupId;
     auto popupNode = tipsInfo.popupNode;
+    auto context = targetNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto instanceId = context->GetInstanceId();
     if (!tipsInfo.isTips && popupNode) {
         return;
     }
     RefPtr<BubblePattern> popupPattern;
     tipsInfo.markNeedUpdate = true;
-    popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, param);
+    popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, param, spanString);
     if (popupNode) {
         popupId = popupNode->GetId();
     }
