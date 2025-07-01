@@ -19,6 +19,7 @@ import { WrappedArray } from './observeWrappedArray';
 import { WrappedDate } from './observeWrappedDate';
 import { WrappedSet } from './observeWrappedSet';
 import { WrappedMap } from './observeWrappedMap';
+import { ObserveWrappedBase } from './observeWrappedBase';
 
 export class UIUtilsImpl {
     private static observedMap: WeakMap<Object, Object> = new WeakMap<Object, Object>();
@@ -104,6 +105,24 @@ export class UIUtilsImpl {
             return UIUtilsImpl.makeObservedProxyNoCheck(value as Object) as T;
         }
         return value;
+    }
+
+    public getTarget<T>(source: T): T {
+        if (!source || typeof source !== 'object') {
+            return source;
+        }
+        if (UIUtilsImpl.isProxied(source!)) {
+            return Proxy.tryGetTarget(source! as Object)! as Object as T;
+        }
+        if (
+            source instanceof WrappedArray ||
+            source instanceof WrappedMap ||
+            source instanceof WrappedDate ||
+            source instanceof WrappedSet
+        ) {
+            return (source as ObserveWrappedBase).getRaw()! as T;
+        }
+        return source;
     }
 }
 
