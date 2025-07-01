@@ -3534,9 +3534,12 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNodeInList(FocusStep step, const Weak
 
 bool ListPattern::IsListItemGroupByIndex(int32_t index)
 {
+    if (index < 0) {
+        return false;
+    }
     auto list = GetHost();
     CHECK_NULL_RETURN(list, false);
-    auto layoutWapper = list->GetChildByIndex(index);
+    auto layoutWapper = list->GetChildByIndex(static_cast<uint32_t>(index));
     CHECK_NULL_RETURN(layoutWapper, false);
     auto frameNode = layoutWapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, false);
