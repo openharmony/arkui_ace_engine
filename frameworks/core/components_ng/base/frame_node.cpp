@@ -94,7 +94,7 @@ constexpr int32_t MIN_OPINC_AREA = 10000;
 } // namespace
 
 void ClearAccessibilityFocus(const OHOS::Ace::RefPtr<OHOS::Ace::NG::AccessibilityProperty>& accessibilityProperty,
-    const OHOS::Ace::RefPtr<OHOS::Ace::RenderContext>& renderContext)
+    const OHOS::Ace::RefPtr<OHOS::Ace::NG::RenderContext>& renderContext)
 {
     CHECK_NULL_VOID(accessibilityProperty);
     CHECK_NULL_VOID(renderContext);
