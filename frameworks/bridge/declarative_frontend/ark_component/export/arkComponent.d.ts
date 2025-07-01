@@ -1933,6 +1933,7 @@ declare class ArkSwiperComponent extends ArkComponent implements SwiperAttribute
     pageFlipMode(value: PageFlipMode): this;
     onContentWillScroll(handler: ContentWillScrollCallback): this;
     maintainVisibleContentPosition(value: boolean): this;
+    onScrollStateChanged(event: Callback<ScrollState>): this;
 }
 declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

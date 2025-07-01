@@ -86,6 +86,8 @@ public:
     void SetDisableTransitionAnimation(bool isDisable) override;
     void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) override;
     void SetOnContentWillScroll(ContentWillScrollEvent&& onContentWillScroll) override;
+    void SetOnScrollStateChanged(
+        std::function<void(const BaseEventInfo* info)>&& onScrollStateChanged) override;
     void SetBindIndicator(bool bind) override;
     void SetJSIndicatorController(std::function<void()> resetFunc) override;
     void SetPageFlipMode(int32_t pageFlipMode) override;
@@ -162,6 +164,8 @@ public:
     static RefPtr<SwiperController> GetSwiperController(FrameNode* frameNode);
     static void SetOnContentDidScroll(FrameNode* frameNode, ContentDidScrollEvent&& onContentDidScroll);
     static void SetOnContentWillScroll(FrameNode* frameNode, ContentWillScrollEvent&& onContentWillScroll);
+    static void SetOnScrollStateChanged(
+        FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onScrollStateChanged);
     static void SetCustomContentTransition(FrameNode* frameNode, SwiperContentAnimatedTransition& transition);
     static void SetOnSelected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onSelected);
     static RefPtr<SwiperController> GetOrCreateSwiperController(FrameNode* frameNode);
