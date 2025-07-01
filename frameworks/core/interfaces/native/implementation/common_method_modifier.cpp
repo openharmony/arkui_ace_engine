@@ -3524,7 +3524,7 @@ void Rotate0Impl(Ark_NativePointer node,
         angleValue,
         [&convValue](const Ark_String& str) {
             std::string degreeStr = Converter::Convert<std::string>(str);
-            float angle = static_cast<float>(StringUtils::StringToCalcDimension(degreeStr).Value());
+            float angle = static_cast<float>(StringUtils::StringToDegree(degreeStr));
             int32_t indA = 3;
             if (convValue->vec5f.size() > indA) {
                 convValue->vec5f[indA] = angle;
@@ -3945,7 +3945,7 @@ void ClickEffect0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Ark_ClickEffect>(value);
     if (!convValue.has_value()) {
-        ViewAbstractModelStatic::SetClickEffectLevel(frameNode, ClickEffectLevel::LIGHT, DEFAULT_SCALE_LIGHT);
+        ViewAbstractModelStatic::SetClickEffectLevel(frameNode, std::nullopt, std::nullopt);
         return;
     }
     const std::optional<ClickEffectLevel>& level = Converter::OptConvert<ClickEffectLevel>(convValue.value().level);
