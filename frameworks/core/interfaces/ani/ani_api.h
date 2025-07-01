@@ -20,9 +20,12 @@
 #include <functional>
 #include <string>
 
+#include <cstdint>
+#include "ani.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/render/snapshot_param.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,6 +52,7 @@ typedef class __ani_error* ani_error;
 typedef struct __ani_resolver *ani_resolver;
 typedef struct napi_env__* napi_env;
 typedef struct napi_value__* napi_value;
+typedef class __ani_array* ani_array;
 typedef _ArkUINode* ArkUINodeHandle;
 typedef int ArkUI_Int32;
 typedef size_t ani_size;
@@ -219,6 +223,12 @@ struct ArkUIAniCommonModifier {
     ani_double (*px2fp)(ani_double value, ani_int instanceId);
     ani_double (*lpx2px)(ani_double value, ani_int instanceId);
     ani_double (*px2lpx)(ani_double value, ani_int instanceId);
+    ArkUI_Uint32 (*getColorValueByString)(const std::string& src);
+    ArkUI_Uint32 (*getColorValueByNumber)(ArkUI_Uint32 src);
+    void (*sendThemeToNative)(ani_env* env, ani_array colors, ani_int id);
+    void (*setDefaultTheme)(ani_env* env, ani_array colors, ani_boolean isDark);
+    void (*updateColorMode)(ani_int colorMode);
+    void (*restoreColorMode)();
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);
