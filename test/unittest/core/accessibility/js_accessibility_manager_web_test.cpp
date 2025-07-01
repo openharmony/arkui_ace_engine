@@ -28,12 +28,7 @@ using namespace OHOS::Accessibility;
 using namespace testing;
 using namespace testing::ext;
 
-namespace OHOS::Ace {
-} // namespace OHOS::Ace
-
 namespace OHOS::Ace::NG {
-namespace {
-} // namespace
 
 class JsAccessibilityManagerWebTest : public testing::Test {
 public:
