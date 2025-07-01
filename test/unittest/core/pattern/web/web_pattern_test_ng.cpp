@@ -1926,7 +1926,7 @@ HWTEST_F(WebPatternTestNg, HandleMouseEvent_002, TestSize.Level1)
     info.SetButton(MouseButton::LEFT_BUTTON);
     info.SetAction(MouseAction::PRESS);
     webPattern->HandleMouseEvent(info);
-    mouseInfoQueue = WebPattern->GetMouseInfoQueue();
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
     EXPECT_EQ(mouseInfoQueue.size(), 1);
 
     MouseInfo info1;
