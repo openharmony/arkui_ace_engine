@@ -375,12 +375,12 @@ public:
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
-    SizeF GetViewSize() const
+    const SizeF& GetViewSize() const
     {
         return viewSize_;
     }
 
-    SizeF GetViewPortExtent() const
+    const SizeF& GetViewPortExtent() const
     {
         return viewPortExtent_;
     }

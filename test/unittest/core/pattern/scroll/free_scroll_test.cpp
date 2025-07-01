@@ -319,7 +319,8 @@ TEST_F(FreeScrollTest, Animation001)
     PanStart({});
     PanUpdate({ DELTA_X, DELTA_Y });
     FlushUITasks(frameNode_);
-    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(DELTA_X, DELTA_Y));
+    EXPECT_LT(GetChildOffset(frameNode_, 0).GetX(), DELTA_X);
+    EXPECT_LT(GetChildOffset(frameNode_, 0).GetY(), DELTA_Y);
 
     PanEnd({ DELTA_X, DELTA_Y }, { VELOCITY_X, VELOCITY_Y });
     EXPECT_FALSE(MockAnimationManager::GetInstance().AllFinished());
@@ -369,13 +370,15 @@ TEST_F(FreeScrollTest, Animation002)
     PanStart({});
     PanUpdate({ DELTA_X, DELTA_Y });
     FlushUITasks(frameNode_);
-    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(DELTA_X, DELTA_Y));
+    EXPECT_LT(GetChildOffset(frameNode_, 0).GetX(), DELTA_X);
+    EXPECT_LT(GetChildOffset(frameNode_, 0).GetY(), DELTA_Y);
 
     PanEnd({ DELTA_X, DELTA_Y }, { VELOCITY_X, VELOCITY_Y });
     EXPECT_FALSE(MockAnimationManager::GetInstance().AllFinished());
     MockAnimationManager::GetInstance().TickByVelocity(OffsetF(VELOCITY_X, VELOCITY_Y)); // simulate scrolling out of bounds
     FlushUITasks(frameNode_);
-    EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(DELTA_X + VELOCITY_X, DELTA_Y + VELOCITY_Y));
+    EXPECT_GT(GetChildX(frameNode_, 0), VELOCITY_X);
+    EXPECT_GT(GetChildY(frameNode_, 0), VELOCITY_Y);
 
     TouchDown();
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());

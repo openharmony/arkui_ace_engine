@@ -87,10 +87,36 @@ void FreeScrollController::InitializePanRecognizer()
     friction_ = theme->GetFriction() * -FRICTION_SCALE;
 }
 
+namespace {
+/**
+ * @return ratio (non-negative) between overScroll and contentLength.
+ */
+float GetGamma(float offset, float contentLength)
+{
+    if (Positive(offset)) {
+        return offset / contentLength;
+    }
+    if (LessNotEqual(offset, -contentLength)) {
+        return (contentLength + offset) / contentLength;
+    }
+    return 0.0f;
+}
+} // namespace
+
 void FreeScrollController::HandlePanUpdate(const GestureEvent& event)
 {
-    const auto& delta = event.GetDelta();
-    offset_->Set(offset_->Get() + OffsetF { static_cast<float>(delta.GetX()), static_cast<float>(delta.GetY()) });
+    const auto dx = static_cast<float>(event.GetDelta().GetX());
+    const auto dy = static_cast<float>(event.GetDelta().GetY());
+    const float newX = offset_->Get().GetX() + dx;
+    const float newY = offset_->Get().GetY() + dy;
+    const auto& viewSize = pattern_.GetViewSize();
+
+    const float gammaX = GetGamma(newX, viewSize.Width());
+    const float gammaY = GetGamma(newY, viewSize.Height());
+    // apply friction if overScrolling
+    OffsetF deltaF { NearZero(gammaX) ? dx : dx * pattern_.CalculateFriction(gammaX),
+        NearZero(gammaY) ? dy : dy * pattern_.CalculateFriction(gammaY) };
+    offset_->Set(offset_->Get() + deltaF);
     pattern_.MarkDirty();
 }
 
