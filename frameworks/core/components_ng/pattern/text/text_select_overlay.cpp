@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text/text_select_overlay.h"
 
+#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -232,7 +233,7 @@ void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     }
     textPattern->UpdateAIMenuOptions();
     overlayManager->MarkInfoChange((isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE) | DIRTY_SELECT_AREA |
-                                   DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM | DIRTY_AI_MENU_ITEM);
+                                   DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM | DIRTY_AI_MENU_ITEM | DIRTY_ASK_CELIA);
     if (textPattern->CheckSelectedTypeChange()) {
         CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
         ProcessOverlay({ .animation = true });
@@ -336,6 +337,7 @@ void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlay
     } else {
         menuInfo.aiMenuOptionType = TextDataDetectType::INVALID;
     }
+    menuInfo.isAskCeliaEnabled = textPattern->IsAskCeliaEnabled();
     menuInfo.menuIsShow = IsShowMenu();
     menuInfo.showCut = false;
     menuInfo.showPaste = false;
@@ -403,6 +405,9 @@ void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType t
             break;
         case OptionMenuActionId::SHARE:
             HandleOnShare();
+            break;
+        case OptionMenuActionId::ASK_CELIA:
+            textPattern->HandleOnAskCelia();
             break;
         default:
             TAG_LOGI(AceLogTag::ACE_TEXT, "Unsupported menu option id %{public}d", id);
@@ -664,5 +669,27 @@ bool TextSelectOverlay::CheckTouchInHostNode(const PointF& touchPoint)
     auto selectedArea = GetSelectArea();
     selectedArea.SetOffset(selectedArea.GetOffset() - textPattern->GetParentGlobalOffset());
     return rect.IsInRegion(touchPoint) || selectedArea.IsInRegion(touchPoint);
+}
+
+void TextSelectOverlay::IsAIMenuOptionChanged(SelectMenuInfo& menuInfo)
+{
+    auto textPattern = GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+
+    auto oldIsShowAIMenuOption = textPattern->IsShowAIMenuOption();
+    auto oldIsShowAskCelia = textPattern->IsAskCeliaEnabled();
+    textPattern->UpdateAIMenuOptions();
+    menuInfo.isShowAIMenuOptionChanged =
+        oldIsShowAIMenuOption != textPattern->IsShowAIMenuOption() ||
+        oldIsShowAskCelia != textPattern->IsAskCeliaEnabled();
+
+    if (textPattern->IsShowAIMenuOption()) {
+        // do not support two selected ai entity, hence it's enough to pick first item to determine type
+        auto firstSpanItem = textPattern->GetAIItemOption().begin()->second; // null check
+        menuInfo.aiMenuOptionType = firstSpanItem.type;
+    } else {
+        menuInfo.aiMenuOptionType = TextDataDetectType::INVALID;
+    }
+    menuInfo.isAskCeliaEnabled = textPattern->IsAskCeliaEnabled();
 }
 } // namespace OHOS::Ace::NG

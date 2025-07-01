@@ -35,7 +35,11 @@ void SelectContentOverlayPattern::UpdateMenuIsShow(bool menuIsShow, bool noAnima
         DeleteHotAreas();
     }
     info_->menuInfo.menuIsShow = menuIsShow;
-    selectOverlayNode->UpdateToolBar(false, noAnimation);
+    if (info_->menuInfo.menuIsShow && info_->menuInfo.isShowAIMenuOptionChanged) {
+        selectOverlayNode->UpdateToolBar(true, noAnimation);
+    } else {
+        selectOverlayNode->UpdateToolBar(false, noAnimation);
+    }
     UpdateMenuAccessibility(menuIsShow);
 }
 

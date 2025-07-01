@@ -80,6 +80,7 @@ public:
     const RefPtr<ScrollablePattern> FindScrollableParent();
     std::optional<Color> GetHandleColor() override;
     bool CheckTouchInHostNode(const PointF& touchPoint) override;
+    void IsAIMenuOptionChanged(SelectMenuInfo& menuInfo) override;
 
 protected:
     OffsetF GetHandleReferenceOffset(const RectF& handleRect);

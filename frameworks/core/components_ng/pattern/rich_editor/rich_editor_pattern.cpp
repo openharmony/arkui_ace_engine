@@ -8762,13 +8762,24 @@ void RichEditorPattern::UpdateAIMenuOptions()
 {
     if ((copyOption_ != CopyOptions::Local && copyOption_ != CopyOptions::Distributed) || !NeedShowAIDetect()) {
         SetIsShowAIMenuOption(false);
-        return;
+    } else {
+        auto aiItemOptions = GetAIItemOption();
+        auto isShowAIMenuOption = TextPattern::PrepareAIMenuOptions(aiItemOptions);
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateAIMenuOptions isShowAIMenuOption=%{public}d", isShowAIMenuOption);
+        SetIsShowAIMenuOption(isShowAIMenuOption);
+        SetAIItemOption(aiItemOptions);
     }
-    auto aiItemOptions = GetAIItemOption();
-    auto isShowAIMenuOption = TextPattern::PrepareAIMenuOptions(aiItemOptions);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateAIMenuOptions isShowAIMenuOption=%{public}d", isShowAIMenuOption);
-    SetIsShowAIMenuOption(isShowAIMenuOption);
-    SetAIItemOption(aiItemOptions);
+    bool isAskCeliaEnabled = (copyOption_ == CopyOptions::Local || copyOption_ == CopyOptions::Distributed) &&
+        ((NeedShowAIDetect() && !IsShowAIMenuOption()) || (IsEditing() && IsSelected()));
+    SetIsAskCeliaEnabled(isAskCeliaEnabled);
+    if (!IsSupportAskCelia()) {
+        SetIsAskCeliaEnabled(false);
+    }
+    CHECK_NULL_VOID(dataDetectorAdapter_);
+    if (IsAskCeliaEnabled() && !NeedShowAIDetect() &&
+        dataDetectorAdapter_->textDetectResult_.menuOptionAndAction.empty()) {
+        dataDetectorAdapter_->GetAIEntityMenu();
+    }
 }
 
 Offset RichEditorPattern::ConvertGlobalToTextOffset(const Offset& globalOffset)

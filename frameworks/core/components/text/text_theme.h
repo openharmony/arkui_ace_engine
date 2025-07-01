@@ -101,6 +101,8 @@ public:
             theme->fadeoutWidth_ = pattern->GetAttr<Dimension>("text_fadeout_width", 16.0_vp);
             theme->marqueeStartPolicy_ = static_cast<MarqueeStartPolicy>(static_cast<int32_t>(
                 pattern->GetAttr<double>("text_marquee_start_policy", 0.0)));
+            auto textSupportCeliaAsk = pattern->GetAttr<std::string>("menu_celia_ask_is_support", "0");
+            theme->isSupportAskCelia_ = StringUtils::StringToInt(textSupportCeliaAsk);
         }
     };
 
@@ -191,6 +193,10 @@ public:
         return marqueeStartPolicy_;
     }
 
+    bool IsSupportAskCelia() const
+    {
+        return isSupportAskCelia_;
+    }
 protected:
     TextTheme() = default;
     TextStyle textStyle_;
@@ -211,6 +217,7 @@ private:
     Color urlDefaultColor_;
     Color urlHoverColor_;
     Color urlPressColor_;
+    bool isSupportAskCelia_;
 };
 
 } // namespace OHOS::Ace

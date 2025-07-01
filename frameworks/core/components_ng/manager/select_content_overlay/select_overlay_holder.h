@@ -136,6 +136,8 @@ public:
         return true;
     }
 
+    virtual void IsAIMenuOptionChanged(SelectMenuInfo& menuInfo) {}
+
 protected:
     virtual RectF GetSelectAreaFromRects(SelectRectsType pos)
     {

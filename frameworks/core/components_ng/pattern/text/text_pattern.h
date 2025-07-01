@@ -867,7 +867,19 @@ public:
     void RelayoutResetOrUpdateTextEffect();
     void ReseTextEffect(bool clear = true);
     bool ResetTextEffectBeforeLayout();
+
+    void HandleOnAskCelia();
     
+    void SetIsAskCeliaEnabled(bool isAskCeliaEnabled)
+    {
+        isAskCeliaEnabled_ = isAskCeliaEnabled;
+    }
+    
+    bool IsAskCeliaEnabled() const
+    {
+        return isAskCeliaEnabled_;
+    }
+
 protected:
     int32_t GetClickedSpanPosition()
     {
@@ -1048,6 +1060,7 @@ protected:
     bool hasUrlSpan_ = false;
     WeakPtr<PipelineContext> pipeline_;
     void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
+    bool IsSupportAskCelia();
 
 private:
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -1209,6 +1222,7 @@ private:
     bool isShowAIMenuOption_ = false;
     std::unordered_map<TextDataDetectType, AISpan> aiMenuOptions_;
     bool isRegisteredAreaCallback_ = false;
+    bool isAskCeliaEnabled_ = false;
 };
 } // namespace OHOS::Ace::NG
 

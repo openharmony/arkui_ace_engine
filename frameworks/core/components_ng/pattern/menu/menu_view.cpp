@@ -1827,7 +1827,8 @@ void MenuView::CreateOption(bool optionsHasIcon, std::vector<OptionParam>& param
         auto iconNode = CreateSymbol(params[index].symbol, row, nullptr, params[index].symbolUserDefinedIdealFontSize);
         pattern->SetIconNode(iconNode);
     }
-    auto textNode = CreateText(params[index].value, row, false, params[index].isAIMenuOption);
+    auto textNode = CreateText(params[index].value, row, false,
+        params[index].isAIMenuOption || params[index].isAskCeliaOption);
     row->MountToParent(option);
     row->MarkModifyDone();
     pattern->SetTextNode(textNode);
@@ -1937,7 +1938,8 @@ void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPt
         } else {
             optionNode = CreateMenuOption(
                 { .optionsHasIcon = optionsHasIcon, .content = params[i].value,
-                  .isPasteOption = params[i].isPasteOption, .isAIMenuOption = params[i].isAIMenuOption },
+                  .isPasteOption = params[i].isPasteOption,
+                  .isAIMenuOption = (params[i].isAIMenuOption || params[i].isAskCeliaOption) },
                 params[i].action, i, params[i].icon);
             if (optionNode) {
                 auto optionPattern = optionNode->GetPattern<MenuItemPattern>();

@@ -387,6 +387,7 @@ enum class TextDataDetectType {
     EMAIL,
     ADDRESS,
     DATE_TIME,
+    ASK_CELIA, // ask Celia tag, not a valid ai entity
 };
 
 enum class LineBreakStrategy {
