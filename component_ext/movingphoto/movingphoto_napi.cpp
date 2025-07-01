@@ -356,7 +356,7 @@ napi_value RefreshMovingPhoto(napi_env env, napi_callback_info info)
     return ExtNapiUtils::CreateNull(env);
 }
 
-napi_value Pause(napi_env env, napi_callback_info info)
+napi_value PausePlayback(napi_env env, napi_callback_info info)
 {
     napi_value thisVar = nullptr;
     NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &thisVar, NULL));
@@ -401,9 +401,9 @@ napi_value EnableTransition(napi_env env, napi_callback_info info)
     size_t argc = MAX_ARG_NUM;
     napi_value argv[MAX_ARG_NUM] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
-    NAPI_ASSERT(env, argc >= ARG_NUM_TWO, "Wrong number of arguments");
+    NAPI_ASSERT(env, argc >= ARG_NUM_ONE, "Wrong number of arguments");
     bool enabled = true;
-    if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[PARAM_INDEX_ZERO], napi_number)) {
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[PARAM_INDEX_ZERO], napi_boolean)) {
         enabled = ExtNapiUtils::GetBool(env, argv[PARAM_INDEX_ZERO]);
     }
     NG::MovingPhotoController* controller = nullptr;
@@ -445,9 +445,9 @@ napi_value EnableAutoPlay(napi_env env, napi_callback_info info)
     size_t argc = MAX_ARG_NUM;
     napi_value argv[MAX_ARG_NUM] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
-    NAPI_ASSERT(env, argc >= ARG_NUM_TWO, "Wrong number of arguments");
+    NAPI_ASSERT(env, argc >= ARG_NUM_ONE, "Wrong number of arguments");
     bool enabled = true;
-    if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[PARAM_INDEX_ZERO], napi_number)) {
+    if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[PARAM_INDEX_ZERO], napi_boolean)) {
         enabled = ExtNapiUtils::GetBool(env, argv[PARAM_INDEX_ZERO]);
     }
     NG::MovingPhotoController* controller = nullptr;
@@ -486,7 +486,7 @@ napi_value InitController(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("startPlayback", StartPlayback),
         DECLARE_NAPI_FUNCTION("stopPlayback", StopPlayback),
         DECLARE_NAPI_FUNCTION("refreshMovingPhoto", RefreshMovingPhoto),
-        DECLARE_NAPI_FUNCTION("pause", Pause),
+        DECLARE_NAPI_FUNCTION("pausePlayback", PausePlayback),
         DECLARE_NAPI_FUNCTION("reset", Reset),
         DECLARE_NAPI_FUNCTION("restart", Restart),
         DECLARE_NAPI_FUNCTION("enableTransition", EnableTransition),
