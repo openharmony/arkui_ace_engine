@@ -122,6 +122,8 @@ arkui_files = [
   "arkui-preprocessed/arkui/stateManagement/utils.ets",
   "arkui-preprocessed/arkui/stateManagement/storage/localStorage.ets",
   "arkui-preprocessed/arkui/stateManagement/storage/appStorage.ets",
+  "arkui-preprocessed/arkui/stateManagement/storage/storageBase.ets",
+  "arkui-preprocessed/arkui/stateManagement/storage/storageProperty.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorProp.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorStorageProp.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorState.ets",

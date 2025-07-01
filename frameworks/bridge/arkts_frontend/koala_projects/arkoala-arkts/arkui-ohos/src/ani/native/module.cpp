@@ -193,6 +193,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::CreateFromBuilderWithPromise)
         },
         ani_native_function {
+            "_Common_GetSharedLocalStorage",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetSharedLocalStorage)
+        },
+        ani_native_function {
             "_ComponentSnapshot_createFromComponentWithPromise",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::CreateFromComponentWithPromise)

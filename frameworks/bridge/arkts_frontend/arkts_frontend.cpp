@@ -323,7 +323,7 @@ void ArktsFrontend::AttachPipelineContext(const RefPtr<PipelineBase>& context)
     }
 }
 
-void* ArktsFrontend::GetShared(int32_t id)
+ani_ref  ArktsFrontend::GetShared(int32_t id)
 {
     int32_t currentInstance = id;
     if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
@@ -334,7 +334,7 @@ void* ArktsFrontend::GetShared(int32_t id)
         LOGW("LocalStorage with ID %{public}d not found!", currentInstance);
         return nullptr;
     }
-    return it->second;
+    return reinterpret_cast<ani_ref>(it->second);
 }
 
 void ArktsFrontend::Destroy()

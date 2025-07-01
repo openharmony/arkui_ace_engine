@@ -42,6 +42,7 @@ import router from '@ohos/router'
 import { ComponentContent } from 'arkui/ComponentContent'
 import overlayManager from '@ohos/overlayManager'
 import promptAction from '@ohos/promptAction';
+import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
 import { AsyncCallback, CustomBuilder, DragItemInfo } from 'arkui/component'
 import { Router as RouterExt } from 'arkui/handwritten';
 import { ComponentContent } from "arkui/ComponentContent"
@@ -362,6 +363,9 @@ export class UIContext {
     }
     public getFrameNodeById(id: string): FrameNode | null {
         throw Error("getFrameNodeById not implemented in UIContext!")
+    }
+    public getSharedLocalStorage(): LocalStorage | undefined {
+        throw Error('getFrameNodeById not implemented in UIContext!');
     }
     getAttachedFrameNodeById(id: string): FrameNode | null {
         throw Error("getAttachedFrameNodeById not implemented in UIContext!")

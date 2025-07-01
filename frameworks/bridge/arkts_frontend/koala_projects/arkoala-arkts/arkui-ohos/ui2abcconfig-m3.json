@@ -79,7 +79,12 @@
             "@ohos.promptAction": [
                 "./@ohos.promptAction.ts"
             ],
-            "@koalaui/runtime/annotations": ["../../incremental/runtime/annotations"],
+            "@koalaui/runtime/annotations": [
+                "../../incremental/runtime/annotations"
+            ],
+            "@ohos.arkui.stateManagement": [
+                "arkui/stateManagement/index.ts"
+            ],
             "#stateMgmtTool": [
                 "arkui/stateManagement/tools/arkts"
             ]

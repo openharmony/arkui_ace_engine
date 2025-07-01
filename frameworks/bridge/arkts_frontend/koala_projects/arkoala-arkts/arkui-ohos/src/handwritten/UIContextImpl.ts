@@ -63,6 +63,7 @@ import { Serializer } from "arkui/component/peers/Serializer"
 import { KBuffer } from "@koalaui/interop"
 import { deserializeAndCallCallback } from "arkui/component/peers/CallbackDeserializeCall"
 import { InteropNativeModule } from "@koalaui/interop"
+import { LocalStorage } from '../stateManagement/storage/localStorage';
 import { Router as RouterExt } from 'arkui/handwritten';
 import { ComponentContent } from "arkui/ComponentContent"
 
@@ -890,6 +891,9 @@ export class UIContextImpl extends UIContext {
         }
         ArkUIAniModule._Common_Restore_InstanceId();
         return node;
+    }
+    public getSharedLocalStorage(): LocalStorage | undefined {
+        return  ArkUIAniModule._Common_GetSharedLocalStorage();
     }
     getAttachedFrameNodeById(id: string): FrameNode | null {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
