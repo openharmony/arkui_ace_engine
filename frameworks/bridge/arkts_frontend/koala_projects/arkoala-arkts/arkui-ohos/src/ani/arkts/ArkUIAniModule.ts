@@ -48,7 +48,7 @@ export class ArkUIAniModule {
     native static _ContentSlot_construct(id: KInt): KPointer
     native static _ContentSlotInterface_setContentSlotOptions(slot: KPointer, content: KPointer): void
     native static _SetDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
-    native static _SetDrawModifier(ptr: KPointer, drawModifier: DrawModifier): void
+    native static _SetDrawModifier(ptr: KPointer, flag: KInt, drawModifier: DrawModifier): void
     native static _Invalidate(ptr: KPointer): void
     native static _SetWaterFlowOptions(ptr: KPointer, options: WaterFlowOptions): void
 

@@ -119,7 +119,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function {
             "_SetDrawModifier",
-            "JLarkui/component/common/DrawModifier;:V",
+            "JILarkui/component/common/DrawModifier;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetDrawModifier)
         },
         ani_native_function {
