@@ -94,6 +94,7 @@ constexpr int32_t MIN_OPINC_AREA = 10000;
 } // namespace
 namespace OHOS::Ace::NG {
 
+namespace {
 void ClearAccessibilityFocus(const RefPtr<AccessibilityProperty>& accessibilityProperty,
     const RefPtr<RenderContext>& renderContext)
 {
@@ -107,6 +108,7 @@ void ClearAccessibilityFocus(const RefPtr<AccessibilityProperty>& accessibilityP
         }
     }
 }
+} // namespace
 
 class FrameNode::FrameProxy final : public RecursiveLock {
 public:
