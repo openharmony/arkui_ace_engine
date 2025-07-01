@@ -92,6 +92,20 @@ constexpr float WIDTH_RATIO_LIMIT = 1.0f;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
 } // namespace
+
+void ClearAccessibilityFocus(const OHOS::Ace::RefPtr<OHOS::Ace::NG::AccessibilityProperty>& accessibilityProperty,
+    const OHOS::Ace::RefPtr<OHOS::Ace::RenderContext>& renderContext)
+{
+    CHECK_NULL_VOID(accessibilityProperty);
+    CHECK_NULL_VOID(renderContext);
+    if (OHOS::Ace::AceApplicationInfo::GetInstance().IsAccessibilityEnabled() &&
+        accessibilityProperty->GetAccessibilityFocusState()) {
+        accessibilityProperty->SetAccessibilityFocusState(false);
+        if (renderContext->GetAccessibilityFocus().value_or(false)) {
+            renderContext->UpdateAccessibilityFocus(false);
+        }
+    }
+}
 namespace OHOS::Ace::NG {
 
 class FrameNode::FrameProxy final : public RecursiveLock {
@@ -4210,20 +4224,6 @@ void FrameNode::OnAccessibilityEvent(
     }
 }
 
-void clearAccessibilityFocus(
-    const RefPtr<AccessibilityProperty>& accessibilityProperty, const RefPtr<RenderContext>& renderContext)
-{
-    CHECK_NULL_VOID(accessibilityProperty);
-    CHECK_NULL_VOID(renderContext);
-    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() &&
-        accessibilityProperty->GetAccessibilityFocusState()) {
-        accessibilityProperty->SetAccessibilityFocusState(false);
-        if (renderContext->GetAccessibilityFocus().value_or(false)) {
-            renderContext->UpdateAccessibilityFocus(false);
-        }
-    }
-}
-
 void FrameNode::OnRecycle()
 {
     for (const auto& destroyCallback : destroyCallbacksMap_) {
@@ -4237,7 +4237,7 @@ void FrameNode::OnRecycle()
     
     auto accessibilityProperty = GetAccessibilityProperty<NG::AccessibilityProperty>();
     auto renderContext = GetRenderContext();
-    clearAccessibilityFocus(accessibilityProperty, renderContext);
+    ClearAccessibilityFocus(accessibilityProperty, renderContext);
 }
 
 void FrameNode::OnReuse()
