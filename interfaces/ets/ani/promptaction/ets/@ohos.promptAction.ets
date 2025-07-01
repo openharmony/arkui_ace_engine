@@ -215,13 +215,13 @@ export default namespace promptAction {
 
     export native function showActionMenu(options: ActionMenuOptions): Promise<ActionMenuSuccessResponse>;
 
-    export native function openCustomDialog1(contentNode: long, options?: BaseDialogOptions): Promise<void>;
+    export native function openCustomDialog1(content: long, options?: BaseDialogOptions): Promise<void>;
 
-    export native function openCustomDialog(options: CustomDialogOptions): Promise<number>;
+    export native function openCustomDialog(builder: long, options: CustomDialogOptions): Promise<number>;
 
-    export native function updateCustomDialog(contentNode: long, options: BaseDialogOptions): Promise<void>;
+    export native function updateCustomDialog(content: long, options: BaseDialogOptions): Promise<void>;
 
-    export native function closeCustomDialog1(contentNode: long): Promise<void>;
+    export native function closeCustomDialog1(content: long): Promise<void>;
 
     export native function closeCustomDialog(dialogId: number): void;
 }
