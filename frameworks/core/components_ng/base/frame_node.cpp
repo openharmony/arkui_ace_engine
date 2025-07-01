@@ -92,7 +92,6 @@ constexpr float WIDTH_RATIO_LIMIT = 1.0f;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
 } // namespace
-
 namespace OHOS::Ace::NG {
 
 void ClearAccessibilityFocus(const RefPtr<AccessibilityProperty>& accessibilityProperty,
