@@ -85,7 +85,6 @@ arkui_files = [
   "arkui-preprocessed/arkui/handwritten/UIContextImpl.ets",
   "arkui-preprocessed/arkui/handwritten/Router.ets",
   "arkui-preprocessed/arkui/handwritten/UIContextUtil.ets",
-  "arkui-preprocessed/arkui/handwritten/ArkDrawModifierImpl.ets",
   "arkui-preprocessed/arkui/handwritten/ArkDragDrop.ets",
   "arkui-preprocessed/arkui/handwritten/LazyItemNode.ets",
   "arkui-preprocessed/arkui/handwritten/ArkRouterExtenderMaterialized.ets",

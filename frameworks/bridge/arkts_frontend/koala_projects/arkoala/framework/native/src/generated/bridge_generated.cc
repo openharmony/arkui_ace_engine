@@ -1756,20 +1756,6 @@ void impl_CommonMethod_height1(Ark_NativePointer thisPtr, KSerializerBuffer this
         GetNodeModifiers()->getCommonMethodModifier()->setHeight1(self, (const Opt_Union_Length_LayoutPolicy*)&value_value);
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_height1, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_CommonMethod_drawModifier(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
-        Deserializer thisDeserializer(thisArray, thisLength);
-        const auto value_value_buf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
-        Opt_DrawModifier value_value_buf = {};
-        value_value_buf.tag = value_value_buf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
-        if ((INTEROP_RUNTIME_UNDEFINED) != (value_value_buf_runtimeType))
-        {
-            value_value_buf.value = static_cast<Ark_DrawModifier>(thisDeserializer.readDrawModifier());
-        }
-        Opt_DrawModifier value_value = value_value_buf;;
-        GetNodeModifiers()->getCommonMethodModifier()->setDrawModifier(self, (const Opt_DrawModifier*)&value_value);
-}
-KOALA_INTEROP_DIRECT_V3(CommonMethod_drawModifier, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_responseRegion(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         Deserializer thisDeserializer(thisArray, thisLength);
@@ -35141,14 +35127,14 @@ Ark_NativePointer impl_TabsOps_registerBarBackgroundBlurStyle(Ark_NativePointer 
         return GetAccessors()->getTabsOpsAccessor()->registerBarBackgroundBlurStyle(node, (const Opt_BlurStyle*)&style_value, (const Opt_BackgroundBlurStyleOptions*)&options_value);
 }
 KOALA_INTEROP_DIRECT_3(TabsOps_registerBarBackgroundBlurStyle, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
-void impl_UIContextImp_freezeUINode0(const KStringPtr& id, Ark_Boolean isFrozen) {
-        GetAccessors()->getUIContextImpAccessor()->freezeUINode0((const Ark_String*) (&id), isFrozen);
+void impl_IUIContext_freezeUINode0(const KStringPtr& id, Ark_Boolean isFrozen) {
+        GetAccessors()->getIUIContextAccessor()->freezeUINode0((const Ark_String*) (&id), isFrozen);
 }
-KOALA_INTEROP_V2(UIContextImp_freezeUINode0, KStringPtr, Ark_Boolean)
-void impl_UIContextImp_freezeUINode1(KInteropNumber id, Ark_Boolean isFrozen) {
-        GetAccessors()->getUIContextImpAccessor()->freezeUINode1((const Ark_Number*) (&id), isFrozen);
+KOALA_INTEROP_V2(IUIContext_freezeUINode0, KStringPtr, Ark_Boolean)
+void impl_IUIContext_freezeUINode1(KInteropNumber id, Ark_Boolean isFrozen) {
+        GetAccessors()->getIUIContextAccessor()->freezeUINode1((const Ark_Number*) (&id), isFrozen);
 }
-KOALA_INTEROP_DIRECT_V2(UIContextImp_freezeUINode1, KInteropNumber, Ark_Boolean)
+KOALA_INTEROP_DIRECT_V2(IUIContext_freezeUINode1, KInteropNumber, Ark_Boolean)
 Ark_NativePointer impl_GridItemOps_registerSelectedCallback(Ark_NativePointer node, Ark_Boolean value, KSerializerBuffer thisArray, int32_t thisLength) {
     Deserializer thisDeserializer(thisArray, thisLength);
     SelectedCallback callback_value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_Boolean selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_SelectedCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_Boolean selected)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_SelectedCallback))))};;
