@@ -12509,6 +12509,7 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     std::function<void()> builderFunc;
     BackgroundType backgroundType = BackgroundType::COLOR;
     if (!ParseJsColor(info[0], color, backgroundColorResObj)) {
+        ViewAbstractModel::GetInstance()->ClearResObj("customBackgroundColor");
         if (ParseBackgroundBuilder(info, info[0], builderFunc)) {
             backgroundType = BackgroundType::CUSTOM_BUILDER;
         } else {
@@ -12546,8 +12547,8 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBackground(std::move(builderFunc));
     ViewAbstractModel::GetInstance()->SetBackgroundIgnoresLayoutSafeAreaEdges(ignoreLayoutSafeAreaEdges);
     ViewAbstractModel::GetInstance()->SetBackgroundAlign(alignment);
-    if (SystemProperties::ConfigChangePerform() && backgroundColorResObj) {
-        ViewAbstractModel::GetInstance()->SetCustomBackgroundColorWithResourceObj(backgroundColorResObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        ViewAbstractModel::GetInstance()->SetCustomBackgroundColorWithResourceObj(color, backgroundColorResObj);
     } else {
         ViewAbstractModel::GetInstance()->SetCustomBackgroundColor(color);
     }
