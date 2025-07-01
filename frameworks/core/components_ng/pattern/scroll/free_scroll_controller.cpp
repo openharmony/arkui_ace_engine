@@ -65,7 +65,7 @@ void FreeScrollController::InitializePanRecognizer()
     freePanGesture_->SetOnActionStart([weak = WeakClaim(this)](const GestureEvent& event) {
         auto controller = weak.Upgrade();
         if (controller) {
-            controller->duringPan_ = true;
+            controller->HandlePanStart(event);
         }
     });
     freePanGesture_->SetOnActionUpdate([weak = WeakClaim(this)](const GestureEvent& event) {
@@ -108,6 +108,12 @@ float GetGamma(float offset, float contentLength)
     return 0.0f;
 }
 } // namespace
+
+void FreeScrollController::HandlePanStart(const GestureEvent& event)
+{
+    duringPan_ = true;
+    pattern_.FireOnScrollStart();
+}
 
 void FreeScrollController::HandlePanUpdate(const GestureEvent& event)
 {
@@ -207,5 +213,11 @@ OffsetF FreeScrollController::GetOffset() const
         return offset_->Get();
     }
     return {};
+}
+void FreeScrollController::SetOffset(const OffsetF& offset)
+{
+    if (offset_) {
+        offset_->Set(offset);
+    }
 }
 } // namespace OHOS::Ace::NG

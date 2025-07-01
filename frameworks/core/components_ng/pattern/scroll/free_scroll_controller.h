@@ -37,19 +37,14 @@ public:
         return freePanGesture_;
     }
 
-    void UpdateOffset(const OffsetF& offset)
-    {
-        if (offset_) {
-            offset_->Set(offset);
-        }
-    }
-
+    void SetOffset(const OffsetF& offset);
     OffsetF GetOffset() const;
 
 private:
     void InitializePanRecognizer();
     void InitializeTouchEvent();
 
+    void HandlePanStart(const GestureEvent& event);
     void HandlePanUpdate(const GestureEvent& event);
     void HandlePanEndOrCancel(const GestureEvent& event);
 

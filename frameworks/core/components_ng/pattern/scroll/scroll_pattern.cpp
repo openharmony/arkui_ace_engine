@@ -162,7 +162,7 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     currentOffset_ = layoutAlgorithm->GetCurrentOffset();
     if (freeScroll_) {
-        freeScroll_->UpdateOffset(layoutAlgorithm->GetFreeOffset());
+        freeScroll_->SetOffset(layoutAlgorithm->GetFreeOffset());
     }
     auto oldScrollableDistance = scrollableDistance_;
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();

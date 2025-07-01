@@ -408,4 +408,27 @@ TEST_F(FreeScrollTest, Animation002)
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, 0));
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 }
+
+/**
+ * @tc.name: Events001
+ * @tc.desc: Test scroll events
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Event001)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::FREE);
+    static bool scrollBegun = false;
+    model.SetOnScrollStart([]() {
+        scrollBegun = true;
+    });
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    PanStart({});
+    EXPECT_TRUE(scrollBegun);
+    // PanUpdate({ -DELTA_X, -DELTA_Y });
+    // FlushUITasks(frameNode_);
+    // PanEnd({ -DELTA_X, -DELTA_Y }, { -VELOCITY_X, -VELOCITY_Y });
+    // MockAnimationManager::GetInstance().Reset();
+}
 } // namespace OHOS::Ace::NG
