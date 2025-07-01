@@ -445,6 +445,30 @@ float ScrollPattern::FireTwoDimensionOnWillScroll(float scroll)
     }
 }
 
+namespace {
+Dimension ToVp(float value)
+{
+    return Dimension { Dimension(value).ConvertToVp(), DimensionUnit::VP };
+}
+} // namespace
+
+OffsetF ScrollPattern::FreeModeFireOnWillScroll(const OffsetF& delta, ScrollState state, ScrollSource source) const
+{
+    auto eventHub = GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_RETURN(eventHub, delta);
+    auto onScroll = eventHub->GetOnWillScrollEvent();
+    if (!onScroll) {
+        onScroll = eventHub->GetJSFrameNodeOnScrollWillScroll();
+    }
+    CHECK_NULL_RETURN(onScroll, delta);
+
+    // delta sign is reversed in user space
+    const auto res = onScroll(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state, source);
+    auto* context = GetContext();
+    CHECK_NULL_RETURN(context, delta);
+    return { -context->NormalizeToPx(res.xOffset), -context->NormalizeToPx(res.yOffset) };
+}
+
 void ScrollPattern::FireOnDidScroll(float scroll)
 {
     FireObserverOnDidScroll(scroll);

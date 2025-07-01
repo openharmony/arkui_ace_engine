@@ -457,6 +457,12 @@ public:
         return nullptr;
     }
 
+    /**
+     * @brief triggers onWillScroll user callback
+     * @return user-modified delta
+     */
+    OffsetF FreeModeFireOnWillScroll(const OffsetF& delta, ScrollState state, ScrollSource source) const;
+
 private:
     RefPtr<FreeScrollController> freeScroll_;
     /* ============================================================================== */

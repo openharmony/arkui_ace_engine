@@ -15,6 +15,7 @@
 
 #include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/unittest/core/pattern/scroll/scroll_test_ng.h"
+#include "ui/base/geometry/dimension.h"
 
 #include "core/components_ng/pattern/scroll/free_scroll_controller.h"
 #include "core/event/touch_event.h"
@@ -417,17 +418,28 @@ TEST_F(FreeScrollTest, Animation002)
 TEST_F(FreeScrollTest, Event001)
 {
     ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
     model.SetAxis(Axis::FREE);
     static bool scrollBegun = false;
-    model.SetOnScrollStart([]() {
-        scrollBegun = true;
-    });
+    model.SetOnScrollStart([]() { scrollBegun = true; });
+    model.SetOnWillScroll(
+        [](const Dimension& xOffset, const Dimension& yOffset, ScrollState state, ScrollSource source) {
+            EXPECT_EQ(xOffset.Unit(), DimensionUnit::VP);
+            EXPECT_EQ(yOffset.Unit(), DimensionUnit::VP);
+            EXPECT_EQ(xOffset.Value(), DELTA_X);
+            EXPECT_EQ(yOffset.Value(), DELTA_Y);
+            EXPECT_EQ(state, ScrollState::SCROLL);
+            EXPECT_EQ(source, ScrollSource::DRAG);
+            return TwoDimensionScrollResult { .xOffset = Dimension(DELTA_X), .yOffset = 0.0_vp };
+        });
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
     PanStart({});
     EXPECT_TRUE(scrollBegun);
-    // PanUpdate({ -DELTA_X, -DELTA_Y });
-    // FlushUITasks(frameNode_);
+    PanUpdate({ -DELTA_X, -DELTA_Y });
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -DELTA_X);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     // PanEnd({ -DELTA_X, -DELTA_Y }, { -VELOCITY_X, -VELOCITY_Y });
     // MockAnimationManager::GetInstance().Reset();
 }

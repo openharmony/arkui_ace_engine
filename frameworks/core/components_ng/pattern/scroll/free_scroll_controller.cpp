@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
 FreeScrollController::FreeScrollController(ScrollPattern& pattern) : pattern_(pattern)
@@ -128,6 +129,7 @@ void FreeScrollController::HandlePanUpdate(const GestureEvent& event)
     // apply friction if overScrolling
     OffsetF deltaF { NearZero(gammaX) ? dx : dx * pattern_.CalculateFriction(gammaX),
         NearZero(gammaY) ? dy : dy * pattern_.CalculateFriction(gammaY) };
+    deltaF = pattern_.FreeModeFireOnWillScroll(deltaF, ScrollState::SCROLL, ScrollSource::DRAG);
     offset_->Set(offset_->Get() + deltaF);
     pattern_.MarkDirty();
 }
