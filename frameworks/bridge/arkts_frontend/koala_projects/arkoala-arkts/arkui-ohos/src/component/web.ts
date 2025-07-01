@@ -3442,7 +3442,7 @@ export interface OnPageBeginEvent {
     url: string;
 }
 export interface OnProgressChangeEvent {
-    newProgress: number;
+    newProgress: int32;
 }
 export interface OnTitleReceiveEvent {
     title: string;

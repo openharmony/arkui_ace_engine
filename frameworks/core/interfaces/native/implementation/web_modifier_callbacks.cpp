@@ -92,7 +92,7 @@ void OnProgressChange(const CallbackHelper<Callback_OnProgressChangeEvent_Void>&
     auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebProgressChangeEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     Ark_OnProgressChangeEvent parameter;
-    parameter.newProgress = Converter::ArkValue<Ark_Number>(eventInfo->GetNewProgress());
+    parameter.newProgress = Converter::ArkValue<Ark_Int32>(eventInfo->GetNewProgress());
     arkCallback.Invoke(parameter);
 }
 
