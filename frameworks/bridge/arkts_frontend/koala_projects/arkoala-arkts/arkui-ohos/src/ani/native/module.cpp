@@ -30,6 +30,8 @@
 #include "utils/convert_utils.h"
 #include "water_flow/waterFlowSection_module.h"
 #include "web/web_module_methods.h"
+#include "video/video_module_methods.h"
+#include "shape/shape_module_methods.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -269,6 +271,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_RequireArkoalaNodeId",
             "I:I",
             reinterpret_cast<void*>(OHOS::Ace::Ani::RequireArkoalaNodeId)
+        },
+        ani_native_function {
+            "_Video_Transfer_PixelMap",
+            "JL@ohos/multimedia/image/image/PixelMap;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetVideoPixelMap)
+        },
+        ani_native_function {
+            "_Shape_Transfer_PixelMap",
+            "JL@ohos/multimedia/image/image/PixelMap;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetShapePixelMap)
         },
     };
 

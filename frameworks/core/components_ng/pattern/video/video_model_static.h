@@ -42,6 +42,7 @@ public:
     static void SetOnUpdate(FrameNode* frameNode, VideoEventFunc&& onUpdate);
     static void SetOnError(FrameNode* frameNode, VideoEventFunc&& onError);
     static void SetOnStop(FrameNode* frameNode, VideoEventFunc&& onStop);
+    static void SetPosterSourceByPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_MODEL_STATIC_H

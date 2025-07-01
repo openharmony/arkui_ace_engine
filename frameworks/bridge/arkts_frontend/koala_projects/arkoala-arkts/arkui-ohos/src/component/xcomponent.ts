@@ -219,32 +219,7 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setXComponentOptions0Attribute(value: Type_XComponentInterface_callable0_value): void {
-        const thisSerializer : Serializer = Serializer.hold()
-        const value_id  = value.id
-        thisSerializer.writeString(value_id)
-        const value_type  = value.type
-        thisSerializer.writeString(value_type)
-        const value_libraryname  = value.libraryname
-        let value_libraryname_type : int32 = RuntimeType.UNDEFINED
-        value_libraryname_type = runtimeType(value_libraryname)
-        thisSerializer.writeInt8(value_libraryname_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_libraryname_type)) {
-            const value_libraryname_value  = value_libraryname!
-            thisSerializer.writeString(value_libraryname_value)
-        }
-        const value_controller  = value.controller
-        let value_controller_type : int32 = RuntimeType.UNDEFINED
-        value_controller_type = runtimeType(value_controller)
-        thisSerializer.writeInt8(value_controller_type as int32)
-        if ((RuntimeType.UNDEFINED) != (value_controller_type)) {
-            const value_controller_value  = value_controller!
-            thisSerializer.writeXComponentController(value_controller_value)
-        }
-        ArkUIGeneratedNativeModule._XComponentInterface_setXComponentOptions0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setXComponentOptions1Attribute(value: Type_XComponentInterface_callable1_value): void {
+    setXComponentOptions0Attribute(value: Type_XComponentInterface_callable1_value): void {
         const thisSerializer : Serializer = Serializer.hold()
         const value_id  = value.id
         thisSerializer.writeString(value_id)
@@ -269,7 +244,7 @@ export class ArkXComponentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._XComponentInterface_setXComponentOptions1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setXComponentOptions2Attribute(options: XComponentOptions): void {
+    setXComponentOptions1Attribute(options: XComponentOptions): void {
         const thisSerializer : Serializer = Serializer.hold()
         options.controller?.holdXComponentCallback();
         thisSerializer.writeXComponentOptions(options)
@@ -438,23 +413,7 @@ export class ArkXComponentComponent extends ArkCommonMethodComponent implements 
     }
     public setXComponentOptions(value: XComponentParameter | XComponentOptions | NativeXComponentParameters): this {
         if (this.checkPriority("setXComponentOptions")) {
-            const value_type = runtimeType(value)
-            if (TypeChecker.isXComponentOptions(value, true, true, true, false)) {
-                const options_casted = value as (XComponentOptions)
-                this.getPeer()?.setXComponentOptions2Attribute(options_casted)
-                return this
-            }
-            if (TypeChecker.isNativeXComponentParameters(value, true, true)) {
-                const params_casted = value as (NativeXComponentParameters)
-                this.getPeer()?.setXComponentOptions3Attribute(params_casted)
-                return this
-            }
-            if (RuntimeType.OBJECT == value_type) {
-                const value_casted = value as (Type_XComponentInterface_callable1_value)
-                this.getPeer()?.setXComponentOptions1Attribute(value_casted)
-                return this
-            }
-            throw new Error("Can not select appropriate overload")
+            hookSetXComponentOptions(this, value)
         }
         return this
     }
