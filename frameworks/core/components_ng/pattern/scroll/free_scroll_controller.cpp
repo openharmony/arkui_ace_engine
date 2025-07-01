@@ -93,6 +93,9 @@ namespace {
  */
 float GetGamma(float offset, float contentLength)
 {
+    if (NearZero(contentLength)) {
+        return 1.0f;
+    }
     if (Positive(offset)) {
         return offset / contentLength;
     }
