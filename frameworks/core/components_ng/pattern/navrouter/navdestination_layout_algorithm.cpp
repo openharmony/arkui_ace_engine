@@ -235,8 +235,8 @@ float TransferBarHeight(const RefPtr<NavDestinationGroupNode>& hostNode, float d
             return 0.0f;
         }
     }
-    return navDestinationPattern->GetTitleBarStyle().value_or(BarStyle::STANDARD) == BarStyle::STANDARD ?
-        defaultBarHeight : 0.0f;
+    auto barStyle = isTitleBar ? navDestinationPattern->GetTitleBarStyle() : navDestinationPattern->GetToolBarStyle();
+    return barStyle.value_or(BarStyle::STANDARD) == BarStyle::STANDARD ? defaultBarHeight : 0.0f;
 }
 
 bool IsDestSizeMatchNavigation(const RefPtr<NavDestinationGroupNode>& destNode, const SizeF& navDestSize)
