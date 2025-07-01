@@ -347,7 +347,7 @@ void ArktsFrontend::Destroy()
     handleMessageMethod_ = nullptr;
 }
 
-ani_object ArktsFrontend::CallGetUIContextFunc()
+ani_object ArktsFrontend::CallGetUIContextFunc(int32_t instanceId)
 {
     ani_object result = nullptr;
     ani_status status;
@@ -356,20 +356,17 @@ ani_object ArktsFrontend::CallGetUIContextFunc()
     CHECK_NULL_RETURN(env, result);
 
     ani_class uiContextClass;
-    if ((status = env->FindClass("L@ohos/arkui/UIContext/UIContext;", &uiContextClass)) != ANI_OK) {
+    if ((status = env->FindClass("Larkui/handwritten/UIContextUtil/UIContextUtil;", &uiContextClass)) != ANI_OK) {
         LOGE("FindClass UIContext failed, %{public}d", status);
         return result;
     }
-    ani_method uiContextClassCtor;
-    if ((status = env->Class_FindMethod(uiContextClass, "<ctor>", "I:V", &uiContextClassCtor)) != ANI_OK) {
-        LOGE("Class_FindMethod UIContext ctor failed, %{public}d", status);
+    ani_ref aniRef = nullptr;
+    if ((status = env->Class_CallStaticMethodByName_Ref(uiContextClass, "getOrCreateUIContextById",
+        "I:L@ohos/arkui/UIContext/UIContext;", &aniRef, instanceId)) != ANI_OK) {
+        LOGE("Class_CallStaticMethodByName_Ref failed, %{public}d", status);
         return result;
     }
-    ani_int instanceId = 100000;
-    if ((status = env->Object_New(uiContextClass, uiContextClassCtor, &result, instanceId)) != ANI_OK) {
-        LOGE("New UIContext object failed, %{public}d", status);
-        return result;
-    }
+    result = reinterpret_cast<ani_object>(aniRef);
     return result;
 }
 

@@ -1177,7 +1177,7 @@ ani_object UIContentImpl::GetUIAniContext()
     CHECK_NULL_RETURN(frontend, result);
     auto arktsFrontend = AceType::DynamicCast<ArktsFrontend>(frontend);
     CHECK_NULL_RETURN(arktsFrontend, result);
-    result = arktsFrontend->CallGetUIContextFunc();
+    result = arktsFrontend->CallGetUIContextFunc(instanceId_);
     return result;
 }
 
