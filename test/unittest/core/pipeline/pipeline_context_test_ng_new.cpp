@@ -2171,6 +2171,8 @@ HWTEST_F(PipelineContextTestNg, PipelineFlushTouchEvents002, TestSize.Level1)
     context_->SetupRootElement();
     context_->vsyncTime_ = AFTER_VSYNC_TIME;
     context_->eventManager_->idToTouchPoints_.clear();
+    bool isAcc = context_->touchAccelarate_;
+    context_->touchAccelarate_ = true;
 
     for (auto& testCase : FLUSH_TOUCH_EVENTS_TESTCASES) {
         context_->resampleTimeStamp_ = testCase.vsyncTime;
@@ -2188,6 +2190,7 @@ HWTEST_F(PipelineContextTestNg, PipelineFlushTouchEvents002, TestSize.Level1)
         auto idToTouchPoint = context_->eventManager_->GetIdToTouchPoint();
         EXPECT_EQ(idToTouchPoint[DEFAULT_INT0].history.size(), testCase.originTouchEventSize);
     }
+    context_->touchAccelarate_ = isAcc;
 }
 
 HWTEST_F(PipelineContextTestNg, PipelineOnHoverMove001, TestSize.Level1)

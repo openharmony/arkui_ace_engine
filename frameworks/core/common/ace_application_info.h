@@ -336,7 +336,7 @@ protected:
     uint32_t versionCode_ = 0;
     int32_t missionId_ = -1;
     mutable std::shared_mutex eventsPassMutex_;
-    TouchPassMode touchPassMode_ = TouchPassMode::DEFAULT;
+    TouchPassMode touchPassMode_ = TouchPassMode::ACCELERATE;
     bool reusedNodeSkipMeasure_ = false;
     bool mouseTransformEnable_ = false;
     bool touchPadIdChanged_ = false;
