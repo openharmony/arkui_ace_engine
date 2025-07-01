@@ -457,6 +457,7 @@ public:
         return nullptr;
     }
 
+    void FreeModeFireOnDidScroll(const OffsetF& delta, ScrollState state);
     /**
      * @brief triggers onWillScroll user callback
      * @return user-modified delta

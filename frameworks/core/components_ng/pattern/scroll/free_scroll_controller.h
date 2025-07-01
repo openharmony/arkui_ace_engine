@@ -37,7 +37,8 @@ public:
         return freePanGesture_;
     }
 
-    void SetOffset(const OffsetF& offset);
+    void OnLayoutFinished(const OffsetF& adjustedOffset);
+
     OffsetF GetOffset() const;
 
 private:
@@ -63,6 +64,7 @@ private:
 
     ScrollPattern& pattern_;
     RefPtr<NodeAnimatablePropertyOffsetF> offset_;
+    OffsetF prevOffset_;
     RefPtr<PanRecognizer> freePanGesture_;
     RefPtr<TouchEventImpl> freeTouch_;
     float friction_ = 0.0f;

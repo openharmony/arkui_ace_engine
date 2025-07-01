@@ -432,6 +432,13 @@ TEST_F(FreeScrollTest, Event001)
             EXPECT_EQ(source, ScrollSource::DRAG);
             return TwoDimensionScrollResult { .xOffset = Dimension(DELTA_X), .yOffset = 0.0_vp };
         });
+    static int32_t didScroll = 0;
+    model.SetOnDidScroll([](const Dimension& xOffset, const Dimension& yOffset, ScrollState state) {
+        EXPECT_EQ(xOffset.Value(), DELTA_X);
+        EXPECT_EQ(yOffset.Value(), 0.0f);
+        EXPECT_EQ(state, ScrollState::SCROLL);
+        ++didScroll;
+    });
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
     PanStart({});
@@ -440,7 +447,8 @@ TEST_F(FreeScrollTest, Event001)
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildX(frameNode_, 0), -DELTA_X);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
-    // PanEnd({ -DELTA_X, -DELTA_Y }, { -VELOCITY_X, -VELOCITY_Y });
-    // MockAnimationManager::GetInstance().Reset();
+    EXPECT_EQ(didScroll, 1);
+
+    MockAnimationManager::GetInstance().Reset();
 }
 } // namespace OHOS::Ace::NG

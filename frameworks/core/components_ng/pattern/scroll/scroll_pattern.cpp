@@ -162,7 +162,7 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
     CHECK_NULL_RETURN(layoutAlgorithm, false);
     currentOffset_ = layoutAlgorithm->GetCurrentOffset();
     if (freeScroll_) {
-        freeScroll_->SetOffset(layoutAlgorithm->GetFreeOffset());
+        freeScroll_->OnLayoutFinished(layoutAlgorithm->GetFreeOffset());
     }
     auto oldScrollableDistance = scrollableDistance_;
     scrollableDistance_ = layoutAlgorithm->GetScrollableDistance();
@@ -469,8 +469,23 @@ OffsetF ScrollPattern::FreeModeFireOnWillScroll(const OffsetF& delta, ScrollStat
     return { -context->NormalizeToPx(res.xOffset), -context->NormalizeToPx(res.yOffset) };
 }
 
+void ScrollPattern::FreeModeFireOnDidScroll(const OffsetF& delta, ScrollState state)
+{
+    auto eventHub = GetOrCreateEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto onScroll = eventHub->GetOnDidScrollEvent();
+    if (!onScroll) {
+        onScroll = eventHub->GetJSFrameNodeOnScrollDidScroll();
+    }
+    CHECK_NULL_VOID(onScroll);
+    onScroll(ToVp(-delta.GetX()), ToVp(-delta.GetY()), state);
+}
+
 void ScrollPattern::FireOnDidScroll(float scroll)
 {
+    if (freeScroll_) {
+        return; // using FreeModeFireOnDidScroll
+    }
     FireObserverOnDidScroll(scroll);
     FireObserverOnScrollerAreaChange(scroll);
     auto eventHub = GetOrCreateEventHub<ScrollEventHub>();

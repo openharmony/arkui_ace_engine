@@ -35,6 +35,7 @@ FreeScrollController::FreeScrollController(ScrollPattern& pattern) : pattern_(pa
     InitializePanRecognizer();
     InitializeTouchEvent();
 }
+
 FreeScrollController::~FreeScrollController()
 {
     if (offset_) {
@@ -216,10 +217,16 @@ OffsetF FreeScrollController::GetOffset() const
     }
     return {};
 }
-void FreeScrollController::SetOffset(const OffsetF& offset)
+
+void FreeScrollController::OnLayoutFinished(const OffsetF& adjustedOffset)
 {
-    if (offset_) {
-        offset_->Set(offset);
+    if (offset_ && offset_->Get() != adjustedOffset) {
+        offset_->Set(adjustedOffset);
+    }
+    if (adjustedOffset != prevOffset_) {
+        // Fire onDidScroll only if the offset has changed.
+        pattern_.FreeModeFireOnDidScroll(adjustedOffset - prevOffset_, duringPan_ ? ScrollState::SCROLL : ScrollState::FLING);
+        prevOffset_ = adjustedOffset;
     }
 }
 } // namespace OHOS::Ace::NG
