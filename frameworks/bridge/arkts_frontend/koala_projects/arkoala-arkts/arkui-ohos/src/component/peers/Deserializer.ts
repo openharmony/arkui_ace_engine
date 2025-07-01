@@ -606,7 +606,7 @@ export class Deserializer extends DeserializerBase {
     }
     readOnProgressChangeEvent(): OnProgressChangeEvent {
         let valueDeserializer : Deserializer = this
-        const newProgress_result : number = (valueDeserializer.readNumber() as number)
+        const newProgress_result : int32 = (valueDeserializer.readInt32() as int32)
         let value : OnProgressChangeEvent = ({newProgress: newProgress_result} as OnProgressChangeEvent)
         return value
     }
