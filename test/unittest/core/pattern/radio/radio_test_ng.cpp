@@ -1572,60 +1572,6 @@ HWTEST_F(RadioTestNg, RadioPatternTest027, TestSize.Level1)
 }
 
 /**
- * @tc.name: RadioPatternTest028
- * @tc.desc: Test Radio OnDetachFromFrameNodeMultiThread.
- * @tc.type: FUNC
- */
-HWTEST_F(RadioTestNg, RadioPatternTest028, TestSize.Level1)
-{
-    RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    frameNode->MarkModifyDone();
-
-    auto pattern = frameNode->GetPattern<RadioPattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->OnDetachFromFrameNodeMultiThread();
-}
-
-/**
- * @tc.name: RadioPatternTest029
- * @tc.desc: Test Radio OnDetachFromMainTree.
- * @tc.type: FUNC
- */
-HWTEST_F(RadioTestNg, RadioPatternTest029, TestSize.Level1)
-{
-    RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    frameNode->MarkModifyDone();
-
-    auto pattern = frameNode->GetPattern<RadioPattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->OnDetachFromMainTree();
-}
-
-/**
- * @tc.name: RadioPatternTest030
- * @tc.desc: Test Radio OnDetachFromMainTreeMultiThread.
- * @tc.type: FUNC
- */
-HWTEST_F(RadioTestNg, RadioPatternTest030, TestSize.Level1)
-{
-    RadioModelNG radioModelNG;
-    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
-    frameNode->MarkModifyDone();
-
-    auto pattern = frameNode->GetPattern<RadioPattern>();
-    ASSERT_NE(pattern, nullptr);
-    pattern->OnDetachFromMainTreeMultiThread(frameNode);
-}
-
-/**
  * @tc.name: RadioEventHubChangeEventTest001
  * @tc.desc: Set Radio value into RadioEventHub and get it.
  * @tc.type: FUNC

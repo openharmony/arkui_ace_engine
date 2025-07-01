@@ -1642,8 +1642,6 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest046, TestSize.Level1)
     checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    frameNode->MarkModifyDone();
-
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->OnDetachFromFrameNodeMultiThread();
@@ -1660,8 +1658,6 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest047, TestSize.Level1)
     checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    frameNode->MarkModifyDone();
-
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->OnDetachFromMainTree();
@@ -1678,8 +1674,6 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest048, TestSize.Level1)
     checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
-    frameNode->MarkModifyDone();
-
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->OnDetachFromMainTreeMultiThread(frameNode);
