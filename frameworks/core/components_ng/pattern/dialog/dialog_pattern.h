@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/components_ng/pattern/dialog/alert_dialog_model.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model.h"
+#include "core/components_ng/manager/avoid_info/avoid_info_manager.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -50,8 +51,12 @@ enum class DialogDismissReason {
     DIALOG_TOUCH_OUTSIDE,
     DIALOG_CLOSE_BUTTON,
 };
-class DialogPattern : public PopupBasePattern, public FocusView, public AutoFillTriggerStateHolder {
-    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern, FocusView, AutoFillTriggerStateHolder);
+class DialogPattern : public PopupBasePattern,
+                      public FocusView,
+                      public AutoFillTriggerStateHolder,
+                      public IAvoidInfoListener {
+    DECLARE_ACE_TYPE(DialogPattern, PopupBasePattern, FocusView,
+        AutoFillTriggerStateHolder, IAvoidInfoListener);
 
 public:
     DialogPattern(const RefPtr<DialogTheme>& dialogTheme, const RefPtr<UINode>& customNode)
@@ -174,6 +179,8 @@ public:
         dialogProperties_ = param;
         InitHostWindowRect();
     }
+
+    bool GetWindowButtonRect(NG::RectF& floatButtons);
 
     const DialogProperties& GetDialogProperties() const
     {
@@ -386,6 +393,9 @@ private:
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleBlurEvent();
     void HandleFocusEvent();
+    void OnAvoidInfoChange(const ContainerModalAvoidInfo& info) override;
+    void RegisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode);
+    void UnRegisterAvoidInfoChangeListener(FrameNode* hostNode);
 
     void PopDialog(int32_t buttonIdx);
     bool NeedUpdateHostWindowRect();
