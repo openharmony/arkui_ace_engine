@@ -51,9 +51,11 @@ void NodeContainerPattern::RemakeNode()
         return;
     }
     host->RemoveChildAtIndex(0);
+    BuilderUtils::RemoveBuilderFromParent(host, oldChild);
     if (newNode) {
         CHECK_NULL_VOID(CheckBeforeAddNode(host, newNode));
         host->AddChild(newNode, 0);
+        BuilderUtils::AddBuilderToParent(host, newNode);
         newNode->UpdateGeometryTransition();
     }
     OnAddBaseNode();
@@ -185,33 +187,6 @@ void NodeContainerPattern::OnAddBaseNode()
 void NodeContainerPattern::OnMountToParentDone()
 {
     SetExportTextureInfoIfNeeded();
-}
-
-void NodeContainerPattern::OnAttachToMainTree()
-{
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    std::list<RefPtr<NG::UINode>> nodes;
-    BuilderUtils::GetFirstBuilderNode(frameNode, nodes);
-    if (nodes.empty()) {
-        return;
-    }
-    if (BuilderUtils::HasParentView(frameNode)) {
-        BuilderUtils::AddBuilderToContainer(frameNode, nodes);
-        return;
-    }
-    auto parent = frameNode->GetParent();
-    while (parent) {
-        if (BuilderUtils::IsBuilderContainer(parent) && BuilderUtils::HasParentView(parent)) {
-            BuilderUtils::AddBuilderToContainer(parent, nodes);
-            return;
-        }
-        if (parent->GetIsRootBuilderNode()) {
-            BuilderUtils::AddBuilderToBuilder(parent, nodes);
-            return;
-        }
-        parent = parent->GetParent();
-    }
 }
 
 RefPtr<NodeContainerEventHub> NodeContainerPattern::GetNodeContainerEventHub()

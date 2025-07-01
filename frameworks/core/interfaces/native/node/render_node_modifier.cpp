@@ -112,7 +112,9 @@ void ClearBuilderNode(ArkUINodeHandle node)
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto currentRef = Referenced::Claim<UINode>(currentNode);
-    BuilderUtils::ClearBuilder(currentRef);
+    std::list<RefPtr<NG::UINode>> nodes;
+    BuilderUtils::GetBuilderNodes(currentRef, nodes);
+    BuilderUtils::RemoveBuilderFromParent(currentRef, nodes);
 }
 
 void ClearChildren(ArkUINodeHandle node)
