@@ -127,7 +127,7 @@ void WebSelectOverlay::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebT
     } else {
         if (overlayType == INSERT_OVERLAY) {
             if (!selectOverlayDragging_) {
-                UpdateTouchHandleForOverlay(false);
+                UpdateTouchHandleForOverlay(true);
             }
         } else {
             UpdateSelectHandleInfo();
@@ -774,6 +774,7 @@ bool WebSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     SetEnableSubWindowMenu(true);
     SetMenuTranslateIsSupport(true);
     SetIsSupportMenuSearch(true);
+    CheckEnableContainerModal();
     pipeline->AddOnAreaChangeNode(host->GetId());
     return true;
 }
