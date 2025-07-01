@@ -356,7 +356,7 @@ public:
         mediaUpdateCallback_ = nullptr;
     }
 
-    ani_object CallGetUIContextFunc();
+    ani_object CallGetUIContextFunc(int32_t instanceId);
 
     void SetAniContext(int32_t instanceId, ani_ref* context);
 
