@@ -656,8 +656,8 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
         auto scenePersistence = session_->GetScenePersistence();
         CHECK_NULL_VOID(scenePersistence);
         auto key = session_->GetWindowStatus();
-        auto isSavingSnapshot = scenePersistence->IsSavingSnapshot(key, session_->specialType_);
-        auto hasSnapshot = scenePersistence->HasSnapshot(key, session_->specialType_);
+        auto isSavingSnapshot = scenePersistence->IsSavingSnapshot(key, session_->freeMultiWindow_);
+        auto hasSnapshot = scenePersistence->HasSnapshot(key, session_->freeMultiWindow_);
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
             "id: %{public}d isSavingSnapshot: %{public}d, hasSnapshot: %{public}d",
             persistentId, isSavingSnapshot, hasSnapshot);
@@ -679,7 +679,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             Rosen::SceneSessionManager::GetInstance().VisitSnapshotFromCache(persistentId);
         } else {
             sourceInfo = ImageSourceInfo("file://" + scenePersistence->GetSnapshotFilePath(key, matchSnapshot,
-                session_->specialType_));
+                session_->freeMultiWindow_));
             auto snapshotRotation =
                 static_cast<uint32_t>(scenePersistence->rotate_[key.first][key.second]);
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
@@ -692,7 +692,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
             }
         }
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
-        ClearImageCache(sourceInfo, key, session_->specialType_);
+        ClearImageCache(sourceInfo, key, session_->freeMultiWindow_);
         auto eventHub = snapshotWindow_->GetOrCreateEventHub<ImageEventHub>();
         CHECK_NULL_VOID(eventHub);
         eventHub->SetOnError([weakThis = WeakClaim(this)](const LoadImageFailEvent& info) {
@@ -726,7 +726,7 @@ void WindowPattern::CreateSnapshotWindow(std::optional<std::shared_ptr<Media::Pi
     UpdateSnapshotWindowProperty();
 }
 
-void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo, Rosen::SnapshotStatus key, bool specialType)
+void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo, Rosen::SnapshotStatus key, bool freeMultiWindow)
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -736,7 +736,7 @@ void WindowPattern::ClearImageCache(const ImageSourceInfo& sourceInfo, Rosen::Sn
     CHECK_NULL_VOID(imageCache);
     imageCache->ClearCacheImgObj(sourceInfo.GetKey());
     if (!Rosen::ScenePersistence::IsAstcEnabled()) {
-        auto snapshotSize = session_->GetScenePersistence()->GetSnapshotSize(key, specialType);
+        auto snapshotSize = session_->GetScenePersistence()->GetSnapshotSize(key, freeMultiWindow);
         imageCache->ClearCacheImage(
             ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.first, snapshotSize.second)));
         imageCache->ClearCacheImage(
@@ -836,15 +836,16 @@ ImageRotateOrientation WindowPattern::TransformOrientationForDisMatchSnapshot(ui
     uint32_t windowRotation, uint32_t snapshotRotation)
 {
     ImageRotateOrientation orientation = ImageRotateOrientation::UP;
-    if (lastRotation != snapshotRotation) {
-        if (TransformOrientation(lastRotation, snapshotRotation, ROTATION_COUNT_SNAPSHOT) != 0) {
-            if (TransformOrientation(lastRotation, windowRotation, ROTATION_COUNT_SNAPSHOT) != 0) {
-                orientation = static_cast<ImageRotateOrientation>(
-                    TransformOrientation(lastRotation, windowRotation, ROTATION_COUNT) + 1);
-            } else {
-                orientation = static_cast<ImageRotateOrientation>(
-                    TransformOrientation(windowRotation, snapshotRotation, ROTATION_COUNT) + 1);
-            }
+    if (lastRotation == snapshotRotation) {
+        return orientation;
+    }
+    if (TransformOrientation(lastRotation, snapshotRotation, ROTATION_COUNT_SNAPSHOT) != 0) {
+        if (TransformOrientation(lastRotation, windowRotation, ROTATION_COUNT_SNAPSHOT) != 0) {
+            orientation = static_cast<ImageRotateOrientation>(
+                TransformOrientation(lastRotation, windowRotation, ROTATION_COUNT) + 1);
+        } else {
+            orientation = static_cast<ImageRotateOrientation>(
+                TransformOrientation(windowRotation, snapshotRotation, ROTATION_COUNT) + 1);
         }
     }
     return orientation;

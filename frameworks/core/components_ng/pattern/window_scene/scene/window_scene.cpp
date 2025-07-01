@@ -220,7 +220,9 @@ void WindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
     session_->SetUINodeId(0);
     session_->SetAttachState(false, initWindowMode_);
     auto surfaceNode = session_->GetSurfaceNode();
-    if (surfaceNode) surfaceNode->SetVisible(true);
+    if (surfaceNode) {
+        surfaceNode->SetVisible(true);
+    }
     CHECK_NULL_VOID(frameNode);
     auto windowName = IsMainWindow() ? session_->GetSessionInfo().bundleName_ : session_->GetWindowName();
     ACE_SCOPED_TRACE("OnDetachFromFrameNode[id:%d][self:%d][type:%d][name:%s]",
@@ -319,7 +321,8 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
 
     CHECK_NULL_VOID(session_);
     if (session_->GetShowRecent()) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnBoundsChanged in recent %{public}d", session_->GetPersistentId());
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnBoundsChanged in recent %{public}d, rect:%{public}s",
+            session_->GetPersistentId(), windowRect.ToString().c_str());
         return;
     }
     Rosen::WSRectF originBounds = {
