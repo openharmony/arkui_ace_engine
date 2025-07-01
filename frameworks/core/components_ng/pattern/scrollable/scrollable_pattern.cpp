@@ -4426,20 +4426,6 @@ void ScrollablePattern::MarkScrollBarProxyDirty()
     }
 }
 
-bool ScrollablePattern::AccumulatingTerminateHelper(
-    RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf, LayoutSafeAreaType ignoreType)
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto expandFromContainer = host->GetAccumulatedSafeAreaExpand(false,
-        { .edges = GetAxis() == Axis::VERTICAL ? LAYOUT_SAFE_AREA_EDGE_HORIZONTAL : LAYOUT_SAFE_AREA_EDGE_VERTICAL });
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto frameRect = geometryNode->GetFrameRect();
-    totalExpand = totalExpand.Plus(AdjacentExpandToRect(adjustingRect, expandFromContainer, frameRect));
-    return true;
-}
-
 std::string ScrollablePattern::ParseCommand(const std::string& command)
 {
     auto json = JsonUtil::ParseJsonString(command);

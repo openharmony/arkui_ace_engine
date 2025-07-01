@@ -851,8 +851,6 @@ public:
 
     void MarkScrollBarProxyDirty();
 
-    bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
-        LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override;
     bool ChildPreMeasureHelperEnabled() override
     {
         return true;
