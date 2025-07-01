@@ -4854,6 +4854,39 @@ HWTEST_F(WebSelectOverlayTest, PreProcessOverlay_002, TestSize.Level0)
 }
 
 /**
+ * @tc.name: PreProcessOverlay_003
+ * @tc.desc: Test function PreProcessOverlay.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, PreProcessOverlay_003, TestSize.Level0)
+{
+    MockContainer::SetUp();
+    MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    MockPipelineContext::SetUp();
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    WeakPtr<TextBase> textBase = Referenced::WeakClaim(Referenced::RawPtr(webPattern));
+    WebSelectOverlay overlay(textBase);
+    OverlayRequest request;
+    request.menuIsShow = false;
+    request.hideHandle = false;
+    request.animation = false;
+    request.hideHandleLine = false;
+    request.requestCode = 0;
+    bool result = overlay.PreProcessOverlay(request);
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(overlay.IsEnableContainerModal());
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
+}
+
+/**
  * @tc.name: CheckHandleVisible_001
  * @tc.desc: Test function CheckHandleVisible.
  * @tc.type: FUNC
