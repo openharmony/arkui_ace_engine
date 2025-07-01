@@ -133,7 +133,7 @@ public:
     void OnRestoreInfo(const std::string& restoreInfo) override;
     OffsetF CalculateGlobalSafeOffset();
     void UpdateValue(float value);
-    void UpdateValueMultiThread(float value);
+    void UpdateValueMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
     void SetBuilderFunc(SliderMakeCallback&& makeFunc)
@@ -193,7 +193,7 @@ private:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromFrameNodeMultiThread();
     void OnDetachFromMainTree() override;
-    void OnDetachFromMainTreeMultiThread();
+    void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& frameNode);
     void OnModifyDone() override;
     void CalcSliderValue();
     void CancelExceptionValue(float& min, float& max, float& step);

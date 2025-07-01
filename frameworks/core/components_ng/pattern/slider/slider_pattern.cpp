@@ -1923,7 +1923,7 @@ void SliderPattern::UpdateValue(float value)
         sliderPaintProperty->UpdateValue(value);
     }
     auto host = GetHost();
-    FREE_NODE_CHECK(host, UpdateValue, value);
+    FREE_NODE_CHECK(host, UpdateValue, host);
     CalcSliderValue();
     FireBuilder();
 }
@@ -2143,7 +2143,7 @@ void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 void SliderPattern::OnDetachFromMainTree()
 {
     auto host = GetHost();
-    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree, host);
 }
 
 void SliderPattern::InitOrRefreshSlipFactor()

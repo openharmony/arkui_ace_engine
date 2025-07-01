@@ -18,15 +18,13 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-void SliderPattern::UpdateValueMultiThread(float value)
+void SliderPattern::UpdateValueMultiThread(const RefPtr<FrameNode>& frameNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto updateTask = [this]() {
         CalcSliderValue();
         FireBuilder();
     };
-    host->PostAfterAttachMainTreeTask(std::move(updateTask));
+    frameNode->PostAfterAttachMainTreeTask(std::move(updateTask));
 }
 
 void SliderPattern::OnAttachToFrameNodeMultiThread()
@@ -44,10 +42,8 @@ void SliderPattern::OnDetachFromFrameNodeMultiThread()
 {
 }
 
-void SliderPattern::OnDetachFromMainTreeMultiThread()
+void SliderPattern::OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& frameNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    RemoveCallbackOnDetach(host.GetRawPtr());
+    RemoveCallbackOnDetach(frameNode.GetRawPtr());
 }
 } // namespace OHOS::Ace::NG
