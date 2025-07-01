@@ -69,6 +69,7 @@ declare interface BuildOptions {
   lazyBuildSupported?: boolean;
   bindedViewOfBuilderNode?:ViewPU;
   localStorage?:LocalStorage;
+  enableProvideConsumeCrossing?:boolean;
 }
 
 declare interface RegisterParams {

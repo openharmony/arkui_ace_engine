@@ -59,7 +59,7 @@ globalThis.__AddToNodeControllerMap__ = function __AddToNodeControllerMap__(cont
   NodeControllerRegisterProxy.__NodeControllerMap__.set(containerId, nodeController);
 }
 
-globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeControllerMap__(containerId: number) {
+globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeControllerMap__(containerId: number): void {
   let nodeController = NodeControllerRegisterProxy.__NodeControllerMap__.get(containerId);
   if (nodeController) {
     nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;

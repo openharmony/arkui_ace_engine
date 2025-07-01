@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
-function __establishConnection__(allow: boolean, parentView: ViewBuildNodeBase, builderIds: Array<number>): boolean {
+function __establishConnection__(allow: boolean, parentView: ViewBuildNodeBase | undefined, builderIds: Array<number>): boolean {
+    if (!parentView) {
+        return false;
+    }
     builderIds.forEach((builderId, indx) => {
         let builderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(builderId);
         let builderNode = builderNodePtr?.deref()?.getBuilderNode();
@@ -25,12 +28,15 @@ function __establishConnection__(allow: boolean, parentView: ViewBuildNodeBase, 
             builderNode.setAllowFreezeWhenInactive(allow);
         }
         builderNode.__parentViewOfBuildNode = parentView;
-        parentView.addChildBuilderNode(builderNode);
+        parentView?.addChildBuilderNode(builderNode);
     });
     return true;
 }
 
-function __disconnectConnection__(parentView: ViewBuildNodeBase, builderIds: Array<number>): boolean {
+function __disconnectConnection__(parentView: ViewBuildNodeBase | undefined, builderIds: Array<number>): boolean {
+    if (!parentView) {
+        return false;
+    }
     builderIds.forEach((builderId, indx) => {
         let builderNodePtr = FrameNodeFinalizationRegisterProxy.rootFrameNodeIdToBuilderNode_.get(builderId);
         let builderNode = builderNodePtr?.deref()?.getBuilderNode();
@@ -43,7 +49,7 @@ function __disconnectConnection__(parentView: ViewBuildNodeBase, builderIds: Arr
             builderNode.setActiveInternal(true);
         }
         builderNode.__parentViewOfBuildNode = undefined;
-        parentView.removeChildBuilderNode(builderId);
+        parentView?.removeChildBuilderNode(builderId);
     });
     return true;
 }
