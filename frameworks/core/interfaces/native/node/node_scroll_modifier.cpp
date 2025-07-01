@@ -603,12 +603,30 @@ void CreateWithResourceObjFriction(ArkUINodeHandle node, void* resObj)
     ScrollModelNG::CreateWithResourceObjFriction(frameNode, AceType::Claim(resourceObj));
 }
 
-void CreateWithResourceObjSnapPaginations(ArkUINodeHandle node, void* resObjs)
+void CreateWithResourceObjSnap(ArkUINodeHandle node, const ArkUI_Float32* paginationValue, ArkUI_Int32 paginationSize,
+    const int32_t* paginationParam, void* resObjs)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+
+    std::vector<Dimension> snapPagination;
+    if (paginationSize > 0) {
+        auto isArray = false;
+        auto isArrayIndex = paginationSize + 3;
+        isArray = static_cast<bool>(paginationParam[isArrayIndex]);
+        if (isArray) {
+            for (auto i = 0; i < paginationSize; i++) {
+                auto pValue = paginationValue[i];
+                auto pUnit = static_cast<DimensionUnit>(paginationParam[i]);
+                CalcDimension dms = Dimension(pValue, pUnit);
+                snapPagination.push_back(dms);
+            }
+        }
+    }
+
     auto* resourceObj = reinterpret_cast<std::vector<RefPtr<ResourceObject>>*>(resObjs);
-    ScrollModelNG::CreateWithResourceObjSnapPaginations(frameNode, *resourceObj);
+    ScrollModelNG::CreateWithResourceObjIntervalSize(frameNode, *resourceObj);
+    ScrollModelNG::CreateWithResourceObjSnapPaginations(frameNode, snapPagination, *resourceObj);
 }
 
 void SetMaxZoomScale(ArkUINodeHandle node, ArkUI_Float32 scale)
@@ -778,7 +796,7 @@ const ArkUIScrollModifier* GetScrollModifier()
         .setScrollFling = SetScrollFling,
         .getScrollContentSize = GetScrollContentSize,
         .createWithResourceObjFriction = CreateWithResourceObjFriction,
-        .createWithResourceObjSnapPaginations = CreateWithResourceObjSnapPaginations,
+        .createWithResourceObjSnap = CreateWithResourceObjSnap,
         .setMaxZoomScale = SetMaxZoomScale,
         .resetMaxZoomScale = ResetMaxZoomScale,
         .setMinZoomScale = SetMinZoomScale,

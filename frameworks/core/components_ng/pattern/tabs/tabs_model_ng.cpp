@@ -1662,13 +1662,12 @@ void TabsModelNG::HandleBackgroundEffectColor(FrameNode* frameNode, const RefPtr
         CHECK_NULL_VOID(tabBarNode);
         auto target = tabBarNode->GetRenderContext();
         CHECK_NULL_VOID(target);
-        if (target->GetBackgroundEffect().has_value()) {
-            EffectOption option = target->GetBackgroundEffect().value();
-            Color result;
-            ResourceParseUtils::ParseResColor(resObj, result);
-            option.color = result;
-            TabsModelNG::SetBarBackgroundEffect(AceType::RawPtr(tabsNode), option);
-        }
+        EffectOption option = target->GetBackgroundEffect().value_or(EffectOption{});
+        option.isWindowFocused = true; // set to default value
+        Color result = Color::TRANSPARENT;
+        ResourceParseUtils::ParseResColor(resObj, result);
+        option.color = result;
+        TabsModelNG::SetBarBackgroundEffect(AceType::RawPtr(tabsNode), option);
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
@@ -1691,13 +1690,12 @@ void TabsModelNG::HandleBackgroundEffectInactiveColor(FrameNode* frameNode, cons
         CHECK_NULL_VOID(tabBarNode);
         auto target = tabBarNode->GetRenderContext();
         CHECK_NULL_VOID(target);
-        if (target->GetBackgroundEffect().has_value()) {
-            EffectOption option = target->GetBackgroundEffect().value();
-            Color result;
-            ResourceParseUtils::ParseResColor(resObj, result);
-            option.inactiveColor = result;
-            TabsModelNG::SetBarBackgroundEffect(AceType::RawPtr(tabsNode), option);
-        }
+        EffectOption option = target->GetBackgroundEffect().value_or(EffectOption{});
+        option.isWindowFocused = true; // set to default value
+        Color result = Color::TRANSPARENT;
+        option.isValidColor = ResourceParseUtils::ParseResColor(resObj, result);
+        option.inactiveColor = result;
+        TabsModelNG::SetBarBackgroundEffect(AceType::RawPtr(tabsNode), option);
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
@@ -1720,13 +1718,12 @@ void TabsModelNG::HandleBackgroundBlurStyleInactiveColor(FrameNode* frameNode, c
         CHECK_NULL_VOID(tabBarNode);
         auto target = tabBarNode->GetRenderContext();
         CHECK_NULL_VOID(target);
-        if (target->GetBackBlurStyle().has_value()) {
-            BlurStyleOption styleOption = target->GetBackBlurStyle().value();
-            Color result;
-            ResourceParseUtils::ParseResColor(resObj, result);
-            styleOption.inactiveColor = result;
-            TabsModelNG::SetBarBackgroundBlurStyle(AceType::RawPtr(tabsNode), styleOption);
-        }
+        BlurStyleOption styleOption = target->GetBackBlurStyle().value_or(BlurStyleOption{});
+        styleOption.isWindowFocused = true; // set to default value
+        Color result = Color::TRANSPARENT;
+        styleOption.isValidColor = ResourceParseUtils::ParseResColor(resObj, result);
+        styleOption.inactiveColor = result;
+        TabsModelNG::SetBarBackgroundBlurStyle(AceType::RawPtr(tabsNode), styleOption);
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }

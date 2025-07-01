@@ -67,7 +67,8 @@ public:
     virtual void SetInitialOffset(const NG::OffsetT<CalcDimension>& offset) = 0;
     virtual void CreateWithResourceObjFriction(const RefPtr<ResourceObject>& resObj) {};
     virtual void CreateWithResourceObjIntervalSize(const RefPtr<ResourceObject>& resObj) {};
-    virtual void CreateWithResourceObjSnapPaginations(std::vector<RefPtr<ResourceObject>>& resObjs) {};
+    virtual void CreateWithResourceObjSnapPaginations(
+        const std::vector<Dimension>& snapPaginations, std::vector<RefPtr<ResourceObject>>& resObjs) {};
     virtual void SetMaxZoomScale(float scale) {};
     virtual void SetMinZoomScale(float scale) {};
     virtual void SetZoomScale(float scale) {};
