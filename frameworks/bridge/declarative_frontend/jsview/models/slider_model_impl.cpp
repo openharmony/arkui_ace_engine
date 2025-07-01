@@ -101,7 +101,7 @@ void SliderModelImpl::SetMaxLabel(float value)
     CHECK_NULL_VOID(slider);
     slider->SetMaxValue(value);
 }
-void SliderModelImpl::SetShowSteps(bool value)
+void SliderModelImpl::SetShowSteps(bool value, const std::optional<SliderModel::SliderShowStepOptions>& options)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto slider = AceType::DynamicCast<SliderComponent>(component);

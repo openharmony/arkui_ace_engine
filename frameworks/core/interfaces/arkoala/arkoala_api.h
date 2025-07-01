@@ -1030,6 +1030,11 @@ struct ArkUIPickerEdgeAlignStruct {
     void* dyRawPtr;
 };
 
+struct ArkUISliderShowStepOptions {
+    uint32_t step;
+    const char* text;
+};
+
 enum ArkUINodeType {
     ARKUI_TEXT = 1,
     ARKUI_SPAN,
@@ -4233,6 +4238,8 @@ struct ArkUISliderModifier {
     void (*setBlockColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
     void (*setTrackBackgroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
     void (*setSelectColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_VoidPtr colorRawPtr);
+    void (*setShowStepsWithOptions)(
+        ArkUINodeHandle node, ArkUI_Bool showSteps, ArkUISliderShowStepOptions* options, ArkUI_Int32 length);
 };
 
 struct ArkUIProgressModifier {

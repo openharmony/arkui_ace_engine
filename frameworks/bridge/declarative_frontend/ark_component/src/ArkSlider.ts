@@ -54,8 +54,9 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
   maxLabel(value: string): this {
     throw new Error('Method not implemented.');
   }
-  showSteps(value: boolean): this {
-    modifierWithKey(this._modifiersWithKeys, ShowStepsModifier.identity, ShowStepsModifier, value);
+  showSteps(value: boolean, options?: SliderShowStepOptions): this {
+    let stepOptions = new ArkSliderStepOptions(value, options);
+    modifierWithKey(this._modifiersWithKeys, ShowStepsModifier.identity, ShowStepsModifier, stepOptions);
     return this;
   }
   showTips(value: boolean, content?: any): this {
@@ -442,8 +443,8 @@ class SelectColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
-class ShowStepsModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
+class ShowStepsModifier extends ModifierWithKey<ArkSliderStepOptions> {
+  constructor(value: ArkSliderStepOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('sliderShowSteps');
@@ -451,11 +452,29 @@ class ShowStepsModifier extends ModifierWithKey<boolean> {
     if (reset) {
       getUINativeModule().slider.resetShowSteps(node);
     } else {
-      getUINativeModule().slider.setShowSteps(node, this.value);
+      getUINativeModule().slider.setShowSteps(node, this.value.showSteps, this.value.stepOptions);
     }
   }
   checkObjectDiff(): boolean {
-    return this.stageValue !== this.value;
+    let isShowStepsDiff = this.stageValue.showSteps !== this.value.showSteps;
+    let isStepOptionsDiff = false;
+    if ((this.stageValue.stepOptions === null) || (this.stageValue.stepOptions === undefined)) {
+      isStepOptionsDiff = (this.value.stepOptions !== null) && (this.value.stepOptions !== undefined);
+    } else if ((this.value.stepOptions === null) || (this.value.stepOptions === undefined)) {
+      isStepOptionsDiff = true;
+    } else if (this.stageValue.stepOptions.stepsAccessibility.size !==
+      this.value.stepOptions.stepsAccessibility.size) {
+      isStepOptionsDiff = true;
+    } else {
+      for (const [key, val] of this.stageValue.stepOptions.stepsAccessibility) {
+        if (!this.value.stepOptions.stepsAccessibility.has(key)) {
+          isStepOptionsDiff = true;
+        } else if (!isBaseOrResourceEqual(this.value.stepOptions.stepsAccessibility.get(key), val)) {
+          isStepOptionsDiff = true;
+        }
+      }
+    }
+    return isShowStepsDiff || isStepOptionsDiff;
   }
 }
 

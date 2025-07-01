@@ -386,6 +386,24 @@ void SetShowSteps(ArkUINodeHandle node, int showSteps)
     SliderModelNG::SetShowSteps(frameNode, static_cast<bool>(showSteps));
 }
 
+void SetShowStepsWithOptions(
+    ArkUINodeHandle node, int showSteps, ArkUISliderShowStepOptions* options, ArkUI_Int32 length)
+{
+    std::unordered_map<uint32_t, std::string> optionMaps;
+    std::optional<std::unordered_map<uint32_t, std::string>> showStepOptions = std::nullopt;
+    while (options && (length > 0)) {
+        optionMaps [options->step] = std::string(options->text);
+        options++;
+        length--;
+    }
+    if (optionMaps.size() > 0) {
+        showStepOptions = optionMaps;
+    }
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SliderModelNG::SetShowSteps(frameNode, static_cast<bool>(showSteps), showStepOptions);
+}
+
 void ResetShowSteps(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -982,6 +1000,7 @@ const ArkUISliderModifier* GetSliderModifier()
         .resetEnableHapticFeedback = SliderModifier::ResetEnableHapticFeedback,
         .setLinearTrackBackgroundColor = SliderModifier::SetLinearTrackBackgroundColor,
         .setLinearSelectColor = SliderModifier::SetLinearSelectColor,
+        .setShowStepsWithOptions = SliderModifier::SetShowStepsWithOptions,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

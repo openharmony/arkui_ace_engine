@@ -123,6 +123,8 @@ const std::vector<std::pair<std::vector<float>, int32_t>> ACCESSIBILITY_STEP_IND
 constexpr float PLAY_HAPTIC_FEEDBACK_RATIO = 1.0f;
 constexpr float PLAY_HAPTIC_FEEDBACK_RATIO_HALF = 0.5f;
 constexpr float PLAY_HAPTIC_FEEDBACK_RATIO_ZERO = 0.0f;
+const SliderModel::SliderShowStepOptions OPTIONS_MAP = {
+    { 0, "step 0" }, { 50, "step 50" }, { 1, "step 1" }, { 8, "step 8" }, { 5, "step 5" }};
 } // namespace
 class SliderPatternTestNg : public testing::Test {
 public:
@@ -2546,6 +2548,59 @@ HWTEST_F(SliderPatternTestNg, UpdateSliderComponentString001, TestSize.Level1)
             pattern->UpdateSliderComponentMedia();
             pattern->UpdateSliderComponentString(true, "test");
             EXPECT_TRUE(paintProperty->GetShowTips());
+        }
+    }
+}
+
+/**
+ * @tc.name: UpdateStepPointsAccessibilityText001
+ * @tc.desc: Test slider_pattern UpdateStepPointsAccessibilityText001
+ * UpdateStepPointsAccessibilityText
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, UpdateStepPointsAccessibilityText001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init Slider node.
+     */
+    RefPtr<FrameNode> frameNode;
+    auto sliderPattern = AccessibilityInit(frameNode);
+    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(sliderPattern, nullptr);
+    auto parent = sliderPattern->parentAccessibilityNode_;
+    ASSERT_NE(parent, nullptr);
+    /**
+     * @tc.steps: step2. Add Slider virtual node.
+     */
+    sliderPattern->AddStepPointsAccessibilityVirtualNode();
+    /**
+     * @tc.steps: step3. Get accessibility virtual node size.
+     */
+    EXPECT_EQ(sliderPattern->pointAccessibilityNodeVec_.size(), HORIZONTAL_STEP_POINTS.size());
+    EXPECT_EQ(sliderPattern->pointAccessibilityNodeEventVec_.size(), HORIZONTAL_STEP_POINTS.size());
+    EXPECT_EQ(parent->GetChildren().size(), HORIZONTAL_STEP_POINTS.size());
+    /**
+     * @tc.steps: step4. Update virtual node selected.
+     */
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    auto options = OPTIONS_MAP;
+    for (const auto& item : ACCESSIBILITY_STEP_INDEX_DATA) {
+        sliderPaintProperty->UpdateMax(item.first[0]);
+        sliderPaintProperty->UpdateMin(item.first[1]);
+        sliderPaintProperty->UpdateStep(item.first[2]);
+        sliderPaintProperty->UpdateValue(item.first[3]);
+        for (int32_t i = 0; i < sliderPattern->pointAccessibilityNodeVec_.size(); i++) {
+            auto node = sliderPattern->pointAccessibilityNodeVec_[i];
+            ASSERT_NE(node, nullptr);
+            sliderPattern->UpdateStepPointsAccessibilityText(node, i, options);
+            auto pointAccessibilityProperty = node->GetAccessibilityProperty<TextAccessibilityProperty>();
+            ASSERT_NE(pointAccessibilityProperty, nullptr);
+            auto pointNodeProperty = node->GetLayoutProperty<TextLayoutProperty>();
+            ASSERT_NE(pointNodeProperty, nullptr);
+            auto text = options.find(i) != options.end() ?
+                options[i] : StringUtils::Str16ToStr8(pointNodeProperty->GetContent().value_or(u""));
+            EXPECT_EQ(pointAccessibilityProperty->GetAccessibilityText(), text);
         }
     }
 }
