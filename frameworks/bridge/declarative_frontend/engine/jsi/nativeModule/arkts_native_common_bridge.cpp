@@ -1019,7 +1019,7 @@ void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args, std::optional<C
 void ParseNullptrResObj(std::vector<RefPtr<ResourceObject>>& resObjs, int32_t index)
 {
     if (SystemProperties::ConfigChangePerform()) {
-        for (uint32_t i = 0; i < index; i++) {
+        for (int32_t i = 0; i < index; i++) {
             resObjs.push_back(nullptr);
         }
     }
