@@ -86,6 +86,7 @@ struct OptionParam {
     bool isPasteOption = false;
 
     bool isAIMenuOption = false;
+    bool isAskCeliaOption = false;
 
     OptionParam() = default;
     OptionParam(const std::string &valueParam, const std::string &iconParam, const std::function<void()> &actionParam)

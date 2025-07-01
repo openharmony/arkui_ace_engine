@@ -2397,6 +2397,11 @@ class TextMenuItemId {
   static get dateTime() {
     return new TextMenuItemId('OH_DEFAULT_AI_MENU_DATETIME');
   }
+
+  static get askAI() {
+    return new TextMenuItemId('OH_DEFAULT_ASK_CELIA');
+  }
+
 }
 
 globalThis.TextMenuItemId = TextMenuItemId;

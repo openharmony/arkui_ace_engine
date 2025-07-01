@@ -851,10 +851,31 @@ void TextPattern::HandleAIMenuOption(const std::string& labelInfo)
     CHECK_NE_VOID(aiMenuOptions_.size(), 1);
     auto aiSpan = aiMenuOptions_.begin()->second;
     auto aiEntityType = aiSpan.type;
+    CHECK_NULL_VOID(dataDetectorAdapter_);
     auto menuOptionAndActions = dataDetectorAdapter_->textDetectResult_.
                                 menuOptionAndAction[TEXT_DETECT_MAP.at(aiEntityType)];
     CHECK_EQUAL_VOID(menuOptionAndActions.empty(), true);
     HiddenMenu();
+    dataDetectorAdapter_->OnClickAIMenuOption(aiSpan, *menuOptionAndActions.begin(), nullptr);
+}
+
+void TextPattern::HandleOnAskCelia()
+{
+    CHECK_NULL_VOID(IsSelected());
+    CHECK_NULL_VOID(dataDetectorAdapter_);
+    auto baseOffset = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
+    auto destinationOffset = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
+    auto selectedContent = GetSelectedText(baseOffset, destinationOffset, false, false, true);
+    auto menuOptionAndActions = dataDetectorAdapter_->textDetectResult_.
+                                menuOptionAndAction["askCelia"];
+    CHECK_EQUAL_VOID(menuOptionAndActions.empty(), true);
+    HiddenMenu();
+    AISpan aiSpan{
+        .start = baseOffset,
+        .end = destinationOffset,
+        .content = UtfUtils::Str16DebugToStr8(selectedContent),
+        .type = TextDataDetectType::ASK_CELIA
+    };
     dataDetectorAdapter_->OnClickAIMenuOption(aiSpan, *menuOptionAndActions.begin(), nullptr);
 }
     
@@ -1260,10 +1281,28 @@ bool TextPattern::PrepareAIMenuOptions(
 
 void TextPattern::UpdateAIMenuOptions()
 {
-    if (copyOption_ == CopyOptions::Local && NeedShowAIDetect()) {
+    if ((copyOption_ == CopyOptions::Local || copyOption_ == CopyOptions::Distributed) &&
+        NeedShowAIDetect()) {
         isShowAIMenuOption_ = PrepareAIMenuOptions(aiMenuOptions_);
     } else {
         isShowAIMenuOption_ = false;
+    }
+    if (copyOption_ == CopyOptions::Local || copyOption_ == CopyOptions::Distributed) {
+        if (NeedShowAIDetect()) {
+            isAskCeliaEnabled_ = !isShowAIMenuOption_;
+        } else {
+            isAskCeliaEnabled_ = true;
+        }
+    } else {
+        isAskCeliaEnabled_ = false;
+    }
+    if (!IsSupportAskCelia()) {
+        isAskCeliaEnabled_ = false;
+    }
+    CHECK_NULL_VOID(dataDetectorAdapter_);
+    if (isAskCeliaEnabled_ && !NeedShowAIDetect() &&
+        dataDetectorAdapter_->textDetectResult_.menuOptionAndAction.empty()) {
+        dataDetectorAdapter_->GetAIEntityMenu();
     }
 }
 
@@ -1323,6 +1362,17 @@ bool TextPattern::IsShowSearch()
     auto textTheme = context->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(textTheme, false);
     return textTheme->IsShowSearch();
+}
+
+bool TextPattern::IsSupportAskCelia()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto textTheme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, false);
+    return textTheme->IsSupportAskCelia();
 }
 
 void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)

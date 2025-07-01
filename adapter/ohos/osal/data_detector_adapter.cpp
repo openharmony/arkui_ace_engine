@@ -34,6 +34,7 @@ constexpr uint8_t ALL_DETECT_FINISH = URL_DETECT_FINISH | OTHER_DETECT_FINISH;
 
 const std::string ALL_TEXT_DETECT_TYPES = "phoneNum,url,email,location,datetime";
 const std::string TEXT_DETECT_TYPES_WITHOUT_URL = "phoneNum,email,location,datetime";
+const std::string ASK_CELIA_TAG = "askCelia";
 
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
@@ -177,6 +178,21 @@ void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
     auto bundleName = runtimeContext->GetBundleName();
 
     hasClickedMenuOption_ = true;
+    if (aiSpan.type == TextDataDetectType::ASK_CELIA) {
+        auto vectorStringFunc = textDetectResult_.menuOptionAndAction.find(ASK_CELIA_TAG);
+        if (vectorStringFunc == textDetectResult_.menuOptionAndAction.end()) {
+            TAG_LOGW(AceLogTag::ACE_TEXT, "No askCelia option");
+        } else {
+            auto funcVariant = vectorStringFunc->second.begin()->second;
+            if (std::holds_alternative<std::function<void(int, std::string)>>(funcVariant) &&
+                std::get<std::function<void(int, std::string)>>(funcVariant)) {
+                TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter::OnClickAIMenuOption, call ask celia");
+                std::get<std::function<void(int, std::string)>>(funcVariant)(true, aiSpan.content);
+            }
+        }
+        hasClickedMenuOption_ = false;
+        return;
+    }
     if (onClickMenu_ && std::holds_alternative<std::function<std::string()>>(menuOption.second)) {
         onClickMenu_(std::get<std::function<std::string()>>(menuOption.second)());
     } else if (std::holds_alternative<std::function<void(sptr<IRemoteObject>, std::string)>>(menuOption.second)) {

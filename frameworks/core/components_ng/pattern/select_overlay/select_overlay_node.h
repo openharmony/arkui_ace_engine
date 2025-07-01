@@ -199,6 +199,8 @@ private:
 
     void NotifyUpdateToolBar(bool itemChanged, bool withoutAnimation);
     void SetSelectMenuInnerSize();
+    void ShowAskCelia(
+        float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
 
     using ExecuteStateFunc = void (SelectOverlayNode::*)(FrameNodeType type, FrameNodeTrigger trigger);
 
@@ -243,7 +245,7 @@ private:
     bool isExtensionMenu_ = false;
 
     // Label whether the menu default button needs to appear within the extended menu
-    bool isShowInDefaultMenu_[10] = { false }; // OPTION_INDEX_AI_MENU + 1
+    bool isShowInDefaultMenu_[11] = { false }; // OPTION_INDEX_ASK_CELIA + 1
 
     bool isDefaultBtnOverMaxWidth_ = false;
 
