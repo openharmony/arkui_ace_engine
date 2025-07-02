@@ -22,11 +22,15 @@
 #endif
 
 #include "bridge/arkts_frontend/arkts_ani_utils.h"
+#include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
+#include "core/components_ng/property/layout_constraint.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/render_node_peer_impl.h"
 #include "core/interfaces/native/node/extension_custom_node.h"
 #include "core/pipeline/pipeline_base.h"
+#include "ui/base/geometry/ng/size_t.h"
+#include "ui/base/referenced.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -271,5 +275,30 @@ void AniGraphicsModule::SetCustomCallback(
     CHECK_NULL_VOID(frameNodePeer);
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
     frameNode->SetExtensionHandler(customNode);
+}
+void AniGraphicsModule::OnMeasureInnerMeasure(ani_env* env, ani_long ptr)
+{
+    auto* frameNodePeer = reinterpret_cast<FrameNodePeer*>(ptr);
+    CHECK_NULL_VOID(frameNodePeer);
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
+    CHECK_NULL_VOID(frameNode);
+    auto layoutAlgorithm = frameNode->GetLayoutAlgorithm();
+    CHECK_NULL_VOID(layoutAlgorithm);
+    auto size = layoutAlgorithm->MeasureContent(frameNode->GetLayoutProperty()->CreateContentConstraint(),
+        AceType::RawPtr(frameNode));
+    if (size.has_value()) {
+        frameNode->GetGeometryNode()->SetContentSize(size.value());
+    }
+    layoutAlgorithm->Measure(AceType::RawPtr(frameNode));
+}
+void AniGraphicsModule::OnLayoutInnerLayout(ani_env* env, ani_long ptr)
+{
+    auto* frameNodePeer = reinterpret_cast<FrameNodePeer*>(ptr);
+    CHECK_NULL_VOID(frameNodePeer);
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
+    CHECK_NULL_VOID(frameNode);
+    auto layoutAlgorithm = frameNode->GetLayoutAlgorithm();
+    CHECK_NULL_VOID(layoutAlgorithm);
+    layoutAlgorithm->Layout(AceType::RawPtr(frameNode));
 }
 } // namespace OHOS::Ace::Framework

@@ -97,6 +97,8 @@ struct ArkUIAniCommonModifier {
     ArkUI_Int32 (*requireArkoalaNodeId)(ArkUI_Int32 capacity);
     ani_boolean (*checkIsUIThread)(ArkUI_Int32 id);
     ani_boolean (*isDebugMode)(ArkUI_Int32 id);
+    void (*onMeasureInnerMeasure)(ani_env* env, ani_long ptr);
+    void (*onLayoutInnerLayout)(ani_env* env, ani_long ptr);
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);

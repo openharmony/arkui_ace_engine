@@ -154,6 +154,16 @@ ani_boolean IsDebugMode(ArkUI_Int32 instanceId)
     return res;
 }
 
+void OnMeasureInnerMeasure(ani_env* env, ani_long ptr)
+{
+    Framework::AniGraphicsModule::OnMeasureInnerMeasure(env, ptr);
+}
+
+void OnLayoutInnerLayout(ani_env* env, ani_long ptr)
+{
+    Framework::AniGraphicsModule::OnLayoutInnerLayout(env, ptr);
+}
+
 const ArkUIAniCommonModifier* GetCommonAniModifier()
 {
     static const ArkUIAniCommonModifier impl = {
@@ -168,7 +178,9 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .setCustomCallback = OHOS::Ace::NG::SetCustomCallback,
         .requireArkoalaNodeId = OHOS::Ace::NG::RequireArkoalaNodeId,
         .checkIsUIThread = OHOS::Ace::NG::CheckIsUIThread,
-        .isDebugMode =  OHOS::Ace::NG::IsDebugMode };
+        .isDebugMode =  OHOS::Ace::NG::IsDebugMode,
+        .onMeasureInnerMeasure = OHOS::Ace::NG::OnMeasureInnerMeasure,
+        .onLayoutInnerLayout = OHOS::Ace::NG::OnLayoutInnerLayout };
     return &impl;
 }
 
