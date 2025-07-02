@@ -4158,6 +4158,9 @@ RefPtr<Curve> SwiperPattern::GetIndicatorHeadCurve()
 
 void SwiperPattern::PlayIndicatorTranslateAnimation(float translate, std::optional<int32_t> nextIndex)
 {
+    if (NearZero(translate)) {
+        return;
+    }
     if (!stopIndicatorAnimation_) {
         stopIndicatorAnimation_ = true;
         return;
