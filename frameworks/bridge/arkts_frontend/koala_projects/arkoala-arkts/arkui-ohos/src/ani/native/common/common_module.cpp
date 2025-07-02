@@ -153,4 +153,22 @@ ani_int RequireArkoalaNodeId(ani_env* env, ani_object obj, ani_int capacity)
     auto cursor = modifier->getCommonAniModifier()->requireArkoalaNodeId(idCapacity);
     return cursor;
 }
+
+ani_int CheckIsUIThread([[maybe_unused]] ani_env* env, ani_object obj, ani_int id)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return false;
+    }
+    return modifier->getCommonAniModifier()->checkIsUIThread(id);
+}
+
+ani_int IsDebugMode([[maybe_unused]] ani_env* env, ani_object obj, ani_int id)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return false;
+    }
+    return modifier->getCommonAniModifier()->isDebugMode(id);
+}
 } // namespace OHOS::Ace::Ani
