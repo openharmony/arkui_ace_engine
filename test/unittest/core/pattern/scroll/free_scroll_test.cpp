@@ -376,18 +376,6 @@ TEST_F(FreeScrollTest, Animation001)
     EXPECT_EQ(GetChildX(frameNode_, 0), -DELTA_X - VELOCITY_X / pattern_->freeScroll_->friction_);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
-
-    PanStart({});
-    PanUpdate({ -LARGE_DELTA_X, -LARGE_DELTA_Y });
-    FlushUITasks(frameNode_);
-    PanEnd({ -LARGE_DELTA_X, -LARGE_DELTA_Y }, { -VELOCITY_X, -VELOCITY_Y });
-    EXPECT_FALSE(MockAnimationManager::GetInstance().AllFinished());
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks(frameNode_);
-    ASSERT_TRUE(pattern_->freeScroll_);
-    EXPECT_EQ(GetChildX(frameNode_, 0), WIDTH - CONTENT_W);
-    EXPECT_EQ(GetChildY(frameNode_, 0), HEIGHT - CONTENT_H);
-    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 }
 
 /**
@@ -423,6 +411,38 @@ TEST_F(FreeScrollTest, Animation002)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks(frameNode_);
     EXPECT_EQ(GetChildOffset(frameNode_, 0), OffsetF(0, 0));
+    EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
+}
+
+/**
+ * @tc.name: Animation003
+ * @tc.desc: Test animation with end overScroll
+ * @tc.type: FUNC
+ */
+TEST_F(FreeScrollTest, Animation003)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetAxis(Axis::FREE);
+    model.SetInitialOffset({ CalcDimension(CONTENT_W), CalcDimension(CONTENT_H) });
+    CreateFreeContent({ CONTENT_W, CONTENT_H });
+    CreateScrollDone();
+    EXPECT_EQ(GetChildX(frameNode_, 0), -CONTENT_W);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -CONTENT_H);
+    PanStart({});
+    PanUpdate({ -LARGE_DELTA_X, -LARGE_DELTA_Y });
+    FlushUITasks(frameNode_);
+    EXPECT_LT(GetChildX(frameNode_, 0), -CONTENT_W);
+    EXPECT_LT(GetChildY(frameNode_, 0), -CONTENT_H);
+    EXPECT_GT(GetChildX(frameNode_, 0), -CONTENT_W - LARGE_DELTA_X);
+    EXPECT_GT(GetChildY(frameNode_, 0), -CONTENT_H - LARGE_DELTA_Y);
+    PanEnd({ -LARGE_DELTA_X, -LARGE_DELTA_Y }, { -VELOCITY_X, -VELOCITY_Y });
+    EXPECT_FALSE(MockAnimationManager::GetInstance().AllFinished());
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks(frameNode_);
+    ASSERT_TRUE(pattern_->freeScroll_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), WIDTH - CONTENT_W);
+    EXPECT_EQ(GetChildY(frameNode_, 0), HEIGHT - CONTENT_H);
     EXPECT_TRUE(MockAnimationManager::GetInstance().AllFinished());
 }
 

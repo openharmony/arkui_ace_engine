@@ -94,18 +94,18 @@ void FreeScrollController::InitializePanRecognizer()
 
 namespace {
 /**
- * @return ratio (non-negative) between overScroll and contentLength.
+ * @return ratio (non-negative) between overScroll and viewport length.
  */
-float GetGamma(float offset, float contentLength)
+float GetGamma(float offset, float scrollableDistance, float viewLength)
 {
-    if (NearZero(contentLength)) {
+    if (NearZero(viewLength)) {
         return 1.0f;
     }
     if (Positive(offset)) {
-        return offset / contentLength;
+        return offset / viewLength;
     }
-    if (LessNotEqual(offset, -contentLength)) {
-        return (contentLength + offset) / contentLength;
+    if (LessNotEqual(offset, -scrollableDistance)) {
+        return -(scrollableDistance + offset) / viewLength;
     }
     return 0.0f;
 }
@@ -123,10 +123,10 @@ void FreeScrollController::HandlePanUpdate(const GestureEvent& event)
     const auto dy = static_cast<float>(event.GetDelta().GetY());
     const float newX = offset_->Get().GetX() + dx;
     const float newY = offset_->Get().GetY() + dy;
-    const auto& viewSize = pattern_.GetViewSize();
+    const auto scrollableArea = pattern_.GetViewPortExtent() - pattern_.GetViewSize();
 
-    const float gammaX = GetGamma(newX, viewSize.Width());
-    const float gammaY = GetGamma(newY, viewSize.Height());
+    const float gammaX = GetGamma(newX, scrollableArea.Width(), pattern_.GetViewSize().Width());
+    const float gammaY = GetGamma(newY, scrollableArea.Height(), pattern_.GetViewSize().Height());
     // apply friction if overScrolling
     OffsetF deltaF { NearZero(gammaX) ? dx : dx * pattern_.CalculateFriction(gammaX),
         NearZero(gammaY) ? dy : dy * pattern_.CalculateFriction(gammaY) };
