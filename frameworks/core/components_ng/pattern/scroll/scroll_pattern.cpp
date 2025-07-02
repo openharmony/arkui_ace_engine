@@ -144,6 +144,7 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     auto globalViewPort = RectF(offsetRelativeToWindow, geometryNode->GetFrameRect().GetSize());
     host->SetViewPort(globalViewPort);
     isInitialized_ = true;
+    ChangeAnimateOverScroll();
     SetScrollSource(SCROLL_FROM_NONE);
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, false);
