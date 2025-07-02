@@ -764,8 +764,17 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
             FlushFocusScroll();
         }
     }
-    HandleOnAreaChangeEvent(nanoTimestamp);
-    HandleVisibleAreaChangeEvent(nanoTimestamp);
+    if (SystemProperties::GetContainerDeleteFlag()) {
+        if (isNeedCallbackAreaChange_) {
+            HandleOnAreaChangeEvent(nanoTimestamp);
+            HandleVisibleAreaChangeEvent(nanoTimestamp);
+            isNeedCallbackAreaChange_ = false;
+            RenderContext::SetNeedCallbackNodeChange(true);
+        }
+    } else {
+        HandleOnAreaChangeEvent(nanoTimestamp);
+        HandleVisibleAreaChangeEvent(nanoTimestamp);
+    }
     FlushMouseEventInVsync();
     eventManager_->FlushCursorStyleRequests();
     if (isNeedFlushAnimationStartTime_) {
