@@ -19,14 +19,14 @@
  * 
  */
 class BusinessError extends Error {
-    code: number;
-    constructor(code: number, message: string) {
+    code: string;
+    constructor(code: string, message: string) {
         super(message);
         this.code = code;
         this.name = 'BusinessError';
     }
 }
 
-const ADD_MONITOR_FAIL_TARGET_ILLEGAL: number = 130000;
-const ADD_MONITOR_FAIL_PATH_ILLEGAL: number = 130001;
-const ADD_MONITOR_FAIL_FUNC_ILLEGAL: number = 130002;
+const ADD_MONITOR_FAIL_TARGET_ILLEGAL: string = '130000';
+const ADD_MONITOR_FAIL_PATH_ILLEGAL: string = '130001';
+const ADD_MONITOR_FAIL_FUNC_ILLEGAL: string = '130002';

@@ -1035,7 +1035,7 @@ class ObserveV2 {
     const isSync: boolean = options ? options.isSynchronous : false;
     const paths = Array.isArray(path) ? path : [path];
     if (monitor && monitor instanceof MonitorV2) {
-      if (isSync != monitor.isSync()) {
+      if (isSync !== monitor.isSync()) {
         stateMgmtConsole.applicationError(`addMonitor failed, current function ${funcName} has already register as ${monitor.isSync()? `sync`: `async`}, cannot change to ${isSync? `sync`: `async`} anymore`);
         return;
       }
@@ -1125,7 +1125,7 @@ class ObserveV2 {
     this.clearBinding(id);
   }
 
-  public registerMonitor(monitor: MonitorV2, id: number) {
+  public registerMonitor(monitor: MonitorV2, id: number): void {
     const weakRef = WeakRefPool.get(monitor);
     // this instance, which maybe MonitorV2/ComputedV2 have been already recorded in id2Others
     if (this.id2Others_[id] === weakRef) {

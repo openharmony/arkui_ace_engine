@@ -266,19 +266,17 @@ class MonitorV2 {
   // Analyze the changed path and return this Monitor's
   // watchId if the path was dirty and the monitor function needs to be executed later.
 public notifyChangeForEachPath(pathId: number): number {
-  let value;
   for (const item of this.values_.values()) {
     if (item.id === pathId) {
-      value = item;
-      break; 
+      return this.recordDependenciesForProp(item) ? this.watchId_ : -1;
     }
   }
-  return this.recordDependenciesForProp(value) ? this.watchId_ : -1;
+  return -1;
 }
   // Only used for MonitorAPI: AddMonitor
   // record dependencies for given MonitorValue, when any monitored path
   // has changed and notifyChange is called
-  private recordDependenciesForProp(monitoredValue: MonitorValueV2<unknown>) {
+  private recordDependenciesForProp(monitoredValue: MonitorValueV2<unknown>): boolean {
     ObserveV2.getObserve().startRecordDependencies(this, monitoredValue.id);
     const [success, value] = this.analysisProp(false, monitoredValue);
     ObserveV2.getObserve().stopRecordDependencies();
