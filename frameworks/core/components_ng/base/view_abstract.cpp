@@ -4346,10 +4346,13 @@ int32_t ViewAbstract::UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG
                 GetSpecificItemById<NG::FrameNode>(wrapperPattern->GetTargetId());
             CHECK_NULL_RETURN(target, ERROR_CODE_INTERNAL_ERROR);
             NG::OffsetF targetNodePosition = target->GetPositionToWindowWithTransform();
+            auto pipelineContext = target->GetContext();
+            CHECK_NULL_RETURN(pipelineContext, ERROR_CODE_INTERNAL_ERROR);
+            auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
             NG::OffsetF menuPosition = { menuParam.anchorPosition.GetX() + menuParam.positionOffset.GetX() +
-                                         targetNodePosition.GetX(),
+                                         targetNodePosition.GetX() + windowRect.Left(),
                                          menuParam.anchorPosition.GetY() + menuParam.positionOffset.GetY() +
-                                         targetNodePosition.GetY() };
+                                         targetNodePosition.GetY() + windowRect.Top() };
             menuProperty->UpdateMenuOffset(menuPosition);
             menuProperty->ResetMenuPlacement();
         }
