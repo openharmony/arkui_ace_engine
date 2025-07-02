@@ -32,6 +32,7 @@
 #include "web/web_module_methods.h"
 #include "video/video_module_methods.h"
 #include "shape/shape_module_methods.h"
+#include "xcomponent/xcomponent_module_methods.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -291,6 +292,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Shape_Transfer_PixelMap",
             "JL@ohos/multimedia/image/image/PixelMap;:V",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetShapePixelMap)
+        },
+        ani_native_function {
+            "_XComponent_SetSurfaceCallback",
+            "JLarkui/component/xcomponent/XComponentControllerCallbackInternal;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetXComponentControllerCallback)
         },
     };
 
