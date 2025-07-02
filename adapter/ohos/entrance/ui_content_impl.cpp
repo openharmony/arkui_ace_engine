@@ -5403,18 +5403,18 @@ void UIContentImpl::SetForceSplitEnable(
     CHECK_NULL_VOID(context);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, homePage, isRouter]() {
+    auto forceSplitTask = [weakContext = WeakPtr(context), isForceSplit, homePage, isRouter, ignoreOrientation]() {
         auto context = weakContext.Upgrade();
         CHECK_NULL_VOID(context);
         if (isRouter) {
             auto stageManager = context->GetStageManager();
             CHECK_NULL_VOID(stageManager);
-            stageManager->SetForceSplitEnable(isForceSplit, homePage);
+            stageManager->SetForceSplitEnable(isForceSplit, homePage, ignoreOrientation);
             return;
         }
         auto navManager = context->GetNavigationManager();
         CHECK_NULL_VOID(navManager);
-        navManager->SetForceSplitEnable(isForceSplit, homePage);
+        navManager->SetForceSplitEnable(isForceSplit, homePage, ignoreOrientation);
     };
     if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         forceSplitTask();
