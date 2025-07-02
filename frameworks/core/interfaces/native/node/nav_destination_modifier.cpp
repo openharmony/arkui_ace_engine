@@ -61,6 +61,23 @@ void ResetNavDestinationHideBackButton(ArkUINodeHandle node)
     NavDestinationModelNG::SetHideBackButton(frameNode, false);
 }
 
+void SetNavDestinationBackgroundColor(ArkUINodeHandle node, uint32_t color, void* bgColorRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* bgColor = reinterpret_cast<ResourceObject*>(bgColorRawPtr);
+    auto backgroundColorResObj = AceType::Claim(bgColor);
+    NavDestinationModelNG::SetBackgroundColor(frameNode, Color(color), true, backgroundColorResObj);
+}
+
+void ResetNavDestinationBackgroundColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor;
+    NavDestinationModelNG::SetBackgroundColor(frameNode, backgroundColor, false, nullptr);
+}
+
 void SetNavDestinationMode(ArkUINodeHandle node, int32_t value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -731,6 +748,8 @@ const ArkUINavDestinationModifier* GetNavDestinationModifier()
         .resetNavDestinationMode = ResetNavDestinationMode,
         .setIgnoreLayoutSafeArea = SetIgnoreLayoutSafeArea,
         .resetIgnoreLayoutSafeArea = ResetIgnoreLayoutSafeArea,
+        .setNavDestinationBackgroundColor = SetNavDestinationBackgroundColor,
+        .resetNavDestinationBackgroundColor = ResetNavDestinationBackgroundColor,
         .setTitle = SetTitle,
         .resetTitle = ResetTitle,
         .setMenus = SetMenus,

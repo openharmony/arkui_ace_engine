@@ -25024,6 +25024,10 @@ class ArkNavDestinationComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, EnableNavigationIndicatorModifier.identity, EnableNavigationIndicatorModifier, enable);
     return this;
   }
+  backgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationBackgroundColorModifier.identity, NavDestinationBackgroundColorModifier, value);
+    return this;
+  }
   systemBarStyle(style) {
     modifierWithKey(this._modifiersWithKeys, NavDestinationSystemBarStyleModifier.identity, NavDestinationSystemBarStyleModifier, style);
     return this;
@@ -25224,6 +25228,24 @@ class EnableNavigationIndicatorModifier extends ModifierWithKey {
   }
 }
 EnableNavigationIndicatorModifier.identity = Symbol('enableNavigationIndicator');
+
+class NavDestinationBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetBackgroundColor(node);
+    }
+    else {
+      getUINativeModule().navDestination.setBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+NavDestinationBackgroundColorModifier.identity = Symbol('navDestinationBackgroundColorModifier');
 
 class NavDestinationSystemBarStyleModifier extends ModifierWithKey {
   constructor(value) {

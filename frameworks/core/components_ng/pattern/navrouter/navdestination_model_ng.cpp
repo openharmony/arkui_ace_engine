@@ -1189,7 +1189,8 @@ void NavDestinationModelNG::SetMenuOptions(NavigationMenuOptions&& opt)
     navDestinationPattern->AddResObj("navDestination.navigationMenuOptions", resObj, std::move(updateFunc));
 }
 
-void NavDestinationModelNG::SetBackgroundColor(const Color& color, bool isVaild)
+void NavDestinationModelNG::SetBackgroundColor(
+    const Color& color, bool isVaild, const RefPtr<ResourceObject>& backgroundColorResObj)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -1201,11 +1202,16 @@ void NavDestinationModelNG::SetBackgroundColor(const Color& color, bool isVaild)
         navDestinationPattern->SetIsUserDefinedBgColor(false);
         return;
     }
-    ViewAbstract::SetBackgroundColor(color);
+    if (SystemProperties::ConfigChangePerform() && backgroundColorResObj) {
+        ViewAbstract::SetBackgroundColorWithResourceObj(color, backgroundColorResObj);
+    } else {
+        ViewAbstract::SetBackgroundColor(color);
+    }
     navDestinationPattern->SetIsUserDefinedBgColor(true);
 }
 
-void NavDestinationModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild)
+void NavDestinationModelNG::SetBackgroundColor(
+    FrameNode* frameNode, const Color& color, bool isVaild, const RefPtr<ResourceObject>& backgroundColorResObj)
 {
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationNode);
@@ -1215,7 +1221,12 @@ void NavDestinationModelNG::SetBackgroundColor(FrameNode* frameNode, const Color
         navDestinationPattern->SetIsUserDefinedBgColor(false);
         return;
     }
-    ViewAbstract::SetBackgroundColor(frameNode, color);
+    if (SystemProperties::ConfigChangePerform() && backgroundColorResObj) {
+        ViewAbstract::SetBackgroundColor(frameNode, color, backgroundColorResObj);
+    } else {
+        ViewAbstract::SetBackgroundColor(frameNode, color);
+    }
+    
     navDestinationPattern->SetIsUserDefinedBgColor(true);
 }
 
