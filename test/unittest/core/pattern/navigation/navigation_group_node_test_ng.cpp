@@ -918,4 +918,38 @@ HWTEST_F(NavigationGroupNodeTestNg, GetNavBarOrHomeDestinationNode002, TestSize.
     EXPECT_EQ(retNode, node);
     NavigationGroupNodeTestNg::TearDownTestCase();
 }
+
+/*
+ * @tc.name: OnAttachToMainTree001
+ * @tc.desc: Branch: if (!parentCustomNode && curTag == V2::JS_VIEW_ETS_TAG) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationGroupNodeTestNg, OnAttachToMainTree001, TestSize.Level1)
+{
+    NavigationGroupNodeTestNg::SetUpTestCase();
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationModelNG navigationModel;
+    // create homeNavDestination
+    navigationModel.Create(true);
+    navigationModel.SetNavigationStack(mockNavPathStack);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(navigation, nullptr);
+    auto navPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navPattern, nullptr);
+    auto parentNode = FrameNode::GetOrCreateFrameNode(V2::JS_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(parentNode, nullptr);
+    parentNode->AddChild(navigation);
+    auto destNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destNode, nullptr);
+
+    EXPECT_CALL(*mockNavPathStack, CreateHomeDestination(_, _))
+        .WillOnce(DoAll(SetArgReferee<1>(destNode), Return(true)));
+    navigation->OnAttachToMainTree(true);
+    EXPECT_EQ(navPattern->GetParentCustomNode().Upgrade(), parentNode);
+    auto homeDest = navigation->GetHomeDestinationNode();
+    EXPECT_EQ(homeDest, destNode);
+    NavigationGroupNodeTestNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG

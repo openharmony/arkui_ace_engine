@@ -497,7 +497,6 @@ void NavigationPattern::OnModifyDone()
     UpdateChildLayoutPolicy();
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    hostNode->CreateHomeDestinationIfNeeded();
     auto navBarOrHomeDesteNode =
         AceType::DynamicCast<NavDestinationNodeBase>(hostNode->GetNavBarOrHomeDestinationNode());
     if (navBarOrHomeDesteNode) {

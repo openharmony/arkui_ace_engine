@@ -1514,6 +1514,7 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
     if (!findParentNode) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "current navigation has no parent page");
     }
+    CreateHomeDestinationIfNeeded();
     auto pipelineContext = GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     bool findNavdestination = FindNavigationParent(V2::NAVDESTINATION_VIEW_ETS_TAG);
@@ -2545,7 +2546,7 @@ void NavigationGroupNode::CreateHomeDestinationIfNeeded()
     CHECK_NULL_VOID(customHomeNode_);
     CHECK_NULL_VOID(destNode);
     SetBackButtonEvent(destNode);
-    auto eventHub = destNode->GetEventHub<NavDestinationEventHub>();
+    auto eventHub = destNode->GetOrCreateEventHub<NavDestinationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnWillAppear();
     AddChild(destNode, 0);

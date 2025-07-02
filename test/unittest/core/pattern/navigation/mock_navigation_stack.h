@@ -235,6 +235,8 @@ public:
     bool CheckIsReplacedDestination(int32_t index, std::string& replacedName, int32_t& replacedIndex);
     void SetRecoveryFromReplaceDestination(int32_t index, bool value);
 
+    MOCK_METHOD2(CreateHomeDestination, bool(const WeakPtr<UINode>& customNode, RefPtr<UINode>& node));
+
     // ============================ operation above is for mock NavPathStack in arkTS ============================
 private:
     int8_t lifecycleIndex_ = 0;
