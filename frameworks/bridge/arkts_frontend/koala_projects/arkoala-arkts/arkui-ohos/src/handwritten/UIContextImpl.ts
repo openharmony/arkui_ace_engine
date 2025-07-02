@@ -488,17 +488,26 @@ export class DragControllerImpl extends DragController {
 
 export class RouterImpl extends Router {
     public pushUrl(options: router.RouterOptions): Promise<void> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
         return new Promise<void>((resolve, reject) => {
-            router.pushUrl(options)
+            this.router_!.push(options)
         })
     }
 
     public back(options?:router.RouterOptions): void {
-        router.back(options)
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        this.router_!.back(options)
     }
 
     public clear(): void {
-        router.clear()
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        this.router_!.clear()
     }
 }
 
