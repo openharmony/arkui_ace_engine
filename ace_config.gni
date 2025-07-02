@@ -123,7 +123,11 @@ graphic_2d_path = "//foundation/graphic/graphic_2d"
 ark_ets_path = "//arkcompiler/ets_runtime"
 crossplatform_plugin_root = "//plugins"
 crossplatform_multimedia_root = "//foundation/multimedia"
-skia_root_new = "//third_party/skia"
+if (ace_engine_feature_enable_upgrade_skia) {
+  skia_root_new = "//third_party/skia/m133"
+} else {
+  skia_root_new = "//third_party/skia"
+}
 c_utils_header_path = "//commonlibrary/c_utils/base/include"
 ace_graphic_surface = "//foundation/graphic/graphic_surface"
 
