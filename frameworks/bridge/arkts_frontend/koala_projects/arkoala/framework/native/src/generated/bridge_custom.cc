@@ -41,14 +41,6 @@ const GENERATED_ArkUIExtendedNodeAPI* GetArkUIExtendedNodeAPI() {
         GENERATED_ARKUI_EXTENDED_NODE_API_VERSION, nullptr));
 }
 
-const GENERATED_ArkUIInteropNodeAPI* GetArkUIInteropNodeAPI()
-{
-    return reinterpret_cast<const GENERATED_ArkUIInteropNodeAPI*>(
-        GetAnyImpl(static_cast<int>(GENERATED_Ark_APIVariantKind::GENERATED_INTEROP),
-                   GENERATED_ARKUI_INTEROP_NODE_API_VERSION,
-                   nullptr));
-}
-
 CustomDeserializer* DeserializerBase::customDeserializers = nullptr;
 
 // TODO: Remove all this.
@@ -584,22 +576,3 @@ KVMObjectHandle impl_LoadUserView(KVMContext vm, const KStringPtr& viewClass, co
 #endif
 }
 KOALA_INTEROP_CTX_2(LoadUserView, KVMObjectHandle, KStringPtr, KStringPtr)
-
-Ark_NativePointer impl_CreateViewStackProcessor()
-{
-    return GetArkUIInteropNodeAPI()->createViewStackProcessor();
-}
-KOALA_INTEROP_DIRECT_0(CreateViewStackProcessor, Ark_NativePointer)
-
-Ark_NativePointer impl_PopViewStackProcessor()
-{
-    return GetArkUIInteropNodeAPI()->popViewStackProcessor();
-}
-KOALA_INTEROP_DIRECT_0(PopViewStackProcessor, Ark_NativePointer)
-
-void impl_DeleteViewStackProcessor(Ark_NativePointer ptr)
-{
-    Ark_NodeHandle ptrCast = (Ark_NodeHandle) ptr;
-    GetArkUIInteropNodeAPI()->deleteViewStackProcessor(ptrCast);
-}
-KOALA_INTEROP_DIRECT_V1(DeleteViewStackProcessor, Ark_NativePointer)

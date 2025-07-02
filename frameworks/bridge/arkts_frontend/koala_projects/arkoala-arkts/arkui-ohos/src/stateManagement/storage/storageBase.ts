@@ -52,7 +52,7 @@ export class StorageProperty<T> extends StateDecoratedVariable<T>
         StateMgmtConsole.log(`makeStorageLink('${propertyNameInAppStorage} ${varName}')`);
         const get = () => { return this.get() as T };
         const set = (newValue: T) => { this.set(newValue); }
-        return new StorageLinkDecoratedVariable<T>(owner, propertyNameInAppStorage, varName, get, set, watchFunc);
+        return new StorageLinkDecoratedVariable<T>(owner, propertyNameInAppStorage, varName, this, get, set, watchFunc);
     }
 
     public registerWatch<T>(link: DecoratedV1VariableBase<T>): WatchIdType {

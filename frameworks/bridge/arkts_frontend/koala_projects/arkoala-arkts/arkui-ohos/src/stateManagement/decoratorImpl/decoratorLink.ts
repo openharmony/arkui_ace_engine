@@ -14,7 +14,7 @@
  */
 import { ExtendableComponent } from '../../component/extendableComponent';
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { WatchFuncType } from '../decorator';
+import { IDecoratedV1Variable, WatchFuncType } from '../decorator';
 import { ILinkDecoratedVariable } from '../decorator';
 import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
@@ -40,6 +40,7 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
     constructor(
         owningView: ExtendableComponent | null,
         varName: string,
+        source: IDecoratedV1Variable<T>,
         sourceGet: () => T,
         sourceSet: (newValue: T) => void,
         watchFunc?: WatchFuncType
@@ -49,6 +50,11 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
         this.sourceGet_ = sourceGet;
         this.sourceSet_ = sourceSet;
 
+        if (source instanceof LinkDecoratedVariable) {
+            this.source_ = source.getSource();
+        } else {
+            this.source_ = source;
+        }
         // @Watch
         // if initial value is object, register so that property changes trigger
         // @Watch function exec
@@ -88,5 +94,11 @@ export class LinkDecoratedVariable<T> extends DecoratedV1VariableBase<T> impleme
             // set also get above.
             this.sourceSet_!(newValue); // makeObserved should be called in source
         }
+    }
+    
+    private source_: IDecoratedV1Variable<T>;
+
+    public getSource(): IDecoratedV1Variable<T> {
+        return this.source_;
     }
 }

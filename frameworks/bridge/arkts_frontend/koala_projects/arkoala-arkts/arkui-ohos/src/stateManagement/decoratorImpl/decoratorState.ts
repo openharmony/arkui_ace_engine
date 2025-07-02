@@ -14,7 +14,7 @@
  */
 
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { IStateDecoratedVariable, IPropDecoratedVariable, ILinkDecoratedVariable } from '../decorator';
+import { IStateDecoratedVariable, IPropDecoratedVariable, ILinkDecoratedVariable, IObservedObject } from '../decorator';
 import { ExtendableComponent } from '../../component/extendableComponent';
 import { WatchFuncType, WatchIdType } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
@@ -26,6 +26,8 @@ import { WatchFunc } from './decoratorWatch';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
+import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
+import { StateMgmtTool } from '../tools/arkts/stateMgmtTool';
 export interface __MkPropReturnType<T> {
     prop: PropDecoratedVariable<T>;
     watchId: WatchIdType;
@@ -42,6 +44,9 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
     // initValue is either value provided by parent or localInit value
     constructor(owningView: ExtendableComponent | null, varName: string, initValue: T, watchFunc?: WatchFuncType) {
         super('@State', owningView, varName, watchFunc);
+        if (isDynamicObject(initValue)) {
+            initValue = getObservedObject(initValue);
+        }
         this.backing_ = FactoryInternal.mkDecoratorValue(varName, initValue);
         // @Watch
         // if initial value is object, register so that property changes trigger
@@ -84,6 +89,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         const link = new LinkDecoratedVariable<T>(
             null,
             varName,
+            this,
             () => this.get(),
             (newValue: T) => this.set(newValue)
         );
@@ -115,5 +121,30 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         watchThis.setFunc(watchFunc);
         this._watchFuncs.set(watchThis.id(), watchThis);
         return { prop: prop, watchId: watchThis.id() };
+    }
+
+    private proxy?: ESValue;
+
+    public getProxy(): ESValue | undefined {
+        return this.proxy;
+    }
+
+    public setProxy(proxy: ESValue): void {
+        this.proxy = proxy;
+    }
+
+    public setProxyValue?: CompatibleStateChangeCallback<T>;
+
+    public setNotifyCallback(callback: WatchFuncType): void {
+        const func = new WatchFunc(callback);
+        const id = func.id();
+        const value = this.backing_.get(false);
+        if (StateMgmtTool.isIObservedObject(value as NullableObject)) {
+            (value as IObservedObject).addWatchSubscriber(id);
+        }
+    }
+    
+    public fireChange(): void {
+        this.backing_.fireChange();
     }
 }

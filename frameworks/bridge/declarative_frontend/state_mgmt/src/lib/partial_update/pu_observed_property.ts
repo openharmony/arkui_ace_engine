@@ -29,6 +29,8 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
 
   private wrappedValue_: T;
 
+  public _setInteropValueForStaticState?: setValue<T>;
+
   constructor(localInitValue: T, owningView: IPropertySubscriber, propertyName: PropertyInfo) {
     super(owningView, propertyName);
    
@@ -100,6 +102,14 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
     }
 
     this.unsubscribeWrappedObject();
+
+    // for interop
+    if (InteropConfigureStateMgmt.instance.needsInterop() && newValue && typeof newValue === 'object' && isStaticProxy(newValue)) {
+      this.wrappedValue_ = InteropExtractorModule.getInteropObservedObject(newValue, this);
+      stateMgmtProfiler.end();
+      return true;
+    }
+
     if (!newValue || typeof newValue !== 'object') {
       // undefined, null, simple type: 
       // nothing to subscribe to in case of new value undefined || null || simple type 
@@ -153,6 +163,10 @@ class ObservedPropertyPU<T> extends ObservedPropertyAbstractPU<T>
       TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.wrappedValue_,
         this.notifyPropertyHasChangedPU,
         this.notifyTrackedObjectPropertyHasChanged, this);
+      // for interop
+      if (InteropConfigureStateMgmt.instance.needsInterop()) {
+        InteropExtractorModule.setStaticValueForInterop(this, newValue);
+      }
     }
   }
 

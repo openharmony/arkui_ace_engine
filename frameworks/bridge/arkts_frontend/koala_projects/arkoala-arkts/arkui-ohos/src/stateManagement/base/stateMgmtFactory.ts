@@ -150,6 +150,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         const link = new LinkDecoratedVariable<T>(
             owningView,
             varName,
+            source,
             () => source.get(),
             (newValue: T) => source.set(newValue),
             watchFunc
@@ -167,6 +168,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         const link = new LinkDecoratedVariable<T>(
             owningView,
             varName,
+            source,
             () => source.get(),
             (newValue: T) => source.set(newValue),
             watchFunc
@@ -184,6 +186,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         const link = new LinkDecoratedVariable<T>(
             owningView,
             varName,
+            source,
             () => source.get(),
             (newValue: T) => source.set(newValue),
             watchFunc
@@ -201,6 +204,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         const link = new LinkDecoratedVariable<T>(
             owningView,
             varName,
+            source,
             () => source.get(),
             (newValue: T) => source.set(newValue),
             watchFunc
@@ -218,6 +222,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         const link = new LinkDecoratedVariable<T>(
             owningView,
             varName,
+            source,
             () => source.get(),
             (newValue: T) => source.set(newValue),
             watchFunc
@@ -235,6 +240,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         const link = new LinkDecoratedVariable<T>(
             owningView,
             varName,
+            source,
             () => source.get(),
             (newValue: T) => source.set(newValue),
             watchFunc
@@ -252,6 +258,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         const link = new LinkDecoratedVariable<T>(
             owningView,
             varName,
+            source,
             () => source.get(),
             (newValue: T) => source.set(newValue),
             watchFunc
@@ -269,6 +276,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         const link = new LinkDecoratedVariable<T>(
             owningView,
             varName,
+            source,
             () => source.get(),
             (newValue: T) => source.set(newValue),
             watchFunc
@@ -286,6 +294,7 @@ export class __StateMgmtFactoryImpl implements IStateMgmtFactory {
         const link = new LinkDecoratedVariable<T>(
             owningView,
             varName,
+            source,
             () => source.get(),
             (newValue: T) => {
                 /* set do nothing */

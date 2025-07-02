@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-/**
-  skeleton of a class to support
-  versioning of backing store values
-*/
+#ifndef KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_INTEROP_MODULE
+#define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_INTEROP_MODULE
 
-export interface IBackingValue<T> {
-    get(shouldAddRef: boolean): T;
-    set(newValue: T): boolean;
-    setSilently(newValue: T): void;
-    fireChange(): void;
-}
+#include "ani.h"
+
+namespace OHOS::Ace::Ani {
+ani_long CreateViewStackProcessor(ani_env* env);
+ani_long PopViewStackProcessor(ani_env* env);
+void DeleteViewStackProcessor(ani_env* env, ani_long ptr);
+} // namespace OHOS::Ace::Ani
+
+#endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_INTEROP_MODULE
