@@ -338,6 +338,42 @@ HWTEST_F(BubbleTipsTestNg, ResetTipsMaxLines002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ResetTipsMaxLines003
+ * @tc.desc: Test ResetTipsMaxLines.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, ResetTipsMaxLines003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto param = CreateTipsParamForCursor();
+    param->SetAnchorType(TipsAnchorType::TARGET);
+    auto tipsNode = CreateTipsNode(param, TIPS_MSG_1);
+    ASSERT_NE(tipsNode, nullptr);
+    auto bubbleProp = AceType::DynamicCast<BubbleLayoutProperty>(tipsNode->GetLayoutProperty());
+    bubbleProp->layoutConstraint_ = LayoutConstraintF();
+    bubbleProp->contentConstraint_ = LayoutConstraintF();
+    bubbleProp->UpdateShowAtAnchor(TipsAnchorType::TARGET);
+
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(tipsNode->layoutAlgorithm_->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    const auto& children = tipsNode->GetAllChildrenWithBuild();
+    auto childWrapper = children.front();
+    ASSERT_NE(childWrapper, nullptr);
+    auto text = childWrapper->GetAllChildrenWithBuild().front();
+    ASSERT_NE(text, nullptr);
+    auto layoutProps = AceType::DynamicCast<TextLayoutProperty>(text->GetLayoutProperty());
+    /**
+     * @tc.steps: step2. test ResetTipsMaxLines.
+     */
+    layoutProps->UpdateMaxLines(DOUBLE);
+    layoutAlgorithm->Measure(AceType::RawPtr(tipsNode));
+    EXPECT_NE(layoutProps->GetMaxLinesValue(0), DOUBLE);
+}
+
+/**
  * @tc.name: TipsFitAvailableRect001
  * @tc.desc: Test FitAvailableRect for tips.
  * @tc.type: FUNC
@@ -863,5 +899,106 @@ HWTEST_F(BubbleTipsTestNg, MeasureTipsFollowTarget001, TestSize.Level1)
     LayoutConstraintF childConstraint;
     layoutAlgorithm->MeasureTipsFollowTarget(childWrapper, childConstraint);
     EXPECT_TRUE(layoutProps->HasMaxLines());
+}
+
+/**
+ * @tc.name: OnAttachToFrameNode001
+ * @tc.desc: Test OnAttachToFrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, OnAttachToFrameNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto id = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto tipsNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(id, targetTag));
+    auto bubblePattern = tipsNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+
+    /**
+     * @tc.steps: step2. expect onAreaChangedFunc add.
+     */
+    EXPECT_TRUE(eventHub->onAreaChangedInnerCallbacks_.count(tipsNode->nodeId_));
+    eventHub->onAreaChangedInnerCallbacks_[tipsNode->nodeId_]({}, {}, {}, {});
+}
+
+/**
+ * @tc.name: PopBubble001
+ * @tc.desc: Test PopBubble.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, PopBubble001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto id = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto tipsNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(id, targetTag));
+    auto bubblePattern = tipsNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto overlayManager = MockPipelineContext::GetCurrent()->GetOverlayManager();
+    PopupInfo popupInfo;
+    popupInfo.isCurrentOnShow = false;
+    overlayManager->UpdatePopupMap(id, popupInfo);
+    bubblePattern->PopBubble();
+
+    popupInfo.isCurrentOnShow = true;
+    overlayManager->UpdatePopupMap(id, popupInfo);
+    auto layoutProp = tipsNode->GetLayoutProperty<BubbleLayoutProperty>();
+    layoutProp->UpdateShowInSubWindow(true);
+    layoutProp->UpdateIsTips(true);
+    bubblePattern->PopBubble();
+    
+    layoutProp->UpdateIsTips(false);
+    bubblePattern->PopBubble();
+
+    layoutProp->UpdateShowInSubWindow(false);
+    layoutProp->UpdateIsTips(true);
+    bubblePattern->PopBubble();
+    
+    layoutProp->UpdateIsTips(false);
+    bubblePattern->PopBubble();
+    EXPECT_EQ(overlayManager->GetPopupInfo(id).markNeedUpdate, false);
+}
+
+/**
+ * @tc.name: PopBubble002
+ * @tc.desc: Test PopBubble.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, PopBubble002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto id = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto tipsNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(id, targetTag));
+    auto bubblePattern = tipsNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    auto overlayManager = MockPipelineContext::GetCurrent()->GetOverlayManager();
+    PopupInfo popupInfo;
+    popupInfo.isCurrentOnShow = true;
+    popupInfo.isTips = false;
+    overlayManager->UpdatePopupMap(id, popupInfo);
+    bubblePattern->PopBubble(true);
+
+    popupInfo.isTips = true;
+    overlayManager->UpdatePopupMap(id, popupInfo);
+    bubblePattern->PopBubble(true);
+    EXPECT_EQ(overlayManager->GetPopupInfo(id).markNeedUpdate, false);
 }
 } // namespace OHOS::Ace::NG
