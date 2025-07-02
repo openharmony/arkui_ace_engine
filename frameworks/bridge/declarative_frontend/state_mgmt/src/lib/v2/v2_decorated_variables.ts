@@ -252,7 +252,7 @@ function observedV2Internal<T extends ConstructorV2>(BaseClass: T): T {
 
   if (BaseClass.prototype && !Reflect.has(BaseClass.prototype, ObserveV2.V2_DECO_META)) {
     // not an error, suspicious of developer oversight
-    stateMgmtConsole.warn(`'@Observed class ${BaseClass?.name}': no @Track property inside. Is this intended? Check our application.`);
+    stateMgmtConsole.warn(`'@ObservedV2 class ${BaseClass?.name}': no @Trace property inside. Is this intended? Check our application.`);
   }
 
   // Use ID_REFS only if number of observed attrs is significant
