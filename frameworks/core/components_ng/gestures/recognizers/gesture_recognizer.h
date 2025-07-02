@@ -441,6 +441,8 @@ public:
     void SetPreventBegin(bool preventBegin);
 
     std::string GetCallbackName(const std::unique_ptr<GestureEventFunc>& callback);
+
+    void ResetResponseLinkRecognizer();
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
