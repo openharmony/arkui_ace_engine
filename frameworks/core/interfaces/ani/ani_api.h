@@ -37,6 +37,7 @@ struct _ArkUINodeContent;
 typedef class __ani_ref* ani_ref;
 typedef class __ani_object* ani_object;
 typedef struct __ani_env ani_env;
+typedef uint8_t ani_boolean;
 typedef int32_t ani_int;
 typedef int64_t ani_long;
 typedef class __ani_fn_object *ani_fn_object;
@@ -94,6 +95,8 @@ struct ArkUIAniCommonModifier {
     void (*setBackgroundImagePixelMap)(ani_env* env, ArkUINodeHandle node, ani_ref pixelMapPtr, ArkUI_Int32 repeat);
     void (*setCustomCallback)(ani_env* env, ani_long ptr, ani_fn_object fnObjMeasure, ani_fn_object fnObjLayout);
     ArkUI_Int32 (*requireArkoalaNodeId)(ArkUI_Int32 capacity);
+    ani_boolean (*checkIsUIThread)(ArkUI_Int32 id);
+    ani_boolean (*isDebugMode)(ArkUI_Int32 id);
 };
 struct ArkUIAniCustomNodeModifier {
     ani_long (*constructCustomNode)(ani_int);
@@ -125,6 +128,11 @@ struct ArkUIAniAnimationModifier {
         ani_env* env, ArkUINodeHandle node, ani_string propertyName, ani_object property);
     void (*createAnimatableProperty)(
         ani_env* env, ArkUINodeHandle node, ani_string propertyName, ani_object property, ani_fn_object callback);
+};
+struct ArkUIAniInteropModifier {
+    ani_long (*createViewStackProcessor)();
+    ani_long (*popViewStackProcessor)();
+    void (*deleteViewStackProcessor)(ani_long ptr);
 };
 struct ArkUIAniDragControllerModifier {
     ani_object (*aniExecuteDragWithCallback)(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object custom,
@@ -167,6 +175,12 @@ struct ArkUIAniStateMgmtModifier {
     int32_t (*getAccessibilityEnabled)();
     int32_t (*getLayoutDirection)();
     int32_t (*getLanguageCode)();
+}
+struct ArkUIAniXComponentModifier {
+    void (*setXComponentControllerCallback)(ArkUINodeHandle node,
+        std::function<void(const std::string&)>&& onSurfaceCreated,
+        std::function<void(const std::string&, float, float, float, float)>&& onSurfaceChanged,
+        std::function<void(const std::string&)>&& onSurfaceDestroyed);
 };
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
@@ -180,11 +194,13 @@ struct ArkUIAniModifiers {
     const ArkUIAniWaterFlowModifier* (*getArkUIAniWaterFlowModifier)();
     const ArkUIAniComponentSnapshotModifier* (*getComponentSnapshotAniModifier)();
     const ArkUIAniAnimationModifier* (*getAnimationAniModifier)();
+    const ArkUIAniInteropModifier* (*getInteropAniModifier)();
     const ArkUIAniDragControllerModifier* (*getDragControllerAniModifier)();
     const ArkUIAniImageSpanModifier* (*getImageSpanAniModifier)();
     const ArkUIAniVideoModifier* (*getArkUIAniVideoModifier)();
     const ArkUIAniShapeModifier* (*getArkUIAniShapeModifier)();
     const ArkUIAniStateMgmtModifier* (*getStateMgmtAniModifier)();
+    const ArkUIAniXComponentModifier* (*getArkUIAniXComponentModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

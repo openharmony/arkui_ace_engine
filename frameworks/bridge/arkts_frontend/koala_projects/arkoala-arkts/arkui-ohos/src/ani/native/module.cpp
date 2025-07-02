@@ -29,9 +29,11 @@
 #include "log/log.h"
 #include "utils/convert_utils.h"
 #include "water_flow/waterFlowSection_module.h"
+#include "interop/interop_module.h"
 #include "web/web_module_methods.h"
 #include "video/video_module_methods.h"
 #include "shape/shape_module_methods.h"
+#include "xcomponent/xcomponent_module_methods.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -213,6 +215,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetOrCreateAnimatableProperty)
         },
         ani_native_function {
+            "_CreateViewStackProcessor",
+            ":J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CreateViewStackProcessor)
+        },
+        ani_native_function {
+            "_PopViewStackProcessor",
+            ":J",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::PopViewStackProcessor)
+        },
+        ani_native_function {
+            "_DeleteViewStackProcessor",
+            "J:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DeleteViewStackProcessor)
+        },
+        ani_native_function {
             "_BackgroundImage_PixelMap",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetBackgroundImagePixelMap)
@@ -347,6 +364,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             ":Lstd/core/String;",
             reinterpret_cast<void*>(OHOS::Ace::Ani::Env_GetLanguageCode)
         },
+        ani_native_function {
+            "_XComponent_SetSurfaceCallback",
+            "JLarkui/component/xcomponent/XComponentControllerCallbackInternal;:V",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetXComponentControllerCallback)
+        },
+        ani_native_function {
+            "_CheckIsUIThread",
+            "I:I",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::CheckIsUIThread)
+        },
+        ani_native_function {
+            "_IsDebugMode",
+            "I:I",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::IsDebugMode)
+        }
     };
 
     auto bindRst = env->Class_BindNativeMethods(cls, methods.data(), methods.size());

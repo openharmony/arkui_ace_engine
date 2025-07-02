@@ -17,7 +17,8 @@ import {
     WatchFuncType,
     IStorageLinkDecoratedVariable,
     IStoragePropRefDecoratedVariable,
-    ILocalStorageLinkDecoratedVariable
+    ILocalStorageLinkDecoratedVariable,
+    IDecoratedV1Variable
 } from '../decorator';
 import { ExtendableComponent } from '../../component/extendableComponent';
 
@@ -32,11 +33,12 @@ export class StorageLinkDecoratedVariable<T> extends LinkDecoratedVariable<T>
     constructor(
         owningComponent: ExtendableComponent | null,
         propertyNameInAppStorage: string, varName: string,
+        source: IDecoratedV1Variable<T>,
         sourceGet: () => T,
         sourceSet: (newValue: T) => void,
         watchFunc?: WatchFuncType
     ) {
-        super(owningComponent, varName, sourceGet, sourceSet, watchFunc);
+        super(owningComponent, varName, source, sourceGet, sourceSet, watchFunc);
         this.propertyNameInAppStorage_ = propertyNameInAppStorage;
     }
 }

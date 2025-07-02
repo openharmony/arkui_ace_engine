@@ -2461,6 +2461,8 @@ void FrameNode::MarkModifyDone()
 
 [[deprecated("using AfterMountToParent")]] void FrameNode::OnMountToParentDone()
 {
+    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
+    FREE_NODE_CHECK(this, OnMountToParentDone);
     pattern_->OnMountToParentDone();
 }
 

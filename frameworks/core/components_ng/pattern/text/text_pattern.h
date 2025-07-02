@@ -150,6 +150,8 @@ public:
     }
 
     void OnModifyDone() override;
+    void OnModifyDoneMultiThread();
+    void OnModifyDoneMultiThreadAddition();
 
     void OnWindowHide() override;
 
@@ -221,6 +223,7 @@ public:
     }
 
     virtual void SetTextDetectEnable(bool enable);
+    void SetTextDetectEnableMultiThread(bool enable);
     bool GetTextDetectEnable()
     {
         return textDetectEnable_;
@@ -577,6 +580,7 @@ public:
         }
     }
     void SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
+    void SetStyledStringMultiThread(const RefPtr<SpanString>& value, bool closeSelectOverlay = true);
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
     std::u16string GetSelectedText(int32_t start, int32_t end, bool includeStartHalf = false,
@@ -663,6 +667,7 @@ public:
     }
 
     void SetExternalSpanItem(const std::list<RefPtr<SpanItem>>& spans);
+    void SetExternalSpanItemMultiThread(const std::list<RefPtr<SpanItem>>& spans);
 
     void SetExternalParagraphStyle(std::optional<ParagraphStyle> paragraphStyle)
     {
@@ -802,7 +807,9 @@ protected:
         return clickedSpanPosition_;
     }
     void OnAttachToFrameNode() override;
+    void OnAttachToFrameNodeMultiThread();
     void OnDetachFromFrameNode(FrameNode* node) override;
+    void OnDetachFromFrameNodeMultiThread(FrameNode* node);
     void OnAfterModifyDone() override;
     virtual bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan);
     virtual void InitAISpanHoverEvent();
@@ -866,15 +873,10 @@ protected:
     virtual bool CanStartAITask();
 
     void MarkDirtySelf();
-    void OnAttachToMainTree() override
-    {
-        isDetachFromMainTree_ = false;
-    }
-
-    void OnDetachFromMainTree() override
-    {
-        isDetachFromMainTree_ = true;
-    }
+    void OnAttachToMainTree() override;
+    void OnAttachToMainTreeMultiThread();
+    void OnDetachFromMainTree() override;
+    void OnDetachFromMainTreeMultiThread();
 
     bool SetActionExecSubComponent();
     void GetSubComponentInfosForAISpans(std::vector<SubComponentInfo>& subComponentInfos);
@@ -1090,6 +1092,11 @@ private:
     // Used to record original caret position for "shift + up/down"
     // Less than 0 is invalid, initialized as invalid in constructor
     OffsetF originCaretPosition_;
+
+    // ----- multi thread state variables -----
+    bool setTextDetectEnableMultiThread_ = false;
+    bool setExternalSpanItemMultiThread_ = false;
+    // ----- multi thread state variables end -----
 };
 } // namespace OHOS::Ace::NG
 

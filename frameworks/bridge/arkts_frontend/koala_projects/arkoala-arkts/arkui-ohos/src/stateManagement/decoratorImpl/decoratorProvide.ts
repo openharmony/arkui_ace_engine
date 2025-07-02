@@ -15,13 +15,16 @@
 
 import { ExtendableComponent } from '../../component/extendableComponent';
 import { DecoratedV1VariableBase } from './decoratorBase';
-import { WatchFuncType } from '../decorator';
+import { IObservedObject, WatchFuncType } from '../decorator';
 import { IProvideDecoratedVariable } from '../decorator';
 import { IBackingValue } from '../base/iBackingValue';
 import { FactoryInternal } from '../base/iFactoryInternal';
 import { ObserveSingleton } from '../base/observeSingleton';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
+import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
+import { WatchFunc } from "./decoratorWatch";
+import { StateMgmtTool } from "../tools/arkts/stateMgmtTool";
 
 export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> implements IProvideDecoratedVariable<T> {
     private readonly provideAlias_: string;
@@ -36,6 +39,9 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         watchFunc?: WatchFuncType
     ) {
         super('Provide', owningView, varName, watchFunc);
+        if (isDynamicObject(initValue)) {
+            initValue = getObservedObject(initValue);
+        }
         this.provideAlias_ = provideAliasName;
         this.allowOverride_ = allowOverride ? allowOverride : false;
         this.backing_ = FactoryInternal.mkDecoratorValue<T>(varName, initValue);
@@ -60,5 +66,30 @@ export class ProvideDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
             this.registerWatchForObservedObjectChanges(newValue);
             this.execWatchFuncs();
         }
+    }
+            
+    private proxy?: ESValue;
+
+    public getProxy(): ESValue | undefined {
+        return this.proxy;
+    }
+
+    public setProxy(proxy: ESValue): void {
+        this.proxy = proxy;
+    }
+
+    public setProxyValue?: CompatibleStateChangeCallback<T>;
+
+    public setNotifyCallback(callback: WatchFuncType): void {
+        const func = new WatchFunc(callback);
+        const id = func.id();
+        const value = this.backing_.get(false);
+        if (StateMgmtTool.isIObservedObject(value as NullableObject)) {
+            (value as IObservedObject).addWatchSubscriber(id);
+        }
+    }
+
+    public fireChange(): void {
+        this.backing_.fireChange();
     }
 }

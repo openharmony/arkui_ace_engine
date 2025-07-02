@@ -386,6 +386,7 @@ protected:
     std::optional<int32_t> transformHintChangedCallbackId_;
     std::string surfaceId_;
     bool isOnTree_ = false;
+    void RegisterTransformHintCallback(PipelineContext* context);
 
 private:
     void OnAreaChangedInner() override;
@@ -445,7 +446,13 @@ private:
     void ReleaseImageAnalyzer();
     void SetRotation(uint32_t rotation);
     void RegisterSurfaceCallbackModeEvent();
-    void RegisterTransformHintCallback(PipelineContext* context);
+
+    void InitSurfaceMultiThread(const RefPtr<FrameNode>& host);
+    void InitControllerMultiThread();
+    void OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& host);
+    void RegisterContextEventMultiThread(const RefPtr<FrameNode>& host);
+    void OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode>& host);
+    void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     RenderSurface::RenderSurfaceType CovertToRenderSurfaceType(const XComponentType& hostType);

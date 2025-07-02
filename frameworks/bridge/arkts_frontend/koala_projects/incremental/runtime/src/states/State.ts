@@ -53,6 +53,8 @@ export interface StateManager extends StateContext {
     frozen: boolean
     reset(): void
     contextData: object | undefined
+    isDebugMode: boolean
+    setThreadChecker(callback: () => boolean): void;
 }
 
 /**
@@ -318,6 +320,7 @@ class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> 
 
     checkSetProhibited() {
         if (this.dependencies?.empty != false) return // no dependencies
+        this.manager?.checkThread();
         const scope = this.manager?.current
         if (scope === undefined) return // outside the incremental update
         if (scope?.node === undefined && scope?.parent === undefined) return // during animation
@@ -544,6 +547,8 @@ export class StateManagerImpl implements StateManager {
     contextData: object | undefined = undefined;
     private readonly callbacks = markableQueue()
     readonly journal = new Journal()
+    isDebugMode: boolean = false
+    private threadCheckerCallback?: () => boolean
 
     constructor() {
     }
@@ -797,6 +802,19 @@ export class StateManagerImpl implements StateManager {
         this.checkForStateCreating()
         const scope = this.current
         if (scope) throw new Error("prohibited when computing scope(" + KoalaCallsiteKeys.asString(scope.id) + ")")
+    }
+
+    setThreadChecker(callback: () => boolean): void {
+        this.threadCheckerCallback = callback;
+    }
+
+    checkThread(): void {
+        if (this.isDebugMode) {
+            let isUIThread = this.threadCheckerCallback!()
+            if (isUIThread !== true) {
+                throw new Error("prohibited to modify a state when not in UI thread");
+            }
+        }
     }
 }
 

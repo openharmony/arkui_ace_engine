@@ -507,6 +507,10 @@ export class UIContext {
     public px2lpx(value: number): number {
         throw Error("px2lpx not implemented in UIContext!")
     }
+
+    public setUIStates(callback: () => void): void {
+        throw Error("setUIStates not implemented in UIContext!")
+    }
 }
 export abstract class FrameCallback {
     onFrame(frameTimeInNano: number): void {}

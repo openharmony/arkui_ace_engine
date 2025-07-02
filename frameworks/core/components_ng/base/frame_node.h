@@ -1511,6 +1511,7 @@ private:
     void MarkDirtyNodeMultiThread(PropertyChangeFlag extraFlag);
     void RebuildRenderContextTreeMultiThread();
     void MarkNeedRenderMultiThread(bool isRenderBoundary);
+    void OnMountToParentDoneMultiThread();
 
     bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
