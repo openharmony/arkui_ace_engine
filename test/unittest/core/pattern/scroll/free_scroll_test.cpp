@@ -148,7 +148,6 @@ TEST_F(FreeScrollTest, RecognizerOverride001)
     EXPECT_EQ(link.size(), 1);
     EXPECT_NE(*link.begin(), controller->freePanGesture_);
     EXPECT_NE(*res.begin(), controller->freePanGesture_);
-    // ASSERT_FALSE(link.begin()->);
 }
 
 /**
