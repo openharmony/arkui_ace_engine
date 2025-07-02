@@ -47,6 +47,9 @@ public:
     void OnModifyDone() override;
 
     void OnAttachToFrameNode() override;
+    void OnAttachToMainTree() override;
+    void OnAttachToFrameNodeMultiThread();
+    void OnAttachToMainTreeMultiThread();
 
     bool IsAtomicNode() const override
     {
