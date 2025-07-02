@@ -480,6 +480,9 @@ HWTEST_F(MenuDividerTestNG, MenuDividerTest009, TestSize.Level1)
     ASSERT_NE(menuItemPattern, nullptr);
     auto bottomDivider = menuItemPattern->GetBottomDivider();
     EXPECT_NE(bottomDivider, nullptr);
+    auto bottomDivider1 = menuItemPattern->GetBottomDivider();
+    EXPECT_NE(bottomDivider1, nullptr);
+    EXPECT_EQ(bottomDivider, bottomDivider1);
     auto dividerPattern = bottomDivider->GetPattern<MenuDividerPattern>();
     ASSERT_NE(dividerPattern, nullptr);
     auto layoutAlgorithm = dividerPattern->CreateLayoutAlgorithm();
