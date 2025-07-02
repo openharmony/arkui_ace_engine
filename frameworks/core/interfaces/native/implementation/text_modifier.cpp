@@ -706,11 +706,10 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     // TextSpanType
     NG::TextSpanType textSpanType = NG::TextSpanType::TEXT;
-    bool isValidTextSpanType = true;
+    bool isValidTextSpanType = false;
     auto optSpanType = Converter::OptConvert<TextSpanType>(*spanType);
     if (optSpanType) {
-        isValidTextSpanType =
-            NG::TextSpanTypeMapper::GetTextSpanTypeFromJsType(static_cast<int32_t>(*optSpanType), textSpanType);
+        isValidTextSpanType = true;
     }
     // Builder
     auto optContent = Converter::GetOptPtr(content);
