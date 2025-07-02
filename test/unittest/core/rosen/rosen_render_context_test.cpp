@@ -2162,7 +2162,7 @@ HWTEST_F(RosenRenderContextTest, RemoveFromTreeTest002, TestSize.Level1)
 
 class MockRosenRenderContext : public RosenRenderContext {
 public:
-    MOCK_METHOD(SetNeedUseCmdlistDrawRegion, void());
+    MOCK_METHOD1(SetNeedUseCmdlistDrawRegion, void(bool needUseCmdlistDrawRegion));
 };
 
 /**
