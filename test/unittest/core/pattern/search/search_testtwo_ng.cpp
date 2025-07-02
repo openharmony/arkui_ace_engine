@@ -3317,4 +3317,33 @@ HWTEST_F(SearchTestTwoNg, searchMeasureTest01, TestSize.Level1)
     layoutAlgorithm->SearchButtonMeasure(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_GE(pipeline->GetFontScale(), 0.5f);
 }
+
+/**
+ * @tc.name: GetIMEClientInfo001
+ * @tc.desc: Test search GetIMEClientInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, GetIMEClientInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize search
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(u"12345", PLACEHOLDER_U16, "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto searchPattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(searchPattern, nullptr);
+
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    auto searchHost = searchPattern->GetHost();
+    EXPECT_NE(searchHost, nullptr);
+
+    IMEClient iMEClientInfo = textFieldPattern->GetIMEClientInfo();
+    EXPECT_EQ(iMEClientInfo.nodeId, searchHost->GetId());
+}
 } // namespace OHOS::Ace::NG
