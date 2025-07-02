@@ -363,7 +363,7 @@ void FfiOHOSAceFrameworkInteractableViewOnKey(bool (*callback)(CJKeyEvent info))
 {
     auto onKeyEvent = [ffiCallback = CJLambda::Create(callback)](KeyEventInfo& keyInfo) -> bool {
         CJKeyEvent ffiKeyInfo {};
-        ffiKeyInfo.keyText = keyInfo.GetKeyText();
+        ffiKeyInfo.keyText = keyInfo.GetKeyText().c_str();
         ffiKeyInfo.type = static_cast<int32_t>(keyInfo.GetKeyType());
         ffiKeyInfo.keyCode = static_cast<int32_t>(keyInfo.GetKeyCode());
         ffiKeyInfo.keySource = static_cast<int32_t>(keyInfo.GetKeySource());
