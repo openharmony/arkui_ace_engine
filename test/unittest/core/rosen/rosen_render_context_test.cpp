@@ -2173,7 +2173,7 @@ public:
 HWTEST_F(RosenRenderContextTest, SetNeedUseCmdlistDrawRegion001, TestSize.Level1)
 {
     auto mockRosenRenderContext = AceType::MakeRefPtr<MockRosenRenderContext>();
-    EXPECT_CALL(*mockRosenRenderContext, SetNeedUseCmdlistDrawRegion()).Times(2);
+    EXPECT_CALL(*mockRosenRenderContext, SetNeedUseCmdlistDrawRegion(_)).Times(2);
     mockRosenRenderContext->SetNeedUseCmdlistDrawRegion(true);
     mockRosenRenderContext->SetNeedUseCmdlistDrawRegion(false);
 }
