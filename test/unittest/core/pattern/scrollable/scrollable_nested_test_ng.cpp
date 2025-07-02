@@ -690,7 +690,7 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest008, TestSize.Level1)
      * @tc.expected: Scroll spring animate back to top, remain velocity start list fling animation.
      */
     MockPipelineContext::GetCurrent()->SetVsyncTime(scrollScrollable->lastVsyncTime_ + 30 * MS);
-    MockAnimationManager::GetInstance().TickByVelocity(-60);
+    MockAnimationManager::GetInstance().TickByVelocity(-60.0f);
     FlushUITasks(rootNode);
     FlushUITasks(listNode);
     EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);

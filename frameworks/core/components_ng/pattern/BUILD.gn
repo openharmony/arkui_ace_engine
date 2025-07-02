@@ -386,6 +386,7 @@ build_component_ng("pattern_ng") {
     "scroll/effect/scroll_fade_controller.cpp",
     "scroll/effect/scroll_fade_effect.cpp",
     "scroll/effect/scroll_fade_painter.cpp",
+    "scroll/free_scroll_controller.cpp",
     "scroll/inner/scroll_bar.cpp",
     "scroll/inner/scroll_bar_overlay_modifier.cpp",
     "scroll/scroll_accessibility_property.cpp",
@@ -635,10 +636,10 @@ build_component_ng("pattern_ng") {
   ]
 
   # Add Cangjie application window registration
-  sources += [ 
+  sources += [
+    "$ace_root/frameworks/bridge/cj_frontend/frontend/cj_app_bar_utils.cpp",
     "$ace_root/frameworks/bridge/cj_frontend/frontend/container_modal_cj_utils.cpp",
-    "$ace_root/frameworks/bridge/cj_frontend/frontend/cj_app_bar_utils.cpp"
-    ]
+  ]
 
   if (!ace_engine_feature_wearable) {
     sources += [

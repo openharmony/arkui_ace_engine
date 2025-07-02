@@ -420,6 +420,13 @@ public:
         return frameNode->GetContext();
     }
 
+    RenderContext* GetRenderContext() const
+    {
+        auto frameNode = GetHost();
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        return frameNode->GetRenderContext().GetRawPtr();
+    }
+
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
@@ -456,6 +463,13 @@ public:
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
         return DynamicCast<T>(host->GetOrCreateEventHub<T>());
+    }
+
+    void MarkDirty(PropertyChangeFlag flag = PROPERTY_UPDATE_MEASURE_SELF)
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(flag);
     }
 
     // Called after frameNode RebuildRenderContextTree.

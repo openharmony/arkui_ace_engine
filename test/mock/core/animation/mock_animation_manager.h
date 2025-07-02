@@ -88,7 +88,8 @@ public:
      * @brief Force update animations by @c delta to simulate velocity animation
      *
      */
-    void TickByVelocity(float velocity);
+    template<typename T>
+    void TickByVelocity(const T& delta);
 
     void Reset();
 

@@ -54,24 +54,24 @@ public:
         return it->second.endValue_;
     }
 
-    T GetStagingValue(const WeakPtr<AnimatableProperty<T>>& ptr)
+    T GetValue(const WeakPtr<AnimatableProperty<T>>& ptr)
     {
         auto it = props_.find(ptr);
         if (it == props_.end()) {
             return {};
         }
-        return it->second.stagingValue_;
+        return it->second.value_;
     }
 
-    /* move staging value by one frame */
+    /* move value by one frame */
     void Next(const WeakPtr<AnimatableProperty<T>>& ptr, int32_t remainingTicks)
     {
         auto it = props_.find(ptr);
         if (it == props_.end() || remainingTicks == 0) {
             return;
         }
-        T delta = (it->second.endValue_ - it->second.stagingValue_) / remainingTicks;
-        it->second.stagingValue_ += delta;
+        T delta = (it->second.endValue_ - it->second.value_) / remainingTicks;
+        it->second.value_ += delta;
     }
 
     void ForceUpdate(const WeakPtr<AnimatableProperty<T>>& ptr, T delta)
@@ -80,12 +80,12 @@ public:
         if (it == props_.end()) {
             return;
         }
-        it->second.stagingValue_ += delta;
+        it->second.value_ += delta;
     }
 
 private:
     struct PropertyImpl {
-        T stagingValue_;
+        T value_;
         T endValue_;
     };
     std::map<WeakPtr<AnimatableProperty<T>>, PropertyImpl> props_;
