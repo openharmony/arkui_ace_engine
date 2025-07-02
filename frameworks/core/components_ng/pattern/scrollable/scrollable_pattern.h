@@ -518,6 +518,9 @@ public:
 
     static ScrollSource ConvertScrollSource(int32_t source);
 
+    static int32_t ScrollToTarget(
+        RefPtr<FrameNode>& scrollable, RefPtr<FrameNode>& target, float targetOffset, ScrollAlign targetAlign);
+
     float CalculateFriction(float gamma)
     {
         gamma = std::clamp(gamma, 0.0f, 1.0f);

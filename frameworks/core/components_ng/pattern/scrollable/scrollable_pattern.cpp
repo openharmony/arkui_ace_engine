@@ -18,6 +18,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/point.h"
 #include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
@@ -2273,6 +2274,33 @@ ScrollSource ScrollablePattern::ConvertScrollSource(int32_t source)
         sourceType = scrollSourceMap[idx].value;
     }
     return sourceType;
+}
+
+int32_t ScrollablePattern::ScrollToTarget(
+    RefPtr<FrameNode>& scrollable, RefPtr<FrameNode>& target, float targetOffset, ScrollAlign targetAlign)
+{
+    CHECK_NULL_RETURN(scrollable, RET_FAILED);
+    CHECK_NULL_RETURN(target, RET_FAILED);
+    auto pattern = scrollable->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, RET_FAILED);
+    ACE_SCOPED_TRACE("ScrollToTarget, scrollable:%d, target:%d, offset:%f, align:%d", scrollable->GetId(),
+        target->GetId(), targetOffset, targetAlign);
+
+    auto scrollablePos = scrollable->GetTransformRelativeOffset();
+    auto targetPos = target->GetTransformRelativeOffset();
+    auto offsetToScrollable = (targetPos - scrollablePos).GetMainOffset(pattern->GetAxis());
+    auto scrollToOffset = pattern->GetTotalOffset();
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
+        "ScrollToTarget, scrollable:%{public}d, target:%{public}d, offset:%{public}f, align:%{public}d, "
+        "currentOffset:%{public}f, offsetToScrollabl:%{public}f",
+        scrollable->GetId(), target->GetId(), targetOffset, targetAlign, scrollToOffset, offsetToScrollable);
+    scrollToOffset += offsetToScrollable;
+    scrollToOffset += targetOffset;
+    if (targetAlign == ScrollAlign::CENTER) {
+        scrollToOffset -= pattern->GetMainContentSize() / 2;
+    }
+    pattern->AnimateTo(scrollToOffset, -1, nullptr, true, false, false);
+    return RET_SUCCESS;
 }
 
 ScrollResult ScrollablePattern::HandleScrollParentFirst(float& offset, int32_t source, NestedState state)
