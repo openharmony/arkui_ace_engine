@@ -8936,6 +8936,7 @@ void JSViewAbstract::JsFocusBox(const JSCallbackInfo& info)
     Color strokeColor;
     RefPtr<ResourceObject> resObjColor;
     if (ParseColorMetricsToColor(obj->GetProperty("strokeColor"), strokeColor, resObjColor)) {
+        CompleteResourceObjectFromColor(resObjColor, strokeColor, true);
         ViewAbstractModel::GetInstance()->SetFocusBoxStyleUpdateFunc(style, resObjColor, "focusBoxStyleColor");
         style.strokeColor = strokeColor;
     }
