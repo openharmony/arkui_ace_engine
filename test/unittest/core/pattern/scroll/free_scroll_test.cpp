@@ -181,12 +181,18 @@ TEST_F(FreeScrollTest, InitialOffset001)
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     model.SetAxis(Axis::FREE);
-    model.SetInitialOffset({ CalcDimension(0.5, DimensionUnit::PERCENT), CalcDimension(DELTA_X) });
+    model.SetInitialOffset({ CalcDimension(0.5, DimensionUnit::PERCENT), CalcDimension(DELTA_Y) });
     CreateFreeContent({ CONTENT_W, CONTENT_H });
     CreateScrollDone();
 
     EXPECT_EQ(GetChildX(frameNode_, 0), -WIDTH / 2);
-    EXPECT_EQ(GetChildY(frameNode_, 0), -DELTA_X);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -DELTA_Y);
+
+    PanUpdate({ -DELTA_X, -DELTA_Y });
+
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -WIDTH / 2 - DELTA_X);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -DELTA_Y * 2);
 }
 
 /**
