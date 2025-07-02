@@ -188,8 +188,8 @@ HWTEST_F(StackNewTestNG, LayoutPolicyTest001, TestSize.Level1)
     /* corresponding ets code:
         Stack() {
           Stack()
-            .width(LayoutPolicy.MATCH_PARENT)
-            .height(LayoutPolicy.MATCH_PARENT)
+            .width(LayoutPolicy.matchParent)
+            .height(LayoutPolicy.matchParent)
         }
         .width("500px")
         .height("300px")
@@ -237,8 +237,8 @@ HWTEST_F(StackNewTestNG, LayoutPolicyTest002, TestSize.Level1)
     /* corresponding ets code:
         Stack() {
           Stack()
-            .width(LayoutPolicy.MATCH_PARENT)
-            .height(LayoutPolicy.MATCH_PARENT)
+            .width(LayoutPolicy.matchParent)
+            .height(LayoutPolicy.matchParent)
         }
         .width("500px")
         .height("300px")
@@ -289,8 +289,8 @@ HWTEST_F(StackNewTestNG, LayoutPolicyTest003, TestSize.Level1)
             .width("500px")
             .height("300px")
         }
-        .width(LayoutPolicy.WRAP_CONTENT)
-        .height(LayoutPolicy.WRAP_CONTENT)
+        .width(LayoutPolicy.wrapContent)
+        .height(LayoutPolicy.wrapContent)
     */
 
     // Expect stack's width is 500, height is 300 and offset is [0.0, 0.0].
@@ -486,6 +486,108 @@ HWTEST_F(StackNewTestNG, LayoutPolicyTest006, TestSize.Level1)
     auto offsetInner = geometryNodeInner->GetFrameOffset();
     EXPECT_EQ(sizeInner, SizeF(300.0f, 400.0f));
     EXPECT_EQ(offsetInner, OffsetF(-75.0f, -50.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest007
+ * @tc.desc: test the measure result when setting matchParent and constraintSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, LayoutPolicyTest007, TestSize.Level1)
+{
+    RefPtr<FrameNode> stackInner;
+    auto stack = CreateStack([this, &stackInner](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500.0f));
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+        stackInner = CreateStack([this](StackModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+            ViewAbstract::SetMaxWidth(CalcLength(200.0f));
+            ViewAbstract::SetMaxHeight(CalcLength(200.0f));
+        });
+    });
+    ASSERT_NE(stack, nullptr);
+    ASSERT_EQ(stack->GetChildren().size(), 1);
+    CreateLayoutTask(stack);
+
+    /* corresponding ets code:
+        Stack() {
+          Stack()
+            .width(LayoutPolicy.matchParent)
+            .height(LayoutPolicy.matchParent)
+            .constraintSize({ maxWidth: "200px", maxHeight: "200px" })
+        }
+        .width("500px")
+        .height("300px")
+    */
+
+    // Expect stack's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode = stack->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect stackInner's width is 200, height is 200 and offset is [150.0, 50.0].
+    auto geometryNode1 = stackInner->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(200.0f, 200.0f));
+    EXPECT_EQ(offset1, OffsetF(150.0f, 50.0f));
+}
+
+/**
+ * @tc.name: LayoutPolicyTest008
+ * @tc.desc: test the measure result when setting matchParent and constraintSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(StackNewTestNG, LayoutPolicyTest008, TestSize.Level1)
+{
+    RefPtr<FrameNode> stackInner;
+    auto stack = CreateStack([this, &stackInner](StackModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(100.0f));
+        ViewAbstract::SetHeight(CalcLength(100.0f));
+        stackInner = CreateStack([this](StackModelNG model) {
+            ViewAbstractModelNG model1;
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+            ViewAbstract::SetMinWidth(CalcLength(200.0f));
+            ViewAbstract::SetMinHeight(CalcLength(200.0f));
+        });
+    });
+    ASSERT_NE(stack, nullptr);
+    ASSERT_EQ(stack->GetChildren().size(), 1);
+    CreateLayoutTask(stack);
+
+    /* corresponding ets code:
+        Stack() {
+          Stack()
+            .width(LayoutPolicy.matchParent)
+            .height(LayoutPolicy.matchParent)
+            .constraintSize({ minWidth: "200px", minHeight: "200px" })
+        }
+        .width("100px")
+        .height("100px")
+    */
+
+    // Expect stack's width is 100, height is 100 and offset is [0.0, 0.0].
+    auto geometryNode = stack->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(100.0f, 100.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect stackInner's width is 200, height is 200 and offset is [-50.0, -50.0].
+    auto geometryNode1 = stackInner->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(200.0f, 200.0f));
+    EXPECT_EQ(offset1, OffsetF(-50.0f, -50.0f));
 }
 
 /**
