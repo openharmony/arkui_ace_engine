@@ -375,6 +375,9 @@ void PipelineContext::AddIgnoreLayoutSafeAreaBundle(IgnoreLayoutSafeAreaBundle&&
         LOGW("Cannot add ignoreSafeArea bundle as the pipeline context is destroyed.");
         return;
     }
+    if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+        ACE_MEASURE_SCOPED_TRACE("PostponeBundleByIgnore postponedChildCount = %zu", bundle.first.size());
+    }
     taskScheduler_->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
 }
 

@@ -855,6 +855,28 @@ public:
     // layoutwrapper function override
     const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm(bool needReset = false) override;
 
+    bool PreMeasure(const std::optional<LayoutConstraintF>& parentConstraint);
+
+    bool ChildPreMeasureHelper(LayoutWrapper* childWrapper, const std::optional<LayoutConstraintF>& parentConstraint);
+
+    void CollectDelayMeasureChild(LayoutWrapper* childWrapper);
+
+    void PostTaskForIgnore(PipelineContext* pipeline);
+
+    bool PostponedTaskForIgnore();
+
+    void AddDelayLayoutChild(const RefPtr<FrameNode>& child)
+    {
+        if (child) {
+            delayLayoutChildren_.emplace_back(child);
+        }
+    }
+
+    const std::vector<RefPtr<FrameNode>>& GetDelayLayoutChildren() const
+    {
+        return delayLayoutChildren_;
+    }
+
     void Measure(const std::optional<LayoutConstraintF>& parentConstraint) override;
 
     // Called to perform layout children.
@@ -1753,6 +1775,9 @@ private:
 
     RefPtr<FrameNode> cornerMarkNode_ = nullptr;
     RefPtr<DragDropRelatedConfigurations> dragDropRelatedConfigurations_;
+
+    std::vector<RefPtr<FrameNode>> delayMeasureChildren_;
+    std::vector<RefPtr<FrameNode>> delayLayoutChildren_;
 };
 } // namespace OHOS::Ace::NG
 

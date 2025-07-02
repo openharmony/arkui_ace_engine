@@ -4627,6 +4627,92 @@ void FrameNode::UpdatePercentSensitive()
     }
 }
 
+bool FrameNode::PreMeasure(const std::optional<LayoutConstraintF>& parentConstraint)
+{
+    if (GetHasPreMeasured()) {
+        return false;
+    }
+    auto parent = GetAncestorNodeOfFrame(true);
+    CHECK_NULL_RETURN(parent, false);
+    if (parent->ChildPreMeasureHelper(this, parentConstraint)) {
+        parent->CollectDelayMeasureChild(this);
+        return true;
+    }
+    return false;
+}
+
+bool FrameNode::ChildPreMeasureHelper(
+    LayoutWrapper* childWrapper, const std::optional<LayoutConstraintF>& parentConstraint)
+{
+    auto pattern = GetPattern();
+    if (!pattern->ChildPreMeasureHelperEnabled()) {
+        return false;
+    }
+    CHECK_NULL_RETURN(childWrapper, false);
+    auto layoutProperty = childWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    if (!layoutProperty->IsIgnoreOptsValid()) {
+        return false;
+    }
+    auto childNode = childWrapper->GetHostNode();
+    if (childNode) {
+        childNode->SetDelaySelfLayoutForIgnore();
+        AddDelayLayoutChild(childNode);
+    }
+    bool needDelayMeasure = false;
+    if (pattern->ChildPreMeasureHelperCustomized()) {
+        needDelayMeasure = pattern->ChildPreMeasureHelper(childWrapper, parentConstraint);
+    } else {
+        needDelayMeasure = PredictMeasureResult(childWrapper, parentConstraint);
+    }
+    if (needDelayMeasure && childNode) {
+        childNode->SetHasPreMeasured();
+    }
+    return needDelayMeasure;
+}
+
+void FrameNode::CollectDelayMeasureChild(LayoutWrapper* childWrapper)
+{
+    CHECK_NULL_VOID(childWrapper);
+    auto childNode = childWrapper->GetHostNode();
+    CHECK_NULL_VOID(childNode);
+    delayMeasureChildren_.emplace_back(childNode);
+}
+
+void FrameNode::PostTaskForIgnore(PipelineContext* pipeline)
+{
+    if (delayMeasureChildren_.empty() && delayLayoutChildren_.empty()) {
+        return;
+    }
+    CHECK_NULL_VOID(pipeline);
+    IgnoreLayoutSafeAreaBundle bundle;
+    bundle.second = Claim(this);
+    bundle.first = std::move(delayMeasureChildren_);
+    pipeline->AddIgnoreLayoutSafeAreaBundle(std::move(bundle));
+}
+
+bool FrameNode::PostponedTaskForIgnore()
+{
+    auto pattern = GetPattern();
+    if (!pattern->PostponedTaskForIgnoreEnabled()) {
+        delayLayoutChildren_.clear();
+        return false;
+    }
+    if (pattern->PostponedTaskForIgnoreCustomized()) {
+        pattern->PostponedTaskForIgnore();
+    } else {
+        for (auto&& node : delayLayoutChildren_) {
+            ExpandEdges sae = node->GetAccumulatedSafeAreaExpand();
+            auto offset = node->GetGeometryNode()->GetMarginFrameOffset();
+            offset -= sae.Offset();
+            node->GetGeometryNode()->SetMarginFrameOffset(offset);
+            node->Layout();
+        }
+    }
+    delayLayoutChildren_.clear();
+    return true;
+}
+
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
@@ -4686,6 +4772,10 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         ApplyConstraint(*parentConstraint);
     } else {
         CreateRootConstraint();
+    }
+
+    if (PreMeasure(parentConstraint)) {
+        return;
     }
 
     layoutProperty_->UpdateContentConstraint();
@@ -4754,6 +4844,8 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         measureCallback_(kitNode_);
     }
 
+    PostTaskForIgnore(pipeline);
+
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
         ACE_MEASURE_SCOPED_TRACE("MeasureFinish[frameRect:%s][contentSize:%s]",
@@ -4766,6 +4858,10 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 // Called to perform layout children.
 void FrameNode::Layout()
 {
+    if (GetDelaySelfLayoutForIgnore()) {
+        return;
+    }
+
     ACE_LAYOUT_TRACE_BEGIN("Layout[%s][self:%d][parent:%d][key:%s]", tag_.c_str(), nodeId_,
         GetAncestorNodeOfFrame(true) ? GetAncestorNodeOfFrame(true)->GetId() : 0, GetInspectorIdValue("").c_str());
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
