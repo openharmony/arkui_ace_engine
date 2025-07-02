@@ -99,8 +99,11 @@ export class Router {
     }
 
     public replaceUrl(options: router.RouterOptions): Promise<void> {
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
         return new Promise<void>((resolve, reject) => {
-            router.replaceUrl(options)
+            this.router_!.replace(options);
         });
     }
 
@@ -112,23 +115,38 @@ export class Router {
         throw Error("clear not implemented in Router!")
     }
     public getLength(): string {
-        return router.getLength();
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        return this.router_!.getLength();
     }
 
     public getParams(): Object {
-        return router.getParams();
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        return this.router_!.getParams();
     }
 
     public getState(): router.RouterState {
-        return router.getState();
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        return this.router_!.getState();
     }
 
     public getStateByIndex(index: number): router.RouterState | undefined {
-        return router.getStateByIndex(index);
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        return this.router_!.getStateByIndex(index);
     }
 
     public getStateByUrl(url: string): Array<router.RouterState> {
-        return router.getStateByUrl(url);
+        if (this.router_ === undefined) {
+            throw Error("router set in uiContext is empty");
+        }
+        return this.router_!.getStateByUrl(url);
     }
 }
 
