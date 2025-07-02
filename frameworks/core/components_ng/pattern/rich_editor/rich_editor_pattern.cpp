@@ -783,11 +783,11 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     frameRect_ = dirty->GetGeometryNode()->GetFrameRect();
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
-    auto richEditorLayoutAlgorithm =
-        DynamicCast<RichEditorLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-    CHECK_NULL_RETURN(richEditorLayoutAlgorithm, false);
+    auto layoutAlgorithm = DynamicCast<RichEditorLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    CHECK_NULL_RETURN(layoutAlgorithm, false);
     UpdateParentOffsetAndOverlay();
-    richTextRect_ = richEditorLayoutAlgorithm->GetTextRect();
+    const auto& richTextRectOpt = layoutAlgorithm->GetTextRect();
+    IF_TRUE(richTextRectOpt.has_value(), richTextRect_ = richTextRectOpt.value());
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
     UpdateScrollStateAfterLayout(config.frameSizeChange);

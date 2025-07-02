@@ -131,7 +131,7 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
     void Measure(LayoutWrapper* layoutWrapper) override;
 
-    const RectF& GetTextRect()
+    const std::optional<RectF>& GetTextRect()
     {
         return richTextRect_;
     }
@@ -199,7 +199,7 @@ private:
     std::list<RefPtr<SpanItem>> allSpans_;
     RichEditorParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;
-    RectF richTextRect_;
+    std::optional<RectF> richTextRect_;
     LRUMap<std::uintptr_t, RefPtr<Paragraph>>* const paraMapPtr_;
     std::unique_ptr<StyleManager>& styleManager_;
     bool needShowPlaceholder_ = false;

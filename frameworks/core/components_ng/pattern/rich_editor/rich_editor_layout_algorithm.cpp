@@ -287,6 +287,10 @@ void RichEditorLayoutAlgorithm::UpdateConstraintByLayoutPolicy(
     const auto& percentReference = layoutConstraint->percentReference;
     auto finalSize = UpdateOptionSizeByCalcLayoutConstraint(OptionalSizeF(textSize), calcLayoutConstraint,
         percentReference);
+    if (calcLayoutConstraint->maxSize.has_value() && calcLayoutConstraint->maxSize->Height().has_value()) {
+        const auto& padding = layoutProperty->CreatePaddingAndBorder();
+        MinusPaddingToSize(padding, finalSize);
+    }
     IF_TRUE(finalSize.Height().has_value(), constraint.maxSize.SetHeight(finalSize.Height().value()));
 }
 
@@ -434,7 +438,8 @@ void RichEditorLayoutAlgorithm::UpdateRichTextRect(const SizeF& textSize, Layout
 {
     auto pattern = GetRichEditorPattern(layoutWrapper);
     CHECK_NULL_VOID(pattern);
-    richTextRect_.SetSize(pattern->IsShowPlaceholder() ? SizeF() : textSize);
+    IF_TRUE(!richTextRect_.has_value(), richTextRect_ = std::make_optional<RectF>());
+    richTextRect_->SetSize(pattern->IsShowPlaceholder() ? SizeF() : textSize);
 }
 
 bool RichEditorLayoutAlgorithm::SetPlaceholder(LayoutWrapper* layoutWrapper)
@@ -531,6 +536,7 @@ void RichEditorLayoutAlgorithm::UpdateFrameSizeWithLayoutPolicy(LayoutWrapper* l
 
 void RichEditorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    ACE_SCOPED_TRACE("RichEditorLayoutAlgorithm::Layout");
     auto context = layoutWrapper->GetHostNode()->GetContext();
     CHECK_NULL_VOID(context);
     parentGlobalOffset_ = layoutWrapper->GetHostNode()->GetPaintRectOffsetNG() - context->GetRootRect().GetOffset();
@@ -575,8 +581,9 @@ OffsetF RichEditorLayoutAlgorithm::GetContentOffset(LayoutWrapper* layoutWrapper
     CHECK_NULL_RETURN(host, contentOffset);
     auto pattern = host->GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, contentOffset);
-    richTextRect_.SetOffset(OffsetF(contentOffset.GetX(), pattern->GetTextRect().GetY()));
-    return richTextRect_.GetOffset();
+    IF_TRUE(!richTextRect_.has_value(), richTextRect_ = std::make_optional<RectF>());
+    richTextRect_->SetOffset(OffsetF(contentOffset.GetX(), pattern->GetTextRect().GetY()));
+    return richTextRect_->GetOffset();
 }
 
 ParagraphStyle RichEditorLayoutAlgorithm::GetEditorParagraphStyle(
