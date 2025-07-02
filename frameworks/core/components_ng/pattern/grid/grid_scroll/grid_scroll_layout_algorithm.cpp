@@ -335,8 +335,8 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
             offset += OffsetF(padding.left.value_or(0.0f), 0.0f);
             wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + translate);
-            const bool forceLayout =
-                info_.hasMultiLineItem_ || expandSafeArea_ || wrapper->CheckNeedForceMeasureAndLayout();
+            const bool forceLayout = info_.hasMultiLineItem_ || expandSafeArea_ ||
+                                     wrapper->CheckNeedForceMeasureAndLayout() || wrapper->IsIgnoreOptsValid();
             if (!isCache && forceLayout) {
                 wrapper->Layout();
             } else {
@@ -1713,6 +1713,7 @@ LayoutConstraintF GridScrollLayoutAlgorithm::CreateChildConstraint(float mainSiz
         itemConstraint.percentReference = SizeF(itemConstraint.percentReference.Width(), heightPercentBase);
     }
     itemConstraint.maxSize = itemIdealSize;
+    itemConstraint.parentIdealSize.SetCrossSize(itemCrossSize, axis_);
     itemConstraint.UpdateIllegalSelfMarginSizeWithCheck(axis_ == Axis::VERTICAL
                                                             ? OptionalSizeF(itemCrossSize, std::nullopt)
                                                             : OptionalSizeF(std::nullopt, itemCrossSize));
@@ -1821,7 +1822,7 @@ bool GridScrollLayoutAlgorithm::CheckNeedMeasure(
         return true;
     }
 
-    if (expandSafeArea_ || layoutWrapper->CheckNeedForceMeasureAndLayout()) {
+    if (expandSafeArea_ || layoutWrapper->CheckNeedForceMeasureAndLayout() || layoutWrapper->IsIgnoreOptsValid()) {
         return true;
     }
 

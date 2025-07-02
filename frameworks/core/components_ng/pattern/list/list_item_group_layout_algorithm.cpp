@@ -264,7 +264,7 @@ void ListItemGroupLayoutAlgorithm::SyncGeometry(RefPtr<LayoutWrapper>& wrapper)
 
 bool ListItemGroupLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const
 {
-    if (layoutWrapper->CheckNeedForceMeasureAndLayout()) {
+    if (layoutWrapper->CheckNeedForceMeasureAndLayout() || layoutWrapper->IsIgnoreOptsValid()) {
         return true;
     }
     auto geometryNode = layoutWrapper->GetGeometryNode();
@@ -1219,7 +1219,7 @@ void ListItemGroupLayoutAlgorithm::LayoutListItem(LayoutWrapper* layoutWrapper,
         auto index = isStackFromEnd_ ? totalItemCount_ - pos.first - 1 : pos.first;
         SetListItemIndex(layoutWrapper, wrapper, index);
         wrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
-        if (wrapper->CheckNeedForceMeasureAndLayout()) {
+        if (wrapper->CheckNeedForceMeasureAndLayout() || wrapper->IsIgnoreOptsValid()) {
             wrapper->Layout();
         } else {
             SyncGeometry(wrapper);

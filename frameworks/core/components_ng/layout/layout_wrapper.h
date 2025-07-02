@@ -127,7 +127,8 @@ struct ActiveChildSets {
 enum class IgnoreStrategy {
     NORMAL = 0,
     FROM_MARGIN,
-    STRIDE_OVER
+    STRIDE_OVER,
+    SCROLLABLE_AXIS
 };
 class ACE_FORCE_EXPORT LayoutWrapper : public virtual AceType {
     DECLARE_ACE_TYPE(LayoutWrapper, AceType)
@@ -301,6 +302,13 @@ public:
         return std::exchange(delaySelfLayoutForIgnore_, false);
     }
 
+    bool IsIgnoreOptsValid();
+
+    bool GetScrollableAxisSensitive()
+    {
+        return isScrollableAxis_;
+    }
+
 protected:
     void CreateRootConstraint();
     void ApplyConstraint(LayoutConstraintF constraint);
@@ -347,6 +355,7 @@ protected:
     bool ignoreLayoutProcess_ = false;
     bool hasPreMeasured_ = false;
     bool delaySelfLayoutForIgnore_ = false;
+    bool isScrollableAxis_ = false;
 private:
     void AdjustChildren(const OffsetF& offset, bool parentScrollable);
     void AdjustChild(RefPtr<UINode> node, const OffsetF& offset, bool parentScrollable);

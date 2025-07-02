@@ -830,6 +830,19 @@ public:
         return false;
     }
     virtual void PostponedTaskForIgnore() {}
+    virtual bool NeedCustomizeSafeAreaPadding()
+    {
+        return false;
+    }
+    virtual PaddingPropertyF CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate)
+    {
+        return safeAreaPadding;
+    }
+    virtual bool ChildTentativelyLayouted(IgnoreStrategy& strategy)
+    {
+        return false;
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

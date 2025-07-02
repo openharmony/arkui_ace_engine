@@ -452,6 +452,71 @@ public:
         }
     }
 
+    Axis GetAxis() const
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, Axis::HORIZONTAL);
+        auto swiperNode = host->GetAncestorNodeOfFrame(false);
+        CHECK_NULL_RETURN(swiperNode, Axis::HORIZONTAL);
+        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+        CHECK_NULL_RETURN(swiperPattern, Axis::HORIZONTAL);
+        return swiperPattern->GetDirection();
+    }
+
+    bool ChildPreMeasureHelperEnabled() override
+    {
+        return true;
+    }
+    bool PostponedTaskForIgnoreEnabled() override
+    {
+        return true;
+    }
+
+    bool NeedCustomizeSafeAreaPadding() override
+    {
+        return true;
+    }
+
+    PaddingPropertyF CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate) override
+    {
+        bool isVertical = GetAxis() == Axis::VERTICAL;
+        if (needRotate) {
+            isVertical = !isVertical;
+        }
+        if (isVertical) {
+            safeAreaPadding.top = std::nullopt;
+            safeAreaPadding.bottom = std::nullopt;
+        } else {
+            safeAreaPadding.left = std::nullopt;
+            safeAreaPadding.right = std::nullopt;
+        }
+        return safeAreaPadding;
+    }
+
+    bool ChildTentativelyLayouted(IgnoreStrategy& strategy) override
+    {
+        strategy = IgnoreStrategy::SCROLLABLE_AXIS;
+        return true;
+    }
+
+    bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
+        LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        if (!host->GetScrollableAxisSensitive()) {
+            return false;
+        }
+        auto expandFromSwiper = host->GetAccumulatedSafeAreaExpand(
+            false, { .edges = GetAxis() == Axis::VERTICAL ? LAYOUT_SAFE_AREA_EDGE_HORIZONTAL
+                                                          : LAYOUT_SAFE_AREA_EDGE_VERTICAL });
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        auto frameRect = geometryNode->GetFrameRect();
+        totalExpand = totalExpand.Plus(AdjacentExpandToRect(adjustingRect, expandFromSwiper, frameRect));
+        return true;
+    }
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     TabBarParam tabBarParam_;

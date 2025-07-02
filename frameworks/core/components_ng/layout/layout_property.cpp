@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "layout_wrapper.h"
 #include "base/utils/string_expression.h"
 #include "core/components_ng/layout/layout_property.h"
 
@@ -445,7 +446,11 @@ void LayoutProperty::ExpandConstraintWithSafeArea()
     if (ignoreLayoutSafeAreaOpts_) {
         options = *ignoreLayoutSafeAreaOpts_;
     }
-    ExpandEdges sae = parent->GetAccumulatedSafeAreaExpand(true, options);
+    auto pattern = parent->GetPattern();
+    IgnoreStrategy strategy = IgnoreStrategy::NORMAL;
+    ExpandEdges sae = pattern && pattern->ChildTentativelyLayouted(strategy)
+                          ? host->GetAccumulatedSafeAreaExpand(false, options, strategy)
+                          : parent->GetAccumulatedSafeAreaExpand(true, options);
     OptionalSizeF expandedSize;
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);

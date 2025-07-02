@@ -867,6 +867,23 @@ public:
     {
         return true;
     }
+
+    bool NeedCustomizeSafeAreaPadding() override
+    {
+        return true;
+    }
+
+    PaddingPropertyF CustomizeSafeAreaPadding(PaddingPropertyF safeAreaPadding, bool needRotate) override;
+
+    bool ChildTentativelyLayouted(IgnoreStrategy& strategy) override
+    {
+        strategy = IgnoreStrategy::SCROLLABLE_AXIS;
+        return true;
+    }
+
+    bool AccumulatingTerminateHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false,
+        LayoutSafeAreaType ignoreType = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM) override;
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
