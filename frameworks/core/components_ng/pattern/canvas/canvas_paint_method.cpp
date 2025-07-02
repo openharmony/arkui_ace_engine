@@ -89,12 +89,7 @@ void CanvasPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     lastLayoutSize_.SetSizeT(pixelGridRoundSize);
     auto recordingCanvas = std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_);
     CHECK_NULL_VOID(recordingCanvas);
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    auto fontManager = context->GetFontManager();
-    if (fontManager) {
-        recordingCanvas->SetIsCustomTextType(fontManager->IsDefaultFontChanged());
-    }
+    SetCustomTextType();
 
     if (!HasTask()) {
         return;
@@ -123,6 +118,17 @@ void CanvasPaintMethod::UpdateRecordingCanvas(float width, float height)
         ResetStates();
     }
     needMarkDirty_ = true;
+}
+
+void CanvasPaintMethod::SetCustomTextType()
+{
+    auto recordingCanvas = std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_);
+    CHECK_NULL_VOID(recordingCanvas);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto fontManager = context->GetFontManager();
+    CHECK_NULL_VOID(fontManager);
+    recordingCanvas->SetIsCustomTextType(fontManager->IsDefaultFontChanged());
 }
 
 void CanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& canvasImage)
@@ -171,15 +177,26 @@ void CanvasPaintMethod::DrawPixelMapInternal(RefPtr<PixelMap> pixelMap, const Ac
     CHECK_NULL_VOID(tempPixelMap);
     RSRect srcRect;
     RSRect dstRect;
+    CalculatePixelMapRect(canvasImage, tempPixelMap->GetWidth(), tempPixelMap->GetHeight(), srcRect, dstRect);
+    auto recordingCanvas = std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_);
+    CHECK_NULL_VOID(recordingCanvas);
+    recordingCanvas->AttachBrush(imageBrush_);
+    recordingCanvas->DrawPixelMapRect(tempPixelMap, srcRect, dstRect, sampleOptions_);
+    recordingCanvas->DetachBrush();
+#endif
+}
+
+void CanvasPaintMethod::CalculatePixelMapRect(
+    const Ace::CanvasImage& canvasImage, int32_t width, int32_t height, RSRect& srcRect, RSRect& dstRect)
+{
     switch (canvasImage.flag) {
         case DrawImageType::THREE_PARAMS: {
-            srcRect = RSRect(0, 0, tempPixelMap->GetWidth(), tempPixelMap->GetHeight());
-            dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dx + tempPixelMap->GetWidth(),
-                canvasImage.dy + tempPixelMap->GetHeight());
+            srcRect = RSRect(0, 0, width, height);
+            dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dx + width, canvasImage.dy + height);
             break;
         }
         case DrawImageType::FIVE_PARAMS: {
-            srcRect = RSRect(0, 0, tempPixelMap->GetWidth(), tempPixelMap->GetHeight());
+            srcRect = RSRect(0, 0, width, height);
             dstRect = RSRect(canvasImage.dx, canvasImage.dy, canvasImage.dx + canvasImage.dWidth,
                 canvasImage.dy + canvasImage.dHeight);
             break;
@@ -194,12 +211,6 @@ void CanvasPaintMethod::DrawPixelMapInternal(RefPtr<PixelMap> pixelMap, const Ac
         default:
             break;
     }
-    auto recordingCanvas = std::static_pointer_cast<RSRecordingCanvas>(rsCanvas_);
-    CHECK_NULL_VOID(recordingCanvas);
-    recordingCanvas->AttachBrush(imageBrush_);
-    recordingCanvas->DrawPixelMapRect(tempPixelMap, srcRect, dstRect, sampleOptions_);
-    recordingCanvas->DetachBrush();
-#endif
 }
 
 void CanvasPaintMethod::CloseImageBitmap(const std::string& src)
@@ -213,8 +224,7 @@ void CanvasPaintMethod::CloseImageBitmap(const std::string& src)
 #endif
 }
 
-std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
-    double left, double top, double width, double height)
+std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(double left, double top, double width, double height)
 {
     auto host = frameNode_.Upgrade();
     CHECK_NULL_RETURN(host, nullptr);
@@ -259,8 +269,7 @@ std::unique_ptr<Ace::ImageData> CanvasPaintMethod::GetImageData(
     return imageData;
 }
 
-void CanvasPaintMethod::GetImageData(
-    const std::shared_ptr<Ace::ImageData>& imageData)
+void CanvasPaintMethod::GetImageData(const std::shared_ptr<Ace::ImageData>& imageData)
 {
 #ifndef ACE_UNITTEST
     auto host = frameNode_.Upgrade();
@@ -281,20 +290,17 @@ void CanvasPaintMethod::GetImageData(
     auto pixelMap = imageData->pixelMap;
     CHECK_NULL_VOID(pixelMap);
     auto sharedPixelMap = pixelMap->GetPixelMapSharedPtr();
-    auto ret = rosenRenderContext->GetPixelMap(sharedPixelMap, drawCmdList, &rect);
-    if (!ret) {
-        if (!drawCmdList || drawCmdList->IsEmpty()) {
-            return;
-        }
-        RSBitmap bitmap;
-        RSImageInfo info = RSImageInfo(rect.GetWidth(), rect.GetHeight(),
-            RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_PREMUL);
-        bitmap.InstallPixels(info, pixelMap->GetWritablePixels(), pixelMap->GetRowBytes());
-        RSCanvas canvas;
-        canvas.Bind(bitmap);
-        canvas.Translate(-rect.GetLeft(), -rect.GetTop());
-        drawCmdList->Playback(canvas, &rect);
+    if (rosenRenderContext->GetPixelMap(sharedPixelMap, drawCmdList, &rect) || !drawCmdList || drawCmdList->IsEmpty()) {
+        return;
     }
+    RSBitmap bitmap;
+    RSImageInfo info = RSImageInfo(rect.GetWidth(), rect.GetHeight(),
+        RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_PREMUL);
+    bitmap.InstallPixels(info, pixelMap->GetWritablePixels(), pixelMap->GetRowBytes());
+    RSCanvas canvas;
+    canvas.Bind(bitmap);
+    canvas.Translate(-rect.GetLeft(), -rect.GetTop());
+    drawCmdList->Playback(canvas, &rect);
 #endif
 }
 

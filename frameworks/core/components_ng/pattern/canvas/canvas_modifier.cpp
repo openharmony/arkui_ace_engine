@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/canvas/canvas_modifier.h"
 
 #include "base/utils/time_util.h"
-#include "core/components_ng/pattern/canvas/custom_paint_util.h"
 #include "core/components_ng/render/render_context.h"
 #ifdef ACE_ENABLE_HYBRID_RENDER
 #include "render_service_base/include/platform/common/rs_system_properties.h"
