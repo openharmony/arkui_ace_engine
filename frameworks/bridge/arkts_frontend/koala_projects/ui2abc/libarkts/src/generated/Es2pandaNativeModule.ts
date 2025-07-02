@@ -178,12 +178,6 @@ export class Es2pandaNativeModule {
     _ETSFunctionTypeFlagsConst(context: KNativePointer, receiver: KNativePointer): KInt {
         throw new Error("This methods was not overloaded by native module initialization")
     }
-    _ETSFunctionTypeIsThrowingConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
-        throw new Error("This methods was not overloaded by native module initialization")
-    }
-    _ETSFunctionTypeIsRethrowingConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
-        throw new Error("This methods was not overloaded by native module initialization")
-    }
     _ETSFunctionTypeIsExtensionFunctionConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
         throw new Error("This methods was not overloaded by native module initialization")
     }
@@ -1298,12 +1292,6 @@ export class Es2pandaNativeModule {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _ScriptFunctionHasThrowStatementConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
-        throw new Error("This methods was not overloaded by native module initialization")
-    }
-    _ScriptFunctionIsThrowingConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
-        throw new Error("This methods was not overloaded by native module initialization")
-    }
-    _ScriptFunctionIsRethrowingConst(context: KNativePointer, receiver: KNativePointer): KBoolean {
         throw new Error("This methods was not overloaded by native module initialization")
     }
     _ScriptFunctionIsTrailingLambdaConst(context: KNativePointer, receiver: KNativePointer): KBoolean {

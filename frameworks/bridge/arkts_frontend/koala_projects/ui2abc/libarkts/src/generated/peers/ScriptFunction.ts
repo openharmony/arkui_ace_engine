@@ -150,12 +150,6 @@ export class ScriptFunction extends AstNode {
     get hasThrowStatement(): boolean {
         return global.generatedEs2panda._ScriptFunctionHasThrowStatementConst(global.context, this.peer)
     }
-    get isThrowing(): boolean {
-        return global.generatedEs2panda._ScriptFunctionIsThrowingConst(global.context, this.peer)
-    }
-    get isRethrowing(): boolean {
-        return global.generatedEs2panda._ScriptFunctionIsRethrowingConst(global.context, this.peer)
-    }
     get isTrailingLambda(): boolean {
         return global.generatedEs2panda._ScriptFunctionIsTrailingLambdaConst(global.context, this.peer)
     }
