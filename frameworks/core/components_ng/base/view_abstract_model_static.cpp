@@ -1275,4 +1275,74 @@ void ViewAbstractModelStatic::SetOnGestureRecognizerJudgeBegin(
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetOnGestureRecognizerJudgeBegin(std::move(gestureRecognizerJudgeFunc));
 }
+
+void ViewAbstractModelStatic::SetBrightness(FrameNode* frameNode,
+    const std::optional<Dimension>& brightness)
+{
+    if (brightness.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontBrightness, brightness.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontBrightness, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetContrast(FrameNode* frameNode,
+    const std::optional<Dimension>& contrast)
+{
+    if (contrast.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(FrontContrast, contrast.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, FrontContrast, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetLightUpEffect(FrameNode* frameNode, std::optional<double> radio)
+{
+    if (radio.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(LightUpEffect, radio.value(), frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, LightUpEffect, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetClickEffectLevel(FrameNode* frameNode,
+    const std::optional<ClickEffectLevel>& level, std::optional<float> scaleValue)
+{
+    if (level.has_value() || scaleValue.has_value()) {
+        ClickEffectInfo clickEffectInfo;
+        if (level.has_value()) {
+            clickEffectInfo.level = level.value();
+        }
+        if (scaleValue.has_value()) {
+            clickEffectInfo.scaleNumber = scaleValue.value();
+        }
+        ACE_UPDATE_NODE_RENDER_CONTEXT(ClickEffectLevel, clickEffectInfo, frameNode);
+    } else {
+        auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, ClickEffectLevel, frameNode);
+    }
+}
+
+void ViewAbstractModelStatic::SetOuterBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderWidth, value, frameNode);
+}
+
+void ViewAbstractModelStatic::SetOuterBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderRadius, value, frameNode);
+}
+
+void ViewAbstractModelStatic::SetOuterBorderColor(FrameNode* frameNode, const BorderColorProperty& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderColor, value, frameNode);
+}
+
+void ViewAbstractModelStatic::SetOuterBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderStyle, value, frameNode);
+}
 } // namespace OHOS::Ace::NG
