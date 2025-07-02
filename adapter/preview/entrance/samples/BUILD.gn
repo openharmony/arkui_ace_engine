@@ -274,9 +274,19 @@ ohos_copy("copy_preview_shared_library") {
   sources = [
     "//base/global/system_resources/fonts",
     "//third_party/icu/ohos_icu4j/data/icudt72l.dat",
-    "//third_party/skia/src/ports/skia_ohos/config/fontconfig.json",
-    "//third_party/skia/src/ports/skia_ohos/config/fontconfig_ohos.json",
   ]
+
+  if (ace_engine_feature_enable_upgrade_skia) {
+    sources += [
+      "//third_party/skia/m133/src/ports/skia_ohos/config/fontconfig.json",
+      "//third_party/skia/m133/src/ports/skia_ohos/config/fontconfig_ohos.json",
+    ]
+  } else {
+    sources += [
+      "//third_party/skia/src/ports/skia_ohos/config/fontconfig.json",
+      "//third_party/skia/src/ports/skia_ohos/config/fontconfig_ohos.json",
+    ]
+  }
 
   foreach(item, common_bin) {
     subsystem_name = item.subsystem_name
