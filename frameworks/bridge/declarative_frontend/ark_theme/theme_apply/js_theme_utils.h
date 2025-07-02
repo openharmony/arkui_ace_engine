@@ -23,6 +23,8 @@
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::Framework {
 class JSThemeUtils {
@@ -37,8 +39,22 @@ public:
 
     static std::optional<JSThemeColors> GetThemeColors()
     {
+        bool isDark = IsDarkMode();
         return (JSThemeScope::jsCurrentTheme) ?
-            std::make_optional(JSThemeScope::jsCurrentTheme->Colors()) : std::nullopt;
+            std::make_optional(JSThemeScope::jsCurrentTheme->Colors(isDark)) : std::nullopt;
+    }
+private:
+    static bool IsDarkMode()
+    {
+        auto pipelineContext = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+        if (pipelineContext) {
+            auto localMode = pipelineContext->GetLocalColorMode();
+            auto systemMode = OHOS::Ace::Container::CurrentColorMode();
+            auto mode = (localMode == OHOS::Ace::ColorMode::COLOR_MODE_UNDEFINED) ? systemMode : localMode;
+            return mode == OHOS::Ace::ColorMode::DARK;
+        }
+        // fallback
+        return OHOS::Ace::Container::CurrentColorMode() == OHOS::Ace::ColorMode::DARK;
     }
 };
 }

@@ -330,12 +330,18 @@ public:
         colors_ = colors;
     }
 
-    const JSThemeColors& Colors() const
+    void SetDarkColors(const JSThemeColors& darkColors)
     {
-        return colors_;
+        darkColors_ = darkColors;
+    }
+
+    const JSThemeColors& Colors(bool isDark = false) const
+    {
+        return isDark ? darkColors_ : colors_;
     }
 private:
     JSThemeColors colors_;
+    JSThemeColors darkColors_;
 };
 
 class JSThemeScope {
