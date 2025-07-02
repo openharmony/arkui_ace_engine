@@ -176,6 +176,14 @@ void LazyForEachNode::OnDataDeleted(size_t index)
             }
             builder_->ProcessOffscreenNode(node, true);
         }
+        auto pipeline = GetContext();
+        if (pipeline && !pipeline->GetOnShow()) {
+            pipeline->AddAfterLayoutTask(
+                [node = std::move(node)]() mutable {
+                    node = nullptr;
+                }
+            );
+        }
     }
     tempChildren_.clear();
     tempChildren_.swap(children_);
