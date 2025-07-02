@@ -146,6 +146,12 @@ struct ArkUIAniDragControllerModifier {
         ani_object callback, ani_long dragActionPtr);
     void (*aniDragActionOff)([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, const char* type,
         [[maybe_unused]] ani_object callback, ani_long dragActionPtr);
+    ani_object (*aniGetDragPreview)([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass);
+    void (*aniDragPreviewSetForegroundColor)(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object color, ani_long dragPreviewPtr);
+    void (*aniDragPreviewAnimate)(
+        [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_object options, ani_object handler,
+        ani_long dragPreviewPtr);
     void (*aniDragActionSetDragEventStrictReportingEnabled)(
         [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, bool enable);
     void (*aniDragActionCancelDataLoading)(
