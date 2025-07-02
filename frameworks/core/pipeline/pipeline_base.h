@@ -164,6 +164,11 @@ public:
     void StartImplicitAnimation(const AnimationOption& operation, const RefPtr<Curve>& curve,
         const std::function<void()>& finishCallback = nullptr, const std::optional<int32_t>& count = std::nullopt);
 
+    bool HasPendingAnimation() const
+    {
+        return !pendingFrontendAnimation_.empty();
+    }
+
     void PrepareCloseImplicitAnimation();
 
     bool CloseImplicitAnimation();

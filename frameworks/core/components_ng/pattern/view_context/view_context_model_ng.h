@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_MODEL_NG_H
 
+#include <set>
+
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/view_context/view_context_model.h"
 
@@ -36,6 +38,9 @@ public:
         const RefPtr<NG::FrameNode>& sheetContentNode, const NG::SheetStyle& sheetStyle, bool isPartialUpdate,
         int32_t currentInstanceId) override;
     int32_t CloseBindSheet(const RefPtr<NG::FrameNode>& sheetContentNode, int32_t currentInstanceId) override;
+
+private:
+    static thread_local std::set<FrameNode*> pendingAnimationNodes_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_MODEL_NG_H

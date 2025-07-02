@@ -950,13 +950,13 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg063, TestSize.Level1)
      */
     AnimationOption option(Curves::EASE, 1000);
     context_->OpenFrontendAnimation(option, option.GetCurve(), nullptr);
-    EXPECT_EQ(context_->pendingFrontendAnimation_.size(), 1);
+    EXPECT_TRUE(context_->HasPendingAnimation());
     /**
      * @tc.steps3: Call CloseFrontendAnimation after OpenFrontendAnimation.
      * @tc.expected: The pending flag is out of stack.
      */
     context_->CloseFrontendAnimation();
-    EXPECT_EQ(context_->pendingFrontendAnimation_.size(), 0);
+    EXPECT_TRUE(!context_->HasPendingAnimation());
 }
 
 /**
