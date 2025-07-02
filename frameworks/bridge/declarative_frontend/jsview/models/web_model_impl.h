@@ -117,6 +117,7 @@ public:
     void SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeEmbedVisibilityChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
+    void SetNativeEmbedMouseEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override {};
     void SetOnOverrideUrlLoading(std::function<bool(const BaseEventInfo* info)>&& jsCallback) override;
     void SetNativeVideoPlayerConfig(bool enable, bool shouldOverlay) override;
     void SetRenderProcessNotRespondingId(std::function<void(const BaseEventInfo* info)> && jsCallback) override;

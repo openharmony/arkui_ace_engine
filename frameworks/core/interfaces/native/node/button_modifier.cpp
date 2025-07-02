@@ -56,7 +56,7 @@ const std::string NONE_FONT_FAMILY = "NoneFontFamily";
 const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
-std::string g_strValue;
+thread_local std::string g_strValue;
 
 const std::unordered_map<int, DimensionUnit> DIMENSION_UNIT_MAP = {
     { -2, DimensionUnit::INVALID },

@@ -211,6 +211,8 @@ public:
     virtual void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) {}
     virtual void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) {}
     virtual void SetOnContentWillScroll(ContentWillScrollEvent&& onContentWillScroll) {}
+    virtual void SetOnScrollStateChanged(
+        std::function<void(const BaseEventInfo* info)>&& onScrollStateChanged) {}
     virtual void SetPageFlipMode(int32_t pageFlipMode) {}
     virtual void SetDigitalCrownSensitivity(int32_t sensitivity) {}
     virtual void SetDisableTransitionAnimation(bool isDisable) {}

@@ -1047,7 +1047,7 @@ declare class ArkSliderComponent extends ArkComponent implements SliderAttribute
     selectedColor(value: ResourceColor): this;
     minLabel(value: string): this;
     maxLabel(value: string): this;
-    showSteps(value: boolean): this;
+    showSteps(value: boolean, options?: SliderShowStepOptions): this;
     showTips(value: boolean, content?: any): this;
     trackThickness(value: Length): this;
     onChange(callback: (value: number, mode: SliderChangeMode) => void): this;
@@ -1933,6 +1933,7 @@ declare class ArkSwiperComponent extends ArkComponent implements SwiperAttribute
     pageFlipMode(value: PageFlipMode): this;
     onContentWillScroll(handler: ContentWillScrollCallback): this;
     maintainVisibleContentPosition(value: boolean): this;
+    onScrollStateChanged(event: Callback<ScrollState>): this;
 }
 declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

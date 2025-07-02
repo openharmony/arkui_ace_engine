@@ -46,6 +46,16 @@
       "buildFunction": "DialogFocusableBuilder"
     },
     {
+      "name": "AlertDialogAvoid",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/alertDialogAvoidTest.ets",
+      "buildFunction": "AlertDialogAvoidBuilder"
+    },
+    {
+      "name": "CustomDialogAvoid",
+      "pageSourceFile": "src/main/ets/pages/components/dialog/customDialogAvoidTest.ets",
+      "buildFunction": "CustomDialogAvoidBuilder"
+    },
+    {
       "name": "EmbeddedDialogPageOne",
       "pageSourceFile": "src/main/ets/pages/components/dialog/embeddedDialogPageOne.ets",
       "buildFunction": "EmbeddedDialogPageOneBuilder"
@@ -290,6 +300,21 @@
       "name": "PopupComplexTest",
       "pageSourceFile": "src/main/ets/pages/components/popup/popupComplexTest.ets",
       "buildFunction": "PopupComplexBuilder"
+    },
+    {
+      "name": "popupMutiTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupMutiTest.ets",
+      "buildFunction": "PopupMutiBuilder"
+    },
+    {
+      "name": "openPopupTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/openPopupTest.ets",
+      "buildFunction": "OpenPopupBuilder"
+    },
+    {
+      "name": "popupBlurTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupBlurTest.ets",
+      "buildFunction": "PopupBlurBuilder"
     },
     {
       "name": "ToastIndex",

@@ -189,6 +189,7 @@ public:
     void SetChange()
     {
         isSelected_ = !isSelected_;
+        UpdateDividerSelectedStatus(isSelected_);
     }
 
     bool IsChange() const

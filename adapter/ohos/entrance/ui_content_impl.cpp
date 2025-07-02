@@ -2069,7 +2069,9 @@ void UIContentImpl::SetDeviceProperties()
         auto screenProperties = Rosen::ScreenSessionManagerClient::GetInstance().GetAllScreensProperties();
         if (!screenProperties.empty()) {
             auto iter = screenProperties.begin();
-            defaultDensity = iter->second.GetDefaultDensity();
+            // GetDensityInCurResolution means dpi of current screen component.
+            defaultDensity = iter->second.GetDensityInCurResolution();
+            LOGI("SCB default density:%{public}f", defaultDensity);
         }
     }
 

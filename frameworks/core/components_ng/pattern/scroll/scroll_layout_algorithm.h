@@ -45,6 +45,11 @@ public:
         return currentOffset_;
     }
 
+    OffsetF GetFreeOffset() const
+    {
+        return { currentOffset_, crossOffset_ };
+    }
+
     float GetScrollableDistance() const
     {
         return scrollableDistance_;
@@ -80,13 +85,15 @@ private:
     void UseInitialOffset(Axis axis, SizeF selfSize, LayoutWrapper* layoutWrapper);
     bool UnableOverScroll(LayoutWrapper* layoutWrapper) const;
 
-    const float crossOffset_;
+    float AdjustOffsetInFreeMode(float offset, float scrollableDistance, EdgeEffect effect, EffectEdge appliedEdge);
+
+    float crossOffset_;
     float currentOffset_ = 0.0f;
     float scrollableDistance_ = 0.0f;
     float viewPortLength_ = 0.0f;
-    SizeF viewPort_;
-    SizeF viewPortExtent_;
-    SizeF viewSize_;
+    SizeF viewPort_;       // content area size (viewSize_ minus padding)
+    SizeF viewPortExtent_; // size of child (scrollable area)
+    SizeF viewSize_;       // size of the Scroll component
     void UpdateScrollAlignment(Alignment& scrollAlignment);
 };
 

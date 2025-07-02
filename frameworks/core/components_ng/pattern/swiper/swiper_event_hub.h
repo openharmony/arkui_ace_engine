@@ -129,6 +129,20 @@ public:
         }
     }
 
+    void AddOnScrollStateChangedEvent(const ChangeEventPtr& changeEvent)
+    {
+        scrollStateChangedEvent_ = changeEvent;
+    }
+
+    void FireScrollStateChangedEvent(ScrollState scrollState)
+    {
+        if (!scrollStateChangedEvent_ || !(*scrollStateChangedEvent_)) {
+            return;
+        }
+        auto event = *scrollStateChangedEvent_;
+        event(static_cast<int32_t>(scrollState));
+    }
+
     void FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool isInLayout)
     {
         if (isInLayout) {
@@ -334,6 +348,7 @@ private:
     std::list<ChangeEventPtr> changeEvents_;
     std::list<ChangeEventPtr> selectedEvents_;
     std::list<ChangeEventWithPreIndexPtr> changeEventsWithPreIndex_;
+    ChangeEventPtr scrollStateChangedEvent_;
     ChangeDoneEvent changeDoneEvent_;
     ChangeIndicatorEvent changeIndicatorEvent_;
     IndicatorIndexChangeEvent indicatorIndexChangeEvent_;

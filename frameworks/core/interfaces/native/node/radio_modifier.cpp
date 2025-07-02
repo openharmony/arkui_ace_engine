@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr bool DEFAULT_CHECKED = false;
 const int32_t ERROR_INT_CODE = -1;
-std::string g_radioStrValue;
+thread_local std::string g_radioStrValue;
 
 void SetRadioChecked(ArkUINodeHandle node, ArkUI_Bool isCheck)
 {
@@ -375,50 +375,11 @@ void ResetRadioOnChange(ArkUINodeHandle node)
     RadioModelNG::SetOnChange(frameNode, nullptr);
 }
 
-void SetRadioMargin(ArkUINodeHandle node, const struct ArkUISizeType* top, const struct ArkUISizeType* right,
-    const struct ArkUISizeType* bottom, const struct ArkUISizeType* left)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CalcLength topDimen;
-    CalcLength rightDimen;
-    CalcLength bottomDimen;
-    CalcLength leftDimen;
-    if (top->string != nullptr) {
-        topDimen = CalcLength(top->string);
-    } else {
-        topDimen = CalcLength(top->value, static_cast<DimensionUnit>(top->unit));
-    }
-    if (right->string != nullptr) {
-        rightDimen = CalcLength(right->string);
-    } else {
-        rightDimen = CalcLength(right->value, static_cast<DimensionUnit>(right->unit));
-    }
-    if (bottom->string != nullptr) {
-        bottomDimen = CalcLength(bottom->string);
-    } else {
-        bottomDimen = CalcLength(bottom->value, static_cast<DimensionUnit>(bottom->unit));
-    }
-    if (left->string != nullptr) {
-        leftDimen = CalcLength(left->string);
-    } else {
-        leftDimen = CalcLength(left->value, static_cast<DimensionUnit>(left->unit));
-    }
-    NG::PaddingProperty paddings;
-    paddings.top = std::optional<CalcLength>(topDimen);
-    paddings.bottom = std::optional<CalcLength>(bottomDimen);
-    paddings.left = std::optional<CalcLength>(leftDimen);
-    paddings.right = std::optional<CalcLength>(rightDimen);
-    RadioModelNG::SetIsUserSetMargin(frameNode, true);
-    ViewAbstract::SetMargin(frameNode, paddings);
-}
-
-void ResetRadioMargin(ArkUINodeHandle node)
+void SetIsUserSetMargin(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RadioModelNG::SetIsUserSetMargin(frameNode, true);
-    ViewAbstract::SetMargin(frameNode, NG::CalcLength(0.0));
 }
 } // namespace
 
@@ -456,8 +417,7 @@ const ArkUIRadioModifier* GetRadioModifier()
         .setRadioOptions = SetRadioOptions,
         .setRadioOnChange = SetRadioOnChange,
         .resetRadioOnChange = ResetRadioOnChange,
-        .setRadioMargin = SetRadioMargin,
-        .resetRadioMargin = ResetRadioMargin,
+        .setIsUserSetMargin = SetIsUserSetMargin,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

@@ -196,11 +196,11 @@ RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string&
 
 // NG ImageLoader entrance
 RefPtr<NG::ImageData> ImageLoader::GetImageData(
-    const ImageSourceInfo& src, ImageErrorInfo& errorInfo, const WeakPtr<PipelineBase>& context)
+    const ImageSourceInfo& src, NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& context)
 {
     ACE_SCOPED_TRACE("GetImageData %s", src.ToString().c_str());
     if (src.IsPixmap()) {
-        return LoadDecodedImageData(src, errorInfo, context);
+        return LoadDecodedImageData(src, loadResultInfo, context);
     }
     std::shared_ptr<RSData> rsData = nullptr;
     do {
@@ -208,7 +208,7 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(
         if (rsData) {
             break;
         }
-        rsData = LoadImageData(src, errorInfo, context);
+        rsData = LoadImageData(src, loadResultInfo, context);
         CHECK_NULL_RETURN(rsData, nullptr);
         ImageLoader::CacheImageData(src.GetKey(), AceType::MakeRefPtr<NG::DrawingImageData>(rsData));
     } while (false);
@@ -224,9 +224,10 @@ bool NetworkImageLoader::DownloadImage(DownloadCallback&& downloadCallback, cons
                       std::move(downloadCallback), src, Container::CurrentId());
 }
 
-std::shared_ptr<RSData> FileImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, ImageErrorInfo& errorInfo, const WeakPtr<PipelineBase>& /* context */)
+std::shared_ptr<RSData> FileImageLoader::LoadImageData(const ImageSourceInfo& imageSourceInfo,
+    NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& /* context */)
 {
+    auto& errorInfo = loadResultInfo.errorInfo;
     const auto& src = imageSourceInfo.GetSrc();
     std::string filePath = RemovePathHead(src);
     auto imageDfxConfig = imageSourceInfo.GetImageDfxConfig();
@@ -268,6 +269,12 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(
             filePath.c_str(), src.c_str(), realPath, strerror(errno), imageDfxConfig.ToStringWithoutSrc().c_str());
         errorInfo = { ImageErrorCode::GET_IMAGE_FILE_READ_DATA_FAILED, "read data failed." };
         return nullptr;
+    } else {
+        loadResultInfo.fileSize = result->size();
+        ACE_SCOPED_TRACE("LoadImageData result %s - %d", imageDfxConfig.ToStringWithSrc().c_str(),
+            static_cast<int32_t>(result->size()));
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "Read data %{private}s - %{public}s : %{public}d", realPath,
+            imageDfxConfig.ToStringWithoutSrc().c_str(), static_cast<int32_t>(result->size()));
     }
     auto rsData = std::make_shared<RSData>();
 #ifdef PREVIEW
@@ -282,9 +289,10 @@ std::shared_ptr<RSData> FileImageLoader::LoadImageData(
 #endif
 }
 
-std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, ImageErrorInfo& errorInfo, const WeakPtr<PipelineBase>& context)
+std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(const ImageSourceInfo& imageSourceInfo,
+    NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& context)
 {
+    auto& errorInfo = loadResultInfo.errorInfo;
     const auto& src = imageSourceInfo.GetSrc();
     auto drawingData = ImageLoader::LoadDataFromCachedFile(src);
     if (drawingData) {
@@ -305,9 +313,10 @@ std::shared_ptr<RSData> DataProviderImageLoader::LoadImageData(
     return data;
 }
 
-std::shared_ptr<RSData> AssetImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, ImageErrorInfo& errorInfo, const WeakPtr<PipelineBase>& context)
+std::shared_ptr<RSData> AssetImageLoader::LoadImageData(const ImageSourceInfo& imageSourceInfo,
+    NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& context)
 {
+    auto& errorInfo = loadResultInfo.errorInfo;
     ACE_FUNCTION_TRACE();
     const auto& src = imageSourceInfo.GetSrc();
     auto imageDfxConfig = imageSourceInfo.GetImageDfxConfig();
@@ -377,8 +386,8 @@ std::string AssetImageLoader::LoadJsonData(const std::string& src, const WeakPtr
     return std::string((char*)assetData->GetData(), assetData->GetSize());
 }
 
-std::shared_ptr<RSData> NetworkImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, ImageErrorInfo& errorInfo, const WeakPtr<PipelineBase>& context)
+std::shared_ptr<RSData> NetworkImageLoader::LoadImageData(const ImageSourceInfo& imageSourceInfo,
+    NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& context)
 {
     auto uri = imageSourceInfo.GetSrc();
     auto pipelineContext = context.Upgrade();
@@ -420,8 +429,8 @@ std::shared_ptr<RSData> NetworkImageLoader::LoadImageData(
     return data;
 }
 
-std::shared_ptr<RSData> InternalImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, ImageErrorInfo& errorInfo, const WeakPtr<PipelineBase>& context)
+std::shared_ptr<RSData> InternalImageLoader::LoadImageData(const ImageSourceInfo& imageSourceInfo,
+    NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& context)
 {
     size_t imageSize = 0;
     const uint8_t* internalData =
@@ -436,9 +445,10 @@ std::shared_ptr<RSData> InternalImageLoader::LoadImageData(
     return drawingData;
 }
 
-std::shared_ptr<RSData> Base64ImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, ImageErrorInfo& errorInfo, const WeakPtr<PipelineBase>& context)
+std::shared_ptr<RSData> Base64ImageLoader::LoadImageData(const ImageSourceInfo& imageSourceInfo,
+    NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& context)
 {
+    auto& errorInfo = loadResultInfo.errorInfo;
     std::string_view base64Code = GetBase64ImageCode(imageSourceInfo.GetSrc());
     auto imageDfxConfig = imageSourceInfo.GetImageDfxConfig();
     if (base64Code.size() == 0) {
@@ -530,9 +540,10 @@ bool ResourceImageLoader::GetResourceName(const std::string& uri, std::string& r
     return false;
 }
 
-std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
-    const ImageSourceInfo& imageSourceInfo, ImageErrorInfo& errorInfo, const WeakPtr<PipelineBase>& context)
+std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(const ImageSourceInfo& imageSourceInfo,
+    NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& context)
 {
+    auto& errorInfo = loadResultInfo.errorInfo;
     int32_t instanceId = Container::CurrentIdSafely();
     auto uri = imageSourceInfo.GetSrc();
     auto bundleName = imageSourceInfo.GetBundleName();
@@ -610,7 +621,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
 }
 
 std::shared_ptr<RSData> DecodedDataProviderImageLoader::LoadImageData(const ImageSourceInfo& /* imageSourceInfo */,
-    ImageErrorInfo& /* errorInfo */, const WeakPtr<PipelineBase>& /* context */)
+    NG::ImageLoadResultInfo& /* errorInfo */, const WeakPtr<PipelineBase>& /* context */)
 {
     return nullptr;
 }
@@ -640,11 +651,12 @@ std::string DecodedDataProviderImageLoader::GetThumbnailOrientation(const ImageS
 }
 
 RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
-    const ImageSourceInfo& src, ImageErrorInfo& errorInfo, const WeakPtr<PipelineBase>& pipelineWk)
+    const ImageSourceInfo& src, NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& pipelineWk)
 {
 #ifndef PIXEL_MAP_SUPPORTED
     return nullptr;
 #else
+    auto& errorInfo = loadResultInfo.errorInfo;
     ACE_FUNCTION_TRACE();
     auto pipeline = pipelineWk.Upgrade();
     auto imageDfxConfig = src.GetImageDfxConfig();
@@ -688,13 +700,13 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
 }
 
 std::shared_ptr<RSData> PixelMapImageLoader::LoadImageData(const ImageSourceInfo& /* imageSourceInfo */,
-    ImageErrorInfo& /* errorInfo */, const WeakPtr<PipelineBase>& /* context */)
+    NG::ImageLoadResultInfo& /* loadResultInfo */, const WeakPtr<PipelineBase>& /* context */)
 {
     return nullptr;
 }
 
-RefPtr<NG::ImageData> PixelMapImageLoader::LoadDecodedImageData(
-    const ImageSourceInfo& imageSourceInfo, ImageErrorInfo& errorInfo, const WeakPtr<PipelineBase>& context)
+RefPtr<NG::ImageData> PixelMapImageLoader::LoadDecodedImageData(const ImageSourceInfo& imageSourceInfo,
+    NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& context)
 {
 #ifndef PIXEL_MAP_SUPPORTED
     return nullptr;
@@ -714,8 +726,9 @@ RefPtr<NG::ImageData> PixelMapImageLoader::LoadDecodedImageData(
 }
 
 std::shared_ptr<RSData> SharedMemoryImageLoader::LoadImageData(
-    const ImageSourceInfo& src, ImageErrorInfo& errorInfo, const WeakPtr<PipelineBase>& pipelineWk)
+    const ImageSourceInfo& src, NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& pipelineWk)
 {
+    auto& errorInfo = loadResultInfo.errorInfo;
     CHECK_RUN_ON(BACKGROUND);
     auto imageDfxConfig = src.GetImageDfxConfig();
     auto pipeline = pipelineWk.Upgrade();
@@ -760,13 +773,13 @@ void SharedMemoryImageLoader::UpdateData(const std::string& uri, const std::vect
 }
 
 std::shared_ptr<RSData> AstcImageLoader::LoadImageData(const ImageSourceInfo& /* ImageSourceInfo */,
-    ImageErrorInfo& /* errorInfo */, const WeakPtr<PipelineBase>& /* context */)
+    NG::ImageLoadResultInfo& /* errorInfo */, const WeakPtr<PipelineBase>& /* context */)
 {
     return nullptr;
 }
 
 RefPtr<NG::ImageData> AstcImageLoader::LoadDecodedImageData(
-    const ImageSourceInfo& src, ImageErrorInfo& errorInfo, const WeakPtr<PipelineBase>& pipelineWK)
+    const ImageSourceInfo& src, NG::ImageLoadResultInfo& loadResultInfo, const WeakPtr<PipelineBase>& pipelineWK)
 {
 #ifndef PIXEL_MAP_SUPPORTED
     return nullptr;

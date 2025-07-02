@@ -786,4 +786,53 @@ HWTEST_F(DatePickerTestTwoNg, DatePickerDialogCanLoop002, TestSize.Level1)
     }
     EXPECT_TRUE(tested);
 }
+
+/**
+ * @tc.name: DatePickerPatternTest022
+ * @tc.desc: Test OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestTwoNg, DatePickerPatternTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create pickerPattern.
+     */
+    CreateDatePickerColumnNode();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
+    auto pickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    auto host = pickerPattern->GetHost();
+    auto optionCount = pickerPattern->datePickerColumns_.size();
+    EXPECT_EQ(optionCount, 3);
+    RefPtr<FrameNode> stackYear;
+    RefPtr<FrameNode> stackMonth;
+    RefPtr<FrameNode> stackDay;
+    pickerPattern->OrderAllChildNode(stackYear, stackMonth, stackDay);
+    for (const auto& child : stackDay->GetChildren()) {
+        auto frameNodeChild = AceType::DynamicCast<NG::FrameNode>(child);
+        CHECK_NULL_VOID(frameNodeChild);
+        auto layoutProperty = frameNodeChild->GetLayoutProperty();
+        EXPECT_EQ(layoutProperty->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::VISIBLE);
+    }
+    /**
+     * @tc.steps: step2.call OnModifyDone.
+     * @tc.expected:all branch of OnModifyDone is executed correctly.
+     */
+    auto datePickerRowLayoutProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    ASSERT_NE(datePickerRowLayoutProperty, nullptr);
+
+    pickerPattern->isFiredDateChange_ = true;
+    pickerPattern->SetMode(DatePickerMode::YEAR_AND_MONTH);
+    pickerPattern->OnModifyDone();
+    pickerPattern->OrderAllChildNode(stackYear, stackMonth, stackDay);
+    bool tested = false;
+    for (const auto& child : stackDay->GetChildren()) {
+        auto frameNodeChild = AceType::DynamicCast<NG::FrameNode>(child);
+        CHECK_NULL_VOID(frameNodeChild);
+        auto layoutProperty = frameNodeChild->GetLayoutProperty();
+        EXPECT_EQ(layoutProperty->GetVisibilityValue(VisibleType::INVISIBLE), VisibleType::GONE);
+        tested = true;
+    }
+    EXPECT_TRUE(tested);
+}
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/// <reference path="./disposable.ts" />
 interface LayoutConstraint {
   maxSize: Size;
   minSize: Size;
@@ -36,13 +36,21 @@ enum ExpandMode {
   LAZY_EXPAND = 2,
 }
 
-enum EventQueryType {
+enum UIState {
+  NORMAL = 0 ,
+  PRESSED = 1 << 0 ,
+  FOCUSED = 1 << 1 ,
+  DISABLED = 1 << 2 ,
+  SELECTED = 1 << 3 ,
+}
+
+declare enum EventQueryType {
   ON_CLICK = 0,
 }
 
 declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) => void;
 
-+class FrameNode extends Disposable {
+class FrameNode extends Disposable {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;
   protected _commonEvent: UICommonEvent;
@@ -325,6 +333,25 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
     __JSScopeUtil__.restoreInstanceId();
     this._childList.clear();
   }
+  moveTo(targetParent: FrameNode, index?: number): void {
+    if (targetParent === undefined || targetParent === null) {
+      return;
+    }
+    if (index === undefined || index === null) {
+      index = -1;
+    }
+    const oldParent = this.getParent();
+    if (oldParent && !oldParent.isModifiable() || !targetParent.isModifiable() || !targetParent.checkValid(this)) {
+      throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    getUINativeModule().frameNode.moveTo(this.nodePtr_, targetParent.nodePtr_, index);
+    __JSScopeUtil__.restoreInstanceId();
+    if (oldParent) {
+      oldParent._childList.delete(this._nodeId);
+    }
+    targetParent._childList.set(this._nodeId, this);
+  }
   getChild(index: number, expandMode?: ExpandMode): FrameNode | null {
     const result = getUINativeModule().frameNode.getChild(this.getNodePtr(), index, expandMode);
     const nodeId = result?.nodeId;
@@ -432,27 +459,6 @@ declare type UIStatesChangeHandler = (node: FrameNode, currentUIStates: number) 
     __JSScopeUtil__.restoreInstanceId();
     return childrenCount;
   }
-
-  moveTo(targetParent: FrameNode, index?: number): void {
-    if (targetParent === undefined || targetParent === null) {
-      return;
-    }
-    if (index === undefined || index === null) {
-      index = -1;
-    }
-    const oldParent = this.getParent();
-    if (oldParent && !oldParent.isModifiable() || !targetParent.isModifiable() || !targetParent.checkValid(this)) {
-      throw { message: 'The FrameNode is not modifiable.', code: 100021 };
-    }
-    __JSScopeUtil__.syncInstanceId(this.instanceId_);
-    getUINativeModule().frameNode.moveTo(this.nodePtr_, targetParent.nodePtr_, index);
-    __JSScopeUtil__.restoreInstanceId();
-    if (oldParent) {
-      oldParent._childList.delete(this._nodeId);
-    }
-    targetParent._childList.set(this._nodeId, this);
-  }
-
   getPositionToParent(): Position {
     const position = getUINativeModule().frameNode.getPositionToParent(this.getNodePtr());
     return { x: position[0], y: position[1] };
@@ -758,9 +764,11 @@ class ImmutableFrameNode extends FrameNode {
     return this._commonAttribute;
   }
   createAnimation(property: AnimationPropertyType, startValue: number[] | undefined, endValue: number[], param: AnimateParam): boolean {
+    JSXNodeLogConsole.warn("can't create animation on unmodifiable frameNode");
     return false;
   }
   cancelAnimations(properties: AnimationPropertyType[]): boolean {
+    JSXNodeLogConsole.warn("can't cancel animation on unmodifiable frameNode");
     return false;
   }
 }

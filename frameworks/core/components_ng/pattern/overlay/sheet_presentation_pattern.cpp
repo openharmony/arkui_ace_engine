@@ -112,7 +112,7 @@ void SheetPresentationPattern::OnModifyDone()
     UpdateSheetType();
     UpdateSheetObject(sheetType_);
     InitSheetMode();
-    InitScrollProps();
+    sheetObject_->InitScrollProps();
     InitFoldCreaseRegion();
 }
 
@@ -208,24 +208,6 @@ void SheetPresentationPattern::InitPageHeight()
     TAG_LOGD(AceLogTag::ACE_SHEET, "sheetTopSafeArea of sheet is : %{public}f", sheetTopSafeArea_);
     if (!NearEqual(currentTopSafeArea, sheetTopSafeArea_)) {
         topSafeAreaChanged_ = true;
-    }
-}
-
-void SheetPresentationPattern::InitScrollProps()
-{
-    auto scrollNode = GetSheetScrollNode();
-    CHECK_NULL_VOID(scrollNode);
-    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_VOID(scrollPattern);
-
-    // When sheet content height is larger than sheet height,
-    // the sheet height should set scroll always enabled.
-    auto edgeEffectAlwaysEnabled = scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && IsScrollable();
-    if (sheetEffectEdge_ == SheetEffectEdge::NONE) {
-        scrollPattern->SetEdgeEffect(EdgeEffect::NONE, edgeEffectAlwaysEnabled);
-    } else {
-        scrollPattern->SetEdgeEffect(EdgeEffect::SPRING,
-            edgeEffectAlwaysEnabled, static_cast<EffectEdge>(sheetEffectEdge_));
     }
 }
 
@@ -1914,6 +1896,10 @@ SheetType SheetPresentationPattern::GetSheetType() const
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     TAG_LOGD(AceLogTag::ACE_SHEET, "GetSheetType displayWindowRect info is : %{public}s",
         windowGlobalRect.ToString().c_str());
+    // first check SHEET_CONTENT_COVER, then check SHEET_BOTTOM
+    if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_CONTENT_COVER) {
+        return SheetType::SHEET_CONTENT_COVER;
+    }
     // only bottom when width is less than 600vp
     if ((windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) ||
         (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM)) {
@@ -3868,6 +3854,8 @@ void SheetPresentationPattern::InitSheetObject()
     // And must be earlier than the entry animation.
     if (sheetType_ == SheetType::SHEET_SIDE) {
         sheetObject_ = AceType::MakeRefPtr<SheetSideObject>(sheetType_);
+    } else if (sheetType_ == SheetType::SHEET_CONTENT_COVER) {
+        sheetObject_ = AceType::MakeRefPtr<SheetContentCoverObject>(sheetType_);
     } else {
         sheetObject_ = AceType::MakeRefPtr<SheetObject>(sheetType_);
     }
@@ -3877,21 +3865,23 @@ void SheetPresentationPattern::InitSheetObject()
     // and the data is not updated to the pattern.
 }
 
-void SheetPresentationPattern::UpdateSheetObject(SheetType type)
+void SheetPresentationPattern::UpdateSheetObject(SheetType newType)
 {
     CHECK_NULL_VOID(sheetObject_);
     RefPtr<SheetObject> sheetObject = sheetObject_;
-    if (sheetObject->GetSheetType() == type) {
+    if (sheetObject->GetSheetType() == newType) {
         return;
     }
-    if (type != SheetType::SHEET_SIDE && sheetObject->GetSheetType() != SheetType::SHEET_SIDE) {
-        sheetObject->UpdateSheetType(type);
+    if (!sheetObject->CheckIfUpdateObject(newType)) {
+        sheetObject->UpdateSheetType(newType);
         return;
     }
-    if (type == SheetType::SHEET_SIDE) {
-        sheetObject = AceType::MakeRefPtr<SheetSideObject>(type);
+    if (newType == SheetType::SHEET_SIDE) {
+        sheetObject = AceType::MakeRefPtr<SheetSideObject>(newType);
+    } else if (newType == SheetType::SHEET_CONTENT_COVER) {
+        sheetObject = AceType::MakeRefPtr<SheetContentCoverObject>(newType);
     } else {
-        sheetObject = AceType::MakeRefPtr<SheetObject>(type);
+        sheetObject = AceType::MakeRefPtr<SheetObject>(newType);
     }
     sheetObject->CopyData(sheetObject_);
     // start clear old sheet data

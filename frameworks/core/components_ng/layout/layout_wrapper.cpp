@@ -563,7 +563,43 @@ void LayoutWrapper::GetAccumulatedSafeAreaExpandHelper(
     if (IsIgnoreTypeTrivial(ignoreType) && recursiveHost->AccumulateExpandCacheHit(totalExpand, innerSpace)) {
         return;
     }
+    auto pattern = recursiveHost->GetPattern();
+    if (pattern && pattern->AccumulatingTerminateHelper(adjustingRect, totalExpand, fromSelf, ignoreType)) {
+        return;
+    }
     recursiveHost->GetAccumulatedSafeAreaExpandHelper(adjustingRect, totalExpand, false, ignoreType);
+}
+
+bool LayoutWrapper::PredictMeasureResult(
+    LayoutWrapper* childWrapper, const std::optional<LayoutConstraintF>& parentConstraint)
+{
+    auto layoutProperty = childWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();
+    if (!layoutConstraint.has_value() || !parentConstraint.has_value()) {
+        return false;
+    }
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    if (!layoutPolicy || !layoutPolicy->IsMatch()) {
+        return false;
+    }
+    OptionalSizeF realSize;
+    auto parentIdealSize = parentConstraint->parentIdealSize;
+    auto widthLayoutPolicy = layoutPolicy->widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+    auto heightLayoutPolicy = layoutPolicy->heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+    if (parentIdealSize.Width().has_value() && widthLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
+        realSize.SetWidth(parentIdealSize.Width().value());
+    }
+    if (parentIdealSize.Height().has_value() && heightLayoutPolicy == LayoutCalPolicy::MATCH_PARENT) {
+        realSize.SetHeight(parentIdealSize.Height().value());
+    }
+    auto selfIdealSize = layoutConstraint->selfIdealSize;
+    realSize.UpdateIllegalSizeWithCheck(selfIdealSize);
+    if (realSize.IsValid()) {
+        childWrapper->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
+        return true;
+    }
+    return false;
 }
 
 void LayoutWrapper::AdjustChildren(const OffsetF& offset, bool parentScrollable)

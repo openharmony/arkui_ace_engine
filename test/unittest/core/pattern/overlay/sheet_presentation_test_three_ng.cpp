@@ -1705,4 +1705,107 @@ HWTEST_F(SheetPresentationTestThreeNg, SetWindowUseImplicitAnimation001, TestSiz
     pipelineContext->windowManager_ = nullptr;
     SheetPresentationTestThreeNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: IsNeedChangeScrollHeight001
+ * @tc.desc: Test IsNeedChangeScrollHeight function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, IsNeedChangeScrollHeight001, TestSize.Level1)
+{
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    // Make the lowest detentSize is not in the end of the vector
+    sheetPattern->sheetDetentHeight_.emplace_back(50.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(60.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(70.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(40.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(80.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(90.0f);
+    // Make height great than lowest value of detentSize
+    sheetPattern->height_ = 45;
+    sheetPattern->sheetHeightUp_ = 0;
+    sheetPattern->bottomOffsetY_ = 0;
+    sheetPattern->scrollSizeMode_ = ScrollSizeMode::CONTINUOUS;
+    ASSERT_TRUE(sheetPattern->sheetDetentHeight_.size() > 0);
+
+    bool isNeedChangeScrollHeight = sheetPattern->IsNeedChangeScrollHeight(sheetPattern->height_);
+    ASSERT_TRUE(isNeedChangeScrollHeight);
+}
+
+/**
+ * @tc.name: IsNeedChangeScrollHeight002
+ * @tc.desc: Test IsNeedChangeScrollHeight function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, IsNeedChangeScrollHeight002, TestSize.Level1)
+{
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    // Make the lowest detentSize is in the end of the vector
+    sheetPattern->sheetDetentHeight_.emplace_back(50.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(60.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(70.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(80.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(90.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(40.0f);
+    // Make height great than lowest value of detentSize
+    sheetPattern->height_ = 120;
+    sheetPattern->sheetHeightUp_ = 0;
+    sheetPattern->bottomOffsetY_ = 0;
+    sheetPattern->scrollSizeMode_ = ScrollSizeMode::CONTINUOUS;
+    ASSERT_TRUE(sheetPattern->sheetDetentHeight_.size() > 0);
+
+    bool isNeedChangeScrollHeight = sheetPattern->IsNeedChangeScrollHeight(sheetPattern->height_);
+    ASSERT_TRUE(isNeedChangeScrollHeight);
+}
+
+/**
+ * @tc.name: IsNeedChangeScrollHeight003
+ * @tc.desc: Test IsNeedChangeScrollHeight function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestThreeNg, IsNeedChangeScrollHeight003, TestSize.Level1)
+{
+    SheetPresentationTestThreeNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    // Make the lowest detentSize is not in the end of the vector
+    sheetPattern->sheetDetentHeight_.emplace_back(50.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(60.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(70.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(40.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(80.0f);
+    sheetPattern->sheetDetentHeight_.emplace_back(90.0f);
+    // Make height great than lowest value of detentSize
+    sheetPattern->height_ = 45;
+    sheetPattern->sheetHeightUp_ = 0;
+    sheetPattern->bottomOffsetY_ = 0;
+    // Make scroll size mode is not continuous
+    sheetPattern->scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
+    ASSERT_TRUE(sheetPattern->sheetDetentHeight_.size() > 0);
+
+    bool isNeedChangeScrollHeight = sheetPattern->IsNeedChangeScrollHeight(sheetPattern->height_);
+    ASSERT_FALSE(isNeedChangeScrollHeight);
+}
 } // namespace OHOS::Ace::NG

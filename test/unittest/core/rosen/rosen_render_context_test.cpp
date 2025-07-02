@@ -2158,4 +2158,25 @@ HWTEST_F(RosenRenderContextTest, RemoveFromTreeTest002, TestSize.Level1)
     EXPECT_EQ(rosenRenderContext->rsNode_->isOnTheTreeInit_, true);
     EXPECT_EQ(rosenRenderContext->rsNode_->isOnTheTree_, false);
 }
+
+/**
+ * @tc.name: ShouldSkipAffineTransformation001
+ * @tc.desc: Test ShouldSkipAffineTransformation Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, ShouldSkipAffineTransformation001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    rosenRenderContext->rsNode_->SetDrawNodeType(Rosen::DrawNodeType::DrawPropertyType);
+    bool res = rosenRenderContext->ShouldSkipAffineTransformation(rosenRenderContext->rsNode_);
+    rosenRenderContext->rsNode_->SetDrawNodeType(Rosen::DrawNodeType::GeometryPropertyType);
+    res = rosenRenderContext->ShouldSkipAffineTransformation(rosenRenderContext->rsNode_);
+    ASSERT_EQ(res, false);
+    rosenRenderContext->rsNode_ = nullptr;
+    ASSERT_EQ(rosenRenderContext->rsNode_, nullptr);
+}
 } // namespace OHOS::Ace::NG

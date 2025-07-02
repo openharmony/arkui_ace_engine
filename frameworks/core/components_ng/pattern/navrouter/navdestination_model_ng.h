@@ -76,7 +76,8 @@ public:
     RefPtr<AceType> CreateEmpty() override;
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar, bool animated);
     static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
-    static void SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild = true);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color, bool isVaild = true,
+        const RefPtr<ResourceObject>& backgroundColorResObj = nullptr);
     static void SetBackButtonIcon(FrameNode* frameNode, const std::string& src,
         bool noPixMap, RefPtr<PixelMap>& pixMap);
     static void SetBackButtonIcon(FrameNode* frameNode, bool noPixMap, RefPtr<PixelMap>& pixMap,
@@ -91,7 +92,8 @@ public:
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;
     void SetCustomMenu(const RefPtr<AceType>& customNode) override;
     void SetMenuOptions(NavigationMenuOptions&& opt) override;
-    void SetBackgroundColor(const Color& color, bool isVaild = true) override;
+    void SetBackgroundColor(const Color& color, bool isVaild = true,
+        const RefPtr<ResourceObject>& backgroundColorResObj = nullptr) override;
     void SetIgnoreLayoutSafeArea(const NG::IgnoreLayoutSafeAreaOpts& opts) override;
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::IgnoreLayoutSafeAreaOpts& opts);
     void SetNavDestinationPathInfo(const std::string& moduleName, const std::string& pagePath) override;

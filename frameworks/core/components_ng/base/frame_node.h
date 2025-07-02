@@ -855,6 +855,28 @@ public:
     // layoutwrapper function override
     const RefPtr<LayoutAlgorithmWrapper>& GetLayoutAlgorithm(bool needReset = false) override;
 
+    bool PreMeasure(const std::optional<LayoutConstraintF>& parentConstraint);
+
+    bool ChildPreMeasureHelper(LayoutWrapper* childWrapper, const std::optional<LayoutConstraintF>& parentConstraint);
+
+    void CollectDelayMeasureChild(LayoutWrapper* childWrapper);
+
+    void PostTaskForIgnore(PipelineContext* pipeline);
+
+    bool PostponedTaskForIgnore();
+
+    void AddDelayLayoutChild(const RefPtr<FrameNode>& child)
+    {
+        if (child) {
+            delayLayoutChildren_.emplace_back(child);
+        }
+    }
+
+    const std::vector<RefPtr<FrameNode>>& GetDelayLayoutChildren() const
+    {
+        return delayLayoutChildren_;
+    }
+
     void Measure(const std::optional<LayoutConstraintF>& parentConstraint) override;
 
     // Called to perform layout children.
@@ -1250,6 +1272,9 @@ public:
     void ArkoalaRemoveItemsOnChange(int32_t changeIndex);
 
 private:
+    RefPtr<LayoutWrapper> ArkoalaGetOrCreateChild(uint32_t index);
+    void ArkoalaUpdateActiveRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached);
+
     /* temporary adapter to provide LazyForEach feature in Arkoala */
     std::unique_ptr<LazyComposeAdapter> arkoalaLazyAdapter_;
 
@@ -1750,6 +1775,9 @@ private:
 
     RefPtr<FrameNode> cornerMarkNode_ = nullptr;
     RefPtr<DragDropRelatedConfigurations> dragDropRelatedConfigurations_;
+
+    std::vector<RefPtr<FrameNode>> delayMeasureChildren_;
+    std::vector<RefPtr<FrameNode>> delayLayoutChildren_;
 };
 } // namespace OHOS::Ace::NG
 

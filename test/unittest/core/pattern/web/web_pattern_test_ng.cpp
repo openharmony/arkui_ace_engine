@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "oh_window_pip.h"
+#include "oh_window_comm.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -63,6 +64,7 @@ enum PictureInPictureCallback {
 #define PIP_SURFACE_OK_0 0
 #define PIP_SURFACE_OK_1 100
 #define PIP_SURFACE_N_0  1
+#define PIP_ID_CREATE_ERROR WINDOW_MANAGER_ERRORCODE_PIP_CREATE_FAILED
 
 int32_t OH_PictureInPicture_CreatePip(
     PictureInPicture_PipConfig pipConfig, uint32_t* controllerId)
@@ -82,6 +84,9 @@ int32_t OH_PictureInPicture_StartPip(uint32_t controllerId)
     if (controllerId == PIP_ID_OK_0 || controllerId == PIP_ID_OK_1 ||
         controllerId == PIP_ID_OK_2) {
         return 0;
+    }
+    if (controllerId == PIP_ID_CREATE_ERROR) {
+        return WINDOW_MANAGER_ERRORCODE_PIP_CREATE_FAILED;
     }
     return 1;
 }
@@ -1889,6 +1894,57 @@ HWTEST_F(WebPatternTestNg, HandleMouseEvent_001, TestSize.Level1)
 
     webPattern->HandleMouseEvent(info);
     EXPECT_NE(webPattern, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: HandleMouseEvent_002
+ * @tc.desc: HandleMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, HandleMouseEvent_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    MouseInfo info;
+    auto mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    info.SetButton(MouseButton::RIGHT_BUTTON);
+    webPattern->HandleMouseEvent(info);
+    EXPECT_EQ(mouseInfoQueue.size(), 0);
+
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    webPattern->HandleMouseEvent(info);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 0);
+
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    webPattern->HandleMouseEvent(info);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 1);
+
+    MouseInfo info1;
+    info1.SetButton(MouseButton::LEFT_BUTTON);
+    info1.SetAction(MouseAction::RELEASE);
+    webPattern->HandleMouseEvent(info1);
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 2);
+    for (int i = 0; i < 10; i++) {
+        webPattern->HandleMouseEvent(info1);
+    }
+    mouseInfoQueue = webPattern->GetMouseInfoQueue();
+    EXPECT_EQ(mouseInfoQueue.size(), 10);
 #endif
 }
 
@@ -4384,7 +4440,42 @@ HWTEST_F(WebPatternTestNg, StartPip_002, TestSize.Level1)
     EXPECT_EQ(ret, false);
 #endif
 }
- 
+
+/**
+ * @tc.name: StartPip_003
+ * @tc.desc: StartPip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, StartPip_003, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    auto ret = webPattern.StartPip(PIP_ID_CREATE_ERROR);
+    EXPECT_EQ(ret, false);
+#endif
+}
+
+/**
+ * @tc.name: StartPip_004
+ * @tc.desc: StartPip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, StartPip_004, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebPattern webPattern;
+    webPattern.delegate_ = nullptr;
+    EXPECT_EQ(webPattern.delegate_, nullptr);
+    auto delegateMock = AceType::MakeRefPtr<WebDelegateMock>(
+        PipelineContext::GetCurrentContext(), nullptr, "", Container::CurrentId());
+    webPattern.delegate_ = delegateMock;
+    auto ret = webPattern.StartPip(PIP_ID_CREATE_ERROR);
+    EXPECT_EQ(ret, false);
+#endif
+}
+
 /**
  * @tc.name: EnablePip_001
  * @tc.desc: EnablePip.

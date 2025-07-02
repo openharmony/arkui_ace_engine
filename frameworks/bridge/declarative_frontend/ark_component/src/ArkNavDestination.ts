@@ -298,6 +298,24 @@ class NavDestinationHideToolBarModifier extends ModifierWithKey<ArkNavHideTitleB
   }
 }
 
+class NavDestinationBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('navDestinationBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetBackgroundColor(node);
+    } else {
+      getUINativeModule().navDestination.setBackgroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class NavDestinationBackButtonIconModifier extends ModifierWithKey<object> {
   constructor(value: object) {
     super(value);

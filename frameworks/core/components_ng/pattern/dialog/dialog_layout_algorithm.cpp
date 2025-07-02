@@ -58,6 +58,9 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(dialogProp);
     auto dialogPattern = hostNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
+    NG::RectF floatButtons;
+    dialogPattern->GetWindowButtonRect(floatButtons);
+    floatButtonsHeight_ = floatButtons.Height();
     auto parent = hostNode->GetParent();
     expandDisplay_ = dialogTheme->GetExpandDisplay() || dialogPattern->IsShowInFreeMultiWindow();
     keyboardAvoidMode_ = dialogPattern->GetDialogProperties().keyboardAvoidMode;
@@ -696,7 +699,7 @@ void DialogLayoutAlgorithm::AvoidScreen(
         static_cast<float>(availableRect.Bottom() - childSize.Height()));
     left = std::clamp(static_cast<float>(left - wrapperOffset_.GetX()), 0.0f,
         static_cast<float>(wrapperSize_.Width() - childSize.Width()));
-    top = std::clamp(static_cast<float>(top - wrapperOffset_.GetY()), 0.0f,
+    top = std::clamp(static_cast<float>(top - wrapperOffset_.GetY()), floatButtonsHeight_,
         static_cast<float>(wrapperSize_.Height() - childSize.Height()));
     topLeftPoint.SetX(left);
     topLeftPoint.SetY(top);

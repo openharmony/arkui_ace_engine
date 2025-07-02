@@ -1903,6 +1903,7 @@ let SheetType;
   SheetType[SheetType.CENTER = 1] = 'CENTER';
   SheetType[SheetType.POPUP = 2] = 'POPUP';
   SheetType[SheetType.SIDE = 3] = 'SIDE';
+  SheetType[SheetType.CONTENT_COVER = 4] = 'CONTENT_COVER';
 })(SheetType || (SheetType = {}));
 
 let SheetMode;
@@ -2396,6 +2397,11 @@ class TextMenuItemId {
   static get dateTime() {
     return new TextMenuItemId('OH_DEFAULT_AI_MENU_DATETIME');
   }
+
+  static get askAI() {
+    return new TextMenuItemId('OH_DEFAULT_ASK_CELIA');
+  }
+
 }
 
 globalThis.TextMenuItemId = TextMenuItemId;

@@ -1409,4 +1409,29 @@ HWTEST_F(FrameNodeTestNg, FrameNodeHitTestMode005, TestSize.Level1)
     EXPECT_EQ(result.size(), 2);
     EXPECT_TRUE(onChildTouchTestTriggerd);
 }
+
+/**
+ * @tc.name: FrameNodeSetFocusDependenceTestMode001
+ * @tc.desc: Test the function SetFocusDependence
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeSetFocusDependenceTestMode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto childNode = FrameNode::CreateFrameNode("childNode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step2. call the function SetFocusDependence.
+     */
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusDependence(FocusDependence::SELF);
+    /**
+     * @tc.steps: step3. getFocusDependence.
+     * @tc.expected: expect The function return value is SELF.
+     */
+    EXPECT_EQ(focusHub->GetFocusDependence(), FocusDependence::SELF);
+}
 } // namespace OHOS::Ace::NG

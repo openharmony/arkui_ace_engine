@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -247,7 +248,7 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     }
     pattern->CalculateHandleOffsetAndShowOverlay();
     overlayManager->MarkInfoChange((isFirstHandle ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE) | DIRTY_SELECT_AREA |
-                            DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM | DIRTY_AI_MENU_ITEM);
+                            DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM | DIRTY_AI_MENU_ITEM | DIRTY_ASK_CELIA);
     ProcessOverlay({ .animation = true, .requestCode = recreateAfterMoveDone_ ? REQUEST_RECREATE : 0 });
     recreateAfterMoveDone_ = false;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -298,6 +299,7 @@ void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectO
     menuInfo.showShare = menuInfo.showCopy && IsSupportMenuShare() && IsNeedMenuShare();
     menuInfo.showSearch = menuInfo.showCopy && pattern->IsShowSearch() && IsNeedMenuSearch();
     menuInfo.showAIWrite = pattern->IsShowAIWrite() && hasValue;
+    menuInfo.isAskCeliaEnabled = pattern->IsAskCeliaEnabled();
     pattern->UpdateSelectMenuInfo(menuInfo);
 }
 
@@ -414,6 +416,9 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
             if (pattern->GetTextDetectEnable() && !pattern->HasFocus()) {
                 pattern->ResetSelection();
             }
+            break;
+        case OptionMenuActionId::ASK_CELIA:
+            pattern->HandleOnAskCelia();
             break;
         default:
             TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Unsupported menu option id %{public}d", id);

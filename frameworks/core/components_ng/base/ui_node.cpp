@@ -1881,6 +1881,11 @@ void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
 void UINode::SetIsRootBuilderNode(bool isRootBuilderNode)
 {
     isRootBuilderNode_ = isRootBuilderNode;
+    if (isRootBuilderNode) {
+        jsBuilderNodeId_ = nodeId_;
+    } else {
+        jsBuilderNodeId_ = -1;
+    }
 }
 
 bool UINode::GetIsRootBuilderNode() const

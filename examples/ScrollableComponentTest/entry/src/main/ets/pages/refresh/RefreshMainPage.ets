@@ -35,6 +35,9 @@ struct RefreshMainPage {
     new TextList(1, 'Back', 'pages/Index'),
     new TextList(2, 'RefreshingContent', 'pages/refresh/RefreshingContent'),
     new TextList(3, 'RefreshAndLoad', 'pages/refresh/RefreshAndLoad'),
+    new TextList(4, 'RefreshSuspensionEffectSample', 'pages/refresh/RefreshSuspensionEffectSample'),
+    new TextList(5, 'RefreshAPNG', 'pages/refresh/RefreshAPNG'),
+    new TextList(5, 'RefreshListEdgeEffect', 'pages/refresh/RefreshListEdgeEffect'),
   ]
   @State fontSize: Resource | undefined = undefined
 

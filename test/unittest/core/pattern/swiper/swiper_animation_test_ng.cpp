@@ -200,7 +200,8 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation005, TestSize.Level1
     pattern_->PlaySpringAnimation(200.0f);
     // left align because children total size < swiper
     EXPECT_EQ(
-        AceType::DynamicCast<NodeAnimatablePropertyFloat>(frameNode_->GetAnimatablePropertyFloat("spring"))->Get(),
+        AceType::DynamicCast<AnimatablePropertyFloat>(frameNode_->GetAnimatablePropertyFloat("spring")->GetProperty())
+            ->GetStagingValue(),
         0.0f);
 }
 
@@ -223,7 +224,8 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation006, TestSize.Level1
     EXPECT_EQ(GetChildX(frameNode_, 0), 200.0f);
     pattern_->PlaySpringAnimation(200.0f);
     EXPECT_EQ(
-        AceType::DynamicCast<NodeAnimatablePropertyFloat>(frameNode_->GetAnimatablePropertyFloat("spring"))->Get(),
+        AceType::DynamicCast<AnimatablePropertyFloat>(frameNode_->GetAnimatablePropertyFloat("spring")->GetProperty())
+            ->GetStagingValue(),
         0.0f);
 }
 
@@ -567,8 +569,8 @@ HWTEST_F(SwiperAnimationTestNg, SwipeCustomAnimationTest003, TestSize.Level1)
  * @tc.desc: Test check onContentDidScroll info
  * @tc.type: FUNC
  */
- HWTEST_F(SwiperAnimationTestNg, SwipeCustomAnimationTest004, TestSize.Level1)
- {
+HWTEST_F(SwiperAnimationTestNg, SwipeCustomAnimationTest004, TestSize.Level1)
+{
     bool isTrigger = false;
     float finalPosition = 0.0f;
     auto onContentDidScroll = [&isTrigger, &finalPosition](

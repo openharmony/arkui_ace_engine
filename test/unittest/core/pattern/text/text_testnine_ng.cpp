@@ -837,6 +837,38 @@ HWTEST_F(TextTestNineNg, UpdateShaderStyle004, TestSize.Level1)
     multipleAlgorithm->UpdateShaderStyle(layoutProperty, textStyle);
     EXPECT_EQ(textStyle.GetColorShaderStyle().value(), Color::GREEN);
 }
+ 
+/**
+ * @tc.name: UpdateShaderStyle005
+ * @tc.desc: Test UpdateShaderStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNineNg, UpdateShaderStyle005, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test2", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    pattern->AttachToFrameNode(frameNode);
+    Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    auto value = 5.0;
+    auto values = CalcDimension(value);
+    gradient.GetLinearGradient()->angle = values;
+    gradient.GetLinearGradient()->linearX = GradientDirection::RIGHT;
+    gradient.GetLinearGradient()->linearY = GradientDirection::LEFT;
+    layoutProperty->UpdateGradientShaderStyle(gradient);
+
+    auto gradientValue = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+    AnimatableDimension result(value);
+    ASSERT_NE(gradientValue.GetLinearGradient(), nullptr);
+    EXPECT_EQ(gradientValue.GetLinearGradient()->angle, result);
+    EXPECT_EQ(gradientValue.GetLinearGradient()->linearX, GradientDirection::RIGHT);
+    EXPECT_EQ(gradientValue.GetLinearGradient()->linearY, GradientDirection::LEFT);
+    layoutProperty->ResetGradientShaderStyle();
+    auto gradientValue1 = layoutProperty->GetGradientShaderStyle().value_or(Gradient());
+    EXPECT_EQ(gradientValue1.GetLinearGradient(), nullptr);
+}
 
 /**
  * @tc.name: UpdateRelayoutShaderStyle

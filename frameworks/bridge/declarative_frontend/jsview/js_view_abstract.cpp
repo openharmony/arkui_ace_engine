@@ -7158,7 +7158,8 @@ bool JSViewAbstract::ParseJsSymbolId(
     auto resourceObject = GetResourceObject(jsObj);
     auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
     symbolResourceObject = resourceObject;
-    if (CheckCustomSymbolId(resourceWrapper, resId, symbolId)) {
+    int32_t type = jsObj->GetPropertyValue<int32_t>(static_cast<int32_t>(ArkUIIndex::TYPE), UNKNOWN_RESOURCE_TYPE);
+    if (type == static_cast<int32_t>(ResourceType::STRING) && CheckCustomSymbolId(resourceWrapper, resId, symbolId)) {
         return true;
     }
     if (!CheckResource(resourceObject, resourceWrapper)) {
@@ -9893,13 +9894,26 @@ void AddInvalidateFunc(JSRef<JSObject> jsDrawModifier, NG::FrameNode* frameNode)
 
 void JSViewAbstract::JsDrawModifier(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject()) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY) && !info[0]->IsObject()) {
         return;
     }
 
     auto frameNode = static_cast<NG::FrameNode*>(ViewAbstractModel::GetInstance()->GetFrameNode());
     bool IsSupportDrawModifier = frameNode && frameNode->IsSupportDrawModifier();
     if (!IsSupportDrawModifier) {
+        return;
+    }
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY) && !info[0]->IsObject()) {
+        ViewAbstractModel::GetInstance()->SetDrawModifier(nullptr);
+        if (frameNode) {
+            const auto& extensionHandler = frameNode->GetExtensionHandler();
+            if (extensionHandler) {
+                extensionHandler->InvalidateRender();
+                extensionHandler->ForegroundRender();
+            } else {
+                frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
+            }
+        }
         return;
     }
     auto jsDrawModifier = JSRef<JSObject>::Cast(info[0]);
@@ -10758,7 +10772,7 @@ void JSViewAbstract::NewParseSweepGradientColor(NG::Gradient& gradient, RefPtr<R
     auto&& updateFunc = [gradientColor, indx](const RefPtr<ResourceObject>& resObj,
         NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t index = 0; index < colorLength; index++) {
             NG::GradientColor gradColor = colorVector[index];
@@ -10780,7 +10794,7 @@ void JSViewAbstract::NewParseRadialGradientColor(NG::Gradient& gradient, RefPtr<
     auto&& updateFunc = [gradientColor, indx](const RefPtr<ResourceObject>& resObj,
         NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t index = 0; index < colorLength; index++) {
             NG::GradientColor gradColor = colorVector[index];
@@ -10802,7 +10816,7 @@ void JSViewAbstract::NewParseGradientColor(NG::Gradient& gradient, RefPtr<Resour
     auto&& updateFunc = [gradientColor, indx](const RefPtr<ResourceObject>& resObj,
         NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t index = 0; index < colorLength; index++) {
             NG::GradientColor gradColor = colorVector[index];
@@ -10856,7 +10870,7 @@ void JSViewAbstract::NewGetJsGradientColorStops(NG::Gradient& gradient, const JS
         gradientColor.SetDimension(CalcDimension(value * 100.0, DimensionUnit::PERCENT));
         gradient.AddColor(gradientColor);
         if (SystemProperties::ConfigChangePerform() && resObj) {
-            int32_t indx = i - nullNum;
+            int32_t indx = static_cast<int32_t>(i) - nullNum;
             if (mapIdx == NUM_1) {
                 NewParseSweepGradientColor(gradient, resObj, gradientColor, indx);
             } else if (mapIdx == NUM_2) {
@@ -12772,6 +12786,7 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     std::function<void()> builderFunc;
     BackgroundType backgroundType = BackgroundType::COLOR;
     if (!ParseJsColor(info[0], color, backgroundColorResObj)) {
+        ViewAbstractModel::GetInstance()->ClearResObj("customBackgroundColor");
         if (ParseBackgroundBuilder(info, info[0], builderFunc)) {
             backgroundType = BackgroundType::CUSTOM_BUILDER;
         } else {
@@ -12809,8 +12824,8 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetBackground(std::move(builderFunc));
     ViewAbstractModel::GetInstance()->SetBackgroundIgnoresLayoutSafeAreaEdges(ignoreLayoutSafeAreaEdges);
     ViewAbstractModel::GetInstance()->SetBackgroundAlign(alignment);
-    if (SystemProperties::ConfigChangePerform() && backgroundColorResObj) {
-        ViewAbstractModel::GetInstance()->SetCustomBackgroundColorWithResourceObj(backgroundColorResObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        ViewAbstractModel::GetInstance()->SetCustomBackgroundColorWithResourceObj(color, backgroundColorResObj);
     } else {
         ViewAbstractModel::GetInstance()->SetCustomBackgroundColor(color);
     }

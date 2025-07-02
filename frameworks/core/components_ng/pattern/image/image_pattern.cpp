@@ -1892,6 +1892,8 @@ void ImagePattern::DumpOtherInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("rawImageSize: ").append(loadingCtx_->GetOriginImageSize().ToString()));
         DumpLog::GetInstance().AddDesc(std::string("LoadErrorMsg: ").append(loadingCtx_->GetErrorMsg()));
+        DumpLog::GetInstance().AddDesc(
+            std::string("ImageDataSizeInfo: ").append(loadingCtx_->GetImageSizeInfo()));
     } else {
         DumpLog::GetInstance().AddDesc(std::string("imageLoadingContext: null"));
     }

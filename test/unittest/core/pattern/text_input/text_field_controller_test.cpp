@@ -758,7 +758,7 @@ HWTEST_F(TextFieldControllerTest, TextFieldControllerTest003, TestSize.Level1)
     /**
      * @tc.steps: Initialize textarea node.
      */
-    auto frameNode = TextFieldModelNG::CreateFrameNode(-1, u"", u"", true);
+    auto frameNode = TextFieldModelNG::CreateTextAreaNode(-1, u"", u"");
     ASSERT_NE(frameNode, nullptr);
     auto node = AceType::RawPtr(frameNode);
 

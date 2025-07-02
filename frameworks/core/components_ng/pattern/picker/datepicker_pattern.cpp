@@ -387,8 +387,10 @@ void DatePickerPattern::OnModifyDone()
         ColumnPatternInitHapticController();
         isHapticChanged_ = false;
     }
-    if (isFiredDateChange_ && !isForceUpdate_ && (lunar_ == datePickerRowLayoutProperty->GetLunar().value_or(false)) &&
-        !isDateOrderChange_ && (isLoop_ == datePickerRowLayoutProperty->GetCanLoopValue(true))) {
+    isForceUpdate_ = isForceUpdate_ ||
+        (lunar_ != datePickerRowLayoutProperty->GetLunar().value_or(false)) ||
+        (isLoop_ != datePickerRowLayoutProperty->GetCanLoopValue(true));
+    if (isFiredDateChange_ && !isForceUpdate_ && !isDateOrderChange_) {
         isFiredDateChange_ = false;
         return;
     }

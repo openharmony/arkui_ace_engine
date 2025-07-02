@@ -34,6 +34,7 @@ static NG::SystemServiceMenuDisableFlag GetDisableFlag(const std::string& id)
         { NG::OH_DEFAULT_AI_MENU_EMAIL, NG::DISABLE_AI_MENU_EMAIL_FLAG },
         { NG::OH_DEFAULT_AI_MENU_ADDRESS, NG::DISABLE_AI_MENU_ADDRESS_FLAG },
         { NG::OH_DEFAULT_AI_MENU_DATETIME, NG::DISABLE_AI_MENU_DATETIME_FLAG },
+        { NG::OH_DEFAULT_ASK_CELIA, NG::DISABLE_ASK_CELIA_FLAG },
     };
     return disalbeFlagsMap.find(id) == disalbeFlagsMap.end() ? NG::DISABLE_NORMAL_FLAG : disalbeFlagsMap[id];
 }

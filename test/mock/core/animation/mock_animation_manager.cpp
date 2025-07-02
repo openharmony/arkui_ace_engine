@@ -81,14 +81,17 @@ void MockAnimationManager::Tick()
     }
 }
 
-void MockAnimationManager::TickByVelocity(float velocity)
+template<typename T>
+void MockAnimationManager::TickByVelocity(const T& delta)
 {
     PruneAnimation(animations_);
     const auto anims = animations_;
     for (const auto& anim : anims) {
-        anim->ForceUpdate(velocity);
+        anim->ForceUpdate(delta);
     }
 }
+template void MockAnimationManager::TickByVelocity<float>(const float& delta);
+template void MockAnimationManager::TickByVelocity<OffsetF>(const OffsetF& delta);
 
 void MockAnimationManager::Reset()
 {

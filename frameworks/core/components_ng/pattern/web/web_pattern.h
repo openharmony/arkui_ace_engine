@@ -822,6 +822,16 @@ public:
     void InitRotationEventCallback();
     void UninitRotationEventCallback();
 
+    std::queue<MouseInfo>& GetMouseInfoQueue()
+    {
+        return mouseInfoQueue_;
+    }
+
+    MouseInfo GetMouseInfo()
+    {
+        return mouseInfo_;
+    }
+
     // Data Detector funcs
     RefPtr<WebDataDetectorAdapter> GetDataDetectorAdapter();
 
@@ -1275,6 +1285,7 @@ private:
     bool isParentReachEdge_ = false;
     RefPtr<PinchGesture> pinchGesture_ = nullptr;
     std::queue<TouchEventInfo> touchEventQueue_;
+    std::queue<MouseInfo> mouseInfoQueue_;
     std::vector<NG::MenuOptionsParam> menuOptionParam_ {};
     std::list<KeyEvent> webKeyEvent_ {};
     double startPinchScale_ = -1.0;
@@ -1339,6 +1350,8 @@ private:
     std::vector<uint32_t> pipController_;
     std::optional<int32_t> dataListNodeId_ = std::nullopt;
     bool isRegisterJsObject_ = false;
+
+    MouseInfo mouseInfo_;
 
     // properties for AI data detector
     bool isAILinkMenuShow_ = false;

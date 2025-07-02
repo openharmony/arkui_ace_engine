@@ -445,7 +445,7 @@ public:
     virtual void SetBackground(std::function<void()>&& buildFunc) = 0;
     virtual void SetBackgroundAlign(const Alignment& align) = 0;
     virtual void SetCustomBackgroundColor(const Color& color) = 0;
-    virtual void SetCustomBackgroundColorWithResourceObj(const RefPtr<ResourceObject>& resObj) = 0;
+    virtual void SetCustomBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetBackgroundIgnoresLayoutSafeAreaEdges(const uint32_t edges) = 0;
     virtual void SetIsTransitionBackground(bool val) = 0;
     virtual void SetIsBuilderBackground(bool val) = 0;

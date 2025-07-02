@@ -214,6 +214,9 @@ public:
     static int32_t CloseMenu(const RefPtr<NG::UINode>& customNode);
     static void JsBindContentCover(const JSCallbackInfo& info);
     static void ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalStyle& modalStyle);
+    static void ParseModalTransition(const JSRef<JSVal>& jsValue,
+        std::optional<NG::ModalTransition>& modalTransition,
+        NG::ModalTransition defaultTransition = NG::ModalTransition::DEFAULT);
     static void ParseEnableSafeArea(const JSRef<JSObject>& paramObj, NG::ContentCoverParam& contentCoverParam);
     static void JsBindSheet(const JSCallbackInfo& info);
     static bool CheckJSCallbackInfo(

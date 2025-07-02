@@ -461,10 +461,18 @@ float TextFieldPattern::GetTextOrPlaceHolderFontSize()
 
 TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
 {
-    if (PipelineContext::GetCurrentContextSafelyWithCheck() &&
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    if (context &&
         // for normal app add version protection, enable keyboard as default start from API 10 or higher
-        PipelineContext::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
-        needToRequestKeyboardOnFocus_ = !GetIndependentControlKeyboard();
+        context->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
+        auto theme = context->GetTheme<TextFieldTheme>();
+        if (theme) {
+            independentControlKeyboard_ = theme->GetIndependentControlKeyboard();
+            needToRequestKeyboardOnFocus_ = !independentControlKeyboard_;
+        } else {
+            needToRequestKeyboardOnFocus_ = true;
+        }
     }
     contentController_ = MakeRefPtr<ContentController>(WeakClaim(this));
     selectController_ = MakeRefPtr<TextSelectController>(WeakClaim(this));
@@ -491,10 +499,6 @@ bool TextFieldPattern::GetIndependentControlKeyboard()
 
 TextFieldPattern::~TextFieldPattern()
 {
-    if (textEditingController_) {
-        textEditingController_->Clear();
-        textEditingController_->RemoveObserver(WeakClaim(this));
-    }
     CloseSelectOverlay();
     if (isCustomKeyboardAttached_) {
         CloseCustomKeyboard();
@@ -2293,11 +2297,9 @@ TextDragInfo TextFieldPattern::CreateTextDragInfo() const
     auto firstIndex = selectController_->GetFirstHandleIndex();
     auto secondIndex = selectController_->GetSecondHandleIndex();
     if (firstIndex > secondIndex) {
-        info.secondHandle = selectOverlayInfo->firstHandle.paintRect;
-        info.firstHandle = selectOverlayInfo->secondHandle.paintRect;
+        selectOverlay_->GetDragViewHandleRects(info.secondHandle, info.firstHandle);
     } else {
-        info.firstHandle = selectOverlayInfo->firstHandle.paintRect;
-        info.secondHandle = selectOverlayInfo->secondHandle.paintRect;
+        selectOverlay_->GetDragViewHandleRects(info.firstHandle, info.secondHandle);
     }
     auto firstIsShow = selectOverlayInfo->firstHandle.isShow;
     auto secondIsShow = selectOverlayInfo->secondHandle.isShow;
@@ -8439,9 +8441,6 @@ bool TextFieldPattern::IsReachedBoundary(float offset)
 
 OffsetF TextFieldPattern::GetTextPaintOffset() const
 {
-    if (selectOverlay_->HasRenderTransform()) {
-        return selectOverlay_->GetPaintRectOffsetWithTransform();
-    }
     return GetPaintRectGlobalOffset();
 }
 
@@ -8453,7 +8452,7 @@ OffsetF TextFieldPattern::GetPaintRectGlobalOffset() const
     CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
     auto rootOffset = pipeline->GetRootRect().GetOffset();
     OffsetF textPaintOffset;
-    textPaintOffset = host->GetPaintRectOffset(false, true);
+    textPaintOffset = host->GetPaintRectOffsetNG(false, true);
     return textPaintOffset - rootOffset;
 }
 

@@ -181,7 +181,11 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     return this;
   }
   maintainVisibleContentPosition(value: boolean): this {
-    modifierWithKey(this._modifiersWithKeys, SwiperMaintainVisibleContentPositionModifier.identity, SwiperMaintainVisibleContentPositionModifier, handler);
+    modifierWithKey(this._modifiersWithKeys, SwiperMaintainVisibleContentPositionModifier.identity, SwiperMaintainVisibleContentPositionModifier, value);
+    return this;
+  }
+  onScrollStateChanged(event: Callback<ScrollState>): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnScrollStateChangedModifier.identity, SwiperOnScrollStateChangedModifier, event);
     return this;
   }
 }
@@ -947,6 +951,22 @@ class SwiperMaintainVisibleContentPositionModifier extends ModifierWithKey<boole
       getUINativeModule().swiper.resetSwiperMaintainVisibleContentPosition(node);
     } else {
       getUINativeModule().swiper.setSwiperMaintainVisibleContentPosition(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class SwiperOnScrollStateChangedModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnScrollStateChanged');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnScrollStateChanged(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnScrollStateChanged(node, this.value);
     }
   }
   checkObjectDiff(): boolean {

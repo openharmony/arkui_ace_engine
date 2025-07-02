@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
@@ -624,6 +625,66 @@ HWTEST_F(SpanTestNg, ImageSpanSetBaselineOffset001, TestSize.Level1)
     offset = Dimension(-5.0, DimensionUnit::VP);
     layoutProperty->UpdateBaselineOffset(offset);
     EXPECT_EQ(layoutProperty->GetBaselineOffset(), Dimension(-5.0, DimensionUnit::VP));
+}
+
+/**
+ * @tc.name: ImageSpanSetPixelMap001
+ * @tc.desc: Test ImageSpanView SetPixelMap function
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, ImageSpanSetPixelMap001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    auto node = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+
+    /**
+     * @tc.steps: step2. Call SetPixelMap function
+     */
+    RefPtr<PixelMap> pixMap = AceType::MakeRefPtr<MockPixelMap>();
+    ImageSpanView::SetPixelMap(AceType::RawPtr(frameNode), pixMap);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. Gets the sourceInfo of the framenode
+     * @tc.expected: step3. sourceInfo has value
+     */
+    auto sourceInfo = layoutProperty->GetImageSourceInfo();
+    ASSERT_NE(sourceInfo.has_value(), false);
+}
+
+/**
+ * @tc.name: ImageSpanSetPixelMap002
+ * @tc.desc: Test ImageSpanView SetPixelMap function when pixel map is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, ImageSpanSetPixelMap002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    auto node = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+
+    /**
+     * @tc.steps: step2. Call SetPixelMap function
+     */
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageSpanView::SetPixelMap(AceType::RawPtr(frameNode), pixMap);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. Gets the sourceInfo of the framenode
+     * @tc.expected: step3. sourceInfo has value
+     */
+    auto sourceInfo = layoutProperty->GetImageSourceInfo();
+    ASSERT_NE(sourceInfo.has_value(), false);
 }
 
 /**

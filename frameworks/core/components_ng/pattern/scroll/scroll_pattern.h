@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/components_ng/pattern/scroll/free_scroll_controller.h"
 #include "core/components_ng/pattern/scroll/scroll_accessibility_property.h"
 #include "core/components_ng/pattern/scroll/scroll_content_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
@@ -62,7 +63,10 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<ScrollLayoutAlgorithm>(currentOffset_, crossOffset_);
+        if (freeScroll_) {
+            return MakeRefPtr<ScrollLayoutAlgorithm>(freeScroll_->GetOffset().GetX(), freeScroll_->GetOffset().GetY());
+        }
+        return MakeRefPtr<ScrollLayoutAlgorithm>(currentOffset_);
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override;
@@ -371,12 +375,12 @@ public:
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
 
-    SizeF GetViewSize() const
+    const SizeF& GetViewSize() const
     {
         return viewSize_;
     }
 
-    SizeF GetViewPortExtent() const
+    const SizeF& GetViewPortExtent() const
     {
         return viewPortExtent_;
     }
@@ -447,14 +451,14 @@ public:
      */
     RefPtr<NGGestureRecognizer> GetOverrideRecognizer() const
     {
-        return freePanGesture_;
+        if (freeScroll_) {
+            return freeScroll_->GetFreePanGesture();
+        }
+        return nullptr;
     }
 
 private:
-    void InitFreeScroll();
-
-    RefPtr<PanRecognizer> freePanGesture_; // all-direction pan recognizer for free scroll mode
-    float crossOffset_ = 0.0f; // offset on the vertical axis (currentOffset_ represents horizontal axis in Free Scroll mode)
+    RefPtr<FreeScrollController> freeScroll_;
     /* ============================================================================== */
 
     // scrollSnap

@@ -252,4 +252,18 @@ MouseEvent MouseEvent::operator-(const Offset& offset) const
     mouseEvent.pressedButtonsArray = pressedButtonsArray;
     return mouseEvent;
 }
+
+const std::string& NativeEmbeadMouseInfo::GetEmbedId() const
+{
+    return embedId_;
+}
+
+const MouseInfo& NativeEmbeadMouseInfo::GetMouseEventInfo() const
+{
+    return mouseEvent_;
+}
+const RefPtr<MouseEventResult>& NativeEmbeadMouseInfo::GetResult() const
+{
+    return result_;
+}
 } // namespace OHOS::Ace

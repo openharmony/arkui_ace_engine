@@ -52,17 +52,6 @@ const std::vector<TouchTimeTestCase> FLUSH_TOUCH_EVENTS_TESTCASES = {
     { DEFAULT_VSYNC_TIME, 0, { DEFAULT_VSYNC_TIME, AFTER_VSYNC_TIME }, 1, 2 },
 };
 
-class MockMockTaskExecutor : public MockScrollTaskExecutor {
-public:
-    MockMockTaskExecutor() = default;
-    explicit MockMockTaskExecutor(bool delayRun) {};
-
-    bool WillRunOnCurrentThread(TaskType type) const override
-    {
-        return false;
-    }
-};
-
 } // namespace
 /**
  * @tc.name: PipelineContextTestNg036
@@ -961,13 +950,13 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg063, TestSize.Level1)
      */
     AnimationOption option(Curves::EASE, 1000);
     context_->OpenFrontendAnimation(option, option.GetCurve(), nullptr);
-    EXPECT_EQ(context_->pendingFrontendAnimation_.size(), 1);
+    EXPECT_TRUE(context_->HasPendingAnimation());
     /**
      * @tc.steps3: Call CloseFrontendAnimation after OpenFrontendAnimation.
      * @tc.expected: The pending flag is out of stack.
      */
     context_->CloseFrontendAnimation();
-    EXPECT_EQ(context_->pendingFrontendAnimation_.size(), 0);
+    EXPECT_TRUE(!context_->HasPendingAnimation());
 }
 
 /**
@@ -2182,6 +2171,8 @@ HWTEST_F(PipelineContextTestNg, PipelineFlushTouchEvents002, TestSize.Level1)
     context_->SetupRootElement();
     context_->vsyncTime_ = AFTER_VSYNC_TIME;
     context_->eventManager_->idToTouchPoints_.clear();
+    bool isAcc = context_->touchAccelarate_;
+    context_->touchAccelarate_ = true;
 
     for (auto& testCase : FLUSH_TOUCH_EVENTS_TESTCASES) {
         context_->resampleTimeStamp_ = testCase.vsyncTime;
@@ -2199,6 +2190,7 @@ HWTEST_F(PipelineContextTestNg, PipelineFlushTouchEvents002, TestSize.Level1)
         auto idToTouchPoint = context_->eventManager_->GetIdToTouchPoint();
         EXPECT_EQ(idToTouchPoint[DEFAULT_INT0].history.size(), testCase.originTouchEventSize);
     }
+    context_->touchAccelarate_ = isAcc;
 }
 
 HWTEST_F(PipelineContextTestNg, PipelineOnHoverMove001, TestSize.Level1)
@@ -3118,8 +3110,6 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg230, TestSize.Level1)
     auto taskExecutor = context_->taskExecutor_;
     ASSERT_NE(taskExecutor, nullptr);
     context_->SetIsFormRender(false);
-    auto mockTaskExecutor = AceType::MakeRefPtr<MockMockTaskExecutor>();
-    context_->taskExecutor_ = mockTaskExecutor;
 
     context_->dirtyPropertyNodes_.clear();
     context_->FlushDirtyPropertyNodes();

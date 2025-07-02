@@ -265,7 +265,7 @@ void CheckGradientColorsResObj(NG::Gradient& gradient, const NG::GradientColor& 
 {
     auto&& updateFunc = [gradientColor, index](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t i = 0; i < colorLength; i++) {
             NG::GradientColor gradColor = colorVector[i];
@@ -286,7 +286,7 @@ void CheckSweepGradientColorsResObj(NG::Gradient& gradient, const NG::GradientCo
 {
     auto&& updateFunc = [gradientColor, index](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t i = 0; i < colorLength; i++) {
             NG::GradientColor gradColor = colorVector[i];
@@ -307,7 +307,7 @@ void CheckRadialGradientColorsResObj(NG::Gradient& gradient, const NG::GradientC
 {
     auto&& updateFunc = [gradientColor, index](const RefPtr<ResourceObject>& resObj, NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
-        int32_t colorLength = colorVector.size();
+        int32_t colorLength = static_cast<int32_t>(colorVector.size());
         gradient.ClearColors();
         for (int32_t i = 0; i < colorLength; i++) {
             NG::GradientColor gradColor = colorVector[i];
@@ -357,8 +357,8 @@ void SetSweepGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* c
         }
         gradient.AddColor(gradientColor);
         auto idx = index / NUM_3 + startPos;
-        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr && objs.size() > idx &&
-            objs[idx] != nullptr) {
+        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr &&
+            objs.size() > static_cast<size_t>(idx) && objs[idx] != nullptr) {
             CheckSweepGradientColorsResObj(gradient, gradientColor, objs[idx], index / NUM_3);
         }
     }
@@ -388,8 +388,8 @@ void SetRadialGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* 
         }
         gradient.AddColor(gradientColor);
         auto idx = index / NUM_3 + startPos;
-        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr && objs.size() > idx &&
-            objs[idx] != nullptr) {
+        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr &&
+            objs.size() > static_cast<size_t>(idx) && objs[idx] != nullptr) {
             CheckRadialGradientColorsResObj(gradient, gradientColor, objs[idx], index / NUM_3);
         }
     }
@@ -425,8 +425,8 @@ void SetGradientColors(NG::Gradient& gradient, const ArkUIInt32orFloat32* colors
         }
         gradient.AddColor(gradientColor);
         auto idx = index / NUM_3;
-        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr && objs.size() > idx &&
-            objs[idx] != nullptr) {
+        if (SystemProperties::ConfigChangePerform() && colorRawPtr != nullptr &&
+            objs.size() > static_cast<size_t>(idx) && objs[idx] != nullptr) {
             CheckGradientColorsResObj(gradient, gradientColor, objs[idx], index / NUM_3);
         }
     }
